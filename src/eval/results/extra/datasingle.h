@@ -60,10 +60,6 @@ public:
     unsigned int numOK() const;
     bool hasExtraTestData() const;
 
-//    static const std::string DetailInside;    //bool
-//    static const std::string DetailExtra;     //bool
-//    static const std::string DetailRefExists; //bool
-
     enum DetailKey
     {
         Inside,    //bool

@@ -76,33 +76,20 @@ public:
 
     EvaluationRequirement::TrackAngle* req ();
 
-//    static const std::string DetailOffset;         //int
-//    static const std::string DetailCheckPassed;    //bool
-//    static const std::string DetailValueRef;       // double
-//    static const std::string DetailValueTst;       // double
-//    static const std::string DetailSpeedRef;       // double
-//    static const std::string DetailPosInside;      //bool
-//    static const std::string DetailNumPos;         //int
-//    static const std::string DetailNumNoRef;       //int
-//    static const std::string DetailNumInside;      //int
-//    static const std::string DetailNumOutside;     //int
-//    static const std::string DetailNumCheckFailed; //int
-//    static const std::string DetailNumCheckPassed; //int
-
     enum DetailKey
     {
-        Offset,         //int
+        Offset,         //float
         CheckPassed,    //bool
         ValueRef,       // double
         ValueTst,       // double
         SpeedRef,       // double
         PosInside,      //bool
-        NumPos,         //int
-        NumNoRef,       //int
-        NumInside,      //int
-        NumOutside,     //int
-        NumCheckFailed, //int
-        NumCheckPassed //int
+        NumPos,         //unsigned int
+        NumNoRef,       //unsigned int
+        NumInside,      //unsigned int
+        NumOutside,     //unsigned int
+        NumCheckFailed, //unsigned int
+        NumCheckPassed //unsigned int
     };
 
     void addAnnotations(nlohmann::json::object_t& viewable) override;

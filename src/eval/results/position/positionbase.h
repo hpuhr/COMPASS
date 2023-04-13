@@ -55,27 +55,17 @@ public:
 
     const vector<double>& values() const;
 
-//    static const std::string DetailValue;          //float
-//    static const std::string DetailCheckPassed;     //bool
-//    static const std::string DetailPosInside;       //bool
-//    static const std::string DetailNumPos;          //int
-//    static const std::string DetailNumNoRef;        //int
-//    static const std::string DetailNumInside;       //int
-//    static const std::string DetailNumOutside;      //int
-//    static const std::string DetailNumCheckPassed;  //int
-//    static const std::string DetailNumCheckFailed;  //int
-
     enum DetailKey
     {
         Value,          //float
         CheckPassed,     //bool
         PosInside,       //bool
-        NumPos,          //int
-        NumNoRef,        //int
-        NumInside,       //int
-        NumOutside,      //int
-        NumCheckPassed,  //int
-        NumCheckFailed  //int
+        NumPos,          //unsigned int
+        NumNoRef,        //unsigned int
+        NumInside,       //unsigned int
+        NumOutside,      //unsigned int
+        NumCheckPassed,  //unsigned int
+        NumCheckFailed  //unsigned int
     };
 
 protected:

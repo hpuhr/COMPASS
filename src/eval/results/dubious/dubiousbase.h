@@ -92,18 +92,6 @@ public:
 
     static const std::string DetailCommentGroupDubious;
 
-    //    static const std::string DetailUTNOrTrackNum;   //unsigned int
-    //    static const std::string DetailFirstInside;     //bool
-    //    static const std::string DetailTODBegin;        //ptime
-    //    static const std::string DetailTODEnd;          //ptime
-    //    static const std::string DetailDuration;        //time_duration
-    //    static const std::string DetailNumPosInside;    //int
-    //    static const std::string DetailNumPosInsideDub; //int
-    //    static const std::string DetailHasModeAC;       //bool
-    //    static const std::string DetailHasModeS;        //bool
-    //    static const std::string DetailLeftSector;      //bool
-    //    static const std::string DetailIsDubious;       //bool
-
     enum DetailKey
     {
         CommentGroupDubious,
@@ -112,8 +100,8 @@ public:
         TODBegin,        //ptime
         TODEnd,          //ptime
         Duration,        //time_duration
-        NumPosInside,    //int
-        NumPosInsideDub, //int
+        NumPosInside,    //unsigned int
+        NumPosInsideDub, //unsigned int
         HasModeAC,       //bool
         HasModeS,        //bool
         LeftSector,      //bool
