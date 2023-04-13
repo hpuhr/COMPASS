@@ -24,17 +24,6 @@ namespace EvaluationRequirementResult
  * SingleFalseBase
  ***************************************************************************/
 
-//const std::string SingleFalseBase::DetailRefExists    = "RefExists";
-//const std::string SingleFalseBase::DetailPosInside    = "PosInside";
-//const std::string SingleFalseBase::DetailIsNotOk      = "IsNotOk";
-//const std::string SingleFalseBase::DetailNumUpdates   = "NumUpdates";
-//const std::string SingleFalseBase::DetailNumNoRef     = "NumNoRef";
-//const std::string SingleFalseBase::DetailNumInside    = "NumInside";
-//const std::string SingleFalseBase::DetailNumOutside   = "NumOutside";
-//const std::string SingleFalseBase::DetailNumUnknownID = "NumUnknownID";
-//const std::string SingleFalseBase::DetailNumCorrectID = "NumCorrectID";
-//const std::string SingleFalseBase::DetailNumFalseID   = "NumFalseID";
-
 SingleFalseBase::SingleFalseBase(const std::string& result_type,
                                  const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,

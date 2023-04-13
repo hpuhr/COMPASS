@@ -40,40 +40,30 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-//const std::string SingleSpeed::DetailOffset         = "Offset";
-//const std::string SingleSpeed::DetailCheckPassed    = "CheckPassed";
-//const std::string SingleSpeed::DetailPosInside      = "PosInside";
-//const std::string SingleSpeed::DetailNumPos         = "NumPos";
-//const std::string SingleSpeed::DetailNumNoRef       = "NumNoRef";
-//const std::string SingleSpeed::DetailNumInside      = "NumInside";
-//const std::string SingleSpeed::DetailNumOutside     = "NumOutside";
-//const std::string SingleSpeed::DetailNumCheckFailed = "NumCheckFailed";
-//const std::string SingleSpeed::DetailNumCheckPassed = "NumCheckPassed";
-
 SingleSpeed::SingleSpeed(const std::string& result_id, 
                          std::shared_ptr<EvaluationRequirement::Base> requirement,
                          const SectorLayer& sector_layer,
-                         unsigned int utn, 
-                         const EvaluationTargetData* target, 
+                         unsigned int utn,
+                         const EvaluationTargetData* target,
                          EvaluationManager& eval_man,
                          const EvaluationDetails& details,
-                         unsigned int num_pos, 
+                         unsigned int num_pos,
                          unsigned int num_no_ref,
-                         unsigned int num_pos_outside, 
-                         unsigned int num_pos_inside, 
+                         unsigned int num_pos_outside,
+                         unsigned int num_pos_inside,
                          unsigned int num_no_tst_value,
-                         unsigned int num_comp_failed, 
+                         unsigned int num_comp_failed,
                          unsigned int num_comp_passed,
                          vector<double> values)
-:   Single("SingleSpeed", result_id, requirement, sector_layer, utn, target, eval_man, details)
-,   num_pos_         (num_pos)
-,   num_no_ref_      (num_no_ref)
-,   num_pos_outside_ (num_pos_outside)
-,   num_pos_inside_  (num_pos_inside)
-,   num_no_tst_value_(num_no_tst_value)
-,   num_comp_failed_ (num_comp_failed)
-,   num_comp_passed_ (num_comp_passed)
-,   values_          (values)
+    :   Single("SingleSpeed", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   num_pos_         (num_pos)
+    ,   num_no_ref_      (num_no_ref)
+    ,   num_pos_outside_ (num_pos_outside)
+    ,   num_pos_inside_  (num_pos_inside)
+    ,   num_no_tst_value_(num_no_tst_value)
+    ,   num_comp_failed_ (num_comp_failed)
+    ,   num_comp_passed_ (num_comp_passed)
+    ,   values_          (values)
 {
     update();
 }
@@ -323,25 +313,29 @@ void SingleSpeed::reportDetails(EvaluationResultsReport::Section& utn_req_sectio
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        bool has_ref_pos = rq_det_it.numPositions() >= 2;
 
-        utn_req_details_table.addRow(
-                    { Time::toString(rq_det_it.timestamp()).c_str(),
-                     !has_ref_pos, 
-                      rq_det_it.getValue(DetailKey::PosInside),
-                      rq_det_it.getValue(DetailKey::Offset),                // "Distance"
-                      rq_det_it.getValue(DetailKey::CheckPassed),           // CP"
-                      rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#CF",
-                      rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#CP"
-                      rq_det_it.comments().generalComment().c_str() }, // "Comment"
-                    this, detail_cnt);
+        unsigned int detail_cnt = 0;
 
-        ++detail_cnt;
-    }
+        for (auto& rq_det_it : getDetails())
+        {
+            bool has_ref_pos = rq_det_it.numPositions() >= 2;
+
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          !has_ref_pos,
+                          rq_det_it.getValue(DetailKey::PosInside),
+                          rq_det_it.getValue(DetailKey::Offset),                // "Distance"
+                          rq_det_it.getValue(DetailKey::CheckPassed),           // CP"
+                          rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#CF",
+                          rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#CP"
+                          rq_det_it.comments().generalComment().c_str() }, // "Comment"
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SingleSpeed::hasViewableData (
@@ -374,21 +368,21 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-//        const auto& detail = getDetail(detail_cnt);
+        //        const auto& detail = getDetail(detail_cnt);
 
-//        assert(detail.numPositions() >= 1);
+        //        assert(detail.numPositions() >= 1);
 
-//        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
-//        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
-//        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-//        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-//        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+        //        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        //        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+        //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+        //        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-//        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
-//        assert(check_passed.has_value());
+        //        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
+        //        assert(check_passed.has_value());
 
-//        if (!check_passed.value())
-//            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
+        //        if (!check_passed.value())
+        //            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
@@ -411,8 +405,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::getTargetErrorsViewable (
         auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
         assert(check_passed.has_value());
 
-        if ((failed_values_of_interest && check_passed.value()) || 
-            (!failed_values_of_interest && !check_passed.value()))
+        if ((failed_values_of_interest && check_passed.value()) ||
+                (!failed_values_of_interest && !check_passed.value()))
             continue;
 
         assert (detail_it.numPositions() >= 1);

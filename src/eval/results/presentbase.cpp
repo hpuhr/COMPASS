@@ -24,17 +24,6 @@ namespace EvaluationRequirementResult
  * SinglePresentBase
  ***************************************************************************/
 
-//const std::string SinglePresentBase::DetailRefExists    = "RefExists";
-//const std::string SinglePresentBase::DetailPosInside    = "PosInside";
-//const std::string SinglePresentBase::DetailIsNotOk      = "IsNotOk";
-//const std::string SinglePresentBase::DetailNumUpdates   = "NumUpdates";
-//const std::string SinglePresentBase::DetailNumNoRef     = "NumNoRef";
-//const std::string SinglePresentBase::DetailNumInside    = "NumInside";
-//const std::string SinglePresentBase::DetailNumOutside   = "NumOutside";
-//const std::string SinglePresentBase::DetailNumNoRefVal  = "NumNoRefVal";
-//const std::string SinglePresentBase::DetailNumPresent   = "NumPresent";
-//const std::string SinglePresentBase::DetailNumMissing   = "NumMissing";
-
 SinglePresentBase::SinglePresentBase(const std::string& result_type,
                                      const std::string& result_id, 
                                      std::shared_ptr<EvaluationRequirement::Base> requirement,

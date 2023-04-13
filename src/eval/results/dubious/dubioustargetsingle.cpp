@@ -40,18 +40,18 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id, 
+SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id,
                                          std::shared_ptr<EvaluationRequirement::Base> requirement,
                                          const SectorLayer& sector_layer,
-                                         unsigned int utn, 
-                                         const EvaluationTargetData* target, 
+                                         unsigned int utn,
+                                         const EvaluationTargetData* target,
                                          EvaluationManager& eval_man,
                                          const EvaluationDetails& details,
                                          unsigned int num_updates,
-                                         unsigned int num_pos_outside, 
-                                         unsigned int num_pos_inside, 
+                                         unsigned int num_pos_outside,
+                                         unsigned int num_pos_inside,
                                          unsigned int num_pos_inside_dubious)
-:   SingleDubiousBase("SingleDubiousTarget", result_id, requirement, sector_layer, utn, target, eval_man, details, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
+    :   SingleDubiousBase("SingleDubiousTarget", result_id, requirement, sector_layer, utn, target, eval_man, details, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
 {
     update();
 }
@@ -122,7 +122,7 @@ void SingleDubiousTarget::addTargetToOverviewTable(shared_ptr<EvaluationResultsR
     }
 }
 
-void SingleDubiousTarget::addTargetDetailsToTable (EvaluationResultsReport::Section& section, 
+void SingleDubiousTarget::addTargetDetailsToTable (EvaluationResultsReport::Section& section,
                                                    const std::string& table_name)
 {
     if (!section.hasTable(table_name))
@@ -317,27 +317,31 @@ void SingleDubiousTarget::reportDetails(EvaluationResultsReport::Section& utn_re
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    assert(numDetails() > 0);
-    const auto& detail = getDetail(0);
-
-    std::string dub_string = dubiousReasonsString(detail.comments());
-
-    if (detail.hasDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        unsigned int detail_cnt = 0;
-        for (auto& update : detail.details())
+
+        assert(numDetails() > 0);
+        const auto& detail = getDetail(0);
+
+        std::string dub_string = dubiousReasonsString(detail.comments());
+
+        if (detail.hasDetails())
         {
-            utn_req_details_table.addRow(
-                        { Time::toString(update.timestamp()).c_str(),
-                        detail.getValue(DetailKey::UTNOrTrackNum),
-                        dub_string.c_str() }, // "Comment"
-                        this, {detail_cnt});
-            ++detail_cnt;
-        }
-    }
+            unsigned int detail_cnt = 0;
+            for (auto& update : detail.details())
+            {
+                utn_req_details_table.addRow(
+                            { Time::toString(update.timestamp()).c_str(),
+                              detail.getValue(DetailKey::UTNOrTrackNum),
+                              dub_string.c_str() }, // "Comment"
+                            this, {detail_cnt});
+                ++detail_cnt;
+            }
+        }});
 }
 
-bool SingleDubiousTarget::hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+bool SingleDubiousTarget::hasViewableData (const EvaluationResultsReport::SectionContentTable& table,
                                            const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -368,25 +372,25 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTarget::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-//        assert (numDetails() > 0);
-//        const auto& detail = getDetail(0);
+        //        assert (numDetails() > 0);
+        //        const auto& detail = getDetail(0);
 
-//        unsigned int per_detail_update_cnt = detail_update_cnt;
+        //        unsigned int per_detail_update_cnt = detail_update_cnt;
 
-//        assert (per_detail_update_cnt < detail.numDetails());
+        //        assert (per_detail_update_cnt < detail.numDetails());
 
-//        const auto& update_detail = detail.details().at(per_detail_update_cnt);
+        //        const auto& update_detail = detail.details().at(per_detail_update_cnt);
 
-//        assert (update_detail.numPositions() >= 1);
+        //        assert (update_detail.numPositions() >= 1);
 
-//        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
-//        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
-//        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-//        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-//        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
+        //        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
+        //        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
+        //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+        //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+        //        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-//        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
-//            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
+        //        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
+        //            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }

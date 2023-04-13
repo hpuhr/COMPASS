@@ -308,25 +308,29 @@ void SinglePositionDistance::reportDetails(EvaluationResultsReport::Section& utn
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        bool has_ref_pos = rq_det_it.numPositions() >= 2;
 
-        utn_req_details_table.addRow(
-                    { Time::toString(rq_det_it.timestamp()).c_str(),
-                      !has_ref_pos,
-                      rq_det_it.getValue(DetailKey::PosInside),
-                      rq_det_it.getValue(DetailKey::Value),                 // "Distance"
-                      rq_det_it.getValue(DetailKey::CheckPassed),           // CP"
-                      rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#CF",
-                      rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#CP"
-                      rq_det_it.comments().generalComment().c_str() }, // "Comment"
-                    this, detail_cnt);
+        unsigned int detail_cnt = 0;
 
-        ++detail_cnt;
-    }
+        for (auto& rq_det_it : getDetails())
+        {
+            bool has_ref_pos = rq_det_it.numPositions() >= 2;
+
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          !has_ref_pos,
+                          rq_det_it.getValue(DetailKey::PosInside),
+                          rq_det_it.getValue(DetailKey::Value),                 // "Distance"
+                          rq_det_it.getValue(DetailKey::CheckPassed),           // CP"
+                          rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#CF",
+                          rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#CP"
+                          rq_det_it.comments().generalComment().c_str() }, // "Comment"
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SinglePositionDistance::hasViewableData (

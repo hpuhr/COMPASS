@@ -38,38 +38,28 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-//const std::string SingleIdentificationCorrect::DetailRefExists     = "RefExists";
-//const std::string SingleIdentificationCorrect::DetailPosInside     = "PosInside";
-//const std::string SingleIdentificationCorrect::DetailIsNotCorrect  = "IsNotCorrect";
-//const std::string SingleIdentificationCorrect::DetailNumUpdates    = "NumUpdates";
-//const std::string SingleIdentificationCorrect::DetailNumNoRef      = "NumNoRef";
-//const std::string SingleIdentificationCorrect::DetailNumInside     = "NumInside";
-//const std::string SingleIdentificationCorrect::DetailNumOutside    = "NumOutside";
-//const std::string SingleIdentificationCorrect::DetailNumCorrect    = "NumCorrect";
-//const std::string SingleIdentificationCorrect::DetailNumNotCorrect = "NumNotCorrect";
-
 SingleIdentificationCorrect::SingleIdentificationCorrect(const std::string& result_id, 
                                                          std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                          const SectorLayer& sector_layer,
-                                                         unsigned int utn, 
-                                                         const EvaluationTargetData* target, 
+                                                         unsigned int utn,
+                                                         const EvaluationTargetData* target,
                                                          EvaluationManager& eval_man,
                                                          const EvaluationDetails& details,
-                                                         unsigned int num_updates, 
-                                                         unsigned int num_no_ref_pos, 
+                                                         unsigned int num_updates,
+                                                         unsigned int num_no_ref_pos,
                                                          unsigned int num_no_ref_id,
-                                                         unsigned int num_pos_outside, 
+                                                         unsigned int num_pos_outside,
                                                          unsigned int num_pos_inside,
-                                                         unsigned int num_correct, 
+                                                         unsigned int num_correct,
                                                          unsigned int num_not_correct)
-:   Single("SingleIdentificationCorrect", result_id, requirement, sector_layer, utn, target, eval_man, details)
-,   num_updates_    (num_updates)
-,   num_no_ref_pos_ (num_no_ref_pos)
-,   num_no_ref_id_  (num_no_ref_id)
-,   num_pos_outside_(num_pos_outside)
-,   num_pos_inside_ (num_pos_inside)
-,   num_correct_    (num_correct)
-,   num_not_correct_(num_not_correct)
+    :   Single("SingleIdentificationCorrect", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   num_updates_    (num_updates)
+    ,   num_no_ref_pos_ (num_no_ref_pos)
+    ,   num_no_ref_id_  (num_no_ref_id)
+    ,   num_pos_outside_(num_pos_outside)
+    ,   num_pos_inside_ (num_pos_inside)
+    ,   num_correct_    (num_correct)
+    ,   num_not_correct_(num_not_correct)
 {
     updatePID();
 }
@@ -129,10 +119,10 @@ void SingleIdentificationCorrect::addTargetDetailsToTable (
 
     target_table.addRow(
                 { utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-                 target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-                 num_updates_, num_no_ref_pos_+num_no_ref_id_, num_correct_, num_not_correct_,
-                 pd_var}, this, {utn_});
+                  target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+                  num_updates_, num_no_ref_pos_+num_no_ref_id_, num_correct_, num_not_correct_,
+                  pd_var}, this, {utn_});
 }
 
 void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -210,25 +200,29 @@ void SingleIdentificationCorrect::reportDetails(EvaluationResultsReport::Section
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    { Time::toString(rq_det_it.timestamp()).c_str(), 
-                      rq_det_it.getValue(DetailKey::RefExists),
-                     !rq_det_it.getValue(DetailKey::IsNotCorrect).toBool(),
-                      rq_det_it.getValue(DetailKey::NumUpdates),
-                      rq_det_it.getValue(DetailKey::NumNoRef),
-                      rq_det_it.getValue(DetailKey::NumInside),
-                      rq_det_it.getValue(DetailKey::NumOutside),
-                      rq_det_it.getValue(DetailKey::NumCorrect),
-                      rq_det_it.getValue(DetailKey::NumNotCorrect),
-                      rq_det_it.comments().generalComment().c_str() },
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailKey::RefExists),
+                          !rq_det_it.getValue(DetailKey::IsNotCorrect).toBool(),
+                          rq_det_it.getValue(DetailKey::NumUpdates),
+                          rq_det_it.getValue(DetailKey::NumNoRef),
+                          rq_det_it.getValue(DetailKey::NumInside),
+                          rq_det_it.getValue(DetailKey::NumOutside),
+                          rq_det_it.getValue(DetailKey::NumCorrect),
+                          rq_det_it.getValue(DetailKey::NumNotCorrect),
+                          rq_det_it.comments().generalComment().c_str() },
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SingleIdentificationCorrect::hasViewableData (

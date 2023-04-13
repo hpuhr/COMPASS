@@ -38,27 +38,20 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-//const std::string SingleDetection::DetailMissOccurred = "MissOccurred";
-//const std::string SingleDetection::DetailDiffTOD      = "DiffTOD";
-//const std::string SingleDetection::DetailRefExists    = "RefExists";
-//const std::string SingleDetection::DetailMissedUIs    = "MissedUIs";
-//const std::string SingleDetection::DetailMaxGapUIs    = "MaxGapUIs";
-//const std::string SingleDetection::DetailNoRefUIs     = "NoRefUIs";
-
 SingleDetection::SingleDetection(const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                 const SectorLayer& sector_layer, 
-                                 unsigned int utn, 
+                                 const SectorLayer& sector_layer,
+                                 unsigned int utn,
                                  const EvaluationTargetData* target,
                                  EvaluationManager& eval_man,
                                  const EvaluationDetails& details,
-                                 int sum_uis, 
-                                 int missed_uis, 
+                                 int sum_uis,
+                                 int missed_uis,
                                  TimePeriodCollection ref_periods)
-:   Single      ("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man, details)
-,   sum_uis_    (sum_uis)
-,   missed_uis_ (missed_uis)
-,   ref_periods_(ref_periods)
+    :   Single      ("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   sum_uis_    (sum_uis)
+    ,   missed_uis_ (missed_uis)
+    ,   ref_periods_(ref_periods)
 {
     updatePD();
 }
@@ -210,35 +203,39 @@ void SingleDetection::reportDetails(EvaluationResultsReport::Section& utn_req_se
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        auto d_tod = rq_det_it.getValue(DetailKey::DiffTOD);
+        unsigned int detail_cnt = 0;
 
-        if (d_tod.isValid())
+        for (auto& rq_det_it : getDetails())
         {
-            utn_req_details_table.addRow(
-                        { Time::toString(rq_det_it.timestamp()).c_str(),
-                          String::timeStringFromDouble(d_tod.toFloat()).c_str(),
-                          rq_det_it.getValue(DetailKey::RefExists),
-                          rq_det_it.getValue(DetailKey::MissedUIs),
-                          rq_det_it.comments().generalComment().c_str() },
-                        this, detail_cnt);
-        }
-        else
-        {
-            utn_req_details_table.addRow(
-                        { Time::toString(rq_det_it.timestamp()).c_str(),
-                          QVariant(),
-                          rq_det_it.getValue(DetailKey::RefExists),
-                          rq_det_it.getValue(DetailKey::MissedUIs),
-                          rq_det_it.comments().generalComment().c_str() },
-                        this, detail_cnt);
-        }
+            auto d_tod = rq_det_it.getValue(DetailKey::DiffTOD);
 
-        ++detail_cnt;
-    }
+            if (d_tod.isValid())
+            {
+                utn_req_details_table.addRow(
+                            { Time::toString(rq_det_it.timestamp()).c_str(),
+                              String::timeStringFromDouble(d_tod.toFloat()).c_str(),
+                              rq_det_it.getValue(DetailKey::RefExists),
+                              rq_det_it.getValue(DetailKey::MissedUIs),
+                              rq_det_it.comments().generalComment().c_str() },
+                            this, detail_cnt);
+            }
+            else
+            {
+                utn_req_details_table.addRow(
+                            { Time::toString(rq_det_it.timestamp()).c_str(),
+                              QVariant(),
+                              rq_det_it.getValue(DetailKey::RefExists),
+                              rq_det_it.getValue(DetailKey::MissedUIs),
+                              rq_det_it.comments().generalComment().c_str() },
+                            this, detail_cnt);
+            }
+
+            ++detail_cnt;
+        }
+    });
 }
 
 bool SingleDetection::hasViewableData (
@@ -270,21 +267,21 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-//        const auto& detail = getDetail(detail_cnt);
+        //        const auto& detail = getDetail(detail_cnt);
 
-//        assert (detail.numPositions() >= 1);
+        //        assert (detail.numPositions() >= 1);
 
-//        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
-//        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
-//        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-//        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-//        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+        //        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        //        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+        //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+        //        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-//        auto miss_occurred = detail.getValueAs<bool>(DetailMissOccurred);
-//        assert (miss_occurred.has_value());
+        //        auto miss_occurred = detail.getValueAs<bool>(DetailMissOccurred);
+        //        assert (miss_occurred.has_value());
 
-//        if (miss_occurred.value())
-//            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
+        //        if (miss_occurred.value())
+        //            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }

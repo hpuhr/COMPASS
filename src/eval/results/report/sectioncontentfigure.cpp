@@ -56,7 +56,7 @@ namespace EvaluationResultsReport
         layout->addLayout(fig_layout);
     }
 
-    void SectionContentFigure::accept(LatexVisitor& v) const
+    void SectionContentFigure::accept(LatexVisitor& v)
     {
         loginf << "SectionContentFigure: accept";
         v.visit(this);

@@ -28,18 +28,6 @@ namespace EvaluationRequirementResult
 
 const std::string SingleDubiousBase::DetailCommentGroupDubious = "CommentsDubious";
 
-//const std::string SingleDubiousBase::DetailUTNOrTrackNum   = "UTNOrTrackNum";
-//const std::string SingleDubiousBase::DetailFirstInside     = "FirstInside";
-//const std::string SingleDubiousBase::DetailTODBegin        = "TODBegin";
-//const std::string SingleDubiousBase::DetailTODEnd          = "TODEnd";
-//const std::string SingleDubiousBase::DetailDuration        = "Duration";
-//const std::string SingleDubiousBase::DetailNumPosInside    = "NumPosInside";
-//const std::string SingleDubiousBase::DetailNumPosInsideDub = "NumPosInsideDub";
-//const std::string SingleDubiousBase::DetailHasModeAC       = "HasModeAC";
-//const std::string SingleDubiousBase::DetailHasModeS        = "HasModeS";
-//const std::string SingleDubiousBase::DetailLeftSector      = "LeftSector";
-//const std::string SingleDubiousBase::DetailIsDubious       = "IsDubious";
-
 /**
 */
 SingleDubiousBase::DetailData::DetailData(unsigned int utn_or_track_number, boost::posix_time::ptime ts_begin)

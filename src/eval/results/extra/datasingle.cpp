@@ -38,26 +38,22 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-//const std::string SingleExtraData::DetailInside    = "Inside";
-//const std::string SingleExtraData::DetailExtra     = "Extra";
-//const std::string SingleExtraData::DetailRefExists = "RefExists";
-
 SingleExtraData::SingleExtraData(const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                 const SectorLayer& sector_layer, 
-                                 unsigned int utn, 
+                                 const SectorLayer& sector_layer,
+                                 unsigned int utn,
                                  const EvaluationTargetData* target,
                                  EvaluationManager& eval_man,
                                  const EvaluationDetails& details,
-                                 bool ignore, 
-                                 unsigned int num_extra, 
-                                 unsigned int num_ok, 
+                                 bool ignore,
+                                 unsigned int num_extra,
+                                 unsigned int num_ok,
                                  bool has_extra_test_data)
-:   Single("SingleExtraData", result_id, requirement, sector_layer, utn, target, eval_man, details)
-,   ignore_             (ignore)
-,   num_extra_          (num_extra)
-,   num_ok_             (num_ok)
-,   has_extra_test_data_(has_extra_test_data)
+    :   Single("SingleExtraData", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   ignore_             (ignore)
+    ,   num_extra_          (num_extra)
+    ,   num_ok_             (num_ok)
+    ,   has_extra_test_data_(has_extra_test_data)
 {
     updateProb();
 }
@@ -123,7 +119,7 @@ void SingleExtraData::addTargetDetailsToTable (
                  target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(), target_->numTstUpdates(),
-                  ignore_, num_extra_+num_ok_, num_ok_, num_extra_, prob_var}, this, {utn_});
+                 ignore_, num_extra_+num_ok_, num_ok_, num_extra_, prob_var}, this, {utn_});
 }
 
 void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -202,20 +198,24 @@ void SingleExtraData::reportDetails(EvaluationResultsReport::Section& utn_req_se
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    { Time::toString(rq_det_it.timestamp()).c_str(),
-                      rq_det_it.getValue(DetailKey::Inside),
-                      rq_det_it.getValue(DetailKey::Extra),
-                      rq_det_it.getValue(DetailKey::RefExists),
-                      rq_det_it.comments().generalComment().c_str() },
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailKey::Inside),
+                          rq_det_it.getValue(DetailKey::Extra),
+                          rq_det_it.getValue(DetailKey::RefExists),
+                          rq_det_it.comments().generalComment().c_str() },
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SingleExtraData::hasViewableData (

@@ -41,19 +41,19 @@ namespace EvaluationRequirementResult
 SingleModeCPresent::SingleModeCPresent(const std::string& result_id, 
                                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                                        const SectorLayer& sector_layer,
-                                       unsigned int utn, 
-                                       const EvaluationTargetData* target, 
+                                       unsigned int utn,
+                                       const EvaluationTargetData* target,
                                        EvaluationManager& eval_man,
                                        const EvaluationDetails& details,
-                                       int num_updates, 
-                                       int num_no_ref_pos, 
-                                       int num_pos_outside, 
+                                       int num_updates,
+                                       int num_no_ref_pos,
+                                       int num_pos_outside,
                                        int num_pos_inside,
-                                       int num_no_ref_id, 
-                                       int num_present_id, 
+                                       int num_no_ref_id,
+                                       int num_present_id,
                                        int num_missing_id)
-:   SinglePresentBase("SingleModeAPresent", result_id, requirement, sector_layer, utn, target, eval_man, details,
-                      num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside, num_no_ref_id, num_present_id, num_missing_id)
+    :   SinglePresentBase("SingleModeAPresent", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                          num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside, num_no_ref_id, num_present_id, num_missing_id)
 {
     updateProbabilities();
 }
@@ -196,26 +196,30 @@ void SingleModeCPresent::reportDetails(EvaluationResultsReport::Section& utn_req
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-            { Time::toString(rq_det_it.timestamp()).c_str(), 
-              rq_det_it.getValue(DetailKey::RefExists),
-             !rq_det_it.getValue(DetailKey::IsNotOk).toBool(),
-              rq_det_it.getValue(DetailKey::NumUpdates),
-              rq_det_it.getValue(DetailKey::NumNoRef),
-              rq_det_it.getValue(DetailKey::NumInside),
-              rq_det_it.getValue(DetailKey::NumOutside),
-              rq_det_it.getValue(DetailKey::NumNoRefVal),
-              rq_det_it.getValue(DetailKey::NumPresent),
-              rq_det_it.getValue(DetailKey::NumMissing),
-              rq_det_it.comments().generalComment().c_str() },
-            this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailKey::RefExists),
+                          !rq_det_it.getValue(DetailKey::IsNotOk).toBool(),
+                          rq_det_it.getValue(DetailKey::NumUpdates),
+                          rq_det_it.getValue(DetailKey::NumNoRef),
+                          rq_det_it.getValue(DetailKey::NumInside),
+                          rq_det_it.getValue(DetailKey::NumOutside),
+                          rq_det_it.getValue(DetailKey::NumNoRefVal),
+                          rq_det_it.getValue(DetailKey::NumPresent),
+                          rq_det_it.getValue(DetailKey::NumMissing),
+                          rq_det_it.comments().generalComment().c_str() },
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SingleModeCPresent::hasViewableData (

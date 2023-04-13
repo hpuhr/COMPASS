@@ -42,7 +42,7 @@ public:
 
     virtual void addToLayout (QVBoxLayout* layout) override;
 
-    virtual void accept(LatexVisitor& v) const override;
+    virtual void accept(LatexVisitor& v) override;
 
     void view () const;
     std::string getSubPath() const;

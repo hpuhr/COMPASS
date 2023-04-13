@@ -27,16 +27,6 @@ namespace EvaluationRequirementResult
  * SinglePositionBase
  ****************************************************************************/
 
-//const std::string SinglePositionBase::DetailValue           = "Value";
-//const std::string SinglePositionBase::DetailCheckPassed     = "CheckPassed";
-//const std::string SinglePositionBase::DetailPosInside       = "PosInside";
-//const std::string SinglePositionBase::DetailNumPos          = "NumPos";
-//const std::string SinglePositionBase::DetailNumNoRef        = "NumNoRef";
-//const std::string SinglePositionBase::DetailNumInside       = "NumInside";
-//const std::string SinglePositionBase::DetailNumOutside      = "NumOutside";
-//const std::string SinglePositionBase::DetailNumCheckPassed  = "NumCheckPassed";
-//const std::string SinglePositionBase::DetailNumCheckFailed  = "NumCheckFailed";
-
 /**
 */
 SinglePositionBase::SinglePositionBase(const std::string& result_type,

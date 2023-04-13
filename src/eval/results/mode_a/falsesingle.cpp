@@ -41,20 +41,20 @@ namespace EvaluationRequirementResult
 SingleModeAFalse::SingleModeAFalse(const std::string& result_id, 
                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
                                    const SectorLayer& sector_layer,
-                                   unsigned int utn, 
-                                   const EvaluationTargetData* target, 
+                                   unsigned int utn,
+                                   const EvaluationTargetData* target,
                                    EvaluationManager& eval_man,
                                    const EvaluationDetails& details,
-                                   int num_updates, 
-                                   int num_no_ref_pos, 
-                                   int num_no_ref_val, 
-                                   int num_pos_outside, 
+                                   int num_updates,
+                                   int num_no_ref_pos,
+                                   int num_no_ref_val,
+                                   int num_pos_outside,
                                    int num_pos_inside,
-                                   int num_unknown, 
-                                   int num_correct, 
+                                   int num_unknown,
+                                   int num_correct,
                                    int num_false)
-:   SingleFalseBase("SingleModeAFalse", result_id, requirement, sector_layer, utn, target, eval_man, details,
-                    num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside, num_unknown, num_correct, num_false)
+    :   SingleFalseBase("SingleModeAFalse", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                        num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside, num_unknown, num_correct, num_false)
 {
     updateProbabilities();
 }
@@ -102,8 +102,8 @@ void SingleModeAFalse::addTargetDetailsToTable (
 {
     if (!section.hasTable(table_name))
         section.addTable(table_name, 14,
-        {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-            "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PF"}, true, 13, Qt::DescendingOrder);
+                         {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+                          "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PF"}, true, 13, Qt::DescendingOrder);
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
@@ -113,10 +113,10 @@ void SingleModeAFalse::addTargetDetailsToTable (
         pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
-    {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-        target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-        target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-        num_updates_, num_no_ref_pos_+num_no_ref_val_, num_unknown_, num_correct_, num_false_, pf_var},
+                {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+                 num_updates_, num_no_ref_pos_+num_no_ref_val_, num_unknown_, num_correct_, num_false_, pf_var},
                 this, {utn_});
 }
 
@@ -136,7 +136,7 @@ void SingleModeAFalse::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
     utn_req_table.addRow({"Use", "To be used in results", use_}, this);
     utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
     utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or code",
-                            num_no_ref_pos_+num_no_ref_val_}, this);
+                          num_no_ref_pos_+num_no_ref_val_}, this);
     utn_req_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
     utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference code", num_no_ref_val_}, this);
     utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
@@ -178,7 +178,7 @@ void SingleModeAFalse::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
     if (p_false_.has_value() && p_false_.value() != 0.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                    [this](void) { return this->getTargetErrorsViewable(); });
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -195,32 +195,36 @@ void SingleModeAFalse::reportDetails(EvaluationResultsReport::Section& utn_req_s
 {
     if (!utn_req_section.hasTable(tr_details_table_name_))
         utn_req_section.addTable(tr_details_table_name_, 11,
-        {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#Unknown",
-            "#Correct", "#False", "Comment"});
+                                 {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#Unknown",
+                                  "#Correct", "#False", "Comment"});
 
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    { Time::toString(rq_det_it.timestamp()).c_str(), 
-                      rq_det_it.getValue(DetailKey::RefExists),
-                     !rq_det_it.getValue(DetailKey::IsNotOk).toBool(),
-                      rq_det_it.getValue(DetailKey::NumUpdates),
-                      rq_det_it.getValue(DetailKey::NumNoRef),
-                      rq_det_it.getValue(DetailKey::NumInside),
-                      rq_det_it.getValue(DetailKey::NumOutside),
-                      rq_det_it.getValue(DetailKey::NumUnknownID),
-                      rq_det_it.getValue(DetailKey::NumCorrectID),
-                      rq_det_it.getValue(DetailKey::NumFalseID),
-                      rq_det_it.comments().generalComment().c_str()},
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailKey::RefExists),
+                          !rq_det_it.getValue(DetailKey::IsNotOk).toBool(),
+                          rq_det_it.getValue(DetailKey::NumUpdates),
+                          rq_det_it.getValue(DetailKey::NumNoRef),
+                          rq_det_it.getValue(DetailKey::NumInside),
+                          rq_det_it.getValue(DetailKey::NumOutside),
+                          rq_det_it.getValue(DetailKey::NumUnknownID),
+                          rq_det_it.getValue(DetailKey::NumCorrectID),
+                          rq_det_it.getValue(DetailKey::NumFalseID),
+                          rq_det_it.comments().generalComment().c_str()},
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 

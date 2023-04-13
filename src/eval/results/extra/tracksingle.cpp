@@ -38,26 +38,22 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-//const std::string SingleExtraTrack::DetailTrackNum = "";
-//const std::string SingleExtraTrack::DetailInside   = "";
-//const std::string SingleExtraTrack::DetailExtra    = "";
-
 SingleExtraTrack::SingleExtraTrack(const std::string& result_id, 
                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                   const SectorLayer& sector_layer, 
-                                   unsigned int utn, 
+                                   const SectorLayer& sector_layer,
+                                   unsigned int utn,
                                    const EvaluationTargetData* target,
                                    EvaluationManager& eval_man,
                                    const EvaluationDetails& details,
-                                   bool ignore, 
-                                   unsigned int num_inside, 
-                                   unsigned int num_extra, 
+                                   bool ignore,
+                                   unsigned int num_inside,
+                                   unsigned int num_extra,
                                    unsigned int num_ok)
-:   Single("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, eval_man, details)
-,   ignore_    (ignore)
-,   num_inside_(num_inside)
-,   num_extra_ (num_extra)
-,   num_ok_    (num_ok)
+    :   Single("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   ignore_    (ignore)
+    ,   num_inside_(num_inside)
+    ,   num_extra_ (num_extra)
+    ,   num_ok_    (num_ok)
 {
     //loginf << "SingleTrack: ctor: result_id " << result_id_ << " ignore " << ignore_;
 
@@ -204,20 +200,24 @@ void SingleExtraTrack::reportDetails(EvaluationResultsReport::Section& utn_req_s
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    { Time::toString(rq_det_it.timestamp()).c_str(),
-                      rq_det_it.getValue(DetailKey::Inside),
-                      rq_det_it.getValue(DetailKey::TrackNum),
-                      rq_det_it.getValue(DetailKey::Extra),
-                      rq_det_it.comments().generalComment().c_str() },
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailKey::Inside),
+                          rq_det_it.getValue(DetailKey::TrackNum),
+                          rq_det_it.getValue(DetailKey::Extra),
+                          rq_det_it.comments().generalComment().c_str() },
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SingleExtraTrack::hasViewableData (
@@ -225,8 +225,8 @@ bool SingleExtraTrack::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-        else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
-            return true;
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
+        return true;
     else
         return false;
 }
