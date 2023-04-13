@@ -206,12 +206,6 @@ EvaluationDetail& EvaluationDetail::setValue(const Key& key, const boost::posix_
 */
 QVariant EvaluationDetail::getValue(const Key& key) const
 {
-//    auto it = values_.find(key);
-//    if (it == values_.end())
-//        return {};
-
-//    return it->second;
-
     if (key >= values_.size()) // never set
         return {};
 
@@ -258,52 +252,6 @@ const EvaluationDetail::Position& EvaluationDetail::position(size_t idx) const
 {
     return positions_.at(idx);
 }
-
-//EvaluationDetail& EvaluationDetail::addLine(const Line& l)
-//{
-//    lines_.push_back(l);
-
-//    return *this;
-//}
-
-///**
-//*/
-//EvaluationDetail& EvaluationDetail::addLine(const boost::optional<Line>& l)
-//{
-//    if (l.has_value())
-//        addLine(l.value());
-
-//    return *this;
-//}
-
-//EvaluationDetail& EvaluationDetail::addLines(const std::vector<Line>& lines)
-//{
-//    for (const auto& line_it : lines)
-//        addLine(line_it);
-
-//    return *this;
-//}
-
-///**
-//*/
-//int EvaluationDetail::numLines() const
-//{
-//    return (int)lines_.size();
-//}
-
-///**
-//*/
-//const std::vector<EvaluationDetail::Line>& EvaluationDetail::lines() const
-//{
-//    return lines_;
-//}
-
-///**
-//*/
-//const EvaluationDetail::Line& EvaluationDetail::line(int idx) const
-//{
-//    return lines_.at(idx);
-//}
 
 /**
 */
