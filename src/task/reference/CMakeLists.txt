@@ -7,9 +7,11 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/calculatereferencestask.h"
         "${CMAKE_CURRENT_LIST_DIR}/calculatereferencestaskdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/calculatereferencesstatusdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/calculatereferencesjob.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/calculatereferencestask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/calculatereferencestaskdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/calculatereferencesstatusdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/calculatereferencesjob.cpp"
   
 )

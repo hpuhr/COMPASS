@@ -15,6 +15,7 @@
 
 class CalculateReferencesTaskDialog;
 class CalculateReferencesStatusDialog;
+class CalculateReferencesJob;
 
 class CalculateReferencesTask : public Task, public Configurable
 {
@@ -50,6 +51,13 @@ protected:
     std::unique_ptr<CalculateReferencesTaskDialog> dialog_;
 
     std::unique_ptr<CalculateReferencesStatusDialog> status_dialog_;
+
+    std::shared_ptr<dbContent::Cache> cache_;
+
+    std::map<std::string, std::shared_ptr<Buffer>> data_;
+
+    std::shared_ptr<CalculateReferencesJob> create_job_;
+    bool create_job_done_{false};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

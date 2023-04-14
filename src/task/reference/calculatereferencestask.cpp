@@ -1,6 +1,7 @@
 #include "calculatereferencestask.h"
 #include "calculatereferencestaskdialog.h"
 #include "calculatereferencesstatusdialog.h"
+#include "calculatereferencesjob.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
@@ -74,7 +75,7 @@ void CalculateReferencesTask::run()
 {
     assert(canRun());
 
-    loginf << "CreateAssociationsTask: run: started";
+    loginf << "CalculateReferencesTask: run: started";
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -103,6 +104,9 @@ void CalculateReferencesTask::run()
         if (!dbo_it.second->hasData())
             continue;
 
+        if (dbo_it.first != "CAT021" && dbo_it.first != "CAT062")
+            continue;
+
         VariableSet read_set = getReadSetFor(dbo_it.first);
 
         dbo_it.second->load(read_set, false, false);
@@ -113,7 +117,7 @@ void CalculateReferencesTask::run()
 
 void CalculateReferencesTask::dialogRunSlot()
 {
-    loginf << "CreateAssociationsTask: dialogRunSlot";
+    loginf << "CalculateReferencesTask: dialogRunSlot";
 
     assert (dialog_);
     dialog_->hide();
@@ -124,7 +128,7 @@ void CalculateReferencesTask::dialogRunSlot()
 
 void CalculateReferencesTask::dialogCancelSlot()
 {
-    loginf << "CreateAssociationsTask: dialogCancelSlot";
+    loginf << "CalculateReferencesTask: dialogCancelSlot";
 
     assert (dialog_);
     dialog_->hide();
@@ -132,20 +136,20 @@ void CalculateReferencesTask::dialogCancelSlot()
 
 void CalculateReferencesTask::createDoneSlot()
 {
-    loginf << "CreateAssociationsTask: createDoneSlot";
+    loginf << "CalculateReferencesTask: createDoneSlot";
 
-   // create_job_done_ = true;
+    create_job_done_ = true;
 
     status_dialog_->setStatus("Done");
 
-    //assert (create_job_);
+    assert (create_job_);
 
     status_dialog_->setDone();
 
     if (!show_done_summary_)
         status_dialog_->close();
 
-    //create_job_ = nullptr;
+    create_job_ = nullptr;
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -159,8 +163,8 @@ void CalculateReferencesTask::createDoneSlot()
 
 //    COMPASS::instance().interface().saveProperties();
 
-//    cache_ = nullptr;
-//    data_.clear();
+    cache_ = nullptr;
+    data_.clear();
 
     done_ = true;
 
@@ -170,12 +174,15 @@ void CalculateReferencesTask::createDoneSlot()
 }
 void CalculateReferencesTask::createObsoleteSlot()
 {
-    //create_job_ = nullptr;
+    create_job_ = nullptr;
+    data_.clear();
+
 }
 
-void CalculateReferencesTask::loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+void CalculateReferencesTask::loadedDataSlot(
+        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-//    data_ = data;
+    data_ = data;
 
     assert (status_dialog_);
     status_dialog_->updateTime();
@@ -183,42 +190,41 @@ void CalculateReferencesTask::loadedDataSlot(const std::map<std::string, std::sh
 
 void CalculateReferencesTask::loadingDoneSlot()
 {
-    loginf << "CreateAssociationsTask: loadingDoneSlot";
+    loginf << "CalculateReferencesTask: loadingDoneSlot";
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-//    if (!cache_)
-//        cache_ = std::make_shared<dbContent::Cache> (dbcontent_man);
+    if (!cache_)
+        cache_ = std::make_shared<dbContent::Cache> (dbcontent_man);
 
-//    cache_->add(data_);
+    cache_->add(data_);
 
-//    disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
-//               this, &CreateAssociationsTask::loadedDataSlot);
-//    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
-//               this, &CreateAssociationsTask::loadingDoneSlot);
+    disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+               this, &CalculateReferencesTask::loadedDataSlot);
+    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+               this, &CalculateReferencesTask::loadingDoneSlot);
 
     assert(status_dialog_);
-    status_dialog_->setStatus("Loading done, starting association");
+    status_dialog_->setStatus("Loading done, starting calculation");
 
     dbcontent_man.clearData();
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    loginf << "CreateAssociationsTask: loadingDoneSlot: data loading done";
+    loginf << "CalculateReferencesTask: loadingDoneSlot: data loading done";
 
-    //assert(!create_job_);
+    assert(!create_job_);
 
-//    create_job_ = std::make_shared<CreateAssociationsJob>(
-//                *this, COMPASS::instance().interface(), cache_);
+    create_job_ = std::make_shared<CalculateReferencesJob>(*this, cache_);
 
-//    connect(create_job_.get(), &CreateAssociationsJob::doneSignal, this,
-//            &CreateAssociationsTask::createDoneSlot, Qt::QueuedConnection);
-//    connect(create_job_.get(), &CreateAssociationsJob::obsoleteSignal, this,
-//            &CreateAssociationsTask::createObsoleteSlot, Qt::QueuedConnection);
-//    connect(create_job_.get(), &CreateAssociationsJob::statusSignal, this,
-//            &CreateAssociationsTask::associationStatusSlot, Qt::QueuedConnection);
+    connect(create_job_.get(), &CalculateReferencesJob::doneSignal, this,
+            &CalculateReferencesTask::createDoneSlot, Qt::QueuedConnection);
+    connect(create_job_.get(), &CalculateReferencesJob::obsoleteSignal, this,
+            &CalculateReferencesTask::createObsoleteSlot, Qt::QueuedConnection);
+    connect(create_job_.get(), &CalculateReferencesJob::statusSignal, this,
+            &CalculateReferencesTask::calculationStatusSlot, Qt::QueuedConnection);
 
-//    JobManager::instance().addDBJob(create_job_);
+    JobManager::instance().addDBJob(create_job_);
 }
 
 void CalculateReferencesTask::calculationStatusSlot(QString status)

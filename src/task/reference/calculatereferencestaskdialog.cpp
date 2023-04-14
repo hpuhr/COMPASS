@@ -25,6 +25,8 @@ CalculateReferencesTaskDialog::CalculateReferencesTaskDialog(CalculateReferences
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
+    main_layout->addStretch();
+
 //    task_widget_ = new CreateAssociationsTaskWidget(task_, this);
 //    main_layout->addWidget(task_widget_);
 

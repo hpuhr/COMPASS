@@ -45,6 +45,8 @@
 #include "gpsimportcsvtaskdialog.h"
 #include "managesectorstask.h"
 #include "managesectorstaskdialog.h"
+#include "calculatereferencestask.h"
+#include "calculatereferencestaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
 #include "viewwidget.h"
@@ -218,8 +220,10 @@ MainWindow::MainWindow()
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
              this, &MainWindow::appModeSwitchSlot);
 
-    QObject::connect(&COMPASS::instance().dbContentManager(), &DBContentManager::loadingDoneSignal,
+    connect(&COMPASS::instance().dbContentManager(), &DBContentManager::loadingDoneSignal,
                      this, &MainWindow::loadingDoneSlot);
+    connect (&COMPASS::instance().dbContentManager(), &DBContentManager::associationStatusChangedSignal,
+             this, &MainWindow::updateMenus);
 
     //init ui related commands
     ui_test::initUITestCommands();
@@ -397,6 +401,11 @@ void MainWindow::createMenus ()
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
 
+    calculate_references_action_ = new QAction(tr("Calculate References"));
+    calculate_references_action_->setToolTip(tr("Calculate References from System Tracker and ADS-B data"));
+    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesSlot);
+    process_menu_->addAction(calculate_references_action_);
+
     // ui menu
     ui_menu_ = menuBar()->addMenu(tr("&UI"));
     ui_menu_->setToolTipsVisible(true);
@@ -493,6 +502,9 @@ void MainWindow::updateMenus()
         connect(clear_file_act, &QAction::triggered, this, &MainWindow::clearImportRecentAsterixRecordingsSlot);
         import_recent_asterix_menu_->addAction(clear_file_act);
     }
+
+    assert (calculate_references_action_);
+    calculate_references_action_->setEnabled(COMPASS::instance().dbContentManager().hasAssociations());
 
     assert (config_menu_);
     config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
@@ -842,6 +854,13 @@ void MainWindow::calculateAssociationsSlot()
     loginf << "MainWindow: calculateAssociationsSlot";
 
     COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
+}
+
+void  MainWindow::calculateReferencesSlot()
+{
+    loginf << "MainWindow: calculateReferencesSlot";
+
+    COMPASS::instance().taskManager().calculateReferencesTask().dialog()->show();
 }
 
 void MainWindow::configureDataSourcesSlot()
