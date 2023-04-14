@@ -67,84 +67,107 @@ private:
 class Chain
 {
 public:
-
     typedef TargetReport::DataID                                  DataID;
     typedef std::multimap<boost::posix_time::ptime, Index>      IndexMap;
 
-    Chain(std::shared_ptr<dbContent::Cache> cache);
+    Chain(std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name);
     virtual ~Chain();
 
-//    void addIndex (const std::string& dbcontent_name, boost::posix_time::ptime timestamp, unsigned int index);
+    void addIndex (boost::posix_time::ptime timestamp, unsigned int index);
 
-//    unsigned int numUpdates () const;
+    bool hasData() const;
 
-//    boost::posix_time::ptime timeBegin() const;
-//    std::string timeBeginStr() const;
-//    boost::posix_time::ptime timeEnd() const;
-//    std::string timeEndStr() const;
-//    boost::posix_time::time_duration timeDuration() const;
+    void finalize () const;
 
-//    std::set<std::string> callsigns() const;
-//    std::string callsignsStr() const;
+    unsigned int numUpdates () const;
 
-//    std::set<unsigned int> targetAddresses() const;
-//    std::string targetAddressesStr() const;
+    boost::posix_time::ptime timeBegin() const;
+    std::string timeBeginStr() const;
+    boost::posix_time::ptime timeEnd() const;
+    std::string timeEndStr() const;
+    boost::posix_time::time_duration timeDuration() const;
 
-//    std::set<unsigned int> modeACodes() const;
-//    std::string modeACodesStr() const;
+    std::set<std::string> callsigns() const;
+    std::string callsignsStr() const;
 
-//    bool hasModeC() const;
-//    float modeCMin() const;
-//    std::string modeCMinStr() const;
-//    float modeCMax() const;
-//    std::string modeCMaxStr() const;
+    std::set<unsigned int> targetAddresses() const;
+    std::string targetAddressesStr() const;
 
-//    bool isPrimaryOnly () const;
+    std::set<unsigned int> modeACodes() const;
+    std::string modeACodesStr() const;
 
-//    const IndexMap& data() const;
+    bool hasModeC() const;
+    float modeCMin() const;
+    std::string modeCMinStr() const;
+    float modeCMax() const;
+    std::string modeCMaxStr() const;
 
-//    double latitudeMin() const;
-//    double latitudeMax() const;
-//    double longitudeMin() const;
-//    double longitudeMax() const;
+    bool isPrimaryOnly () const;
 
-//    bool hasPos() const;
+    const IndexMap& data() const;
 
-//    bool hasADSBInfo() const;
-//    bool hasMOPSVersion() const;
-//    std::set<unsigned int> mopsVersions() const;
-//    std::string mopsVersionStr() const;
+    double latitudeMin() const;
+    double latitudeMax() const;
+    double longitudeMin() const;
+    double longitudeMax() const;
 
-//    bool hasNucpNic() const;
-//    std::string nucpNicStr() const;
-//    bool hasNacp() const;
-//    std::string nacpStr() const;
+    bool hasPos() const;
 
-//    DataID dataID(const boost::posix_time::ptime& timestamp) const;
+    DataID dataID(const boost::posix_time::ptime& timestamp) const;
 
-//    bool hasPos(const DataID& id) const;
-//    TargetPosition refPos(const DataID& id) const;
-//    bool hasRefSpeed(const DataID& id) const;
-//    TargetVelocity refSpeed(const DataID& id) const;
-//    // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
+    bool hasRefPos(const DataID& id) const;
+    TargetPosition refPos(const DataID& id) const;
+    bool hasRefSpeed(const DataID& id) const;
+    TargetVelocity refSpeed(const DataID& id) const;
+    // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
-//    bool hasRefCallsign(const DataID& id) const;
-//    std::string refCallsign(const DataID& id) const;
+    bool hasRefCallsign(const DataID& id) const;
+    std::string refCallsign(const DataID& id) const;
 
-//    bool hasRefModeA(const DataID& id) const; // only if set, is v, not g
-//    unsigned int refModeA(const DataID& id) const;
+    bool hasRefModeA(const DataID& id) const; // only if set, is v, not g
+    unsigned int refModeA(const DataID& id) const;
 
-//    bool hasRefModeC(const DataID& id) const; // only if set, is v, not g
-//    float refModeC(const DataID& id) const;
+    bool hasRefModeC(const DataID& id) const; // only if set, is v, not g
+    float refModeC(const DataID& id) const;
 
-//    bool hasRefTA(const DataID& id) const;
-//    unsigned int refTA(const DataID& id) const;
+    bool hasRefTA(const DataID& id) const;
+    unsigned int refTA(const DataID& id) const;
 
-//    std::pair<bool,bool> refGroundBit(const DataID& id) const; // has gbs, gbs true
+    std::pair<bool,bool> refGroundBit(const DataID& id) const; // has gbs, gbs true
 
 protected:
     std::shared_ptr<dbContent::Cache> cache_;
+    std::string dbcontent_name_;
 
+    std::multimap<boost::posix_time::ptime, Index> ref_data_; // timestamp -> index
+    std::vector<unsigned int> ref_indices_;
+
+    mutable std::set<std::string> callsigns_;
+    mutable std::set<unsigned int> target_addresses_;
+    mutable std::set<unsigned int> mode_a_codes_;
+
+    mutable bool  has_mode_c_ {false};
+    mutable float mode_c_min_ {0};
+    mutable float mode_c_max_ {0};
+
+    mutable bool   has_pos_      {false};
+    mutable double latitude_min_ {0};
+    mutable double latitude_max_ {0};
+
+    mutable double longitude_min_ {0};
+    mutable double longitude_max_ {0};
+
+    void updateCallsigns() const;
+    void updateTargetAddresses() const;
+    void updateModeACodes() const;
+    void updateModeCMinMax() const;
+    void updatePositionMinMax() const;
+
+    std::pair<bool, float> estimateRefAltitude (
+            const boost::posix_time::ptime& timestamp, unsigned int index_internal) const;
+
+    Index indexFromDataID(const DataID& id) const;
+    boost::posix_time::ptime timestampFromDataID(const DataID& id) const;
 };
 
 } // namespace TargetReport
