@@ -246,69 +246,71 @@ VariableSet CalculateReferencesTask::getReadSetFor(const std::string& dbcontent_
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    // ds id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    // line id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_line_id_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name));
 
-    // timestamp
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name));
 
-    // aircraft address
-    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
-        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
+    // flight level
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name));
 
-    // aircraft id
-    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
-        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name));
 
-    // track num
-    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_num_))
-        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name));
 
-    // track end
-    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_end_))
-        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_end_));
-
-    // mode 3a
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
-
-    // mode c
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
-
+    // flight level trusted
     if (dbcontent_name == "CAT062")
     {
-        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
-        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
+        read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_baro_alt_.name()));
+        read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_fl_measured_.name()));
     }
 
-    // latitude
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+    // m3a
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name));
 
-    // longitude
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name));
 
-    // assoc
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_associations_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name));
 
-    // rec num, must be last for update process
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
+    // tn
+    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name));
 
-    // adsb mops
+    // ground bit
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name));
+
+    // speed & track angle
+
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+
+    // adsb qis
     if (dbcontent_name == "CAT021")
     {
         assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
         read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
+
+        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_nacp_));
+        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_nacp_));
+
+        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_nucp_nic_));
+        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_nucp_nic_));
+
+        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_sil_));
+        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_sil_));
     }
 
     return read_set;

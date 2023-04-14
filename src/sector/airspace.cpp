@@ -18,7 +18,7 @@
 #include "airspace.h"
 #include "sectorlayer.h"
 #include "sector.h"
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 #include "json.h"
 #include "logger.h"
 
@@ -290,7 +290,7 @@ const std::vector<std::shared_ptr<SectorLayer>>& AirSpace::layers() const
 /**
 */
 AirSpace::AboveCheckResult AirSpace::isAbove(const SectorLayer* layer,
-                                             const EvaluationTargetPosition& pos,
+                                             const dbContent::TargetPosition& pos,
                                              bool has_ground_bit,
                                              bool ground_bit_set)
 {

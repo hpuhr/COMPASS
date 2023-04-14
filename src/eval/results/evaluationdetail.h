@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 #include "timeconv.h"
 
 #include <string>
@@ -70,7 +70,7 @@ class EvaluationDetail
 public:
     typedef unsigned char                 Key;
     typedef boost::posix_time::ptime      Timestamp;
-    typedef EvaluationTargetPosition      Position;
+    typedef dbContent::TargetPosition      Position;
     typedef std::vector<EvaluationDetail> Details;
 
     EvaluationDetail() = default;

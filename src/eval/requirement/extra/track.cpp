@@ -151,10 +151,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     bool has_tod {false};
     ptime tod_min, tod_max;
 
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
+                            const dbContent::TargetPosition& tst_pos,
                             const QVariant& inside,
                             const QVariant& track_num,
                             const QVariant& extra,

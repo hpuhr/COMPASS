@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTDETECTION_H
 
 #include "eval/requirement/base/base.h"
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 
@@ -31,7 +31,7 @@ class DetectionDetail
 public:
     DetectionDetail(
             boost::posix_time::ptime timestamp, QVariant d_tod,
-            bool miss_occurred, EvaluationTargetPosition pos_current,
+            bool miss_occurred, dbContent::TargetPosition pos_current,
             bool ref_exists, int missed_uis, const std::string& comment)
         : timestamp_(timestamp), d_tod_(d_tod), miss_occurred_(miss_occurred), pos_current_(pos_current),
           ref_exists_(ref_exists), missed_uis_(missed_uis),
@@ -43,7 +43,7 @@ public:
     QVariant d_tod_;
     bool miss_occurred_ {false};
 
-    EvaluationTargetPosition pos_current_;
+    dbContent::TargetPosition pos_current_;
 
     bool ref_exists_ {false};
 
@@ -54,7 +54,7 @@ public:
     std::string comment_;
 
     bool has_last_position_ {false};
-    EvaluationTargetPosition pos_last_;
+    dbContent::TargetPosition pos_last_;
 };
 
 class Detection : public Base

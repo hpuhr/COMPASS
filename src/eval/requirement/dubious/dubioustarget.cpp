@@ -69,7 +69,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
     const auto& tst_data = target_data.tstData();
 
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     bool is_inside;
 

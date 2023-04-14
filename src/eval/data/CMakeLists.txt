@@ -8,8 +8,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdata.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetdata.h"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetposition.h"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetvelocity.h"
         "${CMAKE_CURRENT_LIST_DIR}/timeperiod.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdata.cpp"

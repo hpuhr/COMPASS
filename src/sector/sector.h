@@ -28,12 +28,15 @@
 #include <boost/optional.hpp>
 
 class DBInterface;
-class EvaluationTargetPosition;
+
+namespace dbContent {
+class TargetPosition;
+}
 
 class OGRPolygon;
 
 /**
- * Fast sector inside test via image descretization.
+ * Fast sector inside test via image discretization.
  * 
  * Generates an discrete image map representation of the input polygon and checks this 
  * representation for definitely inside, definitely outside and dubious points.
@@ -156,7 +159,7 @@ public:
     void serializeSector(bool ok);
     void save();
     
-    virtual bool isInside(const EvaluationTargetPosition& pos, 
+    virtual bool isInside(const dbContent::TargetPosition& pos, 
                           bool has_ground_bit, 
                           bool ground_bit_set,
                           InsideCheckType check_type = InsideCheckType::XYZ) const;

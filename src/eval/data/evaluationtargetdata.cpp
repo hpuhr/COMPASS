@@ -399,7 +399,7 @@ std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& id,
     return {{}, {}};
 }
 
-boost::optional<EvaluationTargetPosition> EvaluationTargetData::mappedRefPos(const DataID& id) const
+boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(const DataID& id) const
 {
     auto index = indexFromDataID(id, DataType::Test);
 
@@ -410,7 +410,7 @@ boost::optional<EvaluationTargetPosition> EvaluationTargetData::mappedRefPos(con
     return tdm.pos_ref_;
 }
 
-std::pair<EvaluationTargetPosition, bool> EvaluationTargetData::mappedRefPos(const DataID& id, 
+std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(const DataID& id,
                                                                              time_duration d_max) const
 {
     auto timestamp = timestampFromDataID(id);
@@ -462,7 +462,7 @@ std::pair<EvaluationTargetPosition, bool> EvaluationTargetData::mappedRefPos(con
     return {{}, false};
 }
 
-std::pair<EvaluationTargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(const DataID& id, 
+std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(const DataID& id,
                                                                                time_duration d_max) const
 {
     auto timestamp = timestampFromDataID(id);
@@ -555,14 +555,14 @@ bool EvaluationTargetData::hasRefPos(const DataID& id) const
     return ref_data_.count(timestamp);
 }
 
-EvaluationTargetPosition EvaluationTargetData::refPos(const DataID& id) const
+dbContent::TargetPosition EvaluationTargetData::refPos(const DataID& id) const
 {
     auto timestamp = timestampFromDataID(id);
     auto index     = indexFromDataID(id, DataType::Reference);
 
     unsigned int index_ext = index.idx_external;
 
-    EvaluationTargetPosition pos;
+    dbContent::TargetPosition pos;
 
     NullableVector<double>& latitude_vec  = eval_data_.ref_buffer_->get<double>(eval_data_.ref_latitude_name_);
     NullableVector<double>& longitude_vec = eval_data_.ref_buffer_->get<double>(eval_data_.ref_longitude_name_);
@@ -788,7 +788,7 @@ bool EvaluationTargetData::hasRefSpeed(const DataID& id) const
     return !speed_vec.isNull(index_ext) && !track_angle_vec.isNull(index_ext);
 }
 
-EvaluationTargetVelocity EvaluationTargetData::refSpeed(const DataID& id) const
+dbContent::TargetVelocity EvaluationTargetData::refSpeed(const DataID& id) const
 {
     auto index = indexFromDataID(id, DataType::Reference);
 
@@ -802,7 +802,7 @@ EvaluationTargetVelocity EvaluationTargetData::refSpeed(const DataID& id) const
     assert (!speed_vec.isNull(index_ext));
     assert (!track_angle_vec.isNull(index_ext));
 
-    EvaluationTargetVelocity spd;
+    dbContent::TargetVelocity spd;
 
     spd.speed_ = speed_vec.get(index_ext) * KNOTS2M_S; // true north to mathematical
     spd.track_angle_ = track_angle_vec.get(index_ext);
@@ -962,7 +962,7 @@ bool EvaluationTargetData::hasTstPos(const DataID& id) const
     return tst_data_.count(timestamp);
 }
 
-EvaluationTargetPosition EvaluationTargetData::tstPos(const DataID& id) const
+dbContent::TargetPosition EvaluationTargetData::tstPos(const DataID& id) const
 {
     assert (hasTstPos(id));
 
@@ -971,7 +971,7 @@ EvaluationTargetPosition EvaluationTargetData::tstPos(const DataID& id) const
 
     auto index_ext = index.idx_external;
 
-    EvaluationTargetPosition pos;
+    dbContent::TargetPosition pos;
 
     NullableVector<double>& latitude_vec = eval_data_.tst_buffer_->get<double>(eval_data_.tst_latitude_name_);
     NullableVector<double>& longitude_vec = eval_data_.tst_buffer_->get<double>(eval_data_.tst_longitude_name_);
@@ -2093,12 +2093,12 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
         ptime lower = mapping.timestamp_ref1_;
         ptime upper = mapping.timestamp_ref2_;
 
-        EvaluationTargetPosition pos1 = refPos(lower);
-        EvaluationTargetPosition pos2 = refPos(upper);
+        dbContent::TargetPosition pos1 = refPos(lower);
+        dbContent::TargetPosition pos2 = refPos(upper);
         float d_t = Time::partialSeconds(upper - lower);
 
-        EvaluationTargetVelocity spd1;
-        EvaluationTargetVelocity spd2;
+        dbContent::TargetVelocity spd1;
+        dbContent::TargetVelocity spd2;
 
         double acceleration;
         double speed, angle;
@@ -2199,7 +2199,7 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
 
                     mapping.has_ref_pos_ = true;
 
-                    mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
+                    mapping.pos_ref_ = dbContent::TargetPosition(x_pos, y_pos, has_altitude, true, altitude);
 
                     // calulcate interpolated speed / track angle
 
@@ -2246,8 +2246,8 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
 //        ptime lower = mapping.timestamp_ref1_;
 //        ptime upper = mapping.timestamp_ref2_;
 
-//        EvaluationTargetPosition pos1 = refPosForTime(lower);
-//        EvaluationTargetPosition pos2 = refPosForTime(upper);
+//        dbContent::TargetPosition pos1 = refPosForTime(lower);
+//        dbContent::TargetPosition pos2 = refPosForTime(upper);
 //        float d_t = Time::partialSeconds(upper - lower);
 
 //        logdbg << "EvaluationTargetData: addRefPositiosToMappingFast: d_t " << d_t;
@@ -2312,7 +2312,7 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
 
 //                mapping.has_ref_pos_ = true;
 
-//                mapping.pos_ref_ = EvaluationTargetPosition(int_lat, int_long, has_altitude, true, altitude);
+//                mapping.pos_ref_ = dbContent::TargetPosition(int_lat, int_long, has_altitude, true, altitude);
 //            }
 //        }
 //    }
@@ -2506,7 +2506,7 @@ boost::optional<bool> EvaluationTargetData::availableGroundBit(const DataID& id,
 /**
 */
 void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat, 
-                                                   const EvaluationTargetPosition& pos, 
+                                                   const dbContent::TargetPosition& pos,
                                                    unsigned int idx_internal,
                                                    const boost::optional<bool>& ground_bit,
                                                    const SectorLayer* min_height_filter) const

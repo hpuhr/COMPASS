@@ -59,7 +59,7 @@ protected:
     Transformation trafo_;
 
     // deg, m/s
-    EvaluationTargetPosition getPositionAtAngle(const EvaluationTargetPosition& org, double track_angle, double speed);
+    dbContent::TargetPosition getPositionAtAngle(const dbContent::TargetPosition& org, double track_angle, double speed);
 };
 
 }

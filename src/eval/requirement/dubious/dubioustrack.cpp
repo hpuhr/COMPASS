@@ -71,7 +71,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     unsigned int track_num;
     bool track_num_missing_reported {false};
 
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     bool is_inside;
 

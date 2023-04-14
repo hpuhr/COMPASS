@@ -115,7 +115,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     ptime tod_min, tod_max;
     unsigned int num_ok = 0;
     unsigned int num_extra = 0;
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     typedef EvaluationRequirementResult::SingleExtraData Result;
     typedef EvaluationDetail                             Detail;
@@ -125,7 +125,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
+                            const dbContent::TargetPosition& tst_pos,
                             const QVariant& inside,
                             const QVariant& extra,
                             const QVariant& ref_exists,

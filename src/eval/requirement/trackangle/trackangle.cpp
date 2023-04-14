@@ -111,13 +111,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
     //std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     bool is_inside;
-    EvaluationTargetPosition ref_pos;
+    dbContent::TargetPosition ref_pos;
     bool ok;
 
-    EvaluationTargetVelocity ref_spd;
+    dbContent::TargetVelocity ref_spd;
     double ref_trackangle_deg, tst_trackangle_deg;
     float trackangle_min_diff;
 
@@ -131,8 +131,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
-                            const boost::optional<EvaluationTargetPosition>& ref_pos,
+                            const dbContent::TargetPosition& tst_pos,
+                            const boost::optional<dbContent::TargetPosition>& ref_pos,
                             //const std::vector<EvaluationDetail::Line>& lines,
                             const QVariant& pos_inside,
                             const QVariant& offset,
@@ -359,10 +359,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 }
 
 // deg, m/s
-EvaluationTargetPosition TrackAngle::getPositionAtAngle(
-        const EvaluationTargetPosition& org, double track_angle, double speed)
+dbContent::TargetPosition TrackAngle::getPositionAtAngle(
+        const dbContent::TargetPosition& org, double track_angle, double speed)
 {
-    EvaluationTargetPosition new_pos;
+    dbContent::TargetPosition new_pos;
 
     double track_angle_math =  DEG2RAD * (90 - track_angle);
     double x = speed * cos(track_angle_math); // 2sec

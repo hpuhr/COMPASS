@@ -18,11 +18,12 @@
 #ifndef EVALUATIONTARGETDATA_H
 #define EVALUATIONTARGETDATA_H
 
-#include "evaluationtargetposition.h"
-#include "evaluationtargetvelocity.h"
+#include "dbcontent/target/targetposition.h"
+#include "dbcontent/target/targetvelocity.h"
 #include "projection/transformation.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
+#include <boost/optional.hpp>
 
 #include <vector>
 #include <map>
@@ -32,8 +33,6 @@
 #include <string>
 
 #include <Eigen/Core>
-
-#include <boost/optional.hpp>
 
 class Buffer;
 class EvaluationData;
@@ -52,10 +51,10 @@ struct TstDataMapping // mapping to respective ref data
     boost::posix_time::ptime timestamp_ref2_;
 
     bool has_ref_pos_ {false};
-    EvaluationTargetPosition pos_ref_;
+    dbContent::TargetPosition pos_ref_;
 
     bool has_ref_spd_ {false};
-    EvaluationTargetVelocity spd_ref_;
+    dbContent::TargetVelocity spd_ref_;
 };
 
 struct DataMappingTimes // mapping to respective tst data
@@ -212,17 +211,17 @@ public:
             const DataID& id, boost::posix_time::time_duration d_max) const;
     // lower/upper times, {} if not existing
 
-    boost::optional<EvaluationTargetPosition> mappedRefPos(const DataID& id) const;
-    std::pair<EvaluationTargetPosition, bool> mappedRefPos(
+    boost::optional<dbContent::TargetPosition> mappedRefPos(const DataID& id) const;
+    std::pair<dbContent::TargetPosition, bool> mappedRefPos(
             const DataID& id, boost::posix_time::time_duration d_max) const;
     // bool ok
-    std::pair<EvaluationTargetVelocity, bool> mappedRefSpeed(
+    std::pair<dbContent::TargetVelocity, bool> mappedRefSpeed(
             const DataID& id, boost::posix_time::time_duration d_max) const;
 
     bool hasRefPos(const DataID& id) const;
-    EvaluationTargetPosition refPos(const DataID& id) const;
+    dbContent::TargetPosition refPos(const DataID& id) const;
     bool hasRefSpeed(const DataID& id) const;
-    EvaluationTargetVelocity refSpeed(const DataID& id) const;
+    dbContent::TargetVelocity refSpeed(const DataID& id) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
     bool hasRefCallsign(const DataID& id) const;
@@ -243,7 +242,7 @@ public:
 
     // test
     bool hasTstPos(const DataID& id) const;
-    EvaluationTargetPosition tstPos(const DataID& id) const;
+    dbContent::TargetPosition tstPos(const DataID& id) const;
 
     bool hasTstCallsign(const DataID& id) const;
     std::string tstCallsign(const DataID& id) const;
@@ -305,7 +304,7 @@ protected:
     //void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
     void computeSectorInsideInfo() const;
     void computeSectorInsideInfo(InsideCheckMatrix& mat, 
-                                 const EvaluationTargetPosition& pos, 
+                                 const dbContent::TargetPosition& pos,
                                  unsigned int idx_internal,
                                  const boost::optional<bool>& ground_bit,
                                  const SectorLayer* min_height_filter = nullptr) const;

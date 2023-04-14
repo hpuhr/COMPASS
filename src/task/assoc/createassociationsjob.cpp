@@ -571,7 +571,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
                 timestamp = tr_it.timestamp_;
 
-                EvaluationTargetPosition tst_pos;
+                dbContent::TargetPosition tst_pos;
 
                 tst_pos.latitude_ = tr_it.latitude_;
                 tst_pos.longitude_ = tr_it.longitude_;
@@ -585,7 +585,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
                 double x_pos, y_pos;
                 double distance;
 
-                EvaluationTargetPosition ref_pos;
+                dbContent::TargetPosition ref_pos;
                 bool ok;
 
                 unsigned int target_cnt=0;
@@ -1502,12 +1502,12 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
                         unsigned int pos_dubious_cnt {0};
 
-                        EvaluationTargetPosition tst_pos;
+                        dbContent::TargetPosition tst_pos;
 
                         double x_pos, y_pos;
                         double distance;
 
-                        EvaluationTargetPosition ref_pos;
+                        dbContent::TargetPosition ref_pos;
                         bool ok;
 
                         for (auto tod_it : mc_same)

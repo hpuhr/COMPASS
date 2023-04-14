@@ -1,7 +1,7 @@
 #ifndef PRESENTDETAIL_H
 #define PRESENTDETAIL_H
 
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 
@@ -13,7 +13,7 @@ namespace EvaluationRequirement
     {
     public:
         PresentDetail(
-                boost::posix_time::ptime timestamp, EvaluationTargetPosition pos_tst,
+                boost::posix_time::ptime timestamp, dbContent::TargetPosition pos_tst,
                 bool ref_exists, QVariant pos_inside, bool is_not_ok,
                 int num_updates, int num_no_ref, int num_inside, int num_outside,
                 int num_no_ref_id, int num_present_id, int num_missing_id,
@@ -28,7 +28,7 @@ namespace EvaluationRequirement
 
         boost::posix_time::ptime timestamp_;
 
-        EvaluationTargetPosition pos_tst_;
+        dbContent::TargetPosition pos_tst_;
 
         bool ref_exists_ {false};
         QVariant pos_inside_ {false};

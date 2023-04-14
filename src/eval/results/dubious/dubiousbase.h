@@ -19,7 +19,7 @@
 
 #include "eval/results/single.h"
 #include "eval/results/joined.h"
-#include "eval/data/evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <memory>
 #include <string>
@@ -65,8 +65,8 @@ public:
         bool                               has_mode_s             = false;
         bool                               left_sector            = false;
         bool                               is_dubious             = false;
-        EvaluationTargetPosition           pos_begin;
-        EvaluationTargetPosition           pos_last;
+        dbContent::TargetPosition           pos_begin;
+        dbContent::TargetPosition           pos_last;
         EvaluationDetails                  details;
         std::map<std::string, std::string> dubious_reasons;
     };

@@ -23,7 +23,10 @@
 #include <memory>
 
 class Sector;
-class EvaluationTargetPosition;
+
+namespace dbContent {
+class TargetPosition;
+}
 
 /**
 */
@@ -50,7 +53,7 @@ public:
     std::pair<double, double> getMinMaxLatitude() const;
     std::pair<double, double> getMinMaxLongitude() const;
 
-    virtual bool isInside(const EvaluationTargetPosition& pos,
+    virtual bool isInside(const dbContent::TargetPosition& pos,
                           bool has_ground_bit, 
                           bool ground_bit_set) const;
 

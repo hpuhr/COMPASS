@@ -100,7 +100,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     // create ref time periods
     TimePeriodCollection ref_periods;
 
-    EvaluationTargetPosition ref_pos;
+    dbContent::TargetPosition ref_pos;
     ptime timestamp, last_ts;
 
     bool inside, was_inside;
@@ -164,7 +164,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     //int no_ref_uis {0};
 
     bool is_inside {false}, was_outside {false};
-    //pair<EvaluationTargetPosition, bool> ret_pos;
+    //pair<dbContent::TargetPosition, bool> ret_pos;
     bool ok;
 
     typedef EvaluationRequirementResult::SingleDetection Result;
@@ -172,13 +172,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     typedef Result::EvaluationDetails                    Details;
     Details details;
 
-    EvaluationTargetPosition pos_current;
+    dbContent::TargetPosition pos_current;
 
     unsigned int tst_data_size = tst_data.size();
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
-                            const boost::optional<EvaluationTargetPosition>& last_pos,
+                            const dbContent::TargetPosition& tst_pos,
+                            const boost::optional<dbContent::TargetPosition>& last_pos,
                             const QVariant& d_tod,
                             const QVariant& miss_occurred,
                             const QVariant& ref_exists,
@@ -305,7 +305,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                                 +"), between ["+Time::toString(last_period_ts)+", "
                                 +Time::toString(ref_periods.period(period_cnt).end())+"]\n";
 
-                        boost::optional<EvaluationTargetPosition> last_pos;
+                        boost::optional<dbContent::TargetPosition> last_pos;
 
                         if (tst_time_found)
                         {
@@ -507,7 +507,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                         +"), between ["+Time::toString(last_period_tod)+", "
                         +Time::toString(ref_periods.period(period_cnt).end())+"]\n";
 
-                boost::optional<EvaluationTargetPosition> last_pos;
+                boost::optional<dbContent::TargetPosition> last_pos;
 
                 if (tst_time_found)
                 {

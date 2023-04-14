@@ -81,16 +81,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
 
     std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     double x_pos, y_pos;
     double distance, angle, d_along;
 
     bool is_inside;
-    pair<EvaluationTargetPosition, bool> ret_pos;
-    EvaluationTargetPosition ref_pos;
-    pair<EvaluationTargetVelocity, bool> ret_spd;
-    EvaluationTargetVelocity ref_spd;
+    pair<dbContent::TargetPosition, bool> ret_pos;
+    dbContent::TargetPosition ref_pos;
+    pair<dbContent::TargetVelocity, bool> ret_spd;
+    dbContent::TargetVelocity ref_spd;
     bool ok;
 
     bool along_ok;
@@ -103,8 +103,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
-                            const boost::optional<EvaluationTargetPosition>& ref_pos,
+                            const dbContent::TargetPosition& tst_pos,
+                            const boost::optional<dbContent::TargetPosition>& ref_pos,
                             const QVariant& pos_inside,
                             const QVariant& offset,
                             const QVariant& check_passed,

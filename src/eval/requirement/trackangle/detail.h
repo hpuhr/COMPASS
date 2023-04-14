@@ -1,7 +1,7 @@
 #ifndef EVALUATIONREQUIREMENTRACKANGLEDETAIL_H
 #define EVALUATIONREQUIREMENTRACKANGLEDETAIL_H
 
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 
@@ -13,8 +13,8 @@ class TrackAngleDetail
 {
 public:
     TrackAngleDetail(
-            boost::posix_time::ptime timestmap, EvaluationTargetPosition tst_pos,
-            bool has_ref_pos, EvaluationTargetPosition ref_pos,
+            boost::posix_time::ptime timestmap, dbContent::TargetPosition tst_pos,
+            bool has_ref_pos, dbContent::TargetPosition ref_pos,
             QVariant pos_inside, QVariant offset, bool check_passed,
             QVariant value_ref, QVariant value_tst, QVariant speed_ref,
             unsigned int num_pos, unsigned int num_no_ref,
@@ -33,10 +33,10 @@ public:
 
     boost::posix_time::ptime timestamp_;
 
-    EvaluationTargetPosition tst_pos_;
+    dbContent::TargetPosition tst_pos_;
 
     bool has_ref_pos_ {false};
-    EvaluationTargetPosition ref_pos_;
+    dbContent::TargetPosition ref_pos_;
 
     QVariant offset_ {0};
     bool check_passed_ {false};

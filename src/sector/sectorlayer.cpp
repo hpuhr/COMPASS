@@ -17,7 +17,7 @@
 
 #include "sectorlayer.h"
 #include "sector.h"
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 #include "logger.h"
 
 #include <cassert>
@@ -95,7 +95,7 @@ void SectorLayer::clearSectors()
     num_exclusion_sectors_ = 0;
 }
 
-bool SectorLayer::isInside(const EvaluationTargetPosition& pos,
+bool SectorLayer::isInside(const dbContent::TargetPosition& pos,
                            bool has_ground_bit, 
                            bool ground_bit_set)  const
 {

@@ -18,7 +18,7 @@
 #include "sector.h"
 #include "compass.h"
 #include "evaluationmanager.h"
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <cassert>
 
@@ -510,7 +510,7 @@ void Sector::save()
     }
 }
 
-bool Sector::isInside(const EvaluationTargetPosition& pos,
+bool Sector::isInside(const dbContent::TargetPosition& pos,
                       bool has_ground_bit, 
                       bool ground_bit_set,
                       InsideCheckType check_type) const

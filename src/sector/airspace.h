@@ -24,7 +24,10 @@
 class QColor;
 
 class SectorLayer;
-class EvaluationTargetPosition;
+
+namespace dbContent {
+class TargetPosition;
+}
 
 /**
 */
@@ -47,7 +50,7 @@ public:
     const std::vector<std::shared_ptr<SectorLayer>>& layers() const;
 
     static AboveCheckResult isAbove(const SectorLayer* layer,
-                                    const EvaluationTargetPosition& pos,
+                                    const dbContent::TargetPosition& pos,
                                     bool has_ground_bit, 
                                     bool ground_bit_set);
 

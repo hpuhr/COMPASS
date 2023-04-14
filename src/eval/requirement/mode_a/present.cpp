@@ -68,7 +68,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
     typedef Result::EvaluationDetails                       Details;
     Details details;
 
-    EvaluationTargetPosition pos_current;
+    dbContent::TargetPosition pos_current;
     //unsigned int code;
     //bool code_ok;
 
@@ -78,8 +78,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
 
     //bool ref_exists;
     bool is_inside;
-    pair<EvaluationTargetPosition, bool> ret_pos;
-    EvaluationTargetPosition ref_pos;
+    pair<dbContent::TargetPosition, bool> ret_pos;
+    dbContent::TargetPosition ref_pos;
     bool ok;
 
     string comment;
@@ -89,7 +89,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
     bool skip_detail;
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
+                            const dbContent::TargetPosition& tst_pos,
                             const QVariant& ref_exists,
                             const QVariant& pos_inside,
                             const QVariant& is_not_ok,

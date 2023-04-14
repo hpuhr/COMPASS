@@ -15,17 +15,20 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONTARGETPOSITION_H
-#define EVALUATIONTARGETPOSITION_H
+#ifndef DBCONTENTTARGETPOSITION_H
+#define DBCONTENTTARGETPOSITION_H
 
 #include <vector>
 
-class EvaluationTargetPosition
+namespace dbContent
+
+{
+
+class TargetPosition
 {
 public:
-    EvaluationTargetPosition() {}
-    EvaluationTargetPosition(double latitude, double longitude, bool has_altitude, bool altitude_calculated,
-                             float altitude)
+    TargetPosition() {}
+    TargetPosition(double latitude, double longitude, bool has_altitude, bool altitude_calculated, float altitude)
         : latitude_(latitude), longitude_(longitude), has_altitude_(has_altitude),
           altitude_calculated_(altitude_calculated), altitude_(altitude)
     {}
@@ -43,4 +46,6 @@ public:
     };
 };
 
-#endif // EVALUATIONTARGETPOSITION_H
+}
+
+#endif // DBCONTENTTARGETPOSITION_H

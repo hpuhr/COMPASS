@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTDUBIOUSTARGET_H
 
 #include "eval/requirement/base/base.h"
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 

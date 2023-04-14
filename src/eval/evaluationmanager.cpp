@@ -796,14 +796,6 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
     if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
         read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name));
 
-    //    if (dbcontent_name == "ADSB")
-    //    {
-    //        read_set.add(dbcontent.variable("ground_bit"));
-    //        //            read_set.add(obj.variable("nac_p"));
-    //        //            read_set.add(obj.variable("nucp_nic"));
-    //        //            read_set.add(obj.variable("sil"));
-    //    }
-
     // speed & track angle
   
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));

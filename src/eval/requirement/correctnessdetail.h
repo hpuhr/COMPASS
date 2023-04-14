@@ -1,7 +1,7 @@
 #ifndef EVALUATIONREQUIREMENTCORRECTNESSDETAIL_H
 #define EVALUATIONREQUIREMENTCORRECTNESSDETAIL_H
 
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 
@@ -13,7 +13,7 @@ namespace EvaluationRequirement
     {
     public:
         CorrectnessDetail(
-                boost::posix_time::ptime timestamp, EvaluationTargetPosition pos_tst,
+                boost::posix_time::ptime timestamp, dbContent::TargetPosition pos_tst,
                 bool ref_exists, QVariant pos_inside, bool is_not_correct,
                 unsigned int num_updates, unsigned int num_no_ref, unsigned int num_inside, unsigned int num_outside,
                 unsigned int num_correct, unsigned int num_not_correct,
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 
         boost::posix_time::ptime timestamp_;
 
-        EvaluationTargetPosition pos_tst_;
+        dbContent::TargetPosition pos_tst_;
 
         bool ref_exists_ {false};
         QVariant pos_inside_ {false};

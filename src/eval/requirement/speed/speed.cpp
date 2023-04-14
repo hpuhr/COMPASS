@@ -108,13 +108,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     bool is_inside;
-    EvaluationTargetPosition ref_pos;
+    dbContent::TargetPosition ref_pos;
     bool ok;
 
-    EvaluationTargetVelocity ref_spd;
+    dbContent::TargetVelocity ref_spd;
     float tst_spd_ms;
     float spd_diff;
 
@@ -128,8 +128,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
-                            const boost::optional<EvaluationTargetPosition>& ref_pos,
+                            const dbContent::TargetPosition& tst_pos,
+                            const boost::optional<dbContent::TargetPosition>& ref_pos,
                             const QVariant& pos_inside,
                             const QVariant& offset,
                             const QVariant& check_passed,

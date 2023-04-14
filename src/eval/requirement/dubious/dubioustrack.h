@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTDUBIOUSTRACK_H
 
 #include "eval/requirement/base/base.h"
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 
@@ -34,13 +34,13 @@ namespace EvaluationRequirement
 class DubiousTrackUpdateDetail
 {
 public:
-    DubiousTrackUpdateDetail(boost::posix_time::ptime timestamp, EvaluationTargetPosition pos)
+    DubiousTrackUpdateDetail(boost::posix_time::ptime timestamp, dbContent::TargetPosition pos)
         : timestamp_(timestamp), pos_(pos)
     {
     }
 
     boost::posix_time::ptime timestamp_;
-    EvaluationTargetPosition pos_;
+    dbContent::TargetPosition pos_;
     std::map<std::string, std::string> dubious_comments_;
 
     std::string dubiousReasonsString()
