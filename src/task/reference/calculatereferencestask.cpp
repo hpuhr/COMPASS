@@ -259,6 +259,9 @@ VariableSet CalculateReferencesTask::getReadSetFor(const std::string& dbcontent_
     if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
         read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name));
 
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name));
+
     // flight level
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name));
 

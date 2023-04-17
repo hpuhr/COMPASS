@@ -996,7 +996,6 @@ void Chain::updateCallsigns() const
                 acids_.insert(val_it.first);
         }
     }
-
 }
 
 void Chain::updateTargetAddresses() const

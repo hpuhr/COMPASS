@@ -141,6 +141,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
              "calculate radar plot positions")
             ("associate_data", po::bool_switch(&associate_data_), "associate target reports")
+            ("calculate_references", po::bool_switch(&calculate_references_),
+             "calculate references from ADS-B and Tracker data")
             ("load_data", po::bool_switch(&load_data_), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
              "export view points report after start with given filename, e.g. '/data/db2/report.tex")
@@ -335,6 +337,9 @@ void Client::run ()
 
     if (associate_data_)
         rt_man.addCommand("associate_data");
+
+    if (calculate_references_)
+        rt_man.addCommand("calculate_references");
 
     if (load_data_)
         rt_man.addCommand("load_data");

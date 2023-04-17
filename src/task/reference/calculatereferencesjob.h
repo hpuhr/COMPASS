@@ -3,8 +3,7 @@
 
 #include "job.h"
 #include "dbcontent/dbcontentcache.h"
-#include "assoc/targetreport.h"
-#include "assoc/target.h"
+#include "calculatereferencestarget.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
 #include "boost/date_time/posix_time/posix_time_duration.hpp"
@@ -28,6 +27,8 @@ public:
 protected:
     CalculateReferencesTask& task_;
     std::shared_ptr<dbContent::Cache> cache_;
+
+    std::map<unsigned int, std::unique_ptr<CalculateReferences::Target>> targets_;
 };
 
 #endif // CALCULATEREFERENCESJOB_H

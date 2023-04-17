@@ -205,6 +205,18 @@ protected:
     DECLARE_RTCOMMAND_NOOPTIONS
 };
 
+// calc ref
+struct RTCommandCalculateReferences : public rtcommand::RTCommand
+{
+    RTCommandCalculateReferences();
+
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(calculate_references, "calculate references")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
+
 // load data
 struct RTCommandLoadData : public rtcommand::RTCommand
 {

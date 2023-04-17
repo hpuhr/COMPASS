@@ -11,6 +11,7 @@
 #include "dbcontentmanager.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createassociationstask.h"
+#include "calculatereferencestask.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskdialog.h"
@@ -47,6 +48,7 @@ REGISTER_RTCOMMAND(main_window::RTCommandImportGPSTrail)
 REGISTER_RTCOMMAND(main_window::RTCommandImportSectorsJSON)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateRadarPlotPositions)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateAssociations)
+REGISTER_RTCOMMAND(main_window::RTCommandCalculateReferences)
 REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
 REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
 REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
@@ -71,6 +73,7 @@ void init_commands()
     main_window::RTCommandImportSectorsJSON::init();
     main_window::RTCommandCalculateRadarPlotPositions::init();
     main_window::RTCommandCalculateAssociations::init();
+    main_window::RTCommandCalculateReferences::init();
     main_window::RTCommandLoadData::init();
     main_window::RTCommandExportViewPointsReport::init();
     main_window::RTCommandEvaluate::init();
@@ -993,6 +996,43 @@ bool RTCommandCalculateAssociations::run_impl()
     if(!task.canRun())
     {
         setResultMessage("Calculate associations task can not be run");
+        return false;
+    }
+
+    task.showDoneSummary(false);
+    task.run();
+
+    // if ok
+    return true;
+}
+
+
+// calc ref
+RTCommandCalculateReferences::RTCommandCalculateReferences()
+    : rtcommand::RTCommand()
+{
+    condition.setSignal("compass.taskmanager.calculatereferencestask.doneSignal(std::string)", -1); // think about max duration
+}
+
+bool RTCommandCalculateReferences::run_impl()
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    CalculateReferencesTask& task = COMPASS::instance().taskManager().calculateReferencesTask();
+
+    if(!task.canRun())
+    {
+        setResultMessage("Calculate references task can not be run");
         return false;
     }
 
