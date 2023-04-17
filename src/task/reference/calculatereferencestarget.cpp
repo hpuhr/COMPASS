@@ -1,5 +1,9 @@
 #include "calculatereferencestarget.h"
+#include "timeconv.h"
 
+using namespace std;
+using namespace Utils;
+using namespace dbContent;
 using namespace dbContent::TargetReport;
 
 namespace CalculateReferences {
@@ -25,6 +29,53 @@ void Target::finalizeChains()
 {
     for (auto& chain_it : chains_)
         chain_it.second->finalize();
+}
+
+void Target::calculateReference()
+{
+    boost::posix_time::ptime ts_begin, ts_end;
+
+    for (auto& chain_it : chains_)
+    {
+        if (chain_it.second->hasData())
+        {
+            if (ts_begin.is_not_a_date_time())
+            {
+                ts_begin = chain_it.second->timeBegin();
+                ts_end = chain_it.second->timeEnd();
+
+                assert (!ts_begin.is_not_a_date_time());
+                assert (!ts_end.is_not_a_date_time());
+            }
+            else
+            {
+                ts_begin = min(ts_begin, chain_it.second->timeBegin());
+                ts_end = max(ts_end, chain_it.second->timeEnd());
+            }
+        }
+    }
+
+    DataMapping mapping;
+
+    if (!ts_begin.is_not_a_date_time())
+    {
+        boost::posix_time::time_duration update_interval = Time::partialSeconds(1.0);
+
+        for (boost::posix_time::ptime ts_current = ts_begin; ts_current <= ts_end; ts_current += update_interval)
+        {
+            for (auto& chain_it : chains_)
+            {
+                mapping = chain_it.second->calculateDataMapping(ts_current);
+            }
+
+        }
+    }
+
+}
+
+unsigned int Target::utn() const
+{
+    return utn_;
 }
 
 } // namespace CalculateReferences

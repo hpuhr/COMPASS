@@ -7,6 +7,9 @@
 
 #include "util/tbbhack.h"
 
+#include <future>
+
+
 using namespace std;
 using namespace Utils;
 using namespace nlohmann;
@@ -36,6 +39,31 @@ void CalculateReferencesJob::run()
 
     emit statusSignal("Creating Targets");
 
+    createTargets();
+
+    finalizeTargets();
+
+    calculateReferences();
+
+    stop_time = microsec_clock::local_time();
+
+    loginf << "CalculateReferencesJob: run: created " << targets_.size() << " targets";
+
+    double load_time;
+    time_duration diff = stop_time - start_time;
+    load_time = diff.total_milliseconds() / 1000.0;
+
+    loginf << "CalculateReferencesJob: run: done ("
+           << String::doubleToStringPrecision(load_time, 2) << " s).";
+
+    done_ = true;
+}
+
+
+void CalculateReferencesJob::createTargets()
+{
+    loginf << "CalculateReferencesJob: createTargets";
+
     assert (cache_);
 
     unsigned int num_skipped {0};
@@ -44,6 +72,9 @@ void CalculateReferencesJob::run()
 
     ptime timestamp;
     vector<unsigned int> utn_vec;
+
+    // create map for utn lookup
+    map<unsigned int, std::unique_ptr<CalculateReferences::Target>> target_map;
 
     for (auto& buf_it : *cache_)
     {
@@ -95,11 +126,11 @@ void CalculateReferencesJob::run()
 
             for (auto utn_it : utn_vec)
             {
-                if (!targets_.count(utn_it))
-                    targets_[utn_it].reset(new CalculateReferences::Target(utn_it, cache_));
+                if (!target_map.count(utn_it))
+                    target_map[utn_it].reset(new CalculateReferences::Target(utn_it, cache_));
                     //target_data_.emplace_back(utn_it, *this, cache_, eval_man_, dbcont_man_);
 
-                targets_.at(utn_it)->addTargetReport(dbcontent_name, ds_ids.get(cnt), line_ids.get(cnt),
+                target_map.at(utn_it)->addTargetReport(dbcontent_name, ds_ids.get(cnt), line_ids.get(cnt),
                                                      timestamp, cnt);
 
                 ++num_assoc;
@@ -107,19 +138,63 @@ void CalculateReferencesJob::run()
         }
     }
 
+    // move targets from map to vec
+
+    for (auto& tgt_it : target_map)
+        targets_.emplace_back(move(tgt_it.second));
+
+    loginf << "CalculateReferencesJob: createTargets: done for " << targets_.size()
+           << ", reports num_skipped " << num_skipped
+           << " num_unassoc " << num_unassoc << " num_assoc " << num_assoc;
+}
+
+void CalculateReferencesJob::finalizeTargets()
+{
     for (auto& tgt_it : targets_)
-        tgt_it.second->finalizeChains();
+        tgt_it->finalizeChains();
+}
 
-    stop_time = microsec_clock::local_time();
+void CalculateReferencesJob::calculateReferences()
+{
+    loginf << "CalculateReferencesJob: calculateReferences";
 
-    loginf << "CalculateReferencesJob: run: created " << targets_.size() << " targets";
+    bool single_thread = false;
+    bool break_utn = 20;
 
-    double load_time;
-    time_duration diff = stop_time - start_time;
-    load_time = diff.total_milliseconds() / 1000.0;
+    std::future<void> pending_future = std::async(std::launch::async, [&] {
 
-    loginf << "CalculateReferencesJob: run: done ("
-           << String::doubleToStringPrecision(load_time, 2) << " s).";
+        unsigned int num_targets = targets_.size();
 
-    done_ = true;
+        if (single_thread)
+        {
+            for (auto& tgt_it : targets_)
+            {
+                if (tgt_it->utn() > break_utn)
+                    break;
+
+                tgt_it->calculateReference();
+
+                loginf << "CalculateReferencesJob: calculateReferences: utn " << tgt_it->utn() << " done";
+            }
+        }
+        else
+        {
+            tbb::parallel_for(uint(0), num_targets, [&](unsigned int utn_cnt)
+            {
+//                results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+//                done_flags[utn_cnt] = true;
+
+                if (targets_.at(utn_cnt)->utn() > break_utn)
+                    return;
+
+                targets_.at(utn_cnt)->calculateReference();
+
+                loginf << "CalculateReferencesJob: calculateReferences: utn " << targets_.at(utn_cnt)->utn() << " done";
+            });
+        }
+    });
+
+    pending_future.wait(); // or do done flags for progress updates
+
+    loginf << "CalculateReferencesJob: calculateReferences: done";
 }

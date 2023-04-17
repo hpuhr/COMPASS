@@ -28,7 +28,11 @@ protected:
     CalculateReferencesTask& task_;
     std::shared_ptr<dbContent::Cache> cache_;
 
-    std::map<unsigned int, std::unique_ptr<CalculateReferences::Target>> targets_;
+    std::vector<std::unique_ptr<CalculateReferences::Target>> targets_;
+
+    void createTargets();
+    void finalizeTargets();
+    void calculateReferences();
 };
 
 #endif // CALCULATEREFERENCESJOB_H

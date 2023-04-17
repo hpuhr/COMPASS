@@ -19,6 +19,10 @@ public:
 
     void finalizeChains();
 
+    void calculateReference();
+
+    unsigned int utn() const;
+
 protected:
     unsigned int utn_;
     std::shared_ptr<dbContent::Cache> cache_;
