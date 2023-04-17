@@ -18,6 +18,7 @@
 #ifndef EVALUATIONREQUIREMENT_H
 #define EVALUATIONREQUIREMENT_H
 
+#include "dbcontent/target/targetreportchain.h"
 #include "eval/requirement/base/comparisontype.h"
 #include "viewpoint.h"
 
@@ -92,16 +93,16 @@ protected:
     bool compareValue (double val, double threshold, COMPARISON_TYPE check_type);
 
     std::pair<ValueComparisonResult, std::string> compareTi (
-            const Evaluation::DataID& id_tst, const EvaluationTargetData& target_data,
+            const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
             boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareTa (
-            const Evaluation::DataID& id_tst, const EvaluationTargetData& target_data,
+            const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
             boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareModeA (
-            const Evaluation::DataID& id_tst, const EvaluationTargetData& target_data,
+            const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
             boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareModeC (
-            const Evaluation::DataID& id_tst, const EvaluationTargetData& target_data,
+            const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
             boost::posix_time::time_duration max_ref_time_diff, float max_val_diff); // tod tst
 };
 

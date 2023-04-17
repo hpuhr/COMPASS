@@ -636,7 +636,8 @@ void EvaluationManager::loadingDoneSlot()
         return;
     }
 
-    data_.addReferenceData(dbcontent_man.dbContent(dbcontent_name_ref_), line_id_ref_, data.at(dbcontent_name_ref_));
+    data_.setBuffers(data);
+    data_.addReferenceData(dbcontent_name_ref_, line_id_ref_);
     reference_data_loaded_ = true;
 
     if (!data.count(dbcontent_name_tst_))
@@ -651,7 +652,7 @@ void EvaluationManager::loadingDoneSlot()
 
         return;
     }
-    data_.addTestData(dbcontent_man.dbContent(dbcontent_name_tst_), line_id_tst_, data.at(dbcontent_name_tst_));
+    data_.addTestData(dbcontent_name_tst_, line_id_tst_);
     test_data_loaded_ = true;
 
     dbcontent_man.clearData(); // clear data, has been stored locally
@@ -1809,8 +1810,8 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
     //    "Aircraft Address": {
     //    "Aircraft Address Values": "FEFE10"
     //    },
-    if (target_data.targetAddresses().size())
-        data[VP_FILTERS_KEY]["Aircraft Address"]["Aircraft Address Values"] = target_data.targetAddressesStr()+",NULL";
+    if (target_data.acads().size())
+        data[VP_FILTERS_KEY]["Aircraft Address"]["Aircraft Address Values"] = target_data.acadsStr()+",NULL";
 
     //    "Mode 3/A Code": {
     //    "Mode 3/A Code Values": "7000"

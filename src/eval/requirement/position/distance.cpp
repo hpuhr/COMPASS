@@ -71,7 +71,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-    const auto& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     unsigned int num_pos {0};
     unsigned int num_no_ref {0};
@@ -146,7 +146,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         ++num_pos;
 
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPos(tst_id);
+        tst_pos = target_data.tstChain().pos(tst_id);
 
         comp_passed = false;
 

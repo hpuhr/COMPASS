@@ -20,8 +20,7 @@
 
 #include "evaluationtargetdata.h"
 #include "evaluationdatawidget.h"
-
-//#include <tbb/tbb.h>
+#include "dbcontentcache.h"
 
 #include <QAbstractItemModel>
 
@@ -65,8 +64,9 @@ public slots:
 public:
     EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man);
 
-    void addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
-    void addTestData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
+    void setBuffers(std::map<std::string, std::shared_ptr<Buffer>> buffers);
+    void addReferenceData (std::string dbcontent_name, unsigned int line_id);
+    void addTestData (std::string dbcontent_name, unsigned int line_id);
     void finalize ();
 
     bool hasTargetData (unsigned int utn);
@@ -95,59 +95,59 @@ public:
     EvaluationDataWidget* widget();
 
     // ref
-    std::shared_ptr<Buffer> ref_buffer_;
+//    std::shared_ptr<Buffer> ref_buffer_;
     unsigned int ref_line_id_;
 
-    std::string ref_timestamp_name_;
-    std::string ref_latitude_name_;
-    std::string ref_longitude_name_;
-    std::string ref_target_address_name_;
-    std::string ref_callsign_name_;
+//    std::string ref_timestamp_name_;
+//    std::string ref_latitude_name_;
+//    std::string ref_longitude_name_;
+//    std::string ref_target_address_name_;
+//    std::string ref_callsign_name_;
 
-    std::string ref_modea_name_;
-    std::string ref_modea_g_name_; // can be empty
-    std::string ref_modea_v_name_; // can be empty
+//    std::string ref_modea_name_;
+//    std::string ref_modea_g_name_; // can be empty
+//    std::string ref_modea_v_name_; // can be empty
 
-    std::string ref_modec_trusted_name_; // can be empty
-    std::string ref_modec_name_;
-    std::string ref_modec_g_name_; // can be empty
-    std::string ref_modec_v_name_; // can be empty
-    bool has_ref_altitude_secondary_ {false};
-    std::string ref_altitude_secondary_name_;
+//    std::string ref_modec_trusted_name_; // can be empty
+//    std::string ref_modec_name_;
+//    std::string ref_modec_g_name_; // can be empty
+//    std::string ref_modec_v_name_; // can be empty
+//    bool has_ref_altitude_secondary_ {false};
+//    std::string ref_altitude_secondary_name_;
 
-    std::string ref_ground_bit_name_; // can be empty
+//    std::string ref_ground_bit_name_; // can be empty
 
-    std::string ref_spd_ground_speed_kts_name_;
-    std::string ref_spd_track_angle_deg_name_;
+//    std::string ref_spd_ground_speed_kts_name_;
+//    std::string ref_spd_track_angle_deg_name_;
 
     // tst
-    std::shared_ptr<Buffer> tst_buffer_;
+//std::shared_ptr<Buffer> tst_buffer_;
     unsigned int tst_line_id_;
 
-    std::string tst_timestamp_name_;
-    std::string tst_latitude_name_;
-    std::string tst_longitude_name_;
-    std::string tst_target_address_name_;
-    std::string tst_callsign_name_;
+//    std::string tst_timestamp_name_;
+//    std::string tst_latitude_name_;
+//    std::string tst_longitude_name_;
+//    std::string tst_target_address_name_;
+//    std::string tst_callsign_name_;
 
-    std::string tst_modea_name_;
-    std::string tst_modea_g_name_; // can be empty
-    std::string tst_modea_v_name_; // can be empty
+//    std::string tst_modea_name_;
+//    std::string tst_modea_g_name_; // can be empty
+//    std::string tst_modea_v_name_; // can be empty
 
-    std::string tst_modec_trusted_name_; // can be empty
-    std::string tst_modec_name_;
-    std::string tst_modec_g_name_; // can be empty
-    std::string tst_modec_v_name_; // can be empty
+//    std::string tst_modec_trusted_name_; // can be empty
+//    std::string tst_modec_name_;
+//    std::string tst_modec_g_name_; // can be empty
+//    std::string tst_modec_v_name_; // can be empty
 
-    std::string tst_ground_bit_name_; // can be empty
+//    std::string tst_ground_bit_name_; // can be empty
 
-    std::string tst_track_num_name_; // can be empty
+//    std::string tst_track_num_name_; // can be empty
 
-    std::string tst_spd_ground_speed_kts_name_;
-    std::string tst_spd_track_angle_deg_name_;
+//    std::string tst_spd_ground_speed_kts_name_;
+//    std::string tst_spd_track_angle_deg_name_;
 
-    std::string tst_multiple_srcs_name_; // can be empty TODO
-    std::string tst_track_lu_ds_id_name_; // can be empty TODO
+//    std::string tst_multiple_srcs_name_; // can be empty TODO
+//    std::string tst_track_lu_ds_id_name_; // can be empty TODO
 
 
 protected:
@@ -156,6 +156,8 @@ protected:
 
     QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
                                 "M3/A", "MC Min", "MC Max"};
+
+    std::shared_ptr<dbContent::Cache> cache_;
 
     TargetCache target_data_;
     bool finalized_ {false};

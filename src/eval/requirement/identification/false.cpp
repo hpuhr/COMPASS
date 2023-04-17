@@ -50,7 +50,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-    const auto& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     ptime timestamp;
 
@@ -135,7 +135,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
         ++num_updates;
 
         timestamp = tst_id.first;
-        pos_current = target_data.tstPos(tst_id);
+        pos_current = target_data.tstChain().pos(tst_id);
 
         if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {

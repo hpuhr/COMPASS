@@ -69,7 +69,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-    const auto& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     ptime timestamp;
     bool is_inside;
@@ -94,10 +94,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         if (!is_inside)
             continue;
 
-        if (!target_data.hasTstTrackNum(tst_id))
+        if (!target_data.tstChain().hasTstTrackNum(tst_id))
             continue;
 
-        track_num = target_data.tstTrackNum(tst_id);
+        track_num = target_data.tstChain().tstTrackNum(tst_id);
 
         if (!active_tracks.count(track_num)) // not yet existing
         {
@@ -171,12 +171,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         ++num_pos;
 
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPos(tst_id);
+        tst_pos = target_data.tstChain().pos(tst_id);
 
-        has_track_num = target_data.hasTstTrackNum(tst_id);
+        has_track_num = target_data.tstChain().hasTstTrackNum(tst_id);
 
         if (has_track_num)
-            track_num = target_data.tstTrackNum(tst_id);
+            track_num = target_data.tstChain().tstTrackNum(tst_id);
 
         is_inside = target_data.tstPosInside(sector_layer, tst_id);
 

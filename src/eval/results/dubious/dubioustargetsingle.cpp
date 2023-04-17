@@ -158,8 +158,8 @@ void SingleDubiousTarget::addTargetDetailsToTable (EvaluationResultsReport::Sect
                 {utn_,
                  target_->timeBeginStr().c_str(),
                  target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(),
-                 target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(),
+                 target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(),
                  target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(),
@@ -182,10 +182,10 @@ void SingleDubiousTarget::addTargetDetailsToTableADSB (
                 || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
             order = Qt::DescendingOrder;
 
-        section.addTable(table_name, 16,
+        section.addTable(table_name, 14,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                           "#PosInside", "#DU", "PDU", "Reasons", "PDT",
-                          "MOPS", "NUCp/NIC", "NACp"}, true, 12, order);
+                          "MOPS"}, true, 12, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -207,8 +207,8 @@ void SingleDubiousTarget::addTargetDetailsToTableADSB (
                 {utn_,
                  target_->timeBeginStr().c_str(),
                  target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(),
-                 target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(),
+                 target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(),
                  target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(),
@@ -217,9 +217,7 @@ void SingleDubiousTarget::addTargetDetailsToTableADSB (
                  p_dubious_up_var, // "PDU"
                  dub_string.c_str(),  // "Reasons"
                  p_dubious_var, // "PDT"
-                 target_->mopsVersionStr().c_str(), // "MOPS"
-                 target_->nucpNicStr().c_str(), // "NUCp/NIC"
-                 target_->nacpStr().c_str()}, // "NACp"
+                 target_->mopsVersionStr().c_str()}, // "MOPS"
                 this, {utn_});
 
 }

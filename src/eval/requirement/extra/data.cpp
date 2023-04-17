@@ -76,7 +76,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     bool inside;
 
     {
-        const auto& ref_data = target_data.refData();
+        const auto& ref_data = target_data.refChain().timestampIndexes();
 
         bool first {true};
 
@@ -138,14 +138,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     };
 
     {
-        const auto& tst_data = target_data.tstData();
+        const auto& tst_data = target_data.tstChain().timestampIndexes();
 
         for (auto& tst_it : tst_data)
         {
             timestamp = tst_it.first;
 
-            assert (target_data.hasTstPos(tst_it));
-            tst_pos = target_data.tstPos(tst_it);
+            assert (target_data.tstChain().hasPos(tst_it));
+            tst_pos = target_data.tstChain().pos(tst_it);
 
             is_inside_ref_time_period = ref_periods.isInside(timestamp);
 

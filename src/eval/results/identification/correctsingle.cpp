@@ -119,7 +119,7 @@ void SingleIdentificationCorrect::addTargetDetailsToTable (
 
     target_table.addRow(
                 { utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                  target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                  target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                   target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
                   num_updates_, num_no_ref_pos_+num_no_ref_id_, num_correct_, num_not_correct_,
                   pd_var}, this, {utn_});

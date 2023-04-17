@@ -47,7 +47,7 @@ namespace EvaluationRequirement
 
         time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-        const auto& tst_data = target_data.tstData();
+        const auto& tst_data = target_data.tstChain().timestampIndexes();
 
         ptime timestamp;
 
@@ -126,7 +126,7 @@ namespace EvaluationRequirement
             ++num_updates;
 
             timestamp = tst_id.first;
-            pos_current = target_data.tstPos(tst_id);
+            pos_current = target_data.tstChain().pos(tst_id);
 
             if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
             {
@@ -180,14 +180,14 @@ namespace EvaluationRequirement
 
             if ((!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())) // ref times possible
             {
-                if ((!ref_lower.is_not_a_date_time() && target_data.hasRefModeC(ref_lower))
-                        || (!ref_upper.is_not_a_date_time() && target_data.hasRefModeC(ref_upper))) // ref value(s) exist
+                if ((!ref_lower.is_not_a_date_time() && target_data.refChain().hasModeC(ref_lower))
+                        || (!ref_upper.is_not_a_date_time() && target_data.refChain().hasModeC(ref_upper))) // ref value(s) exist
                 {
                     code_present_ref = true;
                 }
             }
 
-            code_present_tst = target_data.hasTstModeC(tst_id);
+            code_present_tst = target_data.tstChain().hasModeC(tst_id);
 
             code_missing = false;
 

@@ -105,8 +105,8 @@ void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> roo
         utn_table.addRow({"UTN", "Unique Target Number", utn_}, this);
         utn_table.addRow({"Begin", "Begin time of target", target_->timeBeginStr().c_str()}, this);
         utn_table.addRow({"End", "End time of target", target_->timeEndStr().c_str()}, this);
-        utn_table.addRow({"Callsign", "Mode S target identification(s)", target_->callsignsStr().c_str()}, this);
-        utn_table.addRow({"Target Addr.", "Mode S target address(es)", target_->targetAddressesStr().c_str()}, this);
+        utn_table.addRow({"Callsign", "Mode S target identification(s)", target_->acidsStr().c_str()}, this);
+        utn_table.addRow({"Target Addr.", "Mode S target address(es)", target_->acadsStr().c_str()}, this);
         utn_table.addRow({"Mode 3/A", "Mode 3/A code(s)", target_->modeACodesStr().c_str()}, this);
         utn_table.addRow({"Mode C Min", "Minimum Mode C code [ft]", target_->modeCMinStr().c_str()}, this);
         utn_table.addRow({"Mode C Max", "Maximum Mode C code [ft]", target_->modeCMaxStr().c_str()}, this);

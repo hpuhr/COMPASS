@@ -67,7 +67,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
            << " use_min_updates " << use_min_updates_ << " min_updates " << min_updates_
            << " use_min_duration " << use_min_duration_ << " min_duration " << min_duration_;
 
-    const auto& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     dbContent::TargetPosition tst_pos;
 
@@ -101,7 +101,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
         // check if inside based on test position only
 
-        tst_pos   = target_data.tstPos(tst_id);
+        tst_pos   = target_data.tstChain().pos(tst_id);
         is_inside = target_data.tstPosInside(sector_layer, tst_id);
 
         if (!is_inside)
@@ -144,11 +144,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
         // do stats
         if (!detail.has_mode_ac
-                && (target_data.hasTstModeA(tst_id) || target_data.hasTstModeC(tst_id)))
+                && (target_data.tstChain().hasModeA(tst_id) || target_data.tstChain().hasModeC(tst_id)))
             detail.has_mode_ac = true;
 
         if (!detail.has_mode_s
-                && (target_data.hasTstTA(tst_id) || target_data.hasTstCallsign(tst_id)))
+                && (target_data.tstChain().hasACAD(tst_id) || target_data.tstChain().hasACID(tst_id)))
             detail.has_mode_s = true;
     }
 
@@ -222,14 +222,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
         if (!do_not_evaluate_target && all_updates_dubious) // mark was primarty/short track if required
             Result::logComments(update, all_updates_dubious_reasons);
 
-        auto id = target_data.dataID(update.timestamp(), Evaluation::DataType::Test);
+        auto id = target_data.tstChain().dataID(update.timestamp());
 
         if (!do_not_evaluate_target && use_max_groundspeed_)
         {
-            if (target_data.hasTstMeasuredSpeed(id) && target_data.tstMeasuredSpeed(id) > max_groundspeed_kts_)
+            if (target_data.tstChain().hasTstMeasuredSpeed(id) && target_data.tstChain().tstMeasuredSpeed(id) > max_groundspeed_kts_)
             {
                 Result::logComment(update, "MSpd",
-                        String::doubleToStringPrecision(target_data.tstMeasuredSpeed(id), 1));
+                        String::doubleToStringPrecision(target_data.tstChain().tstMeasuredSpeed(id), 1));
 
                 ++dubious_groundspeed_found;
             }
@@ -264,13 +264,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
             if (!do_not_evaluate_target && time_diff >= minimum_comparison_time_
                     && time_diff <= maximum_comparison_time_)
             {
-                auto id_last = target_data.dataID(last_timestamp, Evaluation::DataType::Test);
+                auto id_last = target_data.tstChain().dataID(last_timestamp);
 
-                if (use_max_acceleration_ && target_data.hasTstMeasuredSpeed(id)
-                        && target_data.hasTstMeasuredSpeed(id_last))
+                if (use_max_acceleration_ && target_data.tstChain().hasTstMeasuredSpeed(id)
+                        && target_data.tstChain().hasTstMeasuredSpeed(id_last))
                 {
-                    acceleration = fabs(target_data.tstMeasuredSpeed(id)
-                                        - target_data.tstMeasuredSpeed(id_last)) * KNOTS2M_S / time_diff;
+                    acceleration = fabs(target_data.tstChain().tstMeasuredSpeed(id)
+                                        - target_data.tstChain().tstMeasuredSpeed(id_last)) * KNOTS2M_S / time_diff;
 
                     if (acceleration > max_acceleration_)
                     {
@@ -282,11 +282,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
                 }
 
                 if (!do_not_evaluate_target && use_max_turnrate_
-                        && target_data.hasTstMeasuredTrackAngle(id)
-                        && target_data.hasTstMeasuredTrackAngle(id_last))
+                        && target_data.tstChain().hasTstMeasuredTrackAngle(id)
+                        && target_data.tstChain().hasTstMeasuredTrackAngle(id_last))
                 {
-                    track_angle1 = target_data.tstMeasuredTrackAngle(id);
-                    track_angle2 = target_data.tstMeasuredTrackAngle(id_last);
+                    track_angle1 = target_data.tstChain().tstMeasuredTrackAngle(id);
+                    track_angle2 = target_data.tstChain().tstMeasuredTrackAngle(id_last);
 
                     turnrate = Number::calculateMinAngleDifference(track_angle2, track_angle1) / time_diff;
 
@@ -302,11 +302,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
                     }
                 }
 
-                if (!do_not_evaluate_target && use_rocd_ && target_data.hasTstModeC(id)
-                        && target_data.hasTstModeC(id_last))
+                if (!do_not_evaluate_target && use_rocd_ && target_data.tstChain().hasModeC(id)
+                        && target_data.tstChain().hasModeC(id_last))
                 {
 
-                    rocd = fabs(target_data.tstModeC(id) - target_data.tstModeC(id_last)) / time_diff;
+                    rocd = fabs(target_data.tstChain().modeC(id) - target_data.tstChain().modeC(id_last)) / time_diff;
 
                     if (rocd > max_rocd_)
                     {

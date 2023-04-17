@@ -1,6 +1,10 @@
 #ifndef DBCONTENT_TARGETREPORTCHAIN_H
 #define DBCONTENT_TARGETREPORTCHAIN_H
 
+#include "dbcontent/target/targetposition.h"
+#include "dbcontent/target/targetvelocity.h"
+#include "projection/transformation.h"
+
 #include "boost/date_time/posix_time/ptime.hpp"
 #include <boost/optional.hpp>
 
@@ -64,6 +68,39 @@ private:
     bool                     valid_ = false;
 };
 
+struct DataMappingTimes // mapping to respective tst data
+{
+    boost::posix_time::ptime timestamp_; // tod of test
+
+    bool has_other1_ {false};
+    boost::posix_time::ptime timestamp_other1_;
+    DataID dataid_other1_;
+
+    bool has_other2_ {false};
+    boost::posix_time::ptime timestamp_other2_;
+    DataID dataid_other2_;
+};
+
+
+struct DataMapping // mapping to respective ref data
+{
+    boost::posix_time::ptime timestamp_; // timestamp of original
+
+    bool has_ref1_ {false};
+    boost::posix_time::ptime timestamp_ref1_;
+    DataID dataid_ref1_;
+
+    bool has_ref2_ {false};
+    boost::posix_time::ptime timestamp_ref2_;
+    DataID dataid_ref2_;
+
+    bool has_ref_pos_ {false};
+    dbContent::TargetPosition pos_ref_;
+
+    bool has_ref_spd_ {false};
+    dbContent::TargetVelocity spd_ref_;
+};
+
 class Chain
 {
 public:
@@ -79,7 +116,7 @@ public:
 
     void finalize () const;
 
-    unsigned int numUpdates () const;
+    unsigned int size () const;
 
     boost::posix_time::ptime timeBegin() const;
     std::string timeBeginStr() const;
@@ -87,11 +124,11 @@ public:
     std::string timeEndStr() const;
     boost::posix_time::time_duration timeDuration() const;
 
-    std::set<std::string> callsigns() const;
-    std::string callsignsStr() const;
+    std::set<std::string> acids() const;
+    std::string acidsStr() const;
 
-    std::set<unsigned int> targetAddresses() const;
-    std::string targetAddressesStr() const;
+    std::set<unsigned int> acads() const;
+    std::string acadsStr() const;
 
     std::set<unsigned int> modeACodes() const;
     std::string modeACodesStr() const;
@@ -104,7 +141,7 @@ public:
 
     bool isPrimaryOnly () const;
 
-    const IndexMap& data() const;
+    const IndexMap& timestampIndexes() const;
 
     double latitudeMin() const;
     double latitudeMax() const;
@@ -115,35 +152,57 @@ public:
 
     DataID dataID(const boost::posix_time::ptime& timestamp) const;
 
-    bool hasRefPos(const DataID& id) const;
-    TargetPosition refPos(const DataID& id) const;
-    bool hasRefSpeed(const DataID& id) const;
-    TargetVelocity refSpeed(const DataID& id) const;
+    bool hasPos(const DataID& id) const;
+    TargetPosition pos(const DataID& id) const;
+    bool hasSpeed(const DataID& id) const;
+    TargetVelocity speed(const DataID& id) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
-    bool hasRefCallsign(const DataID& id) const;
-    std::string refCallsign(const DataID& id) const;
+    bool hasACID(const DataID& id) const;
+    std::string acid(const DataID& id) const;
 
-    bool hasRefModeA(const DataID& id) const; // only if set, is v, not g
-    unsigned int refModeA(const DataID& id) const;
+    bool hasModeA(const DataID& id) const; // only if set, is v, not g
+    unsigned int modeA(const DataID& id) const;
 
-    bool hasRefModeC(const DataID& id) const; // only if set, is v, not g
-    float refModeC(const DataID& id) const;
+    bool hasModeC(const DataID& id) const; // only if set, is v, not g
+    float modeC(const DataID& id) const;
 
-    bool hasRefTA(const DataID& id) const;
-    unsigned int refTA(const DataID& id) const;
+    bool hasACAD(const DataID& id) const;
+    unsigned int acad(const DataID& id) const;
 
-    std::pair<bool,bool> refGroundBit(const DataID& id) const; // has gbs, gbs true
+    bool hasGroundBit(const DataID& id) const; // only if set
+    std::pair<bool,bool> groundBit(const DataID& id) const; // has gbs, gbs true
+
+    bool hasTstTrackNum(const DataID& id) const;
+    unsigned int tstTrackNum(const DataID& id) const;
+
+    // speed, track angle
+    bool hasTstMeasuredSpeed(const DataID& id) const;
+    float tstMeasuredSpeed(const DataID& id) const; // m/s
+
+    bool hasTstMeasuredTrackAngle(const DataID& id) const;
+    float tstMeasuredTrackAngle(const DataID& id) const; // deg
+
+    //    boost::optional<bool> availableGroundBit(const DataID& id,
+    //                                             const boost::posix_time::time_duration& d_max) const;
+
+    Index indexFromDataID(const DataID& id) const;
+    boost::posix_time::ptime timestampFromDataID(const DataID& id) const;
+
+    DataMapping calculateDataMapping(boost::posix_time::ptime timestamp) const; // test tod
+    void addPositionsSpeedsToMapping (DataMapping& mapping) const;
+
+    DataMappingTimes findDataMappingTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
 
 protected:
     std::shared_ptr<dbContent::Cache> cache_;
     std::string dbcontent_name_;
 
-    std::multimap<boost::posix_time::ptime, Index> ref_data_; // timestamp -> index
-    std::vector<unsigned int> ref_indices_;
+    std::multimap<boost::posix_time::ptime, Index> timestamp_index_lookup_; // timestamp -> index
+    std::vector<unsigned int> indexes_;
 
-    mutable std::set<std::string> callsigns_;
-    mutable std::set<unsigned int> target_addresses_;
+    mutable std::set<std::string> acids_;
+    mutable std::set<unsigned int> acads_;
     mutable std::set<unsigned int> mode_a_codes_;
 
     mutable bool  has_mode_c_ {false};
@@ -157,17 +216,17 @@ protected:
     mutable double longitude_min_ {0};
     mutable double longitude_max_ {0};
 
+    mutable Transformation trafo_;
+
     void updateCallsigns() const;
     void updateTargetAddresses() const;
     void updateModeACodes() const;
     void updateModeCMinMax() const;
     void updatePositionMinMax() const;
 
-    std::pair<bool, float> estimateRefAltitude (
+    std::pair<bool, float> estimateAltitude (
             const boost::posix_time::ptime& timestamp, unsigned int index_internal) const;
 
-    Index indexFromDataID(const DataID& id) const;
-    boost::posix_time::ptime timestampFromDataID(const DataID& id) const;
 };
 
 } // namespace TargetReport

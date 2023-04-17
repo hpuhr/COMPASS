@@ -148,7 +148,7 @@ void SinglePositionAlong::addTargetDetailsToTable (
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
                  Number::round(value_min_,2), // "ALMin"
                  Number::round(value_max_,2), // "ALMax"
@@ -164,10 +164,10 @@ void SinglePositionAlong::addTargetDetailsToTableADSB (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     if (!section.hasTable(table_name))
-        section.addTable(table_name, 18,
+        section.addTable(table_name, 16,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                           "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
-                          "MOPS", "NUCp/NIC", "NACp"}, true, 14);
+                          "MOPS"}, true, 14);
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
@@ -181,7 +181,7 @@ void SinglePositionAlong::addTargetDetailsToTableADSB (
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(),
                  Number::round(value_min_,2), // "ALMin"
@@ -191,9 +191,7 @@ void SinglePositionAlong::addTargetDetailsToTableADSB (
                  num_passed_, // "#ALOK"
                  num_failed_, // "#ALNOK"
                  p_min_var, // "PALOK"
-                 target_->mopsVersionStr().c_str(), // "MOPS"
-                 target_->nucpNicStr().c_str(), // "NUCp/NIC"
-                 target_->nacpStr().c_str()}, // "NACp"
+                 target_->mopsVersionStr().c_str()}, // "MOPS"
                 this, {utn_});
 
 }

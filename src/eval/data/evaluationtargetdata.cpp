@@ -40,75 +40,84 @@
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
+using namespace dbContent::TargetReport;
 
 //const unsigned int debug_utn = 3275;
 
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, 
-                                           EvaluationData& eval_data, 
+                                           EvaluationData& eval_data,
+                                           std::shared_ptr<dbContent::Cache> cache,
                                            EvaluationManager& eval_man,
                                            DBContentManager& dbcont_man)
-:   utn_       (utn)
-,   eval_data_ (eval_data)
-,   eval_man_  (eval_man)
-,   dbcont_man_(dbcont_man)
+    :   utn_       (utn)
+    ,   eval_data_ (eval_data)
+    ,   cache_(cache)
+    ,   eval_man_  (eval_man)
+    ,   dbcont_man_(dbcont_man)
+    ,   ref_chain_(cache_, eval_man_.dbContentNameRef())
+    ,   tst_chain_(cache_, eval_man_.dbContentNameTst())
 {
 }
 
 EvaluationTargetData::~EvaluationTargetData() = default;
 
-EvaluationTargetData::DataID EvaluationTargetData::dataID(const boost::posix_time::ptime& timestamp, 
-                                                          DataType dtype) const
-{
-    const IndexMap& index_map = (dtype == DataType::Reference) ? ref_data_ : tst_data_;
+//EvaluationTargetData::DataID EvaluationTargetData::dataID(const boost::posix_time::ptime& timestamp,
+//                                                          DataType dtype) const
+//{
+//    const IndexMap& index_map = (dtype == DataType::Reference) ? ref_data_ : tst_data_;
 
-    auto range = index_map.equal_range(timestamp);
-#if 0
-    if (range.first == index_map.end())
-        return DataID();
-#else
-    assert(range.first != index_map.end());
-#endif
+//    auto range = index_map.equal_range(timestamp);
+//#if 0
+//    if (range.first == index_map.end())
+//        return DataID();
+//#else
+//    assert(range.first != index_map.end());
+//#endif
 
-    assert(range.first->second.idx_internal < index_map.size());
+//    assert(range.first->second.idx_internal < index_map.size());
 
-    return DataID(timestamp).addIndex(range.first->second);
-}
+//    return DataID(timestamp).addIndex(range.first->second);
+//}
 
-EvaluationTargetData::Index EvaluationTargetData::indexFromDataID(const DataID& id, DataType dtype) const
-{
-    assert(id.valid());
+//EvaluationTargetData::Index EvaluationTargetData::indexFromDataID(const DataID& id, DataType dtype) const
+//{
+//    assert(id.valid());
 
-    if (!id.hasIndex())
-    {
-        auto id_ret = dataID(id.timestamp(), dtype);
-        assert(id_ret.valid());
+//    if (!id.hasIndex())
+//    {
+//        auto id_ret = dataID(id.timestamp(), dtype);
+//        assert(id_ret.valid());
 
-        return id_ret.index();
-    }
-    
-    return id.index();
-}
+//        return id_ret.index();
+//    }
 
-boost::posix_time::ptime EvaluationTargetData::timestampFromDataID(const DataID& id) const
-{
-    assert(id.valid());
-    return id.timestamp();
-}
+//    return id.index();
+//}
+
+//boost::posix_time::ptime EvaluationTargetData::timestampFromDataID(const DataID& id) const
+//{
+//    assert(id.valid());
+//    return id.timestamp();
+//}
 
 void EvaluationTargetData::addRefIndex (boost::posix_time::ptime timestamp, unsigned int index)
 {
-    unsigned int idx_int = (unsigned int)ref_indices_.size();
+    ref_chain_.addIndex(timestamp, index);
 
-    ref_data_.insert({timestamp, Index(index, idx_int)});
-    ref_indices_.push_back(index);
+    //    unsigned int idx_int = (unsigned int)ref_indices_.size();
+
+    //    ref_chain_.insert({timestamp, Index(index, idx_int)});
+    //    ref_indices_.push_back(index);
 }
 
 void EvaluationTargetData::addTstIndex (boost::posix_time::ptime timestamp, unsigned int index)
 {
-    unsigned int idx_int = (unsigned int)tst_indices_.size();
+    tst_chain_.addIndex(timestamp, index);
 
-    tst_data_.insert({timestamp, Index(index, idx_int)});
-    tst_indices_.push_back(index);
+    //    unsigned int idx_int = (unsigned int)tst_indices_.size();
+
+    //    tst_chain_.insert({timestamp, Index(index, idx_int)});
+    //    tst_indices_.push_back(index);
 }
 
 bool EvaluationTargetData::hasData() const
@@ -118,12 +127,14 @@ bool EvaluationTargetData::hasData() const
 
 bool EvaluationTargetData::hasRefData () const
 {
-    return !ref_data_.empty();
+    //return !ref_chain_.empty();
+    return ref_chain_.hasData();
 }
 
 bool EvaluationTargetData::hasTstData () const
 {
-    return !tst_data_.empty();
+    //return !tst_chain_.empty();
+    return tst_chain_.hasData();
 }
 
 void EvaluationTargetData::finalize () const
@@ -132,8 +143,11 @@ void EvaluationTargetData::finalize () const
     //           << " ref " << hasRefData() << " up " << ref_rec_nums_.size()
     //           << " tst " << hasTstData() << " up " << tst_rec_nums_.size();
 
-    updateCallsigns();
-    updateTargetAddresses();
+    ref_chain_.finalize();
+    tst_chain_.finalize();
+
+    updateACIDs();
+    updateACADs();
     updateModeACodes();
     updateModeCMinMax();
     updatePositionMinMax();
@@ -205,27 +219,27 @@ void EvaluationTargetData::finalize () const
 
 unsigned int EvaluationTargetData::numUpdates () const
 {
-    return ref_data_.size() + tst_data_.size();
+    return ref_chain_.size() + tst_chain_.size();
 }
 
 unsigned int EvaluationTargetData::numRefUpdates () const
 {
-    return ref_data_.size();
+    return ref_chain_.size() ;
 }
 
 unsigned int EvaluationTargetData::numTstUpdates () const
 {
-    return tst_data_.size();
+    return tst_chain_.size() ;
 }
 
 ptime EvaluationTargetData::timeBegin() const
 {
-    if (ref_data_.size() && tst_data_.size())
-        return min(ref_data_.begin()->first, tst_data_.begin()->first);
-    else if (ref_data_.size())
-        return ref_data_.begin()->first;
-    else if (tst_data_.size())
-        return tst_data_.begin()->first;
+    if (ref_chain_.size() && tst_chain_.size())
+        return min(ref_chain_.timeBegin(), tst_chain_.timeBegin());
+    else if (ref_chain_.size())
+        return ref_chain_.timeBegin();
+    else if (tst_chain_.size())
+        return tst_chain_.timeBegin();
     else
         throw std::runtime_error("EvaluationTargetData: timeBegin: no data");
 }
@@ -240,12 +254,12 @@ std::string EvaluationTargetData::timeBeginStr() const
 
 ptime EvaluationTargetData::timeEnd() const
 {
-    if (ref_data_.size() && tst_data_.size())
-        return max(ref_data_.rbegin()->first, tst_data_.rbegin()->first);
-    else if (ref_data_.size())
-        return ref_data_.rbegin()->first;
-    else if (tst_data_.size())
-        return tst_data_.rbegin()->first;
+    if (ref_chain_.size() && tst_chain_.size())
+        return max(ref_chain_.timeEnd(), tst_chain_.timeEnd());
+    else if (ref_chain_.size())
+        return ref_chain_.timeEnd();
+    else if (tst_chain_.size())
+        return tst_chain_.timeEnd();
     else
         throw std::runtime_error("EvaluationTargetData: timeEnd: no data");
 }
@@ -325,7 +339,7 @@ std::string EvaluationTargetData::modeCMaxStr() const
 
 bool EvaluationTargetData::isPrimaryOnly () const
 {
-    return !callsigns_.size() && !target_addresses_.size() && !mode_a_codes_.size() && !has_mode_c_;
+    return !acids_.size() && !acads_.size() && !mode_a_codes_.size() && !has_mode_c_;
 }
 
 bool EvaluationTargetData::use() const
@@ -333,23 +347,34 @@ bool EvaluationTargetData::use() const
     return dbcont_man_.utnUseEval(utn_);
 }
 
-const EvaluationTargetData::IndexMap& EvaluationTargetData::refData() const
+const dbContent::TargetReport::Chain& EvaluationTargetData::refChain() const
 {
-    return ref_data_;
+    return ref_chain_;
 }
 
-const EvaluationTargetData::IndexMap& EvaluationTargetData::tstData() const
+const dbContent::TargetReport::Chain& EvaluationTargetData::tstChain() const
 {
-    return tst_data_;
+    return tst_chain_;
 }
 
-bool EvaluationTargetData::hasMappedRefData(const DataID& id, 
+//const EvaluationTargetData::IndexMap& EvaluationTargetData::refData() const
+//{
+//    return ref_data_;
+//}
+
+//const EvaluationTargetData::IndexMap& EvaluationTargetData::tstData() const
+//{
+//    return tst_data_;
+//}
+
+bool EvaluationTargetData::hasMappedRefData(const DataID& tst_id,
                                             time_duration d_max) const
 {
-    auto timestamp = timestampFromDataID(id);
-    auto index     = indexFromDataID(id, DataType::Test);
+    //auto timestamp = tst_chain_.timestampFromDataID(tst_id);
+    auto timestamp = tst_id.timestamp();
+    auto index     = tst_chain_.indexFromDataID(tst_id);
 
-    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
+    const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return false;
@@ -371,13 +396,13 @@ bool EvaluationTargetData::hasMappedRefData(const DataID& id,
     return false;
 }
 
-std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& id, 
+std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& tst_id,
                                                              time_duration d_max)  const
 {
-    auto timestamp = timestampFromDataID(id);
-    auto index     = indexFromDataID(id, DataType::Test);
+    auto timestamp = tst_id.timestamp();
+    auto index     = tst_chain_.indexFromDataID(tst_id);
 
-    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
+    const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, {}};
@@ -399,9 +424,9 @@ std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& id,
     return {{}, {}};
 }
 
-boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(const DataID& id) const
+boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(const DataID& tst_id) const
 {
-    auto index = indexFromDataID(id, DataType::Test);
+    auto index = tst_chain_.indexFromDataID(tst_id);
 
     const auto& tdm = tst_data_mappings_.at(index.idx_internal);
     if (!tdm.has_ref_pos_)
@@ -410,13 +435,13 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
     return tdm.pos_ref_;
 }
 
-std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(const DataID& id,
-                                                                             time_duration d_max) const
+std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(const DataID& tst_id,
+                                                                              time_duration d_max) const
 {
-    auto timestamp = timestampFromDataID(id);
-    auto index     = indexFromDataID(id, DataType::Test);
+    auto timestamp = tst_id.timestamp();
+    auto index     = tst_chain_.indexFromDataID(tst_id);
 
-    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
+    const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, false};
@@ -462,13 +487,13 @@ std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(co
     return {{}, false};
 }
 
-std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(const DataID& id,
-                                                                               time_duration d_max) const
+std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(const DataID& tst_id,
+                                                                                time_duration d_max) const
 {
-    auto timestamp = timestampFromDataID(id);
-    auto index     = indexFromDataID(id, DataType::Test);
+    auto timestamp = tst_id.timestamp();
+    auto index     = tst_chain_.indexFromDataID(tst_id);
 
-    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
+    const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, false};
@@ -514,17 +539,17 @@ std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(
     return {{}, false};
 }
 
-std::pair<bool,bool> EvaluationTargetData::mappedRefGroundBit(const DataID& id, 
+std::pair<bool,bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst_id,
                                                               time_duration d_max) const
 // has gbs, gbs true
 {
     bool has_gbs = false;
     bool gbs = false;
 
-    auto timestamp = timestampFromDataID(id);
-    auto index     = indexFromDataID(id, DataType::Test);
+    auto timestamp = tst_id.timestamp();
+    auto index     = tst_chain_.indexFromDataID(tst_id);
 
-    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
+    const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {has_gbs, gbs};
@@ -540,950 +565,950 @@ std::pair<bool,bool> EvaluationTargetData::mappedRefGroundBit(const DataID& id,
         if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
             return {has_gbs, gbs};
 
-        tie (has_gbs, gbs) = refGroundBit(mapping.timestamp_ref1_);
+        tie (has_gbs, gbs) = ref_chain_.groundBit(mapping.timestamp_ref1_);
 
         if (!gbs)
-            tie (has_gbs, gbs) = refGroundBit(mapping.timestamp_ref2_);
+            tie (has_gbs, gbs) = ref_chain_.groundBit(mapping.timestamp_ref2_);
     }
 
     return {has_gbs, gbs};
 }
 
-bool EvaluationTargetData::hasRefPos(const DataID& id) const
+//bool EvaluationTargetData::hasRefPos(const DataID& id) const
+//{
+//    auto timestamp = timestampFromDataID(id);
+//    return ref_chain_.count(timestamp);
+//}
+
+//dbContent::TargetPosition EvaluationTargetData::refPos(const DataID& id) const
+//{
+//    auto timestamp = timestampFromDataID(id);
+//    auto index     = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    dbContent::TargetPosition pos;
+
+//    NullableVector<double>& latitude_vec  = eval_data_.ref_buffer_->get<double>(eval_data_.ref_latitude_name_);
+//    NullableVector<double>& longitude_vec = eval_data_.ref_buffer_->get<double>(eval_data_.ref_longitude_name_);
+//    NullableVector<float>& altitude_vec   = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
+
+//    NullableVector<float>* altitude_trusted_vec {nullptr};
+
+//    if (eval_data_.ref_modec_trusted_name_.size())
+//    {
+//        assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_trusted_name_));
+//        altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
+//    }
+
+//    assert (!latitude_vec.isNull(index_ext));
+//    assert (!longitude_vec.isNull(index_ext));
+
+//    pos.latitude_  = latitude_vec.get(index_ext);
+//    pos.longitude_ = longitude_vec.get(index_ext);
+
+//    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index_ext))
+//    {
+//        pos.has_altitude_        = true;
+//        pos.altitude_calculated_ = false;
+//        pos.altitude_            = altitude_trusted_vec->get(index_ext);
+//    }
+//    else if (!altitude_vec.isNull(index_ext))
+//    {
+//        pos.has_altitude_        = true;
+//        pos.altitude_calculated_ = false;
+//        pos.altitude_            = altitude_vec.get(index_ext);
+//    }
+//    else if (eval_data_.has_ref_altitude_secondary_
+//             && !eval_data_.ref_buffer_->get<float>(eval_data_.ref_altitude_secondary_name_).isNull(index_ext))
+//    {
+//        pos.has_altitude_        = true;
+//        pos.altitude_calculated_ = true;
+//        pos.altitude_            = eval_data_.ref_buffer_->get<float>(eval_data_.ref_altitude_secondary_name_).get(index_ext);
+//    }
+//    else // calculate
+//    {
+//        bool found;
+//        float alt_calc;
+
+//        tie(found,alt_calc) = estimateRefAltitude(timestamp, index.idx_internal);
+
+//        if (found)
+//        {
+//            pos.has_altitude_        = true;
+//            pos.altitude_calculated_ = true;
+//            pos.altitude_            = alt_calc;
+//        }
+//    }
+
+//    //    if (utn_ == debug_utn)
+//    //        loginf << "EvaluationTargetData: refPosForTime: tod " << String::timeStringFromDouble(tod)
+//    //               << " has_alt " << pos.has_altitude_ << " alt_calc " << pos.altitude_calculated_
+//    //               << " alt " << pos.altitude_;
+
+//    return pos;
+//}
+
+//std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (const boost::posix_time::ptime& timestamp,
+//                                                                  unsigned int index_internal) const
+//{
+//    assert(index_internal < ref_indices_.size());
+
+//    NullableVector<float>& altitude_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
+//    NullableVector<ptime>& ts_vec = eval_data_.ref_buffer_->get<ptime>(eval_data_.ref_timestamp_name_);
+
+//    NullableVector<float>* altitude_trusted_vec {nullptr};
+
+//    if (eval_data_.ref_modec_trusted_name_.size())
+//    {
+//        assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_trusted_name_));
+//        altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
+//    }
+
+//    bool found_prev {false};
+//    float altitude_prev {0.0};
+//    bool found_after {false};
+//    float altitude_after {0.0};
+
+//    // search for prev index
+//    ptime timestamp_prev;
+//    auto prev_it  = ref_indices_.begin() + index_internal;
+//    auto after_it = prev_it;
+
+//    const time_duration max_tdiff = seconds(120);
+
+//    while (prev_it != ref_indices_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
+//    {
+//        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*prev_it))
+//        {
+//            found_prev = true;
+//            altitude_prev = altitude_trusted_vec->get(*prev_it);
+//            timestamp_prev = ts_vec.get(*prev_it);
+
+//            break;
+//        }
+//        else if (!altitude_vec.isNull(*prev_it))
+//        {
+//            found_prev = true;
+//            altitude_prev = altitude_vec.get(*prev_it);
+//            timestamp_prev = ts_vec.get(*prev_it);
+
+//            //            if (utn_ == debug_utn)
+//            //                loginf << "EvaluationTargetData: refPosForTime: found prev at tod "
+//            //                       << String::timeStringFromDouble(tod_prev);
+
+//            break;
+//        }
+
+//        if (prev_it == ref_indices_.begin()) // undefined decrement
+//            break;
+
+//        --prev_it;
+//    }
+
+//    //    if (utn_ == debug_utn)
+//    //    {
+//    //        if (prev_it != ref_indices_.end())
+//    //            loginf << "EvaluationTargetData: refPosForTime: checking prev found end";
+//    //        else if (prev_it != ref_indices_.begin())
+//    //            loginf << "EvaluationTargetData: refPosForTime: checking prev found begin";
+//    //        else
+//    //            loginf << "EvaluationTargetData: refPosForTime: finished prev tod "
+//    //                   << String::timeStringFromDouble(tods.get(*prev_it)) << " found " << found_prev;
+//    //    }
+
+//    // search after index
+//    ptime timestamp_after;
+
+//    while (after_it != ref_indices_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
+//    {
+//        //        if (utn_ == debug_utn)
+//        //            loginf << "EvaluationTargetData: refPosForTime: checking after tod "
+//        //                   << String::timeStringFromDouble(tods.get(*after_it));
+
+//        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*after_it))
+//        {
+//            found_after = true;
+//            altitude_after = altitude_trusted_vec->get(*after_it);
+//            timestamp_after = ts_vec.get(*after_it);
+
+//            break;
+//        }
+//        else if (!altitude_vec.isNull(*after_it))
+//        {
+//            found_after = true;
+//            altitude_after = altitude_vec.get(*after_it);
+//            timestamp_after = ts_vec.get(*after_it);
+
+//            //            if (utn_ == debug_utn)
+//            //                loginf << "EvaluationTargetData: refPosForTime: found after at tod "
+//            //                       << String::timeStringFromDouble(tod_after);
+
+//            break;
+//        }
+//        ++after_it;
+//    }
+
+//    //    if (utn_ == debug_utn)
+//    //    {
+//    //        if (after_it != ref_indices_.end())
+//    //            loginf << "EvaluationTargetData: refPosForTime: checking after found end";
+//    //        else
+//    //            loginf << "EvaluationTargetData: refPosForTime: finished after tod "
+//    //                   << String::timeStringFromDouble(tods.get(*after_it)) << " found " << found_after;
+//    //    }
+
+//    if (found_prev && found_after)
+//    {
+//        if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
+//        {
+//            logerr << "EvaluationTargetData::estimateRefAltitude ts_prev " << Time::toString(timestamp_prev)
+//                   << " ts " << Time::toString(timestamp)
+//                   << " ts_after " << Time::toString(timestamp_after);
+
+//            return {false, 0}; // should never happen
+//        }
+
+//        float d_alt_ft = altitude_after - altitude_prev;
+//        float d_t = Time::partialSeconds(timestamp_after - timestamp_prev);
+
+//        float alt_spd_ft_s = d_alt_ft/d_t;
+
+//        float d_t2 = Time::partialSeconds(timestamp - timestamp_prev);
+
+//        float alt_calc = altitude_prev + alt_spd_ft_s*d_t2;
+
+//        //loginf << "UGA " << alt_calc;
+
+//        //        if (utn_ == debug_utn)
+//        //            loginf << "EvaluationTargetData: refPosForTime: returning alt " << alt_calc;
+
+//        return {true, alt_calc};
+//    }
+//    else if (found_prev && timestamp - timestamp_prev < max_tdiff)
+//        return {true, altitude_prev};
+//    else if (found_after && timestamp_after - timestamp < max_tdiff)
+//        return {true, altitude_after};
+//    else
+//    {
+//        //        if (utn_ == debug_utn)
+//        //            loginf << "EvaluationTargetData: refPosForTime: tod " << String::timeStringFromDouble(tod)
+//        //                   << " none found";
+
+//        return {false, 0}; // none found
+//    }
+//}
+
+//bool EvaluationTargetData::hasRefSpeed(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
+//                eval_data_.ref_spd_ground_speed_kts_name_);
+//    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
+//                eval_data_.ref_spd_track_angle_deg_name_);
+
+//    return !speed_vec.isNull(index_ext) && !track_angle_vec.isNull(index_ext);
+//}
+
+//dbContent::TargetVelocity EvaluationTargetData::refSpeed(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
+//                eval_data_.ref_spd_ground_speed_kts_name_);
+//    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
+//                eval_data_.ref_spd_track_angle_deg_name_);
+
+//    assert (!speed_vec.isNull(index_ext));
+//    assert (!track_angle_vec.isNull(index_ext));
+
+//    dbContent::TargetVelocity spd;
+
+//    spd.speed_ = speed_vec.get(index_ext) * KNOTS2M_S; // true north to mathematical
+//    spd.track_angle_ = track_angle_vec.get(index_ext);
+
+//    return spd;
+//}
+
+//bool EvaluationTargetData::hasRefCallsign(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    NullableVector<string>& callsign_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
+
+//    return !callsign_vec.isNull(index_ext);
+//}
+
+//std::string EvaluationTargetData::refCallsign(const DataID& id) const
+//{
+//    assert (hasRefCallsign(id));
+
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    NullableVector<string>& callsign_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
+//    assert (!callsign_vec.isNull(index_ext));
+
+//    return boost::trim_copy(callsign_vec.get(index_ext)); // remove spaces
+//}
+
+//bool EvaluationTargetData::hasRefModeA(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    if (eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_modea_name_).isNull(index_ext))
+//        return false;
+
+//    if (eval_data_.ref_modea_v_name_.size()
+//            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_v_name_).isNull(index_ext)
+//            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_v_name_).get(index_ext)) // not valid
+//        return false;
+
+//    if (eval_data_.ref_modea_g_name_.size()
+//            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_g_name_).isNull(index_ext)
+//            && eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_g_name_).get(index_ext)) // garbled
+//        return false;
+
+//    return true;
+//}
+
+//unsigned int EvaluationTargetData::refModeA(const DataID& id) const
+//{
+//    assert (hasRefModeA(id));
+
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    NullableVector<unsigned int>& modea_vec = eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_modea_name_);
+//    assert (!modea_vec.isNull(index_ext));
+
+//    return modea_vec.get(index_ext);
+//}
+
+//bool EvaluationTargetData::hasRefModeC(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    if (eval_data_.ref_modec_trusted_name_.size() &&
+//            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index_ext))
+//        return true;
+
+//    if (eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_).isNull(index_ext))
+//        return false;
+
+//    if (eval_data_.ref_modec_v_name_.size()
+//            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_v_name_).isNull(index_ext)
+//            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_v_name_).get(index_ext)) // not valid
+//        return false;
+
+//    if (eval_data_.ref_modec_g_name_.size()
+//            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_g_name_).isNull(index_ext)
+//            && eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_g_name_).get(index_ext)) // garbled
+//        return false;
+
+//    return true;
+//}
+
+//float EvaluationTargetData::refModeC(const DataID& id) const
+//{
+//    assert (hasRefModeC(id));
+
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    if (eval_data_.ref_modec_trusted_name_.size() &&
+//            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index_ext))
+//        return eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).get(index_ext);
+
+//    NullableVector<float>& modec_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
+//    assert (!modec_vec.isNull(index_ext));
+
+//    return modec_vec.get(index_ext);
+//}
+
+//bool EvaluationTargetData::hasRefTA(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    if (eval_data_.ref_target_address_name_.size()
+//            && !eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index_ext))
+//        return true;
+
+//    return false;
+//}
+
+//unsigned int EvaluationTargetData::refTA(const DataID& id) const
+//{
+//    assert (hasRefTA(id));
+
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    assert (!eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index_ext));
+
+//    return eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).get(index_ext);
+//}
+
+//std::pair<bool,bool> EvaluationTargetData::refGroundBit(const DataID& id) const // has gbs, gbs true
+//{
+//    auto index = indexFromDataID(id, DataType::Reference);
+
+//    unsigned int index_ext = index.idx_external;
+
+//    if (eval_data_.ref_ground_bit_name_.size()
+//            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_ground_bit_name_).isNull(index_ext))
+//    {
+//        return {true, eval_data_.ref_buffer_->get<bool>(eval_data_.ref_ground_bit_name_).get(index_ext)};
+//    }
+//    else
+//        return {false, false};
+//}
+
+//bool EvaluationTargetData::hasTstPos(const DataID& id) const
+//{
+//    auto timestamp = timestampFromDataID(id);
+//    return tst_chain_.count(timestamp);
+//}
+
+//dbContent::TargetPosition EvaluationTargetData::tstPos(const DataID& id) const
+//{
+//    assert (hasTstPos(id));
+
+//    auto timestamp = timestampFromDataID(id);
+//    auto index     = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    dbContent::TargetPosition pos;
+
+//    NullableVector<double>& latitude_vec = eval_data_.tst_buffer_->get<double>(eval_data_.tst_latitude_name_);
+//    NullableVector<double>& longitude_vec = eval_data_.tst_buffer_->get<double>(eval_data_.tst_longitude_name_);
+//    NullableVector<float>& altitude_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
+
+//    NullableVector<float>* altitude_trusted_vec {nullptr};
+
+//    if (eval_data_.tst_modec_trusted_name_.size())
+//    {
+//        assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_trusted_name_));
+//        altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
+//    }
+
+//    assert (!latitude_vec.isNull(index_ext));
+//    assert (!longitude_vec.isNull(index_ext));
+
+//    pos.latitude_ = latitude_vec.get(index_ext);
+//    pos.longitude_ = longitude_vec.get(index_ext);
+
+//    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index_ext))
+//    {
+//        pos.has_altitude_ = true;
+//        pos.altitude_calculated_ = false;
+//        pos.altitude_ = altitude_trusted_vec->get(index_ext);
+//    }
+//    else if (!altitude_vec.isNull(index_ext))
+//    {
+//        pos.has_altitude_ = true;
+//        pos.altitude_ = altitude_vec.get(index_ext);
+//        pos.altitude_calculated_ = false;
+//    }
+//    else // calculate
+//    {
+//        bool found;
+//        float alt_calc;
+
+//        tie(found,alt_calc) = estimateTstAltitude(timestamp, index.idx_internal);
+
+//        if (found)
+//        {
+//            pos.has_altitude_ = true;
+//            pos.altitude_calculated_ = true;
+//            pos.altitude_ = alt_calc;
+//        }
+//    }
+
+//    return pos;
+//}
+
+//std::pair<bool, float> EvaluationTargetData::estimateTstAltitude(const boost::posix_time::ptime& timestamp,
+//                                                                 unsigned int index_internal) const
+//{
+//    assert(index_internal < tst_indices_.size());
+
+//    NullableVector<float>& altitude_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
+//    NullableVector<ptime>& ts_vec = eval_data_.tst_buffer_->get<ptime>(eval_data_.tst_timestamp_name_);
+
+//    NullableVector<float>* altitude_trusted_vec {nullptr};
+
+//    if (eval_data_.tst_modec_trusted_name_.size())
+//    {
+//        assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_trusted_name_));
+//        altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
+//    }
+
+//    bool found_prev {false};
+//    float altitude_prev {0.0};
+//    bool found_after {false};
+//    float altitude_after {0.0};
+
+//    // search for prev index
+//    ptime timestamp_prev;
+//    auto prev_it  = tst_indices_.begin() + index_internal;
+//    auto after_it = prev_it;
+
+//    const time_duration max_tdiff = seconds(120);
+
+//    while (prev_it != tst_indices_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
+//    {
+//        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*prev_it))
+//        {
+//            found_prev = true;
+//            altitude_prev = altitude_trusted_vec->get(*prev_it);
+//            timestamp_prev = ts_vec.get(*prev_it);
+
+//            break;
+//        }
+//        else if (!altitude_vec.isNull(*prev_it))
+//        {
+//            found_prev = true;
+//            altitude_prev = altitude_vec.get(*prev_it);
+//            timestamp_prev = ts_vec.get(*prev_it);
+
+//            break;
+//        }
+
+//        if (prev_it == tst_indices_.begin()) // undefined decrement
+//            break;
+
+//        --prev_it;
+//    }
+
+//    // search after index
+//    ptime timestamp_after;
+
+//    while (after_it != tst_indices_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
+//    {
+//        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*after_it))
+//        {
+//            found_after = true;
+//            altitude_after = altitude_trusted_vec->get(*after_it);
+//            timestamp_after = ts_vec.get(*after_it);
+
+//            break;
+//        }
+//        else if (!altitude_vec.isNull(*after_it))
+//        {
+//            found_after = true;
+//            altitude_after = altitude_vec.get(*after_it);
+//            timestamp_after = ts_vec.get(*after_it);
+
+//            break;
+//        }
+//        ++after_it;
+//    }
+
+//    if (found_prev && found_after)
+//    {
+//        if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
+//        {
+//            logerr << "EvaluationTargetData: estimateTstAltitude ts_prev " << Time::toString(timestamp_prev)
+//                   << " ts " << Time::toString(timestamp)
+//                   << " ts_after " << Time::toString(timestamp_after);
+//            return {false, 0}; // should never happen
+//        }
+
+//        float d_alt_ft = altitude_after - altitude_prev;
+//        float d_t = Time::partialSeconds(timestamp_after - timestamp_prev);
+
+//        float alt_spd_ft_s = d_alt_ft/d_t;
+
+//        float d_t2 = Time::partialSeconds(timestamp - timestamp_prev);
+
+//        float alt_calc = altitude_prev + alt_spd_ft_s*d_t2;
+
+//        return {true, alt_calc};
+//    }
+//    else if (found_prev && timestamp - timestamp_prev < max_tdiff)
+//        return {true, altitude_prev};
+//    else if (found_after && timestamp_after - timestamp < max_tdiff)
+//        return {true, altitude_after};
+//    else
+//    {
+//        return {false, 0}; // none found
+//    }
+//}
+
+//bool EvaluationTargetData::hasTstCallsign(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    NullableVector<string>& callsign_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
+//    return !callsign_vec.isNull(index_ext);
+//}
+
+//std::string EvaluationTargetData::tstCallsign(const DataID& id) const
+//{
+//    assert (hasTstCallsign(id));
+
+//    auto index = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    NullableVector<string>& callsign_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
+//    assert (!callsign_vec.isNull(index_ext));
+
+//    return boost::trim_copy(callsign_vec.get(index_ext)); // remove spaces
+//}
+
+//bool EvaluationTargetData::hasTstModeA(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    if (eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_modea_name_).isNull(index_ext))
+//        return false;
+
+//    if (eval_data_.tst_modea_v_name_.size()
+//            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_v_name_).isNull(index_ext)
+//            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_v_name_).get(index_ext)) // not valid
+//        return false;
+
+//    if (eval_data_.tst_modea_g_name_.size()
+//            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_g_name_).isNull(index_ext)
+//            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_g_name_).get(index_ext)) // garbled
+//        return false;
+
+//    return true;
+//}
+
+//unsigned int EvaluationTargetData::tstModeA(const DataID& id) const
+//{
+//    assert (hasTstModeA(id));
+
+//    auto index = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    NullableVector<unsigned int>& modea_vec = eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_modea_name_);
+//    assert (!modea_vec.isNull(index_ext));
+
+//    return modea_vec.get(index_ext);
+//}
+
+//bool EvaluationTargetData::hasTstModeC(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    if (eval_data_.tst_modec_trusted_name_.size() &&
+//            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index_ext))
+//        return true;
+
+//    if (eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_).isNull(index_ext))
+//        return false;
+
+//    if (eval_data_.tst_modec_v_name_.size()
+//            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_v_name_).isNull(index_ext)
+//            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_v_name_).get(index_ext)) // not valid
+//        return false;
+
+//    if (eval_data_.tst_modec_g_name_.size()
+//            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_g_name_).isNull(index_ext)
+//            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_g_name_).get(index_ext)) // garbled
+//        return false;
+
+//    return true;
+//}
+
+//bool EvaluationTargetData::hasTstGroundBit(const DataID& id) const // only if set
+//{
+//    auto index = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    if (eval_data_.tst_ground_bit_name_.size()
+//            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index_ext))
+//        return true;
+
+//    return false;
+//}
+
+//bool EvaluationTargetData::tstGroundBit(const DataID& id) const // true is on ground
+//{
+//    assert (hasTstGroundBit(id));
+
+//    auto index = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    if (eval_data_.tst_ground_bit_name_.size()
+//            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index_ext)
+//            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).get(index_ext))
+//        return true;
+
+//    return false;
+//}
+
+//bool EvaluationTargetData::hasTstTA(const DataID& id) const
+//{
+//    auto index = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    if (eval_data_.tst_target_address_name_.size()
+//            && !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index_ext))
+//        return true;
+
+//    return false;
+//}
+
+//unsigned int EvaluationTargetData::tstTA(const DataID& id) const
+//{
+//    assert (hasTstTA(id));
+
+//    auto index = indexFromDataID(id, DataType::Test);
+
+//    auto index_ext = index.idx_external;
+
+//    assert (!eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index_ext));
+
+//    return eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).get(index_ext);
+//}
+
+//// has gbs, gbs true
+pair<bool,bool> EvaluationTargetData::tstGroundBitInterpolated(const DataID& ref_id) const // true is on ground
 {
-    auto timestamp = timestampFromDataID(id);
-    return ref_data_.count(timestamp);
-}
+//    if (!eval_data_.tst_ground_bit_name_.size())
+//        return pair<bool,bool>(false, false);
 
-dbContent::TargetPosition EvaluationTargetData::refPos(const DataID& id) const
-{
-    auto timestamp = timestampFromDataID(id);
-    auto index     = indexFromDataID(id, DataType::Reference);
+    auto ref_timestamp = ref_chain_.timestampFromDataID(ref_id);
 
-    unsigned int index_ext = index.idx_external;
+    DataMappingTimes times = tst_chain_.findDataMappingTimes(ref_timestamp);
 
-    dbContent::TargetPosition pos;
-
-    NullableVector<double>& latitude_vec  = eval_data_.ref_buffer_->get<double>(eval_data_.ref_latitude_name_);
-    NullableVector<double>& longitude_vec = eval_data_.ref_buffer_->get<double>(eval_data_.ref_longitude_name_);
-    NullableVector<float>& altitude_vec   = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
-
-    NullableVector<float>* altitude_trusted_vec {nullptr};
-
-    if (eval_data_.ref_modec_trusted_name_.size())
-    {
-        assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_trusted_name_));
-        altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
-    }
-
-    assert (!latitude_vec.isNull(index_ext));
-    assert (!longitude_vec.isNull(index_ext));
-
-    pos.latitude_  = latitude_vec.get(index_ext);
-    pos.longitude_ = longitude_vec.get(index_ext);
-
-    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index_ext))
-    {
-        pos.has_altitude_        = true;
-        pos.altitude_calculated_ = false;
-        pos.altitude_            = altitude_trusted_vec->get(index_ext);
-    }
-    else if (!altitude_vec.isNull(index_ext))
-    {
-        pos.has_altitude_        = true;
-        pos.altitude_calculated_ = false;
-        pos.altitude_            = altitude_vec.get(index_ext);
-    }
-    else if (eval_data_.has_ref_altitude_secondary_
-             && !eval_data_.ref_buffer_->get<float>(eval_data_.ref_altitude_secondary_name_).isNull(index_ext))
-    {
-        pos.has_altitude_        = true;
-        pos.altitude_calculated_ = true;
-        pos.altitude_            = eval_data_.ref_buffer_->get<float>(eval_data_.ref_altitude_secondary_name_).get(index_ext);
-    }
-    else // calculate
-    {
-        bool found;
-        float alt_calc;
-
-        tie(found,alt_calc) = estimateRefAltitude(timestamp, index.idx_internal);
-
-        if (found)
-        {
-            pos.has_altitude_        = true;
-            pos.altitude_calculated_ = true;
-            pos.altitude_            = alt_calc;
-        }
-    }
-
-    //    if (utn_ == debug_utn)
-    //        loginf << "EvaluationTargetData: refPosForTime: tod " << String::timeStringFromDouble(tod)
-    //               << " has_alt " << pos.has_altitude_ << " alt_calc " << pos.altitude_calculated_
-    //               << " alt " << pos.altitude_;
-
-    return pos;
-}
-
-std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (const boost::posix_time::ptime& timestamp, 
-                                                                  unsigned int index_internal) const
-{
-    assert(index_internal < ref_indices_.size());
-
-    NullableVector<float>& altitude_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
-    NullableVector<ptime>& ts_vec = eval_data_.ref_buffer_->get<ptime>(eval_data_.ref_timestamp_name_);
-
-    NullableVector<float>* altitude_trusted_vec {nullptr};
-
-    if (eval_data_.ref_modec_trusted_name_.size())
-    {
-        assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_trusted_name_));
-        altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
-    }
-
-    bool found_prev {false};
-    float altitude_prev {0.0};
-    bool found_after {false};
-    float altitude_after {0.0};
-
-    // search for prev index
-    ptime timestamp_prev;
-    auto prev_it  = ref_indices_.begin() + index_internal;
-    auto after_it = prev_it;
-
-    const time_duration max_tdiff = seconds(120);
-
-    while (prev_it != ref_indices_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
-    {
-        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*prev_it))
-        {
-            found_prev = true;
-            altitude_prev = altitude_trusted_vec->get(*prev_it);
-            timestamp_prev = ts_vec.get(*prev_it);
-
-            break;
-        }
-        else if (!altitude_vec.isNull(*prev_it))
-        {
-            found_prev = true;
-            altitude_prev = altitude_vec.get(*prev_it);
-            timestamp_prev = ts_vec.get(*prev_it);
-
-            //            if (utn_ == debug_utn)
-            //                loginf << "EvaluationTargetData: refPosForTime: found prev at tod "
-            //                       << String::timeStringFromDouble(tod_prev);
-
-            break;
-        }
-
-        if (prev_it == ref_indices_.begin()) // undefined decrement
-            break;
-
-        --prev_it;
-    }
-
-    //    if (utn_ == debug_utn)
-    //    {
-    //        if (prev_it != ref_indices_.end())
-    //            loginf << "EvaluationTargetData: refPosForTime: checking prev found end";
-    //        else if (prev_it != ref_indices_.begin())
-    //            loginf << "EvaluationTargetData: refPosForTime: checking prev found begin";
-    //        else
-    //            loginf << "EvaluationTargetData: refPosForTime: finished prev tod "
-    //                   << String::timeStringFromDouble(tods.get(*prev_it)) << " found " << found_prev;
-    //    }
-
-    // search after index
-    ptime timestamp_after;
-
-    while (after_it != ref_indices_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
-    {
-        //        if (utn_ == debug_utn)
-        //            loginf << "EvaluationTargetData: refPosForTime: checking after tod "
-        //                   << String::timeStringFromDouble(tods.get(*after_it));
-
-        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*after_it))
-        {
-            found_after = true;
-            altitude_after = altitude_trusted_vec->get(*after_it);
-            timestamp_after = ts_vec.get(*after_it);
-
-            break;
-        }
-        else if (!altitude_vec.isNull(*after_it))
-        {
-            found_after = true;
-            altitude_after = altitude_vec.get(*after_it);
-            timestamp_after = ts_vec.get(*after_it);
-
-            //            if (utn_ == debug_utn)
-            //                loginf << "EvaluationTargetData: refPosForTime: found after at tod "
-            //                       << String::timeStringFromDouble(tod_after);
-
-            break;
-        }
-        ++after_it;
-    }
-
-    //    if (utn_ == debug_utn)
-    //    {
-    //        if (after_it != ref_indices_.end())
-    //            loginf << "EvaluationTargetData: refPosForTime: checking after found end";
-    //        else
-    //            loginf << "EvaluationTargetData: refPosForTime: finished after tod "
-    //                   << String::timeStringFromDouble(tods.get(*after_it)) << " found " << found_after;
-    //    }
-
-    if (found_prev && found_after)
-    {
-        if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
-        {
-            logerr << "EvaluationTargetData::estimateRefAltitude ts_prev " << Time::toString(timestamp_prev)
-                   << " ts " << Time::toString(timestamp)
-                   << " ts_after " << Time::toString(timestamp_after);
-
-            return {false, 0}; // should never happen
-        }
-
-        float d_alt_ft = altitude_after - altitude_prev;
-        float d_t = Time::partialSeconds(timestamp_after - timestamp_prev);
-
-        float alt_spd_ft_s = d_alt_ft/d_t;
-
-        float d_t2 = Time::partialSeconds(timestamp - timestamp_prev);
-
-        float alt_calc = altitude_prev + alt_spd_ft_s*d_t2;
-
-        //loginf << "UGA " << alt_calc;
-
-        //        if (utn_ == debug_utn)
-        //            loginf << "EvaluationTargetData: refPosForTime: returning alt " << alt_calc;
-
-        return {true, alt_calc};
-    }
-    else if (found_prev && timestamp - timestamp_prev < max_tdiff)
-        return {true, altitude_prev};
-    else if (found_after && timestamp_after - timestamp < max_tdiff)
-        return {true, altitude_after};
-    else
-    {
-        //        if (utn_ == debug_utn)
-        //            loginf << "EvaluationTargetData: refPosForTime: tod " << String::timeStringFromDouble(tod)
-        //                   << " none found";
-
-        return {false, 0}; // none found
-    }
-}
-
-bool EvaluationTargetData::hasRefSpeed(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
-                eval_data_.ref_spd_ground_speed_kts_name_);
-    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
-                eval_data_.ref_spd_track_angle_deg_name_);
-
-    return !speed_vec.isNull(index_ext) && !track_angle_vec.isNull(index_ext);
-}
-
-dbContent::TargetVelocity EvaluationTargetData::refSpeed(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
-                eval_data_.ref_spd_ground_speed_kts_name_);
-    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
-                eval_data_.ref_spd_track_angle_deg_name_);
-
-    assert (!speed_vec.isNull(index_ext));
-    assert (!track_angle_vec.isNull(index_ext));
-
-    dbContent::TargetVelocity spd;
-
-    spd.speed_ = speed_vec.get(index_ext) * KNOTS2M_S; // true north to mathematical
-    spd.track_angle_ = track_angle_vec.get(index_ext);
-
-    return spd;
-}
-
-bool EvaluationTargetData::hasRefCallsign(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    NullableVector<string>& callsign_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
-
-    return !callsign_vec.isNull(index_ext);
-}
-
-std::string EvaluationTargetData::refCallsign(const DataID& id) const
-{
-    assert (hasRefCallsign(id));
-
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    NullableVector<string>& callsign_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
-    assert (!callsign_vec.isNull(index_ext));
-
-    return boost::trim_copy(callsign_vec.get(index_ext)); // remove spaces
-}
-
-bool EvaluationTargetData::hasRefModeA(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    if (eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_modea_name_).isNull(index_ext))
-        return false;
-
-    if (eval_data_.ref_modea_v_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_v_name_).isNull(index_ext)
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_v_name_).get(index_ext)) // not valid
-        return false;
-
-    if (eval_data_.ref_modea_g_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_g_name_).isNull(index_ext)
-            && eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_g_name_).get(index_ext)) // garbled
-        return false;
-
-    return true;
-}
-
-unsigned int EvaluationTargetData::refModeA(const DataID& id) const
-{
-    assert (hasRefModeA(id));
-
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    NullableVector<unsigned int>& modea_vec = eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_modea_name_);
-    assert (!modea_vec.isNull(index_ext));
-
-    return modea_vec.get(index_ext);
-}
-
-bool EvaluationTargetData::hasRefModeC(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    if (eval_data_.ref_modec_trusted_name_.size() &&
-            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index_ext))
-        return true;
-
-    if (eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_).isNull(index_ext))
-        return false;
-
-    if (eval_data_.ref_modec_v_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_v_name_).isNull(index_ext)
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_v_name_).get(index_ext)) // not valid
-        return false;
-
-    if (eval_data_.ref_modec_g_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_g_name_).isNull(index_ext)
-            && eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_g_name_).get(index_ext)) // garbled
-        return false;
-
-    return true;
-}
-
-float EvaluationTargetData::refModeC(const DataID& id) const
-{
-    assert (hasRefModeC(id));
-
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    if (eval_data_.ref_modec_trusted_name_.size() &&
-            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index_ext))
-        return eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).get(index_ext);
-
-    NullableVector<float>& modec_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
-    assert (!modec_vec.isNull(index_ext));
-
-    return modec_vec.get(index_ext);
-}
-
-bool EvaluationTargetData::hasRefTA(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    if (eval_data_.ref_target_address_name_.size()
-            && !eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index_ext))
-        return true;
-
-    return false;
-}
-
-unsigned int EvaluationTargetData::refTA(const DataID& id) const
-{
-    assert (hasRefTA(id));
-
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    assert (!eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index_ext));
-
-    return eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).get(index_ext);
-}
-
-std::pair<bool,bool> EvaluationTargetData::refGroundBit(const DataID& id) const // has gbs, gbs true
-{
-    auto index = indexFromDataID(id, DataType::Reference);
-
-    unsigned int index_ext = index.idx_external;
-
-    if (eval_data_.ref_ground_bit_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_ground_bit_name_).isNull(index_ext))
-    {
-        return {true, eval_data_.ref_buffer_->get<bool>(eval_data_.ref_ground_bit_name_).get(index_ext)};
-    }
-    else
-        return {false, false};
-}
-
-bool EvaluationTargetData::hasTstPos(const DataID& id) const
-{
-    auto timestamp = timestampFromDataID(id);
-    return tst_data_.count(timestamp);
-}
-
-dbContent::TargetPosition EvaluationTargetData::tstPos(const DataID& id) const
-{
-    assert (hasTstPos(id));
-
-    auto timestamp = timestampFromDataID(id);
-    auto index     = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    dbContent::TargetPosition pos;
-
-    NullableVector<double>& latitude_vec = eval_data_.tst_buffer_->get<double>(eval_data_.tst_latitude_name_);
-    NullableVector<double>& longitude_vec = eval_data_.tst_buffer_->get<double>(eval_data_.tst_longitude_name_);
-    NullableVector<float>& altitude_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
-
-    NullableVector<float>* altitude_trusted_vec {nullptr};
-
-    if (eval_data_.tst_modec_trusted_name_.size())
-    {
-        assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_trusted_name_));
-        altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
-    }
-
-    assert (!latitude_vec.isNull(index_ext));
-    assert (!longitude_vec.isNull(index_ext));
-
-    pos.latitude_ = latitude_vec.get(index_ext);
-    pos.longitude_ = longitude_vec.get(index_ext);
-
-    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index_ext))
-    {
-        pos.has_altitude_ = true;
-        pos.altitude_calculated_ = false;
-        pos.altitude_ = altitude_trusted_vec->get(index_ext);
-    }
-    else if (!altitude_vec.isNull(index_ext))
-    {
-        pos.has_altitude_ = true;
-        pos.altitude_ = altitude_vec.get(index_ext);
-        pos.altitude_calculated_ = false;
-    }
-    else // calculate
-    {
-        bool found;
-        float alt_calc;
-
-        tie(found,alt_calc) = estimateTstAltitude(timestamp, index.idx_internal);
-
-        if (found)
-        {
-            pos.has_altitude_ = true;
-            pos.altitude_calculated_ = true;
-            pos.altitude_ = alt_calc;
-        }
-    }
-
-    return pos;
-}
-
-std::pair<bool, float> EvaluationTargetData::estimateTstAltitude(const boost::posix_time::ptime& timestamp, 
-                                                                 unsigned int index_internal) const
-{
-    assert(index_internal < tst_indices_.size());
-
-    NullableVector<float>& altitude_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
-    NullableVector<ptime>& ts_vec = eval_data_.tst_buffer_->get<ptime>(eval_data_.tst_timestamp_name_);
-
-    NullableVector<float>* altitude_trusted_vec {nullptr};
-
-    if (eval_data_.tst_modec_trusted_name_.size())
-    {
-        assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_trusted_name_));
-        altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
-    }
-
-    bool found_prev {false};
-    float altitude_prev {0.0};
-    bool found_after {false};
-    float altitude_after {0.0};
-
-    // search for prev index
-    ptime timestamp_prev;
-    auto prev_it  = tst_indices_.begin() + index_internal;
-    auto after_it = prev_it;
-
-    const time_duration max_tdiff = seconds(120);
-
-    while (prev_it != tst_indices_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
-    {
-        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*prev_it))
-        {
-            found_prev = true;
-            altitude_prev = altitude_trusted_vec->get(*prev_it);
-            timestamp_prev = ts_vec.get(*prev_it);
-
-            break;
-        }
-        else if (!altitude_vec.isNull(*prev_it))
-        {
-            found_prev = true;
-            altitude_prev = altitude_vec.get(*prev_it);
-            timestamp_prev = ts_vec.get(*prev_it);
-
-            break;
-        }
-
-        if (prev_it == tst_indices_.begin()) // undefined decrement
-            break;
-
-        --prev_it;
-    }
-
-    // search after index
-    ptime timestamp_after;
-
-    while (after_it != tst_indices_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
-    {
-        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*after_it))
-        {
-            found_after = true;
-            altitude_after = altitude_trusted_vec->get(*after_it);
-            timestamp_after = ts_vec.get(*after_it);
-
-            break;
-        }
-        else if (!altitude_vec.isNull(*after_it))
-        {
-            found_after = true;
-            altitude_after = altitude_vec.get(*after_it);
-            timestamp_after = ts_vec.get(*after_it);
-
-            break;
-        }
-        ++after_it;
-    }
-
-    if (found_prev && found_after)
-    {
-        if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
-        {
-            logerr << "EvaluationTargetData: estimateTstAltitude ts_prev " << Time::toString(timestamp_prev)
-                   << " ts " << Time::toString(timestamp)
-                   << " ts_after " << Time::toString(timestamp_after);
-            return {false, 0}; // should never happen
-        }
-
-        float d_alt_ft = altitude_after - altitude_prev;
-        float d_t = Time::partialSeconds(timestamp_after - timestamp_prev);
-
-        float alt_spd_ft_s = d_alt_ft/d_t;
-
-        float d_t2 = Time::partialSeconds(timestamp - timestamp_prev);
-
-        float alt_calc = altitude_prev + alt_spd_ft_s*d_t2;
-
-        return {true, alt_calc};
-    }
-    else if (found_prev && timestamp - timestamp_prev < max_tdiff)
-        return {true, altitude_prev};
-    else if (found_after && timestamp_after - timestamp < max_tdiff)
-        return {true, altitude_after};
-    else
-    {
-        return {false, 0}; // none found
-    }
-}
-
-bool EvaluationTargetData::hasTstCallsign(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    NullableVector<string>& callsign_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
-    return !callsign_vec.isNull(index_ext);
-}
-
-std::string EvaluationTargetData::tstCallsign(const DataID& id) const
-{
-    assert (hasTstCallsign(id));
-
-    auto index = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    NullableVector<string>& callsign_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
-    assert (!callsign_vec.isNull(index_ext));
-
-    return boost::trim_copy(callsign_vec.get(index_ext)); // remove spaces
-}
-
-bool EvaluationTargetData::hasTstModeA(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    if (eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_modea_name_).isNull(index_ext))
-        return false;
-
-    if (eval_data_.tst_modea_v_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_v_name_).isNull(index_ext)
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_v_name_).get(index_ext)) // not valid
-        return false;
-
-    if (eval_data_.tst_modea_g_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_g_name_).isNull(index_ext)
-            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_g_name_).get(index_ext)) // garbled
-        return false;
-
-    return true;
-}
-
-unsigned int EvaluationTargetData::tstModeA(const DataID& id) const
-{
-    assert (hasTstModeA(id));
-
-    auto index = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    NullableVector<unsigned int>& modea_vec = eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_modea_name_);
-    assert (!modea_vec.isNull(index_ext));
-
-    return modea_vec.get(index_ext);
-}
-
-bool EvaluationTargetData::hasTstModeC(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    if (eval_data_.tst_modec_trusted_name_.size() &&
-            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index_ext))
-        return true;
-
-    if (eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_).isNull(index_ext))
-        return false;
-
-    if (eval_data_.tst_modec_v_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_v_name_).isNull(index_ext)
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_v_name_).get(index_ext)) // not valid
-        return false;
-
-    if (eval_data_.tst_modec_g_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_g_name_).isNull(index_ext)
-            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_g_name_).get(index_ext)) // garbled
-        return false;
-
-    return true;
-}
-
-bool EvaluationTargetData::hasTstGroundBit(const DataID& id) const // only if set
-{
-    auto index = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    if (eval_data_.tst_ground_bit_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index_ext))
-        return true;
-
-    return false;
-}
-
-bool EvaluationTargetData::tstGroundBit(const DataID& id) const // true is on ground
-{
-    assert (hasTstGroundBit(id));
-
-    auto index = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    if (eval_data_.tst_ground_bit_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index_ext)
-            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).get(index_ext))
-        return true;
-
-    return false;
-}
-
-bool EvaluationTargetData::hasTstTA(const DataID& id) const
-{
-    auto index = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    if (eval_data_.tst_target_address_name_.size()
-            && !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index_ext))
-        return true;
-
-    return false;
-}
-
-unsigned int EvaluationTargetData::tstTA(const DataID& id) const
-{
-    assert (hasTstTA(id));
-
-    auto index = indexFromDataID(id, DataType::Test);
-
-    auto index_ext = index.idx_external;
-
-    assert (!eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index_ext));
-
-    return eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).get(index_ext);
-}
-
-// has gbs, gbs true
-pair<bool,bool> EvaluationTargetData::tstGroundBitInterpolated(const DataID& id) const // true is on ground
-{
-    if (!eval_data_.tst_ground_bit_name_.size())
-        return pair<bool,bool>(false, false);
-
-    auto timestamp = timestampFromDataID(id);
-
-    DataMappingTimes times = findTstTimes(timestamp);
-
-    if (times.has_other1_ && (timestamp - times.timestamp_other1_).abs() < seconds(15)
-            && hasTstGroundBit(times.timestamp_other1_)
-            && tstGroundBit(times.timestamp_other1_))
+    if (times.has_other1_ && (ref_timestamp - times.timestamp_other1_).abs() < seconds(15)
+            && tst_chain_.hasGroundBit(times.dataid_other1_)
+            && get<1>(tst_chain_.groundBit(times.dataid_other1_)))
         return pair<bool,bool> (true, true);
 
-    if (times.has_other2_ && (timestamp - times.timestamp_other2_).abs() < seconds(15)
-            && hasTstGroundBit(times.timestamp_other2_))
-        return pair<bool,bool> (true, tstGroundBit(times.timestamp_other2_));
+    if (times.has_other2_ && (ref_timestamp - times.timestamp_other2_).abs() < seconds(15)
+            && tst_chain_.hasGroundBit(times.timestamp_other2_))
+        return pair<bool,bool> (true, get<1>(tst_chain_.groundBit(times.timestamp_other2_)));
 
     return pair<bool,bool>(false, false);
 }
 
-bool EvaluationTargetData::hasTstTrackNum(const DataID& id) const
-{
-    if (!eval_data_.tst_track_num_name_.size())
-        return false;
+//bool EvaluationTargetData::hasTstTrackNum(const DataID& id) const
+//{
+//    if (!eval_data_.tst_track_num_name_.size())
+//        return false;
 
-    auto index = indexFromDataID(id, DataType::Test);
+//    auto index = indexFromDataID(id, DataType::Test);
 
-    auto index_ext = index.idx_external;
+//    auto index_ext = index.idx_external;
 
-    return !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).isNull(index_ext);
-}
+//    return !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).isNull(index_ext);
+//}
 
-unsigned int EvaluationTargetData::tstTrackNum(const DataID& id) const
-{
-    assert (hasTstTrackNum(id));
+//unsigned int EvaluationTargetData::tstTrackNum(const DataID& id) const
+//{
+//    assert (hasTstTrackNum(id));
 
-    auto index = indexFromDataID(id, DataType::Test);
+//    auto index = indexFromDataID(id, DataType::Test);
 
-    auto index_ext = index.idx_external;
+//    auto index_ext = index.idx_external;
 
-    return eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).get(index_ext);
-}
+//    return eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).get(index_ext);
+//}
 
-bool EvaluationTargetData::hasTstMeasuredSpeed(const DataID& id) const
-{
-    assert (eval_data_.tst_spd_ground_speed_kts_name_.size());
+//bool EvaluationTargetData::hasTstMeasuredSpeed(const DataID& id) const
+//{
+//    assert (eval_data_.tst_spd_ground_speed_kts_name_.size());
 
-    auto index = indexFromDataID(id, DataType::Test);
+//    auto index = indexFromDataID(id, DataType::Test);
 
-    auto index_ext = index.idx_external;
+//    auto index_ext = index.idx_external;
 
-    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).isNull(index_ext);
-}
+//    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).isNull(index_ext);
+//}
 
-float EvaluationTargetData::tstMeasuredSpeed(const DataID& id) const // m/s
-{
-    assert (hasTstMeasuredSpeed(id));
+//float EvaluationTargetData::tstMeasuredSpeed(const DataID& id) const // m/s
+//{
+//    assert (hasTstMeasuredSpeed(id));
 
-    auto index = indexFromDataID(id, DataType::Test);
+//    auto index = indexFromDataID(id, DataType::Test);
 
-    auto index_ext = index.idx_external;
+//    auto index_ext = index.idx_external;
 
-    assert(eval_data_.tst_spd_ground_speed_kts_name_.size());
-    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).get(index_ext) * KNOTS2M_S;
-}
+//    assert(eval_data_.tst_spd_ground_speed_kts_name_.size());
+//    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).get(index_ext) * KNOTS2M_S;
+//}
 
-bool EvaluationTargetData::hasTstMeasuredTrackAngle(const DataID& id) const
-{
-    assert (eval_data_.tst_spd_track_angle_deg_name_.size());
+//bool EvaluationTargetData::hasTstMeasuredTrackAngle(const DataID& id) const
+//{
+//    assert (eval_data_.tst_spd_track_angle_deg_name_.size());
 
-    auto index = indexFromDataID(id, DataType::Test);
+//    auto index = indexFromDataID(id, DataType::Test);
 
-    auto index_ext = index.idx_external;
+//    auto index_ext = index.idx_external;
 
-    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).isNull(index_ext);
-}
+//    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).isNull(index_ext);
+//}
 
-float EvaluationTargetData::tstMeasuredTrackAngle(const DataID& id) const // deg
-{
-    assert (hasTstMeasuredTrackAngle(id));
+//float EvaluationTargetData::tstMeasuredTrackAngle(const DataID& id) const // deg
+//{
+//    assert (hasTstMeasuredTrackAngle(id));
 
-    auto index = indexFromDataID(id, DataType::Test);
+//    auto index = indexFromDataID(id, DataType::Test);
 
-    auto index_ext = index.idx_external;
+//    auto index_ext = index.idx_external;
 
-    assert (eval_data_.tst_spd_track_angle_deg_name_.size());
-    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).get(index_ext);
-}
+//    assert (eval_data_.tst_spd_track_angle_deg_name_.size());
+//    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).get(index_ext);
+//}
 
-float EvaluationTargetData::tstModeC(const DataID& id) const
-{
-    assert (hasTstModeC(id));
+//float EvaluationTargetData::tstModeC(const DataID& id) const
+//{
+//    assert (hasTstModeC(id));
 
-    auto index = indexFromDataID(id, DataType::Test);
+//    auto index = indexFromDataID(id, DataType::Test);
 
-    auto index_ext = index.idx_external;
+//    auto index_ext = index.idx_external;
 
-    if (eval_data_.tst_modec_trusted_name_.size() &&
-            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index_ext))
-        return eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).get(index_ext);
+//    if (eval_data_.tst_modec_trusted_name_.size() &&
+//            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index_ext))
+//        return eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).get(index_ext);
 
-    NullableVector<float>& modec_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
-    assert (!modec_vec.isNull(index_ext));
+//    NullableVector<float>& modec_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
+//    assert (!modec_vec.isNull(index_ext));
 
-    return modec_vec.get(index_ext);
-}
+//    return modec_vec.get(index_ext);
+//}
 
-bool EvaluationTargetData::canCheckTstMultipleSources() const
-{
-    if (!eval_data_.tst_multiple_srcs_name_.size())
-        return false;
+//bool EvaluationTargetData::canCheckTstMultipleSources() const
+//{
+//    if (!eval_data_.tst_multiple_srcs_name_.size())
+//        return false;
 
-    if (!eval_data_.tst_buffer_->has<bool>(eval_data_.tst_multiple_srcs_name_))
-        return false;
+//    if (!eval_data_.tst_buffer_->has<bool>(eval_data_.tst_multiple_srcs_name_))
+//        return false;
 
-    NullableVector<bool>& tst_multiple_srcs_vec =
-            eval_data_.tst_buffer_->get<bool>(eval_data_.tst_multiple_srcs_name_);
+//    NullableVector<bool>& tst_multiple_srcs_vec =
+//            eval_data_.tst_buffer_->get<bool>(eval_data_.tst_multiple_srcs_name_);
 
-    for (auto tst_index : tst_indices_)
-    {
-        if (!tst_multiple_srcs_vec.isNull(tst_index))
-            return true;
-    }
+//    for (auto tst_index : tst_indices_)
+//    {
+//        if (!tst_multiple_srcs_vec.isNull(tst_index))
+//            return true;
+//    }
 
-    return false;
-}
+//    return false;
+//}
 
-bool EvaluationTargetData::hasTstMultipleSources() const
-{
-    assert (canCheckTstMultipleSources());
+//bool EvaluationTargetData::hasTstMultipleSources() const
+//{
+//    assert (canCheckTstMultipleSources());
 
-    NullableVector<bool>& tst_multiple_srcs_vec =
-            eval_data_.tst_buffer_->get<bool>(eval_data_.tst_multiple_srcs_name_);
+//    NullableVector<bool>& tst_multiple_srcs_vec =
+//            eval_data_.tst_buffer_->get<bool>(eval_data_.tst_multiple_srcs_name_);
 
-    for (auto tst_index : tst_indices_) // one must be not null according to canCheckTstMultipleSources
-    {
-        if (!tst_multiple_srcs_vec.isNull(tst_index) && tst_multiple_srcs_vec.get(tst_index))
-            return true;
-    }
+//    for (auto tst_index : tst_indices_) // one must be not null according to canCheckTstMultipleSources
+//    {
+//        if (!tst_multiple_srcs_vec.isNull(tst_index) && tst_multiple_srcs_vec.get(tst_index))
+//            return true;
+//    }
 
-    return false;
-}
+//    return false;
+//}
 
-bool EvaluationTargetData::canCheckTrackLUDSID() const
-{
-    if (!eval_data_.tst_track_lu_ds_id_name_.size())
-        return false;
+//bool EvaluationTargetData::canCheckTrackLUDSID() const
+//{
+//    if (!eval_data_.tst_track_lu_ds_id_name_.size())
+//        return false;
 
-    if (!eval_data_.tst_buffer_->has<unsigned int>(eval_data_.tst_track_lu_ds_id_name_))
-        return false;
+//    if (!eval_data_.tst_buffer_->has<unsigned int>(eval_data_.tst_track_lu_ds_id_name_))
+//        return false;
 
-    NullableVector<unsigned int> tst_ls_ds_id_vec =
-            eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_lu_ds_id_name_);
+//    NullableVector<unsigned int> tst_ls_ds_id_vec =
+//            eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_lu_ds_id_name_);
 
-    for (auto tst_index : tst_indices_)
-    {
-        if (!tst_ls_ds_id_vec.isNull(tst_index))
-            return true;
-    }
+//    for (auto tst_index : tst_indices_)
+//    {
+//        if (!tst_ls_ds_id_vec.isNull(tst_index))
+//            return true;
+//    }
 
-    return false;
-}
+//    return false;
+//}
 
-bool EvaluationTargetData::hasSingleLUDSID() const
-{
-    assert (canCheckTrackLUDSID());
+//bool EvaluationTargetData::hasSingleLUDSID() const
+//{
+//    assert (canCheckTrackLUDSID());
 
-    // check if only single source updates
-    assert (canCheckTstMultipleSources());
-    assert (!hasTstMultipleSources());
+//    // check if only single source updates
+//    assert (canCheckTstMultipleSources());
+//    assert (!hasTstMultipleSources());
 
-    bool lu_ds_id_found = false;
-    unsigned int lu_ds_id;
+//    bool lu_ds_id_found = false;
+//    unsigned int lu_ds_id;
 
-    NullableVector<unsigned int> tst_ls_ds_id_vec =
-            eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_lu_ds_id_name_);
+//    NullableVector<unsigned int> tst_ls_ds_id_vec =
+//            eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_lu_ds_id_name_);
 
-    for (auto tst_index : tst_indices_)
-    {
-        if (!tst_ls_ds_id_vec.isNull(tst_index))
-        {
-            if (!lu_ds_id_found)
-            {
-                lu_ds_id_found = true;
-                lu_ds_id = tst_ls_ds_id_vec.get(tst_index);
+//    for (auto tst_index : tst_indices_)
+//    {
+//        if (!tst_ls_ds_id_vec.isNull(tst_index))
+//        {
+//            if (!lu_ds_id_found)
+//            {
+//                lu_ds_id_found = true;
+//                lu_ds_id = tst_ls_ds_id_vec.get(tst_index);
 
-                continue;
-            }
+//                continue;
+//            }
 
-            if (lu_ds_id_found && tst_ls_ds_id_vec.get(tst_index) != lu_ds_id)
-                return false;
-        }
-    }
+//            if (lu_ds_id_found && tst_ls_ds_id_vec.get(tst_index) != lu_ds_id)
+//                return false;
+//        }
+//    }
 
-    return true;
-}
+//    return true;
+//}
 
-unsigned int EvaluationTargetData::singleTrackLUDSID() const
-{
-    assert (hasSingleLUDSID());
+//unsigned int EvaluationTargetData::singleTrackLUDSID() const
+//{
+//    assert (hasSingleLUDSID());
 
-    NullableVector<unsigned int> tst_ls_ds_id_vec =
-            eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_lu_ds_id_name_);
+//    NullableVector<unsigned int> tst_ls_ds_id_vec =
+//            eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_lu_ds_id_name_);
 
-    for (auto tst_index : tst_indices_)
-    {
-        if (!tst_ls_ds_id_vec.isNull(tst_index))
-            return tst_ls_ds_id_vec.get(tst_index);
-    }
+//    for (auto tst_index : tst_indices_)
+//    {
+//        if (!tst_ls_ds_id_vec.isNull(tst_index))
+//            return tst_ls_ds_id_vec.get(tst_index);
+//    }
 
-    assert (false); // can not be reached
-}
+//    assert (false); // can not be reached
+//}
 
 double EvaluationTargetData::latitudeMin() const
 {
@@ -1552,78 +1577,53 @@ std::string EvaluationTargetData::mopsVersionStr() const
         return "?";
 }
 
-std::string EvaluationTargetData::nucpNicStr() const
-{
-    if (hasNucpNic())
-    {
-        if (min_nucp_nic_ == max_nucp_nic_)
-            return to_string(min_nucp_nic_);
-        else
-            return to_string(min_nucp_nic_)+"-"+to_string(max_nucp_nic_);
-    }
-    else
-        return "?";
-}
-
-std::string EvaluationTargetData::nacpStr() const
-{
-    if (hasNacp())
-    {
-        if (min_nacp_ == max_nacp_)
-            return to_string(min_nacp_);
-        else
-            return to_string(min_nacp_)+"-"+to_string(max_nacp_);
-    }
-    else
-        return "?";
-}
-
-bool EvaluationTargetData::hasNucpNic() const
-{
-    return has_nucp_nic_;
-}
-
-bool EvaluationTargetData::hasNacp() const
-{
-    return has_nacp;
-}
-
-//std::set<unsigned int> EvaluationTargetData::NACPs() const
+//std::string EvaluationTargetData::nucpNicStr() const
 //{
-//    return nacps_;
+//    if (hasNucpNic())
+//    {
+//        if (min_nucp_nic_ == max_nucp_nic_)
+//            return to_string(min_nucp_nic_);
+//        else
+//            return to_string(min_nucp_nic_)+"-"+to_string(max_nucp_nic_);
+//    }
+//    else
+//        return "?";
 //}
 
-//std::set<unsigned int> EvaluationTargetData::NUCpNICs() const
+//std::string EvaluationTargetData::nacpStr() const
 //{
-//    return nucp_nics_;
+//    if (hasNacp())
+//    {
+//        if (min_nacp_ == max_nacp_)
+//            return to_string(min_nacp_);
+//        else
+//            return to_string(min_nacp_)+"-"+to_string(max_nacp_);
+//    }
+//    else
+//        return "?";
 //}
 
-//std::set<unsigned int> EvaluationTargetData::SILs() const
+//bool EvaluationTargetData::hasNucpNic() const
 //{
-//    return sils_;
+//    return has_nucp_nic_;
 //}
 
-//std::shared_ptr<Buffer> EvaluationTargetData::refBuffer() const
+//bool EvaluationTargetData::hasNacp() const
 //{
-//    return ref_buffer_;
+//    return has_nacp;
 //}
 
-//std::shared_ptr<Buffer> EvaluationTargetData::tstBuffer() const
-//{
-//    return tst_buffer_;
-//}
-
-std::set<string> EvaluationTargetData::callsigns() const
+std::set<string> EvaluationTargetData::acids() const
 {
-    return callsigns_;
+    return acids_;
 }
 
-string EvaluationTargetData::callsignsStr() const
+string EvaluationTargetData::acidsStr() const
 {
     std::ostringstream out;
 
     unsigned int cnt=0;
-    for (auto& cs_it : callsigns_)
+    for (auto& cs_it : acids_)
     {
         if (cnt != 0)
             out << ", ";
@@ -1635,17 +1635,17 @@ string EvaluationTargetData::callsignsStr() const
     return out.str().c_str();
 }
 
-std::set<unsigned int> EvaluationTargetData::targetAddresses() const
+std::set<unsigned int> EvaluationTargetData::acads() const
 {
-    return target_addresses_;
+    return acads_;
 }
 
-std::string EvaluationTargetData::targetAddressesStr() const
+std::string EvaluationTargetData::acadsStr() const
 {
     std::ostringstream out;
 
     unsigned int cnt=0;
-    for (auto& ta_it : target_addresses_)
+    for (auto& ta_it : acads_)
     {
         if (cnt != 0)
             out << ", ";
@@ -1657,63 +1657,75 @@ std::string EvaluationTargetData::targetAddressesStr() const
     return out.str().c_str();
 }
 
-void EvaluationTargetData::updateCallsigns() const
+void EvaluationTargetData::updateACIDs() const
 {
-    callsigns_.clear();
+    acids_.clear();
 
-    if (ref_data_.size())
+    if (ref_chain_.size())
     {
-        NullableVector<string>& value_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
-        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indices_);
+        auto acids = ref_chain_.acids();
+        acids_.insert(acids.begin(), acids.end());
 
-        for (auto& val_it : distinct_values)
-        {
-            if (!callsigns_.count(val_it.first))
-                callsigns_.insert(val_it.first);
-        }
+//        NullableVector<string>& value_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
+//        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indices_);
+
+//        for (auto& val_it : distinct_values)
+//        {
+//            if (!callsigns_.count(val_it.first))
+//                callsigns_.insert(val_it.first);
+//        }
     }
 
-    if (tst_data_.size())
+    if (tst_chain_.size())
     {
-        NullableVector<string>& value_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
-        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indices_);
+        auto acids = tst_chain_.acids();
+        acids_.insert(acids.begin(), acids.end());
 
-        for (auto& val_it : distinct_values)
-        {
-            if (!callsigns_.count(val_it.first))
-                callsigns_.insert(val_it.first);
-        }
+//        NullableVector<string>& value_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
+//        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indices_);
+
+//        for (auto& val_it : distinct_values)
+//        {
+//            if (!acids_.count(val_it.first))
+//                acids_.insert(val_it.first);
+//        }
     }
 }
 
-void EvaluationTargetData::updateTargetAddresses() const
+void EvaluationTargetData::updateACADs() const
 {
-    target_addresses_.clear();
+    acads_.clear();
 
-    if (ref_data_.size())
+    if (ref_chain_.size())
     {
-        NullableVector<unsigned int>& value_vec = eval_data_.ref_buffer_->get<unsigned int>(
-                    eval_data_.ref_target_address_name_);
-        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indices_);
+        auto acads = ref_chain_.acads();
+        acads_.insert(acads.begin(), acads.end());
 
-        for (auto& val_it : distinct_values)
-        {
-            if (!target_addresses_.count(val_it.first))
-                target_addresses_.insert(val_it.first);
-        }
+//        NullableVector<unsigned int>& value_vec = eval_data_.ref_buffer_->get<unsigned int>(
+//                    eval_data_.ref_target_address_name_);
+//        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indices_);
+
+//        for (auto& val_it : distinct_values)
+//        {
+//            if (!acads_.count(val_it.first))
+//                acads_.insert(val_it.first);
+//        }
     }
 
-    if (tst_data_.size())
+    if (tst_chain_.size())
     {
-        NullableVector<unsigned int>& value_vec = eval_data_.tst_buffer_->get<unsigned int>(
-                    eval_data_.tst_target_address_name_);
-        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indices_);
+        auto acads = ref_chain_.acads();
+        acads_.insert(acads.begin(), acads.end());
 
-        for (auto& val_it : distinct_values)
-        {
-            if (!target_addresses_.count(val_it.first))
-                target_addresses_.insert(val_it.first);
-        }
+//        NullableVector<unsigned int>& value_vec = eval_data_.tst_buffer_->get<unsigned int>(
+//                    eval_data_.tst_target_address_name_);
+//        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indices_);
+
+//        for (auto& val_it : distinct_values)
+//        {
+//            if (!acads_.count(val_it.first))
+//                acads_.insert(val_it.first);
+//        }
     }
 }
 
@@ -1723,39 +1735,45 @@ void EvaluationTargetData::updateModeACodes() const
 
     mode_a_codes_.clear();
 
-    if (ref_data_.size())
+    if (ref_chain_.size())
     {
-        NullableVector<unsigned int>& mode_a_codes = eval_data_.ref_buffer_->get<unsigned int>(
-                    eval_data_.ref_modea_name_);
-        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(ref_indices_);
-        //unsigned int null_cnt = mode_a_codes.nullValueIndexes(ref_rec_nums_).size();
+        auto values = ref_chain_.modeACodes();
+        mode_a_codes_.insert(values.begin(), values.end());
 
-        for (auto& ma_it : distinct_codes)
-        {
-            if (!mode_a_codes_.count(ma_it.first))
-            {
-                logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " new ref m3a "
-                       << String::octStringFromInt(ma_it.first, 4, '0');
-                mode_a_codes_.insert(ma_it.first);
-            }
-        }
+//        NullableVector<unsigned int>& mode_a_codes = eval_data_.ref_buffer_->get<unsigned int>(
+//                    eval_data_.ref_modea_name_);
+//        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(ref_indices_);
+//        //unsigned int null_cnt = mode_a_codes.nullValueIndexes(ref_rec_nums_).size();
+
+//        for (auto& ma_it : distinct_codes)
+//        {
+//            if (!mode_a_codes_.count(ma_it.first))
+//            {
+//                logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " new ref m3a "
+//                       << String::octStringFromInt(ma_it.first, 4, '0');
+//                mode_a_codes_.insert(ma_it.first);
+//            }
+//        }
     }
 
-    if (tst_data_.size())
+    if (tst_chain_.size())
     {
-        NullableVector<unsigned int>& mode_a_codes = eval_data_.tst_buffer_->get<unsigned int>(
-                    eval_data_.tst_modea_name_);
-        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(tst_indices_);
+        auto values = tst_chain_.modeACodes();
+        mode_a_codes_.insert(values.begin(), values.end());
 
-        for (auto& ma_it : distinct_codes)
-        {
-            if (!mode_a_codes_.count(ma_it.first))
-            {
-                logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " new tst m3a "
-                       << String::octStringFromInt(ma_it.first, 4, '0');
-                mode_a_codes_.insert(ma_it.first);
-            }
-        }
+//        NullableVector<unsigned int>& mode_a_codes = eval_data_.tst_buffer_->get<unsigned int>(
+//                    eval_data_.tst_modea_name_);
+//        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(tst_indices_);
+
+//        for (auto& ma_it : distinct_codes)
+//        {
+//            if (!mode_a_codes_.count(ma_it.first))
+//            {
+//                logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " new tst m3a "
+//                       << String::octStringFromInt(ma_it.first, 4, '0');
+//                mode_a_codes_.insert(ma_it.first);
+//            }
+//        }
     }
 
     logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
@@ -1768,82 +1786,98 @@ void EvaluationTargetData::updateModeCMinMax() const
     // garbled, valid flags?
 
     has_mode_c_ = false;
-    float mode_c_value;
+    //float mode_c_value;
 
-    if (ref_data_.size())
+    if (ref_chain_.size() && ref_chain_.hasModeC())
     {
-        assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_name_));
-        NullableVector<float>& modec_codes_ft = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
+        has_mode_c_ = true;
+        mode_c_min_ = ref_chain_.modeCMin();
+        mode_c_max_ = ref_chain_.modeCMax();
 
-        NullableVector<float>* altitude_trusted_vec {nullptr};
+//        assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_name_));
+//        NullableVector<float>& modec_codes_ft = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
 
-        if (eval_data_.ref_modec_trusted_name_.size())
-        {
-            assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_trusted_name_));
-            altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
-        }
+//        NullableVector<float>* altitude_trusted_vec {nullptr};
 
-        for (auto ind_it : ref_indices_)
-        {
-            if (altitude_trusted_vec && !altitude_trusted_vec->isNull(ind_it))
-                mode_c_value = altitude_trusted_vec->get(ind_it);
-            else if (!modec_codes_ft.isNull(ind_it))
-                mode_c_value = modec_codes_ft.get(ind_it);
-            else
-                continue;
+//        if (eval_data_.ref_modec_trusted_name_.size())
+//        {
+//            assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_trusted_name_));
+//            altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
+//        }
 
-            // mode_c_value is set
+//        for (auto ind_it : ref_indices_)
+//        {
+//            if (altitude_trusted_vec && !altitude_trusted_vec->isNull(ind_it))
+//                mode_c_value = altitude_trusted_vec->get(ind_it);
+//            else if (!modec_codes_ft.isNull(ind_it))
+//                mode_c_value = modec_codes_ft.get(ind_it);
+//            else
+//                continue;
 
-            if (!has_mode_c_)
-            {
-                has_mode_c_ = true;
-                mode_c_min_ = mode_c_value;
-                mode_c_max_ = mode_c_value;
-            }
-            else
-            {
-                mode_c_min_ = min(mode_c_min_, mode_c_value);
-                mode_c_max_ = max(mode_c_max_, mode_c_value);
-            }
-        }
+//            // mode_c_value is set
+
+//            if (!has_mode_c_)
+//            {
+//                has_mode_c_ = true;
+//                mode_c_min_ = mode_c_value;
+//                mode_c_max_ = mode_c_value;
+//            }
+//            else
+//            {
+//                mode_c_min_ = min(mode_c_min_, mode_c_value);
+//                mode_c_max_ = max(mode_c_max_, mode_c_value);
+//            }
+//        }
     }
 
-    if (tst_data_.size())
+    if (tst_chain_.size() && tst_chain_.hasModeC())
     {
-        assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_name_));
-        NullableVector<float>& modec_codes_ft = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
-
-        NullableVector<float>* altitude_trusted_vec {nullptr};
-
-        if (eval_data_.tst_modec_trusted_name_.size())
+        if (!has_mode_c_)
         {
-            assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_trusted_name_));
-            altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
+            has_mode_c_ = true;
+            mode_c_min_ = tst_chain_.modeCMin();
+            mode_c_max_ = tst_chain_.modeCMax();
+        }
+        else
+        {
+            mode_c_min_ = min(mode_c_min_, tst_chain_.modeCMin());
+            mode_c_max_ = max(mode_c_max_, tst_chain_.modeCMax());
         }
 
-        for (auto ind_it : tst_indices_)
-        {
-            if (altitude_trusted_vec && !altitude_trusted_vec->isNull(ind_it))
-                mode_c_value = altitude_trusted_vec->get(ind_it);
-            else if (!modec_codes_ft.isNull(ind_it))
-                mode_c_value = modec_codes_ft.get(ind_it);
-            else
-                continue;
+//        assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_name_));
+//        NullableVector<float>& modec_codes_ft = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
 
-            // mode_c_value is set
+//        NullableVector<float>* altitude_trusted_vec {nullptr};
 
-            if (!has_mode_c_)
-            {
-                has_mode_c_ = true;
-                mode_c_min_ = mode_c_value;
-                mode_c_max_ = mode_c_value;
-            }
-            else
-            {
-                mode_c_min_ = min(mode_c_min_, mode_c_value);
-                mode_c_max_ = max(mode_c_max_, mode_c_value);
-            }
-        }
+//        if (eval_data_.tst_modec_trusted_name_.size())
+//        {
+//            assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_trusted_name_));
+//            altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
+//        }
+
+//        for (auto ind_it : tst_indices_)
+//        {
+//            if (altitude_trusted_vec && !altitude_trusted_vec->isNull(ind_it))
+//                mode_c_value = altitude_trusted_vec->get(ind_it);
+//            else if (!modec_codes_ft.isNull(ind_it))
+//                mode_c_value = modec_codes_ft.get(ind_it);
+//            else
+//                continue;
+
+//            // mode_c_value is set
+
+//            if (!has_mode_c_)
+//            {
+//                has_mode_c_ = true;
+//                mode_c_min_ = mode_c_value;
+//                mode_c_max_ = mode_c_value;
+//            }
+//            else
+//            {
+//                mode_c_min_ = min(mode_c_min_, mode_c_value);
+//                mode_c_max_ = max(mode_c_max_, mode_c_value);
+//            }
+//        }
     }
 }
 
@@ -1851,66 +1885,88 @@ void EvaluationTargetData::updatePositionMinMax() const
 {
     has_pos_ = false;
 
-    if (ref_data_.size())
+    if (ref_chain_.size() && ref_chain_.hasPos())
     {
-        assert (eval_data_.ref_buffer_->has<double>(eval_data_.ref_latitude_name_));
-        assert (eval_data_.ref_buffer_->has<double>(eval_data_.ref_longitude_name_));
+        has_pos_ = true;
+        latitude_min_ = ref_chain_.latitudeMin();
+        latitude_max_ = ref_chain_.latitudeMax();
+        longitude_min_ = ref_chain_.longitudeMin();
+        longitude_max_ = ref_chain_.longitudeMax();
 
-        NullableVector<double>& lats = eval_data_.ref_buffer_->get<double>(eval_data_.ref_latitude_name_);
-        NullableVector<double>& longs = eval_data_.ref_buffer_->get<double>(eval_data_.ref_longitude_name_);
+//        assert (eval_data_.ref_buffer_->has<double>(eval_data_.ref_latitude_name_));
+//        assert (eval_data_.ref_buffer_->has<double>(eval_data_.ref_longitude_name_));
 
-        for (auto ind_it : ref_indices_)
-        {
-            assert (!lats.isNull(ind_it));
-            assert (!longs.isNull(ind_it));
+//        NullableVector<double>& lats = eval_data_.ref_buffer_->get<double>(eval_data_.ref_latitude_name_);
+//        NullableVector<double>& longs = eval_data_.ref_buffer_->get<double>(eval_data_.ref_longitude_name_);
 
-            if (!has_pos_)
-            {
-                has_pos_ = true;
-                latitude_min_ = lats.get(ind_it);
-                latitude_max_ = lats.get(ind_it);
-                longitude_min_ = longs.get(ind_it);
-                longitude_max_ = longs.get(ind_it);
-            }
-            else
-            {
-                latitude_min_ = min(latitude_min_, lats.get(ind_it));
-                latitude_max_ = max(latitude_max_, lats.get(ind_it));
-                longitude_min_ = min(longitude_min_, longs.get(ind_it));
-                longitude_max_ = max(longitude_max_, longs.get(ind_it));
-            }
-        }
+//        for (auto ind_it : ref_indices_)
+//        {
+//            assert (!lats.isNull(ind_it));
+//            assert (!longs.isNull(ind_it));
+
+//            if (!has_pos_)
+//            {
+//                has_pos_ = true;
+//                latitude_min_ = lats.get(ind_it);
+//                latitude_max_ = lats.get(ind_it);
+//                longitude_min_ = longs.get(ind_it);
+//                longitude_max_ = longs.get(ind_it);
+//            }
+//            else
+//            {
+//                latitude_min_ = min(latitude_min_, lats.get(ind_it));
+//                latitude_max_ = max(latitude_max_, lats.get(ind_it));
+//                longitude_min_ = min(longitude_min_, longs.get(ind_it));
+//                longitude_max_ = max(longitude_max_, longs.get(ind_it));
+//            }
+//        }
     }
 
-    if (tst_data_.size())
+    if (tst_chain_.size() && tst_chain_.hasPos())
     {
-        assert (eval_data_.tst_buffer_->has<double>(eval_data_.tst_latitude_name_));
-        assert (eval_data_.tst_buffer_->has<double>(eval_data_.tst_longitude_name_));
-
-        NullableVector<double>& lats = eval_data_.tst_buffer_->get<double>(eval_data_.tst_latitude_name_);
-        NullableVector<double>& longs = eval_data_.tst_buffer_->get<double>(eval_data_.tst_longitude_name_);
-
-        for (auto ind_it : tst_indices_)
+        if (!has_pos_)
         {
-            assert (!lats.isNull(ind_it));
-            assert (!longs.isNull(ind_it));
-
-            if (!has_pos_)
-            {
-                has_pos_ = true;
-                latitude_min_ = lats.get(ind_it);
-                latitude_max_ = lats.get(ind_it);
-                longitude_min_ = longs.get(ind_it);
-                longitude_max_ = longs.get(ind_it);
-            }
-            else
-            {
-                latitude_min_ = min(latitude_min_, lats.get(ind_it));
-                latitude_max_ = max(latitude_max_, lats.get(ind_it));
-                longitude_min_ = min(longitude_min_, longs.get(ind_it));
-                longitude_max_ = max(longitude_max_, longs.get(ind_it));
-            }
+            has_pos_ = true;
+            latitude_min_ = tst_chain_.latitudeMin();
+            latitude_max_ = tst_chain_.latitudeMax();
+            longitude_min_ = tst_chain_.longitudeMin();
+            longitude_max_ = tst_chain_.longitudeMax();
         }
+        else
+        {
+            latitude_min_ = min(latitude_min_, tst_chain_.latitudeMin());
+            latitude_max_ = max(latitude_max_, tst_chain_.latitudeMax());
+            longitude_min_ = min(longitude_min_, tst_chain_.longitudeMin());
+            longitude_max_ = max(longitude_max_, tst_chain_.longitudeMax());
+        }
+
+//        assert (eval_data_.tst_buffer_->has<double>(eval_data_.tst_latitude_name_));
+//        assert (eval_data_.tst_buffer_->has<double>(eval_data_.tst_longitude_name_));
+
+//        NullableVector<double>& lats = eval_data_.tst_buffer_->get<double>(eval_data_.tst_latitude_name_);
+//        NullableVector<double>& longs = eval_data_.tst_buffer_->get<double>(eval_data_.tst_longitude_name_);
+
+//        for (auto ind_it : tst_indices_)
+//        {
+//            assert (!lats.isNull(ind_it));
+//            assert (!longs.isNull(ind_it));
+
+//            if (!has_pos_)
+//            {
+//                has_pos_ = true;
+//                latitude_min_ = lats.get(ind_it);
+//                latitude_max_ = lats.get(ind_it);
+//                longitude_min_ = longs.get(ind_it);
+//                longitude_max_ = longs.get(ind_it);
+//            }
+//            else
+//            {
+//                latitude_min_ = min(latitude_min_, lats.get(ind_it));
+//                latitude_max_ = max(latitude_max_, lats.get(ind_it));
+//                longitude_min_ = min(longitude_min_, longs.get(ind_it));
+//                longitude_max_ = max(longitude_max_, longs.get(ind_it));
+//            }
+//        }
     }
 }
 
@@ -1923,7 +1979,7 @@ void EvaluationTargetData::updatePositionMinMax() const
 //    string nucp_nic_name {"nucp_nic"};
 //    string sil_name {"sil"};
 
-//    if (ref_data_.size() && ref_buffer_->dbContentName() == "ADSB")
+//    if (ref_chain_.size() && ref_buffer_->dbContentName() == "ADSB")
 //    {
 //        assert (ref_buffer_->has<int>(mops_name));
 //        assert (ref_buffer_->has<char>(nacp_name));
@@ -1963,7 +2019,7 @@ void EvaluationTargetData::updatePositionMinMax() const
 //        }
 //    }
 
-//    if (tst_data_.size() && tst_buffer_->dbContentName() == "ADSB")
+//    if (tst_chain_.size() && tst_buffer_->dbContentName() == "ADSB")
 //    {
 //        assert (tst_buffer_->has<int>(mops_name));
 //        assert (tst_buffer_->has<char>(nacp_name));
@@ -2010,11 +2066,11 @@ void EvaluationTargetData::calculateTestDataMappings() const
 
     assert (!tst_data_mappings_.size());
 
-    tst_data_mappings_.resize(tst_indices_.size());
+    tst_data_mappings_.resize(tst_chain_.size());
 
-    for (auto& tst_it : tst_data_)
+    for (auto& tst_it : tst_chain_.timestampIndexes())
     {
-        tst_data_mappings_[tst_it.second.idx_internal] = calculateTestDataMapping(tst_it.first);
+        tst_data_mappings_[tst_it.second.idx_internal] = ref_chain_.calculateDataMapping(tst_it.first);
     }
 
     unsigned int cnt = 0;
@@ -2029,216 +2085,216 @@ void EvaluationTargetData::calculateTestDataMappings() const
            << tst_data_mappings_.size() << " ref pos " << cnt;
 }
 
-TstDataMapping EvaluationTargetData::calculateTestDataMapping(ptime timestamp) const
-{
-    TstDataMapping ret;
+//DataMapping EvaluationTargetData::calculateTestDataMapping(ptime timestamp) const
+//{
+//    DataMapping ret;
 
-    ret.timestamp_ = timestamp;
+//    ret.timestamp_ = timestamp;
 
-    //    Return iterator to lower bound
-    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
-    //    before k (i.e., either it is equivalent or goes after).
+//    //    Return iterator to lower bound
+//    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
+//    //    before k (i.e., either it is equivalent or goes after).
 
-    auto lb_it = ref_data_.lower_bound(timestamp);
+//    auto lb_it = ref_chain_.lower_bound(timestamp);
 
-    //auto ub_it = ref_data_.upper_bound(tod);
+//    //auto ub_it = ref_chain_.upper_bound(tod);
 
-    if (lb_it != ref_data_.end()) // upper tod found
-    {
-        assert (lb_it->first >= timestamp);
+//    if (lb_it != ref_chain_.end()) // upper tod found
+//    {
+//        assert (lb_it->first >= timestamp);
 
-        // save upper value
-        ret.has_ref2_ = true;
-        ret.timestamp_ref2_ = lb_it->first;
+//        // save upper value
+//        ret.has_ref2_ = true;
+//        ret.timestamp_ref2_ = lb_it->first;
 
-        // search lower values by decrementing iterator
-        while (lb_it != ref_data_.end() && (timestamp < lb_it->first || lb_it->first == ret.timestamp_ref2_))
-        {
-            if (lb_it == ref_data_.begin()) // exit condition on first value
-            {
-                if (timestamp < lb_it->first) // set as not found
-                    lb_it = ref_data_.end();
+//        // search lower values by decrementing iterator
+//        while (lb_it != ref_chain_.end() && (timestamp < lb_it->first || lb_it->first == ret.timestamp_ref2_))
+//        {
+//            if (lb_it == ref_chain_.begin()) // exit condition on first value
+//            {
+//                if (timestamp < lb_it->first) // set as not found
+//                    lb_it = ref_chain_.end();
 
-                break;
-            }
+//                break;
+//            }
 
-            lb_it--;
-        }
+//            lb_it--;
+//        }
 
-        if (lb_it != ref_data_.end() && lb_it->first != ret.timestamp_ref2_) // lower tod found
-        {
-            assert (timestamp >= lb_it->first);
+//        if (lb_it != ref_chain_.end() && lb_it->first != ret.timestamp_ref2_) // lower tod found
+//        {
+//            assert (timestamp >= lb_it->first);
 
-            // add lower value
-            ret.has_ref1_ = true;
-            ret.timestamp_ref1_ = lb_it->first;
-        }
-        else // not found, clear previous
-        {
-            ret.has_ref2_ = false;
-            ret.timestamp_ref2_ = {};
-        }
-    }
+//            // add lower value
+//            ret.has_ref1_ = true;
+//            ret.timestamp_ref1_ = lb_it->first;
+//        }
+//        else // not found, clear previous
+//        {
+//            ret.has_ref2_ = false;
+//            ret.timestamp_ref2_ = {};
+//        }
+//    }
 
-    addRefPositionsSpeedsToMapping(ret);
+//    addRefPositionsSpeedsToMapping(ret);
 
-    return ret;
-}
+//    return ret;
+//}
 
-void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mapping) const
-{
-    if (mapping.has_ref1_ && hasRefPos(mapping.timestamp_ref1_)
-            && mapping.has_ref2_ && hasRefPos(mapping.timestamp_ref2_)) // two positions which can be interpolated
-    {
-        ptime lower = mapping.timestamp_ref1_;
-        ptime upper = mapping.timestamp_ref2_;
+//void EvaluationTargetData::addRefPositionsSpeedsToMapping (DataMapping& mapping) const
+//{
+//    if (mapping.has_ref1_ && hasRefPos(mapping.timestamp_ref1_)
+//            && mapping.has_ref2_ && hasRefPos(mapping.timestamp_ref2_)) // two positions which can be interpolated
+//    {
+//        ptime lower = mapping.timestamp_ref1_;
+//        ptime upper = mapping.timestamp_ref2_;
 
-        dbContent::TargetPosition pos1 = refPos(lower);
-        dbContent::TargetPosition pos2 = refPos(upper);
-        float d_t = Time::partialSeconds(upper - lower);
+//        dbContent::TargetPosition pos1 = refPos(lower);
+//        dbContent::TargetPosition pos2 = refPos(upper);
+//        float d_t = Time::partialSeconds(upper - lower);
 
-        dbContent::TargetVelocity spd1;
-        dbContent::TargetVelocity spd2;
+//        dbContent::TargetVelocity spd1;
+//        dbContent::TargetVelocity spd2;
 
-        double acceleration;
-        double speed, angle;
+//        double acceleration;
+//        double speed, angle;
 
-        logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t " << d_t;
+//        logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t " << d_t;
 
-        assert (d_t > 0);
+//        assert (d_t > 0);
 
-        if (pos1.latitude_ == pos2.latitude_ && pos1.longitude_ == pos2.longitude_) // same pos
-        {
-            mapping.has_ref_pos_ = true;
-            mapping.pos_ref_ = pos1;
+//        if (pos1.latitude_ == pos2.latitude_ && pos1.longitude_ == pos2.longitude_) // same pos
+//        {
+//            mapping.has_ref_pos_ = true;
+//            mapping.pos_ref_ = pos1;
 
-            mapping.spd_ref_.track_angle_ = NAN;
-            mapping.spd_ref_.speed_       = NAN;
-        }
-        else
-        {
-            if (lower == upper) // same time
-            {
-                logwrn << "EvaluationTargetData: addRefPositiosToMapping: ref has same time twice";
-            }
-            else
-            {
-                logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos1 "
-                       << pos1.latitude_ << ", " << pos1.longitude_;
-                logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos2 "
-                       << pos2.latitude_ << ", " << pos2.longitude_;
+//            mapping.spd_ref_.track_angle_ = NAN;
+//            mapping.spd_ref_.speed_       = NAN;
+//        }
+//        else
+//        {
+//            if (lower == upper) // same time
+//            {
+//                logwrn << "EvaluationTargetData: addRefPositiosToMapping: ref has same time twice";
+//            }
+//            else
+//            {
+//                logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos1 "
+//                       << pos1.latitude_ << ", " << pos1.longitude_;
+//                logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos2 "
+//                       << pos2.latitude_ << ", " << pos2.longitude_;
 
-                bool ok;
-                double x_pos, y_pos;
+//                bool ok;
+//                double x_pos, y_pos;
 
-                tie(ok, x_pos, y_pos) = trafo_.distanceCart(
-                            pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
+//                tie(ok, x_pos, y_pos) = trafo_.distanceCart(
+//                            pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
 
-                //                logdbg << "EvaluationTargetData: addRefPositiosToMapping: geo2cart";
-                //                bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-                if (!ok)
-                {
-                    logerr << "EvaluationTargetData: addRefPositiosToMapping: error with latitude " << pos2.latitude_
-                           << " longitude " << pos2.longitude_;
-                }
-                else // calculate interpolated position
-                {
-                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: offsets x " << fixed << x_pos
-                           << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
+//                //                logdbg << "EvaluationTargetData: addRefPositiosToMapping: geo2cart";
+//                //                bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+//                if (!ok)
+//                {
+//                    logerr << "EvaluationTargetData: addRefPositiosToMapping: error with latitude " << pos2.latitude_
+//                           << " longitude " << pos2.longitude_;
+//                }
+//                else // calculate interpolated position
+//                {
+//                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: offsets x " << fixed << x_pos
+//                           << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-                    double x_pos_orig = x_pos;
-                    double y_pos_orig = y_pos;
+//                    double x_pos_orig = x_pos;
+//                    double y_pos_orig = y_pos;
 
-                    double v_x = x_pos/d_t;
-                    double v_y = y_pos/d_t;
-                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: v_x " << v_x << " v_y " << v_y;
+//                    double v_x = x_pos/d_t;
+//                    double v_y = y_pos/d_t;
+//                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: v_x " << v_x << " v_y " << v_y;
 
-                    float d_t2 = Time::partialSeconds(mapping.timestamp_ - lower);
-                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t2 " << d_t2;
+//                    float d_t2 = Time::partialSeconds(mapping.timestamp_ - lower);
+//                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t2 " << d_t2;
 
-                    assert (d_t2 >= 0);
+//                    assert (d_t2 >= 0);
 
-                    x_pos = v_x * d_t2;
-                    y_pos = v_y * d_t2;
+//                    x_pos = v_x * d_t2;
+//                    y_pos = v_y * d_t2;
 
-                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: interpolated offsets x "
-                           << x_pos << " y " << y_pos;
+//                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: interpolated offsets x "
+//                           << x_pos << " y " << y_pos;
 
-                    tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1.latitude_, pos1.longitude_, x_pos, y_pos);
+//                    tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1.latitude_, pos1.longitude_, x_pos, y_pos);
 
-                    // x_pos long, y_pos lat
+//                    // x_pos long, y_pos lat
 
-                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: interpolated lat "
-                           << x_pos << " long " << y_pos;
+//                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: interpolated lat "
+//                           << x_pos << " long " << y_pos;
 
-                    // calculate altitude
-                    bool has_altitude = false;
-                    float altitude = 0.0;
+//                    // calculate altitude
+//                    bool has_altitude = false;
+//                    float altitude = 0.0;
 
-                    if (pos1.has_altitude_ && !pos2.has_altitude_)
-                    {
-                        has_altitude = true;
-                        altitude = pos1.altitude_;
-                    }
-                    else if (!pos1.has_altitude_ && pos2.has_altitude_)
-                    {
-                        has_altitude = true;
-                        altitude = pos2.altitude_;
-                    }
-                    else if (pos1.has_altitude_ && pos2.has_altitude_)
-                    {
-                        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
-                        has_altitude = true;
-                        altitude = pos1.altitude_ + v_alt*d_t2;
-                    }
+//                    if (pos1.has_altitude_ && !pos2.has_altitude_)
+//                    {
+//                        has_altitude = true;
+//                        altitude = pos1.altitude_;
+//                    }
+//                    else if (!pos1.has_altitude_ && pos2.has_altitude_)
+//                    {
+//                        has_altitude = true;
+//                        altitude = pos2.altitude_;
+//                    }
+//                    else if (pos1.has_altitude_ && pos2.has_altitude_)
+//                    {
+//                        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
+//                        has_altitude = true;
+//                        altitude = pos1.altitude_ + v_alt*d_t2;
+//                    }
 
-                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos1 has alt "
-                           << pos1.has_altitude_ << " alt " << pos1.altitude_
-                           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
-                           << " interpolated has alt " << has_altitude << " alt " << altitude;
+//                    logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos1 has alt "
+//                           << pos1.has_altitude_ << " alt " << pos1.altitude_
+//                           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
+//                           << " interpolated has alt " << has_altitude << " alt " << altitude;
 
-                    mapping.has_ref_pos_ = true;
+//                    mapping.has_ref_pos_ = true;
 
-                    mapping.pos_ref_ = dbContent::TargetPosition(x_pos, y_pos, has_altitude, true, altitude);
+//                    mapping.pos_ref_ = dbContent::TargetPosition(x_pos, y_pos, has_altitude, true, altitude);
 
-                    // calulcate interpolated speed / track angle
+//                    // calulcate interpolated speed / track angle
 
-                    mapping.has_ref_spd_ = false;
+//                    mapping.has_ref_spd_ = false;
 
-                    if (hasRefSpeed(mapping.timestamp_ref1_) && hasRefSpeed(mapping.timestamp_ref2_))
-                    {
-                        spd1 = refSpeed(mapping.timestamp_ref1_);
-                        spd2 = refSpeed(mapping.timestamp_ref2_);
+//                    if (hasRefSpeed(mapping.timestamp_ref1_) && hasRefSpeed(mapping.timestamp_ref2_))
+//                    {
+//                        spd1 = refSpeed(mapping.timestamp_ref1_);
+//                        spd2 = refSpeed(mapping.timestamp_ref2_);
 
-                        acceleration = (spd2.speed_ - spd1.speed_)/d_t;
-                        speed = spd1.speed_ + acceleration * d_t2;
+//                        acceleration = (spd2.speed_ - spd1.speed_)/d_t;
+//                        speed = spd1.speed_ + acceleration * d_t2;
 
-                        //loginf << "UGA spd1 " << spd1.speed_ << " 2 " << spd2.speed_ << " ipld " << speed;
+//                        //loginf << "UGA spd1 " << spd1.speed_ << " 2 " << spd2.speed_ << " ipld " << speed;
 
-#if 0
-                        double angle_diff = Number::calculateMinAngleDifference(spd2.track_angle_, spd1.track_angle_);
-                        double turnrate   = angle_diff / d_t;
+//#if 0
+//                        double angle_diff = Number::calculateMinAngleDifference(spd2.track_angle_, spd1.track_angle_);
+//                        double turnrate   = angle_diff / d_t;
 
-                        angle = spd1.track_angle_ + turnrate * d_t2;
-#else 
-                        angle = Number::interpolateBearing(0, 0, x_pos_orig, y_pos_orig, spd1.track_angle_, spd2.track_angle_, d_t2 / d_t);
-#endif
+//                        angle = spd1.track_angle_ + turnrate * d_t2;
+//#else
+//                        angle = Number::interpolateBearing(0, 0, x_pos_orig, y_pos_orig, spd1.track_angle_, spd2.track_angle_, d_t2 / d_t);
+//#endif
 
-//                        loginf << "UGA ang1 " << spd1.track_angle_ << " 2 " << spd2.track_angle_
-//                               << " angle_diff " << angle_diff << " turnrate " << turnrate << " ipld " << angle;
+//                        //                        loginf << "UGA ang1 " << spd1.track_angle_ << " 2 " << spd2.track_angle_
+//                        //                               << " angle_diff " << angle_diff << " turnrate " << turnrate << " ipld " << angle;
 
-                        mapping.has_ref_spd_          = true;
-                        mapping.spd_ref_.speed_       = speed;
-                        mapping.spd_ref_.track_angle_ = angle;
-                    }
-                }
-            }
-        }
-    }
-    // else do nothing
-}
+//                        mapping.has_ref_spd_          = true;
+//                        mapping.spd_ref_.speed_       = speed;
+//                        mapping.spd_ref_.track_angle_ = angle;
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    // else do nothing
+//}
 
-//void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping) const
+//void EvaluationTargetData::addRefPositiosToMappingFast (DataMapping& mapping) const
 //{
 //    if (mapping.has_ref1_ && hasRefPosForTime(mapping.timestamp_ref1_)
 //            && mapping.has_ref2_ && hasRefPosForTime(mapping.timestamp_ref2_)) // two positions which can be interpolated
@@ -2319,57 +2375,7 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
 //    // else do nothing
 //}
 
-DataMappingTimes EvaluationTargetData::findTstTimes(ptime timestamp_ref) const // ref tod
-{
-    DataMappingTimes ret;
 
-    ret.timestamp_ = timestamp_ref;
-
-    //    Return iterator to lower bound
-    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
-    //    before k (i.e., either it is equivalent or goes after).
-
-    auto lb_it = tst_data_.lower_bound(timestamp_ref);
-
-    if (lb_it != tst_data_.end()) // upper tod found
-    {
-        assert (lb_it->first >= timestamp_ref);
-
-        // save upper value
-        ret.has_other2_ = true;
-        ret.timestamp_other2_ = lb_it->first;
-
-        // search lower values by decrementing iterator
-        while (lb_it != tst_data_.end() && (timestamp_ref < lb_it->first || lb_it->first == ret.timestamp_other2_))
-        {
-            if (lb_it == tst_data_.begin()) // exit condition on first value
-            {
-                if (timestamp_ref < lb_it->first) // set as not found
-                    lb_it = tst_data_.end();
-
-                break;
-            }
-
-            lb_it--;
-        }
-
-        if (lb_it != tst_data_.end() && lb_it->first != ret.timestamp_other2_) // lower tod found
-        {
-            assert (timestamp_ref >= lb_it->first);
-
-            // add lower value
-            ret.has_other1_ = true;
-            ret.timestamp_other1_ = lb_it->first;
-        }
-        else // not found, clear previous
-        {
-            ret.has_other2_ = false;
-            ret.timestamp_other2_ = {};
-        }
-    }
-
-    return ret;
-}
 
 /**
 */
@@ -2395,8 +2401,8 @@ void EvaluationTargetData::computeSectorInsideInfo() const
         min_height_layer_ptr = eval_man_.minHeightFilterLayer().get();
 
     size_t num_sector_layers = sector_layers.size();
-    size_t num_ref           = ref_indices_.size();
-    size_t num_tst           = tst_indices_.size();
+    size_t num_ref           = ref_chain_.size();
+    size_t num_tst           = tst_chain_.size();
     size_t num_map           = tst_data_mappings_.size();
 
     size_t num_extra         = 2; //ground bit available / above min height filter
@@ -2413,12 +2419,12 @@ void EvaluationTargetData::computeSectorInsideInfo() const
         inside_ref_.resize(num_ref, num_cols);
         inside_ref_.setZero();
 
-        for (const auto& elem : ref_data_)
+        for (const auto& elem : ref_chain_.timestampIndexes())
         {
             DataID id(elem.first, elem.second);
 
-            auto pos = refPos(id);
-            auto gb  = availableGroundBit(id, Evaluation::DataType::Reference, gb_max_sec);
+            auto pos = ref_chain_.pos(id);
+            auto gb  = availableRefGroundBit(id, gb_max_sec);
 
             computeSectorInsideInfo(inside_ref_, pos, elem.second.idx_internal, gb, min_height_layer_ptr);
         }
@@ -2429,12 +2435,12 @@ void EvaluationTargetData::computeSectorInsideInfo() const
         inside_tst_.resize(num_tst, num_cols);
         inside_tst_.setZero();
 
-        for (const auto& elem : tst_data_)
+        for (const auto& elem : tst_chain_.timestampIndexes())
         {
             DataID id(elem.first, elem.second);
 
-            auto pos = tstPos(id);
-            auto gb  = availableGroundBit(id, Evaluation::DataType::Test, gb_max_sec);
+            auto pos = tst_chain_.pos(id);
+            auto gb  = availableTstGroundBit(id, gb_max_sec);
 
             computeSectorInsideInfo(inside_tst_, pos, elem.second.idx_internal, gb, min_height_layer_ptr);
         }
@@ -2445,63 +2451,110 @@ void EvaluationTargetData::computeSectorInsideInfo() const
         inside_map_.resize(num_tst, num_cols);
         inside_map_.setZero();
 
-        for (const auto& elem : tst_data_)
+        for (const auto& elem : tst_chain_.timestampIndexes())
         {
             DataID id(elem.first, elem.second);
 
             auto pos = mappedRefPos(id);
             if (pos.has_value())
             {
-                auto gb = availableGroundBit(id, Evaluation::DataType::Test, gb_max_sec);
+                auto gb = availableTstGroundBit(id, gb_max_sec);
                 computeSectorInsideInfo(inside_map_, pos.value(), elem.second.idx_internal, gb, min_height_layer_ptr);
             }
         }
     }
 }
 
-/**
-*/
-boost::optional<bool> EvaluationTargetData::availableGroundBit(const DataID& id, 
-                                                               DataType dtype,
-                                                               const boost::posix_time::time_duration& d_max) const
+boost::optional<bool> EvaluationTargetData::availableRefGroundBit(
+        const Chain::DataID& id, const boost::posix_time::time_duration& d_max) const
 {
-    auto index = indexFromDataID(id, dtype);
-    auto ts    = timestampFromDataID(id);
+    auto index = ref_chain_.indexFromDataID(id);
+    auto ts    = ref_chain_.timestampFromDataID(id);
 
     DataID indexed_id = DataID(ts, index);
 
-    bool has_ground_bit = false;
-    bool ground_bit_set = false;
+    auto ref_gb = ref_chain_.groundBit(indexed_id);
 
-    if (dtype == DataType::Test)
-    {
-        bool has_ground_bit = hasTstGroundBit(indexed_id);
-        bool ground_bit_set = false;
+    bool has_ground_bit = ref_gb.first;
+    bool ground_bit_set = ref_gb.second;
 
-        if (has_ground_bit)
-            ground_bit_set = tstGroundBit(indexed_id);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = mappedRefGroundBit(indexed_id, d_max);
-    }
-    else if (dtype == DataType::Reference)
-    {
-        auto ref_gb = refGroundBit(indexed_id);
-
-        bool has_ground_bit = ref_gb.first;
-        bool ground_bit_set = ref_gb.second;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = tstGroundBitInterpolated(ts);
-    }
+    if (!ground_bit_set)
+        tie(has_ground_bit, ground_bit_set) = tstGroundBitInterpolated(ts);
 
     if (!has_ground_bit)
         return {};
 
     return ground_bit_set;
 }
+
+boost::optional<bool> EvaluationTargetData::availableTstGroundBit(
+        const Chain::DataID& id, const boost::posix_time::time_duration& d_max) const
+{
+    auto index = tst_chain_.indexFromDataID(id);
+    auto ts    = tst_chain_.timestampFromDataID(id);
+
+    DataID indexed_id = DataID(ts, index);
+
+    bool has_ground_bit = tst_chain_.hasGroundBit(indexed_id);
+    bool ground_bit_set = false;
+
+    if (has_ground_bit)
+        ground_bit_set = get<1>(tst_chain_.groundBit(indexed_id));
+    else
+        ground_bit_set = false;
+
+    if (!ground_bit_set)
+        tie(has_ground_bit, ground_bit_set) = mappedRefGroundBit(indexed_id, d_max);
+
+    if (!has_ground_bit)
+        return {};
+
+    return ground_bit_set;
+}
+
+/**
+*/
+//boost::optional<bool> EvaluationTargetData::availableGroundBit(const DataID& id,
+//                                                               DataType dtype,
+//                                                               const boost::posix_time::time_duration& d_max) const
+//{
+//    auto index = indexFromDataID(id, dtype);
+//    auto ts    = timestampFromDataID(id);
+
+//    DataID indexed_id = DataID(ts, index);
+
+//    bool has_ground_bit = false;
+//    bool ground_bit_set = false;
+
+//    if (dtype == DataType::Test)
+//    {
+//        bool has_ground_bit = hasTstGroundBit(indexed_id);
+//        bool ground_bit_set = false;
+
+//        if (has_ground_bit)
+//            ground_bit_set = tstGroundBit(indexed_id);
+//        else
+//            ground_bit_set = false;
+
+//        if (!ground_bit_set)
+//            tie(has_ground_bit, ground_bit_set) = mappedRefGroundBit(indexed_id, d_max);
+//    }
+//    else if (dtype == DataType::Reference)
+//    {
+//        auto ref_gb = refGroundBit(indexed_id);
+
+//        bool has_ground_bit = ref_gb.first;
+//        bool ground_bit_set = ref_gb.second;
+
+//        if (!ground_bit_set)
+//            tie(has_ground_bit, ground_bit_set) = tstGroundBitInterpolated(ts);
+//    }
+
+//    if (!has_ground_bit)
+//        return {};
+
+//    return ground_bit_set;
+//}
 
 /**
 */
@@ -2523,9 +2576,9 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
     bool above_ok = true;
     if (min_height_filter)
     {
-        auto res = AirSpace::isAbove(min_height_filter, 
-                                     pos, 
-                                     has_gb, 
+        auto res = AirSpace::isAbove(min_height_filter,
+                                     pos,
+                                     has_gb,
                                      gb_set);
 
         if (res == AirSpace::AboveCheckResult::Below)
@@ -2553,7 +2606,7 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
 */
 bool EvaluationTargetData::refPosAbove(const DataID& id) const
 {
-    auto index = indexFromDataID(id, DataType::Reference);
+    auto index = ref_chain_.indexFromDataID(id);
 
     return checkAbove(inside_ref_, index);
 }
@@ -2562,7 +2615,7 @@ bool EvaluationTargetData::refPosAbove(const DataID& id) const
 */
 bool EvaluationTargetData::refPosGroundBitAvailable(const DataID& id) const
 {
-    auto index = indexFromDataID(id, DataType::Reference);
+    auto index = ref_chain_.indexFromDataID(id);
 
     return checkGroundBit(inside_ref_, index);
 }
@@ -2572,7 +2625,7 @@ bool EvaluationTargetData::refPosGroundBitAvailable(const DataID& id) const
 bool EvaluationTargetData::refPosInside(const SectorLayer& layer, 
                                         const DataID& id) const
 {
-    auto index = indexFromDataID(id, DataType::Reference);
+    auto index = ref_chain_.indexFromDataID(id);
 
     return checkInside(layer, inside_ref_, index);
 }
@@ -2581,7 +2634,7 @@ bool EvaluationTargetData::refPosInside(const SectorLayer& layer,
 */
 bool EvaluationTargetData::tstPosAbove(const DataID& id) const
 {
-    auto index = indexFromDataID(id, DataType::Test);
+    auto index = tst_chain_.indexFromDataID(id);
 
     return checkAbove(inside_tst_, index);
 }
@@ -2590,7 +2643,7 @@ bool EvaluationTargetData::tstPosAbove(const DataID& id) const
 */
 bool EvaluationTargetData::tstPosGroundBitAvailable(const DataID& id) const
 {
-    auto index = indexFromDataID(id, DataType::Test);
+    auto index = tst_chain_.indexFromDataID(id);
 
     return checkGroundBit(inside_tst_, index);
 }
@@ -2600,7 +2653,7 @@ bool EvaluationTargetData::tstPosGroundBitAvailable(const DataID& id) const
 bool EvaluationTargetData::tstPosInside(const SectorLayer& layer, 
                                         const DataID& id) const
 {
-    auto index = indexFromDataID(id, DataType::Test);
+    auto index = tst_chain_.indexFromDataID(id);
 
     return checkInside(layer, inside_tst_, index);
 }
@@ -2609,7 +2662,7 @@ bool EvaluationTargetData::tstPosInside(const SectorLayer& layer,
 */
 bool EvaluationTargetData::mappedRefPosAbove(const DataID& id) const
 {
-    auto index = indexFromDataID(id, DataType::Test);
+    auto index = tst_chain_.indexFromDataID(id); // really tst
 
     return checkAbove(inside_map_, index);
 }
@@ -2618,7 +2671,7 @@ bool EvaluationTargetData::mappedRefPosAbove(const DataID& id) const
 */
 bool EvaluationTargetData::mappedRefPosGroundBitAvailable(const DataID& id) const
 {
-    auto index = indexFromDataID(id, DataType::Test);
+    auto index = tst_chain_.indexFromDataID(id);
 
     return checkGroundBit(inside_map_, index);
 }
@@ -2628,7 +2681,7 @@ bool EvaluationTargetData::mappedRefPosGroundBitAvailable(const DataID& id) cons
 bool EvaluationTargetData::mappedRefPosInside(const SectorLayer& layer, 
                                               const DataID& id) const
 {
-    auto index = indexFromDataID(id, DataType::Test);
+    auto index = tst_chain_.indexFromDataID(id);
 
     return checkInside(layer, inside_map_, index);
 }

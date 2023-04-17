@@ -82,7 +82,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-    const auto& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     unsigned int num_pos {0};
     unsigned int num_no_ref {0};
@@ -159,7 +159,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         ++num_pos;
 
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPos(tst_id);
+        tst_pos = target_data.tstChain().pos(tst_id);
 
         comp_passed = false;
 
@@ -228,7 +228,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
         // ref_spd ok
 
-        if (!target_data.hasTstMeasuredSpeed(tst_id))
+        if (!target_data.tstChain().hasTstMeasuredSpeed(tst_id))
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -242,7 +242,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        tst_spd_ms = target_data.tstMeasuredSpeed(tst_id);
+        tst_spd_ms = target_data.tstChain().tstMeasuredSpeed(tst_id);
         spd_diff = fabs(ref_spd.speed_ - tst_spd_ms);
 
         if (use_percent_if_higher_ && tst_spd_ms * threshold_percent_ > threshold_value_) // use percent based threshold
