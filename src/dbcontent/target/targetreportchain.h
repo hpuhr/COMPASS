@@ -183,9 +183,6 @@ public:
     bool hasTstMeasuredTrackAngle(const DataID& id) const;
     float tstMeasuredTrackAngle(const DataID& id) const; // deg
 
-    //    boost::optional<bool> availableGroundBit(const DataID& id,
-    //                                             const boost::posix_time::time_duration& d_max) const;
-
     Index indexFromDataID(const DataID& id) const;
     boost::posix_time::ptime timestampFromDataID(const DataID& id) const;
 

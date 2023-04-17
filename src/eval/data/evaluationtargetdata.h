@@ -19,9 +19,6 @@
 #define EVALUATIONTARGETDATA_H
 
 #include "dbcontent/target/targetreportchain.h"
-#include "dbcontent/target/targetposition.h"
-#include "dbcontent/target/targetvelocity.h"
-#include "projection/transformation.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
 #include <boost/optional.hpp>
@@ -96,9 +93,6 @@ public:
     const dbContent::TargetReport::Chain& refChain() const;
     const dbContent::TargetReport::Chain& tstChain() const;
 
-//    const dbContent::TargetReport::Chain::IndexMap& refData() const;
-//    const dbContent::TargetReport::Chain::IndexMap& tstData() const;
-
 //    bool canCheckTstMultipleSources() const;
 //    bool hasTstMultipleSources() const;
 
@@ -123,8 +117,6 @@ public:
 //    bool hasNacp() const;
 //    std::string nacpStr() const;
 
-    //DataID dataID(const boost::posix_time::ptime& timestamp, DataType dtype) const;
-
     // ref
     bool hasMappedRefData(const dbContent::TargetReport::Chain::DataID& tst_id,
                           boost::posix_time::time_duration d_max) const;
@@ -141,63 +133,12 @@ public:
     std::pair<dbContent::TargetVelocity, bool> mappedRefSpeed(
             const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const;
 
-//    bool hasRefPos(const DataID& id) const;
-//    dbContent::TargetPosition refPos(const DataID& id) const;
-//    bool hasRefSpeed(const DataID& id) const;
-//    dbContent::TargetVelocity refSpeed(const DataID& id) const;
-//    // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
-
-//    bool hasRefCallsign(const DataID& id) const;
-//    std::string refCallsign(const DataID& id) const;
-
-//    bool hasRefModeA(const DataID& id) const; // only if set, is v, not g
-//    unsigned int refModeA(const DataID& id) const;
-
-//    bool hasRefModeC(const DataID& id) const; // only if set, is v, not g
-//    float refModeC(const DataID& id) const;
-
-//    bool hasRefTA(const DataID& id) const;
-//    unsigned int refTA(const DataID& id) const;
-
-//    std::pair<bool,bool> refGroundBit(const DataID& id) const; // has gbs, gbs true
     std::pair<bool,bool> mappedRefGroundBit(
             const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const; // has gbs, gbs true
 
     // test
-//    bool hasTstPos(const DataID& id) const;
-//    dbContent::TargetPosition tstPos(const DataID& id) const;
-
-//    bool hasTstCallsign(const DataID& id) const;
-//    std::string tstCallsign(const DataID& id) const;
-
-//    bool hasTstModeA(const DataID& id) const; // only if set, is v, not g
-//    unsigned int tstModeA(const DataID& id) const;
-
-//    bool hasTstModeC(const DataID& id) const; // only if set, is v, not g
-//    float tstModeC(const DataID& id) const;
-
-//    bool hasTstGroundBit(const DataID& id) const; // only if set
-//    bool tstGroundBit(const DataID& id) const; // true is on ground
-
-//    bool hasTstTA(const DataID& id) const;
-//    unsigned int tstTA(const DataID& id) const;
-
     std::pair<bool,bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& ref_id) const; // has gbs, gbs true
 
-//    bool hasTstTrackNum(const DataID& id) const;
-//    unsigned int tstTrackNum(const DataID& id) const;
-
-//    // speed, track angle
-//    bool hasTstMeasuredSpeed(const DataID& id) const;
-//    float tstMeasuredSpeed(const DataID& id) const; // m/s
-
-//    bool hasTstMeasuredTrackAngle(const DataID& id) const;
-//    float tstMeasuredTrackAngle(const DataID& id) const; // deg
-
-//    // inside check
-//    boost::optional<bool> availableGroundBit(const DataID& id,
-//                                             Evaluation::DataType dtype,
-//                                             const boost::posix_time::time_duration& d_max) const;
     boost::optional<bool> availableRefGroundBit(const dbContent::TargetReport::Chain::DataID& id,
                                                 const boost::posix_time::time_duration& d_max) const;
     boost::optional<bool> availableTstGroundBit(const dbContent::TargetReport::Chain::DataID& id,
@@ -227,9 +168,6 @@ protected:
 //    //void updateADSBInfo() const;
 
     void calculateTestDataMappings() const;
-//    TstDataMapping calculateTestDataMapping(boost::posix_time::ptime timestamp) const; // test tod
-//    void addRefPositionsSpeedsToMapping (TstDataMapping& mapping) const;
-    //void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
     void computeSectorInsideInfo() const;
     void computeSectorInsideInfo(InsideCheckMatrix& mat, 
                                  const dbContent::TargetPosition& pos,
@@ -244,30 +182,14 @@ protected:
                      const InsideCheckMatrix& mat,
                      const dbContent::TargetReport::Index& index) const;
     
-//    DataMappingTimes findTstTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
-
-//    std::pair<bool, float> estimateRefAltitude (const boost::posix_time::ptime& timestamp, unsigned int index_internal) const;
-//    std::pair<bool, float> estimateTstAltitude (const boost::posix_time::ptime& timestamp, unsigned int index_internal) const;
-
-//    Index indexFromDataID(const DataID& id, DataType dtype) const;
-//    boost::posix_time::ptime timestampFromDataID(const DataID& id) const;
-
     EvaluationData&    eval_data_;
     std::shared_ptr<dbContent::Cache> cache_;
     EvaluationManager& eval_man_;
     DBContentManager&  dbcont_man_;
 
-//    std::unique_ptr<dbContent::TargetReport::Chain> ref_chain_;
-//    std::unique_ptr<dbContent::TargetReport::Chain> tst_chain_;
-
     dbContent::TargetReport::Chain ref_chain_;
     dbContent::TargetReport::Chain tst_chain_;
 
-//    std::multimap<boost::posix_time::ptime, const dbContent::TargetReport::Index> ref_data_; // timestamp -> index
-//    std::vector<unsigned int> ref_indices_;
-
-//    std::multimap<boost::posix_time::ptime, const dbContent::TargetReport::Index> tst_data_; // timestamp -> index
-//    std::vector<unsigned int> tst_indices_;
     mutable std::vector<dbContent::TargetReport::DataMapping> tst_data_mappings_;
     
     mutable std::set<std::string> acids_;
@@ -292,8 +214,6 @@ protected:
     //    mutable unsigned int min_nucp_nic_, max_nucp_nic_;
     //    mutable bool has_nacp {false};
     //    mutable unsigned int min_nacp_, max_nacp_;
-
-    //mutable Transformation trafo_;
 
     mutable InsideCheckMatrix                    inside_ref_;
     mutable InsideCheckMatrix                    inside_tst_;

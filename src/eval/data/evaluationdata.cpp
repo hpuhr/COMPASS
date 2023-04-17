@@ -69,90 +69,16 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
     if (!dbcont_man_.hasAssociations())
     {
         logwrn << "EvaluationData: addReferenceData: dbcontent has no associations";
-        //unassociated_ref_cnt_ = buffer->size();
 
         return;
     }
 
-//    assert (!ref_buffer_);
-//    ref_buffer_ = buffer;
     ref_line_id_ = line_id;
     assert (ref_line_id_ <= 3);
-
-    // preset variable names
-
-//    string dbcontent_name = dbcontent.name();
-
-//    ref_timestamp_name_ = dbcont_man_.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
-
-//    ref_latitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
-//    ref_longitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
-//        ref_target_address_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
-//    else
-//        ref_target_address_name_ = "";
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
-//        ref_callsign_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
-//    else
-//        ref_callsign_name_ = "";
-
-//    // mc
-//    if (dbcontent_name == "CAT062")
-//        ref_modec_trusted_name_ = DBContent::var_cat062_fl_measured_.name();
-
-//    ref_modec_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
-//        ref_modec_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
-//    else
-//        ref_modec_g_name_ = "";
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
-//        ref_modec_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
-//    else
-//        ref_modec_v_name_ = "";
-
-//    if (dbcontent_name == "CAT062")
-//    {
-//        has_ref_altitude_secondary_ = true;
-//        ref_altitude_secondary_name_ = DBContent::var_cat062_baro_alt_.name();
-//    }
-
-//    // m3a
-//    ref_modea_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
-//        ref_modea_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
-//    else
-//        ref_modea_g_name_ = "";
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
-//        ref_modea_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
-//    else
-//        ref_modea_v_name_ = "";
-
-//    // ground bit
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
-//        ref_ground_bit_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
-//    else
-//        ref_ground_bit_name_ = "";
-
-//    // speed & track_angle
-
-//    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
-//    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
-
-//    ref_spd_ground_speed_kts_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
-//    ref_spd_track_angle_deg_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
-
-//    assert (buffer->has<ptime>(ref_timestamp_name_));
-//    NullableVector<ptime>& ts_vec = buffer->get<ptime>(ref_timestamp_name_);
 
     assert (cache_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
     NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(
@@ -164,22 +90,13 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
     NullableVector<unsigned int>& ds_ids = cache_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_datasource_id_);
 
-//    assert (buffer->has<unsigned int>(DBContent::meta_var_datasource_id_.name()));
-//    NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBContent::meta_var_datasource_id_.name());
-
     assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
     NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_line_id_);
 
-//    assert (buffer->has<unsigned int>(DBContent::meta_var_line_id_.name()));
-//    NullableVector<unsigned int>& line_ids = buffer->get<unsigned int>(DBContent::meta_var_line_id_.name());
-
     assert (cache_->hasMetaVar<json>(dbcontent_name, DBContent::meta_var_associations_));
     NullableVector<json>& assoc_vec = cache_->getMetaVar<json>(
                 dbcontent_name, DBContent::meta_var_associations_);
-
-//    assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
-//    NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
     ptime timestamp;
     vector<unsigned int> utn_vec;
@@ -256,106 +173,15 @@ void EvaluationData::addTestData (string dbcontent_name, unsigned int line_id)
     if (!dbcont_man_.hasAssociations())
     {
         logwrn << "EvaluationData: addTestData: dbcontent has no associations";
-        //unassociated_ref_cnt_ = buffer->size();
         return;
     }
 
-//    assert (!tst_buffer_);
-//    tst_buffer_ = buffer;
     tst_line_id_ = line_id;
     assert (tst_line_id_ <= 3);
-
-    //string dbcontent_name = dbcontent.name();
-
-//    tst_timestamp_name_ = dbcont_man_.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
-
-//    tst_latitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
-//    tst_longitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
-//        tst_target_address_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
-//    else
-//        tst_target_address_name_ = "";
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
-//        tst_callsign_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
-//    else
-//        tst_callsign_name_ = "";
-
-//    // mc
-//    if (dbcontent_name == "CAT062")
-//        tst_modec_trusted_name_ = DBContent::var_cat062_fl_measured_.name();
-
-//    tst_modec_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
-//        tst_modec_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
-//    else
-//        tst_modec_g_name_ = "";
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
-//        tst_modec_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
-//    else
-//        tst_modec_v_name_ = "";
-
-
-//    //    if (dbcontent_name == "CAT062")
-//    //    {
-//    //        has_tst_altitude_secondary_ = true;
-//    //        tst_altitude_secondary_name_ = DBContent::var_tracker_baro_alt_.name();
-//    //    }
-
-//    // m3a
-//    tst_modea_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
-//        tst_modea_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
-//    else
-//        tst_modea_g_name_ = "";
-
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
-//        tst_modea_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
-//    else
-//        tst_modea_v_name_ = "";
-
-//    // ground bit
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
-//        tst_ground_bit_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
-//    else
-//        tst_ground_bit_name_ = "";
-
-//    // track num
-//    if (dbcont_man_.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
-//        tst_track_num_name_ = dbcont_man_.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name).name();
-//    else
-//        tst_track_num_name_ = "";
-
-//    // speed & track_angle
-
-//    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
-//    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
-
-//    tst_spd_ground_speed_kts_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
-//    tst_spd_track_angle_deg_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesTst();
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
-
-//    unsigned int buffer_size = buffer->size();
-
-//    assert (buffer->has<ptime>(DBContent::meta_var_timestamp_.name()));
-//    NullableVector<ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(
-//                DBContent::meta_var_timestamp_.name());
-
-//    assert (buffer->has<unsigned int>(DBContent::meta_var_datasource_id_.name()));
-//    NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBContent::meta_var_datasource_id_.name());
-
-//    assert (buffer->has<unsigned int>(DBContent::meta_var_line_id_.name()));
-//    NullableVector<unsigned int>& line_ids = buffer->get<unsigned int>(DBContent::meta_var_line_id_.name());
-
-//    assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
-//    NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
     assert (cache_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
     NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(
@@ -489,9 +315,6 @@ const EvaluationTargetData& EvaluationData::targetData(unsigned int utn)
 void EvaluationData::clear()
 {
     beginResetModel();
-
-//    ref_buffer_ = nullptr;
-//    tst_buffer_ = nullptr;
 
     cache_->clear();
 
