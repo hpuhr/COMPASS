@@ -1,11 +1,14 @@
 #include "calculatereferencesjob.h"
 #include "calculatereferencestask.h"
+#include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/target/target.h"
 #include "stringconv.h"
 
 #include "util/tbbhack.h"
+
+#include <QThread>
 
 #include <future>
 
@@ -41,9 +44,20 @@ void CalculateReferencesJob::run()
 
     createTargets();
 
+    emit statusSignal("Finalizing Targets");
+
     finalizeTargets();
 
+    emit statusSignal("Calculating References");
+
     calculateReferences();
+
+    emit statusSignal("Writing References");
+
+    writeReferences();
+
+    while (!insert_done_)
+        QThread::msleep(10);
 
     stop_time = microsec_clock::local_time();
 
@@ -128,10 +142,10 @@ void CalculateReferencesJob::createTargets()
             {
                 if (!target_map.count(utn_it))
                     target_map[utn_it].reset(new CalculateReferences::Target(utn_it, cache_));
-                    //target_data_.emplace_back(utn_it, *this, cache_, eval_man_, dbcont_man_);
+                //target_data_.emplace_back(utn_it, *this, cache_, eval_man_, dbcont_man_);
 
                 target_map.at(utn_it)->addTargetReport(dbcontent_name, ds_ids.get(cnt), line_ids.get(cnt),
-                                                     timestamp, cnt);
+                                                       timestamp, cnt);
 
                 ++num_assoc;
             }
@@ -158,43 +172,56 @@ void CalculateReferencesJob::calculateReferences()
 {
     loginf << "CalculateReferencesJob: calculateReferences";
 
-    bool single_thread = false;
-    bool break_utn = 20;
+    unsigned int num_targets = targets_.size();
+    num_targets = 50; // only calculate part
+
+    std::vector<std::shared_ptr<Buffer>> results;
+
+    results.resize(num_targets);
 
     std::future<void> pending_future = std::async(std::launch::async, [&] {
 
-        unsigned int num_targets = targets_.size();
-
-        if (single_thread)
+        tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
         {
-            for (auto& tgt_it : targets_)
-            {
-                if (tgt_it->utn() > break_utn)
-                    break;
+            results[tgt_cnt] = targets_.at(tgt_cnt)->calculateReference();
 
-                tgt_it->calculateReference();
-
-                loginf << "CalculateReferencesJob: calculateReferences: utn " << tgt_it->utn() << " done";
-            }
-        }
-        else
-        {
-            tbb::parallel_for(uint(0), num_targets, [&](unsigned int utn_cnt)
-            {
-//                results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
-//                done_flags[utn_cnt] = true;
-
-                if (targets_.at(utn_cnt)->utn() > break_utn)
-                    return;
-
-                targets_.at(utn_cnt)->calculateReference();
-
-                loginf << "CalculateReferencesJob: calculateReferences: utn " << targets_.at(utn_cnt)->utn() << " done";
-            });
-        }
+            loginf << "CalculateReferencesJob: calculateReferences: utn "
+                   << targets_.at(tgt_cnt)->utn() << " done";
+        });
     });
 
     pending_future.wait(); // or do done flags for progress updates
 
-    loginf << "CalculateReferencesJob: calculateReferences: done";
+    for (auto& buf_it : results)
+    {
+        if (!result_)
+            result_ = move(buf_it);
+        else
+            result_->seizeBuffer(*buf_it);
+    }
+
+    loginf << "CalculateReferencesJob: calculateReferences: done, buffer size " << result_->size();
 }
+
+
+void CalculateReferencesJob::writeReferences()
+{
+    string dbcontent_name = "RefTraj";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    connect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+            this, &CalculateReferencesJob::insertDoneSlot);
+
+    std::map<std::string, std::shared_ptr<Buffer>> data {{dbcontent_name, result_}};
+
+    dbcontent_man.insertData(data);
+}
+
+void CalculateReferencesJob::insertDoneSlot()
+{
+    loginf << "CalculateReferencesJob: insertDoneSlot";
+
+    insert_done_ = true;
+}
+

@@ -15,6 +15,9 @@ class CalculateReferencesJob : public Job
 {
     Q_OBJECT
 
+public slots:
+    void insertDoneSlot();
+
 signals:
     void statusSignal(QString status);
 
@@ -30,9 +33,14 @@ protected:
 
     std::vector<std::unique_ptr<CalculateReferences::Target>> targets_;
 
+    std::shared_ptr<Buffer> result_;
+
+    bool insert_done_ {false};
+
     void createTargets();
     void finalizeTargets();
     void calculateReferences();
+    void writeReferences();
 };
 
 #endif // CALCULATEREFERENCESJOB_H

@@ -2,6 +2,7 @@
 #define CALCULATEREFERENCES_TARGET_H
 
 #include "dbcontent/target/targetreportchain.h"
+#include "buffer.h"
 
 #include <tuple>
 
@@ -19,7 +20,7 @@ public:
 
     void finalizeChains();
 
-    void calculateReference();
+    std::shared_ptr<Buffer> calculateReference();
 
     unsigned int utn() const;
 

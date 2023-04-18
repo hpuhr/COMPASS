@@ -17,6 +17,8 @@ class CalculateReferencesTaskDialog;
 class CalculateReferencesStatusDialog;
 class CalculateReferencesJob;
 
+// delete from data_reftraj;
+
 class CalculateReferencesTask : public Task, public Configurable
 {
     Q_OBJECT

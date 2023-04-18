@@ -224,7 +224,7 @@ void CalculateReferencesTask::loadingDoneSlot()
     connect(create_job_.get(), &CalculateReferencesJob::statusSignal, this,
             &CalculateReferencesTask::calculationStatusSlot, Qt::QueuedConnection);
 
-    JobManager::instance().addDBJob(create_job_);
+    JobManager::instance().addBlockingJob(create_job_);
 }
 
 void CalculateReferencesTask::calculationStatusSlot(QString status)
