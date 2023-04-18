@@ -375,7 +375,7 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
 void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data)
 {
-    loginf << "DBContentManager: addLoadedData";
+    logdbg << "DBContentManager: addLoadedData";
 
     // newest data batch has been finalized, ready to be added
 
@@ -390,19 +390,19 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
         if (data_.count(buf_it.first))
         {
-            loginf << "DBContentManager: addLoadedData: adding buffer dbo " << buf_it.first
+            logdbg << "DBContentManager: addLoadedData: adding buffer dbo " << buf_it.first
                    << " adding size " << buf_it.second->size() << " current size " << data_.at(buf_it.first)->size();
 
             data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
 
-            loginf << "DBContentManager: addLoadedData: new buffer dbo " << buf_it.first
+            logdbg << "DBContentManager: addLoadedData: new buffer dbo " << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
         else
         {
             data_[buf_it.first] = move(buf_it.second);
 
-            loginf << "DBContentManager: addLoadedData: created buffer dbo " << buf_it.first
+            logdbg << "DBContentManager: addLoadedData: created buffer dbo " << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
 
@@ -413,7 +413,7 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
     {
         updateNumLoadedCounts();
 
-        loginf << "DBContentManager: addLoadedData: emitting signal";
+        logdbg << "DBContentManager: addLoadedData: emitting signal";
 
         emit loadedDataSignal(data_, false);
     }
@@ -1119,7 +1119,7 @@ void DBContentManager::cutCachedData()
 
 void DBContentManager::updateNumLoadedCounts()
 {
-    loginf << "DBContentManager: updateNumLoadedCounts";
+    logdbg << "DBContentManager: updateNumLoadedCounts";
 
     // ds id->dbcont->line->cnt
     std::map<unsigned int, std::map<std::string,

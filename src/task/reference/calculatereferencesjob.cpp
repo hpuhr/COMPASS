@@ -168,6 +168,8 @@ void CalculateReferencesJob::finalizeTargets()
         tgt_it->finalizeChains();
 }
 
+#include <valgrind/callgrind.h>
+
 void CalculateReferencesJob::calculateReferences()
 {
     loginf << "CalculateReferencesJob: calculateReferences";
@@ -179,6 +181,18 @@ void CalculateReferencesJob::calculateReferences()
 
     results.resize(num_targets);
 
+//    CALLGRIND_START_INSTRUMENTATION;
+
+//    CALLGRIND_TOGGLE_COLLECT;
+
+//    for (unsigned int tgt_cnt=0; tgt_cnt < num_targets; ++tgt_cnt)
+//    {
+//        results[tgt_cnt] = targets_.at(tgt_cnt)->calculateReference();
+
+//        loginf << "CalculateReferencesJob: calculateReferences: utn "
+//               << targets_.at(tgt_cnt)->utn() << " done";
+//    }
+
     std::future<void> pending_future = std::async(std::launch::async, [&] {
 
         tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
@@ -189,6 +203,10 @@ void CalculateReferencesJob::calculateReferences()
                    << targets_.at(tgt_cnt)->utn() << " done";
         });
     });
+
+//    CALLGRIND_TOGGLE_COLLECT;
+
+//    CALLGRIND_STOP_INSTRUMENTATION;
 
     pending_future.wait(); // or do done flags for progress updates
 

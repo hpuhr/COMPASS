@@ -178,26 +178,26 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
                 if (mapping.has_ref1_)
                 {
-                    if (m3a_vec.isNull(cnt) && chain_it.second->hasModeA(mapping.timestamp_ref1_))
-                        m3a_vec.set(cnt, chain_it.second->modeA(mapping.timestamp_ref1_));
+                    if (m3a_vec.isNull(cnt) && chain_it.second->hasModeA(mapping.dataid_ref1_))
+                        m3a_vec.set(cnt, chain_it.second->modeA(mapping.dataid_ref1_));
 
-                    if (ta_vec.isNull(cnt) && chain_it.second->hasACAD(mapping.timestamp_ref1_))
-                        ta_vec.set(cnt, chain_it.second->acad(mapping.timestamp_ref1_));
+                    if (ta_vec.isNull(cnt) && chain_it.second->hasACAD(mapping.dataid_ref1_))
+                        ta_vec.set(cnt, chain_it.second->acad(mapping.dataid_ref1_));
 
-                    if (ti_vec.isNull(cnt) && chain_it.second->hasACID(mapping.timestamp_ref1_))
-                        ti_vec.set(cnt, chain_it.second->acid(mapping.timestamp_ref1_));
+                    if (ti_vec.isNull(cnt) && chain_it.second->hasACID(mapping.dataid_ref1_))
+                        ti_vec.set(cnt, chain_it.second->acid(mapping.dataid_ref1_));
                 }
 
                 if (mapping.has_ref2_)
                 {
-                    if (m3a_vec.isNull(cnt) && chain_it.second->hasModeA(mapping.timestamp_ref2_))
-                        m3a_vec.set(cnt, chain_it.second->modeA(mapping.timestamp_ref2_));
+                    if (m3a_vec.isNull(cnt) && chain_it.second->hasModeA(mapping.dataid_ref2_))
+                        m3a_vec.set(cnt, chain_it.second->modeA(mapping.dataid_ref2_));
 
-                    if (ta_vec.isNull(cnt) && chain_it.second->hasACAD(mapping.timestamp_ref2_))
-                        ta_vec.set(cnt, chain_it.second->acad(mapping.timestamp_ref2_));
+                    if (ta_vec.isNull(cnt) && chain_it.second->hasACAD(mapping.dataid_ref2_))
+                        ta_vec.set(cnt, chain_it.second->acad(mapping.dataid_ref2_));
 
-                    if (ti_vec.isNull(cnt) && chain_it.second->hasACID(mapping.timestamp_ref2_))
-                        ti_vec.set(cnt, chain_it.second->acid(mapping.timestamp_ref2_));
+                    if (ti_vec.isNull(cnt) && chain_it.second->hasACID(mapping.dataid_ref2_))
+                        ti_vec.set(cnt, chain_it.second->acid(mapping.dataid_ref2_));
                 }
             }
 

@@ -7,7 +7,7 @@
 #include <iomanip>
 
 //bool Transformation::in_appimage_ = COMPASS::isAppImage();
-//const double Transformation::max_wgs_dist_ {0.5};
+const double Transformation::max_wgs_dist_ {0.1};
 
 Transformation::Transformation()
     : wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
@@ -38,22 +38,11 @@ std::tuple<bool, double, double> Transformation::distanceCart (double lat1, doub
     bool ok;
     std::tuple<bool, double, double> ret {false, 0, 0};
 
-//    if (in_appimage_) // inside appimage
-//    {
     x_pos1 = long1;
     y_pos1 = lat1;
 
     x_pos2 = long2;
     y_pos2 = lat2;
-//    }
-//    else
-//    {
-//        x_pos1 = lat1;
-//        y_pos1 = long1;
-
-//        x_pos2 = lat2;
-//        y_pos2 = long2;
-//    }
 
     ok = ogr_geo2cart_->Transform(1, &x_pos1, &y_pos1); // wgs84 to cartesian offsets
 
@@ -91,16 +80,9 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (
     // calc pos 1 cart
     double x_pos1, y_pos1;
 
-//    if (in_appimage_) // inside appimage
-//    {
         x_pos1 = long1;
         y_pos1 = lat1;
-//    }
-//    else
-//    {
-//        x_pos1 = lat1;
-//        y_pos1 = long1;
-//    }
+
 
     ok = ogr_geo2cart_->Transform(1, &x_pos1, &y_pos1); // wgs84 to cartesian offsets
 
@@ -127,16 +109,9 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (
 
     double lat2, long2;
 
-//    if (in_appimage_) // inside appimage
-//    {
-        lat2 = y_pos2;
-        long2 = x_pos2;
-//    }
-//    else
-//    {
-//        lat2 = x_pos2;
-//        long2 = y_pos2;
-//    }
+    lat2 = y_pos2;
+    long2 = x_pos2;
+
 
     ret = std::tuple<bool, double, double>(true, lat2, long2);
 
@@ -145,8 +120,8 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (
 
 void Transformation::updateCenter(double lat1, double long1)
 {
-//    if (!has_pos1_ || sqrt(pow(lat1_-lat1, 2)+pow(long1_-long1, 2)) > max_wgs_dist_) // set
-//    {
+    if (!has_pos1_ || sqrt(pow(lat1_-lat1, 2)+pow(long1_-long1, 2)) > max_wgs_dist_) // set
+    {
         has_pos1_ = true;
         lat1_ = lat1;
         long1_ = long1;
@@ -155,7 +130,7 @@ void Transformation::updateCenter(double lat1, double long1)
 
         ogr_geo2cart_.reset(OGRCreateCoordinateTransformation(wgs84_.get(), local_.get()));
         ogr_cart2geo_.reset(OGRCreateCoordinateTransformation(local_.get(), wgs84_.get()));
-//    }
+    }
 }
 
 
