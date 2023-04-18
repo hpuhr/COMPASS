@@ -12,7 +12,6 @@
 
 #include <future>
 
-
 using namespace std;
 using namespace Utils;
 using namespace nlohmann;
@@ -175,7 +174,7 @@ void CalculateReferencesJob::calculateReferences()
     loginf << "CalculateReferencesJob: calculateReferences";
 
     unsigned int num_targets = targets_.size();
-    num_targets = 50; // only calculate part
+    //num_targets = 50; // only calculate part
 
     std::vector<std::shared_ptr<Buffer>> results;
 
@@ -198,6 +197,8 @@ void CalculateReferencesJob::calculateReferences()
         tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
         {
             results[tgt_cnt] = targets_.at(tgt_cnt)->calculateReference();
+
+            reftraj_counts_[targets_.at(tgt_cnt)->utn()] = results.at(tgt_cnt)->size(); // store count
 
             loginf << "CalculateReferencesJob: calculateReferences: utn "
                    << targets_.at(tgt_cnt)->utn() << " done";
@@ -239,6 +240,20 @@ void CalculateReferencesJob::writeReferences()
 void CalculateReferencesJob::insertDoneSlot()
 {
     loginf << "CalculateReferencesJob: insertDoneSlot";
+
+    // store counts
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    for (auto& cnt_it : reftraj_counts_) // utn -> cnt
+    {
+        assert (dbcontent_man.existsTarget(cnt_it.first));
+        dbContent::Target &target = dbcontent_man.target(cnt_it.first);
+
+        target.dbContentCount("RefTraj", target.dbContentCount("RefTraj") + cnt_it.second);
+    }
+
+    dbcontent_man.saveTargets();
 
     insert_done_ = true;
 }

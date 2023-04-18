@@ -35,6 +35,8 @@ protected:
 
     std::shared_ptr<Buffer> result_;
 
+    std::map<unsigned int, unsigned int> reftraj_counts_; // utn -> cnt
+
     bool insert_done_ {false};
 
     void createTargets();
