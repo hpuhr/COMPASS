@@ -75,9 +75,18 @@ std::shared_ptr<Buffer> Target::calculateReference()
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sac_id_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
+
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
+
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_));
+
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_));
 
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
@@ -90,12 +99,26 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_).name());
     NullableVector<unsigned int>& line_vec = buffer->get<unsigned int> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_).name());
+
+    NullableVector<float>& tod_vec = buffer->get<float> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_).name());
     NullableVector<ptime>& ts_vec = buffer->get<ptime> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_).name());
+
     NullableVector<double>& lat_vec = buffer->get<double> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name());
     NullableVector<double>& lon_vec = buffer->get<double> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name());
+    NullableVector<float>& mc_vec = buffer->get<float> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
+
+    NullableVector<unsigned int>& m3a_vec = buffer->get<unsigned int> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_).name());
+    NullableVector<unsigned int>& ta_vec = buffer->get<unsigned int> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_).name());
+    NullableVector<string>& ti_vec = buffer->get<string> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_).name());
+
     NullableVector<json>& assoc_vec = buffer->get<json> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_).name());
 
@@ -130,7 +153,9 @@ std::shared_ptr<Buffer> Target::calculateReference()
                     sac_vec.set(cnt, sac);
                     sic_vec.set(cnt, sic);
                     line_vec.set(cnt, line_id);
+
                     ts_vec.set(cnt, ts_current);
+                    tod_vec.set(cnt, ts_current.time_of_day().total_milliseconds() / 1000.0);
 
                     if (!lat_vec.isNull(cnt)) // already set
                     {
@@ -146,6 +171,33 @@ std::shared_ptr<Buffer> Target::calculateReference()
                     }
 
                     assoc_vec.set(cnt, assoc_val);
+                }
+
+                if (mc_vec.isNull(cnt) &&mapping.pos_ref_.has_altitude_)
+                    mc_vec.set(cnt, mapping.pos_ref_.altitude_);
+
+                if (mapping.has_ref1_)
+                {
+                    if (m3a_vec.isNull(cnt) && chain_it.second->hasModeA(mapping.timestamp_ref1_))
+                        m3a_vec.set(cnt, chain_it.second->modeA(mapping.timestamp_ref1_));
+
+                    if (ta_vec.isNull(cnt) && chain_it.second->hasACAD(mapping.timestamp_ref1_))
+                        ta_vec.set(cnt, chain_it.second->acad(mapping.timestamp_ref1_));
+
+                    if (ti_vec.isNull(cnt) && chain_it.second->hasACID(mapping.timestamp_ref1_))
+                        ti_vec.set(cnt, chain_it.second->acid(mapping.timestamp_ref1_));
+                }
+
+                if (mapping.has_ref2_)
+                {
+                    if (m3a_vec.isNull(cnt) && chain_it.second->hasModeA(mapping.timestamp_ref2_))
+                        m3a_vec.set(cnt, chain_it.second->modeA(mapping.timestamp_ref2_));
+
+                    if (ta_vec.isNull(cnt) && chain_it.second->hasACAD(mapping.timestamp_ref2_))
+                        ta_vec.set(cnt, chain_it.second->acad(mapping.timestamp_ref2_));
+
+                    if (ti_vec.isNull(cnt) && chain_it.second->hasACID(mapping.timestamp_ref2_))
+                        ti_vec.set(cnt, chain_it.second->acid(mapping.timestamp_ref2_));
                 }
             }
 

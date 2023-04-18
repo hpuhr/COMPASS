@@ -33,11 +33,11 @@ public:
           altitude_calculated_(altitude_calculated), altitude_(altitude)
     {}
 
-    double latitude_ {0};
-    double longitude_ {0};
+    double latitude_ {0}; // deg
+    double longitude_ {0}; // deg
     bool has_altitude_ {false};
     bool altitude_calculated_ {false}; // indicates if secondary or derived
-    float altitude_ {0};
+    float altitude_ {0}; // ft
 
     std::vector<double> asVector() const
     {
