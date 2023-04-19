@@ -1277,6 +1277,18 @@ void DBInterface::deleteBefore(const DBContent& dbcontent, boost::posix_time::pt
     connection_mutex_.unlock();
 }
 
+void DBInterface::deleteAll(const DBContent& dbcontent)
+{
+    connection_mutex_.lock();
+    assert(db_connection_);
+
+    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent);
+
+    db_connection_->execute(*command.get());
+
+    connection_mutex_.unlock();
+}
+
 void DBInterface::createPropertiesTable()
 {
     assert(!existsPropertiesTable());

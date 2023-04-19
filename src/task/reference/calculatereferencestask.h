@@ -47,7 +47,6 @@ public:
     virtual bool canRun() override;
     virtual void run() override;
 
-
 protected:
 
     std::unique_ptr<CalculateReferencesTaskDialog> dialog_;

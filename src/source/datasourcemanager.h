@@ -97,6 +97,7 @@ public:
 
     void setLoadedCounts(std::map<unsigned int, std::map<std::string,
                          std::map<unsigned int, unsigned int>>> loaded_counts); // ds id->dbcont->line->cnt
+    void clearInsertedCounts(const std::string& dbcontent_name); // after delete all dbcontent
 
     bool loadWidgetShowCounts() const;
     void loadWidgetShowCounts(bool value);

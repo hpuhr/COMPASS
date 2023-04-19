@@ -70,6 +70,8 @@ public:
     dbContent::Target& target(unsigned int utn);
     const dbContent::Target& target(unsigned int utn) const;
 
+    void removeDBContentFromTargets(const std::string& dbcont_name);
+
     nlohmann::json asJSON() const;
     nlohmann::json targetAsJSON(unsigned int utn) const;
     nlohmann::json utnsAsJSON() const;

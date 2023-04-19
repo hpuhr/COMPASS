@@ -90,7 +90,6 @@ public:
     bool existsDBContent(const std::string& dbcontent_name);
     DBContent& dbContent(const std::string& dbcontent_name);
     void deleteDBContent(const std::string& dbcontent_name);
-    void deleteDBContent(boost::posix_time::ptime before_timestamp);
     bool hasData();
 
     using DBContentIterator = typename std::map<std::string, DBContent*>::iterator;
@@ -117,6 +116,8 @@ public:
     void insertData(std::map<std::string, std::shared_ptr<Buffer>> data);
     void insertDone(DBContent& object); // to be called by dbo when it's insert is finished
     bool insertInProgress() const;
+
+    void deleteDBContentData(boost::posix_time::ptime before_timestamp);
 
     DBContentManagerWidget* widget();
 
@@ -158,6 +159,7 @@ public:
     bool existsTarget(unsigned int utn);
     void createNewTarget(unsigned int utn);
     dbContent::Target& target(unsigned int utn);
+    void removeDBContentFromTargets(const std::string& dbcont_name);
     void loadTargets();
     void saveTargets();
 

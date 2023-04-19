@@ -17,6 +17,7 @@
 
 #include <QApplication>
 #include <QMessageBox>
+#include <QThread>
 
 using namespace std;
 using namespace Utils;
@@ -83,14 +84,23 @@ void CalculateReferencesTask::run()
 
     assert(!status_dialog_);
     status_dialog_.reset(new CalculateReferencesStatusDialog(*this));
-    connect(status_dialog_.get(), &CalculateReferencesStatusDialog::closeSignal, this,
-            &CalculateReferencesTask::closeStatusDialogSlot);
+    connect(status_dialog_.get(), &CalculateReferencesStatusDialog::closeSignal,
+            this, &CalculateReferencesTask::closeStatusDialogSlot);
     status_dialog_->markStartTime();
-    status_dialog_->setStatus("Loading Data");
+    status_dialog_->setStatus("Deleting old References");
     status_dialog_->show();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
+    dbcontent_man.dbContent("RefTraj").deleteDBContentData();
+
+    while (dbcontent_man.dbContent("RefTraj").isDeleting())
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(10);
+    }
+
+    status_dialog_->setStatus("Loading Data");
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 

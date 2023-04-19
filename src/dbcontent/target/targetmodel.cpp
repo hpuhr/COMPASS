@@ -604,6 +604,12 @@ const dbContent::Target& TargetModel::target(unsigned int utn) const
     return const_cast<const dbContent::Target&> (*tr_tag_it);
 }
 
+void TargetModel::removeDBContentFromTargets(const std::string& dbcont_name)
+{
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [dbcont_name](Target& p) { p.clearDBContentCount(dbcont_name); });
+}
+
 nlohmann::json TargetModel::asJSON() const
 {
     nlohmann::json data;

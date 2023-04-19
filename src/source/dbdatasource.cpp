@@ -111,6 +111,12 @@ void DBDataSource::addNumInserted(const std::string& db_content, unsigned int li
     counts_ = num_inserted_;
 }
 
+void DBDataSource::clearNumInserted(const std::string& db_content)
+{
+    if (num_inserted_.count(db_content))
+        num_inserted_.erase(db_content);
+}
+
 void DBDataSource::addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num)
 {
     num_loaded_[db_content][line_id] += num;

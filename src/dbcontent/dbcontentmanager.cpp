@@ -187,18 +187,19 @@ void DBContentManager::deleteDBContent(const std::string& dbcontent_name)
     emit dbObjectsChangedSignal();
 }
 
-void DBContentManager::deleteDBContent(boost::posix_time::ptime before_timestamp)
+void DBContentManager::deleteDBContentData(boost::posix_time::ptime before_timestamp)
 {
-    loginf << "DBContentManager: deleteDBContent";
+    loginf << "DBContentManager: deleteDBContentData";
 
     assert (!delete_job_);
 
-    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface(), before_timestamp);
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
+    delete_job_->setBeforeTimestamp(before_timestamp);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContentManager::deleteJobDoneSlot,
             Qt::QueuedConnection);
-    JobManager::instance().addDBJob(delete_job_);
 
+    JobManager::instance().addDBJob(delete_job_);
 }
 
 bool DBContentManager::hasData()
@@ -815,7 +816,7 @@ void DBContentManager::finishInserting()
 
         logdbg << "DBContentManager: finishInserting: deleting data before " << Time::toString(old_time);
 
-        deleteDBContent(old_time);
+        deleteDBContentData(old_time);
     }
 
     logdbg << "DBContentManager: finishInserting: clear old took "
@@ -1306,6 +1307,12 @@ dbContent::Target& DBContentManager::target(unsigned int utn)
 {
     assert (existsTarget(utn));
     return target_model_->target(utn);
+}
+
+void DBContentManager::removeDBContentFromTargets(const std::string& dbcont_name)
+{
+    target_model_->removeDBContentFromTargets(dbcont_name);
+    saveTargets();
 }
 
 void DBContentManager::loadTargets()

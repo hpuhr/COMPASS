@@ -41,6 +41,7 @@ public:
     std::map<std::string, unsigned int> numInsertedSummedLinesMap() const;
 
     void addNumInserted(const std::string& db_content, unsigned int line_id, unsigned int num);
+    void clearNumInserted(const std::string& db_content);
 
     void addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num);
     unsigned int numLoaded (unsigned int line_id);

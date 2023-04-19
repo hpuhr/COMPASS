@@ -35,6 +35,7 @@
 #include "viewmanager.h"
 #include "util/number.h"
 #include "dbcontent/variable/metavariable.h"
+#include "dbcontentdeletedbjob.h"
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
@@ -117,7 +118,7 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
     : Configurable(class_id, instance_id, manager,
                    "db_content_" + boost::algorithm::to_lower_copy(instance_id) + ".json"),
       compass_(compass),
-      dbo_manager_(*manager)
+      dbcont_manager_(*manager)
 {
     registerParameter("name", &name_, "Undefined");
     registerParameter("info", &info_, "");
@@ -468,14 +469,14 @@ void DBContent::loadFiltered(dbContent::VariableSet& read_set, std::string custo
     assert (!read_job_);
 
     // add required vars for processing
-    assert (dbo_manager_.metaCanGetVariable(name_, DBContent::meta_var_rec_num_));
-    read_set.add(dbo_manager_.metaGetVariable(name_, DBContent::meta_var_rec_num_));
+    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_rec_num_));
+    read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_rec_num_));
 
-    assert (dbo_manager_.metaCanGetVariable(name_, DBContent::meta_var_datasource_id_));
-    read_set.add(dbo_manager_.metaGetVariable(name_, DBContent::meta_var_datasource_id_));
+    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_datasource_id_));
+    read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_datasource_id_));
 
-    assert (dbo_manager_.metaCanGetVariable(name_, DBContent::meta_var_line_id_));
-    read_set.add(dbo_manager_.metaGetVariable(name_, DBContent::meta_var_line_id_));
+    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_line_id_));
+    read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_line_id_));
 
     read_job_ = shared_ptr<DBContentReadDBJob>(
                 new DBContentReadDBJob(COMPASS::instance().interface(), *this, read_set, custom_filter_clause));
@@ -610,7 +611,7 @@ void DBContent::insertDoneSlot()
     insert_job_ = nullptr;
     insert_active_ = false;
 
-    dbo_manager_.insertDone(*this);
+    dbcont_manager_.insertDone(*this);
 
     //dbo_manager_.databaseContentChangedSlot();
 
@@ -647,6 +648,21 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
     JobManager::instance().addDBJob(update_job_);
 }
 
+void DBContent::deleteDBContentData()
+{
+    loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "'";
+
+    assert (!delete_job_);
+
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
+    delete_job_->setSpecificDBContent(name_);
+
+    connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
+            Qt::QueuedConnection);
+
+    JobManager::instance().addDBJob(delete_job_);
+}
+
 void DBContent::updateProgressSlot(float percent) { emit updateProgressSignal(percent); }
 
 void DBContent::updateDoneSlot()
@@ -654,6 +670,24 @@ void DBContent::updateDoneSlot()
     update_job_ = nullptr;
 
     emit updateDoneSignal(*this);
+}
+
+void DBContent::deleteJobDoneSlot()
+{
+    loginf << "DBContent: deleteJobDoneSlot";
+
+    assert (delete_job_);
+
+    delete_job_ = nullptr;
+
+    // remove from inserted count
+    COMPASS::instance().dataSourceManager().clearInsertedCounts(name_);
+    COMPASS::instance().dataSourceManager().saveDBDataSources();
+
+    // remove from targets count
+    dbcont_manager_.removeDBContentFromTargets(name_);
+
+    count_ = 0;
 }
 
 //map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums, int break_item_cnt)
@@ -743,12 +777,12 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
     buffer->addProperty(DBContent::selected_var);
 
     // add loaded data
-    dbo_manager_.addLoadedData({{name_, buffer}});
+    dbcont_manager_.addLoadedData({{name_, buffer}});
 
     if (!isLoading())  // is last one
     {
         loginf << "DBContent: " << name_ << " finalizeReadJobDoneSlot: loading done";
-        dbo_manager_.loadingDone(*this);
+        dbcont_manager_.loadingDone(*this);
     }
 
     //    read_job_data_.push_back(buffer);
@@ -778,7 +812,7 @@ void DBContent::readJobDoneSlot()
     if (!isLoading()) // also no more finalize jobs
     {
         loginf << "DBContent: " << name_ << " readJobDoneSlot: done";
-        dbo_manager_.loadingDone(*this);
+        dbcont_manager_.loadingDone(*this);
     }
 }
 
@@ -858,6 +892,8 @@ bool DBContent::isLoading() { return read_job_ != nullptr; }
 
 bool DBContent::isInserting() { return insert_active_; }
 
+bool DBContent::isDeleting() { return delete_job_ != nullptr; }
+
 //bool DBContent::isPostProcessing() { return finalize_jobs_.size(); }
 
 bool DBContent::hasData() { return count_ > 0; }
@@ -866,8 +902,8 @@ size_t DBContent::count() { return count_; }
 
 size_t DBContent::loadedCount()
 {
-    if (dbo_manager_.data().count(name_))
-        return dbo_manager_.data().at(name_)->size();
+    if (dbcont_manager_.data().count(name_))
+        return dbcont_manager_.data().at(name_)->size();
     else
         return 0;
 }

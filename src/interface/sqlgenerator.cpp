@@ -222,6 +222,21 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
     return command;
 }
 
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcontent)
+{
+    //DELETE FROM table WHERE search_condition;
+
+    stringstream ss;
+
+    ss << "DELETE FROM " << dbcontent.dbTableName();
+
+    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+    command->set(ss.str());
+    return command;
+}
+
 //shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBContent& object)
 //{
 //    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE

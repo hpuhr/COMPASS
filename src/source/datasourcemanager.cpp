@@ -293,6 +293,15 @@ void DataSourceManager::setLoadedCounts(std::map<unsigned int, std::map<std::str
         load_widget_->updateContent();
 }
 
+void DataSourceManager::clearInsertedCounts(const std::string& dbcontent_name)
+{
+    for (auto& db_src_it : db_data_sources_)
+        db_src_it->clearNumInserted(dbcontent_name);
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
 bool DataSourceManager::loadWidgetShowCounts() const
 {
     return load_widget_show_counts_;

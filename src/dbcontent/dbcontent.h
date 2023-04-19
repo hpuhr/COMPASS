@@ -39,6 +39,7 @@ class DBContentReadDBJob;
 class InsertBufferDBJob;
 class UpdateBufferDBJob;
 class DBContentManager;
+class DBContentDeleteDBJob;
 
 namespace dbContent
 {
@@ -65,6 +66,8 @@ public slots:
 
     void updateProgressSlot(float percent);
     void updateDoneSlot();
+
+    void deleteJobDoneSlot();
 
 public:
     static const Property meta_var_rec_num_;
@@ -172,10 +175,13 @@ public:
     void insertData(std::shared_ptr<Buffer> buffer);
     void updateData(dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer);
 
+    void deleteDBContentData();
+
     //std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 
     bool isLoading();
     bool isInserting();
+    bool isDeleting();
     //bool isPostProcessing();
     bool hasData();
     size_t count();
@@ -197,7 +203,7 @@ public:
 
 protected:
     COMPASS& compass_;
-    DBContentManager& dbo_manager_;
+    DBContentManager& dbcont_manager_;
     std::string name_;
     std::string info_;
     std::string db_table_name_;
@@ -213,6 +219,7 @@ protected:
     bool insert_active_ {false};
     std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
+    std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
 
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, std::unique_ptr<dbContent::Variable>> variables_;

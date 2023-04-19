@@ -28,7 +28,7 @@ CalculateReferencesStatusDialog::CalculateReferencesStatusDialog(
 
     setModal(true);
 
-    setMinimumSize(QSize(500, 400));
+    setMinimumSize(QSize(500, 200));
 
     QFont font_bold;
     font_bold.setBold(true);
