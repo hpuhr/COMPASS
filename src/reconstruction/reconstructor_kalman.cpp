@@ -137,12 +137,12 @@ void ReconstructorKalman::storeState(Reference& ref,
 /**
 */
 Reference ReconstructorKalman::storeState(const kalman::KalmanState& state,
-                                          double t,
-                                          bool has_stddev) const
+                                          const Measurement& mm) const
 {
     Reference ref;
-    ref.t            = t;
-    ref.nostddev_pos = !has_stddev;
+    ref.source_id    =  mm.source_id;
+    ref.t            =  mm.t;
+    ref.nostddev_pos = !mm.hasStdDev();
 
     storeState(ref, state);
     
@@ -182,7 +182,7 @@ void ReconstructorKalman::init(const Measurement& mm)
 
     //add first state
     kalman::KalmanState state = kalmanState();
-    Reference           ref   = storeState(state, mm.t, mm.hasStdDev());
+    Reference           ref   = storeState(state, mm);
 
     ref.reset_pos   = true;
     ref.nospeed_pos = mm.hasVelocity();
@@ -220,10 +220,6 @@ double ReconstructorKalman::timestep(const Measurement& mm) const
 boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(const std::vector<Measurement>& measurements,
                                                                               const std::string& data_info)
 {
-    std::string dinfo = data_info.empty() ? "data" : data_info;
-
-    loginf << "Reconstructing " << dinfo << " - " << measurements.size() << " measurement(s)";
-
     init();
 
     if (measurements.size() < min_chain_size_)
@@ -261,7 +257,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
 
         //store new state
         auto state = kalmanState();
-        auto ref   = storeState(state, mm.t, mm.hasStdDev());
+        auto ref   = storeState(state, mm);
 
         addReference(ref, state);
     }

@@ -38,10 +38,10 @@ namespace helpers
             R(0, 0) = mm.stddev_x.value() * mm.stddev_x.value();
             R(1, 1) = mm.stddev_y.value() * mm.stddev_y.value();
 
-            if (mm.stddev_xy.has_value())
+            if (mm.cov_xy.has_value())
             {
-                R(0, 1) = mm.stddev_xy.value();
-                R(1, 0) = mm.stddev_xy.value();
+                R(0, 1) = mm.cov_xy.value();
+                R(1, 0) = mm.cov_xy.value();
             }
 
             return R;

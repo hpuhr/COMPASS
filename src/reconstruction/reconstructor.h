@@ -17,90 +17,59 @@
 
 #pragma once
 
+#include "reconstructor_defs.h"
+
 #include <vector>
 
-#include <boost/optional.hpp>
+namespace dbContent 
+{
+    namespace TargetReport 
+    {
+        class Chain;
+    }
+}
 
-#include <Eigen/Core>
+class OGRSpatialReference;
+class OGRCoordinateTransformation;
 
 namespace reconstruction
 {
 
 /**
 */
-struct Measurement
-{
-    bool hasVelocity() const
-    {
-        if (!vx.has_value() || !vy.has_value())
-            return false;
-
-        if (z.has_value() && !vz.has_value())
-            return false;
-
-        return true;
-    }
-    bool hasAcceleration() const
-    {
-        if (!ax.has_value() || !ay.has_value())
-            return false;
-
-        if (z.has_value() && !az.has_value())
-            return false;
-
-        return true;
-    }
-    bool hasStdDev() const
-    {
-        return (stddev_x.has_value() && stddev_y.has_value());
-    }
-
-    double                  t; // time in seconds
-    double                  x; // x position
-    double                  y; // y position
-    boost::optional<double> z; // optional z position
-
-    boost::optional<double> vx; // speed vector x
-    boost::optional<double> vy; // speed vector y
-    boost::optional<double> vz; // speed vector z
-
-    boost::optional<double> ax; // accel vector x
-    boost::optional<double> ay; // accel vector y
-    boost::optional<double> az; // accel vector z
-
-    boost::optional<double> stddev_x;  // stddev x
-    boost::optional<double> stddev_y;  // stddev y
-    boost::optional<double> stddev_xy; // stddev xy-correlation
-};
-
-/**
-*/
-struct Reference : public Measurement
-{
-    bool reset_pos    = false; // is this a position where kalman filter was resetted (e.g. due to long time offset)
-    bool nospeed_pos  = false; // did this position not obtain speed information
-    bool noaccel_pos  = false; // did this position not obtain acceleration information
-    bool nostddev_pos = false; // did this position not obtain stddev information
-
-    Eigen::MatrixXd cov; //covariance matrix
-};
-
-/**
-*/
 class Reconstructor
 {
 public:
+    typedef std::map<uint32_t, const dbContent::TargetReport::Chain*> SourceMap;
+
     Reconstructor() = default;
     virtual ~Reconstructor() = default;
 
-    boost::optional<std::vector<Reference>> reconstruct(const std::vector<Measurement>& measurements, 
-                                                        const std::string& data_info = "");
+    void addChain(const dbContent::TargetReport::Chain* tr_chain);
+
+    boost::optional<std::vector<Reference>> reconstruct(const std::string& data_info = "");
+
+    const dbContent::TargetReport::Chain* chainOfReference(const Reference& ref) const;
+
 protected:
     virtual boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements, 
                                                                      const std::string& data_info = "") = 0;
 
     static double timestep(const Measurement& mm0, const Measurement& mm1);
     static double distance(const Measurement& mm0, const Measurement& mm1);
+
+private:
+    void postprocessMeasurements();
+    void postprocessReferences(std::vector<Reference>& references);
+
+    std::vector<Measurement>                     measurements_;
+    SourceMap                                    sources_;
+    std::unique_ptr<OGRSpatialReference>         ref_src_;
+    std::unique_ptr<OGRSpatialReference>         ref_dst_;
+    std::unique_ptr<OGRCoordinateTransformation> trafo_fwd_;
+    std::unique_ptr<OGRCoordinateTransformation> trafo_bwd_;
+
+    uint32_t source_cnt_ = 0;
 };
 
 } // namespace reconstruction

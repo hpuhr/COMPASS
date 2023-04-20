@@ -95,8 +95,7 @@ private:
     void storeState(Reference& ref,
                     const kalman::KalmanState& state) const;
     Reference storeState(const kalman::KalmanState& state,
-                         double t,
-                         bool has_stddev) const;
+                         const Measurement& mm) const;
 
     bool needsReinit(const Reference& ref, const Measurement& mm) const;
     void init(const Measurement& mm);

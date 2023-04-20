@@ -7,6 +7,7 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/kalman_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman.h"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructor.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructor_kalman.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructor_umkalman2d.h"

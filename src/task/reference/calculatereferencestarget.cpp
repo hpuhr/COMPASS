@@ -8,6 +8,8 @@
 #include "timeconv.h"
 #include "logger.h"
 
+#include "reconstruction/reconstructor_umkalman2d.h"
+
 using namespace dbContent;
 using namespace dbContent::TargetReport;
 
@@ -137,6 +139,57 @@ std::shared_ptr<Buffer> Target::calculateReference()
     {
         boost::posix_time::time_duration update_interval = Time::partialSeconds(1.0);
 
+#if 1
+
+        reconstruction::Reconstructor_UMKalman2D rec;
+        rec.baseConfig().R_std          = 30.0;
+        rec.baseConfig().Q_std          = 10.0;
+        rec.baseConfig().P_std          = 30.0;
+        rec.baseConfig().P_std_high     = 1000.0;
+        rec.baseConfig().smooth         = true;
+        rec.baseConfig().min_dt         = 0.0;
+        rec.baseConfig().max_dt         = 60.0;
+        rec.baseConfig().min_chain_size = 2;
+
+        rec.config().simple_init = false;
+
+        std::map<const Chain*, TargetKey> chain_targets;
+
+        for (auto& chain_it : chains_)
+        {
+            chain_targets[chain_it.second.get()] = chain_it.first;
+            rec.addChain(chain_it.second.get());
+        }
+
+        auto references = rec.reconstruct();
+        if (references.has_value() && references->size() > 0)
+        {
+            for (size_t i = 0; i < references->size(); ++i)
+            {
+                const reconstruction::Reference& ref = references.value()[ i ];
+                const Chain* chain = rec.chainOfReference(ref);
+                assert(chain);
+
+                auto it = chain_targets.find(chain);
+                assert(it != chain_targets.end());
+
+                ds_id_vec.set(i, ds_id);
+                sac_vec.set(i, sac);
+                sic_vec.set(i, sic);
+                line_vec.set(i, line_id);
+
+                ts_vec.set(i, ref.t);
+                tod_vec.set(i, ref.t.time_of_day().total_milliseconds() / 1000.0);
+
+                lat_vec.set(i, ref.lat);
+                lon_vec.set(i, ref.lon);
+
+                assoc_vec.set(i, assoc_val);
+            }
+        }
+
+#else
+
         for (boost::posix_time::ptime ts_current = ts_begin; ts_current <= ts_end; ts_current += update_interval)
         {
             data_written = false;
@@ -212,6 +265,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
             if (data_written)
                 ++cnt;
         }
+#endif
     }
 
     loginf << "Target: calculateReference: buffer size " << buffer->size();
