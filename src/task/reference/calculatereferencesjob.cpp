@@ -167,7 +167,7 @@ void CalculateReferencesJob::finalizeTargets()
         tgt_it->finalizeChains();
 }
 
-#include <valgrind/callgrind.h>
+//#include <valgrind/callgrind.h>
 
 void CalculateReferencesJob::calculateReferences()
 {

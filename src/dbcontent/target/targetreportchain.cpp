@@ -275,6 +275,16 @@ dbContent::TargetPosition Chain::pos(const DataID& id) const
     return pos;
 }
 
+boost::optional<TargetPositionAccuracy> Chain::posAccuracy(const DataID& id) const
+{
+    //auto timestamp = timestampFromDataID(id);
+    auto index     = indexFromDataID(id);
+
+    unsigned int index_ext = index.idx_external;
+
+    return getPositionAccuracy(cache_, dbcontent_name_, index_ext);
+}
+
 bool Chain::hasSpeed(const DataID& id) const
 {
     auto index = indexFromDataID(id);

@@ -2,6 +2,7 @@
 #define DBCONTENT_TARGETREPORTCHAIN_H
 
 #include "dbcontent/target/targetposition.h"
+#include "dbcontent/target/targetpositionaccuracy.h"
 #include "dbcontent/target/targetvelocity.h"
 #include "projection/transformation.h"
 
@@ -154,6 +155,9 @@ public:
 
     bool hasPos(const DataID& id) const;
     TargetPosition pos(const DataID& id) const;
+
+    boost::optional<TargetPositionAccuracy> posAccuracy(const DataID& id) const;
+
     bool hasSpeed(const DataID& id) const;
     TargetVelocity speed(const DataID& id) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
