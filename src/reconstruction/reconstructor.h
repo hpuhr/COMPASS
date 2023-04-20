@@ -40,16 +40,25 @@ namespace reconstruction
 class Reconstructor
 {
 public:
+    enum class CoordSystem
+    {
+        WGS84 = 0,
+        Cart
+    };
+
     typedef std::map<uint32_t, const dbContent::TargetReport::Chain*> SourceMap;
 
-    Reconstructor() = default;
-    virtual ~Reconstructor() = default;
+    Reconstructor();
+    virtual ~Reconstructor();
 
+    void addMeasurements(const std::vector<Measurement>& measurements);
     void addChain(const dbContent::TargetReport::Chain* tr_chain);
 
     boost::optional<std::vector<Reference>> reconstruct(const std::string& data_info = "");
 
     const dbContent::TargetReport::Chain* chainOfReference(const Reference& ref) const;
+
+    void setInputCoordSys(CoordSystem coord_sys) { coord_sys_ = coord_sys; }
 
 protected:
     virtual boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements, 
@@ -70,6 +79,8 @@ private:
     std::unique_ptr<OGRCoordinateTransformation> trafo_bwd_;
 
     uint32_t source_cnt_ = 0;
+
+    CoordSystem coord_sys_ = CoordSystem::WGS84;
 };
 
 } // namespace reconstruction

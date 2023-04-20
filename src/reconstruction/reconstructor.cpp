@@ -29,6 +29,22 @@ namespace reconstruction
 
 /**
 */
+Reconstructor::Reconstructor() = default;
+
+/**
+*/
+Reconstructor::~Reconstructor() = default;
+
+/**
+*/
+void Reconstructor::addMeasurements(const std::vector<Measurement>& measurements)
+{
+    if (!measurements.empty())
+        measurements_.insert(measurements_.end(), measurements.begin(), measurements.end());
+}
+
+/**
+*/
 void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain)
 {
     assert(tr_chain);
@@ -41,8 +57,6 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain)
     std::vector<Measurement> mms;
     mms.reserve(indices.size());
 
-    size_t skipped = 0;
-
     for (const auto& index : indices)
     {
         Measurement mm;
@@ -53,21 +67,13 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain)
         boost::optional<dbContent::TargetVelocity>         speed;
         boost::optional<dbContent::TargetPositionAccuracy> accuracy;
 
-        if (!tr_chain->hasPos(index))
-        {
-            ++skipped;
-            continue;
-        }
-
         pos = tr_chain->pos(index);
 
         mm.lat = pos->latitude_;
         mm.lon = pos->longitude_;
         //@TODO: altitude?
 
-        if (tr_chain->hasSpeed(index))
-            speed = tr_chain->speed(index);
-
+        speed    = tr_chain->speed(index);
         accuracy = tr_chain->posAccuracy(index);
 
         if (speed.has_value())
@@ -117,38 +123,41 @@ void Reconstructor::postprocessMeasurements()
     std::sort(measurements_.begin(), measurements_.end(), [&] (const Measurement& mm0, const Measurement& mm1) { return mm0.t < mm1.t; });
 
     //compute cartesian positions from lat lon
-    double lat_min = measurements_[ 0 ].lat;
-    double lon_min = measurements_[ 0 ].lon;
-    double lat_max = measurements_[ 0 ].lat;
-    double lon_max = measurements_[ 0 ].lon;
-    
-    for (size_t i = 1; i < measurements_.size(); ++i)
+    if (coord_sys_ == CoordSystem::WGS84)
     {
-        const auto& mm  = measurements_[ i ];
+        double lat_min = measurements_[ 0 ].lat;
+        double lon_min = measurements_[ 0 ].lon;
+        double lat_max = measurements_[ 0 ].lat;
+        double lon_max = measurements_[ 0 ].lon;
+        
+        for (size_t i = 1; i < measurements_.size(); ++i)
+        {
+            const auto& mm  = measurements_[ i ];
 
-        if (mm.lat < lat_min) lat_min = mm.lat;
-        if (mm.lon < lon_min) lon_min = mm.lon;
-        if (mm.lat > lat_max) lat_max = mm.lat;
-        if (mm.lon > lon_max) lon_max = mm.lon;
-    }
+            if (mm.lat < lat_min) lat_min = mm.lat;
+            if (mm.lon < lon_min) lon_min = mm.lon;
+            if (mm.lat > lat_max) lat_max = mm.lat;
+            if (mm.lon > lon_max) lon_max = mm.lon;
+        }
 
-    double lat0 = (lat_max - lat_min) / 2;
-    double lon0 = (lon_max - lon_min) / 2;
+        double lat0 = (lat_max - lat_min) / 2;
+        double lon0 = (lon_max - lon_min) / 2;
 
-    ref_src_.reset(new OGRSpatialReference);
-    ref_src_->SetWellKnownGeogCS("WGS84");
+        ref_src_.reset(new OGRSpatialReference);
+        ref_src_->SetWellKnownGeogCS("WGS84");
 
-    ref_dst_.reset(new OGRSpatialReference);
-    ref_dst_->SetStereographic(lat0, lon0, 1.0, 0.0, 0.0);
+        ref_dst_.reset(new OGRSpatialReference);
+        ref_dst_->SetStereographic(lat0, lon0, 1.0, 0.0, 0.0);
 
-    trafo_fwd_.reset(OGRCreateCoordinateTransformation(ref_src_.get(), ref_dst_.get()));
-    trafo_bwd_.reset(OGRCreateCoordinateTransformation(ref_dst_.get(), ref_src_.get()));
+        trafo_fwd_.reset(OGRCreateCoordinateTransformation(ref_src_.get(), ref_dst_.get()));
+        trafo_bwd_.reset(OGRCreateCoordinateTransformation(ref_dst_.get(), ref_src_.get()));
 
-    for (auto& mm : measurements_)
-    {
-        mm.x = mm.lon;
-        mm.y = mm.lat;
-        trafo_fwd_->Transform(1, &mm.x, &mm.y);
+        for (auto& mm : measurements_)
+        {
+            mm.x = mm.lon;
+            mm.y = mm.lat;
+            trafo_fwd_->Transform(1, &mm.x, &mm.y);
+        }
     }
 }
 
@@ -156,12 +165,15 @@ void Reconstructor::postprocessMeasurements()
 */
 void Reconstructor::postprocessReferences(std::vector<Reference>& references)
 {
-    //compute lat lon from cartesian positions
-    for (auto& ref : references)
+    if (coord_sys_ == CoordSystem::WGS84 && trafo_bwd_)
     {
-        ref.lon = ref.x;
-        ref.lat = ref.y;
-        trafo_bwd_->Transform(1, &ref.lon, &ref.lat);
+        //compute lat lon from cartesian positions
+        for (auto& ref : references)
+        {
+            ref.lon = ref.x;
+            ref.lat = ref.y;
+            trafo_bwd_->Transform(1, &ref.lon, &ref.lat);
+        }
     }
 }
 
