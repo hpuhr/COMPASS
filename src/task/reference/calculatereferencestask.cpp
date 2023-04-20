@@ -92,7 +92,9 @@ void CalculateReferencesTask::run()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
-    dbcontent_man.dbContent("RefTraj").deleteDBContentData();
+
+    if (dbcontent_man.dbContent("RefTraj").existsInDB())
+        dbcontent_man.dbContent("RefTraj").deleteDBContentData();
 
     while (dbcontent_man.dbContent("RefTraj").isDeleting())
     {
@@ -324,6 +326,14 @@ VariableSet CalculateReferencesTask::getReadSetFor(const std::string& dbcontent_
 
         assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_sil_));
         read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_sil_));
+    }
+
+    if (dbcontent_name == "CAT010" || dbcontent_name == "CAT020"
+            ||  dbcontent_name == "CAT062" || dbcontent_name == "RefTraj")
+    {
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_));
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_));
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_xy_cov_));
     }
 
     return read_set;

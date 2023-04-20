@@ -652,6 +652,9 @@ void DBContent::deleteDBContentData()
 {
     loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "'";
 
+    if (!existsInDB())
+        return;
+
     assert (!delete_job_);
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());

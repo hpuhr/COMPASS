@@ -53,6 +53,8 @@ protected:
 
     std::unique_ptr<CalculateReferencesStatusDialog> status_dialog_;
 
+    // calculate only utns list
+
     std::shared_ptr<dbContent::Cache> cache_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
