@@ -295,9 +295,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
                         turnrate = Number::calculateMinAngleDifference(*tst_track_angle_last, *tst_track_angle) / time_diff;
 
-                        //                    turnrate = fabs(RAD2DEG*atan2(sin(DEG2RAD*(track_angle1-track_angle2)),
-                        //                                                  cos(DEG2RAD*(track_angle1-track_angle2)))) / time_diff; // turn angle rate
-
                         if (fabs(turnrate) > max_turnrate_)
                         {
                             Result::logComment(update, "TR",

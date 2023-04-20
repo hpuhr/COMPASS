@@ -1129,21 +1129,10 @@ boost::optional<bool> EvaluationTargetData::availableRefGroundBit(
 
     auto gbs = ref_chain_.groundBit(indexed_id);
 
-    //    bool has_ground_bit = ref_gb.first;
-    //    bool ground_bit_set = ref_gb.second;
-
     if (gbs.has_value() && *gbs)
         return gbs;
 
-    //    if (!ground_bit_set)
-    //        tie(has_ground_bit, ground_bit_set) = tstGroundBitInterpolated(ts);
-
     return tstGroundBitInterpolated(ts);
-
-    //    if (!has_ground_bit)
-    //        return {};
-
-    //    return ground_bit_set;
 }
 
 boost::optional<bool> EvaluationTargetData::availableTstGroundBit(
@@ -1159,23 +1148,7 @@ boost::optional<bool> EvaluationTargetData::availableTstGroundBit(
     if (gbs.has_value() && *gbs)
         return gbs;
 
-    //    bool has_ground_bit = tst_chain_.hasGroundBit(indexed_id);
-    //    bool ground_bit_set = false;
-
-    //    if (has_ground_bit)
-    //        ground_bit_set = get<1>(tst_chain_.groundBit(indexed_id));
-    //    else
-    //        ground_bit_set = false;
-
-    //    if (!ground_bit_set)
-    //        tie(has_ground_bit, ground_bit_set) = mappedRefGroundBit(indexed_id, d_max);
-
     return mappedRefGroundBit(indexed_id, d_max);
-
-    //    if (!has_ground_bit)
-    //        return {};
-
-    //    return ground_bit_set;
 }
 
 /**

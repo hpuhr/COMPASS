@@ -260,7 +260,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     ptime last_tod;
     float time_diff;
     float acceleration;
-    float track_angle1, track_angle2, turnrate;
+    float turnrate;
     float rocd;
 
     for (auto& track_detail : finished_tracks)
@@ -351,11 +351,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                     {
                         auto tst_track_angle = target_data.tstChain().tstMeasuredTrackAngle(id);
                         auto tst_track_angle_last = target_data.tstChain().tstMeasuredTrackAngle(id_last);
-
-                        //  turnrate = fabs(RAD2DEG*atan2(sin(DEG2RAD*(track_angle1-track_angle2)),
-                        //           cos(DEG2RAD*(track_angle1-track_angle2)))) / time_diff; // turn angle rate
-
-                        //turnrate = Number::calculateMinAngleDifference(track_angle2, track_angle1) / time_diff;
 
                         if (tst_track_angle.has_value() && tst_track_angle_last.has_value())
                         {

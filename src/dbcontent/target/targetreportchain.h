@@ -153,40 +153,28 @@ public:
 
     DataID dataID(const boost::posix_time::ptime& timestamp) const;
 
-    //bool hasPos(const DataID& id) const;
     TargetPosition pos(const DataID& id) const;
     boost::optional<TargetPosition> posOpt(const DataID& id) const;
 
     boost::optional<TargetPositionAccuracy> posAccuracy(const DataID& id) const;
 
-    //bool hasSpeed(const DataID& id) const;
     boost::optional<TargetVelocity> speed(const DataID& id) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
-    //bool hasACID(const DataID& id) const;
     boost::optional<std::string> acid(const DataID& id) const;
 
-    //bool hasModeA(const DataID& id) const;
     boost::optional<unsigned int> modeA(const DataID& id) const; // only if set, is v, not g
 
-    //bool hasModeC(const DataID& id) const;
     boost::optional<float> modeC(const DataID& id) const; // only if set, is v, not g
 
-    //bool hasACAD(const DataID& id) const;
     boost::optional<unsigned int> acad(const DataID& id) const;
 
-    //bool hasGroundBit(const DataID& id) const; // only if set
-    //std::pair<bool,bool> groundBit(const DataID& id) const; // has gbs, gbs true
     boost::optional<bool> groundBit(const DataID& id) const; // gbs
 
-    //bool hasTstTrackNum(const DataID& id) const;
     boost::optional<unsigned int> tstTrackNum(const DataID& id) const;
 
-    // speed, track angle
-    //bool hasTstMeasuredSpeed(const DataID& id) const;
     boost::optional<float> tstMeasuredSpeed(const DataID& id) const; // m/s
 
-    //bool hasTstMeasuredTrackAngle(const DataID& id) const;
     boost::optional<float> tstMeasuredTrackAngle(const DataID& id) const; // deg
 
     Index indexFromDataID(const DataID& id) const;
