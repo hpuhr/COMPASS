@@ -180,14 +180,15 @@ namespace EvaluationRequirement
 
             if ((!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())) // ref times possible
             {
-                if ((!ref_lower.is_not_a_date_time() && target_data.refChain().hasModeC(ref_lower))
-                        || (!ref_upper.is_not_a_date_time() && target_data.refChain().hasModeC(ref_upper))) // ref value(s) exist
+                if ((!ref_lower.is_not_a_date_time() && target_data.refChain().modeC(ref_lower).has_value())
+                        || (!ref_upper.is_not_a_date_time() && target_data.refChain().modeC(ref_upper).has_value()))
+                    // ref value(s) exist
                 {
                     code_present_ref = true;
                 }
             }
 
-            code_present_tst = target_data.tstChain().hasModeC(tst_id);
+            code_present_tst = target_data.tstChain().modeC(tst_id).has_value();
 
             code_missing = false;
 

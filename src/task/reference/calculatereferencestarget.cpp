@@ -114,9 +114,9 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
     NullableVector<unsigned int>& m3a_vec = buffer->get<unsigned int> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_).name());
-    NullableVector<unsigned int>& ta_vec = buffer->get<unsigned int> (
+    NullableVector<unsigned int>& acad_vec = buffer->get<unsigned int> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_).name());
-    NullableVector<string>& ti_vec = buffer->get<string> (
+    NullableVector<string>& acid_vec = buffer->get<string> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_).name());
 
     NullableVector<json>& assoc_vec = buffer->get<json> (
@@ -178,26 +178,34 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
                 if (mapping.has_ref1_)
                 {
-                    if (m3a_vec.isNull(cnt) && chain_it.second->hasModeA(mapping.dataid_ref1_))
-                        m3a_vec.set(cnt, chain_it.second->modeA(mapping.dataid_ref1_));
+                    boost::optional<unsigned int> m3a = chain_it.second->modeA(mapping.dataid_ref1_);
+                    boost::optional<std::string> acid = chain_it.second->acid(mapping.dataid_ref1_);
+                    boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref1_);
 
-                    if (ta_vec.isNull(cnt) && chain_it.second->hasACAD(mapping.dataid_ref1_))
-                        ta_vec.set(cnt, chain_it.second->acad(mapping.dataid_ref1_));
+                    if (m3a_vec.isNull(cnt) && m3a.has_value())
+                        m3a_vec.set(cnt, *m3a);
 
-                    if (ti_vec.isNull(cnt) && chain_it.second->hasACID(mapping.dataid_ref1_))
-                        ti_vec.set(cnt, chain_it.second->acid(mapping.dataid_ref1_));
+                    if (acad_vec.isNull(cnt) && acad.has_value())
+                        acad_vec.set(cnt, *acad);
+
+                    if (acid_vec.isNull(cnt) && acid.has_value())
+                        acid_vec.set(cnt, *acid);
                 }
 
                 if (mapping.has_ref2_)
                 {
-                    if (m3a_vec.isNull(cnt) && chain_it.second->hasModeA(mapping.dataid_ref2_))
-                        m3a_vec.set(cnt, chain_it.second->modeA(mapping.dataid_ref2_));
+                    boost::optional<unsigned int> m3a = chain_it.second->modeA(mapping.dataid_ref2_);
+                    boost::optional<std::string> acid = chain_it.second->acid(mapping.dataid_ref2_);
+                    boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref2_);
 
-                    if (ta_vec.isNull(cnt) && chain_it.second->hasACAD(mapping.dataid_ref2_))
-                        ta_vec.set(cnt, chain_it.second->acad(mapping.dataid_ref2_));
+                    if (m3a_vec.isNull(cnt) && m3a.has_value())
+                        m3a_vec.set(cnt, *m3a);
 
-                    if (ti_vec.isNull(cnt) && chain_it.second->hasACID(mapping.dataid_ref2_))
-                        ti_vec.set(cnt, chain_it.second->acid(mapping.dataid_ref2_));
+                    if (acad_vec.isNull(cnt) && acad.has_value())
+                        acad_vec.set(cnt, *acad);
+
+                    if (acid_vec.isNull(cnt) && acid.has_value())
+                        acid_vec.set(cnt, *acid);
                 }
             }
 

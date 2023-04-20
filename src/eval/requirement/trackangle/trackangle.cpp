@@ -118,7 +118,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     bool ok;
 
     dbContent::TargetVelocity ref_spd;
-    double ref_trackangle_deg, tst_trackangle_deg;
+    double ref_trackangle_deg;
+    boost::optional<double> tst_trackangle_deg;
     float trackangle_min_diff;
 
     bool comp_passed;
@@ -269,7 +270,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        if (!target_data.tstChain().hasTstMeasuredTrackAngle(tst_id))
+        ref_trackangle_deg = ref_spd.track_angle_;
+        tst_trackangle_deg = target_data.tstChain().tstMeasuredTrackAngle(tst_id);
+
+        if (!tst_trackangle_deg.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -284,10 +288,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        ref_trackangle_deg = ref_spd.track_angle_;
-        tst_trackangle_deg = target_data.tstChain().tstMeasuredTrackAngle(tst_id);
-
-        trackangle_min_diff = Number::calculateMinAngleDifference(ref_trackangle_deg, tst_trackangle_deg);
+        trackangle_min_diff = Number::calculateMinAngleDifference(ref_trackangle_deg, *tst_trackangle_deg);
 
         // tst vector
         //lines.emplace_back(tst_pos, getPositionAtAngle(tst_pos, tst_trackangle_deg, ref_spd.speed_), tst_line_color);
@@ -318,7 +319,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         addDetail(timestamp, tst_pos,
                   ref_pos, //lines, // ref_pos, lines
                   is_inside, trackangle_min_diff, comp_passed, // pos_inside, value, check_passed
-                  ref_trackangle_deg, tst_trackangle_deg, ref_spd.speed_, // value_ref, value_tst, speed_ref
+                  ref_trackangle_deg, *tst_trackangle_deg, ref_spd.speed_, // value_ref, value_tst, speed_ref
                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                   num_comp_failed, num_comp_passed,
                   comment);

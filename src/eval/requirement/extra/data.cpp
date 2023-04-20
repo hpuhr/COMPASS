@@ -144,7 +144,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
         {
             timestamp = tst_it.first;
 
-            assert (target_data.tstChain().hasPos(tst_it));
             tst_pos = target_data.tstChain().pos(tst_it);
 
             is_inside_ref_time_period = ref_periods.isInside(timestamp);

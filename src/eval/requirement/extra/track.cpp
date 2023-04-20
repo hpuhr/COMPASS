@@ -76,7 +76,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
 
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
-    unsigned int track_num;
+    boost::optional<unsigned int> track_num;
 
     // collect track numbers with time periods
     vector<pair<unsigned int, TimePeriod>> finished_tracks;
@@ -94,27 +94,28 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         if (!is_inside)
             continue;
 
-        if (!target_data.tstChain().hasTstTrackNum(tst_id))
-            continue;
-
         track_num = target_data.tstChain().tstTrackNum(tst_id);
 
-        if (!active_tracks.count(track_num)) // not yet existing
+        if (!track_num.has_value())
+            continue;
+
+
+        if (!active_tracks.count(*track_num)) // not yet existing
         {
             //active_tracks[track_num] = {tod, tod};
             active_tracks.emplace(std::piecewise_construct,
-                                  std::forward_as_tuple(track_num),  // args for key
+                                  std::forward_as_tuple(*track_num),  // args for key
                                   std::forward_as_tuple(timestamp, timestamp));
             continue;
         }
 
         // track num exists in active tracks
-        TimePeriod& period = active_tracks.at(track_num);
+        TimePeriod& period = active_tracks.at(*track_num);
         if (!period.isCloseToEnd(timestamp, seconds(300))) // gap, finish old, create new track
         {
-            finished_tracks.emplace_back(track_num, period);
+            finished_tracks.emplace_back(*track_num, period);
             active_tracks.emplace(std::piecewise_construct,
-                                  std::forward_as_tuple(track_num),  // args for key
+                                  std::forward_as_tuple(*track_num),  // args for key
                                   std::forward_as_tuple(timestamp, timestamp));
             continue;
         }
@@ -146,7 +147,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     //unsigned int extra_time_period_cnt;
     vector<string> extra_track_nums;
 
-    bool has_track_num = false;
+    //bool has_track_num = false;
+    QVariant track_num_var;
 
     bool has_tod {false};
     ptime tod_min, tod_max;
@@ -173,10 +175,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         timestamp = tst_id.first;
         tst_pos = target_data.tstChain().pos(tst_id);
 
-        has_track_num = target_data.tstChain().hasTstTrackNum(tst_id);
+//        has_track_num = target_data.tstChain().hasTstTrackNum(tst_id);
 
-        if (has_track_num)
-            track_num = target_data.tstChain().tstTrackNum(tst_id);
+//        if (has_track_num)
+        track_num = target_data.tstChain().tstTrackNum(tst_id);
+
+        if (track_num.has_value())
+            track_num_var = *track_num;
+        else
+            track_num_var = QVariant::Invalid;
 
         is_inside = target_data.tstPosInside(sector_layer, tst_id);
 
@@ -184,7 +191,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos, false, // inside
-                            {has_track_num ? track_num : QVariant::Invalid}, // track_num
+                            track_num_var, // track_num
                             false, "Tst outside"); // extra
 
             ++num_pos_outside;
@@ -192,10 +199,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         }
         ++num_pos_inside;
 
-        if (!has_track_num)
+        if (!track_num.has_value())
         {
             addDetail(timestamp, tst_pos, true, // inside
-                        {has_track_num ? track_num : QVariant::Invalid}, // track_num
+                        track_num_var, // track_num
                         false, "No track num"); // extra
             ++num_no_track_num;
             continue;
@@ -227,7 +234,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
             }
 
             addDetail(timestamp, tst_pos, true, // inside
-                        {has_track_num ? track_num : QVariant::Invalid}, // track_num
+                        track_num_var, // track_num
                         true, // extra
                         "Extra tracks: "+ boost::algorithm::join(extra_track_nums, ","));
         }
@@ -235,7 +242,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         {
             ++num_ok;
             addDetail(timestamp, tst_pos, true, // inside
-                        {has_track_num ? track_num : QVariant::Invalid}, // track_num
+                        track_num_var, // track_num
                         false, "OK"); // extra
         }
 

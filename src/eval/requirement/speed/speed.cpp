@@ -115,7 +115,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     bool ok;
 
     dbContent::TargetVelocity ref_spd;
-    float tst_spd_ms;
+    boost::optional<float> tst_spd_ms;
     float spd_diff;
 
     bool comp_passed;
@@ -227,8 +227,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         ++num_pos_inside;
 
         // ref_spd ok
+        tst_spd_ms = target_data.tstChain().tstMeasuredSpeed(tst_id);
 
-        if (!target_data.tstChain().hasTstMeasuredSpeed(tst_id))
+        if (!tst_spd_ms.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -242,11 +243,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        tst_spd_ms = target_data.tstChain().tstMeasuredSpeed(tst_id);
-        spd_diff = fabs(ref_spd.speed_ - tst_spd_ms);
+        spd_diff = fabs(ref_spd.speed_ - *tst_spd_ms);
 
-        if (use_percent_if_higher_ && tst_spd_ms * threshold_percent_ > threshold_value_) // use percent based threshold
-            tmp_threshold_value = tst_spd_ms * threshold_percent_;
+        if (use_percent_if_higher_ && *tst_spd_ms * threshold_percent_ > threshold_value_) // use percent based threshold
+            tmp_threshold_value = *tst_spd_ms * threshold_percent_;
         else
             tmp_threshold_value = threshold_value_;
 

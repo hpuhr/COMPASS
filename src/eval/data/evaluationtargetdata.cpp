@@ -478,12 +478,12 @@ std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(
     return {{}, false};
 }
 
-std::pair<bool,bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst_id,
-                                                              time_duration d_max) const
+boost::optional<bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst_id,
+                                                               time_duration d_max) const
 // has gbs, gbs true
 {
-    bool has_gbs = false;
-    bool gbs = false;
+    //    bool has_gbs = false;
+    //    bool gbs = false;
 
     auto timestamp = tst_id.timestamp();
     auto index     = tst_chain_.indexFromDataID(tst_id);
@@ -491,7 +491,7 @@ std::pair<bool,bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst_
     const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
-        return {has_gbs, gbs};
+        return {};
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -499,40 +499,47 @@ std::pair<bool,bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst_
         assert (mapping.timestamp_ref2_ >= timestamp);
 
         if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
-            return {has_gbs, gbs};
+            return {};
 
         if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
-            return {has_gbs, gbs};
+            return {};
 
-        tie (has_gbs, gbs) = ref_chain_.groundBit(mapping.timestamp_ref1_);
+        auto gbs = ref_chain_.groundBit(mapping.dataid_ref1_);
 
-        if (!gbs)
-            tie (has_gbs, gbs) = ref_chain_.groundBit(mapping.timestamp_ref2_);
+        if (gbs.has_value() && *gbs)
+            return gbs;
+
+        return ref_chain_.groundBit(mapping.dataid_ref2_);
     }
 
-    return {has_gbs, gbs};
+    return {};
 }
 
-//// has gbs, gbs true
-pair<bool,bool> EvaluationTargetData::tstGroundBitInterpolated(const DataID& ref_id) const // true is on ground
+boost::optional<bool> EvaluationTargetData::tstGroundBitInterpolated(const DataID& ref_id) const // true is on ground
 {
-//    if (!eval_data_.tst_ground_bit_name_.size())
-//        return pair<bool,bool>(false, false);
-
     auto ref_timestamp = ref_chain_.timestampFromDataID(ref_id);
 
     DataMappingTimes times = tst_chain_.findDataMappingTimes(ref_timestamp);
 
-    if (times.has_other1_ && (ref_timestamp - times.timestamp_other1_).abs() < seconds(15)
-            && tst_chain_.hasGroundBit(times.dataid_other1_)
-            && get<1>(tst_chain_.groundBit(times.dataid_other1_)))
-        return pair<bool,bool> (true, true);
+    if (times.has_other1_ && (ref_timestamp - times.timestamp_other1_).abs() < seconds(InterpGroundBitMaxSeconds))
+    {
+        auto gbs = tst_chain_.groundBit(times.dataid_other1_);
 
-    if (times.has_other2_ && (ref_timestamp - times.timestamp_other2_).abs() < seconds(15)
-            && tst_chain_.hasGroundBit(times.timestamp_other2_))
-        return pair<bool,bool> (true, get<1>(tst_chain_.groundBit(times.timestamp_other2_)));
+        if (gbs.has_value() && *gbs)
+            return gbs;
+    }
+    //            && tst_chain_.hasGroundBit(times.dataid_other1_)
+    //            && get<1>(tst_chain_.groundBit(times.dataid_other1_)))
+    //        return pair<bool,bool> (true, true);
 
-    return pair<bool,bool>(false, false);
+    if (times.has_other2_ && (ref_timestamp - times.timestamp_other2_).abs() < seconds(InterpGroundBitMaxSeconds))
+    {
+        return tst_chain_.groundBit(times.dataid_other2_);
+    }
+    //            && tst_chain_.hasGroundBit(times.timestamp_other2_))
+    //        return pair<bool,bool> (true, get<1>(tst_chain_.groundBit(times.timestamp_other2_)));
+
+    return {};
 }
 
 
@@ -1120,18 +1127,23 @@ boost::optional<bool> EvaluationTargetData::availableRefGroundBit(
 
     DataID indexed_id = DataID(ts, index);
 
-    auto ref_gb = ref_chain_.groundBit(indexed_id);
+    auto gbs = ref_chain_.groundBit(indexed_id);
 
-    bool has_ground_bit = ref_gb.first;
-    bool ground_bit_set = ref_gb.second;
+    //    bool has_ground_bit = ref_gb.first;
+    //    bool ground_bit_set = ref_gb.second;
 
-    if (!ground_bit_set)
-        tie(has_ground_bit, ground_bit_set) = tstGroundBitInterpolated(ts);
+    if (gbs.has_value() && *gbs)
+        return gbs;
 
-    if (!has_ground_bit)
-        return {};
+    //    if (!ground_bit_set)
+    //        tie(has_ground_bit, ground_bit_set) = tstGroundBitInterpolated(ts);
 
-    return ground_bit_set;
+    return tstGroundBitInterpolated(ts);
+
+    //    if (!has_ground_bit)
+    //        return {};
+
+    //    return ground_bit_set;
 }
 
 boost::optional<bool> EvaluationTargetData::availableTstGroundBit(
@@ -1142,21 +1154,28 @@ boost::optional<bool> EvaluationTargetData::availableTstGroundBit(
 
     DataID indexed_id = DataID(ts, index);
 
-    bool has_ground_bit = tst_chain_.hasGroundBit(indexed_id);
-    bool ground_bit_set = false;
+    auto gbs = ref_chain_.groundBit(indexed_id);
 
-    if (has_ground_bit)
-        ground_bit_set = get<1>(tst_chain_.groundBit(indexed_id));
-    else
-        ground_bit_set = false;
+    if (gbs.has_value() && *gbs)
+        return gbs;
 
-    if (!ground_bit_set)
-        tie(has_ground_bit, ground_bit_set) = mappedRefGroundBit(indexed_id, d_max);
+    //    bool has_ground_bit = tst_chain_.hasGroundBit(indexed_id);
+    //    bool ground_bit_set = false;
 
-    if (!has_ground_bit)
-        return {};
+    //    if (has_ground_bit)
+    //        ground_bit_set = get<1>(tst_chain_.groundBit(indexed_id));
+    //    else
+    //        ground_bit_set = false;
 
-    return ground_bit_set;
+    //    if (!ground_bit_set)
+    //        tie(has_ground_bit, ground_bit_set) = mappedRefGroundBit(indexed_id, d_max);
+
+    return mappedRefGroundBit(indexed_id, d_max);
+
+    //    if (!has_ground_bit)
+    //        return {};
+
+    //    return ground_bit_set;
 }
 
 /**

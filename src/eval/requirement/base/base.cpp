@@ -141,23 +141,35 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
     ptime ref_lower, ref_upper;
     tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
 
-    bool has_ref_data = (!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())
-            && ((!ref_lower.is_not_a_date_time() && target_data.refChain().hasACID(ref_lower))
-                || (!ref_upper.is_not_a_date_time() && target_data.refChain().hasACID(ref_upper)));
+    boost::optional<std::string> tst_value, ref_value_lower, ref_value_upper;
 
-    bool has_tst_data = target_data.tstChain().hasACID(id);
+    tst_value = target_data.tstChain().acid(id);
+
+    if (!ref_lower.is_not_a_date_time())
+        ref_value_lower = target_data.refChain().acid((ref_lower));
+
+    if (!ref_upper.is_not_a_date_time())
+        ref_value_upper = target_data.refChain().acid((ref_upper));
+
+    //    bool has_ref_data = (!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())
+    //            && ((!ref_lower.is_not_a_date_time() && target_data.refChain().hasACID(ref_lower))
+    //                || (!ref_upper.is_not_a_date_time() && target_data.refChain().hasACID(ref_upper)));
+
+    bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
+
+    //    bool has_tst_data = target_data.tstChain().hasACID(id);
 
     if (!has_ref_data)
     {
-        if (has_tst_data)
+        if (tst_value.has_value())
             return {ValueComparisonResult::Different, "Tst data without ref value"};
         else
             return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
     }
 
-    if (has_tst_data)
+    if (tst_value.has_value())
     {
-        string value = target_data.tstChain().acid(id);
+        //string value = target_data.tstChain().acid(id);
 
         bool value_ok;
         bool lower_nok, upper_nok;
@@ -169,15 +181,15 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
         lower_nok = false;
         upper_nok = false;
 
-        if (!ref_lower.is_not_a_date_time() && target_data.refChain().hasACID((ref_lower)))
+        if (ref_value_lower.has_value())
         {
-            value_ok = target_data.refChain().acid(ref_lower) == value;
+            value_ok = *ref_value_lower == *tst_value;
             lower_nok = !value_ok;
         }
 
-        if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.refChain().hasACID((ref_upper)))
+        if (!value_ok && ref_value_upper.has_value())
         {
-            value_ok = target_data.refChain().acid(ref_upper) == value;
+            value_ok = *ref_value_upper == *tst_value;
             upper_nok = !value_ok;
         }
 
@@ -189,17 +201,16 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
 
             if (lower_nok)
             {
-                comment += " tst '" + target_data.tstChain().acid(id)
+                comment += " tst '" + *tst_value
                         +"' ref at " + Time::toString(ref_lower)
-                        + " '" + target_data.refChain().acid(ref_lower)
-                        + "'";
+                        + " '" + *ref_value_lower + "'";
             }
             else
             {
                 assert (upper_nok);
-                comment += " tst '" + target_data.tstChain().acid(id)
+                comment += " tst '" + *tst_value
                         +"' ref at " + Time::toString(ref_upper)
-                        + " '" + target_data.refChain().acid(ref_upper)
+                        + " '" + *ref_value_upper
                         + "'";
             }
 
@@ -219,24 +230,36 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
 
     tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
 
-    bool has_ref_data = (!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())
-            && ((!ref_lower.is_not_a_date_time() && target_data.refChain().hasACAD(ref_lower))
-                || (!ref_upper.is_not_a_date_time() && target_data.refChain().hasACAD(ref_upper)));
+    boost::optional<unsigned int> tst_value, ref_value_lower, ref_value_upper;
 
-    bool has_tst_data = target_data.tstChain().hasACAD(id);
+    tst_value = target_data.tstChain().acad(id);
+
+    if (!ref_lower.is_not_a_date_time())
+        ref_value_lower = target_data.refChain().acad((ref_lower));
+
+    if (!ref_upper.is_not_a_date_time())
+        ref_value_upper = target_data.refChain().acad((ref_upper));
+
+    //    bool has_ref_data = (!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())
+    //            && ((!ref_lower.is_not_a_date_time() && target_data.refChain().hasACAD(ref_lower))
+    //                || (!ref_upper.is_not_a_date_time() && target_data.refChain().hasACAD(ref_upper)));
+
+    //    bool has_tst_data = target_data.tstChain().hasACAD(id);
+
+    bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
 
     if (!has_ref_data)
     {
-        if (has_tst_data)
+        if (tst_value.has_value())
             return {ValueComparisonResult::Different, "Tst data without ref value"};
         else
             return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
 
     }
 
-    if (has_tst_data)
+    if (tst_value.has_value())
     {
-        unsigned int value = target_data.tstChain().acad(id);
+        //unsigned int value = target_data.tstChain().acad(id);
 
         bool value_ok;
         bool lower_nok, upper_nok;
@@ -248,15 +271,27 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
         lower_nok = false;
         upper_nok = false;
 
-        if (!ref_lower.is_not_a_date_time() && target_data.refChain().hasACAD(ref_lower))
+        //        if (!ref_lower.is_not_a_date_time() && target_data.refChain().hasACAD(ref_lower))
+        //        {
+        //            value_ok = target_data.refChain().acad(ref_lower) == value;
+        //            lower_nok = !value_ok;
+        //        }
+
+        //        if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.refChain().hasACAD(ref_upper))
+        //        {
+        //            value_ok = target_data.refChain().acad(ref_upper) == value;
+        //            upper_nok = !value_ok;
+        //        }
+
+        if (ref_value_lower.has_value())
         {
-            value_ok = target_data.refChain().acad(ref_lower) == value;
+            value_ok = *ref_value_lower == *tst_value;
             lower_nok = !value_ok;
         }
 
-        if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.refChain().hasACAD(ref_upper))
+        if (!value_ok && ref_value_upper.has_value())
         {
-            value_ok = target_data.refChain().acad(ref_upper) == value;
+            value_ok = *ref_value_upper == *tst_value;
             upper_nok = !value_ok;
         }
 
@@ -268,18 +303,16 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
 
             if (lower_nok)
             {
-                comment += " tst value '" + String::hexStringFromInt(target_data.tstChain().acad(id))
+                comment += " tst value '" + String::hexStringFromInt(*tst_value)
                         +"' ref value at " + Time::toString(ref_lower)
-                        + "  '" + String::hexStringFromInt(target_data.refChain().acad(ref_lower))
-                        + "'";
+                        + "  '" + String::hexStringFromInt(*ref_value_lower) + "'";
             }
             else
             {
                 assert (upper_nok);
-                comment += " tst value '" + String::hexStringFromInt(target_data.tstChain().acad(id))
+                comment += " tst value '" + String::hexStringFromInt(*tst_value)
                         +"' ref value at " + Time::toString(ref_upper)
-                        + "  '" + String::hexStringFromInt(target_data.refChain().acad(ref_upper))
-                        + "'";
+                        + "  '" + String::hexStringFromInt(*ref_value_upper) + "'";
             }
 
             return {ValueComparisonResult::Different, comment};
@@ -296,23 +329,35 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeA (
     ptime ref_lower, ref_upper;
     tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
 
-    bool has_ref_data = (!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())
-            && ((!ref_lower.is_not_a_date_time() && target_data.refChain().hasModeA(ref_lower))
-                || (!ref_upper.is_not_a_date_time() && target_data.refChain().hasModeA(ref_upper)));
+    //    bool has_ref_data = (!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())
+    //            && ((!ref_lower.is_not_a_date_time() && target_data.refChain().hasModeA(ref_lower))
+    //                || (!ref_upper.is_not_a_date_time() && target_data.refChain().hasModeA(ref_upper)));
 
-    bool has_tst_data = target_data.tstChain().hasModeA(id);
+    boost::optional<unsigned int> tst_value, ref_value_lower, ref_value_upper;
+
+    tst_value = target_data.tstChain().modeA(id);
+
+    if (!ref_lower.is_not_a_date_time())
+        ref_value_lower = target_data.refChain().modeA((ref_lower));
+
+    if (!ref_upper.is_not_a_date_time())
+        ref_value_upper = target_data.refChain().modeA((ref_upper));
+
+    //    bool has_tst_data = target_data.tstChain().hasModeA(id);
+
+    bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
 
     if (!has_ref_data)
     {
-        if (has_tst_data)
+        if (tst_value.has_value())
             return {ValueComparisonResult::Different, "Tst data without ref value"};
         else
             return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
     }
 
-    if (has_tst_data)
+    if (tst_value.has_value())
     {
-        unsigned int code = target_data.tstChain().modeA(id);
+        //unsigned int code = target_data.tstChain().modeA(id);
 
         bool value_ok;
         bool lower_nok, upper_nok;
@@ -324,15 +369,27 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeA (
         lower_nok = false;
         upper_nok = false;
 
-        if (!ref_lower.is_not_a_date_time() && target_data.refChain().hasModeA(ref_lower))
+        //        if (!ref_lower.is_not_a_date_time() && target_data.refChain().hasModeA(ref_lower))
+        //        {
+        //            value_ok = target_data.refChain().modeA(ref_lower) == code;
+        //            lower_nok = !value_ok;
+        //        }
+
+        //        if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.refChain().hasModeA(ref_upper))
+        //        {
+        //            value_ok = target_data.refChain().modeA(ref_upper) == code;
+        //            upper_nok = !value_ok;
+        //        }
+
+        if (ref_value_lower.has_value())
         {
-            value_ok = target_data.refChain().modeA(ref_lower) == code;
+            value_ok = *ref_value_lower == *tst_value;
             lower_nok = !value_ok;
         }
 
-        if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.refChain().hasModeA(ref_upper))
+        if (!value_ok && ref_value_upper.has_value())
         {
-            value_ok = target_data.refChain().modeA(ref_upper) == code;
+            value_ok = *ref_value_upper == *tst_value;
             upper_nok = !value_ok;
         }
 
@@ -344,18 +401,16 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeA (
 
             if (lower_nok)
             {
-                comment += " tst value '" + String::octStringFromInt(code, 4, '0')
+                comment += " tst value '" + String::octStringFromInt(*tst_value, 4, '0')
                         +"' ref value at " + Time::toString(ref_lower)+ "  '"
-                        + String::octStringFromInt(target_data.refChain().modeA(ref_lower), 4, '0')
-                        + "'";
+                        + String::octStringFromInt(*ref_value_lower, 4, '0')+ "'";
             }
             else
             {
                 assert (upper_nok);
-                comment += " tst value '" + String::octStringFromInt(code, 4, '0')
+                comment += " tst value '" + String::octStringFromInt(*tst_value, 4, '0')
                         +"' ref value at " + Time::toString(ref_upper)+ "  '"
-                        + String::octStringFromInt(target_data.refChain().modeA(ref_upper), 4, '0')
-                        + "'";
+                        + String::octStringFromInt(*ref_value_upper, 4, '0') + "'";
             }
 
             return {ValueComparisonResult::Different, comment};
@@ -369,72 +424,83 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeC (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
         time_duration max_ref_time_diff, float max_val_diff)
 {
-    if (target_data.tstChain().hasModeC(id))
+    boost::optional<float> tst_value, ref_value_lower, ref_value_upper;
+
+    tst_value = target_data.tstChain().modeC(id);
+
+    if (!tst_value.has_value())
+        return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
+
+    //int code = target_data.tstChain().modeC(id);
+
+    ptime ref_lower, ref_upper;
+    tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
+
+    bool value_ok;
+    bool lower_nok, upper_nok;
+
+    if (!ref_lower.is_not_a_date_time())
+        ref_value_lower = target_data.refChain().modeC((ref_lower));
+
+    if (!ref_upper.is_not_a_date_time())
+        ref_value_upper = target_data.refChain().modeC((ref_upper));
+
+    bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
+
+    if (!has_ref_data)
+        return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+
+    value_ok = false;
+
+    lower_nok = false;
+    upper_nok = false;
+
+//    if (!ref_lower.is_not_a_date_time() && target_data.refChain().hasModeC(ref_lower))
+//    {
+//        value_ok = fabs(target_data.refChain().modeC(ref_lower) - code) <= max_val_diff;
+//        lower_nok = !value_ok;
+//    }
+
+//    if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.refChain().hasModeC(ref_upper))
+//    {
+//        value_ok = fabs(target_data.refChain().modeC(ref_upper) - code) <= max_val_diff;
+//        upper_nok = !value_ok;
+//    }
+
+    if (ref_value_lower.has_value())
     {
-        int code = target_data.tstChain().modeC(id);
+        value_ok = fabs(*ref_value_lower - *tst_value) <= max_val_diff;
+        lower_nok = !value_ok;
+    }
 
-        ptime ref_lower, ref_upper;
-        tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
+    if (!value_ok && ref_value_upper.has_value())
+    {
+        value_ok = fabs(*ref_value_upper - *tst_value) <= max_val_diff;
+        upper_nok = !value_ok;
+    }
 
-        bool value_ok;
-        bool lower_nok, upper_nok;
+    if (value_ok)
+        return {ValueComparisonResult::Same, "OK"};
+    else
+    {
+        string comment = "Not OK:";
 
-        if ((!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())) // ref times possible
+        if (lower_nok)
         {
-            if ((!ref_lower.is_not_a_date_time() && target_data.refChain().hasModeC(ref_lower))
-                    || (!ref_upper.is_not_a_date_time() && target_data.refChain().hasModeC(ref_upper))) // ref value(s) exist
-            {
-                value_ok = false;
-
-                lower_nok = false;
-                upper_nok = false;
-
-                if (!ref_lower.is_not_a_date_time() && target_data.refChain().hasModeC(ref_lower))
-                {
-                    value_ok = fabs(target_data.refChain().modeC(ref_lower) - code) <= max_val_diff;
-                    lower_nok = !value_ok;
-                }
-
-                if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.refChain().hasModeC(ref_upper))
-                {
-                    value_ok = fabs(target_data.refChain().modeC(ref_upper) - code) <= max_val_diff;
-                    upper_nok = !value_ok;
-                }
-
-                if (value_ok)
-                    return {ValueComparisonResult::Same, "OK"};
-                else
-                {
-                    string comment = "Not OK:";
-
-                    if (lower_nok)
-                    {
-                        comment += " tst value '" + to_string(code)
-                                +"' ref value at " + Time::toString(ref_lower)+ "  '"
-                                + to_string(target_data.refChain().modeC(ref_lower))
-                                + "'";
-                    }
-                    else
-                    {
-                        assert (upper_nok);
-                        comment += " tst value '" + to_string(code)
-                                +"' ref value at " + Time::toString(ref_upper)+ "  '"
-                                + to_string(target_data.refChain().modeC(ref_upper))
-                                + "'";
-                    }
-
-                    return {ValueComparisonResult::Different, comment};
-                }
-            }
-            else
-                return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
-
+            comment += " tst value '" + to_string(*tst_value)
+                    +"' ref value at " + Time::toString(ref_lower)+ "  '"
+                    + to_string(*ref_value_lower) + "'";
         }
         else
-            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+        {
+            assert (upper_nok);
+            comment += " tst value '" + to_string(*tst_value)
+                    +"' ref value at " + Time::toString(ref_upper)+ "  '"
+                    + to_string(*ref_value_upper) + "'";
+        }
+
+        return {ValueComparisonResult::Different, comment};
     }
-    else
-        return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
 }
 
 }

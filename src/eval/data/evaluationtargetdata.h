@@ -133,12 +133,13 @@ public:
     std::pair<dbContent::TargetVelocity, bool> mappedRefSpeed(
             const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const;
 
-    std::pair<bool,bool> mappedRefGroundBit(
-            const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const; // has gbs, gbs true
+    boost::optional<bool> mappedRefGroundBit(
+            const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const; // gbs
 
     // test
-    std::pair<bool,bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& ref_id) const; // has gbs, gbs true
+    boost::optional<bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& ref_id) const; // gds
 
+    // TODO d_max not used
     boost::optional<bool> availableRefGroundBit(const dbContent::TargetReport::Chain::DataID& id,
                                                 const boost::posix_time::time_duration& d_max) const;
     boost::optional<bool> availableTstGroundBit(const dbContent::TargetReport::Chain::DataID& id,

@@ -11,7 +11,7 @@ namespace CalculateReferences {
 class Target
 {
 public:
-    typedef std::tuple<std::string, unsigned int, unsigned int> TargetKey;
+    typedef std::tuple<std::string, unsigned int, unsigned int> TargetKey; // dbcontent_name, ds_id, line_id
 
     Target(unsigned int utn, std::shared_ptr<dbContent::Cache> cache);
 
