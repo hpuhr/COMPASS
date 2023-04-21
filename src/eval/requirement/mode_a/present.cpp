@@ -180,8 +180,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
 
         if ((!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())) // ref times possible
         {
-            if ((!ref_lower.is_not_a_date_time() && target_data.tstChain().modeA(ref_lower).has_value())
-                    || (!ref_upper.is_not_a_date_time() && target_data.tstChain().modeA(ref_upper).has_value()))
+            if ((!ref_lower.is_not_a_date_time() && target_data.refChain().modeA(ref_lower).has_value())
+                    || (!ref_upper.is_not_a_date_time() && target_data.refChain().modeA(ref_upper).has_value()))
                 // ref value(s) exist
             {
                 code_present_ref = true;
