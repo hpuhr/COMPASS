@@ -193,13 +193,13 @@ void ReconstructorKalman::init(const Measurement& mm)
 
 /**
 */
-bool ReconstructorKalman::reinitIfNeeded(const Measurement& mm)
+bool ReconstructorKalman::reinitIfNeeded(const Measurement& mm, const std::string& data_info)
 {
     const auto& last_ref = lastReference();
 
     if (needsReinit(last_ref, mm))
     {
-        loginf << "Reinitializing kalman filter at t = " << mm.t;
+        loginf << data_info << ": Reinitializing kalman filter at t = " << mm.t;
 
         init(mm);
         return true;
@@ -236,13 +236,13 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
         const auto& mm = measurements[ i ];
 
         //reinit?
-        if (reinitIfNeeded(mm))
+        if (reinitIfNeeded(mm, data_info))
             continue;
 
         double dt = timestep(mm);
         if (dt < base_config_.min_dt)
         {
-            loginf << "Skipping very small timestep of " << dt << " @ mm=" << i << " t=" << mm.t;
+            loginf << data_info << ": Skipping very small timestep of " << dt << " @ mm=" << i << " t=" << mm.t;
             continue;
         }
 
@@ -251,7 +251,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
         if (!ok)
         {
             //@TODO: what to do?
-            logerr << "Kalman step failed @ mm=" << i << " t=" << mm.t;
+            logerr << data_info << ": Kalman step failed @ mm=" << i << " t=" << mm.t;
             return {};
         }
 

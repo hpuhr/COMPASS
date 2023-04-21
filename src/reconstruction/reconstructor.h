@@ -40,6 +40,12 @@ namespace reconstruction
 class Reconstructor
 {
 public:
+    enum class CoordConversion
+    {
+        NoConversion = 0,
+        WGS84ToCart
+    };
+
     enum class CoordSystem
     {
         WGS84 = 0,
@@ -58,14 +64,17 @@ public:
 
     const dbContent::TargetReport::Chain* chainOfReference(const Reference& ref) const;
 
-    void setInputCoordSys(CoordSystem coord_sys) { coord_sys_ = coord_sys; }
+    void setCoordConversion(CoordConversion coord_conv) { coord_conv_ = coord_conv; }
+
+    static std::vector<std::vector<Measurement>> splitMeasurements(const std::vector<Measurement>& measurements,
+                                                                   double max_dt);
 
 protected:
     virtual boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements, 
-                                                                     const std::string& data_info = "") = 0;
+                                                                     const std::string& data_info) = 0;
 
     static double timestep(const Measurement& mm0, const Measurement& mm1);
-    static double distance(const Measurement& mm0, const Measurement& mm1);
+    static double distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys = CoordSystem::Cart);
 
 private:
     void postprocessMeasurements();
@@ -80,7 +89,7 @@ private:
 
     uint32_t source_cnt_ = 0;
 
-    CoordSystem coord_sys_ = CoordSystem::WGS84;
+    CoordConversion coord_conv_ = CoordConversion::WGS84ToCart;
 };
 
 } // namespace reconstruction

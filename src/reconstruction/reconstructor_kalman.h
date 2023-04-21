@@ -71,7 +71,7 @@ public:
 
 protected:
     boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements,
-                                                             const std::string& data_info = "") override final;
+                                                             const std::string& data_info) override final;
     virtual void init_impl() {};
     virtual kalman::KalmanState kalmanState() const = 0;
     virtual bool kalmanStep(double dt, const Measurement& mm) = 0;
@@ -99,7 +99,7 @@ private:
 
     bool needsReinit(const Reference& ref, const Measurement& mm) const;
     void init(const Measurement& mm);
-    bool reinitIfNeeded(const Measurement& mm);
+    bool reinitIfNeeded(const Measurement& mm, const std::string& data_info);
 
     double timestep(const Measurement& mm) const;
 
