@@ -122,8 +122,8 @@ void Reconstructor::postprocessMeasurements()
     //sort measurements by timestamp
     std::sort(measurements_.begin(), measurements_.end(), [&] (const Measurement& mm0, const Measurement& mm1) { return mm0.t < mm1.t; });
 
-    //compute cartesian positions from lat lon
-    if (coord_sys_ == CoordSystem::WGS84)
+    //convert coordinates if needed
+    if (coord_conv_ == CoordConversion::WGS84ToCart)
     {
         double lat_min = measurements_[ 0 ].lat;
         double lon_min = measurements_[ 0 ].lon;
@@ -165,9 +165,11 @@ void Reconstructor::postprocessMeasurements()
 */
 void Reconstructor::postprocessReferences(std::vector<Reference>& references)
 {
-    if (coord_sys_ == CoordSystem::WGS84 && trafo_bwd_)
+    //convert coordinates back if needed
+    if (coord_conv_ == CoordConversion::WGS84ToCart)
     {
-        //compute lat lon from cartesian positions
+        assert(trafo_bwd_);
+
         for (auto& ref : references)
         {
             ref.lon = ref.x;
@@ -194,7 +196,7 @@ boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::st
         postprocessMeasurements();
 
         //reconstruct
-        auto result = reconstruct_impl(measurements_, data_info);
+        auto result = reconstruct_impl(measurements_, dinfo);
 
         //postprocess result references
         if (result.has_value())
@@ -223,12 +225,54 @@ double Reconstructor::timestep(const Measurement& mm0, const Measurement& mm1)
 
 /**
 */
-double Reconstructor::distance(const Measurement& mm0, const Measurement& mm1)
+double Reconstructor::distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys)
 {
+    if (coord_sys == CoordSystem::WGS84)
+        return (Eigen::Vector2d(mm0.lat, mm0.lon) - Eigen::Vector2d(mm1.lat, mm1.lon)).norm();
+
     if (mm0.z.has_value() && mm1.z.has_value())
         return (Eigen::Vector3d(mm0.x, mm0.y, mm0.z.value()) - Eigen::Vector3d(mm1.x, mm1.y, mm1.z.value())).norm();
     
     return (Eigen::Vector2d(mm0.x, mm0.y) - Eigen::Vector2d(mm1.x, mm1.y)).norm();
 }
 
+/**
+*/
+std::vector<std::vector<Measurement>> Reconstructor::splitMeasurements(const std::vector<Measurement>& measurements,
+                                                                       double max_dt)
+{
+    size_t n = measurements.size();
+    if (n == 0)
+        return {};
+
+    std::vector<std::vector<Measurement>> split_measurements;
+    std::vector<Measurement> current;
+
+    current.push_back(measurements[ 0 ]);
+
+    for (size_t i = 1; i < n; ++i)
+    {
+        const auto& mm0 = measurements[i - 1];
+        const auto& mm1 = measurements[i    ];
+
+        double dt = timestep(mm0, mm1);
+
+        if (dt > max_dt)
+        {
+            if (current.size() > 0)
+            {
+                split_measurements.push_back(current);
+                current.clear();
+            }
+        }
+
+        current.push_back(mm1);
+    }
+
+    if (current.size() > 0)
+        split_measurements.push_back(current);
+
+    return split_measurements;
 }
+
+} // namespace reconstruction
