@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTIDENTIFICATIONFALSECONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/identification/false.h"
 #include "eval/requirement/identification/identificationfalseconfigwidget.h"
 
@@ -30,7 +30,7 @@ class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
-class IdentificationFalseConfig : public BaseConfig
+class IdentificationFalseConfig : public ProbabilityBaseConfig
 {
 public:
     IdentificationFalseConfig(const std::string& class_id, const std::string& instance_id,

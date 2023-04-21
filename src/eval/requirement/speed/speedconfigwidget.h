@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTSPEEDCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTSPEEDCONFIGWIDGET_H
 
-#include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
 class ComparisonTypeComboBox;
 
@@ -31,7 +31,7 @@ namespace EvaluationRequirement
 {
 class SpeedConfig;
 
-class SpeedConfigWidget : public BaseConfigWidget
+class SpeedConfigWidget : public ProbabilityBaseConfigWidget
 {
     Q_OBJECT
 

@@ -34,7 +34,7 @@ namespace EvaluationRequirement
 IdentificationCorrectConfig::IdentificationCorrectConfig(
         const std::string& class_id, const std::string& instance_id,
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
     registerParameter("require_correctness_of_all", &require_correctness_of_all_, false);
 

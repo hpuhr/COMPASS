@@ -40,7 +40,7 @@ Speed::Speed(
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         float threshold_value, bool use_percent_if_higher, float threshold_percent,
         COMPARISON_TYPE threshold_value_check_type, bool failed_values_of_interest)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       threshold_value_(threshold_value),
       use_percent_if_higher_(use_percent_if_higher), threshold_percent_(threshold_percent),
       threshold_value_check_type_(threshold_value_check_type),

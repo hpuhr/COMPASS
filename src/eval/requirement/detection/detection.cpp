@@ -40,7 +40,8 @@ Detection::Detection(
         float update_interval_s, bool use_min_gap_length, float min_gap_length_s,
         bool use_max_gap_length, float max_gap_length_s, bool invert_prob,
         bool use_miss_tolerance, float miss_tolerance_s)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man), update_interval_s_(update_interval_s),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
+      update_interval_s_(update_interval_s),
       use_min_gap_length_(use_min_gap_length), min_gap_length_s_(min_gap_length_s),
       use_max_gap_length_(use_max_gap_length), max_gap_length_s_(max_gap_length_s), invert_prob_(invert_prob),
       use_miss_tolerance_(use_miss_tolerance), miss_tolerance_s_(miss_tolerance_s)

@@ -31,7 +31,7 @@ namespace EvaluationRequirement
 {
 
 PositionLatencyConfigWidget::PositionLatencyConfigWidget(PositionLatencyConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     assert (prob_edit_);
     prob_edit_->setToolTip("Probability of acceptable position latency");

@@ -18,14 +18,13 @@
 #ifndef EVALUATIONREQUIREMENTRACKANGLE_H
 #define EVALUATIONREQUIREMENTRACKANGLE_H
 
-#include "eval/requirement/base/base.h"
-#include "eval/requirement/trackangle/detail.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "transformation.h"
 
 namespace EvaluationRequirement
 {
 
-class TrackAngle : public Base
+class TrackAngle : public ProbabilityBase
 {
 public:
     TrackAngle(

@@ -18,13 +18,12 @@
 #ifndef EVALUATIONREQUIREMENSPEED_H
 #define EVALUATIONREQUIREMENSPEED_H
 
-#include "eval/requirement/base/base.h"
-#include "eval/requirement/speed/detail.h"
+#include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
-class Speed : public Base
+class Speed : public ProbabilityBase
 {
 public:
     Speed(

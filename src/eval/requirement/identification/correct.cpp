@@ -36,7 +36,7 @@ IdentificationCorrect::IdentificationCorrect(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         bool require_correctness_of_all, bool use_mode_a, bool use_ms_ta, bool use_ms_ti)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       require_correctness_of_all_(require_correctness_of_all),
       use_mode_a_(use_mode_a), use_ms_ta_(use_ms_ta), use_ms_ti_(use_ms_ti)
 {

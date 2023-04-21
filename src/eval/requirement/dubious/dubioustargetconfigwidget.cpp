@@ -28,7 +28,7 @@ namespace EvaluationRequirement
 {
 
 DubiousTargetConfigWidget::DubiousTargetConfigWidget(DubiousTargetConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     // min comp time
     min_comp_time_edit_ = new QLineEdit(QString::number(config().minimumComparisonTime()));

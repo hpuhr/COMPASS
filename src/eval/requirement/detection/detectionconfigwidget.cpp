@@ -30,7 +30,7 @@ namespace EvaluationRequirement
 {
 
 DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     assert (prob_edit_);
     prob_edit_->setToolTip("Probability of detection or miss (inverted probability)");

@@ -19,7 +19,6 @@
 #define EVALUATIONREQUIREMENT_H
 
 #include "dbcontent/target/targetreportchain.h"
-#include "eval/requirement/base/comparisontype.h"
 #include "viewpoint.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -56,7 +55,7 @@ class Base
 {
 public:
     Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
+         EvaluationManager& eval_man);
     virtual ~Base();
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -69,13 +68,8 @@ public:
     std::string shortname() const;
     std::string groupName() const;
 
-    float prob() const;
-    unsigned int getNumProbDecimals() const;
-
-    COMPARISON_TYPE probCheckType() const;
-
-    std::string getConditionStr () const;
-    std::string getResultConditionStr (float prob) const;
+    virtual std::string getConditionStr () const = 0;
+    virtual std::string getResultConditionStr (float prob) const = 0;
 
 protected:
 
@@ -83,12 +77,7 @@ protected:
     std::string short_name_;
     std::string group_name_;
 
-    float prob_ {0};
-    COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EUQAL};
-
     EvaluationManager& eval_man_;
-
-    bool compareValue (double val, double threshold, COMPARISON_TYPE check_type);
 
     std::pair<ValueComparisonResult, std::string> compareTi (
             const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,

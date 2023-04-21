@@ -4,10 +4,12 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-#        "${CMAKE_CURRENT_LIST_DIR}/detail.h"
         "${CMAKE_CURRENT_LIST_DIR}/distanceconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/distanceconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/distance.h"
+        #"${CMAKE_CURRENT_LIST_DIR}/distancerms.h"
+        #"${CMAKE_CURRENT_LIST_DIR}/distancermsconfig.h"
+        #"${CMAKE_CURRENT_LIST_DIR}/distancermsconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/along.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongconfigwidget.h"
@@ -21,6 +23,9 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/distanceconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/distanceconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/distance.cpp"
+        #"${CMAKE_CURRENT_LIST_DIR}/distancerms.cpp"
+        #"${CMAKE_CURRENT_LIST_DIR}/distancermsconfig.cpp"
+        #"${CMAKE_CURRENT_LIST_DIR}/distancermsconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/along.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/alongconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/alongconfigwidget.cpp"

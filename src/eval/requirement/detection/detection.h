@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTDETECTION_H
 #define EVALUATIONREQUIREMENTDETECTION_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
@@ -57,7 +57,7 @@ public:
     dbContent::TargetPosition pos_last_;
 };
 
-class Detection : public Base
+class Detection : public ProbabilityBase
 {
 public:
     Detection(

@@ -24,8 +24,7 @@ public slots:
     void changedNameSlot();
     void changedShortNameSlot();
     void changedCommentSlot();
-    void changedProbabilitySlot(const QString& value);
-    void changedTypeSlot();
+
 
 public:
     BaseConfigWidget(BaseConfig& cfg);
@@ -35,9 +34,6 @@ protected:
     BaseConfig& config_;
 
     QFormLayout* form_layout_ {nullptr};
-
-    QLineEdit* prob_edit_ {nullptr};
-    ComparisonTypeComboBox* check_type_box_ {nullptr};
 };
 
 }

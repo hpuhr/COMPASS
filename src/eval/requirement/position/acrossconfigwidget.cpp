@@ -28,7 +28,7 @@ namespace EvaluationRequirement
 {
 
 PositionAcrossConfigWidget::PositionAcrossConfigWidget(PositionAcrossConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     assert (prob_edit_);
     prob_edit_->setToolTip("Probability of acceptable across-track position");

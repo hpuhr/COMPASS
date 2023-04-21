@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTDUBIOUSTARGET_H
 #define EVALUATIONREQUIREMENTDUBIOUSTARGET_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
@@ -31,7 +31,7 @@
 namespace EvaluationRequirement
 {
 
-class DubiousTarget : public Base
+class DubiousTarget : public ProbabilityBase
 {
 public:
     DubiousTarget(const std::string& name, const std::string& short_name, const std::string& group_name,

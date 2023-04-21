@@ -58,12 +58,6 @@ public:
     std::string shortName() const;
     void shortName(const std::string& short_name);
 
-    float prob() const;
-    void prob(float value);
-
-    COMPARISON_TYPE probCheckType() const;
-    void probCheckType(const COMPARISON_TYPE& prob_type);
-
     virtual EvaluationStandardTreeItem *child(int row) override;
     virtual int childCount() const override;
     virtual int columnCount() const override;
@@ -86,9 +80,6 @@ protected:
     std::string name_;
     std::string short_name_;
     std::string comment_;
-
-    float prob_ {0};
-    COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EUQAL};
 
     std::unique_ptr<BaseConfigWidget> widget_ {nullptr};
 

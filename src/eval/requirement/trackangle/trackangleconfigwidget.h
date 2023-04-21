@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTTRACKANGLECONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTTRACKANGLECONFIGWIDGET_H
 
-#include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
 class ComparisonTypeComboBox;
 
@@ -31,7 +31,7 @@ namespace EvaluationRequirement
 {
 class TrackAngleConfig;
 
-class TrackAngleConfigWidget : public BaseConfigWidget
+class TrackAngleConfigWidget : public ProbabilityBaseConfigWidget
 {
     Q_OBJECT
 
