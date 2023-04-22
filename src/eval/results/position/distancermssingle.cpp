@@ -67,8 +67,6 @@ void SinglePositionDistanceRMS::update()
 
     assert (values_.size() == num_passed_ + num_failed_);
 
-    prob_.reset();
-
     unsigned int num_distances = values_.size();
 
     if (num_distances)
@@ -93,7 +91,7 @@ void SinglePositionDistanceRMS::update()
         value_var_ = 0;
     }
 
-    result_usable_ = prob_.has_value();
+    result_usable_ = num_distances != 0;
 
     updateUseFromTarget();
 }
@@ -150,11 +148,6 @@ void SinglePositionDistanceRMS::addTargetDetailsToTable (
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
-    QVariant p_min_var;
-
-    if (prob_.has_value())
-        p_min_var = roundf(prob_.value() * 10000.0) / 100.0;
-
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
                  target_->acidsStr().c_str(), target_->acadsStr().c_str(),
@@ -181,11 +174,6 @@ void SinglePositionDistanceRMS::addTargetDetailsToTableADSB (
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
-
-    QVariant prob_var;
-
-    if (prob_.has_value())
-        prob_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
     // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK", "MOPS", "NUCp/NIC", "NACp"
