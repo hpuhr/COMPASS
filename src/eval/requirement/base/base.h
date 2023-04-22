@@ -69,7 +69,6 @@ public:
     std::string groupName() const;
 
     virtual std::string getConditionStr () const = 0;
-    virtual std::string getResultConditionStr (float prob) const = 0;
 
 protected:
 

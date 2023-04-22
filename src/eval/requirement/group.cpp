@@ -19,6 +19,7 @@
 #include "evaluationstandard.h"
 #include "eval/requirement/detection/detectionconfig.h"
 #include "eval/requirement/position/distanceconfig.h"
+#include "eval/requirement/position/distancermsconfig.h"
 #include "eval/requirement/position/alongconfig.h"
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/latencyconfig.h"
@@ -57,6 +58,7 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementModeCPresentConfig", "Mode C Present"},
     {"EvaluationRequirementModeCFalseConfig", "Mode C False"},
     {"EvaluationRequirementPositionDistanceConfig", "Position Distance"},
+    {"EvaluationRequirementPositionDistanceRMSConfig", "Position Distance RMS"},
     {"EvaluationRequirementPositionAlongConfig", "Position Along"},
     {"EvaluationRequirementPositionAcrossConfig", "Position Across"},
     {"EvaluationRequirementPositionLatencyConfig", "Position Latency"},
@@ -140,6 +142,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::PositionDistanceConfig* config =
                 new EvaluationRequirement::PositionDistanceConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementPositionDistanceRMSConfig")
+    {
+        EvaluationRequirement::PositionDistanceRMSConfig* config =
+                new EvaluationRequirement::PositionDistanceRMSConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
