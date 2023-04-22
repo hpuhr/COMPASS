@@ -79,9 +79,14 @@ void JoinedPositionDistanceRMS::update()
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-    prob_.reset();
+    //prob_.reset();
 
     vector<double> all_values = values();
+
+    if (all_values.size() != num_failed_ + num_passed_)
+        logerr << "JoinedPositionDistanceRMS: update: wrong size all_values.size()" << all_values.size()
+               << " num_failed_ " << num_failed_ << " num_passed_ " << num_passed_;
+
     assert (all_values.size() == num_failed_ + num_passed_);
     unsigned int num_distances = all_values.size();
 
