@@ -163,9 +163,11 @@ public:
 
     boost::optional<std::string> acid(const DataID& id) const;
 
-    boost::optional<unsigned int> modeA(const DataID& id) const; // only if set, is v, not g
+    boost::optional<unsigned int> modeA(
+            const DataID& id, bool ignore_invalid = true, bool ignore_garbled = true) const; // only if set
 
-    boost::optional<float> modeC(const DataID& id) const; // only if set, is v, not g
+    boost::optional<float> modeC(
+            const DataID& id, bool ignore_invalid = true, bool ignore_garbled = true) const; // only if set
 
     boost::optional<unsigned int> acad(const DataID& id) const;
 

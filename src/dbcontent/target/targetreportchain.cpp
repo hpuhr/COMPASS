@@ -333,7 +333,7 @@ boost::optional<std::string> Chain::acid(const DataID& id) const
     return boost::trim_copy(callsign_vec.get(index_ext)); // remove spaces
 }
 
-boost::optional<unsigned int> Chain::modeA(const DataID& id) const
+boost::optional<unsigned int> Chain::modeA(const DataID& id, bool ignore_invalid, bool ignore_garbled) const
 {
     auto index = indexFromDataID(id);
 
@@ -345,7 +345,7 @@ boost::optional<unsigned int> Chain::modeA(const DataID& id) const
     if (modea_vec.isNull(index_ext))
         return {};
 
-    if (cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_v_))
+    if (ignore_invalid && cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_v_))
     {
         NullableVector<bool>& modea_v_vec = cache_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_v_);
 
@@ -353,7 +353,7 @@ boost::optional<unsigned int> Chain::modeA(const DataID& id) const
             return {};
     }
 
-    if (cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_g_))
+    if (ignore_garbled && cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_g_))
     {
         NullableVector<bool>& modea_g_vec = cache_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_g_);
 
@@ -366,7 +366,7 @@ boost::optional<unsigned int> Chain::modeA(const DataID& id) const
     return modea_vec.get(index_ext);
 }
 
-boost::optional<float> Chain::modeC(const DataID& id) const
+boost::optional<float> Chain::modeC(const DataID& id, bool ignore_invalid, bool ignore_garbled) const
 {
     auto index = indexFromDataID(id);
 
@@ -386,7 +386,7 @@ boost::optional<float> Chain::modeC(const DataID& id) const
     if (modec_vec.isNull(index_ext))
         return {};
 
-    if (cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_v_))
+    if (ignore_invalid && cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_v_))
     {
         NullableVector<bool>& mc_v_vec = cache_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_v_);
 
@@ -394,7 +394,7 @@ boost::optional<float> Chain::modeC(const DataID& id) const
             return {};
     }
 
-    if (cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_g_))
+    if (ignore_garbled && cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_g_))
     {
         NullableVector<bool>& modec_g_vec = cache_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_g_);
 
