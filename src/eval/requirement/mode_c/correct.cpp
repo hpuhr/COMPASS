@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/identification/correct.h"
-#include "eval/results/identification/correctsingle.h"
+#include "eval/requirement/mode_c/correct.h"
+#include "eval/results/mode_c/correctsingle.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -31,33 +31,32 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-IdentificationCorrect::IdentificationCorrect(
+ModeCCorrect::ModeCCorrect(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-        bool require_correctness_of_all, bool use_mode_a, bool use_ms_ta, bool use_ms_ti)
+        float max_distance_ft)
     : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
-      require_correctness_of_all_(require_correctness_of_all),
-      use_mode_a_(use_mode_a), use_ms_ta_(use_ms_ta), use_ms_ti_(use_ms_ti)
+      max_distance_ft_(max_distance_ft)
 {
 
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_;
+    logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_;
 
-    typedef EvaluationRequirementResult::SingleIdentificationCorrect Result;
+    typedef EvaluationRequirementResult::SingleModeCCorrect Result;
     typedef EvaluationDetail                                         Detail;
     typedef Result::EvaluationDetails                                Details;
 
     if (target_data.isPrimaryOnly())
     {
-        logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
                << " ignored since primary only";
 
-        return make_shared<EvaluationRequirementResult::SingleIdentificationCorrect>(
+        return make_shared<EvaluationRequirementResult::SingleModeCCorrect>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                     eval_man_, Details(), 0, 0, 0, 0, 0, 0, 0);
     }
@@ -91,24 +90,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
     bool skip_detail;
 
-    ValueComparisonResult cmp_res_ti;
-    string cmp_res_ti_comment;
-    bool ti_no_ref;
-    bool ti_correct_failed;
+    ValueComparisonResult cmp_res_mc;
+    string cmp_res_mc_comment;
+    bool mc_no_ref;
+    bool mc_correct_failed;
 
-    ValueComparisonResult cmp_res_ta;
-    string cmp_res_ta_comment;
-    bool ta_no_ref;
-    bool ta_correct_failed;
-
-    ValueComparisonResult cmp_res_ma;
-    string cmp_res_ma_comment;
-    bool ma_no_ref;
-    bool ma_correct_failed;
-
-    bool all_no_ref;
-    bool any_correct;
-    bool all_correct;
     bool result_ok;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -194,93 +180,34 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         }
         ++num_pos_inside;
 
-        any_correct = false;
-        all_correct = true;
-        all_no_ref = true;
+        tie(cmp_res_mc, cmp_res_mc_comment) = compareModeC(tst_id, target_data, max_ref_time_diff, max_distance_ft_);
 
-        if (use_ms_ti_)
+        mc_no_ref = cmp_res_mc == ValueComparisonResult::Unknown_NoRefData;
+
+        mc_correct_failed = cmp_res_mc == ValueComparisonResult::Unknown_NoTstData
+                || cmp_res_mc == ValueComparisonResult::Different;
+
+        if (mc_correct_failed)
         {
-            tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(tst_id, target_data, max_ref_time_diff);
-
-            ti_no_ref = cmp_res_ti == ValueComparisonResult::Unknown_NoRefData;
-            all_no_ref &= ti_no_ref;
-
-            ti_correct_failed = cmp_res_ti == ValueComparisonResult::Unknown_NoTstData
-                    || cmp_res_ti == ValueComparisonResult::Different;
-
-            if (ti_correct_failed)
-                comment += "ACID failed (" + cmp_res_ti_comment + ")";
-
-            any_correct |= !ti_correct_failed;
-            all_correct &= !ti_correct_failed;
+            if (comment.size())
+                comment += ", ";
+            comment += "MC failed (" + cmp_res_mc_comment + ")";
         }
 
-        if (use_ms_ta_)
-        {
-            tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(tst_id, target_data, max_ref_time_diff);
-
-            ta_no_ref = cmp_res_ta == ValueComparisonResult::Unknown_NoRefData;
-            all_no_ref &= ta_no_ref;
-
-            ta_correct_failed = cmp_res_ta == ValueComparisonResult::Unknown_NoTstData
-                    || cmp_res_ta == ValueComparisonResult::Different;
-
-            if (ta_correct_failed)
-            {
-                if (comment.size())
-                    comment += ", ";
-                comment += "ACAD failed (" + cmp_res_ta_comment + ")";
-            }
-
-            any_correct |= !ta_correct_failed;
-            all_correct &= !ta_correct_failed;
-        }
-
-        if (use_mode_a_)
-        {
-            tie(cmp_res_ma, cmp_res_ma_comment) = compareModeA(tst_id, target_data, max_ref_time_diff);
-
-            ma_no_ref = cmp_res_ma == ValueComparisonResult::Unknown_NoRefData;
-            all_no_ref &= ma_no_ref;
-
-            ma_correct_failed = cmp_res_ma == ValueComparisonResult::Unknown_NoTstData
-                    || cmp_res_ma == ValueComparisonResult::Different;
-
-            if (ma_correct_failed)
-            {
-                if (comment.size())
-                    comment += ", ";
-                comment += "M3A failed (" + cmp_res_ma_comment + ")";
-            }
-
-            any_correct |= !ma_correct_failed;
-            all_correct &= !ma_correct_failed;
-        }
-
-        if (all_no_ref) // none has a reference
+        if (mc_no_ref) // none has a reference
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, pos_current,
                             ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
                             num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                            num_correct, num_not_correct, "No reference id");
+                            num_correct, num_not_correct, "No reference Mode C");
 
             ++num_no_ref_id;
 
             continue;
         }
 
-        if (!use_ms_ti_ && !use_ms_ta_ && !use_mode_a_)
-            all_correct = false; // if none is used, set to false
-
-        if (require_correctness_of_all_)
-        {
-            result_ok = all_correct;
-        }
-        else // one correct ok
-        {
-            result_ok = any_correct;
-        }
+        result_ok = !mc_correct_failed;
 
         if (result_ok)
             ++num_correct;
@@ -294,7 +221,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
                         num_correct, num_not_correct, comment);
     }
 
-    logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
            << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
            << " num_no_ref_id " << num_no_ref_id
            << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
@@ -303,30 +230,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
     assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
     assert (num_pos_inside == num_no_ref_id+num_correct+num_not_correct);
 
-    return make_shared<EvaluationRequirementResult::SingleIdentificationCorrect>(
+    return make_shared<EvaluationRequirementResult::SingleModeCCorrect>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside,
                 num_correct, num_not_correct);
 }
 
-bool IdentificationCorrect::requireCorrectnessOfAll() const
+float ModeCCorrect::maxDistanceFt() const
 {
-    return require_correctness_of_all_;
-}
-
-bool IdentificationCorrect::useModeA() const
-{
-    return use_mode_a_;
-}
-
-bool IdentificationCorrect::useMsTa() const
-{
-    return use_ms_ta_;
-}
-
-bool IdentificationCorrect::useMsTi() const
-{
-    return use_ms_ti_;
+    return max_distance_ft_;
 }
 
 }

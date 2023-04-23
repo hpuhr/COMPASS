@@ -17,7 +17,6 @@
 
 #include "eval/requirement/mode_c/present.h"
 #include "eval/results/mode_c/presentsingle.h"
-#include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"

@@ -17,7 +17,6 @@
 
 #include "eval/requirement/identification/false.h"
 #include "eval/results/identification/falsesingle.h"
-#include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"

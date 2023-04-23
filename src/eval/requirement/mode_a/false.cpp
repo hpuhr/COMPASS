@@ -17,7 +17,6 @@
 
 #include "eval/requirement/mode_a/false.h"
 #include "eval/results/mode_a/falsesingle.h"
-#include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"

@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/identification/correct.h"
-#include "eval/requirement/identification/correctconfigwidget.h"
+#include "eval/requirement/identification/identificationcorrectconfigwidget.h"
 
 #include <memory>
 
