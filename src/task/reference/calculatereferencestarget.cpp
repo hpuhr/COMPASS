@@ -237,10 +237,10 @@ std::shared_ptr<Buffer> Target::calculateReference()
         auto reconstructUMKalman2D = [ & ] ()
         {
             reconstruction::Reconstructor_UMKalman2D rec;
-            rec.baseConfig().R_std          = 30.0;
-            rec.baseConfig().Q_std          = 10.0;
-            rec.baseConfig().P_std          = 30.0;
-            rec.baseConfig().P_std_high     = 1000.0;
+            rec.baseConfig().R_std          = 30.0; // observation noise
+            rec.baseConfig().Q_std          = 10.0; // process noise
+            rec.baseConfig().P_std          = 30.0; // system noise (standard)
+            rec.baseConfig().P_std_high     = 1000.0; // system noise (high)
             rec.baseConfig().smooth         = true;
             rec.baseConfig().min_dt         = 0.0;
             rec.baseConfig().max_dt         = 60.0;
