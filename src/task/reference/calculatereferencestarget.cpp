@@ -270,6 +270,9 @@ std::shared_ptr<Buffer> Target::calculateReference()
             rec.baseConfig().max_dt         = 60.0;
             rec.baseConfig().min_chain_size = 2;
 
+            //if (utn_ == 3)
+            //    rec.setVerbosity(2);
+
             rec.config().simple_init = false;
 
             for (auto& chain_it : chains_)
