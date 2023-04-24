@@ -272,17 +272,18 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
 
     for (int k = n - 2; k >= 0; --k)
     {
-        const auto& F_1  = states[ k+1 ].F;
-        const auto& Q_1  = states[ k+1 ].Q;
-        auto        F_1t = F_1.transpose();
+        const auto& F  = states[ k ].F;
+        const auto& Q  = states[ k ].Q;
+        auto        Ft = F.transpose();
 
-        Pp[ k ] = states[ k+1 ].F * P_smooth[ k ] * F_1t + Q_1;
+        Pp[ k ] = states[ k ].F * P_smooth[ k ] * Ft + Q;
 
         if (!Eigen::FullPivLU<Eigen::MatrixXd>(Pp[ k ]).isInvertible())
             return false;
 
-        K[ k ]  = P_smooth[ k ] * F_1t * Pp[ k ].inverse();
-        x_smooth[ k ] += K[ k ] * (x_smooth[ k+1 ] - F_1 * x_smooth[ k ]);
+        K[ k ] = P_smooth[ k ] * Ft * Pp[ k ].inverse();
+
+        x_smooth[ k ] += K[ k ] * (x_smooth[ k+1 ] - F * x_smooth[ k ]);
         P_smooth[ k ] += K[ k ] * (P_smooth[ k+1 ] - Pp[ k ]) * ((const kalman::Matrix&)K[ k ]).transpose();
     }
 

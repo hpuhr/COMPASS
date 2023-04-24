@@ -74,7 +74,7 @@ protected:
                                                              const std::string& data_info) override final;
     virtual void init_impl() {};
     virtual kalman::KalmanState kalmanState() const = 0;
-    virtual bool kalmanStep(double dt, const Measurement& mm) = 0;
+    virtual boost::optional<kalman::KalmanState> kalmanStep(double dt, const Measurement& mm) = 0;
     virtual kalman::Vector xVec(const Measurement& mm) const = 0;
     virtual kalman::Matrix pMat(const Measurement& mm) const = 0;
     virtual kalman::Vector zVec(const Measurement& mm) const = 0;

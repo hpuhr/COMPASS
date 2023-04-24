@@ -95,7 +95,7 @@ kalman::KalmanState Reconstructor_UMKalman2D::kalmanState() const
 
 /**
 */
-bool Reconstructor_UMKalman2D::kalmanStep(double dt, const Measurement& mm)
+boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::kalmanStep(double dt, const Measurement& mm)
 {
     auto F = helpers::transitionMat(dt);
     auto Q = helpers::processMat(dt, qVar());
@@ -113,8 +113,16 @@ bool Reconstructor_UMKalman2D::kalmanStep(double dt, const Measurement& mm)
 
     kalman_->predict(F, Q);
     bool ok = kalman_->update(z, R);
+    if (!ok)
+        return {};
 
-    return ok;
+    kalman::KalmanState state;
+    state.x = kalman_->getX();
+    state.P = kalman_->getP();
+    state.F = F;
+    state.Q = Q;
+
+    return state;
 }
 
 /**
