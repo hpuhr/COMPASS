@@ -108,7 +108,7 @@ void SingleModeCCorrect::addTargetDetailsToTable (
     if (!section.hasTable(table_name))
         section.addTable(table_name, 13,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "#Up", "#NoRef", "#CMC", "#NCMC" "PC"}, true, 12);
+                          "#Up", "#NoRef", "#CMC", "#NCMC", "PC"}, true, 12);
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 

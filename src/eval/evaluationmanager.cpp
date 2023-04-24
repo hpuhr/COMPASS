@@ -1244,6 +1244,11 @@ bool EvaluationManager::importAirSpace(const AirSpace& air_space,
 
     sector_layers_.insert(sector_layers_.begin(), new_layers.begin(), new_layers.end());
 
+    for (auto& sec_lay_it : new_layers)
+        for (auto& sec_it : sec_lay_it->sectors())
+            sec_it->save();
+
+
     updateMaxSectorID();
 
     if (widget_)

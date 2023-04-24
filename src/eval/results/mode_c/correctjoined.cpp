@@ -37,10 +37,10 @@ namespace EvaluationRequirementResult
 {
 
 JoinedModeCCorrect::JoinedModeCCorrect(const std::string& result_id,
-                                                         std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                                         const SectorLayer& sector_layer, 
-                                                         EvaluationManager& eval_man)
-:   Joined("JoinedModeCCorrect", result_id, requirement, sector_layer, eval_man)
+                                       std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                       const SectorLayer& sector_layer,
+                                       EvaluationManager& eval_man)
+    :   Joined("JoinedModeCCorrect", result_id, requirement, sector_layer, eval_man)
 {
 }
 
@@ -124,9 +124,9 @@ void JoinedModeCCorrect::addToOverviewTable(std::shared_ptr<EvaluationResultsRep
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                        requirement_->shortname().c_str(),
-                        result_id_.c_str(), {num_correct_+num_not_correct_},
-                        pd_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
+                     requirement_->shortname().c_str(),
+                     result_id_.c_str(), {num_correct_+num_not_correct_},
+                     pd_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
 }
 
 void JoinedModeCCorrect::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -143,7 +143,7 @@ void JoinedModeCCorrect::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
 
     sec_det_table.addRow({"#Updates", "Total number target reports", num_updates_}, this);
     sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or Mode C",
-                            num_no_ref_pos_+num_no_ref_id_}, this);
+                          num_no_ref_pos_+num_no_ref_id_}, this);
     sec_det_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
     sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference Mode C", num_no_ref_id_}, this);
     sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
@@ -176,7 +176,7 @@ void JoinedModeCCorrect::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
     if (pcor_.has_value() && pcor_.value() != 1.0)
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                    [this](void) { return this->getErrorsViewable(); });
+                                 [this](void) { return this->getErrorsViewable(); });
     }
     else
     {
