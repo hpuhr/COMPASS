@@ -898,10 +898,10 @@ void EvaluationManager::loadSectors()
 
     sector_layers_ = COMPASS::instance().interface().loadSectors();
 
+    sectors_loaded_ = true;
+
     updateMaxSectorID();
     checkMinHeightFilterValid();
-
-    sectors_loaded_ = true;
 }
 
 void EvaluationManager::updateSectorLayers()

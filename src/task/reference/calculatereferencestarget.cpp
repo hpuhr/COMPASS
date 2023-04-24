@@ -86,11 +86,14 @@ std::shared_ptr<Buffer> Target::calculateReference()
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
 
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_));
+
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_));
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_));
+
 
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
 
@@ -115,6 +118,11 @@ std::shared_ptr<Buffer> Target::calculateReference()
     NullableVector<float>& mc_vec = buffer->get<float> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
 
+    // ground bit
+    NullableVector<bool>& gb_vec = buffer->get<bool> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_).name());
+
+
     NullableVector<unsigned int>& m3a_vec = buffer->get<unsigned int> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_).name());
     NullableVector<unsigned int>& acad_vec = buffer->get<unsigned int> (
@@ -127,8 +135,8 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
     DataMapping mapping;
 
-    unsigned int cnt=0;
-    bool data_written=false;
+    //unsigned int cnt=0;
+    //bool data_written=false;
 
     unsigned int sac = 0;
     unsigned int sic = 0;
@@ -138,7 +146,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
     if (!ts_begin.is_not_a_date_time())
     {
-        boost::posix_time::time_duration update_interval = Time::partialSeconds(1.0);
+        //boost::posix_time::time_duration update_interval = Time::partialSeconds(1.0);
 
         std::map<const Chain*, TargetKey> chain_targets;
 
@@ -192,6 +200,14 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
                         if (acid_vec.isNull(i) && acid.has_value())
                             acid_vec.set(i, *acid);
+
+                        if (gb_vec.isNull(i) || (!gb_vec.isNull(i) && !gb_vec.get(i)))
+                        {
+                            boost::optional<bool> gbs = chain_it.second->groundBit(mapping.dataid_ref1_);
+
+                            if (gbs.has_value())
+                                gb_vec.set(i, *gbs);
+                        }
                     }
 
                     if (mapping.has_ref2_)
@@ -208,6 +224,14 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
                         if (acid_vec.isNull(i) && acid.has_value())
                             acid_vec.set(i, *acid);
+
+                        if (gb_vec.isNull(i) || (!gb_vec.isNull(i) && !gb_vec.get(i)))
+                        {
+                            boost::optional<bool> gbs = chain_it.second->groundBit(mapping.dataid_ref2_);
+
+                            if (gbs.has_value())
+                                gb_vec.set(i, *gbs);
+                        }
                     }
                 }
             }
@@ -259,88 +283,8 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 storeReferences(references.value(), rec);
         };
 
-        //        auto reconstructMidpoint = [ & ] ()
-        //        {
-        //            for (boost::posix_time::ptime ts_current = ts_begin; ts_current <= ts_end; ts_current += update_interval)
-        //            {
-        //                data_written = false;
-
-        //                for (auto& chain_it : chains_)
-        //                {
-        //                    mapping = chain_it.second->calculateDataMapping(ts_current);
-
-        //                    if (mapping.has_ref_pos_) // only set values if at least position exists
-        //                    {
-        //                        data_written = true;
-
-        //                        ds_id_vec.set(cnt, ds_id);
-        //                        sac_vec.set(cnt, sac);
-        //                        sic_vec.set(cnt, sic);
-        //                        line_vec.set(cnt, line_id);
-
-        //                        ts_vec.set(cnt, ts_current);
-        //                        tod_vec.set(cnt, ts_current.time_of_day().total_milliseconds() / 1000.0);
-
-        //                        if (!lat_vec.isNull(cnt)) // already set
-        //                        {
-        //                            assert (!lon_vec.isNull(cnt));
-
-        //                            lat_vec.set(cnt, (mapping.pos_ref_.latitude_ + lat_vec.get(cnt))/2.0);
-        //                            lon_vec.set(cnt, (mapping.pos_ref_.longitude_ + lon_vec.get(cnt))/2.0);
-        //                        }
-        //                        else
-        //                        {
-        //                            lat_vec.set(cnt, mapping.pos_ref_.latitude_);
-        //                            lon_vec.set(cnt, mapping.pos_ref_.longitude_);
-        //                        }
-
-        //                        assoc_vec.set(cnt, assoc_val);
-        //                    }
-
-        //                    if (mc_vec.isNull(cnt) &&mapping.pos_ref_.has_altitude_)
-        //                        mc_vec.set(cnt, mapping.pos_ref_.altitude_);
-
-        //                    if (mapping.has_ref1_)
-        //                    {
-        //                        boost::optional<unsigned int> m3a = chain_it.second->modeA(mapping.dataid_ref1_);
-        //                        boost::optional<std::string> acid = chain_it.second->acid(mapping.dataid_ref1_);
-        //                        boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref1_);
-
-        //                        if (m3a_vec.isNull(cnt) && m3a.has_value())
-        //                            m3a_vec.set(cnt, *m3a);
-
-        //                        if (acad_vec.isNull(cnt) && acad.has_value())
-        //                            acad_vec.set(cnt, *acad);
-
-        //                        if (acid_vec.isNull(cnt) && acid.has_value())
-        //                            acid_vec.set(cnt, *acid);
-        //                    }
-
-        //                    if (mapping.has_ref2_)
-        //                    {
-        //                        boost::optional<unsigned int> m3a = chain_it.second->modeA(mapping.dataid_ref2_);
-        //                        boost::optional<std::string> acid = chain_it.second->acid(mapping.dataid_ref2_);
-        //                        boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref2_);
-
-        //                        if (m3a_vec.isNull(cnt) && m3a.has_value())
-        //                            m3a_vec.set(cnt, *m3a);
-
-        //                        if (acad_vec.isNull(cnt) && acad.has_value())
-        //                            acad_vec.set(cnt, *acad);
-
-        //                        if (acid_vec.isNull(cnt) && acid.has_value())
-        //                            acid_vec.set(cnt, *acid);
-        //                    }
-        //                }
-
-        //                if (data_written)
-        //                    ++cnt;
-        //            }
-        //        };
-
         //reconstructInterp();
         reconstructUMKalman2D();
-        //reconstructMidpoint();
     }
 
     loginf << "Target: calculateReference: buffer size " << buffer->size();
