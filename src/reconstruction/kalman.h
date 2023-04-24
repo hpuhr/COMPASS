@@ -72,6 +72,14 @@ public:
     void setMeasurementUncertMat(const Matrix& R) { setR(R); }
     void setProcessMMCrossCorrMat(const Matrix& M) { setM(M); }
 
+    const Vector& getX() const { return x_; }
+    const Matrix& getP() const { return P_; }
+    const Matrix& getQ() const { return Q_; }
+    const Matrix& getF() const { return F_; }
+    const Matrix& getH() const { return H_; }
+    const Matrix& getR() const { return R_; }
+    const Matrix& getM() const { return M_; }
+
 private:
     size_t dim_x_;
     size_t dim_z_;

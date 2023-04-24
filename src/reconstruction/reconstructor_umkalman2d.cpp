@@ -18,6 +18,8 @@
 #include "reconstructor_umkalman2d.h"
 #include "kalman.h"
 
+#include "logger.h"
+
 namespace reconstruction
 {
 
@@ -100,6 +102,15 @@ bool Reconstructor_UMKalman2D::kalmanStep(double dt, const Measurement& mm)
     auto z = zVec(mm);
     auto R = helpers::measurementUMat(rVar(), mm);
 
+    if (verbosity() > 1)
+    {
+        loginf << "[Kalman step] dt = " << dt << "\n" 
+               << "F: " << F << "\n"
+               << "Q: " << Q << "\n"
+               << "z: " << z << "\n"
+               << "R: " << R;
+    }
+
     kalman_->predict(F, Q);
     bool ok = kalman_->update(z, R);
 
@@ -121,8 +132,8 @@ kalman::Vector Reconstructor_UMKalman2D::xVec(const Measurement& mm) const
 
     if (mm.hasVelocity())
     {
-        x[ 1 ] = mm.vx.has_value();
-        x[ 3 ] = mm.vy.has_value();
+        x[ 1 ] = mm.vx.value();
+        x[ 3 ] = mm.vy.value();
     }
 
     return x;
@@ -206,6 +217,17 @@ void Reconstructor_UMKalman2D::init_impl(const Measurement& mm) const
     kalman_->setProcessUncertMat(helpers::processMat(1.0, qVar()));
     kalman_->setMeasurementMat(helpers::measurementMat());
     kalman_->setMeasurementUncertMat(helpers::measurementUMat(rVar(), mm));
+
+    if (verbosity() > 1)
+    {
+        loginf << "[Reinit Kalman] \n"
+         << "x: " << kalman_->getX() << "\n"
+         << "P: " << kalman_->getP() << "\n"
+         << "F: " << kalman_->getF() << "\n"
+         << "Q: " << kalman_->getQ() << "\n"
+         << "H: " << kalman_->getH() << "\n"
+         << "R: " << kalman_->getR();
+    }
 }
 
 } // namespace reconstruction

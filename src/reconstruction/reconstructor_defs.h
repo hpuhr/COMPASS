@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <ostream>
+
 #include <boost/optional.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -52,6 +54,31 @@ struct Measurement
     bool hasStdDev() const
     {
         return (stddev_x.has_value() && stddev_y.has_value());
+    }
+
+    void print(std::ostream& strm) const
+    {
+        strm << "source_id: " << source_id << std::endl;
+        //strm << "t:         " << Utils::Time::toString(t) << std::endl;
+
+        strm << "lat:       " << lat << std::endl;
+        strm << "lon:       " << lon << std::endl;
+
+        strm << "x:         " << x << std::endl;
+        strm << "y:         " << y << std::endl;
+        strm << "z:         " << (z.has_value() ? std::to_string(z.value()) : "-") << std::endl;
+
+        strm << "vx:        " << (vx.has_value() ? std::to_string(vx.value()) : "-") << std::endl;
+        strm << "vy:        " << (vy.has_value() ? std::to_string(vy.value()) : "-") << std::endl;
+        strm << "vz:        " << (vz.has_value() ? std::to_string(vz.value()) : "-") << std::endl;
+
+        strm << "ax:        " << (ax.has_value() ? std::to_string(ax.value()) : "-") << std::endl;
+        strm << "ay:        " << (ay.has_value() ? std::to_string(ay.value()) : "-") << std::endl;
+        strm << "az:        " << (az.has_value() ? std::to_string(az.value()) : "-") << std::endl;
+
+        strm << "stddev x:  " << (stddev_x.has_value() ? std::to_string(stddev_x.value()) : "-") << std::endl;
+        strm << "stddev y:  " << (stddev_y.has_value() ? std::to_string(stddev_y.value()) : "-") << std::endl;
+        strm << "cov xy:    " << (cov_xy.has_value() ? std::to_string(cov_xy.value()) : "-") << std::endl;
     }
 
     uint32_t                 source_id; // source of the measurement

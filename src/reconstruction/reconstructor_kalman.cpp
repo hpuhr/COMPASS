@@ -19,6 +19,8 @@
 #include "kalman.h"
 #include "logger.h"
 
+#include <fstream>
+
 namespace reconstruction
 {
 
@@ -73,11 +75,13 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
         //does chain obtain enough references?
         if (c.references.size() < min_chain_size_)
         {
-            loginf << "Dropping chain of " << c.references.size() << " point(s)";
+            if (verbosity() > 0)
+                loginf << "Dropping chain of " << c.references.size() << " point(s)";
             continue;
         }
             
-        loginf << "Adding chain of " << c.references.size() << " point(s)";
+        if (verbosity() > 0)
+            loginf << "Adding chain of " << c.references.size() << " point(s)";
 
         //apply RTS smoother?
         if (base_config_.smooth)
@@ -199,7 +203,8 @@ bool ReconstructorKalman::reinitIfNeeded(const Measurement& mm, const std::strin
 
     if (needsReinit(last_ref, mm))
     {
-        loginf << data_info << ": Reinitializing kalman filter at t = " << mm.t;
+        if (verbosity() > 0)
+            loginf << data_info << ": Reinitializing kalman filter at t = " << mm.t;
 
         init(mm);
         return true;
@@ -222,6 +227,20 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
 {
     init();
 
+    // if (data_info == "UTN3")
+    // {
+    //     std::cout << "WRITE FILE!!!" << std::endl;
+
+    //     std::ofstream file("/home/mcphatty/rec_input.txt");
+    //     file << "#MEASUREMENTS: " << measurements.size() << std::endl;
+    //     file << "--------" << std::endl;
+    //     for (const auto& mm : measurements)
+    //     {
+    //         mm.print(file);
+    //         file << "--------" << std::endl;
+    //     }
+    // }
+
     if (measurements.size() < min_chain_size_)
         return {};
 
@@ -240,9 +259,10 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
             continue;
 
         double dt = timestep(mm);
-        if (dt < base_config_.min_dt)
+        if (dt <= base_config_.min_dt)
         {
-            loginf << data_info << ": Skipping very small timestep of " << dt << " @ mm=" << i << " t=" << mm.t;
+            if (verbosity() > 0)
+                loginf << data_info << ": Skipping very small timestep of " << dt << " @ mm=" << i << " t=" << mm.t;
             continue;
         }
 

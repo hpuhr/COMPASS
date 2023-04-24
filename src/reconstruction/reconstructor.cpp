@@ -118,9 +118,19 @@ void Reconstructor::postprocessMeasurements()
 {
     if (measurements_.empty())
         return;
+
+    auto sortPred = [&] (const Measurement& mm0, const Measurement& mm1) 
+    { 
+        //sort by time first
+        if (mm0.t != mm1.t)
+            return mm0.t < mm1.t;
+
+        //otherwise sort by source at least
+        return mm0.source_id < mm1.source_id; 
+    };
     
     //sort measurements by timestamp
-    std::sort(measurements_.begin(), measurements_.end(), [&] (const Measurement& mm0, const Measurement& mm1) { return mm0.t < mm1.t; });
+    std::sort(measurements_.begin(), measurements_.end(), sortPred);
 
     //convert coordinates if needed
     if (coord_conv_ == CoordConversion::WGS84ToCart)
@@ -140,8 +150,8 @@ void Reconstructor::postprocessMeasurements()
             if (mm.lon > lon_max) lon_max = mm.lon;
         }
 
-        double lat0 = (lat_max - lat_min) / 2;
-        double lon0 = (lon_max - lon_min) / 2;
+        double lat0 = (lat_max + lat_min) / 2;
+        double lon0 = (lon_max + lon_min) / 2;
 
         ref_src_.reset(new OGRSpatialReference);
         ref_src_->SetWellKnownGeogCS("WGS84");
@@ -158,6 +168,19 @@ void Reconstructor::postprocessMeasurements()
             mm.y = mm.lat;
             trafo_fwd_->Transform(1, &mm.x, &mm.y);
         }
+
+        x_offs_ = lon0;
+        y_offs_ = lat0;
+        trafo_fwd_->Transform(1, &x_offs_, &y_offs_);
+
+        for (auto& mm : measurements_)
+        {
+            if (verbosity() > 1)
+                std::cout << "x: " << mm.x << ", y: " << mm.y << ", xoffs: " << x_offs_ << ", yoffs: " << y_offs_ << std::endl;
+
+            mm.x -= x_offs_;
+            mm.y -= y_offs_;
+        }
     }
 }
 
@@ -172,6 +195,9 @@ void Reconstructor::postprocessReferences(std::vector<Reference>& references)
 
         for (auto& ref : references)
         {
+            ref.x += x_offs_;
+            ref.y += y_offs_;
+
             ref.lon = ref.x;
             ref.lat = ref.y;
             trafo_bwd_->Transform(1, &ref.lon, &ref.lat);

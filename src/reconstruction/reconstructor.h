@@ -66,6 +66,9 @@ public:
 
     void setCoordConversion(CoordConversion coord_conv) { coord_conv_ = coord_conv; }
 
+    void setVerbosity(int v) { verbosity_ = v; }
+    int verbosity() const { return verbosity_; }
+
     static std::vector<std::vector<Measurement>> splitMeasurements(const std::vector<Measurement>& measurements,
                                                                    double max_dt);
 
@@ -86,10 +89,13 @@ private:
     std::unique_ptr<OGRSpatialReference>         ref_dst_;
     std::unique_ptr<OGRCoordinateTransformation> trafo_fwd_;
     std::unique_ptr<OGRCoordinateTransformation> trafo_bwd_;
+    double                                       x_offs_       = 0.0;
+    double                                       y_offs_       = 0.0;
 
     uint32_t source_cnt_ = 0;
 
     CoordConversion coord_conv_ = CoordConversion::WGS84ToCart;
+    int verbosity_ = 1;
 };
 
 } // namespace reconstruction
