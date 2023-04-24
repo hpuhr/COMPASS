@@ -292,6 +292,16 @@ bool EvaluationTargetData::isPrimaryOnly () const
     return !acids_.size() && !acads_.size() && !mode_a_codes_.size() && !has_mode_c_;
 }
 
+bool EvaluationTargetData::isModeS () const
+{
+    return acids_.size() || acads_.size();
+}
+
+bool EvaluationTargetData::isModeACOnly () const
+{
+    return (mode_a_codes_.size() || has_mode_c_) && !isModeS();
+}
+
 bool EvaluationTargetData::use() const
 {
     return dbcont_man_.utnUseEval(utn_);

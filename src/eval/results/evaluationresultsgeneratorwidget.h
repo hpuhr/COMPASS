@@ -31,6 +31,7 @@ class EvaluationResultsGeneratorWidget : public QWidget
     Q_OBJECT
 private slots:
     void toggleSplitResultsByMOPSSlot();
+    void toggleSplitResultsByMACMSSlot();
     void toggleShowAdsbInfoSlot();
     void toggleSkipNoDataDetailsSlot();
 
@@ -46,6 +47,7 @@ protected:
 
     QCheckBox* skip_no_data_details_check_ {nullptr};
     QCheckBox* split_results_by_mops_check_ {nullptr};
+    QCheckBox* split_results_by_mac_ms_check_ {nullptr};
     QCheckBox* show_adsb_info_check_ {nullptr};
 
     QLineEdit* result_detail_zoom_edit_{nullptr};

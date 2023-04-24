@@ -85,7 +85,20 @@ std::string Single::getRequirementSectionID () // TODO hack
 
         tmp = "MOPS "+tmp+" Sum";
 
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+":"+requirement_->name();
+        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+" Sum"+":"+requirement_->name();
+    }
+    else if (eval_man_.reportSplitResultsByACOnlyMS())
+    {
+        string tmp = "Primary";
+
+        if (target()->isModeS())
+            tmp = "Mode S";
+        else if (target()->isModeACOnly())
+            tmp = "Mode A/C";
+        else
+            assert (target()->isPrimaryOnly());
+
+        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+" Sum"+":"+requirement_->name();
     }
     else
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":Sum:"+requirement_->name();
