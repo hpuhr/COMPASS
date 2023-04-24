@@ -127,7 +127,7 @@ void JoinedDetection::addToOverviewTable(std::shared_ptr<EvaluationResultsReport
         ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                             requirement_->shortname().c_str(),
                             result_id_.c_str(), {num_single_targets_},
-                            num_failed_single_targets_, " = 0", result.c_str()}, this, {});
+                            num_failed_single_targets_, "= 0", result.c_str()}, this, {});
     }
     else // pd
     {
