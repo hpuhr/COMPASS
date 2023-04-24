@@ -251,7 +251,7 @@ void SinglePositionAcross::addTargetDetailsToReport(shared_ptr<EvaluationResults
         string result {"Unknown"};
 
         if (prob_.has_value())
-            result = req->getResultConditionStr(prob_.value());
+            result = req->getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Across Fulfilled", "", result.c_str()}, this);
 

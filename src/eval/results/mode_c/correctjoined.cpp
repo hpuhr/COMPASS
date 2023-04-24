@@ -119,7 +119,7 @@ void JoinedModeCCorrect::addToOverviewTable(std::shared_ptr<EvaluationResultsRep
     {
         pd_var = String::percentToString(pcor_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req-> getResultConditionStr(pcor_.value());
+        result = req->getConditionResultStr(pcor_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -165,7 +165,7 @@ void JoinedModeCCorrect::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
     {
         pd_var = String::percentToString(pcor_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req-> getResultConditionStr(pcor_.value());
+        result = req->getConditionResultStr(pcor_.value());
     }
 
     sec_det_table.addRow({"PC [%]", "Probability of correct Mode C", pd_var}, this);

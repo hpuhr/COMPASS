@@ -166,7 +166,7 @@ void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<Evaluation
     string result {"Unknown"};
 
     if (pid_.has_value())
-        result = req-> getResultConditionStr(pid_.value());
+        result = req->getConditionResultStr(pid_.value());
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

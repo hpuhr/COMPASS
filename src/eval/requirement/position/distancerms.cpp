@@ -277,7 +277,7 @@ std::string PositionDistanceRMS::getConditionStr () const
     return "<= "+ to_string(threshold_value_);
 }
 
-std::string PositionDistanceRMS::getResultConditionStr (float rms_value) const
+std::string PositionDistanceRMS::getConditionResultStr (float rms_value) const
 {
     return rms_value <= threshold_value_ ?  "Passed" : "Failed";
 }

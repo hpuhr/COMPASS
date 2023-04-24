@@ -142,7 +142,7 @@ void JoinedPositionDistance::addToOverviewTable(std::shared_ptr<EvaluationResult
     {
         p_passed_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(prob_.value());
+        result = req->getConditionResultStr(prob_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -212,7 +212,7 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
         string result {"Unknown"};
 
         if (prob_.has_value())
-            result = req->getResultConditionStr(prob_.value());
+            result = req->getConditionResultStr(prob_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }

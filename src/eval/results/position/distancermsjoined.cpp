@@ -148,13 +148,13 @@ void JoinedPositionDistanceRMS::addToOverviewTable(std::shared_ptr<EvaluationRes
 //    {
 //        p_passed_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-//        result = req->getResultConditionStr(prob_.value());
+//        result = req->getConditionResultStr(prob_.value());
 //    }
 
     if (num_passed_ + num_failed_)
     {
         calc_val = String::doubleToStringPrecision(value_avg_,2).c_str();
-        result = req->getResultConditionStr(value_avg_);
+        result = req->getConditionResultStr(value_avg_);
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -224,7 +224,7 @@ void JoinedPositionDistanceRMS::addDetails(std::shared_ptr<EvaluationResultsRepo
         string result {"Unknown"};
 
         if (prob_.has_value())
-            result = req->getResultConditionStr(prob_.value());
+            result = req->getConditionResultStr(prob_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }

@@ -85,7 +85,7 @@ std::string Single::getRequirementSectionID () // TODO hack
 
         tmp = "MOPS "+tmp+" Sum";
 
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+" Sum"+":"+requirement_->name();
+        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+":"+requirement_->name();
     }
     else if (eval_man_.reportSplitResultsByACOnlyMS())
     {

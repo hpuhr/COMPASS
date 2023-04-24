@@ -38,7 +38,7 @@ public:
             const SectorLayer& sector_layer) override;
 
     std::string getConditionStr () const override;
-    std::string getResultConditionStr (float rms_value) const;
+    std::string getConditionResultStr (float rms_value) const;
 
 protected:
     float threshold_value_ {0};

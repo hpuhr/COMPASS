@@ -122,7 +122,7 @@ void JoinedModeAPresent::addToOverviewTable(std::shared_ptr<EvaluationResultsRep
 
         if (p_present_.has_value())
         {
-            result = req->getResultConditionStr(p_present_.value());
+            result = req->getConditionResultStr(p_present_.value());
             pe_var = roundf(p_present_.value() * 10000.0) / 100.0;
         }
 
@@ -176,7 +176,7 @@ void JoinedModeAPresent::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
         string result {"Unknown"};
 
         if (p_present_.has_value())
-            result = req->getResultConditionStr(p_present_.value());
+            result = req->getConditionResultStr(p_present_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }

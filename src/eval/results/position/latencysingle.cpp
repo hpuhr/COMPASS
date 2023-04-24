@@ -251,7 +251,7 @@ void SinglePositionLatency::addTargetDetailsToReport(shared_ptr<EvaluationResult
         string result {"Unknown"};
 
         if (prob_.has_value())
-            result = req->getResultConditionStr(prob_.value());
+            result = req->getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Latency Fulfilled", "", result.c_str()}, this);
 

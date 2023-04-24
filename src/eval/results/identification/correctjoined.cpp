@@ -119,7 +119,7 @@ void JoinedIdentificationCorrect::addToOverviewTable(std::shared_ptr<EvaluationR
     {
         pd_var = String::percentToString(pid_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req-> getResultConditionStr(pid_.value());
+        result = req->getConditionResultStr(pid_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -165,7 +165,7 @@ void JoinedIdentificationCorrect::addDetails(std::shared_ptr<EvaluationResultsRe
     {
         pd_var = String::percentToString(pid_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req-> getResultConditionStr(pid_.value());
+        result = req->getConditionResultStr(pid_.value());
     }
 
     sec_det_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);

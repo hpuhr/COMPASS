@@ -39,14 +39,14 @@ Detection::Detection(
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         float update_interval_s, bool use_min_gap_length, float min_gap_length_s,
         bool use_max_gap_length, float max_gap_length_s, bool invert_prob,
-        bool use_miss_tolerance, float miss_tolerance_s)
+        bool use_miss_tolerance, float miss_tolerance_s, bool hold_for_any_target)
     : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       update_interval_s_(update_interval_s),
       use_min_gap_length_(use_min_gap_length), min_gap_length_s_(min_gap_length_s),
       use_max_gap_length_(use_max_gap_length), max_gap_length_s_(max_gap_length_s), invert_prob_(invert_prob),
-      use_miss_tolerance_(use_miss_tolerance), miss_tolerance_s_(miss_tolerance_s)
+      use_miss_tolerance_(use_miss_tolerance), miss_tolerance_s_(miss_tolerance_s),
+      hold_for_any_target_(hold_for_any_target)
 {
-
 }
 
 float Detection::updateInterval() const
@@ -553,6 +553,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     return make_shared<EvaluationRequirementResult::SingleDetection>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, sum_uis, sum_missed_uis, ref_periods);
+}
+
+bool Detection::holdForAnyTarget() const
+{
+    return hold_for_any_target_;
 }
 
 bool Detection::invertProb() const

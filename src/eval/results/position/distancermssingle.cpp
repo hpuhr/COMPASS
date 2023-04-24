@@ -249,7 +249,7 @@ void SinglePositionDistanceRMS::addTargetDetailsToReport(shared_ptr<EvaluationRe
 
     //if (prob_.has_value())
     if (num_failed_ + num_passed_)
-        result = req->getResultConditionStr(value_avg_);
+        result = req->getConditionResultStr(value_avg_);
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

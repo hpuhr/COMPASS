@@ -60,8 +60,11 @@ protected:
     virtual void join_impl(std::shared_ptr<Single> other) override;
     virtual void updatesToUseChanges_impl() override;
 
-    int sum_uis_    {0};
-    int missed_uis_ {0};
+    unsigned int sum_uis_    {0};
+    unsigned int missed_uis_ {0};
+
+    unsigned int num_single_targets_ {0};
+    unsigned int num_failed_single_targets_ {0};
 
     boost::optional<float> pd_;
 };

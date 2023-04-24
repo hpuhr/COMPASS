@@ -139,7 +139,7 @@ void JoinedDubiousTrack::addToOverviewTable(std::shared_ptr<EvaluationResultsRep
     if (p_dubious_.has_value())
     {
         p_dubious_var = String::percentToString(p_dubious_.value() * 100.0, req->getNumProbDecimals()).c_str();
-        result = req->getResultConditionStr(p_dubious_.value());
+        result = req->getConditionResultStr(p_dubious_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -231,7 +231,7 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
         string result {"Unknown"};
 
         if (p_dubious_.has_value())
-            result = req->getResultConditionStr(p_dubious_.value());
+            result = req->getConditionResultStr(p_dubious_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }

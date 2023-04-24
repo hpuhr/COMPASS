@@ -164,7 +164,7 @@ void SingleModeAFalse::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
         string result {"Unknown"};
 
         if (p_false_.has_value())
-            result = req->getResultConditionStr(p_false_.value());
+            result = req->getConditionResultStr(p_false_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

@@ -117,7 +117,7 @@ void JoinedExtraTrack::addToOverviewTable(std::shared_ptr<EvaluationResultsRepor
     {
         prob_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req-> getResultConditionStr(prob_.value());
+        result = req->getConditionResultStr(prob_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -158,7 +158,7 @@ void JoinedExtraTrack::addDetails(std::shared_ptr<EvaluationResultsReport::RootI
     {
         prob_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req-> getResultConditionStr(prob_.value());
+        result = req->getConditionResultStr(prob_.value());
     }
 
     sec_det_table.addRow({"PEx [%]", "Probability of update with extra track", prob_var}, this);

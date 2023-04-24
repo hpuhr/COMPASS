@@ -49,6 +49,8 @@ DetectionConfig::DetectionConfig(
 
     registerParameter("use_miss_tolerance", &use_miss_tolerance_, false);
     registerParameter("miss_tolerance", &miss_tolerance_s_, 0.01);
+
+    registerParameter("hold_for_any_target", &hold_for_any_target_, false);
 }
 
 DetectionConfig::~DetectionConfig()
@@ -61,7 +63,7 @@ std::shared_ptr<Base> DetectionConfig::createRequirement()
     shared_ptr<Detection> req = make_shared<Detection>(
                 name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, update_interval_s_,
                 use_min_gap_length_, min_gap_length_s_, use_max_gap_length_, max_gap_length_s_, invert_prob_,
-                use_miss_tolerance_, miss_tolerance_s_);
+                use_miss_tolerance_, miss_tolerance_s_, hold_for_any_target_);
 
     return req;
 }
@@ -85,26 +87,6 @@ void DetectionConfig::invertProb(bool value)
 {
     invert_prob_ = value;
 }
-
-//    bool DetectionConfig::useMaxGapInterval() const
-//    {
-//        return use_max_gap_interval_;
-//    }
-
-//    void DetectionConfig::useMaxGapInterval(bool value)
-//    {
-//        use_max_gap_interval_ = value;
-//    }
-
-//    float DetectionConfig::maxGapInterval() const
-//    {
-//        return max_gap_interval_s_;
-//    }
-
-//    void DetectionConfig::maxGapInterval(float value)
-//    {
-//        max_gap_interval_s_ = value;
-//    }
 
 bool DetectionConfig::useMissTolerance() const
 {
@@ -206,6 +188,19 @@ void DetectionConfig::addToReport (std::shared_ptr<EvaluationResultsReport::Root
                   String::boolToString(use_miss_tolerance_).c_str()}, nullptr);
     table.addRow({"Miss Tolerance [s]", "Acceptable time delta for miss detection",
                   miss_tolerance_s_}, nullptr);
+
+    table.addRow({"Hold for any Target", "Must hold for any target (every single targets)",
+                  String::boolToString(hold_for_any_target_).c_str()}, nullptr);
+}
+
+bool DetectionConfig::holdForAnyTarget() const
+{
+    return hold_for_any_target_;
+}
+
+void DetectionConfig::holdForAnyTarget(bool value)
+{
+    hold_for_any_target_ = value;
 }
 
 }

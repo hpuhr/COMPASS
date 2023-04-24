@@ -119,7 +119,7 @@ void JoinedIdentificationFalse::addToOverviewTable(std::shared_ptr<EvaluationRes
 
         if (p_false_.has_value())
         {
-            result = req-> getResultConditionStr(p_false_.value());
+            result = req->getConditionResultStr(p_false_.value());
             pf_var = String::percentToString(p_false_.value() * 100.0, req->getNumProbDecimals()).c_str();
         }
 
@@ -174,7 +174,7 @@ void JoinedIdentificationFalse::addDetails(std::shared_ptr<EvaluationResultsRepo
         string result {"Unknown"};
 
         if (p_false_.has_value())
-            result = req-> getResultConditionStr(p_false_.value());
+            result = req->getConditionResultStr(p_false_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }

@@ -30,7 +30,8 @@ public:
     COMPARISON_TYPE probCheckType() const;
 
     std::string getConditionStr () const override;
-    std::string getResultConditionStr (float prob) const;
+    bool getConditionResult (float prob) const; //  true if passed
+    std::string getConditionResultStr (float prob) const;
 
 protected:
     float prob_ {0};

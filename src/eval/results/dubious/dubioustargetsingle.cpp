@@ -279,7 +279,7 @@ void SingleDubiousTarget::addTargetDetailsToReport(shared_ptr<EvaluationResultsR
         string result {"Unknown"};
 
         if (p_dubious_target_.has_value())
-            result = req->getResultConditionStr(p_dubious_target_.value());
+            result = req->getConditionResultStr(p_dubious_target_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

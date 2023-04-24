@@ -70,6 +70,8 @@ public:
 
     void addAnnotations(nlohmann::json::object_t& viewable) override;
 
+    bool hasFailed() const;
+
 protected:
     void updatePD();
 

@@ -60,7 +60,7 @@ std::string ProbabilityBase::getConditionStr () const
                                  +to_string(prob_check_type_)+"'");
 }
 
-std::string ProbabilityBase::getResultConditionStr (float prob) const
+bool ProbabilityBase::getConditionResult (float prob) const
 {
     bool result;
 
@@ -76,7 +76,13 @@ std::string ProbabilityBase::getResultConditionStr (float prob) const
         throw std::runtime_error("ProbabilityBase: getResultConditionStr: unknown type '"
                                  +to_string(prob_check_type_)+"'");
 
-    return result ? "Passed" : "Failed";
+    return result;
+}
+
+std::string ProbabilityBase::getConditionResultStr (float prob) const
+{
+
+    return getConditionResult(prob) ? "Passed" : "Failed";
 }
 
 bool ProbabilityBase::compareValue (double val, double threshold, COMPARISON_TYPE check_type)

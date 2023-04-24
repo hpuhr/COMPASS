@@ -162,7 +162,7 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
         string result {"Unknown"};
 
         if (prob_.has_value())
-            result = req-> getResultConditionStr(prob_.value());
+            result = req->getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

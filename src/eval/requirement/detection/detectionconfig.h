@@ -65,7 +65,10 @@ public:
     float missTolerance() const;
     void missTolerance(float value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+
+    bool holdForAnyTarget() const;
+    void holdForAnyTarget(bool value);
 
 protected:
     float update_interval_s_{0};
@@ -80,6 +83,8 @@ protected:
 
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};
+
+    bool hold_for_any_target_ {false}; // if requirement must hold for any target (all single targets)
 
     virtual void createWidget() override;
 };
