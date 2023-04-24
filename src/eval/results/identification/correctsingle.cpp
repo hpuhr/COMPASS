@@ -98,7 +98,8 @@ void SingleIdentificationCorrect::addTargetToOverviewTable(shared_ptr<Evaluation
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()
+            || eval_man_.reportSplitResultsByACOnlyMS()) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
@@ -165,7 +166,7 @@ void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<Evaluation
     string result {"Unknown"};
 
     if (pid_.has_value())
-        result = req-> getResultConditionStr(pid_.value());
+        result = req->getConditionResultStr(pid_.value());
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

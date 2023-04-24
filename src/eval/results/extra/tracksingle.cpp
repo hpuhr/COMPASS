@@ -98,7 +98,8 @@ void SingleExtraTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsRepo
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()
+            || eval_man_.reportSplitResultsByACOnlyMS()) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
@@ -163,7 +164,7 @@ void SingleExtraTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
         string result {"Unknown"};
 
         if (prob_.has_value())
-            result = req-> getResultConditionStr(prob_.value());
+            result = req->getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

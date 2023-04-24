@@ -19,7 +19,7 @@
 #define DUBIOUSTARGETCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/dubious/dubioustargetconfigwidget.h"
 #include "eval/requirement/dubious/dubioustarget.h"
 
@@ -29,7 +29,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class DubiousTargetConfig : public BaseConfig
+class DubiousTargetConfig : public ProbabilityBaseConfig
 {
 public:
     DubiousTargetConfig(const std::string& class_id, const std::string& instance_id,

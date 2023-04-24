@@ -29,9 +29,9 @@ namespace EvaluationRequirement
 {
 
 Base::Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-           float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
+           EvaluationManager& eval_man)
     : name_(name), short_name_(short_name), group_name_(group_name),
-      prob_(prob), prob_check_type_(prob_check_type), eval_man_(eval_man)
+      eval_man_(eval_man)
 {
 
 }
@@ -56,81 +56,7 @@ std::string Base::groupName() const
     return group_name_;
 }
 
-float Base::prob() const
-{
-    return prob_;
-}
 
-unsigned int Base::getNumProbDecimals() const
-{
-    assert (prob_ <= 1);
-
-    float tmp=1;
-    unsigned int decimals=1;
-
-    while (tmp > prob_ && decimals < 6)
-    {
-        tmp /= 10.0;
-        ++decimals;
-    }
-
-    //loginf << "Requirement::Base: getNumProbDecimals: prob " << prob_ << " dec " << decimals;
-    return decimals;
-}
-
-COMPARISON_TYPE Base::probCheckType() const
-{
-    return prob_check_type_;
-}
-
-std::string Base::getConditionStr () const
-{
-    if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN)
-        return "< "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
-    else if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-        return "<= "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN)
-        return "> "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
-        return ">= "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
-    else
-        throw std::runtime_error("EvaluationRequiretBase: getConditionStr: unknown type '"
-                                 +to_string(prob_check_type_)+"'");
-}
-
-std::string Base::getResultConditionStr (float prob) const
-{
-    bool result;
-
-    if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN)
-        result = prob < prob_;
-    else if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-        result = prob <= prob_;
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN)
-        result = prob > prob_;
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
-        result = prob >= prob_;
-    else
-        throw std::runtime_error("EvaluationRequiretBase: getResultConditionStr: unknown type '"
-                                 +to_string(prob_check_type_)+"'");
-
-    return result ? "Passed" : "Failed";;
-}
-
-bool Base::compareValue (double val, double threshold, COMPARISON_TYPE check_type)
-{
-    if (check_type == COMPARISON_TYPE::LESS_THAN)
-        return val < threshold;
-    else if (check_type == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-        return val <= threshold;
-    else if (check_type == COMPARISON_TYPE::GREATER_THAN)
-        return val > threshold;
-    else if (check_type == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
-        return val >= threshold;
-    else
-        throw std::runtime_error("EvaluationRequiretBase: compareValue: unknown type '"
-                                 +to_string(check_type)+"'");
-}
 
 std::pair<ValueComparisonResult, std::string> Base::compareTi (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,

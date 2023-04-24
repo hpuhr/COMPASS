@@ -30,7 +30,7 @@ namespace EvaluationRequirement
 {
 
 IdentificationFalseConfigWidget::IdentificationFalseConfigWidget(IdentificationFalseConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     assert (prob_edit_);
     prob_edit_->setToolTip("Probability of false identification");

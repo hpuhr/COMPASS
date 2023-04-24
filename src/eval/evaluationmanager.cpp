@@ -154,6 +154,7 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     // report stuff
     registerParameter("report_skip_no_data_details", &report_skip_no_data_details_, true);
     registerParameter("report_split_results_by_mops", &report_split_results_by_mops_, false);
+    registerParameter("report_split_results_by_aconly_ms", &report_split_results_by_aconly_ms_, false);
     registerParameter("report_show_adsb_info", &report_show_adsb_info_, false);
 
     registerParameter("report_author", &report_author_, "");
@@ -898,10 +899,10 @@ void EvaluationManager::loadSectors()
 
     sector_layers_ = COMPASS::instance().interface().loadSectors();
 
-    updateMaxSectorID();
-    checkMinHeightFilterValid();
-
     sectors_loaded_ = true;
+
+    updateMaxSectorID();
+    checkMinHeightFilterValid(); // checks if min fl filter sector exists
 }
 
 void EvaluationManager::updateSectorLayers()
@@ -1243,6 +1244,11 @@ bool EvaluationManager::importAirSpace(const AirSpace& air_space,
         return false;
 
     sector_layers_.insert(sector_layers_.begin(), new_layers.begin(), new_layers.end());
+
+    for (auto& sec_lay_it : new_layers)
+        for (auto& sec_it : sec_lay_it->sectors())
+            sec_it->save();
+
 
     updateMaxSectorID();
 
@@ -2307,6 +2313,18 @@ bool EvaluationManager::reportSplitResultsByMOPS() const
 void EvaluationManager::reportSplitResultsByMOPS(bool value)
 {
     report_split_results_by_mops_ = value;
+}
+
+bool EvaluationManager::reportSplitResultsByACOnlyMS() const
+{
+    return report_split_results_by_aconly_ms_;
+}
+
+void EvaluationManager::reportSplitResultsByACOnlyMS(bool value)
+{
+    loginf << "EvaluationManager: reportSplitResultsByACOnlyMS: value " << value;
+
+    report_split_results_by_aconly_ms_ = value;
 }
 
 bool EvaluationManager::reportShowAdsbInfo() const

@@ -43,7 +43,7 @@ DubiousTrack::DubiousTrack(
         bool use_max_turnrate, float max_turnrate,
         bool use_rocd, float max_rocd, float dubious_prob,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       eval_only_single_ds_id_(eval_only_single_ds_id), single_ds_id_(single_ds_id),
       minimum_comparison_time_(minimum_comparison_time), maximum_comparison_time_(maximum_comparison_time),
       mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),

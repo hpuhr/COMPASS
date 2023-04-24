@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTIDENTIFICATIONFALSECONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTIDENTIFICATIONFALSECONFIGWIDGET_H
 
-#include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
 class IdentificationFalseConfig;
 
-class IdentificationFalseConfigWidget : public BaseConfigWidget
+class IdentificationFalseConfigWidget : public ProbabilityBaseConfigWidget
 {
     Q_OBJECT
 

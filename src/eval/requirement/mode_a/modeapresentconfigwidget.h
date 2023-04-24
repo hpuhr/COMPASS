@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTMODEAPRESENTCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTMODEAPRESENTCONFIGWIDGET_H
 
-#include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
 class ModeAPresentConfig;
 
-class ModeAPresentConfigWidget : public BaseConfigWidget
+class ModeAPresentConfigWidget : public ProbabilityBaseConfigWidget
 {
     Q_OBJECT
 

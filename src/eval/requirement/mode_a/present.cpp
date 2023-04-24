@@ -17,7 +17,6 @@
 
 #include "eval/requirement/mode_a/present.h"
 #include "eval/results/mode_a/presentsingle.h"
-#include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -34,7 +33,7 @@ namespace EvaluationRequirement
 
 ModeAPresent::ModeAPresent(const std::string& name, const std::string& short_name, const std::string& group_name,
                            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man)
 {
 
 }
@@ -180,15 +179,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
 
         if ((!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())) // ref times possible
         {
-            if ((!ref_lower.is_not_a_date_time() && target_data.refChain().modeA(ref_lower).has_value())
-                    || (!ref_upper.is_not_a_date_time() && target_data.refChain().modeA(ref_upper).has_value()))
+            if ((!ref_lower.is_not_a_date_time()
+                 && target_data.refChain().modeA(ref_lower, false, false).has_value())
+                    || (!ref_upper.is_not_a_date_time() &&
+                        target_data.refChain().modeA(ref_upper, false, false).has_value()))
                 // ref value(s) exist
             {
                 code_present_ref = true;
             }
         }
 
-        code_present_tst = target_data.tstChain().modeA(tst_id).has_value();
+        code_present_tst = target_data.tstChain().modeA(tst_id, false, false).has_value();
 
         code_missing = false;
 

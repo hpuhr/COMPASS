@@ -92,7 +92,8 @@ void SingleModeAPresent::addTargetToOverviewTable(shared_ptr<EvaluationResultsRe
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()
+            || eval_man_.reportSplitResultsByACOnlyMS()) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
@@ -161,7 +162,7 @@ void SingleModeAPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
         string result {"Unknown"};
 
         if (p_present_.has_value())
-            result = req-> getResultConditionStr(p_present_.value());
+            result = req->getConditionResultStr(p_present_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

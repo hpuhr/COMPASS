@@ -46,7 +46,7 @@ public:
     struct BaseConfig
     {
         double Q_std      = 10.0;   // process noise
-        double R_std      = 30.0;   // process noise
+        double R_std      = 30.0;   // observation noise
         double P_std      = 30.0;   // system noise (standard)
         double P_std_high = 1000.0; // system noise (high)
 

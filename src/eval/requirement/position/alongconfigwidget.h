@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONALONGCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTPOSITIONALONGCONFIGWIDGET_H
 
-#include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
     class PositionAlongConfig;
 
-    class PositionAlongConfigWidget : public BaseConfigWidget
+    class PositionAlongConfigWidget : public ProbabilityBaseConfigWidget
     {
         Q_OBJECT
 

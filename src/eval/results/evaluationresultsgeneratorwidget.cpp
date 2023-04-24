@@ -56,6 +56,14 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
             this, &EvaluationResultsGeneratorWidget::toggleSplitResultsByMOPSSlot);
     layout->addRow("Split Results by MOPS Version", split_results_by_mops_check_);
 
+    // split results by mode a/c only and mode s
+
+    split_results_by_mac_ms_check_ = new QCheckBox ();
+    split_results_by_mac_ms_check_->setChecked(eval_man_.reportSplitResultsByACOnlyMS());
+    connect(split_results_by_mac_ms_check_, &QCheckBox::clicked,
+            this, &EvaluationResultsGeneratorWidget::toggleSplitResultsByMACMSSlot);
+    layout->addRow("Split Results by Mode A/C Only and Mode S", split_results_by_mac_ms_check_);
+
     // show adsb info
     //++row;
 
@@ -89,6 +97,12 @@ void EvaluationResultsGeneratorWidget::toggleSplitResultsByMOPSSlot()
 {
     assert (split_results_by_mops_check_);
     eval_man_.reportSplitResultsByMOPS(split_results_by_mops_check_->checkState() == Qt::Checked);
+}
+
+void EvaluationResultsGeneratorWidget::toggleSplitResultsByMACMSSlot()
+{
+    assert (split_results_by_mac_ms_check_);
+    eval_man_.reportSplitResultsByACOnlyMS(split_results_by_mac_ms_check_->checkState() == Qt::Checked);
 }
 
 void EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot()

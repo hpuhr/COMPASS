@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTMODECFALSECONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/mode_c/false.h"
 #include "eval/requirement/mode_c/modecfalseconfigwidget.h"
 
@@ -30,7 +30,7 @@ class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
-class ModeCFalseConfig : public BaseConfig
+class ModeCFalseConfig : public ProbabilityBaseConfig
 {
 public:
     ModeCFalseConfig(const std::string& class_id, const std::string& instance_id,

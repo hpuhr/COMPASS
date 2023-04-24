@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
 
 SpeedConfigWidget::SpeedConfigWidget(SpeedConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     // threshold
     threshold_value_edit_ = new QLineEdit(QString::number(config().thresholdValue()));

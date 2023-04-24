@@ -40,7 +40,7 @@ PositionDistance::PositionDistance(
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         float threshold_value, COMPARISON_TYPE threshold_value_check_type,
         bool failed_values_of_interest)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       threshold_value_(threshold_value), threshold_value_check_type_(threshold_value_check_type),
       failed_values_of_interest_(failed_values_of_interest)
 {
@@ -203,16 +203,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
         ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-//        if (in_appimage_) // inside appimage
-//        {
-            x_pos = tst_pos.longitude_;
-            y_pos = tst_pos.latitude_;
-//        }
-//        else
-//        {
-//            x_pos = tst_pos.latitude_;
-//            y_pos = tst_pos.longitude_;
-//        }
+        x_pos = tst_pos.longitude_;
+        y_pos = tst_pos.latitude_;
 
         ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ok)

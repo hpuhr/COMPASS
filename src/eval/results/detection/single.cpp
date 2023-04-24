@@ -99,7 +99,8 @@ void SingleDetection::addTargetToOverviewTable(shared_ptr<EvaluationResultsRepor
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()
+            || eval_man_.reportSplitResultsByACOnlyMS()) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
@@ -173,9 +174,11 @@ void SingleDetection::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     string result {"Unknown"};
 
     if (pd_.has_value())
-        result = req-> getResultConditionStr(pd_.value());
+        result = req->getConditionResultStr(pd_.value());
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
+
+    utn_req_table.addRow({"Must hold for any target ", "", req->holdForAnyTarget()}, this);
 
     // add figure
     if (pd_.has_value() && pd_.value() != 1.0)
@@ -379,6 +382,17 @@ std::string SingleDetection::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
+bool SingleDetection::hasFailed() const
+{
+    std::shared_ptr<EvaluationRequirement::Detection> req =
+            std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+    assert (req);
+
+    if (pd_.has_value())
+        return !req->getConditionResult(pd_.value());
+    else
+        return false;
+}
 
 void SingleDetection::addAnnotations(nlohmann::json::object_t& viewable)
 {

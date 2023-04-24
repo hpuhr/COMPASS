@@ -19,7 +19,7 @@
 #define DUBIOUSTRACKCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/dubious/dubioustrackconfigwidget.h"
 #include "eval/requirement/dubious/dubioustrack.h"
 
@@ -29,7 +29,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class DubiousTrackConfig : public BaseConfig
+class DubiousTrackConfig : public ProbabilityBaseConfig
 {
 public:
     DubiousTrackConfig(const std::string& class_id, const std::string& instance_id,

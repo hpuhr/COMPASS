@@ -17,7 +17,6 @@
 
 #include "eval/requirement/identification/correct.h"
 #include "eval/results/identification/correctsingle.h"
-#include "eval/requirement/correctnessdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -36,7 +35,7 @@ IdentificationCorrect::IdentificationCorrect(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         bool require_correctness_of_all, bool use_mode_a, bool use_ms_ta, bool use_ms_ti)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       require_correctness_of_all_(require_correctness_of_all),
       use_mode_a_(use_mode_a), use_ms_ta_(use_ms_ta), use_ms_ti_(use_ms_ti)
 {
@@ -195,16 +194,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         }
         ++num_pos_inside;
 
-        tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(tst_id, target_data, max_ref_time_diff);
-        tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(tst_id, target_data, max_ref_time_diff);
-        tie(cmp_res_ma, cmp_res_ma_comment) = compareModeA(tst_id, target_data, max_ref_time_diff);
-
         any_correct = false;
         all_correct = true;
         all_no_ref = true;
 
         if (use_ms_ti_)
         {
+            tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(tst_id, target_data, max_ref_time_diff);
+
             ti_no_ref = cmp_res_ti == ValueComparisonResult::Unknown_NoRefData;
             all_no_ref &= ti_no_ref;
 
@@ -220,6 +217,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         if (use_ms_ta_)
         {
+            tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(tst_id, target_data, max_ref_time_diff);
+
             ta_no_ref = cmp_res_ta == ValueComparisonResult::Unknown_NoRefData;
             all_no_ref &= ta_no_ref;
 
@@ -239,6 +238,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         if (use_mode_a_)
         {
+            tie(cmp_res_ma, cmp_res_ma_comment) = compareModeA(tst_id, target_data, max_ref_time_diff);
+
             ma_no_ref = cmp_res_ma == ValueComparisonResult::Unknown_NoRefData;
             all_no_ref &= ma_no_ref;
 

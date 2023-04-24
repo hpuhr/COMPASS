@@ -18,13 +18,13 @@
 #ifndef EVALUATIONREQUIREMENPOSITIONALONG_H
 #define EVALUATIONREQUIREMENPOSITIONALONG_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
-class PositionAlong : public Base
+class PositionAlong : public ProbabilityBase
 {
 public:
     PositionAlong(

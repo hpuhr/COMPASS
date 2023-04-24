@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTDETECTION_H
 #define EVALUATIONREQUIREMENTDETECTION_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
@@ -57,7 +57,7 @@ public:
     dbContent::TargetPosition pos_last_;
 };
 
-class Detection : public Base
+class Detection : public ProbabilityBase
 {
 public:
     Detection(
@@ -66,7 +66,8 @@ public:
             float update_interval_s,
             bool use_min_gap_length, float min_gap_length_s,
             bool use_max_gap_length, float max_gap_length_s, bool invert_prob,
-            bool use_miss_tolerance, float miss_tolerance_s);
+            bool use_miss_tolerance, float miss_tolerance_s,
+            bool hold_for_any_target);
 
     float updateInterval() const;
 
@@ -90,6 +91,8 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    bool holdForAnyTarget() const;
+
 protected:
     float update_interval_s_{0};
 
@@ -103,6 +106,8 @@ protected:
 
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};
+
+    bool hold_for_any_target_ {false}; // if requirement must hold for any target (all single targets)
 
     bool isMiss (float d_tod);
     unsigned int getNumMisses(float d_tod);

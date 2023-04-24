@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIGWIDGET_H
 
-#include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
 class ComparisonTypeComboBox;
 
@@ -31,7 +31,7 @@ namespace EvaluationRequirement
 {
     class PositionDistanceConfig;
 
-    class PositionDistanceConfigWidget : public BaseConfigWidget
+    class PositionDistanceConfigWidget : public ProbabilityBaseConfigWidget
     {
         Q_OBJECT
 

@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTEXTRATRACK_H
 #define EVALUATIONREQUIREMENTEXTRATRACK_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
@@ -48,7 +48,7 @@ public:
     std::string comment_;
 };
 
-class ExtraTrack : public Base
+class ExtraTrack : public ProbabilityBase
 {
 public:
     ExtraTrack(

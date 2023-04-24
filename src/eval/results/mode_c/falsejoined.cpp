@@ -123,7 +123,7 @@ void JoinedModeCFalse::addToOverviewTable(std::shared_ptr<EvaluationResultsRepor
 
         if (p_false_.has_value())
         {
-            result = req-> getResultConditionStr(p_false_.value());
+            result = req->getConditionResultStr(p_false_.value());
             pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
         }
 
@@ -177,7 +177,7 @@ void JoinedModeCFalse::addDetails(std::shared_ptr<EvaluationResultsReport::RootI
         string result {"Unknown"};
 
         if (p_false_.has_value())
-            result = req->getResultConditionStr(p_false_.value());
+            result = req->getConditionResultStr(p_false_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }

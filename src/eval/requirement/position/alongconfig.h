@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTPOSITIONALONGCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/position/alongconfigwidget.h"
 #include "eval/requirement/position/along.h"
 
@@ -29,7 +29,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class PositionAlongConfig : public BaseConfig
+class PositionAlongConfig : public ProbabilityBaseConfig
 {
 public:
     PositionAlongConfig(const std::string& class_id, const std::string& instance_id,

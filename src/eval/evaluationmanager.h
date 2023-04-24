@@ -305,6 +305,9 @@ public:
     bool reportSplitResultsByMOPS() const;
     void reportSplitResultsByMOPS(bool value);
 
+    bool reportSplitResultsByACOnlyMS() const;
+    void reportSplitResultsByACOnlyMS(bool value);
+
     bool reportShowAdsbInfo() const;
     void reportShowAdsbInfo(bool value);
 
@@ -438,6 +441,7 @@ protected:
     // report stuff
     bool report_skip_no_data_details_ {true};
     bool report_split_results_by_mops_ {false};
+    bool report_split_results_by_aconly_ms_ {false};
     bool report_show_adsb_info_ {false};
 
     std::string report_author_;

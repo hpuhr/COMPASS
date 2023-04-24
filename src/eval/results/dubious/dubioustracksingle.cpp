@@ -126,7 +126,8 @@ void SingleDubiousTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsRe
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()
+            || eval_man_.reportSplitResultsByACOnlyMS()) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
@@ -330,7 +331,7 @@ void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
         string result {"Unknown"};
 
         if (p_dubious_track_.has_value())
-            result = req->getResultConditionStr(p_dubious_track_.value());
+            result = req->getConditionResultStr(p_dubious_track_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

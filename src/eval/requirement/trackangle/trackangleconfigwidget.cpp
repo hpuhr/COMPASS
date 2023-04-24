@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
 
 TrackAngleConfigWidget::TrackAngleConfigWidget(TrackAngleConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     // threshold
     threshold_value_edit_ = new QLineEdit(QString::number(config().threshold()));

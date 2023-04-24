@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTDUBIOUSTRACK_H
 #define EVALUATIONREQUIREMENTDUBIOUSTRACK_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
@@ -67,7 +67,7 @@ public:
     }
 };
 
-class DubiousTrack : public Base
+class DubiousTrack : public ProbabilityBase
 {
 public:
     DubiousTrack(const std::string& name, const std::string& short_name, const std::string& group_name,

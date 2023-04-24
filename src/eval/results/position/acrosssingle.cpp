@@ -120,7 +120,8 @@ void SinglePositionAcross::addTargetToOverviewTable(shared_ptr<EvaluationResults
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()
+            || eval_man_.reportSplitResultsByACOnlyMS()) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
@@ -250,7 +251,7 @@ void SinglePositionAcross::addTargetDetailsToReport(shared_ptr<EvaluationResults
         string result {"Unknown"};
 
         if (prob_.has_value())
-            result = req->getResultConditionStr(prob_.value());
+            result = req->getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Across Fulfilled", "", result.c_str()}, this);
 

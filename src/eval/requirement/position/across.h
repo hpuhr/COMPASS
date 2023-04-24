@@ -18,13 +18,13 @@
 #ifndef EVALUATIONREQUIREMENPOSITIONACROSS_H
 #define EVALUATIONREQUIREMENPOSITIONACROSS_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
-class PositionAcross : public Base
+class PositionAcross : public ProbabilityBase
 {
 public:
     PositionAcross(

@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTPOSITIONACROSSCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/position/acrossconfigwidget.h"
 #include "eval/requirement/position/across.h"
 
@@ -29,7 +29,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class PositionAcrossConfig : public BaseConfig
+class PositionAcrossConfig : public ProbabilityBaseConfig
 {
 public:
     PositionAcrossConfig(const std::string& class_id, const std::string& instance_id,

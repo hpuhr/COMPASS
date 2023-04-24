@@ -142,7 +142,7 @@ void JoinedPositionAlong::addToOverviewTable(std::shared_ptr<EvaluationResultsRe
     {
         p_min_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(prob_.value());
+        result = req->getConditionResultStr(prob_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -210,7 +210,7 @@ void JoinedPositionAlong::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
         string result {"Unknown"};
 
         if (prob_.has_value())
-            result = req->getResultConditionStr(prob_.value());
+            result = req->getConditionResultStr(prob_.value());
 
         sec_det_table.addRow({"Condition Along Fulfilled", "", result.c_str()}, this);
     }

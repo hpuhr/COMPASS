@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/identification/correctconfigwidget.h"
+#include "eval/requirement/identification/identificationcorrectconfigwidget.h"
 #include "eval/requirement/identification/correctconfig.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
@@ -30,7 +30,7 @@ namespace EvaluationRequirement
 {
 
     IdentificationCorrectConfigWidget::IdentificationCorrectConfigWidget(IdentificationCorrectConfig& cfg)
-        : BaseConfigWidget(cfg)
+        : ProbabilityBaseConfigWidget(cfg)
     {
         assert (prob_edit_);
         prob_edit_->setToolTip("Probability of correct identification");

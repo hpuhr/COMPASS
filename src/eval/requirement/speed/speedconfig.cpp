@@ -34,7 +34,7 @@ namespace EvaluationRequirement
 SpeedConfig::SpeedConfig(
         const std::string& class_id, const std::string& instance_id,
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
     registerParameter("threshold_value", &threshold_value_, 50.0);
     registerParameter("use_percent_if_higher", &use_percent_if_higher_, false);

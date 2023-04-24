@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTEXTRADATA_H
 #define EVALUATIONREQUIREMENTEXTRADATA_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
@@ -49,7 +49,7 @@ public:
     std::string comment_;
 };
 
-class ExtraData : public Base
+class ExtraData : public ProbabilityBase
 {
 public:
     ExtraData(

@@ -128,6 +128,9 @@ vector<double> JoinedPositionBase::values() const
         SinglePositionBase* single_result = dynamic_cast<SinglePositionBase*>(result_it.get());
         assert (single_result);
 
+        if (!single_result->use())
+            continue;
+
         values.insert(values.end(), single_result->values().begin(), single_result->values().end());
     }
 

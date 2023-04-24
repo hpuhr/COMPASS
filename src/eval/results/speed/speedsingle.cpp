@@ -128,7 +128,8 @@ void SingleSpeed::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::R
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()
+            || eval_man_.reportSplitResultsByACOnlyMS()) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
@@ -275,7 +276,7 @@ void SingleSpeed::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::R
         string result {"Unknown"};
 
         if (p_passed_.has_value())
-            result = req->getResultConditionStr(p_passed_.value());
+            result = req->getConditionResultStr(p_passed_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
