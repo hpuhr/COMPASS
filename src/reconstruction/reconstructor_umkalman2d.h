@@ -46,7 +46,7 @@ public:
 
 protected:
     kalman::KalmanState kalmanState() const override final;
-    bool kalmanStep(double dt, const Measurement& mm) override final;
+    boost::optional<kalman::KalmanState> kalmanStep(double dt, const Measurement& mm) override final;
     kalman::Vector xVec(const Measurement& mm) const override final;
     kalman::Matrix pMat(const Measurement& mm) const override final;
     kalman::Vector zVec(const Measurement& mm) const override final;

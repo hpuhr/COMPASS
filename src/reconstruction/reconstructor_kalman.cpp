@@ -48,9 +48,32 @@ void ReconstructorKalman::init()
 bool ReconstructorKalman::smoothChain(KalmanChain& chain)
 {
     if (chain.references.empty())
+    {
+        //loginf << "no references to smooth...";
         return true;
+    }
     if (chain.references.size() != chain.rts_infos.size())
+    {
+        //loginf << "not enough RTS infos: " << chain.rts_infos.size() << "/" << chain.references.size();
         return false;
+    }
+
+    if (verbosity() > 1)
+    {
+        loginf << "Obtains " << chain.rts_infos.size() << " info(s)";
+
+        int cnt = 0;
+        for (const auto& rts_info : chain.rts_infos)
+        {
+            loginf << "Info " << cnt++ << "\n"
+                   << "    x: " << rts_info.x << "\n"
+                   << "    P: " << rts_info.P << "\n"
+                   << "    Q: " << rts_info.Q << "\n"
+                   << "    F: " << rts_info.F << "\n";
+        }
+    }
+
+    //loginf << "Smoothing chain...";
 
     std::vector<kalman::Vector> x_smooth;
     std::vector<kalman::Matrix> P_smooth;
@@ -267,8 +290,8 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
         }
 
         //do kalman step
-        bool ok = kalmanStep(dt, mm);
-        if (!ok)
+        auto state = kalmanStep(dt, mm);
+        if (!state.has_value())
         {
             //@TODO: what to do?
             logerr << data_info << ": Kalman step failed @ mm=" << i << " t=" << mm.t;
@@ -276,10 +299,9 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
         }
 
         //store new state
-        auto state = kalmanState();
-        auto ref   = storeState(state, mm);
+        auto ref = storeState(state.value(), mm);
 
-        addReference(ref, state);
+        addReference(ref, state.value());
     }
 
     //add last uncollected chain

@@ -175,9 +175,6 @@ void Reconstructor::postprocessMeasurements()
 
         for (auto& mm : measurements_)
         {
-            if (verbosity() > 1)
-                std::cout << "x: " << mm.x << ", y: " << mm.y << ", xoffs: " << x_offs_ << ", yoffs: " << y_offs_ << std::endl;
-
             mm.x -= x_offs_;
             mm.y -= y_offs_;
         }
