@@ -77,9 +77,10 @@ namespace helpers
 
 /**
 */
-Reconstructor_UMKalman2D::Reconstructor_UMKalman2D()
+Reconstructor_UMKalman2D::Reconstructor_UMKalman2D(bool track_velocities)
+:   track_velocities_(track_velocities)
 {
-    kalman_.reset(new kalman::KalmanFilter(4, 2, 0));
+    kalman_.reset(new kalman::KalmanFilter(4, track_velocities_ ? 4 : 2, 0));
 }
 
 /**
@@ -208,10 +209,13 @@ kalman::Vector Reconstructor_UMKalman2D::zVec(const Measurement& mm) const
 void Reconstructor_UMKalman2D::storeState_impl(Reference& ref,
                                                const kalman::KalmanState& state) const
 {
-    ref.x  = state.x[0];
-    ref.y  = state.x[2];
-    ref.vx = state.x[1];
-    ref.vy = state.x[3];
+    ref.x        = state.x[0];
+    ref.y        = state.x[2];
+    ref.vx       = state.x[1];
+    ref.vy       = state.x[3];
+    ref.stddev_x = std::sqrt(state.P(0, 0));
+    ref.stddev_y = std::sqrt(state.P(2, 2));
+    ref.cov_xy   = state.P(2, 0);
 }
 
 /**

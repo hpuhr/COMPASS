@@ -19,8 +19,6 @@
 #include "kalman.h"
 #include "logger.h"
 
-#include <fstream>
-
 namespace reconstruction
 {
 
@@ -100,6 +98,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
         {
             if (verbosity() > 0)
                 loginf << "Dropping chain of " << c.references.size() << " point(s)";
+            
             continue;
         }
             
@@ -114,7 +113,6 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
                 logerr << "ReconstructorKalman::finalize(): RTS smoother failed";
                 return {};
             }
-                
         }
         
         result.insert(result.end(), c.references.begin(), c.references.end());
@@ -250,20 +248,6 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
 {
     init();
 
-    // if (data_info == "UTN3")
-    // {
-    //     std::cout << "WRITE FILE!!!" << std::endl;
-
-    //     std::ofstream file("/home/mcphatty/rec_input.txt");
-    //     file << "#MEASUREMENTS: " << measurements.size() << std::endl;
-    //     file << "--------" << std::endl;
-    //     for (const auto& mm : measurements)
-    //     {
-    //         mm.print(file);
-    //         file << "--------" << std::endl;
-    //     }
-    // }
-
     if (measurements.size() < min_chain_size_)
         return {};
 
@@ -286,6 +270,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
         {
             if (verbosity() > 0)
                 loginf << data_info << ": Skipping very small timestep of " << dt << " @ mm=" << i << " t=" << mm.t;
+            
             continue;
         }
 
