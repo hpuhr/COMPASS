@@ -33,6 +33,7 @@ void ReconstructorKalman::init()
     //cache some values
     Q_var_      = base_config_.Q_std      * base_config_.Q_std;
     R_var_      = base_config_.R_std      * base_config_.R_std;
+    R_var_high_ = base_config_.R_std_high * base_config_.R_std_high;
     P_var_      = base_config_.P_std      * base_config_.P_std;
     P_var_high_ = base_config_.P_std_high * base_config_.P_std_high;
 
@@ -167,7 +168,7 @@ Reference ReconstructorKalman::storeState(const kalman::KalmanState& state,
     Reference ref;
     ref.source_id    =  mm.source_id;
     ref.t            =  mm.t;
-    ref.nostddev_pos = !mm.hasStdDev();
+    ref.nostddev_pos = !mm.hasStdDevPosition();
 
     storeState(ref, state);
     
@@ -239,6 +240,30 @@ bool ReconstructorKalman::reinitIfNeeded(const Measurement& mm, const std::strin
 double ReconstructorKalman::timestep(const Measurement& mm) const
 {
     return Reconstructor::timestep(lastReference(), mm);
+}
+
+/**
+*/
+reconstruction::Uncertainty ReconstructorKalman::defaultUncertaintyOfMeasurement(const Measurement& mm) const
+{
+    //init to standard values
+    reconstruction::Uncertainty uncert;
+    uncert.pos_var   = rVar();
+    uncert.speed_var = rVar();
+    uncert.acc_var   = rVar();
+
+    //try to get uncertainty for source
+    const auto& source_uncert = sourceUncertainty(mm.source_id);
+    if (source_uncert)
+        uncert = source_uncert.value();
+
+    //set to high uncertainty if value is missing (pos is always available)
+    if (!mm.hasVelocity())
+        uncert.speed_var = rVarHigh();
+    if (!mm.hasAcceleration())
+        uncert.acc_var = rVarHigh();
+
+    return uncert;
 }
 
 /**

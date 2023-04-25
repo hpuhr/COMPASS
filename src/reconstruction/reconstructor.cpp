@@ -37,6 +37,20 @@ Reconstructor::~Reconstructor() = default;
 
 /**
 */
+void Reconstructor::setSensorUncertainty(const std::string& dbcontent, const Uncertainty& uncert)
+{
+    dbcontent_uncerts_[dbcontent] = uncert;
+}
+
+/**
+*/
+const boost::optional<Uncertainty>& Reconstructor::sourceUncertainty(uint32_t source_id) const
+{
+    return source_uncerts_.at(source_id);
+}
+
+/**
+*/
 void Reconstructor::addMeasurements(const std::vector<Measurement>& measurements)
 {
     if (!measurements.empty())
@@ -45,12 +59,19 @@ void Reconstructor::addMeasurements(const std::vector<Measurement>& measurements
 
 /**
 */
-void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain)
+void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, const std::string& dbcontent)
 {
     assert(tr_chain);
 
     uint32_t source_id = source_cnt_++;
     sources_[source_id] = tr_chain;
+
+    source_uncerts_.push_back({}); //add empty uncertainty
+
+    //if uncertainty is stored for dbcontent => assign
+    auto uncert_it = dbcontent_uncerts_.find(dbcontent);
+    if (uncert_it != dbcontent_uncerts_.end())
+        source_uncerts_.back() = uncert_it->second;
 
     const auto& indices = tr_chain->timestampIndexes();
 
@@ -65,7 +86,8 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain)
 
         boost::optional<dbContent::TargetPosition>         pos;
         boost::optional<dbContent::TargetVelocity>         speed;
-        boost::optional<dbContent::TargetPositionAccuracy> accuracy;
+        boost::optional<dbContent::TargetPositionAccuracy> accuracy_pos;
+        boost::optional<dbContent::TargetVelocityAccuracy> accuracy_vel;
 
         pos = tr_chain->pos(index);
 
@@ -73,8 +95,9 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain)
         mm.lon = pos->longitude_;
         //@TODO: altitude?
 
-        speed    = tr_chain->speed(index);
-        accuracy = tr_chain->posAccuracy(index);
+        speed        = tr_chain->speed(index);
+        accuracy_pos = tr_chain->posAccuracy(index);
+        accuracy_vel = tr_chain->speedAccuracy(index);
 
         if (speed.has_value())
         {
@@ -87,11 +110,17 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain)
 
         //@TODO: acceleration?
 
-        if (accuracy.has_value())
+        if (accuracy_pos.has_value())
         {
-            mm.stddev_x = accuracy->x_stddev_;
-            mm.stddev_y = accuracy->y_stddev_;
-            mm.cov_xy   = accuracy->xy_cov_;
+            mm.x_stddev = accuracy_pos->x_stddev_;
+            mm.y_stddev = accuracy_pos->y_stddev_;
+            mm.xy_cov   = accuracy_pos->xy_cov_;
+        }
+
+        if (accuracy_vel.has_value())
+        {
+            mm.vx_stddev = accuracy_vel->vx_stddev_;
+            mm.vy_stddev = accuracy_vel->vy_stddev_;
         }
 
         mms.push_back(mm);

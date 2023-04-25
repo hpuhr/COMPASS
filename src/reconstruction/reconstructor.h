@@ -57,8 +57,10 @@ public:
     Reconstructor();
     virtual ~Reconstructor();
 
+    void setSensorUncertainty(const std::string& dbcontent, const Uncertainty& uncert);
+
     void addMeasurements(const std::vector<Measurement>& measurements);
-    void addChain(const dbContent::TargetReport::Chain* tr_chain);
+    void addChain(const dbContent::TargetReport::Chain* tr_chain, const std::string& dbcontent);
 
     boost::optional<std::vector<Reference>> reconstruct(const std::string& data_info = "");
 
@@ -79,12 +81,22 @@ protected:
     static double timestep(const Measurement& mm0, const Measurement& mm1);
     static double distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys = CoordSystem::Cart);
 
+    const boost::optional<Uncertainty>& sourceUncertainty(uint32_t source_id) const;
+
 private:
+    struct DBContentInfo
+    {
+        Uncertainty uncert;
+    };
+
     void postprocessMeasurements();
     void postprocessReferences(std::vector<Reference>& references);
 
+    
     std::vector<Measurement>                     measurements_;
     SourceMap                                    sources_;
+    std::map<std::string, Uncertainty>           dbcontent_uncerts_;
+    std::vector<boost::optional<Uncertainty>>    source_uncerts_;
     std::unique_ptr<OGRSpatialReference>         ref_src_;
     std::unique_ptr<OGRSpatialReference>         ref_dst_;
     std::unique_ptr<OGRCoordinateTransformation> trafo_fwd_;

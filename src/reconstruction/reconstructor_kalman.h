@@ -46,7 +46,8 @@ public:
     struct BaseConfig
     {
         double Q_std      = 10.0;   // process noise
-        double R_std      = 30.0;   // observation noise
+        double R_std      = 30.0;   // observation noise (standard)
+        double R_std_high = 1000.0; // observation noise (high)
         double P_std      = 30.0;   // system noise (standard)
         double P_std_high = 1000.0; // system noise (high)
 
@@ -66,6 +67,7 @@ public:
 
     double qVar() const { return Q_var_; }
     double rVar() const { return R_var_; }
+    double rVarHigh() const { return R_var_high_; }
     double pVar() const { return P_var_; }
     double pVarHigh() const  { return P_var_high_; }
 
@@ -81,6 +83,8 @@ protected:
     virtual void storeState_impl(Reference& ref,
                                  const kalman::KalmanState& state) const = 0;
     virtual void init_impl(const Measurement& mm) const = 0;
+
+    reconstruction::Uncertainty defaultUncertaintyOfMeasurement(const Measurement& mm) const;
 
 private:
     void init();
@@ -110,6 +114,7 @@ private:
     size_t min_chain_size_;
     double Q_var_;
     double R_var_;
+    double R_var_high_;
     double P_var_;
     double P_var_high_;
 

@@ -30,26 +30,68 @@ namespace helpers
         return kalman::KalmanFilter::continuousWhiteNoise(2, dt, Q_var, 2);
     }
 
-    kalman::Matrix measurementUMat(double R_var, const Measurement& mm)
+    kalman::Matrix measurementUMatNoVelocity(const Measurement& mm, const reconstruction::Uncertainty& uncert)
     {
         kalman::Matrix R;
         R.setIdentity(2, 2);
 
-        if (mm.hasStdDev())
+        if (mm.hasStdDevPosition())
         {
-            R(0, 0) = mm.stddev_x.value() * mm.stddev_x.value();
-            R(1, 1) = mm.stddev_y.value() * mm.stddev_y.value();
+            R(0, 0) = mm.x_stddev.value() * mm.x_stddev.value();
+            R(1, 1) = mm.y_stddev.value() * mm.y_stddev.value();
 
-            if (mm.cov_xy.has_value())
+            if (mm.xy_cov.has_value())
             {
-                R(0, 1) = mm.cov_xy.value();
-                R(1, 0) = mm.cov_xy.value();
+                R(0, 1) = mm.xy_cov.value();
+                R(1, 0) = mm.xy_cov.value();
             }
-
+            
             return R;
         }
 
-        return R * R_var;
+        return R * uncert.pos_var;
+    }
+
+    kalman::Matrix measurementUMatVelocity(const Measurement& mm, const reconstruction::Uncertainty& uncert)
+    {
+        kalman::Matrix R;
+        R.setIdentity(4, 4);
+
+        //handle position uncertainty
+        R(0, 0) = uncert.pos_var;
+        R(2, 2) = uncert.pos_var;
+
+        if (mm.hasStdDevPosition())
+        {
+            R(0, 0) = mm.x_stddev.value() * mm.x_stddev.value();
+            R(2, 2) = mm.y_stddev.value() * mm.y_stddev.value();
+
+            if (mm.xy_cov.has_value())
+            {
+                R(0, 2) = mm.xy_cov.value();
+                R(2, 0) = mm.xy_cov.value();
+            }
+        }
+
+        //handle speed uncertainty
+        R(1, 1) = uncert.speed_var;
+        R(3, 3) = uncert.speed_var;
+
+        if (mm.hasVelocity() && mm.hasStdDevVelocity())
+        {
+            R(1, 1) = mm.vx_stddev.value() * mm.vx_stddev.value();
+            R(3, 3) = mm.vy_stddev.value() * mm.vy_stddev.value();
+        }
+
+        return R;
+    }
+
+    kalman::Matrix measurementUMat(const Measurement& mm, const reconstruction::Uncertainty& uncert, bool track_vel)
+    {
+        if (track_vel)
+            return measurementUMatVelocity(mm, uncert);
+
+        return measurementUMatNoVelocity(mm, uncert);
     }
 
     kalman::Matrix transitionMat(double dt)
@@ -63,14 +105,21 @@ namespace helpers
         return F;
     }
 
-    kalman::Matrix measurementMat()
+    kalman::Matrix measurementMat(bool track_vel)
     {
-        kalman::Matrix F(2, 4);
-        F.setZero();
+        kalman::Matrix F;
 
-        F(0, 0) = 1.0;
-        F(1, 2) = 1.0;
-
+        if (track_vel)
+        {
+            F.setIdentity(4, 4);
+        }
+        else
+        {
+            F.setZero(2, 4);
+            F(0, 0) = 1.0;
+            F(1, 2) = 1.0;
+        }
+        
         return F;
     }
 }
@@ -98,10 +147,12 @@ kalman::KalmanState Reconstructor_UMKalman2D::kalmanState() const
 */
 boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::kalmanStep(double dt, const Measurement& mm)
 {
+    auto uncert = defaultUncertaintyOfMeasurement(mm);
+
     auto F = helpers::transitionMat(dt);
     auto Q = helpers::processMat(dt, qVar());
     auto z = zVec(mm);
-    auto R = helpers::measurementUMat(rVar(), mm);
+    auto R = helpers::measurementUMat(mm, uncert, track_velocities_);
 
     if (verbosity() > 1)
     {
@@ -152,43 +203,49 @@ kalman::Vector Reconstructor_UMKalman2D::xVec(const Measurement& mm) const
 */
 kalman::Matrix Reconstructor_UMKalman2D::pMat(const Measurement& mm) const
 {
+    auto uncert = defaultUncertaintyOfMeasurement(mm);
+
     kalman::Matrix P(4, 4);
     P.setZero();
     
     if (config_.simple_init)
     {
-        double speed_var = pVar() * baseConfig().P_std;
-
-        P(0, 0) = pVar();
-        P(1, 1) = speed_var;
-        P(2, 2) = pVar();
-        P(3, 3) = speed_var;
+        P(0, 0) = uncert.pos_var;
+        P(1, 1) = uncert.speed_var;
+        P(2, 2) = uncert.pos_var;
+        P(3, 3) = uncert.speed_var;
 
         return P;
     }
 
-    double var_x = pVar();
-    double var_y = pVar();
+    double var_x  = uncert.pos_var;
+    double var_y  = uncert.pos_var;
+    double cov_xy = 0.0;
 
-    if (mm.hasStdDev())
+    if (mm.hasStdDevPosition())
     {
-        var_x = mm.stddev_x.value() * mm.stddev_x.value();
-        var_y = mm.stddev_y.value() * mm.stddev_y.value();
+        var_x = mm.x_stddev.value() * mm.x_stddev.value();
+        var_y = mm.y_stddev.value() * mm.y_stddev.value();
+
+        if (mm.xy_cov.has_value())
+            cov_xy = mm.xy_cov.value();
     }
 
-    double var_vx = pVar();
-    double var_vy = pVar();
+    double var_vx = uncert.speed_var;
+    double var_vy = uncert.speed_var;
 
-    if (!mm.hasVelocity())
+    if (mm.hasVelocity() && mm.hasStdDevVelocity())
     {
-        var_vx = pVarHigh();
-        var_vy = pVarHigh();
+        var_vx = mm.vx_stddev.value() * mm.vx_stddev.value();
+        var_vy = mm.vy_stddev.value() * mm.vy_stddev.value();
     }
 
     P(0, 0) = var_x;
     P(1, 1) = var_vx;
     P(2, 2) = var_y;
     P(3, 3) = var_vy;
+    P(0, 2) = cov_xy;
+    P(2, 0) = cov_xy;
 
     return P;
 }
@@ -197,9 +254,26 @@ kalman::Matrix Reconstructor_UMKalman2D::pMat(const Measurement& mm) const
 */
 kalman::Vector Reconstructor_UMKalman2D::zVec(const Measurement& mm) const
 {
-    kalman::Vector z(2);
-    z[ 0 ] = mm.x;
-    z[ 1 ] = mm.y;
+    kalman::Vector z;
+
+    if (track_velocities_)
+    {
+        z.setZero(4);
+        z[ 0 ] = mm.x;
+        z[ 2 ] = mm.y;
+
+        if (mm.hasVelocity())
+        {
+            z[ 1 ] = mm.vx.value();
+            z[ 3 ] = mm.vy.value();
+        }
+    }
+    else
+    {
+        z.setZero(2);
+        z[ 0 ] = mm.x;
+        z[ 1 ] = mm.y;
+    }
 
     return z;
 }
@@ -213,22 +287,24 @@ void Reconstructor_UMKalman2D::storeState_impl(Reference& ref,
     ref.y        = state.x[2];
     ref.vx       = state.x[1];
     ref.vy       = state.x[3];
-    ref.stddev_x = std::sqrt(state.P(0, 0));
-    ref.stddev_y = std::sqrt(state.P(2, 2));
-    ref.cov_xy   = state.P(2, 0);
+    ref.x_stddev = std::sqrt(state.P(0, 0));
+    ref.y_stddev = std::sqrt(state.P(2, 2));
+    ref.xy_cov   = state.P(2, 0);
 }
 
 /**
 */
 void Reconstructor_UMKalman2D::init_impl(const Measurement& mm) const
 {
+    auto uncert = defaultUncertaintyOfMeasurement(mm);
+
     //init kalman state
     kalman_->setStateVec(xVec(mm));
     kalman_->setCovarianceMat(pMat(mm));
     kalman_->setStateTransitionMat(helpers::transitionMat(1.0));
     kalman_->setProcessUncertMat(helpers::processMat(1.0, qVar()));
-    kalman_->setMeasurementMat(helpers::measurementMat());
-    kalman_->setMeasurementUncertMat(helpers::measurementUMat(rVar(), mm));
+    kalman_->setMeasurementMat(helpers::measurementMat(track_velocities_));
+    kalman_->setMeasurementUncertMat(helpers::measurementUMat(mm, uncert, track_velocities_));
 
     if (verbosity() > 1)
     {

@@ -51,15 +51,21 @@ struct Measurement
 
         return true;
     }
-    bool hasStdDev() const
+    bool hasStdDevPosition() const
     {
-        return (stddev_x.has_value() && stddev_y.has_value());
+        return (x_stddev.has_value() && y_stddev.has_value());
+    }
+    bool hasStdDevVelocity() const
+    {
+        return (vx_stddev.has_value() && vy_stddev.has_value());
     }
 
     void print(std::ostream& strm) const
     {
         strm << "source_id: " << source_id << std::endl;
         //strm << "t:         " << Utils::Time::toString(t) << std::endl;
+
+        strm << "interp:    " << interpolated << std::endl;
 
         strm << "lat:       " << lat << std::endl;
         strm << "lon:       " << lon << std::endl;
@@ -76,32 +82,40 @@ struct Measurement
         strm << "ay:        " << (ay.has_value() ? std::to_string(ay.value()) : "-") << std::endl;
         strm << "az:        " << (az.has_value() ? std::to_string(az.value()) : "-") << std::endl;
 
-        strm << "stddev x:  " << (stddev_x.has_value() ? std::to_string(stddev_x.value()) : "-") << std::endl;
-        strm << "stddev y:  " << (stddev_y.has_value() ? std::to_string(stddev_y.value()) : "-") << std::endl;
-        strm << "cov xy:    " << (cov_xy.has_value() ? std::to_string(cov_xy.value()) : "-") << std::endl;
+        strm << "pos stddev x:  " << (x_stddev.has_value() ? std::to_string(x_stddev.value()) : "-") << std::endl;
+        strm << "pos stddev y:  " << (y_stddev.has_value() ? std::to_string(y_stddev.value()) : "-") << std::endl;
+        strm << "pos cov xy:    " << (xy_cov.has_value() ? std::to_string(xy_cov.value()) : "-") << std::endl;
+
+        strm << "vel stddev x:  " << (vx_stddev.has_value() ? std::to_string(vx_stddev.value()) : "-") << std::endl;
+        strm << "vel stddev y:  " << (vy_stddev.has_value() ? std::to_string(vy_stddev.value()) : "-") << std::endl;
     }
 
-    uint32_t                 source_id; // source of the measurement
-    boost::posix_time::ptime t;         // timestamp
+    uint32_t                 source_id;            // source of the measurement
+    boost::posix_time::ptime t;                    // timestamp
 
-    double                   lat;       // wgs84 latitude
-    double                   lon;       // wgs84 longitude
+    bool                     interpolated = false; //measurement has been interpolated (e.g. by spline interpolator)
 
-    double                   x;         // x position
-    double                   y;         // y position
-    boost::optional<double>  z;         // optional z position
+    double                   lat;                  // wgs84 latitude
+    double                   lon;                  // wgs84 longitude
 
-    boost::optional<double>  vx;        // speed vector x
-    boost::optional<double>  vy;        // speed vector y
-    boost::optional<double>  vz;        // speed vector z
+    double                   x;                    // x position
+    double                   y;                    // y position
+    boost::optional<double>  z;                    // optional z position
 
-    boost::optional<double>  ax;        // accel vector x
-    boost::optional<double>  ay;        // accel vector y
-    boost::optional<double>  az;        // accel vector z
+    boost::optional<double>  vx;                   // speed vector x
+    boost::optional<double>  vy;                   // speed vector y
+    boost::optional<double>  vz;                   // speed vector z
 
-    boost::optional<double>  stddev_x;  // stddev x
-    boost::optional<double>  stddev_y;  // stddev y
-    boost::optional<double>  cov_xy;    // xy-covariance value
+    boost::optional<double>  ax;                   // accel vector x
+    boost::optional<double>  ay;                   // accel vector y
+    boost::optional<double>  az;                   // accel vector z
+
+    boost::optional<double>  x_stddev;             // position stddev x
+    boost::optional<double>  y_stddev;             // position stddev y
+    boost::optional<double>  xy_cov;               // position xy-covariance value
+
+    boost::optional<double>  vx_stddev;            // velocity stddev x
+    boost::optional<double>  vy_stddev;            // velocity stddev y
 };
 
 /**
@@ -114,6 +128,15 @@ struct Reference : public Measurement
     bool nostddev_pos = false; // did this position not obtain stddev information
 
     Eigen::MatrixXd cov; //covariance matrix
+};
+
+/**
+*/
+struct Uncertainty
+{
+    double pos_var   = 100.0;
+    double speed_var = 100.0;
+    double acc_var   = 100.0;
 };
 
 } // namespace reconstruction

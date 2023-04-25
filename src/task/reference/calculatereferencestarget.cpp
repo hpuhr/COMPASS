@@ -108,7 +108,6 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_));
 
-
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
 
     NullableVector<unsigned int>& ds_id_vec = buffer->get<unsigned int> (
@@ -229,12 +228,12 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
                 // set stddevs
 
-                if (ref.stddev_x.has_value() && ref.stddev_y.has_value() && ref.cov_xy.has_value())
+                if (ref.x_stddev.has_value() && ref.y_stddev.has_value() && ref.xy_cov.has_value())
                 {
-                    x_stddev_vec.set(i, *ref.stddev_x);
-                    y_stddev_vec.set(i, *ref.stddev_y);
+                    x_stddev_vec.set(i, *ref.x_stddev);
+                    y_stddev_vec.set(i, *ref.y_stddev);
 
-                    xy_cov = * ref.cov_xy;
+                    xy_cov = *ref.xy_cov;
 
                     // to inverse of this asterix rep
                     // if (xy_cov < 0)
@@ -331,27 +330,64 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
         auto reconstructUMKalman2D = [ & ] ()
         {
-            reconstruction::Reconstructor_UMKalman2D rec;
-            rec.baseConfig().R_std          = 30.0; // observation noise
-            rec.baseConfig().Q_std          = 10.0; // process noise
-            rec.baseConfig().P_std          = 30.0; // system noise (standard)
-            rec.baseConfig().P_std_high     = 1000.0; // system noise (high)
-            rec.baseConfig().smooth         = true;
-            rec.baseConfig().min_dt         = 0.0;
-            rec.baseConfig().max_dt         = 60.0;
-            rec.baseConfig().min_chain_size = 2;
+            //default uncertainties
+            const double R_std          = 30.0;   // observation noise (standard)
+            const double R_std_high     = 1000.0; // observation noise (high)
+            const double Q_std          = 10.0;   // process noise
+            const double P_std          = 30.0;   // system noise (standard)
+            const double P_std_high     = 1000.0; // system noise (high)
+
+            const double vel_std_cat021 = 1000.0; // default velocity stdddev CAT021
+            const double vel_std_cat062 = 50.0;   // default velocity stdddev CAT062
+
+            //other config values
+            const double min_dt         = 0.0;    // minimum allowed timestep in seconds
+            const double max_dt         = 60.0;   // maximum allowed timestep in seconds
+            const size_t min_chain_size = 2;      // minimum kalman chain size
+
+            const bool   track_vel      = true;   // track velocities in measurements
+            const bool   smooth_rts     = true;   // enable RTS smoother
+
+            reconstruction::Reconstructor_UMKalman2D rec(track_vel);
+
+            //configure kalman
+            rec.baseConfig().R_std          = R_std;
+            rec.baseConfig().R_std_high     = R_std_high;
+            rec.baseConfig().Q_std          = Q_std;
+            rec.baseConfig().P_std          = P_std;
+            rec.baseConfig().P_std_high     = P_std_high;
+
+            rec.baseConfig().min_dt         = min_dt;
+            rec.baseConfig().max_dt         = max_dt;
+            rec.baseConfig().min_chain_size = min_chain_size;
+
+            rec.baseConfig().smooth         = smooth_rts;
 
             //if (utn_ == 3)
             //    rec.setVerbosity(2);
 
-            rec.config().simple_init = false;
+            //configure sensor default noise
+            reconstruction::Uncertainty uncert_cat021;
+            uncert_cat021.pos_var   = R_std          * R_std;
+            uncert_cat021.speed_var = vel_std_cat021 * vel_std_cat021;
+            uncert_cat021.acc_var   = R_std_high     * R_std_high;
 
+            reconstruction::Uncertainty uncert_cat062;
+            uncert_cat062.pos_var   = R_std          * R_std;
+            uncert_cat062.speed_var = vel_std_cat062 * vel_std_cat062;
+            uncert_cat062.acc_var   = R_std_high     * R_std_high;
+
+            rec.setSensorUncertainty("CAT021", uncert_cat021);
+            rec.setSensorUncertainty("CAT062", uncert_cat062);
+
+            //add chains to reconstructor
             for (auto& chain_it : chains_)
             {
                 chain_targets[chain_it.second.get()] = chain_it.first;
-                rec.addChain(chain_it.second.get());
+                rec.addChain(chain_it.second.get(), std::get<0>(chain_it.first));
             }
 
+            //reconstruct
             auto references = rec.reconstruct(dinfo);
             if (references.has_value())
                 storeReferences(references.value(), rec);
