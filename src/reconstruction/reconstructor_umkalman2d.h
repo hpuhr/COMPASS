@@ -39,7 +39,7 @@ public:
         bool simple_init = true;
     };
 
-    Reconstructor_UMKalman2D();
+    Reconstructor_UMKalman2D(bool track_velocities = false);
     virtual ~Reconstructor_UMKalman2D();
 
     Config& config() { return config_; }
@@ -50,12 +50,12 @@ protected:
     kalman::Vector xVec(const Measurement& mm) const override final;
     kalman::Matrix pMat(const Measurement& mm) const override final;
     kalman::Vector zVec(const Measurement& mm) const override final;
-    void storeState_impl(Reference& ref,
-                         const kalman::KalmanState& state) const override final;
+    void storeState_impl(Reference& ref, const kalman::KalmanState& state) const override final;
     void init_impl(const Measurement& mm) const override final;
 
 private:
     Config config_;
+    bool   track_velocities_ = false;
 
     std::unique_ptr<kalman::KalmanFilter> kalman_;
 };
