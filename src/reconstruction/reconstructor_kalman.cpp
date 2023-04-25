@@ -77,7 +77,7 @@ bool ReconstructorKalman::smoothChain(KalmanChain& chain)
     std::vector<kalman::Vector> x_smooth;
     std::vector<kalman::Matrix> P_smooth;
 
-    if (!kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, chain.rts_infos))
+    if (!kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, chain.rts_infos, baseConfig().smooth_scale))
         return false;
 
     for (size_t i = 0; i < chain.references.size(); ++i)

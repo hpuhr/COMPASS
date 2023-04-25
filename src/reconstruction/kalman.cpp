@@ -245,7 +245,8 @@ Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
 */
 bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
                                std::vector<kalman::Matrix>& P_smooth,
-                               const std::vector<KalmanState>& states)
+                               const std::vector<KalmanState>& states,
+                               double smooth_scale)
 {
     if (states.empty())
         return true;
@@ -259,11 +260,13 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
     std::vector<kalman::Matrix> Pp(n);
     std::vector<kalman::Matrix> K (n);
 
+    const double smooth_scale_sqr = smooth_scale * smooth_scale;
+
     for (int i = 0; i < n; ++i)
     {
         x_smooth[ i ] = states[ i ].x;
-        P_smooth[ i ] = states[ i ].P;
-        Pp      [ i ] = states[ i ].P;
+        P_smooth[ i ] = states[ i ].P * smooth_scale_sqr;
+        Pp      [ i ] = states[ i ].P * smooth_scale_sqr;
         K       [ i ].setZero(dim_x, dim_x);
     }
 

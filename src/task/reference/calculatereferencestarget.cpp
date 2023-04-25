@@ -347,6 +347,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
             const bool   track_vel      = true;   // track velocities in measurements
             const bool   smooth_rts     = true;   // enable RTS smoother
+            const double smooth_scale   = 1.0;    // scale factor for RTS smoother
 
             reconstruction::Reconstructor_UMKalman2D rec(track_vel);
 
@@ -362,6 +363,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
             rec.baseConfig().min_chain_size = min_chain_size;
 
             rec.baseConfig().smooth         = smooth_rts;
+            rec.baseConfig().smooth_scale   = smooth_scale;
 
             //if (utn_ == 3)
             //    rec.setVerbosity(2);

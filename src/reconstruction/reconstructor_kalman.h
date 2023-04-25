@@ -52,6 +52,7 @@ public:
         double P_std_high = 1000.0; // system noise (high)
 
         bool   smooth         = true; // use RTS smoother
+        double smooth_scale   = 1.0;  // scale factor for RTS smoothing
         size_t min_chain_size = 2;    // minimum number of connected points used as result (and input for RTS smoother)
 
         double max_distance = 0.0;    // maximum allowed distance of consecutive target reports in meters (0 = do not check)

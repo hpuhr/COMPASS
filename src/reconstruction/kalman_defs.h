@@ -36,10 +36,10 @@ struct KalmanState
     KalmanState() {}
     KalmanState(const Vector& _x, const Matrix& _P) : x(_x), P(_P) {}
 
-    Vector x;
-    Matrix P;
-    Matrix F;
-    Matrix Q;
+    Vector x; // state
+    Matrix P; // state uncertainty
+    Matrix F; // transition mat
+    Matrix Q; // process noise
 };
 
 } // namespace kalman

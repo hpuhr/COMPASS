@@ -50,7 +50,8 @@ public:
     static Matrix continuousWhiteNoise(size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
     static bool rtsSmoother(std::vector<kalman::Vector>& x_smooth,
                             std::vector<kalman::Matrix>& P_smooth,
-                            const std::vector<KalmanState>& states);
+                            const std::vector<KalmanState>& states,
+                            double smooth_scale = 1.0);
 
     kalman::KalmanState state() const;
 
