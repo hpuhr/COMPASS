@@ -227,7 +227,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         ++num_pos_inside;
 
         // ref_spd ok
-        tst_spd_ms = target_data.tstChain().tstMeasuredSpeed(tst_id);
+        tst_spd_ms = target_data.tstChain().groundSpeed(tst_id);
 
         if (!tst_spd_ms.has_value())
         {

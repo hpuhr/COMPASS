@@ -456,7 +456,7 @@ boost::optional<unsigned int> Chain::tstTrackNum(const DataID& id) const
     return tn_vec.get(index_ext);
 }
 
-boost::optional<float> Chain::tstMeasuredSpeed(const DataID& id) const // m/s
+boost::optional<float> Chain::groundSpeed(const DataID& id) const // m/s
 {
     auto index = indexFromDataID(id);
 
@@ -473,7 +473,7 @@ boost::optional<float> Chain::tstMeasuredSpeed(const DataID& id) const // m/s
     return gs_vec.get(index_ext) * KNOTS2M_S; // kts 2 m/s
 }
 
-boost::optional<float> Chain::tstMeasuredTrackAngle(const DataID& id) const // deg
+boost::optional<float> Chain::trackAngle(const DataID& id) const // deg
 {
     auto index = indexFromDataID(id);
 

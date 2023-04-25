@@ -1,4 +1,4 @@
-#include "calculatereferencestarget.h"
+﻿#include "calculatereferencestarget.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
 #include "dbcontent.h"
@@ -74,6 +74,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
     PropertyList buffer_list;
 
+    // basics
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sac_id_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_));
@@ -82,12 +83,25 @@ std::shared_ptr<Buffer> Target::calculateReference()
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
 
+    // pos
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_));
 
+    // spd
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+
+    // stddevs
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_xy_cov_));
+
+    // secondary
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_));
@@ -118,10 +132,30 @@ std::shared_ptr<Buffer> Target::calculateReference()
     NullableVector<float>& mc_vec = buffer->get<float> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
 
+    // speed, track angle
+
+    NullableVector<double>& vx_vec = buffer->get<double> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_).name());
+    NullableVector<double>& vy_vec = buffer->get<double> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_).name());
+
+    NullableVector<double>& speed_vec = buffer->get<double> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name());
+    NullableVector<double>& track_angle_vec = buffer->get<double> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name());
+
+    // stddevs
+
+    NullableVector<double>& x_stddev_vec = buffer->get<double> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_).name());
+    NullableVector<double>& y_stddev_vec = buffer->get<double> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_).name());
+    NullableVector<double>& xy_cov_vec = buffer->get<double> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_xy_cov_).name());
+
     // ground bit
     NullableVector<bool>& gb_vec = buffer->get<bool> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_).name());
-
 
     NullableVector<unsigned int>& m3a_vec = buffer->get<unsigned int> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_).name());
@@ -143,6 +177,8 @@ std::shared_ptr<Buffer> Target::calculateReference()
     unsigned int ds_id = 0;
     unsigned int line_id = 0;
     std::vector<unsigned int> assoc_val ({utn_});
+
+    double speed_ms, bearing_rad, xy_cov;
 
     if (!ts_begin.is_not_a_date_time())
     {
@@ -176,6 +212,41 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 lon_vec.set(i, ref.lon);
 
                 assoc_vec.set(i, assoc_val);
+
+                // set speed
+
+                if (ref.vx.has_value() && ref.vy.has_value())
+                {
+                    vx_vec.set(i, *ref.vx);
+                    vy_vec.set(i, *ref.vy);
+
+                    speed_ms = sqrt(pow(*ref.vx, 2)+pow(*ref.vy, 2)) ; // for 1s
+                    bearing_rad = atan2(*ref.vx, *ref.vy);
+
+                    speed_vec.set(i, speed_ms * M_S2KNOTS);
+                    track_angle_vec.set(i, bearing_rad * RAD2DEG);
+                }
+
+                // set stddevs
+
+                if (ref.stddev_x.has_value() && ref.stddev_y.has_value() && ref.cov_xy.has_value())
+                {
+                    x_stddev_vec.set(i, *ref.stddev_x);
+                    y_stddev_vec.set(i, *ref.stddev_y);
+
+                    xy_cov = * ref.cov_xy;
+
+                    // to inverse of this asterix rep
+                    // if (xy_cov < 0)
+                    //     xy_cov = - pow(xy_cov, 2);
+                    // else
+                    //     xy_cov = pow(xy_cov, 2);
+
+                    if (xy_cov < 0)
+                        xy_cov_vec.set(i, -sqrt(-xy_cov));
+                    else
+                        xy_cov_vec.set(i, sqrt(xy_cov));
+                }
 
                 // set other data
 

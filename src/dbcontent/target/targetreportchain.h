@@ -175,9 +175,9 @@ public:
 
     boost::optional<unsigned int> tstTrackNum(const DataID& id) const;
 
-    boost::optional<float> tstMeasuredSpeed(const DataID& id) const; // m/s
+    boost::optional<float> groundSpeed(const DataID& id) const; // m/s
 
-    boost::optional<float> tstMeasuredTrackAngle(const DataID& id) const; // deg
+    boost::optional<float> trackAngle(const DataID& id) const; // deg
 
     Index indexFromDataID(const DataID& id) const;
     boost::posix_time::ptime timestampFromDataID(const DataID& id) const;

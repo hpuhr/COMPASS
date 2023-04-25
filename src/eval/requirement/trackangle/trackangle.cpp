@@ -271,7 +271,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         }
 
         ref_trackangle_deg = ref_spd.track_angle_;
-        tst_trackangle_deg = target_data.tstChain().tstMeasuredTrackAngle(tst_id);
+        tst_trackangle_deg = target_data.tstChain().trackAngle(tst_id);
 
         if (!tst_trackangle_deg.has_value())
         {

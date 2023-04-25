@@ -226,7 +226,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
         auto id = target_data.tstChain().dataID(update.timestamp());
 
-        auto tst_spd = target_data.tstChain().tstMeasuredSpeed(id); // m/s
+        auto tst_spd = target_data.tstChain().groundSpeed(id); // m/s
 
         if (!do_not_evaluate_target && use_max_groundspeed_)
         {
@@ -269,7 +269,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
             {
                 auto id_last = target_data.tstChain().dataID(last_timestamp);
 
-                auto tst_spd_last = target_data.tstChain().tstMeasuredSpeed(id_last); // m/s
+                auto tst_spd_last = target_data.tstChain().groundSpeed(id_last); // m/s
 
                 if (use_max_acceleration_ && tst_spd.has_value() && tst_spd_last.has_value())
                 {
@@ -287,8 +287,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
                 if (!do_not_evaluate_target && use_max_turnrate_)
                 {
 
-                    auto tst_track_angle = target_data.tstChain().tstMeasuredTrackAngle(id);
-                    auto tst_track_angle_last = target_data.tstChain().tstMeasuredTrackAngle(id_last);
+                    auto tst_track_angle = target_data.tstChain().trackAngle(id);
+                    auto tst_track_angle_last = target_data.tstChain().trackAngle(id_last);
 
                     if (tst_track_angle.has_value() && tst_track_angle_last.has_value())
                     {
