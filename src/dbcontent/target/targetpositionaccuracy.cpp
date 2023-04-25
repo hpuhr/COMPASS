@@ -77,6 +77,7 @@ boost::optional<TargetPositionAccuracy> getRadarPositionAccuracy(
     boost::optional<TargetPositionAccuracy> ret;
 
     // TODO, not yet implemented
+    assert (false);
 
     return ret;
 }

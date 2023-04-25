@@ -125,6 +125,7 @@ public:
     static const Property var_cat021_mops_version_;
     static const Property var_cat021_nacp_;
     static const Property var_cat021_nucp_nic_;
+    static const Property var_cat021_nucv_nacv_;
     static const Property var_cat021_sil_;
 
     static const Property var_cat062_tris_;
@@ -136,6 +137,9 @@ public:
 
     static const Property var_cat062_wtc_;
     static const Property var_cat062_callsign_fpl_;
+
+    static const Property var_cat062_vx_stddev_;
+    static const Property var_cat062_vy_stddev_;
 
     static const Property selected_var;
 

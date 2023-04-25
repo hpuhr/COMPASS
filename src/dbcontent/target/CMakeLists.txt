@@ -20,6 +20,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/targetlistwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/targetreportchain.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/targetpositionaccuracy.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/targetvelocity.cpp"
         )
 
 

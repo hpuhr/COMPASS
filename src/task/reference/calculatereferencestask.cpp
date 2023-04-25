@@ -288,6 +288,9 @@ VariableSet CalculateReferencesTask::getReadSetFor(const std::string& dbcontent_
     {
         read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_baro_alt_.name()));
         read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_fl_measured_.name()));
+
+        read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_vx_stddev_.name()));
+        read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_vy_stddev_.name()));
     }
 
     // m3a
@@ -326,6 +329,9 @@ VariableSet CalculateReferencesTask::getReadSetFor(const std::string& dbcontent_
 
         assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_sil_));
         read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_sil_));
+
+        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_nucv_nacv_));
+        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_nucv_nacv_));
     }
 
     if (dbcontent_name == "CAT010" || dbcontent_name == "CAT020"

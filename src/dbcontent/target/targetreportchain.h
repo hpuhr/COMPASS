@@ -20,8 +20,6 @@
 namespace dbContent {
 
 class Cache;
-class TargetPosition;
-class TargetVelocity;
 
 namespace TargetReport {
 
@@ -160,6 +158,8 @@ public:
 
     boost::optional<TargetVelocity> speed(const DataID& id) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
+
+    boost::optional<TargetVelocityAccuracy> speedAccuracy(const DataID& id) const;
 
     boost::optional<std::string> acid(const DataID& id) const;
 

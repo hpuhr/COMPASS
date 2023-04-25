@@ -99,6 +99,7 @@ const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::
 const Property DBContent::var_cat021_mops_version_ {"MOPS Version", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nacp_ {"NACp", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nucp_nic_ {"NUCp or NIC", PropertyDataType::UCHAR};
+const Property DBContent::var_cat021_nucv_nacv_ {"NUCr or NACv", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_sil_ {"SIL", PropertyDataType::UCHAR};
 
 const Property DBContent::var_cat062_tris_ {"Target Report Identifiers", PropertyDataType::STRING};
@@ -110,6 +111,9 @@ const Property DBContent::var_cat062_fl_measured_ {"Flight Level Measured", Prop
 
 const Property DBContent::var_cat062_wtc_ {"Wake Turbulence Category FPL", PropertyDataType::STRING};
 const Property DBContent::var_cat062_callsign_fpl_ {"Callsign FPL", PropertyDataType::STRING};
+
+const Property DBContent::var_cat062_vx_stddev_ {"Vx StdDev", PropertyDataType::DOUBLE};
+const Property DBContent::var_cat062_vy_stddev_ {"Vy StdDev", PropertyDataType::DOUBLE};
 
 const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 

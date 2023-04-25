@@ -317,6 +317,15 @@ boost::optional<dbContent::TargetVelocity> Chain::speed(const DataID& id) const
     return spd;
 }
 
+boost::optional<TargetVelocityAccuracy> Chain::speedAccuracy(const DataID& id) const
+{
+    auto index = indexFromDataID(id);
+
+    unsigned int index_ext = index.idx_external;
+
+    return getVelocityAccuracy(cache_, dbcontent_name_, index_ext);
+}
+
 boost::optional<std::string> Chain::acid(const DataID& id) const
 {
     auto index = indexFromDataID(id);
