@@ -190,6 +190,8 @@ std::shared_ptr<Buffer> Target::calculateReference()
         auto storeReferences = [ & ] (const std::vector<reconstruction::Reference>& references,
                 const reconstruction::Reconstructor& rec)
         {
+            unsigned int buffer_cnt = 0;
+
             for (size_t i = 0; i < references.size(); ++i)
             {
                 const reconstruction::Reference& ref = references[ i ];
@@ -199,39 +201,57 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 auto it = chain_targets.find(chain);
                 assert(it != chain_targets.end());
 
-                ds_id_vec.set(i, ds_id);
-                sac_vec.set(i, sac);
-                sic_vec.set(i, sic);
-                line_vec.set(i, line_id);
+                // hack to skip no mode c
 
-                ts_vec.set(i, ref.t);
-                tod_vec.set(i, ref.t.time_of_day().total_milliseconds() / 1000.0);
+                bool has_any_mode_c = false;
 
-                lat_vec.set(i, ref.lat);
-                lon_vec.set(i, ref.lon);
+                for (auto& chain_it : chains_) // iterate over both chains
+                {
+                    mapping = chain_it.second->calculateDataMapping(ref.t);
 
-                assoc_vec.set(i, assoc_val);
+                    if (mapping.pos_ref_.has_altitude_)
+                    {
+                        has_any_mode_c = true;
+                        break;
+                    }
+                }
+
+                if (!has_any_mode_c)
+                    continue;
+
+                ds_id_vec.set(buffer_cnt, ds_id);
+                sac_vec.set(buffer_cnt, sac);
+                sic_vec.set(buffer_cnt, sic);
+                line_vec.set(buffer_cnt, line_id);
+
+                ts_vec.set(buffer_cnt, ref.t);
+                tod_vec.set(buffer_cnt, ref.t.time_of_day().total_milliseconds() / 1000.0);
+
+                lat_vec.set(buffer_cnt, ref.lat);
+                lon_vec.set(buffer_cnt, ref.lon);
+
+                assoc_vec.set(buffer_cnt, assoc_val);
 
                 // set speed
 
                 if (ref.vx.has_value() && ref.vy.has_value())
                 {
-                    vx_vec.set(i, *ref.vx);
-                    vy_vec.set(i, *ref.vy);
+                    vx_vec.set(buffer_cnt, *ref.vx);
+                    vy_vec.set(buffer_cnt, *ref.vy);
 
                     speed_ms = sqrt(pow(*ref.vx, 2)+pow(*ref.vy, 2)) ; // for 1s
                     bearing_rad = atan2(*ref.vx, *ref.vy);
 
-                    speed_vec.set(i, speed_ms * M_S2KNOTS);
-                    track_angle_vec.set(i, bearing_rad * RAD2DEG);
+                    speed_vec.set(buffer_cnt, speed_ms * M_S2KNOTS);
+                    track_angle_vec.set(buffer_cnt, bearing_rad * RAD2DEG);
                 }
 
                 // set stddevs
 
                 if (ref.x_stddev.has_value() && ref.y_stddev.has_value() && ref.xy_cov.has_value())
                 {
-                    x_stddev_vec.set(i, *ref.x_stddev);
-                    y_stddev_vec.set(i, *ref.y_stddev);
+                    x_stddev_vec.set(buffer_cnt, *ref.x_stddev);
+                    y_stddev_vec.set(buffer_cnt, *ref.y_stddev);
 
                     xy_cov = *ref.xy_cov;
 
@@ -242,9 +262,9 @@ std::shared_ptr<Buffer> Target::calculateReference()
                     //     xy_cov = pow(xy_cov, 2);
 
                     if (xy_cov < 0)
-                        xy_cov_vec.set(i, -sqrt(-xy_cov));
+                        xy_cov_vec.set(buffer_cnt, -sqrt(-xy_cov));
                     else
-                        xy_cov_vec.set(i, sqrt(xy_cov));
+                        xy_cov_vec.set(buffer_cnt, sqrt(xy_cov));
                 }
 
                 // set other data
@@ -253,8 +273,8 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 {
                     mapping = chain_it.second->calculateDataMapping(ref.t);
 
-                    if (mc_vec.isNull(i) &&mapping.pos_ref_.has_altitude_)
-                        mc_vec.set(i, mapping.pos_ref_.altitude_);
+                    if (mc_vec.isNull(i) && mapping.pos_ref_.has_altitude_)
+                        mc_vec.set(buffer_cnt, mapping.pos_ref_.altitude_);
 
                     if (mapping.has_ref1_)
                     {
@@ -263,20 +283,20 @@ std::shared_ptr<Buffer> Target::calculateReference()
                         boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref1_);
 
                         if (m3a_vec.isNull(i) && m3a.has_value())
-                            m3a_vec.set(i, *m3a);
+                            m3a_vec.set(buffer_cnt, *m3a);
 
                         if (acad_vec.isNull(i) && acad.has_value())
-                            acad_vec.set(i, *acad);
+                            acad_vec.set(buffer_cnt, *acad);
 
                         if (acid_vec.isNull(i) && acid.has_value())
-                            acid_vec.set(i, *acid);
+                            acid_vec.set(buffer_cnt, *acid);
 
                         if (gb_vec.isNull(i) || (!gb_vec.isNull(i) && !gb_vec.get(i)))
                         {
                             boost::optional<bool> gbs = chain_it.second->groundBit(mapping.dataid_ref1_);
 
                             if (gbs.has_value())
-                                gb_vec.set(i, *gbs);
+                                gb_vec.set(buffer_cnt, *gbs);
                         }
                     }
 
@@ -287,23 +307,25 @@ std::shared_ptr<Buffer> Target::calculateReference()
                         boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref2_);
 
                         if (m3a_vec.isNull(i) && m3a.has_value())
-                            m3a_vec.set(i, *m3a);
+                            m3a_vec.set(buffer_cnt, *m3a);
 
                         if (acad_vec.isNull(i) && acad.has_value())
-                            acad_vec.set(i, *acad);
+                            acad_vec.set(buffer_cnt, *acad);
 
                         if (acid_vec.isNull(i) && acid.has_value())
-                            acid_vec.set(i, *acid);
+                            acid_vec.set(buffer_cnt, *acid);
 
                         if (gb_vec.isNull(i) || (!gb_vec.isNull(i) && !gb_vec.get(i)))
                         {
                             boost::optional<bool> gbs = chain_it.second->groundBit(mapping.dataid_ref2_);
 
                             if (gbs.has_value())
-                                gb_vec.set(i, *gbs);
+                                gb_vec.set(buffer_cnt, *gbs);
                         }
                     }
                 }
+
+                ++ buffer_cnt;
             }
         };
 
