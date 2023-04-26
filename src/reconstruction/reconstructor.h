@@ -40,18 +40,6 @@ namespace reconstruction
 class Reconstructor
 {
 public:
-    enum class CoordConversion
-    {
-        NoConversion = 0,
-        WGS84ToCart
-    };
-
-    enum class CoordSystem
-    {
-        WGS84 = 0,
-        Cart
-    };
-
     typedef std::map<uint32_t, const dbContent::TargetReport::Chain*> SourceMap;
 
     Reconstructor();
@@ -67,7 +55,9 @@ public:
 
     const dbContent::TargetReport::Chain* chainOfReference(const Reference& ref) const;
 
-    void setCoordConversion(CoordConversion coord_conv) { coord_conv_ = coord_conv; }
+    void setOverrideCoordSystem(CoordSystem coord_system);
+    void setCoordConversion(CoordConversion coord_conv);
+    CoordSystem coordSystem() const;
 
     void setVerbosity(int v) { verbosity_ = v; }
     int verbosity() const { return verbosity_; }
@@ -80,9 +70,13 @@ protected:
                                                                      const std::string& data_info) = 0;
 
     static double timestep(const Measurement& mm0, const Measurement& mm1);
-    static double distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys = CoordSystem::Cart);
+    double distance(const Measurement& mm0, const Measurement& mm1) const;
+    Eigen::Vector2d position2D(const Measurement& mm) const;
+    void position2D(Measurement& mm, const Eigen::Vector2d& pos) const;
 
     const boost::optional<Uncertainty>& sourceUncertainty(uint32_t source_id) const;
+
+    virtual CoordSystem preferredCoordSystem() const { return CoordSystem::Unknown; } 
 
 private:
     struct DBContentInfo
@@ -93,7 +87,8 @@ private:
     void postprocessMeasurements();
     void postprocessReferences(std::vector<Reference>& references);
 
-    
+    void cacheCoordSystem();
+
     std::vector<Measurement>                     measurements_;
     SourceMap                                    sources_;
     std::map<std::string, Uncertainty>           dbcontent_uncerts_;
@@ -107,8 +102,10 @@ private:
 
     uint32_t source_cnt_ = 0;
 
-    CoordConversion coord_conv_ = CoordConversion::WGS84ToCart;
-    int verbosity_ = 1;
+    CoordConversion coord_conv_         = CoordConversion::WGS84ToCart;
+    CoordSystem     coord_sys_override_ = CoordSystem::Unknown;
+    CoordSystem     coord_sys_          = CoordSystem::Unknown;
+    int             verbosity_          = 1;
 };
 
 } // namespace reconstruction

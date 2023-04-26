@@ -87,6 +87,8 @@ protected:
 
     reconstruction::Uncertainty defaultUncertaintyOfMeasurement(const Measurement& mm) const;
 
+    virtual reconstruction::CoordSystem preferredCoordSystem() const override { return reconstruction::CoordSystem::Cart; }
+
 private:
     void init();
     boost::optional<std::vector<Reference>> finalize();

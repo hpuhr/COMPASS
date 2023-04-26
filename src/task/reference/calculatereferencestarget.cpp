@@ -329,26 +329,29 @@ std::shared_ptr<Buffer> Target::calculateReference()
             }
         };
 
-        //        auto reconstructInterp = [ & ] ()
-        //        {
-        //            reconstruction::ReconstructorInterp rec;
-        //            rec.setCoordConversion(reconstruction::Reconstructor::CoordConversion::NoConversion);
-        //            rec.config().sample_dt = 1.0;
-        //            rec.config().max_dt    = 30.0;
+        auto reconstructInterp = [ & ] ()
+        {
+            reconstruction::ReconstructorInterp rec;
+            rec.setOverrideCoordSystem(reconstruction::CoordSystem::WGS84);
+            rec.setCoordConversion(reconstruction::CoordConversion::NoConversion);
+            rec.config().sample_dt            = 1.0;
+            rec.config().max_dt               = 30.0;
+            rec.config().check_fishy_segments = true;
 
-        //            for (auto& chain_it : chains_)
-        //            {
-        //                if (std::get<0>(chain_it.first) != "CAT062")
-        //                    continue;
-        //                chain_targets[chain_it.second.get()] = chain_it.first;
-        //                rec.addChain(chain_it.second.get());
-        //            }
+            for (auto& chain_it : chains_)
+            {
+                if (std::get<0>(chain_it.first) != "CAT062")
+                    continue;
+                
+                chain_targets[chain_it.second.get()] = chain_it.first;
+                rec.addChain(chain_it.second.get(), std::get<0>(chain_it.first));
+            }
 
-        //            auto references = rec.reconstruct(dinfo);
+            auto references = rec.reconstruct(dinfo);
 
-        //            if (references.has_value())
-        //                storeReferences(references.value(), rec);
-        //        };
+            if (references.has_value())
+                storeReferences(references.value(), rec);
+        };
 
         auto reconstructUMKalman2D = [ & ] ()
         {
