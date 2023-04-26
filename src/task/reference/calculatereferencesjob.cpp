@@ -213,6 +213,9 @@ void CalculateReferencesJob::calculateReferences()
 
     for (auto& buf_it : results)
     {
+        if (!buf_it->size())
+            continue;
+
         if (!result_)
             result_ = move(buf_it);
         else
