@@ -58,6 +58,7 @@ public:
     virtual ~Reconstructor();
 
     void setSensorUncertainty(const std::string& dbcontent, const Uncertainty& uncert);
+    void clearSensorUncertainties();
 
     void addMeasurements(const std::vector<Measurement>& measurements);
     void addChain(const dbContent::TargetReport::Chain* tr_chain, const std::string& dbcontent);

@@ -51,6 +51,13 @@ const boost::optional<Uncertainty>& Reconstructor::sourceUncertainty(uint32_t so
 
 /**
 */
+void Reconstructor::clearSensorUncertainties()
+{
+    source_uncerts_.clear();
+}
+
+/**
+*/
 void Reconstructor::addMeasurements(const std::vector<Measurement>& measurements)
 {
     if (!measurements.empty())
