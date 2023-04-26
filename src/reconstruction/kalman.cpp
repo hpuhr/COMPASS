@@ -26,11 +26,11 @@ namespace kalman
 /**
 */
 KalmanFilter::KalmanFilter(size_t dim_x, 
-                           size_t dim_z, 
+                           size_t dim_z,
                            size_t dim_u)
-:   dim_x_(dim_x)
-,   dim_z_(dim_z)
-,   dim_u_(dim_u)
+    :   dim_x_(dim_x)
+    ,   dim_z_(dim_z)
+    ,   dim_u_(dim_u)
 {
     x_.setZero(dim_x);
     P_.setIdentity(dim_x, dim_x);
@@ -75,7 +75,7 @@ kalman::KalmanState KalmanFilter::state() const
 */
 void KalmanFilter::predict(const OMatrix& F,
                            const OMatrix& Q,
-                           const OMatrix& B, 
+                           const OMatrix& B,
                            const OVector& u)
 {
     const OMatrix& B__ = B.has_value() ? B         : B_;
@@ -98,7 +98,7 @@ void KalmanFilter::predict(const OMatrix& F,
 /**
 */
 bool KalmanFilter::update(const Vector& z,
-                          const OMatrix& R, 
+                          const OMatrix& R,
                           const OMatrix& H)
 {
     // reset to force recompute
@@ -159,8 +159,8 @@ bool KalmanFilter::update(const Vector& z,
 /**
 */
 Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
-                                          double dt, 
-                                          double spectral_density, 
+                                          double dt,
+                                          double spectral_density,
                                           size_t block_size)
 {
     if (dim < 2 || dim > 4)
@@ -275,18 +275,28 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
 
     for (int k = n - 2; k >= 0; --k)
     {
-        const auto& F  = states[ k ].F;
-        const auto& Q  = states[ k ].Q;
-        auto        Ft = F.transpose();
+        //        const auto& F  = states[ k ].F;
+        //        const auto& Q  = states[ k ].Q;
+        //        auto        Ft = F.transpose();
 
-        Pp[ k ] = states[ k ].F * P_smooth[ k ] * Ft + Q;
+        //        Pp[ k ] = states[ k ].F * P_smooth[ k ] * Ft + Q;
+
+
+        const auto& F_1 = states[ k+1 ].F;
+        const auto& Q_1 = states[ k+1 ].Q;
+        auto        F_1t = F_1.transpose();
+
+        Pp[ k ] = states[ k+1 ].F * P_smooth[ k ] * F_1t + Q_1;
 
         if (!Eigen::FullPivLU<Eigen::MatrixXd>(Pp[ k ]).isInvertible())
             return false;
 
-        K[ k ] = P_smooth[ k ] * Ft * Pp[ k ].inverse();
+        //        K[ k ] = P_smooth[ k ] * Ft * Pp[ k ].inverse();
+        //        x_smooth[ k ] += K[ k ] * (x_smooth[ k+1 ] - F * x_smooth[ k ]);
 
-        x_smooth[ k ] += K[ k ] * (x_smooth[ k+1 ] - F * x_smooth[ k ]);
+        K[ k ] = P_smooth[ k ] * F_1t * Pp[ k ].inverse();
+        x_smooth[ k ] += K[ k ] * (x_smooth[ k+1 ] - F_1 * x_smooth[ k ]);
+
         P_smooth[ k ] += K[ k ] * (P_smooth[ k+1 ] - Pp[ k ]) * ((const kalman::Matrix&)K[ k ]).transpose();
     }
 

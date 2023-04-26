@@ -55,6 +55,9 @@ boost::optional<TargetVelocityAccuracy> getVelocityAccuracyADSB(
     TargetVelocityAccuracy acc (adsb_nucr_nacv_accuracies.at(nucv_nacv_vec.get(index)),
                                 adsb_nucr_nacv_accuracies.at(nucv_nacv_vec.get(index)));
 
+//    TargetVelocityAccuracy acc (30.0,
+//                                30.0);
+
     return acc;
 }
 
@@ -73,6 +76,9 @@ boost::optional<TargetVelocityAccuracy> getVelocityAccuracyTracker(
 
 
     TargetVelocityAccuracy acc (vx_stddev_vec.get(index), vy_stddev_vec.get(index));
+
+//    TargetVelocityAccuracy acc (1.0,
+//                                1.0);
 
     return acc;
 }

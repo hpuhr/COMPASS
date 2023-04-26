@@ -333,11 +333,11 @@ std::shared_ptr<Buffer> Target::calculateReference()
             //default uncertainties
             const double R_std          = 30.0;   // observation noise (standard)
             const double R_std_high     = 1000.0; // observation noise (high)
-            const double Q_std          = 10.0;   // process noise
+            const double Q_std          = 30.0;   // process noise
             const double P_std          = 30.0;   // system noise (standard)
             const double P_std_high     = 1000.0; // system noise (high)
 
-            const double vel_std_cat021 = 1000.0; // default velocity stdddev CAT021
+            const double vel_std_cat021 = 50.0; // default velocity stdddev CAT021
             const double vel_std_cat062 = 50.0;   // default velocity stdddev CAT062
 
             //other config values
@@ -347,7 +347,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
             const bool   track_vel      = true;   // track velocities in measurements
             const bool   smooth_rts     = true;   // enable RTS smoother
-            const double smooth_scale   = 1.0;    // scale factor for RTS smoother
+            const double smooth_scale   = 1;    // scale factor for RTS smoother
 
             reconstruction::Reconstructor_UMKalman2D rec(track_vel);
 

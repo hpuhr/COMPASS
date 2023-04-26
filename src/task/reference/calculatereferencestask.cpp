@@ -116,7 +116,7 @@ void CalculateReferencesTask::run()
         if (!dbo_it.second->hasData())
             continue;
 
-        if (dbo_it.first != "CAT021" && dbo_it.first != "CAT062")
+        if (dbo_it.first != "CAT021" && dbo_it.first != "CAT062") // dbo_it.first != "CAT021" &&
             continue;
 
         VariableSet read_set = getReadSetFor(dbo_it.first);
