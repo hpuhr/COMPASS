@@ -29,10 +29,14 @@ class ReconstructorInterp : public Reconstructor
 public:
     struct Config
     {
-        double sample_dt = 1.0;   //sample interval in seconds
-        double min_dt    = 1e-06; //minimum time difference between measurements
-        double max_dt    = 30.0;  //maximum time difference between measurements
-        double min_len   = 1e-07; //minimum length between measurements
+        double sample_dt = 1.0; //sample interval in seconds
+
+        bool check_fishy_segments = true;
+        
+        double min_dt                      = 1e-06; //minimum time difference between measurements
+        double max_dt                      = 30.0;  //maximum time difference between measurements
+        double min_len                     = 1e-07; //minimum length between measurements
+        double max_segment_distance_factor = 2.0;
     };
 
     ReconstructorInterp() = default;
@@ -47,9 +51,12 @@ protected:
 
     boost::optional<std::vector<Reference>> reconstructPart(const std::vector<Measurement>& measurements, 
                                                             const std::string& data_info) const;
+    bool isFishySegment(const Measurement& mm0, 
+                        const Measurement& mm1, 
+                        const std::vector<Reference>& refs,
+                        size_t n) const;
 
-    Reference generateReference(double lat, 
-                                double lon, 
+    Reference generateReference(const Eigen::Vector2d& pos, 
                                 const boost::posix_time::ptime& t, 
                                 const Measurement& mm0, 
                                 const Measurement& mm1, 
@@ -57,6 +64,7 @@ protected:
     Reference generateReference(const Measurement& mm) const;
 
     std::vector<Reference> interpolateLinear(const std::vector<Measurement>& measurements) const;
+
 private:
     Config config_;
 };

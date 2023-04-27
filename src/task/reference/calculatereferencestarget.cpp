@@ -329,47 +329,60 @@ std::shared_ptr<Buffer> Target::calculateReference()
             }
         };
 
-        //        auto reconstructInterp = [ & ] ()
-        //        {
-        //            reconstruction::ReconstructorInterp rec;
-        //            rec.setCoordConversion(reconstruction::Reconstructor::CoordConversion::NoConversion);
-        //            rec.config().sample_dt = 1.0;
-        //            rec.config().max_dt    = 30.0;
+        auto reconstructInterp = [ & ] ()
+        {
+            reconstruction::ReconstructorInterp rec;
+            rec.setOverrideCoordSystem(reconstruction::CoordSystem::WGS84);
+            rec.setCoordConversion(reconstruction::CoordConversion::NoConversion);
+            rec.config().sample_dt            = 1.0;
+            rec.config().max_dt               = 30.0;
+            rec.config().check_fishy_segments = true;
 
-        //            for (auto& chain_it : chains_)
-        //            {
-        //                if (std::get<0>(chain_it.first) != "CAT062")
-        //                    continue;
-        //                chain_targets[chain_it.second.get()] = chain_it.first;
-        //                rec.addChain(chain_it.second.get());
-        //            }
+            for (auto& chain_it : chains_)
+            {
+                if (std::get<0>(chain_it.first) != "CAT062")
+                    continue;
+                
+                chain_targets[chain_it.second.get()] = chain_it.first;
+                rec.addChain(chain_it.second.get(), std::get<0>(chain_it.first));
+            }
 
-        //            auto references = rec.reconstruct(dinfo);
+            auto references = rec.reconstruct(dinfo);
 
-        //            if (references.has_value())
-        //                storeReferences(references.value(), rec);
-        //        };
+            if (references.has_value())
+                storeReferences(references.value(), rec);
+        };
 
         auto reconstructUMKalman2D = [ & ] ()
         {
             //default uncertainties
-            const double R_std          = 30.0;   // observation noise (standard)
-            const double R_std_high     = 1000.0; // observation noise (high)
-            const double Q_std          = 30.0;   // process noise
-            const double P_std          = 30.0;   // system noise (standard)
-            const double P_std_high     = 1000.0; // system noise (high)
+            double R_std             = 30.0;   // observation noise (standard)
+            double R_std_high        = 1000.0; // observation noise (high)
+            double Q_std             = 30.0;   // process noise
+            double P_std             = 30.0;   // system noise (standard)
+            double P_std_high        = 1000.0; // system noise (high)
 
-            const double vel_std_cat021 = 50.0; // default velocity stdddev CAT021
-            const double vel_std_cat062 = 50.0;   // default velocity stdddev CAT062
+            bool   add_sensor_uncert = true;   // add sensor default uncertainties
+            double vel_std_cat021    = 50.0;   // default velocity stdddev CAT021
+            double vel_std_cat062    = 50.0;   // default velocity stdddev CAT062
 
             //other config values
-            const double min_dt         = 0.0;    // minimum allowed timestep in seconds
-            const double max_dt         = 60.0;   // maximum allowed timestep in seconds
-            const size_t min_chain_size = 2;      // minimum kalman chain size
+            double min_dt            = 0.0;    // minimum allowed timestep in seconds
+            double max_dt            = 60.0;   // maximum allowed timestep in seconds
+            size_t min_chain_size    = 2;      // minimum kalman chain size
 
-            const bool   track_vel      = true;   // track velocities in measurements
-            const bool   smooth_rts     = true;   // enable RTS smoother
-            const double smooth_scale   = 1;    // scale factor for RTS smoother
+            bool   track_vel         = true;   // track velocities in measurements
+            bool   smooth_rts        = true;   // enable RTS smoother
+            double smooth_scale      = 1;      // scale factor for RTS smoother
+   
+            bool python_compatibility_mode = false; //python reconstructor comparison mode
+
+            if (python_compatibility_mode)
+            {
+                // apply python code compatible override settings
+                track_vel         = false;
+                add_sensor_uncert = false;
+            }
 
             reconstruction::Reconstructor_UMKalman2D rec(track_vel);
 
@@ -390,19 +403,22 @@ std::shared_ptr<Buffer> Target::calculateReference()
             //if (utn_ == 3)
             //    rec.setVerbosity(2);
 
-            //configure sensor default noise
-            reconstruction::Uncertainty uncert_cat021;
-            uncert_cat021.pos_var   = R_std          * R_std;
-            uncert_cat021.speed_var = vel_std_cat021 * vel_std_cat021;
-            uncert_cat021.acc_var   = R_std_high     * R_std_high;
+            //configure sensor default noise?
+            if (add_sensor_uncert)
+            {
+                reconstruction::Uncertainty uncert_cat021;
+                uncert_cat021.pos_var   = R_std          * R_std;
+                uncert_cat021.speed_var = vel_std_cat021 * vel_std_cat021;
+                uncert_cat021.acc_var   = R_std_high     * R_std_high;
 
-            reconstruction::Uncertainty uncert_cat062;
-            uncert_cat062.pos_var   = R_std          * R_std;
-            uncert_cat062.speed_var = vel_std_cat062 * vel_std_cat062;
-            uncert_cat062.acc_var   = R_std_high     * R_std_high;
+                reconstruction::Uncertainty uncert_cat062;
+                uncert_cat062.pos_var   = R_std          * R_std;
+                uncert_cat062.speed_var = vel_std_cat062 * vel_std_cat062;
+                uncert_cat062.acc_var   = R_std_high     * R_std_high;
 
-            rec.setSensorUncertainty("CAT021", uncert_cat021);
-            rec.setSensorUncertainty("CAT062", uncert_cat062);
+                rec.setSensorUncertainty("CAT021", uncert_cat021);
+                rec.setSensorUncertainty("CAT062", uncert_cat062);
+            }
 
             //add chains to reconstructor
             for (auto& chain_it : chains_)

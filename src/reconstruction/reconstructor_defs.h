@@ -27,10 +27,52 @@
 namespace reconstruction
 {
 
+enum class CoordConversion
+{
+    NoConversion = 0,
+    WGS84ToCart
+};
+
+enum class CoordSystem
+{
+    Unknown = 0,
+    WGS84,
+    Cart
+};
+
 /**
 */
 struct Measurement
 {
+    Eigen::Vector2d position2D(CoordSystem cs) const
+    {
+        if (cs == CoordSystem::WGS84)
+            return Eigen::Vector2d(lat, lon);
+        return Eigen::Vector2d(x, y);
+    }
+
+    void position2D(const Eigen::Vector2d& pos, CoordSystem cs)
+    {
+        if (cs == CoordSystem::WGS84)
+        {
+            lat = pos[ 0 ];
+            lon = pos[ 1 ];
+        }
+        x = pos[ 0 ];
+        y = pos[ 1 ];
+    }
+
+    double distance(const Measurement& other, CoordSystem cs) const
+    {
+        if (cs == CoordSystem::WGS84)
+            return (Eigen::Vector2d(lat, lon) - Eigen::Vector2d(other.lat, other.lon)).norm();
+
+        if (z.has_value() && other.z.has_value())
+            return (Eigen::Vector3d(x, y, z.value()) - Eigen::Vector3d(other.x, other.y, other.z.value())).norm();
+        
+        return (Eigen::Vector2d(x, y) - Eigen::Vector2d(other.x, other.y)).norm();
+    }
+
     bool hasVelocity() const
     {
         if (!vx.has_value() || !vy.has_value())

@@ -37,6 +37,47 @@ Reconstructor::~Reconstructor() = default;
 
 /**
 */
+void Reconstructor::setOverrideCoordSystem(CoordSystem coord_system)
+{
+    coord_sys_override_ = coord_system;
+}
+
+/**
+*/
+void Reconstructor::setCoordConversion(CoordConversion coord_conv)
+{
+    coord_conv_ = coord_conv;
+}
+
+/**
+*/
+CoordSystem Reconstructor::coordSystem() const
+{
+    return coord_sys_;
+}
+
+/**
+*/
+void Reconstructor::cacheCoordSystem()
+{
+    auto cs_pref = preferredCoordSystem();
+    if (cs_pref != CoordSystem::Unknown)
+    {
+        coord_sys_ = cs_pref;
+        return;
+    }
+    if (coord_sys_override_ != CoordSystem::Unknown)
+    {
+        coord_sys_ = coord_sys_override_;
+        return;
+    }
+    
+    //when in doubt use cartesian
+    coord_sys_ = CoordSystem::Cart;
+}
+
+/**
+*/
 void Reconstructor::setSensorUncertainty(const std::string& dbcontent, const Uncertainty& uncert)
 {
     dbcontent_uncerts_[dbcontent] = uncert;
@@ -51,8 +92,18 @@ const boost::optional<Uncertainty>& Reconstructor::sourceUncertainty(uint32_t so
 
 /**
 */
+void Reconstructor::clearSensorUncertainties()
+{
+    source_uncerts_.clear();
+}
+
+/**
+*/
 void Reconstructor::addMeasurements(const std::vector<Measurement>& measurements)
 {
+    cacheCoordSystem();
+    assert(coord_sys_ != CoordSystem::Unknown);
+
     if (!measurements.empty())
         measurements_.insert(measurements_.end(), measurements.begin(), measurements.end());
 }
@@ -62,6 +113,9 @@ void Reconstructor::addMeasurements(const std::vector<Measurement>& measurements
 void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, const std::string& dbcontent)
 {
     assert(tr_chain);
+
+    cacheCoordSystem();
+    assert(coord_sys_ != CoordSystem::Unknown);
 
     uint32_t source_id = source_cnt_++;
     sources_[source_id] = tr_chain;
@@ -235,6 +289,9 @@ void Reconstructor::postprocessReferences(std::vector<Reference>& references)
 */
 boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::string& data_info)
 {
+    cacheCoordSystem();
+    assert(coord_sys_ != CoordSystem::Unknown);
+
     std::string dinfo = data_info.empty() ? "data" : data_info;
 
     loginf << "Reconstructing " << dinfo << " - " << measurements_.size() << " measurement(s)";
@@ -277,15 +334,23 @@ double Reconstructor::timestep(const Measurement& mm0, const Measurement& mm1)
 
 /**
 */
-double Reconstructor::distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys)
+double Reconstructor::distance(const Measurement& mm0, const Measurement& mm1) const
 {
-    if (coord_sys == CoordSystem::WGS84)
-        return (Eigen::Vector2d(mm0.lat, mm0.lon) - Eigen::Vector2d(mm1.lat, mm1.lon)).norm();
+    return mm0.distance(mm1, coord_sys_);
+}
 
-    if (mm0.z.has_value() && mm1.z.has_value())
-        return (Eigen::Vector3d(mm0.x, mm0.y, mm0.z.value()) - Eigen::Vector3d(mm1.x, mm1.y, mm1.z.value())).norm();
-    
-    return (Eigen::Vector2d(mm0.x, mm0.y) - Eigen::Vector2d(mm1.x, mm1.y)).norm();
+/**
+*/
+Eigen::Vector2d Reconstructor::position2D(const Measurement& mm) const
+{
+    return mm.position2D(coord_sys_);
+}
+
+/**
+*/
+void Reconstructor::position2D(Measurement& mm, const Eigen::Vector2d& pos) const
+{
+    mm.position2D(pos, coord_sys_);
 }
 
 /**
