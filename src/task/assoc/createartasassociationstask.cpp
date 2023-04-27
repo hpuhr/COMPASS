@@ -169,14 +169,14 @@ bool CreateARTASAssociationsTask::canRun()
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_timestamp_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) << " "
-        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_associations_.name());
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_utn_.name());
 
     if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_timestamp_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) ||
-            !dbcontent_man.existsMetaVariable(DBContent::meta_var_associations_.name()))
+            !dbcontent_man.existsMetaVariable(DBContent::meta_var_utn_.name()))
         return false;
 
     loginf << "CreateARTASAssociationsTask: canRun: metas in objects";
@@ -206,12 +206,12 @@ bool CreateARTASAssociationsTask::canRun()
             << !dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first) << " "
             << !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first) << " "
             << !dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(dbo_it.first) << " "
-            << !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first);
+            << !dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbo_it.first);
 
         if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first))
+                || !dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbo_it.first))
             return false;
     }
 
@@ -250,7 +250,7 @@ void CreateARTASAssociationsTask::run()
     checkAndSetMetaVariable(DBContent::meta_var_rec_num_.name(), &rec_num_var_);
     checkAndSetMetaVariable(DBContent::meta_var_artas_hash_.name(), &hash_var_);
     checkAndSetMetaVariable(DBContent::meta_var_timestamp_.name(), &timestamp_var_);
-    checkAndSetMetaVariable(DBContent::meta_var_associations_.name(), &associations_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_utn_.name(), &utn_var_);
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
@@ -697,9 +697,9 @@ VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbcont
     assert(timestamp_var_->existsIn(dbcontent_name));
     read_set.add(timestamp_var_->getFor(dbcontent_name));
 
-    assert(associations_var_);
-    assert(associations_var_->existsIn(dbcontent_name));
-    read_set.add(associations_var_->getFor(dbcontent_name));
+    assert(utn_var_);
+    assert(utn_var_->existsIn(dbcontent_name));
+    read_set.add(utn_var_->getFor(dbcontent_name));
 
     if (dbcontent_name == "CAT062")
     {

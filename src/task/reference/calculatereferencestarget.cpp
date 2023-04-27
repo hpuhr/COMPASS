@@ -106,7 +106,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_));
 
-    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
 
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
 
@@ -163,8 +163,8 @@ std::shared_ptr<Buffer> Target::calculateReference()
     NullableVector<string>& acid_vec = buffer->get<string> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_).name());
 
-    NullableVector<json>& assoc_vec = buffer->get<json> (
-                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_).name());
+    NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).name());
 
     DataMapping mapping;
 
@@ -175,7 +175,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
     unsigned int sic = 0;
     unsigned int ds_id = 0;
     unsigned int line_id = 0;
-    std::vector<unsigned int> assoc_val ({utn_});
+    //std::vector<unsigned int> assoc_val ({utn_});
 
     double speed_ms, bearing_rad, xy_cov;
 
@@ -230,7 +230,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 lat_vec.set(buffer_cnt, ref.lat);
                 lon_vec.set(buffer_cnt, ref.lon);
 
-                assoc_vec.set(buffer_cnt, assoc_val);
+                utn_vec.set(buffer_cnt, utn_);
 
                 // set speed
 

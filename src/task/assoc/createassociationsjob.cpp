@@ -162,10 +162,10 @@ void CreateAssociationsJob::removePreviousAssociations()
 
     for (auto& buf_it : *cache_)
     {
-        assert(cache_->hasMetaVar<json>(buf_it.first, DBContent::meta_var_associations_));
-        NullableVector<json>& assoc_vec = cache_->getMetaVar<json>(buf_it.first, DBContent::meta_var_associations_);
+        assert(cache_->hasMetaVar<unsigned int>(buf_it.first, DBContent::meta_var_utn_));
+        NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(buf_it.first, DBContent::meta_var_utn_);
 
-        assoc_vec.setAllNull();
+        utn_vec.setAllNull();
     }
 }
 
@@ -795,9 +795,9 @@ void CreateAssociationsJob::saveAssociations()
         NullableVector<unsigned int>& rec_num_vec = cache_->getMetaVar<unsigned int>(
                     dbcontent_name, DBContent::meta_var_rec_num_);
 
-        assert (cache_->hasMetaVar<json>(dbcontent_name, DBContent::meta_var_associations_));
-        NullableVector<json>& assoc_vec = cache_->getMetaVar<json>(
-                    dbcontent_name, DBContent::meta_var_associations_);
+        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+        NullableVector<unsigned int>& assoc_vec = cache_->getMetaVar<unsigned int>(
+                    dbcontent_name, DBContent::meta_var_utn_);
 
         assert (cache_->has(dbcontent_name));
         unsigned int buffer_size = cache_->get(dbcontent_name)->size();
@@ -810,10 +810,10 @@ void CreateAssociationsJob::saveAssociations()
 
             if (associations.count(rec_num))
             {
-                if (assoc_vec.isNull(cnt))
-                    assoc_vec.set(cnt, {get<0>(associations.at(rec_num))});
-                else
-                    assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
+                //if (assoc_vec.isNull(cnt))
+                    assoc_vec.set(cnt, get<0>(associations.at(rec_num)));
+                //else
+                    //assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
 
                 ++num_associated;
             }
@@ -837,10 +837,10 @@ void CreateAssociationsJob::saveAssociations()
         string rec_num_col_name =
                 dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
 
-        string assoc_var_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
-        string assoc_col_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).dbColumnName();
+        string utn_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).name();
+        string utn_col_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).dbColumnName();
 
 
         PropertyList properties = buf_it.second->properties();
@@ -849,8 +849,8 @@ void CreateAssociationsJob::saveAssociations()
         {
             if (prop_it.name() == rec_num_var_name)
                 buf_it.second->rename<unsigned int>(rec_num_var_name, rec_num_col_name);
-            else if (prop_it.name() == assoc_var_name)
-                buf_it.second->rename<json>(assoc_var_name, assoc_col_name);
+            else if (prop_it.name() == utn_var_name)
+                buf_it.second->rename<unsigned int>(utn_var_name, utn_col_name);
             else
                 buf_it.second->deleteProperty(prop_it);
         }

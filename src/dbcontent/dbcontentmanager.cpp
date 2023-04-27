@@ -952,11 +952,11 @@ void DBContentManager::addInsertedDataToChache()
         }
 
         // add assoc property if required
-        Variable& assoc_var = metaGetVariable(buf_it->first, DBContent::meta_var_associations_);
-        Property assoc_prop (assoc_var.dbColumnName(), assoc_var.dataType());
+        Variable& utn_var = metaGetVariable(buf_it->first, DBContent::meta_var_utn_);
+        Property utn_prop (utn_var.dbColumnName(), utn_var.dataType());
 
-        if (!buf_it->second->hasProperty(assoc_prop))
-            buf_it->second->addProperty(assoc_prop);
+        if (!buf_it->second->hasProperty(utn_prop))
+            buf_it->second->addProperty(utn_prop);
 
         // change db column names to dbo var names
         buf_it->second->transformVariables(read_set, true);
@@ -1458,8 +1458,8 @@ void DBContentManager::addStandardVariables(std::string dbcont_name, dbContent::
     assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_associations_));
-    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_associations_));
+    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_utn_));
+    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_utn_));
 }
 
 MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()

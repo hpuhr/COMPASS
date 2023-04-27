@@ -154,6 +154,11 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
               object.name(), DBContent::meta_var_line_id_).dbColumnName()
        << ");";
 
+    ss << "\nCREATE INDEX UTN_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << COMPASS::instance().dbContentManager().metaGetVariable(
+              object.name(), DBContent::meta_var_utn_).dbColumnName()
+       << ");";
+
     loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
     return ss.str();
 }
@@ -678,8 +683,8 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     ss << " FROM " << table_db_name;  // << table->getAllTableNames();
 
     // check associations json_each
-    if (filter.find("json_each.value") != std::string::npos)
-        ss << ", json_each("+object.dbTableName()+".associations)";
+//    if (filter.find("json_each.value") != std::string::npos)
+//        ss << ", json_each("+object.dbTableName()+".associations)";
 
     // add extra from parts
 //    for (auto& from_part : extra_from_parts)

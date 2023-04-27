@@ -43,12 +43,13 @@ public:
 
 protected:
     std::string utns_str_;
-    std::vector<unsigned int> utns_;
+    std::vector<unsigned int> values_;
+    bool null_wanted_ {false};  // indicates NULL in values
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
     virtual DBFilterWidget* createWidget() override;
 
-    bool updateUTNSFromStr(const std::string& utns); // returns success
+    bool updateUTNSFromStr(const std::string& values_str); // returns success
 };
 
 #endif // UTNFILTER_H

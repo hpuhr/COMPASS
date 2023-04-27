@@ -74,7 +74,7 @@ const Property DBContent::meta_var_longitude_ {"Longitude", PropertyDataType::DO
 
 const Property DBContent::meta_var_detection_type_ {"Type", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_artas_hash_ {"ARTAS Hash", PropertyDataType::UINT};
-const Property DBContent::meta_var_associations_ {"Associations", PropertyDataType::JSON};
+const Property DBContent::meta_var_utn_ {"UTN", PropertyDataType::UINT};
 
 const Property DBContent::meta_var_vx_ {"Vx", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_vy_ {"Vy", PropertyDataType::DOUBLE};
@@ -130,13 +130,7 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
 
     assert (db_table_name_.size());
 
-    //constructor_active_ = true;
-
     createSubConfigurables();
-
-    //constructor_active_ = false;
-
-    //sortContent();
 
     logdbg << "DBContent: constructor: created with instance_id " << instanceId() << " name "
            << name_;
@@ -174,8 +168,6 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
         logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
                << " with name " << var->name();
 
-        //variables_.emplace(var->name(), var);
-
         variables_.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(var->name()),   // args for key
@@ -183,9 +175,6 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
     }
     else
         throw runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
-
-//    if (!constructor_active_)
-//        sortContent();
 }
 
 void DBContent::checkSubConfigurables()
@@ -195,27 +184,12 @@ void DBContent::checkSubConfigurables()
 
 bool DBContent::hasVariable(const string& name) const
 {
-//    auto iter = find_if(variables_.begin(), variables_.end(),
-//                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
-
-//    return iter != variables_.end();
-
-    //return variables_.find(name) != variables_.end();
-
     return variables_.count(name);
 }
 
 Variable& DBContent::variable(const string& name) const
 {
     assert(hasVariable(name));
-
-//    auto iter = find_if(variables_.begin(), variables_.end(),
-//                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
-
-//    assert (iter != variables_.end());
-//    assert (iter->get());
-
-//    return *iter->get();
 
     return *(variables_.at(name).get());
 }
@@ -235,27 +209,11 @@ void DBContent::renameVariable(const string& old_name, const string& new_name)
     assert(!hasVariable(old_name));
     assert(hasVariable(new_name));
 
-//    string old_name = name; // since passed by reference, which will be changed
-
-//    assert(hasVariable(old_name));
-//    assert(!hasVariable(new_name));
-
-//    variable(old_name).name(new_name);
-
-//    loginf << "DBContent: renameVariable: has old var '" << old_name << "' " << hasVariable(old_name);
-//    assert(!hasVariable(old_name));
-//    loginf << "DBContent: renameVariable: has var '" << new_name << "' " << hasVariable(new_name);
-//    assert(hasVariable(new_name));
-
 }
 
 void DBContent::deleteVariable(const string& name)
 {
     assert(hasVariable(name));
-
-//    auto iter = find_if(variables_.begin(), variables_.end(),
-//                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
-//    assert (iter != variables_.end());
 
     variables_.erase(name);
     assert(!hasVariable(name));
@@ -263,12 +221,6 @@ void DBContent::deleteVariable(const string& name)
 
 bool DBContent::hasVariableDBColumnName(const std::string& col_name) const
 {
-//    auto iter = find_if(variables_.begin(), variables_.end(),
-//                        [col_name](const unique_ptr<Variable>& var) { return var->dbColumnName() == col_name;});
-
-//    logdbg << "DBContent: hasVariableDBColumnName: name '" << name << "' " << (iter != variables_.end());
-
-//    return iter != variables_.end();
 
     for (const auto& var : variables_)
     {
@@ -279,13 +231,6 @@ bool DBContent::hasVariableDBColumnName(const std::string& col_name) const
     return false;
 
 }
-
-//string DBContent::associationsTableName()
-//{
-//    assert (db_table_name_.size());
-//    return db_table_name_ + "_assoc";
-//}
-
 
 bool DBContent::hasKeyVariable()
 {
@@ -617,8 +562,6 @@ void DBContent::insertDoneSlot()
 
     dbcont_manager_.insertDone(*this);
 
-    //dbo_manager_.databaseContentChangedSlot();
-
     assert (existsInDB()); // check
 }
 
@@ -697,62 +640,6 @@ void DBContent::deleteJobDoneSlot()
     count_ = 0;
 }
 
-//map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums, int break_item_cnt)
-//{
-//    assert(is_loadable_);
-//    assert(existsInDB());
-
-//    string custom_filter_clause;
-//    bool first = true;
-
-//    assert (dbo_manager_.existsMetaVariable(DBContent::meta_var_rec_num_.name()));
-//    assert (dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(name_));
-
-//    Variable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(name_);
-
-//    custom_filter_clause = rec_num_var.dbColumnName() + " in (";
-//    for (auto& rec_num : rec_nums)
-//    {
-//        if (first)
-//            first = false;
-//        else
-//            custom_filter_clause += ",";
-
-//        custom_filter_clause += to_string(rec_num);
-//    }
-//    custom_filter_clause += ")";
-
-//    VariableSet read_list = label_definition_->readList();
-
-//    if (!read_list.hasVariable(rec_num_var))
-//        read_list.add(rec_num_var);
-
-//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
-//    DBInterface& db_interface = COMPASS::instance().interface();
-
-//    db_interface.prepareRead(*this, read_list, {}, custom_filter_clause, {}, false, nullptr, false, "");
-//    shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
-//    db_interface.finalizeReadStatement(*this);
-
-//    if (buffer->size() != rec_nums.size())
-//        throw runtime_error("DBContent " + name_ +
-//                            ": loadLabelData: failed to load label for " +
-//                            custom_filter_clause);
-
-//    assert(buffer->size() == rec_nums.size());
-
-//    map<unsigned int, string> labels =
-//            label_definition_->generateLabels(rec_nums, buffer, break_item_cnt);
-
-//    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
-//    boost::posix_time::time_duration diff = stop_time - start_time;
-
-//    logdbg << "DBContent: loadLabelData: done after " << diff.total_milliseconds() << " ms";
-
-//    return labels;
-//}
-
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
     assert(buffer);
@@ -792,15 +679,6 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
         dbcont_manager_.loadingDone(*this);
     }
 
-    //    read_job_data_.push_back(buffer);
-
-    //    FinalizeDBOReadJob* job = new FinalizeDBOReadJob(*this, sender->readList(), buffer);
-
-    //    shared_ptr<FinalizeDBOReadJob> job_ptr = shared_ptr<FinalizeDBOReadJob>(job);
-    //    connect(job, SIGNAL(doneSignal()), this, SLOT(finalizeReadJobDoneSlot()), Qt::QueuedConnection);
-    //    finalize_jobs_.push_back(job_ptr);
-
-    //    JobManager::instance().addBlockingJob(job_ptr);
 
 }
 
@@ -822,45 +700,6 @@ void DBContent::readJobDoneSlot()
         dbcont_manager_.loadingDone(*this);
     }
 }
-
-//void DBContent::finalizeReadJobDoneSlot()
-//{
-//    logdbg << "DBContent: " << name_ << " finalizeReadJobDoneSlot";
-
-//    FinalizeDBOReadJob* sender = dynamic_cast<FinalizeDBOReadJob*>(QObject::sender());
-
-//    if (!sender)
-//    {
-//        logwrn << "DBContent: finalizeReadJobDoneSlot: null sender, event on the loose";
-//        return;
-//    }
-
-//    shared_ptr<Buffer> buffer = sender->buffer();
-//    assert (buffer);
-
-//    bool found = false;
-//    for (auto final_it : finalize_jobs_)
-//    {
-//        if (final_it.get() == sender)
-//        {
-//            finalize_jobs_.erase(find(finalize_jobs_.begin(), finalize_jobs_.end(), final_it));
-//            found = true;
-//            break;
-//        }
-//    }
-//    assert(found);
-
-//    // add loaded data
-//    dbo_manager_.addLoadedData({{name_, buffer}});
-
-//    if (!isLoading())  // is last one
-//    {
-//        loginf << "DBContent: " << name_ << " finalizeReadJobDoneSlot: loading done";
-//        dbo_manager_.loadingDone(*this);
-//    }
-
-//    return;
-//}
 
 void DBContent::databaseOpenedSlot()
 {
@@ -890,18 +729,11 @@ string DBContent::dbTableName() const
     return db_table_name_;
 }
 
-//bool DBContent::associationsLoaded() const
-//{
-//    return associations_loaded_;
-//}
-
 bool DBContent::isLoading() { return read_job_ != nullptr; }
 
 bool DBContent::isInserting() { return insert_active_; }
 
 bool DBContent::isDeleting() { return delete_job_ != nullptr; }
-
-//bool DBContent::isPostProcessing() { return finalize_jobs_.size(); }
 
 bool DBContent::hasData() { return count_ > 0; }
 
@@ -919,122 +751,6 @@ bool DBContent::existsInDB() const
 {
     return COMPASS::instance().interface().existsTable(db_table_name_);
 }
-
-//void DBContent::loadAssociationsIfRequired()
-//{
-//    if (dbo_manager_.hasAssociations() && !associations_loaded_)
-//    {
-//        shared_ptr<DBOReadAssociationsJob> read_job =
-//                make_shared<DBOReadAssociationsJob>(*this);
-//        JobManager::instance().addDBJob(read_job);  // fire and forget
-//    }
-//}
-
-//void DBContent::loadAssociations()
-//{
-//    loginf << "DBContent " << name_ << ": loadAssociations";
-
-//    associations_.clear();
-
-//    boost::posix_time::ptime loading_start_time;
-//    boost::posix_time::ptime loading_stop_time;
-
-//    loading_start_time = boost::posix_time::microsec_clock::local_time();
-
-//    DBInterface& db_interface = COMPASS::instance().interface();
-
-//    string associations_table_name = associationsTableName();
-
-//    if (db_interface.existsTable(associations_table_name))
-//        associations_ = db_interface.getAssociations(associations_table_name);
-
-//    associations_loaded_ = true;
-
-//    loading_stop_time = boost::posix_time::microsec_clock::local_time();
-
-//    double load_time;
-//    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
-//    load_time = diff.total_milliseconds() / 1000.0;
-
-//    loginf << "DBContent " << name_ << ": loadAssociations: " << associations_.size()
-//           << " associactions done (" << String::doubleToStringPrecision(load_time, 2) << " s).";
-//}
-
-//bool DBContent::hasAssociations() { return associations_.size() > 0; }
-
-//void DBContent::addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num)
-//{
-//    associations_.add(rec_num, DBOAssociationEntry(utn, has_src, src_rec_num));
-//    associations_changed_ = true;
-//    associations_loaded_ = true;
-//}
-
-//void DBContent::clearAssociations()
-//{
-//    associations_.clear();
-//    associations_changed_ = true;
-//    associations_loaded_ = false;
-//}
-
-//void DBContent::saveAssociations()
-//{
-//    loginf << "DBContent " << name_ << ": saveAssociations";
-
-//    DBInterface& db_interface = COMPASS::instance().interface();
-
-//    string associations_table_name = associationsTableName();
-//    assert(associations_table_name.size());
-
-//    if (db_interface.existsTable(associations_table_name))
-//        db_interface.clearTableContent(associations_table_name);
-//    else
-//        db_interface.createAssociationsTable(associations_table_name);
-
-//    if (!hasAssociations())
-//        return;
-
-//    assert(db_interface.existsTable(associations_table_name));
-
-//    // assoc_id INT, rec_num INT, utn INT
-
-//    PropertyList list;
-//    list.addProperty("rec_num", PropertyDataType::INT);
-//    list.addProperty("utn", PropertyDataType::INT);
-//    list.addProperty("src_rec_num", PropertyDataType::INT);
-
-//    shared_ptr<Buffer> buffer_ptr = shared_ptr<Buffer>(new Buffer(list, name_));
-
-//    NullableVector<int>& rec_nums = buffer_ptr->get<int>("rec_num");
-//    NullableVector<int>& utns = buffer_ptr->get<int>("utn");
-//    NullableVector<int>& src_rec_nums = buffer_ptr->get<int>("src_rec_num");
-
-//    size_t cnt = 0;
-//    for (auto& assoc_it : associations_)
-//    {
-//        rec_nums.set(cnt, assoc_it.first);
-//        utns.set(cnt, assoc_it.second.utn_);
-
-//        if (assoc_it.second.has_src_)
-//            src_rec_nums.set(cnt, assoc_it.second.src_rec_num_);
-
-//        ++cnt;
-//    }
-
-//    db_interface.insertBuffer(associations_table_name, buffer_ptr);
-
-//    associations_changed_ = false;
-
-//    loginf << "DBContent " << name_ << ": saveAssociations: done";
-//}
-
-//void DBContent::sortContent()
-//{
-//    sort(variables_.begin(), variables_.end(),
-//         [](const std::unique_ptr<Variable>& a, const std::unique_ptr<Variable>& b) -> bool
-//    {
-//        return a->name() < b->name();
-//    });
-//}
 
 void DBContent::checkStaticVariable(const Property& property)
 {
