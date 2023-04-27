@@ -39,6 +39,8 @@ protected:
 
     bool insert_done_ {false};
 
+    bool generate_viewpoints_ = true;
+
     void createTargets();
     void finalizeTargets();
     void calculateReferences();

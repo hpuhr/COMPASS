@@ -29,6 +29,8 @@ namespace dbContent
     }
 }
 
+class ViewPointGenVP;
+
 class OGRSpatialReference;
 class OGRCoordinateTransformation;
 
@@ -62,6 +64,8 @@ public:
     void setVerbosity(int v) { verbosity_ = v; }
     int verbosity() const { return verbosity_; }
 
+    void setViewPoint(ViewPointGenVP* vp);
+
     static std::vector<std::vector<Measurement>> splitMeasurements(const std::vector<Measurement>& measurements,
                                                                    double max_dt);
 
@@ -77,6 +81,9 @@ protected:
     const boost::optional<Uncertainty>& sourceUncertainty(uint32_t source_id) const;
 
     virtual CoordSystem preferredCoordSystem() const { return CoordSystem::Unknown; } 
+
+    bool hasViewPoint() const;
+    ViewPointGenVP* viewPoint() const;
 
 private:
     struct DBContentInfo
@@ -106,6 +113,8 @@ private:
     CoordSystem     coord_sys_override_ = CoordSystem::Unknown;
     CoordSystem     coord_sys_          = CoordSystem::Unknown;
     int             verbosity_          = 1;
+
+    mutable ViewPointGenVP* viewpoint_ = nullptr;
 };
 
 } // namespace reconstruction
