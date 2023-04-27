@@ -67,7 +67,6 @@ class ViewManager : public QObject, public Configurable
     virtual ~ViewManager();
 
     void init(QTabWidget* tab_widget);
-    void loadViewPoints();
     void close();
 
     void clearDataInViews();
@@ -106,13 +105,15 @@ class ViewManager : public QObject, public Configurable
     //ViewManagerWidget* widget();
 
     ViewPointsWidget* viewPointsWidget() const;
-
     ViewPointsReportGenerator& viewPointsGenerator();
+
+    void loadViewPoints();
+    std::pair<bool, std::string> loadViewPoints(nlohmann::json json_obj);
 
     void setCurrentViewPoint (const ViewableDataConfig* viewable);
     void unsetCurrentViewPoint ();
-
     void doViewPointAfterLoad ();
+
     void selectTimeWindow(boost::posix_time::ptime ts_min, boost::posix_time::ptime ts_max);
 
     void showMainViewContainerAddView();

@@ -271,6 +271,57 @@ ViewPointsReportGenerator& ViewManager::viewPointsGenerator()
     return *view_points_report_gen_;
 }
 
+std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj)
+{
+    try
+    {
+        //check if valid JSON
+        std::string err;
+        bool json_ok = ViewPoint::isValidJSON(json_obj, "", &err, true);
+        if (!json_ok)
+            return std::make_pair(false, err);
+
+        DBInterface& db_interface = COMPASS::instance().interface();
+
+        //delete existing viewpoints
+        db_interface.deleteAllViewPoints();
+
+        assert (json_obj.contains("view_points"));
+        
+        //add new ones
+        json& view_points = json_obj.at("view_points");
+        assert (view_points.size());
+
+        unsigned int id;
+        for (auto& vp_it : view_points.get<json::array_t>())
+        {
+            assert (vp_it.contains(VP_ID_KEY));
+
+            id = vp_it.at(VP_ID_KEY);
+
+            if (!vp_it.contains(VP_STATUS_KEY))
+                vp_it[VP_STATUS_KEY] = "open";
+
+            db_interface.setViewPoint(id, vp_it.dump());
+        }
+
+        //reload viewpoints
+        loadViewPoints();
+
+        loginf << "ViewManager::loadViewPoints: imported " << std::to_string(view_points.size()) << " view points";
+    }
+    catch (const std::exception& ex)
+    {
+        return std::make_pair(false, ex.what());
+    }
+    catch (...)
+    {
+        return std::make_pair(false, "unknown error");
+    }
+    
+    return std::make_pair(true, "");  
+}
+
 void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 {
     if (current_viewable_)

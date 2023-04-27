@@ -22,6 +22,7 @@
 #include "compass.h"
 #include "dbinterface.h"
 #include "latexvisitor.h"
+#include "files.h"
 
 using namespace nlohmann;
 
@@ -165,4 +166,126 @@ void ViewPoint::save()
 
     DBInterface& db_interface = COMPASS::instance().interface();
     db_interface.setViewPoint(id_, data_.dump());
+}
+
+bool ViewPoint::isValidJSON(nlohmann::json json_obj, 
+                            const std::string& json_filename, 
+                            std::string* err_msg,
+                            bool verbose)
+{
+    try
+    {
+        if (verbose)
+            loginf << "ViewPoint::isValidJSON";
+
+        if (!json_obj.is_object())
+            throw std::runtime_error("current data is not an object");
+
+        if (!json_obj.contains("content_type")
+                || !json_obj.at("content_type").is_string()
+                || json_obj.at("content_type") != "view_points")
+            throw std::runtime_error("current data is not view point content");
+
+        if (!json_obj.contains("content_version")
+                || !json_obj.at("content_version").is_string()
+                || json_obj.at("content_version") != "0.2")
+            throw std::runtime_error("current data content version is not supported");
+
+        if (json_obj.contains("view_point_context"))
+        {
+            json& context = json_obj.at("view_point_context");
+
+            if (context.contains("datasets"))
+            {
+                if (!context.at("datasets").is_array())
+                    throw std::runtime_error("datasets is not an array");
+
+                for (json& ds_it : context.at("datasets").get<json::array_t>())
+                {
+                    if (!ds_it.contains("filename") || !ds_it.at("filename").is_string())
+                        throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid filename");
+
+                    std::string filename = ds_it.at("filename");
+
+                    bool found = true;
+
+                    if (!Utils::Files::fileExists(filename))
+                    {
+                        found = false;
+
+                        std::string file = Utils::Files::getFilenameFromPath(filename);
+                        
+                        if (verbose)
+                            loginf << "ViewPoint::isValidJSON: filename '" << filename << "' not found";
+                        
+                        if (!json_filename.empty())
+                        {
+                            std::string dir = Utils::Files::getDirectoryFromPath(json_filename);
+                        
+                            if (verbose)
+                                loginf << "Checking for file '" << file << "' in dir '" << dir << "'";
+
+                            filename = dir+"/"+file;
+
+                            if (Utils::Files::fileExists(filename))
+                            {
+                                found = true;
+
+                                if (verbose)
+                                {
+                                    loginf << "ViewPoint::isValidJSON: filename '" << filename
+                                           << "' found at different path";
+                                }
+                            }
+                        }
+                    }
+
+                    if (!found)
+                        throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a usable filename");
+                }
+            }
+        }
+
+        if (!json_obj.contains("view_points"))
+            throw std::runtime_error("current data does not contain view points");
+
+        json& view_points = json_obj.at("view_points");
+
+        if (!view_points.is_array())
+            throw std::runtime_error("view_points is not an array");
+
+        if (!view_points.size())
+            throw std::runtime_error("view_points is an empty array");
+
+        for (auto& vp_it : view_points.get<json::array_t>())
+        {
+            if (!vp_it.contains(VP_ID_KEY) || !vp_it.at(VP_ID_KEY).is_number())
+                throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid id");
+
+            if (!vp_it.contains(VP_TYPE_KEY) || !vp_it.at(VP_TYPE_KEY).is_string())
+                throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid type");
+        }
+
+        if (verbose)
+        {
+            loginf << "ViewPointsImportTask: checkParsedData: current data seems to be valid, contains " << view_points.size()
+                << " view points";
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        if (err_msg)
+            *err_msg = ex.what();
+
+        return false;
+    }
+    catch(...)
+    {
+        if (err_msg)
+            *err_msg = "unknown error";
+
+        return false;
+    }
+    
+    return true;
 }
