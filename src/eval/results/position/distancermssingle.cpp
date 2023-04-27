@@ -69,6 +69,7 @@ void SinglePositionDistanceRMS::update()
 
     unsigned int num_distances = values_.size();
 
+    // distances in values
     if (num_distances)
     {
         value_min_ = *min_element(values_.begin(), values_.end());
@@ -76,9 +77,20 @@ void SinglePositionDistanceRMS::update()
         value_avg_ = std::accumulate(values_.begin(), values_.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
+        value_rms_ = 0;
+
         for(auto val : values_)
+        {
             value_var_ += pow(val - value_avg_, 2);
+
+            value_rms_ += pow(val, 2);
+        }
         value_var_ /= (float)num_distances;
+
+
+        value_rms_ /= (float)num_distances;
+        value_rms_ = sqrt(value_rms_);
+
 
         assert (num_passed_ <= num_distances);
         //prob_ = (float)num_passed_/(float)num_distances; no prob here
@@ -89,6 +101,7 @@ void SinglePositionDistanceRMS::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
+        value_rms_ = 0;
     }
 
     result_usable_ = num_distances != 0;
@@ -142,9 +155,9 @@ void SinglePositionDistanceRMS::addTargetDetailsToTable (
         Qt::SortOrder order = Qt::DescendingOrder;
 
 
-        section.addTable(table_name, 14,
+        section.addTable(table_name, 15,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "DMin", "DMax", "DAvg", "DSDev", "#CF", "#CP"}, true, 10, order);
+                          "DMin", "DMax", "DAvg", "DSDev", "RMS", "#CF", "#CP"}, true, 12, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -157,6 +170,7 @@ void SinglePositionDistanceRMS::addTargetDetailsToTable (
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
                  Number::round(sqrt(value_var_),2), // "DSDev"
+                 Number::round(value_rms_,2), // "RMS"
                  num_failed_, // "#DOK"
                  num_passed_}, // "#DNOK"
                 this, {utn_});
@@ -169,9 +183,9 @@ void SinglePositionDistanceRMS::addTargetDetailsToTableADSB (
     {
         Qt::SortOrder order = Qt::DescendingOrder;
 
-        section.addTable(table_name, 15,
+        section.addTable(table_name, 16,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "DMin", "DMax", "DAvg", "DSDev", "#CF", "#CP", "MOPS"}, true, 10, order);
+                          "DMin", "DMax", "DAvg", "DSDev", "RMS", "#CF", "#CP", "MOPS"}, true, 10, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -188,6 +202,7 @@ void SinglePositionDistanceRMS::addTargetDetailsToTableADSB (
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
                  Number::round(sqrt(value_var_),2), // "DSDev"
+                 Number::round(value_rms_,2), // "RMS"
                  num_failed_, // "#CF"
                  num_passed_, // "#CP"
                  target_->mopsVersionStr().c_str()}, // "MOPS"
@@ -230,6 +245,8 @@ void SinglePositionDistanceRMS::addTargetDetailsToReport(shared_ptr<EvaluationRe
     utn_req_table.addRow({"DSDev [m]", "Standard Deviation of distance",
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     utn_req_table.addRow({"DVar [m^2]", "Variance of distance",
+                          String::doubleToStringPrecision(value_rms_,2).c_str()}, this);
+    utn_req_table.addRow({"RMS", "Root mean square",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
     utn_req_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_failed_}, this);
     utn_req_table.addRow({"#CP [1]", "Number of updates with passed comparison", num_passed_},
@@ -249,7 +266,7 @@ void SinglePositionDistanceRMS::addTargetDetailsToReport(shared_ptr<EvaluationRe
 
     //if (prob_.has_value())
     if (num_failed_ + num_passed_)
-        result = req->getConditionResultStr(value_avg_);
+        result = req->getConditionResultStr(value_rms_);
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

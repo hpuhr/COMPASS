@@ -97,9 +97,19 @@ void JoinedPositionDistanceRMS::update()
         value_avg_ = std::accumulate(all_values.begin(), all_values.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
+        value_rms_ = 0;
+
         for(auto val : all_values)
+        {
             value_var_ += pow(val - value_avg_, 2);
+
+            value_rms_ += pow(val, 2);
+        }
+
         value_var_ /= (float)num_distances;
+
+        value_rms_ /= (float)num_distances;
+        value_rms_ = sqrt(value_rms_);
 
         assert (num_passed_ <= num_distances);
         //prob_ = (float)num_passed_ / (float)num_distances;
@@ -110,6 +120,7 @@ void JoinedPositionDistanceRMS::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
+        value_rms_ = 0;
     }
 }
 
@@ -153,8 +164,8 @@ void JoinedPositionDistanceRMS::addToOverviewTable(std::shared_ptr<EvaluationRes
 
     if (num_passed_ + num_failed_)
     {
-        calc_val = String::doubleToStringPrecision(value_avg_,2).c_str();
-        result = req->getConditionResultStr(value_avg_);
+        calc_val = String::doubleToStringPrecision(value_rms_,2).c_str();
+        result = req->getConditionResultStr(value_rms_);
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -205,6 +216,8 @@ void JoinedPositionDistanceRMS::addDetails(std::shared_ptr<EvaluationResultsRepo
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     sec_det_table.addRow({"DVar [m^2]", "Variance of distance",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
+    sec_det_table.addRow({"RMS", "Root mean square",
+                          String::doubleToStringPrecision(value_rms_,2).c_str()}, this);
     sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_failed_}, this);
     sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_passed_},
                          this);

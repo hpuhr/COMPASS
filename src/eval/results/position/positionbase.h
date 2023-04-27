@@ -82,6 +82,7 @@ protected:
     double value_max_ {0};
     double value_avg_ {0};
     double value_var_ {0};
+    double value_rms_ {0};
 
     boost::optional<float> prob_;
 };
@@ -110,6 +111,7 @@ protected:
         double value_max_ {0};
         double value_avg_ {0};
         double value_var_ {0};
+        double value_rms_ {0};
 
         boost::optional<float> prob_;
 

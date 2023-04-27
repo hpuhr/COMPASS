@@ -206,7 +206,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
             continue;
         }
 
-        distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+        distance = sqrt(pow(x_pos,2) + pow(y_pos,2));
 
         if (std::isnan(distance) || std::isinf(distance))
         {
