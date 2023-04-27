@@ -21,6 +21,7 @@ namespace dbContent {
 
 
 const map<int, float> adsb_v0_accuracies {
+    {0, 92600},
     {1, 9260},
     {2, 4630},
     {3, 926},
@@ -47,6 +48,7 @@ const map<int, float> adsb_v0_accuracies {
 //    0   & > 10 NM or Unknown & & - \\ \hline|
 
 const map<int, float> adsb_v12_accuracies {
+    {0, 92600},
     {1, 9260},
     {2, 3704},
     {3, 1852},
