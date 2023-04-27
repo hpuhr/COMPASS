@@ -138,10 +138,11 @@ void CalculateReferencesJob::createTargets()
                 continue;
             }
 
+
             utn = utn_vec.get(cnt);
 
             if (!target_map.count(utn))
-                target_map[utn].reset(new CalculateReferences::Target(utn, cache_));
+                target_map[utn].reset(new CalculateReferences::Target(utn, cache_, generate_viewpoints_));
             //target_data_.emplace_back(utn_it, *this, cache_, eval_man_, dbcont_man_);
 
             target_map.at(utn)->addTargetReport(dbcontent_name, ds_ids.get(cnt), line_ids.get(cnt),
@@ -221,6 +222,8 @@ void CalculateReferencesJob::calculateReferences()
         else
             result_->seizeBuffer(*buf_it);
     }
+
+    //@TODO add generated viewpoints
 
     loginf << "CalculateReferencesJob: calculateReferences: done, buffer size " << result_->size();
 }

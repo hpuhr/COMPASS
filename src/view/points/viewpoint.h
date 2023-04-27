@@ -69,6 +69,11 @@ class ViewPoint : public ViewableDataConfig
 
     const unsigned int id_;
 
+    static bool isValidJSON(nlohmann::json json_obj, 
+                            const std::string& json_filename = "", 
+                            std::string* err_msg = nullptr,
+                            bool verbose = false);
+
 protected:
     ViewManager& view_manager_;
 

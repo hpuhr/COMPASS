@@ -20,6 +20,7 @@
 #include "util/timeconv.h"
 #include "util/number.h"
 #include "targetreportchain.h"
+#include "viewpointgenerator.h"
 #include "logger.h"
 
 #include <ogr_spatialref.h>
@@ -34,6 +35,27 @@ Reconstructor::Reconstructor() = default;
 /**
 */
 Reconstructor::~Reconstructor() = default;
+
+/**
+*/
+void Reconstructor::setViewPoint(ViewPointGenVP* vp)
+{
+    viewpoint_ = vp;
+}
+
+/**
+*/
+bool Reconstructor::hasViewPoint() const
+{
+    return (viewpoint_ != nullptr);
+}
+
+/**
+*/
+ViewPointGenVP* Reconstructor::viewPoint() const
+{
+    return viewpoint_;
+}
 
 /**
 */

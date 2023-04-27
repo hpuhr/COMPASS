@@ -6,6 +6,7 @@
 #include "dbcontent/variable/metavariable.h"
 #include "buffer.h"
 #include "timeconv.h"
+#include "viewpointgenerator.h"
 #include "logger.h"
 
 #include "reconstruction/reconstructor_umkalman2d.h"
@@ -21,10 +22,11 @@ using namespace nlohmann;
 
 namespace CalculateReferences {
 
-Target::Target(unsigned int utn, std::shared_ptr<dbContent::Cache> cache)
-    : utn_(utn), cache_(cache)
+Target::Target(unsigned int utn, 
+               std::shared_ptr<dbContent::Cache> cache,
+               bool generate_viewpoint)
+    : utn_(utn), cache_(cache), generate_viewpoint_(generate_viewpoint)
 {
-
 }
 
 void Target::addTargetReport(const std::string& dbcontent_name, unsigned int ds_id,
@@ -49,6 +51,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
     string dbcontent_name = "RefTraj";
 
     boost::posix_time::ptime ts_begin, ts_end;
+    boost::optional<double>  lat_min, lon_min, lat_max, lon_max;
 
     for (auto& chain_it : chains_)
     {
@@ -67,8 +70,23 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 ts_begin = min(ts_begin, chain_it.second->timeBegin());
                 ts_end = max(ts_end, chain_it.second->timeEnd());
             }
+
+            //keep track of bounds
+            if (!lat_min.has_value() || chain_it.second->latitudeMin() < lat_min.value())
+                lat_min = chain_it.second->latitudeMin();
+            if (!lon_min.has_value() || chain_it.second->longitudeMin() < lon_min.value())
+                lon_min = chain_it.second->longitudeMin();
+            if (!lat_max.has_value() || chain_it.second->latitudeMax() > lat_max.value())
+                lat_max = chain_it.second->latitudeMax();
+            if (!lon_max.has_value() || chain_it.second->longitudeMax() > lon_max.value())
+                lon_max = chain_it.second->longitudeMax();
         }
     }
+
+    //region of interest
+    QRectF roi;
+    if (lat_min.has_value() && lon_min.has_value() && lat_max.has_value() && lon_max.has_value())
+        roi = QRectF(lat_min.value(), lon_min.value(), lat_max.value() - lat_min.value(), lon_max.value() - lon_min.value());
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -132,7 +150,6 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
 
     // speed, track angle
-
     NullableVector<double>& vx_vec = buffer->get<double> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_).name());
     NullableVector<double>& vy_vec = buffer->get<double> (
@@ -144,7 +161,6 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name());
 
     // stddevs
-
     NullableVector<double>& x_stddev_vec = buffer->get<double> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_).name());
     NullableVector<double>& y_stddev_vec = buffer->get<double> (
@@ -185,10 +201,23 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
         std::map<const Chain*, TargetKey> chain_targets;
 
-        std::string dinfo = "UTN" + std::to_string(utn_);
+        std::string dinfo = "UTN " + std::to_string(utn_);
+
+        //init viewpoint generation?
+        std::unique_ptr<ViewPointGenVP> gen_vp;
+
+        if (generate_viewpoint_)
+        {
+            std::string vp_name = "Reconstruction - " + dinfo;
+            gen_vp.reset(new ViewPointGenVP(vp_name, utn_, "Reconstruction", roi));
+            
+            //setup utn filter
+            std::unique_ptr<ViewPointGenFilterUTN> utn_filter(new ViewPointGenFilterUTN(utn_));
+            gen_vp->filters().addFilter(std::move(utn_filter));
+        }
 
         auto storeReferences = [ & ] (const std::vector<reconstruction::Reference>& references,
-                const reconstruction::Reconstructor& rec)
+                                      const reconstruction::Reconstructor& rec)
         {
             unsigned int buffer_cnt = 0;
 
@@ -332,6 +361,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
         auto reconstructInterp = [ & ] ()
         {
             reconstruction::ReconstructorInterp rec;
+            rec.setViewPoint(gen_vp.get());
             rec.setOverrideCoordSystem(reconstruction::CoordSystem::WGS84);
             rec.setCoordConversion(reconstruction::CoordConversion::NoConversion);
             rec.config().sample_dt            = 1.0;
@@ -385,6 +415,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
             }
 
             reconstruction::Reconstructor_UMKalman2D rec(track_vel);
+            rec.setViewPoint(gen_vp.get());
 
             //configure kalman
             rec.baseConfig().R_std          = R_std;
@@ -435,6 +466,10 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
         //reconstructInterp();
         reconstructUMKalman2D();
+
+        //generate viewpoint json?
+        if (gen_vp && gen_vp->hasAnnotations())
+            gen_vp->toJSON(viewpoint_json_);
     }
 
     loginf << "Target: calculateReference: buffer size " << buffer->size();
