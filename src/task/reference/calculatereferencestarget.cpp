@@ -393,7 +393,7 @@ std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_poin
             bool   smooth_rts        = true;   // enable RTS smoother
             double smooth_scale      = 1;      // scale factor for RTS smoother
 
-            bool   resample_cat062       = false; // resample system tracks using spline interpolation
+            bool   resample_cat062       = true; // resample system tracks using spline interpolation
             double resample_dt_cat062    = 1.0;  // resample interval in seconds
             double resample_maxdt_cat062 = 30.0; // maximum timestep to split tracks during resampling
 

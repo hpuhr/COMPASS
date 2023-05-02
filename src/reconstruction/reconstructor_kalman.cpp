@@ -135,8 +135,9 @@ void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
 
         while (tcur >= t0 && tcur < t1)
         {
-            double dt = Utils::Time::partialSeconds(tcur - t0);
-            if (dt <= base_config_.min_dt)
+            double dt0 = Utils::Time::partialSeconds(tcur - t0);
+            double dt1 = Utils::Time::partialSeconds(t1 - tcur);
+            if (dt0 <= base_config_.min_dt)
             {
                 //use first ref if timestep from first ref is very small
                 resampled_chain.add(ref0, state0);
@@ -144,8 +145,21 @@ void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
                 tcur = t0 + time_incr;
                 continue;
             }
+            if (dt1 <= base_config_.min_dt)
+            {
+                //use first ref if timestep from first ref is very small
+                resampled_chain.add(ref1, state1);
+                ++small_intervals;
+                tcur = t1 + time_incr;
+                continue;
+            }
 
-            auto new_state = interpStep(state0, state1, dt);
+            auto new_state0 = interpStep(state0, state1,  dt0);
+            auto new_state1 = interpStep(state1, state0, -dt1);
+
+            kalman::KalmanState new_state;
+            new_state.x = (new_state0.x + new_state1.x) / 2;
+            new_state.P = dt0 < dt1 ? state0.P : state1.P;
 
             Reference ref;
             ref.t            = tcur;
