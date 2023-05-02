@@ -105,9 +105,9 @@ protected:
     virtual void storeState_impl(Reference& ref,
                                  const kalman::KalmanState& state) const = 0;
     virtual void init_impl(const Measurement& mm) const = 0;
-    virtual boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
-                                                            const kalman::KalmanState& state1,
-                                                            double dt) const = 0;
+    virtual kalman::KalmanState interpStep(const kalman::KalmanState& state0,
+                                           const kalman::KalmanState& state1,
+                                           double dt) const = 0;
 
     reconstruction::Uncertainty defaultUncertaintyOfMeasurement(const Measurement& mm) const;
 

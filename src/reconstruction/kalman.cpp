@@ -281,7 +281,6 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
 
         //        Pp[ k ] = states[ k ].F * P_smooth[ k ] * Ft + Q;
 
-
         const auto& F_1 = states[ k+1 ].F;
         const auto& Q_1 = states[ k+1 ].Q;
         auto        F_1t = F_1.transpose();

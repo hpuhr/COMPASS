@@ -320,9 +320,9 @@ void Reconstructor_UMKalman2D::init_impl(const Measurement& mm) const
 
 /**
 */
-boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::interpStep(const kalman::KalmanState& state0, 
-                                                                          const kalman::KalmanState& state1,
-                                                                          double dt) const
+kalman::KalmanState Reconstructor_UMKalman2D::interpStep(const kalman::KalmanState& state0, 
+                                                         const kalman::KalmanState& state1,
+                                                         double dt) const
 {
     kalman_->setX(state0.x);
     kalman_->setP(state0.P);

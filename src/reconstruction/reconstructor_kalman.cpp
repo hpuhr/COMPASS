@@ -146,12 +146,6 @@ void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             }
 
             auto new_state = interpStep(state0, state1, dt);
-            if (!new_state.has_value())
-            {
-                ++errors;
-                tcur += time_incr;
-                continue;
-            }
 
             Reference ref;
             ref.t            = tcur;
@@ -160,9 +154,9 @@ void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             ref.nospeed_pos  = ref0.nospeed_pos;
             ref.nostddev_pos = ref0.nostddev_pos;
 
-            storeState(ref, new_state.value());
+            storeState(ref, new_state);
 
-            resampled_chain.add(ref, new_state.value());
+            resampled_chain.add(ref, new_state);
 
             tcur += time_incr;
         }
@@ -210,35 +204,38 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
             }
         }
 
+        if (base_config_.resample_result)
+        {
+            resampleResult(c, base_config_.resample_dt);
+        }
+
         //add to result chain
         result_chain.add(c);
     }
 
     //interpolate result if desired
-    if (base_config_.resample_result)
-    {
-        if (hasViewPoint())
-        {
-            auto anno = viewPoint()->annotations().addAnnotation("positions_pre_interp");
+    //if (base_config_.resample_result)
+    //{
+        // if (hasViewPoint())
+        // {
+        //     auto anno = viewPoint()->annotations().addAnnotation("positions_pre_interp");
 
-            ViewPointGenFeaturePoints* points = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Square);
-            points->reserve(result_chain.references.size(), false);
-            for (size_t i = 0; i < result_chain.references.size(); ++i)
-            {
-                double x = result_chain.references[ i ].x;
-                double y = result_chain.references[ i ].y;
-                points->addPoint(transformBack(x, y));
-            }
-            points->setColor(QColor(255, 125, 0));
+        //     ViewPointGenFeaturePoints* points = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Square);
+        //     points->reserve(result_chain.references.size(), false);
+        //     for (size_t i = 0; i < result_chain.references.size(); ++i)
+        //     {
+        //         double x = result_chain.references[ i ].x;
+        //         double y = result_chain.references[ i ].y;
+        //         points->addPoint(transformBack(x, y));
+        //     }
+        //     points->setColor(QColor(255, 125, 0));
 
-            anno->addFeature(std::unique_ptr<ViewPointGenFeaturePoints>(points));
-        }
+        //     anno->addFeature(std::unique_ptr<ViewPointGenFeaturePoints>(points));
+        // }
 
-        if (verbosity() > 0)
-            loginf << "Resampling result chain containing " << result_chain.references.size() << " reference(s)";
-        
-        resampleResult(result_chain, base_config_.resample_dt);
-    }
+      //  if (verbosity() > 0)
+       //     loginf << "Resampling result chain containing " << result_chain.references.size() << " reference(s)"; 
+    //}
     
     return result_chain.references;
 }

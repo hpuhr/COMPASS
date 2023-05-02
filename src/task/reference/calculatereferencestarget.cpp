@@ -386,14 +386,14 @@ std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_poin
 
             //other config values
             double min_dt            = 0.0;    // minimum allowed timestep in seconds
-            double max_dt            = 60.0;   // maximum allowed timestep in seconds
+            double max_dt            = 30.0;   // maximum allowed timestep in seconds
             size_t min_chain_size    = 2;      // minimum kalman chain size
 
             bool   track_vel         = true;   // track velocities in measurements
             bool   smooth_rts        = true;   // enable RTS smoother
             double smooth_scale      = 1;      // scale factor for RTS smoother
 
-            bool   resample_cat062       = true; // resample system tracks using spline interpolation
+            bool   resample_cat062       = false; // resample system tracks using spline interpolation
             double resample_dt_cat062    = 1.0;  // resample interval in seconds
             double resample_maxdt_cat062 = 30.0; // maximum timestep to split tracks during resampling
 
@@ -413,6 +413,7 @@ std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_poin
 
             reconstruction::Reconstructor_UMKalman2D rec(track_vel);
             rec.setViewPoint(gen_view_point);
+            rec.setVerbosity(0);
 
             //configure kalman
             rec.baseConfig().R_std          = R_std;
