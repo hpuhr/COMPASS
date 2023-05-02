@@ -45,8 +45,8 @@ bool Chain::hasData() const
 
 void Chain::finalize () const
 {
-    updateCallsigns();
-    updateTargetAddresses();
+    updateACIDs();
+    updateACADs();
     updateModeACodes();
     updateModeCMinMax();
     updatePositionMinMax();
@@ -941,7 +941,7 @@ std::string Chain::acadsStr() const
     return out.str().c_str();
 }
 
-void Chain::updateCallsigns() const
+void Chain::updateACIDs() const
 {
     acids_.clear();
 
@@ -952,13 +952,13 @@ void Chain::updateCallsigns() const
 
         for (auto& val_it : distinct_values)
         {
-            if (!acids_.count(val_it.first))
-                acids_.insert(val_it.first);
+            if (!acids_.count(String::trim(val_it.first)))
+                acids_.insert(String::trim(val_it.first));
         }
     }
 }
 
-void Chain::updateTargetAddresses() const
+void Chain::updateACADs() const
 {
     acads_.clear();
 

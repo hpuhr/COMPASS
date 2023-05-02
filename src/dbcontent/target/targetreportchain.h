@@ -211,8 +211,8 @@ protected:
 
     mutable Transformation trafo_;
 
-    void updateCallsigns() const;
-    void updateTargetAddresses() const;
+    void updateACIDs() const;
+    void updateACADs() const;
     void updateModeACodes() const;
     void updateModeCMinMax() const;
     void updatePositionMinMax() const;

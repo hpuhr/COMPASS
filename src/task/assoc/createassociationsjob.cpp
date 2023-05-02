@@ -72,7 +72,7 @@ void CreateAssociationsJob::run()
 
     loginf << "CreateAssociationsJob: run: clearing associations";
 
-    emit statusSignal("Clearing Previous ARTAS Associations");
+    emit statusSignal("Clearing Previous Associations");
     removePreviousAssociations();
 
     // create target reports
@@ -548,9 +548,8 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
                 // lookup by mode s failed
 
-                if (tr_it.has_ta_ &&
-                        (!tr_it.has_ma_ || mode_a_conspic.count(tr_it.ma_)))
-                    // create new utn if tr has ta and can not be associated using mode a
+                if (tr_it.has_ta_) // create new utn if tr has ta
+                    //  && (!tr_it.has_ma_ || mode_a_conspic.count(tr_it.ma_))  and can not be associated using mode a
                 {
                     boost::mutex::scoped_lock lock(create_todos_mutex);
                     create_todos[tr_it.ta_].push_back(&tr_it);

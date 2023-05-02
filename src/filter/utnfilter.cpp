@@ -172,8 +172,8 @@ void UTNFilter::utns(const std::string& utns)
 {
     if (!updateUTNSFromStr(utns)) // false on failure
     {
-        if (widget_)
-            widget_->update();
+//        if (widget_)
+//            widget_->update();
 
         return;
     }
@@ -181,9 +181,13 @@ void UTNFilter::utns(const std::string& utns)
     utns_str_ = utns;
 }
 
+const string null_str_1 = "NULL";
+const string null_str_2 = "null";
 
 bool UTNFilter::updateUTNSFromStr(const std::string& values_str)
 {
+    values_.clear();
+
     vector<unsigned int> values_tmp;
     vector<string> split_str = String::split(values_str, ',');
 
@@ -192,18 +196,27 @@ bool UTNFilter::updateUTNSFromStr(const std::string& values_str)
 
     for (auto& tmp_str : split_str)
     {
-        if (String::trim(tmp_str) == "NULL" || String::trim(tmp_str) == "null")
-        {
-            null_wanted_ = true;
-            continue;
-        }
-
         unsigned int utn_tmp = QString(tmp_str.c_str()).toInt(&ok);
 
         if (!ok)
         {
-            logerr << "UTNFilter: updateUTNSFromStr: utn '" << tmp_str << "' not valid";
-            break;
+            string tmp_str_trim = String::trim(tmp_str);
+
+            if (tmp_str_trim == null_str_1 || tmp_str_trim == null_str_2)
+            {
+                null_wanted_ = true;
+                continue;
+            }
+            else if (null_str_1.find(tmp_str_trim) != std::string::npos
+                     || null_str_2.find(tmp_str_trim) != std::string::npos) // part null string
+            {
+                continue;
+            }
+            else
+            {
+                logerr << "UTNFilter: updateUTNSFromStr: utn '" << tmp_str << "' not valid";
+                break;
+            }
         }
 
         values_tmp.push_back(utn_tmp);

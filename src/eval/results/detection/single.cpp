@@ -107,10 +107,27 @@ void SingleDetection::addTargetToOverviewTable(shared_ptr<EvaluationResultsRepor
 void SingleDetection::addTargetDetailsToTable (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
+
+
+
+
     if (!section.hasTable(table_name))
+    {
+        std::shared_ptr<EvaluationRequirement::Detection> req =
+                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+        assert (req);
+
+        Qt::SortOrder order;
+
+        if (req->invertProb())
+            order=Qt::DescendingOrder;
+        else
+            order=Qt::AscendingOrder;
+
         section.addTable(table_name, 11,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "#EUIs", "#MUIs", "PD"}, true, 10);
+                          "#EUIs", "#MUIs", "PD"}, true, 10, order);
+    }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
