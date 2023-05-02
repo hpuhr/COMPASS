@@ -347,29 +347,29 @@ std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_poin
             }
         };
 
-        auto reconstructInterp = [ & ] ()
-        {
-            reconstruction::ReconstructorInterp rec;
-            rec.setViewPoint(gen_view_point);
-            rec.setCoordConversion(reconstruction::CoordConversion::NoConversion);
-            rec.config().interp_config.sample_dt            = 1.0;
-            rec.config().interp_config.max_dt               = 30.0;
-            rec.config().interp_config.check_fishy_segments = true;
+        // auto reconstructInterp = [ & ] ()
+        // {
+        //     reconstruction::ReconstructorInterp rec;
+        //     rec.setViewPoint(gen_view_point);
+        //     rec.setCoordConversion(reconstruction::CoordConversion::NoConversion);
+        //     rec.config().interp_config.sample_dt            = 1.0;
+        //     rec.config().interp_config.max_dt               = 30.0;
+        //     rec.config().interp_config.check_fishy_segments = true;
 
-            for (auto& chain_it : chains_)
-            {
-                if (std::get<0>(chain_it.first) != "CAT062")
-                    continue;
+        //     for (auto& chain_it : chains_)
+        //     {
+        //         if (std::get<0>(chain_it.first) != "CAT062")
+        //             continue;
                 
-                chain_targets[chain_it.second.get()] = chain_it.first;
-                rec.addChain(chain_it.second.get(), std::get<0>(chain_it.first));
-            }
+        //         chain_targets[chain_it.second.get()] = chain_it.first;
+        //         rec.addChain(chain_it.second.get(), std::get<0>(chain_it.first));
+        //     }
 
-            auto references = rec.reconstruct(dinfo);
+        //     auto references = rec.reconstruct(dinfo);
 
-            if (references.has_value())
-                storeReferences(references.value(), rec);
-        };
+        //     if (references.has_value())
+        //         storeReferences(references.value(), rec);
+        // };
 
         auto reconstructUMKalman2D = [ & ] ()
         {
@@ -396,6 +396,9 @@ std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_poin
             bool   resample_cat062       = true; // resample system tracks using spline interpolation
             double resample_dt_cat062    = 1.0;  // resample interval in seconds
             double resample_maxdt_cat062 = 30.0; // maximum timestep to split tracks during resampling
+
+            bool   resample_result    = true;
+            double resample_result_dt = 2.0;
    
             bool python_compatibility_mode = false; //python reconstructor comparison mode
 
@@ -404,6 +407,8 @@ std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_poin
                 // apply python code compatible override settings
                 track_vel         = false;
                 add_sensor_uncert = false;
+                resample_cat062   = false;
+                resample_result   = false;
             }
 
             reconstruction::Reconstructor_UMKalman2D rec(track_vel);
@@ -422,6 +427,9 @@ std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_poin
 
             rec.baseConfig().smooth         = smooth_rts;
             rec.baseConfig().smooth_scale   = smooth_scale;
+
+            rec.baseConfig().resample_result = resample_result;
+            rec.baseConfig().resample_dt     = resample_result_dt;
 
             //if (utn_ == 3)
             //    rec.setVerbosity(2);

@@ -336,6 +336,23 @@ void Reconstructor::postprocessReferences(std::vector<Reference>& references)
 
 /**
 */
+Eigen::Vector2d Reconstructor::transformBack(double x, double y) const
+{
+    if (coord_conv_ == CoordConversion::WGS84ToCart)
+    {
+        assert(trafo_bwd_);
+
+        x += x_offs_;
+        y += y_offs_;
+
+        trafo_bwd_->Transform(1, &x, &y);
+    }
+
+    return Eigen::Vector2d(x, y);
+}
+
+/**
+*/
 boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::string& data_info)
 {
     std::string dinfo = data_info.empty() ? "data" : data_info;

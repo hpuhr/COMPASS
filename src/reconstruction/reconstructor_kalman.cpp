@@ -18,6 +18,9 @@
 #include "reconstructor_kalman.h"
 #include "kalman.h"
 #include "logger.h"
+#include "spline_interpolator.h"
+#include "util/timeconv.h"
+#include "viewpointgenerator.h"
 
 namespace reconstruction
 {
@@ -80,18 +83,109 @@ bool ReconstructorKalman::smoothChain(KalmanChain& chain)
     if (!kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, chain.rts_infos, baseConfig().smooth_scale))
         return false;
 
+    //update chain data
     for (size_t i = 0; i < chain.references.size(); ++i)
+    {
         storeState(chain.references[ i ], kalman::KalmanState(x_smooth[ i ], P_smooth[ i ]));
+
+        chain.rts_infos[ i ].P = P_smooth[ i ];
+        chain.rts_infos[ i ].x = x_smooth[ i ];
+    }
     
     return true;
 }
 
 /**
 */
+void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_sec)
+{
+    if (result_chain.references.size() < 2)
+        return;
+
+    size_t n = result_chain.references.size();
+
+    size_t n_estim = SplineInterpolator::estimatedSamples(result_chain.references.front(), 
+                                                          result_chain.references.back(),
+                                                          dt_sec);
+    KalmanChain resampled_chain;
+    resampled_chain.reserve(n_estim);
+
+    resampled_chain.add(result_chain.references.front(), 
+                        result_chain.rts_infos.front());
+
+    boost::posix_time::milliseconds time_incr((int)(dt_sec * 1000.0));
+
+    auto tcur = result_chain.references.front().t + time_incr;
+
+    size_t errors          = 0;
+    size_t small_intervals = 0;
+
+    for (size_t i = 1; i < n; ++i)
+    {
+        const auto& ref0   = result_chain.references[i - 1];
+        const auto& ref1   = result_chain.references[i    ];
+        const auto& state0 = result_chain.rts_infos [i - 1];
+        const auto& state1 = result_chain.rts_infos [i    ];
+
+        auto t0 = ref0.t;
+        auto t1 = ref1.t;
+
+        if (tcur < t0 || tcur >= t1)
+            continue;
+
+        while (tcur >= t0 && tcur < t1)
+        {
+            double dt = Utils::Time::partialSeconds(tcur - t0);
+            if (dt <= base_config_.min_dt)
+            {
+                //use first ref if timestep from first ref is very small
+                resampled_chain.add(ref0, state0);
+                ++small_intervals;
+                tcur = t0 + time_incr;
+                continue;
+            }
+
+            auto new_state = interpStep(state0, state1, dt);
+            if (!new_state.has_value())
+            {
+                ++errors;
+                tcur += time_incr;
+                continue;
+            }
+
+            Reference ref;
+            ref.t            = tcur;
+            ref.source_id    = ref0.source_id;
+            ref.noaccel_pos  = ref0.noaccel_pos;
+            ref.nospeed_pos  = ref0.nospeed_pos;
+            ref.nostddev_pos = ref0.nostddev_pos;
+
+            storeState(ref, new_state.value());
+
+            resampled_chain.add(ref, new_state.value());
+
+            tcur += time_incr;
+        }
+    }
+
+    if (resampled_chain.references.size() >= 2)
+    {
+        resampled_chain.references.pop_back();
+        resampled_chain.rts_infos.pop_back();
+        resampled_chain.add(result_chain.references.back(), 
+                            result_chain.rts_infos.back());
+    }
+
+    result_chain = std::move(resampled_chain);
+}
+
+/**
+*/
 boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
 {
-    std::vector<Reference> result;
+    KalmanChain result_chain;
 
+    //collect (optionally smoothed) results
     for (auto& c : chains_)
     {
         //does chain obtain enough references?
@@ -115,11 +209,38 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
                 return {};
             }
         }
-        
-        result.insert(result.end(), c.references.begin(), c.references.end());
+
+        //add to result chain
+        result_chain.add(c);
     }
 
-    return result;
+    //interpolate result if desired
+    if (base_config_.resample_result)
+    {
+        if (hasViewPoint())
+        {
+            auto anno = viewPoint()->annotations().addAnnotation("positions_pre_interp");
+
+            ViewPointGenFeaturePoints* points = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Square);
+            points->reserve(result_chain.references.size(), false);
+            for (size_t i = 0; i < result_chain.references.size(); ++i)
+            {
+                double x = result_chain.references[ i ].x;
+                double y = result_chain.references[ i ].y;
+                points->addPoint(transformBack(x, y));
+            }
+            points->setColor(QColor(255, 125, 0));
+
+            anno->addFeature(std::unique_ptr<ViewPointGenFeaturePoints>(points));
+        }
+
+        if (verbosity() > 0)
+            loginf << "Resampling result chain containing " << result_chain.references.size() << " reference(s)";
+        
+        resampleResult(result_chain, base_config_.resample_dt);
+    }
+    
+    return result_chain.references;
 }
 
 /**

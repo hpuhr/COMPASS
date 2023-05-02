@@ -55,6 +55,16 @@ public:
 
     std::vector<MeasurementInterp> interpolate(const std::vector<Measurement>& measurements);
 
+    static MeasurementInterp interpMeasurement(const Eigen::Vector2d& pos, 
+                                               const boost::posix_time::ptime& t, 
+                                               const Measurement& mm0, 
+                                               const Measurement& mm1, 
+                                               double interp_factor,
+                                               CoordSystem coord_sys);
+    static size_t estimatedSamples(const Measurement& mm0, 
+                                   const Measurement& mm1,
+                                   double dt);
+
 protected:
     std::vector<MeasurementInterp> interpolatePart(const std::vector<Measurement>& measurements) const;
     bool isFishySegment(const Measurement& mm0, 
@@ -74,12 +84,10 @@ protected:
 
     std::vector<MeasurementInterp> interpolateLinear(const std::vector<Measurement>& measurements) const;
 
+    CoordSystem coordSystem() const;
     Eigen::Vector2d position2D(const Measurement& mm) const;
     void position2D(Measurement& mm, const Eigen::Vector2d& pos) const;
 
-    size_t estimatedSamples(const Measurement& mm0, 
-                            const Measurement& mm1,
-                            double dt) const;
 private:
     Config config_;
 };

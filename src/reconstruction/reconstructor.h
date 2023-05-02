@@ -84,6 +84,8 @@ protected:
     bool hasViewPoint() const;
     ViewPointGenVP* viewPoint() const;
 
+    Eigen::Vector2d transformBack(double x, double y) const;
+
 private:
     struct DBContentInfo
     {

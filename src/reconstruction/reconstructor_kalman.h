@@ -34,6 +34,24 @@ struct KalmanChain
         return references.empty();
     }
 
+    void reserve(size_t n)
+    {
+        references.reserve(n);
+        rts_infos.reserve(n);
+    }
+
+    void add(const KalmanChain& other)
+    {
+        references.insert(references.end(), other.references.begin(), other.references.end());
+        rts_infos.insert(rts_infos.end(), other.rts_infos.begin(), other.rts_infos.end());
+    }
+
+    void add(const Reference& ref, const kalman::KalmanState& state)
+    {
+        references.push_back(ref);
+        rts_infos.push_back(state);
+    }
+
     std::vector<Reference>           references; //reconstructed positions
     std::vector<kalman::KalmanState> rts_infos;  //data needed for RTS smoother
 };
@@ -58,6 +76,9 @@ public:
         double max_distance = 0.0;    // maximum allowed distance of consecutive target reports in meters (0 = do not check)
         double min_dt       = 1e-06;  // minimum allowed time difference of consecutive target reports in seconds (0 = do not check)
         double max_dt       = 60.0;   // maximum allowed time difference of consecutive target reports in seconds (0 = do not check)
+
+        bool   resample_result = false; //resample result references using kalman infos
+        double resample_dt     = 1.0;   //resampling step size in seconds
     };
 
     ReconstructorKalman() = default;
@@ -84,6 +105,9 @@ protected:
     virtual void storeState_impl(Reference& ref,
                                  const kalman::KalmanState& state) const = 0;
     virtual void init_impl(const Measurement& mm) const = 0;
+    virtual boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
+                                                            const kalman::KalmanState& state1,
+                                                            double dt) const = 0;
 
     reconstruction::Uncertainty defaultUncertaintyOfMeasurement(const Measurement& mm) const;
 
@@ -109,6 +133,7 @@ private:
     double timestep(const Measurement& mm) const;
 
     bool smoothChain(KalmanChain& chain);
+    void resampleResult(KalmanChain& result_chain, double dt_sec);
 
     BaseConfig base_config_;
 

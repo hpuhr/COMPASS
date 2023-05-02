@@ -318,4 +318,27 @@ void Reconstructor_UMKalman2D::init_impl(const Measurement& mm) const
     }
 }
 
+/**
+*/
+boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::interpStep(const kalman::KalmanState& state0, 
+                                                                          const kalman::KalmanState& state1,
+                                                                          double dt) const
+{
+    kalman_->setX(state0.x);
+    kalman_->setP(state0.P);
+
+    auto F = helpers::transitionMat(dt);
+    auto Q = helpers::processMat(dt, qVar());
+
+    kalman_->predict(F, Q);
+
+    kalman::KalmanState new_state;
+    new_state.x = kalman_->getX();
+    new_state.P = kalman_->getP();
+    new_state.F = F;
+    new_state.Q = Q;
+
+    return new_state; 
+}
+
 } // namespace reconstruction

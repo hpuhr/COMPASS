@@ -52,6 +52,9 @@ protected:
     kalman::Vector zVec(const Measurement& mm) const override final;
     void storeState_impl(Reference& ref, const kalman::KalmanState& state) const override final;
     void init_impl(const Measurement& mm) const override final;
+    boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
+                                                    const kalman::KalmanState& state1, 
+                                                    double dt) const override final;
 
 private:
     Config config_;

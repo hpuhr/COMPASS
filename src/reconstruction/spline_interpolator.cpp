@@ -72,44 +72,27 @@ namespace
 
 /**
 */
-Eigen::Vector2d SplineInterpolator::position2D(const Measurement& mm) const
-{
-    return mm.position2D(config_.interpolate_cart ? CoordSystem::Cart :
-                                                    CoordSystem::WGS84);
-}
-
-/**
-*/
-void SplineInterpolator::position2D(Measurement& mm, const Eigen::Vector2d& pos) const
-{
-    return mm.position2D(pos, config_.interpolate_cart ? CoordSystem::Cart :
-                                                         CoordSystem::WGS84);
-}
-
-/**
-*/
-MeasurementInterp SplineInterpolator::generateMeasurement(const Eigen::Vector2d& pos, 
-                                                          const boost::posix_time::ptime& t,
-                                                          const Measurement& mm0,
-                                                          const Measurement& mm1,
-                                                          double interp_factor,
-                                                          bool corrected) const
+MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& pos, 
+                                                        const boost::posix_time::ptime& t, 
+                                                        const Measurement& mm0, 
+                                                        const Measurement& mm1, 
+                                                        double interp_factor,
+                                                        CoordSystem coord_sys)
 {
     if (interp_factor == 0.0)
-        return MeasurementInterp(mm0, false, corrected);
+        return MeasurementInterp(mm0, false, false);
     if (interp_factor == 1.0)
-        return MeasurementInterp(mm1, false, corrected);
+        return MeasurementInterp(mm1, false, false);
 
     MeasurementInterp mm_interp;
     mm_interp.source_id    = mm0.source_id;
     mm_interp.t            = t;
     mm_interp.interpolated = true;
-    mm_interp.corrected    = corrected;
 
     assert(interp_factor >= 0.0 && interp_factor <= 1.0);
     
     //set position
-    position2D(mm_interp, pos);
+    mm_interp.position2D(pos, coord_sys);
 
     if (mm0.hasVelocity() && mm1.hasVelocity())
     {
@@ -139,6 +122,43 @@ MeasurementInterp SplineInterpolator::generateMeasurement(const Eigen::Vector2d&
 
 /**
 */
+CoordSystem SplineInterpolator::coordSystem() const
+{
+    return (config_.interpolate_cart ? CoordSystem::Cart :
+                                       CoordSystem::WGS84);
+}
+
+/**
+*/
+Eigen::Vector2d SplineInterpolator::position2D(const Measurement& mm) const
+{
+    return mm.position2D(coordSystem());
+}
+
+/**
+*/
+void SplineInterpolator::position2D(Measurement& mm, const Eigen::Vector2d& pos) const
+{
+    return mm.position2D(pos, coordSystem());
+}
+
+/**
+*/
+MeasurementInterp SplineInterpolator::generateMeasurement(const Eigen::Vector2d& pos, 
+                                                          const boost::posix_time::ptime& t,
+                                                          const Measurement& mm0,
+                                                          const Measurement& mm1,
+                                                          double interp_factor,
+                                                          bool corrected) const
+{
+    auto mm_interp = SplineInterpolator::interpMeasurement(pos, t, mm0, mm1, interp_factor, coordSystem());
+    mm_interp.corrected = corrected;
+
+    return mm_interp;
+}
+
+/**
+*/
 MeasurementInterp SplineInterpolator::generateMeasurement(const Measurement& mm) const
 {
     return generateMeasurement(position2D(mm), mm.t, mm, mm, 0.0, false);
@@ -148,7 +168,7 @@ MeasurementInterp SplineInterpolator::generateMeasurement(const Measurement& mm)
 */
 size_t SplineInterpolator::estimatedSamples(const Measurement& mm0, 
                                             const Measurement& mm1,
-                                            double dt) const
+                                            double dt)
 {
     return (size_t)(std::ceil(Reconstructor::timestep(mm0, mm1) / dt) + 2);
 }
@@ -180,9 +200,9 @@ std::vector<MeasurementInterp> SplineInterpolator::interpolateLinear(const std::
     if (n == 1)
         return interpolation;
 
-    auto tcur = measurements[ 0 ].t;
-
     boost::posix_time::milliseconds time_incr((int)(config().sample_dt * 1000.0));
+
+    auto tcur = measurements[ 0 ].t + time_incr;
 
     interpolation.reserve(estimatedSamples(measurements.front(), measurements.back(), config_.sample_dt));
 
