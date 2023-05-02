@@ -130,7 +130,7 @@ protected:
     dbContent::MetaVariable* rec_num_var_{nullptr};
     dbContent::MetaVariable* hash_var_{nullptr}; // contains artas md5 for target reports, tris for tracker
     dbContent::MetaVariable* timestamp_var_{nullptr};
-    dbContent::MetaVariable* associations_var_{nullptr};
+    dbContent::MetaVariable* utn_var_{nullptr};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

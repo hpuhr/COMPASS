@@ -97,7 +97,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
 
     using namespace dbContent;
 
-    Variable& assoc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_);
+    Variable& utn_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_);
 
     Variable* acid_var {nullptr};
     if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
@@ -114,11 +114,10 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     {
         string main_id("?");
 
-        if (buffer->has<nlohmann::json>(assoc_var.name())
-                && !buffer->get<nlohmann::json>(assoc_var.name()).isNull(buffer_index))
+        if (buffer->has<unsigned int>(utn_var.name())
+                && !buffer->get<unsigned int>(utn_var.name()).isNull(buffer_index))
         {
-            main_id = buffer->get<nlohmann::json>(assoc_var.name()).get(buffer_index).dump();
-            main_id = main_id.substr(1, main_id.size()-2); // remove first and last chars []
+            main_id = to_string(buffer->get<unsigned int>(utn_var.name()).get(buffer_index));
         }
         else if (acid_var && buffer->has<string>(acid_var->name())
                  && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
@@ -231,7 +230,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
     {
         using namespace dbContent;
 
-        Variable& assoc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_);
+        Variable& utn_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_);
 
         Variable* acid_var {nullptr};
         if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
@@ -252,12 +251,11 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
             value = "?";
             unit = "";
 
-            if (buffer->has<nlohmann::json>(assoc_var.name())
-                    && !buffer->get<nlohmann::json>(assoc_var.name()).isNull(buffer_index))
+            if (buffer->has<unsigned int>(utn_var.name())
+                    && !buffer->get<unsigned int>(utn_var.name()).isNull(buffer_index))
             {
-                value = buffer->get<nlohmann::json>(assoc_var.name()).get(buffer_index).dump();
-                value = value.substr(1, value.size()-2); // remove first and last chars []
-                value += " ("+assoc_var.name()+")";
+                value = to_string(buffer->get<unsigned int>(utn_var.name()).get(buffer_index));
+                value += " ("+utn_var.name()+")";
             }
             else if (acid_var && buffer->has<string>(acid_var->name())
                      && !buffer->get<string>(acid_var->name()).isNull(buffer_index))

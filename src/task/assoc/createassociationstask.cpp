@@ -136,7 +136,7 @@ bool CreateAssociationsTask::canRun()
                 || !dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbo_it.first)
                 )
             return false;
 
@@ -589,8 +589,8 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbcontent_n
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
 
     // assoc
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_associations_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_));
+    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_));
+    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
 
     // rec num, must be last for update process
     assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));

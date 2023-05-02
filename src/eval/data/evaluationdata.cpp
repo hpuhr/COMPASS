@@ -94,12 +94,14 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
     NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_line_id_);
 
-    assert (cache_->hasMetaVar<json>(dbcontent_name, DBContent::meta_var_associations_));
-    NullableVector<json>& assoc_vec = cache_->getMetaVar<json>(
-                dbcontent_name, DBContent::meta_var_associations_);
+    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+    NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(
+                dbcontent_name, DBContent::meta_var_utn_);
 
     ptime timestamp;
-    vector<unsigned int> utn_vec;
+    //vector<unsigned int> utn_vec;
+
+    unsigned int utn;
 
     loginf << "EvaluationData: addReferenceData: adding target data";
 
@@ -134,31 +136,25 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
 
         timestamp = ts_vec.get(cnt);
 
-        if (assoc_vec.isNull(cnt))
-            utn_vec.clear();
-        else
-            utn_vec = assoc_vec.get(cnt).get<std::vector<unsigned int>>();
-
-        if (!utn_vec.size())
+        if (utn_vec.isNull(cnt))
         {
             ++unassociated_ref_cnt_;
             continue;
         }
 
-        for (auto utn_it : utn_vec)
-        {
-            if (!hasTargetData(utn_it))
-                target_data_.emplace_back(utn_it, *this, cache_, eval_man_, dbcont_man_);
+        utn = utn_vec.get(cnt);
 
-            assert (hasTargetData(utn_it));
+        if (!hasTargetData(utn))
+            target_data_.emplace_back(utn, *this, cache_, eval_man_, dbcont_man_);
 
-            auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
-            auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
+        assert (hasTargetData(utn));
 
-            target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addRefIndex(timestamp, cnt); });
+        auto tr_tag_it = target_data_.get<target_tag>().find(utn);
+        auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
 
-            ++associated_ref_cnt_;
-        }
+        target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addRefIndex(timestamp, cnt); });
+
+        ++associated_ref_cnt_;
     }
 
     loginf << "EvaluationData: addReferenceData: num targets " << target_data_.size()
@@ -197,12 +193,13 @@ void EvaluationData::addTestData (string dbcontent_name, unsigned int line_id)
     NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_line_id_);
 
-    assert (cache_->hasMetaVar<json>(dbcontent_name, DBContent::meta_var_associations_));
-    NullableVector<json>& assoc_vec = cache_->getMetaVar<json>(
-                dbcontent_name, DBContent::meta_var_associations_);
+    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+    NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(
+                dbcontent_name, DBContent::meta_var_utn_);
 
     boost::posix_time::ptime timestamp;
-    vector<unsigned int> utn_vec;
+    //vector<unsigned int> utn_vec;
+    unsigned int utn;
 
     loginf << "EvaluationData: addTestData: adding target data";
 
@@ -237,31 +234,25 @@ void EvaluationData::addTestData (string dbcontent_name, unsigned int line_id)
 
         timestamp = ts_vec.get(cnt);
 
-        if (assoc_vec.isNull(cnt))
-            utn_vec.clear();
-        else
-            utn_vec = assoc_vec.get(cnt).get<std::vector<unsigned int>>();
-
-        if (!utn_vec.size())
+        if (utn_vec.isNull(cnt))
         {
             ++unassociated_tst_cnt_;
             continue;
         }
 
-        for (auto utn_it : utn_vec)
-        {
-            if (!hasTargetData(utn_it))
-                target_data_.emplace_back(utn_it, *this, cache_, eval_man_, dbcont_man_);
+        utn = utn_vec.get(cnt);
 
-            assert (hasTargetData(utn_it));
+        if (!hasTargetData(utn))
+            target_data_.emplace_back(utn, *this, cache_, eval_man_, dbcont_man_);
 
-            auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
-            auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
+        assert (hasTargetData(utn));
 
-            target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addTstIndex(timestamp, cnt); });
+        auto tr_tag_it = target_data_.get<target_tag>().find(utn);
+        auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
 
-            ++associated_tst_cnt_;
-        }
+        target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addTstIndex(timestamp, cnt); });
+
+        ++associated_tst_cnt_;
     }
 
     loginf << "EvaluationData: addTestData: num targets " << target_data_.size()

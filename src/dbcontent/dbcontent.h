@@ -99,7 +99,7 @@ public:
     static const Property meta_var_detection_type_;
 
     static const Property meta_var_artas_hash_;
-    static const Property meta_var_associations_;
+    static const Property meta_var_utn_;
 
     static const Property meta_var_vx_;
     static const Property meta_var_vy_;

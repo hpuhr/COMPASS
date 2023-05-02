@@ -93,7 +93,8 @@ void CalculateReferencesJob::createTargets()
     unsigned int num_assoc {0};
 
     ptime timestamp;
-    vector<unsigned int> utn_vec;
+    //vector<unsigned int> utn_vec;
+    unsigned int utn;
 
     // create map for utn lookup
     map<unsigned int, std::unique_ptr<CalculateReferences::Target>> target_map;
@@ -106,7 +107,6 @@ void CalculateReferencesJob::createTargets()
         NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(
                     dbcontent_name, DBContent::meta_var_timestamp_);
 
-
         unsigned int buffer_size = ts_vec.size();
 
         assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_datasource_id_));
@@ -118,9 +118,9 @@ void CalculateReferencesJob::createTargets()
         NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
                     dbcontent_name, DBContent::meta_var_line_id_);
 
-        assert (cache_->hasMetaVar<json>(dbcontent_name, DBContent::meta_var_associations_));
-        NullableVector<json>& assoc_vec = cache_->getMetaVar<json>(
-                    dbcontent_name, DBContent::meta_var_associations_);
+        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+        NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(
+                    dbcontent_name, DBContent::meta_var_utn_);
 
         for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
         {
@@ -135,28 +135,28 @@ void CalculateReferencesJob::createTargets()
 
             timestamp = ts_vec.get(cnt);
 
-            if (assoc_vec.isNull(cnt))
-                utn_vec.clear();
-            else
-                utn_vec = assoc_vec.get(cnt).get<std::vector<unsigned int>>();
+//            if (utn_vec.isNull(cnt))
+//                utn_vec.clear();
+//            else
+//                utn_vec = assoc_vec.get(cnt).get<std::vector<unsigned int>>();
 
-            if (!utn_vec.size())
+            if (utn_vec.isNull(cnt))
             {
                 ++num_unassoc;
                 continue;
             }
 
-            for (auto utn_it : utn_vec)
-            {
-                if (!target_map.count(utn_it))
-                    target_map[utn_it].reset(new CalculateReferences::Target(utn_it, cache_));
-                //target_data_.emplace_back(utn_it, *this, cache_, eval_man_, dbcont_man_);
 
-                target_map.at(utn_it)->addTargetReport(dbcontent_name, ds_ids.get(cnt), line_ids.get(cnt),
-                                                       timestamp, cnt);
+            utn = utn_vec.get(cnt);
 
-                ++num_assoc;
-            }
+            if (!target_map.count(utn))
+                target_map[utn].reset(new CalculateReferences::Target(utn, cache_));
+            //target_data_.emplace_back(utn_it, *this, cache_, eval_man_, dbcont_man_);
+
+            target_map.at(utn)->addTargetReport(dbcontent_name, ds_ids.get(cnt), line_ids.get(cnt),
+                                                   timestamp, cnt);
+
+            ++num_assoc;
         }
     }
 
