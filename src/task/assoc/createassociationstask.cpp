@@ -184,6 +184,10 @@ void CreateAssociationsTask::run()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
+    // TODO HACK
+    if (dbcontent_man.dbContent("RefTraj").existsInDB())
+        dbcontent_man.dbContent("RefTraj").deleteDBContentData();
+
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
     connect(&dbcontent_man, &DBContentManager::loadedDataSignal,

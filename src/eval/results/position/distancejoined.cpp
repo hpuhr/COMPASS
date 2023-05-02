@@ -218,17 +218,8 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
     }
 
     // figure
-    if (prob_.has_value() && prob_.value() != 1.0) // TODO
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 [this](void) { return this->getErrorsViewable(); });
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No data found, therefore no figure was generated.");
-    }
+    sector_section.addFigure("sector_overview", "Sector Overview",
+                             [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedPositionDistance::hasViewableData (

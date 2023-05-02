@@ -254,17 +254,9 @@ void JoinedDubiousTarget::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
     }
 
 //    // figure
-//    if (has_p_min_ && p_passed_ != 1.0) // TODO
-//    {
-//        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
+//        sector_section.addFigure("sector_overview", "Sector Overview",
 //                                 [this](void) { return this->getErrorsViewable(); });
-//    }
-//    else
-//    {
-//        sector_section.addText("sector_errors_overview_no_figure");
-//        sector_section.getText("sector_errors_overview_no_figure").addText(
-//                    "No target errors found, therefore no figure was generated.");
-//    }
+
 }
 
 bool JoinedDubiousTarget::hasViewableData (

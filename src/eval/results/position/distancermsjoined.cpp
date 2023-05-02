@@ -84,7 +84,7 @@ void JoinedPositionDistanceRMS::update()
     vector<double> all_values = values();
 
     if (all_values.size() != num_failed_ + num_passed_)
-        logerr << "JoinedPositionDistanceRMS: update: wrong size all_values.size()" << all_values.size()
+        logerr << "JoinedPositionDistanceRMS: update: wrong size all_values.size() " << all_values.size()
                << " num_failed_ " << num_failed_ << " num_passed_ " << num_passed_;
 
     assert (all_values.size() == num_failed_ + num_passed_);
@@ -224,36 +224,27 @@ void JoinedPositionDistanceRMS::addDetails(std::shared_ptr<EvaluationResultsRepo
 
 
     // condition
-    {
-        QVariant p_passed_var;
+//    {
+//        QVariant p_passed_var;
 
-        if (prob_.has_value())
-            p_passed_var = roundf(prob_.value() * 10000.0) / 100.0;
+//        if (prob_.has_value())
+//            p_passed_var = roundf(prob_.value() * 10000.0) / 100.0;
 
-        sec_det_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
+//        sec_det_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
 
         sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
         string result {"Unknown"};
 
-        if (prob_.has_value())
-            result = req->getConditionResultStr(prob_.value());
+        if (num_failed_ + num_passed_)
+            result = req->getConditionResultStr(value_rms_);
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
-    }
+//    }
 
     // figure
-    if (prob_.has_value() && prob_.value() != 1.0) // TODO
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 [this](void) { return this->getErrorsViewable(); });
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No data found, therefore no figure was generated.");
-    }
+    sector_section.addFigure("sector_overview", "Sector Overview",
+                             [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedPositionDistanceRMS::hasViewableData (
