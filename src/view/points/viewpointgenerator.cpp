@@ -141,10 +141,12 @@ void ViewPointGenFeaturePointGeometry::addPoint(const Eigen::Vector2d& pos,
 /**
 */
 void ViewPointGenFeaturePointGeometry::addPoints(const std::vector<Eigen::Vector2d>& positions,
-                                                 const std::vector<QColor>& colors)
+                                                 const boost::optional<std::vector<QColor>>& colors)
 {
     positions_.insert(positions_.end(), positions.begin(), positions.end());
-    colors_.insert(colors_.end(), colors.begin(), colors.end());
+
+    if (colors.has_value())
+        colors_.insert(colors_.end(), colors->begin(), colors->end());
 }
 
 /**
@@ -179,7 +181,7 @@ void ViewPointGenFeaturePointGeometry::toJSON_impl(nlohmann::json& j) const
             colors.push_back(color);
         }
 
-        geom[FeatureFieldNameColors] = coords; 
+        geom[FeatureFieldNameColors] = colors;
     }
     else
     {
@@ -542,6 +544,13 @@ ViewPointGenVP::ViewPointGenVP(const std::string& name,
 
 /**
 */
+void ViewPointGenVP::addCustomField(const std::string& name, const QVariant& value)
+{
+    custom_fields_[ name ] = value;
+}
+
+/**
+*/
 std::string ViewPointGenVP::statusString() const
 {
     if (status_ == Status::Open)
@@ -577,6 +586,20 @@ void ViewPointGenVP::toJSON(nlohmann::json& j) const
     nlohmann::json filters;
     filters_.toJSON(filters);
     j[ViewPointFieldFilters] = filters;
+
+    for (const auto& cf : custom_fields_)
+    {
+        if (cf.second.type() == QVariant::Type::Int)
+            j[cf.first] = cf.second.toInt();
+        else if (cf.second.type() == QVariant::Type::UInt)
+            j[cf.first] = cf.second.toUInt();
+        else if (cf.second.type() == QVariant::Type::Double)
+            j[cf.first] = cf.second.toDouble();
+        else if (cf.second.type() == QVariant::Type::Bool)
+            j[cf.first] = cf.second.toBool();
+        else if (cf.second.type() == QVariant::Type::String)
+            j[cf.first] = cf.second.toString().toStdString();
+    }
 }
 
 /********************************************************************************
@@ -610,30 +633,47 @@ void ViewPointGenerator::addViewPoint(std::unique_ptr<ViewPointGenVP>&& vp)
 
 /**
 */
-void ViewPointGenerator::toJSON(nlohmann::json& j) const
+void ViewPointGenerator::toJSON(nlohmann::json& j, 
+                                bool with_viewpoints_only,
+                                bool with_annotations_only) const
 {
-    j[ViewPointsFieldContentType] = "view_points";
-    j[ViewPointsFieldVersion    ] = Version;
+    nlohmann::json vp_content;
+
+    vp_content[ViewPointsFieldContentType] = "view_points";
+    vp_content[ViewPointsFieldVersion    ] = Version;
 
     nlohmann::json viewpoints = nlohmann::json::array();
 
+    size_t added = 0;
+
     for (const auto& vp : view_points_)
     {
+        if (with_annotations_only && !vp->hasAnnotations())
+            continue;
+
         nlohmann::json viewpoint;
         vp->toJSON(viewpoint);
 
         viewpoints.push_back(viewpoint);
+
+        ++added;
     }
 
-    j[ViewPointsFieldViewPoints] = viewpoints;
+    vp_content[ViewPointsFieldViewPoints] = viewpoints;
+
+    if (with_viewpoints_only && added == 0)
+        return;
+
+    j = vp_content;
 }
 
 /**
 */
-nlohmann::json ViewPointGenerator::toJSON() const
+nlohmann::json ViewPointGenerator::toJSON(bool with_viewpoints_only,
+                                          bool with_annotations_only) const
 {
     nlohmann::json j;
-    toJSON(j);
+    toJSON(j, with_viewpoints_only, with_annotations_only);
 
     return j;
 }

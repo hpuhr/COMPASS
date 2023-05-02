@@ -181,7 +181,7 @@ bool ReconstructorKalman::needsReinit(const Reference& ref, const Measurement& m
 {
     if (base_config_.max_distance > 0)
     {
-        double d = distance(ref, mm);
+        double d = distance(ref, mm, CoordSystem::Cart);
         if (d > base_config_.max_distance)
             return true;
     }

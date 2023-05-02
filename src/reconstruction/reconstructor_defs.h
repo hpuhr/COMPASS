@@ -174,11 +174,30 @@ struct Reference : public Measurement
 
 /**
 */
+struct MeasurementInterp : public Measurement
+{
+    MeasurementInterp() = default;
+    MeasurementInterp(const Measurement& mm, bool is_interp, bool is_corrected) : Measurement(mm), interpolated(is_interp), corrected(is_corrected) {}
+
+    bool interpolated = true;  //stems from an interpolated position between two input measurements
+    bool corrected    = false; //interpolation failed, so the measurement was interpolated linearly
+};
+
+/**
+*/
 struct Uncertainty
 {
     double pos_var   = 100.0;
     double speed_var = 100.0;
     double acc_var   = 100.0;
+};
+
+/**
+*/
+struct InterpOptions
+{
+    double sample_dt = 1.0;
+    double max_dt    = 30.0;
 };
 
 } // namespace reconstruction

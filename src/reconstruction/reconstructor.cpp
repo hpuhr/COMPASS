@@ -21,6 +21,7 @@
 #include "util/number.h"
 #include "targetreportchain.h"
 #include "viewpointgenerator.h"
+#include "spline_interpolator.h"
 #include "logger.h"
 
 #include <ogr_spatialref.h>
@@ -59,43 +60,9 @@ ViewPointGenVP* Reconstructor::viewPoint() const
 
 /**
 */
-void Reconstructor::setOverrideCoordSystem(CoordSystem coord_system)
-{
-    coord_sys_override_ = coord_system;
-}
-
-/**
-*/
 void Reconstructor::setCoordConversion(CoordConversion coord_conv)
 {
     coord_conv_ = coord_conv;
-}
-
-/**
-*/
-CoordSystem Reconstructor::coordSystem() const
-{
-    return coord_sys_;
-}
-
-/**
-*/
-void Reconstructor::cacheCoordSystem()
-{
-    auto cs_pref = preferredCoordSystem();
-    if (cs_pref != CoordSystem::Unknown)
-    {
-        coord_sys_ = cs_pref;
-        return;
-    }
-    if (coord_sys_override_ != CoordSystem::Unknown)
-    {
-        coord_sys_ = coord_sys_override_;
-        return;
-    }
-    
-    //when in doubt use cartesian
-    coord_sys_ = CoordSystem::Cart;
 }
 
 /**
@@ -107,6 +74,13 @@ void Reconstructor::setSensorUncertainty(const std::string& dbcontent, const Unc
 
 /**
 */
+void Reconstructor::setSensorInterpolation(const std::string& dbcontent, const InterpOptions& options)
+{
+    dbcontent_interp_[dbcontent] = options;
+}
+
+/**
+*/
 const boost::optional<Uncertainty>& Reconstructor::sourceUncertainty(uint32_t source_id) const
 {
     return source_uncerts_.at(source_id);
@@ -114,20 +88,78 @@ const boost::optional<Uncertainty>& Reconstructor::sourceUncertainty(uint32_t so
 
 /**
 */
-void Reconstructor::clearSensorUncertainties()
+boost::optional<InterpOptions> Reconstructor::sensorInterpolation(const std::string& db_content) const
 {
-    source_uncerts_.clear();
+    auto it = dbcontent_interp_.find(db_content);
+    if (it == dbcontent_interp_.end())
+        return {};
+
+    return it->second;
 }
 
 /**
 */
 void Reconstructor::addMeasurements(const std::vector<Measurement>& measurements)
 {
-    cacheCoordSystem();
-    assert(coord_sys_ != CoordSystem::Unknown);
-
     if (!measurements.empty())
         measurements_.insert(measurements_.end(), measurements.begin(), measurements.end());
+}
+
+namespace
+{
+    bool mmSortPred(const Measurement& mm0, const Measurement& mm1)
+    { 
+        //sort by time first
+        if (mm0.t != mm1.t)
+            return mm0.t < mm1.t;
+
+        //otherwise sort by source at least
+        return mm0.source_id < mm1.source_id; 
+    }
+}
+
+/**
+*/
+void Reconstructor::interpolateMeasurements(std::vector<Measurement>& measurements, 
+                                            const InterpOptions& options) const
+{
+    //sort measurements by timestamp
+    std::sort(measurements.begin(), measurements.end(), mmSortPred);
+
+    SplineInterpolator interp;
+    interp.config().check_fishy_segments = true;
+    interp.config().interpolate_cart     = false;
+    interp.config().sample_dt            = options.sample_dt;
+    interp.config().max_dt               = options.max_dt;
+
+    //interpolate using desired timestep
+    auto mms_interp = interp.interpolate(measurements);
+    
+    size_t ni = mms_interp.size();
+    if (ni < 1)
+        return;
+
+    //assign new measurements
+    measurements.resize(ni);
+
+    for (size_t i = 0; i < ni; ++i)
+    {
+        measurements[ i ] = mms_interp[ i ];
+    }
+
+    if (hasViewPoint())
+    {
+        VPTrackData vp_data;
+
+        std::vector<Eigen::Vector2d> positions(ni);
+        for (size_t i = 0; i < ni; ++i)
+            positions[ i ] = measurements[ i ].position2D(CoordSystem::WGS84);
+  
+        vp_data.positions = std::move(positions);
+        vp_data.color     = QColor(255, 0, 255);
+
+        vp_data_interp_.push_back(vp_data);
+    }
 }
 
 /**
@@ -135,9 +167,6 @@ void Reconstructor::addMeasurements(const std::vector<Measurement>& measurements
 void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, const std::string& dbcontent)
 {
     assert(tr_chain);
-
-    cacheCoordSystem();
-    assert(coord_sys_ != CoordSystem::Unknown);
 
     uint32_t source_id = source_cnt_++;
     sources_[source_id] = tr_chain;
@@ -202,6 +231,14 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, con
         mms.push_back(mm);
     }
 
+    //resample input data?
+    auto interp_options = sensorInterpolation(dbcontent);
+    if (interp_options.has_value())
+    {
+        loginf << "Interpolating measurements of dbcontent " << dbcontent;
+        interpolateMeasurements(mms, interp_options.value());
+    }
+
     if (!mms.empty())
         measurements_.insert(measurements_.end(), mms.begin(), mms.end());
 }
@@ -224,18 +261,8 @@ void Reconstructor::postprocessMeasurements()
     if (measurements_.empty())
         return;
 
-    auto sortPred = [&] (const Measurement& mm0, const Measurement& mm1) 
-    { 
-        //sort by time first
-        if (mm0.t != mm1.t)
-            return mm0.t < mm1.t;
-
-        //otherwise sort by source at least
-        return mm0.source_id < mm1.source_id; 
-    };
-    
     //sort measurements by timestamp
-    std::sort(measurements_.begin(), measurements_.end(), sortPred);
+    std::sort(measurements_.begin(), measurements_.end(), mmSortPred);
 
     //convert coordinates if needed
     if (coord_conv_ == CoordConversion::WGS84ToCart)
@@ -311,9 +338,6 @@ void Reconstructor::postprocessReferences(std::vector<Reference>& references)
 */
 boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::string& data_info)
 {
-    cacheCoordSystem();
-    assert(coord_sys_ != CoordSystem::Unknown);
-
     std::string dinfo = data_info.empty() ? "data" : data_info;
 
     loginf << "Reconstructing " << dinfo << " - " << measurements_.size() << " measurement(s)";
@@ -321,30 +345,54 @@ boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::st
     if (measurements_.empty())
         return {};
 
+    boost::optional<std::vector<Reference>> result;
+
     try
     {
         //postprocess added measurements
         postprocessMeasurements();
 
         //reconstruct
-        auto result = reconstruct_impl(measurements_, dinfo);
+        result = reconstruct_impl(measurements_, dinfo);
 
         //postprocess result references
         if (result.has_value())
             postprocessReferences(result.value());
-
-        return result;
     }
     catch(const std::exception& ex)
     {
         logerr << "Reconstructor::reconstruct(): " << ex.what();
+        return {};
     }
     catch(...)
     {
         logerr << "Reconstructor::reconstruct(): unknown error";
+        return {};
     }
 
-    return {};
+    if (hasViewPoint())
+    {
+        auto anno_interp_pos = viewPoint()->annotations().addAnnotation("interpolated_tracks");
+        
+        for (const auto& vp_data : vp_data_interp_)
+        {
+            //add spline-interpolated input tracks
+            std::unique_ptr<ViewPointGenFeaturePoints> feat_interp_points;
+            feat_interp_points.reset(new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Square));
+            feat_interp_points->setColor(vp_data.color);
+            feat_interp_points->addPoints(vp_data.positions);
+
+            std::unique_ptr<ViewPointGenFeatureLineString> feat_interp_lines;
+            feat_interp_lines.reset(new ViewPointGenFeatureLineString(false));
+            feat_interp_lines->setColor(vp_data.color);
+            feat_interp_lines->addPoints(vp_data.positions);
+
+            anno_interp_pos->addFeature(std::move(feat_interp_points));
+            anno_interp_pos->addFeature(std::move(feat_interp_lines));
+        }
+    }
+
+    return result;
 }
 
 /**
@@ -356,23 +404,9 @@ double Reconstructor::timestep(const Measurement& mm0, const Measurement& mm1)
 
 /**
 */
-double Reconstructor::distance(const Measurement& mm0, const Measurement& mm1) const
+double Reconstructor::distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys) const
 {
-    return mm0.distance(mm1, coord_sys_);
-}
-
-/**
-*/
-Eigen::Vector2d Reconstructor::position2D(const Measurement& mm) const
-{
-    return mm.position2D(coord_sys_);
-}
-
-/**
-*/
-void Reconstructor::position2D(Measurement& mm, const Eigen::Vector2d& pos) const
-{
-    mm.position2D(pos, coord_sys_);
+    return mm0.distance(mm1, coord_sys);
 }
 
 /**
@@ -412,6 +446,16 @@ std::vector<std::vector<Measurement>> Reconstructor::splitMeasurements(const std
         split_measurements.push_back(current);
 
     return split_measurements;
+}
+
+/**
+*/
+void addTrackToViewPoint(const std::vector<Measurement>& mms,
+                         const std::string& annotation_name,
+                         bool connect,
+                         bool add_speed)
+{
+
 }
 
 } // namespace reconstruction

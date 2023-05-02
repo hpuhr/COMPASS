@@ -21,6 +21,8 @@
 
 #include <vector>
 
+#include <QColor>
+
 namespace dbContent 
 {
     namespace TargetReport 
@@ -33,6 +35,8 @@ class ViewPointGenVP;
 
 class OGRSpatialReference;
 class OGRCoordinateTransformation;
+
+class ViewPointGenAnnotation;
 
 namespace reconstruction
 {
@@ -48,7 +52,7 @@ public:
     virtual ~Reconstructor();
 
     void setSensorUncertainty(const std::string& dbcontent, const Uncertainty& uncert);
-    void clearSensorUncertainties();
+    void setSensorInterpolation(const std::string& dbcontent, const InterpOptions& options);
 
     void addMeasurements(const std::vector<Measurement>& measurements);
     void addChain(const dbContent::TargetReport::Chain* tr_chain, const std::string& dbcontent);
@@ -57,9 +61,7 @@ public:
 
     const dbContent::TargetReport::Chain* chainOfReference(const Reference& ref) const;
 
-    void setOverrideCoordSystem(CoordSystem coord_system);
     void setCoordConversion(CoordConversion coord_conv);
-    CoordSystem coordSystem() const;
 
     void setVerbosity(int v) { verbosity_ = v; }
     int verbosity() const { return verbosity_; }
@@ -68,19 +70,16 @@ public:
 
     static std::vector<std::vector<Measurement>> splitMeasurements(const std::vector<Measurement>& measurements,
                                                                    double max_dt);
+    static double timestep(const Measurement& mm0, const Measurement& mm1);
 
 protected:
     virtual boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements, 
                                                                      const std::string& data_info) = 0;
 
-    static double timestep(const Measurement& mm0, const Measurement& mm1);
-    double distance(const Measurement& mm0, const Measurement& mm1) const;
-    Eigen::Vector2d position2D(const Measurement& mm) const;
-    void position2D(Measurement& mm, const Eigen::Vector2d& pos) const;
+    double distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys) const;
 
     const boost::optional<Uncertainty>& sourceUncertainty(uint32_t source_id) const;
-
-    virtual CoordSystem preferredCoordSystem() const { return CoordSystem::Unknown; } 
+    boost::optional<InterpOptions> sensorInterpolation(const std::string& db_content) const;
 
     bool hasViewPoint() const;
     ViewPointGenVP* viewPoint() const;
@@ -91,14 +90,23 @@ private:
         Uncertainty uncert;
     };
 
+    struct VPTrackData
+    {
+        std::vector<Eigen::Vector2d> positions;
+        std::vector<Eigen::Vector2d> speed_vecs;
+        std::vector<QColor>          colors;
+        QColor                       color;
+    };
+
+    void interpolateMeasurements(std::vector<Measurement>& measurements, 
+                                 const InterpOptions& options) const;
     void postprocessMeasurements();
     void postprocessReferences(std::vector<Reference>& references);
-
-    void cacheCoordSystem();
 
     std::vector<Measurement>                     measurements_;
     SourceMap                                    sources_;
     std::map<std::string, Uncertainty>           dbcontent_uncerts_;
+    std::map<std::string, InterpOptions>         dbcontent_interp_;
     std::vector<boost::optional<Uncertainty>>    source_uncerts_;
     std::unique_ptr<OGRSpatialReference>         ref_src_;
     std::unique_ptr<OGRSpatialReference>         ref_dst_;
@@ -109,12 +117,11 @@ private:
 
     uint32_t source_cnt_ = 0;
 
-    CoordConversion coord_conv_         = CoordConversion::WGS84ToCart;
-    CoordSystem     coord_sys_override_ = CoordSystem::Unknown;
-    CoordSystem     coord_sys_          = CoordSystem::Unknown;
-    int             verbosity_          = 1;
+    CoordConversion coord_conv_ = CoordConversion::WGS84ToCart;
+    int             verbosity_  = 1;
 
-    mutable ViewPointGenVP* viewpoint_ = nullptr;
+    mutable ViewPointGenVP*          viewpoint_ = nullptr;
+    mutable std::vector<VPTrackData> vp_data_interp_;
 };
 
 } // namespace reconstruction

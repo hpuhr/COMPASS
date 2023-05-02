@@ -23,9 +23,8 @@ using namespace nlohmann;
 namespace CalculateReferences {
 
 Target::Target(unsigned int utn, 
-               std::shared_ptr<dbContent::Cache> cache,
-               bool generate_viewpoint)
-    : utn_(utn), cache_(cache), generate_viewpoint_(generate_viewpoint)
+               std::shared_ptr<dbContent::Cache> cache)
+    : utn_(utn), cache_(cache)
 {
 }
 
@@ -46,7 +45,7 @@ void Target::finalizeChains()
         chain_it.second->finalize();
 }
 
-std::shared_ptr<Buffer> Target::calculateReference()
+std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_point)
 {
     string dbcontent_name = "RefTraj";
 
@@ -87,6 +86,9 @@ std::shared_ptr<Buffer> Target::calculateReference()
     QRectF roi;
     if (lat_min.has_value() && lon_min.has_value() && lat_max.has_value() && lon_max.has_value())
         roi = QRectF(lat_min.value(), lon_min.value(), lat_max.value() - lat_min.value(), lon_max.value() - lon_min.value());
+
+    if (gen_view_point)
+        gen_view_point->setROI(roi);
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -202,19 +204,6 @@ std::shared_ptr<Buffer> Target::calculateReference()
         std::map<const Chain*, TargetKey> chain_targets;
 
         std::string dinfo = "UTN " + std::to_string(utn_);
-
-        //init viewpoint generation?
-        std::unique_ptr<ViewPointGenVP> gen_vp;
-
-        if (generate_viewpoint_)
-        {
-            std::string vp_name = "Reconstruction - " + dinfo;
-            gen_vp.reset(new ViewPointGenVP(vp_name, utn_, "Reconstruction", roi));
-            
-            //setup utn filter
-            std::unique_ptr<ViewPointGenFilterUTN> utn_filter(new ViewPointGenFilterUTN(utn_));
-            gen_vp->filters().addFilter(std::move(utn_filter));
-        }
 
         auto storeReferences = [ & ] (const std::vector<reconstruction::Reference>& references,
                                       const reconstruction::Reconstructor& rec)
@@ -361,12 +350,11 @@ std::shared_ptr<Buffer> Target::calculateReference()
         auto reconstructInterp = [ & ] ()
         {
             reconstruction::ReconstructorInterp rec;
-            rec.setViewPoint(gen_vp.get());
-            rec.setOverrideCoordSystem(reconstruction::CoordSystem::WGS84);
+            rec.setViewPoint(gen_view_point);
             rec.setCoordConversion(reconstruction::CoordConversion::NoConversion);
-            rec.config().sample_dt            = 1.0;
-            rec.config().max_dt               = 30.0;
-            rec.config().check_fishy_segments = true;
+            rec.config().interp_config.sample_dt            = 1.0;
+            rec.config().interp_config.max_dt               = 30.0;
+            rec.config().interp_config.check_fishy_segments = true;
 
             for (auto& chain_it : chains_)
             {
@@ -404,6 +392,10 @@ std::shared_ptr<Buffer> Target::calculateReference()
             bool   track_vel         = true;   // track velocities in measurements
             bool   smooth_rts        = true;   // enable RTS smoother
             double smooth_scale      = 1;      // scale factor for RTS smoother
+
+            bool   resample_cat062       = true; // resample system tracks using spline interpolation
+            double resample_dt_cat062    = 1.0;  // resample interval in seconds
+            double resample_maxdt_cat062 = 30.0; // maximum timestep to split tracks during resampling
    
             bool python_compatibility_mode = false; //python reconstructor comparison mode
 
@@ -415,7 +407,7 @@ std::shared_ptr<Buffer> Target::calculateReference()
             }
 
             reconstruction::Reconstructor_UMKalman2D rec(track_vel);
-            rec.setViewPoint(gen_vp.get());
+            rec.setViewPoint(gen_view_point);
 
             //configure kalman
             rec.baseConfig().R_std          = R_std;
@@ -451,6 +443,16 @@ std::shared_ptr<Buffer> Target::calculateReference()
                 rec.setSensorUncertainty("CAT062", uncert_cat062);
             }
 
+            //resample system tracks?
+            if (resample_cat062)
+            {
+                reconstruction::InterpOptions options;
+                options.sample_dt = resample_dt_cat062;
+                options.max_dt    = resample_maxdt_cat062;
+
+                rec.setSensorInterpolation("CAT062", options);
+            }
+
             //add chains to reconstructor
             for (auto& chain_it : chains_)
             {
@@ -466,10 +468,6 @@ std::shared_ptr<Buffer> Target::calculateReference()
 
         //reconstructInterp();
         reconstructUMKalman2D();
-
-        //generate viewpoint json?
-        if (gen_vp && gen_vp->hasAnnotations())
-            gen_vp->toJSON(viewpoint_json_);
     }
 
     loginf << "Target: calculateReference: buffer size " << buffer->size();

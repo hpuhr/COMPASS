@@ -5,6 +5,8 @@
 #include "dbcontent/dbcontentcache.h"
 #include "calculatereferencestarget.h"
 
+#include "json.h"
+
 #include "boost/date_time/posix_time/ptime.hpp"
 #include "boost/date_time/posix_time/posix_time_duration.hpp"
 
@@ -39,7 +41,8 @@ protected:
 
     bool insert_done_ {false};
 
-    bool generate_viewpoints_ = true;
+    bool           generate_viewpoints_ = true;
+    nlohmann::json viewpoint_json_;
 
     void createTargets();
     void finalizeTargets();

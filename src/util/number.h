@@ -45,7 +45,9 @@ extern double knots2MPS(double knots);
 extern double mps2Knots(double mps);
 
 extern std::pair<double, double> bearing2Vec(double bearing_deg);
+extern double vec2Bearing(double dx, double dy);
 extern std::pair<double, double> speedAngle2SpeedVec(double speed_mps, double bearing_deg);
+extern std::pair<double, double> speedVec2SpeedAngle(double vx_mps, double vy_mps);
 
 extern double interpolateBearing(double x0, double y0, 
                                  double x1, double y1, 

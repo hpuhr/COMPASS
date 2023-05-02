@@ -18,6 +18,12 @@
 #pragma once
 
 #include "reconstructor.h"
+#include "spline_interpolator.h"
+
+#include <QColor>
+
+class ViewPointGenFeatureLineString;
+class ViewPointGenFeaturePoints;
 
 namespace reconstruction
 {
@@ -29,14 +35,7 @@ class ReconstructorInterp : public Reconstructor
 public:
     struct Config
     {
-        double sample_dt = 1.0; //sample interval in seconds
-
-        bool check_fishy_segments = true;
-        
-        double min_dt                      = 1e-06; //minimum time difference between measurements
-        double max_dt                      = 30.0;  //maximum time difference between measurements
-        double min_len                     = 1e-07; //minimum length between measurements
-        double max_segment_distance_factor = 2.0;
+        SplineInterpolator::Config interp_config;
     };
 
     ReconstructorInterp() = default;
@@ -47,23 +46,9 @@ public:
 
 protected:
     virtual boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements, 
-                                                                     const std::string& data_info ) override;
-
-    boost::optional<std::vector<Reference>> reconstructPart(const std::vector<Measurement>& measurements, 
-                                                            const std::string& data_info) const;
-    bool isFishySegment(const Measurement& mm0, 
-                        const Measurement& mm1, 
-                        const std::vector<Reference>& refs,
-                        size_t n) const;
-
-    Reference generateReference(const Eigen::Vector2d& pos, 
-                                const boost::posix_time::ptime& t, 
-                                const Measurement& mm0, 
-                                const Measurement& mm1, 
-                                double interp_factor) const;
-    Reference generateReference(const Measurement& mm) const;
-
-    std::vector<Reference> interpolateLinear(const std::vector<Measurement>& measurements) const;
+                                                                     const std::string& data_info) override;
+    static const QColor ColorOk;
+    static const QColor ColorFishy;
 
 private:
     Config config_;

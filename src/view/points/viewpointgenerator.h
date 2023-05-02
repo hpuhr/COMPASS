@@ -25,6 +25,7 @@
 
 #include <QColor>
 #include <QRectF>
+#include <QVariant>
 
 #include <boost/optional.hpp>
 
@@ -85,7 +86,7 @@ public:
     ViewPointGenFeature(const std::string& type = FeatureTypeNameFeat);
     virtual ~ViewPointGenFeature() = default;
 
-    void setColor(const QColor& c) { color_ = color_; }
+    void setColor(const QColor& c) { color_ = c; }
 
     void toJSON(nlohmann::json& j) const;
 
@@ -122,7 +123,7 @@ public:
     void addPoint(const Eigen::Vector2d& pos, 
                   const boost::optional<QColor>& color = boost::optional<QColor>());
     void addPoints(const std::vector<Eigen::Vector2d>& positions,
-                   const std::vector<QColor>& colors);
+                   const boost::optional<std::vector<QColor>>& colors = boost::optional<std::vector<QColor>>());
 
 protected:
     virtual void toJSON_impl(nlohmann::json& j) const override;
@@ -355,12 +356,11 @@ public:
                    Status status = Status::Open);
     virtual ~ViewPointGenVP() = default;
 
-    /**
-    */
-    bool hasAnnotations() const
-    {
-        return (annotations_.size() > 0);
-    }
+    bool hasAnnotations() const { return (annotations_.size() > 0); }
+
+    void setROI(const QRectF& roi) { roi_ = roi; }
+
+    void addCustomField(const std::string& name, const QVariant& value);
 
     ViewPointGenAnnotations& annotations() { return annotations_; }
     ViewPointGenFilters& filters() { return filters_; }
@@ -393,6 +393,8 @@ private:
 
     ViewPointGenAnnotations annotations_;
     ViewPointGenFilters     filters_;
+
+    std::map<std::string, QVariant> custom_fields_;
 };
 
 /**
@@ -416,10 +418,13 @@ public:
     static const std::string ViewPointsFieldContentType;
     static const std::string ViewPointsFieldViewPoints;
 
-    nlohmann::json toJSON() const;
+    nlohmann::json toJSON(bool with_viewpoints_only = false,
+                          bool with_annotations_only = false) const;
 
 private:
-    void toJSON(nlohmann::json& j) const;
+    void toJSON(nlohmann::json& j, 
+                bool with_viewpoints_only,
+                bool with_annotations_only) const;
 
     std::vector<std::unique_ptr<ViewPointGenVP>> view_points_;
 };

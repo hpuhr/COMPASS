@@ -5,6 +5,8 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/target/target.h"
 #include "stringconv.h"
+#include "viewpointgenerator.h"
+#include "viewmanager.h"
 
 #include "util/tbbhack.h"
 
@@ -57,6 +59,13 @@ void CalculateReferencesJob::run()
 
     while (!insert_done_)
         QThread::msleep(10);
+
+    if (generate_viewpoints_)
+    {
+        emit statusSignal("Generating View Points");
+
+        COMPASS::instance().viewManager().loadViewPoints(viewpoint_json_);
+    }
 
     stop_time = microsec_clock::local_time();
 
@@ -140,7 +149,7 @@ void CalculateReferencesJob::createTargets()
             for (auto utn_it : utn_vec)
             {
                 if (!target_map.count(utn_it))
-                    target_map[utn_it].reset(new CalculateReferences::Target(utn_it, cache_, generate_viewpoints_));
+                    target_map[utn_it].reset(new CalculateReferences::Target(utn_it, cache_));
                 //target_data_.emplace_back(utn_it, *this, cache_, eval_man_, dbcont_man_);
 
                 target_map.at(utn_it)->addTargetReport(dbcontent_name, ds_ids.get(cnt), line_ids.get(cnt),
@@ -173,12 +182,31 @@ void CalculateReferencesJob::calculateReferences()
 {
     loginf << "CalculateReferencesJob: calculateReferences";
 
+    ViewPointGenerator viewpoint_gen;
+
     unsigned int num_targets = targets_.size();
     //num_targets = 50; // only calculate part
 
     std::vector<std::shared_ptr<Buffer>> results;
 
     results.resize(num_targets);
+
+    std::vector<ViewPointGenVP*> viewpoints(num_targets, nullptr);
+    if (generate_viewpoints_)
+    {
+        for (unsigned int i = 0; i < num_targets; ++i)
+        {
+            auto utn = targets_.at(i)->utn();
+            std::string vp_name = "Reconstructor Result - UTN " + std::to_string(utn);
+
+            //add viewpoint for target
+            viewpoints[ i ] = viewpoint_gen.addViewPoint(vp_name, i, "Reconstructor", QRectF());
+
+            //setup utn filter
+            std::unique_ptr<ViewPointGenFilterUTN> utn_filter(new ViewPointGenFilterUTN(utn));
+            viewpoints[ i ]->filters().addFilter(std::move(utn_filter));
+        }
+    }
 
 //    CALLGRIND_START_INSTRUMENTATION;
 
@@ -196,7 +224,7 @@ void CalculateReferencesJob::calculateReferences()
 
         tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
         {
-            results[tgt_cnt] = targets_.at(tgt_cnt)->calculateReference();
+            results[tgt_cnt] = targets_.at(tgt_cnt)->calculateReference(viewpoints[tgt_cnt]);
 
             reftraj_counts_[targets_.at(tgt_cnt)->utn()] = results.at(tgt_cnt)->size(); // store count
 
@@ -222,7 +250,8 @@ void CalculateReferencesJob::calculateReferences()
             result_->seizeBuffer(*buf_it);
     }
 
-    //@TODO add generated viewpoints
+    //store viewpoints
+    viewpoint_json_ = viewpoint_gen.toJSON(true, true);
 
     loginf << "CalculateReferencesJob: calculateReferences: done, buffer size " << result_->size();
 }
@@ -262,4 +291,3 @@ void CalculateReferencesJob::insertDoneSlot()
 
     insert_done_ = true;
 }
-
