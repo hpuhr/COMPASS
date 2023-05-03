@@ -7,6 +7,7 @@
 #include <tuple>
 
 class ViewPointGenVP;
+class CalculateReferencesTaskSettings;
 
 namespace CalculateReferences {
 
@@ -18,12 +19,15 @@ public:
     Target(unsigned int utn, 
            std::shared_ptr<dbContent::Cache> cache);
 
-    void addTargetReport(const std::string& dbcontent_name, unsigned int ds_id, unsigned int line_id,
-                         boost::posix_time::ptime timestamp, unsigned int index);
-
+    void addTargetReport(const std::string& dbcontent_name, 
+                         unsigned int ds_id, 
+                         unsigned int line_id,
+                         boost::posix_time::ptime timestamp, 
+                         unsigned int index);
     void finalizeChains();
 
-    std::shared_ptr<Buffer> calculateReference(ViewPointGenVP* gen_view_point = nullptr);
+    std::shared_ptr<Buffer> calculateReference(const CalculateReferencesTaskSettings& settings, 
+                                               ViewPointGenVP* gen_view_point = nullptr);
 
     unsigned int utn() const;
 

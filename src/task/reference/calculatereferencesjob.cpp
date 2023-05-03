@@ -19,15 +19,14 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-CalculateReferencesJob::CalculateReferencesJob(CalculateReferencesTask& task, std::shared_ptr<dbContent::Cache> cache)
+CalculateReferencesJob::CalculateReferencesJob(CalculateReferencesTask& task, 
+                                               std::shared_ptr<dbContent::Cache> cache)
     : Job("CalculateReferencesJob"), task_(task), cache_(cache)
 {
-
 }
 
 CalculateReferencesJob::~CalculateReferencesJob()
 {
-
 }
 
 void CalculateReferencesJob::run()
@@ -224,7 +223,7 @@ void CalculateReferencesJob::calculateReferences()
 
         tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
         {
-            results[tgt_cnt] = targets_.at(tgt_cnt)->calculateReference(viewpoints[tgt_cnt]);
+            results[tgt_cnt] = targets_.at(tgt_cnt)->calculateReference(task_.settings(), viewpoints[tgt_cnt]);
 
             reftraj_counts_[targets_.at(tgt_cnt)->utn()] = results.at(tgt_cnt)->size(); // store count
 

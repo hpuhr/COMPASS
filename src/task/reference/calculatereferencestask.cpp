@@ -32,9 +32,27 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     tooltip_ =
             "Allows calculation of references based on System Tracker and ADS-B data.";
 
+    registerParameter("rec_mm_stddev"        , &settings_.R_std     , 30.0  );
+    registerParameter("rec_mm_stddev_high"   , &settings_.R_std_high, 1000.0);
+    registerParameter("rec_process_stddev"   , &settings_.Q_std     , 30.0  );
+    registerParameter("rec_state_stddev"     , &settings_.P_std     , 30.0  );
+    registerParameter("rec_state_stddev_high", &settings_.P_std_high, 1000.0);
+
+    registerParameter("rec_min_dt"        , &settings_.min_dt        ,  0.0);
+    registerParameter("rec_max_dt"        , &settings_.max_dt        , 30.0);
+    registerParameter("rec_min_chain_size", &settings_.min_chain_size,  2  );
+
+    registerParameter("rec_use_velocity_mm", &settings_.use_vel_mm, true);
+    registerParameter("rec_smooth_result"  , &settings_.smooth_rts, true);
+
+    registerParameter("rec_resample_systracks"   , &settings_.resample_systracks   , true);
+    registerParameter("rec_resample_systracks_dt", &settings_.resample_systracks_dt, 1.0 );
+
+    registerParameter("rec_resample_result"   , &settings_.resample_result   , true);
+    registerParameter("rec_resample_result_dt", &settings_.resample_result_dt, 2.0 );
+
     //registerParameter("associate_non_mode_s", &associate_non_mode_s_, true);
 }
-
 
 CalculateReferencesTask::~CalculateReferencesTask() {}
 

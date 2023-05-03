@@ -19,6 +19,30 @@ class CalculateReferencesJob;
 
 // delete from data_reftraj;
 
+struct CalculateReferencesTaskSettings
+{
+    double R_std                 = 30.0;     // observation noise (standard)
+    double R_std_high            = 1000.0;   // observation noise (high)
+    double Q_std                 = 30.0;     // process noise
+    double P_std                 = 30.0;     // system noise (standard)
+    double P_std_high            = 1000.0;   // system noise (high)
+
+    double min_dt                = 0.0;      // minimum allowed timestep in seconds
+    double max_dt                = 30.0;     // maximum allowed timestep in seconds
+    int    min_chain_size        = 2;        // minimum kalman chain size
+
+    bool   use_vel_mm            = true;     // track velocities in measurements
+    bool   smooth_rts            = true;     // enable RTS smoother
+
+    bool   resample_systracks    = true;     // resample system tracks using spline interpolation
+    double resample_systracks_dt = 1.0;      // resample interval in seconds
+
+    bool   resample_result       = true;     // resample (and interpolate) reconstructor result by a fixed time interval
+    double resample_result_dt    = 2.0;      // result resampling time interval in seconds
+
+    bool   verbose               = false;    // reconstruction verbosity
+};
+
 class CalculateReferencesTask : public Task, public Configurable
 {
     Q_OBJECT
@@ -38,7 +62,8 @@ public slots:
     void closeStatusDialogSlot();
 
 public:
-    CalculateReferencesTask(const std::string& class_id, const std::string& instance_id,
+    CalculateReferencesTask(const std::string& class_id, 
+                            const std::string& instance_id,
                             TaskManager& task_manager);
     virtual ~CalculateReferencesTask();
 
@@ -47,8 +72,10 @@ public:
     virtual bool canRun() override;
     virtual void run() override;
 
-protected:
+    CalculateReferencesTaskSettings& settings() { return settings_; }
+    const CalculateReferencesTaskSettings& settings() const { return settings_; }
 
+protected:
     std::unique_ptr<CalculateReferencesTaskDialog> dialog_;
 
     std::unique_ptr<CalculateReferencesStatusDialog> status_dialog_;
@@ -66,6 +93,9 @@ protected:
     boost::posix_time::ptime stop_time_;
 
     dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name);
+
+private:
+    CalculateReferencesTaskSettings settings_;
 };
 
 #endif // CALCULATEREFERENCESTASK_H

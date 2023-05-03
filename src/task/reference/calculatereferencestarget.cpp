@@ -8,6 +8,7 @@
 #include "timeconv.h"
 #include "viewpointgenerator.h"
 #include "logger.h"
+#include "calculatereferencestask.h"
 
 #include "reconstruction/reconstructor_umkalman2d.h"
 #include "reconstruction/reconstructor_interp.h"
@@ -28,8 +29,11 @@ Target::Target(unsigned int utn,
 {
 }
 
-void Target::addTargetReport(const std::string& dbcontent_name, unsigned int ds_id,
-                             unsigned int line_id, boost::posix_time::ptime timestamp, unsigned int index)
+void Target::addTargetReport(const std::string& dbcontent_name, 
+                             unsigned int ds_id,
+                             unsigned int line_id, 
+                             boost::posix_time::ptime timestamp, 
+                             unsigned int index)
 {
     TargetKey key = TargetKey{dbcontent_name, ds_id, line_id};
 
@@ -45,7 +49,8 @@ void Target::finalizeChains()
         chain_it.second->finalize();
 }
 
-std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_point)
+std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTaskSettings& settings,
+                                                   ViewPointGenVP* gen_view_point)
 {
     string dbcontent_name = "RefTraj";
 
@@ -373,91 +378,68 @@ std::shared_ptr<Buffer> Target::calculateReference(ViewPointGenVP* gen_view_poin
 
         auto reconstructUMKalman2D = [ & ] ()
         {
-            //default uncertainties
-            double R_std             = 30.0;   // observation noise (standard)
-            double R_std_high        = 1000.0; // observation noise (high)
-            double Q_std             = 30.0;   // process noise
-            double P_std             = 30.0;   // system noise (standard)
-            double P_std_high        = 1000.0; // system noise (high)
+            CalculateReferencesTaskSettings s = settings;
 
             bool   add_sensor_uncert = true;   // add sensor default uncertainties
             double vel_std_cat021    = 50.0;   // default velocity stdddev CAT021
             double vel_std_cat062    = 50.0;   // default velocity stdddev CAT062
 
-            //other config values
-            double min_dt            = 0.0;    // minimum allowed timestep in seconds
-            double max_dt            = 30.0;   // maximum allowed timestep in seconds
-            size_t min_chain_size    = 2;      // minimum kalman chain size
-
-            bool   track_vel         = true;   // track velocities in measurements
-            bool   smooth_rts        = true;   // enable RTS smoother
-            double smooth_scale      = 1;      // scale factor for RTS smoother
-
-            bool   resample_cat062       = true; // resample system tracks using spline interpolation
-            double resample_dt_cat062    = 1.0;  // resample interval in seconds
-            double resample_maxdt_cat062 = 30.0; // maximum timestep to split tracks during resampling
-
-            bool   resample_result    = true;
-            double resample_result_dt = 2.0;
-   
             bool python_compatibility_mode = false; //python reconstructor comparison mode
 
             if (python_compatibility_mode)
             {
                 // apply python code compatible override settings
-                track_vel         = false;
+                s.use_vel_mm         = false;
+                s.resample_result    = false;
+                s.resample_systracks = false;
+
                 add_sensor_uncert = false;
-                resample_cat062   = false;
-                resample_result   = false;
             }
 
-            reconstruction::Reconstructor_UMKalman2D rec(track_vel);
+            reconstruction::Reconstructor_UMKalman2D rec(s.use_vel_mm);
             rec.setViewPoint(gen_view_point);
-            rec.setVerbosity(0);
+            rec.setVerbosity(s.verbose ? 1 : 0);
 
             //configure kalman
-            rec.baseConfig().R_std          = R_std;
-            rec.baseConfig().R_std_high     = R_std_high;
-            rec.baseConfig().Q_std          = Q_std;
-            rec.baseConfig().P_std          = P_std;
-            rec.baseConfig().P_std_high     = P_std_high;
+            rec.baseConfig().R_std          = s.R_std;
+            rec.baseConfig().R_std_high     = s.R_std_high;
+            rec.baseConfig().Q_std          = s.Q_std;
+            rec.baseConfig().P_std          = s.P_std;
+            rec.baseConfig().P_std_high     = s.P_std_high;
 
-            rec.baseConfig().min_dt         = min_dt;
-            rec.baseConfig().max_dt         = max_dt;
-            rec.baseConfig().min_chain_size = min_chain_size;
+            rec.baseConfig().min_dt         = s.min_dt;
+            rec.baseConfig().max_dt         = s.max_dt;
+            rec.baseConfig().min_chain_size = s.min_chain_size;
 
-            rec.baseConfig().smooth         = smooth_rts;
-            rec.baseConfig().smooth_scale   = smooth_scale;
+            rec.baseConfig().smooth         = s.smooth_rts;
+            rec.baseConfig().smooth_scale   = 1.0;
 
-            rec.baseConfig().resample_result = resample_result;
-            rec.baseConfig().resample_dt     = resample_result_dt;
-
-            //if (utn_ == 3)
-            //    rec.setVerbosity(2);
+            rec.baseConfig().resample_result = s.resample_result;
+            rec.baseConfig().resample_dt     = s.resample_result_dt;
 
             //configure sensor default noise?
             if (add_sensor_uncert)
             {
                 reconstruction::Uncertainty uncert_cat021;
-                uncert_cat021.pos_var   = R_std          * R_std;
+                uncert_cat021.pos_var   = s.R_std        * s.R_std;
                 uncert_cat021.speed_var = vel_std_cat021 * vel_std_cat021;
-                uncert_cat021.acc_var   = R_std_high     * R_std_high;
+                uncert_cat021.acc_var   = s.R_std_high   * s.R_std_high;
 
                 reconstruction::Uncertainty uncert_cat062;
-                uncert_cat062.pos_var   = R_std          * R_std;
+                uncert_cat062.pos_var   = s.R_std        * s.R_std;
                 uncert_cat062.speed_var = vel_std_cat062 * vel_std_cat062;
-                uncert_cat062.acc_var   = R_std_high     * R_std_high;
+                uncert_cat062.acc_var   = s.R_std_high   * s.R_std_high;
 
                 rec.setSensorUncertainty("CAT021", uncert_cat021);
                 rec.setSensorUncertainty("CAT062", uncert_cat062);
             }
 
             //resample system tracks?
-            if (resample_cat062)
+            if (s.resample_systracks)
             {
                 reconstruction::InterpOptions options;
-                options.sample_dt = resample_dt_cat062;
-                options.max_dt    = resample_maxdt_cat062;
+                options.sample_dt = s.resample_systracks_dt;
+                options.max_dt    = s.max_dt;
 
                 rec.setSensorInterpolation("CAT062", options);
             }
