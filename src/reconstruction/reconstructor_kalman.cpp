@@ -117,7 +117,6 @@ void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
 
     auto tcur = result_chain.references.front().t + time_incr;
 
-    size_t errors          = 0;
     size_t small_intervals = 0;
 
     for (size_t i = 1; i < n; ++i)
@@ -159,7 +158,7 @@ void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
 
             kalman::KalmanState new_state;
             new_state.x = (new_state0.x + new_state1.x) / 2;
-            new_state.P = dt0 < dt1 ? state0.P : state1.P;
+            new_state.P = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, 0.5);
 
             Reference ref;
             ref.t            = tcur;
@@ -175,6 +174,9 @@ void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             tcur += time_incr;
         }
     }
+
+    if (verbosity() >= 1 && small_intervals > 0)
+        logdbg << "Encountered " << small_intervals << " small interval(s) during resampling";
 
     if (resampled_chain.references.size() >= 2)
     {

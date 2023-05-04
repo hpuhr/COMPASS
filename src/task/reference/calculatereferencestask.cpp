@@ -50,6 +50,8 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
 
     registerParameter("rec_resample_result"   , &settings_.resample_result   , true);
     registerParameter("rec_resample_result_dt", &settings_.resample_result_dt, 2.0 );
+    
+    registerParameter("rec_verbose", &settings_.verbose, false);
 
     //registerParameter("associate_non_mode_s", &associate_non_mode_s_, true);
 }

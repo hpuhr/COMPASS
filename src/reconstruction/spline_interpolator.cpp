@@ -54,19 +54,72 @@ namespace
         else
         {
             //interpolate speed and bearing individually
-            double speed_interp = interp(speed_angle0.first, speed_angle1.first, interp_factor);
-#if 0
-            auto pos0 = position2D(mm0);
-            auto pos1 = position2D(mm1);
-            double angle_interp = Utils::Number::interpolateBearing(pos0.x(), pos0.y(), pos1.x(), pos1.y(), speed_angle0.second, speed_angle1.second, interp_factor);
-#else
-            double da           = Utils::Number::calculateMinAngleDifference(speed_angle1.second, speed_angle0.second);
-            double angle_interp = speed_angle0.second + interp_factor * da;
-#endif
-            auto speedvec_interp = Utils::Number::speedAngle2SpeedVec(speed_interp, angle_interp);
+            double speed_interp    = interp(speed_angle0.first, speed_angle1.first, interp_factor);
+            double da              = Utils::Number::calculateMinAngleDifference(speed_angle1.second, speed_angle0.second);
+            double angle_interp    = speed_angle0.second + interp_factor * da;
+            auto   speedvec_interp = Utils::Number::speedAngle2SpeedVec(speed_interp, angle_interp);
+
             vx_interp = speedvec_interp.first;
             vy_interp = speedvec_interp.second;
         }
+    }
+}
+
+/**
+ * Interpolate covariance matrices.
+ * 
+ * -> linear interpolation of cov matrices should lead to symmetrical semi-positive-definite matrices in interval t=[0,1]
+ * (see white, padmanabhan - including parameter dependence in the data and covariance for cosmological inference)
+ *
+ * thus we interpolate (1 - t) * COV0 + t * COV1 = (1 - t) * |stddev_x0^2 cov_xy0    | + t * |stddev_x1^2 cov_xy1    |
+ *                                                           |cov_xy0     stddev_y0^2|       |cov_xy1     stddev_y1^2|
+ */
+Eigen::MatrixXd SplineInterpolator::interpCovarianceMat(const Eigen::MatrixXd& C0, 
+                                                        const Eigen::MatrixXd& C1, 
+                                                        double interp_factor)
+{
+    return (1.0 - interp_factor) * C0 + interp_factor * C1;
+}
+
+/**
+ * Interpolate covariance matrix values stored in the given measurements.
+ * 
+ * -> linear interpolation of cov matrices should lead to symmetrical semi-positive-definite matrices in interval t=[0,1]
+ * (see white, padmanabhan - including parameter dependence in the data and covariance for cosmological inference)
+ *
+ * thus we interpolate (1 - t) * COV0 + t * COV1 = (1 - t) * |stddev_x0^2 cov_xy0    | + t * |stddev_x1^2 cov_xy1    |
+ *                                                           |cov_xy0     stddev_y0^2|       |cov_xy1     stddev_y1^2|
+ */
+void SplineInterpolator::interpCovarianceMat(Measurement& mm_interp,
+                                             const Measurement& mm0,
+                                             const Measurement& mm1,
+                                             double interp_factor)
+{
+    if (mm0.hasStdDevPosition() && mm1.hasStdDevPosition())
+    {
+        double x_stddev_sqr0 = mm0.x_stddev.value() * mm0.x_stddev.value();
+        double y_stddev_sqr0 = mm0.y_stddev.value() * mm0.y_stddev.value();
+
+        double x_stddev_sqr1 = mm1.x_stddev.value() * mm1.x_stddev.value();
+        double y_stddev_sqr1 = mm1.y_stddev.value() * mm1.y_stddev.value();
+
+        mm_interp.x_stddev = std::sqrt(interp(x_stddev_sqr0, x_stddev_sqr1, interp_factor));
+        mm_interp.y_stddev = std::sqrt(interp(y_stddev_sqr0, y_stddev_sqr1, interp_factor));
+    }
+    if (mm0.xy_cov.has_value() && mm1.xy_cov.has_value())
+    {
+        mm_interp.xy_cov = interp(mm0.xy_cov.value(), mm1.xy_cov.value(), interp_factor);
+    }
+    if (mm0.hasStdDevVelocity() && mm1.hasStdDevVelocity())
+    {
+        double vx_stddev_sqr0 = mm0.vx_stddev.value() * mm0.vx_stddev.value();
+        double vy_stddev_sqr0 = mm0.vy_stddev.value() * mm0.vy_stddev.value();
+
+        double vx_stddev_sqr1 = mm1.vx_stddev.value() * mm1.vx_stddev.value();
+        double vy_stddev_sqr1 = mm1.vy_stddev.value() * mm1.vy_stddev.value();
+
+        mm_interp.vx_stddev = std::sqrt(interp(vx_stddev_sqr0, vx_stddev_sqr1, interp_factor));
+        mm_interp.vy_stddev = std::sqrt(interp(vy_stddev_sqr0, vy_stddev_sqr1, interp_factor));
     }
 }
 
@@ -104,39 +157,9 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
         interpolateVector2D(mm_interp.ax, mm_interp.ay, mm0.ax, mm0.ay, mm1.ax, mm1.ay, interp_factor);
     }
 
-    //interpolate covariance matrix
-    // -> linear interpolation of cov matrices should lead to symmetrical semi-positive-definite matrices in interval t=[0,1]
-    // (see e.g. white, padmanabhan - including parameter dependence in the data and covariance for cosmological inference)
-    //
-    // thus we interpolate (1 - t) * COV0 + t * COV1 = (1 - t) * |stddev_x0^2 cov_xy0    | + t * |stddev_x1^2 cov_xy1    |
-    //                                                           |cov_xy0     stddev_y0^2|       |cov_xy1     stddev_y1^2|
-    if (mm0.hasStdDevPosition() && mm1.hasStdDevPosition())
-    {
-        double x_stddev_sqr0 = mm0.x_stddev.value() * mm0.x_stddev.value();
-        double y_stddev_sqr0 = mm0.y_stddev.value() * mm0.y_stddev.value();
-
-        double x_stddev_sqr1 = mm1.x_stddev.value() * mm1.x_stddev.value();
-        double y_stddev_sqr1 = mm1.y_stddev.value() * mm1.y_stddev.value();
-
-        mm_interp.x_stddev = std::sqrt(interp(x_stddev_sqr0, x_stddev_sqr1, interp_factor));
-        mm_interp.y_stddev = std::sqrt(interp(y_stddev_sqr0, y_stddev_sqr1, interp_factor));
-    }
-    if (mm0.xy_cov.has_value() && mm1.xy_cov.has_value())
-    {
-        mm_interp.xy_cov = interp(mm0.xy_cov.value(), mm1.xy_cov.value(), interp_factor);
-    }
-    if (mm0.hasStdDevVelocity() && mm1.hasStdDevVelocity())
-    {
-        double vx_stddev_sqr0 = mm0.vx_stddev.value() * mm0.vx_stddev.value();
-        double vy_stddev_sqr0 = mm0.vy_stddev.value() * mm0.vy_stddev.value();
-
-        double vx_stddev_sqr1 = mm1.vx_stddev.value() * mm1.vx_stddev.value();
-        double vy_stddev_sqr1 = mm1.vy_stddev.value() * mm1.vy_stddev.value();
-
-        mm_interp.vx_stddev = std::sqrt(interp(vx_stddev_sqr0, vx_stddev_sqr1, interp_factor));
-        mm_interp.vy_stddev = std::sqrt(interp(vy_stddev_sqr0, vy_stddev_sqr1, interp_factor));
-    }
-
+    //interpolate cov mat values
+    interpCovarianceMat(mm_interp, mm0, mm1, interp_factor);
+    
     return mm_interp;
 }
 

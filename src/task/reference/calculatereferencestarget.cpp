@@ -400,7 +400,7 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
             rec.setViewPoint(gen_view_point);
             rec.setVerbosity(s.verbose ? 1 : 0);
 
-            //configure kalman
+            //configure kalman reconstructor
             rec.baseConfig().R_std          = s.R_std;
             rec.baseConfig().R_std_high     = s.R_std_high;
             rec.baseConfig().Q_std          = s.Q_std;

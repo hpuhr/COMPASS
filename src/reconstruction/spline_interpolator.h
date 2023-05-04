@@ -61,10 +61,17 @@ public:
                                                const Measurement& mm1, 
                                                double interp_factor,
                                                CoordSystem coord_sys);
+    static Eigen::MatrixXd interpCovarianceMat(const Eigen::MatrixXd& C0, 
+                                               const Eigen::MatrixXd& C1, 
+                                               double interp_factor);
+    static void interpCovarianceMat(Measurement& mm_interp,
+                                    const Measurement& mm0,
+                                    const Measurement& mm1,
+                                    double interp_factor);
+    
     static size_t estimatedSamples(const Measurement& mm0, 
                                    const Measurement& mm1,
                                    double dt);
-
 protected:
     std::vector<MeasurementInterp> interpolatePart(const std::vector<Measurement>& measurements) const;
     bool isFishySegment(const Measurement& mm0, 
