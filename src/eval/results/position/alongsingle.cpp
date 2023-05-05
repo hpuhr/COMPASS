@@ -434,7 +434,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAlong::getTargetErrorsVi
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
-    addAnnotations(*viewable_ptr);
+    addAnnotations(*viewable_ptr, true);
 
     return viewable_ptr;
 }
@@ -456,7 +456,7 @@ std::string SinglePositionAlong::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-void SinglePositionAlong::addAnnotations(nlohmann::json::object_t& viewable)
+void SinglePositionAlong::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
 {
     addAnnotationFeatures(viewable);
 
@@ -479,19 +479,19 @@ void SinglePositionAlong::addAnnotations(nlohmann::json::object_t& viewable)
 
         assert (detail_it.numPositions() == 2);
 
-        if (check_passed)
-        {
-            ok_point_coordinates.push_back(detail_it.position(0).asVector());
-
-            ok_line_coordinates.push_back(detail_it.position(0).asVector());
-            ok_line_coordinates.push_back(detail_it.position(1).asVector());
-        }
-        else
+        if (!check_passed)
         {
             error_point_coordinates.push_back(detail_it.position(0).asVector());
 
             error_line_coordinates.push_back(detail_it.position(0).asVector());
             error_line_coordinates.push_back(detail_it.position(1).asVector());
+        }
+        else if (check_passed && add_ok)
+        {
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+
+            ok_line_coordinates.push_back(detail_it.position(0).asVector());
+            ok_line_coordinates.push_back(detail_it.position(1).asVector());
         }
     }
 }

@@ -170,6 +170,8 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("report_skip_targets_wo_issues", &report_skip_targets_wo_issues_, false);
     registerParameter("report_include_target_tr_details", &report_include_target_tr_details_, false);
 
+    registerParameter("show_ok_joined_target_reports", &show_ok_joined_target_reports_, false);
+
     registerParameter("report_num_max_table_rows", &report_num_max_table_rows_, 1000);
     registerParameter("report_num_max_table_col_width", &report_num_max_table_col_width_, 18);
 
@@ -1669,6 +1671,16 @@ bool EvaluationManager::hasSelectedTestDataSources()
             return true;
 
     return false;
+}
+
+bool EvaluationManager::showJoinedOkTargetReports() const
+{
+    return show_ok_joined_target_reports_;
+}
+
+void EvaluationManager::showJoinedOkTargetReports(bool value)
+{
+    show_ok_joined_target_reports_ = value;
 }
 
 bool EvaluationManager::reportSkipTargetsWoIssues() const

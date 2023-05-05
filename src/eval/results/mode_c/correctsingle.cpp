@@ -333,7 +333,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleModeCCorrect::getTargetErrorsVie
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
-    addAnnotations(*viewable_ptr);
+    addAnnotations(*viewable_ptr, true);
 
     return viewable_ptr;
 }
@@ -355,7 +355,7 @@ std::string SingleModeCCorrect::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-void SingleModeCCorrect::addAnnotations(nlohmann::json::object_t& viewable)
+void SingleModeCCorrect::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
 {
     addAnnotationFeatures(viewable);
 
@@ -373,7 +373,7 @@ void SingleModeCCorrect::addAnnotations(nlohmann::json::object_t& viewable)
 
         if (is_not_correct)
             error_point_coordinates.push_back(detail_it.position(0).asVector());
-        else
+        else if (add_ok)
             ok_point_coordinates.push_back(detail_it.position(0).asVector());
     }
 }

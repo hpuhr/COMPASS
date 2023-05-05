@@ -325,7 +325,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::getTargetErrorsViewa
     //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     //    }
 
-    addAnnotations(*viewable_ptr);
+    addAnnotations(*viewable_ptr, true);
 
     return viewable_ptr;
 }
@@ -372,7 +372,7 @@ unsigned int SingleExtraTrack::numOK() const
     return num_ok_;
 }
 
-void SingleExtraTrack::addAnnotations(nlohmann::json::object_t& viewable)
+void SingleExtraTrack::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
 {
     addAnnotationFeatures(viewable);
 

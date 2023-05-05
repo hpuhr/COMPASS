@@ -268,8 +268,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedSpeed::getErrorsViewable ()
     (*viewable_ptr)["speed_window_latitude"] = lat_w;
     (*viewable_ptr)["speed_window_longitude"] = lon_w;
 
-    for (auto& single_result : results_)
-        single_result->addAnnotations((*viewable_ptr));
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }

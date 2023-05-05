@@ -427,7 +427,7 @@ EvaluationRequirement::DubiousTarget* SingleDubiousTarget::req ()
     return req;
 }
 
-void SingleDubiousTarget::addAnnotations(nlohmann::json::object_t& viewable)
+void SingleDubiousTarget::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
 {
     addAnnotationFeatures(viewable);
 

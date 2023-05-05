@@ -143,37 +143,36 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
             // lines
             viewable.at("annotations").at(0).at("features").push_back(json::object());
 
-            json& error_feature_lines = viewable.at("annotations").at(0).at("features").at(0);
+            json& feature_lines = viewable.at("annotations").at(0).at("features").at(0);
 
-            error_feature_lines["type"] = "feature";
-            error_feature_lines["geometry"] = json::object();
-            error_feature_lines.at("geometry")["type"] = "lines";
-            error_feature_lines.at("geometry")["coordinates"] = json::array();
+            feature_lines["type"] = "feature";
+            feature_lines["geometry"] = json::object();
+            feature_lines.at("geometry")["type"] = "lines";
+            feature_lines.at("geometry")["coordinates"] = json::array();
 
-            error_feature_lines["properties"] = json::object();
-            error_feature_lines.at("properties")["color"] = "#FF0000";
-            error_feature_lines.at("properties")["line_width"] = 2;
+            feature_lines["properties"] = json::object();
+            feature_lines.at("properties")["color"] = "#FF0000";
+            feature_lines.at("properties")["line_width"] = 2;
 
             // symbols
 
             viewable.at("annotations").at(0).at("features").push_back(json::object());
 
-            json& error_feature_points = viewable.at("annotations").at(0).at("features").at(1);
+            json& feature_points = viewable.at("annotations").at(0).at("features").at(1);
 
-            error_feature_points["type"] = "feature";
-            error_feature_points["geometry"] = json::object();
-            error_feature_points.at("geometry")["type"] = "points";
-            error_feature_points.at("geometry")["coordinates"] = json::array();
+            feature_points["type"] = "feature";
+            feature_points["geometry"] = json::object();
+            feature_points.at("geometry")["type"] = "points";
+            feature_points.at("geometry")["coordinates"] = json::array();
 
-            error_feature_points["properties"] = json::object();
-            error_feature_points.at("properties")["color"] = "#FF0000";
-            error_feature_points.at("properties")["symbol"] = "circle";
-            error_feature_points.at("properties")["symbol_size"] = 8;
+            feature_points["properties"] = json::object();
+            feature_points.at("properties")["color"] = "#FF0000";
+            feature_points.at("properties")["symbol"] = "circle";
+            feature_points.at("properties")["symbol_size"] = 8;
 
         }
 
         // ok
-
         {
             viewable.at("annotations").push_back(json::object()); // ok
             viewable.at("annotations").at(1)["name"] = result_id_+" OK";
@@ -182,33 +181,32 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
             // lines
             viewable.at("annotations").at(1).at("features").push_back(json::object());
 
-            json& ok_feature_lines = viewable.at("annotations").at(1).at("features").at(0);
+            json& feature_lines = viewable.at("annotations").at(1).at("features").at(0);
 
-            ok_feature_lines["type"] = "feature";
-            ok_feature_lines["geometry"] = json::object();
-            ok_feature_lines.at("geometry")["type"] = "lines";
-            ok_feature_lines.at("geometry")["coordinates"] = json::array();
+            feature_lines["type"] = "feature";
+            feature_lines["geometry"] = json::object();
+            feature_lines.at("geometry")["type"] = "lines";
+            feature_lines.at("geometry")["coordinates"] = json::array();
 
-            ok_feature_lines["properties"] = json::object();
-            ok_feature_lines.at("properties")["color"] = "#00FF00";
-            ok_feature_lines.at("properties")["line_width"] = 2;
+            feature_lines["properties"] = json::object();
+            feature_lines.at("properties")["color"] = "#00FF00";
+            feature_lines.at("properties")["line_width"] = 2;
 
             // symbols
 
             viewable.at("annotations").at(1).at("features").push_back(json::object());
 
-            json& error_feature_points = viewable.at("annotations").at(1).at("features").at(1);
+            json& feature_points = viewable.at("annotations").at(1).at("features").at(1);
 
-            error_feature_points["type"] = "feature";
-            error_feature_points["geometry"] = json::object();
-            error_feature_points.at("geometry")["type"] = "points";
-            error_feature_points.at("geometry")["coordinates"] = json::array();
+            feature_points["type"] = "feature";
+            feature_points["geometry"] = json::object();
+            feature_points.at("geometry")["type"] = "points";
+            feature_points.at("geometry")["coordinates"] = json::array();
 
-            error_feature_points["properties"] = json::object();
-            error_feature_points.at("properties")["color"] = "#00FF00";
-            error_feature_points.at("properties")["symbol"] = "circle";
-            error_feature_points.at("properties")["symbol_size"] = 8;
-
+            feature_points["properties"] = json::object();
+            feature_points.at("properties")["color"] = "#00FF00";
+            feature_points.at("properties")["symbol"] = "circle";
+            feature_points.at("properties")["symbol_size"] = 8;
         }
     }
 }

@@ -231,8 +231,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedModeCPresent::getErrorsViewable 
     (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
 
-    for (auto& single_result : results_)
-        single_result->addAnnotations((*viewable_ptr));
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }

@@ -495,7 +495,7 @@ EvaluationRequirement::DubiousTrack* SingleDubiousTrack::req ()
     return req;
 }
 
-void SingleDubiousTrack::addAnnotations(nlohmann::json::object_t& viewable)
+void SingleDubiousTrack::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
 {
     addAnnotationFeatures(viewable);
 

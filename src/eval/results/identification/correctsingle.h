@@ -80,7 +80,7 @@ public:
         NumNotCorrect //unsigned int
     };
 
-    void addAnnotations(nlohmann::json::object_t& viewable) override;
+    void addAnnotations(nlohmann::json::object_t& viewable, bool add_ok) override;
 
 protected:
     unsigned int num_updates_     {0};

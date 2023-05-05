@@ -459,7 +459,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::getTargetErrorsViewable (
         (*viewable_ptr)["speed_window_longitude"] = lon_w;
     }
 
-    addAnnotations(*viewable_ptr);
+    addAnnotations(*viewable_ptr, true);
 
     return viewable_ptr;
 }
@@ -534,7 +534,7 @@ EvaluationRequirement::Speed* SingleSpeed::req ()
     return req;
 }
 
-void SingleSpeed::addAnnotations(nlohmann::json::object_t& viewable)
+void SingleSpeed::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
 {
     addAnnotationFeatures(viewable);
 
@@ -556,7 +556,7 @@ void SingleSpeed::addAnnotations(nlohmann::json::object_t& viewable)
 
         if (!check_passed)
             error_point_coordinates.push_back(detail_it.position(0).asVector());
-        else
+        else if (add_ok)
             ok_point_coordinates.push_back(detail_it.position(0).asVector());
     }
 }

@@ -18,6 +18,7 @@
 #include "eval/results/joined.h"
 #include "eval/results/single.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "evaluationmanager.h"
 
 #include "eval/requirement/base/base.h"
 
@@ -95,6 +96,15 @@ void Joined::join(std::shared_ptr<Single> other)
 std::vector<std::shared_ptr<Single>>& Joined::results() 
 { 
     return results_; 
+}
+
+void Joined::addAnnotationsFromSingles(nlohmann::json::object_t& viewable_ref)
+{
+    for (auto& single_result : results_)
+    {
+        if (single_result->use())
+            single_result->addAnnotations(viewable_ref, eval_man_.showJoinedOkTargetReports());
+    }
 }
 
 }

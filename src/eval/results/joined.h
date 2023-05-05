@@ -50,12 +50,14 @@ public:
     unsigned int numUnusableResults();
 
 protected:
+    std::vector<std::shared_ptr<Single>> results_;
+
     void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
 
     virtual void join_impl(std::shared_ptr<Single> other) = 0;
     virtual void updatesToUseChanges_impl() = 0;
 
-    std::vector<std::shared_ptr<Single>> results_;
+    void addAnnotationsFromSingles(nlohmann::json::object_t& viewable_ref);
 };
 
 }

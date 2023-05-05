@@ -314,6 +314,9 @@ public:
     bool reportSkipNoDataDetails() const;
     void reportSkipNoDataDetails(bool value);
 
+    bool showJoinedOkTargetReports() const; //
+    void showJoinedOkTargetReports(bool value);
+
     std::string reportAuthor() const;
     void reportAuthor(const std::string& author);
 
@@ -450,6 +453,8 @@ protected:
     bool report_include_target_details_ {false};
     bool report_skip_targets_wo_issues_ {false};
     bool report_include_target_tr_details_ {false};
+
+    bool show_ok_joined_target_reports_ {false};
 
     unsigned int report_num_max_table_rows_ {1000};
     unsigned int report_num_max_table_col_width_ {18};
