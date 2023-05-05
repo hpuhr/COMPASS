@@ -74,6 +74,14 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     layout->addRow("Show ADS-B Info", show_adsb_info_check_);
 
 
+    // show ok
+
+    show_ok_joined_target_reports_check_ = new QCheckBox ();
+    show_ok_joined_target_reports_check_->setChecked(eval_man_.showJoinedOkTargetReports());
+    connect(show_ok_joined_target_reports_check_, &QCheckBox::clicked,
+            this, &EvaluationResultsGeneratorWidget::toggleShowOKJoinedSlot);
+    layout->addRow("Show OK data in Sector Results", show_ok_joined_target_reports_check_);
+
     result_detail_zoom_edit_ = new QLineEdit(QString::number(eval_man_.resultDetailZoom()));
     result_detail_zoom_edit_->setValidator(new QDoubleValidator(0.000001, 1.0, 7, this));
     connect(result_detail_zoom_edit_, &QLineEdit::textEdited,
@@ -109,6 +117,12 @@ void EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot()
 {
     assert (show_adsb_info_check_);
     eval_man_.reportShowAdsbInfo(show_adsb_info_check_->checkState() == Qt::Checked);
+}
+
+void EvaluationResultsGeneratorWidget::toggleShowOKJoinedSlot()
+{
+    assert (show_ok_joined_target_reports_check_);
+    eval_man_.showJoinedOkTargetReports(show_ok_joined_target_reports_check_->checkState() == Qt::Checked);
 }
 
 void EvaluationResultsGeneratorWidget::toggleSkipNoDataDetailsSlot()
