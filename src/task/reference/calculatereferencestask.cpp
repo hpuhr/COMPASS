@@ -256,7 +256,7 @@ void CalculateReferencesTask::createDoneSlot()
     status_dialog_->setDone();
 
     if (closeDialogAfterFinishing())
-        status_dialog_->close();
+        closeStatusDialogSlot();
 
     create_job_ = nullptr;
 
