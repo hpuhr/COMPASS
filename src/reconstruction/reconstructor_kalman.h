@@ -93,6 +93,10 @@ public:
     double pVar() const { return P_var_; }
     double pVarHigh() const  { return P_var_high_; }
 
+    static const QColor ColorKalman;
+    static const QColor ColorKalmanSmoothed;
+    static const QColor ColorKalmanResampled;
+
 protected:
     boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements,
                                                              const std::string& data_info) override final;

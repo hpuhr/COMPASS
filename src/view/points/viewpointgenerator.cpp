@@ -103,6 +103,16 @@ void ViewPointGenFeature::toJSON(nlohmann::json& j) const
     toJSON_impl(j);
 }
 
+/**
+*/
+void ViewPointGenFeature::print(std::ostream& strm, const std::string& prefix) const
+{
+    strm << prefix << "[Feature]" << std::endl;
+    strm << prefix << "name: " << name() << std::endl;
+    strm << prefix << "type: " << type_ << std::endl;
+    strm << prefix << "size: " << size() << std::endl;
+}
+
 /********************************************************************************
  * ViewPointGenFeaturePointGeometry
  ********************************************************************************/
@@ -474,6 +484,20 @@ void ViewPointGenAnnotation::toJSON(nlohmann::json& j) const
     j[AnnotationFieldFeatures] = feats;
 }
 
+/**
+*/
+void ViewPointGenAnnotation::print(std::ostream& strm, const std::string& prefix) const
+{
+    strm << prefix << "[Annotation]" << std::endl;
+    strm << prefix << "name:   " << name_ << std::endl;
+    strm << prefix << "hidden: " << hidden_ << std::endl;
+
+    std::string p2 = prefix + "   ";
+
+    for (const auto& f : features_)
+        f->print(strm, p2);
+}
+
 /********************************************************************************
  * ViewPointGenAnnotations
  ********************************************************************************/
@@ -506,6 +530,14 @@ void ViewPointGenAnnotations::toJSON(nlohmann::json& j) const
 
         j.push_back(anno);
     }
+}
+
+/**
+*/
+void ViewPointGenAnnotations::print(std::ostream& strm, const std::string& prefix) const
+{
+    for (const auto& a : annotations_)
+        a->print(strm, prefix);
 }
 
 /********************************************************************************
@@ -602,6 +634,39 @@ void ViewPointGenVP::toJSON(nlohmann::json& j) const
     }
 }
 
+/**
+*/
+void ViewPointGenVP::print(std::ostream& strm, const std::string& prefix) const
+{
+    strm << prefix << "[Viewpoint]" << std::endl;
+    strm << prefix << "id:     " << id_ << std::endl;
+    strm << prefix << "name:   " << name_ << std::endl;
+    strm << prefix << "type:   " << type_ << std::endl;
+    strm << prefix << "roi:    " << roi_.x() << "," << roi_.y() << " " << roi_.width() << "x" << roi_.height() << std::endl;
+    strm << prefix << "status: " << statusString() << std::endl;
+
+    std::string p2 = prefix + "   ";
+
+    annotations_.print(strm, p2);
+}
+
+/**
+*/
+bool ViewPointGenVP::hasAnnotations(const nlohmann::json& vp_json)
+{
+    if (!vp_json.is_object())
+        return false;
+
+    if (vp_json.count(ViewPointFieldAnnotations) == 0)
+        return false;
+
+    auto node = vp_json[ViewPointFieldAnnotations];
+    if (!node.is_array() || node.size() < 1)
+        return false;
+
+    return true;
+}
+
 /********************************************************************************
  * ViewPointGenerator
  ********************************************************************************/
@@ -676,4 +741,30 @@ nlohmann::json ViewPointGenerator::toJSON(bool with_viewpoints_only,
     toJSON(j, with_viewpoints_only, with_annotations_only);
 
     return j;
+}
+
+/**
+*/
+boost::optional<nlohmann::json> ViewPointGenerator::viewPointJSON(const nlohmann::json& vps_json, 
+                                                                  size_t idx, 
+                                                                  bool with_annotations_only)
+{
+    if (!vps_json.is_object())
+        return {};
+
+    if (vps_json.count(ViewPointsFieldViewPoints) == 0)
+        return {};
+
+    auto vps_node = vps_json[ViewPointsFieldViewPoints];
+    if (!vps_node.is_array() || vps_node.size() <= idx)
+        return {};
+
+    auto vp_node = vps_node.at(idx);
+    if (!vp_node.is_object())
+        return {};
+
+    if (with_annotations_only && !ViewPointGenVP::hasAnnotations(vp_node))
+        return {};
+
+    return vp_node;
 }

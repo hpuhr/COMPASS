@@ -62,6 +62,7 @@ protected:
     QDoubleSpinBox* resample_result_dt_box_ = nullptr;
 
     QCheckBox*      verbose_box_ = nullptr;
+    QCheckBox*      gen_vp_box_  = nullptr;
 };
 
 #endif // CALCULATEREFERENCESTASKDIALOG_H

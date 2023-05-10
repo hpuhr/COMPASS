@@ -52,18 +52,14 @@ void CalculateReferencesJob::run()
 
     calculateReferences();
 
-    emit statusSignal("Writing References");
-
-    writeReferences();
-
-    while (!insert_done_)
-        QThread::msleep(10);
-
-    if (generate_viewpoints_)
+    //write references to db if desired
+    if (task_.writeReferences())
     {
-        emit statusSignal("Generating View Points");
+        emit statusSignal("Writing References");
+        writeReferences();
 
-        COMPASS::instance().viewManager().loadViewPoints(viewpoint_json_);
+        while (!insert_done_)
+            QThread::msleep(10);
     }
 
     stop_time = microsec_clock::local_time();
@@ -181,6 +177,8 @@ void CalculateReferencesJob::calculateReferences()
 {
     loginf << "CalculateReferencesJob: calculateReferences";
 
+    viewpoint_json_ = {};
+
     ViewPointGenerator viewpoint_gen;
 
     unsigned int num_targets = targets_.size();
@@ -190,8 +188,9 @@ void CalculateReferencesJob::calculateReferences()
 
     results.resize(num_targets);
 
+    //init viewpoints
     std::vector<ViewPointGenVP*> viewpoints(num_targets, nullptr);
-    if (generate_viewpoints_)
+    if (task_.generateViewPoints())
     {
         for (unsigned int i = 0; i < num_targets; ++i)
         {
@@ -249,12 +248,11 @@ void CalculateReferencesJob::calculateReferences()
             result_->seizeBuffer(*buf_it);
     }
 
-    //store viewpoints
+    //create viewpoint json
     viewpoint_json_ = viewpoint_gen.toJSON(true, true);
 
     loginf << "CalculateReferencesJob: calculateReferences: done, buffer size " << result_->size();
 }
-
 
 void CalculateReferencesJob::writeReferences()
 {

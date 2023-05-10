@@ -1476,7 +1476,6 @@ MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
     return meta_cfg_dialog_.get();
 }
 
-
 void DBContentManager::setViewableDataConfig (const nlohmann::json::object_t& data)
 {
     viewable_data_cfg_.reset(new ViewableDataConfig(data));

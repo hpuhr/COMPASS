@@ -3,6 +3,9 @@
 #include "dbcontentmanager.h"
 #include "targetfilterdialog.h"
 #include "logger.h"
+#include "compass.h"
+#include "taskmanager.h"
+#include "calculatereferencestask.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -124,10 +127,27 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
     assert (table_view_);
 
     QModelIndex index = table_view_->indexAt(p);
-    assert (index.isValid());
+    if (!index.isValid())
+        return;
 
     auto const source_index = proxy_model_->mapToSource(index);
     assert (source_index.isValid());
+
+    const dbContent::Target& target = model_.getTargetOf(source_index);
+    unsigned int utn = target.utn_;
+
+    auto recCB = [=] ()
+    {
+        COMPASS::instance().taskManager().calculateReferencesTask().runUTN(utn);
+    };
+
+    QMenu menu;
+
+    QAction* action = new QAction("Show Intermediate Reconstruction Results", this);
+    connect (action, &QAction::triggered, recCB);
+    menu.addAction(action);
+
+    menu.exec(table_view_->viewport()->mapToGlobal(p));
 
 //    const EvaluationTargetData& target = eval_data_.getTargetOf(source_index);
 

@@ -24,8 +24,11 @@ signals:
     void statusSignal(QString status);
 
 public:
-    CalculateReferencesJob(CalculateReferencesTask& task, std::shared_ptr<dbContent::Cache> cache);
+    CalculateReferencesJob(CalculateReferencesTask& task, 
+                           std::shared_ptr<dbContent::Cache> cache);
     virtual ~CalculateReferencesJob();
+
+    nlohmann::json viewPointsJSON() const { return viewpoint_json_; }
 
     virtual void run();
 
@@ -41,7 +44,6 @@ protected:
 
     bool insert_done_ {false};
 
-    bool           generate_viewpoints_ = true;
     nlohmann::json viewpoint_json_;
 
     void createTargets();

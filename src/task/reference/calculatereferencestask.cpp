@@ -13,7 +13,11 @@
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "viewmanager.h"
+#include "viewabledataconfig.h"
+#include "viewpointgenerator.h"
 #include "buffer.h"
+
+#include <fstream>
 
 #include <QApplication>
 #include <QMessageBox>
@@ -51,7 +55,8 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     registerParameter("rec_resample_result"   , &settings_.resample_result   , true);
     registerParameter("rec_resample_result_dt", &settings_.resample_result_dt, 2.0 );
     
-    registerParameter("rec_verbose", &settings_.verbose, false);
+    //registerParameter("rec_verbose", &settings_.verbose, false);
+    //registerParameter("rec_generate_viewpoints", &settings_.generate_viewpoints, false);
 
     //registerParameter("associate_non_mode_s", &associate_non_mode_s_, true);
 }
@@ -92,6 +97,28 @@ bool CalculateReferencesTask::canRun()
     return true;
 }
 
+bool CalculateReferencesTask::generateViewPoints() const
+{
+    return (settings_.generate_viewpoints || !utns_.empty());
+}
+
+bool CalculateReferencesTask::writeReferences() const
+{
+    return utns_.empty();
+}
+
+bool CalculateReferencesTask::closeDialogAfterFinishing() const
+{
+    return (!show_done_summary_ || !utns_.empty());
+}
+
+void CalculateReferencesTask::runUTN(unsigned int utn)
+{
+    utns_ = { utn };
+
+    run();
+}
+
 void CalculateReferencesTask::run()
 {
     assert(canRun());
@@ -107,19 +134,25 @@ void CalculateReferencesTask::run()
     connect(status_dialog_.get(), &CalculateReferencesStatusDialog::closeSignal,
             this, &CalculateReferencesTask::closeStatusDialogSlot);
     status_dialog_->markStartTime();
-    status_dialog_->setStatus("Deleting old References");
+    status_dialog_->setStatus("Initializing");
     status_dialog_->show();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
-    if (dbcontent_man.dbContent("RefTraj").existsInDB())
-        dbcontent_man.dbContent("RefTraj").deleteDBContentData();
-
-    while (dbcontent_man.dbContent("RefTraj").isDeleting())
+    //remove existing references if we want to write the new ones
+    if (writeReferences())
     {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(10);
+        status_dialog_->setStatus("Deleting old References");
+
+        if (dbcontent_man.dbContent("RefTraj").existsInDB())
+            dbcontent_man.dbContent("RefTraj").deleteDBContentData();
+
+        while (dbcontent_man.dbContent("RefTraj").isDeleting())
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(10);
+        }
     }
 
     status_dialog_->setStatus("Loading Data");
@@ -141,7 +174,20 @@ void CalculateReferencesTask::run()
 
         VariableSet read_set = getReadSetFor(dbo_it.first);
 
-        dbo_it.second->load(read_set, false, false);
+        if (utns_.empty())
+        {
+            //load for all utns
+            dbo_it.second->load(read_set, false, false);
+        }
+        else
+        {
+            //load for specified utns only
+            dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
+            DBContent::meta_var_utn_.name()).getFor(dbo_it.first);
+
+            string custom_clause = var.dbColumnName() + " IN (" +  String::compress(utns_, ',') + ")";
+            dbo_it.second->load(read_set, false, false, custom_clause);
+        }
     }
 
     status_dialog_->show();
@@ -172,13 +218,44 @@ void CalculateReferencesTask::createDoneSlot()
 
     create_job_done_ = true;
 
+    //handle viewpoints
+    if (generateViewPoints())
+    {
+        auto j = create_job_->viewPointsJSON();
+
+        if (settings_.generate_viewpoints)
+        {
+            //load all created view points
+            status_dialog_->setStatus("Adding View Points");
+
+            COMPASS::instance().viewManager().loadViewPoints(j);            
+        }
+
+        if (!utns_.empty())
+        {
+            //set first viewpoint as current viewable
+            auto j_vp = ViewPointGenerator::viewPointJSON(j, 0, true);
+
+            if (j_vp.has_value() && j_vp->is_object())
+            {
+                status_dialog_->setStatus("Loading View Point");
+
+                nlohmann::json::object_t obj = j_vp.value();
+
+                viewable_.reset(new ViewableDataConfig(obj));
+
+                COMPASS::instance().viewManager().setCurrentViewPoint(viewable_.get());
+            }
+        }
+    }
+
     status_dialog_->setStatus("Done");
 
     assert (create_job_);
 
     status_dialog_->setDone();
 
-    if (!show_done_summary_)
+    if (closeDialogAfterFinishing())
         status_dialog_->close();
 
     create_job_ = nullptr;
@@ -199,6 +276,8 @@ void CalculateReferencesTask::createDoneSlot()
     data_.clear();
 
     done_ = true;
+
+    utns_ = {}; // all utns reconstructed
 
     QApplication::restoreOverrideCursor();
 

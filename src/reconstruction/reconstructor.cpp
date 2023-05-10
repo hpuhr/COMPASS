@@ -29,6 +29,8 @@
 namespace reconstruction
 {
 
+const QColor Reconstructor::ColorResampledMM = QColor(123, 123, 123);
+
 /**
 */
 Reconstructor::Reconstructor() = default;
@@ -39,9 +41,38 @@ Reconstructor::~Reconstructor() = default;
 
 /**
 */
-void Reconstructor::setViewPoint(ViewPointGenVP* vp)
+void Reconstructor::reset()
 {
-    viewpoint_ = vp;
+    for (auto& info : dbcontent_infos_)
+        info.second.count = 0;
+
+    measurements_.clear();
+    sources_.clear();
+    source_uncerts_.clear();
+    ref_src_.reset();
+    ref_dst_.reset();
+    trafo_fwd_.reset();
+    trafo_bwd_.reset();
+
+    x_offs_ = 0.0;
+    y_offs_ = 0.0;
+
+    min_height_.reset();
+    max_height_.reset();
+
+    source_cnt_ = 0;
+
+    vp_data_interp_.clear();
+
+    reset_impl();
+}
+
+/**
+*/
+void Reconstructor::setViewPoint(ViewPointGenVP* vp, int viewpoint_detail)
+{
+    viewpoint_        = vp;
+    viewpoint_detail_ = viewpoint_detail;
 }
 
 /**
@@ -60,6 +91,13 @@ ViewPointGenVP* Reconstructor::viewPoint() const
 
 /**
 */
+int Reconstructor::viewPointDetail() const
+{
+    return viewpoint_detail_;
+}
+
+/**
+*/
 void Reconstructor::setCoordConversion(CoordConversion coord_conv)
 {
     coord_conv_ = coord_conv;
@@ -69,14 +107,14 @@ void Reconstructor::setCoordConversion(CoordConversion coord_conv)
 */
 void Reconstructor::setSensorUncertainty(const std::string& dbcontent, const Uncertainty& uncert)
 {
-    dbcontent_uncerts_[dbcontent] = uncert;
+    dbcontent_infos_[dbcontent].uncert = uncert;
 }
 
 /**
 */
 void Reconstructor::setSensorInterpolation(const std::string& dbcontent, const InterpOptions& options)
 {
-    dbcontent_interp_[dbcontent] = options;
+    dbcontent_infos_[dbcontent].interp_options = options;
 }
 
 /**
@@ -84,17 +122,6 @@ void Reconstructor::setSensorInterpolation(const std::string& dbcontent, const I
 const boost::optional<Uncertainty>& Reconstructor::sourceUncertainty(uint32_t source_id) const
 {
     return source_uncerts_.at(source_id);
-}
-
-/**
-*/
-boost::optional<InterpOptions> Reconstructor::sensorInterpolation(const std::string& db_content) const
-{
-    auto it = dbcontent_interp_.find(db_content);
-    if (it == dbcontent_interp_.end())
-        return {};
-
-    return it->second;
 }
 
 /**
@@ -156,7 +183,7 @@ void Reconstructor::interpolateMeasurements(std::vector<Measurement>& measuremen
             positions[ i ] = measurements[ i ].position2D(CoordSystem::WGS84);
   
         vp_data.positions = std::move(positions);
-        vp_data.color     = QColor(255, 0, 255);
+        vp_data.color     = ColorResampledMM;
 
         vp_data_interp_.push_back(vp_data);
     }
@@ -173,12 +200,15 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, con
 
     source_uncerts_.push_back({}); //add empty uncertainty
 
+    DBContentInfo& info = dbcontent_infos_[dbcontent];
+
     //if uncertainty is stored for dbcontent => assign
-    auto uncert_it = dbcontent_uncerts_.find(dbcontent);
-    if (uncert_it != dbcontent_uncerts_.end())
-        source_uncerts_.back() = uncert_it->second;
+    if (info.uncert.has_value())
+        source_uncerts_.back() = info.uncert.value();
 
     const auto& indices = tr_chain->timestampIndexes();
+
+    info.count += indices.size();
 
     std::vector<Measurement> mms;
     mms.reserve(indices.size());
@@ -198,7 +228,12 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, con
 
         mm.lat = pos->latitude_;
         mm.lon = pos->longitude_;
-        //@TODO: altitude?
+        
+        //kepp track of min/max height
+        if (pos->has_altitude_ && (!min_height_.has_value() || pos->altitude_ < min_height_.value()))
+            min_height_ = pos->altitude_;
+        if (pos->has_altitude_ && (!max_height_.has_value() || pos->altitude_ > max_height_.value()))
+            max_height_ = pos->altitude_;
 
         speed        = tr_chain->speed(index);
         accuracy_pos = tr_chain->posAccuracy(index);
@@ -232,11 +267,10 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, con
     }
 
     //resample input data?
-    auto interp_options = sensorInterpolation(dbcontent);
-    if (interp_options.has_value())
+    if (info.interp_options.has_value())
     {
         loginf << "Interpolating measurements of dbcontent " << dbcontent;
-        interpolateMeasurements(mms, interp_options.value());
+        interpolateMeasurements(mms, info.interp_options.value());
     }
 
     if (!mms.empty())
@@ -311,6 +345,17 @@ void Reconstructor::postprocessMeasurements()
             mm.y -= y_offs_;
         }
     }
+
+    if (hasViewPoint())
+    {
+        for (const auto& info : dbcontent_infos_)
+            viewPoint()->addCustomField("#" + info.first, QVariant(info.second.count));
+
+        if (min_height_.has_value())
+            viewPoint()->addCustomField("min_altitude", QVariant(min_height_.value()));
+        if (max_height_.has_value())
+            viewPoint()->addCustomField("max_altitude", QVariant(max_height_.value()));
+    }
 }
 
 /**
@@ -342,10 +387,13 @@ Eigen::Vector2d Reconstructor::transformBack(double x, double y) const
     {
         assert(trafo_bwd_);
 
-        x += x_offs_;
-        y += y_offs_;
+        double lon = x + x_offs_;
+        double lat = y + y_offs_;
 
-        trafo_bwd_->Transform(1, &x, &y);
+        trafo_bwd_->Transform(1, &lon, &lat);
+
+        x = lat;
+        y = lon;
     }
 
     return Eigen::Vector2d(x, y);
@@ -407,6 +455,10 @@ boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::st
             anno_interp_pos->addFeature(std::move(feat_interp_points));
             anno_interp_pos->addFeature(std::move(feat_interp_lines));
         }
+
+        //std::stringstream sstrm;
+        //viewPoint()->print(sstrm);
+        //loginf << sstrm.str();
     }
 
     return result;
@@ -463,16 +515,6 @@ std::vector<std::vector<Measurement>> Reconstructor::splitMeasurements(const std
         split_measurements.push_back(current);
 
     return split_measurements;
-}
-
-/**
-*/
-void addTrackToViewPoint(const std::vector<Measurement>& mms,
-                         const std::string& annotation_name,
-                         bool connect,
-                         bool add_speed)
-{
-
 }
 
 } // namespace reconstruction

@@ -89,6 +89,10 @@ public:
     void setColor(const QColor& c) { color_ = c; }
 
     void toJSON(nlohmann::json& j) const;
+    void print(std::ostream& strm, const std::string& prefix = "") const;
+
+    virtual size_t size() const = 0;
+    virtual std::string name() const = 0;
 
     static const std::string FeatureTypeFieldName;
     static const std::string FeatureTypeNameFeat;
@@ -119,6 +123,8 @@ public:
     virtual ~ViewPointGenFeaturePointGeometry() = default;
 
     virtual void reserve(size_t n, bool reserve_cols);
+    virtual size_t size() const override { return positions_.size(); }
+    virtual std::string name() const override { return geom_type_; }
 
     void addPoint(const Eigen::Vector2d& pos, 
                   const boost::optional<QColor>& color = boost::optional<QColor>());
@@ -150,7 +156,7 @@ public:
         Cross
     };
 
-    ViewPointGenFeaturePoints(Symbol symbol,
+    ViewPointGenFeaturePoints(Symbol symbol = Symbol::Square,
                               float symbol_size = 6.0f,
                               const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
                               const std::vector<QColor>& colors = std::vector<QColor>());
@@ -270,6 +276,9 @@ public:
                             TextDirection text_dir = TextDirection::RightUp);
     virtual ~ViewPointGenFeatureText() = default;
 
+    virtual size_t size() const { return 1; }
+    virtual std::string name() const override { return "text"; }
+
     static const std::string FeatureTypeNameText;
     static const std::string FeatureTextFieldNameText;
     static const std::string FeatureTextFieldNamePos;
@@ -306,6 +315,7 @@ public:
     void addFeature(std::unique_ptr<ViewPointGenFeature>&& feat);
 
     void toJSON(nlohmann::json& j) const;
+    void print(std::ostream& strm, const std::string& prefix = "") const;
 
     static const std::string AnnotationFieldName;
     static const std::string AnnotationFieldHidden;
@@ -330,8 +340,10 @@ public:
     void addAnnotation(std::unique_ptr<ViewPointGenAnnotation>&& a);
 
     size_t size() const { return annotations_.size(); }
+    const ViewPointGenAnnotation& annotation(size_t idx) const { return *annotations_.at(idx); }
 
     void toJSON(nlohmann::json& j) const;
+    void print(std::ostream& strm, const std::string& prefix = "") const;
 
 private:
     std::vector<std::unique_ptr<ViewPointGenAnnotation>> annotations_;
@@ -357,6 +369,7 @@ public:
     virtual ~ViewPointGenVP() = default;
 
     bool hasAnnotations() const { return (annotations_.size() > 0); }
+    static bool hasAnnotations(const nlohmann::json& vp_json);
 
     void setROI(const QRectF& roi) { roi_ = roi; }
 
@@ -366,6 +379,7 @@ public:
     ViewPointGenFilters& filters() { return filters_; }
 
     void toJSON(nlohmann::json& j) const;
+    void print(std::ostream& strm, const std::string& prefix = "") const;
 
     std::string statusString() const;
 
@@ -412,6 +426,8 @@ public:
                                  ViewPointGenVP::Status status = ViewPointGenVP::Status::Open);
     void addViewPoint(std::unique_ptr<ViewPointGenVP>&& vp);
 
+    size_t size() const { return view_points_.size(); }
+
     static const std::string Version;
 
     static const std::string ViewPointsFieldVersion;
@@ -421,6 +437,9 @@ public:
     nlohmann::json toJSON(bool with_viewpoints_only = false,
                           bool with_annotations_only = false) const;
 
+    static boost::optional<nlohmann::json> viewPointJSON(const nlohmann::json& vps_json, 
+                                                         size_t idx, 
+                                                         bool with_annotations_only = false);
 private:
     void toJSON(nlohmann::json& j, 
                 bool with_viewpoints_only,

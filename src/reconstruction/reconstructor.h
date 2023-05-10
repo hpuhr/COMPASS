@@ -51,6 +51,8 @@ public:
     Reconstructor();
     virtual ~Reconstructor();
 
+    void reset();
+
     void setSensorUncertainty(const std::string& dbcontent, const Uncertainty& uncert);
     void setSensorInterpolation(const std::string& dbcontent, const InterpOptions& options);
 
@@ -66,30 +68,35 @@ public:
     void setVerbosity(int v) { verbosity_ = v; }
     int verbosity() const { return verbosity_; }
 
-    void setViewPoint(ViewPointGenVP* vp);
+    void setViewPoint(ViewPointGenVP* vp, int viewpoint_detail = 1);
 
     static std::vector<std::vector<Measurement>> splitMeasurements(const std::vector<Measurement>& measurements,
                                                                    double max_dt);
     static double timestep(const Measurement& mm0, const Measurement& mm1);
 
+    static const QColor ColorResampledMM;
+
 protected:
     virtual boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements, 
                                                                      const std::string& data_info) = 0;
+    virtual void reset_impl() {}
 
     double distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys) const;
 
     const boost::optional<Uncertainty>& sourceUncertainty(uint32_t source_id) const;
-    boost::optional<InterpOptions> sensorInterpolation(const std::string& db_content) const;
 
     bool hasViewPoint() const;
     ViewPointGenVP* viewPoint() const;
+    int viewPointDetail() const;
 
     Eigen::Vector2d transformBack(double x, double y) const;
 
 private:
     struct DBContentInfo
     {
-        Uncertainty uncert;
+        boost::optional<Uncertainty>   uncert;
+        boost::optional<InterpOptions> interp_options;
+        unsigned int                   count = 0;
     };
 
     struct VPTrackData
@@ -107,8 +114,7 @@ private:
 
     std::vector<Measurement>                     measurements_;
     SourceMap                                    sources_;
-    std::map<std::string, Uncertainty>           dbcontent_uncerts_;
-    std::map<std::string, InterpOptions>         dbcontent_interp_;
+    std::map<std::string, DBContentInfo>         dbcontent_infos_;
     std::vector<boost::optional<Uncertainty>>    source_uncerts_;
     std::unique_ptr<OGRSpatialReference>         ref_src_;
     std::unique_ptr<OGRSpatialReference>         ref_dst_;
@@ -116,6 +122,8 @@ private:
     std::unique_ptr<OGRCoordinateTransformation> trafo_bwd_;
     double                                       x_offs_       = 0.0;
     double                                       y_offs_       = 0.0;
+    boost::optional<double>                      min_height_;
+    boost::optional<double>                      max_height_;
 
     uint32_t source_cnt_ = 0;
 
@@ -124,6 +132,7 @@ private:
 
     mutable ViewPointGenVP*          viewpoint_ = nullptr;
     mutable std::vector<VPTrackData> vp_data_interp_;
+    int                              viewpoint_detail_ = 0;
 };
 
 } // namespace reconstruction

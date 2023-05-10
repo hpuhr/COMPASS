@@ -107,7 +107,7 @@ struct Measurement
         strm << "source_id: " << source_id << std::endl;
         //strm << "t:         " << Utils::Time::toString(t) << std::endl;
 
-        strm << "interp:    " << interpolated << std::endl;
+        strm << "interp:    " << mm_interp << std::endl;
 
         strm << "lat:       " << lat << std::endl;
         strm << "lon:       " << lon << std::endl;
@@ -135,7 +135,7 @@ struct Measurement
     uint32_t                 source_id;            // source of the measurement
     boost::posix_time::ptime t;                    // timestamp
 
-    bool                     interpolated = false; //measurement has been interpolated (e.g. by spline interpolator)
+    bool                     mm_interp = false;    //measurement has been interpolated (e.g. by spline interpolator)
 
     double                   lat;                  // wgs84 latitude
     double                   lon;                  // wgs84 longitude
@@ -169,6 +169,8 @@ struct Reference : public Measurement
     bool noaccel_pos  = false; // did this position not obtain acceleration information
     bool nostddev_pos = false; // did this position not obtain stddev information
 
+    bool ref_interp   = false; // reference has been interpolated (e.g. from kalman samples)
+
     Eigen::MatrixXd cov; //covariance matrix
 };
 
@@ -177,10 +179,12 @@ struct Reference : public Measurement
 struct MeasurementInterp : public Measurement
 {
     MeasurementInterp() = default;
-    MeasurementInterp(const Measurement& mm, bool is_interp, bool is_corrected) : Measurement(mm), interpolated(is_interp), corrected(is_corrected) {}
+    MeasurementInterp(const Measurement& mm, bool is_interp, bool is_corrected) : Measurement(mm), corrected(is_corrected) 
+    {
+        mm_interp = is_interp;
+    }
 
-    bool interpolated = true;  //stems from an interpolated position between two input measurements
-    bool corrected    = false; //interpolation failed, so the measurement was interpolated linearly
+    bool corrected = false; //interpolation failed, so the measurement was interpolated linearly
 };
 
 /**
