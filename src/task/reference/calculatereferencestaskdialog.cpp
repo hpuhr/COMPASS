@@ -53,7 +53,7 @@ void CalculateReferencesTaskDialog::createUI()
     {
         QHBoxLayout* button_layout = new QHBoxLayout();
 
-        cancel_button_ = new QPushButton("Cancel");
+        cancel_button_ = new QPushButton("Close");
         connect(cancel_button_, &QPushButton::clicked, this, &CalculateReferencesTaskDialog::cancelClickedSlot);
         button_layout->addWidget(cancel_button_);
 
@@ -283,5 +283,8 @@ void CalculateReferencesTaskDialog::runClickedSlot()
 
 void CalculateReferencesTaskDialog::cancelClickedSlot()
 {
+    //write selected values to task
+    writeOptions();
+
     emit cancelSignal();
 }

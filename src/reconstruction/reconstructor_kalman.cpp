@@ -205,41 +205,55 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
     //init viewpoint structures
     std::unique_ptr<ViewPointGenFeaturePoints>      feat_points_kalman;
     std::unique_ptr<ViewPointGenFeatureErrEllipses> feat_errors_kalman;
+    std::unique_ptr<ViewPointGenFeatureLineString>  feat_lines_kalman;
     std::unique_ptr<ViewPointGenFeaturePoints>      feat_points_kalman_smoothed;
     std::unique_ptr<ViewPointGenFeatureErrEllipses> feat_errors_kalman_smoothed;
+    std::unique_ptr<ViewPointGenFeatureLineString>  feat_lines_kalman_smoothed;
     std::unique_ptr<ViewPointGenFeaturePoints>      feat_points_kalman_resampled;
     std::unique_ptr<ViewPointGenFeatureErrEllipses> feat_errors_kalman_resampled;
+    std::unique_ptr<ViewPointGenFeatureLineString>  feat_lines_kalman_resampled;
 
     if (hasViewPoint())
     {
         feat_points_kalman.reset(new ViewPointGenFeaturePoints);
         feat_errors_kalman.reset(new ViewPointGenFeatureErrEllipses);
+        feat_lines_kalman.reset(new ViewPointGenFeatureLineString(false));
 
         feat_points_kalman->setColor(ColorKalman);
         feat_errors_kalman->setColor(ColorKalman);
+        feat_lines_kalman->setColor(ColorKalman);
 
         if (base_config_.smooth)
         {
             feat_points_kalman_smoothed.reset(new ViewPointGenFeaturePoints);
             feat_errors_kalman_smoothed.reset(new ViewPointGenFeatureErrEllipses);
+            feat_lines_kalman_smoothed.reset(new ViewPointGenFeatureLineString(false));
 
             feat_points_kalman_smoothed->setColor(ColorKalmanSmoothed);
             feat_errors_kalman_smoothed->setColor(ColorKalmanSmoothed);
+            feat_lines_kalman_smoothed->setColor(ColorKalmanSmoothed);
         }
 
-        feat_points_kalman_resampled.reset(new ViewPointGenFeaturePoints);
-        feat_errors_kalman_resampled.reset(new ViewPointGenFeatureErrEllipses);
+        if (base_config_.resample_result)
+        {
+            feat_points_kalman_resampled.reset(new ViewPointGenFeaturePoints);
+            feat_errors_kalman_resampled.reset(new ViewPointGenFeatureErrEllipses);
+            feat_lines_kalman_resampled.reset(new ViewPointGenFeatureLineString(false));
 
-        feat_points_kalman_resampled->setColor(ColorKalmanResampled);
-        feat_errors_kalman_resampled->setColor(ColorKalmanResampled);
+            feat_points_kalman_resampled->setColor(ColorKalmanResampled);
+            feat_errors_kalman_resampled->setColor(ColorKalmanResampled);
+            feat_lines_kalman_resampled->setColor(ColorKalmanResampled);
+        }
     }
 
     auto addReferences = [&] (std::unique_ptr<ViewPointGenFeaturePoints>& points,
                               std::unique_ptr<ViewPointGenFeatureErrEllipses>& errors,
+                              std::unique_ptr<ViewPointGenFeatureLineString>& lines,
                               const std::vector<Reference>& refs)
     {
         points->reserve(points->size() + refs.size(), false);
         errors->reserve(errors->size() + refs.size(), false);
+        lines->reserve(errors->size() + refs.size(), false);
 
         for (const auto& ref : refs)
         {
@@ -248,6 +262,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
             points->addPoint(pos);
             errors->addPoint(pos);
             errors->addSize(Eigen::Vector3d(ref.x_stddev.value(), ref.y_stddev.value(), ref.xy_cov.value()));
+            lines->addPoint(pos);
         }
     };
 
@@ -268,7 +283,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
 
         //add unsmoothed positions to viewpoint
         if (hasViewPoint())
-            addReferences(feat_points_kalman, feat_errors_kalman, c.references);
+            addReferences(feat_points_kalman, feat_errors_kalman, feat_lines_kalman, c.references);
 
         //apply RTS smoother?
         if (base_config_.smooth)
@@ -281,7 +296,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
 
             //add smoothed positions to viewpoint
             if (hasViewPoint())
-                addReferences(feat_points_kalman_smoothed, feat_errors_kalman_smoothed, c.references);
+                addReferences(feat_points_kalman_smoothed, feat_errors_kalman_smoothed, feat_lines_kalman_smoothed, c.references);
         }
 
         if (base_config_.resample_result)
@@ -290,7 +305,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
 
             //add resampled positions to viewpoint
             if (hasViewPoint())
-                addReferences(feat_points_kalman_resampled, feat_errors_kalman_resampled, c.references);
+                addReferences(feat_points_kalman_resampled, feat_errors_kalman_resampled, feat_lines_kalman_resampled, c.references);
         }
 
         //add to result chain
@@ -302,27 +317,33 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
     {
         if (base_config_.resample_result)
         {
-            auto anno_pos_resampled    = viewPoint()->annotations().addAnnotation("kalman_resampled_positions");
             auto anno_errors_resampled = viewPoint()->annotations().addAnnotation("kalman_resampled_errors");
+            auto anno_pos_resampled    = viewPoint()->annotations().addAnnotation("kalman_resampled_positions");
+            auto anno_lines_resampled  = viewPoint()->annotations().addAnnotation("kalman_resampled_lines");
     
             anno_pos_resampled->addFeature(std::move(feat_points_kalman_resampled));
             anno_errors_resampled->addFeature(std::move(feat_errors_kalman_resampled));
+            anno_lines_resampled->addFeature(std::move(feat_lines_kalman_resampled));
         }
 
         if (base_config_.smooth)
         {
-            auto anno_pos_smoothed    = viewPoint()->annotations().addAnnotation("kalman_smoothed_positions");
             auto anno_errors_smoothed = viewPoint()->annotations().addAnnotation("kalman_smoothed_errors");
+            auto anno_pos_smoothed    = viewPoint()->annotations().addAnnotation("kalman_smoothed_positions");
+            auto anno_lines_smoothed = viewPoint()->annotations().addAnnotation("kalman_smoothed_lines");
     
             anno_pos_smoothed->addFeature(std::move(feat_points_kalman_smoothed));
             anno_errors_smoothed->addFeature(std::move(feat_errors_kalman_smoothed));
+            anno_lines_smoothed->addFeature(std::move(feat_lines_kalman_smoothed));
         }
 
-        auto anno_pos    = viewPoint()->annotations().addAnnotation("kalman_positions");
         auto anno_errors = viewPoint()->annotations().addAnnotation("kalman_errors");
-
+        auto anno_pos    = viewPoint()->annotations().addAnnotation("kalman_positions");
+        auto anno_lines  = viewPoint()->annotations().addAnnotation("kalman_lines");
+        
         anno_pos->addFeature(std::move(feat_points_kalman));
         anno_errors->addFeature(std::move(feat_errors_kalman));
+        anno_lines->addFeature(std::move(feat_lines_kalman));
     }
     
     return result_chain.references;
