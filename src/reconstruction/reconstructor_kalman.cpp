@@ -276,9 +276,9 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
 
         anno_group->setSymbolColor(color);
 
-        auto anno_errors = anno_group->addAnnotation("errors");
-        auto anno_points = anno_group->addAnnotation("positions");
-        auto anno_lines  = anno_group->addAnnotation("lines");
+        auto anno_errors = anno_group->addAnnotation("Errors");
+        auto anno_points = anno_group->addAnnotation("Positions");
+        auto anno_lines  = anno_group->addAnnotation("Connection Lines");
 
         anno_errors->setSymbolColor(color);
         anno_points->setSymbolColor(color);
@@ -339,12 +339,12 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
     if (hasViewPoint())
     {
         if (base_config_.resample_result)
-            addAnnotation("kalman_resampled", ColorKalmanResampled, feat_points_kalman_resampled, feat_errors_kalman_resampled, feat_lines_kalman_resampled);
+            addAnnotation("Kalman (resampled)", ColorKalmanResampled, feat_points_kalman_resampled, feat_errors_kalman_resampled, feat_lines_kalman_resampled);
 
         if (base_config_.smooth)
-            addAnnotation("kalman_smoothed", ColorKalmanSmoothed, feat_points_kalman_smoothed, feat_errors_kalman_smoothed, feat_lines_kalman_smoothed);
+            addAnnotation("Kalman (smoothed)", ColorKalmanSmoothed, feat_points_kalman_smoothed, feat_errors_kalman_smoothed, feat_lines_kalman_smoothed);
 
-        addAnnotation("kalman", ColorKalman, feat_points_kalman, feat_errors_kalman, feat_lines_kalman);
+        addAnnotation("Kalman", ColorKalman, feat_points_kalman, feat_errors_kalman, feat_lines_kalman);
     }
     
     return result_chain.references;
