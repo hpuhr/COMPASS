@@ -444,9 +444,11 @@ void ViewPointGenFeatureText::toJSON_impl(nlohmann::json& j) const
  * ViewPointGenAnnotation
  ********************************************************************************/
 
-const std::string ViewPointGenAnnotation::AnnotationFieldName     = "name";
-const std::string ViewPointGenAnnotation::AnnotationFieldHidden   = "hidden";
-const std::string ViewPointGenAnnotation::AnnotationFieldFeatures = "features";
+const std::string ViewPointGenAnnotation::AnnotationFieldName        = "name";
+const std::string ViewPointGenAnnotation::AnnotationFieldHidden      = "hidden";
+const std::string ViewPointGenAnnotation::AnnotationFieldSymbolColor = "symbol_color";
+const std::string ViewPointGenAnnotation::AnnotationFieldFeatures    = "features";
+const std::string ViewPointGenAnnotation::AnnotationFieldAnnotations = "annotations";
 
 /**
 */
@@ -459,9 +461,31 @@ ViewPointGenAnnotation::ViewPointGenAnnotation(const std::string& name,
 
 /**
 */
+void ViewPointGenAnnotation::setSymbolColor(const QColor& color)
+{
+    symbol_color_ = color;
+}
+
+/**
+*/
 void ViewPointGenAnnotation::addFeature(std::unique_ptr<ViewPointGenFeature>&& feat)
 {
     features_.push_back(std::move(feat));
+}
+
+/**
+*/
+ViewPointGenAnnotation* ViewPointGenAnnotation::addAnnotation(const std::string& name, bool hidden)
+{
+    annotations_.emplace_back(new ViewPointGenAnnotation(name, hidden));
+    return annotations_.back().get();
+}
+
+/**
+*/
+void ViewPointGenAnnotation::addAnnotation(std::unique_ptr<ViewPointGenAnnotation>&& a)
+{
+    annotations_.push_back(std::move(a));
 }
 
 /**
@@ -470,6 +494,9 @@ void ViewPointGenAnnotation::toJSON(nlohmann::json& j) const
 {
     j[AnnotationFieldName  ] = name_;
     j[AnnotationFieldHidden] = hidden_;
+
+    if (symbol_color_.has_value())
+        j[AnnotationFieldSymbolColor] = symbol_color_.value().name().toStdString();
 
     nlohmann::json feats = nlohmann::json::array();
 
@@ -482,6 +509,18 @@ void ViewPointGenAnnotation::toJSON(nlohmann::json& j) const
     }
 
     j[AnnotationFieldFeatures] = feats;
+
+    nlohmann::json annos = nlohmann::json::array();
+
+    for (const auto& a : annotations_)
+    {
+        nlohmann::json anno;
+        a->toJSON(anno);
+
+        annos.push_back(anno);
+    }
+
+    j[AnnotationFieldAnnotations] = annos;
 }
 
 /**
@@ -496,6 +535,9 @@ void ViewPointGenAnnotation::print(std::ostream& strm, const std::string& prefix
 
     for (const auto& f : features_)
         f->print(strm, p2);
+
+    for (const auto& a : annotations_)
+        a->print(strm, p2);
 }
 
 /********************************************************************************

@@ -312,20 +312,40 @@ public:
                            bool hidden = false);
     virtual ~ViewPointGenAnnotation() = default;
 
+    void setSymbolColor(const QColor& color);
+
     void addFeature(std::unique_ptr<ViewPointGenFeature>&& feat);
+
+    template<class T, typename... Arguments>
+    T* addFeature(Arguments... args)
+    {
+        T* ptr = new T(args...);
+        features_.push_back(std::unique_ptr<T>(ptr));
+        return ptr;
+    }
+
+    ViewPointGenAnnotation* addAnnotation(const std::string& name, bool hidden = false);
+    void addAnnotation(std::unique_ptr<ViewPointGenAnnotation>&& a);
+
+    size_t size() const { return annotations_.size(); }
+    size_t numFeatures() const { return features_.size(); }
 
     void toJSON(nlohmann::json& j) const;
     void print(std::ostream& strm, const std::string& prefix = "") const;
 
     static const std::string AnnotationFieldName;
     static const std::string AnnotationFieldHidden;
+    static const std::string AnnotationFieldSymbolColor;
     static const std::string AnnotationFieldFeatures;
+    static const std::string AnnotationFieldAnnotations;
 
 private:
-    std::string name_;
-    bool        hidden_;
+    std::string             name_;
+    bool                    hidden_;
+    boost::optional<QColor> symbol_color_;
 
-    std::vector<std::unique_ptr<ViewPointGenFeature>> features_;
+    std::vector<std::unique_ptr<ViewPointGenFeature>>    features_;
+    std::vector<std::unique_ptr<ViewPointGenAnnotation>> annotations_;
 };
 
 /**
