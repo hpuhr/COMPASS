@@ -384,7 +384,7 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
     return tdm.pos_ref_;
 }
 
-std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(const DataID& tst_id,
+boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(const DataID& tst_id,
                                                                               time_duration d_max) const
 {
     auto timestamp = tst_id.timestamp();
@@ -393,7 +393,7 @@ std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(co
     const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
-        return {{}, false};
+        return {};
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -405,7 +405,7 @@ std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(co
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
 
-            return {{}, false};
+            return {};
         }
 
         if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
@@ -413,7 +413,7 @@ std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(co
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
 
-            return {{}, false};
+            return {};
         }
 
         if (!mapping.has_ref_pos_)
@@ -421,7 +421,7 @@ std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(co
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: no ref pos";
 
-            return {{}, false};
+            return {};
         }
 
         //        if (utn_ == debug_utn)
@@ -430,13 +430,13 @@ std::pair<dbContent::TargetPosition, bool> EvaluationTargetData::mappedRefPos(co
         //                   << " alt_calc " << mapping.pos_ref_.altitude_calculated_
         //                   << " alt " << mapping.pos_ref_.altitude_;
 
-        return {mapping.pos_ref_, true};
+        return mapping.pos_ref_;
     }
 
-    return {{}, false};
+    return {};
 }
 
-std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(const DataID& tst_id,
+boost::optional<dbContent::TargetVelocity> EvaluationTargetData::mappedRefSpeed(const DataID& tst_id,
                                                                                 time_duration d_max) const
 {
     auto timestamp = tst_id.timestamp();
@@ -445,7 +445,7 @@ std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(
     const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
-        return {{}, false};
+        return {};
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -457,7 +457,7 @@ std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
 
-            return {{}, false};
+            return {};
         }
 
         if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
@@ -465,7 +465,7 @@ std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
 
-            return {{}, false};
+            return {};
         }
 
         if (!mapping.has_ref_spd_)
@@ -473,7 +473,7 @@ std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: no ref pos";
 
-            return {{}, false};
+            return {};
         }
 
         //        if (utn_ == debug_utn)
@@ -482,10 +482,10 @@ std::pair<dbContent::TargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(
         //                   << " alt_calc " << mapping.pos_ref_.altitude_calculated_
         //                   << " alt " << mapping.pos_ref_.altitude_;
 
-        return {mapping.spd_ref_, true};
+        return mapping.spd_ref_;
     }
 
-    return {{}, false};
+    return {};
 }
 
 boost::optional<bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst_id,

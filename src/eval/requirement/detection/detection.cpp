@@ -101,7 +101,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     // create ref time periods
     TimePeriodCollection ref_periods;
 
-    dbContent::TargetPosition ref_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     ptime timestamp, last_ts;
 
     bool inside, was_inside;
@@ -160,13 +160,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     float t_diff;
 
     int sum_missed_uis {0};
-    //int max_gap_uis {0};
-
-    //int no_ref_uis {0};
 
     bool is_inside {false}, was_outside {false};
-    //pair<dbContent::TargetPosition, bool> ret_pos;
-    bool ok;
+    //bool ok;
 
     typedef EvaluationRequirementResult::SingleDetection Result;
     typedef EvaluationDetail                             Detail;
@@ -198,7 +194,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                                              .generalComment(comment));
     };
 
-    if (!tst_data_size)
+    if (!tst_data_size) // if not test data, add everything as misses
     {
         for (auto& period_it : ref_periods)
         {
@@ -346,13 +342,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         // is inside period
         period_index = ref_periods.getPeriodIndex(timestamp);
 
-        tie(ref_pos, ok) = target_data.mappedRefPos(tst_it, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_it, max_ref_time_diff);
 
 //        ref_pos = ret_pos.first;
 //        ok = ret_pos.second;
         //assert (ok); // must be since inside ref time interval
 
-        if (!ok) // only happens if test time is exact beginning of reference interval
+        if (!ref_pos.has_value()) // only happens if test time is exact beginning of reference interval
         {
             if (!skip_no_data_details)
             {

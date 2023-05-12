@@ -70,8 +70,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
 
     bool ref_exists;
     bool is_inside;
-    pair<dbContent::TargetPosition, bool> ret_pos;
-    dbContent::TargetPosition ref_pos;
+    //pair<dbContent::TargetPosition, bool> ret_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
     ValueComparisonResult cmp_res;
@@ -132,12 +132,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
             continue;
         }
 
-        ret_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
+//        ref_pos = ret_pos.first;
+//        ok = ret_pos.second;
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, pos_current,

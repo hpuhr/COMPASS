@@ -114,10 +114,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     dbContent::TargetPosition tst_pos;
 
     bool is_inside;
-    dbContent::TargetPosition ref_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
-    dbContent::TargetVelocity ref_spd;
+    boost::optional<dbContent::TargetVelocity> ref_spd;
     double ref_trackangle_deg;
     boost::optional<double> tst_trackangle_deg;
     float trackangle_min_diff;
@@ -197,9 +197,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        tie(ref_pos, ok) = target_data.mappedRefPos(tst_id, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -231,9 +231,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        tie (ref_spd, ok) = target_data.mappedRefSpeed(tst_id, max_ref_time_diff);
+        ref_spd = target_data.mappedRefSpeed(tst_id, max_ref_time_diff);
 
-        if (!ok)
+        if (!ref_spd.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -252,13 +252,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
         // ref_spd ok
 
-        if (use_minimum_speed_ && ref_spd.speed_ < minimum_speed_)
+        if (use_minimum_speed_ && ref_spd->speed_ < minimum_speed_)
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
                           {}, //lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
-                          {}, {}, ref_spd.speed_, // value_ref, value_tst, speed_ref
+                          {}, {}, ref_spd->speed_, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                           num_comp_failed, num_comp_passed,
                           "Reference speed too low");
@@ -270,7 +270,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        ref_trackangle_deg = ref_spd.track_angle_;
+        ref_trackangle_deg = ref_spd->track_angle_;
         tst_trackangle_deg = target_data.tstChain().trackAngle(tst_id);
 
         if (!tst_trackangle_deg.has_value())
@@ -279,7 +279,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                 addDetail(timestamp, tst_pos,
                           {}, //lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
-                          {}, {}, ref_spd.speed_, // value_ref, value_tst, speed_ref
+                          {}, {}, ref_spd->speed_, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                           num_comp_failed, num_comp_passed,
                           "No tst speed");
@@ -319,7 +319,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         addDetail(timestamp, tst_pos,
                   ref_pos, //lines, // ref_pos, lines
                   is_inside, trackangle_min_diff, comp_passed, // pos_inside, value, check_passed
-                  ref_trackangle_deg, *tst_trackangle_deg, ref_spd.speed_, // value_ref, value_tst, speed_ref
+                  ref_trackangle_deg, *tst_trackangle_deg, ref_spd->speed_, // value_ref, value_tst, speed_ref
                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                   num_comp_failed, num_comp_passed,
                   comment);

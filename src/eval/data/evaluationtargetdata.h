@@ -129,10 +129,10 @@ public:
 
     boost::optional<dbContent::TargetPosition> mappedRefPos(
             const dbContent::TargetReport::Chain::DataID& tst_id) const;
-    std::pair<dbContent::TargetPosition, bool> mappedRefPos(
+    boost::optional<dbContent::TargetPosition> mappedRefPos(
             const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const;
     // bool ok
-    std::pair<dbContent::TargetVelocity, bool> mappedRefSpeed(
+    boost::optional<dbContent::TargetVelocity> mappedRefSpeed(
             const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const;
 
     boost::optional<bool> mappedRefGroundBit(

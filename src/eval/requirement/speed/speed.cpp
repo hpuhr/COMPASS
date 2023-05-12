@@ -111,10 +111,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     dbContent::TargetPosition tst_pos;
 
     bool is_inside;
-    dbContent::TargetPosition ref_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
-    dbContent::TargetVelocity ref_spd;
+    boost::optional<dbContent::TargetVelocity> ref_spd;
     boost::optional<float> tst_spd_ms;
     float spd_diff;
 
@@ -177,9 +177,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        tie(ref_pos, ok) = target_data.mappedRefPos(tst_id, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -208,9 +208,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        tie (ref_spd, ok) = target_data.mappedRefSpeed(tst_id, max_ref_time_diff);
+        ref_spd = target_data.mappedRefSpeed(tst_id, max_ref_time_diff);
 
-        if (!ok)
+        if (!ref_spd.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -243,7 +243,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        spd_diff = fabs(ref_spd.speed_ - *tst_spd_ms);
+        spd_diff = fabs(ref_spd->speed_ - *tst_spd_ms);
 
         if (use_percent_if_higher_ && *tst_spd_ms * threshold_percent_ > threshold_value_) // use percent based threshold
             tmp_threshold_value = *tst_spd_ms * threshold_percent_;

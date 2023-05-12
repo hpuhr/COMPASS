@@ -88,10 +88,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
     double distance, angle, d_across;
 
     bool is_inside;
-    pair<dbContent::TargetPosition, bool> ret_pos;
-    dbContent::TargetPosition ref_pos;
-    pair<dbContent::TargetVelocity, bool> ret_spd;
-    dbContent::TargetVelocity ref_spd;
+    //pair<dbContent::TargetPosition, bool> ret_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
+    //pair<dbContent::TargetVelocity, bool> ret_spd;
+    boost::optional<dbContent::TargetVelocity> ref_spd;
     bool ok;
 
     bool along_ok;
@@ -153,12 +153,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
             continue;
         }
 
-        ret_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
+//        ref_pos = ret_pos.first;
+//        ok = ret_pos.second;
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -172,9 +172,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
             continue;
         }
 
-        ret_spd = target_data.mappedRefSpeed(tst_id, max_ref_time_diff);
+        ref_spd = target_data.mappedRefSpeed(tst_id, max_ref_time_diff);
 
-        if (!ret_spd.second)
+        if (!ref_spd.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -188,8 +188,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
             continue;
         }
 
-        ref_spd = ret_spd.first;
-        assert (ret_pos.second); // must be set of ref pos exists
+//        ref_spd = ret_spd.first;
+//        assert (ret_pos.second); // must be set of ref pos exists
 
         is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
@@ -207,7 +207,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
         }
         ++num_pos_inside;
 
-        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+        local.SetStereographic(ref_pos->latitude_, ref_pos->longitude_, 1.0, 0.0, 0.0);
 
         ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
@@ -236,7 +236,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
         }
 
         distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-        angle = ref_spd.track_angle_ - atan2(y_pos, x_pos);
+        angle = ref_spd->track_angle_ - atan2(y_pos, x_pos);
 
         if (std::isnan(distance) || std::isinf(distance))
         {
