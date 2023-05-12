@@ -68,7 +68,7 @@ public:
         NoRefUIs     //unsigned int
     };
 
-    void addAnnotations(nlohmann::json::object_t& viewable, bool add_ok) override;
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
     bool hasFailed() const;
 

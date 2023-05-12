@@ -331,7 +331,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::getTarget
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
-    addAnnotations(*viewable_ptr, true);
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -353,9 +353,9 @@ std::string SingleIdentificationCorrect::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-void SingleIdentificationCorrect::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
+void SingleIdentificationCorrect::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    addAnnotationFeatures(viewable);
+    addAnnotationFeatures(viewable, overview);
 
     json& error_point_coordinates =
             viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");

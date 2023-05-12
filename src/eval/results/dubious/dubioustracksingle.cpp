@@ -495,9 +495,9 @@ EvaluationRequirement::DubiousTrack* SingleDubiousTrack::req ()
     return req;
 }
 
-void SingleDubiousTrack::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
+void SingleDubiousTrack::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    addAnnotationFeatures(viewable);
+    addAnnotationFeatures(viewable, overview);
 
     json& error_line_coordinates =
             viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");

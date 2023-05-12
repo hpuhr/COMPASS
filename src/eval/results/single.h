@@ -60,7 +60,7 @@ public:
     const static std::string tr_details_table_name_;
     const static std::string target_table_name_;
 
-    virtual void addAnnotations(nlohmann::json::object_t& viewable, bool add_ok) = 0;
+    virtual void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) = 0;
 
 protected:
     unsigned int                utn_;    // used to generate result
@@ -75,7 +75,7 @@ protected:
 
     void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    void addAnnotationFeatures(nlohmann::json::object_t& viewable);
+    void addAnnotationFeatures(nlohmann::json::object_t& viewable, bool overview);
 };
 
 }

@@ -377,7 +377,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewab
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
-    addAnnotations(*viewable_ptr, true);
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -411,9 +411,9 @@ bool SingleDetection::hasFailed() const
         return false;
 }
 
-void SingleDetection::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
+void SingleDetection::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    addAnnotationFeatures(viewable);
+    addAnnotationFeatures(viewable, overview);
 
     json& error_line_coordinates =
             viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
@@ -447,8 +447,11 @@ void SingleDetection::addAnnotations(nlohmann::json::object_t& viewable, bool ad
             ok_point_coordinates.push_back(detail_it.position(0).asVector());
             ok_point_coordinates.push_back(detail_it.position(1).asVector());
 
-            ok_line_coordinates.push_back(detail_it.position(0).asVector());
-            ok_line_coordinates.push_back(detail_it.position(1).asVector());
+            if (!overview)
+            {
+                ok_line_coordinates.push_back(detail_it.position(0).asVector());
+                ok_line_coordinates.push_back(detail_it.position(1).asVector());
+            }
         }
     }
 }
