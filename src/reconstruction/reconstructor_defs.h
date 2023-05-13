@@ -101,6 +101,10 @@ struct Measurement
     {
         return (vx_stddev.has_value() && vy_stddev.has_value());
     }
+    bool hasStdDevAccel() const
+    {
+        return (ax_stddev.has_value() && ay_stddev.has_value());
+    }
 
     void print(std::ostream& strm) const
     {
@@ -130,6 +134,9 @@ struct Measurement
 
         strm << "vel stddev x:  " << (vx_stddev.has_value() ? std::to_string(vx_stddev.value()) : "-") << std::endl;
         strm << "vel stddev y:  " << (vy_stddev.has_value() ? std::to_string(vy_stddev.value()) : "-") << std::endl;
+
+        strm << "acc stddev x:  " << (ax_stddev.has_value() ? std::to_string(ax_stddev.value()) : "-") << std::endl;
+        strm << "acc stddev y:  " << (ay_stddev.has_value() ? std::to_string(ay_stddev.value()) : "-") << std::endl;
     }
 
     uint32_t                 source_id;            // source of the measurement
@@ -158,6 +165,9 @@ struct Measurement
 
     boost::optional<double>  vx_stddev;            // velocity stddev x
     boost::optional<double>  vy_stddev;            // velocity stddev y
+
+    boost::optional<double>  ax_stddev;            // accel stddev x
+    boost::optional<double>  ay_stddev;            // accel stddev y
 };
 
 /**

@@ -29,7 +29,6 @@ const QColor ReconstructorKalman::ColorKalman          = QColor(255, 102, 178);
 const QColor ReconstructorKalman::ColorKalmanSmoothed  = QColor(102, 178, 255);
 const QColor ReconstructorKalman::ColorKalmanResampled = QColor(255, 178, 102);
 
-
 /**
 */
 void ReconstructorKalman::init()
