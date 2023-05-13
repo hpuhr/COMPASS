@@ -138,7 +138,7 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable, bool over
 
         {
             viewable.at("annotations").at(0)["name"] = result_id_+" Errors";
-            viewable.at("annotations").at(0)["symbol_color"] = "#FF66B2";
+            viewable.at("annotations").at(0)["symbol_color"] = "#FF6666";
             viewable.at("annotations").at(0)["features"] = json::array();
 
             // lines
@@ -152,7 +152,7 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable, bool over
             feature_lines.at("geometry")["coordinates"] = json::array();
 
             feature_lines["properties"] = json::object();
-            feature_lines.at("properties")["color"] = "#FF66B2";
+            feature_lines.at("properties")["color"] = "#FF6666";
             feature_lines.at("properties")["line_width"] = 2;
 
             // symbols
@@ -167,7 +167,7 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable, bool over
             feature_points.at("geometry")["coordinates"] = json::array();
 
             feature_points["properties"] = json::object();
-            feature_points.at("properties")["color"] = "#FF66B2";
+            feature_points.at("properties")["color"] = "#FF6666";
 
             if (overview)
             {
