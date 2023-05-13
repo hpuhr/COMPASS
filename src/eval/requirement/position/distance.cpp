@@ -101,8 +101,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     double distance;
 
     bool is_inside;
-    pair<dbContent::TargetPosition, bool> ret_pos;
-    dbContent::TargetPosition ref_pos;
+    //boost::optional<dbContent::TargetPosition> ret_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
     bool comp_passed;
@@ -164,12 +164,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
             continue;
         }
 
-        ret_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
+//        ref_pos = ret_pos.first;
+//        ok = ret_pos.second;
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -199,7 +199,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         }
         ++num_pos_inside;
 
-        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+        local.SetStereographic(ref_pos->latitude_, ref_pos->longitude_, 1.0, 0.0, 0.0);
 
         ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 

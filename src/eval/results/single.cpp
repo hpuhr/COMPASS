@@ -126,7 +126,7 @@ void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> roo
     }
 }
 
-void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
+void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable, bool overview)
 {
     if (!viewable.count("annotations"))
         viewable["annotations"] = json::array();
@@ -138,6 +138,7 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
 
         {
             viewable.at("annotations").at(0)["name"] = result_id_+" Errors";
+            viewable.at("annotations").at(0)["symbol_color"] = "#FF6666";
             viewable.at("annotations").at(0)["features"] = json::array();
 
             // lines
@@ -151,7 +152,7 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
             feature_lines.at("geometry")["coordinates"] = json::array();
 
             feature_lines["properties"] = json::object();
-            feature_lines.at("properties")["color"] = "#FF0000";
+            feature_lines.at("properties")["color"] = "#FF6666";
             feature_lines.at("properties")["line_width"] = 2;
 
             // symbols
@@ -166,9 +167,18 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
             feature_points.at("geometry")["coordinates"] = json::array();
 
             feature_points["properties"] = json::object();
-            feature_points.at("properties")["color"] = "#FF0000";
-            feature_points.at("properties")["symbol"] = "circle";
-            feature_points.at("properties")["symbol_size"] = 8;
+            feature_points.at("properties")["color"] = "#FF6666";
+
+            if (overview)
+            {
+                feature_points.at("properties")["symbol"] = "circle";
+                feature_points.at("properties")["symbol_size"] = 8;
+            }
+            else
+            {
+                feature_points.at("properties")["symbol"] = "border";
+                feature_points.at("properties")["symbol_size"] = 10;
+            }
 
         }
 
@@ -176,6 +186,7 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
         {
             viewable.at("annotations").push_back(json::object()); // ok
             viewable.at("annotations").at(1)["name"] = result_id_+" OK";
+            viewable.at("annotations").at(1)["symbol_color"] = "#66FF66";
             viewable.at("annotations").at(1)["features"] = json::array();
 
             // lines
@@ -189,7 +200,7 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
             feature_lines.at("geometry")["coordinates"] = json::array();
 
             feature_lines["properties"] = json::object();
-            feature_lines.at("properties")["color"] = "#00FF00";
+            feature_lines.at("properties")["color"] = "#66FF66";
             feature_lines.at("properties")["line_width"] = 2;
 
             // symbols
@@ -204,9 +215,18 @@ void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
             feature_points.at("geometry")["coordinates"] = json::array();
 
             feature_points["properties"] = json::object();
-            feature_points.at("properties")["color"] = "#00FF00";
-            feature_points.at("properties")["symbol"] = "circle";
-            feature_points.at("properties")["symbol_size"] = 8;
+            feature_points.at("properties")["color"] = "#66FF66";
+
+            if (overview)
+            {
+                feature_points.at("properties")["symbol"] = "circle";
+                feature_points.at("properties")["symbol_size"] = 8;
+            }
+            else
+            {
+                feature_points.at("properties")["symbol"] = "border";
+                feature_points.at("properties")["symbol_size"] = 10;
+            }
         }
     }
 }

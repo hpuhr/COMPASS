@@ -463,7 +463,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleTrackAngle::getTargetErrorsViewa
         (*viewable_ptr)["trackangle_window_longitude"] = lon_w;
     }
 
-    addAnnotations(*viewable_ptr, true);
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -539,9 +539,9 @@ EvaluationRequirement::TrackAngle* SingleTrackAngle::req ()
     return req;
 }
 
-void SingleTrackAngle::addAnnotations(nlohmann::json::object_t& viewable, bool add_ok)
+void SingleTrackAngle::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    addAnnotationFeatures(viewable);
+    addAnnotationFeatures(viewable, overview);
 
     json& error_line_coordinates =
             viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");

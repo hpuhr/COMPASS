@@ -103,7 +103,7 @@ void Joined::addAnnotationsFromSingles(nlohmann::json::object_t& viewable_ref)
     for (auto& single_result : results_)
     {
         if (single_result->use())
-            single_result->addAnnotations(viewable_ref, eval_man_.showJoinedOkTargetReports());
+            single_result->addAnnotations(viewable_ref, true, eval_man_.showJoinedOkTargetReports());
     }
 }
 
