@@ -109,9 +109,12 @@ protected:
     virtual void storeState_impl(Reference& ref,
                                  const kalman::KalmanState& state) const = 0;
     virtual void init_impl(const Measurement& mm) const = 0;
-    virtual kalman::KalmanState interpStep(const kalman::KalmanState& state0,
-                                           const kalman::KalmanState& state1,
-                                           double dt) const = 0;
+    virtual boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
+                                                            const kalman::KalmanState& state1,
+                                                            double dt) const = 0;
+    virtual bool smoothChain_impl(std::vector<kalman::Vector>& x_smooth,
+                                  std::vector<kalman::Matrix>& P_smooth,
+                                  const KalmanChain& chain) const = 0;
 
     reconstruction::Uncertainty defaultUncertaintyOfMeasurement(const Measurement& mm) const;
 
@@ -137,7 +140,7 @@ private:
     double timestep(const Measurement& mm) const;
 
     bool smoothChain(KalmanChain& chain);
-    void resampleResult(KalmanChain& result_chain, double dt_sec);
+    bool resampleResult(KalmanChain& result_chain, double dt_sec);
 
     BaseConfig base_config_;
 

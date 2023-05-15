@@ -84,7 +84,7 @@ bool ReconstructorKalman::smoothChain(KalmanChain& chain)
     std::vector<kalman::Vector> x_smooth;
     std::vector<kalman::Matrix> P_smooth;
 
-    if (!kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, chain.rts_infos, baseConfig().smooth_scale))
+    if (!smoothChain_impl(x_smooth, P_smooth, chain))
         return false;
 
     //update chain data
@@ -101,10 +101,10 @@ bool ReconstructorKalman::smoothChain(KalmanChain& chain)
 
 /**
 */
-void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_sec)
+bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_sec)
 {
     if (result_chain.references.size() < 2)
-        return;
+        return true;
 
     size_t n = result_chain.references.size();
 
@@ -160,9 +160,12 @@ void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             auto new_state0 = interpStep(state0, state1,  dt0);
             auto new_state1 = interpStep(state1, state0, -dt1);
 
+            if (!new_state0.has_value() || !new_state1.has_value())
+                return false;
+
             kalman::KalmanState new_state;
-            new_state.x = (new_state0.x + new_state1.x) / 2;
-            new_state.P = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, 0.5);
+            new_state.x = (new_state0->x + new_state1->x) / 2;
+            new_state.P = SplineInterpolator::interpCovarianceMat(new_state0->P, new_state1->P, 0.5);
 
             Reference ref;
             ref.t            = tcur;
@@ -193,6 +196,8 @@ void ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
     }
 
     result_chain = std::move(resampled_chain);
+
+    return true;
 }
 
 /**
@@ -323,7 +328,11 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
 
         if (base_config_.resample_result)
         {
-            resampleResult(c, base_config_.resample_dt);
+            if (!resampleResult(c, base_config_.resample_dt))
+            {
+                logerr << "ReconstructorKalman::finalize(): Resampling failed";
+                return {};
+            }
 
             //add resampled positions to viewpoint
             if (hasViewPoint())
@@ -486,9 +495,9 @@ reconstruction::Uncertainty ReconstructorKalman::defaultUncertaintyOfMeasurement
         uncert = source_uncert.value();
 
     //set to high uncertainty if value is missing (pos is always available)
-    if (!mm.hasVelocity())
+    if (!tracksVelocity() || !mm.hasVelocity())
         uncert.speed_var = rVarHigh();
-    if (!mm.hasAcceleration())
+    if (!tracksAcceleration() || !mm.hasAcceleration())
         uncert.acc_var = rVarHigh();
 
     return uncert;

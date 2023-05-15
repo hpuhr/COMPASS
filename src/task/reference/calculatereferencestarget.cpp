@@ -12,6 +12,9 @@
 
 #include "reconstruction/reconstructor_umkalman2d.h"
 #include "reconstruction/reconstructor_interp.h"
+#if USE_EXPERIMENTAL_SOURCE
+    #include "reconstructor_amkalman2d.h"
+#endif
 
 using namespace dbContent;
 using namespace dbContent::TargetReport;
@@ -376,13 +379,15 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
         //         storeReferences(references.value(), rec);
         // };
 
-        auto reconstructUMKalman2D = [ & ] ()
+        auto reconstructKalman2D = [ & ] ()
         {
             CalculateReferencesTaskSettings s = settings;
 
             bool   add_sensor_uncert = true;   // add sensor default uncertainties
             double vel_std_cat021    = 50.0;   // default velocity stdddev CAT021
             double vel_std_cat062    = 50.0;   // default velocity stdddev CAT062
+            double acc_std_cat021    = 50.0;   // default acceleration stdddev CAT021
+            double acc_std_cat062    = 50.0;   // default acceleration stdddev CAT062
 
             bool python_compatibility_mode = false; //python reconstructor comparison mode
 
@@ -396,42 +401,56 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
                 add_sensor_uncert = false;
             }
 
-            reconstruction::Reconstructor_UMKalman2D rec(s.use_vel_mm);
-            rec.setViewPoint(gen_view_point);
-            rec.setVerbosity(s.verbose ? 1 : 0);
+            std::unique_ptr<reconstruction::ReconstructorKalman> rec;
+
+        #if USE_EXPERIMENTAL_SOURCE
+            if (s.rec_type == CalculateReferencesTaskSettings::ReconstructorType::AMKalman2D)
+            {
+                rec.reset(new reconstruction::Reconstructor_AMKalman2D);
+            }
+            else
+        #endif
+            {
+                rec.reset(new reconstruction::Reconstructor_UMKalman2D(s.use_vel_mm));
+            }
+        
+            assert(rec);
+
+            rec->setViewPoint(gen_view_point);
+            rec->setVerbosity(s.verbose ? 1 : 0);
 
             //configure kalman reconstructor
-            rec.baseConfig().R_std          = s.R_std;
-            rec.baseConfig().R_std_high     = s.R_std_high;
-            rec.baseConfig().Q_std          = s.Q_std;
-            rec.baseConfig().P_std          = s.P_std;
-            rec.baseConfig().P_std_high     = s.P_std_high;
+            rec->baseConfig().R_std          = s.R_std;
+            rec->baseConfig().R_std_high     = s.R_std_high;
+            rec->baseConfig().Q_std          = s.Q_std;
+            rec->baseConfig().P_std          = s.P_std;
+            rec->baseConfig().P_std_high     = s.P_std_high;
 
-            rec.baseConfig().min_dt         = s.min_dt;
-            rec.baseConfig().max_dt         = s.max_dt;
-            rec.baseConfig().min_chain_size = s.min_chain_size;
+            rec->baseConfig().min_dt         = s.min_dt;
+            rec->baseConfig().max_dt         = s.max_dt;
+            rec->baseConfig().min_chain_size = s.min_chain_size;
 
-            rec.baseConfig().smooth         = s.smooth_rts;
-            rec.baseConfig().smooth_scale   = 1.0;
+            rec->baseConfig().smooth         = s.smooth_rts;
+            rec->baseConfig().smooth_scale   = 1.0;
 
-            rec.baseConfig().resample_result = s.resample_result;
-            rec.baseConfig().resample_dt     = s.resample_result_dt;
+            rec->baseConfig().resample_result = s.resample_result;
+            rec->baseConfig().resample_dt     = s.resample_result_dt;
 
             //configure sensor default noise?
             if (add_sensor_uncert)
             {
                 reconstruction::Uncertainty uncert_cat021;
-                uncert_cat021.pos_var   = s.R_std        * s.R_std;
+                uncert_cat021.pos_var   = s.R_std * s.R_std;
                 uncert_cat021.speed_var = vel_std_cat021 * vel_std_cat021;
-                uncert_cat021.acc_var   = s.R_std_high   * s.R_std_high;
+                uncert_cat021.acc_var   = acc_std_cat021 * acc_std_cat021;
 
                 reconstruction::Uncertainty uncert_cat062;
-                uncert_cat062.pos_var   = s.R_std        * s.R_std;
+                uncert_cat062.pos_var   = s.R_std * s.R_std;
                 uncert_cat062.speed_var = vel_std_cat062 * vel_std_cat062;
-                uncert_cat062.acc_var   = s.R_std_high   * s.R_std_high;
+                uncert_cat062.acc_var   = acc_std_cat062 * acc_std_cat062;
 
-                rec.setSensorUncertainty("CAT021", uncert_cat021);
-                rec.setSensorUncertainty("CAT062", uncert_cat062);
+                rec->setSensorUncertainty("CAT021", uncert_cat021);
+                rec->setSensorUncertainty("CAT062", uncert_cat062);
             }
 
             //resample system tracks?
@@ -441,24 +460,24 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
                 options.sample_dt = s.resample_systracks_dt;
                 options.max_dt    = s.max_dt;
 
-                rec.setSensorInterpolation("CAT062", options);
+                rec->setSensorInterpolation("CAT062", options);
             }
 
             //add chains to reconstructor
             for (auto& chain_it : chains_)
             {
                 chain_targets[chain_it.second.get()] = chain_it.first;
-                rec.addChain(chain_it.second.get(), std::get<0>(chain_it.first));
+                rec->addChain(chain_it.second.get(), std::get<0>(chain_it.first));
             }
 
             //reconstruct
-            auto references = rec.reconstruct(dinfo);
+            auto references = rec->reconstruct(dinfo);
             if (references.has_value())
-                storeReferences(references.value(), rec);
+                storeReferences(references.value(), *rec);
         };
 
         //reconstructInterp();
-        reconstructUMKalman2D();
+        reconstructKalman2D();
     }
 
     loginf << "Target: calculateReference: buffer size " << buffer->size();

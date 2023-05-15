@@ -23,7 +23,7 @@
 namespace reconstruction
 {
 
-namespace helpers
+namespace helpers_umkalman2d
 {
     kalman::Matrix processMat(double dt, double Q_var)
     {
@@ -149,10 +149,10 @@ boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::kalmanStep(double
 {
     auto uncert = defaultUncertaintyOfMeasurement(mm);
 
-    auto F = helpers::transitionMat(dt);
-    auto Q = helpers::processMat(dt, qVar());
+    auto F = helpers_umkalman2d::transitionMat(dt);
+    auto Q = helpers_umkalman2d::processMat(dt, qVar());
     auto z = zVec(mm);
-    auto R = helpers::measurementUMat(mm, uncert, track_velocities_);
+    auto R = helpers_umkalman2d::measurementUMat(mm, uncert, track_velocities_);
 
     if (verbosity() > 1)
     {
@@ -301,10 +301,10 @@ void Reconstructor_UMKalman2D::init_impl(const Measurement& mm) const
     //init kalman state
     kalman_->setStateVec(xVec(mm));
     kalman_->setCovarianceMat(pMat(mm));
-    kalman_->setStateTransitionMat(helpers::transitionMat(1.0));
-    kalman_->setProcessUncertMat(helpers::processMat(1.0, qVar()));
-    kalman_->setMeasurementMat(helpers::measurementMat(track_velocities_));
-    kalman_->setMeasurementUncertMat(helpers::measurementUMat(mm, uncert, track_velocities_));
+    kalman_->setStateTransitionMat(helpers_umkalman2d::transitionMat(1.0));
+    kalman_->setProcessUncertMat(helpers_umkalman2d::processMat(1.0, qVar()));
+    kalman_->setMeasurementMat(helpers_umkalman2d::measurementMat(track_velocities_));
+    kalman_->setMeasurementUncertMat(helpers_umkalman2d::measurementUMat(mm, uncert, track_velocities_));
 
     if (verbosity() > 1)
     {
@@ -320,15 +320,15 @@ void Reconstructor_UMKalman2D::init_impl(const Measurement& mm) const
 
 /**
 */
-kalman::KalmanState Reconstructor_UMKalman2D::interpStep(const kalman::KalmanState& state0, 
-                                                         const kalman::KalmanState& state1,
-                                                         double dt) const
+boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::interpStep(const kalman::KalmanState& state0, 
+                                                                          const kalman::KalmanState& state1,
+                                                                          double dt) const
 {
     kalman_->setX(state0.x);
     kalman_->setP(state0.P);
 
-    auto F = helpers::transitionMat(dt);
-    auto Q = helpers::processMat(dt, qVar());
+    auto F = helpers_umkalman2d::transitionMat(dt);
+    auto Q = helpers_umkalman2d::processMat(dt, qVar());
 
     kalman_->predict(F, Q);
 
@@ -339,6 +339,15 @@ kalman::KalmanState Reconstructor_UMKalman2D::interpStep(const kalman::KalmanSta
     new_state.Q = Q;
 
     return new_state; 
+}
+
+/**
+*/
+bool Reconstructor_UMKalman2D::smoothChain_impl(std::vector<kalman::Vector>& x_smooth,
+                                                std::vector<kalman::Matrix>& P_smooth,
+                                                const KalmanChain& chain) const
+{
+    return kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, chain.rts_infos, baseConfig().smooth_scale);
 }
 
 } // namespace reconstruction

@@ -70,6 +70,9 @@ public:
 
     void setViewPoint(ViewPointGenVP* vp, int viewpoint_detail = 1);
 
+    virtual bool tracksVelocity() const = 0;
+    virtual bool tracksAcceleration() const = 0;
+
     static std::vector<std::vector<Measurement>> splitMeasurements(const std::vector<Measurement>& measurements,
                                                                    double max_dt);
     static double timestep(const Measurement& mm0, const Measurement& mm1);

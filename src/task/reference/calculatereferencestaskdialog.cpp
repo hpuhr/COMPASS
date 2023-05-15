@@ -12,6 +12,7 @@
 #include <QScrollArea>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
+#include <QComboBox>
 
 CalculateReferencesTaskDialog::CalculateReferencesTaskDialog(CalculateReferencesTask& task)
     : QDialog(), task_(task)
@@ -107,6 +108,13 @@ void CalculateReferencesTaskDialog::createSettingsWidget(QWidget* w)
         layout->addWidget(label, row++, 0);
     };
 
+    rec_type_box_ = new QComboBox;
+    rec_type_box_->addItem("UMKalman2D");
+#if USE_EXPERIMENTAL_SOURCE
+    rec_type_box_->addItem("AMKalman2D");
+#endif
+    addRow("Reconstructor", rec_type_box_);
+
     //uncertainty section
     addHeader("Default Uncertainties");
 
@@ -189,6 +197,8 @@ void CalculateReferencesTaskDialog::readOptions()
 {
     const auto& s = task_.settings();
 
+    rec_type_box_->setCurrentIndex((int)s.rec_type);
+
     R_std_box_->setValue(s.R_std);
     R_std_high_box_->setValue(s.R_std_high);
     Q_std_box_->setValue(s.Q_std);
@@ -214,6 +224,8 @@ void CalculateReferencesTaskDialog::readOptions()
 void CalculateReferencesTaskDialog::writeOptions()
 {
     CalculateReferencesTaskSettings& s = task_.settings();
+
+    s.rec_type              = (CalculateReferencesTaskSettings::ReconstructorType)rec_type_box_->currentIndex();
 
     s.R_std                 = R_std_box_->value();
     s.R_std_high            = R_std_high_box_->value();

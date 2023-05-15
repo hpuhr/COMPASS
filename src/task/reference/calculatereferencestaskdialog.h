@@ -11,6 +11,7 @@ class QPushButton;
 class QDoubleSpinBox;
 class QCheckBox;
 class QSpinBox;
+class QComboBox;
 
 class CalculateReferencesTaskDialog : public QDialog
 {
@@ -41,6 +42,8 @@ protected:
 
     QPushButton*    cancel_button_{nullptr};
     QPushButton*    run_button_   {nullptr};
+
+    QComboBox*      rec_type_box_ = nullptr;
 
     QDoubleSpinBox* R_std_box_      = nullptr;
     QDoubleSpinBox* R_std_high_box_ = nullptr;

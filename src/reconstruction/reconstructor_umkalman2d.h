@@ -44,6 +44,9 @@ public:
 
     Config& config() { return config_; }
 
+    virtual bool tracksVelocity() const override { return true; }
+    virtual bool tracksAcceleration() const override { return false; }
+
 protected:
     kalman::KalmanState kalmanState() const override final;
     boost::optional<kalman::KalmanState> kalmanStep(double dt, const Measurement& mm) override final;
@@ -52,9 +55,12 @@ protected:
     kalman::Vector zVec(const Measurement& mm) const override final;
     void storeState_impl(Reference& ref, const kalman::KalmanState& state) const override final;
     void init_impl(const Measurement& mm) const override final;
-    kalman::KalmanState interpStep(const kalman::KalmanState& state0,
-                                   const kalman::KalmanState& state1, 
-                                   double dt) const override final;
+    boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
+                                                    const kalman::KalmanState& state1, 
+                                                    double dt) const override final;
+    bool smoothChain_impl(std::vector<kalman::Vector>& x_smooth,
+                          std::vector<kalman::Matrix>& P_smooth,
+                          const KalmanChain& chain) const override final;
 
 private:
     Config config_;
