@@ -207,16 +207,6 @@ kalman::Matrix Reconstructor_UMKalman2D::pMat(const Measurement& mm) const
 
     kalman::Matrix P(4, 4);
     P.setZero();
-    
-    if (config_.simple_init)
-    {
-        P(0, 0) = uncert.pos_var;
-        P(1, 1) = uncert.speed_var;
-        P(2, 2) = uncert.pos_var;
-        P(3, 3) = uncert.speed_var;
-
-        return P;
-    }
 
     double var_x  = uncert.pos_var;
     double var_y  = uncert.pos_var;

@@ -389,12 +389,10 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
             double acc_std_cat021    = 50.0;   // default acceleration stdddev CAT021
             double acc_std_cat062    = 50.0;   // default acceleration stdddev CAT062
 
-            bool python_compatibility_mode = false; //python reconstructor comparison mode
-
-            if (python_compatibility_mode)
+            if (settings.python_compatibility)
             {
                 // apply python code compatible override settings
-                s.use_vel_mm         = false;
+                s.use_vel_mm         = true;
                 s.resample_result    = false;
                 s.resample_systracks = false;
 

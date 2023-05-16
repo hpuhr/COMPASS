@@ -49,6 +49,7 @@ struct CalculateReferencesTaskSettings
 
     bool          verbose               = false;    // reconstruction verbosity
     bool          generate_viewpoints   = false;    // generate viewpoints and add to viewpoints list
+    bool          python_compatibility  = false;    // if true settings may be overriden to make rec compatible with python version
 
     ReconstructorType rec_type = ReconstructorType::UMKalman2D;
 };
