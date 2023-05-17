@@ -31,18 +31,18 @@ class SinglePositionBase : public Single
 {
 public:
     SinglePositionBase(const std::string& result_type,
-                       const std::string& result_id, 
+                       const std::string& result_id,
                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                        const SectorLayer& sector_layer,
-                       unsigned int utn, 
-                       const EvaluationTargetData* target, 
+                       unsigned int utn,
+                       const EvaluationTargetData* target,
                        EvaluationManager& eval_man,
                        const EvaluationDetails& details,
-                       unsigned int num_pos, 
+                       unsigned int num_pos,
                        unsigned int num_no_ref,
-                       unsigned int num_pos_outside, 
+                       unsigned int num_pos_outside,
                        unsigned int num_pos_inside,
-                       unsigned int num_passed, 
+                       unsigned int num_passed,
                        unsigned int num_failed,
                        vector<double> values);
 
@@ -93,29 +93,35 @@ class JoinedPositionBase : public Joined
 {
 public:
     JoinedPositionBase(const std::string& result_type,
-                       const std::string& result_id, 
+                       const std::string& result_id,
                        std::shared_ptr<EvaluationRequirement::Base> requirement,
-                       const SectorLayer& sector_layer, 
+                       const SectorLayer& sector_layer,
                        EvaluationManager& eval_man);
 protected:
-        unsigned int num_pos_         {0};
-        unsigned int num_no_ref_      {0};
-        unsigned int num_pos_outside_ {0};
-        unsigned int num_pos_inside_  {0};
-        unsigned int num_passed_      {0};
-        unsigned int num_failed_      {0};
+    unsigned int num_pos_         {0};
+    unsigned int num_no_ref_      {0};
+    unsigned int num_pos_outside_ {0};
+    unsigned int num_pos_inside_  {0};
+    unsigned int num_passed_      {0};
+    unsigned int num_failed_      {0};
 
-        //vector<double> values_;
+    //vector<double> values_;
 
-        double value_min_ {0};
-        double value_max_ {0};
-        double value_avg_ {0};
-        double value_var_ {0};
-        double value_rms_ {0};
+    double value_min_ {0};
+    double value_max_ {0};
+    double value_avg_ {0};
+    double value_var_ {0};
+    double value_rms_ {0};
 
-        boost::optional<float> prob_;
+    boost::optional<float> prob_;
 
-        vector<double> values() const;
+    void addToValues (std::shared_ptr<SinglePositionBase> single_result, bool do_update=true);
+    virtual void update() = 0;
+
+    virtual void join_impl(std::shared_ptr<Single> other) override;
+    virtual void updatesToUseChanges_impl() override;
+
+    vector<double> values() const;
 };
 
 }

@@ -36,6 +36,7 @@
 #include <QMessageBox>
 #include <QClipboard>
 #include <QApplication>
+#include <QInputDialog>
 
 #include <cassert>
 #include <type_traits>
@@ -606,11 +607,18 @@ void SectionContentTable::removeUTNSlot ()
 
     unsigned int utn = action->data().toUInt();
 
-    loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
+    bool ok;
+    QString text =
+        QInputDialog::getText(nullptr, "Remove UTN "+QString::number(utn),
+                              "Please provide a comment as reason:", QLineEdit::Normal, "", &ok);
+    if (ok && !text.isEmpty())
+    {
 
-    COMPASS::instance().dbContentManager().utnUseEval(utn, false);
+        loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
 
-    //eval_man_.useUTN(utn, false, true);
+        COMPASS::instance().dbContentManager().utnUseEval(utn, false);
+        COMPASS::instance().dbContentManager().utnComment(utn, text.toStdString());
+    }
 }
 
 void SectionContentTable::showFullUTNSlot ()

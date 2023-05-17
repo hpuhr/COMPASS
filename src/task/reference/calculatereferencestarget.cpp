@@ -299,8 +299,14 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
                 {
                     mapping = chain_it.second->calculateDataMapping(ref.t);
 
-                    if (mc_vec.isNull(i) && mapping.pos_ref_.has_altitude_)
-                        mc_vec.set(buffer_cnt, mapping.pos_ref_.altitude_);
+                    if (mapping.pos_ref_.has_altitude_)
+                    {
+                        if (mc_vec.isNull(i))
+                            mc_vec.set(buffer_cnt, mapping.pos_ref_.altitude_);
+                        else
+                            mc_vec.set(buffer_cnt,
+                                       (mapping.pos_ref_.altitude_ + mc_vec.get(buffer_cnt))/2.0);
+                    }
 
                     if (mapping.has_ref1_)
                     {
