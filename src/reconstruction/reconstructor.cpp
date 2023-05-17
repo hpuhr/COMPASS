@@ -380,7 +380,8 @@ void Reconstructor::postprocessReferences(std::vector<Reference>& references)
 }
 
 /**
-*/
+ * Transforms back a position to the input coordinate system.
+ */
 Eigen::Vector2d Reconstructor::transformBack(double x, double y) const
 {
     if (coord_conv_ == CoordConversion::WGS84ToCart)
@@ -397,6 +398,14 @@ Eigen::Vector2d Reconstructor::transformBack(double x, double y) const
     }
 
     return Eigen::Vector2d(x, y);
+}
+
+/**
+ * Transforms back a vector to the input coordinate system.
+ */
+Eigen::Vector2d Reconstructor::transformBack(double x, double y, double vx, double vy) const
+{
+    return transformBack(x + vx, y + vy) - transformBack(x, y);
 }
 
 /**

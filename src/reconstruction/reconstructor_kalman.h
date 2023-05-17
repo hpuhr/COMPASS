@@ -97,6 +97,8 @@ public:
     static const QColor ColorKalmanSmoothed;
     static const QColor ColorKalmanResampled;
 
+    static const float  SpeedVecLineWidth;
+
 protected:
     boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements,
                                                              const std::string& data_info) override final;
