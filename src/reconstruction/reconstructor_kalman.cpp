@@ -58,18 +58,18 @@ bool ReconstructorKalman::smoothChain(KalmanChain& chain)
         //loginf << "no references to smooth...";
         return true;
     }
-    if (chain.references.size() != chain.rts_infos.size())
+    if (chain.references.size() != chain.kalman_states.size())
     {
-        //loginf << "not enough RTS infos: " << chain.rts_infos.size() << "/" << chain.references.size();
+        //loginf << "not enough kalman states: " << chain.kalman_states.size() << "/" << chain.references.size();
         return false;
     }
 
     if (verbosity() > 1)
     {
-        loginf << "Obtains " << chain.rts_infos.size() << " info(s)";
+        loginf << "Obtains " << chain.kalman_states.size() << " info(s)";
 
         int cnt = 0;
-        for (const auto& rts_info : chain.rts_infos)
+        for (const auto& rts_info : chain.kalman_states)
         {
             loginf << "Info " << cnt++ << "\n"
                    << "    x: " << rts_info.x << "\n"
@@ -92,8 +92,8 @@ bool ReconstructorKalman::smoothChain(KalmanChain& chain)
     {
         storeState(chain.references[ i ], kalman::KalmanState(x_smooth[ i ], P_smooth[ i ]));
 
-        chain.rts_infos[ i ].P = P_smooth[ i ];
-        chain.rts_infos[ i ].x = x_smooth[ i ];
+        chain.kalman_states[ i ].P = P_smooth[ i ];
+        chain.kalman_states[ i ].x = x_smooth[ i ];
     }
     
     return true;
@@ -115,7 +115,7 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
     resampled_chain.reserve(n_estim);
 
     resampled_chain.add(result_chain.references.front(), 
-                        result_chain.rts_infos.front());
+                        result_chain.kalman_states.front());
 
     boost::posix_time::milliseconds time_incr((int)(dt_sec * 1000.0));
 
@@ -125,10 +125,10 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
 
     for (size_t i = 1; i < n; ++i)
     {
-        const auto& ref0   = result_chain.references[i - 1];
-        const auto& ref1   = result_chain.references[i    ];
-        const auto& state0 = result_chain.rts_infos [i - 1];
-        const auto& state1 = result_chain.rts_infos [i    ];
+        const auto& ref0   = result_chain.references   [i - 1];
+        const auto& ref1   = result_chain.references   [i    ];
+        const auto& state0 = result_chain.kalman_states[i - 1];
+        const auto& state1 = result_chain.kalman_states[i    ];
 
         auto t0 = ref0.t;
         auto t1 = ref1.t;
@@ -190,9 +190,9 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
     if (resampled_chain.references.size() >= 2)
     {
         resampled_chain.references.pop_back();
-        resampled_chain.rts_infos.pop_back();
+        resampled_chain.kalman_states.pop_back();
         resampled_chain.add(result_chain.references.back(), 
-                            result_chain.rts_infos.back());
+                            result_chain.kalman_states.back());
     }
 
     result_chain = std::move(resampled_chain);
@@ -383,7 +383,7 @@ void ReconstructorKalman::addReference(const Reference& ref,
     chain_cur_.references.push_back(ref);
 
     if (base_config_.smooth || base_config_.resample_result)
-        chain_cur_.rts_infos.push_back(rts_info);
+        chain_cur_.kalman_states.push_back(rts_info);
 }
 
 /**

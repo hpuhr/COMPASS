@@ -337,7 +337,7 @@ bool Reconstructor_UMKalman2D::smoothChain_impl(std::vector<kalman::Vector>& x_s
                                                 std::vector<kalman::Matrix>& P_smooth,
                                                 const KalmanChain& chain) const
 {
-    return kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, chain.rts_infos, baseConfig().smooth_scale);
+    return kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, chain.kalman_states, baseConfig().smooth_scale);
 }
 
 } // namespace reconstruction
