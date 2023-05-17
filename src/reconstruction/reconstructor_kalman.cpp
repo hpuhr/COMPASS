@@ -382,7 +382,7 @@ void ReconstructorKalman::addReference(const Reference& ref,
 {
     chain_cur_.references.push_back(ref);
 
-    if (base_config_.smooth)
+    if (base_config_.smooth || base_config_.resample_result)
         chain_cur_.rts_infos.push_back(rts_info);
 }
 
