@@ -123,12 +123,10 @@ std::vector<Base::ReportParam> SingleIntervalBase::detailsOverviewDescriptions()
     if (pd_.has_value())
         pd_var = roundf(pd_.value() * 10000.0) / 100.0;
 
-    descr.push_back({"Use", "To be used in results", use_});
-    descr.push_back({"#EUIs [1]", "Expected Update Intervals", sum_uis_});
-    descr.push_back({"#MUIs [1]", "Missed Update Intervals", missed_uis_});
-    descr.push_back({"PD [%]", "Probability of Detection", pd_var});
-
-    return descr;
+    return { { "Use"      , "To be used in results"    , use_        },
+             { "#EUIs [1]", "Expected Update Intervals", sum_uis_    },
+             { "#MUIs [1]", "Missed Update Intervals"  , missed_uis_ },
+             { "PD [%]"   , "Probability of Detection" , pd_var      } };
 }
 
 /**
@@ -269,7 +267,9 @@ void SingleIntervalBase::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
         result = req->getConditionResultStr(pd_.value());
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
-    utn_req_table.addRow({"Must hold for any target ", "", req->mustHoldForAnyTarget()}, this);
+
+    if (req->mustHoldForAnyTarget().has_value())
+        utn_req_table.addRow({"Must hold for any target ", "", req->mustHoldForAnyTarget().value()}, this);
 
     // add figure
     if (pd_.has_value() && pd_.value() != 1.0)
@@ -637,7 +637,7 @@ void JoinedIntervalBase::addToOverviewTable(std::shared_ptr<EvaluationResultsRep
     std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
     assert (req);
 
-    if (req->mustHoldForAnyTarget()) // for any target
+    if (req->mustHoldForAnyTarget().has_value() && req->mustHoldForAnyTarget().value()) // for any target
     {
         string result = num_failed_single_targets_ == 0 ? "Passed" : "Failed";
 
@@ -688,14 +688,22 @@ std::vector<Base::ReportParam> JoinedIntervalBase::detailsOverviewDescriptions()
         result = req->getConditionResultStr(pd_.value());
     }
 
-    return { { "#Updates/#EUIs [1]"       , "Total number update intervals"    , sum_uis_                       },
-             { "#MUIs [1]"                , "Number of missed update intervals", missed_uis_                    },
-             { "PD [%]"                   , "Probability of Detection"         , pd_var                         },
-             { "Condition"                , {}                                 , req->getConditionStr().c_str() },
-             { "Condition Fulfilled"      , {}                                 , result.c_str()                 },
-             { "Must hold for any target ", ""                                 , req->mustHoldForAnyTarget()    },
-             { "#Single Targets"          , {}                                 , num_single_targets_            },
-             { "#Failed Single Targets"   , {}                                 , num_failed_single_targets_     } };
+    std::vector<Base::ReportParam> params;
+
+    params.emplace_back("#Updates/#EUIs [1]", "Total number update intervals", sum_uis_);
+    params.emplace_back("#MUIs [1]", "Number of missed update intervals", missed_uis_);
+    params.emplace_back("PD [%]", "Probability of Detection", pd_var);
+
+    params.emplace_back("Condition", "", req->getConditionStr().c_str());
+    params.emplace_back("Condition Fulfilled", "", result.c_str());
+
+    if (req->mustHoldForAnyTarget().has_value())
+        params.emplace_back("Must hold for any target ", "", req->mustHoldForAnyTarget().value());
+
+    params.emplace_back("#Single Targets", "", num_single_targets_);
+    params.emplace_back("#Failed Single Targets", "", num_failed_single_targets_);
+
+    return params;
 }
 
 /**

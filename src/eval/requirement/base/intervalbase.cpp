@@ -54,16 +54,16 @@ IntervalBase::IntervalBase(const std::string& name,
                            const boost::optional<float>& max_gap_length_s,
                            const boost::optional<float>& miss_tolerance_s,
                            const boost::optional<float>& min_ref_period_s,
-                           bool invert_prob,
-                           bool hold_for_any_target)
-:   ProbabilityBase     (name, short_name, group_name, prob, prob_check_type, eval_man)
-,   update_interval_s_  (update_interval_s  )
-,   min_gap_length_s_   (min_gap_length_s   )
-,   max_gap_length_s_   (max_gap_length_s   )
-,   miss_tolerance_s_   (miss_tolerance_s   )
-,   min_ref_period_s_   (min_ref_period_s   )
-,   invert_prob_        (invert_prob        )
-,   hold_for_any_target_(hold_for_any_target)
+                           const boost::optional<bool>& must_hold_for_any_target,
+                           bool invert_prob)
+:   ProbabilityBase          (name, short_name, group_name, prob, prob_check_type, eval_man)
+,   update_interval_s_       (update_interval_s       )
+,   min_gap_length_s_        (min_gap_length_s        )
+,   max_gap_length_s_        (max_gap_length_s        )
+,   miss_tolerance_s_        (miss_tolerance_s        )
+,   min_ref_period_s_        (min_ref_period_s        )
+,   must_hold_for_any_target_(must_hold_for_any_target)
+,   invert_prob_             (invert_prob             )
 {
 }
 

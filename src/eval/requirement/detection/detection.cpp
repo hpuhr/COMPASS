@@ -50,14 +50,14 @@ Detection::Detection(const std::string& name,
                      float miss_tolerance_s, 
                      bool hold_for_any_target)
     : ProbabilityBase     (name, short_name, group_name, prob, prob_check_type, eval_man),
-      update_interval_s_  (update_interval_s), //bleibt
+      update_interval_s_  (update_interval_s), 
       use_min_gap_length_ (use_min_gap_length), 
       min_gap_length_s_   (min_gap_length_s),
       use_max_gap_length_ (use_max_gap_length), 
       max_gap_length_s_   (max_gap_length_s), 
       invert_prob_        (invert_prob),
-      use_miss_tolerance_ (use_miss_tolerance), //bleibt
-      miss_tolerance_s_   (miss_tolerance_s),   //bleibt
+      use_miss_tolerance_ (use_miss_tolerance),
+      miss_tolerance_s_   (miss_tolerance_s),
       hold_for_any_target_(hold_for_any_target)
 {
 }
