@@ -13,6 +13,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdata.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatawidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetdata.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/timeperiod.cpp"
 )
-
-

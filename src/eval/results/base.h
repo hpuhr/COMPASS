@@ -96,6 +96,23 @@ public:
     const static std::string req_overview_table_name_;
 
 protected:
+    /**
+     * Used to display a certain result parameter in the report as
+     * Name | Description | Value, e.g.
+     * PD [%]    Probability of Detection    98.4
+     */
+    struct ReportParam
+    {
+        ReportParam() = default;
+        ReportParam(const std::string& _name, 
+                    const std::string& _descr, 
+                    const QVariant& _value) : name(_name), descr(_descr), value(_value) {}
+
+        std::string name;
+        std::string descr;
+        QVariant    value;
+    };
+
     EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
