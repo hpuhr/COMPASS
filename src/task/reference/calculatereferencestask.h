@@ -22,6 +22,12 @@ class ViewableDataConfig;
 
 struct CalculateReferencesTaskSettings
 {
+    enum class ReconstructorType
+    {
+        UMKalman2D = 0,
+        AMKalman2D
+    };
+
     double        R_std                 = 30.0;     // observation noise (standard)
     double        R_std_high            = 1000.0;   // observation noise (high)
     double        Q_std                 = 30.0;     // process noise
@@ -43,6 +49,9 @@ struct CalculateReferencesTaskSettings
 
     bool          verbose               = false;    // reconstruction verbosity
     bool          generate_viewpoints   = false;    // generate viewpoints and add to viewpoints list
+    bool          python_compatibility  = false;    // if true settings may be overriden to make rec compatible with python version
+
+    ReconstructorType rec_type = ReconstructorType::UMKalman2D;
 };
 
 class CalculateReferencesTask : public Task, public Configurable

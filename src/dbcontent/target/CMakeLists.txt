@@ -5,6 +5,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/targetreportdefs.h"
         "${CMAKE_CURRENT_LIST_DIR}/target.h"
         "${CMAKE_CURRENT_LIST_DIR}/targetmodel.h"
         "${CMAKE_CURRENT_LIST_DIR}/targetfilterdialog.h"

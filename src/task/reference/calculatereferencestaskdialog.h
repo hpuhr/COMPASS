@@ -11,6 +11,7 @@ class QPushButton;
 class QDoubleSpinBox;
 class QCheckBox;
 class QSpinBox;
+class QComboBox;
 
 class CalculateReferencesTaskDialog : public QDialog
 {
@@ -42,6 +43,8 @@ protected:
     QPushButton*    cancel_button_{nullptr};
     QPushButton*    run_button_   {nullptr};
 
+    QComboBox*      rec_type_box_ = nullptr;
+
     QDoubleSpinBox* R_std_box_      = nullptr;
     QDoubleSpinBox* R_std_high_box_ = nullptr;
     QDoubleSpinBox* Q_std_box_      = nullptr;
@@ -61,8 +64,8 @@ protected:
     QCheckBox*      resample_result_box_    = nullptr;
     QDoubleSpinBox* resample_result_dt_box_ = nullptr;
 
-    QCheckBox*      verbose_box_ = nullptr;
-    QCheckBox*      gen_vp_box_  = nullptr;
+    QCheckBox*      verbose_box_     = nullptr;
+    QCheckBox*      python_comp_box_ = nullptr;
 };
 
 #endif // CALCULATEREFERENCESTASKDIALOG_H

@@ -37,23 +37,23 @@ struct KalmanChain
     void reserve(size_t n)
     {
         references.reserve(n);
-        rts_infos.reserve(n);
+        kalman_states.reserve(n);
     }
 
     void add(const KalmanChain& other)
     {
         references.insert(references.end(), other.references.begin(), other.references.end());
-        rts_infos.insert(rts_infos.end(), other.rts_infos.begin(), other.rts_infos.end());
+        kalman_states.insert(kalman_states.end(), other.kalman_states.begin(), other.kalman_states.end());
     }
 
     void add(const Reference& ref, const kalman::KalmanState& state)
     {
         references.push_back(ref);
-        rts_infos.push_back(state);
+        kalman_states.push_back(state);
     }
 
-    std::vector<Reference>           references; //reconstructed positions
-    std::vector<kalman::KalmanState> rts_infos;  //data needed for RTS smoother
+    std::vector<Reference>           references;    //reconstructed positions
+    std::vector<kalman::KalmanState> kalman_states; //data needed for RTS smoother
 };
 
 /**
@@ -97,6 +97,8 @@ public:
     static const QColor ColorKalmanSmoothed;
     static const QColor ColorKalmanResampled;
 
+    static const float  SpeedVecLineWidth;
+
 protected:
     boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements,
                                                              const std::string& data_info) override final;
@@ -109,9 +111,12 @@ protected:
     virtual void storeState_impl(Reference& ref,
                                  const kalman::KalmanState& state) const = 0;
     virtual void init_impl(const Measurement& mm) const = 0;
-    virtual kalman::KalmanState interpStep(const kalman::KalmanState& state0,
-                                           const kalman::KalmanState& state1,
-                                           double dt) const = 0;
+    virtual boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
+                                                            const kalman::KalmanState& state1,
+                                                            double dt) const = 0;
+    virtual bool smoothChain_impl(std::vector<kalman::Vector>& x_smooth,
+                                  std::vector<kalman::Matrix>& P_smooth,
+                                  const KalmanChain& chain) const = 0;
 
     reconstruction::Uncertainty defaultUncertaintyOfMeasurement(const Measurement& mm) const;
 
@@ -137,7 +142,7 @@ private:
     double timestep(const Measurement& mm) const;
 
     bool smoothChain(KalmanChain& chain);
-    void resampleResult(KalmanChain& result_chain, double dt_sec);
+    bool resampleResult(KalmanChain& result_chain, double dt_sec);
 
     BaseConfig base_config_;
 

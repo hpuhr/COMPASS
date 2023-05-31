@@ -184,16 +184,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
 
         mc_no_ref = cmp_res_mc == ValueComparisonResult::Unknown_NoRefData;
 
-        mc_correct_failed = cmp_res_mc == ValueComparisonResult::Unknown_NoTstData
-                || cmp_res_mc == ValueComparisonResult::Different;
-
-        if (mc_correct_failed)
-        {
-            if (comment.size())
-                comment += ", ";
-            comment += "MC failed (" + cmp_res_mc_comment + ")";
-        }
-
         if (mc_no_ref) // none has a reference
         {
             if (!skip_no_data_details)
@@ -205,6 +195,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
             ++num_no_ref_id;
 
             continue;
+        }
+
+        mc_correct_failed = cmp_res_mc == ValueComparisonResult::Unknown_NoTstData
+                || cmp_res_mc == ValueComparisonResult::Different;
+
+        if (mc_correct_failed)
+        {
+            if (comment.size())
+                comment += ", ";
+            comment += "MC failed (" + cmp_res_mc_comment + ")";
         }
 
         result_ok = !mc_correct_failed;

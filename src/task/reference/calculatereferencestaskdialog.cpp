@@ -12,6 +12,7 @@
 #include <QScrollArea>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
+#include <QComboBox>
 
 CalculateReferencesTaskDialog::CalculateReferencesTaskDialog(CalculateReferencesTask& task)
     : QDialog(), task_(task)
@@ -107,6 +108,13 @@ void CalculateReferencesTaskDialog::createSettingsWidget(QWidget* w)
         layout->addWidget(label, row++, 0);
     };
 
+    rec_type_box_ = new QComboBox;
+    rec_type_box_->addItem("UMKalman2D");
+#if USE_EXPERIMENTAL_SOURCE
+    rec_type_box_->addItem("AMKalman2D");
+#endif
+    addRow("Reconstructor", rec_type_box_);
+
     //uncertainty section
     addHeader("Default Uncertainties");
 
@@ -181,6 +189,9 @@ void CalculateReferencesTaskDialog::createSettingsWidget(QWidget* w)
     verbose_box_ = new QCheckBox("Verbose");
     addOptionalRow(verbose_box_, nullptr);
 
+    python_comp_box_ = new QCheckBox("Python Compatibility Mode");
+    addOptionalRow(python_comp_box_, nullptr);
+
     //read in values from task
     readOptions();
 }
@@ -188,6 +199,8 @@ void CalculateReferencesTaskDialog::createSettingsWidget(QWidget* w)
 void CalculateReferencesTaskDialog::readOptions()
 {
     const auto& s = task_.settings();
+
+    rec_type_box_->setCurrentIndex((int)s.rec_type);
 
     R_std_box_->setValue(s.R_std);
     R_std_high_box_->setValue(s.R_std_high);
@@ -209,11 +222,14 @@ void CalculateReferencesTaskDialog::readOptions()
     resample_result_dt_box_->setValue(s.resample_result_dt);
 
     verbose_box_->setChecked(s.verbose);
+    python_comp_box_->setChecked(s.python_compatibility);
 }
 
 void CalculateReferencesTaskDialog::writeOptions()
 {
     CalculateReferencesTaskSettings& s = task_.settings();
+
+    s.rec_type              = (CalculateReferencesTaskSettings::ReconstructorType)rec_type_box_->currentIndex();
 
     s.R_std                 = R_std_box_->value();
     s.R_std_high            = R_std_high_box_->value();
@@ -235,6 +251,7 @@ void CalculateReferencesTaskDialog::writeOptions()
     s.resample_result_dt    = resample_result_dt_box_->value();
 
     s.verbose               = verbose_box_->isChecked();
+    s.python_compatibility  = python_comp_box_->isChecked();
 }
 
 QWidget* CalculateReferencesTaskDialog::addScrollArea(QWidget* w) const

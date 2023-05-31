@@ -50,16 +50,16 @@ public:
     void exportAsCSV();
 
 protected:
-    void addToValues (std::shared_ptr<SinglePositionDistance> single_result);
-    void update();
+    //void addToValues (std::shared_ptr<SinglePositionBase> single_result);
+    void update() override;
 
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
     std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
 
-    virtual void join_impl(std::shared_ptr<Single> other) override;
-    virtual void updatesToUseChanges_impl() override;
+//    virtual void join_impl(std::shared_ptr<Single> other) override;
+//    virtual void updatesToUseChanges_impl() override;
 };
 
 }

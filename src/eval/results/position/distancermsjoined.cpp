@@ -48,31 +48,31 @@ JoinedPositionDistanceRMS::JoinedPositionDistanceRMS(const std::string& result_i
 {
 }
 
-void JoinedPositionDistanceRMS::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SinglePositionDistanceRMS> other_sub =
-            std::static_pointer_cast<SinglePositionDistanceRMS>(other);
-    assert (other_sub);
+//void JoinedPositionDistanceRMS::join_impl(std::shared_ptr<Single> other)
+//{
+//    std::shared_ptr<SinglePositionDistanceRMS> other_sub =
+//            std::static_pointer_cast<SinglePositionDistanceRMS>(other);
+//    assert (other_sub);
 
-    addToValues(other_sub);
-}
+//    addToValues(other_sub);
+//}
 
-void JoinedPositionDistanceRMS::addToValues (std::shared_ptr<SinglePositionDistanceRMS> single_result)
-{
-    assert (single_result);
+//void JoinedPositionDistanceRMS::addToValues (std::shared_ptr<SinglePositionDistanceRMS> single_result)
+//{
+//    assert (single_result);
 
-    if (!single_result->use())
-        return;
+//    if (!single_result->use())
+//        return;
 
-    num_pos_         += single_result->numPos();
-    num_no_ref_      += single_result->numNoRef();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_passed_      += single_result->numPassed();
-    num_failed_      += single_result->numFailed();
+//    num_pos_         += single_result->numPos();
+//    num_no_ref_      += single_result->numNoRef();
+//    num_pos_outside_ += single_result->numPosOutside();
+//    num_pos_inside_  += single_result->numPosInside();
+//    num_passed_      += single_result->numPassed();
+//    num_failed_      += single_result->numFailed();
 
-    update();
-}
+//    update();
+//}
 
 void JoinedPositionDistanceRMS::update()
 {
@@ -310,26 +310,26 @@ std::string JoinedPositionDistanceRMS::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedPositionDistanceRMS::updatesToUseChanges_impl()
-{
-    loginf << "JoinedPositionDistanceRMS: updatesToUseChanges";
+//void JoinedPositionDistanceRMS::updatesToUseChanges_impl()
+//{
+//    loginf << "JoinedPositionDistanceRMS: updatesToUseChanges";
 
-    num_pos_         = 0;
-    num_no_ref_      = 0;
-    num_pos_outside_ = 0;
-    num_pos_inside_  = 0;
-    num_failed_      = 0;
-    num_passed_      = 0;
+//    num_pos_         = 0;
+//    num_no_ref_      = 0;
+//    num_pos_outside_ = 0;
+//    num_pos_inside_  = 0;
+//    num_failed_      = 0;
+//    num_passed_      = 0;
 
-    for (auto result_it : results_)
-    {
-        std::shared_ptr<SinglePositionDistanceRMS> result =
-                std::static_pointer_cast<SinglePositionDistanceRMS>(result_it);
-        assert (result);
+//    for (auto result_it : results_)
+//    {
+//        std::shared_ptr<SinglePositionDistanceRMS> result =
+//                std::static_pointer_cast<SinglePositionDistanceRMS>(result_it);
+//        assert (result);
 
-        addToValues(result);
-    }
-}
+//        addToValues(result);
+//    }
+//}
 
 void JoinedPositionDistanceRMS::exportAsCSV()
 {
