@@ -87,9 +87,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
     double distance, angle, d_along;
 
     bool is_inside;
-    //pair<dbContent::TargetPosition, bool> ret_pos;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    //pair<dbContent::TargetVelocity, bool> ret_spd;
     boost::optional<dbContent::TargetVelocity> ref_spd;
     bool ok;
 
@@ -154,9 +152,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
 
         ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-//        ref_pos = ret_pos.first;
-//        ok = ret_pos.second;
-
         if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
@@ -187,9 +182,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
             continue;
         }
 
-//        ref_spd = ret_spd.first;
-//        assert (ret_pos.second); // must be set of ref pos exists
-
         is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
@@ -210,16 +202,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
 
         ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-//        if (in_appimage_) // inside appimage
-//        {
-            x_pos = tst_pos.longitude_;
-            y_pos = tst_pos.latitude_;
-//        }
-//        else
-//        {
-//            x_pos = tst_pos.latitude_;
-//            y_pos = tst_pos.longitude_;
-//        }
+        x_pos = tst_pos.longitude_;
+        y_pos = tst_pos.latitude_;
 
         ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ok)

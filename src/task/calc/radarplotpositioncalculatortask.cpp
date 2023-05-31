@@ -181,14 +181,13 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
     assert(proj_man.hasCurrentProjection());
     Projection& projection = proj_man.currentProjection();
     projection.clearCoordinateSystems(); // to rebuild from data sources
+    projection.addAllRadarCoordinateSystems();
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method '"
            << projection.name() << "'";
 
-    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
-
     string dbcontent_name;
-    set<unsigned int> ds_wo_full_pos;
+    set<unsigned int> ds_unknown;
 
     for (auto& buf_it : data_)
     {
@@ -285,21 +284,15 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
             pos_range_m = 1852.0 * pos_range_nm;
 
-            if (!projection.hasCoordinateSystem(ds_id) && !ds_wo_full_pos.count(ds_id))
+            if (!projection.hasCoordinateSystem(ds_id))
             {
-                assert (ds_man.hasDBDataSource(ds_id));
-
-                dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
-
-                if (!ds.hasFullPosition())
+                if (!ds_unknown.count(ds_id))
                 {
-                    logwrn << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source " << ds.name()
-                           << " does not have full position information, skipping";
-                    ds_wo_full_pos.insert(ds_id);
-                    continue;
+                    logwrn << "RadarPlotPositionCalculatorTask: loadingDoneSlot: unknown data source " << ds_id
+                           << ", skipping";
+                    ds_unknown.insert(ds_id);
                 }
-
-                projection.addCoordinateSystem(ds_id, ds.latitude(), ds.longitude(), ds.altitude());
+                continue;
             }
 
             ret = projection.polarToWGS84(ds_id, pos_azm_rad, pos_range_m, has_altitude,

@@ -20,6 +20,8 @@
 #include "eval/requirement/detection/detectionconfig.h"
 #include "eval/requirement/position/distanceconfig.h"
 #include "eval/requirement/position/distancermsconfig.h"
+#include "eval/requirement/position/rangeconfig.h"
+#include "eval/requirement/position/azimuthconfig.h"
 #include "eval/requirement/position/alongconfig.h"
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/latencyconfig.h"
@@ -61,6 +63,8 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementModeCFalseConfig", "Mode C False"},
     {"EvaluationRequirementPositionDistanceConfig", "Position Distance"},
     {"EvaluationRequirementPositionDistanceRMSConfig", "Position Distance RMS"},
+    {"EvaluationRequirementPositionRangeConfig", "Position Range"},
+    {"EvaluationRequirementPositionAzimuthConfig", "Position Azimuth"},
     {"EvaluationRequirementPositionAlongConfig", "Position Along"},
     {"EvaluationRequirementPositionAcrossConfig", "Position Across"},
     {"EvaluationRequirementPositionLatencyConfig", "Position Latency"},
@@ -160,6 +164,26 @@ void Group::generateSubConfigurable(const std::string& class_id,
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
+    else if (class_id == "EvaluationRequirementPositionRangeConfig")
+    {
+        EvaluationRequirement::PositionRangeConfig* config =
+                new EvaluationRequirement::PositionRangeConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+        else if (class_id == "EvaluationRequirementPositionAzimuthConfig")
+        {
+            EvaluationRequirement::PositionAzimuthConfig* config =
+                    new EvaluationRequirement::PositionAzimuthConfig(
+                        class_id, instance_id, *this, standard_, eval_man_);
+            logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+            assert(!hasRequirementConfig(config->name()));
+            configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+        }
     else if (class_id == "EvaluationRequirementPositionAlongConfig")
     {
         EvaluationRequirement::PositionAlongConfig* config =

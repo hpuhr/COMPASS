@@ -44,6 +44,7 @@ public:
     void createConfigDataSource(unsigned int ds_id);
     void deleteConfigDataSource(unsigned int ds_id);
     dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
+    const std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>>& configDataSources() const;
 
     bool hasDBDataSource(unsigned int ds_id);
     bool hasDBDataSource(const std::string& ds_name);

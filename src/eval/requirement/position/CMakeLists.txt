@@ -19,6 +19,12 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/latency.h"
         "${CMAKE_CURRENT_LIST_DIR}/latencyconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/latencyconfigwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/range.h"
+        "${CMAKE_CURRENT_LIST_DIR}/rangeconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/rangeconfigwidget.h"        
+        "${CMAKE_CURRENT_LIST_DIR}/azimuth.h"
+        "${CMAKE_CURRENT_LIST_DIR}/azimuthconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/azimuthconfigwidget.h"        
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/distanceconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/distanceconfigwidget.cpp"
@@ -35,6 +41,13 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/latency.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/latencyconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/latencyconfigwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/range.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/rangeconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/rangeconfigwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/azimuth.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/azimuthconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/azimuthconfigwidget.cpp"
+        
     )
 
 

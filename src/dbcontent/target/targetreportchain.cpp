@@ -205,6 +205,20 @@ Chain::DataID Chain::dataID(const boost::posix_time::ptime& timestamp) const
     return DataID(timestamp).addIndex(range.first->second);
 }
 
+unsigned int Chain::dsID(const DataID& id) const
+{
+    auto index     = indexFromDataID(id);
+
+    unsigned int index_ext = index.idx_external;
+
+    NullableVector<unsigned int>& dsid_vec  =
+            cache_->getMetaVar<unsigned int>(dbcontent_name_, DBContent::meta_var_datasource_id_);
+
+    assert (!dsid_vec.isNull(index_ext));
+
+    return dsid_vec.get(index_ext);
+}
+
 dbContent::TargetPosition Chain::pos(const DataID& id) const
 {
     auto timestamp = timestampFromDataID(id);

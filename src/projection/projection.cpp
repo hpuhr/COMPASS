@@ -16,9 +16,10 @@
  */
 
 #include "projection.h"
-
+#include "datasourcemanager.h"
 #include "logger.h"
 #include "projectionmanager.h"
+#include "compass.h"
 
 Projection::Projection(const std::string& class_id, const std::string& instance_id,
                        ProjectionManager& proj_manager)
@@ -36,6 +37,43 @@ Projection::~Projection() {}
 void Projection::generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id)
 {
+}
+
+void Projection::addAllRadarCoordinateSystems()
+{
+    if (!radar_coordinate_systems_added_)
+    {
+        boost::mutex::scoped_lock locker(radar_coordinate_systems_mutex_);
+
+        if (radar_coordinate_systems_added_)
+            return;
+
+        DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+        for (const auto& ds_it : ds_man.dbDataSources())
+        {
+            if (!hasCoordinateSystem(ds_it->id()))
+            {
+                if (!ds_it->hasFullPosition())
+                    continue;
+
+                addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());
+            }
+        }
+
+        for (const auto& ds_it : ds_man.configDataSources())
+        {
+            if (!hasCoordinateSystem(ds_it->id()))
+            {
+                if (!ds_it->hasFullPosition())
+                    continue;
+
+                addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());
+            }
+        }
+
+        radar_coordinate_systems_added_ = true;
+    }
 }
 
 std::string Projection::name() const { return name_; }

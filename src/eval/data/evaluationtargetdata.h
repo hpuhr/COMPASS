@@ -139,7 +139,8 @@ public:
             const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const; // gbs
 
     // test
-    boost::optional<bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& ref_id) const; // gds
+    unsigned int tstDSID(const dbContent::TargetReport::Chain::DataID& ref_id) const;
+    boost::optional<bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& tst_id) const; // gds
 
     // TODO d_max not used
     boost::optional<bool> availableRefGroundBit(const dbContent::TargetReport::Chain::DataID& id,

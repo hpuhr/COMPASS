@@ -633,6 +633,11 @@ dbContent::ConfigurationDataSource& DataSourceManager::configDataSource (unsigne
     { return s->id() == ds_id; } )->get();
 }
 
+const std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>>& DataSourceManager::configDataSources() const
+{
+    return config_data_sources_;
+}
+
 void DataSourceManager::checkSubConfigurables()
 {
 

@@ -525,6 +525,12 @@ boost::optional<bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst
     return {};
 }
 
+unsigned int EvaluationTargetData::tstDSID(const dbContent::TargetReport::Chain::DataID& tst_id) const
+{
+    //auto index     = tst_chain_.indexFromDataID(tst_id);
+    return tst_chain_.dsID(tst_id);
+}
+
 boost::optional<bool> EvaluationTargetData::tstGroundBitInterpolated(const DataID& ref_id) const // true is on ground
 {
     auto ref_timestamp = ref_chain_.timestampFromDataID(ref_id);
