@@ -36,7 +36,6 @@ class Reconstructor_UMKalman2D : public ReconstructorKalman
 public:
     struct Config
     {
-        bool simple_init = false;
     };
 
     Reconstructor_UMKalman2D(bool track_velocities = false);

@@ -93,6 +93,7 @@ protected:
     int viewPointDetail() const;
 
     Eigen::Vector2d transformBack(double x, double y) const;
+    Eigen::Vector2d transformBack(double x, double y, double vx, double vy) const;
 
 private:
     struct DBContentInfo

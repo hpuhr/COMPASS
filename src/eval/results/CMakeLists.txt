@@ -23,6 +23,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.h"
         "${CMAKE_CURRENT_LIST_DIR}/presentbase.h"
         "${CMAKE_CURRENT_LIST_DIR}/falsebase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/intervalbase.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgeneratorwidget.cpp"
@@ -32,4 +33,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/presentbase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/falsebase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/intervalbase.cpp"
     )

@@ -61,12 +61,20 @@ class Detection : public ProbabilityBase
 {
 public:
     Detection(
-            const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+            const std::string& name, 
+            const std::string& short_name, 
+            const std::string& group_name,
+            float prob, 
+            COMPARISON_TYPE prob_check_type, 
+            EvaluationManager& eval_man,
             float update_interval_s,
-            bool use_min_gap_length, float min_gap_length_s,
-            bool use_max_gap_length, float max_gap_length_s, bool invert_prob,
-            bool use_miss_tolerance, float miss_tolerance_s,
+            bool use_min_gap_length, 
+            float min_gap_length_s,
+            bool use_max_gap_length, 
+            float max_gap_length_s, 
+            bool invert_prob,
+            bool use_miss_tolerance, 
+            float miss_tolerance_s,
             bool hold_for_any_target);
 
     float updateInterval() const;

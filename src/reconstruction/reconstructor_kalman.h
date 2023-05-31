@@ -37,23 +37,23 @@ struct KalmanChain
     void reserve(size_t n)
     {
         references.reserve(n);
-        rts_infos.reserve(n);
+        kalman_states.reserve(n);
     }
 
     void add(const KalmanChain& other)
     {
         references.insert(references.end(), other.references.begin(), other.references.end());
-        rts_infos.insert(rts_infos.end(), other.rts_infos.begin(), other.rts_infos.end());
+        kalman_states.insert(kalman_states.end(), other.kalman_states.begin(), other.kalman_states.end());
     }
 
     void add(const Reference& ref, const kalman::KalmanState& state)
     {
         references.push_back(ref);
-        rts_infos.push_back(state);
+        kalman_states.push_back(state);
     }
 
-    std::vector<Reference>           references; //reconstructed positions
-    std::vector<kalman::KalmanState> rts_infos;  //data needed for RTS smoother
+    std::vector<Reference>           references;    //reconstructed positions
+    std::vector<kalman::KalmanState> kalman_states; //data needed for RTS smoother
 };
 
 /**
@@ -96,6 +96,8 @@ public:
     static const QColor ColorKalman;
     static const QColor ColorKalmanSmoothed;
     static const QColor ColorKalmanResampled;
+
+    static const float  SpeedVecLineWidth;
 
 protected:
     boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements,

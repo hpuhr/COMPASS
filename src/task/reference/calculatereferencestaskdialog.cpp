@@ -189,6 +189,9 @@ void CalculateReferencesTaskDialog::createSettingsWidget(QWidget* w)
     verbose_box_ = new QCheckBox("Verbose");
     addOptionalRow(verbose_box_, nullptr);
 
+    python_comp_box_ = new QCheckBox("Python Compatibility Mode");
+    addOptionalRow(python_comp_box_, nullptr);
+
     //read in values from task
     readOptions();
 }
@@ -219,6 +222,7 @@ void CalculateReferencesTaskDialog::readOptions()
     resample_result_dt_box_->setValue(s.resample_result_dt);
 
     verbose_box_->setChecked(s.verbose);
+    python_comp_box_->setChecked(s.python_compatibility);
 }
 
 void CalculateReferencesTaskDialog::writeOptions()
@@ -247,6 +251,7 @@ void CalculateReferencesTaskDialog::writeOptions()
     s.resample_result_dt    = resample_result_dt_box_->value();
 
     s.verbose               = verbose_box_->isChecked();
+    s.python_compatibility  = python_comp_box_->isChecked();
 }
 
 QWidget* CalculateReferencesTaskDialog::addScrollArea(QWidget* w) const
