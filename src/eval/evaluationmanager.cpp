@@ -17,32 +17,26 @@
 
 #include "evaluationmanager.h"
 #include "evaluationmanagerwidget.h"
-#include "evaluationdatawidget.h"
+#include "eval/results/report/pdfgeneratordialog.h"
 #include "evaluationstandard.h"
-#include "evaluationstandardwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/baseconfig.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "datasourcesloadwidget.h"
 #include "datasourcemanager.h"
 #include "sectorlayer.h"
 #include "sector.h"
 #include "airspace.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
-#include "dbcontent/target/target.h"
 #include "buffer.h"
 #include "filtermanager.h"
 #include "dbfilter.h"
-#include "dbfilterwidget.h"
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "stringconv.h"
-#include "dbcontent/variable/variableorderedset.h"
-#include "sqliteconnection.h"
 #include "stringconv.h"
 #include "util/timeconv.h"
 
@@ -53,8 +47,6 @@
 #include <QCoreApplication>
 #include <QThread>
 #include <QMessageBox>
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <memory>
 #include <fstream>

@@ -1,5 +1,6 @@
 #include "calculatereferencestaskdialog.h"
 #include "calculatereferencestask.h"
+#include "selectdatasourceswidget.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -23,7 +24,9 @@ CalculateReferencesTaskDialog::CalculateReferencesTaskDialog(CalculateReferences
     setMinimumSize(QSize(800, 600));
 
     createUI();
-    update();
+
+    updateSourcesWidgets();
+    updateButtons();
 }
 
 void CalculateReferencesTaskDialog::createUI()
@@ -41,14 +44,16 @@ void CalculateReferencesTaskDialog::createUI()
     QTabWidget* tab_widget = new QTabWidget;
     tab_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     main_layout->addWidget(tab_widget);
-    
-    //settings tab
-    QWidget* settings_widget = new QWidget;
-    createSettingsWidget(settings_widget);
-    tab_widget->addTab(settings_widget, "Settings");
 
-    //task_widget_ = new CreateAssociationsTaskWidget(task_, this);
-    //main_layout->addWidget(task_widget_);
+    //data sources settings tab
+    QWidget* data_sources_settings_widget = new QWidget;
+    createDataSourcesSettingsWidget(data_sources_settings_widget);
+    tab_widget->addTab(data_sources_settings_widget, "Input Data Sources");
+
+    //kalman settings tab
+    QWidget* kalman_settings_widget = new QWidget;
+    createKalmanSettingsWidget(kalman_settings_widget);
+    tab_widget->addTab(kalman_settings_widget, "Kalman Settings");
 
     //bottom buttons
     {
@@ -68,7 +73,42 @@ void CalculateReferencesTaskDialog::createUI()
     }
 }
 
-void CalculateReferencesTaskDialog::createSettingsWidget(QWidget* w)
+void CalculateReferencesTaskDialog::createDataSourcesSettingsWidget(QWidget* w)
+{
+    QWidget* content_widget = addScrollArea(w);
+
+    QVBoxLayout* layout = new QVBoxLayout;
+    content_widget->setLayout(layout);
+
+    use_tracker_check_ = new QCheckBox ("Use Tracker Data");
+    use_tracker_check_->setChecked(task_.useTrackerData());
+    connect (use_tracker_check_, SIGNAL(toggled(bool)), this, SLOT(toggleTrackerSourcesSlot()));
+    layout->addWidget(use_tracker_check_);
+
+    tracker_sources_ = new SelectDataSourcesWidget("Tracker Sources", "Tracker");
+    tracker_sources_->updateSelected(task_.trackerDataSources());
+    connect(tracker_sources_, &SelectDataSourcesWidget::selectionChangedSignal,
+            this, &CalculateReferencesTaskDialog::trackerSourcesChangedSlot);
+    layout->addWidget(tracker_sources_);
+
+    use_adsb_check_ = new QCheckBox ("Use ADS-B Data");
+    use_adsb_check_->setChecked(task_.useADSBData());
+    connect (use_adsb_check_, SIGNAL(toggled(bool)), this, SLOT(toggleADSBSourcesSlot()));
+    layout->addWidget(use_adsb_check_);
+
+    adsb_sources_ = new SelectDataSourcesWidget("ADS-B Sources", "ADSB");
+    adsb_sources_->updateSelected(task_.adsbDataSources());
+    connect(adsb_sources_, &SelectDataSourcesWidget::selectionChangedSignal,
+            this, &CalculateReferencesTaskDialog::adsbSourcesChangedSlot);
+    layout->addWidget(adsb_sources_);
+}
+
+void CalculateReferencesTaskDialog::createFilterSettingsWidget(QWidget* w)
+{
+
+}
+
+void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 {
     QWidget* content_widget = addScrollArea(w);
 
@@ -282,12 +322,21 @@ QWidget* CalculateReferencesTaskDialog::addScrollArea(QWidget* w) const
     return content_widget;
 }
 
+void CalculateReferencesTaskDialog::updateSourcesWidgets()
+{
+    assert (tracker_sources_);
+    tracker_sources_->setEnabled(task_.useTrackerData());
+
+    assert (adsb_sources_);
+    adsb_sources_->setEnabled(task_.useADSBData());
+
+}
+
 void CalculateReferencesTaskDialog::updateButtons()
 {
     assert (run_button_);
 
     run_button_->setDisabled(!task_.canRun());
-
 }
 
 void CalculateReferencesTaskDialog::runClickedSlot()
@@ -304,4 +353,38 @@ void CalculateReferencesTaskDialog::cancelClickedSlot()
     writeOptions();
 
     emit cancelSignal();
+}
+
+void CalculateReferencesTaskDialog::toggleTrackerSourcesSlot()
+{
+    assert (use_tracker_check_);
+    task_.useTrackerData(use_tracker_check_->isChecked());
+
+    updateSourcesWidgets();
+    updateButtons();
+}
+
+void CalculateReferencesTaskDialog::trackerSourcesChangedSlot(std::map<std::string, bool> selection)
+{
+    task_.trackerDataSources(selection);
+
+    updateSourcesWidgets();
+    updateButtons();
+}
+
+void CalculateReferencesTaskDialog::toggleADSBSourcesSlot()
+{
+    assert (use_adsb_check_);
+    task_.useADSBData(use_adsb_check_->isChecked());
+
+    updateSourcesWidgets();
+    updateButtons();
+}
+
+void CalculateReferencesTaskDialog::adsbSourcesChangedSlot(std::map<std::string, bool> selection)
+{
+    task_.adsbDataSources(selection);
+
+    updateSourcesWidgets();
+    updateButtons();
 }

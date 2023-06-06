@@ -43,8 +43,6 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
     main_layout->addWidget(main_label);
 
     QFrame* line = new QFrame();
-    //line->setObjectName(QString::fromUtf8("line"));
-    //line->setGeometry(QRect(320, 150, 118, 3));
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
     main_layout->addWidget(line);
@@ -54,11 +52,11 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
 
     dbo_lay->addWidget(new QLabel("DBContent"), 0, 0);
 
-    dbo_combo_ = new DBContentComboBox(false);
-    dbo_combo_->setObjectName(dbcontent_name_);
-    connect (dbo_combo_, &DBContentComboBox::changedObject, this, &EvaluationDataSourceWidget::dbContentNameChangedSlot);
+    dbcont_combo_ = new DBContentComboBox(false);
+    dbcont_combo_->setObjectName(dbcontent_name_);
+    connect (dbcont_combo_, &DBContentComboBox::changedObject, this, &EvaluationDataSourceWidget::dbContentNameChangedSlot);
 
-    dbo_lay->addWidget(dbo_combo_, 0, 1);
+    dbo_lay->addWidget(dbcont_combo_, 0, 1);
 
 
     main_layout->addLayout(dbo_lay);
@@ -66,14 +64,9 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
     // data sources
     data_source_layout_ = new QGridLayout();
 
-    //updateDataSources();
-
     main_layout->addLayout(data_source_layout_);
 
     main_layout->addStretch();
-
-    //updateCheckboxesChecked();
-    //updateCheckboxesDisabled();
 
     // line
     assert (line_id_ <= 3);
@@ -91,8 +84,6 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
     line_lay->addWidget(line_box, 0, 1);
 
     main_layout->addLayout(line_lay);
-
-    // buttons
 
     setLayout(main_layout);
 }
@@ -177,9 +168,9 @@ void EvaluationDataSourceWidget::updateCheckboxesChecked()
 
 void EvaluationDataSourceWidget::dbContentNameChangedSlot()
 {
-    assert (dbo_combo_);
+    assert (dbcont_combo_);
 
-    dbcontent_name_ = dbo_combo_->getObjectName();
+    dbcontent_name_ = dbcont_combo_->getObjectName();
 
     loginf << "EvaluationDataSourceWidget: dbContentNameChangedSlot: name " << dbcontent_name_;
 
@@ -188,27 +179,7 @@ void EvaluationDataSourceWidget::dbContentNameChangedSlot()
     updateDataSources();
 
     updateCheckboxesChecked();
-    //updateCheckboxesDisabled();
 }
-
-//void EvaluationDataSourceWidget::updateCheckboxesDisabled()
-//{
-//    map<unsigned int, bool> data_sources;
-
-//    if (title_ == "Reference Data")
-//        data_sources = COMPASS::instance().evaluationManager().dataSourcesRef();
-//    else
-//        data_sources = COMPASS::instance().evaluationManager().dataSourcesTst();
-
-//    for (auto& checkit : data_sources_checkboxes_)
-//    {
-//        assert(data_sources.count(checkit.first));
-//        ActiveDataSource& src = data_sources_.at(checkit.first);
-//        checkit.second->setEnabled(src.isActiveInData());
-//        loginf << "EvaluationDataSourceWidget: updateCheckboxesDisabled: src " << src.getName()
-//               << " active " << src.isActiveInData();
-//    }
-//}
 
 void EvaluationDataSourceWidget::toggleDataSourceSlot()
 {

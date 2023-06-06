@@ -4,14 +4,15 @@
 
 #include <QDialog>
 
-
 class CalculateReferencesTask;
+class SelectDataSourcesWidget;
 
 class QPushButton;
 class QDoubleSpinBox;
 class QCheckBox;
 class QSpinBox;
 class QComboBox;
+class QTabWidget;
 
 class CalculateReferencesTaskDialog : public QDialog
 {
@@ -25,14 +26,22 @@ public slots:
     void runClickedSlot();
     void cancelClickedSlot();
 
+    void toggleTrackerSourcesSlot();
+    void trackerSourcesChangedSlot(std::map<std::string, bool> selection);
+    void toggleADSBSourcesSlot();
+    void adsbSourcesChangedSlot(std::map<std::string, bool> selection);
+
 public:
     CalculateReferencesTaskDialog(CalculateReferencesTask& task);
 
+    void updateSourcesWidgets(); // disables if not selected
     void updateButtons();
 
 protected:
     void createUI();
-    void createSettingsWidget(QWidget* w);
+    void createDataSourcesSettingsWidget(QWidget* w);
+    void createFilterSettingsWidget(QWidget* w);
+    void createKalmanSettingsWidget(QWidget* w);
     QWidget* addScrollArea(QWidget* w) const;
 
     void readOptions();
@@ -40,9 +49,22 @@ protected:
 
     CalculateReferencesTask& task_;
 
+    QTabWidget* tab_widget_{nullptr};
+
+    // buttons
     QPushButton*    cancel_button_{nullptr};
     QPushButton*    run_button_   {nullptr};
 
+    // data sources
+
+    QCheckBox* use_tracker_check_ {nullptr};
+    SelectDataSourcesWidget* tracker_sources_ {nullptr};
+    QCheckBox* use_adsb_check_ {nullptr};
+    SelectDataSourcesWidget* adsb_sources_ {nullptr};
+
+    // filters
+
+    // kalman
     QComboBox*      rec_type_box_ = nullptr;
 
     QDoubleSpinBox* R_std_box_      = nullptr;

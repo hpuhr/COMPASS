@@ -24,13 +24,10 @@
 #include "viewabledataconfig.h"
 #include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgenerator.h"
-#include "eval/results/report/pdfgeneratordialog.h"
 
 #include <QObject>
 
 #include "json.hpp"
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 class COMPASS;
 class EvaluationStandard;

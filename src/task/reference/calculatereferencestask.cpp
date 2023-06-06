@@ -3,7 +3,7 @@
 #include "calculatereferencesstatusdialog.h"
 #include "calculatereferencesjob.h"
 #include "compass.h"
-#include "dbinterface.h"
+#include "datasourcemanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
@@ -26,6 +26,7 @@
 using namespace std;
 using namespace Utils;
 using namespace dbContent;
+using namespace nlohmann;
 
 CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
                                                  const std::string& instance_id,
@@ -54,6 +55,12 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
 
     registerParameter("rec_resample_result"   , &settings_.resample_result   , true);
     registerParameter("rec_resample_result_dt", &settings_.resample_result_dt, 2.0 );
+
+    registerParameter("use_tracker_data"  , &settings_.use_tracker_data, true);
+    registerParameter("data_sources_tracker", &settings_.data_sources_tracker, json::object());
+
+    registerParameter("use_adsb_data"  , &settings_.use_adsb_data, true);
+    registerParameter("data_sources_adsb", &settings_.data_sources_adsb, json::object());
     
     //registerParameter("rec_verbose", &settings_.verbose, false);
     //registerParameter("rec_generate_viewpoints", &settings_.generate_viewpoints, false);
@@ -80,6 +87,113 @@ CalculateReferencesTaskDialog* CalculateReferencesTask::dialog()
     return dialog_.get();
 }
 
+bool CalculateReferencesTask::useTrackerData() const
+{
+    return settings_.use_tracker_data;
+}
+
+void CalculateReferencesTask::useTrackerData(bool value)
+{
+    loginf << "CalculateReferencesTask: useTrackerData: value " << value;
+
+    settings_.use_tracker_data = value;
+}
+
+
+std::map<std::string, bool> CalculateReferencesTask::trackerDataSources()
+{
+    return settings_.data_sources_tracker;
+}
+
+void CalculateReferencesTask::trackerDataSources(std::map<std::string, bool> sources)
+{
+    loginf << "CalculateReferencesTask: trackerDataSources";
+
+    settings_.data_sources_tracker = sources;
+}
+
+bool CalculateReferencesTask::useADSBData() const
+{
+    return settings_.use_adsb_data;
+}
+
+void CalculateReferencesTask::useADSBData(bool value)
+{
+    loginf << "CalculateReferencesTask: useADSBData: value " << value;
+
+    settings_.use_adsb_data = value;
+}
+
+std::map<std::string, bool> CalculateReferencesTask::adsbDataSources()
+{
+    return settings_.data_sources_adsb;
+}
+
+void CalculateReferencesTask::adsbDataSources(std::map<std::string, bool> sources)
+{
+    loginf << "CalculateReferencesTask: adsbDataSources";
+
+    settings_.data_sources_adsb = sources;
+}
+
+bool CalculateReferencesTask::anySourcesActive(const std::string& ds_type, const nlohmann::json& sources)
+{
+    loginf << "CalculateReferencesTask: anySourcesActive: ds_type " << ds_type;
+
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    string ds_id_str;
+
+    for (auto& ds_it : ds_man.dbDataSources())
+    {
+        if (ds_it->dsType() != ds_type)
+            continue;
+
+        ds_id_str = to_string(ds_it->id());
+
+        if (sources.count(ds_id_str))
+        {
+            if (sources.at(ds_id_str))
+                return true;
+        }
+        else
+            return true; // not disabled
+    }
+
+    return false;
+}
+
+std::string CalculateReferencesTask::getActiveDataSources(const std::string& ds_type, const nlohmann::json& sources)
+{
+    loginf << "CalculateReferencesTask: getActiveDataSources: ds_type " << ds_type;
+
+    string tmp;
+
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    string ds_id_str;
+
+    for (auto& ds_it : ds_man.dbDataSources())
+    {
+        if (ds_it->dsType() != ds_type)
+            continue;
+
+        ds_id_str = to_string(ds_it->id());
+
+        if (sources.count(ds_id_str))
+        {
+            if (sources.at(ds_id_str))
+                tmp += tmp.size() ? ", " + ds_id_str : ds_id_str;
+        }
+        else
+            tmp += tmp.size() ? ", " + ds_id_str : ds_id_str;
+    }
+
+    loginf << "CalculateReferencesTask: getActiveDataSources: ds_type " << ds_type << " ids '" << tmp << "'";
+
+    return tmp;
+}
+
 bool CalculateReferencesTask::canRun()
 {
     if (!COMPASS::instance().dbOpened())
@@ -90,8 +204,13 @@ bool CalculateReferencesTask::canRun()
     if (!dbcontent_man.hasData())
         return false;
 
-    if (!dbcontent_man.dbContent("CAT021").hasData()
-            && !dbcontent_man.dbContent("CAT062").hasData())
+    bool load_any_cat021 = dbcontent_man.dbContent("CAT021").hasData()
+            && useADSBData() && anySourcesActive("ADSB", settings_.data_sources_adsb);
+
+    bool load_any_cat062 = dbcontent_man.dbContent("CAT062").hasData()
+            && useTrackerData() && anySourcesActive("Tracker", settings_.data_sources_tracker);
+
+    if (!load_any_cat021 && !load_any_cat062)
         return false;
 
     return true;
@@ -164,6 +283,8 @@ void CalculateReferencesTask::run()
     connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
             this, &CalculateReferencesTask::loadingDoneSlot);
 
+    bool loaded_any = false;
+
     for (auto& dbo_it : dbcontent_man)
     {
         if (!dbo_it.second->hasData())
@@ -172,23 +293,46 @@ void CalculateReferencesTask::run()
         if (dbo_it.first != "CAT021" && dbo_it.first != "CAT062") // dbo_it.first != "CAT021" &&
             continue;
 
+        if (dbo_it.first == "CAT021" && (!useADSBData() || !anySourcesActive("ADSB", settings_.data_sources_adsb)))
+            continue;
+
+        if (dbo_it.first == "CAT062" && (!useTrackerData() || !anySourcesActive("Tracker", settings_.data_sources_tracker)))
+            continue;
+
         VariableSet read_set = getReadSetFor(dbo_it.first);
 
-        if (utns_.empty())
-        {
-            //load for all utns
-            dbo_it.second->load(read_set, false, false);
-        }
+        string custom_clause;
+
+        dbContent::Variable& ds_id_var = COMPASS::instance().dbContentManager().metaVariable(
+                    DBContent::meta_var_datasource_id_.name()).getFor(dbo_it.first);
+
+
+        custom_clause += ds_id_var.dbColumnName() + " IN (";
+
+        if (dbo_it.first == "CAT021")
+            custom_clause += getActiveDataSources("ADSB", settings_.data_sources_adsb);
         else
+            custom_clause += getActiveDataSources("Tracker", settings_.data_sources_tracker);
+
+        custom_clause += ")";
+
+        if (!utns_.empty())
         {
             //load for specified utns only
             dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
-            DBContent::meta_var_utn_.name()).getFor(dbo_it.first);
+                        DBContent::meta_var_utn_.name()).getFor(dbo_it.first);
 
-            string custom_clause = var.dbColumnName() + " IN (" +  String::compress(utns_, ',') + ")";
-            dbo_it.second->load(read_set, false, false, custom_clause);
+            if (custom_clause.size())
+                custom_clause += " AND ";
+            custom_clause += var.dbColumnName() + " IN (" +  String::compress(utns_, ',') + ")";
         }
+
+        dbo_it.second->load(read_set, false, false, custom_clause);
+
+        loaded_any |= true;
     }
+
+    assert (loaded_any);
 
     status_dialog_->show();
 }
@@ -228,7 +372,7 @@ void CalculateReferencesTask::createDoneSlot()
             //load all created view points
             status_dialog_->setStatus("Adding View Points");
 
-            COMPASS::instance().viewManager().loadViewPoints(j);            
+            COMPASS::instance().viewManager().loadViewPoints(j);
         }
 
         if (!utns_.empty())
@@ -266,11 +410,11 @@ void CalculateReferencesTask::createDoneSlot()
 
     std::string time_str = String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
 
-//    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
-//    COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
-//    COMPASS::instance().dbContentManager().resizeTargetListWidget();
+    //    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+    //    COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+    //    COMPASS::instance().dbContentManager().resizeTargetListWidget();
 
-//    COMPASS::instance().interface().saveProperties();
+    //    COMPASS::instance().interface().saveProperties();
 
     cache_ = nullptr;
     data_.clear();

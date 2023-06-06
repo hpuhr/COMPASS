@@ -5,13 +5,13 @@
 #include "dbcontent/variable/variableset.h"
 #include "dbcontent/dbcontentcache.h"
 #include "task.h"
-#include "global.h"
+//#include "global.h"
 
 #include <QObject>
 
 #include <memory>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+//#include "boost/date_time/posix_time/posix_time.hpp"
 
 class CalculateReferencesTaskDialog;
 class CalculateReferencesStatusDialog;
@@ -51,6 +51,12 @@ struct CalculateReferencesTaskSettings
     bool          generate_viewpoints   = false;    // generate viewpoints and add to viewpoints list
     bool          python_compatibility  = false;    // if true settings may be overriden to make rec compatible with python version
 
+    bool use_tracker_data {true};
+    nlohmann::json data_sources_tracker;            // map, ds_id str -> active flag, true if not contained
+
+    bool use_adsb_data {true};
+    nlohmann::json data_sources_adsb;               // map, ds_id str -> active flag, true if not contained
+
     ReconstructorType rec_type = ReconstructorType::UMKalman2D;
 };
 
@@ -86,6 +92,21 @@ public:
     virtual ~CalculateReferencesTask();
 
     CalculateReferencesTaskDialog* dialog();
+
+    bool useTrackerData() const;
+    void useTrackerData(bool value);
+
+    std::map<std::string, bool> trackerDataSources();
+    void trackerDataSources(std::map<std::string, bool> sources);
+
+    bool useADSBData() const;
+    void useADSBData(bool value);
+
+    std::map<std::string, bool> adsbDataSources();
+    void adsbDataSources(std::map<std::string, bool> sources);
+
+    bool anySourcesActive(const std::string& ds_type, const nlohmann::json& sources);
+    std::string getActiveDataSources(const std::string& ds_type, const nlohmann::json& sources);
 
     virtual bool canRun() override;
     virtual void run() override;
