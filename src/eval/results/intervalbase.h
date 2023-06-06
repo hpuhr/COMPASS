@@ -79,9 +79,9 @@ protected:
     virtual std::vector<std::string> detailsTableColumns() const;
     virtual std::vector<QVariant> detailsTableValues(const EvaluationDetail& detail) const;
 
-    virtual unsigned int sortColumn() const = 0;
+    virtual unsigned int sortColumn() const;
 
-    void updatePD();
+    void updatePCD();
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
@@ -90,12 +90,14 @@ protected:
 
     std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
 
+    QVariant pcdVar() const;
+
     int sum_uis_    {0};
     int missed_uis_ {0};
 
     TimePeriodCollection ref_periods_;
 
-    boost::optional<float> pd_;
+    boost::optional<float> pcd_;
 };
 
 /**
@@ -123,7 +125,7 @@ public:
 
 protected:
     void addToValues (std::shared_ptr<SingleIntervalBase> single_result);
-    void updatePD();
+    void updatePCD();
 
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -141,7 +143,7 @@ protected:
     unsigned int num_single_targets_ {0};
     unsigned int num_failed_single_targets_ {0};
 
-    boost::optional<float> pd_;
+    boost::optional<float> pcd_;
 };
 
-}
+} // EvaluationRequirementResult

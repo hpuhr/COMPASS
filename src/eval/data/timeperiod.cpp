@@ -127,7 +127,7 @@ void TimePeriodCollection::clear()
 void TimePeriodCollection::add (TimePeriod&& period)
 {
     if (periods_.size())
-        assert (periods_.rbegin()->end() < period.begin());
+        assert (periods_.rbegin()->end() <= period.begin());
 
     periods_.push_back(period);
 }
@@ -359,20 +359,27 @@ void TimePeriodCollection::fillInOutsidePeriods(const boost::optional<boost::pos
                                                 const boost::optional<boost::posix_time::ptime>& data_tmax)
 {
     //no periods?
-    if (periods_.empty())
-        return;
+    std::vector<TimePeriod> periods;
 
     //collect inside periods
-    std::vector<TimePeriod> periods;
-    periods.reserve(periods_.size());
+    if (!periods_.empty())
+    {
+        periods.reserve(periods_.size());
 
-    for (const auto& p : periods_)
-        if (p.type() == TimePeriod::Type::InsideSector)
-            periods.push_back(TimePeriod(p.begin(), p.end(), TimePeriod::Type::InsideSector));
+        for (const auto& p : periods_)
+            if (p.type() == TimePeriod::Type::InsideSector)
+                periods.push_back(TimePeriod(p.begin(), p.end(), TimePeriod::Type::InsideSector));
+    }
 
     //no inside periods?
     if (periods.empty())
+    {
+        //add a single outside sector if data bounds are provided
+        if (data_tmin.has_value() && data_tmax.has_value())
+            add({data_tmin.value(), data_tmax.value(), TimePeriod::Type::OutsideSector});
+
         return;
+    }
 
     //inside periods start and end
     auto t0 = periods.front().begin();

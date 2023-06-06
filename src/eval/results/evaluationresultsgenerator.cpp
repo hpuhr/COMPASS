@@ -114,7 +114,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     vector<unsigned int> utns;
 
     for (auto& target_data_it : data)
-        utns.push_back(target_data_it.utn_);
+    {
+        //if (target_data_it.use())
+            utns.push_back(target_data_it.utn_);
+    }
 
     unsigned int num_utns = utns.size();
 
@@ -167,7 +170,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 //                tbb::task::enqueue(*t);
 
                 const SectorLayer& sector_layer = *sec_it;
-                bool single_thread = false;
+                bool single_thread = true;
 
 //                int num_threads = oneapi::tbb::info::default_concurrency();
 //                loginf << "EvaluateTask: execute: starting, num_threads " << num_threads;

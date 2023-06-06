@@ -60,7 +60,7 @@ std::string Base::groupName() const
 
 std::pair<ValueComparisonResult, std::string> Base::compareTi (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff)
+        time_duration max_ref_time_diff) const
 {
     ptime ref_lower, ref_upper;
     tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
@@ -140,7 +140,7 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
 
 std::pair<ValueComparisonResult, std::string> Base::compareTa (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff)
+        time_duration max_ref_time_diff) const
 {
     ptime ref_lower, ref_upper;
 
@@ -220,7 +220,7 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
 
 std::pair<ValueComparisonResult, std::string> Base::compareModeA (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff)
+        time_duration max_ref_time_diff) const
 {
     ptime ref_lower, ref_upper;
     tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
@@ -298,7 +298,7 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeA (
 
 std::pair<ValueComparisonResult, std::string> Base::compareModeC (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff, float max_val_diff)
+        time_duration max_ref_time_diff, float max_val_diff) const
 {
     boost::optional<float> tst_value, ref_value_lower, ref_value_upper;
 

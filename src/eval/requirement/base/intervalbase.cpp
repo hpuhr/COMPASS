@@ -109,7 +109,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
 
     uint32_t sum_uis = periods.getUIs(update_interval_s_);
 
-    //sort test updates into periods
+    //sort test updates into ref periods
     for (const auto& tst_it : tst_data)
     {
         auto timestamp = tst_it.first;
@@ -164,15 +164,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
         //!events which cause misses should generate comments!
         assert(event.misses == 0 || !detail_info.evt_comment.empty());
 
-        auto evt_dt = event.dtSeconds();
-
         //add detail for event
-        addDetail(event.interval_time1, 
+        addDetail(detail_info.evt_time, 
                   detail_info.evt_position, 
                   detail_info.evt_position_ref, 
-                  evt_dt, 
-                  event.misses > 0, 
-                  detail_info.evt_has_ref, 
+                  detail_info.evt_dt, 
+                  detail_info.evt_has_misses, 
+                  detail_info.evt_has_ref,
                   misses_total, 
                   detail_info.evt_comment);
     }
@@ -196,18 +194,28 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriodCollection& period
 {
     std::vector<Event> events;
 
+    uint32_t inside_period_cnt = 0;
+
     for (size_t i = 0; i < periods.size(); ++i)
     {
-        //create events for period
-        auto events_period = periodEvents(periods.period(i), target_data, sector_layer);
+        const auto& period = periods.period(i);
 
-        //add period index to events
-        for (auto& e : events_period)
-            e.period = (uint32_t)i;
+        //create events for period
+        auto events_period = periodEvents(period, target_data, sector_layer);
+
+        //period is inside period?
+        if (period.type() == TimePeriod::Type::InsideSector)
+        {
+            //add inside period index to events
+            for (auto& e : events_period)
+                e.period = inside_period_cnt;
+
+            ++inside_period_cnt;
+        }
 
         //collect
         if (!events_period.empty())
-            events.insert(events.begin(), events_period.begin(), events_period.end());
+            events.insert(events.end(), events_period.begin(), events_period.end());
     }
 
     return events;
@@ -253,7 +261,9 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     if (period.type() == TimePeriod::Type::OutsideSector)
     {
         for (const auto& update : period.getUpdates())
-            logEvent(Event::TypeOutsideSector, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false);
+        {
+            logEvent(Event::TypeNoReference, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false);
+        }
 
         return events;
     }
@@ -272,6 +282,8 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     else
     {
         //period obtains updates
+        auto max_ref_time_diff = Utils::Time::partialSeconds(eval_man_.maxRefTimeDiff());
+
         size_t n = updates.size();
 
         const TimePeriodUpdate* valid_last = nullptr;
@@ -281,13 +293,19 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
             const auto& update = updates[ i ];
 
             //check if update is valid
-            std::string err;
-            bool valid = isValid(update.data_id, target_data, sector_layer, err);
+            auto validity = isValid(update.data_id, target_data, sector_layer, max_ref_time_diff);
+
+            //no ref data available for update => log and skip
+            if (validity.value == Validity::Value::DataMissing)
+            {
+                logEvent(Event::TypeDataMissing, &update, update.data_id.timestamp(), update.data_id.timestamp(), validity.comment, false);
+                continue;
+            }
 
             //invalid update => log and skip
-            if (!valid)
+            if (validity.value == Validity::Value::Invalid)
             {
-                logEvent(Event::TypeInvalid, &update, update.data_id.timestamp(), update.data_id.timestamp(), err, false);
+                logEvent(Event::TypeInvalid, &update, update.data_id.timestamp(), update.data_id.timestamp(), validity.comment, false);
                 continue;
             }
 
@@ -361,111 +379,155 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
     bool has_miss = event.misses > 0;
 
     IntervalBase::DetailInfo dinfo;
+    dinfo.evt_has_misses = has_miss;
+    dinfo.evt_dt         = event.dtSeconds();
 
     switch (event.type)
     {
-        case Event::TypeOutsideSector:
+        case Event::TypeNoReference:
         {
-            dinfo.evt_comment     = "Outside sector";
+            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+
+            dinfo.evt_time        = event.data_id.timestamp();
+            dinfo.evt_comment     = "Outside reference period";
             dinfo.evt_position    = target_data.tstChain().pos(event.data_id);
             dinfo.evt_has_ref     = false;
             dinfo.generate_detail = true;
+
+            break;
         }
         case Event::TypeEnterPeriod:
         {
+            assert(target_data.refChain().posOpt(event.interval_time0).has_value());
+
+            dinfo.evt_time        = event.interval_time0;
             dinfo.evt_comment     = "Entering " + period;
             dinfo.evt_position    = target_data.refChain().pos(event.interval_time0);
             dinfo.evt_has_ref     = true;
             dinfo.generate_detail = true;
+
+            break;
         }
         case Event::TypeFirstValidUpdateInPeriod:
         {
+            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+
+            dinfo.evt_time        = event.data_id.timestamp();
             dinfo.evt_comment     = "First valid target report of " + period;
             dinfo.evt_position    = target_data.tstChain().pos(event.data_id);
             dinfo.evt_has_ref     = true;
             dinfo.generate_detail = true;
+
+            break;
         }
         case Event::TypeValidFirst:
         {
+            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            assert(target_data.refChain().posOpt(event.interval_time0).has_value());
+
+            dinfo.evt_time         = event.data_id.timestamp();
             dinfo.evt_comment      = has_miss ? "Miss detected at start of current " + period + " " + miss + ", between " + evt_interval : "OK " + hit;
             dinfo.evt_position     = target_data.tstChain().pos(event.data_id);
             dinfo.evt_position_ref = target_data.refChain().pos(event.interval_time0);
             dinfo.evt_has_ref      = true;
             dinfo.generate_detail  = true;
+
+            break;
         }
         case Event::TypeValid:
         {
+            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            assert(target_data.tstChain().posOpt(event.interval_time0).has_value());
+
+            dinfo.evt_time         = event.data_id.timestamp();
             dinfo.evt_comment      = has_miss ? "Miss detected in current " + period + " " + miss + ", between " + evt_interval : "OK " + hit;
             dinfo.evt_position     = target_data.tstChain().pos(event.data_id);
             dinfo.evt_position_ref = target_data.tstChain().pos(event.interval_time0);
             dinfo.evt_has_ref      = true;
             dinfo.generate_detail  = true;
+
+            break;
         }
         case Event::TypeValidLast:
         {
+            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            assert(target_data.refChain().posOpt(event.interval_time1).has_value());
+
+            dinfo.evt_time         = event.data_id.timestamp();
             dinfo.evt_comment      = has_miss ? "Miss detected at end of current " + period + " " + miss + ", between " + evt_interval : 
                                                 "End of current " + period + " OK " + hit;
             dinfo.evt_position     = target_data.tstChain().pos(event.data_id);
             dinfo.evt_position_ref = target_data.refChain().pos(event.interval_time1);
             dinfo.evt_has_ref      = true;
             dinfo.generate_detail  = true;
+
+            break;
         }
         case Event::TypeInvalid:
         {
+            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+
+            dinfo.evt_time        = event.data_id.timestamp();
             dinfo.evt_comment     = "Invalid target report: " + error;
             dinfo.evt_position    = target_data.tstChain().pos(event.data_id);
             dinfo.evt_has_ref     = true;
             dinfo.generate_detail = true;
+
+            break;
+        }
+        case Event::TypeDataMissing:
+        {
+            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+
+            dinfo.evt_time        = event.data_id.timestamp();
+            dinfo.evt_comment     = "Invalid target report: " + error;
+            dinfo.evt_position    = target_data.tstChain().pos(event.data_id);
+            dinfo.evt_has_ref     = true;
+            dinfo.generate_detail = true;
+
+            break;
         }
         case Event::TypeLastValidUpdateInPeriod:
         {
+            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+
+            dinfo.evt_time        = event.data_id.timestamp();
             dinfo.evt_comment     = "Last valid target report of " + period;
             dinfo.evt_position    = target_data.tstChain().pos(event.data_id);
             dinfo.evt_has_ref     = true;
             dinfo.generate_detail = true;
+
+            break;
         }
         case Event::TypeLeavePeriod:
         {
+            assert(target_data.refChain().posOpt(event.interval_time1).has_value());
+
+            dinfo.evt_time        = event.interval_time1;
             dinfo.evt_comment     = "Leaving " + period;
             dinfo.evt_position    = target_data.refChain().pos(event.interval_time1);
             dinfo.evt_has_ref     = true;
             dinfo.generate_detail = true;
+
+            break;
         }
         case Event::TypeEmptyPeriod:
         {
+            assert(target_data.refChain().posOpt(event.interval_time0).has_value());
+            assert(target_data.refChain().posOpt(event.interval_time1).has_value());
+
+            dinfo.evt_time         = event.interval_time1;
             dinfo.evt_comment      = has_miss ? "Miss detected in empty period " + period + " " + miss + ", between " + evt_interval : "";
             dinfo.evt_position     = target_data.refChain().pos(event.interval_time1);
             dinfo.evt_position_ref = target_data.refChain().pos(event.interval_time0);
             dinfo.evt_has_ref      = true;
             dinfo.generate_detail  = has_miss;
+
+            break;
         }
     }
 
     return dinfo;
 }
-
-// TEST IMPL (TO BE REMOVED)
-// std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::createResult(const std::string& result_id,
-//                                                                                 std::shared_ptr<Base> instance, 
-//                                                                                 const EvaluationTargetData& target_data,
-//                                                                                 const SectorLayer& sector_layer, 
-//                                                                                 const std::vector<EvaluationDetail>& details,
-//                                                                                 const TimePeriodCollection& periods,
-//                                                                                 unsigned int sum_uis,
-//                                                                                 unsigned int misses_total)
-// {
-//     return std::make_shared<EvaluationRequirementResult::MyResultClass>(
-//                 "My Result Type",
-//                 result_id, 
-//                 instance, 
-//                 sector_layer, 
-//                 target_data.utn_, 
-//                 &target_data,
-//                 eval_man_, 
-//                 details, 
-//                 sum_uis,
-//                 misses_total, 
-//                 periods);
-// }
 
 } // namespace EvaluationRequirement
