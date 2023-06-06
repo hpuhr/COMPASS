@@ -126,109 +126,154 @@ void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> roo
     }
 }
 
-void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable, bool overview)
+void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable, 
+                                   bool overview,
+                                   bool add_highlight)  const
 {
     if (!viewable.count("annotations"))
         viewable["annotations"] = json::array();
 
-    if (!viewable.at("annotations").size()) // not yet initialized
+    auto addAnnotation = [ & ] (const std::string& name,
+                                const std::string& symbol_color,
+                                const std::string& symbol,
+                                const std::string& point_color,
+                                int point_size,
+                                const std::string& line_color,
+                                int line_width)
     {
-        // errors
         viewable.at("annotations").push_back(json::object()); // errors
 
+        nlohmann::json& annotation = viewable.at("annotations").back();
+
+        annotation["name"        ] = name;
+        annotation["symbol_color"] = symbol_color;
+        annotation["features"    ] = json::array();
+
+        // lines
+        annotation.at("features").push_back(json::object());
+
+        json& feature_lines = annotation.at("features").back();
+
+        feature_lines["type"] = "feature";
+        feature_lines["geometry"] = json::object();
+        feature_lines.at("geometry")["type"] = "lines";
+        feature_lines.at("geometry")["coordinates"] = json::array();
+
+        feature_lines["properties"] = json::object();
+        feature_lines.at("properties")["color"] = line_color;
+        feature_lines.at("properties")["line_width"] = line_width;
+
+        // symbols
+
+        annotation.at("features").push_back(json::object());
+
+        json& feature_points = annotation.at("features").back();
+
+        feature_points["type"] = "feature";
+        feature_points["geometry"] = json::object();
+        feature_points.at("geometry")["type"] = "points";
+        feature_points.at("geometry")["coordinates"] = json::array();
+
+        feature_points["properties"] = json::object();
+        feature_points.at("properties")["color"] = point_color;
+
+        feature_points.at("properties")["symbol"] = symbol;
+        feature_points.at("properties")["symbol_size"] = point_size;
+    };
+
+    if (!viewable.at("annotations").size()) // not yet initialized
+    {
+        //ATTENTION: !ORDER IMPORTANT!
+
+        // highlight
+        if (add_highlight)
         {
-            viewable.at("annotations").at(0)["name"] = result_id_+" Errors";
-            viewable.at("annotations").at(0)["symbol_color"] = "#FF6666";
-            viewable.at("annotations").at(0)["features"] = json::array();
-
-            // lines
-            viewable.at("annotations").at(0).at("features").push_back(json::object());
-
-            json& feature_lines = viewable.at("annotations").at(0).at("features").at(0);
-
-            feature_lines["type"] = "feature";
-            feature_lines["geometry"] = json::object();
-            feature_lines.at("geometry")["type"] = "lines";
-            feature_lines.at("geometry")["coordinates"] = json::array();
-
-            feature_lines["properties"] = json::object();
-            feature_lines.at("properties")["color"] = "#FF6666";
-            feature_lines.at("properties")["line_width"] = 2;
-
-            // symbols
-
-            viewable.at("annotations").at(0).at("features").push_back(json::object());
-
-            json& feature_points = viewable.at("annotations").at(0).at("features").at(1);
-
-            feature_points["type"] = "feature";
-            feature_points["geometry"] = json::object();
-            feature_points.at("geometry")["type"] = "points";
-            feature_points.at("geometry")["coordinates"] = json::array();
-
-            feature_points["properties"] = json::object();
-            feature_points.at("properties")["color"] = "#FF6666";
-
-            if (overview)
-            {
-                feature_points.at("properties")["symbol"] = "circle";
-                feature_points.at("properties")["symbol_size"] = 8;
-            }
-            else
-            {
-                feature_points.at("properties")["symbol"] = "border";
-                feature_points.at("properties")["symbol_size"] = 10;
-            }
-
+            addAnnotation(result_id_+" Selected", 
+                        "#FFFF00",
+                        overview ? "circle" : "border",
+                        "#FFFF00",
+                        overview ? 8 : 10,
+                        "#FFFF00",
+                        4);
         }
 
+        // errors
+        addAnnotation(result_id_+" Errors", 
+                      "#FF6666",
+                      overview ? "circle" : "border",
+                      "#FF6666",
+                      overview ? 8 : 10,
+                      "#FF6666",
+                      2);
         // ok
-        {
-            viewable.at("annotations").push_back(json::object()); // ok
-            viewable.at("annotations").at(1)["name"] = result_id_+" OK";
-            viewable.at("annotations").at(1)["symbol_color"] = "#66FF66";
-            viewable.at("annotations").at(1)["features"] = json::array();
+        addAnnotation(result_id_+" OK", 
+                      "#66FF66",
+                      overview ? "circle" : "border",
+                      "#66FF66",
+                      overview ? 8 : 10,
+                      "#66FF66",
+                      2);
 
-            // lines
-            viewable.at("annotations").at(1).at("features").push_back(json::object());
-
-            json& feature_lines = viewable.at("annotations").at(1).at("features").at(0);
-
-            feature_lines["type"] = "feature";
-            feature_lines["geometry"] = json::object();
-            feature_lines.at("geometry")["type"] = "lines";
-            feature_lines.at("geometry")["coordinates"] = json::array();
-
-            feature_lines["properties"] = json::object();
-            feature_lines.at("properties")["color"] = "#66FF66";
-            feature_lines.at("properties")["line_width"] = 2;
-
-            // symbols
-
-            viewable.at("annotations").at(1).at("features").push_back(json::object());
-
-            json& feature_points = viewable.at("annotations").at(1).at("features").at(1);
-
-            feature_points["type"] = "feature";
-            feature_points["geometry"] = json::object();
-            feature_points.at("geometry")["type"] = "points";
-            feature_points.at("geometry")["coordinates"] = json::array();
-
-            feature_points["properties"] = json::object();
-            feature_points.at("properties")["color"] = "#66FF66";
-
-            if (overview)
-            {
-                feature_points.at("properties")["symbol"] = "circle";
-                feature_points.at("properties")["symbol_size"] = 8;
-            }
-            else
-            {
-                feature_points.at("properties")["symbol"] = "border";
-                feature_points.at("properties")["symbol_size"] = 10;
-            }
-        }
+        
     }
+}
+
+nlohmann::json& Single::annotationPointCoords(nlohmann::json::object_t& viewable, AnnotationType type) const
+{
+    auto& annos = viewable.at("annotations");
+    bool has_highlight = annos.size() == 3;
+
+    const int idx_hl  = 0;
+    const int idx_err = has_highlight ? 1 : 0;
+    const int idx_ok  = has_highlight ? 2 : 1;
+
+    if (type == AnnotationType::TypeOk)
+        return annos.at( idx_ok ).at("features").at( 1 ).at("geometry")["coordinates"];
+    if (type == AnnotationType::TypeError)
+        return annos.at( idx_err ).at("features").at( 1 ).at("geometry")["coordinates"];
+
+    assert(has_highlight);
+
+    //type == AnnotationType::TypeHighlight
+    return annos.at( idx_hl ).at("features").at( 1 ).at("geometry")["coordinates"];
+}
+
+nlohmann::json& Single::annotationLineCoords(nlohmann::json::object_t& viewable, AnnotationType type) const
+{
+    auto& annos = viewable.at("annotations");
+    bool has_highlight = annos.size() == 3;
+
+    const int idx_hl  = 0;
+    const int idx_err = has_highlight ? 1 : 0;
+    const int idx_ok  = has_highlight ? 2 : 1;
+
+    if (type == AnnotationType::TypeOk)
+        return annos.at( idx_ok ).at("features").at( 0 ).at("geometry")["coordinates"];
+    if (type == AnnotationType::TypeError)
+        return annos.at( idx_err ).at("features").at( 0 ).at("geometry")["coordinates"];
+
+    assert(has_highlight);
+
+    //type == AnnotationType::TypeHighlight
+    return annos.at( idx_hl ).at("features").at( 0 ).at("geometry")["coordinates"];
+}
+
+void Single::addAnnotationPos(nlohmann::json::object_t& viewable, 
+                              const EvaluationDetail::Position& pos, 
+                              AnnotationType type) const
+{
+    auto& coords = annotationPointCoords(viewable, type);
+    coords.push_back(pos.asVector());
+}
+
+void Single::addAnnotationLine(nlohmann::json::object_t& viewable,
+                               const EvaluationDetail::Position& pos0, 
+                               const EvaluationDetail::Position& pos1, 
+                               AnnotationType type) const
+{
+    auto& coords = annotationLineCoords(viewable, type);
+    coords.push_back(pos0.asVector());
+    coords.push_back(pos1.asVector());
 }
 
 std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const

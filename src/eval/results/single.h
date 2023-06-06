@@ -63,6 +63,13 @@ public:
     virtual void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) = 0;
 
 protected:
+    enum AnnotationType
+    {
+        TypeOk = 0,
+        TypeError,
+        TypeHighlight
+    };
+
     unsigned int                utn_;    // used to generate result
     const EvaluationTargetData* target_; // used to generate result
 
@@ -75,7 +82,19 @@ protected:
 
     void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    void addAnnotationFeatures(nlohmann::json::object_t& viewable, bool overview);
+    void addAnnotationFeatures(nlohmann::json::object_t& viewable, 
+                               bool overview,
+                               bool add_highlight = false) const;
+
+    void addAnnotationPos(nlohmann::json::object_t& viewable,
+                          const EvaluationDetail::Position& pos, 
+                          AnnotationType type) const;
+    void addAnnotationLine(nlohmann::json::object_t& viewable,
+                           const EvaluationDetail::Position& pos0, 
+                           const EvaluationDetail::Position& pos1, 
+                           AnnotationType type) const;
+    nlohmann::json& annotationPointCoords(nlohmann::json::object_t& viewable, AnnotationType type) const;
+    nlohmann::json& annotationLineCoords(nlohmann::json::object_t& viewable, AnnotationType type) const;
 };
 
 }
