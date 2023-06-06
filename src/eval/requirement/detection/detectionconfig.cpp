@@ -55,7 +55,6 @@ DetectionConfig::DetectionConfig(
 
 DetectionConfig::~DetectionConfig()
 {
-
 }
 
 std::shared_ptr<Base> DetectionConfig::createRequirement()

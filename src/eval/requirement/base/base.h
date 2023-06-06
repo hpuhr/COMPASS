@@ -80,16 +80,16 @@ protected:
 
     std::pair<ValueComparisonResult, std::string> compareTi (
             const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
-            boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
+            boost::posix_time::time_duration max_ref_time_diff) const; // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareTa (
             const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
-            boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
+            boost::posix_time::time_duration max_ref_time_diff) const; // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareModeA (
             const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
-            boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
+            boost::posix_time::time_duration max_ref_time_diff) const; // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareModeC (
             const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
-            boost::posix_time::time_duration max_ref_time_diff, float max_val_diff); // tod tst
+            boost::posix_time::time_duration max_ref_time_diff, float max_val_diff) const; // tod tst
 };
 
 }

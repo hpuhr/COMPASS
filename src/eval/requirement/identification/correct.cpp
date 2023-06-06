@@ -200,7 +200,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         if (use_ms_ti_)
         {
-            tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(tst_id, target_data, max_ref_time_diff);
+            tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(tst_id, target_data, max_ref_time_diff); //aircraft id
 
             ti_no_ref = cmp_res_ti == ValueComparisonResult::Unknown_NoRefData;
             all_no_ref &= ti_no_ref;
@@ -217,7 +217,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         if (use_ms_ta_)
         {
-            tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(tst_id, target_data, max_ref_time_diff);
+            tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(tst_id, target_data, max_ref_time_diff); //mode s
 
             ta_no_ref = cmp_res_ta == ValueComparisonResult::Unknown_NoRefData;
             all_no_ref &= ta_no_ref;

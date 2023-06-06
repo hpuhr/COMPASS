@@ -44,13 +44,14 @@ struct Event
 {
     enum Type
     {
-        TypeOutsideSector = 0,        // update is outside of sector (= not part of an inside sector reference time period)
+        TypeNoReference = 0,          // update is not part of an inside sector reference time period
         TypeEnterPeriod,              // a new in-sector reference period is entered
         TypeFirstValidUpdateInPeriod, // the first valid update of an in-sector reference period is encountered
         TypeValidFirst,               // a valid update is checked at the start of an in-sector reference period
         TypeValid,                    // a valid update is checked inside an in-sector reference period
         TypeValidLast,                // a valid update is checked at the end of an in-sector reference period
         TypeInvalid,                  // an invalid update was encountered inside an in-sector reference period
+        TypeDataMissing,              // update misses (e.g. reference) data to perform validity check
         TypeLastValidUpdateInPeriod,  // the last valid update of an in-sector reference period is encountered
         TypeLeavePeriod,              // an in-sector reference period is being left
         TypeEmptyPeriod,              // an in-sector reference period without updates is encountered
@@ -77,12 +78,28 @@ class IntervalBase : public ProbabilityBase
 public:
     struct DetailInfo
     {
-        std::string                                evt_comment;
-        dbContent::TargetPosition                  evt_position;
-        boost::optional<dbContent::TargetPosition> evt_position_ref;
-        bool                                       evt_has_ref;
+        boost::posix_time::ptime                   evt_time;          // time the event occurs at
+        double                                     evt_dt;            // event duration
+        std::string                                evt_comment;       // event comment
+        dbContent::TargetPosition                  evt_position;      // event location
+        boost::optional<dbContent::TargetPosition> evt_position_ref;  // event reference position (e.g. start of interval)
+        bool                                       evt_has_misses;    // event has misses
+        bool                                       evt_has_ref;       // event has reference
 
-        bool generate_detail = false;
+        bool generate_detail = false; // generate a detail for this event
+    };
+
+    struct Validity
+    {
+        enum class Value
+        {
+            Valid = 0,     // update is valid
+            Invalid,       // update is invalid
+            DataMissing    // reference data is missing => could not check validity
+        };
+
+        Value        value = Value::Invalid; // validity value
+        std::string  comment;                // additional textual info
     };
 
     IntervalBase(const std::string& name, 
@@ -121,11 +138,10 @@ protected:
     virtual DetailInfo eventDetailInfo(const EvaluationTargetData& target_data,
                                        const Event& event) const;
 
-    virtual std::string resultType() const = 0; 
-    virtual bool isValid(const dbContent::TargetReport::DataID& data_id,
+    virtual Validity isValid(const dbContent::TargetReport::DataID& data_id,
                          const EvaluationTargetData& target_data,
                          const SectorLayer& sector_layer,
-                         std::string& message) const = 0;
+                         const boost::posix_time::time_duration& max_ref_time_diff) const = 0;
     virtual std::shared_ptr<EvaluationRequirementResult::Single> createResult(const std::string& result_id,
                                                                               std::shared_ptr<Base> instance, 
                                                                               const EvaluationTargetData& target_data,
