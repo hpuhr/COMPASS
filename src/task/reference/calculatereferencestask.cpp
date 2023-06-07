@@ -580,6 +580,18 @@ VariableSet CalculateReferencesTask::getReadSetFor(const std::string& dbcontent_
     if (dbcontent_name == "CAT010" || dbcontent_name == "CAT020"
             ||  dbcontent_name == "CAT062" || dbcontent_name == "RefTraj")
     {
+        if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_confirmed_))
+            read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_confirmed_));
+
+        if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_coasting_))
+            read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_coasting_));
+
+        if (dbcontent_man.canGetVariable(dbcontent_name, DBContent::var_cat062_mono_sensor_))
+            read_set.add(dbcontent_man.getVariable(dbcontent_name, DBContent::var_cat062_mono_sensor_));
+
+        if (dbcontent_man.canGetVariable(dbcontent_name, DBContent::var_cat062_type_lm_))
+            read_set.add(dbcontent_man.getVariable(dbcontent_name, DBContent::var_cat062_type_lm_));
+
         read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_));
         read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_));
         read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_xy_cov_));

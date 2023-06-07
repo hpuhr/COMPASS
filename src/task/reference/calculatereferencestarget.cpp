@@ -3,15 +3,13 @@
 #include "dbcontentmanager.h"
 #include "dbcontent.h"
 #include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/metavariable.h"
 #include "buffer.h"
-#include "timeconv.h"
 #include "viewpointgenerator.h"
 #include "logger.h"
 #include "calculatereferencestask.h"
 
 #include "reconstruction/reconstructor_umkalman2d.h"
-#include "reconstruction/reconstructor_interp.h"
+
 #if USE_EXPERIMENTAL_SOURCE
     #include "reconstructor_amkalman2d.h"
 #endif

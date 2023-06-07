@@ -911,6 +911,25 @@ DataMappingTimes Chain::findDataMappingTimes(ptime timestamp_ref) const // ref t
     return ret;
 }
 
+void Chain::setIgnoredPositions(std::vector<bool> ignored_positions)
+{
+    assert (indexes_.size() == ignored_positions.size());
+
+    ignored_positions_ = ignored_positions;
+}
+
+bool Chain::ignorePosition(const DataID& id) const
+{
+    if (!ignored_positions_.has_value())
+        return false;
+
+    auto index  = indexFromDataID(id);
+
+    assert (index.idx_internal < ignored_positions_->size());
+
+    return ignored_positions_->at(index.idx_internal);
+}
+
 std::set<string> Chain::acids() const
 {
     return acids_;

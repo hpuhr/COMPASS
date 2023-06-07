@@ -106,6 +106,8 @@ const Property DBContent::var_cat062_tris_ {"Target Report Identifiers", Propert
 const Property DBContent::var_cat062_track_begin_ {"Track Begin", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_coasting_ {"Coasting", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_track_end_ {"Track End", PropertyDataType::BOOL};
+const Property DBContent::var_cat062_mono_sensor_ {"Monosensor", PropertyDataType::BOOL};
+const Property DBContent::var_cat062_type_lm_ {"Type LM", PropertyDataType::UCHAR};
 const Property DBContent::var_cat062_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
 const Property DBContent::var_cat062_fl_measured_ {"Flight Level Measured", PropertyDataType::FLOAT};
 

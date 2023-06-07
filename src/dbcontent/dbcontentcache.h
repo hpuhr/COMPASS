@@ -62,7 +62,8 @@ template <typename T>
 inline bool Cache::hasMetaVar(const std::string& dbcontent_name, const Property& metavar_property)
 {
     return meta_var_lookup_.count(dbcontent_name)
-            && meta_var_lookup_.at(dbcontent_name).count(metavar_property.name());
+            && meta_var_lookup_.at(dbcontent_name).count(metavar_property.name())
+            && buffers_.at(dbcontent_name)->has<T>(meta_var_lookup_.at(dbcontent_name).at(metavar_property.name()));
 }
 
 template <typename T>

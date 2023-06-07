@@ -132,6 +132,8 @@ public:
     static const Property var_cat062_track_begin_;
     static const Property var_cat062_coasting_;
     static const Property var_cat062_track_end_;
+    static const Property var_cat062_mono_sensor_;
+    static const Property var_cat062_type_lm_;
     static const Property var_cat062_baro_alt_;
     static const Property var_cat062_fl_measured_; // trusted, not valid
 

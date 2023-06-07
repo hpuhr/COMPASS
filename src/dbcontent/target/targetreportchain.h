@@ -146,12 +146,17 @@ public:
 
     DataMappingTimes findDataMappingTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
 
+    void setIgnoredPositions(std::vector<bool> ignored_positions);
+    bool ignorePosition(const DataID& id) const;
+
 protected:
     std::shared_ptr<dbContent::Cache> cache_;
     std::string dbcontent_name_;
 
     std::multimap<boost::posix_time::ptime, Index> timestamp_index_lookup_; // timestamp -> index
     std::vector<unsigned int> indexes_;
+
+    boost::optional<std::vector<bool>> ignored_positions_;
 
     mutable std::set<std::string> acids_;
     mutable std::set<unsigned int> acads_;

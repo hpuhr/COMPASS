@@ -31,6 +31,8 @@ public:
 
     unsigned int utn() const;
 
+    std::map<TargetKey, std::unique_ptr<dbContent::TargetReport::Chain>>& chains () { return chains_; }
+
 protected:
     unsigned int                      utn_;
     std::shared_ptr<dbContent::Cache> cache_;

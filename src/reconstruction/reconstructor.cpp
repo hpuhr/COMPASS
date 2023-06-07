@@ -224,6 +224,9 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, con
         boost::optional<dbContent::TargetPositionAccuracy> accuracy_pos;
         boost::optional<dbContent::TargetVelocityAccuracy> accuracy_vel;
 
+        if (tr_chain->ignorePosition(index))
+            continue;
+
         pos = tr_chain->pos(index);
 
         mm.lat = pos->latitude_;
