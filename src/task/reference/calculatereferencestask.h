@@ -59,7 +59,11 @@ struct CalculateReferencesTaskSettings
     bool tracker_only_report_detection_positions {false}; // no no detection
     bool tracker_only_report_detection_nonpsronly_positions {false}; // no mono + psr det
     bool tracker_only_high_accuracy_postions {true};
-    float tracker_minium_accuracy {30}; // m
+    float tracker_minimum_accuracy {30}; // m
+
+    bool adsb_only_v12_positions_ {true};
+    bool adsb_only_high_nacp_positions_ {true};
+    unsigned int adsb_minimum_nacp {4};
 
     bool use_adsb_data {true};
     nlohmann::json data_sources_adsb;               // map, ds_id str -> active flag, true if not contained

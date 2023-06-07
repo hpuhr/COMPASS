@@ -19,12 +19,15 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-string tracker_only_confirmed_positions_reason {"I062/080 CNF: Tentative or unkown"}; // non-tentative
-string tracker_only_noncoasting_positions_reason {"I062/080 CST: Coasting or unkown"};
-string tracker_only_report_detection_positions_reason {"I062/340 TYP: No detection or unkown"};
+string tracker_only_confirmed_positions_reason {"I062/080 CNF: Tentative or unknown"}; // non-tentative
+string tracker_only_noncoasting_positions_reason {"I062/080 CST: Coasting or unknown"};
+string tracker_only_report_detection_positions_reason {"I062/340 TYP: No detection or unknown"};
 string tracker_only_report_detection_nonpsronly_positions_reason {
-    "I062/080 MON: Mono sensor or unknown + I062/340 TYP: Single PSR detection or unkown"};
+    "I062/080 MON: Mono sensor or unknown + I062/340 TYP: Single PSR detection or unknown"};
 string tracker_only_high_accuracy_postions_reason {"I062/500 APC too high or unknown"};
+
+string adsb_only_mops12_reason {"I021/210 MOPS: V0 or unkown"}; // v 1/2 only
+string adsb_only_high_nacp_reason {"I021/090 NACp: Too low or unknown"};
 
 CalculateReferencesJob::CalculateReferencesJob(CalculateReferencesTask& task, 
                                                std::shared_ptr<dbContent::Cache> cache)
@@ -257,7 +260,7 @@ void CalculateReferencesJob::createTargets()
                     {
                         if (x_stddev_vec.isNull(index) || y_stddev_vec.isNull(index)
                                 || (sqrt(x_stddev_vec.get(index) + y_stddev_vec.get(index))
-                                    > settings.tracker_minium_accuracy))
+                                    > settings.tracker_minimum_accuracy))
                         {
                             ignore_current_position = true;
                             tracker_ignored_reasons[tracker_only_high_accuracy_postions_reason] += 1;
@@ -278,29 +281,95 @@ void CalculateReferencesJob::createTargets()
         }
     }
 
-    loginf << "CalculateReferencesJob: createTargets: tracker data ignored pos " << ignored_positions
-           << " used " << used_positions;
-
     for (auto& reason_it : tracker_ignored_reasons)
         loginf << "CalculateReferencesJob: createTargets: ignored " << reason_it.second
                << " '" << reason_it.first << "'";
 
+    loginf << "CalculateReferencesJob: createTargets: tracker data ignored pos " << ignored_positions
+           << " used " << used_positions;
 
-    dbcontent_name = "ADSB";
+    dbcontent_name = "CAT021";
+
+    map<string, unsigned int> adsb_ignored_reasons;
 
     // MOPS version, NACp, NIC, PIC, SIL
 
     if (cache_->has(dbcontent_name))
     {
+//        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
+
+//        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_nacp_));
+//        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_nacp_));
+
+        vector<bool> ignore_positions;
+        bool ignore_current_position;
+
+        unsigned int buffer_size = cache_->get(dbcontent_name)->size();
+
+        assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_mops_version_));
+        NullableVector<unsigned char>& mops_vec = cache_->getVar<unsigned char>(
+                    dbcontent_name, DBContent::var_cat021_mops_version_);
+
+        assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nacp_));
+        NullableVector<unsigned char>& nacp_vec = cache_->getVar<unsigned char>(
+                    dbcontent_name, DBContent::var_cat021_nacp_);
+
+                unsigned int index;
+
         for (auto& target_it : target_map)
         {
             for (auto& chain_it : target_it.second->chains())
             {
                 if (get<0>(chain_it.first) != dbcontent_name) // skip non-tracker chains
                     continue;
+
+                ignore_positions.clear();
+
+                for (auto& ts_index_it : chain_it.second->timestampIndexes())
+                {
+                    ignore_current_position = false;
+
+                    index = ts_index_it.second.idx_external; // index into buffer
+                    assert (index <= buffer_size);
+
+                    if (!ignore_current_position && settings.adsb_only_v12_positions_)
+                    {
+                        if (mops_vec.isNull(index) || mops_vec.get(index) == 0)
+                        {
+                            ignore_current_position = true;
+                            adsb_ignored_reasons[adsb_only_mops12_reason] += 1;
+                        }
+                    }
+
+                    if (!ignore_current_position && settings.adsb_only_high_nacp_positions_)
+                    {
+                        if (nacp_vec.isNull(index) || nacp_vec.get(index) < settings.adsb_minimum_nacp)
+                        {
+                            ignore_current_position = true;
+                            adsb_ignored_reasons[adsb_only_high_nacp_reason] += 1;
+                        }
+                    }
+
+                    ignore_positions.push_back(ignore_current_position);
+
+                    if (ignore_current_position)
+                        ++ignored_positions;
+                    else
+                        ++used_positions;
+                }
+
+                // set ignore positions flag
+                chain_it.second->setIgnoredPositions(ignore_positions);
             }
         }
     }
+
+    for (auto& reason_it : adsb_ignored_reasons)
+        loginf << "CalculateReferencesJob: createTargets: ignored " << reason_it.second
+               << " '" << reason_it.first << "'";
+
+    loginf << "CalculateReferencesJob: createTargets: ads-b data ignored pos " << ignored_positions
+           << " used " << used_positions;
 
     // move targets from map to vec
 
