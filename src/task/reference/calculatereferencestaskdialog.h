@@ -13,6 +13,7 @@ class QCheckBox;
 class QSpinBox;
 class QComboBox;
 class QTabWidget;
+class QLineEdit;
 
 class CalculateReferencesTaskDialog : public QDialog
 {
@@ -42,6 +43,7 @@ protected:
     void createDataSourcesSettingsWidget(QWidget* w);
     void createPositionFilterSettingsWidget(QWidget* w);
     void createKalmanSettingsWidget(QWidget* w);
+    void createOutputSettingsWidget(QWidget* w);
     QWidget* addScrollArea(QWidget* w) const;
 
     void readOptions();
@@ -124,6 +126,12 @@ protected:
 
     QCheckBox*      verbose_box_     = nullptr;
     QCheckBox*      python_comp_box_ = nullptr;
+
+    // output source
+    QLineEdit* ds_name_edit_ {nullptr};
+    QSpinBox* ds_sac_box_ {nullptr};
+    QSpinBox* ds_sic_box_ {nullptr};
+    QSpinBox* ds_line_box_ {nullptr};
 };
 
 #endif // CALCULATEREFERENCESTASKDIALOG_H

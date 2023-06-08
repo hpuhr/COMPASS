@@ -80,6 +80,12 @@ struct CalculateReferencesTaskSettings
 
     bool adsb_only_high_sil_positions {false};
     unsigned int adsb_minimum_sil {1};
+
+    // output
+    std::string ds_name;
+    unsigned int ds_sac {0};
+    unsigned int ds_sic {1};
+    unsigned int ds_line {0};
 };
 
 class CalculateReferencesTask : public Task, public Configurable

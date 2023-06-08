@@ -7,6 +7,7 @@
 #include "viewpointgenerator.h"
 #include "logger.h"
 #include "calculatereferencestask.h"
+#include "util/number.h"
 
 #include "reconstruction/reconstructor_umkalman2d.h"
 
@@ -195,10 +196,11 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
     //unsigned int cnt=0;
     //bool data_written=false;
 
-    unsigned int sac = 0;
-    unsigned int sic = 0;
-    unsigned int ds_id = 0;
-    unsigned int line_id = 0;
+    unsigned int sac = settings.ds_sac;
+    unsigned int sic = settings.ds_sic;
+    unsigned int ds_id = Number::dsIdFrom(sac, sic);
+    assert (settings.ds_line >= 1 && settings.ds_line <= 4);
+    unsigned int line_id = settings.ds_line - 1; // 0 ... 3
     //std::vector<unsigned int> assoc_val ({utn_});
 
     double speed_ms, bearing_rad, xy_cov;

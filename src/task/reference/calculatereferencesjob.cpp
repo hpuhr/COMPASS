@@ -6,6 +6,8 @@
 #include "dbcontent/target/target.h"
 #include "stringconv.h"
 #include "viewpointgenerator.h"
+#include "datasourcemanager.h"
+#include "util/number.h"
 
 #include "util/tbbhack.h"
 
@@ -514,6 +516,25 @@ void CalculateReferencesJob::calculateReferences()
 void CalculateReferencesJob::writeReferences()
 {
     string dbcontent_name = "RefTraj";
+
+    const CalculateReferencesTaskSettings& settings = task_.settings();
+
+    // config data source
+    {
+        DataSourceManager& src_man = COMPASS::instance().dataSourceManager();
+
+        unsigned int ds_id = Number::dsIdFrom(settings.ds_sac, settings.ds_sic);
+
+        if (!src_man.hasDBDataSource(ds_id))
+            src_man.addNewDataSource(ds_id);
+
+        assert (src_man.hasDBDataSource(ds_id));
+
+        dbContent::DBDataSource& src = src_man.dbDataSource(ds_id);
+
+        src.name(settings.ds_name);
+        src.dsType(dbcontent_name); // same as dstype
+    }
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 

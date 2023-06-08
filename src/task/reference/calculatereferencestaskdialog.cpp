@@ -14,6 +14,7 @@
 #include <QDoubleSpinBox>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QLineEdit>
 
 CalculateReferencesTaskDialog::CalculateReferencesTaskDialog(CalculateReferencesTask& task)
     : QDialog(), task_(task)
@@ -58,6 +59,11 @@ void CalculateReferencesTaskDialog::createUI()
     QWidget* kalman_settings_widget = new QWidget;
     createKalmanSettingsWidget(kalman_settings_widget);
     tab_widget->addTab(kalman_settings_widget, "Kalman Settings");
+
+    //output settings tab
+    QWidget* output_settings_widget = new QWidget;
+    createOutputSettingsWidget(output_settings_widget);
+    tab_widget->addTab(output_settings_widget, "Output");
 
     //read in values from task
     readOptions();
@@ -333,6 +339,69 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
 }
 
+void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
+{
+    QWidget* content_widget = addScrollArea(w);
+
+    QGridLayout* layout = new QGridLayout;
+    content_widget->setLayout(layout);
+
+    int row = 0;
+
+    auto boldify = [&] (QLabel* l)
+    {
+        auto f = l->font();
+        f.setBold(true);
+        l->setFont(f);
+        return l;
+    };
+
+    auto addRow = [&] (const QString& name, QWidget* w)
+    {
+        QLabel* label = new QLabel(name);
+        label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        layout->addWidget(label, row, 0);
+        if (w) layout->addWidget(w, row, 1);
+        ++row;
+    };
+
+    auto addEditRow = [&] (const QString& name, QLineEdit* edit)
+    {
+        QLabel* label = new QLabel(name);
+        edit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        layout->addWidget(label, row, 0);
+        layout->addWidget(edit, row, 1);
+        ++row;
+    };
+
+    auto addHeader = [&] (const QString& name)
+    {
+        QLabel* label = boldify(new QLabel(name));
+        layout->addWidget(label, row++, 0);
+    };
+
+    addHeader("Output Data Source");
+
+    ds_name_edit_ = new QLineEdit();
+    addEditRow("Name", ds_name_edit_);
+
+    ds_sac_box_ = new QSpinBox;
+    ds_sac_box_->setMinimum(0);
+    ds_sac_box_->setMaximum(255);
+    addRow("SAC", ds_sac_box_);
+
+    ds_sic_box_ = new QSpinBox;
+    ds_sic_box_->setMinimum(0);
+    ds_sic_box_->setMaximum(255);
+    addRow("SIC", ds_sic_box_);
+
+    ds_line_box_ = new QSpinBox;
+    ds_line_box_->setMinimum(1);
+    ds_line_box_->setMaximum(4);
+    addRow("Line", ds_line_box_);
+
+}
+
 void CalculateReferencesTaskDialog::readOptions()
 {
     const auto& s = task_.settings();
@@ -381,6 +450,12 @@ void CalculateReferencesTaskDialog::readOptions()
 
     verbose_box_->setChecked(s.verbose);
     python_comp_box_->setChecked(s.python_compatibility);
+
+    // output
+    ds_name_edit_->setText(s.ds_name.c_str());
+    ds_sac_box_->setValue(s.ds_sac);
+    ds_sic_box_->setValue(s.ds_sic);
+    ds_line_box_->setValue(s.ds_line);
 }
 
 void CalculateReferencesTaskDialog::writeOptions()
@@ -432,6 +507,13 @@ void CalculateReferencesTaskDialog::writeOptions()
 
     s.verbose               = verbose_box_->isChecked();
     s.python_compatibility  = python_comp_box_->isChecked();
+
+    // output
+
+    s.ds_name = ds_name_edit_->text().toStdString();
+    s.ds_sac = ds_sac_box_->value();
+    s.ds_sic = ds_sic_box_->value();
+    s.ds_line = ds_line_box_->value();
 }
 
 QWidget* CalculateReferencesTaskDialog::addScrollArea(QWidget* w) const

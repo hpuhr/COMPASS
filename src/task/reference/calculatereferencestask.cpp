@@ -81,6 +81,12 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     registerParameter("adsb_only_high_sil_positions_", &settings_.adsb_only_high_sil_positions, false);
     registerParameter("adsb_minimum_sil", &settings_.adsb_minimum_sil, 1);
 
+    // output
+    registerParameter("ds_name", &settings_.ds_name, "CalcRefTraj");
+    registerParameter("ds_sac", &settings_.ds_sac, 0);
+    registerParameter("ds_sic", &settings_.ds_sic, 1);
+    registerParameter("ds_line", &settings_.ds_line, 1); // 1 ... 4
+
     //registerParameter("rec_verbose", &settings_.verbose, false);
     //registerParameter("rec_generate_viewpoints", &settings_.generate_viewpoints, false);
 
@@ -283,7 +289,7 @@ void CalculateReferencesTask::run()
     {
         status_dialog_->setStatus("Deleting old References");
 
-        if (dbcontent_man.dbContent("RefTraj").existsInDB())
+        if (dbcontent_man.dbContent("RefTraj").existsInDB()) // TODO rework to only delete define data source + line
             dbcontent_man.dbContent("RefTraj").deleteDBContentData();
 
         while (dbcontent_man.dbContent("RefTraj").isDeleting())
