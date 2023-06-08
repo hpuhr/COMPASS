@@ -65,123 +65,123 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 ,   results_gen_(*this)
 ,   pdf_gen_    (*this)
 {
-    registerParameter("dbcontent_name_ref", &dbcontent_name_ref_, "RefTraj");
-    registerParameter("line_id_ref", &line_id_ref_, 0);
-    registerParameter("active_sources_ref", &active_sources_ref_, json::object());
+    registerParameter("dbcontent_name_ref", &settings_.dbcontent_name_ref_, "RefTraj");
+    registerParameter("line_id_ref", &settings_.line_id_ref_, 0);
+    registerParameter("active_sources_ref", &settings_.active_sources_ref_, json::object());
 
-    data_sources_ref_ = active_sources_ref_.get<std::map<std::string, std::map<std::string, bool>>>();
+    data_sources_ref_ = settings_.active_sources_ref_.get<std::map<std::string, std::map<std::string, bool>>>();
 
      //j.at("foo").get<std::map<std::string, int>>();
 
-    registerParameter("dbcontent_name_tst", &dbcontent_name_tst_, "CAT062");
-    registerParameter("line_id_tst", &line_id_tst_, 0);
-    registerParameter("active_sources_tst", &active_sources_tst_, json::object());
-    data_sources_tst_ = active_sources_tst_.get<std::map<std::string, std::map<std::string, bool>>>();
+    registerParameter("dbcontent_name_tst", &settings_.dbcontent_name_tst_, "CAT062");
+    registerParameter("line_id_tst", &settings_.line_id_tst_, 0);
+    registerParameter("active_sources_tst", &settings_.active_sources_tst_, json::object());
+    data_sources_tst_ = settings_.active_sources_tst_.get<std::map<std::string, std::map<std::string, bool>>>();
 
-    registerParameter("current_standard", &current_standard_, "");
+    registerParameter("current_standard", &settings_.current_standard_, "");
 
-    registerParameter("use_grp_in_sector", &use_grp_in_sector_, json::object());
-    registerParameter("use_requirement", &use_requirement_, json::object());
+    registerParameter("use_grp_in_sector", &settings_.use_grp_in_sector_, json::object());
+    registerParameter("use_requirement", &settings_.use_requirement_, json::object());
 
-    registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
+    registerParameter("max_ref_time_diff", &settings_.max_ref_time_diff_, 4.0);
 
     // load filter
-    registerParameter("use_load_filter", &use_load_filter_, false);
+    registerParameter("use_load_filter", &settings_.use_load_filter_, false);
 
-    registerParameter("use_timestamp_filter", &use_timestamp_filter_, false);
-    registerParameter("load_timestamp_begin", &load_timestamp_begin_str_, "");
-    registerParameter("load_timestamp_end", &load_timestamp_end_str_, "");
+    registerParameter("use_timestamp_filter", &settings_.use_timestamp_filter_, false);
+    registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, "");
+    registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, "");
 
-    if (load_timestamp_begin_str_.size())
-        load_timestamp_begin_ = Time::fromString(load_timestamp_begin_str_);
+    if (settings_.load_timestamp_begin_str_.size())
+        load_timestamp_begin_ = Time::fromString(settings_.load_timestamp_begin_str_);
 
-    if (load_timestamp_end_str_.size())
-        load_timestamp_end_ = Time::fromString(load_timestamp_end_str_);
+    if (settings_.load_timestamp_end_str_.size())
+        load_timestamp_end_ = Time::fromString(settings_.load_timestamp_end_str_);
 
-    registerParameter("use_adsb_filter", &use_adsb_filter_, false);
-    registerParameter("use_v0", &use_v0_, true);
-    registerParameter("use_v1", &use_v1_, true);
-    registerParameter("use_v2", &use_v2_, true);
+    registerParameter("use_adsb_filter", &settings_.use_adsb_filter_, false);
+    registerParameter("use_v0", &settings_.use_v0_, true);
+    registerParameter("use_v1", &settings_.use_v1_, true);
+    registerParameter("use_v2", &settings_.use_v2_, true);
 
     // nucp
-    registerParameter("use_min_nucp", &use_min_nucp_, true);
-    registerParameter("min_nucp", &min_nucp_, 4);
+    registerParameter("use_min_nucp", &settings_.use_min_nucp_, true);
+    registerParameter("min_nucp", &settings_.min_nucp_, 4);
 
-    registerParameter("use_max_nucp", &use_max_nucp_, true);
-    registerParameter("max_nucp", &max_nucp_, 4);
+    registerParameter("use_max_nucp", &settings_.use_max_nucp_, true);
+    registerParameter("max_nucp", &settings_.max_nucp_, 4);
 
     // nic
-    registerParameter("use_min_nic", &use_min_nic_, true);
-    registerParameter("min_nic", &min_nic_, 5);
+    registerParameter("use_min_nic", &settings_.use_min_nic_, true);
+    registerParameter("min_nic", &settings_.min_nic_, 5);
 
-    registerParameter("use_max_nic", &use_max_nic_, true);
-    registerParameter("max_nic", &max_nic_, 5);
+    registerParameter("use_max_nic", &settings_.use_max_nic_, true);
+    registerParameter("max_nic", &settings_.max_nic_, 5);
 
     // nacp
-    registerParameter("use_min_nacp", &use_min_nacp_, true);
-    registerParameter("min_nacp", &min_nacp_, 5);
+    registerParameter("use_min_nacp", &settings_.use_min_nacp_, true);
+    registerParameter("min_nacp", &settings_.min_nacp_, 5);
 
-    registerParameter("use_max_nacp", &use_max_nacp_, true);
-    registerParameter("max_nacp", &max_nacp_, 5);
+    registerParameter("use_max_nacp", &settings_.use_max_nacp_, true);
+    registerParameter("max_nacp", &settings_.max_nacp_, 5);
 
     // sil v1
-    registerParameter("use_min_sil_v1", &use_min_sil_v1_, true);
-    registerParameter("min_sil_v1", &min_sil_v1_, 2);
+    registerParameter("use_min_sil_v1", &settings_.use_min_sil_v1_, true);
+    registerParameter("min_sil_v1", &settings_.min_sil_v1_, 2);
 
-    registerParameter("use_max_sil_v1", &use_max_sil_v1_, true);
-    registerParameter("max_sil_v1", &max_sil_v1_, 2);
+    registerParameter("use_max_sil_v1", &settings_.use_max_sil_v1_, true);
+    registerParameter("max_sil_v1", &settings_.max_sil_v1_, 2);
 
     // sil v2
-    registerParameter("use_min_sil_v2", &use_min_sil_v2_, true);
-    registerParameter("min_sil_v2", &min_sil_v2_, 4);
+    registerParameter("use_min_sil_v2", &settings_.use_min_sil_v2_, true);
+    registerParameter("min_sil_v2", &settings_.min_sil_v2_, 4);
 
-    registerParameter("use_max_sil_v2", &use_max_sil_v2_, true);
-    registerParameter("max_sil_v2", &max_sil_v2_, 4);
+    registerParameter("use_max_sil_v2", &settings_.use_max_sil_v2_, true);
+    registerParameter("max_sil_v2", &settings_.max_sil_v2_, 4);
 
-    registerParameter("result_detail_zoom", &result_detail_zoom_, 0.02);
+    registerParameter("result_detail_zoom", &settings_.result_detail_zoom_, 0.02);
 
     // min height filter
-    registerParameter("min_height_filter_layer", &min_height_filter_layer_, "");
+    registerParameter("min_height_filter_layer", &settings_.min_height_filter_layer_, "");
 
     // report stuff
-    registerParameter("report_skip_no_data_details", &report_skip_no_data_details_, true);
-    registerParameter("report_split_results_by_mops", &report_split_results_by_mops_, false);
-    registerParameter("report_split_results_by_aconly_ms", &report_split_results_by_aconly_ms_, false);
-    registerParameter("report_show_adsb_info", &report_show_adsb_info_, false);
+    registerParameter("report_skip_no_data_details", &settings_.report_skip_no_data_details_, true);
+    registerParameter("report_split_results_by_mops", &settings_.report_split_results_by_mops_, false);
+    registerParameter("report_split_results_by_aconly_ms", &settings_.report_split_results_by_aconly_ms_, false);
+    registerParameter("report_show_adsb_info", &settings_.report_show_adsb_info_, false);
 
-    registerParameter("report_author", &report_author_, "");
+    registerParameter("report_author", &settings_.report_author_, "");
 
-    if (!report_author_.size())
-        report_author_ = System::getUserName();
-    if (!report_author_.size())
-        report_author_ = "User";
+    if (!settings_.report_author_.size())
+        settings_.report_author_ = System::getUserName();
+    if (!settings_.report_author_.size())
+        settings_.report_author_ = "User";
 
-    registerParameter("report_abstract", &report_abstract_, "");
+    registerParameter("report_abstract", &settings_.report_abstract_, "");
 
-    registerParameter("report_include_target_details", &report_include_target_details_, false);
-    registerParameter("report_skip_targets_wo_issues", &report_skip_targets_wo_issues_, false);
-    registerParameter("report_include_target_tr_details", &report_include_target_tr_details_, false);
+    registerParameter("report_include_target_details", &settings_.report_include_target_details_, false);
+    registerParameter("report_skip_targets_wo_issues", &settings_.report_skip_targets_wo_issues_, false);
+    registerParameter("report_include_target_tr_details", &settings_.report_include_target_tr_details_, false);
 
-    registerParameter("show_ok_joined_target_reports", &show_ok_joined_target_reports_, false);
+    registerParameter("show_ok_joined_target_reports", &settings_.show_ok_joined_target_reports_, false);
 
-    registerParameter("report_num_max_table_rows", &report_num_max_table_rows_, 1000);
-    registerParameter("report_num_max_table_col_width", &report_num_max_table_col_width_, 18);
+    registerParameter("report_num_max_table_rows", &settings_.report_num_max_table_rows_, 1000);
+    registerParameter("report_num_max_table_col_width", &settings_.report_num_max_table_col_width_, 18);
 
-    registerParameter("report_wait_on_map_loading", &report_wait_on_map_loading_, true);
+    registerParameter("report_wait_on_map_loading", &settings_.report_wait_on_map_loading_, true);
 
-    registerParameter("report_run_pdflatex", &report_run_pdflatex_, true);
+    registerParameter("report_run_pdflatex", &settings_.report_run_pdflatex_, true);
 
-    registerParameter("report_open_created_pdf", &report_open_created_pdf_, false);
+    registerParameter("report_open_created_pdf", &settings_.report_open_created_pdf_, false);
 
     bool pdflatex_found = System::exec("which pdflatex").size();
 
     if (!pdflatex_found)
     {
-        report_run_pdflatex_ = false;
-        report_open_created_pdf_ = false;
+        settings_.report_run_pdflatex_ = false;
+        settings_.report_open_created_pdf_ = false;
     }
 
-    registerParameter("warning_shown", &warning_shown_, false);
+    registerParameter("warning_shown", &settings_.warning_shown_, false);
 
     createSubConfigurables();
 }
@@ -268,11 +268,11 @@ void EvaluationManager::loadData ()
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    std::set<unsigned int> line_ref_set = {line_id_ref_};
+    std::set<unsigned int> line_ref_set = {settings_.line_id_ref_};
 
     unsigned int ds_id;
 
-    for (auto& ds_it : data_sources_ref_[dbcontent_name_ref_])
+    for (auto& ds_it : data_sources_ref_[settings_.dbcontent_name_ref_])
     {
         ds_id = stoul(ds_it.first);
 
@@ -287,9 +287,9 @@ void EvaluationManager::loadData ()
             ds_ids.insert(make_pair(ds_id, line_ref_set));
     }
 
-    std::set<unsigned int> line_tst_set = {line_id_tst_};
+    std::set<unsigned int> line_tst_set = {settings_.line_id_tst_};
 
-    for (auto& ds_it : data_sources_tst_[dbcontent_name_tst_])
+    for (auto& ds_it : data_sources_tst_[settings_.dbcontent_name_tst_])
     {
         ds_id = stoul(ds_it.first);
 
@@ -315,7 +315,7 @@ void EvaluationManager::loadData ()
     fil_man.disableAllFilters();
 
     // position data
-    if (load_only_sector_data_ && hasCurrentStandard() && sectorsLayers().size())
+    if (settings_.load_only_sector_data_ && hasCurrentStandard() && sectorsLayers().size())
     {
         assert (fil_man.hasFilter("Position"));
         DBFilter* pos_fil = fil_man.getFilter("Position");
@@ -391,9 +391,9 @@ void EvaluationManager::loadData ()
         min_max_pos_set_ = false;
 
     // other filters
-    if (use_load_filter_)
+    if (settings_.use_load_filter_)
     {
-        if (use_timestamp_filter_)
+        if (settings_.use_timestamp_filter_)
         {
             assert (fil_man.hasFilter("Timestamp"));
             DBFilter* fil = fil_man.getFilter("Timestamp");
@@ -409,7 +409,7 @@ void EvaluationManager::loadData ()
         }
 
 
-        if (use_adsb_filter_)
+        if (settings_.use_adsb_filter_)
         {
             assert (fil_man.hasFilter("ADSB Quality"));
             DBFilter* adsb_fil = fil_man.getFilter("ADSB Quality");
@@ -418,39 +418,39 @@ void EvaluationManager::loadData ()
 
             json filter;
 
-            filter["ADSB Quality"]["use_v0"] = use_v0_;
-            filter["ADSB Quality"]["use_v1"] = use_v1_;
-            filter["ADSB Quality"]["use_v2"] = use_v2_;
+            filter["ADSB Quality"]["use_v0"] = settings_.use_v0_;
+            filter["ADSB Quality"]["use_v1"] = settings_.use_v1_;
+            filter["ADSB Quality"]["use_v2"] = settings_.use_v2_;
 
             // nucp
-            filter["ADSB Quality"]["use_min_nucp"] = use_min_nucp_;
-            filter["ADSB Quality"]["min_nucp"] = min_nucp_;
-            filter["ADSB Quality"]["use_max_nucp"] = use_max_nucp_;
-            filter["ADSB Quality"]["max_nucp"] = max_nucp_;
+            filter["ADSB Quality"]["use_min_nucp"] = settings_.use_min_nucp_;
+            filter["ADSB Quality"]["min_nucp"] = settings_.min_nucp_;
+            filter["ADSB Quality"]["use_max_nucp"] = settings_.use_max_nucp_;
+            filter["ADSB Quality"]["max_nucp"] = settings_.max_nucp_;
 
             // nic
-            filter["ADSB Quality"]["use_min_nic"] = use_min_nic_;
-            filter["ADSB Quality"]["min_nic"] = min_nic_;
-            filter["ADSB Quality"]["use_max_nic"] = use_max_nic_;
-            filter["ADSB Quality"]["max_nic"] = max_nic_;
+            filter["ADSB Quality"]["use_min_nic"] = settings_.use_min_nic_;
+            filter["ADSB Quality"]["min_nic"] = settings_.min_nic_;
+            filter["ADSB Quality"]["use_max_nic"] = settings_.use_max_nic_;
+            filter["ADSB Quality"]["max_nic"] = settings_.max_nic_;
 
             // nacp
-            filter["ADSB Quality"]["use_min_nacp"] = use_min_nacp_;
-            filter["ADSB Quality"]["min_nacp"] = min_nacp_;
-            filter["ADSB Quality"]["use_max_nacp"] = use_max_nacp_;
-            filter["ADSB Quality"]["max_nacp"] = max_nacp_;
+            filter["ADSB Quality"]["use_min_nacp"] = settings_.use_min_nacp_;
+            filter["ADSB Quality"]["min_nacp"] = settings_.min_nacp_;
+            filter["ADSB Quality"]["use_max_nacp"] = settings_.use_max_nacp_;
+            filter["ADSB Quality"]["max_nacp"] = settings_.max_nacp_;
 
             // sil v1
-            filter["ADSB Quality"]["use_min_sil_v1"] = use_min_sil_v1_;
-            filter["ADSB Quality"]["min_sil_v1"] = min_sil_v1_;
-            filter["ADSB Quality"]["use_max_sil_v1"] = use_max_sil_v1_;
-            filter["ADSB Quality"]["max_sil_v1"] = max_sil_v1_;
+            filter["ADSB Quality"]["use_min_sil_v1"] = settings_.use_min_sil_v1_;
+            filter["ADSB Quality"]["min_sil_v1"] = settings_.min_sil_v1_;
+            filter["ADSB Quality"]["use_max_sil_v1"] = settings_.use_max_sil_v1_;
+            filter["ADSB Quality"]["max_sil_v1"] = settings_.max_sil_v1_;
 
             // sil v2
-            filter["ADSB Quality"]["use_min_sil_v2"] = use_min_sil_v2_;
-            filter["ADSB Quality"]["min_sil_v2"] = min_sil_v2_;
-            filter["ADSB Quality"]["use_max_sil_v2"] = use_max_sil_v2_;
-            filter["ADSB Quality"]["max_sil_v2"] = max_sil_v2_;
+            filter["ADSB Quality"]["use_min_sil_v2"] = settings_.use_min_sil_v2_;
+            filter["ADSB Quality"]["min_sil_v2"] = settings_.min_sil_v2_;
+            filter["ADSB Quality"]["use_max_sil_v2"] = settings_.use_max_sil_v2_;
+            filter["ADSB Quality"]["max_sil_v2"] = settings_.max_sil_v2_;
 
             adsb_fil->loadViewPointConditions(filter);
         }
@@ -615,10 +615,11 @@ void EvaluationManager::loadingDoneSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    loginf << "EvaluationManager: loadingDoneSlot: line ref " << line_id_ref_ << " tst " << line_id_tst_;
+    loginf << "EvaluationManager: loadingDoneSlot: line ref " << settings_.line_id_ref_
+           << " tst " << settings_.line_id_tst_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data = dbcontent_man.loadedData();
-    if (!data.count(dbcontent_name_ref_))
+    if (!data.count(settings_.dbcontent_name_ref_))
     {
         QMessageBox m_warning(QMessageBox::Warning, "Loading Data Failed",
                               "No reference data was loaded.",
@@ -632,10 +633,10 @@ void EvaluationManager::loadingDoneSlot()
     }
 
     data_.setBuffers(data);
-    data_.addReferenceData(dbcontent_name_ref_, line_id_ref_);
+    data_.addReferenceData(settings_.dbcontent_name_ref_, settings_.line_id_ref_);
     reference_data_loaded_ = true;
 
-    if (!data.count(dbcontent_name_tst_))
+    if (!data.count(settings_.dbcontent_name_tst_))
     {
         QMessageBox m_warning(QMessageBox::Warning, "Loading Data Failed",
                               "No test data was loaded.",
@@ -647,7 +648,7 @@ void EvaluationManager::loadingDoneSlot()
 
         return;
     }
-    data_.addTestData(dbcontent_name_tst_, line_id_tst_);
+    data_.addTestData(settings_.dbcontent_name_tst_, settings_.line_id_tst_);
     test_data_loaded_ = true;
 
     dbcontent_man.clearData(); // clear data, has been stored locally
@@ -768,7 +769,7 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
     if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
         read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name));
 
-    if (dbcontent_name_ref_ == dbcontent_name && dbcontent_name_ref_ == "CAT062")
+    if (settings_.dbcontent_name_ref_ == dbcontent_name && settings_.dbcontent_name_ref_ == "CAT062")
         read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_baro_alt_.name()));
 
     // flight level trusted
@@ -1256,12 +1257,12 @@ bool EvaluationManager::importAirSpace(const AirSpace& air_space,
 
 bool EvaluationManager::filterMinimumHeight() const
 {
-    return !min_height_filter_layer_.empty();
+    return !settings_.min_height_filter_layer_.empty();
 }   
 
 const std::string& EvaluationManager::minHeightFilterLayerName() const
 {
-    return min_height_filter_layer_;
+    return settings_.min_height_filter_layer_;
 }
 
 void EvaluationManager::minHeightFilterLayerName(const std::string& layer_name)
@@ -1271,7 +1272,7 @@ void EvaluationManager::minHeightFilterLayerName(const std::string& layer_name)
     loginf << "EvaluationManager: minHeightFilterLayerName: layer changed to "
            << (layer_name.empty() ? "null" : "'" + layer_name + "'");
 
-    min_height_filter_layer_= layer_name;
+    settings_.min_height_filter_layer_= layer_name;
 }
 
 std::shared_ptr<SectorLayer> EvaluationManager::minHeightFilterLayer() const
@@ -1280,7 +1281,7 @@ std::shared_ptr<SectorLayer> EvaluationManager::minHeightFilterLayer() const
         return {};
 
     //!will assert on non-existing layer name!
-    return sectorLayer(min_height_filter_layer_);
+    return sectorLayer(settings_.min_height_filter_layer_);
 }
 
 /**
@@ -1289,25 +1290,25 @@ std::shared_ptr<SectorLayer> EvaluationManager::minHeightFilterLayer() const
  */
 void EvaluationManager::checkMinHeightFilterValid()
 {
-    if (!min_height_filter_layer_.empty() && !hasSectorLayer(min_height_filter_layer_))
+    if (!settings_.min_height_filter_layer_.empty() && !hasSectorLayer(settings_.min_height_filter_layer_))
     {
-        logerr << "EvaluationManager: checkMinHeightFilterValid: Layer '" << min_height_filter_layer_ << "'"
+        logerr << "EvaluationManager: checkMinHeightFilterValid: Layer '" << settings_.min_height_filter_layer_ << "'"
                << " not present, resetting min height filter";
         
-        min_height_filter_layer_ = "";
+        settings_.min_height_filter_layer_ = "";
     }
 }
 
 std::string EvaluationManager::dbContentNameRef() const
 {
-    return dbcontent_name_ref_;
+    return settings_.dbcontent_name_ref_;
 }
 
 void EvaluationManager::dbContentNameRef(const std::string& name)
 {
     loginf << "EvaluationManager: dbContentNameRef: name " << name;
 
-    dbcontent_name_ref_ = name;
+    settings_.dbcontent_name_ref_ = name;
 
     checkReferenceDataSources();
 
@@ -1316,17 +1317,17 @@ void EvaluationManager::dbContentNameRef(const std::string& name)
 
 bool EvaluationManager::hasValidReferenceDBContent ()
 {
-    if (!dbcontent_name_ref_.size())
+    if (!settings_.dbcontent_name_ref_.size())
         return false;
 
-    return COMPASS::instance().dbContentManager().existsDBContent(dbcontent_name_ref_);
+    return COMPASS::instance().dbContentManager().existsDBContent(settings_.dbcontent_name_ref_);
 }
 
 set<unsigned int> EvaluationManager::activeDataSourcesRef()
 {
     set<unsigned int> srcs;
 
-    for (auto& ds_it : data_sources_ref_[dbcontent_name_ref_])
+    for (auto& ds_it : data_sources_ref_[settings_.dbcontent_name_ref_])
         if (ds_it.second)
             srcs.insert(stoul(ds_it.first));
 
@@ -1336,14 +1337,14 @@ set<unsigned int> EvaluationManager::activeDataSourcesRef()
 
 std::string EvaluationManager::dbContentNameTst() const
 {
-    return dbcontent_name_tst_;
+    return settings_.dbcontent_name_tst_;
 }
 
 void EvaluationManager::dbContentNameTst(const std::string& name)
 {
     loginf << "EvaluationManager: dbContentNameTst: name " << name;
 
-    dbcontent_name_tst_ = name;
+    settings_.dbcontent_name_tst_ = name;
 
     checkTestDataSources();
 
@@ -1352,17 +1353,17 @@ void EvaluationManager::dbContentNameTst(const std::string& name)
 
 bool EvaluationManager::hasValidTestDBContent ()
 {
-    if (!dbcontent_name_tst_.size())
+    if (!settings_.dbcontent_name_tst_.size())
         return false;
 
-    return COMPASS::instance().dbContentManager().existsDBContent(dbcontent_name_tst_);
+    return COMPASS::instance().dbContentManager().existsDBContent(settings_.dbcontent_name_tst_);
 }
 
 set<unsigned int> EvaluationManager::activeDataSourcesTst()
 {
     set<unsigned int> srcs;
 
-    for (auto& ds_it : data_sources_tst_[dbcontent_name_tst_])
+    for (auto& ds_it : data_sources_tst_[settings_.dbcontent_name_tst_])
         if (ds_it.second)
             srcs.insert(stoul(ds_it.first));
 
@@ -1387,20 +1388,20 @@ EvaluationData& EvaluationManager::getData()
 
 bool EvaluationManager::hasCurrentStandard()
 {
-    return current_standard_.size() && hasStandard(current_standard_);
+    return settings_.current_standard_.size() && hasStandard(settings_.current_standard_);
 }
 
 std::string EvaluationManager::currentStandardName() const
 {
-    return current_standard_;
+    return settings_.current_standard_;
 }
 
 void EvaluationManager::currentStandardName(const std::string& current_standard)
 {
-    current_standard_ = current_standard;
+    settings_.current_standard_ = current_standard;
 
-    if (current_standard_.size())
-        assert (hasStandard(current_standard_));
+    if (settings_.current_standard_.size())
+        assert (hasStandard(settings_.current_standard_));
 
     emit currentStandardChangedSignal();
 
@@ -1416,7 +1417,7 @@ void EvaluationManager::renameCurrentStandard (const std::string& new_name)
     assert (!hasStandard(new_name));
 
     currentStandard().name(new_name);
-    current_standard_ = new_name;
+    settings_.current_standard_ = new_name;
 
     emit standardsChangedSignal();
     emit currentStandardChangedSignal();
@@ -1440,7 +1441,7 @@ void EvaluationManager::copyCurrentStandard (const std::string& new_name)
     //config.addParameterString("name", new_name);
     generateSubConfigurable("EvaluationStandard", config.getInstanceId());
 
-    current_standard_ = new_name;
+    settings_.current_standard_ = new_name;
 
     emit standardsChangedSignal();
     emit currentStandardChangedSignal();
@@ -1450,7 +1451,7 @@ EvaluationStandard& EvaluationManager::currentStandard()
 {
     assert (hasCurrentStandard());
 
-    string name = current_standard_;
+    string name = settings_.current_standard_;
 
     auto iter = std::find_if(standards_.begin(), standards_.end(),
                              [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
@@ -1488,11 +1489,11 @@ void EvaluationManager::addStandard(const std::string& name)
 
 void EvaluationManager::deleteCurrentStandard()
 {
-    loginf << "EvaluationManager: deleteCurrentStandard: name " << current_standard_;
+    loginf << "EvaluationManager: deleteCurrentStandard: name " << settings_.current_standard_;
 
     assert (hasCurrentStandard());
 
-    string name = current_standard_;
+    string name = settings_.current_standard_;
 
     auto iter = std::find_if(standards_.begin(), standards_.end(),
                              [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
@@ -1577,7 +1578,7 @@ void EvaluationManager::checkReferenceDataSources()
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     // clear out old ds_ids
-    auto ds_copy = data_sources_ref_[dbcontent_name_ref_];
+    auto ds_copy = data_sources_ref_[settings_.dbcontent_name_ref_];
 
     unsigned int ds_id;
     for (auto& ds_it : ds_copy)
@@ -1585,21 +1586,21 @@ void EvaluationManager::checkReferenceDataSources()
         ds_id = stoul(ds_it.first);
 
         if (!ds_man.hasDBDataSource(ds_id))
-            data_sources_ref_[dbcontent_name_ref_].erase(ds_it.first);
+            data_sources_ref_[settings_.dbcontent_name_ref_].erase(ds_it.first);
     }
 
     // init non-existing ones with false
-    if (ds_man.hasDataSourcesOfDBContent(dbcontent_name_ref_))
+    if (ds_man.hasDataSourcesOfDBContent(settings_.dbcontent_name_ref_))
     {
         for (auto& ds_it : ds_man.dbDataSources())
         {
-            if (!ds_it->hasNumInserted(dbcontent_name_ref_))
+            if (!ds_it->hasNumInserted(settings_.dbcontent_name_ref_))
                 continue;
 
             string ds_id_str = to_string(ds_it->id());
 
-            if (!data_sources_ref_[dbcontent_name_ref_].count(ds_id_str))
-                data_sources_ref_[dbcontent_name_ref_][ds_id_str] = false; // init with default false
+            if (!data_sources_ref_[settings_.dbcontent_name_ref_].count(ds_id_str))
+                data_sources_ref_[settings_.dbcontent_name_ref_][ds_id_str] = false; // init with default false
         }
     }
 }
@@ -1614,7 +1615,7 @@ void EvaluationManager::checkTestDataSources()
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     // clear out old ds_ids
-    auto ds_copy = data_sources_tst_[dbcontent_name_tst_];
+    auto ds_copy = data_sources_tst_[settings_.dbcontent_name_tst_];
 
     unsigned int ds_id;
     for (auto& ds_it : ds_copy)
@@ -1622,21 +1623,21 @@ void EvaluationManager::checkTestDataSources()
         ds_id = stoul(ds_it.first);
 
         if (!ds_man.hasDBDataSource(ds_id))
-            data_sources_tst_[dbcontent_name_tst_].erase(ds_it.first);
+            data_sources_tst_[settings_.dbcontent_name_tst_].erase(ds_it.first);
     }
 
     // init non-existing ones with false
-    if (ds_man.hasDataSourcesOfDBContent(dbcontent_name_tst_))
+    if (ds_man.hasDataSourcesOfDBContent(settings_.dbcontent_name_tst_))
     {
         for (auto& ds_it : ds_man.dbDataSources())
         {
-            if (!ds_it->hasNumInserted(dbcontent_name_tst_))
+            if (!ds_it->hasNumInserted(settings_.dbcontent_name_tst_))
                 continue;
 
             string ds_id_str = to_string(ds_it->id());
 
-            if (!data_sources_tst_[dbcontent_name_tst_].count(ds_id_str))
-                data_sources_tst_[dbcontent_name_tst_][ds_id_str] = false; // init with default false
+            if (!data_sources_tst_[settings_.dbcontent_name_tst_].count(ds_id_str))
+                data_sources_tst_[settings_.dbcontent_name_tst_][ds_id_str] = false; // init with default false
         }
     }
 }
@@ -1646,7 +1647,7 @@ bool EvaluationManager::hasSelectedReferenceDataSources()
     if (!hasValidReferenceDBContent())
         return false;
 
-    for (auto& ds_it : data_sources_ref_[dbcontent_name_ref_])
+    for (auto& ds_it : data_sources_ref_[settings_.dbcontent_name_ref_])
         if (ds_it.second)
             return true;
 
@@ -1658,7 +1659,7 @@ bool EvaluationManager::hasSelectedTestDataSources()
     if (!hasValidTestDBContent())
         return false;
 
-    for (auto& ds_it : data_sources_tst_[dbcontent_name_tst_])
+    for (auto& ds_it : data_sources_tst_[settings_.dbcontent_name_tst_])
         if (ds_it.second)
             return true;
 
@@ -1667,24 +1668,24 @@ bool EvaluationManager::hasSelectedTestDataSources()
 
 bool EvaluationManager::showJoinedOkTargetReports() const
 {
-    return show_ok_joined_target_reports_;
+    return settings_.show_ok_joined_target_reports_;
 }
 
 void EvaluationManager::showJoinedOkTargetReports(bool value)
 {
-    show_ok_joined_target_reports_ = value;
+    settings_.show_ok_joined_target_reports_ = value;
 }
 
 bool EvaluationManager::reportSkipTargetsWoIssues() const
 {
-    return report_skip_targets_wo_issues_;
+    return settings_.report_skip_targets_wo_issues_;
 }
 
 void EvaluationManager::reportSkipTargetsWoIssues(bool value)
 {
     loginf << "EvaluationManager: reportSkipTargetsWoIssues: value " << value;
 
-    report_skip_targets_wo_issues_ = value;
+    settings_.report_skip_targets_wo_issues_ = value;
 }
 
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
@@ -1868,12 +1869,12 @@ json::boolean_t& EvaluationManager::useGroupInSectorLayer(const std::string& sec
     assert (hasCurrentStandard());
 
     // standard_name->sector_layer_name->req_grp_name->bool use
-    if (!use_grp_in_sector_.contains(current_standard_)
-            || !use_grp_in_sector_.at(current_standard_).contains(sector_layer_name)
-            || !use_grp_in_sector_.at(current_standard_).at(sector_layer_name).contains(group_name))
-        use_grp_in_sector_[current_standard_][sector_layer_name][group_name] = true;
+    if (!settings_.use_grp_in_sector_.contains(settings_.current_standard_)
+            || !settings_.use_grp_in_sector_.at(settings_.current_standard_).contains(sector_layer_name)
+            || !settings_.use_grp_in_sector_.at(settings_.current_standard_).at(sector_layer_name).contains(group_name))
+        settings_.use_grp_in_sector_[settings_.current_standard_][sector_layer_name][group_name] = true;
 
-    return use_grp_in_sector_[current_standard_][sector_layer_name][group_name].get_ref<json::boolean_t&>();
+    return settings_.use_grp_in_sector_[settings_.current_standard_][sector_layer_name][group_name].get_ref<json::boolean_t&>();
 }
 
 void EvaluationManager::useGroupInSectorLayer(const std::string& sector_layer_name,
@@ -1881,10 +1882,10 @@ void EvaluationManager::useGroupInSectorLayer(const std::string& sector_layer_na
 {
     assert (hasCurrentStandard());
 
-    loginf << "EvaluationManager: useGroupInSector: standard_name " << current_standard_
+    loginf << "EvaluationManager: useGroupInSector: standard_name " << settings_.current_standard_
            << " sector_layer_name " << sector_layer_name << " group_name " << group_name << " value " << value;
 
-    use_grp_in_sector_[current_standard_][sector_layer_name][group_name] = value;
+    settings_.use_grp_in_sector_[settings_.current_standard_][sector_layer_name][group_name] = value;
 
     if (widget_)
         widget_->updateButtons();
@@ -1894,12 +1895,12 @@ json::boolean_t& EvaluationManager::useRequirement(const std::string& standard_n
                                                    const std::string& req_name)
 {
     // standard_name->req_grp_name->req_grp_name->bool use
-    if (!use_requirement_.contains(standard_name)
-            || !use_requirement_.at(standard_name).contains(group_name)
-            || !use_requirement_.at(standard_name).at(group_name).contains(req_name))
-        use_requirement_[standard_name][group_name][req_name] = true;
+    if (!settings_.use_requirement_.contains(standard_name)
+            || !settings_.use_requirement_.at(standard_name).contains(group_name)
+            || !settings_.use_requirement_.at(standard_name).at(group_name).contains(req_name))
+        settings_.use_requirement_[standard_name][group_name][req_name] = true;
 
-    return use_requirement_[standard_name][group_name][req_name].get_ref<json::boolean_t&>();
+    return settings_.use_requirement_[standard_name][group_name][req_name].get_ref<json::boolean_t&>();
 }
 
 EvaluationResultsReport::PDFGenerator& EvaluationManager::pdfGenerator()
@@ -1909,12 +1910,12 @@ EvaluationResultsReport::PDFGenerator& EvaluationManager::pdfGenerator()
 
 bool EvaluationManager::loadOnlySectorData() const
 {
-    return load_only_sector_data_;
+    return settings_.load_only_sector_data_;
 }
 
 void EvaluationManager::loadOnlySectorData(bool value)
 {
-    load_only_sector_data_ = value;
+    settings_.load_only_sector_data_ = value;
 }
 
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
@@ -1925,17 +1926,17 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 
     std::map<unsigned int, std::set<unsigned int>> data_sources;
 
-    for (auto& src_it : data_sources_ref_[dbcontent_name_ref_])
+    for (auto& src_it : data_sources_ref_[settings_.dbcontent_name_ref_])
         if (src_it.second)
-            data_sources[stoul(src_it.first)].insert(line_id_ref_);
+            data_sources[stoul(src_it.first)].insert(settings_.line_id_ref_);
 
-    for (auto& src_it : data_sources_tst_[dbcontent_name_tst_])
+    for (auto& src_it : data_sources_tst_[settings_.dbcontent_name_tst_])
         if (src_it.second)
-            data_sources[stoul(src_it.first)].insert(line_id_tst_);
+            data_sources[stoul(src_it.first)].insert(settings_.line_id_tst_);
 
     data["data_sources"] = data_sources;
 
-    if (load_only_sector_data_ && min_max_pos_set_)
+    if (settings_.load_only_sector_data_ && min_max_pos_set_)
     {
         data[VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(latitude_max_);
         data[VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(latitude_min_);
@@ -1957,277 +1958,277 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableNoDataConfig ()
 
 bool EvaluationManager::useV0() const
 {
-    return use_v0_;
+    return settings_.use_v0_;
 }
 
 void EvaluationManager::useV0(bool value)
 {
     loginf << "EvaluationManager: useV0: value " << value;
-    use_v0_ = value;
+    settings_.use_v0_ = value;
 }
 
 bool EvaluationManager::useV1() const
 {
-    return use_v1_;
+    return settings_.use_v1_;
 }
 
 void EvaluationManager::useV1(bool value)
 {
     loginf << "EvaluationManager: useV1: value " << value;
-    use_v1_ = value;
+    settings_.use_v1_ = value;
 }
 
 bool EvaluationManager::useV2() const
 {
-    return use_v2_;
+    return settings_.use_v2_;
 }
 
 void EvaluationManager::useV2(bool value)
 {
     loginf << "EvaluationManager: useV2: value " << value;
-    use_v2_ = value;
+    settings_.use_v2_ = value;
 }
 
 bool EvaluationManager::useMinNUCP() const
 {
-    return use_min_nucp_;
+    return settings_.use_min_nucp_;
 }
 
 void EvaluationManager::useMinNUCP(bool value)
 {
     loginf << "EvaluationManager: useMinNUCP: value " << value;
-    use_min_nucp_ = value;
+    settings_.use_min_nucp_ = value;
 }
 
 unsigned int EvaluationManager::minNUCP() const
 {
-    return min_nucp_;
+    return settings_.min_nucp_;
 }
 
 void EvaluationManager::minNUCP(unsigned int value)
 {
     loginf << "EvaluationManager: minNUCP: value " << value;
-    min_nucp_ = value;
+    settings_.min_nucp_ = value;
 }
 
 bool EvaluationManager::useMinNIC() const
 {
-    return use_min_nic_;
+    return settings_.use_min_nic_;
 }
 
 void EvaluationManager::useMinNIC(bool value)
 {
     loginf << "EvaluationManager: useMinNIC: value " << value;
-    use_min_nic_ = value;
+    settings_.use_min_nic_ = value;
 }
 
 unsigned int EvaluationManager::minNIC() const
 {
-    return min_nic_;
+    return settings_.min_nic_;
 }
 
 void EvaluationManager::minNIC(unsigned int value)
 {
     loginf << "EvaluationManager: minNIC: value " << value;
-    min_nic_ = value;
+    settings_.min_nic_ = value;
 }
 
 bool EvaluationManager::useMinNACp() const
 {
-    return use_min_nacp_;
+    return settings_.use_min_nacp_;
 }
 
 void EvaluationManager::useMinNACp(bool value)
 {
     loginf << "EvaluationManager: useMinNACp: value " << value;
-    use_min_nacp_ = value;
+    settings_.use_min_nacp_ = value;
 }
 
 unsigned int EvaluationManager::minNACp() const
 {
-    return min_nacp_;
+    return settings_.min_nacp_;
 }
 
 void EvaluationManager::minNACp(unsigned int value)
 {
     loginf << "EvaluationManager: minNACp: value " << value;
-    min_nacp_ = value;
+    settings_.min_nacp_ = value;
 }
 
 bool EvaluationManager::useMinSILv1() const
 {
-    return use_min_sil_v1_;
+    return settings_.use_min_sil_v1_;
 }
 
 void EvaluationManager::useMinSILv1(bool value)
 {
     loginf << "EvaluationManager: useMinSILv1: value " << value;
-    use_min_sil_v1_ = value;
+    settings_.use_min_sil_v1_ = value;
 }
 
 unsigned int EvaluationManager::minSILv1() const
 {
-    return min_sil_v1_;
+    return settings_.min_sil_v1_;
 }
 
 void EvaluationManager::minSILv1(unsigned int value)
 {
     loginf << "EvaluationManager: minSILv1: value " << value;
-    min_sil_v1_ = value;
+    settings_.min_sil_v1_ = value;
 }
 
 bool EvaluationManager::useMinSILv2() const
 {
-    return use_min_sil_v2_;
+    return settings_.use_min_sil_v2_;
 }
 
 void EvaluationManager::useMinSILv2(bool value)
 {
     loginf << "EvaluationManager: useMinSILv2: value " << value;
-    use_min_sil_v2_ = value;
+    settings_.use_min_sil_v2_ = value;
 }
 
 unsigned int EvaluationManager::minSILv2() const
 {
-    return min_sil_v2_;
+    return settings_.min_sil_v2_;
 }
 
 void EvaluationManager::minSILv2(unsigned int value)
 {
     loginf << "EvaluationManager: minSILv2: value " << value;
-    min_sil_v2_ = value;
+    settings_.min_sil_v2_ = value;
 }
 
 bool EvaluationManager::useMaxNUCP() const
 {
-    return use_max_nucp_;
+    return settings_.use_max_nucp_;
 }
 
 void EvaluationManager::useMaxNUCP(bool value)
 {
     loginf << "EvaluationManager: useMaxNUCP: value " << value;
-    use_max_nucp_ = value;
+    settings_.use_max_nucp_ = value;
 }
 
 unsigned int EvaluationManager::maxNUCP() const
 {
-    return max_nucp_;
+    return settings_.max_nucp_;
 }
 
 void EvaluationManager::maxNUCP(unsigned int value)
 {
     loginf << "EvaluationManager: maxNUCP: value " << value;
-    max_nucp_ = value;
+    settings_.max_nucp_ = value;
 }
 
 bool EvaluationManager::useMaxNIC() const
 {
-    return use_max_nic_;
+    return settings_.use_max_nic_;
 }
 
 void EvaluationManager::useMaxNIC(bool value)
 {
     loginf << "EvaluationManager: useMaxNIC: value " << value;
-    use_max_nic_ = value;
+    settings_.use_max_nic_ = value;
 }
 
 unsigned int EvaluationManager::maxNIC() const
 {
-    return max_nic_;
+    return settings_.max_nic_;
 }
 
 void EvaluationManager::maxNIC(unsigned int value)
 {
     loginf << "EvaluationManager: maxNIC: value " << value;
-    max_nic_ = value;
+    settings_.max_nic_ = value;
 }
 
 bool EvaluationManager::useMaxNACp() const
 {
-    return use_max_nacp_;
+    return settings_.use_max_nacp_;
 }
 
 void EvaluationManager::useMaxNACp(bool value)
 {
     loginf << "EvaluationManager: useMaxNACp: value " << value;
-    use_max_nacp_ = value;
+    settings_.use_max_nacp_ = value;
 }
 
 unsigned int EvaluationManager::maxNACp() const
 {
-    return max_nacp_;
+    return settings_.max_nacp_;
 }
 
 void EvaluationManager::maxNACp(unsigned int value)
 {
     loginf << "EvaluationManager: maxNACp: value " << value;
-    max_nacp_ = value;
+    settings_.max_nacp_ = value;
 }
 
 bool EvaluationManager::useMaxSILv1() const
 {
-    return use_max_sil_v1_;
+    return settings_.use_max_sil_v1_;
 }
 
 void EvaluationManager::useMaxSILv1(bool value)
 {
     loginf << "EvaluationManager: useMaxSILv1: value " << value;
-    use_max_sil_v1_ = value;
+    settings_.use_max_sil_v1_ = value;
 }
 
 unsigned int EvaluationManager::maxSILv1() const
 {
-    return max_sil_v1_;
+    return settings_.max_sil_v1_;
 }
 
 void EvaluationManager::maxSILv1(unsigned int value)
 {
     loginf << "EvaluationManager: maxSILv1: value " << value;
-    max_sil_v1_ = value;
+    settings_.max_sil_v1_ = value;
 }
 
 bool EvaluationManager::useMaxSILv2() const
 {
-    return use_max_sil_v2_;
+    return settings_.use_max_sil_v2_;
 }
 
 void EvaluationManager::useMaxSILv2(bool value)
 {
     loginf << "EvaluationManager: useMaxSILv2: value " << value;
-    use_max_sil_v2_ = value;
+    settings_.use_max_sil_v2_ = value;
 }
 
 unsigned int EvaluationManager::maxSILv2() const
 {
-    return max_sil_v2_;
+    return settings_.max_sil_v2_;
 }
 
 void EvaluationManager::maxSILv2(unsigned int value)
 {
     loginf << "EvaluationManager: maxSILv2: value " << value;
-    max_sil_v2_ = value;
+    settings_.max_sil_v2_ = value;
 }
 
 bool EvaluationManager::useLoadFilter() const
 {
-    return use_load_filter_;
+    return settings_.use_load_filter_;
 }
 
 void EvaluationManager::useLoadFilter(bool value)
 {
     loginf << "EvaluationManager: useLoadFilter: value " << value;
-    use_load_filter_ = value;
+    settings_.use_load_filter_ = value;
 }
 
 bool EvaluationManager::useTimestampFilter() const
 {
-    return use_timestamp_filter_;
+    return settings_.use_timestamp_filter_;
 }
 
 void EvaluationManager::useTimestampFilter(bool value)
 {
     loginf << "EvaluationManager: useTimeFilter: value " << value;
-    use_timestamp_filter_ = value;
+    settings_.use_timestamp_filter_ = value;
 }
 
 boost::posix_time::ptime EvaluationManager::loadTimestampBegin() const
@@ -2240,7 +2241,7 @@ void EvaluationManager::loadTimestampBegin(boost::posix_time::ptime value)
     loginf << "EvaluationManager: loadTimeBegin: value " << Time::toString(value);
 
     load_timestamp_begin_ = value;
-    load_timestamp_begin_str_ = Time::toString(load_timestamp_begin_);
+    settings_.load_timestamp_begin_str_ = Time::toString(load_timestamp_begin_);
 }
 
 boost::posix_time::ptime EvaluationManager::loadTimestampEnd() const
@@ -2253,210 +2254,210 @@ void EvaluationManager::loadTimestampEnd(boost::posix_time::ptime value)
     loginf << "EvaluationManager: loadTimeEnd: value " << Time::toString(value);
 
     load_timestamp_end_ = value;
-    load_timestamp_end_str_ = Time::toString(load_timestamp_end_);
+    settings_.load_timestamp_end_str_ = Time::toString(load_timestamp_end_);
 }
 
 bool EvaluationManager::useASDBFilter() const
 {
-    return use_adsb_filter_;
+    return settings_.use_adsb_filter_;
 }
 
 void EvaluationManager::useASDBFilter(bool value)
 {
     loginf << "EvaluationManager: useASDBFilter: value " << value;
-    use_adsb_filter_ = value;
+    settings_.use_adsb_filter_ = value;
 }
 
 float EvaluationManager::maxRefTimeDiff() const
 {
-    return max_ref_time_diff_;
+    return settings_.max_ref_time_diff_;
 }
 
 void EvaluationManager::maxRefTimeDiff(float value)
 {
     loginf << "EvaluationManager: maxRefTimeDiff: value " << value;
 
-    max_ref_time_diff_ = value;
+    settings_.max_ref_time_diff_ = value;
 }
 
 bool EvaluationManager::warningShown() const
 {
-    return warning_shown_;
+    return settings_.warning_shown_;
 }
 
 void EvaluationManager::warningShown(bool warning_shown)
 {
-    warning_shown_ = warning_shown;
+    settings_.warning_shown_ = warning_shown;
 }
 
 double EvaluationManager::resultDetailZoom() const
 {
-    return result_detail_zoom_;
+    return settings_.result_detail_zoom_;
 }
 
 void EvaluationManager::resultDetailZoom(double result_detail_zoom)
 {
-    result_detail_zoom_ = result_detail_zoom;
+    settings_.result_detail_zoom_ = result_detail_zoom;
 }
 
 bool EvaluationManager::reportSkipNoDataDetails() const
 {
-    return report_skip_no_data_details_;
+    return settings_.report_skip_no_data_details_;
 }
 
 void EvaluationManager::reportSkipNoDataDetails(bool value)
 {
-    report_skip_no_data_details_ = value;
+    settings_.report_skip_no_data_details_ = value;
 }
 
 bool EvaluationManager::reportSplitResultsByMOPS() const
 {
-    return report_split_results_by_mops_;
+    return settings_.report_split_results_by_mops_;
 }
 
 void EvaluationManager::reportSplitResultsByMOPS(bool value)
 {
-    report_split_results_by_mops_ = value;
+    settings_.report_split_results_by_mops_ = value;
 }
 
 bool EvaluationManager::reportSplitResultsByACOnlyMS() const
 {
-    return report_split_results_by_aconly_ms_;
+    return settings_.report_split_results_by_aconly_ms_;
 }
 
 void EvaluationManager::reportSplitResultsByACOnlyMS(bool value)
 {
     loginf << "EvaluationManager: reportSplitResultsByACOnlyMS: value " << value;
 
-    report_split_results_by_aconly_ms_ = value;
+    settings_.report_split_results_by_aconly_ms_ = value;
 }
 
 bool EvaluationManager::reportShowAdsbInfo() const
 {
-    return report_show_adsb_info_;
+    return settings_.report_show_adsb_info_;
 }
 
 void EvaluationManager::reportShowAdsbInfo(bool value)
 {
-    report_show_adsb_info_ = value;
+    settings_.report_show_adsb_info_ = value;
 }
 
 std::string EvaluationManager::reportAuthor() const
 {
-    return report_author_;
+    return settings_.report_author_;
 }
 
 void EvaluationManager::reportAuthor(const std::string& author)
 {
-    report_author_ = author;
+    settings_.report_author_ = author;
 }
 
 std::string EvaluationManager::reportAbstract() const
 {
-    return report_abstract_;
+    return settings_.report_abstract_;
 }
 
 void EvaluationManager::reportAbstract(const std::string& abstract)
 {
-    report_abstract_ = abstract;
+    settings_.report_abstract_ = abstract;
 }
 
 bool EvaluationManager::reportRunPDFLatex() const
 {
-    return report_run_pdflatex_;
+    return settings_.report_run_pdflatex_;
 }
 
 void EvaluationManager::reportRunPDFLatex(bool value)
 {
-    report_run_pdflatex_ = value;
+    settings_.report_run_pdflatex_ = value;
 }
 
 
 bool EvaluationManager::reportOpenCreatedPDF() const
 {
-    return report_open_created_pdf_;
+    return settings_.report_open_created_pdf_;
 }
 
 void EvaluationManager::reportOpenCreatedPDF(bool value)
 {
-    report_open_created_pdf_ = value;
+    settings_.report_open_created_pdf_ = value;
 }
 
 bool EvaluationManager::reportWaitOnMapLoading() const
 {
-    return report_wait_on_map_loading_;
+    return settings_.report_wait_on_map_loading_;
 }
 
 void EvaluationManager::reportWaitOnMapLoading(bool value)
 {
-    report_wait_on_map_loading_ = value;
+    settings_.report_wait_on_map_loading_ = value;
 }
 
 bool EvaluationManager::reportIncludeTargetDetails() const
 {
-    return report_include_target_details_;
+    return settings_.report_include_target_details_;
 }
 
 void EvaluationManager::reportIncludeTargetDetails(bool value)
 {
-    report_include_target_details_ = value;
+    settings_.report_include_target_details_ = value;
 }
 
 bool EvaluationManager::reportIncludeTargetTRDetails() const
 {
-    return report_include_target_tr_details_;
+    return settings_.report_include_target_tr_details_;
 }
 
 void EvaluationManager::reportIncludeTargetTRDetails(bool value)
 {
-    report_include_target_tr_details_ = value;
+    settings_.report_include_target_tr_details_ = value;
 }
 
 unsigned int EvaluationManager::reportNumMaxTableRows() const
 {
-    return report_num_max_table_rows_;
+    return settings_.report_num_max_table_rows_;
 }
 
 void EvaluationManager::reportNumMaxTableRows(unsigned int value)
 {
-    report_num_max_table_rows_ = value;
+    settings_.report_num_max_table_rows_ = value;
 }
 
 unsigned int EvaluationManager::reportNumMaxTableColWidth() const
 {
-    return report_num_max_table_col_width_;
+    return settings_.report_num_max_table_col_width_;
 }
 
 void EvaluationManager::reportNumMaxTableColWidth(unsigned int value)
 {
-    report_num_max_table_col_width_ = value;
+    settings_.report_num_max_table_col_width_ = value;
 }
 
 void EvaluationManager::updateActiveDataSources() // save to config var
 {
-    active_sources_ref_ = data_sources_ref_;
-    active_sources_tst_ = data_sources_tst_;
+    settings_.active_sources_ref_ = data_sources_ref_;
+    settings_.active_sources_tst_ = data_sources_tst_;
 
     widget_->updateButtons();
 }
 
 unsigned int EvaluationManager::lineIDRef() const
 {
-    return line_id_ref_;
+    return settings_.line_id_ref_;
 }
 
 void EvaluationManager::lineIDRef(unsigned int line_id_ref)
 {
-    line_id_ref_ = line_id_ref;
+    settings_.line_id_ref_ = line_id_ref;
 }
 
 unsigned int EvaluationManager::lineIDTst() const
 {
-    return line_id_tst_;
+    return settings_.line_id_tst_;
 }
 
 void EvaluationManager::lineIDTst(unsigned int line_id_tst)
 {
-    line_id_tst_ = line_id_tst;
+    settings_.line_id_tst_ = line_id_tst;
 }
 

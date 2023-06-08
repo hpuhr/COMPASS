@@ -44,6 +44,103 @@ class VariableSet;
 class QWidget;
 class QTabWidget;
 
+struct EvaluationManagerSettings
+{
+    std::string dbcontent_name_ref_;
+    unsigned int line_id_ref_;
+    nlohmann::json active_sources_ref_; // config var for data_sources_ref_
+
+    std::string dbcontent_name_tst_;
+    unsigned int line_id_tst_;
+    nlohmann::json active_sources_tst_; // config var for active_sources_tst_
+
+    std::string current_standard_;
+    std::string current_config_name_;
+
+    nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
+    nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
+
+    float max_ref_time_diff_ {0};
+
+    bool load_only_sector_data_ {true};
+
+    // load filter
+    bool use_load_filter_ {false};
+
+    bool use_timestamp_filter_ {false};
+    std::string load_timestamp_begin_str_;
+    std::string load_timestamp_end_str_;
+
+    bool use_adsb_filter_ {false};
+    bool use_v0_ {false};
+    bool use_v1_ {false};
+    bool use_v2_ {false};
+
+    // nucp
+    bool use_min_nucp_ {false};
+    unsigned int min_nucp_ {0};
+
+    bool use_max_nucp_ {false};
+    unsigned int max_nucp_ {0};
+
+    // nic
+    bool use_min_nic_ {false};
+    unsigned int min_nic_ {0};
+
+    bool use_max_nic_ {false};
+    unsigned int max_nic_ {0};
+
+    // nacp
+    bool use_min_nacp_ {false};
+    unsigned int min_nacp_ {0};
+
+    bool use_max_nacp_ {false};
+    unsigned int max_nacp_ {0};
+
+    // sil v1
+    bool use_min_sil_v1_ {false};
+    unsigned int min_sil_v1_ {0};
+
+    bool use_max_sil_v1_ {false};
+    unsigned int max_sil_v1_ {0};
+
+    // sil v2
+    bool use_min_sil_v2_ {false};
+    unsigned int min_sil_v2_ {0};
+
+    bool use_max_sil_v2_ {false};
+    unsigned int max_sil_v2_ {0};
+
+    double result_detail_zoom_ {0.0}; // in WGS84 deg
+
+    std::string min_height_filter_layer_; //layer used as minimum height filter
+
+    // report stuff
+    bool report_skip_no_data_details_ {true};
+    bool report_split_results_by_mops_ {false};
+    bool report_split_results_by_aconly_ms_ {false};
+    bool report_show_adsb_info_ {false};
+
+    std::string report_author_;
+    std::string report_abstract_;
+
+    bool report_include_target_details_ {false};
+    bool report_skip_targets_wo_issues_ {false};
+    bool report_include_target_tr_details_ {false};
+
+    bool show_ok_joined_target_reports_ {false};
+
+    unsigned int report_num_max_table_rows_ {1000};
+    unsigned int report_num_max_table_col_width_ {18};
+
+    bool report_wait_on_map_loading_ {true};
+
+    bool report_run_pdflatex_ {true};
+    bool report_open_created_pdf_ {false};
+
+    bool warning_shown_ {false};
+};
+
 class EvaluationManager : public QObject, public Configurable
 {
     Q_OBJECT
@@ -126,7 +223,7 @@ public:
     void lineIDRef(unsigned int line_id_ref);
 
     bool hasValidReferenceDBContent ();
-    std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[dbcontent_name_ref_]; } // can be used to set active bool
+    std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[settings_.dbcontent_name_ref_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesRef();
 
     std::string dbContentNameTst() const;
@@ -136,7 +233,7 @@ public:
     void lineIDTst(unsigned int line_id_tst);
 
     bool hasValidTestDBContent ();
-    std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[dbcontent_name_tst_]; } // can be used to set active bool
+    std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[settings_.dbcontent_name_tst_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesTst();
 
     bool dataLoaded() const;
@@ -344,6 +441,8 @@ public:
     unsigned int reportNumMaxTableColWidth() const;
     void reportNumMaxTableColWidth(unsigned int value);
 
+    const EvaluationManagerSettings& settings() const { return settings_; }
+
     // updaters
     void updateActiveDataSources(); // save to config var
 
@@ -352,6 +451,20 @@ public:
 
 protected:
     COMPASS& compass_;
+
+    EvaluationManagerSettings settings_;
+
+    std::map<std::string, std::map<std::string, bool>> data_sources_ref_ ; // db_content -> ds_id -> active flag
+    std::map<std::string, std::map<std::string, bool>> data_sources_tst_; // db_content -> ds_id -> active flag
+
+    boost::posix_time::ptime load_timestamp_begin_;
+    boost::posix_time::ptime load_timestamp_end_;
+
+    bool min_max_pos_set_ {false};
+    double latitude_min_ {0};
+    double latitude_max_ {0};
+    double longitude_min_ {0};
+    double longitude_max_ {0};
 
     bool sectors_loaded_ {false};
     bool initialized_ {false};
@@ -364,115 +477,11 @@ protected:
 
     bool evaluated_ {false};
 
-    std::string dbcontent_name_ref_;
-    unsigned int line_id_ref_;
-    std::map<std::string, std::map<std::string, bool>> data_sources_ref_ ; // db_content -> ds_id -> active flag
-    nlohmann::json active_sources_ref_; // config var for data_sources_ref_
-
-    std::string dbcontent_name_tst_;
-    unsigned int line_id_tst_;
-    std::map<std::string, std::map<std::string, bool>> data_sources_tst_; // db_content -> ds_id -> active flag
-    nlohmann::json active_sources_tst_; // config var for active_sources_tst_
-
-    std::string current_standard_;
-    std::string current_config_name_;
-
-    float max_ref_time_diff_ {0};
-
-    bool load_only_sector_data_ {true};
-
-    bool min_max_pos_set_ {false};
-    double latitude_min_ {0};
-    double latitude_max_ {0};
-    double longitude_min_ {0};
-    double longitude_max_ {0};
-
-    // load filter
-    bool use_load_filter_ {false};
-
-    bool use_timestamp_filter_ {false};
-    std::string load_timestamp_begin_str_;
-    boost::posix_time::ptime load_timestamp_begin_;
-    std::string load_timestamp_end_str_;
-    boost::posix_time::ptime load_timestamp_end_;
-
-    bool use_adsb_filter_ {false};
-    bool use_v0_ {false};
-    bool use_v1_ {false};
-    bool use_v2_ {false};
-
-    // nucp
-    bool use_min_nucp_ {false};
-    unsigned int min_nucp_ {0};
-
-    bool use_max_nucp_ {false};
-    unsigned int max_nucp_ {0};
-
-    // nic
-    bool use_min_nic_ {false};
-    unsigned int min_nic_ {0};
-
-    bool use_max_nic_ {false};
-    unsigned int max_nic_ {0};
-
-    // nacp
-    bool use_min_nacp_ {false};
-    unsigned int min_nacp_ {0};
-
-    bool use_max_nacp_ {false};
-    unsigned int max_nacp_ {0};
-
-    // sil v1
-    bool use_min_sil_v1_ {false};
-    unsigned int min_sil_v1_ {0};
-
-    bool use_max_sil_v1_ {false};
-    unsigned int max_sil_v1_ {0};
-
-    // sil v2
-    bool use_min_sil_v2_ {false};
-    unsigned int min_sil_v2_ {0};
-
-    bool use_max_sil_v2_ {false};
-    unsigned int max_sil_v2_ {0};
-
-    double result_detail_zoom_ {0.0}; // in WGS84 deg
-
-    // report stuff
-    bool report_skip_no_data_details_ {true};
-    bool report_split_results_by_mops_ {false};
-    bool report_split_results_by_aconly_ms_ {false};
-    bool report_show_adsb_info_ {false};
-
-    std::string report_author_;
-    std::string report_abstract_;
-
-    bool report_include_target_details_ {false};
-    bool report_skip_targets_wo_issues_ {false};
-    bool report_include_target_tr_details_ {false};
-
-    bool show_ok_joined_target_reports_ {false};
-
-    unsigned int report_num_max_table_rows_ {1000};
-    unsigned int report_num_max_table_col_width_ {18};
-
-    bool report_wait_on_map_loading_ {true};
-
-    bool report_run_pdflatex_ {true};
-    bool report_open_created_pdf_ {false};
-
-    bool warning_shown_ {false};
-
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
     unsigned int max_sector_id_ {0};
     std::vector<std::unique_ptr<EvaluationStandard>> standards_;
-
-    std::string min_height_filter_layer_; //layer used as minimum height filter
-
-    nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
-    nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
 
     EvaluationData data_;
     EvaluationResultsGenerator results_gen_;
