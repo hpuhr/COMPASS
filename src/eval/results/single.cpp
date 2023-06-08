@@ -76,7 +76,7 @@ std::string Single::getTargetRequirementSectionID ()
 
 std::string Single::getRequirementSectionID () // TODO hack
 {
-    if (eval_man_.reportSplitResultsByMOPS())
+    if (eval_man_.settings().report_split_results_by_mops_)
     {
         string tmp = target()->mopsVersionStr();
 
@@ -87,7 +87,7 @@ std::string Single::getRequirementSectionID () // TODO hack
 
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+":"+requirement_->name();
     }
-    else if (eval_man_.reportSplitResultsByACOnlyMS())
+    else if (eval_man_.settings().report_split_results_by_aconly_ms_)
     {
         string tmp = "Primary";
 

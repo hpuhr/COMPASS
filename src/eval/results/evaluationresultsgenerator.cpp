@@ -55,8 +55,9 @@ using namespace EvaluationRequirementResult;
 using namespace EvaluationResultsReport;
 using namespace Utils;
 
-EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationManager& eval_man)
-    : eval_man_(eval_man), results_model_(eval_man_)
+EvaluationResultsGenerator::EvaluationResultsGenerator(
+        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
+    : eval_man_(eval_man), eval_settings_(eval_settings), results_model_(eval_man_)
 {
 }
 
@@ -67,10 +68,11 @@ EvaluationResultsGenerator::~EvaluationResultsGenerator()
 
 void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStandard& standard)
 {
-    loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details " << eval_man_.reportSkipNoDataDetails()
-           << " split_results_by_mops " << eval_man_.reportSplitResultsByMOPS()
-           << " report_split_results_by_aconly_ms " << eval_man_.reportSplitResultsByACOnlyMS()
-           << " show_adsb_info " << eval_man_.reportShowAdsbInfo();
+    loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details "
+           << eval_settings_.report_skip_no_data_details_
+           << " split_results_by_mops " << eval_settings_.report_split_results_by_mops_
+           << " report_split_results_by_aconly_ms " << eval_settings_.report_split_results_by_aconly_ms_
+           << " show_adsb_info " << eval_settings_.report_show_adsb_info_;
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;
@@ -295,7 +297,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                     result_sum->join(result_it);
 
-                    if (eval_man_.reportSplitResultsByMOPS())
+                    if (eval_man_.settings().report_split_results_by_mops_)
                     {
                         subresult_str = result_it->target()->mopsVersionStr();
 
@@ -311,7 +313,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                         extra_results_sums.at(subresult_str+" Sum")->join(result_it);
                     }
 
-                    if (eval_man_.reportSplitResultsByACOnlyMS())
+                    if (eval_man_.settings().report_split_results_by_aconly_ms_)
                     {
                         subresult_str = "Primary";
 
@@ -517,7 +519,7 @@ void EvaluationResultsGenerator::updateToChanges ()
 EvaluationResultsGeneratorWidget& EvaluationResultsGenerator::widget()
 {
     if (!widget_)
-        widget_.reset(new EvaluationResultsGeneratorWidget(*this, eval_man_));
+        widget_.reset(new EvaluationResultsGeneratorWidget(*this, eval_man_, eval_settings_));
 
     return *widget_.get();
 }

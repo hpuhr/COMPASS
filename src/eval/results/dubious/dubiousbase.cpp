@@ -205,11 +205,11 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousBase::getTargetErrorsView
     //            double lat_w = 1.1*(lat_max-lat_min)/2.0;
     //            double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    //            if (lat_w < eval_man_.resultDetailZoom())
-    //                lat_w = eval_man_.resultDetailZoom();
+    //            if (lat_w < eval_man_.settings().result_detail_zoom_)
+    //                lat_w = eval_man_.settings().result_detail_zoom_;
 
-    //            if (lon_w < eval_man_.resultDetailZoom())
-    //                lon_w = eval_man_.resultDetailZoom();
+    //            if (lon_w < eval_man_.settings().result_detail_zoom_)
+    //                lon_w = eval_man_.settings().result_detail_zoom_;
 
     //            (*viewable_ptr)["speed_window_latitude"] = lat_w;
     //            (*viewable_ptr)["speed_window_longitude"] = lon_w;

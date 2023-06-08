@@ -62,7 +62,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
                     eval_man_, Details(), 0, 0, 0, 0, 0, 0, 0);
     }
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -88,7 +88,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
     string comment;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
     bool skip_detail;
 
     ValueComparisonResult cmp_res_ti;

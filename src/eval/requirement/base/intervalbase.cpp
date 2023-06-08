@@ -80,8 +80,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
                                                                             std::shared_ptr<Base> instance,
                                                                             const SectorLayer& sector_layer)
 {
-    auto max_ref_time_diff    = Utils::Time::partialSeconds(eval_man_.maxRefTimeDiff());
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    auto max_ref_time_diff    = Utils::Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     typedef EvaluationRequirementResult::SingleIntervalBase Result;
     typedef EvaluationDetail                                Detail;
@@ -282,7 +282,7 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     else
     {
         //period obtains updates
-        auto max_ref_time_diff = Utils::Time::partialSeconds(eval_man_.maxRefTimeDiff());
+        auto max_ref_time_diff = Utils::Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
         size_t n = updates.size();
 

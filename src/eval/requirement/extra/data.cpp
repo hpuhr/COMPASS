@@ -65,7 +65,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
            << " min_duration " << min_duration_ << " min_num_updates " << min_num_updates_
            << " ignore_primary_only " << ignore_primary_only_ << " prob " << prob_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
     bool ignore = false;
 
     // create ref time periods, irrespective of inside
@@ -122,7 +122,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     typedef Result::EvaluationDetails                    Details;
     Details details;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
                             const dbContent::TargetPosition& tst_pos,

@@ -46,11 +46,9 @@ class QTabWidget;
 
 struct EvaluationManagerSettings
 {
-    std::string dbcontent_name_ref_;
     unsigned int line_id_ref_;
     nlohmann::json active_sources_ref_; // config var for data_sources_ref_
 
-    std::string dbcontent_name_tst_;
     unsigned int line_id_tst_;
     nlohmann::json active_sources_tst_; // config var for active_sources_tst_
 
@@ -68,8 +66,7 @@ struct EvaluationManagerSettings
     bool use_load_filter_ {false};
 
     bool use_timestamp_filter_ {false};
-    std::string load_timestamp_begin_str_;
-    std::string load_timestamp_end_str_;
+
 
     bool use_adsb_filter_ {false};
     bool use_v0_ {false};
@@ -139,6 +136,16 @@ struct EvaluationManagerSettings
     bool report_open_created_pdf_ {false};
 
     bool warning_shown_ {false};
+
+private:
+    friend class EvaluationManager;
+
+    // private since specific setter functions
+    std::string dbcontent_name_ref_;
+    std::string dbcontent_name_tst_;
+
+    std::string load_timestamp_begin_str_;
+    std::string load_timestamp_end_str_;
 };
 
 class EvaluationManager : public QObject, public Configurable
@@ -219,8 +226,8 @@ public:
     std::string dbContentNameRef() const;
     void dbContentNameRef(const std::string& name);
 
-    unsigned int lineIDRef() const;
-    void lineIDRef(unsigned int line_id_ref);
+//    unsigned int lineIDRef() const;
+//    void lineIDRef(unsigned int line_id_ref);
 
     bool hasValidReferenceDBContent ();
     std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[settings_.dbcontent_name_ref_]; } // can be used to set active bool
@@ -229,8 +236,8 @@ public:
     std::string dbContentNameTst() const;
     void dbContentNameTst(const std::string& name);
 
-    unsigned int lineIDTst() const;
-    void lineIDTst(unsigned int line_id_tst);
+//    unsigned int lineIDTst() const;
+//    void lineIDTst(unsigned int line_id_tst);
 
     bool hasValidTestDBContent ();
     std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[settings_.dbcontent_name_tst_]; } // can be used to set active bool
@@ -293,89 +300,89 @@ public:
 
     EvaluationResultsReport::PDFGenerator& pdfGenerator();
 
-    bool loadOnlySectorData() const;
-    void loadOnlySectorData(bool value);
+//    bool loadOnlySectorData() const;
+//    void loadOnlySectorData(bool value);
 
-    bool useV0() const;
-    void useV0(bool value);
+//    bool useV0() const;
+//    void useV0(bool value);
 
-    bool useV1() const;
-    void useV1(bool value);
+//    bool useV1() const;
+//    void useV1(bool value);
 
-    bool useV2() const;
-    void useV2(bool value);
+//    bool useV2() const;
+//    void useV2(bool value);
 
-    // nucp
-    bool useMinNUCP() const;
-    void useMinNUCP(bool value);
+//    // nucp
+//    bool useMinNUCP() const;
+//    void useMinNUCP(bool value);
 
-    unsigned int minNUCP() const;
-    void minNUCP(unsigned int value);
+//    unsigned int minNUCP() const;
+//    void minNUCP(unsigned int value);
 
-    bool useMaxNUCP() const;
-    void useMaxNUCP(bool value);
+//    bool useMaxNUCP() const;
+//    void useMaxNUCP(bool value);
 
-    unsigned int maxNUCP() const;
-    void maxNUCP(unsigned int value);
+//    unsigned int maxNUCP() const;
+//    void maxNUCP(unsigned int value);
 
-    // nic
-    bool useMinNIC() const;
-    void useMinNIC(bool value);
+//    // nic
+//    bool useMinNIC() const;
+//    void useMinNIC(bool value);
 
-    unsigned int minNIC() const;
-    void minNIC(unsigned int value);
+//    unsigned int minNIC() const;
+//    void minNIC(unsigned int value);
 
-    bool useMaxNIC() const;
-    void useMaxNIC(bool value);
+//    bool useMaxNIC() const;
+//    void useMaxNIC(bool value);
 
-    unsigned int maxNIC() const;
-    void maxNIC(unsigned int value);
+//    unsigned int maxNIC() const;
+//    void maxNIC(unsigned int value);
 
-    // nacp
-    bool useMinNACp() const;
-    void useMinNACp(bool value);
+//    // nacp
+//    bool useMinNACp() const;
+//    void useMinNACp(bool value);
 
-    unsigned int minNACp() const;
-    void minNACp(unsigned int value);
+//    unsigned int minNACp() const;
+//    void minNACp(unsigned int value);
 
-    bool useMaxNACp() const;
-    void useMaxNACp(bool value);
+//    bool useMaxNACp() const;
+//    void useMaxNACp(bool value);
 
-    unsigned int maxNACp() const;
-    void maxNACp(unsigned int value);
+//    unsigned int maxNACp() const;
+//    void maxNACp(unsigned int value);
 
-    // sil v1
-    bool useMinSILv1() const;
-    void useMinSILv1(bool value);
+//    // sil v1
+//    bool useMinSILv1() const;
+//    void useMinSILv1(bool value);
 
-    unsigned int minSILv1() const;
-    void minSILv1(unsigned int value);
+//    unsigned int minSILv1() const;
+//    void minSILv1(unsigned int value);
 
-    bool useMaxSILv1() const;
-    void useMaxSILv1(bool value);
+//    bool useMaxSILv1() const;
+//    void useMaxSILv1(bool value);
 
-    unsigned int maxSILv1() const;
-    void maxSILv1(unsigned int value);
+//    unsigned int maxSILv1() const;
+//    void maxSILv1(unsigned int value);
 
-    // sil v2
-    bool useMinSILv2() const;
-    void useMinSILv2(bool value);
+//    // sil v2
+//    bool useMinSILv2() const;
+//    void useMinSILv2(bool value);
 
-    unsigned int minSILv2() const;
-    void minSILv2(unsigned int value);
+//    unsigned int minSILv2() const;
+//    void minSILv2(unsigned int value);
 
-    bool useMaxSILv2() const;
-    void useMaxSILv2(bool value);
+//    bool useMaxSILv2() const;
+//    void useMaxSILv2(bool value);
 
-    unsigned int maxSILv2() const;
-    void maxSILv2(unsigned int value);
+//    unsigned int maxSILv2() const;
+//    void maxSILv2(unsigned int value);
 
-    // other
-    bool useLoadFilter() const;
-    void useLoadFilter(bool value);
+//    // other
+//    bool useLoadFilter() const;
+//    void useLoadFilter(bool value);
 
-    bool useTimestampFilter() const;
-    void useTimestampFilter(bool value);
+//    bool useTimestampFilter() const;
+//    void useTimestampFilter(bool value);
 
     boost::posix_time::ptime loadTimestampBegin() const;
     void loadTimestampBegin(boost::posix_time::ptime value);
@@ -383,63 +390,63 @@ public:
     boost::posix_time::ptime loadTimestampEnd() const;
     void loadTimestampEnd(boost::posix_time::ptime value);
 
-    bool useASDBFilter() const;
-    void useASDBFilter(bool value);
+//    bool useASDBFilter() const;
+//    void useASDBFilter(bool value);
 
-    float maxRefTimeDiff() const;
-    void maxRefTimeDiff(float value);
+//    float maxRefTimeDiff() const;
+//    void maxRefTimeDiff(float value);
 
-    bool warningShown() const;
-    void warningShown(bool warning_shown);
+//    bool warningShown() const;
+//    void warningShown(bool warning_shown);
 
-    double resultDetailZoom() const;
-    void resultDetailZoom(double result_detail_zoom);
+//    double resultDetailZoom() const;
+//    void resultDetailZoom(double result_detail_zoom);
 
-    // report stuff
-    bool reportSplitResultsByMOPS() const;
-    void reportSplitResultsByMOPS(bool value);
+//    // report stuff
+//    bool reportSplitResultsByMOPS() const;
+//    void reportSplitResultsByMOPS(bool value);
 
-    bool reportSplitResultsByACOnlyMS() const;
-    void reportSplitResultsByACOnlyMS(bool value);
+//    bool reportSplitResultsByACOnlyMS() const;
+//    void reportSplitResultsByACOnlyMS(bool value);
 
-    bool reportShowAdsbInfo() const;
-    void reportShowAdsbInfo(bool value);
+//    bool reportShowAdsbInfo() const;
+//    void reportShowAdsbInfo(bool value);
 
-    bool reportSkipNoDataDetails() const;
-    void reportSkipNoDataDetails(bool value);
+//    bool reportSkipNoDataDetails() const;
+//    void reportSkipNoDataDetails(bool value);
 
-    bool showJoinedOkTargetReports() const; //
-    void showJoinedOkTargetReports(bool value);
+//    bool showJoinedOkTargetReports() const; //
+//    void showJoinedOkTargetReports(bool value);
 
-    std::string reportAuthor() const;
-    void reportAuthor(const std::string& author);
+//    std::string reportAuthor() const;
+//    void reportAuthor(const std::string& author);
 
-    std::string reportAbstract() const;
-    void reportAbstract(const std::string& abstract);
+//    std::string reportAbstract() const;
+//    void reportAbstract(const std::string& abstract);
 
-    bool reportRunPDFLatex() const;
-    void reportRunPDFLatex(bool value);
+//    bool reportRunPDFLatex() const;
+//    void reportRunPDFLatex(bool value);
 
-    bool reportOpenCreatedPDF() const;
-    void reportOpenCreatedPDF(bool value);
+//    bool reportOpenCreatedPDF() const;
+//    void reportOpenCreatedPDF(bool value);
 
-    bool reportWaitOnMapLoading() const;
-    void reportWaitOnMapLoading(bool value);
+//    bool reportWaitOnMapLoading() const;
+//    void reportWaitOnMapLoading(bool value);
 
-    bool reportIncludeTargetDetails() const;
-    void reportIncludeTargetDetails(bool value);
+//    bool reportIncludeTargetDetails() const;
+//    void reportIncludeTargetDetails(bool value);
 
-    bool reportSkipTargetsWoIssues() const;
-    void reportSkipTargetsWoIssues(bool value);
+//    bool reportSkipTargetsWoIssues() const;
+//    void reportSkipTargetsWoIssues(bool value);
 
-    bool reportIncludeTargetTRDetails() const;
-    void reportIncludeTargetTRDetails(bool value);
+//    bool reportIncludeTargetTRDetails() const;
+//    void reportIncludeTargetTRDetails(bool value);
 
-    unsigned int reportNumMaxTableRows() const;
-    void reportNumMaxTableRows(unsigned int value);
+//    unsigned int reportNumMaxTableRows() const;
+//    void reportNumMaxTableRows(unsigned int value);
 
-    unsigned int reportNumMaxTableColWidth() const;
-    void reportNumMaxTableColWidth(unsigned int value);
+//    unsigned int reportNumMaxTableColWidth() const;
+//    void reportNumMaxTableColWidth(unsigned int value);
 
     const EvaluationManagerSettings& settings() const { return settings_; }
 

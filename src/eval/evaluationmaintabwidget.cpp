@@ -32,9 +32,9 @@
 #include <QLineEdit>
 #include <QComboBox>
 
-EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
+EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
                                                  EvaluationManagerWidget& man_widget)
-    : QWidget(nullptr), eval_man_(eval_man), man_widget_(man_widget)
+    : QWidget(nullptr), eval_man_(eval_man),  eval_settings_(eval_settings), man_widget_(man_widget)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -50,7 +50,7 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 
     // titles define which data sources to display
     data_source_ref_widget_.reset(
-                new EvaluationDataSourceWidget("Reference Data", eval_man_.dbContentNameRef(), eval_man_.lineIDRef()));
+                new EvaluationDataSourceWidget("Reference Data", eval_man_.dbContentNameRef(), eval_settings_.line_id_ref_));
     connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::dbContentNameChangedSignal,
              this, &EvaluationMainTabWidget::dboRefNameChangedSlot);
     connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
@@ -58,7 +58,7 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
     data_sources_layout->addWidget(data_source_ref_widget_.get());
 
     data_source_tst_widget_.reset(
-                new EvaluationDataSourceWidget("Test Data", eval_man_.dbContentNameTst(), eval_man_.lineIDTst()));
+                new EvaluationDataSourceWidget("Test Data", eval_man_.dbContentNameTst(), eval_settings_.line_id_tst_));
     connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::dbContentNameChangedSignal,
              this, &EvaluationMainTabWidget::dboTstNameChangedSlot);
     connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
@@ -189,7 +189,7 @@ void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
 {
     loginf << "EvaluationMainTabWidget: lineRefChangedSlot: value " << line_id;
 
-    eval_man_.lineIDRef(line_id);
+    eval_settings_.line_id_ref_ = line_id;
 }
 
 void EvaluationMainTabWidget::dboTstNameChangedSlot(const std::string& dbcontent_name)
@@ -203,7 +203,7 @@ void EvaluationMainTabWidget::lineTstChangedSlot(unsigned int line_id)
 {
     loginf << "EvaluationMainTabWidget: lineTstChangedSlot: value " << line_id;
 
-    eval_man_.lineIDTst(line_id);
+    eval_settings_.line_id_tst_ = line_id;
 }
 
 void EvaluationMainTabWidget::changedStandardsSlot()

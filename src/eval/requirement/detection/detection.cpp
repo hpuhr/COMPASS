@@ -109,7 +109,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
            << " update_interval " << update_interval_s_ << " prob " << prob_
            << " use_miss_tolerance " << use_miss_tolerance_ << " miss_tolerance " << miss_tolerance_s_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
     // create ref time periods
     TimePeriodCollection ref_periods;
@@ -257,7 +257,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
     string comment;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     for (const auto& tst_it : tst_data)
     {

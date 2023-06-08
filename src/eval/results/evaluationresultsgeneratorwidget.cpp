@@ -29,8 +29,9 @@
 #include <QLineEdit>
 
 EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
-        EvaluationResultsGenerator& results_gen, EvaluationManager& eval_man)
-    : results_gen_(results_gen), eval_man_(eval_man)
+        EvaluationResultsGenerator& results_gen, EvaluationManager& eval_man,
+        EvaluationManagerSettings& eval_settings)
+    : results_gen_(results_gen), eval_man_(eval_man), eval_settings_(eval_settings)
 {
     QHBoxLayout* main_layout = new QHBoxLayout();
 
@@ -42,7 +43,7 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     //++row;
 
     skip_no_data_details_check_ = new QCheckBox ();
-    skip_no_data_details_check_->setChecked(eval_man_.reportSkipNoDataDetails());
+    skip_no_data_details_check_->setChecked(eval_settings_.report_skip_no_data_details_);
     connect(skip_no_data_details_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleSkipNoDataDetailsSlot);
     layout->addRow("Skip No Data Details", skip_no_data_details_check_);
@@ -51,7 +52,7 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     //++row;
 
     split_results_by_mops_check_ = new QCheckBox ();
-    split_results_by_mops_check_->setChecked(eval_man_.reportSplitResultsByMOPS());
+    split_results_by_mops_check_->setChecked(eval_settings_.report_split_results_by_mops_);
     connect(split_results_by_mops_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleSplitResultsByMOPSSlot);
     layout->addRow("Split Results by MOPS Version", split_results_by_mops_check_);
@@ -59,7 +60,7 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     // split results by mode a/c only and mode s
 
     split_results_by_mac_ms_check_ = new QCheckBox ();
-    split_results_by_mac_ms_check_->setChecked(eval_man_.reportSplitResultsByACOnlyMS());
+    split_results_by_mac_ms_check_->setChecked(eval_settings_.report_split_results_by_aconly_ms_);
     connect(split_results_by_mac_ms_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleSplitResultsByMACMSSlot);
     layout->addRow("Split Results by Mode A/C Only and Mode S", split_results_by_mac_ms_check_);
@@ -68,7 +69,7 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     //++row;
 
     show_adsb_info_check_ = new QCheckBox ();
-    show_adsb_info_check_->setChecked(eval_man_.reportShowAdsbInfo());
+    show_adsb_info_check_->setChecked(eval_settings_.report_show_adsb_info_);
     connect(show_adsb_info_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot);
     layout->addRow("Show ADS-B Info", show_adsb_info_check_);
@@ -77,12 +78,12 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     // show ok
 
     show_ok_joined_target_reports_check_ = new QCheckBox ();
-    show_ok_joined_target_reports_check_->setChecked(eval_man_.showJoinedOkTargetReports());
+    show_ok_joined_target_reports_check_->setChecked(eval_settings_.show_ok_joined_target_reports_);
     connect(show_ok_joined_target_reports_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleShowOKJoinedSlot);
     layout->addRow("Show OK data in Sector Results", show_ok_joined_target_reports_check_);
 
-    result_detail_zoom_edit_ = new QLineEdit(QString::number(eval_man_.resultDetailZoom()));
+    result_detail_zoom_edit_ = new QLineEdit(QString::number(eval_settings_.result_detail_zoom_));
     result_detail_zoom_edit_->setValidator(new QDoubleValidator(0.000001, 1.0, 7, this));
     connect(result_detail_zoom_edit_, &QLineEdit::textEdited,
             this, &EvaluationResultsGeneratorWidget::resultDetailZoomEditSlot);
@@ -104,31 +105,31 @@ EvaluationResultsGeneratorWidget::~EvaluationResultsGeneratorWidget()
 void EvaluationResultsGeneratorWidget::toggleSplitResultsByMOPSSlot()
 {
     assert (split_results_by_mops_check_);
-    eval_man_.reportSplitResultsByMOPS(split_results_by_mops_check_->checkState() == Qt::Checked);
+    eval_settings_.report_split_results_by_mops_ = split_results_by_mops_check_->checkState() == Qt::Checked;
 }
 
 void EvaluationResultsGeneratorWidget::toggleSplitResultsByMACMSSlot()
 {
     assert (split_results_by_mac_ms_check_);
-    eval_man_.reportSplitResultsByACOnlyMS(split_results_by_mac_ms_check_->checkState() == Qt::Checked);
+    eval_settings_.report_split_results_by_aconly_ms_ = split_results_by_mac_ms_check_->checkState() == Qt::Checked;
 }
 
 void EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot()
 {
     assert (show_adsb_info_check_);
-    eval_man_.reportShowAdsbInfo(show_adsb_info_check_->checkState() == Qt::Checked);
+    eval_settings_.report_show_adsb_info_ = show_adsb_info_check_->checkState() == Qt::Checked;
 }
 
 void EvaluationResultsGeneratorWidget::toggleShowOKJoinedSlot()
 {
     assert (show_ok_joined_target_reports_check_);
-    eval_man_.showJoinedOkTargetReports(show_ok_joined_target_reports_check_->checkState() == Qt::Checked);
+    eval_settings_.show_ok_joined_target_reports_ = show_ok_joined_target_reports_check_->checkState() == Qt::Checked;
 }
 
 void EvaluationResultsGeneratorWidget::toggleSkipNoDataDetailsSlot()
 {
     assert (skip_no_data_details_check_);
-    eval_man_.reportSkipNoDataDetails(skip_no_data_details_check_->checkState() == Qt::Checked);
+    eval_settings_.report_skip_no_data_details_ = skip_no_data_details_check_->checkState() == Qt::Checked;
 }
 
 void EvaluationResultsGeneratorWidget::resultDetailZoomEditSlot(QString value)
@@ -139,7 +140,7 @@ void EvaluationResultsGeneratorWidget::resultDetailZoomEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        eval_man_.resultDetailZoom(val);
+        eval_settings_.result_detail_zoom_ = val;
     else
         loginf << "EvaluationResultsGeneratorWidget: resultDetailZoomEditSlot: axvalid value";
 }

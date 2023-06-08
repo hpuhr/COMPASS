@@ -53,8 +53,8 @@ using namespace Utils;
 namespace EvaluationResultsReport
 {
 
-PDFGenerator::PDFGenerator(EvaluationManager& eval_manager)
-    : eval_man_(eval_manager)
+PDFGenerator::PDFGenerator(EvaluationManager& eval_manager, EvaluationManagerSettings& eval_settings)
+    : eval_man_(eval_manager), eval_settings_(eval_settings)
 {
     report_filename_ = "report.tex";
 
@@ -77,7 +77,7 @@ PDFGeneratorDialog& PDFGenerator::dialog()
     }
 
     if (!dialog_)
-        dialog_.reset(new PDFGeneratorDialog(*this, eval_man_));
+        dialog_.reset(new PDFGeneratorDialog(*this, eval_man_, eval_settings_));
 
     return *dialog_;
 }
@@ -100,18 +100,18 @@ void PDFGenerator::run ()
         LatexDocument doc (report_path_, report_filename_);
         doc.title("OpenATS COMPASS Evaluation Report");
 
-        if (eval_man_.reportAuthor().size())
-            doc.author(eval_man_.reportAuthor());
+        if (eval_settings_.report_author_.size())
+            doc.author(eval_settings_.report_author_);
 
-        if (eval_man_.reportAbstract().size())
-            doc.abstract(eval_man_.reportAbstract());
+        if (eval_settings_.report_abstract_.size())
+            doc.abstract(eval_settings_.report_abstract_);
 
-        LatexTable::num_max_rows_ = eval_man_.reportNumMaxTableRows();
+        LatexTable::num_max_rows_ = eval_settings_.report_num_max_table_rows_;
         LatexVisitor visitor (doc, false, false, false,
-                              eval_man_.reportIncludeTargetDetails(),
-                              eval_man_.reportIncludeTargetTRDetails(),
-                              eval_man_.reportNumMaxTableColWidth(),
-                              eval_man_.reportWaitOnMapLoading());
+                              eval_settings_.report_include_target_details_,
+                              eval_settings_.report_include_target_tr_details_,
+                              eval_settings_.report_num_max_table_col_width_,
+                              eval_settings_.report_wait_on_map_loading_);
 
         cancel_ = false;
         running_ = true;
@@ -136,8 +136,8 @@ void PDFGenerator::run ()
         // create sections
         vector<shared_ptr<Section>> sections;
         sections.push_back(root_section);
-        root_section->addSectionsFlat(sections, eval_man_.reportIncludeTargetDetails(),
-                                      eval_man_.reportSkipTargetsWoIssues());
+        root_section->addSectionsFlat(sections, eval_settings_.report_include_target_details_,
+                                      eval_settings_.report_skip_targets_wo_issues_);
 
         unsigned int num_sections = sections.size();
 
@@ -216,7 +216,7 @@ void PDFGenerator::run ()
 
             doc.write();
 
-            if (eval_man_.reportRunPDFLatex())
+            if (eval_settings_.report_run_pdflatex_)
             {
                 std::string command_out;
                 std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
@@ -274,7 +274,7 @@ void PDFGenerator::run ()
 
                     dialog_->setStatus("Running pdflatex done");
 
-                    if (eval_man_.reportOpenCreatedPDF())
+                    if (eval_settings_.report_open_created_pdf_)
                     {
                         std::string fullpath = report_path_+report_filename_;
 

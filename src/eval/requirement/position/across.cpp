@@ -56,7 +56,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
     logdbg << "EvaluationRequirementPositionAcross '" << name_ << "': evaluate: utn " << target_data.utn_
            << " max_abs_value " << max_abs_value_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -101,7 +101,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
 
     vector<double> values;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
                             const dbContent::TargetPosition& tst_pos,

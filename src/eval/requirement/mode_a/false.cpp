@@ -43,7 +43,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAFalse::evaluate (
 {
     logdbg << "EvaluationRequirementModeAFalse '" << name_ << "': evaluate: utn " << target_data.utn_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -75,7 +75,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAFalse::evaluate (
     ValueComparisonResult cmp_res;
     string comment;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
     bool skip_detail;
 
     auto addDetail = [ & ] (const ptime& ts,
