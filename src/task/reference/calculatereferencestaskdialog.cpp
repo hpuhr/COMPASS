@@ -50,10 +50,17 @@ void CalculateReferencesTaskDialog::createUI()
     createDataSourcesSettingsWidget(data_sources_settings_widget);
     tab_widget->addTab(data_sources_settings_widget, "Input Data Sources");
 
+    QWidget* position_filter_widget = new QWidget;
+    createPositionFilterSettingsWidget(position_filter_widget);
+    tab_widget->addTab(position_filter_widget, "Position Data Filter");
+
     //kalman settings tab
     QWidget* kalman_settings_widget = new QWidget;
     createKalmanSettingsWidget(kalman_settings_widget);
     tab_widget->addTab(kalman_settings_widget, "Kalman Settings");
+
+    //read in values from task
+    readOptions();
 
     //bottom buttons
     {
@@ -103,8 +110,100 @@ void CalculateReferencesTaskDialog::createDataSourcesSettingsWidget(QWidget* w)
     layout->addWidget(adsb_sources_);
 }
 
-void CalculateReferencesTaskDialog::createFilterSettingsWidget(QWidget* w)
+void CalculateReferencesTaskDialog::createPositionFilterSettingsWidget(QWidget* w)
 {
+    QWidget* content_widget = addScrollArea(w);
+
+    QGridLayout* layout = new QGridLayout;
+    content_widget->setLayout(layout);
+
+    auto boldify = [&] (QLabel* l)
+    {
+        auto f = l->font();
+        f.setBold(true);
+        l->setFont(f);
+        return l;
+    };
+
+    int row = 0;
+
+    auto addRow = [&] (const QString& name, QWidget* w)
+    {
+        QLabel* label = new QLabel(name);
+        label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        layout->addWidget(label, row, 0);
+        if (w) layout->addWidget(w, row, 1);
+        ++row;
+    };
+
+    auto addOptionalRow = [&] (QCheckBox* check_box, QWidget* w)
+    {
+        check_box->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        layout->addWidget(check_box, row, 0);
+        if (w) layout->addWidget(w, row, 1);
+        ++row;
+    };
+
+    auto addHeader = [&] (const QString& name)
+    {
+        QLabel* label = boldify(new QLabel(name));
+        layout->addWidget(label, row++, 0);
+    };
+
+    filter_position_usage_check_ = new QCheckBox("Filter Position Data");
+    addOptionalRow(filter_position_usage_check_, nullptr);
+
+    addHeader("Tracker Position Data Usage");
+
+    tracker_only_confirmed_positions_check_ = new QCheckBox("Only Use Confirmed");
+    addOptionalRow(tracker_only_confirmed_positions_check_, nullptr);
+
+    tracker_only_noncoasting_positions_check_ = new QCheckBox("Only Use Non-Coasting");
+    addOptionalRow(tracker_only_noncoasting_positions_check_, nullptr);
+
+    tracker_only_report_detection_positions_check_ = new QCheckBox("Only Use Detected Report");
+    addOptionalRow(tracker_only_report_detection_positions_check_, nullptr);
+
+    tracker_only_report_detection_nonpsronly_positions_check_ = new QCheckBox("Only Use Non-Single PSR-only Detections");
+    addOptionalRow(tracker_only_report_detection_nonpsronly_positions_check_, nullptr);
+
+    tracker_only_high_accuracy_postions_check_ = new QCheckBox("Only Use High Accuracy");
+    addOptionalRow(tracker_only_high_accuracy_postions_check_, nullptr);
+
+    tracker_minimum_accuracy_box_ = new QDoubleSpinBox;
+    tracker_minimum_accuracy_box_->setMinimum(0.0);
+    tracker_minimum_accuracy_box_->setMaximum(DBL_MAX);
+    addRow("Minimum Position Stddev", tracker_minimum_accuracy_box_);
+
+    addHeader("ADS-B Position Data Usage");
+
+    adsb_only_v12_positions_check_ = new QCheckBox("Only Use MOPS V1 / V2");
+    addOptionalRow(adsb_only_v12_positions_check_, nullptr);
+
+
+    adsb_only_high_nucp_nic_positions_check_ = new QCheckBox("Only Use High NUCp / NIC");
+    addOptionalRow(adsb_only_high_nucp_nic_positions_check_, nullptr);
+
+    adsb_minimum_nucp_nic_box_ = new QSpinBox;
+    adsb_minimum_nucp_nic_box_->setMinimum(0);
+    adsb_minimum_nucp_nic_box_->setMaximum(20);
+    addRow("Minimum Position NUCp / NIC", adsb_minimum_nucp_nic_box_);
+
+    adsb_only_high_nacp_positions_check_ = new QCheckBox("Only Use High NACp");
+    addOptionalRow(adsb_only_high_nacp_positions_check_, nullptr);
+
+    adsb_minimum_nacp_box_ = new QSpinBox;
+    adsb_minimum_nacp_box_->setMinimum(0);
+    adsb_minimum_nacp_box_->setMaximum(20);
+    addRow("Minimum Position NACp", adsb_minimum_nacp_box_);
+
+    adsb_only_high_sil_positionss_check_ = new QCheckBox("Only Use High SIL");
+    addOptionalRow(adsb_only_high_sil_positionss_check_, nullptr);
+
+    adsb_minimum_sil_box_ = new QSpinBox;
+    adsb_minimum_sil_box_->setMinimum(0);
+    adsb_minimum_sil_box_->setMaximum(5);
+    addRow("Minimum Position SIL", adsb_minimum_sil_box_);
 
 }
 
@@ -232,13 +331,32 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     python_comp_box_ = new QCheckBox("Python Compatibility Mode");
     addOptionalRow(python_comp_box_, nullptr);
 
-    //read in values from task
-    readOptions();
 }
 
 void CalculateReferencesTaskDialog::readOptions()
 {
     const auto& s = task_.settings();
+
+    // position filter
+
+    filter_position_usage_check_->setChecked(s.filter_position_usage);
+    tracker_only_confirmed_positions_check_->setChecked(s.tracker_only_confirmed_positions);
+    tracker_only_noncoasting_positions_check_->setChecked(s.tracker_only_noncoasting_positions);
+    tracker_only_report_detection_positions_check_->setChecked(s.tracker_only_report_detection_positions);
+    tracker_only_report_detection_nonpsronly_positions_check_->setChecked(
+                s.tracker_only_report_detection_nonpsronly_positions);
+    tracker_only_high_accuracy_postions_check_->setChecked(s.tracker_only_high_accuracy_postions);
+    tracker_minimum_accuracy_box_->setValue(s.tracker_minimum_accuracy);
+
+    adsb_only_v12_positions_check_->setChecked(s.adsb_only_v12_positions);
+    adsb_only_high_nucp_nic_positions_check_->setChecked(s.adsb_only_high_nucp_nic_positions);
+    adsb_minimum_nucp_nic_box_->setValue(s.adsb_minimum_nucp_nic);
+    adsb_only_high_nacp_positions_check_->setChecked(s.adsb_only_high_nacp_positions);
+    adsb_minimum_nacp_box_->setValue(s.adsb_minimum_nacp);
+    adsb_only_high_sil_positionss_check_->setChecked(s.adsb_only_high_sil_positions);
+    adsb_minimum_sil_box_->setValue(s.adsb_minimum_sil);
+
+    // kalman
 
     rec_type_box_->setCurrentIndex((int)s.rec_type);
 
@@ -268,6 +386,28 @@ void CalculateReferencesTaskDialog::readOptions()
 void CalculateReferencesTaskDialog::writeOptions()
 {
     CalculateReferencesTaskSettings& s = task_.settings();
+
+    // position filter
+
+    s.filter_position_usage = filter_position_usage_check_->isChecked();
+
+    s.tracker_only_confirmed_positions = tracker_only_confirmed_positions_check_->isChecked();
+    s.tracker_only_noncoasting_positions = tracker_only_noncoasting_positions_check_->isChecked();
+    s.tracker_only_report_detection_positions = tracker_only_report_detection_positions_check_->isChecked();
+    s.tracker_only_report_detection_nonpsronly_positions  =
+            tracker_only_report_detection_nonpsronly_positions_check_->isChecked();
+    s.tracker_only_high_accuracy_postions = tracker_only_high_accuracy_postions_check_->isChecked();
+    s.tracker_minimum_accuracy  = tracker_minimum_accuracy_box_->value();
+
+    s.adsb_only_v12_positions = adsb_only_v12_positions_check_->isChecked();
+    s.adsb_only_high_nucp_nic_positions = adsb_only_high_nucp_nic_positions_check_->isChecked();
+    s.adsb_minimum_nucp_nic = adsb_minimum_nucp_nic_box_->value();
+    s.adsb_only_high_nacp_positions = adsb_only_high_nacp_positions_check_->isChecked();
+    s.adsb_minimum_nacp = adsb_minimum_nacp_box_->value();
+    s.adsb_only_high_sil_positions = adsb_only_high_sil_positionss_check_->isChecked();
+    s.adsb_minimum_sil = adsb_minimum_sil_box_->value();
+
+    // kalman
 
     s.rec_type              = (CalculateReferencesTaskSettings::ReconstructorType)rec_type_box_->currentIndex();
 

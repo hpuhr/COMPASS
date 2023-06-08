@@ -62,6 +62,25 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     registerParameter("use_adsb_data"  , &settings_.use_adsb_data, true);
     registerParameter("data_sources_adsb", &settings_.data_sources_adsb, json::object());
     
+    // position usage
+    registerParameter("filter_position_usage", &settings_.filter_position_usage, true);
+    registerParameter("tracker_only_confirmed_positions", &settings_.tracker_only_confirmed_positions, true);
+    registerParameter("tracker_only_noncoasting_positions", &settings_.tracker_only_noncoasting_positions, true);
+    registerParameter("tracker_only_report_detection_positions",
+                      &settings_.tracker_only_report_detection_positions, false);
+    registerParameter("tracker_only_report_detection_nonpsronly_positions",
+                      &settings_.tracker_only_report_detection_nonpsronly_positions, false);
+    registerParameter("tracker_only_high_accuracy_postions", &settings_.tracker_only_high_accuracy_postions, true);
+    registerParameter("tracker_minimum_accuracy", &settings_.tracker_minimum_accuracy, 30);
+
+    registerParameter("adsb_only_v12_positions", &settings_.adsb_only_v12_positions, true);
+    registerParameter("adsb_only_high_nucp_nic_positions", &settings_.adsb_only_high_nucp_nic_positions, false);
+    registerParameter("adsb_minimum_nucp_nic", &settings_.adsb_minimum_nucp_nic, 4);
+    registerParameter("adsb_only_high_nacp_positions", &settings_.adsb_only_high_nacp_positions, true);
+    registerParameter("adsb_minimum_nacp", &settings_.adsb_minimum_nacp, 4);
+    registerParameter("adsb_only_high_sil_positions_", &settings_.adsb_only_high_sil_positions, false);
+    registerParameter("adsb_minimum_sil", &settings_.adsb_minimum_sil, 1);
+
     //registerParameter("rec_verbose", &settings_.verbose, false);
     //registerParameter("rec_generate_viewpoints", &settings_.generate_viewpoints, false);
 

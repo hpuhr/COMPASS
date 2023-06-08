@@ -47,6 +47,7 @@ protected:
     nlohmann::json viewpoint_json_;
 
     void createTargets();
+    void filterPositionUsage(std::map<unsigned int, std::unique_ptr<CalculateReferences::Target>>& target_map);
     void finalizeTargets();
     void calculateReferences();
     void writeReferences();

@@ -26,8 +26,11 @@ string tracker_only_report_detection_nonpsronly_positions_reason {
     "I062/080 MON: Mono sensor or unknown + I062/340 TYP: Single PSR detection or unknown"};
 string tracker_only_high_accuracy_postions_reason {"I062/500 APC too high or unknown"};
 
-string adsb_only_mops12_reason {"I021/210 MOPS: V0 or unkown"}; // v 1/2 only
+string adsb_no_mops_reason {"I021/210 MOPS: unkown"};
+string adsb_only_mops12_reason {"I021/210 MOPS: V0"}; // v 1/2 only
+string adsb_only_high_nuc_nic_reason {"I021/090 NUCp or NIC: Too low or unknown"};
 string adsb_only_high_nacp_reason {"I021/090 NACp: Too low or unknown"};
+string adsb_only_high_sil_reason {"I021/090 SIL: Too low or unknown"};
 
 CalculateReferencesJob::CalculateReferencesJob(CalculateReferencesTask& task, 
                                                std::shared_ptr<dbContent::Cache> cache)
@@ -156,10 +159,30 @@ void CalculateReferencesJob::createTargets()
     }
 
     // filter pos accuracy
+    filterPositionUsage(target_map);
 
-    loginf << "CalculateReferencesJob: createTargets: assessing position data usage";
+    // move targets from map to vec
 
+    for (auto& tgt_it : target_map)
+        targets_.emplace_back(move(tgt_it.second));
+
+    loginf << "CalculateReferencesJob: createTargets: done for " << targets_.size()
+           << ", reports num_skipped " << num_skipped
+           << " num_unassoc " << num_unassoc << " num_assoc " << num_assoc;
+}
+
+void CalculateReferencesJob::filterPositionUsage(
+        map<unsigned int, std::unique_ptr<CalculateReferences::Target>>& target_map)
+{
     const CalculateReferencesTaskSettings& settings = task_.settings();
+
+    if (!settings.filter_position_usage)
+    {
+        loginf << "CalculateReferencesJob: filterPositionUsage: disabled";
+        return;
+    }
+
+    loginf << "CalculateReferencesJob: filterPositionUsage: assessing position data usage";
 
     unsigned int ignored_positions {0}, used_positions {0};
     map<string, unsigned int> tracker_ignored_reasons;
@@ -282,10 +305,10 @@ void CalculateReferencesJob::createTargets()
     }
 
     for (auto& reason_it : tracker_ignored_reasons)
-        loginf << "CalculateReferencesJob: createTargets: ignored " << reason_it.second
+        loginf << "CalculateReferencesJob: filterPositionUsage: ignored " << reason_it.second
                << " '" << reason_it.first << "'";
 
-    loginf << "CalculateReferencesJob: createTargets: tracker data ignored pos " << ignored_positions
+    loginf << "CalculateReferencesJob: filterPositionUsage: tracker data ignored pos " << ignored_positions
            << " used " << used_positions;
 
     dbcontent_name = "CAT021";
@@ -296,11 +319,6 @@ void CalculateReferencesJob::createTargets()
 
     if (cache_->has(dbcontent_name))
     {
-//        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
-
-//        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_nacp_));
-//        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_nacp_));
-
         vector<bool> ignore_positions;
         bool ignore_current_position;
 
@@ -314,7 +332,15 @@ void CalculateReferencesJob::createTargets()
         NullableVector<unsigned char>& nacp_vec = cache_->getVar<unsigned char>(
                     dbcontent_name, DBContent::var_cat021_nacp_);
 
-                unsigned int index;
+        assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nucp_nic_));
+        NullableVector<unsigned char>& nucp_nic_vec = cache_->getVar<unsigned char>(
+                    dbcontent_name, DBContent::var_cat021_nucp_nic_);
+
+        assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_sil_));
+        NullableVector<unsigned char>& sil_vec = cache_->getVar<unsigned char>(
+                    dbcontent_name, DBContent::var_cat021_sil_);
+
+        unsigned int index;
 
         for (auto& target_it : target_map)
         {
@@ -332,21 +358,45 @@ void CalculateReferencesJob::createTargets()
                     index = ts_index_it.second.idx_external; // index into buffer
                     assert (index <= buffer_size);
 
-                    if (!ignore_current_position && settings.adsb_only_v12_positions_)
+                    if (mops_vec.isNull(index))
                     {
-                        if (mops_vec.isNull(index) || mops_vec.get(index) == 0)
+                        ignore_current_position = true;
+                        adsb_ignored_reasons[adsb_no_mops_reason] += 1;
+                    }
+
+                    if (!ignore_current_position && settings.adsb_only_v12_positions)
+                    {
+                        if (mops_vec.get(index) == 0)
                         {
                             ignore_current_position = true;
                             adsb_ignored_reasons[adsb_only_mops12_reason] += 1;
                         }
                     }
 
-                    if (!ignore_current_position && settings.adsb_only_high_nacp_positions_)
+                    if (!ignore_current_position && settings.adsb_only_high_nacp_positions)
                     {
                         if (nacp_vec.isNull(index) || nacp_vec.get(index) < settings.adsb_minimum_nacp)
                         {
                             ignore_current_position = true;
                             adsb_ignored_reasons[adsb_only_high_nacp_reason] += 1;
+                        }
+                    }
+
+                    if (!ignore_current_position && settings.adsb_only_high_nucp_nic_positions)
+                    {
+                        if (nucp_nic_vec.isNull(index) || nucp_nic_vec.get(index) < settings.adsb_minimum_nucp_nic)
+                        {
+                            ignore_current_position = true;
+                            adsb_ignored_reasons[adsb_only_high_nuc_nic_reason] += 1;
+                        }
+                    }
+
+                    if (!ignore_current_position && settings.adsb_only_high_sil_positions)
+                    {
+                        if (sil_vec.isNull(index) || sil_vec.get(index) < settings.adsb_minimum_sil)
+                        {
+                            ignore_current_position = true;
+                            adsb_ignored_reasons[adsb_only_high_sil_reason] += 1;
                         }
                     }
 
@@ -365,20 +415,11 @@ void CalculateReferencesJob::createTargets()
     }
 
     for (auto& reason_it : adsb_ignored_reasons)
-        loginf << "CalculateReferencesJob: createTargets: ignored " << reason_it.second
+        loginf << "CalculateReferencesJob: filterPositionUsage: ignored " << reason_it.second
                << " '" << reason_it.first << "'";
 
-    loginf << "CalculateReferencesJob: createTargets: ads-b data ignored pos " << ignored_positions
+    loginf << "CalculateReferencesJob: filterPositionUsage: ads-b data ignored pos " << ignored_positions
            << " used " << used_positions;
-
-    // move targets from map to vec
-
-    for (auto& tgt_it : target_map)
-        targets_.emplace_back(move(tgt_it.second));
-
-    loginf << "CalculateReferencesJob: createTargets: done for " << targets_.size()
-           << ", reports num_skipped " << num_skipped
-           << " num_unassoc " << num_unassoc << " num_assoc " << num_assoc;
 }
 
 void CalculateReferencesJob::finalizeTargets()

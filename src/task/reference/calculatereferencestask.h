@@ -54,21 +54,32 @@ struct CalculateReferencesTaskSettings
     bool use_tracker_data {true};
     nlohmann::json data_sources_tracker;            // map, ds_id str -> active flag, true if not contained
 
-    bool tracker_only_confirmed_positions {true}; // non-tentative
-    bool tracker_only_noncoasting_positions {true};
-    bool tracker_only_report_detection_positions {false}; // no no detection
-    bool tracker_only_report_detection_nonpsronly_positions {false}; // no mono + psr det
-    bool tracker_only_high_accuracy_postions {true};
-    float tracker_minimum_accuracy {30}; // m
-
-    bool adsb_only_v12_positions_ {true};
-    bool adsb_only_high_nacp_positions_ {true};
-    unsigned int adsb_minimum_nacp {4};
-
     bool use_adsb_data {true};
     nlohmann::json data_sources_adsb;               // map, ds_id str -> active flag, true if not contained
 
     ReconstructorType rec_type = ReconstructorType::UMKalman2D;
+
+    bool filter_position_usage {true};
+
+    // tracker position usage
+    bool tracker_only_confirmed_positions {true}; // non-tentative
+    bool tracker_only_noncoasting_positions {true};
+    bool tracker_only_report_detection_positions {false}; // no no detection
+    bool tracker_only_report_detection_nonpsronly_positions {true}; // no mono + psr det
+    bool tracker_only_high_accuracy_postions {true};
+    float tracker_minimum_accuracy {30}; // m
+
+    // adsb position usage
+    bool adsb_only_v12_positions {true};
+
+    bool adsb_only_high_nucp_nic_positions {false};
+    unsigned int adsb_minimum_nucp_nic {4};
+
+    bool adsb_only_high_nacp_positions {true};
+    unsigned int adsb_minimum_nacp {4};
+
+    bool adsb_only_high_sil_positions {false};
+    unsigned int adsb_minimum_sil {1};
 };
 
 class CalculateReferencesTask : public Task, public Configurable

@@ -40,7 +40,7 @@ public:
 protected:
     void createUI();
     void createDataSourcesSettingsWidget(QWidget* w);
-    void createFilterSettingsWidget(QWidget* w);
+    void createPositionFilterSettingsWidget(QWidget* w);
     void createKalmanSettingsWidget(QWidget* w);
     QWidget* addScrollArea(QWidget* w) const;
 
@@ -62,7 +62,43 @@ protected:
     QCheckBox* use_adsb_check_ {nullptr};
     SelectDataSourcesWidget* adsb_sources_ {nullptr};
 
-    // filters
+    // position filters
+
+    QCheckBox* filter_position_usage_check_ {nullptr};
+    //    bool filter_position_usage {true};
+
+    // tracker position usage
+    QCheckBox* tracker_only_confirmed_positions_check_ {nullptr};
+    //    bool tracker_only_confirmed_positions {true}; // non-tentative
+    QCheckBox* tracker_only_noncoasting_positions_check_ {nullptr};
+    //    bool tracker_only_noncoasting_positions {true};
+    QCheckBox* tracker_only_report_detection_positions_check_ {nullptr};
+    //    bool tracker_only_report_detection_positions {false}; // no no detection
+    QCheckBox* tracker_only_report_detection_nonpsronly_positions_check_ {nullptr};
+    //    bool tracker_only_report_detection_nonpsronly_positions {true}; // no mono + psr det
+    QCheckBox* tracker_only_high_accuracy_postions_check_ {nullptr};
+    //    bool tracker_only_high_accuracy_postions {true};
+    QDoubleSpinBox* tracker_minimum_accuracy_box_ {nullptr};
+    //    float tracker_minimum_accuracy {30}; // m
+
+    //    // adsb position usage
+    QCheckBox* adsb_only_v12_positions_check_ {nullptr};
+    //    bool adsb_only_v12_positions {true};
+
+    QCheckBox* adsb_only_high_nucp_nic_positions_check_ {nullptr};
+    //    bool adsb_only_high_nucp_nic_positions {true};
+    QSpinBox* adsb_minimum_nucp_nic_box_ {nullptr};
+    //    unsigned int adsb_minimum_nucp_nic {4};
+
+    QCheckBox* adsb_only_high_nacp_positions_check_ {nullptr};
+    //    bool adsb_only_high_nacp_positions {false};
+    QSpinBox* adsb_minimum_nacp_box_ {nullptr};
+    //    unsigned int adsb_minimum_nacp {4};
+
+    QCheckBox* adsb_only_high_sil_positionss_check_ {nullptr};
+    //    bool adsb_only_high_sil_positions {false};
+    QSpinBox* adsb_minimum_sil_box_ {nullptr};
+    //    unsigned int adsb_minimum_sil {1};
 
     // kalman
     QComboBox*      rec_type_box_ = nullptr;
