@@ -284,7 +284,7 @@ void CalculateReferencesJob::filterPositionUsage(
                     if (!ignore_current_position && settings.tracker_only_high_accuracy_postions)
                     {
                         if (x_stddev_vec.isNull(index) || y_stddev_vec.isNull(index)
-                                || (sqrt(x_stddev_vec.get(index) + y_stddev_vec.get(index))
+                                || (sqrt(pow(x_stddev_vec.get(index), 2) + pow(y_stddev_vec.get(index), 2))
                                     > settings.tracker_minimum_accuracy))
                         {
                             ignore_current_position = true;

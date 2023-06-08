@@ -396,10 +396,10 @@ void MainWindow::createMenus ()
     connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsSlot);
     process_menu_->addAction(assoc_action);
 
-    QAction* assoc_artas_action = new QAction(tr("Calculate Associations from ARTAS"));
-    assoc_artas_action->setToolTip(tr("Create Unique Targets based on ARTAS TRI information"));
-    connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
-    process_menu_->addAction(assoc_artas_action);
+//    QAction* assoc_artas_action = new QAction(tr("Calculate Associations from ARTAS"));
+//    assoc_artas_action->setToolTip(tr("Create Unique Targets based on ARTAS TRI information"));
+//    connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
+//    process_menu_->addAction(assoc_artas_action);
 
     calculate_references_action_ = new QAction(tr("Calculate References"));
     calculate_references_action_->setToolTip(tr("Calculate References from System Tracker and ADS-B data"));

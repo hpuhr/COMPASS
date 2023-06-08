@@ -229,21 +229,21 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
 
                 // hack to skip no mode c
 
-                bool has_any_mode_c = false;
+//                bool has_any_mode_c = false;
 
-                for (auto& chain_it : chains_) // iterate over both chains
-                {
-                    mapping = chain_it.second->calculateDataMapping(ref.t);
+//                for (auto& chain_it : chains_) // iterate over both chains
+//                {
+//                    mapping = chain_it.second->calculateDataMapping(ref.t);
 
-                    if (mapping.pos_ref_.has_altitude_)
-                    {
-                        has_any_mode_c = true;
-                        break;
-                    }
-                }
+//                    if (mapping.pos_ref_.has_altitude_)
+//                    {
+//                        has_any_mode_c = true;
+//                        break;
+//                    }
+//                }
 
-                if (!has_any_mode_c)
-                    continue;
+//                if (!has_any_mode_c)
+//                    continue;
 
                 ds_id_vec.set(buffer_cnt, ds_id);
                 sac_vec.set(buffer_cnt, sac);
