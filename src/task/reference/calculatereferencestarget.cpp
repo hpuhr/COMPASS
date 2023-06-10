@@ -199,8 +199,7 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
     unsigned int sac = settings.ds_sac;
     unsigned int sic = settings.ds_sic;
     unsigned int ds_id = Number::dsIdFrom(sac, sic);
-    assert (settings.ds_line >= 1 && settings.ds_line <= 4);
-    unsigned int line_id = settings.ds_line - 1; // 0 ... 3
+    assert (settings.ds_line >= 0 && settings.ds_line <= 3);
     //std::vector<unsigned int> assoc_val ({utn_});
 
     double speed_ms, bearing_rad, xy_cov;
@@ -248,7 +247,7 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
                 ds_id_vec.set(buffer_cnt, ds_id);
                 sac_vec.set(buffer_cnt, sac);
                 sic_vec.set(buffer_cnt, sic);
-                line_vec.set(buffer_cnt, line_id);
+                line_vec.set(buffer_cnt, settings.ds_line);
 
                 ts_vec.set(buffer_cnt, ref.t);
                 tod_vec.set(buffer_cnt, ref.t.time_of_day().total_milliseconds() / 1000.0);
@@ -484,7 +483,7 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
         reconstructKalman2D();
     }
 
-    loginf << "Target: calculateReference: buffer size " << buffer->size();
+    logdbg << "Target: calculateReference: buffer size " << buffer->size();
 
     return buffer;
 }

@@ -24,6 +24,9 @@ private slots:
     void timeBeginEditedSlot (const QDateTime& datetime);
     void timeEndEditedSlot (const QDateTime& datetime);
 
+    void toggleUseRefTrajAccuracySlot();
+    void minRefTrajAccuracyEditedSlot (const QString& text);
+
     void toggleUseADSBSlot();
     void toggleUseV0Slot();
     void toggleUseV1Slot();
@@ -70,6 +73,13 @@ protected:
     QCheckBox* use_time_check_{nullptr};
     QDateTimeEdit* time_begin_edit_{nullptr};
     QDateTimeEdit* time_end_edit_{nullptr};
+
+    // reftraj
+
+    QCheckBox* use_reftraj_acc_check_{nullptr};
+    QLineEdit* min_reftraj_acc_edit_{nullptr};
+
+    // adsb
 
     QCheckBox* use_adsb_check_{nullptr};
 

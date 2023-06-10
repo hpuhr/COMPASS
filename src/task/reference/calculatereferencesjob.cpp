@@ -485,7 +485,7 @@ void CalculateReferencesJob::calculateReferences()
 
             reftraj_counts_[targets_.at(tgt_cnt)->utn()] = results.at(tgt_cnt)->size(); // store count
 
-            loginf << "CalculateReferencesJob: calculateReferences: utn "
+            logdbg << "CalculateReferencesJob: calculateReferences: utn "
                    << targets_.at(tgt_cnt)->utn() << " done";
         });
     });

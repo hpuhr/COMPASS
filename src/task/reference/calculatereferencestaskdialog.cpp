@@ -1,6 +1,7 @@
 #include "calculatereferencestaskdialog.h"
 #include "calculatereferencestask.h"
 #include "selectdatasourceswidget.h"
+#include "util/stringconv.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -15,6 +16,9 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QLineEdit>
+
+using namespace std;
+using namespace Utils;
 
 CalculateReferencesTaskDialog::CalculateReferencesTaskDialog(CalculateReferencesTask& task)
     : QDialog(), task_(task)
@@ -343,8 +347,13 @@ void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
 {
     QWidget* content_widget = addScrollArea(w);
 
+    QVBoxLayout* out_layout = new QVBoxLayout();
+
     QGridLayout* layout = new QGridLayout;
-    content_widget->setLayout(layout);
+    out_layout->addLayout(layout);
+    out_layout->addStretch();
+
+    content_widget->setLayout(out_layout);
 
     int row = 0;
 
@@ -365,15 +374,6 @@ void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
         ++row;
     };
 
-    auto addEditRow = [&] (const QString& name, QLineEdit* edit)
-    {
-        QLabel* label = new QLabel(name);
-        edit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-        layout->addWidget(label, row, 0);
-        layout->addWidget(edit, row, 1);
-        ++row;
-    };
-
     auto addHeader = [&] (const QString& name)
     {
         QLabel* label = boldify(new QLabel(name));
@@ -383,7 +383,7 @@ void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
     addHeader("Output Data Source");
 
     ds_name_edit_ = new QLineEdit();
-    addEditRow("Name", ds_name_edit_);
+    addRow("Name", ds_name_edit_);
 
     ds_sac_box_ = new QSpinBox;
     ds_sac_box_->setMinimum(0);
@@ -395,11 +395,12 @@ void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
     ds_sic_box_->setMaximum(255);
     addRow("SIC", ds_sic_box_);
 
-    ds_line_box_ = new QSpinBox;
-    ds_line_box_->setMinimum(1);
-    ds_line_box_->setMaximum(4);
-    addRow("Line", ds_line_box_);
+    layout->addWidget(new QLabel(), row, 0);
 
+    ds_line_box_ = new QComboBox();
+    ds_line_box_->addItems({"1", "2", "3", "4"});
+
+    addRow("Line ID", ds_line_box_);
 }
 
 void CalculateReferencesTaskDialog::readOptions()
@@ -455,7 +456,7 @@ void CalculateReferencesTaskDialog::readOptions()
     ds_name_edit_->setText(s.ds_name.c_str());
     ds_sac_box_->setValue(s.ds_sac);
     ds_sic_box_->setValue(s.ds_sic);
-    ds_line_box_->setValue(s.ds_line);
+    ds_line_box_->setCurrentText(String::lineStrFrom(s.ds_line).c_str());
 }
 
 void CalculateReferencesTaskDialog::writeOptions()
@@ -513,7 +514,13 @@ void CalculateReferencesTaskDialog::writeOptions()
     s.ds_name = ds_name_edit_->text().toStdString();
     s.ds_sac = ds_sac_box_->value();
     s.ds_sic = ds_sic_box_->value();
-    s.ds_line = ds_line_box_->value();
+
+    bool ok;
+    unsigned int line_id = ds_line_box_->currentText().toUInt(&ok);
+    assert (ok);
+    assert (line_id > 0 && line_id <= 4);
+
+    task_.settings().ds_line = line_id-1;
 }
 
 QWidget* CalculateReferencesTaskDialog::addScrollArea(QWidget* w) const
@@ -610,3 +617,5 @@ void CalculateReferencesTaskDialog::adsbSourcesChangedSlot(std::map<std::string,
     updateSourcesWidgets();
     updateButtons();
 }
+
+

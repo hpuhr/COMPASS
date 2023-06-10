@@ -85,7 +85,9 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     registerParameter("ds_name", &settings_.ds_name, "CalcRefTraj");
     registerParameter("ds_sac", &settings_.ds_sac, 0);
     registerParameter("ds_sic", &settings_.ds_sic, 1);
-    registerParameter("ds_line", &settings_.ds_line, 1); // 1 ... 4
+    registerParameter("ds_line", &settings_.ds_line, 0); // 0 ... 3
+
+    assert (settings_.ds_line >= 0 && settings_.ds_line <= 3);
 
     //registerParameter("rec_verbose", &settings_.verbose, false);
     //registerParameter("rec_generate_viewpoints", &settings_.generate_viewpoints, false);

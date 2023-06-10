@@ -216,6 +216,16 @@ void Client::run ()
     loginf << "COMPASSClient: started with " << num_threads << " threads";
 #endif
 
+//    unsigned int data_size = 10e6;
+//    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
+//        double x = 0;
+
+//        for (unsigned int cnt2=1; cnt2 < data_size * data_size; ++ cnt2)
+//            x += (data_size * cnt) % cnt2;
+
+//        loginf << x;
+//    });
+
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
     splash.show();

@@ -40,6 +40,7 @@
 #include "primaryonlyfilter.h"
 #include "timestampfilter.h"
 #include "trackertracknumberfilter.h"
+#include "reftrajaccuracyfilter.h"
 
 #include "json.hpp"
 
@@ -208,6 +209,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         PrimaryOnlyFilter* filter = new PrimaryOnlyFilter(class_id, instance_id, this);
         filters_.emplace_back(filter);
     }
+    else if (class_id == "RefTrajAccuracyFilter")
+    {
+        RefTrajAccuracyFilter* filter = new RefTrajAccuracyFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
     else
         throw std::runtime_error("FilterManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
@@ -249,7 +255,7 @@ void FilterManager::checkSubConfigurables()
 
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
-    { // no UTN filter
+    {
         addNewSubConfiguration(classid, classid+"0");
         generateSubConfigurable(classid, classid+"0");
     }
@@ -258,10 +264,19 @@ void FilterManager::checkSubConfigurables()
 
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
-    { // no UTN filter
+    {
         addNewSubConfiguration(classid, classid+"0");
         generateSubConfigurable(classid, classid+"0");
     }
+
+    classid = "RefTrajAccuracyFilter";
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
+    {
+        addNewSubConfiguration(classid, classid+"0");
+        generateSubConfigurable(classid, classid+"0");
+    }
+
 //    classid = "ADSBQualityFilter";
 
 //    if (std::find_if(filters_.begin(), filters_.end(),

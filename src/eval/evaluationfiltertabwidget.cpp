@@ -2,6 +2,7 @@
 #include "evaluationmanagerwidget.h"
 #include "evaluationmanager.h"
 #include "util/stringconv.h"
+#include "textfielddoublevalidator.h"
 #include "util/timeconv.h"
 
 #include <QVBoxLayout>
@@ -55,9 +56,22 @@ EvaluationFilterTabWidget::EvaluationFilterTabWidget(
     connect(time_end_edit_, &QDateTimeEdit::dateTimeChanged, this, &EvaluationFilterTabWidget::timeEndEditedSlot);
     layout->addWidget(time_end_edit_, row, 1);
 
-//    time_end_edit_ = new QLineEdit();
-//    connect(time_end_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::timeEndEditedSlot);
-//    layout->addWidget(time_end_edit_, row, 1);
+    // reftraj
+    ++row;
+
+    use_reftraj_acc_check_ = new QCheckBox ("Use RefTraj Accuracy Filter");
+    connect(use_reftraj_acc_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseRefTrajAccuracySlot);
+    layout->addWidget(use_reftraj_acc_check_, row, 0);
+
+    ++row;
+
+    layout->addWidget(new QLabel("RefTraj Accuracy"), row, 0);
+
+    min_reftraj_acc_edit_ = new QLineEdit();
+    min_reftraj_acc_edit_->setValidator(new TextFieldDoubleValidator(0, 3600, 2));
+    connect(min_reftraj_acc_edit_, &QLineEdit::textEdited,
+            this, &EvaluationFilterTabWidget::minRefTrajAccuracyEditedSlot);
+    layout->addWidget(min_reftraj_acc_edit_, row, 1);
 
     // adsb
     ++row;
@@ -236,6 +250,25 @@ void EvaluationFilterTabWidget::timeEndEditedSlot (const QDateTime& datetime)
            << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
     eval_man_.loadTimestampEnd(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()));
+}
+
+void EvaluationFilterTabWidget::toggleUseRefTrajAccuracySlot()
+{
+    assert (use_reftraj_acc_check_);
+    eval_settings_.use_ref_traj_accuracy_filter_ = use_reftraj_acc_check_->checkState() == Qt::Checked;
+}
+
+void EvaluationFilterTabWidget::minRefTrajAccuracyEditedSlot (const QString& text)
+{
+    float val;
+    bool ok;
+
+    val = text.toFloat(&ok);
+
+    if (!ok)
+        logwrn << "EvaluationFilterTabWidget: minRefTrajAccuracyEditedSlot: unable to parse value '" << text.toStdString() << "'";
+    else
+        eval_settings_.ref_traj_minimum_accuracy_ = val;
 }
 
 void EvaluationFilterTabWidget::toggleUseADSBSlot()
@@ -510,6 +543,18 @@ void EvaluationFilterTabWidget::update()
     time_end_edit_->setEnabled(use_filter && eval_settings_.use_timestamp_filter_);
 
     update_active_ = false;
+
+    // reftraj
+
+    assert(use_reftraj_acc_check_);
+    use_reftraj_acc_check_->setChecked(eval_settings_.use_ref_traj_accuracy_filter_);
+    use_reftraj_acc_check_->setEnabled(use_filter);
+
+    assert (min_reftraj_acc_edit_);
+    min_reftraj_acc_edit_->setText(QString::number(eval_settings_.ref_traj_minimum_accuracy_));
+    time_begin_edit_->setEnabled(use_filter && eval_settings_.use_ref_traj_accuracy_filter_);
+
+    // adsb
 
     bool use_adsb_filter = use_filter && eval_settings_.use_adsb_filter_;
 

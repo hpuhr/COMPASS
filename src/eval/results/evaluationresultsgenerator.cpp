@@ -172,7 +172,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 //                tbb::task::enqueue(*t);
 
                 const SectorLayer& sector_layer = *sec_it;
-                bool single_thread = true;
+                bool single_thread = false;
 
 //                int num_threads = oneapi::tbb::info::default_concurrency();
 //                loginf << "EvaluateTask: execute: starting, num_threads " << num_threads;

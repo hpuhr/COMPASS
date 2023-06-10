@@ -32,6 +32,7 @@ public slots:
     void toggleADSBSourcesSlot();
     void adsbSourcesChangedSlot(std::map<std::string, bool> selection);
 
+
 public:
     CalculateReferencesTaskDialog(CalculateReferencesTask& task);
 
@@ -131,7 +132,7 @@ protected:
     QLineEdit* ds_name_edit_ {nullptr};
     QSpinBox* ds_sac_box_ {nullptr};
     QSpinBox* ds_sic_box_ {nullptr};
-    QSpinBox* ds_line_box_ {nullptr};
+    QComboBox* ds_line_box_ {nullptr};
 };
 
 #endif // CALCULATEREFERENCESTASKDIALOG_H

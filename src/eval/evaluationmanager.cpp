@@ -98,6 +98,9 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     if (settings_.load_timestamp_end_str_.size())
         load_timestamp_end_ = Time::fromString(settings_.load_timestamp_end_str_);
 
+    registerParameter("use_ref_traj_accuracy_filter_", &settings_.use_ref_traj_accuracy_filter_, false);
+    registerParameter("ref_traj_minimum_accuracy", &settings_.ref_traj_minimum_accuracy_, 30.0);
+
     registerParameter("use_adsb_filter", &settings_.use_adsb_filter_, false);
     registerParameter("use_v0", &settings_.use_v0_, true);
     registerParameter("use_v1", &settings_.use_v1_, true);
@@ -408,6 +411,19 @@ void EvaluationManager::loadData ()
             fil->loadViewPointConditions(filter);
         }
 
+        if (settings_.use_ref_traj_accuracy_filter_)
+        {
+            assert (fil_man.hasFilter("RefTraj Accuracy"));
+            DBFilter* fil = fil_man.getFilter("RefTraj Accuracy");
+
+            fil->setActive(true);
+
+            json filter;
+
+            filter["RefTraj Accuracy"]["Accuracy Minimum"] = to_string(settings_.ref_traj_minimum_accuracy_);
+
+            fil->loadViewPointConditions(filter);
+        }
 
         if (settings_.use_adsb_filter_)
         {

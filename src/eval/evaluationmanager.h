@@ -67,6 +67,8 @@ struct EvaluationManagerSettings
 
     bool use_timestamp_filter_ {false};
 
+    bool use_ref_traj_accuracy_filter_ {false};
+    float ref_traj_minimum_accuracy_ {30};
 
     bool use_adsb_filter_ {false};
     bool use_v0_ {false};

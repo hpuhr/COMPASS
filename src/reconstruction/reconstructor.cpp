@@ -272,7 +272,7 @@ void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, con
     //resample input data?
     if (info.interp_options.has_value())
     {
-        loginf << "Interpolating measurements of dbcontent " << dbcontent;
+        //loginf << "Interpolating measurements of dbcontent " << dbcontent;
         interpolateMeasurements(mms, info.interp_options.value());
     }
 
@@ -417,7 +417,7 @@ boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::st
 {
     std::string dinfo = data_info.empty() ? "data" : data_info;
 
-    loginf << "Reconstructing " << dinfo << " - " << measurements_.size() << " measurement(s)";
+    //loginf << "Reconstructing " << dinfo << " - " << measurements_.size() << " measurement(s)";
 
     if (measurements_.empty())
         return {};
@@ -438,12 +438,12 @@ boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::st
     }
     catch(const std::exception& ex)
     {
-        logerr << "Reconstructor::reconstruct(): " << ex.what();
+        logerr << "Reconstructor: reconstruct: " << ex.what();
         return {};
     }
     catch(...)
     {
-        logerr << "Reconstructor::reconstruct(): unknown error";
+        logerr << "Reconstructor: reconstruct: unknown error";
         return {};
     }
 
