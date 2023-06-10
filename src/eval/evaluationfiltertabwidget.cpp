@@ -65,7 +65,7 @@ EvaluationFilterTabWidget::EvaluationFilterTabWidget(
 
     ++row;
 
-    layout->addWidget(new QLabel("RefTraj Accuracy"), row, 0);
+    layout->addWidget(new QLabel("RefTraj Minimum Accuracy"), row, 0);
 
     min_reftraj_acc_edit_ = new QLineEdit();
     min_reftraj_acc_edit_->setValidator(new TextFieldDoubleValidator(0, 3600, 2));
