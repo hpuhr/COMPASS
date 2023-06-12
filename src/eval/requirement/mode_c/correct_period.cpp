@@ -15,9 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/mode_a/correct_period.h"
-#include "eval/results/mode_a/correct_period.h"
+#include "eval/requirement/mode_c/correct_period.h"
+#include "eval/results/mode_c/correct_period.h"
 #include "eval/requirement/group.h"
+#include "eval/results/report/sectioncontenttable.h"
 
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
@@ -27,6 +28,8 @@
 #include "sectorlayer.h"
 
 #include <QLineEdit>
+#include <QDoubleValidator>
+#include <QFormLayout>
 
 using namespace std;
 using namespace Utils;
@@ -36,12 +39,12 @@ namespace EvaluationRequirement
 {
 
 /********************************************************************************************************
- * ModeACorrectPeriod
+ * ModeCCorrectPeriod
  ********************************************************************************************************/
 
 /**
  */
-ModeACorrectPeriod::ModeACorrectPeriod(const std::string& name, 
+ModeCCorrectPeriod::ModeCCorrectPeriod(const std::string& name, 
                                        const std::string& short_name, 
                                        const std::string& group_name,
                                        float prob, 
@@ -49,7 +52,8 @@ ModeACorrectPeriod::ModeACorrectPeriod(const std::string& name,
                                        EvaluationManager& eval_man,
                                        float update_interval_s, 
                                        bool  use_miss_tolerance,
-                                       float miss_tolerance_s)
+                                       float miss_tolerance_s,
+                                       float max_distance_ft)
 :   IntervalBase(name, 
                  short_name, 
                  group_name, 
@@ -60,17 +64,18 @@ ModeACorrectPeriod::ModeACorrectPeriod(const std::string& name,
                  {}, 
                  {},
                  use_miss_tolerance ? boost::optional<float>(miss_tolerance_s) : boost::optional<float>())
+,   max_distance_ft_(max_distance_ft)
 {
 }
 
 /**
  */
-ModeACorrectPeriod::Validity ModeACorrectPeriod::isValid(const dbContent::TargetReport::DataID& data_id,
+ModeCCorrectPeriod::Validity ModeCCorrectPeriod::isValid(const dbContent::TargetReport::DataID& data_id,
                                                          const EvaluationTargetData& target_data,
                                                          const SectorLayer& sector_layer,
                                                          const boost::posix_time::time_duration& max_ref_time_diff) const
 {
-    auto cmp_res = compareModeA(data_id, target_data, max_ref_time_diff);
+    auto cmp_res = compareModeC(data_id, target_data, max_ref_time_diff, max_distance_ft_);
 
     bool no_ref = cmp_res.first == ValueComparisonResult::Unknown_NoRefData;
     bool failed = cmp_res.first == ValueComparisonResult::Unknown_NoTstData || 
@@ -79,14 +84,14 @@ ModeACorrectPeriod::Validity ModeACorrectPeriod::isValid(const dbContent::Target
     Validity v;
 
     v.value   = no_ref ? Validity::Value::DataMissing : (failed ? Validity::Value::Invalid : Validity::Value::Valid);
-    v.comment = no_ref ? "Reference Mode3A missing"   : (failed ? "M3A failed (" + cmp_res.second + ")" : "");
+    v.comment = no_ref ? "Reference ModeC missing"   : (failed ? "ModeC failed (" + cmp_res.second + ")" : "");
 
     return v;
 }
 
 /**
  */
-std::shared_ptr<EvaluationRequirementResult::Single> ModeACorrectPeriod::createResult(
+std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrectPeriod::createResult(
                                         const std::string& result_id,
                                         std::shared_ptr<Base> instance, 
                                         const EvaluationTargetData& target_data,
@@ -96,8 +101,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeACorrectPeriod::createR
                                         unsigned int sum_uis,
                                         unsigned int misses_total)
 {
-    return std::make_shared<EvaluationRequirementResult::SingleModeACorrectPeriod>(
-                                        "SingleModeACorrectPeriod", 
+    return std::make_shared<EvaluationRequirementResult::SingleModeCCorrectPeriod>(
+                                        "SingleModeCCorrectPeriod", 
                                         result_id, 
                                         instance, 
                                         sector_layer, 
@@ -112,25 +117,25 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeACorrectPeriod::createR
 
 /**
  */
-std::string ModeACorrectPeriod::probabilityName()
+std::string ModeCCorrectPeriod::probabilityName()
 {
-    return "PCMAD [%]";
+    return "PCMCD [%]";
 }
 
 /**
  */
-std::string ModeACorrectPeriod::probabilityDescription()
+std::string ModeCCorrectPeriod::probabilityDescription()
 {
-    return "Probability of Correct Mode A Detection";
+    return "Probability of Correct Mode C Detection";
 }
 
 /********************************************************************************************************
- * ModeACorrectPeriodConfig
+ * ModeCCorrectPeriodConfig
  ********************************************************************************************************/
 
 /**
  */
-ModeACorrectPeriodConfig::ModeACorrectPeriodConfig(const std::string& class_id, 
+ModeCCorrectPeriodConfig::ModeCCorrectPeriodConfig(const std::string& class_id, 
                                                    const std::string& instance_id,
                                                    Group& group, 
                                                    EvaluationStandard& standard,
@@ -138,13 +143,15 @@ ModeACorrectPeriodConfig::ModeACorrectPeriodConfig(const std::string& class_id,
 :   IntervalBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
     configure(UseMissTol);
+
+    registerParameter("max_distance_ft", &max_distance_ft_, 300);
 }
 
 /**
 */
-std::shared_ptr<Base> ModeACorrectPeriodConfig::createRequirement()
+std::shared_ptr<Base> ModeCCorrectPeriodConfig::createRequirement()
 {
-    shared_ptr<ModeACorrectPeriod> req = make_shared<ModeACorrectPeriod>(
+    shared_ptr<ModeCCorrectPeriod> req = make_shared<ModeCCorrectPeriod>(
                 name_, 
                 short_name_, 
                 group_.name(), 
@@ -153,34 +160,80 @@ std::shared_ptr<Base> ModeACorrectPeriodConfig::createRequirement()
                 eval_man_,
                 update_interval_s_,
                 use_miss_tolerance_, 
-                miss_tolerance_s_);
+                miss_tolerance_s_,
+                max_distance_ft_);
     return req;
 }
 
 /**
 */
-BaseConfigWidget* ModeACorrectPeriodConfig::createWidget_impl()
+float ModeCCorrectPeriodConfig::maxDistanceFt() const
 {
-    return new ModeACorrectPeriodConfigWidget(*this);
+    return max_distance_ft_;
+}
+
+/**
+*/
+void ModeCCorrectPeriodConfig::maxDistanceFt(float value)
+{
+    max_distance_ft_ = value;
+}
+
+/**
+*/
+BaseConfigWidget* ModeCCorrectPeriodConfig::createWidget_impl()
+{
+    return new ModeCCorrectPeriodConfigWidget(*this);
+}
+
+/**
+*/
+void ModeCCorrectPeriodConfig::addCustomTableEntries(EvaluationResultsReport::SectionContentTable& table) const
+{
+    table.addRow( { "Maximum Difference [ft]", 
+                    "Maximum altitude difference between the test and the reference",
+                    std::to_string(max_distance_ft_).c_str()}, nullptr);
 }
 
 /********************************************************************************************************
- * ModeACorrectPeriodConfigWidget
+ * ModeCCorrectPeriodConfigWidget
  ********************************************************************************************************/
 
 /**
 */
-ModeACorrectPeriodConfigWidget::ModeACorrectPeriodConfigWidget(ModeACorrectPeriodConfig& cfg)
+ModeCCorrectPeriodConfigWidget::ModeCCorrectPeriodConfigWidget(ModeCCorrectPeriodConfig& cfg)
 :   IntervalBaseConfigWidget(cfg)
 {
-    prob_edit_->setToolTip(QString::fromStdString(ModeACorrectPeriod::probabilityDescription()));
+    distance_value_edit_ = new QLineEdit(QString::number(config().maxDistanceFt()));
+    distance_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
+    connect(distance_value_edit_, &QLineEdit::textEdited,
+            this, &ModeCCorrectPeriodConfigWidget::distanceChanged);
+
+    form_layout_->addRow("Maximum Offset [ft]", distance_value_edit_);
+
+    prob_edit_->setToolTip(QString::fromStdString(ModeCCorrectPeriod::probabilityDescription()));
 }
 
 /**
 */
-ModeACorrectPeriodConfig& ModeACorrectPeriodConfigWidget::config()
+ModeCCorrectPeriodConfig& ModeCCorrectPeriodConfigWidget::config()
 {
-    return static_cast<ModeACorrectPeriodConfig&>(config_);
+    return static_cast<ModeCCorrectPeriodConfig&>(config_);
+}
+
+/**
+*/
+void ModeCCorrectPeriodConfigWidget::distanceChanged(const QString& value)
+{
+    loginf << "ModeCCorrectPeriodConfigWidget: distanceChanged: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config().maxDistanceFt(val);
+    else
+        loginf << "ModeCCorrectPeriodConfigWidget: distanceChanged: invalid value";
 }
 
 } // namespace EvaluationRequirement

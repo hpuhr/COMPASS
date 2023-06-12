@@ -9,7 +9,7 @@ ProbabilityBaseConfig::ProbabilityBaseConfig(
 {
     registerParameter("prob", &prob_, 0.9);
     registerParameter("prob_check_type", (unsigned int*)&prob_check_type_,
-                      (unsigned int)COMPARISON_TYPE::GREATER_THAN_OR_EUQAL);
+                      (unsigned int)COMPARISON_TYPE::GREATER_THAN_OR_EQUAL);
 
 }
 

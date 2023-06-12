@@ -53,7 +53,7 @@ std::string ProbabilityBase::getConditionStr () const
         return "<= "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
     else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN)
         return "> "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
+    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EQUAL)
         return ">= "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
     else
         throw std::runtime_error("ProbabilityBase: getConditionStr: unknown type '"
@@ -70,7 +70,7 @@ bool ProbabilityBase::getConditionResult (float prob) const
         result = prob <= prob_;
     else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN)
         result = prob > prob_;
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
+    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EQUAL)
         result = prob >= prob_;
     else
         throw std::runtime_error("ProbabilityBase: getResultConditionStr: unknown type '"
@@ -93,7 +93,7 @@ bool ProbabilityBase::compareValue (double val, double threshold, COMPARISON_TYP
         return val <= threshold;
     else if (check_type == COMPARISON_TYPE::GREATER_THAN)
         return val > threshold;
-    else if (check_type == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
+    else if (check_type == COMPARISON_TYPE::GREATER_THAN_OR_EQUAL)
         return val >= threshold;
     else
         throw std::runtime_error("ProbabilityBase: compareValue: unknown type '"

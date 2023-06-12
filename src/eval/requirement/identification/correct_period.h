@@ -21,15 +21,48 @@
 #include "eval/requirement/base/intervalbaseconfig.h"
 #include "eval/requirement/base/intervalbaseconfigwidget.h"
 
+class QComboBox;
+
 namespace EvaluationRequirement
 {
 
 /**
 */
-class ModeACorrectPeriod : public IntervalBase
+class IdentificationCorrectPeriodConfig : public IntervalBaseConfig
 {
 public:
-    ModeACorrectPeriod(
+    enum class IdentificationType
+    {
+        AircraftAddress = 0,
+        AircraftID
+    };
+
+    IdentificationCorrectPeriodConfig(const std::string& class_id, 
+                                      const std::string& instance_id,
+                                      Group& group, 
+                                      EvaluationStandard& standard,
+                                      EvaluationManager& eval_man);
+    virtual ~IdentificationCorrectPeriodConfig() = default;
+
+    IdentificationType identificationType() const { return identification_type_; }
+    void identificationType(IdentificationType type) { identification_type_ = type; }
+
+    std::shared_ptr<Base> createRequirement() override;
+
+protected:
+    virtual BaseConfigWidget* createWidget_impl() override;
+
+    IdentificationType identification_type_ = IdentificationType::AircraftAddress;
+};
+
+/**
+*/
+class IdentificationCorrectPeriod : public IntervalBase
+{
+public:
+    typedef IdentificationCorrectPeriodConfig::IdentificationType IdentificationType;
+
+    IdentificationCorrectPeriod(
             const std::string& name, 
             const std::string& short_name, 
             const std::string& group_name,
@@ -38,10 +71,14 @@ public:
             EvaluationManager& eval_man,
             float update_interval_s, 
             bool  use_miss_tolerance,
-            float miss_tolerance_s);
+            float miss_tolerance_s,
+            IdentificationType identification_type);
 
-    static std::string probabilityName();
-    static std::string probabilityDescription();
+    static std::string probabilityName(IdentificationType identification_type);
+    static std::string probabilityDescription(IdentificationType identification_type);
+    static std::string identificationName(IdentificationType identification_type);
+
+    IdentificationType identificationType() const { return identification_type_; }
 
 protected:
     virtual Validity isValid(const dbContent::TargetReport::DataID& data_id,
@@ -56,36 +93,23 @@ protected:
                                                                               const TimePeriodCollection& periods,
                                                                               unsigned int sum_uis,
                                                                               unsigned int misses_total) override;
+    IdentificationType identification_type_ = IdentificationType::AircraftAddress;
 };
 
 /**
 */
-class ModeACorrectPeriodConfig : public IntervalBaseConfig
+class IdentificationCorrectPeriodConfigWidget : public IntervalBaseConfigWidget
 {
 public:
-    ModeACorrectPeriodConfig(const std::string& class_id, 
-                             const std::string& instance_id,
-                             Group& group, 
-                             EvaluationStandard& standard,
-                             EvaluationManager& eval_man);
-    virtual ~ModeACorrectPeriodConfig() = default;
-
-    std::shared_ptr<Base> createRequirement() override;
+    IdentificationCorrectPeriodConfigWidget(IdentificationCorrectPeriodConfig& cfg);
+    virtual ~IdentificationCorrectPeriodConfigWidget() = default;
 
 protected:
-    virtual BaseConfigWidget* createWidget_impl() override;
-};
+    IdentificationCorrectPeriodConfig& config();
 
-/**
-*/
-class ModeACorrectPeriodConfigWidget : public IntervalBaseConfigWidget
-{
-public:
-    ModeACorrectPeriodConfigWidget(ModeACorrectPeriodConfig& cfg);
-    virtual ~ModeACorrectPeriodConfigWidget() = default;
+    void identificationTypeChanged();
 
-protected:
-    ModeACorrectPeriodConfig& config();
+    QComboBox* identification_type_combo_ = nullptr;
 };
 
 }

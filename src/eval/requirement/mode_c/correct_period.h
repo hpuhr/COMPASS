@@ -21,15 +21,17 @@
 #include "eval/requirement/base/intervalbaseconfig.h"
 #include "eval/requirement/base/intervalbaseconfigwidget.h"
 
+class QLineEdit;
+
 namespace EvaluationRequirement
 {
 
 /**
 */
-class ModeACorrectPeriod : public IntervalBase
+class ModeCCorrectPeriod : public IntervalBase
 {
 public:
-    ModeACorrectPeriod(
+    ModeCCorrectPeriod(
             const std::string& name, 
             const std::string& short_name, 
             const std::string& group_name,
@@ -38,7 +40,8 @@ public:
             EvaluationManager& eval_man,
             float update_interval_s, 
             bool  use_miss_tolerance,
-            float miss_tolerance_s);
+            float miss_tolerance_s,
+            float max_distance_ft);
 
     static std::string probabilityName();
     static std::string probabilityDescription();
@@ -56,36 +59,47 @@ protected:
                                                                               const TimePeriodCollection& periods,
                                                                               unsigned int sum_uis,
                                                                               unsigned int misses_total) override;
+    float max_distance_ft_;
 };
 
 /**
 */
-class ModeACorrectPeriodConfig : public IntervalBaseConfig
+class ModeCCorrectPeriodConfig : public IntervalBaseConfig
 {
 public:
-    ModeACorrectPeriodConfig(const std::string& class_id, 
+    ModeCCorrectPeriodConfig(const std::string& class_id, 
                              const std::string& instance_id,
                              Group& group, 
                              EvaluationStandard& standard,
                              EvaluationManager& eval_man);
-    virtual ~ModeACorrectPeriodConfig() = default;
+    virtual ~ModeCCorrectPeriodConfig() = default;
 
     std::shared_ptr<Base> createRequirement() override;
 
+    float maxDistanceFt() const;
+    void maxDistanceFt(float value);
+
 protected:
     virtual BaseConfigWidget* createWidget_impl() override;
+    virtual void addCustomTableEntries(EvaluationResultsReport::SectionContentTable& table) const override;
+
+    float max_distance_ft_ = 300.0f;
 };
 
 /**
 */
-class ModeACorrectPeriodConfigWidget : public IntervalBaseConfigWidget
+class ModeCCorrectPeriodConfigWidget : public IntervalBaseConfigWidget
 {
 public:
-    ModeACorrectPeriodConfigWidget(ModeACorrectPeriodConfig& cfg);
-    virtual ~ModeACorrectPeriodConfigWidget() = default;
+    ModeCCorrectPeriodConfigWidget(ModeCCorrectPeriodConfig& cfg);
+    virtual ~ModeCCorrectPeriodConfigWidget() = default;
 
 protected:
-    ModeACorrectPeriodConfig& config();
+    ModeCCorrectPeriodConfig& config();
+
+    void distanceChanged(const QString& value);
+
+    QLineEdit* distance_value_edit_ = nullptr;
 };
 
 }

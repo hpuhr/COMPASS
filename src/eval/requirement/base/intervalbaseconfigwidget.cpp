@@ -96,18 +96,6 @@ IntervalBaseConfigWidget::IntervalBaseConfigWidget(IntervalBaseConfig& cfg)
         form_layout_->addRow("Miss Tolerance [s]", miss_tolerance_edit_);
     }
 
-    // invert prob
-    if (config_flags & IntervalBaseConfig::UseInvProb)
-    {
-        use_invert_prob_check_ = new QCheckBox ();
-        use_invert_prob_check_->setChecked(config().invertProb());
-        use_invert_prob_check_->setToolTip("If calculated probability should be inverted");
-        connect(use_invert_prob_check_, &QCheckBox::clicked,
-                this, &IntervalBaseConfigWidget::toggleInvertProbSlot);
-
-        form_layout_->addRow("Invert Probability", use_invert_prob_check_);
-    }
-
     // hold_for_any_target_check_
     if (config_flags & IntervalBaseConfig::UseAnyTarget)
     {
@@ -210,20 +198,6 @@ void IntervalBaseConfigWidget::maxGapLengthEditSlot(QString value)
         config().maxGapLength(val);
     else
         loginf << "IntervalBaseConfigWidget: maxGapLengthEditSlot: axvalid value";
-}
-
-
-/**
-*/
-void IntervalBaseConfigWidget::toggleInvertProbSlot()
-{
-    loginf << "IntervalBaseConfigWidget: toggleInvertProbSlot";
-
-    if (use_invert_prob_check_)
-    {
-        config().invertProb(use_invert_prob_check_->checkState() == Qt::Checked);
-        updateActive();
-    }
 }
 
 /**

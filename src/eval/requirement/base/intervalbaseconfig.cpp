@@ -47,7 +47,6 @@ IntervalBaseConfig::IntervalBaseConfig(const std::string& class_id,
     registerParameter("use_miss_tolerance", &use_miss_tolerance_, false);
     registerParameter("miss_tolerance", &miss_tolerance_s_, 0.01);
 
-    registerParameter("invert_prob", &invert_prob_, false);
     registerParameter("hold_for_any_target", &hold_for_any_target_, false);
 }
 
@@ -70,7 +69,7 @@ uint32_t IntervalBaseConfig::configFlags() const
 void IntervalBaseConfig::createWidget()
 {
     assert (!widget_);
-    widget_.reset(new IntervalBaseConfigWidget(*this));
+    widget_.reset(createWidget_impl());
     assert (widget_);
 }
 
@@ -84,7 +83,7 @@ void IntervalBaseConfig::addToReport (std::shared_ptr<EvaluationResultsReport::R
 
     EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
 
-    table.addRow({"Probability [1]", "Probability of code detection or miss (inverted probability)",
+    table.addRow({"Probability [%]", "Probability of code detection",
                   roundf(prob_ * 10000.0) / 100.0}, nullptr);
     table.addRow({"Probability Check Type", "",
                   comparisonTypeString(prob_check_type_).c_str()}, nullptr);
@@ -116,17 +115,13 @@ void IntervalBaseConfig::addToReport (std::shared_ptr<EvaluationResultsReport::R
                       miss_tolerance_s_}, nullptr);
     }
 
-    if (config_flags_ & ConfigFlags::UseInvProb)
-    {
-        table.addRow({"Invert Probability", "If calculated probability should be inverted",
-                      comment_.c_str()}, nullptr);
-    }
-
     if (config_flags_ & ConfigFlags::UseAnyTarget)
     {
         table.addRow({"Must hold for any Target", "Must hold for any target (every single target)",
                     Utils::String::boolToString(hold_for_any_target_).c_str()}, nullptr);
     }
+
+    addCustomTableEntries(table);
 }
 
 /**
@@ -225,20 +220,6 @@ float IntervalBaseConfig::missTolerance() const
 void IntervalBaseConfig::missTolerance(float value)
 {
     miss_tolerance_s_ = value;
-}
-
-/**
-*/
-bool IntervalBaseConfig::invertProb() const
-{
-    return invert_prob_;
-}
-
-/**
-*/
-void IntervalBaseConfig::invertProb(bool value)
-{
-    invert_prob_ = value;
 }
 
 /**

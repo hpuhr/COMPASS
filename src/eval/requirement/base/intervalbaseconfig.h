@@ -21,8 +21,15 @@
 
 #include <boost/optional.hpp>
 
+namespace EvaluationResultsReport
+{
+    class SectionContentTable;
+}
+
 namespace EvaluationRequirement
 {
+
+class BaseConfigWidget;
 
 /**
 */
@@ -34,7 +41,6 @@ public:
         UseMinGapLen = 1 << 0,
         UseMaxGapLen = 1 << 1,
         UseMissTol   = 1 << 2,
-        UseInvProb   = 1 << 3,
         UseAnyTarget = 1 << 4
     };
 
@@ -78,8 +84,11 @@ public:
 
 protected:
     void configure(uint32_t flags);
-    
+
     virtual void createWidget() override;
+
+    virtual BaseConfigWidget* createWidget_impl() = 0;
+    virtual void addCustomTableEntries(EvaluationResultsReport::SectionContentTable& table) const {};
 
     uint32_t config_flags_    = std::numeric_limits<uint32_t>::max();
 
@@ -94,7 +103,6 @@ protected:
     bool use_miss_tolerance_  = false;
     float miss_tolerance_s_   = 0.0f;
 
-    bool invert_prob_         = false;
     bool hold_for_any_target_ = false; // if requirement must hold for any target (all single targets)
 };
 

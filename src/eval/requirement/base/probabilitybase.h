@@ -51,7 +51,7 @@ public:
 
 protected:
     float prob_ {0};
-    COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EUQAL};
+    COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EQUAL};
 
     bool compareValue (double val, double threshold, COMPARISON_TYPE check_type);
 };

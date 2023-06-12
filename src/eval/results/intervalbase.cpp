@@ -81,10 +81,7 @@ void SingleIntervalBase::updateProbability()
         std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
         assert (req);
 
-        if (req->invertProbability())
-            probability_ = (float)missed_uis_/(float)(sum_uis_);
-        else
-            probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+        probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
     }
 
     result_usable_ = probability_.has_value();
@@ -205,11 +202,7 @@ void SingleIntervalBase::addTargetDetailsToTable (EvaluationResultsReport::Secti
         assert (req);
 
         Qt::SortOrder order;
-
-        if (req->invertProbability())
-            order = Qt::DescendingOrder;
-        else
-            order = Qt::AscendingOrder;
+        order = Qt::AscendingOrder;
 
         std::vector<std::string> columns = targetTableColumns();
 
@@ -631,10 +624,7 @@ void JoinedIntervalBase::updateProbability()
         std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
         assert (req);
 
-        if (req->invertProbability())
-            probability_ = (float)missed_uis_/(float)(sum_uis_);
-        else
-            probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+        probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
     }
 }
 

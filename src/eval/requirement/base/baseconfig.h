@@ -29,7 +29,6 @@
 class Group;
 class EvaluationStandard;
 
-
 class QWidget;
 class QFormLayout;
 class EvaluationManager;
@@ -38,13 +37,16 @@ namespace EvaluationRequirement
 {
 class Base;
 
+/**
+*/
 class BaseConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
     Q_OBJECT
-
 public:
-    BaseConfig(const std::string& class_id, const std::string& instance_id,
-               Group& group, EvaluationStandard& standard,
+    BaseConfig(const std::string& class_id, 
+               const std::string& instance_id,
+               Group& group, 
+               EvaluationStandard& standard,
                EvaluationManager& eval_man);
     virtual ~BaseConfig();
 

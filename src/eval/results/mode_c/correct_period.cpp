@@ -16,7 +16,7 @@
  */
 
 #include "correct_period.h"
-#include "eval/requirement/mode_a/correct_period.h"
+#include "eval/requirement/mode_c/correct_period.h"
 
 namespace EvaluationRequirementResult
 {
@@ -27,7 +27,7 @@ namespace EvaluationRequirementResult
 
 /**
 */
-SingleModeACorrectPeriod::SingleModeACorrectPeriod(const std::string& result_type, 
+SingleModeCCorrectPeriod::SingleModeCCorrectPeriod(const std::string& result_type, 
                                                    const std::string& result_id, 
                                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                    const SectorLayer& sector_layer, 
@@ -44,23 +44,23 @@ SingleModeACorrectPeriod::SingleModeACorrectPeriod(const std::string& result_typ
 
 /**
 */
-std::shared_ptr<Joined> SingleModeACorrectPeriod::createEmptyJoined(const std::string& result_id)
+std::shared_ptr<Joined> SingleModeCCorrectPeriod::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedModeACorrectPeriod> ("JoinedModeACorrectPeriod", result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedModeCCorrectPeriod> ("JoinedModeCCorrectPeriod", result_id, requirement_, sector_layer_, eval_man_);
 }
 
 /**
 */
-std::string SingleModeACorrectPeriod::probabilityName() const
+std::string SingleModeCCorrectPeriod::probabilityName() const
 {
-    return EvaluationRequirement::ModeACorrectPeriod::probabilityName();
+    return EvaluationRequirement::ModeCCorrectPeriod::probabilityName();
 }
 
 /**
 */
-std::string SingleModeACorrectPeriod::probabilityDescription() const
+std::string SingleModeCCorrectPeriod::probabilityDescription() const
 {
-    return EvaluationRequirement::ModeACorrectPeriod::probabilityDescription();
+    return EvaluationRequirement::ModeCCorrectPeriod::probabilityDescription();
 }
 
 /********************************************************************************
@@ -69,7 +69,7 @@ std::string SingleModeACorrectPeriod::probabilityDescription() const
 
 /**
 */
-JoinedModeACorrectPeriod::JoinedModeACorrectPeriod(const std::string& result_type, 
+JoinedModeCCorrectPeriod::JoinedModeCCorrectPeriod(const std::string& result_type, 
                                                    const std::string& result_id, 
                                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                    const SectorLayer& sector_layer, 
@@ -80,16 +80,16 @@ JoinedModeACorrectPeriod::JoinedModeACorrectPeriod(const std::string& result_typ
 
 /**
 */
-std::string JoinedModeACorrectPeriod::probabilityName() const
+std::string JoinedModeCCorrectPeriod::probabilityName() const
 {
-    return EvaluationRequirement::ModeACorrectPeriod::probabilityName();
+    return EvaluationRequirement::ModeCCorrectPeriod::probabilityName();
 }
 
 /**
 */
-std::string JoinedModeACorrectPeriod::probabilityDescription() const
+std::string JoinedModeCCorrectPeriod::probabilityDescription() const
 {
-    return EvaluationRequirement::ModeACorrectPeriod::probabilityDescription();
+    return EvaluationRequirement::ModeCCorrectPeriod::probabilityDescription();
 }
 
 } // namespace EvaluationRequirementResult

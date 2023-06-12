@@ -113,8 +113,7 @@ public:
                  const boost::optional<float>& max_gap_length_s = boost::optional<float>(),
                  const boost::optional<float>& miss_tolerance_s = boost::optional<float>(),
                  const boost::optional<float>& min_ref_period_s = boost::optional<float>(),
-                 const boost::optional<bool>& must_hold_for_any_target = boost::optional<bool>(),
-                 bool invert_prob = false);
+                 const boost::optional<bool>& must_hold_for_any_target = boost::optional<bool>());
     virtual ~IntervalBase() = default;
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -128,7 +127,6 @@ public:
     const boost::optional<float>& maxGapLength() const { return max_gap_length_s_; }
     const boost::optional<float>& missTolerance() const { return miss_tolerance_s_; }
 
-    bool invertProbability() const { return invert_prob_; }
     const boost::optional<bool>& mustHoldForAnyTarget() const { return must_hold_for_any_target_; }
 
     float missThreshold() const;
@@ -164,7 +162,6 @@ private:
     boost::optional<float> miss_tolerance_s_;
     boost::optional<float> min_ref_period_s_;
     boost::optional<bool>  must_hold_for_any_target_;
-    bool                   invert_prob_;  
 };
 
 } // namespace EvaluationRequirement

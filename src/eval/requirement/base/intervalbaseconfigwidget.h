@@ -48,7 +48,6 @@ public slots:
     void toggleUseMissToleranceSlot();
     void missToleranceEditSlot(QString value);
 
-    void toggleInvertProbSlot();
     void toggleHoldForAnyTargetSlot();
 
 protected:
@@ -68,7 +67,6 @@ protected:
     QCheckBox* use_miss_tolerance_check_  = nullptr;
     QLineEdit* miss_tolerance_edit_       = nullptr;
 
-    QCheckBox* use_invert_prob_check_     = nullptr;
     QCheckBox* hold_for_any_target_check_ = nullptr;
 };
 
