@@ -63,14 +63,14 @@ SingleIntervalBase::SingleIntervalBase(const std::string& result_type,
     ,   missed_uis_ (missed_uis)
     ,   ref_periods_(ref_periods)
 {
-    updatePCD();
+    updateProbability();
 }
 
 /**
 */
-void SingleIntervalBase::updatePCD()
+void SingleIntervalBase::updateProbability()
 {
-    pcd_.reset();
+    probability_.reset();
 
     if (sum_uis_)
     {
@@ -82,23 +82,23 @@ void SingleIntervalBase::updatePCD()
         assert (req);
 
         if (req->invertProbability())
-            pcd_ = (float)missed_uis_/(float)(sum_uis_);
+            probability_ = (float)missed_uis_/(float)(sum_uis_);
         else
-            pcd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+            probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
     }
 
-    result_usable_ = pcd_.has_value();
+    result_usable_ = probability_.has_value();
 
     updateUseFromTarget();
 }
 
 /**
 */
-QVariant SingleIntervalBase::pcdVar() const
+QVariant SingleIntervalBase::probabilityVar() const
 {
     QVariant pcd_var;
-    if (pcd_.has_value())
-        pcd_var = roundf(pcd_.value() * 10000.0) / 100.0;
+    if (probability_.has_value())
+        pcd_var = roundf(probability_.value() * 10000.0) / 100.0;
 
     return pcd_var;
 }
@@ -107,7 +107,7 @@ QVariant SingleIntervalBase::pcdVar() const
 */
 std::vector<std::string> SingleIntervalBase::targetTableColumns() const
 {
-    return { "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max", "#EUIs", "#MUIs", "PCD" };
+    return { "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max", "#EUIs", "#MUIs", probabilityName() };
 }
 
 /**
@@ -124,7 +124,7 @@ std::vector<QVariant> SingleIntervalBase::targetTableValues() const
              target_->modeCMaxStr().c_str(),
              sum_uis_,
              missed_uis_,
-             pcdVar() };
+             probabilityVar() };
 }
 
 /**
@@ -133,10 +133,10 @@ std::vector<Base::ReportParam> SingleIntervalBase::detailsOverviewDescriptions()
 {
     std::vector<Base::ReportParam> descr;
 
-    return { { "Use"      , "To be used in results"         , use_        },
-             { "#EUIs [1]", "Expected Update Intervals"     , sum_uis_    },
-             { "#MUIs [1]", "Missed Update Intervals"       , missed_uis_ },
-             { "PCD [%]"  , "Probability of Code Detection" , pcdVar()    } };
+    return { { "Use"            , "To be used in results"         , use_             },
+             { "#EUIs [1]"      , "Expected Update Intervals"     , sum_uis_         },
+             { "#MUIs [1]"      , "Missed Update Intervals"       , missed_uis_      },
+             { probabilityName(), probabilityDescription()        , probabilityVar() } };
 }
 
 /**
@@ -272,8 +272,8 @@ void SingleIntervalBase::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
 
     string result {"Unknown"};
 
-    if (pcd_.has_value())
-        result = req->getConditionResultStr(pcd_.value());
+    if (probability_.has_value())
+        result = req->getConditionResultStr(probability_.value());
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -281,7 +281,7 @@ void SingleIntervalBase::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
         utn_req_table.addRow({"Must hold for any target ", "", req->mustHoldForAnyTarget().value()}, this);
 
     // add figure
-    if (pcd_.has_value() && pcd_.value() != 1.0)
+    if (probability_.has_value())
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   [this](void) { return this->getTargetErrorsViewable(); });
@@ -494,8 +494,8 @@ bool SingleIntervalBase::hasFailed() const
     std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
     assert (req);
 
-    if (pcd_.has_value())
-        return !req->getConditionResult(pcd_.value());
+    if (probability_.has_value())
+        return !req->getConditionResult(probability_.value());
     else
         return false;
 }
@@ -613,14 +613,14 @@ void JoinedIntervalBase::addToValues (std::shared_ptr<SingleIntervalBase> single
     if (single_result->hasFailed())
         ++num_failed_single_targets_;
 
-    updatePCD();
+    updateProbability();
 }
 
 /**
 */
-void JoinedIntervalBase::updatePCD()
+void JoinedIntervalBase::updateProbability()
 {
-    pcd_.reset();
+    probability_.reset();
 
     if (sum_uis_)
     {
@@ -632,9 +632,9 @@ void JoinedIntervalBase::updatePCD()
         assert (req);
 
         if (req->invertProbability())
-            pcd_ = (float)missed_uis_/(float)(sum_uis_);
+            probability_ = (float)missed_uis_/(float)(sum_uis_);
         else
-            pcd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+            probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
     }
 }
 
@@ -682,13 +682,13 @@ void JoinedIntervalBase::addToOverviewTable(std::shared_ptr<EvaluationResultsRep
 
         string result {"Unknown"};
 
-        if (pcd_.has_value())
+        if (probability_.has_value())
         {
-            pd_var = String::percentToString(pcd_.value() * 100.0, req->getNumProbDecimals()).c_str();
+            pd_var = String::percentToString(probability_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
             //loginf << "UGA '" << pd_var.toString().toStdString() << "' dec " << req->getNumProbDecimals();
 
-            result = req->getConditionResultStr(pcd_.value());
+            result = req->getConditionResultStr(probability_.value());
         }
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -708,20 +708,20 @@ std::vector<Base::ReportParam> JoinedIntervalBase::detailsOverviewDescriptions()
     assert (req);
 
     // pd
-    QVariant pd_var;
+    QVariant p_var;
     std::string result {"Unknown"};
 
-    if (pcd_.has_value())
+    if (probability_.has_value())
     {
-        pd_var = String::percentToString(pcd_.value() * 100.0, req->getNumProbDecimals()).c_str();
-        result = req->getConditionResultStr(pcd_.value());
+        p_var = String::percentToString(probability_.value() * 100.0, req->getNumProbDecimals()).c_str();
+        result = req->getConditionResultStr(probability_.value());
     }
 
     std::vector<Base::ReportParam> params;
 
     params.emplace_back("#Updates/#EUIs [1]", "Total number update intervals", sum_uis_);
     params.emplace_back("#MUIs [1]", "Number of missed update intervals", missed_uis_);
-    params.emplace_back("PCD [%]", "Probability of Code Detection", pd_var);
+    params.emplace_back(probabilityName(), probabilityDescription(), p_var);
 
     params.emplace_back("Condition", "", req->getConditionStr().c_str());
     params.emplace_back("Condition Fulfilled", "", result.c_str());
@@ -843,9 +843,9 @@ void JoinedIntervalBase::updatesToUseChanges_impl()
     loginf << type() << ": updatesToUseChanges: prev sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
 
-    if (pcd_.has_value())
+    if (probability_.has_value())
         loginf << type() << ": updatesToUseChanges: prev result " << result_id_
-                << " pcd " << 100.0 * pcd_.value();
+                << " pcd " << 100.0 * probability_.value();
     else
         loginf << type() << ": updatesToUseChanges: prev result " << result_id_ << " has no data";
 
@@ -863,9 +863,9 @@ void JoinedIntervalBase::updatesToUseChanges_impl()
     loginf << type() << ": updatesToUseChanges: updt sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
 
-    if (pcd_.has_value())
+    if (probability_.has_value())
         loginf << type() << ": updatesToUseChanges: updt result " << result_id_
-                << " pcd " << 100.0 * pcd_.value();
+                << " pcd " << 100.0 * probability_.value();
     else
         loginf << type() << ": updatesToUseChanges: updt result " << result_id_ << " has no data";
 }

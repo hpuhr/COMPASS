@@ -42,12 +42,8 @@ public:
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
 protected:
-    virtual std::vector<std::string> targetTableColumns() const override;
-    virtual std::vector<QVariant> targetTableValues() const override;
-    virtual std::vector<ReportParam> detailsOverviewDescriptions() const override;
-    virtual std::vector<std::string> detailsTableColumns() const override;
-    virtual std::vector<QVariant> detailsTableValues(const EvaluationDetail& detail) const override;
-    virtual unsigned int sortColumn() const override;
+    virtual std::string probabilityName() const override;
+    virtual std::string probabilityDescription() const override;
 };
 
 /**
@@ -61,7 +57,8 @@ public:
                              const SectorLayer& sector_layer, 
                              EvaluationManager& eval_man);
 protected:
-    virtual std::vector<ReportParam> detailsOverviewDescriptions() const override;
+    virtual std::string probabilityName() const override;
+    virtual std::string probabilityDescription() const override;
 };
 
 } // namespace EvaluationRequirementResult

@@ -43,51 +43,23 @@ SingleModeACorrectPeriod::SingleModeACorrectPeriod(const std::string& result_typ
 
 /**
 */
-std::vector<std::string> SingleModeACorrectPeriod::targetTableColumns() const
-{
-    return SingleIntervalBase::targetTableColumns();
-}
-
-/**
-*/
-std::vector<QVariant> SingleModeACorrectPeriod::targetTableValues() const
-{
-    return SingleIntervalBase::targetTableValues();
-}
-
-/**
-*/
-std::vector<SingleModeACorrectPeriod::ReportParam> SingleModeACorrectPeriod::detailsOverviewDescriptions() const 
-{
-    return SingleIntervalBase::detailsOverviewDescriptions();
-}
-
-/**
-*/
-std::vector<std::string> SingleModeACorrectPeriod::detailsTableColumns() const
-{
-    return SingleIntervalBase::detailsTableColumns();
-}
-
-/**
-*/
-std::vector<QVariant> SingleModeACorrectPeriod::detailsTableValues(const EvaluationDetail& detail) const 
-{
-    return SingleIntervalBase::detailsTableValues(detail);
-}
-
-/**
-*/
-unsigned int SingleModeACorrectPeriod::sortColumn() const
-{
-    return SingleIntervalBase::sortColumn();
-}
-
-/**
-*/
 std::shared_ptr<Joined> SingleModeACorrectPeriod::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedModeACorrectPeriod> ("JoinedModeACorrectPeriod", result_id, requirement_, sector_layer_, eval_man_);
+}
+
+/**
+*/
+std::string SingleModeACorrectPeriod::probabilityName() const
+{
+    return "PCMAD [%]";
+}
+
+/**
+*/
+std::string SingleModeACorrectPeriod::probabilityDescription() const
+{
+    return "Probability of Correct Mode A Detection";
 }
 
 /********************************************************************************
@@ -107,9 +79,16 @@ JoinedModeACorrectPeriod::JoinedModeACorrectPeriod(const std::string& result_typ
 
 /**
 */
-std::vector<JoinedModeACorrectPeriod::ReportParam> JoinedModeACorrectPeriod::detailsOverviewDescriptions() const
+std::string JoinedModeACorrectPeriod::probabilityName() const
 {
-    return JoinedIntervalBase::detailsOverviewDescriptions();
+    return "PCMAD [%]";
+}
+
+/**
+*/
+std::string JoinedModeACorrectPeriod::probabilityDescription() const
+{
+    return "Probability of Correct Mode A Detection";
 }
 
 } // namespace EvaluationRequirementResult

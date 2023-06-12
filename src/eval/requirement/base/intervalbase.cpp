@@ -389,7 +389,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             assert(target_data.tstChain().posOpt(event.data_id).has_value());
 
             dinfo.evt_time        = event.data_id.timestamp();
-            dinfo.evt_comment     = "Outside reference period";
+            dinfo.evt_comment     = "Outside sector/reference period";
             dinfo.evt_position    = target_data.tstChain().pos(event.data_id);
             dinfo.evt_has_ref     = false;
             dinfo.generate_detail = true;

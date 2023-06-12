@@ -79,9 +79,12 @@ protected:
     virtual std::vector<std::string> detailsTableColumns() const;
     virtual std::vector<QVariant> detailsTableValues(const EvaluationDetail& detail) const;
 
+    virtual std::string probabilityName() const = 0;
+    virtual std::string probabilityDescription() const = 0;
+
     virtual unsigned int sortColumn() const;
 
-    void updatePCD();
+    void updateProbability();
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
@@ -92,14 +95,14 @@ protected:
 
     std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (const EvaluationDetail* detail = nullptr);
 
-    QVariant pcdVar() const;
+    QVariant probabilityVar() const;
 
     int sum_uis_    {0};
     int missed_uis_ {0};
 
     TimePeriodCollection ref_periods_;
 
-    boost::optional<float> pcd_;
+    boost::optional<float> probability_;
 };
 
 /**
@@ -127,7 +130,7 @@ public:
 
 protected:
     void addToValues (std::shared_ptr<SingleIntervalBase> single_result);
-    void updatePCD();
+    void updateProbability();
 
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -139,13 +142,16 @@ protected:
 
     virtual std::vector<ReportParam> detailsOverviewDescriptions() const;
 
+    virtual std::string probabilityName() const = 0;
+    virtual std::string probabilityDescription() const = 0;
+
     unsigned int sum_uis_    {0};
     unsigned int missed_uis_ {0};
 
     unsigned int num_single_targets_ {0};
     unsigned int num_failed_single_targets_ {0};
 
-    boost::optional<float> pcd_;
+    boost::optional<float> probability_;
 };
 
 } // EvaluationRequirementResult
