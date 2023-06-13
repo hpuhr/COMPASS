@@ -32,7 +32,6 @@
 #include "eval/requirement/identification/correct_period.h"
 #include "eval/requirement/mode_a/presentconfig.h"
 #include "eval/requirement/mode_a/falseconfig.h"
-#include "eval/requirement/mode_a/correct_period.h"
 #include "eval/requirement/mode_c/falseconfig.h"
 #include "eval/requirement/mode_c/presentconfig.h"
 #include "eval/requirement/mode_c/correctconfig.h"
@@ -62,7 +61,6 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementIdentificationCorrectPeriodConfig", "Identification Correct (Periods)"},
     {"EvaluationRequirementModeAPresentConfig", "Mode 3/A Present"},
     {"EvaluationRequirementModeAFalseConfig", "Mode 3/A False"},
-    {"EvaluationRequirementModeACorrectPeriodConfig", "Mode 3/A Correct (Periods)"},
     {"EvaluationRequirementModeCPresentConfig", "Mode C Present"},
     {"EvaluationRequirementModeCCorrectConfig", "Mode C Correct"},
     {"EvaluationRequirementModeCFalseConfig", "Mode C False"},
@@ -312,16 +310,6 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::ModeCFalseConfig* config =
                 new EvaluationRequirement::ModeCFalseConfig(
-                    class_id, instance_id, *this, standard_, eval_man_);
-        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
-
-        assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
-    }
-    else if (class_id == "EvaluationRequirementModeACorrectPeriodConfig")
-    {
-        EvaluationRequirement::ModeACorrectPeriodConfig* config =
-                new EvaluationRequirement::ModeACorrectPeriodConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 

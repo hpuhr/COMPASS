@@ -34,7 +34,8 @@ public:
     enum class IdentificationType
     {
         AircraftAddress = 0,
-        AircraftID
+        AircraftID,
+        ModeA
     };
 
     IdentificationCorrectPeriodConfig(const std::string& class_id, 

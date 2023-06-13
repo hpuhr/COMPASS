@@ -74,18 +74,31 @@ IdentificationCorrectPeriod::Validity IdentificationCorrectPeriod::isValid(const
                                                                            const SectorLayer& sector_layer,
                                                                            const boost::posix_time::time_duration& max_ref_time_diff) const
 {
-    auto cmp_res = identification_type_ == IdentificationType::AircraftID ? 
-                            compareTi(data_id, target_data, max_ref_time_diff) :
-                            compareTa(data_id, target_data, max_ref_time_diff);
+    std::pair<EvaluationRequirement::ValueComparisonResult, std::string> cmp_res;
 
+    switch(identification_type_)
+    {
+        case IdentificationType::AircraftAddress:
+            cmp_res = compareTa(data_id, target_data, max_ref_time_diff);
+            break;
+        case IdentificationType::AircraftID:
+            cmp_res = compareTi(data_id, target_data, max_ref_time_diff);
+            break;
+        case IdentificationType::ModeA:
+            cmp_res = compareModeA(data_id, target_data, max_ref_time_diff);
+            break;
+    }
+                            
     bool no_ref = cmp_res.first == ValueComparisonResult::Unknown_NoRefData;
     bool failed = cmp_res.first == ValueComparisonResult::Unknown_NoTstData || 
                   cmp_res.first == ValueComparisonResult::Different;
 
     Validity v;
 
+    auto id_name = identificationName(identification_type_);
+
     v.value   = no_ref ? Validity::Value::DataMissing : (failed ? Validity::Value::Invalid : Validity::Value::Valid);
-    v.comment = no_ref ? "Reference Mode3A missing"   : (failed ? "M3A failed (" + cmp_res.second + ")" : "");
+    v.comment = no_ref ? "Reference " + id_name + " missing" : (failed ? id_name + " failed (" + cmp_res.second + ")" : "");
 
     return v;
 }
@@ -120,10 +133,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrectPeriod
  */
 std::string IdentificationCorrectPeriod::probabilityName(IdentificationType identification_type)
 {
-    if (identification_type == IdentificationType::AircraftID)
-        return "PCAIDD [%]";
-
-    return  "PCAAD [%]";
+    switch(identification_type)
+    {
+        case IdentificationType::AircraftAddress:
+            return "PCAAD [%]";
+        case IdentificationType::AircraftID:
+            return "PCAIDD [%]";
+        case IdentificationType::ModeA:
+            return "PCMAD [%]";
+    }
+    return "";
 }
 
 /**
@@ -137,10 +156,16 @@ std::string IdentificationCorrectPeriod::probabilityDescription(IdentificationTy
  */
 std::string IdentificationCorrectPeriod::identificationName(IdentificationType identification_type)
 {
-    if (identification_type == IdentificationType::AircraftID)
-        return "Aircraft ID";
-    
-    return "Aircraft Address";
+    switch(identification_type)
+    {
+        case IdentificationType::AircraftAddress:
+            return "Aircraft Address";
+        case IdentificationType::AircraftID:
+            return "Aircraft ID";
+        case IdentificationType::ModeA:
+            return "Mode3A";
+    }
+    return "";
 }
 
 /********************************************************************************************************
@@ -205,8 +230,9 @@ IdentificationCorrectPeriodConfigWidget::IdentificationCorrectPeriodConfigWidget
     prob_edit_->setToolTip(QString::fromStdString(IdentificationCorrectPeriod::probabilityDescription(config().identificationType())));
 
     identification_type_combo_ = new QComboBox;
-    identification_type_combo_->addItem("Aircraft Address");
-    identification_type_combo_->addItem("Aircraft ID");
+    identification_type_combo_->addItem("Aircraft Address", QVariant((int)IdentificationCorrectPeriodConfig::IdentificationType::AircraftAddress));
+    identification_type_combo_->addItem("Aircraft ID", QVariant((int)IdentificationCorrectPeriodConfig::IdentificationType::AircraftID));
+    identification_type_combo_->addItem("Mode A", QVariant((int)IdentificationCorrectPeriodConfig::IdentificationType::ModeA));
     identification_type_combo_->setCurrentIndex((int)config().identificationType());
 
     connect(identification_type_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &IdentificationCorrectPeriodConfigWidget::identificationTypeChanged);
@@ -225,9 +251,12 @@ IdentificationCorrectPeriodConfig& IdentificationCorrectPeriodConfigWidget::conf
 */
 void IdentificationCorrectPeriodConfigWidget::identificationTypeChanged()
 {
-    loginf << "IdentificationCorrectPeriodConfigWidget: identificationTypeChanged: value " << identification_type_combo_->currentIndex();
+    auto data = identification_type_combo_->currentData();
+    assert(!data.isNull());
 
-    auto id_type = (IdentificationCorrectPeriodConfig::IdentificationType)identification_type_combo_->currentIndex();
+    auto id_type = (IdentificationCorrectPeriodConfig::IdentificationType)data.toInt();
+
+    loginf << "IdentificationCorrectPeriodConfigWidget: identificationTypeChanged: value " << IdentificationCorrectPeriod::identificationName(id_type);
 
     config().identificationType(id_type);
 
