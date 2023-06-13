@@ -186,6 +186,13 @@ BaseConfigWidget* IdentificationCorrectPeriodConfig::createWidget_impl()
     return new IdentificationCorrectPeriodConfigWidget(*this);
 }
 
+/**
+*/
+std::string IdentificationCorrectPeriodConfig::probabilityDescription() const
+{
+    return IdentificationCorrectPeriod::probabilityDescription(identification_type_);
+}
+
 /********************************************************************************************************
  * IdentificationCorrectPeriodConfigWidget
  ********************************************************************************************************/

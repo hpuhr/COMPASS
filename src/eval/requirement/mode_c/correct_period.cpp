@@ -195,6 +195,13 @@ void ModeCCorrectPeriodConfig::addCustomTableEntries(EvaluationResultsReport::Se
                     std::to_string(max_distance_ft_).c_str()}, nullptr);
 }
 
+/**
+*/
+std::string ModeCCorrectPeriodConfig::probabilityDescription() const
+{
+    return ModeCCorrectPeriod::probabilityDescription();
+}
+
 /********************************************************************************************************
  * ModeCCorrectPeriodConfigWidget
  ********************************************************************************************************/

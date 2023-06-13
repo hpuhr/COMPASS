@@ -164,6 +164,13 @@ BaseConfigWidget* ModeACorrectPeriodConfig::createWidget_impl()
     return new ModeACorrectPeriodConfigWidget(*this);
 }
 
+/**
+*/
+std::string ModeACorrectPeriodConfig::probabilityDescription() const
+{
+    return ModeACorrectPeriod::probabilityDescription();
+}
+
 /********************************************************************************************************
  * ModeACorrectPeriodConfigWidget
  ********************************************************************************************************/

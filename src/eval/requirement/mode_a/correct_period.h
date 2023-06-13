@@ -74,6 +74,7 @@ public:
 
 protected:
     virtual BaseConfigWidget* createWidget_impl() override;
+    virtual std::string probabilityDescription() const override;
 };
 
 /**

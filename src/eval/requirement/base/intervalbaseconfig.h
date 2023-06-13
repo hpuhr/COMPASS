@@ -87,9 +87,10 @@ protected:
 
     virtual void createWidget() override;
 
+    virtual std::string probabilityDescription() const = 0;
     virtual BaseConfigWidget* createWidget_impl() = 0;
     virtual void addCustomTableEntries(EvaluationResultsReport::SectionContentTable& table) const {};
-
+    
     uint32_t config_flags_    = std::numeric_limits<uint32_t>::max();
 
     float update_interval_s_  = 0.0f;

@@ -83,7 +83,7 @@ void IntervalBaseConfig::addToReport (std::shared_ptr<EvaluationResultsReport::R
 
     EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
 
-    table.addRow({"Probability [%]", "Probability of code detection",
+    table.addRow({"Probability [%]", QString::fromStdString(probabilityDescription()),
                   roundf(prob_ * 10000.0) / 100.0}, nullptr);
     table.addRow({"Probability Check Type", "",
                   comparisonTypeString(prob_check_type_).c_str()}, nullptr);
