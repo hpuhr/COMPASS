@@ -22,6 +22,8 @@
 #include "dbcontentmanager.h"
 #include "dbcontent.h"
 #include "viewmanager.h"
+#include "compass.h"
+#include "metavariable.h"
 
 #include <boost/program_options.hpp>
 
@@ -96,10 +98,15 @@ bool RTCommandGetData::run_impl()
 
     if (utn_.has_value())
     {
-        stringstream ss;
-        ss << " json_each.value IN (" << to_string(utn_.value()) << ")"; // rest done in SQLGenerator::getSelectCommand
+        dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
+            DBContent::meta_var_utn_.name()).getFor(dbcontent_name_);
 
-        db_content.load(read_set, false, false, ss.str());
+        string custom_clause = var.dbColumnName() + " IN (" + std::to_string(utn_.value()) + ")";
+
+        //stringstream ss;
+        //ss << " json_each.value IN (" << to_string(utn_.value()) << ")"; // rest done in SQLGenerator::getSelectCommand
+
+        db_content.load(read_set, false, false, custom_clause);
     }
     else
         db_content.load(read_set, false, false);
