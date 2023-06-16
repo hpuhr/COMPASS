@@ -194,7 +194,7 @@ void ManageSectorsTaskWidget::addManageTab()
 
 void ManageSectorsTaskWidget::updateSectorTableSlot()
 {
-    logdbg << "ManageSectorsTaskWidget: updateSectorTable";
+    logdbg << "ManageSectorsTaskWidget: updateSectorTableSlot";
 
     assert(sector_table_);
 
@@ -776,5 +776,5 @@ void ManageSectorsTaskWidget::importAirSpaceSectorsJSON(const std::string& filen
     if (!COMPASS::instance().evaluationManager().importAirSpace(air_space, sectors_to_import))
         QMessageBox::critical(this, "Error", "Importing air space sectors failed.");
 
-    updateSectorTable();
+    updateSectorTableSlot();
 }
