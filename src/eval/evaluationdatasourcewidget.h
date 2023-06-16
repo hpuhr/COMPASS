@@ -33,18 +33,18 @@ signals:
     void dbContentNameChangedSignal(const std::string& dbcontent_name);
     void lineChangedSignal(unsigned int line_id);
 
-protected slots:
+public slots:
     void dbContentNameChangedSlot();
     void toggleDataSourceSlot();
     void lineIDEditSlot(const QString& text);
+
+    void updateDataSourcesSlot();
 
 public:
     EvaluationDataSourceWidget(const std::string& title, const std::string& dbcontent_name, unsigned int line_id,
                                QWidget* parent=nullptr, Qt::WindowFlags f=Qt::WindowFlags());
 
     virtual ~EvaluationDataSourceWidget();
-
-    void updateDataSources();
 
 protected:
     std::string title_;

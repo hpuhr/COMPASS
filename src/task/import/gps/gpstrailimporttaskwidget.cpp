@@ -19,6 +19,7 @@
 #include "gpstrailimporttask.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "timeconv.h"
 
 #include "textfielddoublevalidator.h"
 #include "textfieldhexvalidator.h"
@@ -35,6 +36,7 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QDateEdit>
 
 #include <iostream>
 
@@ -123,16 +125,27 @@ void GPSTrailImportTaskWidget::addConfigTab()
 
     // tod offset
     ++row;
-    grid->addWidget(new QLabel("Time of Day Offset"), row, 0);
+    use_tod_offset_check_ = new QCheckBox("Use Time of Day Offset");
+    connect(use_tod_offset_check_, &QCheckBox::clicked, this, &GPSTrailImportTaskWidget::useTodOffsetCheckedSlot);
+    grid->addWidget(use_tod_offset_check_, row, 0);
 
     tod_offset_edit_ = new QLineEdit();
     tod_offset_edit_->setValidator(new TextFieldDoubleValidator(-24 * 3600, 24 * 3600, 3));
-    connect(tod_offset_edit_, &QLineEdit::textEdited, this,
-            &GPSTrailImportTaskWidget::todOffsetEditedSlot);
+    connect(tod_offset_edit_, &QLineEdit::textEdited, this, &GPSTrailImportTaskWidget::todOffsetEditedSlot);
     grid->addWidget(tod_offset_edit_, row, 1);
 
-    // mode 3a
+    // date override
+    ++row;
+    use_override_date_check_ = new QCheckBox("Override Date");
+    connect(use_override_date_check_, &QCheckBox::clicked, this, &GPSTrailImportTaskWidget::overrideDateCheckedSlot);
+    grid->addWidget(use_override_date_check_, row, 0);
 
+    override_date_edit_ = new QDateEdit();
+    override_date_edit_->setDisplayFormat("yyyy-MM-dd");
+    connect(override_date_edit_, &QDateEdit::dateChanged, this, &GPSTrailImportTaskWidget::overrideDateChangedSlot);
+    grid->addWidget(override_date_edit_, row, 1);
+
+    // mode 3a
     ++row;
     set_mode_3a_code_check_ = new QCheckBox("Mode 3/A Code (octal)");
     connect(set_mode_3a_code_check_, &QCheckBox::clicked, this, &GPSTrailImportTaskWidget::mode3ACheckedSlot);
@@ -231,6 +244,14 @@ void GPSTrailImportTaskWidget::nameEditedSlot(const QString& value)
     task_.dsName(name_edit_->text().toStdString());
 }
 
+void GPSTrailImportTaskWidget::useTodOffsetCheckedSlot()
+{
+    loginf << "GPSTrailImportTaskWidget: useTodOffsetCheckedSlot";
+
+    assert (use_tod_offset_check_);
+    task_.useTodOffset(use_tod_offset_check_->checkState() == Qt::Checked);
+}
+
 void GPSTrailImportTaskWidget::todOffsetEditedSlot(const QString& value)
 {
     assert (tod_offset_edit_);
@@ -239,6 +260,23 @@ void GPSTrailImportTaskWidget::todOffsetEditedSlot(const QString& value)
 
     if (tod_offset_edit_->hasAcceptableInput())
         task_.todOffset(value.toFloat());
+}
+
+void GPSTrailImportTaskWidget::overrideDateCheckedSlot()
+{
+    loginf << "GPSTrailImportTaskWidget: overrideDateCheckedSlot";
+
+    assert (use_override_date_check_);
+    task_.useOverrideDate(use_override_date_check_->checkState() == Qt::Checked);
+}
+
+void GPSTrailImportTaskWidget::overrideDateChangedSlot(QDate date)
+{
+    string tmp = date.toString("yyyy-MM-dd").toStdString();
+
+    loginf << "ASTERIXImportTaskWidget: dateChangedSlot: " << tmp;
+
+    task_.overrideDate(boost::gregorian::from_string(tmp));
 }
 
 void GPSTrailImportTaskWidget::mode3ACheckedSlot()
@@ -322,8 +360,19 @@ void GPSTrailImportTaskWidget::updateConfig ()
     assert (name_edit_);
     name_edit_->setText(task_.dsName().c_str());
 
+    assert (use_tod_offset_check_);
+    use_tod_offset_check_->setChecked(task_.useTodOffset());
+
     assert (tod_offset_edit_);
     tod_offset_edit_->setText(QString::number(task_.todOffset()));
+
+    assert (use_override_date_check_);
+    use_override_date_check_->setChecked(task_.useOverrideDate());
+
+    QDate date = QDate::fromString(boost::gregorian::to_iso_extended_string(task_.overrideDate()).c_str(), "yyyy-MM-dd");
+    //loginf << "UGA2 " << date.toString().toStdString();
+
+    override_date_edit_->setDate(date);
 
     assert (set_mode_3a_code_check_);
     set_mode_3a_code_check_->setChecked(task_.setMode3aCode());

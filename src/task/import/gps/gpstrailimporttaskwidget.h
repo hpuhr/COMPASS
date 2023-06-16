@@ -29,6 +29,7 @@ class QTabWidget;
 class QHBoxLayout;
 class QLineEdit;
 class QCheckBox;
+class QDateEdit;
 
 class GPSTrailImportTaskWidget : public TaskWidget
 {
@@ -39,7 +40,11 @@ class GPSTrailImportTaskWidget : public TaskWidget
     void sicEditedSlot(const QString& value);
     void nameEditedSlot(const QString& value);
 
+    void useTodOffsetCheckedSlot();
     void todOffsetEditedSlot(const QString& value);
+
+    void overrideDateCheckedSlot();
+    void overrideDateChangedSlot(QDate date);
 
     void mode3ACheckedSlot();
     void mode3AEditedSlot(const QString& value);
@@ -78,7 +83,11 @@ protected:
     QLineEdit* sic_edit_ {nullptr};
     QLineEdit* name_edit_ {nullptr};
 
+    QCheckBox* use_tod_offset_check_ {nullptr};
     QLineEdit* tod_offset_edit_ {nullptr};
+
+    QCheckBox* use_override_date_check_ {nullptr};
+    QDateEdit* override_date_edit_ {nullptr};
 
     QCheckBox* set_mode_3a_code_check_ {nullptr};
     QLineEdit* mode_3a_code_edit_ {nullptr};

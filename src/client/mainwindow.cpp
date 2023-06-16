@@ -341,10 +341,11 @@ void MainWindow::createMenus ()
     connect(import_gps_nmea_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
     import_menu_->addAction(import_gps_nmea_action);
 
-    QAction* import_gps_csv_action = new QAction(tr("&GPS Trail CSV"));
-    import_gps_csv_action->setToolTip(tr("Import GPS Trail CSV File"));
-    connect(import_gps_csv_action, &QAction::triggered, this, &MainWindow::importGPSCSVSlot);
-    import_menu_->addAction(import_gps_csv_action);
+    // deactivated, just for porto?
+//    QAction* import_gps_csv_action = new QAction(tr("&GPS Trail CSV"));
+//    import_gps_csv_action->setToolTip(tr("Import GPS Trail CSV File"));
+//    connect(import_gps_csv_action, &QAction::triggered, this, &MainWindow::importGPSCSVSlot);
+//    import_menu_->addAction(import_gps_csv_action);
 
     if (!COMPASS::instance().hideViewpoints())
     {

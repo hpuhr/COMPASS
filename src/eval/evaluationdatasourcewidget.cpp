@@ -86,15 +86,18 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
     main_layout->addLayout(line_lay);
 
     setLayout(main_layout);
+
+    connect(&COMPASS::instance().dataSourceManager(), &DataSourceManager::dataSourcesChangedSignal,
+            this, &EvaluationDataSourceWidget::updateDataSourcesSlot); // update if data sources changed
 }
 
 EvaluationDataSourceWidget::~EvaluationDataSourceWidget()
 {
 }
 
-void EvaluationDataSourceWidget::updateDataSources()
+void EvaluationDataSourceWidget::updateDataSourcesSlot()
 {
-    loginf << "EvaluationDataSourceWidget: updateDataSources";
+    loginf << "EvaluationDataSourceWidget: updateDataSourcesSlot: title " << title_;
     assert (data_source_layout_);
 
     QLayoutItem* child;
@@ -135,7 +138,7 @@ void EvaluationDataSourceWidget::updateDataSources()
         checkbox->setProperty("id", ds_id);
         connect(checkbox, SIGNAL(clicked()), this, SLOT(toggleDataSourceSlot()));
 
-        loginf << "EvaluationDataSourceWidget: updateDataSources: got sensor " << it.first << " name "
+        loginf << "EvaluationDataSourceWidget: updateDataSourcesSlot: got sensor " << it.first << " name "
                << ds.name() << " active " << checkbox->isChecked();
 
         data_sources_checkboxes_[ds_id] = checkbox;
@@ -176,7 +179,7 @@ void EvaluationDataSourceWidget::dbContentNameChangedSlot()
 
     emit dbContentNameChangedSignal(dbcontent_name_);
 
-    updateDataSources();
+    updateDataSourcesSlot();
 
     updateCheckboxesChecked();
 }

@@ -70,7 +70,6 @@ bool DBDataSource::hasNumInserted(unsigned int line_id) const
 
 const std::map<std::string, std::map<unsigned int, unsigned int>>& DBDataSource::numInsertedMap() const
 {
-    assert (hasNumInserted());
     return num_inserted_;
 }
 

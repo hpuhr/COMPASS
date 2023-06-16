@@ -54,6 +54,8 @@ public slots:
     void clearSectorsSlot ();
     void importSectorsSlot ();
 
+  void updateSectorTableSlot();
+
 private slots:
     void importAirSpaceSectorsSlot ();
 

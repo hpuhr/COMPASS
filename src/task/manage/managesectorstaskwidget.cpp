@@ -62,7 +62,12 @@ ManageSectorsTaskWidget::ManageSectorsTaskWidget(ManageSectorsTask& task, QWidge
     addImportTab();
     addManageTab();
 
-    updateSectorTable();
+    updateSectorTableSlot();
+
+    QObject::connect(&COMPASS::instance(), &COMPASS::databaseOpenedSignal,
+                     this, &ManageSectorsTaskWidget::updateSectorTableSlot);
+    QObject::connect(&COMPASS::instance(), &COMPASS::databaseClosedSignal,
+                     this, &ManageSectorsTaskWidget::updateSectorTableSlot);
 
     setLayout(main_layout_);
 }
@@ -187,7 +192,7 @@ void ManageSectorsTaskWidget::addManageTab()
     tab_widget_->addTab(manage_tab_widget, "Manage");
 }
 
-void ManageSectorsTaskWidget::updateSectorTable()
+void ManageSectorsTaskWidget::updateSectorTableSlot()
 {
     logdbg << "ManageSectorsTaskWidget: updateSectorTable";
 
@@ -458,7 +463,7 @@ void ManageSectorsTaskWidget::importSlot()
         assert (task_.canImportFile());
         task_.importFile(dialog.layerName(), dialog.exclude(), dialog.color());
 
-        updateSectorTable();
+        updateSectorTableSlot();
     }
     else
         loginf << "ManageSectorsTaskWidget: importSlot: cancelled";
@@ -549,7 +554,7 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
     else
         assert(false);  // impossible
 
-    updateSectorTable();
+    updateSectorTableSlot();
 }
 
 void ManageSectorsTaskWidget::changeSectorColorSlot()
@@ -580,7 +585,7 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
     {
         loginf << "ManageSectorsTaskWidget: changeSectorColorSlot: color " << color.name().toStdString();
         sector->colorStr(color.name().toStdString());
-        updateSectorTable();
+        updateSectorTableSlot();
     }
 }
 
@@ -604,7 +609,7 @@ void ManageSectorsTaskWidget::deleteSectorSlot()
 
     eval_man.deleteSector(sector);
 
-    updateSectorTable();
+    updateSectorTableSlot();
 }
 
 void ManageSectorsTaskWidget::exportSectorsSlot ()
@@ -640,7 +645,7 @@ void ManageSectorsTaskWidget::clearSectorsSlot ()
 
     COMPASS::instance().evaluationManager().deleteAllSectors();
 
-    updateSectorTable();
+    updateSectorTableSlot();
 }
 
 void ManageSectorsTaskWidget::importSectorsSlot ()
@@ -666,7 +671,7 @@ void ManageSectorsTaskWidget::importSectorsJSON (const std::string& filename)
 
     COMPASS::instance().evaluationManager().importSectors(filename);
 
-    updateSectorTable();
+    updateSectorTableSlot();
 }
 
 void ManageSectorsTaskWidget::importAirSpaceSectorsSlot()

@@ -126,6 +126,10 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     QObject::connect(this, &COMPASS::databaseClosedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
 
+    // data sources changed
+    QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
+            eval_manager_.get(), &EvaluationManager::dataSourcesChangedSlot); // update if data sources changed
+
     // data exchange
     QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingStartedSignal,
                      view_manager_.get(), &ViewManager::loadingStartedSlot);

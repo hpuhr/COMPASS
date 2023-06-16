@@ -652,6 +652,9 @@ void GPSImportCSVTask::insertDoneSlot()
 
     buffer_ = nullptr;
 
+    COMPASS::instance().dataSourceManager().saveDBDataSources();
+    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+
     done_ = true;
 
     //    COMPASS::instance().interface().databaseContentChanged();
