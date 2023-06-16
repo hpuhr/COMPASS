@@ -54,7 +54,7 @@ public slots:
     void clearSectorsSlot ();
     void importSectorsSlot ();
 
-  void updateSectorTableSlot();
+    void updateSectorTableSlot();
 
 private slots:
     void importAirSpaceSectorsSlot ();
@@ -73,8 +73,6 @@ public:
 protected:
     void addImportTab();
     void addManageTab();
-
-    void updateSectorTable();
 
     ManageSectorsTask& task_;
 
