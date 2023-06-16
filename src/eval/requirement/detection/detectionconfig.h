@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTDETECTIONCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/detection/detectionconfigwidget.h"
 #include "eval/requirement/detection/detection.h"
 
@@ -32,7 +32,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class DetectionConfig : public BaseConfig
+class DetectionConfig : public ProbabilityBaseConfig
 {
 public:
     DetectionConfig(const std::string& class_id, const std::string& instance_id,
@@ -65,7 +65,10 @@ public:
     float missTolerance() const;
     void missTolerance(float value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+
+    bool holdForAnyTarget() const;
+    void holdForAnyTarget(bool value);
 
 protected:
     float update_interval_s_{0};
@@ -80,6 +83,8 @@ protected:
 
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};
+
+    bool hold_for_any_target_ {false}; // if requirement must hold for any target (all single targets)
 
     virtual void createWidget() override;
 };

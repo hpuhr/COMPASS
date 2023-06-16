@@ -113,6 +113,7 @@ public:
     void finalizeReadStatement(const DBContent& dbcontent);
 
     void deleteBefore(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);
+    void deleteAll(const DBContent& dbcontent);
 
     size_t count(const std::string& table);
 

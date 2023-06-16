@@ -72,7 +72,7 @@ void CreateAssociationsJob::run()
 
     loginf << "CreateAssociationsJob: run: clearing associations";
 
-    emit statusSignal("Clearing Previous ARTAS Associations");
+    emit statusSignal("Clearing Previous Associations");
     removePreviousAssociations();
 
     // create target reports
@@ -162,10 +162,10 @@ void CreateAssociationsJob::removePreviousAssociations()
 
     for (auto& buf_it : *cache_)
     {
-        assert(cache_->hasMetaVar<json>(buf_it.first, DBContent::meta_var_associations_));
-        NullableVector<json>& assoc_vec = cache_->getMetaVar<json>(buf_it.first, DBContent::meta_var_associations_);
+        assert(cache_->hasMetaVar<unsigned int>(buf_it.first, DBContent::meta_var_utn_));
+        NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(buf_it.first, DBContent::meta_var_utn_);
 
-        assoc_vec.setAllNull();
+        utn_vec.setAllNull();
     }
 }
 
@@ -548,9 +548,8 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
                 // lookup by mode s failed
 
-                if (tr_it.has_ta_ &&
-                        (!tr_it.has_ma_ || mode_a_conspic.count(tr_it.ma_)))
-                    // create new utn if tr has ta and can not be associated using mode a
+                if (tr_it.has_ta_) // create new utn if tr has ta
+                    //  && (!tr_it.has_ma_ || mode_a_conspic.count(tr_it.ma_))  and can not be associated using mode a
                 {
                     boost::mutex::scoped_lock lock(create_todos_mutex);
                     create_todos[tr_it.ta_].push_back(&tr_it);
@@ -571,7 +570,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
                 timestamp = tr_it.timestamp_;
 
-                EvaluationTargetPosition tst_pos;
+                dbContent::TargetPosition tst_pos;
 
                 tst_pos.latitude_ = tr_it.latitude_;
                 tst_pos.longitude_ = tr_it.longitude_;
@@ -585,7 +584,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
                 double x_pos, y_pos;
                 double distance;
 
-                EvaluationTargetPosition ref_pos;
+                dbContent::TargetPosition ref_pos;
                 bool ok;
 
                 unsigned int target_cnt=0;
@@ -795,9 +794,9 @@ void CreateAssociationsJob::saveAssociations()
         NullableVector<unsigned int>& rec_num_vec = cache_->getMetaVar<unsigned int>(
                     dbcontent_name, DBContent::meta_var_rec_num_);
 
-        assert (cache_->hasMetaVar<json>(dbcontent_name, DBContent::meta_var_associations_));
-        NullableVector<json>& assoc_vec = cache_->getMetaVar<json>(
-                    dbcontent_name, DBContent::meta_var_associations_);
+        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+        NullableVector<unsigned int>& assoc_vec = cache_->getMetaVar<unsigned int>(
+                    dbcontent_name, DBContent::meta_var_utn_);
 
         assert (cache_->has(dbcontent_name));
         unsigned int buffer_size = cache_->get(dbcontent_name)->size();
@@ -810,10 +809,10 @@ void CreateAssociationsJob::saveAssociations()
 
             if (associations.count(rec_num))
             {
-                if (assoc_vec.isNull(cnt))
-                    assoc_vec.set(cnt, {get<0>(associations.at(rec_num))});
-                else
-                    assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
+                //if (assoc_vec.isNull(cnt))
+                    assoc_vec.set(cnt, get<0>(associations.at(rec_num)));
+                //else
+                    //assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
 
                 ++num_associated;
             }
@@ -837,10 +836,10 @@ void CreateAssociationsJob::saveAssociations()
         string rec_num_col_name =
                 dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
 
-        string assoc_var_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
-        string assoc_col_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).dbColumnName();
+        string utn_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).name();
+        string utn_col_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).dbColumnName();
 
 
         PropertyList properties = buf_it.second->properties();
@@ -849,8 +848,8 @@ void CreateAssociationsJob::saveAssociations()
         {
             if (prop_it.name() == rec_num_var_name)
                 buf_it.second->rename<unsigned int>(rec_num_var_name, rec_num_col_name);
-            else if (prop_it.name() == assoc_var_name)
-                buf_it.second->rename<json>(assoc_var_name, assoc_col_name);
+            else if (prop_it.name() == utn_var_name)
+                buf_it.second->rename<unsigned int>(utn_var_name, utn_col_name);
             else
                 buf_it.second->deleteProperty(prop_it);
         }
@@ -1502,12 +1501,12 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
                         unsigned int pos_dubious_cnt {0};
 
-                        EvaluationTargetPosition tst_pos;
+                        dbContent::TargetPosition tst_pos;
 
                         double x_pos, y_pos;
                         double distance;
 
-                        EvaluationTargetPosition ref_pos;
+                        dbContent::TargetPosition ref_pos;
                         bool ok;
 
                         for (auto tod_it : mc_same)

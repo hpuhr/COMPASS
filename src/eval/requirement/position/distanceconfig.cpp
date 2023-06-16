@@ -18,7 +18,7 @@
 #include "eval/requirement/position/distanceconfig.h"
 #include "eval/requirement/position/distanceconfigwidget.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
@@ -34,7 +34,7 @@ namespace EvaluationRequirement
 PositionDistanceConfig::PositionDistanceConfig(
         const std::string& class_id, const std::string& instance_id,
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
     registerParameter("threshold_value", &threshold_value_, 50.0);
     registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,

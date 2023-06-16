@@ -147,7 +147,7 @@ void JoinedTrackAngle::addToOverviewTable(std::shared_ptr<EvaluationResultsRepor
     {
         p_passed_var = String::percentToString(p_passed_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(p_passed_.value());
+        result = req->getConditionResultStr(p_passed_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -217,23 +217,14 @@ void JoinedTrackAngle::addDetails(std::shared_ptr<EvaluationResultsReport::RootI
         string result {"Unknown"};
 
         if (p_passed_.has_value())
-            result = req->getResultConditionStr(p_passed_.value());
+            result = req->getConditionResultStr(p_passed_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (p_passed_.has_value() && p_passed_.value() != 1.0) // TODO
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 getErrorsViewable());
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
+        sector_section.addFigure("sector_overview", "Sector Overview",
+                                 [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedTrackAngle::hasViewableData (
@@ -269,14 +260,16 @@ std::unique_ptr<nlohmann::json::object_t> JoinedTrackAngle::getErrorsViewable ()
     double lat_w = 1.1*(lat_max-lat_min)/2.0;
     double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    if (lat_w < eval_man_.resultDetailZoom())
-        lat_w = eval_man_.resultDetailZoom();
+    if (lat_w < eval_man_.settings().result_detail_zoom_)
+        lat_w = eval_man_.settings().result_detail_zoom_;
 
-    if (lon_w < eval_man_.resultDetailZoom())
-        lon_w = eval_man_.resultDetailZoom();
+    if (lon_w < eval_man_.settings().result_detail_zoom_)
+        lon_w = eval_man_.settings().result_detail_zoom_;
 
     (*viewable_ptr)["trackangle_window_latitude"] = lat_w;
     (*viewable_ptr)["trackangle_window_longitude"] = lon_w;
+
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }

@@ -36,133 +36,144 @@ class QTableView;
 
 namespace EvaluationRequirementResult
 {
-    class Base;
+class Base;
 }
 
 namespace EvaluationResultsReport
 {
-    using namespace std;
+using namespace std;
 
-    //typedef void (*CallBackFunction)(void);
+//typedef void (*CallBackFunction)(void);
 
-    class TableQSortFilterProxyModel : public QSortFilterProxyModel
+class TableQSortFilterProxyModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+
+public:
+
+    TableQSortFilterProxyModel(QObject* parent=nullptr)
+        : QSortFilterProxyModel(parent)
     {
-        Q_OBJECT
 
-    public:
+    }
 
-        TableQSortFilterProxyModel(QObject* parent=nullptr)
-            : QSortFilterProxyModel(parent)
-        {
-
-        }
-
-        bool showUnused() const
-        {
-            return show_unused_;
-        }
-
-        void showUnused(bool value)
-        {
-            //emit layoutAboutToBeChanged();
-
-            show_unused_ = value;
-
-            //emit layoutChanged();
-        }
-
-    protected:
-        bool show_unused_ {true};
-
-        bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
-        {
-            //return sourceModel()->row(source_row)[0].checkState() == Qt::Checked;
-
-            QModelIndex index = sourceModel()->index(source_row, 0, source_parent);
-
-            if (show_unused_)
-                return true;
-            else
-                return (sourceModel()->data(index, Qt::BackgroundRole) != QBrush(Qt::lightGray));
-        }
-    };
-
-
-    class SectionContentTable : public QAbstractItemModel, public SectionContent
+    bool showUnused() const
     {
-        Q_OBJECT
+        return show_unused_;
+    }
 
-    public slots:
-        void currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous);
-        void doubleClickedSlot(const QModelIndex& index);
-        void customContextMenuSlot(const QPoint& p);
-        void addUTNSlot ();
-        void removeUTNSlot ();
-        void showFullUTNSlot ();
-        void showSurroundingDataSlot ();
+    void showUnused(bool value)
+    {
+        //emit layoutAboutToBeChanged();
 
-        void showMenuSlot();
-        void toggleShowUnusedSlot();
-        void copyContentSlot();
-        void executeCallBackSlot();
+        show_unused_ = value;
 
-    public:
-        SectionContentTable(const string& name, unsigned int num_columns,
-                            vector<string> headings, Section* parent_section, EvaluationManager& eval_man,
-                            bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
+        //emit layoutChanged();
+    }
 
-        void addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
-                     QVariant annotation = {});
+protected:
+    bool show_unused_ {true};
 
-        virtual void addToLayout (QVBoxLayout* layout) override;
+    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+    {
+        //return sourceModel()->row(source_row)[0].checkState() == Qt::Checked;
 
-        virtual void accept(LatexVisitor& v) const override;
+        QModelIndex index = sourceModel()->index(source_row, 0, source_parent);
 
-        QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-        QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
-        int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-        int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-        QModelIndex parent(const QModelIndex& index) const override;
+        if (show_unused_)
+            return true;
+        else
+            return (sourceModel()->data(index, Qt::BackgroundRole) != QBrush(Qt::lightGray));
+    }
+};
 
-        Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-        vector<string> headings() const;
-        unsigned int filteredRowCount () const;
-        std::vector<std::string> sortedRowStrings(unsigned int row, bool latex=true) const;
+class SectionContentTable : public QAbstractItemModel, public SectionContent
+{
+    Q_OBJECT
 
-        bool hasReference (unsigned int row) const;
-        std::string reference (unsigned int row) const;
+public slots:
+    void currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous);
+    void doubleClickedSlot(const QModelIndex& index);
+    void customContextMenuSlot(const QPoint& p);
+    void addUTNSlot ();
+    void removeUTNSlot ();
+    void showFullUTNSlot ();
+    void showSurroundingDataSlot ();
 
-        bool showUnused() const;
-        void showUnused(bool value);
+    void showMenuSlot();
+    void toggleShowUnusedSlot();
+    void copyContentSlot();
+    void executeCallBackSlot();
 
-        void registerCallBack (const std::string& name, std::function<void()> func);
-        void executeCallBack (const std::string& name);
+public:
+    SectionContentTable(const string& name, unsigned int num_columns,
+                        vector<string> headings, Section* parent_section, EvaluationManager& eval_man,
+                        bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
 
-    protected:
-        unsigned int num_columns_ {0};
-        vector<string> headings_;
+    void addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
+                 QVariant annotation = {});
 
-        bool sortable_ {true};
-        unsigned int sort_column_ {0};
-        Qt::SortOrder order_ {Qt::AscendingOrder};
+    virtual void addToLayout (QVBoxLayout* layout) override;
 
-        bool show_unused_ {false};
+    virtual void accept(LatexVisitor& v) override;
 
-        vector<vector<QVariant>> rows_;
-        vector<EvaluationRequirementResult::Base*> result_ptrs_;
-        vector<QVariant> annotations_;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex& index) const override;
 
-//        mutable QPushButton* toogle_show_unused_button_ {nullptr};
-//        mutable QPushButton* copy_button_ {nullptr};
-         mutable QPushButton* options_button_ {nullptr};
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-        mutable TableQSortFilterProxyModel* proxy_model_ {nullptr};
-        mutable QTableView* table_view_ {nullptr}; // for reset
+    vector<string> headings() const;
+    unsigned int filteredRowCount () const;
+    std::vector<std::string> sortedRowStrings(unsigned int row, bool latex=true) const;
 
-        std::map<std::string, std::function<void()>> callback_map_;
-    };
+    bool hasReference (unsigned int row) const;
+    std::string reference (unsigned int row) const;
+
+    bool showUnused() const;
+    void showUnused(bool value);
+
+    void registerCallBack (const std::string& name, std::function<void()> func);
+    void executeCallBack (const std::string& name);
+
+    void setCreateOnDemand(std::function<void(void)> create_on_demand_fnc);
+
+protected:
+    bool create_on_demand_ {false};
+    std::function<void(void)> create_on_demand_fnc_;
+    bool already_created_by_demand_ {false};
+
+    unsigned int num_columns_ {0};
+    vector<string> headings_;
+
+    bool sortable_ {true};
+    unsigned int sort_column_ {0};
+    Qt::SortOrder order_ {Qt::AscendingOrder};
+
+    bool show_unused_ {false};
+
+    vector<vector<QVariant>> rows_;
+    vector<EvaluationRequirementResult::Base*> result_ptrs_;
+    vector<QVariant> annotations_;
+
+    //        mutable QPushButton* toogle_show_unused_button_ {nullptr};
+    //        mutable QPushButton* copy_button_ {nullptr};
+    mutable QPushButton* options_button_ {nullptr};
+
+    mutable TableQSortFilterProxyModel* proxy_model_ {nullptr};
+    mutable QTableView* table_view_ {nullptr}; // for reset
+
+    std::map<std::string, std::function<void()>> callback_map_;
+
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+
+    void createOnDemandIfNeeded();
+};
 
 }
 #endif // EVALUATIONRESULTSREPORTSECTIONCONTENTTABLE_H

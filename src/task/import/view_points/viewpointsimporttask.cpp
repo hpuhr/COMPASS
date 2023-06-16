@@ -35,8 +35,6 @@
 #include "asterixoverridewidget.h"
 #include "util/timeconv.h"
 
-//#include "managedatasourcestask.h"
-
 #include <fstream>
 
 #include <QCoreApplication>
@@ -54,7 +52,7 @@ using namespace Utils;
 
 ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const std::string& instance_id,
                                            TaskManager& task_manager)
-    : Task("ViewPointsImportTask", "Import View Points", true, false, task_manager),
+    : Task("ViewPointsImportTask", "Import View Points", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_view_points.json")
 {
     tooltip_ =
@@ -163,101 +161,9 @@ void ViewPointsImportTask::checkParsedData ()
 {
     loginf << "ViewPointsImportTask: checkParsedData";
 
-    if (!current_data_.is_object())
-        throw std::runtime_error("current data is not an object");
-
-    if (!current_data_.contains("content_type")
-            || !current_data_.at("content_type").is_string()
-            || current_data_.at("content_type") != "view_points")
-        throw std::runtime_error("current data is not view point content");
-
-    if (!current_data_.contains("content_version")
-            || !current_data_.at("content_version").is_string()
-            || current_data_.at("content_version") != "0.2")
-        throw std::runtime_error("current data content version is not supported");
-
-    if (current_data_.contains("view_point_context"))
-    {
-        json& context = current_data_.at("view_point_context");
-
-        if (context.contains("datasets"))
-        {
-            if (!context.at("datasets").is_array())
-                throw std::runtime_error("datasets is not an array");
-
-            for (json& ds_it : context.at("datasets").get<json::array_t>())
-            {
-                if (!ds_it.contains("filename") || !ds_it.at("filename").is_string())
-                    throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid filename");
-
-                std::string filename = ds_it.at("filename");
-
-                bool found = true;
-
-                if (!Files::fileExists(filename))
-                {
-                    found = false;
-
-                    std::string file = Files::getFilenameFromPath(filename);
-                    std::string dir = Files::getDirectoryFromPath(current_filename_);
-
-                    loginf << "ViewPointsImportTask: checkParsedData: filename '" << filename
-                           << "' not found, checking for file '" << file << "' in dir '" << dir << "'";
-
-                    filename = dir+"/"+file;
-
-                    if (Files::fileExists(filename))
-                    {
-                        found = true;
-
-                        loginf << "ViewPointsImportTask: checkParsedData: filename '" << filename
-                               << "' found at different path";
-                    }
-                }
-
-                if (!found)
-                    throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a usable filename");
-            }
-        }
-    }
-
-    if (!current_data_.contains("view_points"))
-        throw std::runtime_error("current data does not contain view points");
-
-    json& view_points = current_data_.at("view_points");
-
-    if (!view_points.is_array())
-        throw std::runtime_error("view_points is not an array");
-
-    if (!view_points.size())
-        throw std::runtime_error("view_points is an empty array");
-
-    for (auto& vp_it : view_points.get<json::array_t>())
-    {
-        if (!vp_it.contains(VP_ID_KEY) || !vp_it.at(VP_ID_KEY).is_number())
-            throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid id");
-
-        if (!vp_it.contains(VP_TYPE_KEY) || !vp_it.at(VP_TYPE_KEY).is_string())
-            throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid type");
-    }
-
-    loginf << "ViewPointsImportTask: checkParsedData: current data seems to be valid, contains " << view_points.size()
-           << " view points";
-}
-
-bool ViewPointsImportTask::checkPrerequisites()
-{
-    return canImport();
-}
-
-bool ViewPointsImportTask::isRecommended()
-{
-    return false;
-}
-
-bool ViewPointsImportTask::isRequired()
-{
-    return false;
+    std::string err;
+    if (!ViewPoint::isValidJSON(current_data_, current_filename_, &err, true))
+        throw std::runtime_error(err);
 }
 
 bool ViewPointsImportTask::canImport ()
@@ -278,15 +184,6 @@ void ViewPointsImportTask::run()
     done_ = false;
     stopped_ = false;
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    // view points
-
-    assert (current_data_.contains("view_points"));
-
-    json& view_points = current_data_.at("view_points");
-    assert (view_points.size());
-
     DBInterface& db_interface = COMPASS::instance().interface();
 
     // check and clear existing ones
@@ -302,7 +199,6 @@ void ViewPointsImportTask::run()
         if (reply == QMessageBox::Yes)
         {
             loginf << "ViewPointsImportTask: import: deleting all view points";
-            db_interface.deleteAllViewPoints();
         }
         else
         {
@@ -313,22 +209,9 @@ void ViewPointsImportTask::run()
         }
     }
 
-    unsigned int id;
-    for (auto& vp_it : view_points.get<json::array_t>())
-    {
-        assert (vp_it.contains(VP_ID_KEY));
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-        id = vp_it.at(VP_ID_KEY);
-
-        if (!vp_it.contains(VP_STATUS_KEY))
-            vp_it[VP_STATUS_KEY] = "open";
-
-        db_interface.setViewPoint(id, vp_it.dump());
-    }
-
-    COMPASS::instance().viewManager().loadViewPoints();
-
-    loginf << "ViewPointsImportTask: import: imported " << to_string(view_points.size()) << " view points";
+    COMPASS::instance().viewManager().loadViewPoints(current_data_);
 
     QApplication::restoreOverrideCursor();
 
@@ -449,4 +332,3 @@ const nlohmann::json& ViewPointsImportTask::currentData() const
 {
     return current_data_;
 }
-

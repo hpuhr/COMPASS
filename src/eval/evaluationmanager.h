@@ -19,23 +19,21 @@
 #define EVALUATIONMANAGER_H
 
 #include "configurable.h"
-#include "sectorlayer.h"
 #include "evaluationdata.h"
 #include "evaluationresultsgenerator.h"
 #include "viewabledataconfig.h"
 #include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgenerator.h"
-#include "eval/results/report/pdfgeneratordialog.h"
 
 #include <QObject>
 
 #include "json.hpp"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
 class COMPASS;
 class EvaluationStandard;
 class DBContent;
+class SectorLayer;
+class AirSpace;
 
 namespace dbContent {
 
@@ -45,6 +43,112 @@ class VariableSet;
 
 class QWidget;
 class QTabWidget;
+
+struct EvaluationManagerSettings
+{
+    unsigned int line_id_ref_;
+    nlohmann::json active_sources_ref_; // config var for data_sources_ref_
+
+    unsigned int line_id_tst_;
+    nlohmann::json active_sources_tst_; // config var for active_sources_tst_
+
+    std::string current_standard_;
+    std::string current_config_name_;
+
+    nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
+    nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
+
+    float max_ref_time_diff_ {0};
+
+    bool load_only_sector_data_ {true};
+
+    // load filter
+    bool use_load_filter_ {false};
+
+    bool use_timestamp_filter_ {false};
+
+    bool use_ref_traj_accuracy_filter_ {false};
+    float ref_traj_minimum_accuracy_ {30};
+
+    bool use_adsb_filter_ {false};
+    bool use_v0_ {false};
+    bool use_v1_ {false};
+    bool use_v2_ {false};
+
+    // nucp
+    bool use_min_nucp_ {false};
+    unsigned int min_nucp_ {0};
+
+    bool use_max_nucp_ {false};
+    unsigned int max_nucp_ {0};
+
+    // nic
+    bool use_min_nic_ {false};
+    unsigned int min_nic_ {0};
+
+    bool use_max_nic_ {false};
+    unsigned int max_nic_ {0};
+
+    // nacp
+    bool use_min_nacp_ {false};
+    unsigned int min_nacp_ {0};
+
+    bool use_max_nacp_ {false};
+    unsigned int max_nacp_ {0};
+
+    // sil v1
+    bool use_min_sil_v1_ {false};
+    unsigned int min_sil_v1_ {0};
+
+    bool use_max_sil_v1_ {false};
+    unsigned int max_sil_v1_ {0};
+
+    // sil v2
+    bool use_min_sil_v2_ {false};
+    unsigned int min_sil_v2_ {0};
+
+    bool use_max_sil_v2_ {false};
+    unsigned int max_sil_v2_ {0};
+
+    double result_detail_zoom_ {0.0}; // in WGS84 deg
+
+    std::string min_height_filter_layer_; //layer used as minimum height filter
+
+    // report stuff
+    bool report_skip_no_data_details_ {true};
+    bool report_split_results_by_mops_ {false};
+    bool report_split_results_by_aconly_ms_ {false};
+    bool report_show_adsb_info_ {false};
+
+    std::string report_author_;
+    std::string report_abstract_;
+
+    bool report_include_target_details_ {false};
+    bool report_skip_targets_wo_issues_ {false};
+    bool report_include_target_tr_details_ {false};
+
+    bool show_ok_joined_target_reports_ {false};
+
+    unsigned int report_num_max_table_rows_ {1000};
+    unsigned int report_num_max_table_col_width_ {18};
+
+    bool report_wait_on_map_loading_ {true};
+
+    bool report_run_pdflatex_ {true};
+    bool report_open_created_pdf_ {false};
+
+    bool warning_shown_ {false};
+
+private:
+    friend class EvaluationManager;
+
+    // private since specific setter functions
+    std::string dbcontent_name_ref_;
+    std::string dbcontent_name_tst_;
+
+    std::string load_timestamp_begin_str_;
+    std::string load_timestamp_end_str_;
+};
 
 class EvaluationManager : public QObject, public Configurable
 {
@@ -94,9 +198,9 @@ public:
     bool sectorsLoaded() const;
     bool anySectorsWithReq();
 
-    bool hasSectorLayer (const std::string& layer_name);
+    bool hasSectorLayer (const std::string& layer_name) const;
     //void renameSectorLayer (const std::string& name, const std::string& new_name);
-    std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
+    std::shared_ptr<SectorLayer> sectorLayer(const std::string& layer_name) const;
 
     void createNewSector (const std::string& name, const std::string& layer_name,
                           bool exclude, QColor color, std::vector<std::pair<double,double>> points);
@@ -113,25 +217,33 @@ public:
     void importSectors (const std::string& filename);
     void exportSectors (const std::string& filename);
     unsigned int getMaxSectorId ();
+    void updateSectorLayers();
+
+    bool importAirSpace(const AirSpace& air_space, 
+                        const boost::optional<std::set<std::string>>& sectors_to_import = {});
+    bool filterMinimumHeight() const;
+    const std::string& minHeightFilterLayerName() const;
+    void minHeightFilterLayerName(const std::string& layer_name);
+    std::shared_ptr<SectorLayer> minHeightFilterLayer() const;
 
     std::string dbContentNameRef() const;
     void dbContentNameRef(const std::string& name);
 
-    unsigned int lineIDRef() const;
-    void lineIDRef(unsigned int line_id_ref);
+//    unsigned int lineIDRef() const;
+//    void lineIDRef(unsigned int line_id_ref);
 
     bool hasValidReferenceDBContent ();
-    std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[dbcontent_name_ref_]; } // can be used to set active bool
+    std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[settings_.dbcontent_name_ref_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesRef();
 
     std::string dbContentNameTst() const;
     void dbContentNameTst(const std::string& name);
 
-    unsigned int lineIDTst() const;
-    void lineIDTst(unsigned int line_id_tst);
+//    unsigned int lineIDTst() const;
+//    void lineIDTst(unsigned int line_id_tst);
 
     bool hasValidTestDBContent ();
-    std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[dbcontent_name_tst_]; } // can be used to set active bool
+    std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[settings_.dbcontent_name_tst_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesTst();
 
     bool dataLoaded() const;
@@ -191,89 +303,89 @@ public:
 
     EvaluationResultsReport::PDFGenerator& pdfGenerator();
 
-    bool loadOnlySectorData() const;
-    void loadOnlySectorData(bool value);
+//    bool loadOnlySectorData() const;
+//    void loadOnlySectorData(bool value);
 
-    bool useV0() const;
-    void useV0(bool value);
+//    bool useV0() const;
+//    void useV0(bool value);
 
-    bool useV1() const;
-    void useV1(bool value);
+//    bool useV1() const;
+//    void useV1(bool value);
 
-    bool useV2() const;
-    void useV2(bool value);
+//    bool useV2() const;
+//    void useV2(bool value);
 
-    // nucp
-    bool useMinNUCP() const;
-    void useMinNUCP(bool value);
+//    // nucp
+//    bool useMinNUCP() const;
+//    void useMinNUCP(bool value);
 
-    unsigned int minNUCP() const;
-    void minNUCP(unsigned int value);
+//    unsigned int minNUCP() const;
+//    void minNUCP(unsigned int value);
 
-    bool useMaxNUCP() const;
-    void useMaxNUCP(bool value);
+//    bool useMaxNUCP() const;
+//    void useMaxNUCP(bool value);
 
-    unsigned int maxNUCP() const;
-    void maxNUCP(unsigned int value);
+//    unsigned int maxNUCP() const;
+//    void maxNUCP(unsigned int value);
 
-    // nic
-    bool useMinNIC() const;
-    void useMinNIC(bool value);
+//    // nic
+//    bool useMinNIC() const;
+//    void useMinNIC(bool value);
 
-    unsigned int minNIC() const;
-    void minNIC(unsigned int value);
+//    unsigned int minNIC() const;
+//    void minNIC(unsigned int value);
 
-    bool useMaxNIC() const;
-    void useMaxNIC(bool value);
+//    bool useMaxNIC() const;
+//    void useMaxNIC(bool value);
 
-    unsigned int maxNIC() const;
-    void maxNIC(unsigned int value);
+//    unsigned int maxNIC() const;
+//    void maxNIC(unsigned int value);
 
-    // nacp
-    bool useMinNACp() const;
-    void useMinNACp(bool value);
+//    // nacp
+//    bool useMinNACp() const;
+//    void useMinNACp(bool value);
 
-    unsigned int minNACp() const;
-    void minNACp(unsigned int value);
+//    unsigned int minNACp() const;
+//    void minNACp(unsigned int value);
 
-    bool useMaxNACp() const;
-    void useMaxNACp(bool value);
+//    bool useMaxNACp() const;
+//    void useMaxNACp(bool value);
 
-    unsigned int maxNACp() const;
-    void maxNACp(unsigned int value);
+//    unsigned int maxNACp() const;
+//    void maxNACp(unsigned int value);
 
-    // sil v1
-    bool useMinSILv1() const;
-    void useMinSILv1(bool value);
+//    // sil v1
+//    bool useMinSILv1() const;
+//    void useMinSILv1(bool value);
 
-    unsigned int minSILv1() const;
-    void minSILv1(unsigned int value);
+//    unsigned int minSILv1() const;
+//    void minSILv1(unsigned int value);
 
-    bool useMaxSILv1() const;
-    void useMaxSILv1(bool value);
+//    bool useMaxSILv1() const;
+//    void useMaxSILv1(bool value);
 
-    unsigned int maxSILv1() const;
-    void maxSILv1(unsigned int value);
+//    unsigned int maxSILv1() const;
+//    void maxSILv1(unsigned int value);
 
-    // sil v2
-    bool useMinSILv2() const;
-    void useMinSILv2(bool value);
+//    // sil v2
+//    bool useMinSILv2() const;
+//    void useMinSILv2(bool value);
 
-    unsigned int minSILv2() const;
-    void minSILv2(unsigned int value);
+//    unsigned int minSILv2() const;
+//    void minSILv2(unsigned int value);
 
-    bool useMaxSILv2() const;
-    void useMaxSILv2(bool value);
+//    bool useMaxSILv2() const;
+//    void useMaxSILv2(bool value);
 
-    unsigned int maxSILv2() const;
-    void maxSILv2(unsigned int value);
+//    unsigned int maxSILv2() const;
+//    void maxSILv2(unsigned int value);
 
-    // other
-    bool useLoadFilter() const;
-    void useLoadFilter(bool value);
+//    // other
+//    bool useLoadFilter() const;
+//    void useLoadFilter(bool value);
 
-    bool useTimestampFilter() const;
-    void useTimestampFilter(bool value);
+//    bool useTimestampFilter() const;
+//    void useTimestampFilter(bool value);
 
     boost::posix_time::ptime loadTimestampBegin() const;
     void loadTimestampBegin(boost::posix_time::ptime value);
@@ -281,57 +393,65 @@ public:
     boost::posix_time::ptime loadTimestampEnd() const;
     void loadTimestampEnd(boost::posix_time::ptime value);
 
-    bool useASDBFilter() const;
-    void useASDBFilter(bool value);
+//    bool useASDBFilter() const;
+//    void useASDBFilter(bool value);
 
-    float maxRefTimeDiff() const;
-    void maxRefTimeDiff(float value);
+//    float maxRefTimeDiff() const;
+//    void maxRefTimeDiff(float value);
 
-    bool warningShown() const;
-    void warningShown(bool warning_shown);
+//    bool warningShown() const;
+//    void warningShown(bool warning_shown);
 
-    double resultDetailZoom() const;
-    void resultDetailZoom(double result_detail_zoom);
+//    double resultDetailZoom() const;
+//    void resultDetailZoom(double result_detail_zoom);
 
-    // report stuff
-    bool reportSplitResultsByMOPS() const;
-    void reportSplitResultsByMOPS(bool value);
+//    // report stuff
+//    bool reportSplitResultsByMOPS() const;
+//    void reportSplitResultsByMOPS(bool value);
 
-    bool reportShowAdsbInfo() const;
-    void reportShowAdsbInfo(bool value);
+//    bool reportSplitResultsByACOnlyMS() const;
+//    void reportSplitResultsByACOnlyMS(bool value);
 
-    bool reportSkipNoDataDetails() const;
-    void reportSkipNoDataDetails(bool value);
+//    bool reportShowAdsbInfo() const;
+//    void reportShowAdsbInfo(bool value);
 
-    std::string reportAuthor() const;
-    void reportAuthor(const std::string& author);
+//    bool reportSkipNoDataDetails() const;
+//    void reportSkipNoDataDetails(bool value);
 
-    std::string reportAbstract() const;
-    void reportAbstract(const std::string& abstract);
+//    bool showJoinedOkTargetReports() const; //
+//    void showJoinedOkTargetReports(bool value);
 
-    bool reportRunPDFLatex() const;
-    void reportRunPDFLatex(bool value);
+//    std::string reportAuthor() const;
+//    void reportAuthor(const std::string& author);
 
-    bool reportOpenCreatedPDF() const;
-    void reportOpenCreatedPDF(bool value);
+//    std::string reportAbstract() const;
+//    void reportAbstract(const std::string& abstract);
 
-    bool reportWaitOnMapLoading() const;
-    void reportWaitOnMapLoading(bool value);
+//    bool reportRunPDFLatex() const;
+//    void reportRunPDFLatex(bool value);
 
-    bool reportIncludeTargetDetails() const;
-    void reportIncludeTargetDetails(bool value);
+//    bool reportOpenCreatedPDF() const;
+//    void reportOpenCreatedPDF(bool value);
 
-    bool reportSkipTargetsWoIssues() const;
-    void reportSkipTargetsWoIssues(bool value);
+//    bool reportWaitOnMapLoading() const;
+//    void reportWaitOnMapLoading(bool value);
 
-    bool reportIncludeTargetTRDetails() const;
-    void reportIncludeTargetTRDetails(bool value);
+//    bool reportIncludeTargetDetails() const;
+//    void reportIncludeTargetDetails(bool value);
 
-    unsigned int reportNumMaxTableRows() const;
-    void reportNumMaxTableRows(unsigned int value);
+//    bool reportSkipTargetsWoIssues() const;
+//    void reportSkipTargetsWoIssues(bool value);
 
-    unsigned int reportNumMaxTableColWidth() const;
-    void reportNumMaxTableColWidth(unsigned int value);
+//    bool reportIncludeTargetTRDetails() const;
+//    void reportIncludeTargetTRDetails(bool value);
+
+//    unsigned int reportNumMaxTableRows() const;
+//    void reportNumMaxTableRows(unsigned int value);
+
+//    unsigned int reportNumMaxTableColWidth() const;
+//    void reportNumMaxTableColWidth(unsigned int value);
+
+    const EvaluationManagerSettings& settings() const { return settings_; }
 
     // updaters
     void updateActiveDataSources(); // save to config var
@@ -339,9 +459,22 @@ public:
     bool hasSelectedReferenceDataSources();
     bool hasSelectedTestDataSources();
 
-
 protected:
     COMPASS& compass_;
+
+    EvaluationManagerSettings settings_;
+
+    std::map<std::string, std::map<std::string, bool>> data_sources_ref_ ; // db_content -> ds_id -> active flag
+    std::map<std::string, std::map<std::string, bool>> data_sources_tst_; // db_content -> ds_id -> active flag
+
+    boost::posix_time::ptime load_timestamp_begin_;
+    boost::posix_time::ptime load_timestamp_end_;
+
+    bool min_max_pos_set_ {false};
+    double latitude_min_ {0};
+    double latitude_max_ {0};
+    double longitude_min_ {0};
+    double longitude_max_ {0};
 
     bool sectors_loaded_ {false};
     bool initialized_ {false};
@@ -354,110 +487,11 @@ protected:
 
     bool evaluated_ {false};
 
-    std::string dbcontent_name_ref_;
-    unsigned int line_id_ref_;
-    std::map<std::string, std::map<std::string, bool>> data_sources_ref_ ; // db_content -> ds_id -> active flag
-    nlohmann::json active_sources_ref_; // config var for data_sources_ref_
-
-    std::string dbcontent_name_tst_;
-    unsigned int line_id_tst_;
-    std::map<std::string, std::map<std::string, bool>> data_sources_tst_; // db_content -> ds_id -> active flag
-    nlohmann::json active_sources_tst_; // config var for active_sources_tst_
-
-    std::string current_standard_;
-    std::string current_config_name_;
-
-    float max_ref_time_diff_ {0};
-
-    bool load_only_sector_data_ {true};
-
-    bool min_max_pos_set_ {false};
-    double latitude_min_ {0};
-    double latitude_max_ {0};
-    double longitude_min_ {0};
-    double longitude_max_ {0};
-
-    // load filter
-    bool use_load_filter_ {false};
-
-    bool use_timestamp_filter_ {false};
-    std::string load_timestamp_begin_str_;
-    boost::posix_time::ptime load_timestamp_begin_;
-    std::string load_timestamp_end_str_;
-    boost::posix_time::ptime load_timestamp_end_;
-
-    bool use_adsb_filter_ {false};
-    bool use_v0_ {false};
-    bool use_v1_ {false};
-    bool use_v2_ {false};
-
-    // nucp
-    bool use_min_nucp_ {false};
-    unsigned int min_nucp_ {0};
-
-    bool use_max_nucp_ {false};
-    unsigned int max_nucp_ {0};
-
-    // nic
-    bool use_min_nic_ {false};
-    unsigned int min_nic_ {0};
-
-    bool use_max_nic_ {false};
-    unsigned int max_nic_ {0};
-
-    // nacp
-    bool use_min_nacp_ {false};
-    unsigned int min_nacp_ {0};
-
-    bool use_max_nacp_ {false};
-    unsigned int max_nacp_ {0};
-
-    // sil v1
-    bool use_min_sil_v1_ {false};
-    unsigned int min_sil_v1_ {0};
-
-    bool use_max_sil_v1_ {false};
-    unsigned int max_sil_v1_ {0};
-
-    // sil v2
-    bool use_min_sil_v2_ {false};
-    unsigned int min_sil_v2_ {0};
-
-    bool use_max_sil_v2_ {false};
-    unsigned int max_sil_v2_ {0};
-
-    double result_detail_zoom_ {0.0}; // in WGS84 deg
-
-    // report stuff
-    bool report_skip_no_data_details_ {true};
-    bool report_split_results_by_mops_ {false};
-    bool report_show_adsb_info_ {false};
-
-    std::string report_author_;
-    std::string report_abstract_;
-
-    bool report_include_target_details_ {false};
-    bool report_skip_targets_wo_issues_ {false};
-    bool report_include_target_tr_details_ {false};
-
-    unsigned int report_num_max_table_rows_ {1000};
-    unsigned int report_num_max_table_col_width_ {18};
-
-    bool report_wait_on_map_loading_ {true};
-
-    bool report_run_pdflatex_ {true};
-    bool report_open_created_pdf_ {false};
-
-    bool warning_shown_ {false};
-
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
     unsigned int max_sector_id_ {0};
     std::vector<std::unique_ptr<EvaluationStandard>> standards_;
-
-    nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
-    nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
 
     EvaluationData data_;
     EvaluationResultsGenerator results_gen_;
@@ -469,12 +503,18 @@ protected:
     std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
         std::tuple<bool, unsigned int, unsigned int>>> adsb_info_;
 
+    bool use_fast_sector_inside_check_ = true;
+
     virtual void checkSubConfigurables() override;
 
     void loadSectors();
 
     void checkReferenceDataSources();
     void checkTestDataSources();
+
+    void updateMaxSectorID();
+
+    void checkMinHeightFilterValid();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();

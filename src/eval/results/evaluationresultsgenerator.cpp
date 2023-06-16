@@ -55,8 +55,9 @@ using namespace EvaluationRequirementResult;
 using namespace EvaluationResultsReport;
 using namespace Utils;
 
-EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationManager& eval_man)
-    : eval_man_(eval_man), results_model_(eval_man_)
+EvaluationResultsGenerator::EvaluationResultsGenerator(
+        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
+    : eval_man_(eval_man), eval_settings_(eval_settings), results_model_(eval_man_)
 {
 }
 
@@ -67,9 +68,11 @@ EvaluationResultsGenerator::~EvaluationResultsGenerator()
 
 void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStandard& standard)
 {
-    loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details " << eval_man_.reportSkipNoDataDetails()
-           << " split_results_by_mops " << eval_man_.reportSplitResultsByMOPS()
-           << " show_adsb_info " << eval_man_.reportShowAdsbInfo();
+    loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details "
+           << eval_settings_.report_skip_no_data_details_
+           << " split_results_by_mops " << eval_settings_.report_split_results_by_mops_
+           << " report_split_results_by_aconly_ms " << eval_settings_.report_split_results_by_aconly_ms_
+           << " show_adsb_info " << eval_settings_.report_show_adsb_info_;
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;
@@ -113,7 +116,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     vector<unsigned int> utns;
 
     for (auto& target_data_it : data)
-        utns.push_back(target_data_it.utn_);
+    {
+        //if (target_data_it.use())
+            utns.push_back(target_data_it.utn_);
+    }
 
     unsigned int num_utns = utns.size();
 
@@ -125,7 +131,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     string remaining_time_str;
 
-    string mops_str;
+    string subresult_str;
 
     for (auto& sec_it : sector_layers)
     {
@@ -151,7 +157,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 std::shared_ptr<EvaluationRequirement::Base> req = req_cfg_it->createRequirement();
                 std::shared_ptr<Joined> result_sum;
-                map<string, std::shared_ptr<Joined>> mops_sums;
+                map<string, std::shared_ptr<Joined>> extra_results_sums;
 
                 vector<shared_ptr<Single>> results;
                 results.resize(num_utns);
@@ -291,20 +297,38 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                     result_sum->join(result_it);
 
-                    if (eval_man_.reportSplitResultsByMOPS())
+                    if (eval_man_.settings().report_split_results_by_mops_)
                     {
-                        mops_str = result_it->target()->mopsVersionStr();
+                        subresult_str = result_it->target()->mopsVersionStr();
 
-                        if (mops_str == "?")
-                            mops_str = "Unknown";
+                        if (subresult_str == "?")
+                            subresult_str = "Unknown";
 
-                        mops_str = "MOPS "+mops_str;
+                        subresult_str = "MOPS "+subresult_str;
 
-                        if (!mops_sums.count(mops_str+" Sum"))
-                            mops_sums[mops_str+" Sum"] =
-                                    result_it->createEmptyJoined(mops_str+" Sum");
+                        if (!extra_results_sums.count(subresult_str+" Sum"))
+                            extra_results_sums[subresult_str+" Sum"] =
+                                    result_it->createEmptyJoined(subresult_str+" Sum");
 
-                        mops_sums.at(mops_str+" Sum")->join(result_it);
+                        extra_results_sums.at(subresult_str+" Sum")->join(result_it);
+                    }
+
+                    if (eval_man_.settings().report_split_results_by_aconly_ms_)
+                    {
+                        subresult_str = "Primary";
+
+                        if (result_it->target()->isModeS())
+                            subresult_str = "Mode S";
+                        else if (result_it->target()->isModeACOnly())
+                            subresult_str = "Mode A/C";
+                        else
+                            assert (result_it->target()->isPrimaryOnly());
+
+                        if (!extra_results_sums.count(subresult_str+" Sum"))
+                            extra_results_sums[subresult_str+" Sum"] =
+                                    result_it->createEmptyJoined(subresult_str+" Sum");
+
+                        extra_results_sums.at(subresult_str+" Sum")->join(result_it);
                     }
                 }
 
@@ -317,18 +341,15 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     results_vec_.push_back(result_sum); // has to be added after all singles
                 }
 
-                if (eval_man_.reportSplitResultsByMOPS())
+                for (auto& mops_res_it : extra_results_sums) // add extra results generated by splits
                 {
-                    for (auto& mops_res_it : mops_sums)
-                    {
-                        loginf << "EvaluationResultsGenerator: evaluate: adding result '"
-                               << mops_res_it.second->reqGrpId()
-                               << "' id '" << mops_res_it.second->resultId() << "'";
+                    loginf << "EvaluationResultsGenerator: evaluate: adding extra result '"
+                           << mops_res_it.second->reqGrpId()
+                           << "' id '" << mops_res_it.second->resultId() << "'";
 
-                        assert (!results_[mops_res_it.second->reqGrpId()].count(mops_res_it.second->resultId()));
-                        results_[mops_res_it.second->reqGrpId()][mops_res_it.second->resultId()] = mops_res_it.second;
-                        results_vec_.push_back(mops_res_it.second); // has to be added after all singles
-                    }
+                    assert (!results_[mops_res_it.second->reqGrpId()].count(mops_res_it.second->resultId()));
+                    results_[mops_res_it.second->reqGrpId()][mops_res_it.second->resultId()] = mops_res_it.second;
+                    results_vec_.push_back(mops_res_it.second); // has to be added after all singles
                 }
 
                 assert (eval_cnt <= num_req_evals);
@@ -498,7 +519,7 @@ void EvaluationResultsGenerator::updateToChanges ()
 EvaluationResultsGeneratorWidget& EvaluationResultsGenerator::widget()
 {
     if (!widget_)
-        widget_.reset(new EvaluationResultsGeneratorWidget(*this, eval_man_));
+        widget_.reset(new EvaluationResultsGeneratorWidget(*this, eval_man_, eval_settings_));
 
     return *widget_.get();
 }

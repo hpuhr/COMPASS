@@ -73,7 +73,7 @@ public:
 
 signals:
     void commandProcessed(CommandId id, std::string msg, std::string data, bool is_error);
-    void shellCommandProcessed(std::string msg, std::string data, bool is_error);
+    void shellCommandProcessed(const QString& msg, const QString& data, bool is_error);
 
 protected:
     volatile bool stop_requested_;

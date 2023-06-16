@@ -138,7 +138,9 @@ void RTCommandManager::run()
             {
                 std::string msg  = cmd_response.errorToString();
                 std::string data = cmd_response.stringifiedReply();
-                emit shellCommandProcessed(msg, data, cmd_response.error.hasError());
+                emit shellCommandProcessed(QString::fromStdString(msg), 
+                                           QString::fromStdString(data), 
+                                           cmd_response.error.hasError());
             }
             else if (source == Source::Server)
             {

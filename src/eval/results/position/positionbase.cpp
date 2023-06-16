@@ -16,6 +16,7 @@
  */
 
 #include "eval/results/position/positionbase.h"
+#include "logger.h"
 
 using namespace std;
 using namespace Utils;
@@ -26,16 +27,6 @@ namespace EvaluationRequirementResult
 /****************************************************************************
  * SinglePositionBase
  ****************************************************************************/
-
-const std::string SinglePositionBase::DetailValue           = "Value";
-const std::string SinglePositionBase::DetailCheckPassed     = "CheckPassed";
-const std::string SinglePositionBase::DetailPosInside       = "PosInside";
-const std::string SinglePositionBase::DetailNumPos          = "NumPos";
-const std::string SinglePositionBase::DetailNumNoRef        = "NumNoRef";
-const std::string SinglePositionBase::DetailNumInside       = "NumInside";
-const std::string SinglePositionBase::DetailNumOutside      = "NumOutside";
-const std::string SinglePositionBase::DetailNumCheckPassed  = "NumCheckPassed";
-const std::string SinglePositionBase::DetailNumCheckFailed  = "NumCheckFailed";
 
 /**
 */
@@ -127,6 +118,74 @@ JoinedPositionBase::JoinedPositionBase(const std::string& result_type,
                                        EvaluationManager& eval_man)
 : Joined(result_type, result_id, requirement, sector_layer, eval_man)
 {
+}
+
+void JoinedPositionBase::addToValues (std::shared_ptr<SinglePositionBase> single_result, bool do_update)
+{
+    assert (single_result);
+
+    if (!single_result->use())
+        return;
+
+    num_pos_         += single_result->numPos();
+    num_no_ref_      += single_result->numNoRef();
+    num_pos_outside_ += single_result->numPosOutside();
+    num_pos_inside_  += single_result->numPosInside();
+    num_passed_      += single_result->numPassed();
+    num_failed_      += single_result->numFailed();
+
+    if (do_update)
+        update();
+}
+
+vector<double> JoinedPositionBase::values() const
+{
+    vector<double> values;
+
+    for (auto& result_it : results_)
+    {
+        SinglePositionBase* single_result = dynamic_cast<SinglePositionBase*>(result_it.get());
+        assert (single_result);
+
+        if (!single_result->use())
+            continue;
+
+        values.insert(values.end(), single_result->values().begin(), single_result->values().end());
+    }
+
+    return values;
+}
+
+void JoinedPositionBase::join_impl(std::shared_ptr<Single> other)
+{
+    std::shared_ptr<SinglePositionBase> other_sub =
+            std::static_pointer_cast<SinglePositionBase>(other);
+    assert (other_sub);
+
+    addToValues(other_sub);
+}
+
+void JoinedPositionBase::updatesToUseChanges_impl()
+{
+    loginf << "JoinedPositionBase: updatesToUseChanges";
+
+    num_pos_         = 0;
+    num_no_ref_      = 0;
+    num_pos_outside_ = 0;
+    num_pos_inside_  = 0;
+    num_failed_      = 0;
+    num_passed_      = 0;
+
+    for (auto result_it : results_)
+    {
+        std::shared_ptr<SinglePositionBase> result =
+                std::static_pointer_cast<SinglePositionBase>(result_it);
+        assert (result);
+
+        addToValues(result, false);
+    }
+
+    update();
 }
 
 }

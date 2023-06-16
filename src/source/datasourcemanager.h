@@ -44,6 +44,7 @@ public:
     void createConfigDataSource(unsigned int ds_id);
     void deleteConfigDataSource(unsigned int ds_id);
     dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
+    const std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>>& configDataSources() const;
 
     bool hasDBDataSource(unsigned int ds_id);
     bool hasDBDataSource(const std::string& ds_name);
@@ -93,8 +94,11 @@ public:
     void deleteAllConfigDataSources();
     void exportDataSources(const std::string& filename);
 
+    nlohmann::json getDataSourcesAsJSON();
+
     void setLoadedCounts(std::map<unsigned int, std::map<std::string,
                          std::map<unsigned int, unsigned int>>> loaded_counts); // ds id->dbcont->line->cnt
+    void clearInsertedCounts(const std::string& dbcontent_name); // after delete all dbcontent
 
     bool loadWidgetShowCounts() const;
     void loadWidgetShowCounts(bool value);

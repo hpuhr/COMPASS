@@ -18,8 +18,8 @@
 #ifndef EVALUATIONREQUIREMENTEXTRADATA_H
 #define EVALUATIONREQUIREMENTEXTRADATA_H
 
-#include "eval/requirement/base/base.h"
-#include "evaluationtargetposition.h"
+#include "eval/requirement/base/probabilitybase.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 
@@ -32,15 +32,15 @@ class ExtraDataDetail
 {
 public:
     ExtraDataDetail(
-            boost::posix_time::ptime timestamp, EvaluationTargetPosition pos_current, bool inside, bool extra, bool ref_exists,
-            const std::string& comment)
+            boost::posix_time::ptime timestamp, dbContent::TargetPosition pos_current,
+            bool inside, bool extra, bool ref_exists, const std::string& comment)
         : timestamp_(timestamp), pos_current_(pos_current), inside_(inside), extra_(extra), ref_exists_(ref_exists),
           comment_(comment)
     {
     }
 
     boost::posix_time::ptime timestamp_;
-    EvaluationTargetPosition pos_current_;
+    dbContent::TargetPosition pos_current_;
     bool inside_ {false};
     bool extra_ {false};
 
@@ -49,7 +49,7 @@ public:
     std::string comment_;
 };
 
-class ExtraData : public Base
+class ExtraData : public ProbabilityBase
 {
 public:
     ExtraData(

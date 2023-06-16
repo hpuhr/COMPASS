@@ -112,12 +112,8 @@ public:
     bool markTrackCoastingAssociationsDubious() const;
     void markTrackCoastingAssociationsDubious(bool value);
 
-    virtual bool checkPrerequisites();
-    virtual bool isRecommended();
-    virtual bool isRequired() { return false; }
-
-    bool canRun();
-    void run();
+    virtual bool canRun() override;
+    virtual void run() override;
 
     static const std::string DONE_PROPERTY_NAME;
 
@@ -134,7 +130,7 @@ protected:
     dbContent::MetaVariable* rec_num_var_{nullptr};
     dbContent::MetaVariable* hash_var_{nullptr}; // contains artas md5 for target reports, tris for tracker
     dbContent::MetaVariable* timestamp_var_{nullptr};
-    dbContent::MetaVariable* associations_var_{nullptr};
+    dbContent::MetaVariable* utn_var_{nullptr};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

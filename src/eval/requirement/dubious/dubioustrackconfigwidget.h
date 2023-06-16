@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTDUBIOUSTRACKCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTDUBIOUSTRACKCONFIGWIDGET_H
 
-#include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
 class ComparisonTypeComboBox;
 
@@ -32,7 +32,7 @@ namespace EvaluationRequirement
 
 class DubiousTrackConfig;
 
-class DubiousTrackConfigWidget : public BaseConfigWidget
+class DubiousTrackConfigWidget : public ProbabilityBaseConfigWidget
 {
     Q_OBJECT
 

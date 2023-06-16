@@ -69,7 +69,7 @@ class ASTERIXDecodeJob : public Job
 
     std::map<unsigned int, size_t> categoryCounts() const;
 
-    std::vector<std::unique_ptr<nlohmann::json>> extractedData() { return std::move(extracted_data_); } // ds_id -> (ip,port)
+    std::vector<std::unique_ptr<nlohmann::json>> extractedData();
 
     float getFileDecodingProgress() const;
     float getRecordsPerSecond() const;
@@ -119,6 +119,8 @@ private:
 
     size_t count_total_ {0};
     std::map<unsigned int, size_t> category_counts_;
+
+    unsigned int signal_count_ {0};
 
     void doFileDecoding();
     void doUDPStreamDecoding();

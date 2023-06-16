@@ -388,18 +388,18 @@ void CreateARTASAssociationsJob::saveAssociations()
         assert (buffers_.count(dbcontent_name));
 
         assert (dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbcontent_name));
-        assert (dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbcontent_name));
+        assert (dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbcontent_name));
 
         string rec_num_var_name =
                 dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).name();
-        string assoc_var_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
+        string utn_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).name();
 
         assert (buffers_.at(dbcontent_name)->has<unsigned int>(rec_num_var_name));
-        assert (buffers_.at(dbcontent_name)->has<json>(assoc_var_name));
+        assert (buffers_.at(dbcontent_name)->has<unsigned int>(utn_var_name));
 
         NullableVector<unsigned int>& rec_num_vec = buffers_.at(dbcontent_name)->get<unsigned int>(rec_num_var_name);
-        NullableVector<json>& assoc_vec = buffers_.at(dbcontent_name)->get<json>(assoc_var_name);
+        NullableVector<unsigned int>& utn_vec = buffers_.at(dbcontent_name)->get<unsigned int>(utn_var_name);
 
         for (unsigned int cnt=0; cnt < buffers_.at(dbcontent_name)->size(); ++cnt)
         {
@@ -409,10 +409,10 @@ void CreateARTASAssociationsJob::saveAssociations()
 
             if (associations.count(rec_num))
             {
-                if (assoc_vec.isNull(cnt))
-                    assoc_vec.set(cnt, {get<0>(associations.at(rec_num))});
-                else
-                    assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
+                //if (utn_vec.isNull(cnt))
+                utn_vec.set(cnt, get<0>(associations.at(rec_num)));
+                //else
+                    //utn_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
 
                 ++num_associated;
             }
@@ -436,10 +436,10 @@ void CreateARTASAssociationsJob::saveAssociations()
         string rec_num_col_name =
                 dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
 
-        string assoc_var_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
-        string assoc_col_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).dbColumnName();
+        string utn_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).name();
+        string utn_col_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).dbColumnName();
 
 
         PropertyList properties = buf_it.second->properties();
@@ -448,8 +448,8 @@ void CreateARTASAssociationsJob::saveAssociations()
         {
             if (prop_it.name() == rec_num_var_name)
                 buf_it.second->rename<unsigned int>(rec_num_var_name, rec_num_col_name);
-            else if (prop_it.name() == assoc_var_name)
-                buf_it.second->rename<json>(assoc_var_name, assoc_col_name);
+            else if (prop_it.name() == utn_var_name)
+                buf_it.second->rename<unsigned int>(utn_var_name, utn_col_name);
             else
                 buf_it.second->deleteProperty(prop_it);
         }
@@ -697,13 +697,13 @@ void CreateARTASAssociationsJob::removePreviousAssociations()
 
     for (auto& buf_it : buffers_)
     {
-        assert (object_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(buf_it.first));
+        assert (object_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(buf_it.first));
 
-        string assoc_var_name =
-                object_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(buf_it.first).name();
+        string utn_var_name =
+                object_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(buf_it.first).name();
 
-        assert (buf_it.second->has<json>(assoc_var_name));
-        NullableVector<json>& assoc_vec = buf_it.second->get<json>(assoc_var_name);
+        assert (buf_it.second->has<unsigned int>(utn_var_name));
+        NullableVector<unsigned int>& assoc_vec = buf_it.second->get<unsigned int>(utn_var_name);
 
         assoc_vec.setAllNull();
     }

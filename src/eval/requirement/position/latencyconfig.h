@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTPOSITIONLATENCYCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/position/latencyconfigwidget.h"
 #include "eval/requirement/position/latency.h"
 
@@ -29,7 +29,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class PositionLatencyConfig : public BaseConfig
+class PositionLatencyConfig : public ProbabilityBaseConfig
 {
 public:
     PositionLatencyConfig(const std::string& class_id, const std::string& instance_id,

@@ -83,6 +83,7 @@ public slots:
     void calculateRadarPlotPositionsSlot();
     void calculateAssociationsARTASSlot();
     void calculateAssociationsSlot();
+    void calculateReferencesSlot();
 
     void quitRequestedSlot();
     void showAddViewMenuSlot();
@@ -139,6 +140,7 @@ protected:
 
     // process menu
     QMenu* process_menu_ {nullptr};
+    QAction* calculate_references_action_ {nullptr};
 
     // ui menu
     QMenu* ui_menu_ {nullptr};

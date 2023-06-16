@@ -62,6 +62,8 @@ public:
 
     EvaluationRequirement::PositionDistance* req ();
 
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+
 protected:
     void update();
 
@@ -72,6 +74,7 @@ protected:
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
     std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
+
 };
 
 }

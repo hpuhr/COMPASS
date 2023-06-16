@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTDETECTIONCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTDETECTIONCONFIGWIDGET_H
 
-#include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
 class DetectionConfig;
 
-class DetectionConfigWidget : public BaseConfigWidget
+class DetectionConfigWidget : public ProbabilityBaseConfigWidget
 {
     Q_OBJECT
 
@@ -47,6 +47,8 @@ public slots:
     void toggleUseMissToleranceSlot();
     void missToleranceEditSlot(QString value);
 
+    void toggleHoldForAnyTargetSlot();
+
 public:
     DetectionConfigWidget(DetectionConfig& cfg);
 
@@ -63,6 +65,8 @@ protected:
 
     QCheckBox* use_miss_tolerance_check_{nullptr};
     QLineEdit* miss_tolerance_edit_{nullptr};
+
+    QCheckBox* hold_for_any_target_check_{nullptr};
 
     DetectionConfig& config();
 

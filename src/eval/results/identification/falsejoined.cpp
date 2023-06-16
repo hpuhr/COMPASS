@@ -119,7 +119,7 @@ void JoinedIdentificationFalse::addToOverviewTable(std::shared_ptr<EvaluationRes
 
         if (p_false_.has_value())
         {
-            result = req-> getResultConditionStr(p_false_.value());
+            result = req->getConditionResultStr(p_false_.value());
             pf_var = String::percentToString(p_false_.value() * 100.0, req->getNumProbDecimals()).c_str();
         }
 
@@ -174,23 +174,14 @@ void JoinedIdentificationFalse::addDetails(std::shared_ptr<EvaluationResultsRepo
         string result {"Unknown"};
 
         if (p_false_.has_value())
-            result = req-> getResultConditionStr(p_false_.value());
+            result = req->getConditionResultStr(p_false_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (p_false_.has_value() && p_false_.value() != 0.0)
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 getErrorsViewable());
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
+    sector_section.addFigure("sector_overview", "Sector Overview",
+                             [this](void) { return this->getErrorsViewable(); });
 }
 
 
@@ -229,14 +220,16 @@ std::unique_ptr<nlohmann::json::object_t> JoinedIdentificationFalse::getErrorsVi
     double lat_w = 1.1*(lat_max-lat_min)/2.0;
     double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    if (lat_w < eval_man_.resultDetailZoom())
-        lat_w = eval_man_.resultDetailZoom();
+    if (lat_w < eval_man_.settings().result_detail_zoom_)
+        lat_w = eval_man_.settings().result_detail_zoom_;
 
-    if (lon_w < eval_man_.resultDetailZoom())
-        lon_w = eval_man_.resultDetailZoom();
+    if (lon_w < eval_man_.settings().result_detail_zoom_)
+        lon_w = eval_man_.settings().result_detail_zoom_;
 
     (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }

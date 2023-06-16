@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 #include "timeconv.h"
 
 #include <string>
@@ -68,10 +68,9 @@ private:
 class EvaluationDetail
 {
 public:
-    typedef std::string                   Key;
+    typedef unsigned char                 Key;
     typedef boost::posix_time::ptime      Timestamp;
-    typedef EvaluationTargetPosition      Position;
-    typedef std::tuple<EvaluationTargetPosition, EvaluationTargetPosition, QColor> Line;
+    typedef dbContent::TargetPosition      Position;
     typedef std::vector<EvaluationDetail> Details;
 
     EvaluationDetail() = default;
@@ -94,12 +93,14 @@ public:
     template<typename T>
     boost::optional<T> getValueAs(const Key& key) const
     {
-        auto it = values_.find(key);
-        if (it == values_.end())
+        if (key >= values_.size()) // never set
             return {};
-        if (!it->second.canConvert<T>())
+
+        assert (key < values_.size());
+        if (!values_.at(key).canConvert<T>())
             return {};
-        return it->second.value<T>();
+
+        return values_.at(key).value<T>();
     }
 
     template<typename T>
@@ -115,13 +116,6 @@ public:
     size_t numPositions() const;
     const std::vector<Position>& positions() const;
     const Position& position(size_t idx) const;
-
-    EvaluationDetail& addLine(const Line& l);
-    EvaluationDetail& addLine(const boost::optional<Line>& l);
-    EvaluationDetail& addLines(const std::vector<Line>& lines);
-    int numLines() const;
-    const std::vector<Line>& lines() const;
-    const Line& line(int idx) const;
 
     EvaluationDetailComments& comments() { return comments_; }
     const EvaluationDetailComments& comments() const { return comments_; }
@@ -139,8 +133,7 @@ private:
 
     Timestamp                        timestamp_;
     std::vector<Position>            positions_;
-    std::vector<Line>               lines_;
-    std::map<Key, QVariant>          values_;
+    std::vector<QVariant>            values_;
     EvaluationDetailComments         comments_;
     mutable boost::optional<Details> details_;
 };

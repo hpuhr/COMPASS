@@ -7,6 +7,7 @@
 #include "number.h"
 #include "files.h"
 #include "json.hpp"
+#include "datasource_commands.h"
 
 #include <QMessageBox>
 
@@ -32,6 +33,9 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
     createSubConfigurables();
 
     updateDSIdsAll();
+
+
+    dbContent::init_data_source_commands();
 }
 
 DataSourceManager::~DataSourceManager()
@@ -231,6 +235,19 @@ void DataSourceManager::exportDataSources(const std::string& filename)
 {
     loginf << "DataSourceManager: exportDataSources: file '" << filename << "'";
 
+    json data = getDataSourcesAsJSON();
+
+    std::ofstream file(filename);
+    file << data.dump(4);
+
+    QMessageBox m_info(QMessageBox::Information, "Export Data Sources",
+                       "File export: '"+QString(filename.c_str())+"' done.\n"
+                       +QString::number(config_data_sources_.size())+" Data Sources saved.", QMessageBox::Ok);
+    m_info.exec();
+}
+
+nlohmann::json DataSourceManager::getDataSourcesAsJSON()
+{
     json data;
 
     data["content_type"] = "data_sources";
@@ -246,13 +263,7 @@ void DataSourceManager::exportDataSources(const std::string& filename)
         ++cnt;
     }
 
-    std::ofstream file(filename);
-    file << data.dump(4);
-
-    QMessageBox m_info(QMessageBox::Information, "Export Data Sources",
-                       "File export: '"+QString(filename.c_str())+"' done.\n"
-                       +QString::number(config_data_sources_.size())+" Data Sources saved.", QMessageBox::Ok);
-    m_info.exec();
+    return data;
 }
 
 // ds id->dbcont->line->cnt
@@ -279,6 +290,15 @@ void DataSourceManager::setLoadedCounts(std::map<unsigned int, std::map<std::str
     }
 
     if (load_widget_ && load_widget_show_counts_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::clearInsertedCounts(const std::string& dbcontent_name)
+{
+    for (auto& db_src_it : db_data_sources_)
+        db_src_it->clearNumInserted(dbcontent_name);
+
+    if (load_widget_)
         load_widget_->updateContent();
 }
 
@@ -611,6 +631,11 @@ dbContent::ConfigurationDataSource& DataSourceManager::configDataSource (unsigne
     return *find_if(config_data_sources_.begin(), config_data_sources_.end(),
                     [ds_id] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
     { return s->id() == ds_id; } )->get();
+}
+
+const std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>>& DataSourceManager::configDataSources() const
+{
+    return config_data_sources_;
 }
 
 void DataSourceManager::checkSubConfigurables()

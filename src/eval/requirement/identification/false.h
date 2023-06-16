@@ -18,12 +18,12 @@
 #ifndef EVALUATIONREQUIREMENTIDENTIFICATIONFALSE_H
 #define EVALUATIONREQUIREMENTIDENTIFICATIONFALSE_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
-class IdentificationFalse : public Base
+class IdentificationFalse : public ProbabilityBase
 {
 public:
     IdentificationFalse(const std::string& name, const std::string& short_name, const std::string& group_name,

@@ -70,6 +70,8 @@ private:
     bool calculate_radar_plot_positions_ {false};
     bool associate_data_ {false};
 
+    bool calculate_references_ {false};
+
     bool load_data_ {false};
 
     std::string export_view_points_report_filename_;

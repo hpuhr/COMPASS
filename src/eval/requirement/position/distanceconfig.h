@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/position/distanceconfigwidget.h"
 #include "eval/requirement/position/distance.h"
 
@@ -29,7 +29,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class PositionDistanceConfig : public BaseConfig
+class PositionDistanceConfig : public ProbabilityBaseConfig
 {
 public:
     PositionDistanceConfig(const std::string& class_id, const std::string& instance_id,

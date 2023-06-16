@@ -35,44 +35,35 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
 
-const std::string SingleSpeed::DetailOffset         = "Offset";
-const std::string SingleSpeed::DetailCheckPassed    = "CheckPassed";
-const std::string SingleSpeed::DetailPosInside      = "PosInside";
-const std::string SingleSpeed::DetailNumPos         = "NumPos";
-const std::string SingleSpeed::DetailNumNoRef       = "NumNoRef";
-const std::string SingleSpeed::DetailNumInside      = "NumInside";
-const std::string SingleSpeed::DetailNumOutside     = "NumOutside";
-const std::string SingleSpeed::DetailNumCheckFailed = "NumCheckFailed";
-const std::string SingleSpeed::DetailNumCheckPassed = "NumCheckPassed";
-
 SingleSpeed::SingleSpeed(const std::string& result_id, 
                          std::shared_ptr<EvaluationRequirement::Base> requirement,
                          const SectorLayer& sector_layer,
-                         unsigned int utn, 
-                         const EvaluationTargetData* target, 
+                         unsigned int utn,
+                         const EvaluationTargetData* target,
                          EvaluationManager& eval_man,
                          const EvaluationDetails& details,
-                         unsigned int num_pos, 
+                         unsigned int num_pos,
                          unsigned int num_no_ref,
-                         unsigned int num_pos_outside, 
-                         unsigned int num_pos_inside, 
+                         unsigned int num_pos_outside,
+                         unsigned int num_pos_inside,
                          unsigned int num_no_tst_value,
-                         unsigned int num_comp_failed, 
+                         unsigned int num_comp_failed,
                          unsigned int num_comp_passed,
                          vector<double> values)
-:   Single("SingleSpeed", result_id, requirement, sector_layer, utn, target, eval_man, details)
-,   num_pos_         (num_pos)
-,   num_no_ref_      (num_no_ref)
-,   num_pos_outside_ (num_pos_outside)
-,   num_pos_inside_  (num_pos_inside)
-,   num_no_tst_value_(num_no_tst_value)
-,   num_comp_failed_ (num_comp_failed)
-,   num_comp_passed_ (num_comp_passed)
-,   values_          (values)
+    :   Single("SingleSpeed", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   num_pos_         (num_pos)
+    ,   num_no_ref_      (num_no_ref)
+    ,   num_pos_outside_ (num_pos_outside)
+    ,   num_pos_inside_  (num_pos_inside)
+    ,   num_no_tst_value_(num_no_tst_value)
+    ,   num_comp_failed_ (num_comp_failed)
+    ,   num_comp_passed_ (num_comp_passed)
+    ,   values_          (values)
 {
     update();
 }
@@ -132,16 +123,17 @@ void SingleSpeed::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::R
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-    if (eval_man_.reportShowAdsbInfo())
+    if (eval_man_.settings().report_show_adsb_info_)
         addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-        if (eval_man_.reportShowAdsbInfo())
+        if (eval_man_.settings().report_show_adsb_info_)
             addTargetDetailsToTableADSB(sum_section, target_table_name_);
         else
             addTargetDetailsToTable(sum_section, target_table_name_);
@@ -174,7 +166,7 @@ void SingleSpeed::addTargetDetailsToTable (
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
                  Number::round(value_min_,2), // "DMin"
                  Number::round(value_max_,2), // "DMax"
@@ -197,10 +189,10 @@ void SingleSpeed::addTargetDetailsToTableADSB (
                 || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
             order = Qt::DescendingOrder;
 
-        section.addTable(table_name, 18,
+        section.addTable(table_name, 16,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                           "OMin", "OMax", "OAvg", "OSDev", "#CF", "#CP", "PCP",
-                          "MOPS", "NUCp/NIC", "NACp"}, true, 14, order);
+                          "MOPS"}, true, 14, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -215,7 +207,7 @@ void SingleSpeed::addTargetDetailsToTableADSB (
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(),
                  Number::round(value_min_,2), // "DMin"
@@ -225,9 +217,7 @@ void SingleSpeed::addTargetDetailsToTableADSB (
                  num_comp_failed_, // "#DOK"
                  num_comp_passed_, // "#DNOK"
                  prob_var, // "PDOK"
-                 target_->mopsVersionStr().c_str(), // "MOPS"
-                 target_->nucpNicStr().c_str(), // "NUCp/NIC"
-                 target_->nacpStr().c_str()}, // "NACp"
+                 target_->mopsVersionStr().c_str()}, // "MOPS"
                 this, {utn_});
 }
 
@@ -286,7 +276,7 @@ void SingleSpeed::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::R
         string result {"Unknown"};
 
         if (p_passed_.has_value())
-            result = req->getResultConditionStr(p_passed_.value());
+            result = req->getConditionResultStr(p_passed_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -300,7 +290,7 @@ void SingleSpeed::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::R
     if (p_passed_.has_value() && p_passed_.value() != 1.0) // TODO
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -322,25 +312,29 @@ void SingleSpeed::reportDetails(EvaluationResultsReport::Section& utn_req_sectio
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        bool has_ref_pos = rq_det_it.numPositions() >= 2;
 
-        utn_req_details_table.addRow(
-                    { Time::toString(rq_det_it.timestamp()).c_str(),
-                     !has_ref_pos, 
-                      rq_det_it.getValue(DetailPosInside),
-                      rq_det_it.getValue(DetailOffset),                // "Distance"
-                      rq_det_it.getValue(DetailCheckPassed),           // CP"
-                      rq_det_it.getValue(DetailNumCheckFailed),        // "#CF",
-                      rq_det_it.getValue(DetailNumCheckPassed),        // "#CP"
-                      rq_det_it.comments().generalComment().c_str() }, // "Comment"
-                    this, detail_cnt);
+        unsigned int detail_cnt = 0;
 
-        ++detail_cnt;
-    }
+        for (auto& rq_det_it : getDetails())
+        {
+            bool has_ref_pos = rq_det_it.numPositions() >= 2;
+
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          !has_ref_pos,
+                          rq_det_it.getValue(DetailKey::PosInside),
+                          rq_det_it.getValue(DetailKey::Offset),                // "Distance"
+                          rq_det_it.getValue(DetailKey::CheckPassed),           // CP"
+                          rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#CF",
+                          rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#CP"
+                          rq_det_it.comments().generalComment().c_str() }, // "Comment"
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SingleSpeed::hasViewableData (
@@ -373,21 +367,21 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const auto& detail = getDetail(detail_cnt);
+        //        const auto& detail = getDetail(detail_cnt);
 
-        assert(detail.numPositions() >= 1);
+        //        assert(detail.numPositions() >= 1);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+        //        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        //        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        //        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
-        assert(check_passed.has_value());
+        //        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
+        //        assert(check_passed.has_value());
 
-        if (!check_passed.value())
-            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
+        //        if (!check_passed.value())
+        //            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
@@ -407,11 +401,11 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::getTargetErrorsViewable (
 
     for (auto& detail_it : getDetails())
     {
-        auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
+        auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
         assert(check_passed.has_value());
 
-        if ((failed_values_of_interest && check_passed.value()) || 
-            (!failed_values_of_interest && !check_passed.value()))
+        if ((failed_values_of_interest && check_passed.value()) ||
+                (!failed_values_of_interest && !check_passed.value()))
             continue;
 
         assert (detail_it.numPositions() >= 1);
@@ -455,15 +449,17 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::getTargetErrorsViewable (
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
         double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-        if (lat_w < eval_man_.resultDetailZoom())
-            lat_w = eval_man_.resultDetailZoom();
+        if (lat_w < eval_man_.settings().result_detail_zoom_)
+            lat_w = eval_man_.settings().result_detail_zoom_;
 
-        if (lon_w < eval_man_.resultDetailZoom())
-            lon_w = eval_man_.resultDetailZoom();
+        if (lon_w < eval_man_.settings().result_detail_zoom_)
+            lon_w = eval_man_.settings().result_detail_zoom_;
 
         (*viewable_ptr)["speed_window_latitude"] = lat_w;
         (*viewable_ptr)["speed_window_longitude"] = lon_w;
     }
+
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -536,6 +532,33 @@ EvaluationRequirement::Speed* SingleSpeed::req ()
             dynamic_cast<EvaluationRequirement::Speed*>(requirement_.get());
     assert (req);
     return req;
+}
+
+void SingleSpeed::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+{
+    addAnnotationFeatures(viewable, overview);
+
+    json& error_line_coordinates =
+            viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
+    json& error_point_coordinates =
+            viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");
+    json& ok_line_coordinates =
+            viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
+    json& ok_point_coordinates =
+            viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
+
+    for (auto& detail_it : getDetails())
+    {
+        auto check_passed = detail_it.getValueAsOrAssert<bool>(
+                    EvaluationRequirementResult::SingleSpeed::DetailKey::CheckPassed);
+
+        assert (detail_it.numPositions() >= 1);
+
+        if (!check_passed)
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
+        else if (add_ok)
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+    }
 }
 
 }

@@ -20,7 +20,6 @@
 
 #include <QFrame>
 
-class ActiveDataSource;
 class DBContentComboBox;
 
 class QCheckBox;
@@ -36,12 +35,10 @@ signals:
 
 public slots:
     void dbContentNameChangedSlot();
-    /// @brief Updates the sensor active checkboxes
     void toggleDataSourceSlot();
     void lineIDEditSlot(const QString& text);
 
     void updateDataSourcesSlot();
-
 
 public:
     EvaluationDataSourceWidget(const std::string& title, const std::string& dbcontent_name, unsigned int line_id,
@@ -54,13 +51,12 @@ protected:
     std::string dbcontent_name_;
     unsigned int line_id_;
 
-    DBContentComboBox* dbo_combo_ {nullptr};
+    DBContentComboBox* dbcont_combo_ {nullptr};
 
     QGridLayout* data_source_layout_ {nullptr};
     std::map<unsigned int, QCheckBox*> data_sources_checkboxes_;
 
     void updateCheckboxesChecked();
-    //void updateCheckboxesDisabled();
 };
 
 #endif // EVALUATIONDATASOURCEWIDGET_H

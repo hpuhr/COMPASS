@@ -70,6 +70,8 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
 
         current_date_set_ = true;
     }
+
+    //ignore_time_jumps_ = true; // do if problems with import
 }
 
 ASTERIXPostprocessJob::~ASTERIXPostprocessJob() { logdbg << "ASTERIXPostprocessJob: dtor"; }

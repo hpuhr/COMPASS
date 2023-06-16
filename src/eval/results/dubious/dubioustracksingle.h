@@ -71,6 +71,8 @@ public:
 
     EvaluationRequirement::DubiousTrack* req ();
 
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+
 protected:
     void update();
 

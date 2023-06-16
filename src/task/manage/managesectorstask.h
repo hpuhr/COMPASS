@@ -53,9 +53,7 @@ public:
     bool canImportFile();
     void importFile (const std::string& layer_name, bool exclude, QColor color);
 
-    virtual bool checkPrerequisites();
-    virtual bool isRecommended() { return false; }
-    virtual bool isRequired() { return false; }
+    virtual void run() {} // TODO doesnt fit
 
     const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
     bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }

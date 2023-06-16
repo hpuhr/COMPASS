@@ -52,6 +52,7 @@
 #include <QPushButton>
 
 #include <algorithm>
+#include <malloc.h>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -66,7 +67,7 @@ const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
-    : Task("ASTERIXImportTask", "Import ASTERIX Data", false, false, task_manager),
+    : Task("ASTERIXImportTask", "Import ASTERIX Data", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_asterix.json")
 {
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
@@ -541,30 +542,6 @@ void ASTERIXImportTask::debug(bool debug_jasterix)
 
     loginf << "ASTERIXImportTask: debug " << debug_jasterix_;
 }
-
-bool ASTERIXImportTask::checkPrerequisites()
-{
-    if (!COMPASS::instance().interface().ready())  // must be connected
-        return false;
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
-
-    return true;
-}
-
-bool ASTERIXImportTask::isRecommended()
-{
-    if (!checkPrerequisites())
-        return false;
-
-    if (COMPASS::instance().dbContentManager().hasData())
-        return false;
-
-    return true;
-}
-
-bool ASTERIXImportTask::isRequired() { return false; }
 
 bool ASTERIXImportTask::overrideTodActive() const { return override_tod_active_; }
 
@@ -1079,7 +1056,8 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
             return;
         }
 
-        if (maxLoadReached()) // break if too many packets in process, this slot is called again from insertDoneSlot
+        if (maxLoadReached())
+            // break if too many packets in process, this slot is called again from insertDoneSlot or postProcessDone
         {
             logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
             return;
@@ -1104,7 +1082,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         return;
     }
 
-    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data total cnt " << num_packets_total_;
 
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
 
@@ -1267,13 +1245,26 @@ void ASTERIXImportTask::postprocessDoneSlot()
     for (auto& buf_it : job_buffers)
         buffer_cnt += buf_it.second->size();
 
+    logdbg << "ASTERIXImportTask: postprocessDoneSlot: buffer cnt " << buffer_cnt;
+
     if (buffer_cnt == 0)
     {
         // quit
         assert (num_packets_in_processing_);
         --num_packets_in_processing_;
 
+
+        logdbg << "ASTERIXImportTask: postprocessDoneSlot: no data,"
+               << " num_packets_in_processing_ " << num_packets_in_processing_
+               << " num_packets_total_ " << num_packets_total_;
+
         checkAllDone();
+
+        if (decode_job_ && decode_job_->hasData())
+        {
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: starting decoding of next chunk";
+            addDecodedASTERIXSlot(); // load next chunk
+        }
 
         return;
     }
@@ -1497,6 +1488,8 @@ void ASTERIXImportTask::checkAllDone()
         COMPASS::instance().dataSourceManager().saveDBDataSources();
         emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
         COMPASS::instance().interface().saveProperties();
+
+        malloc_trim(0); // release unused memory
     }
 
     logdbg << "ASTERIXImportTask: checkAllDone: done";

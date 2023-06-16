@@ -136,6 +136,19 @@
                     "unit": ""
                 }
             },
+            "VariableRadarUTN0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "utn",
+                    "description": "Unique Target Number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "UTN",
+                    "representation_str": "STANDARD",
+                    "short_name": "UTN",
+                    "unit": ""
+                }
+            },
             "VariableRadaracas_aircraft_identification0": {
                 "parameters": {
                     "data_type_str": "BOOL",
@@ -211,19 +224,6 @@
                     "name": "Mode S Specific Service Capability",
                     "representation_str": "STANDARD",
                     "short_name": "MSSC",
-                    "unit": ""
-                }
-            },
-            "VariableRadarassociations0": {
-                "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "associations",
-                    "description": "Associations set as JSON object",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Associations",
-                    "representation_str": "STANDARD",
-                    "short_name": "Assoc",
                     "unit": ""
                 }
             },

@@ -63,12 +63,8 @@ public:
 
     RadarPlotPositionCalculatorTaskDialog* dialog();
 
-    virtual bool checkPrerequisites();
-    virtual bool isRecommended();
-    virtual bool isRequired();
-
-    virtual bool canRun();
-    virtual void run();
+    virtual bool canRun() override;
+    virtual void run() override;
 
     static const std::string DONE_PROPERTY_NAME;
 

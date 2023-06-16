@@ -17,7 +17,6 @@
 
 #include "eval/requirement/identification/correct.h"
 #include "eval/results/identification/correctsingle.h"
-#include "eval/requirement/correctnessdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -36,7 +35,7 @@ IdentificationCorrect::IdentificationCorrect(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         bool require_correctness_of_all, bool use_mode_a, bool use_ms_ta, bool use_ms_ti)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       require_correctness_of_all_(require_correctness_of_all),
       use_mode_a_(use_mode_a), use_ms_ta_(use_ms_ta), use_ms_ti_(use_ms_ti)
 {
@@ -63,9 +62,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
                     eval_man_, Details(), 0, 0, 0, 0, 0, 0, 0);
     }
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     ptime timestamp;
 
@@ -79,21 +78,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
     Details details;
 
-    EvaluationTargetPosition pos_current;
+    dbContent::TargetPosition pos_current;
 
     bool ref_exists;
     bool is_inside;
-    pair<EvaluationTargetPosition, bool> ret_pos;
-    EvaluationTargetPosition ref_pos;
+    //pair<dbContent::TargetPosition, bool> ret_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
     string comment;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
     bool skip_detail;
-
-    bool has_ground_bit;
-    bool ground_bit_set;
 
     ValueComparisonResult cmp_res_ti;
     string cmp_res_ti_comment;
@@ -116,7 +112,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
     bool result_ok;
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
+                            const dbContent::TargetPosition& tst_pos,
                             const QVariant& ref_exists,
                             const QVariant& pos_inside,
                             const QVariant& is_not_correct,
@@ -128,15 +124,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
                             const QVariant& num_not_correct,
                             const std::string& comment)
     {
-        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailRefExists, ref_exists)
-                                             .setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailIsNotCorrect, is_not_correct)
-                                             .setValue(Result::DetailNumUpdates, num_updates)
-                                             .setValue(Result::DetailNumNoRef, num_no_ref)
-                                             .setValue(Result::DetailNumInside, num_pos_inside)
-                                             .setValue(Result::DetailNumOutside, num_pos_outside)
-                                             .setValue(Result::DetailNumCorrect, num_correct)
-                                             .setValue(Result::DetailNumNotCorrect, num_not_correct)
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::RefExists, ref_exists)
+                                             .setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailKey::IsNotCorrect, is_not_correct)
+                                             .setValue(Result::DetailKey::NumUpdates, num_updates)
+                                             .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                                             .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                                             .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                                             .setValue(Result::DetailKey::NumCorrect, num_correct)
+                                             .setValue(Result::DetailKey::NumNotCorrect, num_not_correct)
                                              .generalComment(comment));
     };
 
@@ -151,9 +147,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         ++num_updates;
 
         timestamp = tst_id.first;
-        pos_current = target_data.tstPosForTime(timestamp);
+        pos_current = target_data.tstChain().pos(tst_id);
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, pos_current,
@@ -165,12 +161,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
+//        ref_pos = ret_pos.first;
+//        ok = ret_pos.second;
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, pos_current,
@@ -183,17 +179,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         }
         ref_exists = true;
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
-
-        is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
@@ -208,16 +194,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         }
         ++num_pos_inside;
 
-        tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(timestamp, target_data, max_ref_time_diff);
-        tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(timestamp, target_data, max_ref_time_diff);
-        tie(cmp_res_ma, cmp_res_ma_comment) = compareModeA(timestamp, target_data, max_ref_time_diff);
-
         any_correct = false;
         all_correct = true;
         all_no_ref = true;
 
         if (use_ms_ti_)
         {
+            tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(tst_id, target_data, max_ref_time_diff); //aircraft id
+
             ti_no_ref = cmp_res_ti == ValueComparisonResult::Unknown_NoRefData;
             all_no_ref &= ti_no_ref;
 
@@ -233,6 +217,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         if (use_ms_ta_)
         {
+            tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(tst_id, target_data, max_ref_time_diff); //mode s
+
             ta_no_ref = cmp_res_ta == ValueComparisonResult::Unknown_NoRefData;
             all_no_ref &= ta_no_ref;
 
@@ -252,6 +238,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         if (use_mode_a_)
         {
+            tie(cmp_res_ma, cmp_res_ma_comment) = compareModeA(tst_id, target_data, max_ref_time_diff);
+
             ma_no_ref = cmp_res_ma == ValueComparisonResult::Unknown_NoRefData;
             all_no_ref &= ma_no_ref;
 

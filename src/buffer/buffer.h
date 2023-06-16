@@ -55,18 +55,18 @@ std::map<std::string, std::shared_ptr<NullableVector<boost::posix_time::ptime>>>
 ArrayListMapTupel;
 
 template <class T, class Tuple>
-struct Index;
+struct BufferIndex;
 
 template <class T, class... Types>
-struct Index<T, std::tuple<T, Types...>>
+struct BufferIndex<T, std::tuple<T, Types...>>
 {
     static const std::size_t value = 0;
 };
 
 template <class T, class U, class... Types>
-struct Index<T, std::tuple<U, Types...>>
+struct BufferIndex<T, std::tuple<U, Types...>>
 {
-    static const std::size_t value = 1 + Index<T, std::tuple<Types...>>::value;
+    static const std::size_t value = 1 + BufferIndex<T, std::tuple<Types...>>::value;
 };
 
 class Buffer
@@ -118,6 +118,7 @@ public:
                             bool dbcol2dbovar);  // tc2dbovar true for db col -> dbo var, false dbo var -> db column
 
     nlohmann::json asJSON(unsigned int max_size=0);
+    nlohmann::json asJSON(std::set<std::string> variable_names, unsigned int max_size=0);
 
 protected:
     PropertyList properties_;
@@ -150,14 +151,14 @@ inline bool Buffer::has(const std::string& id)
 template <typename T>
 NullableVector<T>& Buffer::get(const std::string& id)
 {
-    if (!(std::get<Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
+    if (!(std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
           ArrayListMapTupel>::value>(array_list_tuple_)).count(id))
         logerr << "Buffer: get: id '" << id << "' type " << typeid(T).name() << " not found";
 
-    assert ((std::get<Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
+    assert ((std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
              ArrayListMapTupel>::value>(array_list_tuple_)).count(id));
 
-    return *(std::get<Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
+    return *(std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
              ArrayListMapTupel>::value>(array_list_tuple_))
             .at(id);
 }
@@ -189,7 +190,7 @@ template <typename T>
 std::map<std::string, std::shared_ptr<NullableVector<T>>>& Buffer::getArrayListMap()
 {
     return std::get<
-            Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>, ArrayListMapTupel>::value>(
+            BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>, ArrayListMapTupel>::value>(
                 array_list_tuple_);
 }
 
@@ -199,6 +200,7 @@ void Buffer::renameArrayListMapEntry(const std::string& id, const std::string& i
     assert(getArrayListMap<T>().count(id) == 1);
     assert(getArrayListMap<T>().count(id_new) == 0);
     std::shared_ptr<NullableVector<T>> array_list = getArrayListMap<T>().at(id);
+    array_list->renameProperty(id_new);
     getArrayListMap<T>().erase(id);
     getArrayListMap<T>()[id_new] = array_list;
 }

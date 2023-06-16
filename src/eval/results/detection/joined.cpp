@@ -63,6 +63,11 @@ void JoinedDetection::addToValues (std::shared_ptr<SingleDetection> single_resul
     sum_uis_    += single_result->sumUIs();
     missed_uis_ += single_result->missedUIs();
 
+    ++num_single_targets_;
+    if (single_result->hasFailed())
+        ++num_failed_single_targets_;
+
+
     updatePD();
 }
 
@@ -114,26 +119,37 @@ void JoinedDetection::addToOverviewTable(std::shared_ptr<EvaluationResultsReport
             std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
     assert (req);
 
-    // pd
-    QVariant pd_var;
-
-    string result {"Unknown"};
-
-    if (pd_.has_value())
+    if (req->holdForAnyTarget()) // for any target
     {
-        pd_var = String::percentToString(pd_.value() * 100.0, req->getNumProbDecimals()).c_str();
+        string result = num_failed_single_targets_ == 0 ? "Passed" : "Failed";
 
-        //loginf << "UGA '" << pd_var.toString().toStdString() << "' dec " << req->getNumProbDecimals();
-
-        result = req->getResultConditionStr(pd_.value());
+        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+        ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                            requirement_->shortname().c_str(),
+                            result_id_.c_str(), {num_single_targets_},
+                            num_failed_single_targets_, "= 0", result.c_str()}, this, {});
     }
+    else // pd
+    {
+        QVariant pd_var;
 
-    // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
-    ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                        requirement_->shortname().c_str(),
-                        result_id_.c_str(), {sum_uis_},
-                        pd_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
-    // "Report:Results:Overview"
+        string result {"Unknown"};
+
+        if (pd_.has_value())
+        {
+            pd_var = String::percentToString(pd_.value() * 100.0, req->getNumProbDecimals()).c_str();
+
+            //loginf << "UGA '" << pd_var.toString().toStdString() << "' dec " << req->getNumProbDecimals();
+
+            result = req->getConditionResultStr(pd_.value());
+        }
+
+        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+        ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                            requirement_->shortname().c_str(),
+                            result_id_.c_str(), {sum_uis_},
+                            pd_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
+    }
 }
 
 void JoinedDetection::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -165,25 +181,20 @@ void JoinedDetection::addDetails(std::shared_ptr<EvaluationResultsReport::RootIt
     {
         pd_var = String::percentToString(pd_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(pd_.value());
+        result = req->getConditionResultStr(pd_.value());
     }
 
     sec_det_table.addRow({"PD [%]", "Probability of Detection", pd_var}, this);
     sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
     sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
 
+    sec_det_table.addRow({"Must hold for any target ", "", req->holdForAnyTarget()}, this);
+    sec_det_table.addRow({"#Single Targets", {}, num_single_targets_}, this);
+    sec_det_table.addRow({"#Failed Single Targets", {}, num_failed_single_targets_}, this);
+
     // figure
-    if (pd_.has_value() && pd_.value() != 1.0)
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                    getErrorsViewable());
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
+    sector_section.addFigure("sector_overview", "Sector Overview",
+                             [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedDetection::hasViewableData (
@@ -220,14 +231,16 @@ std::unique_ptr<nlohmann::json::object_t> JoinedDetection::getErrorsViewable ()
     double lat_w = 1.1*(lat_max-lat_min)/2.0;
     double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    if (lat_w < eval_man_.resultDetailZoom())
-        lat_w = eval_man_.resultDetailZoom();
+    if (lat_w < eval_man_.settings().result_detail_zoom_)
+        lat_w = eval_man_.settings().result_detail_zoom_;
 
-    if (lon_w < eval_man_.resultDetailZoom())
-        lon_w = eval_man_.resultDetailZoom();
+    if (lon_w < eval_man_.settings().result_detail_zoom_)
+        lon_w = eval_man_.settings().result_detail_zoom_;
 
     (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }

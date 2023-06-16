@@ -62,6 +62,7 @@ void OGRProjection::addCoordinateSystem(unsigned int id, double latitude_deg, do
 void OGRProjection::clearCoordinateSystems()
 {
     coordinate_systems_.clear();
+    radar_coordinate_systems_added_ = false;
 }
 
 bool OGRProjection::polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,

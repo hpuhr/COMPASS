@@ -25,7 +25,7 @@ public:
         addItem(comparisonTypeLongString(COMPARISON_TYPE::LESS_THAN).c_str());
         addItem(comparisonTypeLongString(COMPARISON_TYPE::LESS_THAN_OR_EQUAL).c_str());
         addItem(comparisonTypeLongString(COMPARISON_TYPE::GREATER_THAN).c_str());
-        addItem(comparisonTypeLongString(COMPARISON_TYPE::GREATER_THAN_OR_EUQAL).c_str());
+        addItem(comparisonTypeLongString(COMPARISON_TYPE::GREATER_THAN_OR_EQUAL).c_str());
 
         connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedTypeSignal()));
     }
@@ -42,7 +42,7 @@ public:
         else if (currentText() == "Greater Than (>)")
             return COMPARISON_TYPE::GREATER_THAN;
         else if (currentText() == "Greater Than or Equal (>=)")
-            return COMPARISON_TYPE::GREATER_THAN_OR_EUQAL;
+            return COMPARISON_TYPE::GREATER_THAN_OR_EQUAL;
         else
             throw std::runtime_error("ComparisonTypeComboBox: getType: unknown type '"+currentText().toStdString()+"'");
     }

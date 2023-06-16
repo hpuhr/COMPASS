@@ -111,7 +111,7 @@ void JoinedExtraData::addToOverviewTable(std::shared_ptr<EvaluationResultsReport
     {
         prob_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req-> getResultConditionStr(prob_.value());
+        result = req->getConditionResultStr(prob_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -152,7 +152,7 @@ void JoinedExtraData::addDetails(std::shared_ptr<EvaluationResultsReport::RootIt
     {
         prob_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req-> getResultConditionStr(prob_.value());
+        result = req->getConditionResultStr(prob_.value());
     }
 
     sec_det_table.addRow({"PEx [%]", "Probability of extra test update", prob_var}, this);
@@ -160,17 +160,8 @@ void JoinedExtraData::addDetails(std::shared_ptr<EvaluationResultsReport::RootIt
     sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
 
     // figure
-    if (prob_.has_value() && prob_.value() != 0.0)
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                    getErrorsViewable());
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
+    sector_section.addFigure("sector_overview", "Sector Overview",
+                             [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedExtraData::hasViewableData (
@@ -205,14 +196,16 @@ std::unique_ptr<nlohmann::json::object_t> JoinedExtraData::getErrorsViewable ()
     double lat_w = 1.1*(lat_max-lat_min)/2.0;
     double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    if (lat_w < eval_man_.resultDetailZoom())
-        lat_w = eval_man_.resultDetailZoom();
+    if (lat_w < eval_man_.settings().result_detail_zoom_)
+        lat_w = eval_man_.settings().result_detail_zoom_;
 
-    if (lon_w < eval_man_.resultDetailZoom())
-        lon_w = eval_man_.resultDetailZoom();
+    if (lon_w < eval_man_.settings().result_detail_zoom_)
+        lon_w = eval_man_.settings().result_detail_zoom_;
 
     (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }

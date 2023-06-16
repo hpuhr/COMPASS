@@ -23,6 +23,7 @@
 #include <memory>
 
 class EvaluationManager;
+class EvaluationManagerSettings;
 class EvaluationManagerWidget;
 class EvaluationStandardComboBox;
 
@@ -47,10 +48,12 @@ private slots:
     void maxRefTimeDiffEditSlot(QString value);
 
 public:
-    EvaluationStandardTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
+    EvaluationStandardTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
+                                EvaluationManagerWidget& man_widget);
 
 protected:
     EvaluationManager& eval_man_;
+    EvaluationManagerSettings& eval_settings_;
     EvaluationManagerWidget& man_widget_;
 
     std::unique_ptr<EvaluationStandardComboBox> standard_box_ {nullptr};

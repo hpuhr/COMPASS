@@ -64,16 +64,19 @@ public:
     int numPresent() const;
     int numMissing() const;
 
-    static const std::string DetailRefExists;    //bool
-    static const std::string DetailPosInside;    //bool 
-    static const std::string DetailIsNotOk;      //bool
-    static const std::string DetailNumUpdates;   //int
-    static const std::string DetailNumNoRef;     //int
-    static const std::string DetailNumInside;    //int
-    static const std::string DetailNumOutside;   //int
-    static const std::string DetailNumNoRefVal;  //int
-    static const std::string DetailNumPresent;   //int
-    static const std::string DetailNumMissing;   //int
+    enum DetailKey
+    {
+        RefExists,    //bool
+        PosInside,    //bool
+        IsNotOk,      //bool
+        NumUpdates,   //unsigned int
+        NumNoRef,     //unsigned int
+        NumInside,    //unsigned int
+        NumOutside,   //unsigned int
+        NumNoRefVal,  //unsigned int
+        NumPresent,   //unsigned int
+        NumMissing   //unsigned int
+    };
 
 protected:
     int num_updates_     {0};

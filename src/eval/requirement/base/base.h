@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENT_H
 #define EVALUATIONREQUIREMENT_H
 
-#include "eval/requirement/base/comparisontype.h"
+#include "dbcontent/target/targetreportchain.h"
 #include "viewpoint.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -33,6 +33,11 @@ class SectorLayer;
 
 namespace EvaluationRequirementResult {
 class Single;
+}
+
+namespace Evaluation
+{
+    class DataID;
 }
 
 namespace EvaluationRequirement
@@ -50,7 +55,7 @@ class Base
 {
 public:
     Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
+         EvaluationManager& eval_man);
     virtual ~Base();
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -63,41 +68,28 @@ public:
     std::string shortname() const;
     std::string groupName() const;
 
-    float prob() const;
-    unsigned int getNumProbDecimals() const;
-
-    COMPARISON_TYPE probCheckType() const;
-
-    std::string getConditionStr () const;
-    std::string getResultConditionStr (float prob) const;
+    virtual std::string getConditionStr () const = 0;
 
 protected:
-    //static bool in_appimage_;
 
     std::string name_;
     std::string short_name_;
     std::string group_name_;
 
-    float prob_ {0};
-    COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EUQAL};
-    //std::string prob_name_{"Minimum Probability [1]"};
-
     EvaluationManager& eval_man_;
 
-    bool compareValue (double val, double threshold, COMPARISON_TYPE check_type);
-
     std::pair<ValueComparisonResult, std::string> compareTi (
-            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
-            boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
+            const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
+            boost::posix_time::time_duration max_ref_time_diff) const; // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareTa (
-            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
-            boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
+            const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
+            boost::posix_time::time_duration max_ref_time_diff) const; // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareModeA (
-            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
-            boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
+            const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
+            boost::posix_time::time_duration max_ref_time_diff) const; // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareModeC (
-            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
-            boost::posix_time::time_duration max_ref_time_diff, float max_val_diff); // tod tst
+            const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
+            boost::posix_time::time_duration max_ref_time_diff, float max_val_diff) const; // tod tst
 };
 
 }

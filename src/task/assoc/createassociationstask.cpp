@@ -35,6 +35,7 @@
 
 #include <QApplication>
 #include <QMessageBox>
+
 #include <sstream>
 
 using namespace std;
@@ -46,7 +47,7 @@ const std::string CreateAssociationsTask::DONE_PROPERTY_NAME = "associations_cre
 CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
                                                const std::string& instance_id,
                                                TaskManager& task_manager)
-    : Task("CreateAssociationsTask", "Associate Target Reports", true, false, task_manager),
+    : Task("CreateAssociationsTask", "Associate Target Reports", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_assoc.json")
 {
     tooltip_ =
@@ -105,39 +106,6 @@ CreateAssociationsTaskDialog* CreateAssociationsTask::dialog()
 
 }
 
-bool CreateAssociationsTask::checkPrerequisites()
-{
-    logdbg << "CreateAssociationsTask: checkPrerequisites: ready "
-           << COMPASS::instance().interface().ready();
-
-    if (!COMPASS::instance().interface().ready())
-        return false;
-
-    logdbg << "CreateAssociationsTask: checkPrerequisites: done "
-           << COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME);
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
-
-    if (!canRun())
-        return false;
-
-    // check if hash var exists in all data
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-
-    if (!object_man.hasData())
-        return false;
-
-    logdbg << "CreateAssociationsTask: checkPrerequisites: ok";
-
-    return true;
-}
-
-bool CreateAssociationsTask::isRecommended()
-{
-    return false;
-}
-
 bool CreateAssociationsTask::canRun()
 {
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
@@ -168,7 +136,7 @@ bool CreateAssociationsTask::canRun()
                 || !dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbo_it.first)
                 )
             return false;
 
@@ -215,6 +183,10 @@ void CreateAssociationsTask::run()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
+
+    // TODO HACK
+    if (dbcontent_man.dbContent("RefTraj").existsInDB())
+        dbcontent_man.dbContent("RefTraj").deleteDBContentData();
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
@@ -531,8 +503,6 @@ void CreateAssociationsTask::createDoneSlot()
     std::string time_str = String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
 
     COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
-
-    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
     COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
     COMPASS::instance().dbContentManager().resizeTargetListWidget();
 
@@ -623,8 +593,8 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbcontent_n
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
 
     // assoc
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_associations_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_));
+    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_));
+    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
 
     // rec num, must be last for update process
     assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));

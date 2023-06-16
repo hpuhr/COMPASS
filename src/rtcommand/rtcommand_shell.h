@@ -92,7 +92,7 @@ private:
     void log(const QString& txt, LogType log_type = LogType::Plain, bool indent = false);
     void logResult(std::string msg, bool error);
 
-    void receiveResult(std::string msg, std::string data, bool error);
+    void receiveResult(const QString& msg, const QString& data, bool error);
 
     void lastCmd();
     void nextCmd();

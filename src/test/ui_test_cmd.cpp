@@ -86,7 +86,7 @@ void RTCommandUIInjection::assignVariables_impl(const VariablesMap& variables)
 
 /**
  */
-bool RTCommandUISet::run_impl() const
+bool RTCommandUISet::run_impl()
 {
     auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
     if (receiver.first != rtcommand::FindObjectErrCode::NoError)
@@ -135,7 +135,7 @@ void RTCommandUISet::assignVariables_impl(const VariablesMap& variables)
 
 /**
  */
-bool RTCommandUIGet::run_impl() const
+bool RTCommandUIGet::run_impl()
 {
     auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
     if (receiver.first != rtcommand::FindObjectErrCode::NoError)

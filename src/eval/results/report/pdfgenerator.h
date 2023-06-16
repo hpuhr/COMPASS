@@ -19,6 +19,7 @@
 #define EVALUATIONRESULTSREPORTPDFGENERATOR_H
 
 class EvaluationManager;
+class EvaluationManagerSettings;
 class LatexDocument;
 
 #include <string>
@@ -31,7 +32,7 @@ namespace EvaluationResultsReport
     class PDFGenerator
     {
     public:
-        PDFGenerator(EvaluationManager& eval_manager);
+        PDFGenerator(EvaluationManager& eval_manager, EvaluationManagerSettings& eval_settings);
 
         PDFGeneratorDialog& dialog();
 
@@ -54,6 +55,7 @@ namespace EvaluationResultsReport
 
     protected:
         EvaluationManager& eval_man_;
+        EvaluationManagerSettings& eval_settings_;
 
         std::unique_ptr<PDFGeneratorDialog> dialog_;
 

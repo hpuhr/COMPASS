@@ -146,6 +146,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     rtcommand::RTCommandHelp::init();
 
+    appMode(app_mode_);
+
     logdbg << "COMPASS: constructor: end";
 }
 

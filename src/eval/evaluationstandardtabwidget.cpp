@@ -37,9 +37,9 @@
 
 using namespace std;
 
-EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval_man,
-                                                         EvaluationManagerWidget& man_widget)
-    : QWidget(nullptr), eval_man_(eval_man), man_widget_(man_widget)
+EvaluationStandardTabWidget::EvaluationStandardTabWidget(
+        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings, EvaluationManagerWidget& man_widget)
+    : QWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings), man_widget_(man_widget)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -104,7 +104,7 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
         QFormLayout* form_layout = new QFormLayout();
 
         // max ref time diff
-        max_ref_time_diff_edit_ = new QLineEdit(QString::number(eval_man_.maxRefTimeDiff()));
+        max_ref_time_diff_edit_ = new QLineEdit(QString::number(eval_settings_.max_ref_time_diff_));
         max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.0, 30.0, 2, this));
         connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
                 this, &EvaluationStandardTabWidget::maxRefTimeDiffEditSlot);
@@ -294,7 +294,7 @@ void EvaluationStandardTabWidget::maxRefTimeDiffEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        eval_man_.maxRefTimeDiff(val);
+        eval_settings_.max_ref_time_diff_ = val;
     else
         loginf << "EvaluationStandardTabWidget: maxRefTimeDiffEditSlot: invalid value";
 }

@@ -48,54 +48,51 @@ JoinedPositionAlong::JoinedPositionAlong(const std::string& result_id,
 {
 }
 
-void JoinedPositionAlong::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SinglePositionAlong> other_sub =
-            std::static_pointer_cast<SinglePositionAlong>(other);
-    assert (other_sub);
+//void JoinedPositionAlong::join_impl(std::shared_ptr<Single> other)
+//{
+//    std::shared_ptr<SinglePositionAlong> other_sub =
+//            std::static_pointer_cast<SinglePositionAlong>(other);
+//    assert (other_sub);
 
-    addToValues(other_sub);
-}
+//    addToValues(other_sub);
+//}
 
-void JoinedPositionAlong::addToValues (std::shared_ptr<SinglePositionAlong> single_result)
-{
-    assert (single_result);
+//void JoinedPositionAlong::addToValues (std::shared_ptr<SinglePositionAlong> single_result)
+//{
+//    assert (single_result);
 
-    if (!single_result->use())
-        return;
+//    if (!single_result->use())
+//        return;
 
-    num_pos_         += single_result->numPos();
-    num_no_ref_      += single_result->numNoRef();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_passed_      += single_result->numPassed();
-    num_failed_      += single_result->numFailed();
+//    num_pos_         += single_result->numPos();
+//    num_no_ref_      += single_result->numNoRef();
+//    num_pos_outside_ += single_result->numPosOutside();
+//    num_pos_inside_  += single_result->numPosInside();
+//    num_passed_      += single_result->numPassed();
+//    num_failed_      += single_result->numFailed();
 
-    const vector<double>& other_values = single_result->values();
-
-    values_.insert(values_.end(), other_values.begin(), other_values.end());
-
-    update();
-}
+//    update();
+//}
 
 void JoinedPositionAlong::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
-    assert (values_.size() == num_passed_ + num_failed_);
 
     prob_.reset();
 
-    unsigned int num_distances = values_.size();
+    vector<double> all_values = values();
+    assert (all_values.size() == num_passed_ + num_failed_);
+    unsigned int num_distances = all_values.size();
 
     if (num_distances)
     {
-        value_min_ = *min_element(values_.begin(), values_.end());
-        value_max_ = *max_element(values_.begin(), values_.end());
-        value_avg_ = std::accumulate(values_.begin(), values_.end(), 0.0) / (float) num_distances;
+        value_min_ = *min_element(all_values.begin(), all_values.end());
+        value_max_ = *max_element(all_values.begin(), all_values.end());
+        value_avg_ = std::accumulate(all_values.begin(), all_values.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
-        for(auto val : values_)
+        for(auto val : all_values)
             value_var_ += pow(val - value_avg_, 2);
         value_var_ /= (float)num_distances;
 
@@ -145,7 +142,7 @@ void JoinedPositionAlong::addToOverviewTable(std::shared_ptr<EvaluationResultsRe
     {
         p_min_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(prob_.value());
+        result = req->getConditionResultStr(prob_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -213,23 +210,14 @@ void JoinedPositionAlong::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
         string result {"Unknown"};
 
         if (prob_.has_value())
-            result = req->getResultConditionStr(prob_.value());
+            result = req->getConditionResultStr(prob_.value());
 
         sec_det_table.addRow({"Condition Along Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (prob_.has_value() && prob_.value() != 1.0)
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 getErrorsViewable());
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
+    sector_section.addFigure("sector_overview", "Sector Overview",
+                             [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedPositionAlong::hasViewableData (
@@ -265,14 +253,16 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionAlong::getErrorsViewable
     double lat_w = 1.1*(lat_max-lat_min)/2.0;
     double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    if (lat_w < eval_man_.resultDetailZoom())
-        lat_w = eval_man_.resultDetailZoom();
+    if (lat_w < eval_man_.settings().result_detail_zoom_)
+        lat_w = eval_man_.settings().result_detail_zoom_;
 
-    if (lon_w < eval_man_.resultDetailZoom())
-        lon_w = eval_man_.resultDetailZoom();
+    if (lon_w < eval_man_.settings().result_detail_zoom_)
+        lon_w = eval_man_.settings().result_detail_zoom_;
 
     (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }
@@ -293,28 +283,26 @@ std::string JoinedPositionAlong::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedPositionAlong::updatesToUseChanges_impl()
-{
-    loginf << "JoinedPositionAlong: updatesToUseChanges";
+//void JoinedPositionAlong::updatesToUseChanges_impl()
+//{
+//    loginf << "JoinedPositionAlong: updatesToUseChanges";
 
-    num_pos_         = 0;
-    num_no_ref_      = 0;
-    num_pos_outside_ = 0;
-    num_pos_inside_  = 0;
-    num_passed_      = 0;
-    num_failed_      = 0;
+//    num_pos_         = 0;
+//    num_no_ref_      = 0;
+//    num_pos_outside_ = 0;
+//    num_pos_inside_  = 0;
+//    num_passed_      = 0;
+//    num_failed_      = 0;
 
-    values_.clear();
+//    for (auto result_it : results_)
+//    {
+//        std::shared_ptr<SinglePositionAlong> result =
+//                std::static_pointer_cast<SinglePositionAlong>(result_it);
+//        assert (result);
 
-    for (auto result_it : results_)
-    {
-        std::shared_ptr<SinglePositionAlong> result =
-                std::static_pointer_cast<SinglePositionAlong>(result_it);
-        assert (result);
-
-        addToValues(result);
-    }
-}
+//        addToValues(result);
+//    }
+//}
 
 void JoinedPositionAlong::exportAsCSV()
 {
@@ -340,10 +328,12 @@ void JoinedPositionAlong::exportAsCSV()
         if (output_file)
         {
             output_file << "d_along\n";
-            unsigned int size = values_.size();
+
+            vector<double> all_values = values();
+            unsigned int size = all_values.size();
 
             for (unsigned int cnt=0; cnt < size; ++cnt)
-                output_file << values_.at(cnt) << "\n";
+                output_file << all_values.at(cnt) << "\n";
         }
     }
 }

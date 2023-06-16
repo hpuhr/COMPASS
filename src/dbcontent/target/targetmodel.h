@@ -3,6 +3,7 @@
 
 #include "target.h"
 #include "configurable.h"
+#include "json.hpp"
 
 #include <QAbstractItemModel>
 
@@ -64,9 +65,16 @@ public:
 
     bool hasTargetsInfo();
     void clearTargetsInfo();
-    bool existsTarget(unsigned int utn);
+    bool existsTarget(unsigned int utn) const;
     void createNewTarget(unsigned int utn);
     dbContent::Target& target(unsigned int utn);
+    const dbContent::Target& target(unsigned int utn) const;
+
+    void removeDBContentFromTargets(const std::string& dbcont_name);
+
+    nlohmann::json asJSON() const;
+    nlohmann::json targetAsJSON(unsigned int utn) const;
+    nlohmann::json utnsAsJSON() const;
 
     void loadFromDB();
     void saveToDB();
@@ -151,7 +159,6 @@ protected:
 
     bool remove_not_detected_dbos_{false};
     nlohmann::json remove_not_detected_dbo_values_;
-
 
     virtual void checkSubConfigurables() override {};
 };

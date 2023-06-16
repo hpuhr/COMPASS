@@ -19,6 +19,9 @@
 #include "evaluationstandard.h"
 #include "eval/requirement/detection/detectionconfig.h"
 #include "eval/requirement/position/distanceconfig.h"
+#include "eval/requirement/position/distancermsconfig.h"
+#include "eval/requirement/position/rangeconfig.h"
+#include "eval/requirement/position/azimuthconfig.h"
 #include "eval/requirement/position/alongconfig.h"
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/latencyconfig.h"
@@ -26,10 +29,13 @@
 #include "eval/requirement/trackangle/trackangleconfig.h"
 #include "eval/requirement/identification/correctconfig.h"
 #include "eval/requirement/identification/falseconfig.h"
+#include "eval/requirement/identification/correct_period.h"
 #include "eval/requirement/mode_a/presentconfig.h"
 #include "eval/requirement/mode_a/falseconfig.h"
 #include "eval/requirement/mode_c/falseconfig.h"
 #include "eval/requirement/mode_c/presentconfig.h"
+#include "eval/requirement/mode_c/correctconfig.h"
+#include "eval/requirement/mode_c/correct_period.h"
 #include "eval/requirement/extra/dataconfig.h"
 #include "eval/requirement/extra/trackconfig.h"
 #include "eval/requirement/dubious/dubioustrackconfig.h"
@@ -52,11 +58,17 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementDetectionConfig", "Detection"},
     {"EvaluationRequirementIdentificationCorrectConfig", "Identification Correct"},
     {"EvaluationRequirementIdentificationFalseConfig", "Identification False"},
+    {"EvaluationRequirementIdentificationCorrectPeriodConfig", "Identification Correct (Periods)"},
     {"EvaluationRequirementModeAPresentConfig", "Mode 3/A Present"},
     {"EvaluationRequirementModeAFalseConfig", "Mode 3/A False"},
     {"EvaluationRequirementModeCPresentConfig", "Mode C Present"},
+    {"EvaluationRequirementModeCCorrectConfig", "Mode C Correct"},
     {"EvaluationRequirementModeCFalseConfig", "Mode C False"},
+    {"EvaluationRequirementModeCCorrectPeriodConfig", "Mode C Correct (Periods)"},
     {"EvaluationRequirementPositionDistanceConfig", "Position Distance"},
+    {"EvaluationRequirementPositionDistanceRMSConfig", "Position Distance RMS"},
+    {"EvaluationRequirementPositionRangeConfig", "Position Range"},
+    {"EvaluationRequirementPositionAzimuthConfig", "Position Azimuth"},
     {"EvaluationRequirementPositionAlongConfig", "Position Along"},
     {"EvaluationRequirementPositionAcrossConfig", "Position Across"},
     {"EvaluationRequirementPositionLatencyConfig", "Position Latency"},
@@ -79,9 +91,7 @@ Group::Group(const std::string& class_id, const std::string& instance_id,
 
 Group::~Group()
 {
-
 }
-
 
 void Group::generateSubConfigurable(const std::string& class_id,
                                                          const std::string& instance_id)
@@ -140,6 +150,36 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::PositionDistanceConfig* config =
                 new EvaluationRequirement::PositionDistanceConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementPositionDistanceRMSConfig")
+    {
+        EvaluationRequirement::PositionDistanceRMSConfig* config =
+                new EvaluationRequirement::PositionDistanceRMSConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementPositionRangeConfig")
+    {
+        EvaluationRequirement::PositionRangeConfig* config =
+                new EvaluationRequirement::PositionRangeConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementPositionAzimuthConfig")
+    {
+        EvaluationRequirement::PositionAzimuthConfig* config =
+                new EvaluationRequirement::PositionAzimuthConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -216,6 +256,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
+    else if (class_id == "EvaluationRequirementIdentificationCorrectPeriodConfig")
+    {
+        EvaluationRequirement::IdentificationCorrectPeriodConfig* config =
+                new EvaluationRequirement::IdentificationCorrectPeriodConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
     else if (class_id == "EvaluationRequirementModeAPresentConfig")
     {
         EvaluationRequirement::ModeAPresentConfig* config =
@@ -246,10 +296,30 @@ void Group::generateSubConfigurable(const std::string& class_id,
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
+    else if (class_id == "EvaluationRequirementModeCCorrectConfig")
+    {
+        EvaluationRequirement::ModeCCorrectConfig* config =
+                new EvaluationRequirement::ModeCCorrectConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
     else if (class_id == "EvaluationRequirementModeCFalseConfig")
     {
         EvaluationRequirement::ModeCFalseConfig* config =
                 new EvaluationRequirement::ModeCFalseConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementModeCCorrectPeriodConfig")
+    {
+        EvaluationRequirement::ModeCCorrectPeriodConfig* config =
+                new EvaluationRequirement::ModeCCorrectPeriodConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 

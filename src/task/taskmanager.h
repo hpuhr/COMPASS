@@ -26,8 +26,6 @@
 #include "task.h"
 
 class COMPASS;
-class DatabaseOpenTask;
-class ManageDBContentTask;
 class CreateARTASAssociationsTask;
 class JSONImportTask;
 class GPSTrailImportTask;
@@ -35,14 +33,10 @@ class GPSImportCSVTask;
 class ASTERIXImportTask;
 class ViewPointsImportTask;
 class RadarPlotPositionCalculatorTask;
-//class PostProcessTask;
-//class TaskManagerWidget;
-//class ManageDataSourcesTask;
+class CalculateReferencesTask;
 class ManageSectorsTask;
 class CreateAssociationsTask;
 class MainWindow;
-
-
 
 class QMainWindow;
 
@@ -72,7 +66,6 @@ class TaskManager : public QObject, public Configurable
 
     void runTask(const std::string& task_name);
 
-    DatabaseOpenTask& databaseOpenTask() const;
     ASTERIXImportTask& asterixImporterTask() const;
     ViewPointsImportTask& viewPointsImportTask() const;
     JSONImportTask& jsonImporterTask() const;
@@ -82,11 +75,10 @@ class TaskManager : public QObject, public Configurable
     RadarPlotPositionCalculatorTask& radarPlotPositionCalculatorTask() const;
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     CreateAssociationsTask& createAssociationsTask() const;
+    CalculateReferencesTask& calculateReferencesTask() const;
 
 protected:
     // tasks
-    std::unique_ptr<DatabaseOpenTask> database_open_task_;
-    std::unique_ptr<ManageDBContentTask> manage_dbobjects_task_;
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
     std::unique_ptr<ViewPointsImportTask> view_points_import_task_;
     std::unique_ptr<JSONImportTask> json_import_task_;
@@ -96,7 +88,7 @@ protected:
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<CreateAssociationsTask> create_associations_task_;
-
+    std::unique_ptr<CalculateReferencesTask> calculate_references_task_;
 
     virtual void checkSubConfigurables();
 

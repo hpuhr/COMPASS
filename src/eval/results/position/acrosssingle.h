@@ -57,6 +57,8 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+
 protected:
     void update();
 

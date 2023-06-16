@@ -139,7 +139,7 @@ void JoinedDubiousTrack::addToOverviewTable(std::shared_ptr<EvaluationResultsRep
     if (p_dubious_.has_value())
     {
         p_dubious_var = String::percentToString(p_dubious_.value() * 100.0, req->getNumProbDecimals()).c_str();
-        result = req->getResultConditionStr(p_dubious_.value());
+        result = req->getConditionResultStr(p_dubious_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -231,23 +231,14 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
         string result {"Unknown"};
 
         if (p_dubious_.has_value())
-            result = req->getResultConditionStr(p_dubious_.value());
+            result = req->getConditionResultStr(p_dubious_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
 //    // figure
-//    if (has_p_min_ && p_passed_ != 1.0) // TODO
-//    {
-//        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-//                                 getErrorsViewable());
-//    }
-//    else
-//    {
-//        sector_section.addText("sector_errors_overview_no_figure");
-//        sector_section.getText("sector_errors_overview_no_figure").addText(
-//                    "No target errors found, therefore no figure was generated.");
-//    }
+//        sector_section.addFigure("sector_overview", "Sector Overview",
+//                                 [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedDubiousTrack::hasViewableData (
@@ -283,14 +274,16 @@ std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTrack::getErrorsViewable 
 //    double lat_w = 1.1*(lat_max-lat_min)/2.0;
 //    double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-//    if (lat_w < eval_man_.resultDetailZoom())
-//        lat_w = eval_man_.resultDetailZoom();
+//    if (lat_w < eval_man_.settings().result_detail_zoom_)
+//        lat_w = eval_man_.settings().result_detail_zoom_;
 
-//    if (lon_w < eval_man_.resultDetailZoom())
-//        lon_w = eval_man_.resultDetailZoom();
+//    if (lon_w < eval_man_.settings().result_detail_zoom_)
+//        lon_w = eval_man_.settings().result_detail_zoom_;
 
 //    (*viewable_ptr)["speed_window_latitude"] = lat_w;
 //    (*viewable_ptr)["speed_window_longitude"] = lon_w;
+
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }

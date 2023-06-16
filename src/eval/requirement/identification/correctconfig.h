@@ -19,9 +19,9 @@
 #define EVALUATIONREQUIREMENTIDENTIFICATIONCORRECTCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/identification/correct.h"
-#include "eval/requirement/identification/correctconfigwidget.h"
+#include "eval/requirement/identification/identificationcorrectconfigwidget.h"
 
 #include <memory>
 
@@ -31,7 +31,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class IdentificationCorrectConfig : public BaseConfig
+class IdentificationCorrectConfig : public ProbabilityBaseConfig
 {
 public:
     IdentificationCorrectConfig(const std::string& class_id, const std::string& instance_id,

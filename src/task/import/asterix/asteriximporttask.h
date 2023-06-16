@@ -86,8 +86,10 @@ class ASTERIXImportTask : public Task, public Configurable
     void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
 
     bool canImportFile();
+
     virtual bool canRun() override;
     virtual void run() override;
+
     virtual void stop() override;
     void run(bool test);
     bool isRunning() const;
@@ -123,10 +125,6 @@ class ASTERIXImportTask : public Task, public Configurable
 
     bool debug() const;
     void debug(bool debug);
-
-    virtual bool checkPrerequisites() override;
-    virtual bool isRecommended() override;
-    virtual bool isRequired() override;
 
     // override
 

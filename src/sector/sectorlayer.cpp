@@ -17,7 +17,7 @@
 
 #include "sectorlayer.h"
 #include "sector.h"
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 #include "logger.h"
 
 #include <cassert>
@@ -27,12 +27,16 @@ using namespace std;
 SectorLayer::SectorLayer(const std::string& name)
   : name_(name)
 {
-
 }
 
 std::string SectorLayer::name() const
 {
     return name_;
+}
+
+bool SectorLayer::hasExclusionSector() const
+{
+    return (num_exclusion_sectors_ > 0);
 }
 
 bool SectorLayer::hasSector (const std::string& name)
@@ -43,16 +47,7 @@ bool SectorLayer::hasSector (const std::string& name)
     return iter != sectors_.end();
 }
 
-void SectorLayer::addSector (std::shared_ptr<Sector> sector)
-{
-    assert (!hasSector(sector->name()));
-    assert (sector->layerName() == name_);
-    sectors_.push_back(sector);
-
-    has_exclude_sector_ |= sector->exclude();
-}
-
-std::shared_ptr<Sector> SectorLayer::sector (const std::string& name)
+std::shared_ptr<Sector> SectorLayer::sector(const std::string& name)
 {
     assert (hasSector(name));
 
@@ -61,6 +56,16 @@ std::shared_ptr<Sector> SectorLayer::sector (const std::string& name)
     assert (iter != sectors_.end());
 
     return *iter;
+}
+
+void SectorLayer::addSector (std::shared_ptr<Sector> sector)
+{
+    assert (!hasSector(sector->name()));
+    assert (sector->layerName() == name_);
+    sectors_.push_back(sector);
+
+    if (sector->isExclusionSector())
+        ++num_exclusion_sectors_;
 }
 
 void SectorLayer::removeSector (std::shared_ptr<Sector> sector)
@@ -72,26 +77,40 @@ void SectorLayer::removeSector (std::shared_ptr<Sector> sector)
                              [&name](const shared_ptr<Sector>& x) { return x->name() == name;});
     assert (iter != sectors_.end());
 
+    bool is_exclusion = sector->isExclusionSector();
+
     sectors_.erase(iter);
     assert (!hasSector(sector->name()));
+
+    if (is_exclusion)
+    {
+        assert(num_exclusion_sectors_ > 0);
+        --num_exclusion_sectors_;
+    }
 }
 
-bool SectorLayer::isInside(const EvaluationTargetPosition& pos,
-                           bool has_ground_bit, bool ground_bit_set)  const
+void SectorLayer::clearSectors()
 {
-    bool is_inside = false;
+    sectors_               = {};
+    num_exclusion_sectors_ = 0;
+}
+
+bool SectorLayer::isInside(const dbContent::TargetPosition& pos,
+                           bool has_ground_bit, 
+                           bool ground_bit_set)  const
+{
+    bool is_inside         = false;
     bool is_inside_exclude = false;
 
     // check if inside normal ones
     for (auto& sec_it : sectors_)
     {
-        if (sec_it->exclude())
+        if (sec_it->isExclusionSector())
             continue;
 
         if (sec_it->isInside(pos, has_ground_bit, ground_bit_set))
         {
-            logdbg << "SectorLayer " << name_ << ": isInside: true, has alt " << pos.has_altitude_
-                   << " alt " << pos.altitude_ << " exclude " << sec_it->exclude();
+            logdbg << "SectorLayer " << name_ << ": isInside: true, has alt " << pos.has_altitude_ << " alt " << pos.altitude_ ;
 
             is_inside = true;
             break;
@@ -103,26 +122,25 @@ bool SectorLayer::isInside(const EvaluationTargetPosition& pos,
 
     // is inside normal sector
 
-    if (!has_exclude_sector_) // nothin more to check
+    if (!hasExclusionSector()) // nothin more to check
         return true;
 
     // check if inside exclude ones
     for (auto& sec_it : sectors_)
     {
-        if (!sec_it->exclude())
+        if (!sec_it->isExclusionSector())
             continue;
 
         if (sec_it->isInside(pos, has_ground_bit, ground_bit_set))
         {
-            logdbg << "SectorLayer " << name_ << ": isInside: true, has alt " << pos.has_altitude_
-                   << " alt " << pos.altitude_ << " exclude " << sec_it->exclude();
+            logdbg << "SectorLayer " << name_ << " (exclusion): isInside: true, has alt " << pos.has_altitude_ << " alt " << pos.altitude_;
 
             is_inside_exclude = true;
             break;
         }
     }
 
-    return !is_inside_exclude; // true if in no exlcude, false if in include
+    return !is_inside_exclude; // true if in no exclude, false if in include
 }
 
 std::pair<double, double> SectorLayer::getMinMaxLatitude() const

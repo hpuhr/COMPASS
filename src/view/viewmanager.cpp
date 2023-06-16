@@ -37,6 +37,7 @@
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
 #include "util/timeconv.h"
+#include "viewpoint_commands.h"
 
 #include "json.hpp"
 
@@ -57,6 +58,8 @@ ViewManager::ViewManager(const std::string& class_id, const std::string& instanc
     logdbg << "ViewManager: constructor";
 
     qRegisterMetaType<ViewPoint*>("ViewPoint*");
+
+    init_view_point_commands();
 }
 
 void ViewManager::init(QTabWidget* tab_widget)
@@ -97,7 +100,6 @@ void ViewManager::init(QTabWidget* tab_widget)
 #endif
 
     view_class_list_.append("ScatterPlotView");
-
 
     initialized_ = true;
 
@@ -199,7 +201,6 @@ void ViewManager::generateSubConfigurable(const std::string& class_id,
     else
         throw std::runtime_error("ViewManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
-
 //    if (widget_)
 //        widget_->update();
 }
@@ -270,6 +271,58 @@ ViewPointsReportGenerator& ViewManager::viewPointsGenerator()
     return *view_points_report_gen_;
 }
 
+std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj)
+{
+    try
+    {
+        //check if valid JSON
+        std::string err;
+        bool json_ok = ViewPoint::isValidJSON(json_obj, "", &err, true);
+        if (!json_ok)
+            return std::make_pair(false, err);
+
+        DBInterface& db_interface = COMPASS::instance().interface();
+
+        //delete existing viewpoints
+        if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
+            db_interface.deleteAllViewPoints();
+
+        assert (json_obj.contains("view_points"));
+        
+        //add new ones
+        json& view_points = json_obj.at("view_points");
+        assert (view_points.size());
+
+        unsigned int id;
+        for (auto& vp_it : view_points.get<json::array_t>())
+        {
+            assert (vp_it.contains(VP_ID_KEY));
+
+            id = vp_it.at(VP_ID_KEY);
+
+            if (!vp_it.contains(VP_STATUS_KEY))
+                vp_it[VP_STATUS_KEY] = "open";
+
+            db_interface.setViewPoint(id, vp_it.dump());
+        }
+
+        //reload viewpoints
+        loadViewPoints();
+
+        loginf << "ViewManager::loadViewPoints: imported " << std::to_string(view_points.size()) << " view points";
+    }
+    catch (const std::exception& ex)
+    {
+        return std::make_pair(false, ex.what());
+    }
+    catch (...)
+    {
+        return std::make_pair(false, "unknown error");
+    }
+    
+    return std::make_pair(true, "");  
+}
+
 void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 {
     if (current_viewable_)
@@ -279,7 +332,7 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     view_point_data_selected_ = false;
 
-    loginf << "ViewManager: setCurrentViewPoint: setting current view point data: '"
+    logdbg << "ViewManager: setCurrentViewPoint: setting current view point data: '"
     << viewable->data().dump(4) << "'";
 
     emit showViewPointSignal(current_viewable_);

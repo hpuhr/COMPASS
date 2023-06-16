@@ -38,14 +38,6 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
 
     name_ = "UTNs";
 
-//    if (!COMPASS::instance().dbContentManager().hasAssociations())
-//    {
-//        loginf << "UTNFilter: constructor: disabled since no associations";
-
-//        active_ = false;
-//        visible_ = false;
-//    }
-
     createSubConfigurables();
 }
 
@@ -68,24 +60,47 @@ std::string UTNFilter::getConditionString(const std::string& dbcontent_name, boo
 
     stringstream ss;
 
-    if (active_)
+    if (active_ && (values_.size() || null_wanted_))
     {
-        DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-        assert (dbcontent_man.existsDBContent(dbcontent_name));
+//        DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+//        assert (dbcontent_man.existsDBContent(dbcontent_name));
 
-        assert (dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbcontent_name));
-        //Variable& assoc_var = dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name);
+//        assert (dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbcontent_name));
 
-        //extra_from_parts.push_back("json_each("+dbcontent_man.dbContent(dbcontent_name).dbTableName()+".associations)");
+//        if (!first)
+//        {
+//            ss << " AND";
+//        }
+
+//        // SELECT x FROM data_cat062, json_each(data_cat062.associations) WHERE json_each.value == 0;
+
+//        ss << " json_each.value IN (" << utns_str_ << ")"; // rest done in SQLGenerator::getSelectCommand
+
+//        first = false;
+
+        dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
+                    DBContent::meta_var_utn_.name()).getFor(dbcontent_name);
 
         if (!first)
-        {
             ss << " AND";
+
+        ss << " ";
+
+        if (null_wanted_)
+            ss << "(";
+
+        if (values_.size())
+        {
+            ss << var.dbColumnName() << " IN (" << String::compress(values_, ',') << ")";
         }
 
-        // SELECT x FROM data_cat062, json_each(data_cat062.associations) WHERE json_each.value == 0;
+        if (null_wanted_)
+        {
+            if (values_.size())
+                ss << " OR";
 
-        ss << " json_each.value IN (" << utns_str_ << ")";
+            ss << " " << var.dbColumnName() << " IS NULL)";
+        }
 
         first = false;
     }
@@ -157,8 +172,8 @@ void UTNFilter::utns(const std::string& utns)
 {
     if (!updateUTNSFromStr(utns)) // false on failure
     {
-        if (widget_)
-            widget_->update();
+//        if (widget_)
+//            widget_->update();
 
         return;
     }
@@ -166,31 +181,51 @@ void UTNFilter::utns(const std::string& utns)
     utns_str_ = utns;
 }
 
+const string null_str_1 = "NULL";
+const string null_str_2 = "null";
 
-bool UTNFilter::updateUTNSFromStr(const std::string& utns)
+bool UTNFilter::updateUTNSFromStr(const std::string& values_str)
 {
-    vector<unsigned int> utns_tmp;
-    vector<string> utns_tmp_str = String::split(utns, ',');
+    values_.clear();
+
+    vector<unsigned int> values_tmp;
+    vector<string> split_str = String::split(values_str, ',');
 
     bool ok = true;
+    null_wanted_ = false;
 
-    for (auto& utn_str : utns_tmp_str)
+    for (auto& tmp_str : split_str)
     {
-        unsigned int utn_tmp = QString(utn_str.c_str()).toInt(&ok);
+        unsigned int utn_tmp = QString(tmp_str.c_str()).toInt(&ok);
 
         if (!ok)
         {
-            logerr << "UTNFilter: updateUTNSFromStr: utn '" << utn_str << "' not valid";
-            break;
+            string tmp_str_trim = String::trim(tmp_str);
+
+            if (tmp_str_trim == null_str_1 || tmp_str_trim == null_str_2)
+            {
+                null_wanted_ = true;
+                continue;
+            }
+            else if (null_str_1.find(tmp_str_trim) != std::string::npos
+                     || null_str_2.find(tmp_str_trim) != std::string::npos) // part null string
+            {
+                continue;
+            }
+            else
+            {
+                logerr << "UTNFilter: updateUTNSFromStr: utn '" << tmp_str << "' not valid";
+                break;
+            }
         }
 
-        utns_tmp.push_back(utn_tmp);
+        values_tmp.push_back(utn_tmp);
     }
 
     if (!ok)
         return false;
 
-    utns_ = utns_tmp;
+    values_ = values_tmp;
 
     return true;
 }

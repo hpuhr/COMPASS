@@ -84,6 +84,19 @@
                     "unit": ""
                 }
             },
+            "VariableMLATUTN0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "utn",
+                    "description": "Unique Target Number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "UTN",
+                    "representation_str": "STANDARD",
+                    "short_name": "UTN",
+                    "unit": ""
+                }
+            },
             "VariableMLATacas_aircraft_identification0": {
                 "parameters": {
                     "data_type_str": "STRING",
@@ -212,19 +225,6 @@
                     "representation_str": "STANDARD",
                     "short_name": "GA",
                     "unit": "Feet"
-                }
-            },
-            "VariableMLATassociations0": {
-                "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "associations",
-                    "description": "Associations set as JSON object",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Associations",
-                    "representation_str": "STANDARD",
-                    "short_name": "Assoc",
-                    "unit": ""
                 }
             },
             "VariableMLATcalc_alt_geo_ft0": {

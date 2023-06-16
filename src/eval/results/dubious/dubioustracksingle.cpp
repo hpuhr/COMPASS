@@ -35,6 +35,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
@@ -42,20 +43,20 @@ namespace EvaluationRequirementResult
 SingleDubiousTrack::SingleDubiousTrack(const std::string& result_id, 
                                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                                        const SectorLayer& sector_layer,
-                                       unsigned int utn, 
-                                       const EvaluationTargetData* target, 
+                                       unsigned int utn,
+                                       const EvaluationTargetData* target,
                                        EvaluationManager& eval_man,
                                        const EvaluationDetails& details,
                                        unsigned int num_updates,
-                                       unsigned int num_pos_outside, 
-                                       unsigned int num_pos_inside, 
+                                       unsigned int num_pos_outside,
+                                       unsigned int num_pos_inside,
                                        unsigned int num_pos_inside_dubious,
-                                       unsigned int num_tracks, 
+                                       unsigned int num_tracks,
                                        unsigned int num_tracks_dubious)
-:   SingleDubiousBase  ("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, eval_man, details, 
-                        num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
-,   num_tracks_        (num_tracks)
-,   num_tracks_dubious_(num_tracks_dubious)
+    :   SingleDubiousBase  ("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                            num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
+    ,   num_tracks_        (num_tracks)
+    ,   num_tracks_dubious_(num_tracks_dubious)
 {
     update();
 }
@@ -75,8 +76,8 @@ void SingleDubiousTrack::update()
 
         for (auto& detail_it : getDetails())
         {
-            auto duration   = detail_it.getValue(DetailDuration).toDouble();
-            auto is_dubious = detail_it.getValue(DetailIsDubious).toBool();
+            auto duration   = detail_it.getValue(DetailKey::Duration).toDouble();
+            auto is_dubious = detail_it.getValue(DetailKey::IsDubious).toBool();
 
             track_duration_all_ += duration;
 
@@ -120,16 +121,17 @@ void SingleDubiousTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsRe
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-    if (eval_man_.reportShowAdsbInfo())
+    if (eval_man_.settings().report_show_adsb_info_)
         addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-        if (eval_man_.reportShowAdsbInfo())
+        if (eval_man_.settings().report_show_adsb_info_)
             addTargetDetailsToTableADSB(sum_section, target_table_name_);
         else
             addTargetDetailsToTable(sum_section, target_table_name_);
@@ -173,12 +175,12 @@ void SingleDubiousTrack::addTargetDetailsToTable (EvaluationResultsReport::Secti
 
         auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
 
-        reasons += to_string(detail_it.getValue(DetailUTNOrTrackNum).toUInt())+":" + dub_reasons_str;
+        reasons += to_string(detail_it.getValue(DetailKey::UTNOrTrackNum).toUInt())+":" + dub_reasons_str;
     }
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
                  num_pos_inside_, // "#IU"
                  num_pos_inside_dubious_, // "#DU"
@@ -201,10 +203,10 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (EvaluationResultsReport::S
                 || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
             order = Qt::DescendingOrder;
 
-        section.addTable(table_name, 18,
+        section.addTable(table_name, 16,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                           "#PosInside", "#DU", "PDU", "#T", "#DT", "Reasons", "PDT",
-                          "MOPS", "NUCp/NIC", "NACp"}, true, 14, order);
+                          "MOPS"}, true, 14, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -228,7 +230,7 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (EvaluationResultsReport::S
 
         auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
 
-        reasons += to_string(detail_it.getValue(DetailUTNOrTrackNum).toUInt())+":" + dub_reasons_str;
+        reasons += to_string(detail_it.getValue(DetailKey::UTNOrTrackNum).toUInt())+":" + dub_reasons_str;
     }
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
@@ -236,7 +238,7 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (EvaluationResultsReport::S
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(),
                  num_pos_inside_, // "#PosInside"
@@ -246,9 +248,7 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (EvaluationResultsReport::S
                  num_tracks_dubious_, // "#DT"
                  reasons.c_str(),  // "Reasons"
                  p_dubious_var, // "PDT"
-                 target_->mopsVersionStr().c_str(), // "MOPS"
-                 target_->nucpNicStr().c_str(), // "NUCp/NIC"
-                 target_->nacpStr().c_str()}, // "NACp"
+                 target_->mopsVersionStr().c_str()}, // "MOPS"
                 this, {utn_});
 
 }
@@ -331,7 +331,7 @@ void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
         string result {"Unknown"};
 
         if (p_dubious_track_.has_value())
-            result = req->getResultConditionStr(p_dubious_track_.value());
+            result = req->getConditionResultStr(p_dubious_track_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -345,7 +345,7 @@ void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
     if (p_dubious_track_.has_value() && p_dubious_track_.value() != 0.0) // TODO
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -367,26 +367,30 @@ void SingleDubiousTrack::reportDetails(EvaluationResultsReport::Section& utn_req
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_update_cnt = 0;
-
-    //iterate over details
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        if (!rq_det_it.hasDetails())
-            continue;
 
-        //iterate over updates
-        for (auto& update : rq_det_it.details())
+        unsigned int detail_update_cnt = 0;
+
+        //iterate over details
+        for (auto& rq_det_it : getDetails())
         {
-            utn_req_details_table.addRow(
-                        { Time::toString(update.timestamp()).c_str(),
-                        rq_det_it.getValue(DetailUTNOrTrackNum),
-                        dubiousReasonsString(update.comments()).c_str() }, // "Comment"
-                        this, {detail_update_cnt});
+            if (!rq_det_it.hasDetails())
+                continue;
 
-            ++detail_update_cnt;
-        }
-    }
+            //iterate over updates
+            for (auto& update : rq_det_it.details())
+            {
+                utn_req_details_table.addRow(
+                            { Time::toString(update.timestamp()).c_str(),
+                              rq_det_it.getValue(DetailKey::UTNOrTrackNum),
+                              dubiousReasonsString(update.comments()).c_str() }, // "Comment"
+                            this, {detail_update_cnt});
+
+                ++detail_update_cnt;
+            }
+        }});
 }
 
 bool SingleDubiousTrack::hasViewableData (
@@ -420,40 +424,40 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        unsigned int detail_cnt = 0;
-        unsigned int per_detail_update_cnt = detail_update_cnt;
+        //        unsigned int detail_cnt = 0;
+        //        unsigned int per_detail_update_cnt = detail_update_cnt;
 
-        const auto& details = getDetails();
-        assert (details.size());
+        //        const auto& details = getDetails();
+        //        assert (details.size());
 
-        while (per_detail_update_cnt >= details.at(detail_cnt).numDetails())
-        {
-            per_detail_update_cnt -= details.at(detail_cnt).numDetails();
-            ++detail_cnt;
+        //        while (per_detail_update_cnt >= details.at(detail_cnt).numDetails())
+        //        {
+        //            per_detail_update_cnt -= details.at(detail_cnt).numDetails();
+        //            ++detail_cnt;
 
-            assert (detail_cnt < details.size());
-        }
+        //            assert (detail_cnt < details.size());
+        //        }
 
-        logdbg << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
-               << " update detail size " << details.at(detail_cnt).numDetails()
-               << " per_detail_update_cnt " << per_detail_update_cnt;
+        //        logdbg << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
+        //               << " update detail size " << details.at(detail_cnt).numDetails()
+        //               << " per_detail_update_cnt " << per_detail_update_cnt;
 
-        assert (detail_cnt < details.size());
-        assert (per_detail_update_cnt < details.at(detail_cnt).numDetails());
+        //        assert (detail_cnt < details.size());
+        //        assert (per_detail_update_cnt < details.at(detail_cnt).numDetails());
 
-        const auto& detail        = details.at(detail_cnt);
-        const auto& update_detail = detail.details().at(per_detail_update_cnt);
+        //        const auto& detail        = details.at(detail_cnt);
+        //        const auto& update_detail = detail.details().at(per_detail_update_cnt);
 
-        assert(update_detail.numPositions() >= 1);
+        //        assert(update_detail.numPositions() >= 1);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
+        //        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
+        //        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
+        //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        //        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
-            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
+        //        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
+        //            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }
@@ -489,6 +493,20 @@ EvaluationRequirement::DubiousTrack* SingleDubiousTrack::req ()
             dynamic_cast<EvaluationRequirement::DubiousTrack*>(requirement_.get());
     assert (req);
     return req;
+}
+
+void SingleDubiousTrack::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+{
+    addAnnotationFeatures(viewable, overview);
+
+    json& error_line_coordinates =
+            viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
+    json& error_point_coordinates =
+            viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");
+    json& ok_line_coordinates =
+            viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
+    json& ok_point_coordinates =
+            viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
 }
 
 float SingleDubiousTrack::trackDurationAll() const

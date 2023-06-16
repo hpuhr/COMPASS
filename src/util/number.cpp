@@ -171,6 +171,46 @@ unsigned int sicFromDsId (unsigned int ds_id)
     return ds_id % 255;
 }
 
+double knots2MPS(double knots)
+{
+    return knots * 0.514444;
+}
+
+double mps2Knots(double mps)
+{
+    return mps * 1.94384;
+}
+
+std::pair<double, double> bearing2Vec(double bearing_deg)
+{
+    double bearing_rad = deg2rad(bearing_deg);
+    return std::make_pair(std::sin(bearing_rad), std::cos(bearing_rad));
+}
+
+double vec2Bearing(double dx, double dy)
+{
+    return rad2deg(std::atan2(dx, dy));
+}
+
+std::pair<double, double> speedAngle2SpeedVec(double speed_mps, 
+                                              double bearing_deg)
+{
+    auto vec = bearing2Vec(bearing_deg);
+    vec.first  *= speed_mps;
+    vec.second *= speed_mps;
+
+    return vec;
+}
+
+std::pair<double, double> speedVec2SpeedAngle(double vx_mps, 
+                                              double vy_mps)
+{
+    double speed = Eigen::Vector2d(vx_mps, vy_mps).norm();
+    double angle = vec2Bearing(vx_mps / speed, vy_mps / speed);
+
+    return std::make_pair(speed, angle);
+}
+
 }  // namespace Number
 
 //void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list) {}

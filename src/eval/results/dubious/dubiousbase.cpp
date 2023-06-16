@@ -28,18 +28,6 @@ namespace EvaluationRequirementResult
 
 const std::string SingleDubiousBase::DetailCommentGroupDubious = "CommentsDubious";
 
-const std::string SingleDubiousBase::DetailUTNOrTrackNum   = "UTNOrTrackNum";
-const std::string SingleDubiousBase::DetailFirstInside     = "FirstInside";
-const std::string SingleDubiousBase::DetailTODBegin        = "TODBegin";
-const std::string SingleDubiousBase::DetailTODEnd          = "TODEnd";
-const std::string SingleDubiousBase::DetailDuration        = "Duration";
-const std::string SingleDubiousBase::DetailNumPosInside    = "NumPosInside";
-const std::string SingleDubiousBase::DetailNumPosInsideDub = "NumPosInsideDub";
-const std::string SingleDubiousBase::DetailHasModeAC       = "HasModeAC";
-const std::string SingleDubiousBase::DetailHasModeS        = "HasModeS";
-const std::string SingleDubiousBase::DetailLeftSector      = "LeftSector";
-const std::string SingleDubiousBase::DetailIsDubious       = "IsDubious";
-
 /**
 */
 SingleDubiousBase::DetailData::DetailData(unsigned int utn_or_track_number, boost::posix_time::ptime ts_begin)
@@ -53,17 +41,17 @@ SingleDubiousBase::DetailData::DetailData(unsigned int utn_or_track_number, boos
 */
 void SingleDubiousBase::DetailData::assignTo(EvaluationDetail& d) const
 {
-    d.setValue(DetailUTNOrTrackNum, utn_or_tracknum)
-     .setValue(DetailFirstInside, first_inside)
-     .setValue(DetailTODBegin, tod_begin)
-     .setValue(DetailTODEnd, tod_end)
-     .setValue(DetailDuration, duration)
-     .setValue(DetailNumPosInside, num_pos_inside)
-     .setValue(DetailNumPosInsideDub, num_pos_inside_dubious)
-     .setValue(DetailHasModeAC, has_mode_ac)
-     .setValue(DetailHasModeS, has_mode_s)
-     .setValue(DetailLeftSector, left_sector)
-     .setValue(DetailIsDubious, is_dubious)
+    d.setValue(DetailKey::UTNOrTrackNum, utn_or_tracknum)
+     .setValue(DetailKey::FirstInside, first_inside)
+     .setValue(DetailKey::TODBegin, tod_begin)
+     .setValue(DetailKey::TODEnd, tod_end)
+     .setValue(DetailKey::Duration, duration)
+     .setValue(DetailKey::NumPosInside, num_pos_inside)
+     .setValue(DetailKey::NumPosInsideDub, num_pos_inside_dubious)
+     .setValue(DetailKey::HasModeAC, has_mode_ac)
+     .setValue(DetailKey::HasModeS, has_mode_s)
+     .setValue(DetailKey::LeftSector, left_sector)
+     .setValue(DetailKey::IsDubious, is_dubious)
      .addPosition(pos_begin)
      .addPosition(pos_last)
      .setDetails(details);
@@ -217,15 +205,17 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousBase::getTargetErrorsView
     //            double lat_w = 1.1*(lat_max-lat_min)/2.0;
     //            double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    //            if (lat_w < eval_man_.resultDetailZoom())
-    //                lat_w = eval_man_.resultDetailZoom();
+    //            if (lat_w < eval_man_.settings().result_detail_zoom_)
+    //                lat_w = eval_man_.settings().result_detail_zoom_;
 
-    //            if (lon_w < eval_man_.resultDetailZoom())
-    //                lon_w = eval_man_.resultDetailZoom();
+    //            if (lon_w < eval_man_.settings().result_detail_zoom_)
+    //                lon_w = eval_man_.settings().result_detail_zoom_;
 
     //            (*viewable_ptr)["speed_window_latitude"] = lat_w;
     //            (*viewable_ptr)["speed_window_longitude"] = lon_w;
     //        }
+
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }

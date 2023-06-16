@@ -35,22 +35,23 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
 
-SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id, 
+SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id,
                                          std::shared_ptr<EvaluationRequirement::Base> requirement,
                                          const SectorLayer& sector_layer,
-                                         unsigned int utn, 
-                                         const EvaluationTargetData* target, 
+                                         unsigned int utn,
+                                         const EvaluationTargetData* target,
                                          EvaluationManager& eval_man,
                                          const EvaluationDetails& details,
                                          unsigned int num_updates,
-                                         unsigned int num_pos_outside, 
-                                         unsigned int num_pos_inside, 
+                                         unsigned int num_pos_outside,
+                                         unsigned int num_pos_inside,
                                          unsigned int num_pos_inside_dubious)
-:   SingleDubiousBase("SingleDubiousTarget", result_id, requirement, sector_layer, utn, target, eval_man, details, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
+    :   SingleDubiousBase("SingleDubiousTarget", result_id, requirement, sector_layer, utn, target, eval_man, details, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
 {
     update();
 }
@@ -70,7 +71,7 @@ void SingleDubiousTarget::update()
 
     const auto& detail = getDetail(0);
 
-    p_dubious_target_ = (float)detail.getValue(DetailIsDubious).toBool();
+    p_dubious_target_ = (float)detail.getValue(DetailKey::IsDubious).toBool();
 
     result_usable_ = true;
 
@@ -105,23 +106,24 @@ void SingleDubiousTarget::addTargetToOverviewTable(shared_ptr<EvaluationResultsR
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-    if (eval_man_.reportShowAdsbInfo())
+    if (eval_man_.settings().report_show_adsb_info_)
         addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-        if (eval_man_.reportShowAdsbInfo())
+        if (eval_man_.settings().report_show_adsb_info_)
             addTargetDetailsToTableADSB(sum_section, target_table_name_);
         else
             addTargetDetailsToTable(sum_section, target_table_name_);
     }
 }
 
-void SingleDubiousTarget::addTargetDetailsToTable (EvaluationResultsReport::Section& section, 
+void SingleDubiousTarget::addTargetDetailsToTable (EvaluationResultsReport::Section& section,
                                                    const std::string& table_name)
 {
     if (!section.hasTable(table_name))
@@ -157,8 +159,8 @@ void SingleDubiousTarget::addTargetDetailsToTable (EvaluationResultsReport::Sect
                 {utn_,
                  target_->timeBeginStr().c_str(),
                  target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(),
-                 target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(),
+                 target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(),
                  target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(),
@@ -181,10 +183,10 @@ void SingleDubiousTarget::addTargetDetailsToTableADSB (
                 || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
             order = Qt::DescendingOrder;
 
-        section.addTable(table_name, 16,
+        section.addTable(table_name, 14,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                           "#PosInside", "#DU", "PDU", "Reasons", "PDT",
-                          "MOPS", "NUCp/NIC", "NACp"}, true, 12, order);
+                          "MOPS"}, true, 12, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -206,8 +208,8 @@ void SingleDubiousTarget::addTargetDetailsToTableADSB (
                 {utn_,
                  target_->timeBeginStr().c_str(),
                  target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(),
-                 target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(),
+                 target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(),
                  target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(),
@@ -216,9 +218,7 @@ void SingleDubiousTarget::addTargetDetailsToTableADSB (
                  p_dubious_up_var, // "PDU"
                  dub_string.c_str(),  // "Reasons"
                  p_dubious_var, // "PDT"
-                 target_->mopsVersionStr().c_str(), // "MOPS"
-                 target_->nucpNicStr().c_str(), // "NUCp/NIC"
-                 target_->nacpStr().c_str()}, // "NACp"
+                 target_->mopsVersionStr().c_str()}, // "MOPS"
                 this, {utn_});
 
 }
@@ -243,7 +243,7 @@ void SingleDubiousTarget::addTargetDetailsToReport(shared_ptr<EvaluationResultsR
     assert(numDetails() > 0);
     const auto& detail = getDetail(0);
 
-    auto duration = detail.getValueAs<boost::posix_time::time_duration>(DetailDuration);
+    auto duration = detail.getValueAs<boost::posix_time::time_duration>(DetailKey::Duration);
     assert(duration.has_value());
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
@@ -279,7 +279,7 @@ void SingleDubiousTarget::addTargetDetailsToReport(shared_ptr<EvaluationResultsR
         string result {"Unknown"};
 
         if (p_dubious_target_.has_value())
-            result = req->getResultConditionStr(p_dubious_target_.value());
+            result = req->getConditionResultStr(p_dubious_target_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -294,7 +294,7 @@ void SingleDubiousTarget::addTargetDetailsToReport(shared_ptr<EvaluationResultsR
     if (p_dubious_target_.has_value() && p_dubious_target_.value() != 0.0) // TODO
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -316,27 +316,31 @@ void SingleDubiousTarget::reportDetails(EvaluationResultsReport::Section& utn_re
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    assert(numDetails() > 0);
-    const auto& detail = getDetail(0);
-
-    std::string dub_string = dubiousReasonsString(detail.comments());
-
-    if (detail.hasDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        unsigned int detail_cnt = 0;
-        for (auto& update : detail.details())
+
+        assert(numDetails() > 0);
+        const auto& detail = getDetail(0);
+
+        std::string dub_string = dubiousReasonsString(detail.comments());
+
+        if (detail.hasDetails())
         {
-            utn_req_details_table.addRow(
-                        { Time::toString(update.timestamp()).c_str(),
-                        detail.getValue(DetailUTNOrTrackNum),
-                        dub_string.c_str() }, // "Comment"
-                        this, {detail_cnt});
-            ++detail_cnt;
-        }
-    }
+            unsigned int detail_cnt = 0;
+            for (auto& update : detail.details())
+            {
+                utn_req_details_table.addRow(
+                            { Time::toString(update.timestamp()).c_str(),
+                              detail.getValue(DetailKey::UTNOrTrackNum),
+                              dub_string.c_str() }, // "Comment"
+                            this, {detail_cnt});
+                ++detail_cnt;
+            }
+        }});
 }
 
-bool SingleDubiousTarget::hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+bool SingleDubiousTarget::hasViewableData (const EvaluationResultsReport::SectionContentTable& table,
                                            const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -367,41 +371,25 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTarget::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        assert (numDetails() > 0);
-        const auto& detail = getDetail(0);
+        //        assert (numDetails() > 0);
+        //        const auto& detail = getDetail(0);
 
-        //unsigned int detail_cnt = 0;
-        unsigned int per_detail_update_cnt = detail_update_cnt;
+        //        unsigned int per_detail_update_cnt = detail_update_cnt;
 
-//        assert (details_.size());
-//        while (per_detail_update_cnt >= details_.at(detail_cnt).updates_.size())
-//        {
-//            per_detail_update_cnt -= details_.at(detail_cnt).updates_.size();
-//            ++detail_cnt;
+        //        assert (per_detail_update_cnt < detail.numDetails());
 
-//            assert (detail_cnt < details_.size());
-//        }
+        //        const auto& update_detail = detail.details().at(per_detail_update_cnt);
 
-//        logdbg << "SingleDubiousTarget: viewableData: FINAL detail_cnt " << detail_cnt
-//               << " update detail size " << details_.at(detail_cnt).updates_.size()
-//               << " per_detail_update_cnt " << per_detail_update_cnt;
+        //        assert (update_detail.numPositions() >= 1);
 
-//        assert (detail_cnt < details_.size());
+        //        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
+        //        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
+        //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        //        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-        assert (per_detail_update_cnt < detail.numDetails());
-
-        const auto& update_detail = detail.details().at(per_detail_update_cnt);
-
-        assert (update_detail.numPositions() >= 1);
-
-        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
-
-        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
-            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
+        //        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
+        //            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }
@@ -437,6 +425,22 @@ EvaluationRequirement::DubiousTarget* SingleDubiousTarget::req ()
             dynamic_cast<EvaluationRequirement::DubiousTarget*>(requirement_.get());
     assert (req);
     return req;
+}
+
+void SingleDubiousTarget::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+{
+    addAnnotationFeatures(viewable, overview);
+
+    json& error_line_coordinates =
+            viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
+    json& error_point_coordinates =
+            viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");
+    json& ok_line_coordinates =
+            viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
+    json& ok_point_coordinates =
+            viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
+
+
 }
 
 }

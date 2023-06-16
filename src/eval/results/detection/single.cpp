@@ -33,31 +33,25 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
 
-const std::string SingleDetection::DetailMissOccurred = "MissOccurred";
-const std::string SingleDetection::DetailDiffTOD      = "DiffTOD";
-const std::string SingleDetection::DetailRefExists    = "RefExists";
-const std::string SingleDetection::DetailMissedUIs    = "MissedUIs";
-const std::string SingleDetection::DetailMaxGapUIs    = "MaxGapUIs";
-const std::string SingleDetection::DetailNoRefUIs     = "NoRefUIs";
-
 SingleDetection::SingleDetection(const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                 const SectorLayer& sector_layer, 
-                                 unsigned int utn, 
+                                 const SectorLayer& sector_layer,
+                                 unsigned int utn,
                                  const EvaluationTargetData* target,
                                  EvaluationManager& eval_man,
                                  const EvaluationDetails& details,
-                                 int sum_uis, 
-                                 int missed_uis, 
+                                 int sum_uis,
+                                 int missed_uis,
                                  TimePeriodCollection ref_periods)
-:   Single      ("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man, details)
-,   sum_uis_    (sum_uis)
-,   missed_uis_ (missed_uis)
-,   ref_periods_(ref_periods)
+    :   Single      ("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   sum_uis_    (sum_uis)
+    ,   missed_uis_ (missed_uis)
+    ,   ref_periods_(ref_periods)
 {
     updatePD();
 }
@@ -105,17 +99,35 @@ void SingleDetection::addTargetToOverviewTable(shared_ptr<EvaluationResultsRepor
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
 void SingleDetection::addTargetDetailsToTable (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
+
+
+
+
     if (!section.hasTable(table_name))
+    {
+        std::shared_ptr<EvaluationRequirement::Detection> req =
+                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+        assert (req);
+
+        Qt::SortOrder order;
+
+        if (req->invertProb())
+            order=Qt::DescendingOrder;
+        else
+            order=Qt::AscendingOrder;
+
         section.addTable(table_name, 11,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "#EUIs", "#MUIs", "PD"}, true, 10);
+                          "#EUIs", "#MUIs", "PD"}, true, 10, order);
+    }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
@@ -126,7 +138,7 @@ void SingleDetection::addTargetDetailsToTable (
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, pd_var}, this, {utn_});
 }
@@ -179,15 +191,17 @@ void SingleDetection::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     string result {"Unknown"};
 
     if (pd_.has_value())
-        result = req-> getResultConditionStr(pd_.value());
+        result = req->getConditionResultStr(pd_.value());
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
+
+    utn_req_table.addRow({"Must hold for any target ", "", req->holdForAnyTarget()}, this);
 
     // add figure
     if (pd_.has_value() && pd_.value() != 1.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -209,35 +223,39 @@ void SingleDetection::reportDetails(EvaluationResultsReport::Section& utn_req_se
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : getDetails())
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        auto d_tod = rq_det_it.getValue(DetailDiffTOD);
+        unsigned int detail_cnt = 0;
 
-        if (d_tod.isValid())
+        for (auto& rq_det_it : getDetails())
         {
-            utn_req_details_table.addRow(
-                        { Time::toString(rq_det_it.timestamp()).c_str(),
-                          String::timeStringFromDouble(d_tod.toFloat()).c_str(),
-                          rq_det_it.getValue(DetailRefExists), 
-                          rq_det_it.getValue(DetailMissedUIs), 
-                          rq_det_it.comments().generalComment().c_str() },
-                        this, detail_cnt);
-        }
-        else
-        {
-            utn_req_details_table.addRow(
-                        { Time::toString(rq_det_it.timestamp()).c_str(),
-                          QVariant(),
-                          rq_det_it.getValue(DetailRefExists), 
-                          rq_det_it.getValue(DetailMissedUIs),
-                          rq_det_it.comments().generalComment().c_str() },
-                        this, detail_cnt);
-        }
+            auto d_tod = rq_det_it.getValue(DetailKey::DiffTOD);
 
-        ++detail_cnt;
-    }
+            if (d_tod.isValid())
+            {
+                utn_req_details_table.addRow(
+                            { Time::toString(rq_det_it.timestamp()).c_str(),
+                              String::timeStringFromDouble(d_tod.toFloat()).c_str(),
+                              rq_det_it.getValue(DetailKey::RefExists),
+                              rq_det_it.getValue(DetailKey::MissedUIs),
+                              rq_det_it.comments().generalComment().c_str() },
+                            this, detail_cnt);
+            }
+            else
+            {
+                utn_req_details_table.addRow(
+                            { Time::toString(rq_det_it.timestamp()).c_str(),
+                              QVariant(),
+                              rq_det_it.getValue(DetailKey::RefExists),
+                              rq_det_it.getValue(DetailKey::MissedUIs),
+                              rq_det_it.comments().generalComment().c_str() },
+                            this, detail_cnt);
+            }
+
+            ++detail_cnt;
+        }
+    });
 }
 
 bool SingleDetection::hasViewableData (
@@ -269,21 +287,21 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const auto& detail = getDetail(detail_cnt);
+        //        const auto& detail = getDetail(detail_cnt);
 
-        assert (detail.numPositions() >= 1);
+        //        assert (detail.numPositions() >= 1);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+        //        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        //        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        //        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-        auto miss_occurred = detail.getValueAs<bool>(DetailMissOccurred);
-        assert (miss_occurred.has_value());
+        //        auto miss_occurred = detail.getValueAs<bool>(DetailMissOccurred);
+        //        assert (miss_occurred.has_value());
 
-        if (miss_occurred.value())
-            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
+        //        if (miss_occurred.value())
+        //            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
@@ -301,7 +319,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewab
 
     for (auto& detail_it : getDetails())
     {
-        if (!detail_it.getValue(DetailMissOccurred).toBool())
+        if (!detail_it.getValue(DetailKey::MissOccurred).toBool())
             continue;
 
         assert(detail_it.numPositions() >= 1);
@@ -349,15 +367,17 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewab
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
         double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-        if (lat_w < eval_man_.resultDetailZoom())
-            lat_w = eval_man_.resultDetailZoom();
+        if (lat_w < eval_man_.settings().result_detail_zoom_)
+            lat_w = eval_man_.settings().result_detail_zoom_;
 
-        if (lon_w < eval_man_.resultDetailZoom())
-            lon_w = eval_man_.resultDetailZoom();
+        if (lon_w < eval_man_.settings().result_detail_zoom_)
+            lon_w = eval_man_.settings().result_detail_zoom_;
 
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
+
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -377,6 +397,63 @@ std::string SingleDetection::reference(
     assert (hasReference(table, annotation));
 
     return "Report:Results:"+getTargetRequirementSectionID();
+}
+
+bool SingleDetection::hasFailed() const
+{
+    std::shared_ptr<EvaluationRequirement::Detection> req =
+            std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+    assert (req);
+
+    if (pd_.has_value())
+        return !req->getConditionResult(pd_.value());
+    else
+        return false;
+}
+
+void SingleDetection::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+{
+    addAnnotationFeatures(viewable, overview);
+
+    json& error_line_coordinates =
+            viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
+    json& error_point_coordinates =
+            viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");
+    json& ok_line_coordinates =
+            viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
+    json& ok_point_coordinates =
+            viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
+
+    for (auto& detail_it : getDetails())
+    {
+        auto check_failed = detail_it.getValueAsOrAssert<bool>(
+                    EvaluationRequirementResult::SingleDetection::DetailKey::MissOccurred);
+
+        if (detail_it.numPositions() == 1)
+            continue;
+
+        assert (detail_it.numPositions() >= 2);
+
+        if (check_failed)
+        {
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
+            error_point_coordinates.push_back(detail_it.position(1).asVector());
+
+            error_line_coordinates.push_back(detail_it.position(0).asVector());
+            error_line_coordinates.push_back(detail_it.position(1).asVector());
+        }
+        else if (add_ok)
+        {
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+            ok_point_coordinates.push_back(detail_it.position(1).asVector());
+
+            if (!overview)
+            {
+                ok_line_coordinates.push_back(detail_it.position(0).asVector());
+                ok_line_coordinates.push_back(detail_it.position(1).asVector());
+            }
+        }
+    }
 }
 
 std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& result_id)

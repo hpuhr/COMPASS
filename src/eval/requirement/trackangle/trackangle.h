@@ -18,14 +18,13 @@
 #ifndef EVALUATIONREQUIREMENTRACKANGLE_H
 #define EVALUATIONREQUIREMENTRACKANGLE_H
 
-#include "eval/requirement/base/base.h"
-#include "eval/requirement/trackangle/detail.h"
+#include "eval/requirement/base/probabilitybase.h"
 #include "transformation.h"
 
 namespace EvaluationRequirement
 {
 
-class TrackAngle : public Base
+class TrackAngle : public ProbabilityBase
 {
 public:
     TrackAngle(
@@ -59,7 +58,7 @@ protected:
     Transformation trafo_;
 
     // deg, m/s
-    EvaluationTargetPosition getPositionAtAngle(const EvaluationTargetPosition& org, double track_angle, double speed);
+    dbContent::TargetPosition getPositionAtAngle(const dbContent::TargetPosition& org, double track_angle, double speed);
 };
 
 }

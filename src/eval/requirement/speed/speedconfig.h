@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTSPEEDCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/speed/speedconfigwidget.h"
 #include "eval/requirement/speed/speed.h"
 
@@ -29,7 +29,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class SpeedConfig : public BaseConfig
+class SpeedConfig : public ProbabilityBaseConfig
 {
 public:
     SpeedConfig(const std::string& class_id, const std::string& instance_id,

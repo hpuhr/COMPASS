@@ -19,6 +19,7 @@
 #include "rtcommand_wait_condition.h"
 #include "rtcommand_registry.h"
 #include "rtcommand_string.h"
+#include "rtcommand_helpers.h"
 #include "stringconv.h"
 #include "ui_test_find.h"
 #include "compass.h"
@@ -45,138 +46,6 @@ using namespace Utils;
 
 namespace rtcommand
 {
-
-    /***************************************************************************************
-     * Helpers
-     ***************************************************************************************/
-
-    /**
-     * Returns the elements of a valid object path if the string could be split.
-     */
-    boost::optional<std::vector<std::string>> validObjectPath(const std::string& path)
-    {
-        std::vector<std::string> parts = String::split(path, RTCommand::ObjectPathSeparator);
-        if (parts.empty())
-            return {};
-
-        for (const auto& p : parts)
-            if (p.empty())
-                return {};
-
-        return parts;
-    }
-
-    /**
-     * Sets the signal object and name from the given signal path.
-     */
-    boost::optional<std::pair<std::string, std::string>> signalFromObjectPath(const std::string& path)
-    {
-        auto path_parts = validObjectPath(path);
-        if (!path_parts.has_value() || path_parts.value().size() < 2)
-            return {};
-
-        //last path element should be signal name
-        std::string sig_name = path_parts.value().back();
-
-        //the others describe the QObject the signal is emitted from
-        std::vector<std::string> obj_path = path_parts.value();
-        obj_path.pop_back();
-
-        std::string sig_obj = String::compress(obj_path, RTCommand::ObjectPathSeparator);
-
-        if (sig_name.empty() || sig_obj.empty())
-            return {};
-
-        return std::make_pair(sig_obj, sig_name);
-    }
-
-
-    /**
-     * Return the application's main window.
-     */
-    QMainWindow *mainWindow()
-    {
-        for (auto win : qApp->topLevelWidgets())
-        {
-            auto mw = dynamic_cast<QMainWindow *>(win);
-            if (mw)
-                return mw;
-        }
-        return nullptr;
-    }
-
-    /**
-     * Returns the currently active modal dialog.
-     */
-    QDialog *activeDialog()
-    {
-        QWidget *w = qApp->activeModalWidget();
-        if (!w)
-            return nullptr;
-
-        QDialog *dlg = dynamic_cast<QDialog *>(w);
-        if (!dlg)
-            return nullptr;
-
-        return dlg;
-    }
-
-    /**
-     * Finds the QObject described by the given object path.
-     * Unifies Configurables and UI elements (e.g. QWidget's).
-     */
-    std::pair<rtcommand::FindObjectErrCode, QObject *> getCommandReceiver(const std::string &object_path)
-    {
-        auto parts = validObjectPath(object_path);
-
-        if (!parts.has_value())
-            return {rtcommand::FindObjectErrCode::NotFound, nullptr};
-
-        std::string first_part = parts.value().at(0);
-        parts.value().erase(parts.value().begin());
-        std::string remainder = String::compress(parts.value(), RTCommand::ObjectPathSeparator);
-
-        if (first_part == "mainwindow")
-        {
-            return ui_test::findObject(mainWindow(), remainder.c_str());
-        }
-        else if (first_part.find("window") == 0)
-        {
-            //HACK, ViewContainerWidget could be a non-modal QDialog instead of a free-floating QWidget
-            QString num = QString::fromStdString(first_part).remove("window");
-
-            bool ok;
-            int idx = num.toInt(&ok);
-
-            if (ok)
-            {
-                QString view_container_name = "ViewWindow" + num;
-
-                auto container = COMPASS::instance().viewManager().containerWidget(view_container_name.toStdString());
-                if (!container)
-                    return std::make_pair(FindObjectErrCode::NotFound, nullptr);
-
-                return ui_test::findObject(container, remainder.c_str());
-            }
-        }
-        else if (first_part == "dialog")
-        {
-            return ui_test::findObject(activeDialog(), remainder.c_str());
-        }   
-        else if (first_part == "compass")
-        {
-            std::pair<rtcommand::FindObjectErrCode, Configurable *> ret = COMPASS::instance().findSubConfigurable(remainder);
-
-            QObject *obj_casted = dynamic_cast<QObject *>(ret.second);
-
-            if (!obj_casted)
-                return {rtcommand::FindObjectErrCode::WrongType, nullptr};
-
-            return {rtcommand::FindObjectErrCode::NoError, obj_casted};
-        }
-
-        return {rtcommand::FindObjectErrCode::NotFound, nullptr};
-    }
 
     /***************************************************************************************
      * RTCommandWaitCondition
@@ -316,6 +185,7 @@ namespace rtcommand
 
     const std::string RTCommand::ReplyStringIndentation = "   ";
     const char        RTCommand::ObjectPathSeparator    = '.';
+    const char        RTCommand::ParameterListSeparator = '|';
 
     /**
      */
@@ -478,7 +348,7 @@ namespace rtcommand
     /**
      * Run the command and track state.
      */
-    bool RTCommand::run() const
+    bool RTCommand::run()
     {
         try
         {
@@ -524,7 +394,7 @@ namespace rtcommand
     /**
      * Run command result check and track state.
      */
-    bool RTCommand::checkResult() const
+    bool RTCommand::checkResult()
     {
         try
         {
@@ -655,7 +525,7 @@ namespace rtcommand
 
     /**
      */
-    bool RTCommandHelp::run_impl() const
+    bool RTCommandHelp::run_impl()
     {
         nlohmann::json root;
         std::string    str;

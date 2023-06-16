@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/mode_c/present.h"
 
 #include <memory>
@@ -29,7 +29,7 @@ class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
-class ModeCPresentConfig : public BaseConfig
+class ModeCPresentConfig : public ProbabilityBaseConfig
 {
 public:
     ModeCPresentConfig(const std::string& class_id, const std::string& instance_id,

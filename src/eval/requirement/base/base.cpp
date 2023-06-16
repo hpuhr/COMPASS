@@ -28,12 +28,10 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-//bool Base::in_appimage_ = true; //COMPASS::isAppImage();
-
 Base::Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-           float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
+           EvaluationManager& eval_man)
     : name_(name), short_name_(short_name), group_name_(group_name),
-      prob_(prob), prob_check_type_(prob_check_type), eval_man_(eval_man)
+      eval_man_(eval_man)
 {
 
 }
@@ -58,107 +56,37 @@ std::string Base::groupName() const
     return group_name_;
 }
 
-float Base::prob() const
-{
-    return prob_;
-}
 
-unsigned int Base::getNumProbDecimals() const
-{
-    assert (prob_ <= 1);
-
-    float tmp=1;
-    unsigned int decimals=1;
-
-    while (tmp > prob_ && decimals < 6)
-    {
-        tmp /= 10.0;
-        ++decimals;
-    }
-
-    //loginf << "Requirement::Base: getNumProbDecimals: prob " << prob_ << " dec " << decimals;
-    return decimals;
-}
-
-COMPARISON_TYPE Base::probCheckType() const
-{
-    return prob_check_type_;
-}
-
-std::string Base::getConditionStr () const
-{
-    if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN)
-        return "< "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
-    else if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-        return "<= "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN)
-        return "> "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
-        return ">= "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
-    else
-        throw std::runtime_error("EvaluationRequiretBase: getConditionStr: unknown type '"
-                                 +to_string(prob_check_type_)+"'");
-}
-
-std::string Base::getResultConditionStr (float prob) const
-{
-    bool result;
-
-    if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN)
-        result = prob < prob_;
-    else if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-        result = prob <= prob_;
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN)
-        result = prob > prob_;
-    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
-        result = prob >= prob_;
-    else
-        throw std::runtime_error("EvaluationRequiretBase: getResultConditionStr: unknown type '"
-                                 +to_string(prob_check_type_)+"'");
-
-    return result ? "Passed" : "Failed";;
-}
-
-bool Base::compareValue (double val, double threshold, COMPARISON_TYPE check_type)
-{
-    if (check_type == COMPARISON_TYPE::LESS_THAN)
-        return val < threshold;
-    else if (check_type == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-        return val <= threshold;
-    else if (check_type == COMPARISON_TYPE::GREATER_THAN)
-        return val > threshold;
-    else if (check_type == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
-        return val >= threshold;
-    else
-        throw std::runtime_error("EvaluationRequiretBase: compareValue: unknown type '"
-                                 +to_string(check_type)+"'");
-}
 
 std::pair<ValueComparisonResult, std::string> Base::compareTi (
-        ptime timestamp, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff)
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        time_duration max_ref_time_diff) const
 {
     ptime ref_lower, ref_upper;
-    tie(ref_lower, ref_upper) = target_data.refTimesFor(timestamp, max_ref_time_diff);
+    tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
 
-    bool has_ref_data = (!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())
-            && ((!ref_lower.is_not_a_date_time() && target_data.hasRefCallsignForTime(ref_lower))
-                || (!ref_upper.is_not_a_date_time() && target_data.hasRefCallsignForTime(ref_upper)));
+    boost::optional<std::string> tst_value, ref_value_lower, ref_value_upper;
 
-    bool has_tst_data = target_data.hasTstCallsignForTime(timestamp);
+    tst_value = target_data.tstChain().acid(id);
+
+    if (!ref_lower.is_not_a_date_time())
+        ref_value_lower = target_data.refChain().acid((ref_lower));
+
+    if (!ref_upper.is_not_a_date_time())
+        ref_value_upper = target_data.refChain().acid((ref_upper));
+
+    bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
 
     if (!has_ref_data)
     {
-        if (has_tst_data)
+        if (tst_value.has_value())
             return {ValueComparisonResult::Different, "Tst data without ref value"};
         else
             return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
     }
 
-    if (has_tst_data)
+    if (tst_value.has_value())
     {
-        string value = target_data.tstCallsignForTime(timestamp);
-
         bool value_ok;
         bool lower_nok, upper_nok;
 
@@ -169,15 +97,15 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
         lower_nok = false;
         upper_nok = false;
 
-        if (!ref_lower.is_not_a_date_time() && target_data.hasRefCallsignForTime(ref_lower))
+        if (ref_value_lower.has_value())
         {
-            value_ok = target_data.refCallsignForTime(ref_lower) == value;
+            value_ok = *ref_value_lower == *tst_value;
             lower_nok = !value_ok;
         }
 
-        if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.hasRefCallsignForTime(ref_upper))
+        if (!value_ok && ref_value_upper.has_value())
         {
-            value_ok = target_data.refCallsignForTime(ref_upper) == value;
+            value_ok = *ref_value_upper == *tst_value;
             upper_nok = !value_ok;
         }
 
@@ -189,17 +117,16 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
 
             if (lower_nok)
             {
-                comment += " tst '" + target_data.tstCallsignForTime(timestamp)
+                comment += " tst '" + *tst_value
                         +"' ref at " + Time::toString(ref_lower)
-                        + " '" + target_data.refCallsignForTime(ref_lower)
-                        + "'";
+                        + " '" + *ref_value_lower + "'";
             }
             else
             {
                 assert (upper_nok);
-                comment += " tst '" + target_data.tstCallsignForTime(timestamp)
+                comment += " tst '" + *tst_value
                         +"' ref at " + Time::toString(ref_upper)
-                        + " '" + target_data.refCallsignForTime(ref_upper)
+                        + " '" + *ref_value_upper
                         + "'";
             }
 
@@ -212,32 +139,36 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
 }
 
 std::pair<ValueComparisonResult, std::string> Base::compareTa (
-        ptime timestamp, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff)
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        time_duration max_ref_time_diff) const
 {
     ptime ref_lower, ref_upper;
 
-    tie(ref_lower, ref_upper) = target_data.refTimesFor(timestamp, max_ref_time_diff);
+    tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
 
-    bool has_ref_data = (!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())
-            && ((!ref_lower.is_not_a_date_time() && target_data.hasRefTAForTime(ref_lower))
-                || (!ref_upper.is_not_a_date_time() && target_data.hasRefTAForTime(ref_upper)));
+    boost::optional<unsigned int> tst_value, ref_value_lower, ref_value_upper;
 
-    bool has_tst_data = target_data.hasTstTAForTime(timestamp);
+    tst_value = target_data.tstChain().acad(id);
+
+    if (!ref_lower.is_not_a_date_time())
+        ref_value_lower = target_data.refChain().acad((ref_lower));
+
+    if (!ref_upper.is_not_a_date_time())
+        ref_value_upper = target_data.refChain().acad((ref_upper));
+
+    bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
 
     if (!has_ref_data)
     {
-        if (has_tst_data)
+        if (tst_value.has_value())
             return {ValueComparisonResult::Different, "Tst data without ref value"};
         else
             return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
 
     }
 
-    if (has_tst_data)
+    if (tst_value.has_value())
     {
-        unsigned int value = target_data.tstTAForTime(timestamp);
-
         bool value_ok;
         bool lower_nok, upper_nok;
 
@@ -248,15 +179,15 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
         lower_nok = false;
         upper_nok = false;
 
-        if (!ref_lower.is_not_a_date_time() && target_data.hasRefTAForTime(ref_lower))
+        if (ref_value_lower.has_value())
         {
-            value_ok = target_data.refTAForTime(ref_lower) == value;
+            value_ok = *ref_value_lower == *tst_value;
             lower_nok = !value_ok;
         }
 
-        if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.hasRefTAForTime(ref_upper))
+        if (!value_ok && ref_value_upper.has_value())
         {
-            value_ok = target_data.refTAForTime(ref_upper) == value;
+            value_ok = *ref_value_upper == *tst_value;
             upper_nok = !value_ok;
         }
 
@@ -268,18 +199,16 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
 
             if (lower_nok)
             {
-                comment += " tst value '" + String::hexStringFromInt(target_data.tstTAForTime(timestamp))
+                comment += " tst value '" + String::hexStringFromInt(*tst_value)
                         +"' ref value at " + Time::toString(ref_lower)
-                        + "  '" + String::hexStringFromInt(target_data.refTAForTime(ref_lower))
-                        + "'";
+                        + "  '" + String::hexStringFromInt(*ref_value_lower) + "'";
             }
             else
             {
                 assert (upper_nok);
-                comment += " tst value '" + String::hexStringFromInt(target_data.tstTAForTime(timestamp))
+                comment += " tst value '" + String::hexStringFromInt(*tst_value)
                         +"' ref value at " + Time::toString(ref_upper)
-                        + "  '" + String::hexStringFromInt(target_data.refTAForTime(ref_upper))
-                        + "'";
+                        + "  '" + String::hexStringFromInt(*ref_value_upper) + "'";
             }
 
             return {ValueComparisonResult::Different, comment};
@@ -290,30 +219,34 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
 }
 
 std::pair<ValueComparisonResult, std::string> Base::compareModeA (
-        ptime timestamp, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff)
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        time_duration max_ref_time_diff) const
 {
     ptime ref_lower, ref_upper;
-    tie(ref_lower, ref_upper) = target_data.refTimesFor(timestamp, max_ref_time_diff);
+    tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
 
-    bool has_ref_data = (!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())
-            && ((!ref_lower.is_not_a_date_time() && target_data.hasRefModeAForTime(ref_lower))
-                || (!ref_upper.is_not_a_date_time() && target_data.hasRefModeAForTime(ref_upper)));
+    boost::optional<unsigned int> tst_value, ref_value_lower, ref_value_upper;
 
-    bool has_tst_data = target_data.hasTstModeAForTime(timestamp);
+    tst_value = target_data.tstChain().modeA(id);
+
+    if (!ref_lower.is_not_a_date_time())
+        ref_value_lower = target_data.refChain().modeA((ref_lower));
+
+    if (!ref_upper.is_not_a_date_time())
+        ref_value_upper = target_data.refChain().modeA((ref_upper));
+
+    bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
 
     if (!has_ref_data)
     {
-        if (has_tst_data)
+        if (tst_value.has_value())
             return {ValueComparisonResult::Different, "Tst data without ref value"};
         else
             return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
     }
 
-    if (has_tst_data)
+    if (tst_value.has_value())
     {
-        unsigned int code = target_data.tstModeAForTime(timestamp);
-
         bool value_ok;
         bool lower_nok, upper_nok;
 
@@ -324,15 +257,15 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeA (
         lower_nok = false;
         upper_nok = false;
 
-        if (!ref_lower.is_not_a_date_time() && target_data.hasRefModeAForTime(ref_lower))
+        if (ref_value_lower.has_value())
         {
-            value_ok = target_data.refModeAForTime(ref_lower) == code;
+            value_ok = *ref_value_lower == *tst_value;
             lower_nok = !value_ok;
         }
 
-        if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.hasRefModeAForTime(ref_upper))
+        if (!value_ok && ref_value_upper.has_value())
         {
-            value_ok = target_data.refModeAForTime(ref_upper) == code;
+            value_ok = *ref_value_upper == *tst_value;
             upper_nok = !value_ok;
         }
 
@@ -344,18 +277,16 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeA (
 
             if (lower_nok)
             {
-                comment += " tst value '" + String::octStringFromInt(code, 4, '0')
+                comment += " tst value '" + String::octStringFromInt(*tst_value, 4, '0')
                         +"' ref value at " + Time::toString(ref_lower)+ "  '"
-                        + String::octStringFromInt(target_data.refModeAForTime(ref_lower), 4, '0')
-                        + "'";
+                        + String::octStringFromInt(*ref_value_lower, 4, '0')+ "'";
             }
             else
             {
                 assert (upper_nok);
-                comment += " tst value '" + String::octStringFromInt(code, 4, '0')
+                comment += " tst value '" + String::octStringFromInt(*tst_value, 4, '0')
                         +"' ref value at " + Time::toString(ref_upper)+ "  '"
-                        + String::octStringFromInt(target_data.refModeAForTime(ref_upper), 4, '0')
-                        + "'";
+                        + String::octStringFromInt(*ref_value_upper, 4, '0') + "'";
             }
 
             return {ValueComparisonResult::Different, comment};
@@ -366,75 +297,72 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeA (
 }
 
 std::pair<ValueComparisonResult, std::string> Base::compareModeC (
-        ptime timestamp, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff, float max_val_diff)
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        time_duration max_ref_time_diff, float max_val_diff) const
 {
-    if (target_data.hasTstModeCForTime(timestamp))
+    boost::optional<float> tst_value, ref_value_lower, ref_value_upper;
+
+    tst_value = target_data.tstChain().modeC(id);
+
+    if (!tst_value.has_value())
+        return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
+
+    ptime ref_lower, ref_upper;
+    tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
+
+    bool value_ok;
+    bool lower_nok, upper_nok;
+
+    if (!ref_lower.is_not_a_date_time())
+        ref_value_lower = target_data.refChain().modeC((ref_lower));
+
+    if (!ref_upper.is_not_a_date_time())
+        ref_value_upper = target_data.refChain().modeC((ref_upper));
+
+    bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
+
+    if (!has_ref_data)
+        return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+
+    value_ok = false;
+
+    lower_nok = false;
+    upper_nok = false;
+
+    if (ref_value_lower.has_value())
     {
-        int code = target_data.tstModeCForTime(timestamp);
+        value_ok = fabs(*ref_value_lower - *tst_value) <= max_val_diff;
+        lower_nok = !value_ok;
+    }
 
-        ptime ref_lower, ref_upper;
-        tie(ref_lower, ref_upper) = target_data.refTimesFor(timestamp, max_ref_time_diff);
+    if (!value_ok && ref_value_upper.has_value())
+    {
+        value_ok = fabs(*ref_value_upper - *tst_value) <= max_val_diff;
+        upper_nok = !value_ok;
+    }
 
-        bool value_ok;
-        bool lower_nok, upper_nok;
+    if (value_ok)
+        return {ValueComparisonResult::Same, "OK"};
+    else
+    {
+        string comment = "Not OK:";
 
-        if ((!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())) // ref times possible
+        if (lower_nok)
         {
-            if ((!ref_lower.is_not_a_date_time() && target_data.hasRefModeCForTime(ref_lower))
-                    || (!ref_upper.is_not_a_date_time() && target_data.hasRefModeCForTime(ref_upper))) // ref value(s) exist
-            {
-                value_ok = false;
-
-                lower_nok = false;
-                upper_nok = false;
-
-                if (!ref_lower.is_not_a_date_time() && target_data.hasRefModeCForTime(ref_lower))
-                {
-                    value_ok = fabs(target_data.refModeCForTime(ref_lower) - code) <= max_val_diff;
-                    lower_nok = !value_ok;
-                }
-
-                if (!value_ok && !ref_upper.is_not_a_date_time() && target_data.hasRefModeCForTime(ref_upper))
-                {
-                    value_ok = fabs(target_data.refModeCForTime(ref_upper) - code) <= max_val_diff;
-                    upper_nok = !value_ok;
-                }
-
-                if (value_ok)
-                    return {ValueComparisonResult::Same, "OK"};
-                else
-                {
-                    string comment = "Not OK:";
-
-                    if (lower_nok)
-                    {
-                        comment += " tst value '" + to_string(code)
-                                +"' ref value at " + Time::toString(ref_lower)+ "  '"
-                                + to_string(target_data.refModeCForTime(ref_lower))
-                                + "'";
-                    }
-                    else
-                    {
-                        assert (upper_nok);
-                        comment += " tst value '" + to_string(code)
-                                +"' ref value at " + Time::toString(ref_upper)+ "  '"
-                                + to_string(target_data.refModeCForTime(ref_upper))
-                                + "'";
-                    }
-
-                    return {ValueComparisonResult::Different, comment};
-                }
-            }
-            else
-                return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
-
+            comment += " tst value '" + to_string(*tst_value)
+                    +"' ref value at " + Time::toString(ref_lower)+ "  '"
+                    + to_string(*ref_value_lower) + "'";
         }
         else
-            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+        {
+            assert (upper_nok);
+            comment += " tst value '" + to_string(*tst_value)
+                    +"' ref value at " + Time::toString(ref_upper)+ "  '"
+                    + to_string(*ref_value_upper) + "'";
+        }
+
+        return {ValueComparisonResult::Different, comment};
     }
-    else
-        return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
 }
 
 }

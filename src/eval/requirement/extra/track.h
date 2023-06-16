@@ -18,8 +18,8 @@
 #ifndef EVALUATIONREQUIREMENTEXTRATRACK_H
 #define EVALUATIONREQUIREMENTEXTRATRACK_H
 
-#include "eval/requirement/base/base.h"
-#include "evaluationtargetposition.h"
+#include "eval/requirement/base/probabilitybase.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 
@@ -32,7 +32,7 @@ class ExtraTrackDetail
 {
 public:
     ExtraTrackDetail(
-            boost::posix_time::ptime timestmap, EvaluationTargetPosition pos_current, bool inside, QVariant track_num, bool extra,
+            boost::posix_time::ptime timestmap, dbContent::TargetPosition pos_current, bool inside, QVariant track_num, bool extra,
             const std::string& comment)
         : timestamp_(timestmap), pos_current_(pos_current), track_num_(track_num), inside_(inside),
           extra_(extra), comment_(comment)
@@ -40,7 +40,7 @@ public:
     }
 
     boost::posix_time::ptime timestamp_;
-    EvaluationTargetPosition pos_current_;
+    dbContent::TargetPosition pos_current_;
     QVariant track_num_;
     bool inside_ {false};
     bool extra_ {false};
@@ -48,7 +48,7 @@ public:
     std::string comment_;
 };
 
-class ExtraTrack : public Base
+class ExtraTrack : public ProbabilityBase
 {
 public:
     ExtraTrack(

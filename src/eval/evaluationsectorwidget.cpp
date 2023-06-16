@@ -29,16 +29,29 @@
 
 using namespace std;
 
-EvaluationSectorWidget::EvaluationSectorWidget(EvaluationManager& eval_man)
-    : eval_man_(eval_man)
+/**
+*/
+EvaluationSectorWidget::EvaluationSectorWidget(EvaluationManager& eval_man, QWidget* parent)
+:   QScrollArea(parent)
+,   eval_man_  (eval_man)
 {
-    grid_layout_ = new QGridLayout();
+    QWidget* widget = new QWidget(this);
+    widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    grid_layout_ = new QGridLayout;
+    widget->setLayout(grid_layout_);
+
+    setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
+    setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 
     update();
 
-    setLayout(grid_layout_);
+    setWidgetResizable(true);
+    setWidget(widget);
 }
 
+/**
+*/
 void EvaluationSectorWidget::update()
 {
     logdbg << "EvaluationSectorWidget: update";
@@ -53,18 +66,17 @@ void EvaluationSectorWidget::update()
         delete child;
     }
 
-    unsigned int row=0;
-    unsigned int col=0;
+    unsigned int row = 0;
+    unsigned int col = 0;
 
     QFont font_italic;
     font_italic.setItalic(true);
 
     if (eval_man_.hasCurrentStandard() && eval_man_.sectorsLoaded())
     {
-        EvaluationStandard& std = eval_man_.currentStandard();
-        //const string& std_name = std.name();
+        EvaluationStandard& standard = eval_man_.currentStandard();
 
-        for (auto& sec_lay_it : eval_man_.sectorsLayers())
+        for (const auto& sec_lay_it : eval_man_.sectorsLayers())
         {
             col = 0;
             const string& sector_layer_name = sec_lay_it->name();
@@ -74,7 +86,7 @@ void EvaluationSectorWidget::update()
             grid_layout_->addWidget(sec_label, row, col);
             ++col;
 
-            for (auto& req_grp_it : std)
+            for (const auto& req_grp_it : standard)
             {
                 const string& requirement_group_name = req_grp_it->name();
 
@@ -82,6 +94,7 @@ void EvaluationSectorWidget::update()
                 check->setChecked(eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name));
                 check->setProperty("sector_layer_name", sector_layer_name.c_str());
                 check->setProperty("requirement_group_name", requirement_group_name.c_str());
+
                 connect(check, &QCheckBox::clicked, this, &EvaluationSectorWidget::toggleUseGroupSlot);
 
                 grid_layout_->addWidget(check, row, col);
@@ -90,11 +103,16 @@ void EvaluationSectorWidget::update()
             }
             ++row;
         }
+
+        QSpacerItem* spacer = new QSpacerItem(1, 1, QSizePolicy::Preferred, QSizePolicy::Expanding);
+        grid_layout_->addItem(spacer, row, 0);
     }
 
     logdbg << "EvaluationSectorWidget: update: done";
 }
 
+/**
+*/
 void EvaluationSectorWidget::toggleUseGroupSlot()
 {
     QCheckBox* check = static_cast<QCheckBox*> (QObject::sender());

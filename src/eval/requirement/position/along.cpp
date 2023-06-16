@@ -38,7 +38,7 @@ namespace EvaluationRequirement
 PositionAlong::PositionAlong(const std::string& name, const std::string& short_name, const std::string& group_name,
                              float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
                              float max_abs_value)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man), max_abs_value_(max_abs_value)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man), max_abs_value_(max_abs_value)
 {
 }
 
@@ -55,9 +55,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
     logdbg << "EvaluationRequirementPositionAlong '" << name_ << "': evaluate: utn " << target_data.utn_
            << " max_abs_value " << max_abs_value_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     unsigned int num_pos {0};
     unsigned int num_no_ref {0};
@@ -81,16 +81,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
 
     std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     double x_pos, y_pos;
     double distance, angle, d_along;
 
     bool is_inside;
-    pair<EvaluationTargetPosition, bool> ret_pos;
-    EvaluationTargetPosition ref_pos;
-    pair<EvaluationTargetVelocity, bool> ret_spd;
-    EvaluationTargetVelocity ref_spd;
+    boost::optional<dbContent::TargetPosition> ref_pos;
+    boost::optional<dbContent::TargetVelocity> ref_spd;
     bool ok;
 
     bool along_ok;
@@ -100,14 +98,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
 
     vector<double> values;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
-
-    bool has_ground_bit;
-    bool ground_bit_set;
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
-                            const boost::optional<EvaluationTargetPosition>& ref_pos,
+                            const dbContent::TargetPosition& tst_pos,
+                            const boost::optional<dbContent::TargetPosition>& ref_pos,
                             const QVariant& pos_inside,
                             const QVariant& offset,
                             const QVariant& check_passed,
@@ -119,15 +114,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
                             const QVariant& num_value_nok,
                             const std::string& comment)
     {
-        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailValue, offset.isValid() ? offset : 0.0f)
-                                             .setValue(Result::DetailCheckPassed, check_passed)
-                                             .setValue(Result::DetailNumPos, num_pos)
-                                             .setValue(Result::DetailNumNoRef, num_no_ref)
-                                             .setValue(Result::DetailNumInside, num_pos_inside)
-                                             .setValue(Result::DetailNumOutside, num_pos_outside)
-                                             .setValue(Result::DetailNumCheckPassed, num_value_ok)
-                                             .setValue(Result::DetailNumCheckFailed, num_value_nok)
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::CheckPassed, check_passed)
+                                             .setValue(Result::DetailKey::NumPos, num_pos)
+                                             .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                                             .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                                             .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                                             .setValue(Result::DetailKey::NumCheckPassed, num_value_ok)
+                                             .setValue(Result::DetailKey::NumCheckFailed, num_value_nok)
                                              .addPosition(ref_pos)
                                              .generalComment(comment));
     };
@@ -137,11 +132,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         ++num_pos;
 
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPosForTime(timestamp);
+        tst_pos = target_data.tstChain().pos(tst_id);
 
         along_ok = true;
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -155,12 +150,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
-
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -174,9 +166,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
             continue;
         }
 
-        ret_spd = target_data.interpolatedRefSpdForTime(timestamp, max_ref_time_diff);
+        ref_spd = target_data.mappedRefSpeed(tst_id, max_ref_time_diff);
 
-        if (!ret_spd.second)
+        if (!ref_spd.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -190,20 +182,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
             continue;
         }
 
-        ref_spd = ret_spd.first;
-        assert (ret_pos.second); // must be set of ref pos exists
-
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
-
-        is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
@@ -219,20 +198,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         }
         ++num_pos_inside;
 
-        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+        local.SetStereographic(ref_pos->latitude_, ref_pos->longitude_, 1.0, 0.0, 0.0);
 
         ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-//        if (in_appimage_) // inside appimage
-//        {
-            x_pos = tst_pos.longitude_;
-            y_pos = tst_pos.latitude_;
-//        }
-//        else
-//        {
-//            x_pos = tst_pos.latitude_;
-//            y_pos = tst_pos.longitude_;
-//        }
+        x_pos = tst_pos.longitude_;
+        y_pos = tst_pos.latitude_;
 
         ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ok)
@@ -248,7 +219,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         }
 
         distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-        angle = ref_spd.track_angle_ - atan2(y_pos, x_pos);
+        angle = ref_spd->track_angle_ - atan2(y_pos, x_pos);
 
         if (std::isnan(distance) || std::isinf(distance))
         {

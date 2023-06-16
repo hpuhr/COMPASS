@@ -32,11 +32,11 @@ namespace EvaluationResultsReport
 {
 
     SectionContentFigure::SectionContentFigure(const string& name, const string& caption,
-                                               std::unique_ptr<nlohmann::json::object_t> viewable_data,
+                                               std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
                                                Section* parent_section, EvaluationManager& eval_man)
-        : SectionContent(name, parent_section, eval_man), caption_(caption), viewable_data_(move(viewable_data))
+        : SectionContent(name, parent_section, eval_man), caption_(caption), viewable_fnc_(viewable_fnc)
     {
-        assert (viewable_data_);
+        //assert (viewable_data_);
     }
 
     void SectionContentFigure::addToLayout (QVBoxLayout* layout)
@@ -56,7 +56,7 @@ namespace EvaluationResultsReport
         layout->addLayout(fig_layout);
     }
 
-    void SectionContentFigure::accept(LatexVisitor& v) const
+    void SectionContentFigure::accept(LatexVisitor& v)
     {
         loginf << "SectionContentFigure: accept";
         v.visit(this);
@@ -70,7 +70,7 @@ namespace EvaluationResultsReport
 
     void SectionContentFigure::view () const
     {
-        eval_man_.setViewableDataConfig(*viewable_data_);
+        eval_man_.setViewableDataConfig(*viewable_fnc_());
     }
 
     std::string SectionContentFigure::getSubPath() const

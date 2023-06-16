@@ -21,7 +21,7 @@ public:
 
 protected:
 //    static bool in_appimage_;
-//    static const double max_wgs_dist_;
+    static const double max_wgs_dist_;
 
     std::unique_ptr<OGRSpatialReference> wgs84_;
     std::unique_ptr<OGRSpatialReference> local_;

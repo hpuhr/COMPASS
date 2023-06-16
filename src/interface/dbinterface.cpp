@@ -743,10 +743,13 @@ std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
                         [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
         }
 
-        shared_ptr<Sector> new_sector = make_shared<Sector>(id, name, layer_name, json_str);
-        string layer_name = new_sector->layerName();
+        auto eval_sector = new Sector(id, name, layer_name, true);
+        bool ok = eval_sector->readJSON(json_str);
+        assert(ok);
 
-        (*lay_it)->addSector(new_sector);
+        string layer_name = eval_sector->layerName();
+
+        (*lay_it)->addSector(shared_ptr<Sector>(eval_sector));
         assert ((*lay_it)->hasSector(name));
 
         loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '"
@@ -903,12 +906,10 @@ void DBInterface::createSectorsTable()
     updateTableInfo();
 }
 
-
 void DBInterface::clearSectorsTable()
 {
     clearTableContent(TABLE_NAME_SECTORS);
 }
-
 
 void DBInterface::saveSector(shared_ptr<Sector> sector)
 {
@@ -1270,6 +1271,18 @@ void DBInterface::deleteBefore(const DBContent& dbcontent, boost::posix_time::pt
     assert(db_connection_);
 
     std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, before_timestamp);
+
+    db_connection_->execute(*command.get());
+
+    connection_mutex_.unlock();
+}
+
+void DBInterface::deleteAll(const DBContent& dbcontent)
+{
+    connection_mutex_.lock();
+    assert(db_connection_);
+
+    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent);
 
     db_connection_->execute(*command.get());
 

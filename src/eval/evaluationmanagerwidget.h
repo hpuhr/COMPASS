@@ -23,6 +23,7 @@
 #include <memory>
 
 class EvaluationManager;
+class EvaluationManagerSettings;
 class EvaluationMainTabWidget;
 class EvaluationFilterTabWidget;
 class EvaluationTargetsTabWidget;
@@ -44,7 +45,7 @@ private slots:
     void generateReportSlot();
 
 public:
-    EvaluationManagerWidget(EvaluationManager& eval_man);
+    EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
     virtual ~EvaluationManagerWidget();
 
     void updateDataSources();
@@ -58,6 +59,7 @@ public:
 
 protected:
     EvaluationManager& eval_man_;
+    EvaluationManagerSettings& eval_settings_;
 
     QVBoxLayout* main_layout_{nullptr};
 

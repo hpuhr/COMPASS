@@ -16,6 +16,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/datatypeformatselectionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/groupbox.h"
+        "${CMAKE_CURRENT_LIST_DIR}/selectdatasourceswidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/autoresumedialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rangeedit.cpp"
@@ -23,4 +24,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/datatypeformatselectionwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/groupbox.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/selectdatasourceswidget.cpp"
 )

@@ -17,7 +17,6 @@
 
 #include "eval/requirement/mode_c/false.h"
 #include "eval/results/mode_c/falsesingle.h"
-#include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -34,7 +33,7 @@ namespace EvaluationRequirement
 
 ModeCFalse::ModeCFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
                        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       maximum_probability_false_(maximum_probability_false), maximum_difference_(maximum_difference)
 {
 }
@@ -46,9 +45,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
     logdbg << "EvaluationRequirementModeCFalse '" << name_ << "': evaluate: utn " << target_data.utn_
            << " prob " << maximum_probability_false_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     ptime timestamp;
 
@@ -66,26 +65,23 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
     typedef Result::EvaluationDetails                     Details;
     Details details;
 
-    EvaluationTargetPosition pos_current;
+    dbContent::TargetPosition pos_current;
     bool code_ok;
 
     bool ref_exists;
     bool is_inside;
-    pair<EvaluationTargetPosition, bool> ret_pos;
-    EvaluationTargetPosition ref_pos;
+    //pair<dbContent::TargetPosition, bool> ret_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
     ValueComparisonResult cmp_res;
     string comment;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
     bool skip_detail;
 
-    bool has_ground_bit;
-    bool ground_bit_set;
-
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
+                            const dbContent::TargetPosition& tst_pos,
                             const QVariant& ref_exists,
                             const QVariant& pos_inside,
                             const QVariant& is_not_ok,
@@ -98,16 +94,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
                             const QVariant& num_false_id,
                             const std::string& comment)
     {
-        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailRefExists, ref_exists)
-                                             .setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailIsNotOk, is_not_ok)
-                                             .setValue(Result::DetailNumUpdates, num_updates)
-                                             .setValue(Result::DetailNumNoRef, num_no_ref)
-                                             .setValue(Result::DetailNumInside, num_pos_inside)
-                                             .setValue(Result::DetailNumOutside, num_pos_outside)
-                                             .setValue(Result::DetailNumUnknownID, num_unknown_id)
-                                             .setValue(Result::DetailNumCorrectID, num_correct_id)
-                                             .setValue(Result::DetailNumFalseID, num_false_id)
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::RefExists, ref_exists)
+                                             .setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailKey::IsNotOk, is_not_ok)
+                                             .setValue(Result::DetailKey::NumUpdates, num_updates)
+                                             .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                                             .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                                             .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                                             .setValue(Result::DetailKey::NumUnknownID, num_unknown_id)
+                                             .setValue(Result::DetailKey::NumCorrectID, num_correct_id)
+                                             .setValue(Result::DetailKey::NumFalseID, num_false_id)
                                              .generalComment(comment));
     };
 
@@ -122,9 +118,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         ++num_updates;
 
         timestamp = tst_id.first;
-        pos_current = target_data.tstPosForTime(timestamp);
+        pos_current = target_data.tstChain().pos(tst_id);
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, pos_current,
@@ -136,12 +132,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
+//        ref_pos = ret_pos.first;
+//        ok = ret_pos.second;
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, pos_current,
@@ -154,17 +150,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         }
         ref_exists = true;
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
-
-        is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
@@ -179,7 +165,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         }
         ++num_pos_inside;
 
-        tie(cmp_res, comment) = compareModeC(timestamp, target_data, max_ref_time_diff, maximum_difference_);
+        tie(cmp_res, comment) = compareModeC(tst_id, target_data, max_ref_time_diff, maximum_difference_);
 
         code_ok = true;
         if (cmp_res == ValueComparisonResult::Unknown_NoRefData)

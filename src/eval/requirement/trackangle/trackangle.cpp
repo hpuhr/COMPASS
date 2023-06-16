@@ -43,7 +43,7 @@ TrackAngle::TrackAngle(
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
                     float threshold, bool use_minimum_speed, float minimum_speed,
         COMPARISON_TYPE threshold_value_check_type, bool failed_values_of_interest)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       threshold_(threshold),
       use_minimum_speed_(use_minimum_speed), minimum_speed_(minimum_speed),
       threshold_value_check_type_(threshold_value_check_type),
@@ -84,9 +84,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
            << " threshold_percent " << threshold_
            << " threshold_value_check_type " << threshold_value_check_type_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     unsigned int num_pos {0};
     unsigned int num_no_ref {0};
@@ -111,14 +111,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
     //std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     bool is_inside;
-    EvaluationTargetPosition ref_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
-    EvaluationTargetVelocity ref_spd;
-    double ref_trackangle_deg, tst_trackangle_deg;
+    boost::optional<dbContent::TargetVelocity> ref_spd;
+    double ref_trackangle_deg;
+    boost::optional<double> tst_trackangle_deg;
     float trackangle_min_diff;
 
     bool comp_passed;
@@ -128,15 +129,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
     vector<double> values; // track angle diff percentage
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
-
-    bool has_ground_bit;
-    bool ground_bit_set;
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
-                            const EvaluationTargetPosition& tst_pos,
-                            const boost::optional<EvaluationTargetPosition>& ref_pos,
-                            const std::vector<EvaluationDetail::Line>& lines,
+                            const dbContent::TargetPosition& tst_pos,
+                            const boost::optional<dbContent::TargetPosition>& ref_pos,
+                            //const std::vector<EvaluationDetail::Line>& lines,
                             const QVariant& pos_inside,
                             const QVariant& offset,
                             const QVariant& check_passed,
@@ -151,44 +149,44 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                             const QVariant& num_comp_passed,
                             const std::string& comment)
     {
-        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailOffset, offset.isValid() ? offset : 0.0f)
-                                             .setValue(Result::DetailCheckPassed, check_passed)
-                                             .setValue(Result::DetailValueRef, value_ref)
-                                             .setValue(Result::DetailValueTst, value_tst)
-                                             .setValue(Result::DetailSpeedRef, speed_ref)
-                                             .setValue(Result::DetailNumPos, num_pos)
-                                             .setValue(Result::DetailNumNoRef, num_no_ref)
-                                             .setValue(Result::DetailNumInside, num_pos_inside)
-                                             .setValue(Result::DetailNumOutside, num_pos_outside)
-                                             .setValue(Result::DetailNumCheckFailed, num_comp_failed)
-                                             .setValue(Result::DetailNumCheckPassed, num_comp_passed)
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailKey::Offset, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::CheckPassed, check_passed)
+                                             .setValue(Result::DetailKey::ValueRef, value_ref)
+                                             .setValue(Result::DetailKey::ValueTst, value_tst)
+                                             .setValue(Result::DetailKey::SpeedRef, speed_ref)
+                                             .setValue(Result::DetailKey::NumPos, num_pos)
+                                             .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                                             .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                                             .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                                             .setValue(Result::DetailKey::NumCheckFailed, num_comp_failed)
+                                             .setValue(Result::DetailKey::NumCheckPassed, num_comp_passed)
                                              .addPosition(ref_pos)
-                                             .addLines(lines)
+                                             //.addLines(lines)
                                              .generalComment(comment));
     };
 
-    QColor ref_line_color = QColor("#ffa500");
-    QColor tst_line_color = QColor("#00BBBB");
+//    QColor ref_line_color = QColor("#ffa500");
+//    QColor tst_line_color = QColor("#00BBBB");
 
-    std::vector<EvaluationDetail::Line> lines;
+//    std::vector<EvaluationDetail::Line> lines;
 
     for (const auto& tst_id : tst_data)
     {
         ++num_pos;
 
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPosForTime(timestamp);
+        tst_pos = target_data.tstChain().pos(tst_id);
 
         comp_passed = false;
 
-        lines.clear();
+        //lines.clear();
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, lines, // ref_pos, lines
+                          {}, //lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, {}, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -199,13 +197,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        tie(ref_pos, ok) = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, lines, // ref_pos, lines
+                          {}, //lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, {}, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -216,23 +214,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
-
-        is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, lines, // ref_pos, lines
+                          {}, //lines, // ref_pos, lines
                           is_inside, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, {}, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -243,13 +231,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        tie (ref_spd, ok) = target_data.interpolatedRefSpdForTime(timestamp, max_ref_time_diff);
+        ref_spd = target_data.mappedRefSpeed(tst_id, max_ref_time_diff);
 
-        if (!ok)
+        if (!ref_spd.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, lines, // ref_pos, lines
+                          {}, //lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, {}, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -264,13 +252,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
         // ref_spd ok
 
-        if (use_minimum_speed_ && ref_spd.speed_ < minimum_speed_)
+        if (use_minimum_speed_ && ref_spd->speed_ < minimum_speed_)
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, lines, // ref_pos, lines
+                          {}, //lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
-                          {}, {}, ref_spd.speed_, // value_ref, value_tst, speed_ref
+                          {}, {}, ref_spd->speed_, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                           num_comp_failed, num_comp_passed,
                           "Reference speed too low");
@@ -282,13 +270,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        if (!target_data.hasTstMeasuredTrackAngleForTime(timestamp))
+        ref_trackangle_deg = ref_spd->track_angle_;
+        tst_trackangle_deg = target_data.tstChain().trackAngle(tst_id);
+
+        if (!tst_trackangle_deg.has_value())
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, lines, // ref_pos, lines
+                          {}, //lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
-                          {}, {}, ref_spd.speed_, // value_ref, value_tst, speed_ref
+                          {}, {}, ref_spd->speed_, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                           num_comp_failed, num_comp_passed,
                           "No tst speed");
@@ -297,16 +288,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        ref_trackangle_deg = ref_spd.track_angle_;
-        tst_trackangle_deg = target_data.tstMeasuredTrackAngleForTime (timestamp);
-
-        trackangle_min_diff = Number::calculateMinAngleDifference(ref_trackangle_deg, tst_trackangle_deg);
+        trackangle_min_diff = Number::calculateMinAngleDifference(ref_trackangle_deg, *tst_trackangle_deg);
 
         // tst vector
-        lines.emplace_back(tst_pos, getPositionAtAngle(tst_pos, tst_trackangle_deg, ref_spd.speed_), tst_line_color);
+        //lines.emplace_back(tst_pos, getPositionAtAngle(tst_pos, tst_trackangle_deg, ref_spd.speed_), tst_line_color);
 
         // ref vector
-        lines.emplace_back(tst_pos, getPositionAtAngle(tst_pos, ref_trackangle_deg, ref_spd.speed_), ref_line_color);
+        //lines.emplace_back(tst_pos, getPositionAtAngle(tst_pos, ref_trackangle_deg, ref_spd.speed_), ref_line_color);
 
 //        loginf << Time::toString(timestamp) << " tst_track ref " << ref_trackangle_deg
 //               << " tst " << tst_trackangle_deg << " diff " << trackangle_min_diff;
@@ -329,9 +317,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 //                + " tst " + to_string(tst_trackangle_deg) + " diff " + to_string(trackangle_min_diff);
 
         addDetail(timestamp, tst_pos,
-                  ref_pos, lines, // ref_pos, lines
+                  ref_pos, //lines, // ref_pos, lines
                   is_inside, trackangle_min_diff, comp_passed, // pos_inside, value, check_passed
-                  ref_trackangle_deg, tst_trackangle_deg, ref_spd.speed_, // value_ref, value_tst, speed_ref
+                  ref_trackangle_deg, *tst_trackangle_deg, ref_spd->speed_, // value_ref, value_tst, speed_ref
                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                   num_comp_failed, num_comp_passed,
                   comment);
@@ -372,10 +360,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 }
 
 // deg, m/s
-EvaluationTargetPosition TrackAngle::getPositionAtAngle(
-        const EvaluationTargetPosition& org, double track_angle, double speed)
+dbContent::TargetPosition TrackAngle::getPositionAtAngle(
+        const dbContent::TargetPosition& org, double track_angle, double speed)
 {
-    EvaluationTargetPosition new_pos;
+    dbContent::TargetPosition new_pos;
 
     double track_angle_math =  DEG2RAD * (90 - track_angle);
     double x = speed * cos(track_angle_math); // 2sec

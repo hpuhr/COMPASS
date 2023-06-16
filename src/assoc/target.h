@@ -1,7 +1,7 @@
 #ifndef ASSOCIATIONTARGET_H
 #define ASSOCIATIONTARGET_H
 
-#include "evaluationtargetposition.h"
+#include "dbcontent/target/targetposition.h"
 #include "projection/transformation.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
@@ -86,14 +86,14 @@ namespace Association
                 boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
         // lower/upper times, -1 if not existing
 
-        std::pair<EvaluationTargetPosition, bool> interpolatedPosForTime (
+        std::pair<dbContent::TargetPosition, bool> interpolatedPosForTime (
                 boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
-        std::pair<EvaluationTargetPosition, bool> interpolatedPosForTimeFast (
+        std::pair<dbContent::TargetPosition, bool> interpolatedPosForTimeFast (
                 boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
         bool hasDataForExactTime (boost::posix_time::ptime timestamp) const;
         TargetReport& dataForExactTime (boost::posix_time::ptime timestamp) const;
-        EvaluationTargetPosition posForExactTime (boost::posix_time::ptime timestamp) const;
+        dbContent::TargetPosition posForExactTime (boost::posix_time::ptime timestamp) const;
 
         float duration () const;
         bool timeOverlaps (const Target& other) const;

@@ -1553,6 +1553,19 @@
                     "unit": ""
                 }
             },
+            "VariableADSBUTN0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "utn",
+                    "description": "Unique Target Number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "UTN",
+                    "representation_str": "STANDARD",
+                    "short_name": "UTN",
+                    "unit": ""
+                }
+            },
             "VariableADSBaircraft_leng_width0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
@@ -1602,19 +1615,6 @@
                     "name": "Altitude Reporting Capability",
                     "representation_str": "STANDARD",
                     "short_name": "ARC",
-                    "unit": ""
-                }
-            },
-            "VariableADSBassociations0": {
-                "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "associations",
-                    "description": "Associations set as JSON object",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Associations",
-                    "representation_str": "STANDARD",
-                    "short_name": "Assoc",
                     "unit": ""
                 }
             },

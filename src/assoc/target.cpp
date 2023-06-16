@@ -331,7 +331,7 @@ std::pair<ptime, ptime> Target::timesFor (
     return {lower, upper};
 }
 
-std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTime (ptime timestamp, time_duration d_max) const
+std::pair<dbContent::TargetPosition, bool> Target::interpolatedPosForTime (ptime timestamp, time_duration d_max) const
 {
     ptime lower, upper;
 
@@ -343,8 +343,8 @@ std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTime (ptime 
     if (lower.is_not_a_date_time())
         return {{}, false};
 
-    EvaluationTargetPosition pos1 = posForExactTime(lower);
-    EvaluationTargetPosition pos2 = posForExactTime(upper);
+    dbContent::TargetPosition pos1 = posForExactTime(lower);
+    dbContent::TargetPosition pos2 = posForExactTime(upper);
     float d_t = Time::partialSeconds(upper - lower);
 
     logdbg << "Target: interpolatedPosForTime: d_t " << d_t;
@@ -436,7 +436,7 @@ std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTime (ptime 
     return {{x_pos, y_pos, has_altitude, true, altitude}, true};
 }
 
-std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTimeFast (
+std::pair<dbContent::TargetPosition, bool> Target::interpolatedPosForTimeFast (
         ptime timestamp, time_duration d_max) const
 {
     ptime lower, upper;
@@ -449,8 +449,8 @@ std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTimeFast (
     if (lower.is_not_a_date_time())
         return {{}, false};
 
-    EvaluationTargetPosition pos1 = posForExactTime(lower);
-    EvaluationTargetPosition pos2 = posForExactTime(upper);
+    dbContent::TargetPosition pos1 = posForExactTime(lower);
+    dbContent::TargetPosition pos2 = posForExactTime(upper);
     float d_t = Time::partialSeconds(upper - lower);
 
     logdbg << "Target: interpolatedPosForTimeFast: d_t " << d_t;
@@ -522,13 +522,13 @@ TargetReport& Target::dataForExactTime (ptime timestamp) const
     return *assoc_trs_.at(timed_indexes_.at(timestamp));
 }
 
-EvaluationTargetPosition Target::posForExactTime (ptime timestamp) const
+dbContent::TargetPosition Target::posForExactTime (ptime timestamp) const
 {
     assert (hasDataForExactTime(timestamp));
 
     TargetReport& tr = dataForExactTime(timestamp);
 
-    EvaluationTargetPosition pos;
+    dbContent::TargetPosition pos;
 
     pos.latitude_ = tr.latitude_;
     pos.longitude_ = tr.longitude_;
