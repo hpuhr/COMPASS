@@ -169,6 +169,8 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
         }
         const auto& state1_ref = x_tr_func ? state1_tr : state1;
 
+        //const double dt = Utils::Time::partialSeconds(t1 - t0);
+
         while (tcur >= t0 && tcur < t1)
         {
             double dt0 = Utils::Time::partialSeconds(tcur - t0);
@@ -196,9 +198,11 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             if (!new_state0.has_value() || !new_state1.has_value())
                 return false;
 
+            double interp_factor = 0.5; //dt0 / dt;
+
             kalman::KalmanState new_state;
-            new_state.x = (new_state0->x + new_state1->x) / 2;
-            new_state.P = SplineInterpolator::interpCovarianceMat(new_state0->P, new_state1->P, 0.5);
+            new_state.x = new_state0->x * (1.0 - interp_factor) + new_state1->x * interp_factor;
+            new_state.P = SplineInterpolator::interpCovarianceMat(new_state0->P, new_state1->P, interp_factor);
 
             Reference ref;
             ref.t              = tcur;

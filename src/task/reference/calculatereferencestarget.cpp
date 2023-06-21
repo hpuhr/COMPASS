@@ -220,6 +220,7 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
             for (size_t i = 0; i < references.size(); ++i)
             {
                 const reconstruction::Reference& ref = references[ i ];
+
                 const Chain* chain = rec.chainOfReference(ref);
                 assert(chain);
 
