@@ -30,6 +30,15 @@ typedef boost::optional<Matrix> OMatrix;
 typedef boost::optional<Vector> OVector;
 
 /**
+ * Transfer func for a state vector.
+ * Used to transfer the given state vector between two collected kalman states.
+ * This functional is kept very general on purpose and can be used e.g. to convert from
+ * one map projection system to another one.
+ * params: state vec transformed | state vec | index of the old kalman state | index of the new kalman state
+ */
+typedef std::function<void(Vector&,const Vector&,size_t,size_t)> XTransferFunc;
+
+/**
 */
 struct KalmanState
 {

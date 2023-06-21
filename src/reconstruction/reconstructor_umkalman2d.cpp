@@ -183,8 +183,7 @@ kalman::Vector Reconstructor_UMKalman2D::xVec(const Measurement& mm) const
 {
     kalman::Vector x(4);
 
-    x[ 0 ] = mm.x;
-    x[ 2 ] = mm.y;
+    ReconstructorKalman::xPos(x, mm);
 
     //start with zero velocity
     x[ 1 ] = 0.0;
@@ -197,6 +196,30 @@ kalman::Vector Reconstructor_UMKalman2D::xVec(const Measurement& mm) const
     }
 
     return x;
+}
+
+/**
+*/
+void Reconstructor_UMKalman2D::xVec(const kalman::Vector& x) const
+{
+    //update state vector after projection change
+    kalman_->setStateVec(x);
+}
+
+/**
+*/
+void Reconstructor_UMKalman2D::xPos(double& x, double& y, const kalman::Vector& x_vec) const
+{
+    x = x_vec[ 0 ];
+    y = x_vec[ 2 ];
+}
+
+/**
+*/
+void Reconstructor_UMKalman2D::xPos(kalman::Vector& x_vec, double x, double y) const
+{
+    x_vec[ 0 ] = x;
+    x_vec[ 2 ] = y;
 }
 
 /**
@@ -335,9 +358,13 @@ boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::interpStep(const 
 */
 bool Reconstructor_UMKalman2D::smoothChain_impl(std::vector<kalman::Vector>& x_smooth,
                                                 std::vector<kalman::Matrix>& P_smooth,
-                                                const KalmanChain& chain) const
+                                                const KalmanChain& chain,
+                                                const kalman::XTransferFunc& x_tr) const
 {
-    return kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, chain.kalman_states, baseConfig().smooth_scale);
+    return kalman::KalmanFilter::rtsSmoother(x_smooth, 
+                                             P_smooth, 
+                                             chain.kalman_states,
+                                             x_tr);
 }
 
 } // namespace reconstruction

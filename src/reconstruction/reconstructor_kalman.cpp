@@ -33,6 +33,13 @@ const float  ReconstructorKalman::SpeedVecLineWidth    = 3.0f;
 
 /**
 */
+ReconstructorKalman::ReconstructorKalman()
+:   proj_handler_(this)
+{
+}
+
+/**
+*/
 void ReconstructorKalman::init()
 {
     //reset chains
@@ -46,13 +53,22 @@ void ReconstructorKalman::init()
     P_var_      = base_config_.P_std      * base_config_.P_std;
     P_var_high_ = base_config_.P_std_high * base_config_.P_std_high;
 
-    min_chain_size_ = std::max((size_t)1, base_config_.min_chain_size);
+    min_chain_size_   = std::max((size_t)1, base_config_.min_chain_size);
+    max_distance_sqr_ = base_config_.max_distance * base_config_.max_distance;
+
+    //configure projection 
+    
+
+    proj_handler_.settings().map_proj_mode          = base_config_.map_proj_mode;
+    proj_handler_.settings().proj_max_dist_cart_sqr = base_config_.max_proj_distance_cart * 
+                                                      base_config_.max_proj_distance_cart;
 
     init_impl(); //invoke derived impl
 }
 
 /**
-*/
+ * Smoothes the given kalman chain.
+ */
 bool ReconstructorKalman::smoothChain(KalmanChain& chain)
 {
     if (chain.references.empty())
@@ -71,13 +87,13 @@ bool ReconstructorKalman::smoothChain(KalmanChain& chain)
         loginf << "Obtains " << chain.kalman_states.size() << " info(s)";
 
         int cnt = 0;
-        for (const auto& rts_info : chain.kalman_states)
+        for (const auto& state : chain.kalman_states)
         {
             loginf << "Info " << cnt++ << "\n"
-                   << "    x: " << rts_info.x << "\n"
-                   << "    P: " << rts_info.P << "\n"
-                   << "    Q: " << rts_info.Q << "\n"
-                   << "    F: " << rts_info.F << "\n";
+                   << "    x: " << state.x << "\n"
+                   << "    P: " << state.P << "\n"
+                   << "    Q: " << state.Q << "\n"
+                   << "    F: " << state.F << "\n";
         }
     }
 
@@ -86,7 +102,7 @@ bool ReconstructorKalman::smoothChain(KalmanChain& chain)
     std::vector<kalman::Vector> x_smooth;
     std::vector<kalman::Matrix> P_smooth;
 
-    if (!smoothChain_impl(x_smooth, P_smooth, chain))
+    if (!smoothChain_impl(x_smooth, P_smooth, chain, proj_handler_.reprojectionTransform(chain)))
         return false;
 
     //update chain data
@@ -117,7 +133,8 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
     resampled_chain.reserve(n_estim);
 
     resampled_chain.add(result_chain.references.front(), 
-                        result_chain.kalman_states.front());
+                        result_chain.kalman_states.front(),
+                        result_chain.proj_centers.front());
 
     boost::posix_time::milliseconds time_incr((int)(dt_sec * 1000.0));
 
@@ -125,18 +142,32 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
 
     size_t small_intervals = 0;
 
+    auto x_tr_func = proj_handler_.reprojectionTransform(result_chain);
+
+    kalman::KalmanState state1_tr;
+
     for (size_t i = 1; i < n; ++i)
     {
-        const auto& ref0   = result_chain.references   [i - 1];
-        const auto& ref1   = result_chain.references   [i    ];
-        const auto& state0 = result_chain.kalman_states[i - 1];
-        const auto& state1 = result_chain.kalman_states[i    ];
+        const auto& ref0         = result_chain.references   [i - 1];
+        const auto& ref1         = result_chain.references   [i    ];
+        const auto& state0       = result_chain.kalman_states[i - 1];
+        const auto& state1       = result_chain.kalman_states[i    ];
+        const auto& proj_center0 = result_chain.proj_centers [i - 1];
+        const auto& proj_center1 = result_chain.proj_centers [i    ];
 
         auto t0 = ref0.t;
         auto t1 = ref1.t;
 
         if (tcur < t0 || tcur >= t1)
             continue;
+
+        //transfer state1 to map projection of state0?
+        if (x_tr_func)
+        { 
+            state1_tr = state1;
+            x_tr_func(state1_tr.x, state1.x, i+1, i);
+        }
+        const auto& state1_ref = x_tr_func ? state1_tr : state1;
 
         while (tcur >= t0 && tcur < t1)
         {
@@ -145,22 +176,22 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             if (dt0 <= base_config_.min_dt)
             {
                 //use first ref if timestep from first ref is very small
-                resampled_chain.add(ref0, state0);
+                resampled_chain.add(ref0, state0, proj_center0);
                 ++small_intervals;
                 tcur = t0 + time_incr;
                 continue;
             }
             if (dt1 <= base_config_.min_dt)
             {
-                //use first ref if timestep from first ref is very small
-                resampled_chain.add(ref1, state1);
+                //use second ref if timestep from second ref is very small
+                resampled_chain.add(ref1, state1, proj_center1);
                 ++small_intervals;
                 tcur = t1 + time_incr;
                 continue;
             }
 
-            auto new_state0 = interpStep(state0, state1,  dt0);
-            auto new_state1 = interpStep(state1, state0, -dt1);
+            auto new_state0 = interpStep(state0, state1_ref,  dt0);
+            auto new_state1 = interpStep(state1_ref, state0, -dt1);
 
             if (!new_state0.has_value() || !new_state1.has_value())
                 return false;
@@ -170,17 +201,18 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             new_state.P = SplineInterpolator::interpCovarianceMat(new_state0->P, new_state1->P, 0.5);
 
             Reference ref;
-            ref.t            = tcur;
-            ref.source_id    = ref0.source_id;
-            ref.noaccel_pos  = ref0.noaccel_pos;
-            ref.nospeed_pos  = ref0.nospeed_pos;
-            ref.nostddev_pos = ref0.nostddev_pos;
-            ref.mm_interp    = ref0.mm_interp || ref1.mm_interp;
-            ref.ref_interp   = true;
+            ref.t              = tcur;
+            ref.source_id      = ref0.source_id;
+            ref.noaccel_pos    = ref0.noaccel_pos || ref1.noaccel_pos;
+            ref.nospeed_pos    = ref0.nospeed_pos || ref1.nospeed_pos;
+            ref.nostddev_pos   = ref0.nostddev_pos || ref1.nostddev_pos;
+            ref.mm_interp      = ref0.mm_interp || ref1.mm_interp;
+            ref.projchange_pos = ref1.projchange_pos; //if a change in map proj happend, this should be logged in the second reference
+            ref.ref_interp     = true;
 
             storeState(ref, new_state);
 
-            resampled_chain.add(ref, new_state);
+            resampled_chain.add(ref, new_state, proj_center0);
 
             tcur += time_incr;
         }
@@ -189,12 +221,12 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
     if (verbosity() >= 1 && small_intervals > 0)
         logdbg << "Encountered " << small_intervals << " small interval(s) during resampling";
 
-    if (resampled_chain.references.size() >= 2)
+    if (resampled_chain.size() >= 2)
     {
-        resampled_chain.references.pop_back();
-        resampled_chain.kalman_states.pop_back();
+        resampled_chain.pop_back();
         resampled_chain.add(result_chain.references.back(), 
-                            result_chain.kalman_states.back());
+                            result_chain.kalman_states.back(),
+                            result_chain.proj_centers.back());
     }
 
     result_chain = std::move(resampled_chain);
@@ -268,27 +300,38 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
                               std::unique_ptr<ViewPointGenFeatureErrEllipses>& errors,
                               std::unique_ptr<ViewPointGenFeatureLineString>& lines,
                               std::unique_ptr<ViewPointGenFeatureLines>& speeds,
-                              const std::vector<Reference>& refs)
+                              const KalmanChain& chain)
     {
-        points->reserve(points->size() + refs.size(), false);
-        errors->reserve(errors->size() + refs.size(), false);
-        lines->reserve(lines->size() + refs.size(), false);
-        speeds->reserve(speeds->size() + refs.size() * 2, false);
+        points->reserve(points->size() + chain.size(), false);
+        errors->reserve(errors->size() + chain.size(), false);
+        lines->reserve(lines->size() + chain.size(), false);
+        speeds->reserve(speeds->size() + chain.size() * 2, false);
 
-        for (const auto& ref : refs)
+        Eigen::Vector2d pos_geod;
+        Eigen::Vector2d pos_geod_tip;
+
+        for (size_t i = 0; i < chain.size(); ++i)
         {
-            auto pos = transformBack(ref.x, ref.y);
+            const auto& ref         = chain.references  [ i ];
+            const auto& proj_center = chain.proj_centers[ i ];
+
+            proj_handler_.unproject(pos_geod[ 0 ], pos_geod[ 1 ], ref.x, ref.y, proj_center);
             
-            points->addPoint(pos);
-            errors->addPoint(pos);
+            points->addPoint(pos_geod);
+            errors->addPoint(pos_geod);
             errors->addSize(Eigen::Vector3d(ref.x_stddev.value(), ref.y_stddev.value(), ref.xy_cov.value()));
-            lines->addPoint(pos);
+            lines->addPoint(pos_geod);
 
             if (ref.hasVelocity())
             {
-                auto speed_vec_tip = transformBack(ref.x + ref.vx.value(), ref.y + ref.vy.value());
-                speeds->addPoint(pos);
-                speeds->addPoint(speed_vec_tip);
+                proj_handler_.unproject(pos_geod_tip[ 0 ], 
+                                        pos_geod_tip[ 1 ], 
+                                        ref.x + ref.vx.value(), 
+                                        ref.y + ref.vy.value(), 
+                                        proj_center);
+
+                speeds->addPoint(pos_geod);
+                speeds->addPoint(pos_geod_tip);
             }
         }
     };
@@ -342,7 +385,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
                           feat_errors_kalman, 
                           feat_lines_kalman, 
                           feat_speeds_kalman, 
-                          c.references);
+                          c);
         }
 
         //apply RTS smoother?
@@ -361,7 +404,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
                               feat_errors_kalman_smoothed, 
                               feat_lines_kalman_smoothed, 
                               feat_speeds_kalman_smoothed, 
-                              c.references);
+                              c);
             }
         }
 
@@ -380,9 +423,12 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
                               feat_errors_kalman_resampled, 
                               feat_lines_kalman_resampled, 
                               feat_speeds_kalman_resampled,
-                              c.references);
+                              c);
             }
         }
+
+        //obtain geodetic coords
+        proj_handler_.unproject(c.references, c.proj_centers);
 
         //add to result chain
         result_chain.add(c);
@@ -394,7 +440,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
         if (base_config_.resample_result)
         {
             addAnnotation("Kalman (resampled)", 
-                          ColorKalmanResampled, 
+                          ColorKalmanResampled,
                           feat_points_kalman_resampled, 
                           feat_errors_kalman_resampled, 
                           feat_lines_kalman_resampled,
@@ -439,13 +485,22 @@ void ReconstructorKalman::newChain()
 
 /**
 */
-void ReconstructorKalman::addReference(const Reference& ref,
-                                       const kalman::KalmanState& rts_info)
+void ReconstructorKalman::addReference(Reference& ref,
+                                       kalman::KalmanState& state,
+                                       const std::string& data_info)
 {
-    chain_cur_.references.push_back(ref);
+    //finalize reference (unprojection, projection change etc.)
+    finalizeReference(ref, state, data_info);
 
-    if (base_config_.smooth || base_config_.resample_result)
-        chain_cur_.kalman_states.push_back(rts_info);
+    //add to current chain
+    chain_cur_.add(ref, state, proj_handler_.projectionCenter());
+}
+
+/**
+*/
+void ReconstructorKalman::xPos(kalman::Vector& x, const Measurement& mm) const
+{
+    xPos(x, mm.x, mm.y);
 }
 
 /**
@@ -476,20 +531,31 @@ Reference ReconstructorKalman::storeState(const kalman::KalmanState& state,
 
 /**
 */
-bool ReconstructorKalman::needsReinit(const Reference& ref, const Measurement& mm) const
+bool ReconstructorKalman::needsReinit(const Reference& ref, 
+                                      const Measurement& mm, 
+                                      int flags,
+                                      std::string* reason) const
 {
-    if (base_config_.max_distance > 0)
+    if ((flags & ReinitFlags::ReinitCheckDistance) && base_config_.max_distance > 0)
     {
-        double d = distance(ref, mm, CoordSystem::Cart);
-        if (d > base_config_.max_distance)
+        const double d_sqr = distanceSqr(ref, mm, CoordSystem::Cart);
+        if (d_sqr > max_distance_sqr_)
+        {
+            if (reason)
+                *reason = "distance^2 = " + std::to_string(d_sqr) + " (>" + std::to_string(max_distance_sqr_) + ")"; 
             return true;
+        }
     }
 
-    if (base_config_.max_dt > 0)
+    if ((flags & ReinitFlags::ReinitCheckTime) && base_config_.max_dt > 0)
     {
         double dt = Reconstructor::timestep(ref, mm);
         if (dt > base_config_.max_dt)
+        {
+            if (reason)
+                *reason = "dt = " + std::to_string(dt) + " (>" + std::to_string(base_config_.max_dt) + ")"; 
             return true;
+        }
     }
 
     return false;
@@ -497,8 +563,12 @@ bool ReconstructorKalman::needsReinit(const Reference& ref, const Measurement& m
 
 /**
 */
-void ReconstructorKalman::init(const Measurement& mm)
+void ReconstructorKalman::init(Measurement& mm,
+                               const std::string& data_info)
 {
+    //init projection and project measurement
+    proj_handler_.initProjection(mm, true);
+
     //start new chain
     newChain();
 
@@ -513,21 +583,24 @@ void ReconstructorKalman::init(const Measurement& mm)
     ref.nospeed_pos = mm.hasVelocity();
     ref.noaccel_pos = mm.hasAcceleration();
 
-    addReference(ref, state);
+    addReference(ref, state, data_info);
 }
 
 /**
 */
-bool ReconstructorKalman::reinitIfNeeded(const Measurement& mm, const std::string& data_info)
+bool ReconstructorKalman::reinitIfNeeded(Measurement& mm, 
+                                         const std::string& data_info,
+                                         int flags)
 {
     const auto& last_ref = lastReference();
 
-    if (needsReinit(last_ref, mm))
+    std::string msg;
+    if (needsReinit(last_ref, mm, flags, &msg))
     {
         if (verbosity() > 0)
-            loginf << data_info << ": Reinitializing kalman filter at t = " << mm.t;
+            loginf << data_info << ": Reinitializing kalman filter at t = " << mm.t << ", " << msg;
 
-        init(mm);
+        init(mm, data_info);
         return true;
     }
 
@@ -566,8 +639,9 @@ reconstruction::Uncertainty ReconstructorKalman::defaultUncertaintyOfMeasurement
 }
 
 /**
+ * Implements reconstruction for all kalman-based reconstructors.
 */
-boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(const std::vector<Measurement>& measurements,
+boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(std::vector<Measurement>& measurements,
                                                                               const std::string& data_info)
 {
     init();
@@ -576,17 +650,17 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
         return {};
 
     //init kalman using first target report
-    const auto& mm0 = measurements.at(0);
-    init(mm0);
+    auto& mm0 = measurements.at(0);
+    init(mm0, data_info);
 
     size_t n = measurements.size();
 
     for (size_t i = 1; i < n; ++i)
     {
-        const auto& mm = measurements[ i ];
+        auto& mm = measurements[ i ];
 
-        //reinit?
-        if (reinitIfNeeded(mm, data_info))
+        //reinit based on timestep threshold?
+        if (reinitIfNeeded(mm, data_info, ReinitFlags::ReinitCheckTime))
             continue;
 
         double dt = timestep(mm);
@@ -597,6 +671,9 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
             
             continue;
         }
+
+        //initialize measurement (handle projection etc.)
+        initMeasurement(mm);
 
         //do kalman step
         auto state = kalmanStep(dt, mm);
@@ -610,7 +687,12 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
         //store new state
         auto ref = storeState(state.value(), mm);
 
-        addReference(ref, state.value());
+        //reinit based on distance threshold?
+        if (reinitIfNeeded(mm, data_info, ReinitFlags::ReinitCheckDistance))
+            continue;
+
+        //collect reference
+        addReference(ref, state.value(), data_info);
     }
 
     //add last uncollected chain
@@ -622,6 +704,51 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(co
         return {};
 
     return result;
+}
+
+/**
+ * Initializes some measurement internals.
+ */
+void ReconstructorKalman::initMeasurement(Measurement& mm) const
+{
+    //project measurement
+    //note: the last kalman state is always in sync with the current projection,
+    //so the projected measurement will lie in the same map projection system as the last state.
+    proj_handler_.project(mm);
+}
+
+/**
+ * Finalizes some reference internals (e.g. handles map projection changes).
+ */
+void ReconstructorKalman::finalizeReference(Reference& ref,
+                                            kalman::KalmanState& state,
+                                            const std::string& data_info) const
+{
+    if (base_config_.map_proj_mode != MapProjectionMode::None)
+    {
+        if (!chain_cur_.empty())
+        {
+            //check if a projection change is needed, if yes trigger post proc
+            if (proj_handler_.changeProjectionIfNeeded(ref, state))
+            {
+                postProjectionChange(state);
+
+                if (verbosity() > 1)
+                    loginf << data_info << ": Changed map projection @t=" << ref.t;
+            }
+        }
+
+        assert(proj_.valid());
+    }
+}
+
+/**
+ * Updates the given kalman state after a change of map projection.
+ */
+void ReconstructorKalman::postProjectionChange(const kalman::KalmanState& state) const
+{
+    //update state vector in kalman instance
+    xVec(state.x);
 }
 
 } // namespace reconstruction

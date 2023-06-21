@@ -51,7 +51,7 @@ public:
     static bool rtsSmoother(std::vector<kalman::Vector>& x_smooth,
                             std::vector<kalman::Matrix>& P_smooth,
                             const std::vector<KalmanState>& states,
-                            double smooth_scale = 1.0);
+                            const XTransferFunc& x_tr = XTransferFunc());
 
     kalman::KalmanState state() const;
 

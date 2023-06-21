@@ -423,6 +423,8 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
             rec->setVerbosity(s.verbose ? 1 : 0);
 
             //configure kalman reconstructor
+            rec->baseConfig().map_proj_mode  = s.map_proj_mode;
+
             rec->baseConfig().R_std          = s.R_std;
             rec->baseConfig().R_std_high     = s.R_std_high;
             rec->baseConfig().Q_std          = s.Q_std;
@@ -434,7 +436,6 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
             rec->baseConfig().min_chain_size = s.min_chain_size;
 
             rec->baseConfig().smooth         = s.smooth_rts;
-            rec->baseConfig().smooth_scale   = 1.0;
 
             rec->baseConfig().resample_result = s.resample_result;
             rec->baseConfig().resample_dt     = s.resample_result_dt;

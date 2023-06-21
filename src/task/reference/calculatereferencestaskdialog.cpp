@@ -1,7 +1,9 @@
+
 #include "calculatereferencestaskdialog.h"
 #include "calculatereferencestask.h"
 #include "selectdatasourceswidget.h"
 #include "util/stringconv.h"
+#include "reconstruction/reconstructor_defs.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -264,6 +266,11 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 #endif
     addRow("Reconstructor", rec_type_box_);
 
+    map_mode_box_ = new QComboBox;
+    map_mode_box_->addItem("Static", QVariant((int)reconstruction::MapProjectionMode::Static));
+    map_mode_box_->addItem("Dynamic", QVariant((int)reconstruction::MapProjectionMode::Dynamic));
+    addRow("Map Projection", map_mode_box_);
+
     //uncertainty section
     addHeader("Default Uncertainties");
 
@@ -429,6 +436,7 @@ void CalculateReferencesTaskDialog::readOptions()
     // kalman
 
     rec_type_box_->setCurrentIndex((int)s.rec_type);
+    map_mode_box_->setCurrentIndex(map_mode_box_->findData((int)s.map_proj_mode));
 
     R_std_box_->setValue(s.R_std);
     R_std_high_box_->setValue(s.R_std_high);
@@ -486,6 +494,7 @@ void CalculateReferencesTaskDialog::writeOptions()
     // kalman
 
     s.rec_type              = (CalculateReferencesTaskSettings::ReconstructorType)rec_type_box_->currentIndex();
+    s.map_proj_mode         = (CalculateReferencesTaskSettings::MapProjectionMode)map_mode_box_->currentData().toInt();
 
     s.R_std                 = R_std_box_->value();
     s.R_std_high            = R_std_high_box_->value();
