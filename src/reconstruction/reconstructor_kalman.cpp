@@ -163,7 +163,7 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
         if (x_tr_func)
         { 
             state1_tr = state1;
-            x_tr_func(state1_tr.x, state1.x, i+1, i);
+            x_tr_func(state1_tr.x, state1.x, i, i - 1);
         }
         const auto& state1_ref = x_tr_func ? state1_tr : state1;
 
