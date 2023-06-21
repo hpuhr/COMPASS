@@ -89,13 +89,24 @@ void RecKalmanProjectionHandler::initProjection(double lat,
  */
 void RecKalmanProjectionHandler::project(Measurement& mm) const
 {
+    project(mm.x, mm.y, mm.lat, mm.lon);
+}
+
+/**
+ * Projects the given geodetic coords using the current map projection.
+ */
+void RecKalmanProjectionHandler::project(double& x, 
+                                         double& y, 
+                                         double lat, 
+                                         double lon) const
+{
     if (settings_.map_proj_mode == MapProjectionMode::None)
         return;
 
     assert(proj_ && proj_->valid());
 
     //project using current projection
-    proj_->project(mm.x, mm.y, mm.lat, mm.lon);
+    proj_->project(x, y, lat, lon);
 }
 
 /**
@@ -191,15 +202,15 @@ void RecKalmanProjectionHandler::changeProjection(Reference& ref,
 
     assert(rec_);
 
-    //obtain lat and lon from current projection
+    //obtain geodetic ref coords from current projection
     double lat, lon;
     unproject(lat, lon, ref);
 
-    //update projection to ref wgs84 coords
+    //update projection to new geodetic coords
     initProjection(lat, lon);
 
-    //update cartesian coords to new map projection
-    project(ref);
+    //update cartesian coords of ref to new map projection
+    project(ref.x, ref.y, lat, lon);
 
     //store new position to state vector
     //note: we assume only small changes in map projection, 

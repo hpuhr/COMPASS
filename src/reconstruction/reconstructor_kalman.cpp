@@ -57,8 +57,6 @@ void ReconstructorKalman::init()
     max_distance_sqr_ = base_config_.max_distance * base_config_.max_distance;
 
     //configure projection 
-    
-
     proj_handler_.settings().map_proj_mode          = base_config_.map_proj_mode;
     proj_handler_.settings().proj_max_dist_cart_sqr = base_config_.max_proj_distance_cart * 
                                                       base_config_.max_proj_distance_cart;

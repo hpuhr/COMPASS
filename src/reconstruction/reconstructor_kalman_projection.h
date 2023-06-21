@@ -56,6 +56,10 @@ public:
     void initProjection(Measurement& mm, bool project_mm);
     
     void project(Measurement& mm) const;
+    void project(double& x, 
+                 double& y, 
+                 double lat, 
+                 double lon) const;
     void unproject(Reference& ref) const;
     void unproject(double& lat, double& lon, const Reference& ref) const;
     void unproject(double& lat, 
