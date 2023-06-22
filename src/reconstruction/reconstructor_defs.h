@@ -37,17 +37,19 @@ enum class CoordSystem
 enum class MapProjectionMode
 {
     None = 0, //no projection (cartesian coords pre-stored in the measurements are used,
-                //    unprojection to wgs84 should happen outside of reconstructor)
+              //unprojection to geodetic should happen outside of reconstructor)
+
     Static,   //a single map projection is used for the whole track (origin of projection is set to
-                //    center of data bounds)
+              //center of data bounds, might result in inaccuracies in locations far away from the projection center)
+    
     Dynamic   //the map projection varies dynamically based on a maximum distance threshold (most accurate,
-                //    but results in some computation overhead)
+              //but results in some computation overhead)
 };
 
 enum class StateInterpMode
 {
-    BlendHalf,    //projected kalman states will be blended halfways
-    BlendLinear   //projected kalman states will be blended linearly with time
+    BlendHalf,    //time-projected kalman states will be blended halfways
+    BlendLinear   //time-projected kalman states will be blended linearly with time
 };
 
 /**

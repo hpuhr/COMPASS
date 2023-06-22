@@ -4,6 +4,7 @@
 #include "selectdatasourceswidget.h"
 #include "util/stringconv.h"
 #include "reconstruction/reconstructor_defs.h"
+#include "compass.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -236,12 +237,20 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     int row = 0;
 
-    auto addRow = [&] (const QString& name, QWidget* w)
+    auto addRow = [&] (const QString& name, QWidget* w, bool visible)
     {
         QLabel* label = new QLabel(name);
         label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        label->setVisible(visible);
+
         layout->addWidget(label, row, 0);
-        if (w) layout->addWidget(w, row, 1);
+
+        if (w) 
+        {
+            w->setVisible(visible);
+            layout->addWidget(w, row, 1);
+        }
+        
         ++row;
     };
 
@@ -259,17 +268,19 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
         layout->addWidget(label, row++, 0);
     };
 
+    bool is_appimage = COMPASS::instance().isAppImage();
+
     rec_type_box_ = new QComboBox;
     rec_type_box_->addItem("UMKalman2D");
 #if USE_EXPERIMENTAL_SOURCE
     rec_type_box_->addItem("AMKalman2D");
 #endif
-    addRow("Reconstructor", rec_type_box_);
+    addRow("Reconstructor", rec_type_box_, true);
 
     map_mode_box_ = new QComboBox;
     map_mode_box_->addItem("Static", QVariant((int)reconstruction::MapProjectionMode::Static));
     map_mode_box_->addItem("Dynamic", QVariant((int)reconstruction::MapProjectionMode::Dynamic));
-    addRow("Map Projection", map_mode_box_);
+    addRow("Map Projection", map_mode_box_, !is_appimage);
 
     //uncertainty section
     addHeader("Default Uncertainties");
@@ -277,27 +288,27 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     R_std_box_ = new QDoubleSpinBox;
     R_std_box_->setMinimum(0.0);
     R_std_box_->setMaximum(DBL_MAX);
-    addRow("Measurement Stddev", R_std_box_);
+    addRow("Measurement Stddev", R_std_box_, true);
 
     R_std_high_box_ = new QDoubleSpinBox;
     R_std_high_box_->setMinimum(0.0);
     R_std_high_box_->setMaximum(DBL_MAX);
-    addRow("Measurement Stddev (high)", R_std_high_box_);
+    addRow("Measurement Stddev (high)", R_std_high_box_, true);
 
     Q_std_box_ = new QDoubleSpinBox;
     Q_std_box_->setMinimum(0.0);
     Q_std_box_->setMaximum(DBL_MAX);
-    addRow("Process Stddev", Q_std_box_);
+    addRow("Process Stddev", Q_std_box_, true);
 
     P_std_box_ = new QDoubleSpinBox;
     P_std_box_->setMinimum(0.0);
     P_std_box_->setMaximum(DBL_MAX);
-    addRow("System Stddev", P_std_box_);
+    addRow("System Stddev", P_std_box_, true);
 
     P_std_high_box_ = new QDoubleSpinBox;
     P_std_high_box_->setMinimum(0.0);
     P_std_high_box_->setMaximum(DBL_MAX);
-    addRow("System Stddev (high)", P_std_high_box_);
+    addRow("System Stddev (high)", P_std_high_box_, true);
 
     //chain section
     addHeader("Chain Generation");
@@ -306,18 +317,18 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     min_dt_box_->setMinimum(0.0);
     min_dt_box_->setMaximum(DBL_MAX);
     min_dt_box_->setSuffix(" s");
-    addRow("Minimum Time Step", min_dt_box_);
+    addRow("Minimum Time Step", min_dt_box_, true);
 
     max_dt_box_ = new QDoubleSpinBox;
     max_dt_box_->setMinimum(0.0);
     max_dt_box_->setMaximum(DBL_MAX);
     max_dt_box_->setSuffix(" s");
-    addRow("Maximum Time Step", max_dt_box_);
+    addRow("Maximum Time Step", max_dt_box_, true);
 
     min_chain_size_box_ = new QSpinBox;
     min_chain_size_box_->setMinimum(1);
     min_chain_size_box_->setMaximum(INT_MAX);
-    addRow("Minimum Chain Size", min_chain_size_box_);
+    addRow("Minimum Chain Size", min_chain_size_box_, true);
 
     //additional option section
     addHeader("Additional Options");
