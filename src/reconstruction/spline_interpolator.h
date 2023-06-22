@@ -61,6 +61,9 @@ public:
                                                const Measurement& mm1, 
                                                double interp_factor,
                                                CoordSystem coord_sys);
+    static Eigen::VectorXd interpStateVector(const Eigen::VectorXd& x0, 
+                                             const Eigen::VectorXd& x1, 
+                                             double interp_factor);
     static Eigen::MatrixXd interpCovarianceMat(const Eigen::MatrixXd& C0, 
                                                const Eigen::MatrixXd& C1, 
                                                double interp_factor);

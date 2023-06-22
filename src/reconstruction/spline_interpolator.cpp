@@ -66,6 +66,16 @@ namespace
 }
 
 /**
+ * Interpolate state vector (usually containing position and e.g. velocity vector, acceleration vector).
+*/
+Eigen::VectorXd SplineInterpolator::interpStateVector(const Eigen::VectorXd& x0, 
+                                                      const Eigen::VectorXd& x1, 
+                                                      double interp_factor)
+{
+    return (1.0 - interp_factor) * x0 + interp_factor * x1;
+}
+
+/**
  * Interpolate covariance matrices.
  * 
  * -> linear interpolation of cov matrices should lead to symmetrical semi-positive-definite matrices in interval t=[0,1]

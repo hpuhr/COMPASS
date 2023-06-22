@@ -144,6 +144,15 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
 
     kalman::KalmanState state1_tr;
 
+    auto blendFunc = [ & ] (double dt0, double dt1, double dt)
+    {
+        if (base_config_.interp_mode == StateInterpMode::BlendLinear)
+            return dt0 / dt;
+
+        //StateInterpMode::BlendHalf
+        return 0.5;
+    };
+
     for (size_t i = 1; i < n; ++i)
     {
         const auto& ref0         = result_chain.references   [i - 1];
@@ -167,7 +176,7 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
         }
         const auto& state1_ref = x_tr_func ? state1_tr : state1;
 
-        //const double dt = Utils::Time::partialSeconds(t1 - t0);
+        const double dt = Utils::Time::partialSeconds(t1 - t0);
 
         while (tcur >= t0 && tcur < t1)
         {
@@ -196,10 +205,10 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             if (!new_state0.has_value() || !new_state1.has_value())
                 return false;
 
-            double interp_factor = 0.5; //dt0 / dt;
+            double interp_factor = blendFunc(dt0, dt1, dt);
 
             kalman::KalmanState new_state;
-            new_state.x = new_state0->x * (1.0 - interp_factor) + new_state1->x * interp_factor;
+            new_state.x = SplineInterpolator::interpStateVector(new_state0->x, new_state1->x, interp_factor);
             new_state.P = SplineInterpolator::interpCovarianceMat(new_state0->P, new_state1->P, interp_factor);
 
             Reference ref;
@@ -209,12 +218,13 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             ref.nospeed_pos    = ref0.nospeed_pos || ref1.nospeed_pos;
             ref.nostddev_pos   = ref0.nostddev_pos || ref1.nostddev_pos;
             ref.mm_interp      = ref0.mm_interp || ref1.mm_interp;
-            ref.projchange_pos = ref1.projchange_pos; //if a change in map proj happend, this should be logged in the second reference
+            ref.projchange_pos = ref1.projchange_pos; //if a change in map projection happened between the two reference states, 
+                                                      //this should be logged in the second reference
             ref.ref_interp     = true;
 
             storeState(ref, new_state);
 
-            resampled_chain.add(ref, new_state, proj_center0);
+            resampled_chain.add(ref, new_state, proj_center0); //!map projection of state0 used!
 
             tcur += time_incr;
         }

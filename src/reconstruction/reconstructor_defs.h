@@ -27,12 +27,6 @@
 namespace reconstruction
 {
 
-enum class CoordConversion
-{
-    NoConversion = 0,
-    WGS84ToCart
-};
-
 enum class CoordSystem
 {
     Unknown = 0,
@@ -48,6 +42,12 @@ enum class MapProjectionMode
                 //    center of data bounds)
     Dynamic   //the map projection varies dynamically based on a maximum distance threshold (most accurate,
                 //    but results in some computation overhead)
+};
+
+enum class StateInterpMode
+{
+    BlendHalf,
+    BlendLinear
 };
 
 /**
