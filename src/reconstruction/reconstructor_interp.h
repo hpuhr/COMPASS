@@ -45,7 +45,7 @@ public:
     const Config& config() const { return config_; }
 
 protected:
-    virtual boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements, 
+    virtual boost::optional<std::vector<Reference>> reconstruct_impl(std::vector<Measurement>& measurements, 
                                                                      const std::string& data_info) override;
     static const QColor ColorOk;
     static const QColor ColorFishy;

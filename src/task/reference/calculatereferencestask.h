@@ -6,6 +6,7 @@
 #include "dbcontent/dbcontentcache.h"
 #include "task.h"
 //#include "global.h"
+#include "reconstruction/reconstructor_defs.h"
 
 #include <QObject>
 
@@ -27,6 +28,11 @@ struct CalculateReferencesTaskSettings
         UMKalman2D = 0,
         AMKalman2D
     };
+
+    typedef reconstruction::MapProjectionMode MapProjectionMode;
+
+    ReconstructorType rec_type      = ReconstructorType::UMKalman2D;
+    MapProjectionMode map_proj_mode = MapProjectionMode::Dynamic;
 
     double        R_std                 = 30.0;     // observation noise (standard)
     double        R_std_high            = 1000.0;   // observation noise (high)
@@ -56,8 +62,6 @@ struct CalculateReferencesTaskSettings
 
     bool use_adsb_data {true};
     nlohmann::json data_sources_adsb;               // map, ds_id str -> active flag, true if not contained
-
-    ReconstructorType rec_type = ReconstructorType::UMKalman2D;
 
     bool filter_position_usage {true};
 

@@ -18,6 +18,7 @@
 #pragma once
 
 #include "reconstructor.h"
+#include "reconstructor_kalman_projection.h"
 #include "kalman_defs.h"
 
 #include <Eigen/Core>
@@ -26,7 +27,8 @@ namespace reconstruction
 {
 
 /**
-*/
+ * A connected chain of kalman reference updates and respective kalman states.
+ */
 struct KalmanChain
 {
     bool empty() const
@@ -38,25 +40,44 @@ struct KalmanChain
     {
         references.reserve(n);
         kalman_states.reserve(n);
+        proj_centers.reserve(n);
     }
 
     void add(const KalmanChain& other)
     {
         references.insert(references.end(), other.references.begin(), other.references.end());
         kalman_states.insert(kalman_states.end(), other.kalman_states.begin(), other.kalman_states.end());
+        proj_centers.insert(proj_centers.end(), other.proj_centers.begin(), other.proj_centers.end());
     }
 
-    void add(const Reference& ref, const kalman::KalmanState& state)
+    void add(const Reference& ref, 
+             const kalman::KalmanState& state,
+             const Eigen::Vector2d& proj_center)
     {
         references.push_back(ref);
         kalman_states.push_back(state);
+        proj_centers.push_back(proj_center);
     }
 
-    std::vector<Reference>           references;    //reconstructed positions
-    std::vector<kalman::KalmanState> kalman_states; //data needed for RTS smoother
+    void pop_back()
+    {
+        references.pop_back();
+        kalman_states.pop_back();
+        proj_centers.pop_back();
+    }
+
+    size_t size() const
+    {
+        return references.size();
+    }
+
+    std::vector<Reference>           references;
+    std::vector<kalman::KalmanState> kalman_states;
+    std::vector<Eigen::Vector2d>     proj_centers;
 };
 
 /**
+ * Base class for kalman-based reconstructors.
 */
 class ReconstructorKalman : public Reconstructor
 {
@@ -70,18 +91,22 @@ public:
         double P_std_high = 1000.0; // system noise (high)
 
         bool   smooth         = true; // use RTS smoother
-        double smooth_scale   = 1.0;  // scale factor for RTS smoothing
         size_t min_chain_size = 2;    // minimum number of connected points used as result (and input for RTS smoother)
 
-        double max_distance = 0.0;    // maximum allowed distance of consecutive target reports in meters (0 = do not check)
-        double min_dt       = 1e-06;  // minimum allowed time difference of consecutive target reports in seconds (0 = do not check)
-        double max_dt       = 60.0;   // maximum allowed time difference of consecutive target reports in seconds (0 = do not check)
+        double max_distance = 50000.0; // maximum allowed distance of consecutive target reports in meters (0 = do not check)
+        double min_dt       = 1e-06;   // minimum allowed time difference of consecutive target reports in seconds (0 = do not check)
+        double max_dt       = 30.0;    // maximum allowed time difference of consecutive target reports in seconds (0 = do not check)
 
-        bool   resample_result = false; //resample result references using kalman infos
-        double resample_dt     = 1.0;   //resampling step size in seconds
+        bool            resample_result = false;                      // resample result references using kalman infos
+        double          resample_dt     = 1.0;                        // resampling step size in seconds
+        StateInterpMode interp_mode     = StateInterpMode::BlendHalf; // kalman state interpolation mode used during resampling
+
+        MapProjectionMode map_proj_mode          = MapProjectionMode::Dynamic; // map projection mode
+        double            max_proj_distance_cart = 20000.0;                    // maximum distance from the current map projection origin in meters 
+                                                                               // before changing the projection center
     };
 
-    ReconstructorKalman() = default;
+    ReconstructorKalman();
     virtual ~ReconstructorKalman() = default;
 
     BaseConfig& baseConfig() { return base_config_; }
@@ -100,49 +125,78 @@ public:
     static const float  SpeedVecLineWidth;
 
 protected:
-    boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements,
+    boost::optional<std::vector<Reference>> reconstruct_impl(std::vector<Measurement>& measurements,
                                                              const std::string& data_info) override final;
     virtual void init_impl() {};
     virtual kalman::KalmanState kalmanState() const = 0;
     virtual boost::optional<kalman::KalmanState> kalmanStep(double dt, const Measurement& mm) = 0;
     virtual kalman::Vector xVec(const Measurement& mm) const = 0;
+    virtual void xVec(const kalman::Vector& x) const = 0;
+    virtual void xPos(double& x, double& y, const kalman::Vector& x_vec) const = 0;
+    virtual void xPos(kalman::Vector& x_vec, double x, double y) const = 0;
+    virtual void xPos(kalman::Vector& x, const Measurement& mm) const;
     virtual kalman::Matrix pMat(const Measurement& mm) const = 0;
     virtual kalman::Vector zVec(const Measurement& mm) const = 0;
-    virtual void storeState_impl(Reference& ref,
-                                 const kalman::KalmanState& state) const = 0;
+    
+    virtual void storeState_impl(Reference& ref, const kalman::KalmanState& state) const = 0;
     virtual void init_impl(const Measurement& mm) const = 0;
+    
     virtual boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
                                                             const kalman::KalmanState& state1,
                                                             double dt) const = 0;
     virtual bool smoothChain_impl(std::vector<kalman::Vector>& x_smooth,
                                   std::vector<kalman::Matrix>& P_smooth,
-                                  const KalmanChain& chain) const = 0;
-
+                                  const KalmanChain& chain,
+                                  const kalman::XTransferFunc& x_tr) const = 0;
+    
     reconstruction::Uncertainty defaultUncertaintyOfMeasurement(const Measurement& mm) const;
 
 private:
+    friend class RecKalmanProjectionHandler;
+
+    enum ReinitFlags
+    {
+        ReinitCheckTime     = 1 << 0, //checks for reinit using a timestep threshold
+        ReinitCheckDistance = 1 << 1  //checks for reinit using a metric distance-based threshold
+    };
+
     void init();
     boost::optional<std::vector<Reference>> finalize();
 
+    //measurement & reference related
     const Reference& lastReference() const;
-
     void newChain();
-    void addReference(const Reference& ref,
-                      const kalman::KalmanState& rts_info);
-
+    void addReference(Reference& ref,
+                      kalman::KalmanState& state,
+                      const std::string& data_info);
     void storeState(Reference& ref,
                     const kalman::KalmanState& state) const;
     Reference storeState(const kalman::KalmanState& state,
                          const Measurement& mm) const;
+    void initMeasurement(Measurement& mm) const;
+    void finalizeReference(Reference& ref,
+                           kalman::KalmanState& state,
+                           const std::string& data_info) const;
 
-    bool needsReinit(const Reference& ref, const Measurement& mm) const;
-    void init(const Measurement& mm);
-    bool reinitIfNeeded(const Measurement& mm, const std::string& data_info);
+    //kalman init related
+    bool needsReinit(const Reference& ref, 
+                     const Measurement& mm,
+                     int flags,
+                     std::string* reason = nullptr) const;
+    void init(Measurement& mm, const std::string& data_info);
+    bool reinitIfNeeded(Measurement& mm, 
+                        const std::string& data_info,
+                        int flags);
 
-    double timestep(const Measurement& mm) const;
-
+    //map projection related
+    virtual void postProjectionChange(const kalman::KalmanState& state) const;
+    
+    //kalman chain operations
     bool smoothChain(KalmanChain& chain);
     bool resampleResult(KalmanChain& result_chain, double dt_sec);
+
+    //various
+    double timestep(const Measurement& mm) const;
 
     BaseConfig base_config_;
 
@@ -152,9 +206,12 @@ private:
     double R_var_high_;
     double P_var_;
     double P_var_high_;
+    double max_distance_sqr_ = 0.0;
 
     std::vector<KalmanChain> chains_;
     KalmanChain              chain_cur_;
+
+    mutable RecKalmanProjectionHandler proj_handler_;
 };
 
 } // namespace reconstruction

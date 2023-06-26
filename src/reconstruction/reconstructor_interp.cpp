@@ -31,7 +31,7 @@ const QColor ReconstructorInterp::ColorFishy = QColor(255, 255, 0);
 
 /**
 */
-boost::optional<std::vector<Reference>> ReconstructorInterp::reconstruct_impl(const std::vector<Measurement>& measurements, 
+boost::optional<std::vector<Reference>> ReconstructorInterp::reconstruct_impl(std::vector<Measurement>& measurements, 
                                                                               const std::string& data_info)
 {
     size_t n = measurements.size();

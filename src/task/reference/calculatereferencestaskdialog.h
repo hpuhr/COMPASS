@@ -1,6 +1,6 @@
+
 #ifndef CALCULATEREFERENCESTASKDIALOG_H
 #define CALCULATEREFERENCESTASKDIALOG_H
-
 
 #include <QDialog>
 
@@ -31,7 +31,6 @@ public slots:
     void trackerSourcesChangedSlot(std::map<std::string, bool> selection);
     void toggleADSBSourcesSlot();
     void adsbSourcesChangedSlot(std::map<std::string, bool> selection);
-
 
 public:
     CalculateReferencesTaskDialog(CalculateReferencesTask& task);
@@ -105,6 +104,7 @@ protected:
 
     // kalman
     QComboBox*      rec_type_box_ = nullptr;
+    QComboBox*      map_mode_box_ = nullptr;
 
     QDoubleSpinBox* R_std_box_      = nullptr;
     QDoubleSpinBox* R_std_high_box_ = nullptr;
