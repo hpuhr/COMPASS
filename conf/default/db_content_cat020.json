@@ -71,6 +71,19 @@
                     "unit": ""
                 }
             },
+            "Variable46": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "contributing_receivers",
+                    "description": "From 400.Contributing Receivers.RUx\n\nRUx Contribution\n0 RUx has NOT contributed to the target detection\n1 RUx has contributed to the target detection",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Contributing Receivers",
+                    "representation_str": "STANDARD",
+                    "short_name": "RUx",
+                    "unit": ""
+                }
+            },
             "VariableMLATTimestamp0": {
                 "parameters": {
                     "data_type_str": "TIMESTAMP",

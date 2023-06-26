@@ -459,8 +459,9 @@ bool JSONObjectParser::parseTargetReport(const nlohmann::json& tr, Buffer& buffe
                        << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<nlohmann::json>(current_var_name));
 
-                mandatory_missing =
-                        map_it->findAndSetValue(tr, buffer.get<nlohmann::json>(current_var_name), row_cnt);
+//                mandatory_missing =
+//                        map_it->findAndSetValue(tr, buffer.get<nlohmann::json>(current_var_name), row_cnt);
+                 map_it->findAndSetValues(tr, buffer.get<json>(current_var_name), row_cnt);
 
                 break;
             }

@@ -1029,6 +1029,22 @@
                     "mandatory": false,
                     "unit": ""
                 }
+            },
+            "JSONDataMapping96": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "Contributing Receivers",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "400.Contributing Receivers.RUx",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
             }
         }
     }

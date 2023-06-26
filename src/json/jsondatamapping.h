@@ -52,6 +52,9 @@ class JSONDataMapping : public Configurable
     template <typename T>
     bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list,
                          size_t row_cnt, bool debug=false) const;
+    // only used for lists ending up as JSON
+    bool findAndSetValues(const nlohmann::json& j, NullableVector<nlohmann::json>& array_list,
+                         size_t row_cnt, bool debug=false) const;
 
     bool hasDimension() const { return dimension_.size() > 0; }
     /// @brief Returns dimension contained in the column
@@ -130,6 +133,7 @@ class JSONDataMapping : public Configurable
     bool has_factor_ {false};
     double factor_ {0};
 
+    // remove? not used in ASTERIX
     bool in_array_{false};
     bool append_value_{false};
 
@@ -148,6 +152,9 @@ class JSONDataMapping : public Configurable
 
     // TODO change to Utils::JSON?
     const nlohmann::json* findKey(const nlohmann::json& j) const;
+    const std::vector<const nlohmann::json*> findKeys(const nlohmann::json& j) const;
+    const void addKeys(const nlohmann::json& j, std::vector<const nlohmann::json*>& rets,
+                      unsigned int key_cnt) const;
     const nlohmann::json* findParentKey(const nlohmann::json& j) const;
 
     // generic template functions
@@ -158,6 +165,7 @@ class JSONDataMapping : public Configurable
     template <typename T>
     void appendValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list,
                      size_t row_cnt, bool debug=false) const;
+
     // bool template functions
     void setValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list,
                   size_t row_cnt, bool debug=false) const;
@@ -173,6 +181,9 @@ class JSONDataMapping : public Configurable
                   size_t row_cnt, bool debug=false) const;
     void appendValue(const nlohmann::json* val_ptr, NullableVector<std::string>& array_list,
                      size_t row_cnt, bool debug=false) const;
+
+    void pushBackValue(const nlohmann::json& val_ref, NullableVector<nlohmann::json>& array_list,
+                       size_t row_cnt, bool debug=false) const;
 };
 
 Q_DECLARE_METATYPE(JSONDataMapping*)
