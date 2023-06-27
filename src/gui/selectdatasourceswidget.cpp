@@ -45,7 +45,7 @@ SelectDataSourcesWidget::~SelectDataSourcesWidget()
 
 void SelectDataSourcesWidget::updateSelected(std::map<std::string, bool> selection)
 {
-    loginf << "SelectDataSourcesWidget: updateSelected";
+    loginf << "SelectDataSourcesWidget: updateSelected: ds_type_ " << ds_type_;
     assert (data_source_layout_);
 
     QLayoutItem* child;

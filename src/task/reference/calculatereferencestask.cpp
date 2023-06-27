@@ -109,6 +109,8 @@ CalculateReferencesTaskDialog* CalculateReferencesTask::dialog()
         connect(dialog_.get(), &CalculateReferencesTaskDialog::cancelSignal,
                 this, &CalculateReferencesTask::dialogCancelSlot);
     }
+    else
+        dialog_->updateSourcesWidgets();
 
     assert(dialog_);
     return dialog_.get();
