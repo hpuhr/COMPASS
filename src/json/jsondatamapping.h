@@ -152,9 +152,9 @@ class JSONDataMapping : public Configurable
 
     // TODO change to Utils::JSON?
     const nlohmann::json* findKey(const nlohmann::json& j) const;
-    const std::vector<const nlohmann::json*> findKeys(const nlohmann::json& j) const;
-    const void addKeys(const nlohmann::json& j, std::vector<const nlohmann::json*>& rets,
-                      unsigned int key_cnt) const;
+    const std::vector<nlohmann::json> findKeys(const nlohmann::json& j) const;
+    void addKeys(const nlohmann::json& j, std::vector<nlohmann::json>& rets,
+                 unsigned int key_cnt) const;
     const nlohmann::json* findParentKey(const nlohmann::json& j) const;
 
     // generic template functions

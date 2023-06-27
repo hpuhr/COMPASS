@@ -38,6 +38,54 @@
                     "unit": "Second"
                 }
             },
+            "JSONDataMapping100": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "Vehicle Fleet Identification",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "300.VFI",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping101": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "PPM MSG",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "310.MSG",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping102": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "PPM TRB",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "310.TRB",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
             "JSONDataMapping12": {
                 "parameters": {
                     "active": true,
@@ -1041,6 +1089,54 @@
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "400.Contributing Receivers.RUx",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping97": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "W/E Value",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "030.Warning/Error Conditions.W/E Value",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping98": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "Mode S MB Data",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "250.Mode S MB Data",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping99": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "ACAS MB DATA",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "260.MB DATA",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""

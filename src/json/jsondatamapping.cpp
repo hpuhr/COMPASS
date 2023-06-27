@@ -485,9 +485,9 @@ bool JSONDataMapping::findAndSetValues(const json& j, NullableVector<json>& arra
     assert (!in_array_);
     assert (!append_value_);
 
-    std::vector<const json*> val_ptrs = findKeys(j);
+    std::vector<json> values = findKeys(j);
 
-    if (!val_ptrs.size())
+    if (!values.size())
     {
         if (mandatory_)
             return true;
@@ -498,19 +498,20 @@ bool JSONDataMapping::findAndSetValues(const json& j, NullableVector<json>& arra
     {
         try
         {
-            for (const json* val_ptr : val_ptrs)
-            {
-                assert (val_ptr);
-                loginf << "JSONDataMapping: findAndSetValue: row_cnt " << row_cnt
-                       << " key " << json_key_ << " value '" << val_ptr->dump() << "'";
+//            for (const json& val_ptr : val_ptrs)
+//            {
+//                assert (val_ptr);
+//                loginf << "JSONDataMapping: findAndSetValues: row_cnt " << row_cnt
+//                       << " key " << json_key_ << " value '" << val_ptr.dump() << "'";
 
-                pushBackValue(*val_ptr, array_list, row_cnt, debug);
-            }
+//                pushBackValue(val_ptr, array_list, row_cnt, debug);
+//            }
+            array_list.set(row_cnt, values);
             return false;  // everything ok
         }
         catch (json::exception& e)
         {
-            logerr << "JSONDataMapping: findAndSetValue: key " << json_key_
+            logerr << "JSONDataMapping: findAndSetValues: key " << json_key_
                    << " json exception " << e.what() << " property "
                    << array_list.propertyID();
             array_list.setNull(row_cnt);
@@ -560,24 +561,24 @@ const json* JSONDataMapping::findKey(const json& j) const
     return val_ptr;
 }
 
-const std::vector<const json*>JSONDataMapping::findKeys(const json& j) const
+const std::vector<json>JSONDataMapping::findKeys(const json& j) const
 {
-    std::vector<const json*> rets;
+    std::vector<json> rets;
 
     if (has_sub_keys_)
         addKeys(j, rets, 0);
     else
     {
         if (j.contains(json_key_))
-            rets.push_back(&j.at(json_key_));
+            rets.push_back(j.at(json_key_));
     }
 
-    //loginf << "JSONDataMapping: findKeys: UGA rets " << rets.size();
+    logdbg << "JSONDataMapping: findKeys: UGA rets " << rets.size();
 
     return rets;
 }
 
-const void JSONDataMapping::addKeys(const json& j, std::vector<const json*>& rets ,
+void JSONDataMapping::addKeys(const json& j, std::vector<json>& rets ,
                                     unsigned int key_cnt) const
 {
     assert (key_cnt < sub_keys_.size());
@@ -588,29 +589,29 @@ const void JSONDataMapping::addKeys(const json& j, std::vector<const json*>& ret
 
         if (key_cnt == sub_keys_.size()-1) // last found
         {
-            loginf << "JSONDataMapping: addKeys: UGA last value '" << value.dump() << "'";
-            rets.push_back(&j.at(sub_keys_.at(key_cnt)));
+            logdbg << "JSONDataMapping: addKeys: last value '" << value.dump() << "'";
+            rets.push_back(value);
             return;
         }
         else // not last
         {
             if (value.is_object())
             {
-                //loginf << "JSONDataMapping: addKeys: UGA stepping into object";
+                //loginf << "JSONDataMapping: addKeys: stepping into object";
 
                 addKeys(value, rets, key_cnt+1);
 
             }
             else if (value.is_array())
             {
-                //loginf << "JSONDataMapping: addKeys: UGA stepping into array";
+                //loginf << "JSONDataMapping: addKeys: stepping into array";
 
                 for (const json& it : value.get<json::array_t>())
                     addKeys(it, rets, key_cnt+1);
             }
             else
             {
-                //loginf << "JSONDataMapping: addKeys: UGA unkown value type '" << value.dump() << "'";
+                //loginf << "JSONDataMapping: addKeys: unkown value type '" << value.dump() << "'";
                 assert (false); // not gonna happen
             }
         }
@@ -901,10 +902,18 @@ void JSONDataMapping::appendValue(const json* val_ptr,
 void JSONDataMapping::pushBackValue(const nlohmann::json& val_ref, NullableVector<nlohmann::json>& array_list,
                    size_t row_cnt, bool debug) const
 {
+    if (debug)
+        loginf << "JSONDataMapping: pushBackValue: key " << json_key_ << " json " << val_ref.type_name()
+               << " '" << val_ref.dump() << "' format '" << json_value_format_ << "'";
+
     assert (json_value_format_ == "");
 
     if (array_list.isNull(row_cnt))
-        array_list.set(row_cnt, {val_ref});
+    {
+        std::vector<unsigned int> list;
+        list.push_back(val_ref);
+        array_list.set(row_cnt, list);
+    }
     else
         array_list.getRef(row_cnt).push_back(val_ref);
 }

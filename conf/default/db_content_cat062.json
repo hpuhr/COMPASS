@@ -344,6 +344,32 @@
                     "unit": "Feet"
                 }
             },
+            "Variable122": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "acas_mb_data",
+                    "description": "From 380.ACS.MB Data\n\n56-bit message conveying Mode S Comm B message data of BDS Register 3,0",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ACAS MB Data",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable123": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "mode_s_mb_data",
+                    "description": "From 380.MB.Mode S MB Data.MB Data\n\n56-bit message conveying Mode S Comm B message data",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode S MB Data",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "Variable13": {
                 "parameters": {
                     "data_type_str": "BOOL",

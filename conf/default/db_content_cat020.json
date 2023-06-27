@@ -84,6 +84,84 @@
                     "unit": ""
                 }
             },
+            "Variable47": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "w_e_value",
+                    "description": "From 030.Warning/Error Conditions.W/E Value\n\nWarning/error condition value.\n0 Not defined; never used.\n1 Multipath Reply (Reflection)\n3 Split plot\n10 Phantom SSR plot\n11 Non-Matching Mode-3/A Code\n12 Mode C code / Mode S altitude code abnormal value compared to the track\n15 Transponder anomaly detected\n16 Duplicated or Illegal Mode S Aircraft Address\n17 Mode S error correction applied\n18 Undecodable Mode C code / Mode S altitude code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "W/E Value",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable48": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "mode_s_mb_data",
+                    "description": "From 250.Mode S MB Data.MB Data\n\n56-bit message conveying Mode S Comm B message data",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode S MB Data",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable49": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "acas_mb_data",
+                    "description": "From 260.MB DATA\n\n56-bit message conveying Mode S Comm B message data of BDS Register 3,0.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ACAS MB DATA",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable50": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "vehicle_fleet_identification",
+                    "description": "From 300.VFI\n\n0 Unknown\n1 ATC equipment maintenance\n2 Airport maintenance\n3 Fire\n4 Bird scarer\n5 Snow plough\n6 Runway sweeper\n7 Emergency\n8 Police\n9 Bus\n10 Tug (push/tow)\n11 Grass cutter\n12 Fuel\n13 Baggage\n14 Catering\n15 Aircraft maintenance\n16 Flyco (follow me)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Vehicle Fleet Identification",
+                    "representation_str": "STANDARD",
+                    "short_name": "VFI",
+                    "unit": ""
+                }
+            },
+            "Variable51": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "ppm_msg",
+                    "description": "From 310.MSG\n\n1 Towing aircraft\n2 “Follow me” operation\n3 Runway check\n4 Emergency operation (fire, medical...)\n5Work in progress (maintenance, birds scarer, sweepers...)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "PPM MSG",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable52": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "ppm_trb",
+                    "description": "From 310.TRB\n\n0 Default\n1 In Trouble",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "PPM TRB",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "VariableMLATTimestamp0": {
                 "parameters": {
                     "data_type_str": "TIMESTAMP",
