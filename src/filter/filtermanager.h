@@ -19,7 +19,6 @@
 #define FILTERMANAGER_H_
 
 #include "configurable.h"
-#include "singleton.h"
 #include "appmode.h"
 
 #include <QObject>

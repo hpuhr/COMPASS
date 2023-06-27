@@ -35,7 +35,9 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/trackertracknumberfilterwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/reftrajaccuracyfilter.h"
         "${CMAKE_CURRENT_LIST_DIR}/reftrajaccuracyfilterwidget.h"
-        
+        "${CMAKE_CURRENT_LIST_DIR}/mlatrufilter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/mlatrufilterwidget.h"
+
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbfiltercondition.cpp"
@@ -65,6 +67,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/trackertracknumberfilterwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/reftrajaccuracyfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/reftrajaccuracyfilterwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/mlatrufilter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/mlatrufilterwidget.cpp"
 )
 
 

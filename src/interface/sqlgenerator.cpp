@@ -682,9 +682,9 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
 
     ss << " FROM " << table_db_name;  // << table->getAllTableNames();
 
-    // check associations json_each
-//    if (filter.find("json_each.value") != std::string::npos)
-//        ss << ", json_each("+object.dbTableName()+".associations)";
+    // check contributing_receivers json_each
+    if (filter.find("json_each.value") != std::string::npos)
+        ss << ", json_each("+object.dbTableName()+".contributing_receivers)";
 
     // add extra from parts
 //    for (auto& from_part : extra_from_parts)
