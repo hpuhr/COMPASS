@@ -242,7 +242,7 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
 
             double interp_factor = blendFunc(dt0, dt1, dt, *new_state0, *new_state1, base_config_.interp_mode);
 
-            std::cout << interp_factor << std::endl;
+            //std::cout << interp_factor << std::endl;
 
             kalman::KalmanState new_state;
             new_state.x = SplineInterpolator::interpStateVector(new_state0->x, new_state1->x, interp_factor);

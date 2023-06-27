@@ -193,7 +193,6 @@ void CalculateReferencesTaskDialog::createPositionFilterSettingsWidget(QWidget* 
     adsb_only_v12_positions_check_ = new QCheckBox("Only Use MOPS V1 / V2");
     addOptionalRow(adsb_only_v12_positions_check_, nullptr);
 
-
     adsb_only_high_nucp_nic_positions_check_ = new QCheckBox("Only Use High NUCp / NIC");
     addOptionalRow(adsb_only_high_nucp_nic_positions_check_, nullptr);
 
@@ -277,9 +276,9 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     rec_type_box_ = new QComboBox;
     rec_type_box_->addItem("UMKalman2D");
-#if USE_EXPERIMENTAL_SOURCE
+//#if USE_EXPERIMENTAL_SOURCE
     rec_type_box_->addItem("AMKalman2D");
-#endif
+//#endif
     addLabel("Reconstructor", 0, true);
     addWidget(rec_type_box_, 2);
     newRow();
@@ -380,7 +379,7 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     resample_systracks_dt_box_->setMaximum(DBL_MAX);
     resample_systracks_dt_box_->setSuffix(" s");
 
-    addLabel("Interval", 1, true);
+    addLabel("Resample Interval", 1, true);
     addWidget(resample_systracks_dt_box_, 2);
     newRow();
 
@@ -395,11 +394,11 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     resample_result_Q_std_box_->setMinimum(0.0);
     resample_result_Q_std_box_->setMaximum(DBL_MAX);
 
-    addLabel("Interval", 1, true);
+    addLabel("Resample Interval", 1, true);
     addWidget(resample_result_dt_box_, 2);
     newRow();
 
-    addLabel("Process Stddev", 1, true);
+    addLabel("Resample Process Stddev", 1, true);
     addWidget(resample_result_Q_std_box_, 2);
     newRow();
 
