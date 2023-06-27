@@ -122,8 +122,9 @@ protected:
     QCheckBox*      resample_systracks_box_    = nullptr;
     QDoubleSpinBox* resample_systracks_dt_box_ = nullptr;
 
-    QCheckBox*      resample_result_box_    = nullptr;
-    QDoubleSpinBox* resample_result_dt_box_ = nullptr;
+    QCheckBox*      resample_result_box_       = nullptr;
+    QDoubleSpinBox* resample_result_dt_box_    = nullptr;
+    QDoubleSpinBox* resample_result_Q_std_box_ = nullptr;
 
     QCheckBox*      verbose_box_     = nullptr;
     QCheckBox*      python_comp_box_ = nullptr;

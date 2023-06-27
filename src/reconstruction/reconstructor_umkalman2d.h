@@ -50,11 +50,14 @@ protected:
     kalman::KalmanState kalmanState() const override final;
     boost::optional<kalman::KalmanState> kalmanStep(double dt, const Measurement& mm) override final;
     kalman::Vector xVec(const Measurement& mm) const override final;
+    kalman::Vector xVecInv(const kalman::Vector& x) const override final;
     void xVec(const kalman::Vector& x) const override final;
     void xPos(double& x, double& y, const kalman::Vector& x_vec) const override final;
     void xPos(kalman::Vector& x_vec, double x, double y) const override final;
     kalman::Matrix pMat(const Measurement& mm) const override final;
     kalman::Vector zVec(const Measurement& mm) const override final;
+    double xVar(const kalman::Matrix& P) const override final;
+    double yVar(const kalman::Matrix& P) const override final; 
 
     void storeState_impl(Reference& ref, const kalman::KalmanState& state) const override final;
     void init_impl(const Measurement& mm) const override final;
