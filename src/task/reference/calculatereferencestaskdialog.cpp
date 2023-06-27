@@ -142,7 +142,7 @@ void CalculateReferencesTaskDialog::createPositionFilterSettingsWidget(QWidget* 
 
     auto addRow = [&] (const QString& name, QWidget* w)
     {
-        QLabel* label = new QLabel(name);
+        QLabel* label = new QLabel(name + ":");
         label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
         layout->addWidget(label, row, 0);
         if (w) layout->addWidget(w, row, 1);
@@ -218,6 +218,8 @@ void CalculateReferencesTaskDialog::createPositionFilterSettingsWidget(QWidget* 
     adsb_minimum_sil_box_->setMaximum(5);
     addRow("Minimum Position SIL", adsb_minimum_sil_box_);
 
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding), layout->rowCount(), 0);
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 0, layout->columnCount());
 }
 
 void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
@@ -237,35 +239,38 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     int row = 0;
 
-    auto addRow = [&] (const QString& name, QWidget* w, bool visible)
+    auto addLabel = [&] (const QString& name, int col, bool visible)
     {
-        QLabel* label = new QLabel(name);
+        QLabel* label = new QLabel(name + ":");
         label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
         label->setVisible(visible);
-
-        layout->addWidget(label, row, 0);
-
-        if (w) 
-        {
-            w->setVisible(visible);
-            layout->addWidget(w, row, 1);
-        }
-        
-        ++row;
+        layout->addWidget(label, row, col);
     };
 
-    auto addOptionalRow = [&] (QCheckBox* check_box, QWidget* w)
+    auto addCheckBox = [&] (const QString& name, int col, bool visible)
     {
+        QCheckBox* check_box = new QCheckBox(name);
         check_box->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-        layout->addWidget(check_box, row, 0);
-        if (w) layout->addWidget(w, row, 1);
-        ++row;
+        check_box->setVisible(visible);
+        layout->addWidget(check_box, row, col);
+
+        return check_box;
     };
 
     auto addHeader = [&] (const QString& name)
     {
         QLabel* label = boldify(new QLabel(name));
         layout->addWidget(label, row++, 0);
+    };
+
+    auto addWidget = [&] (QWidget* w, int col)
+    {
+        layout->addWidget(w, row, col);
+    };
+
+    auto newRow = [&] ()
+    {
+        ++row;
     };
 
     bool is_appimage = COMPASS::instance().isAppImage();
@@ -275,12 +280,18 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 #if USE_EXPERIMENTAL_SOURCE
     rec_type_box_->addItem("AMKalman2D");
 #endif
-    addRow("Reconstructor", rec_type_box_, true);
+    addLabel("Reconstructor", 0, true);
+    addWidget(rec_type_box_, 2);
+    newRow();
 
     map_mode_box_ = new QComboBox;
     map_mode_box_->addItem("Static", QVariant((int)reconstruction::MapProjectionMode::Static));
     map_mode_box_->addItem("Dynamic", QVariant((int)reconstruction::MapProjectionMode::Dynamic));
-    addRow("Map Projection", map_mode_box_, !is_appimage);
+    map_mode_box_->setVisible(!is_appimage);
+
+    addLabel("Map Projection", 0, !is_appimage);
+    addWidget(map_mode_box_, 2);
+    newRow();
 
     //uncertainty section
     addHeader("Default Uncertainties");
@@ -288,27 +299,42 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     R_std_box_ = new QDoubleSpinBox;
     R_std_box_->setMinimum(0.0);
     R_std_box_->setMaximum(DBL_MAX);
-    addRow("Measurement Stddev", R_std_box_, true);
+
+    addLabel("Measurement Stddev", 0, true);
+    addWidget(R_std_box_, 2);
+    newRow();
 
     R_std_high_box_ = new QDoubleSpinBox;
     R_std_high_box_->setMinimum(0.0);
     R_std_high_box_->setMaximum(DBL_MAX);
-    addRow("Measurement Stddev (high)", R_std_high_box_, true);
+
+    addLabel("Measurement Stddev (high)", 0, true);
+    addWidget(R_std_high_box_, 2);
+    newRow();
 
     Q_std_box_ = new QDoubleSpinBox;
     Q_std_box_->setMinimum(0.0);
     Q_std_box_->setMaximum(DBL_MAX);
-    addRow("Process Stddev", Q_std_box_, true);
+
+    addLabel("Process Stddev", 0, true);
+    addWidget(Q_std_box_, 2);
+    newRow();
 
     P_std_box_ = new QDoubleSpinBox;
     P_std_box_->setMinimum(0.0);
     P_std_box_->setMaximum(DBL_MAX);
-    addRow("System Stddev", P_std_box_, true);
+
+    addLabel("System Stddev", 0, true);
+    addWidget(P_std_box_, 2);
+    newRow();
 
     P_std_high_box_ = new QDoubleSpinBox;
     P_std_high_box_->setMinimum(0.0);
     P_std_high_box_->setMaximum(DBL_MAX);
-    addRow("System Stddev (high)", P_std_high_box_, true);
+
+    addLabel("System Stddev (high)", 0, true);
+    addWidget(P_std_high_box_, 2);
+    newRow();
 
     //chain section
     addHeader("Chain Generation");
@@ -317,48 +343,87 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     min_dt_box_->setMinimum(0.0);
     min_dt_box_->setMaximum(DBL_MAX);
     min_dt_box_->setSuffix(" s");
-    addRow("Minimum Time Step", min_dt_box_, true);
+
+    addLabel("Minimum Time Step", 0, true);
+    addWidget(min_dt_box_, 2);
+
+    newRow();
 
     max_dt_box_ = new QDoubleSpinBox;
     max_dt_box_->setMinimum(0.0);
     max_dt_box_->setMaximum(DBL_MAX);
     max_dt_box_->setSuffix(" s");
-    addRow("Maximum Time Step", max_dt_box_, true);
+
+    addLabel("Maximum Time Step", 0, true);
+    addWidget(max_dt_box_, 2);
+    newRow();
 
     min_chain_size_box_ = new QSpinBox;
     min_chain_size_box_->setMinimum(1);
     min_chain_size_box_->setMaximum(INT_MAX);
-    addRow("Minimum Chain Size", min_chain_size_box_, true);
+
+    addLabel("Minimum Chain Size", 0, true);
+    addWidget(min_chain_size_box_, 2);
+    newRow();
 
     //additional option section
     addHeader("Additional Options");
 
-    use_vel_mm_box_ = new QCheckBox("Use Velocity Measurements");
-    addOptionalRow(use_vel_mm_box_, nullptr);
+    smooth_box_ = addCheckBox("Smooth Results", 0, true);
+    newRow();
 
-    smooth_box_ = new QCheckBox("Smooth Results");
-    addOptionalRow(smooth_box_, nullptr);
+    //systemk track resampling
+    resample_systracks_box_ = addCheckBox("Resample System Tracks", 0, true);
 
-    resample_systracks_box_    = new QCheckBox("Resample System Tracks");
     resample_systracks_dt_box_ = new QDoubleSpinBox;
     resample_systracks_dt_box_->setMinimum(1.0);
     resample_systracks_dt_box_->setMaximum(DBL_MAX);
     resample_systracks_dt_box_->setSuffix(" s");
-    addOptionalRow(resample_systracks_box_, resample_systracks_dt_box_);
 
-    resample_result_box_    = new QCheckBox("Resample Result");
+    addLabel("Interval", 1, true);
+    addWidget(resample_systracks_dt_box_, 2);
+    newRow();
+
+    resample_result_box_= addCheckBox("Resample Result", 0, true);
+
     resample_result_dt_box_ = new QDoubleSpinBox;
     resample_result_dt_box_->setMinimum(1.0);
     resample_result_dt_box_->setMaximum(DBL_MAX);
     resample_result_dt_box_->setSuffix(" s");
-    addOptionalRow(resample_result_box_, resample_result_dt_box_);
 
-    verbose_box_ = new QCheckBox("Verbose");
-    addOptionalRow(verbose_box_, nullptr);
+    resample_result_Q_std_box_ = new QDoubleSpinBox;
+    resample_result_Q_std_box_->setMinimum(0.0);
+    resample_result_Q_std_box_->setMaximum(DBL_MAX);
 
-    python_comp_box_ = new QCheckBox("Python Compatibility Mode");
-    addOptionalRow(python_comp_box_, nullptr);
+    addLabel("Interval", 1, true);
+    addWidget(resample_result_dt_box_, 2);
+    newRow();
 
+    addLabel("Process Stddev", 1, true);
+    addWidget(resample_result_Q_std_box_, 2);
+    newRow();
+
+    use_vel_mm_box_ = addCheckBox("Use Velocity Measurements", 0, !is_appimage);
+    newRow();
+
+    verbose_box_ = addCheckBox("Verbose", 0, !is_appimage);
+    newRow();
+
+    python_comp_box_ = addCheckBox("Python Compatibility Mode", 0, !is_appimage);
+    newRow();
+
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding), layout->rowCount(), 0);
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 0, layout->columnCount());
+
+    auto activityCB = [ & ]
+    {
+        resample_systracks_dt_box_->setEnabled(resample_systracks_box_->isChecked());
+        resample_result_dt_box_->setEnabled(resample_result_box_->isChecked());
+        resample_result_Q_std_box_->setEnabled(resample_result_box_->isChecked());
+    };
+
+    connect(resample_systracks_box_, &QCheckBox::toggled, activityCB);
+    connect(resample_result_box_, &QCheckBox::toggled, activityCB);
 }
 
 void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
@@ -385,7 +450,7 @@ void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
 
     auto addRow = [&] (const QString& name, QWidget* w)
     {
-        QLabel* label = new QLabel(name);
+        QLabel* label = new QLabel(name + ":");
         label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
         layout->addWidget(label, row, 0);
         if (w) layout->addWidget(w, row, 1);
@@ -419,6 +484,9 @@ void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
     ds_line_box_->addItems({"1", "2", "3", "4"});
 
     addRow("Line ID", ds_line_box_);
+
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding), layout->rowCount(), 0);
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 0, layout->columnCount());
 }
 
 void CalculateReferencesTaskDialog::readOptions()
@@ -467,6 +535,7 @@ void CalculateReferencesTaskDialog::readOptions()
 
     resample_result_box_->setChecked(s.resample_result);
     resample_result_dt_box_->setValue(s.resample_result_dt);
+    resample_result_Q_std_box_->setValue(s.resample_result_Q_std);
 
     verbose_box_->setChecked(s.verbose);
     python_comp_box_->setChecked(s.python_compatibility);
@@ -525,6 +594,7 @@ void CalculateReferencesTaskDialog::writeOptions()
 
     s.resample_result       = resample_result_box_->isChecked();
     s.resample_result_dt    = resample_result_dt_box_->value();
+    s.resample_result_Q_std = resample_result_Q_std_box_->value();
 
     s.verbose               = verbose_box_->isChecked();
     s.python_compatibility  = python_comp_box_->isChecked();

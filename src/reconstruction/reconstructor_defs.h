@@ -48,8 +48,10 @@ enum class MapProjectionMode
 
 enum class StateInterpMode
 {
-    BlendHalf,    //time-projected kalman states will be blended halfways
-    BlendLinear   //time-projected kalman states will be blended linearly with time
+    BlendHalf,      // time-projected kalman states will be blended halfways
+    BlendLinear,    // time-projected kalman states will be blended linearly with time
+    BlendStdDev,    // states will be weighted by time-projected stddevs
+    BlendVar        // states will be weighted by time-projected variances
 };
 
 /**

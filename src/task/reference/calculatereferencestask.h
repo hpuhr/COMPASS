@@ -52,6 +52,7 @@ struct CalculateReferencesTaskSettings
 
     bool          resample_result       = true;     // resample (and interpolate) reconstructor result by a fixed time interval
     double        resample_result_dt    = 2.0;      // result resampling time interval in seconds
+    double        resample_result_Q_std = 10.0;     // process noise used in result resampling
 
     bool          verbose               = false;    // reconstruction verbosity
     bool          generate_viewpoints   = false;    // generate viewpoints and add to viewpoints list

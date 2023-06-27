@@ -440,6 +440,7 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
 
             rec->baseConfig().resample_result = s.resample_result;
             rec->baseConfig().resample_dt     = s.resample_result_dt;
+            rec->baseConfig().resample_Q_std  = s.resample_result_Q_std;
 
             //configure sensor default noise?
             if (add_sensor_uncert)

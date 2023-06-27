@@ -99,7 +99,8 @@ public:
 
         bool            resample_result = false;                      // resample result references using kalman infos
         double          resample_dt     = 1.0;                        // resampling step size in seconds
-        StateInterpMode interp_mode     = StateInterpMode::BlendHalf; // kalman state interpolation mode used during resampling
+        double          resample_Q_std  = 10.0;                       // resampling process noise
+        StateInterpMode interp_mode     = StateInterpMode::BlendVar;  // kalman state interpolation mode used during resampling
 
         MapProjectionMode map_proj_mode          = MapProjectionMode::Dynamic; // map projection mode
         double            max_proj_distance_cart = 20000.0;                    // maximum distance from the current map projection origin in meters 
@@ -117,6 +118,7 @@ public:
     double rVarHigh() const { return R_var_high_; }
     double pVar() const { return P_var_; }
     double pVarHigh() const  { return P_var_high_; }
+    double qVarResample() const { return resample_Q_var_; }
 
     static const QColor ColorKalman;
     static const QColor ColorKalmanSmoothed;
@@ -131,12 +133,15 @@ protected:
     virtual kalman::KalmanState kalmanState() const = 0;
     virtual boost::optional<kalman::KalmanState> kalmanStep(double dt, const Measurement& mm) = 0;
     virtual kalman::Vector xVec(const Measurement& mm) const = 0;
+    virtual kalman::Vector xVecInv(const kalman::Vector& x) const = 0;
     virtual void xVec(const kalman::Vector& x) const = 0;
     virtual void xPos(double& x, double& y, const kalman::Vector& x_vec) const = 0;
     virtual void xPos(kalman::Vector& x_vec, double x, double y) const = 0;
     virtual void xPos(kalman::Vector& x, const Measurement& mm) const;
     virtual kalman::Matrix pMat(const Measurement& mm) const = 0;
     virtual kalman::Vector zVec(const Measurement& mm) const = 0;
+    virtual double xVar(const kalman::Matrix& P) const = 0;
+    virtual double yVar(const kalman::Matrix& P) const = 0; 
     
     virtual void storeState_impl(Reference& ref, const kalman::KalmanState& state) const = 0;
     virtual void init_impl(const Measurement& mm) const = 0;
@@ -206,8 +211,9 @@ private:
     double R_var_high_;
     double P_var_;
     double P_var_high_;
+    double resample_Q_var_;
     double max_distance_sqr_ = 0.0;
-
+    
     std::vector<KalmanChain> chains_;
     KalmanChain              chain_cur_;
 

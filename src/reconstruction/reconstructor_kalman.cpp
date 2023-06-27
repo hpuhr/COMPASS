@@ -53,6 +53,8 @@ void ReconstructorKalman::init()
     P_var_      = base_config_.P_std      * base_config_.P_std;
     P_var_high_ = base_config_.P_std_high * base_config_.P_std_high;
 
+    resample_Q_var_ = base_config_.resample_Q_std * base_config_.resample_Q_std;
+
     min_chain_size_   = std::max((size_t)1, base_config_.min_chain_size);
     max_distance_sqr_ = base_config_.max_distance * base_config_.max_distance;
 
@@ -144,10 +146,43 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
 
     kalman::KalmanState state1_tr;
 
-    auto blendFunc = [ & ] (double dt0, double dt1, double dt)
+    auto blendFunc = [ & ] (double dt0, 
+                            double dt1, 
+                            double dt,
+                            const kalman::KalmanState& state0,
+                            const kalman::KalmanState& state1,
+                            StateInterpMode mode)
     {
-        if (base_config_.interp_mode == StateInterpMode::BlendLinear)
+        if (mode == StateInterpMode::BlendLinear)
+        {
             return dt0 / dt;
+        }
+        else if (mode == StateInterpMode::BlendStdDev)
+        {
+            double stddev_x0 = std::sqrt(xVar(state0.P));
+            double stddev_y0 = std::sqrt(yVar(state0.P));
+
+            double stddev_x1 = std::sqrt(xVar(state1.P));
+            double stddev_y1 = std::sqrt(yVar(state1.P));
+
+            double w0 = std::max(stddev_x0, stddev_y0);
+            double w1 = std::max(stddev_x1, stddev_y1);
+
+            return w0 / (w0 + w1);
+        }
+        else if (mode == StateInterpMode::BlendVar)
+        {
+            double var_x0 = xVar(state0.P);
+            double var_y0 = yVar(state0.P);
+
+            double var_x1 = xVar(state1.P);
+            double var_y1 = yVar(state1.P);
+
+            double w0 = std::max(var_x0, var_y0);
+            double w1 = std::max(var_x1, var_y1);
+
+            return w0 / (w0 + w1);
+        }
 
         //StateInterpMode::BlendHalf
         return 0.5;
@@ -205,7 +240,9 @@ bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_se
             if (!new_state0.has_value() || !new_state1.has_value())
                 return false;
 
-            double interp_factor = blendFunc(dt0, dt1, dt);
+            double interp_factor = blendFunc(dt0, dt1, dt, *new_state0, *new_state1, base_config_.interp_mode);
+
+            std::cout << interp_factor << std::endl;
 
             kalman::KalmanState new_state;
             new_state.x = SplineInterpolator::interpStateVector(new_state0->x, new_state1->x, interp_factor);
