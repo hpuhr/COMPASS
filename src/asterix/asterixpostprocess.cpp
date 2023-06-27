@@ -17,10 +17,12 @@
 
 #include "asterixpostprocess.h"
 
-#include "global.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "number.h"
+
+#include <boost/range/adaptor/reversed.hpp>
+#include <bitset>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -198,6 +200,49 @@ void ASTERIXPostProcess::postProcessCAT020(int sac, int sic, nlohmann::json& rec
 //        else if (arc == 1)
 //            item_230["ARC_ft"] = 25.0;
 //    }
+
+    // 400 contributing receivers hack
+
+    if (record.contains("400") && record.at("400").contains("Contributing Receivers"))
+    {
+        std::vector<unsigned int> ru_indexes; // collect them all
+
+        nlohmann::json& contr_rvs = record.at("400").at("Contributing Receivers");
+        assert (contr_rvs.is_array());
+
+        logdbg << "ASTERIXPostProcess: postProcessCAT020: processing '" << contr_rvs.dump() << "'";
+
+        unsigned int prev_bit_cnt = 0;
+
+        for (const json& it : boost::adaptors::reverse(contr_rvs.get_ref<json::array_t&>()))
+        {
+            assert (it.contains("RUx"));
+
+            logdbg << "ASTERIXPostProcess: postProcessCAT020: processing '" << it.at("RUx").dump() << "'";
+
+            unsigned int rux_bits = it.at("RUx");
+            assert (rux_bits < 256);
+
+            for (unsigned int current_bit_cnt = 0; current_bit_cnt < 8; ++current_bit_cnt)
+            {
+                bool current_bit = rux_bits & (0x1 << current_bit_cnt);
+
+                if (current_bit)
+                    ru_indexes.push_back(prev_bit_cnt + current_bit_cnt + 1); // count starts at 1 in ASTERIX spec
+            }
+
+            prev_bit_cnt += 8;
+        }
+
+        std::vector<std::map<std::string, json>> new_contrib_rus;
+
+        for (auto& contrib_ru_index : ru_indexes)
+            new_contrib_rus.push_back({{"RUx", contrib_ru_index}});
+
+        record.at("400").at("Contributing Receivers") = new_contrib_rus;
+
+        logdbg << "ASTERIXPostProcess: postProcessCAT020: result '" << record.at("400").at("Contributing Receivers").dump() << "'";
+    }
 }
 
 void ASTERIXPostProcess::postProcessCAT021(int sac, int sic, nlohmann::json& record)
