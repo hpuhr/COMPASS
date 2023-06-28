@@ -29,12 +29,12 @@
 #include "insertbufferdbjob.h"
 #include "jobmanager.h"
 #include "propertylist.h"
-#include "stringconv.h"
-#include "taskmanager.h"
+//#include "stringconv.h"
+//#include "taskmanager.h"
 #include "updatebufferdbjob.h"
-#include "viewmanager.h"
-#include "util/number.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "viewmanager.h"
+//#include "util/number.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "dbcontentdeletedbjob.h"
 
 #include <algorithm>

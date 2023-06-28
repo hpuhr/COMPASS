@@ -644,9 +644,11 @@ QWidget* CalculateReferencesTaskDialog::addScrollArea(QWidget* w) const
 void CalculateReferencesTaskDialog::updateSourcesWidgets()
 {
     assert (tracker_sources_);
+    tracker_sources_->updateSelected(task_.trackerDataSources());
     tracker_sources_->setEnabled(task_.useTrackerData());
 
     assert (adsb_sources_);
+    adsb_sources_->updateSelected(task_.adsbDataSources());
     adsb_sources_->setEnabled(task_.useADSBData());
 
 }

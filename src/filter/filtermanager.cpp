@@ -18,14 +18,14 @@
 #include "filtermanager.h"
 
 #include "compass.h"
-#include "configurationmanager.h"
-#include "sqliteconnection.h"
+//#include "configurationmanager.h"
+//#include "sqliteconnection.h"
 #include "dbfilter.h"
-#include "dbfilterwidget.h"
-#include "dbinterface.h"
+//#include "dbfilterwidget.h"
+//#include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "datasourcemanager.h"
 #include "filtermanagerwidget.h"
 #include "logger.h"
@@ -41,6 +41,7 @@
 #include "timestampfilter.h"
 #include "trackertracknumberfilter.h"
 #include "reftrajaccuracyfilter.h"
+#include "mlatrufilter.h"
 
 #include "json.hpp"
 
@@ -177,7 +178,7 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         }
         catch (const std::exception& e)
         {
-            loginf << "FilterManager: generateSubConfigurable: data source filter exception '"
+            loginf << "FilterManager: generateSubConfigurable: utn filter exception '"
                    << e.what() << "', deleting";
             configuration().removeSubConfiguration(class_id, instance_id);
         }
@@ -212,6 +213,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "RefTrajAccuracyFilter")
     {
         RefTrajAccuracyFilter* filter = new RefTrajAccuracyFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
+    else if (class_id == "MLATRUFilter")
+    {
+        MLATRUFilter* filter = new MLATRUFilter(class_id, instance_id, this);
         filters_.emplace_back(filter);
     }
     else
@@ -270,6 +276,15 @@ void FilterManager::checkSubConfigurables()
     }
 
     classid = "RefTrajAccuracyFilter";
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
+    {
+        addNewSubConfiguration(classid, classid+"0");
+        generateSubConfigurable(classid, classid+"0");
+    }
+
+    classid = "MLATRUFilter";
+
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     {
