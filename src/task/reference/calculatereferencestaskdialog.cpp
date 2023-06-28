@@ -5,6 +5,7 @@
 #include "util/stringconv.h"
 #include "reconstruction/reconstructor_defs.h"
 #include "compass.h"
+#include "global.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -276,9 +277,9 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     rec_type_box_ = new QComboBox;
     rec_type_box_->addItem("UMKalman2D");
-//#if USE_EXPERIMENTAL_SOURCE
+#if USE_EXPERIMENTAL_SOURCE
     rec_type_box_->addItem("AMKalman2D");
-//#endif
+#endif
     addLabel("Reconstructor", 0, true);
     addWidget(rec_type_box_, 2);
     newRow();
