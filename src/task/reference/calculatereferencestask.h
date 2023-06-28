@@ -41,7 +41,7 @@ struct CalculateReferencesTaskSettings
     double        P_std_high            = 1000.0;   // system noise (high)
 
     double        min_dt                = 0.0;      // minimum allowed timestep in seconds
-    double        max_dt                = 30.0;     // maximum allowed timestep in seconds
+    double        max_dt                = 11.0;     // maximum allowed timestep in seconds
     int           min_chain_size        = 2;        // minimum kalman chain size
 
     bool          use_vel_mm            = true;     // track velocities in measurements
