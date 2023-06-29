@@ -773,7 +773,7 @@ void ReconstructorKalman::finalizeReference(Reference& ref,
                                             kalman::KalmanState& state,
                                             const std::string& data_info) const
 {
-    if (base_config_.map_proj_mode != MapProjectionMode::None)
+    if (base_config_.map_proj_mode != MapProjectionMode::MapProjectNone)
     {
         if (!chain_cur_.empty())
         {

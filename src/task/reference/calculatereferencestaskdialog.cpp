@@ -285,8 +285,8 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     newRow();
 
     map_mode_box_ = new QComboBox;
-    map_mode_box_->addItem("Static", QVariant((int)reconstruction::MapProjectionMode::Static));
-    map_mode_box_->addItem("Dynamic", QVariant((int)reconstruction::MapProjectionMode::Dynamic));
+    map_mode_box_->addItem("Static", QVariant((int)reconstruction::MapProjectionMode::MapProjectStatic));
+    map_mode_box_->addItem("Dynamic", QVariant((int)reconstruction::MapProjectionMode::MapProjectDynamic));
     map_mode_box_->setVisible(!is_appimage);
 
     addLabel("Map Projection", 0, !is_appimage);
@@ -323,16 +323,18 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     P_std_box_ = new QDoubleSpinBox;
     P_std_box_->setMinimum(0.0);
     P_std_box_->setMaximum(DBL_MAX);
+    P_std_box_->setVisible(!is_appimage);
 
-    addLabel("System Stddev", 0, true);
+    addLabel("System Stddev", 0, !is_appimage);
     addWidget(P_std_box_, 2);
     newRow();
 
     P_std_high_box_ = new QDoubleSpinBox;
     P_std_high_box_->setMinimum(0.0);
     P_std_high_box_->setMaximum(DBL_MAX);
+    P_std_high_box_->setVisible(!is_appimage);
 
-    addLabel("System Stddev (high)", 0, true);
+    addLabel("System Stddev (high)", 0, !is_appimage);
     addWidget(P_std_high_box_, 2);
     newRow();
 

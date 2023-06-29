@@ -389,26 +389,18 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
         {
             CalculateReferencesTaskSettings s = settings;
 
-            bool   add_sensor_uncert = true;   // add sensor default uncertainties
-            double vel_std_cat021    = 50.0;   // default velocity stdddev CAT021
-            double vel_std_cat062    = 50.0;   // default velocity stdddev CAT062
-            double acc_std_cat021    = 50.0;   // default acceleration stdddev CAT021
-            double acc_std_cat062    = 50.0;   // default acceleration stdddev CAT062
-
             if (settings.python_compatibility)
             {
                 // apply python code compatible override settings
                 s.use_vel_mm         = true;
                 s.resample_result    = false;
                 s.resample_systracks = false;
-
-                add_sensor_uncert = false;
             }
 
             std::unique_ptr<reconstruction::ReconstructorKalman> rec;
 
         #if USE_EXPERIMENTAL_SOURCE
-            if (s.rec_type == CalculateReferencesTaskSettings::ReconstructorType::AMKalman2D)
+            if (s.rec_type == CalculateReferencesTaskSettings::ReconstructorType::Rec_AMKalman2D)
             {
                 rec.reset(new reconstruction::Reconstructor_AMKalman2D);
             }
@@ -442,20 +434,26 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
             rec->baseConfig().resample_dt     = s.resample_result_dt;
             rec->baseConfig().resample_Q_std  = s.resample_result_Q_std;
 
+            bool add_sensor_uncert_cat021 = !s.python_compatibility && s.use_R_std_cat021;
+            bool add_sensor_uncert_cat062 = !s.python_compatibility && s.use_R_std_cat062;
+
             //configure sensor default noise?
-            if (add_sensor_uncert)
+            if (add_sensor_uncert_cat021)
             {
                 reconstruction::Uncertainty uncert_cat021;
-                uncert_cat021.pos_var   = s.R_std * s.R_std;
-                uncert_cat021.speed_var = vel_std_cat021 * vel_std_cat021;
-                uncert_cat021.acc_var   = acc_std_cat021 * acc_std_cat021;
-
-                reconstruction::Uncertainty uncert_cat062;
-                uncert_cat062.pos_var   = s.R_std * s.R_std;
-                uncert_cat062.speed_var = vel_std_cat062 * vel_std_cat062;
-                uncert_cat062.acc_var   = acc_std_cat062 * acc_std_cat062;
+                uncert_cat021.pos_var   = s.R_std_pos_cat021 * s.R_std_pos_cat021;
+                uncert_cat021.speed_var = s.R_std_vel_cat021 * s.R_std_vel_cat021;
+                uncert_cat021.acc_var   = s.R_std_acc_cat021 * s.R_std_acc_cat021;
 
                 rec->setSensorUncertainty("CAT021", uncert_cat021);
+            }
+            if (add_sensor_uncert_cat062)
+            {
+                reconstruction::Uncertainty uncert_cat062;
+                uncert_cat062.pos_var   = s.R_std_pos_cat062 * s.R_std_pos_cat062;
+                uncert_cat062.speed_var = s.R_std_vel_cat062 * s.R_std_vel_cat062;
+                uncert_cat062.acc_var   = s.R_std_acc_cat062 * s.R_std_acc_cat062;
+
                 rec->setSensorUncertainty("CAT062", uncert_cat062);
             }
 
@@ -464,7 +462,7 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
             {
                 reconstruction::InterpOptions options;
                 options.sample_dt = s.resample_systracks_dt;
-                options.max_dt    = s.max_dt;
+                options.max_dt    = s.resample_systracks_max_dt;
 
                 rec->setSensorInterpolation("CAT062", options);
             }

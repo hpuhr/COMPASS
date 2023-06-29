@@ -37,11 +37,24 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     tooltip_ =
             "Allows calculation of references based on System Tracker and ADS-B data.";
 
+    registerParameter("rec_type"     , (int*)&settings_.rec_type     , CalculateReferencesTaskSettings::Rec_UMKalman2D);
+    registerParameter("rec_proj_mode", (int*)&settings_.map_proj_mode, CalculateReferencesTaskSettings::MapProjectionMode::MapProjectDynamic);
+
     registerParameter("rec_mm_stddev"        , &settings_.R_std     , 30.0  );
     registerParameter("rec_mm_stddev_high"   , &settings_.R_std_high, 1000.0);
     registerParameter("rec_process_stddev"   , &settings_.Q_std     , 30.0  );
     registerParameter("rec_state_stddev"     , &settings_.P_std     , 30.0  );
     registerParameter("rec_state_stddev_high", &settings_.P_std_high, 1000.0);
+
+    registerParameter("rec_use_mm_stddev_cat021", &settings_.use_R_std_cat021, true);
+    registerParameter("rec_mm_stddev_cat021_pos", &settings_.R_std_pos_cat021, 30.0);
+    registerParameter("rec_mm_stddev_cat021_vel", &settings_.R_std_vel_cat021, 50.0);
+    registerParameter("rec_mm_stddev_cat021_acc", &settings_.R_std_acc_cat021, 50.0);
+
+    registerParameter("rec_use_mm_stddev_cat062", &settings_.use_R_std_cat062, true);
+    registerParameter("rec_mm_stddev_cat062_pos", &settings_.R_std_pos_cat062, 30.0);
+    registerParameter("rec_mm_stddev_cat062_vel", &settings_.R_std_vel_cat062, 50.0);
+    registerParameter("rec_mm_stddev_cat062_acc", &settings_.R_std_acc_cat062, 50.0);
 
     registerParameter("rec_min_dt"        , &settings_.min_dt        ,  0.0);
     registerParameter("rec_max_dt"        , &settings_.max_dt        , 11.0);
@@ -52,10 +65,11 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
 
     registerParameter("rec_resample_systracks"   , &settings_.resample_systracks   , true);
     registerParameter("rec_resample_systracks_dt", &settings_.resample_systracks_dt, 1.0 );
+    registerParameter("rec_resample_systracks_max_dt", &settings_.resample_systracks_max_dt, 30.0);
 
     registerParameter("rec_resample_result"   , &settings_.resample_result   , true);
     registerParameter("rec_resample_result_dt", &settings_.resample_result_dt, 2.0 );
-    registerParameter("rec_resample_result_dt", &settings_.resample_result_Q_std, 10.0);
+    registerParameter("rec_resample_result_qstd", &settings_.resample_result_Q_std, 10.0);
 
     registerParameter("use_tracker_data"  , &settings_.use_tracker_data, true);
     registerParameter("data_sources_tracker", &settings_.data_sources_tracker, json::object());
