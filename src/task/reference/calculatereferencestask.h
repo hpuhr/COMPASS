@@ -107,8 +107,6 @@ public slots:
     void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
-    void calculationStatusSlot(QString status);
-
     void closeStatusDialogSlot();
 
 public:

@@ -1,5 +1,6 @@
 #include "calculatereferencesjob.h"
 #include "calculatereferencestask.h"
+#include "calculatereferencesstatusdialog.h"
 #include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
@@ -35,9 +36,11 @@ string adsb_only_high_nacp_reason {"I021/090 NACp: Too low or unknown"};
 string adsb_only_high_sil_reason {"I021/090 SIL: Too low or unknown"};
 
 CalculateReferencesJob::CalculateReferencesJob(CalculateReferencesTask& task, 
+                                               CalculateReferencesStatusDialog& status_dialog,
                                                std::shared_ptr<dbContent::Cache> cache)
-    : Job("CalculateReferencesJob"), task_(task), cache_(cache)
+    : Job("CalculateReferencesJob"), task_(task), status_dialog_(status_dialog), cache_(cache)
 {
+
 }
 
 CalculateReferencesJob::~CalculateReferencesJob()
@@ -55,22 +58,39 @@ void CalculateReferencesJob::run()
 
     start_time = microsec_clock::local_time();
 
-    emit statusSignal("Creating Targets");
+    QMetaObject::invokeMethod(&status_dialog_, "setStatusSlot",
+                              Qt::QueuedConnection,
+                              Q_ARG(const std::string&, "Creating Targets"));
+
+    //status_dialog_.setStatus("Creating Targets");
 
     createTargets();
 
-    emit statusSignal("Finalizing Targets");
+    //status_dialog_.setStatus("Finalizing Targets");
+
+    QMetaObject::invokeMethod(&status_dialog_, "setStatusSlot",
+                              Qt::QueuedConnection,
+                              Q_ARG(const std::string&, "Finalizing Targets"));
 
     finalizeTargets();
 
-    emit statusSignal("Calculating References");
+    //status_dialog_.setStatus("Calculating References");
+
+    QMetaObject::invokeMethod(&status_dialog_, "setStatusSlot",
+                              Qt::QueuedConnection,
+                              Q_ARG(const std::string&, "Calculating References"));
 
     calculateReferences();
 
     //write references to db if desired
     if (task_.writeReferences())
     {
-        emit statusSignal("Writing References");
+        //status_dialog_.setStatus("Writing References");
+
+        QMetaObject::invokeMethod(&status_dialog_, "setStatusSlot",
+                                  Qt::QueuedConnection,
+                                  Q_ARG(const std::string&, "Writing References"));
+
         writeReferences();
 
         while (!insert_done_)
@@ -90,7 +110,6 @@ void CalculateReferencesJob::run()
 
     done_ = true;
 }
-
 
 void CalculateReferencesJob::createTargets()
 {
@@ -186,7 +205,7 @@ void CalculateReferencesJob::filterPositionUsage(
 
     loginf << "CalculateReferencesJob: filterPositionUsage: assessing position data usage";
 
-    unsigned int ignored_positions {0}, used_positions {0};
+    unsigned int cat062_ignored_positions {0}, cat062_used_positions {0};
     map<string, unsigned int> tracker_ignored_reasons;
 
     string dbcontent_name = "CAT062";
@@ -295,9 +314,9 @@ void CalculateReferencesJob::filterPositionUsage(
                     ignore_positions.push_back(ignore_current_position);
 
                     if (ignore_current_position)
-                        ++ignored_positions;
+                        ++cat062_ignored_positions;
                     else
-                        ++used_positions;
+                        ++cat062_used_positions;
                 }
 
                 // set ignore positions flag
@@ -310,11 +329,14 @@ void CalculateReferencesJob::filterPositionUsage(
         loginf << "CalculateReferencesJob: filterPositionUsage: ignored " << reason_it.second
                << " '" << reason_it.first << "'";
 
-    loginf << "CalculateReferencesJob: filterPositionUsage: tracker data ignored pos " << ignored_positions
-           << " used " << used_positions;
+    loginf << "CalculateReferencesJob: filterPositionUsage: CAT062 data ignored pos " << cat062_ignored_positions
+           << " used " << cat062_used_positions;
+
+    used_pos_counts_[dbcontent_name] = {cat062_used_positions, cat062_ignored_positions};
 
     dbcontent_name = "CAT021";
 
+    unsigned int cat021_ignored_positions {0}, cat021_used_positions {0};
     map<string, unsigned int> adsb_ignored_reasons;
 
     // MOPS version, NACp, NIC, PIC, SIL
@@ -405,9 +427,9 @@ void CalculateReferencesJob::filterPositionUsage(
                     ignore_positions.push_back(ignore_current_position);
 
                     if (ignore_current_position)
-                        ++ignored_positions;
+                        ++cat021_ignored_positions;
                     else
-                        ++used_positions;
+                        ++cat021_used_positions;
                 }
 
                 // set ignore positions flag
@@ -420,8 +442,17 @@ void CalculateReferencesJob::filterPositionUsage(
         loginf << "CalculateReferencesJob: filterPositionUsage: ignored " << reason_it.second
                << " '" << reason_it.first << "'";
 
-    loginf << "CalculateReferencesJob: filterPositionUsage: ads-b data ignored pos " << ignored_positions
-           << " used " << used_positions;
+    loginf << "CalculateReferencesJob: filterPositionUsage: cat021 data ignored pos " << cat021_ignored_positions
+           << " used " << cat021_used_positions;
+
+    used_pos_counts_[dbcontent_name] = {cat021_used_positions, cat021_ignored_positions};
+
+
+    QMetaObject::invokeMethod(&status_dialog_, "setUsedPositionCountsSlot",
+                              Qt::QueuedConnection,
+                              Q_ARG(CalculateReferencesStatusDialog::PositionCountsMap, used_pos_counts_));
+
+
 }
 
 void CalculateReferencesJob::finalizeTargets()
@@ -510,6 +541,77 @@ void CalculateReferencesJob::calculateReferences()
     //create viewpoint json
     viewpoint_json_ = viewpoint_gen.toJSON(true, true);
 
+    // set info
+
+    string dbcontent_name = "RefTraj";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    NullableVector<double>& x_stddev_vec = result_->get<double> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_).name());
+    NullableVector<double>& y_stddev_vec = result_->get<double> (
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_).name());
+
+    unsigned int num_accs = 0;
+    double acc;
+    double acc_min = 0, acc_max = 0, acc_sum = 0;
+
+    for (unsigned int cnt=0; cnt < result_->size(); ++cnt)
+    {
+        if (!x_stddev_vec.isNull(cnt) && !y_stddev_vec.isNull(cnt))
+        {
+            acc = sqrt(pow(x_stddev_vec.get(cnt),2) + pow(y_stddev_vec.get(cnt),2));
+            acc_sum += acc;
+
+            if (num_accs)
+            {
+                acc_min = min(acc_min, acc);
+                acc_max = max(acc_max, acc);
+            }
+            else
+            {
+                acc_min = acc;
+                acc_max = acc;
+            }
+
+            ++num_accs;
+        }
+    }
+
+    CalculateReferencesStatusDialog::CalcInfoVector info;
+
+    info.push_back({"Number of Targets", to_string(num_targets)});
+    info.push_back({"Number of Reference Target Reports", to_string(result_->size())});
+
+    if (num_accs)
+    {
+        double acc_avg = acc_sum / (double) num_accs;
+        double acc_stddev = 0;
+
+        for (unsigned int cnt=0; cnt < result_->size(); ++cnt)
+        {
+            if (!x_stddev_vec.isNull(cnt) && !y_stddev_vec.isNull(cnt))
+            {
+                acc = sqrt(pow(x_stddev_vec.get(cnt),2) + pow(y_stddev_vec.get(cnt),2));
+
+                acc_stddev += pow(acc - acc_avg, 2); // store as variance
+            }
+        }
+
+        acc_stddev /= num_accs;
+        acc_stddev = sqrt(acc_stddev); // var to std dev
+
+        info.push_back({"Accuracy Min [m]", String::doubleToStringPrecision(acc_min, 2)});
+        info.push_back({"Accuracy Max [m]", String::doubleToStringPrecision(acc_max, 2)});
+
+        info.push_back({"Accuracy Avg [m]", String::doubleToStringPrecision(acc_avg, 2)});
+        info.push_back({"Accuracy StdDev [m]", String::doubleToStringPrecision(acc_stddev, 2)});
+    }
+
+    QMetaObject::invokeMethod(&status_dialog_, "setCalculateInfoSlot",
+                              Qt::QueuedConnection,
+                              Q_ARG(CalculateReferencesStatusDialog::CalcInfoVector, info));
+
     loginf << "CalculateReferencesJob: calculateReferences: done, buffer size " << result_->size();
 }
 
@@ -566,3 +668,4 @@ void CalculateReferencesJob::insertDoneSlot()
 
     insert_done_ = true;
 }
+

@@ -283,7 +283,7 @@ void CalculateReferencesTask::run()
     connect(status_dialog_.get(), &CalculateReferencesStatusDialog::closeSignal,
             this, &CalculateReferencesTask::closeStatusDialogSlot);
     status_dialog_->markStartTime();
-    status_dialog_->setStatus("Initializing");
+    status_dialog_->setStatusSlot("Initializing");
     status_dialog_->show();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
@@ -292,7 +292,7 @@ void CalculateReferencesTask::run()
     //remove existing references if we want to write the new ones
     if (writeReferences())
     {
-        status_dialog_->setStatus("Deleting old References");
+        status_dialog_->setStatusSlot("Deleting old References");
 
         if (dbcontent_man.dbContent("RefTraj").existsInDB()) // TODO rework to only delete define data source + line
             dbcontent_man.dbContent("RefTraj").deleteDBContentData();
@@ -304,7 +304,7 @@ void CalculateReferencesTask::run()
         }
     }
 
-    status_dialog_->setStatus("Loading Data");
+    status_dialog_->setStatusSlot("Loading Data");
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
@@ -400,7 +400,7 @@ void CalculateReferencesTask::createDoneSlot()
         if (settings_.generate_viewpoints)
         {
             //load all created view points
-            status_dialog_->setStatus("Adding View Points");
+            status_dialog_->setStatusSlot("Adding View Points");
 
             COMPASS::instance().viewManager().loadViewPoints(j);
         }
@@ -412,7 +412,7 @@ void CalculateReferencesTask::createDoneSlot()
 
             if (j_vp.has_value() && j_vp->is_object())
             {
-                status_dialog_->setStatus("Loading View Point");
+                status_dialog_->setStatusSlot("Loading View Point");
 
                 nlohmann::json::object_t obj = j_vp.value();
 
@@ -423,7 +423,7 @@ void CalculateReferencesTask::createDoneSlot()
         }
     }
 
-    status_dialog_->setStatus("Done");
+    status_dialog_->setStatusSlot("Done");
 
     assert (create_job_);
 
@@ -470,6 +470,7 @@ void CalculateReferencesTask::loadedDataSlot(
     data_ = data;
 
     assert (status_dialog_);
+
     status_dialog_->updateTime();
 }
 
@@ -490,7 +491,8 @@ void CalculateReferencesTask::loadingDoneSlot()
                this, &CalculateReferencesTask::loadingDoneSlot);
 
     assert(status_dialog_);
-    status_dialog_->setStatus("Loading done, starting calculation");
+    status_dialog_->setStatusSlot("Loading done, starting calculation");
+    status_dialog_->setLoadedCountsSlot(data_);
 
     dbcontent_man.clearData();
 
@@ -500,22 +502,14 @@ void CalculateReferencesTask::loadingDoneSlot()
 
     assert(!create_job_);
 
-    create_job_ = std::make_shared<CalculateReferencesJob>(*this, cache_);
+    create_job_ = std::make_shared<CalculateReferencesJob>(*this, *status_dialog_, cache_);
 
     connect(create_job_.get(), &CalculateReferencesJob::doneSignal, this,
             &CalculateReferencesTask::createDoneSlot, Qt::QueuedConnection);
     connect(create_job_.get(), &CalculateReferencesJob::obsoleteSignal, this,
             &CalculateReferencesTask::createObsoleteSlot, Qt::QueuedConnection);
-    connect(create_job_.get(), &CalculateReferencesJob::statusSignal, this,
-            &CalculateReferencesTask::calculationStatusSlot, Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(create_job_);
-}
-
-void CalculateReferencesTask::calculationStatusSlot(QString status)
-{
-    assert(status_dialog_);
-    status_dialog_->setStatus(status.toStdString());
 }
 
 void CalculateReferencesTask::closeStatusDialogSlot()

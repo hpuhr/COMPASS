@@ -5,12 +5,8 @@
 #include "dbcontent/dbcontentcache.h"
 #include "calculatereferencestarget.h"
 
-//#include "json.h"
-
-//#include "boost/date_time/posix_time/ptime.hpp"
-//#include "boost/date_time/posix_time/posix_time_duration.hpp"
-
 class CalculateReferencesTask;
+class CalculateReferencesStatusDialog;
 class DBContent;
 
 class CalculateReferencesJob : public Job
@@ -20,11 +16,9 @@ class CalculateReferencesJob : public Job
 public slots:
     void insertDoneSlot();
 
-signals:
-    void statusSignal(QString status);
-
 public:
-    CalculateReferencesJob(CalculateReferencesTask& task, 
+    CalculateReferencesJob(CalculateReferencesTask& task,
+                           CalculateReferencesStatusDialog& status_dialog,
                            std::shared_ptr<dbContent::Cache> cache);
     virtual ~CalculateReferencesJob();
 
@@ -34,12 +28,14 @@ public:
 
 protected:
     CalculateReferencesTask& task_;
+    CalculateReferencesStatusDialog& status_dialog_;
     std::shared_ptr<dbContent::Cache> cache_;
 
     std::vector<std::unique_ptr<CalculateReferences::Target>> targets_;
 
     std::shared_ptr<Buffer> result_;
 
+    std::map<std::string, std::pair<unsigned int, unsigned int>> used_pos_counts_; // dbcont -> used, unused
     std::map<unsigned int, unsigned int> reftraj_counts_; // utn -> cnt
 
     bool insert_done_ {false};
