@@ -205,7 +205,7 @@ void CalculateReferencesStatusDialog::setLoadedCountsSlot(const std::map<std::st
     }
 }
 
-void CalculateReferencesStatusDialog::setUsedPositionCountsSlot (PositionCountsMap counts)
+void CalculateReferencesStatusDialog::setUsedPositionCountsSlot (PositionCountsMapStruct counts)
 {
     loginf << "CalculateReferencesStatusDialog: setUsedPositionCountsSlot";
 
@@ -239,11 +239,12 @@ void CalculateReferencesStatusDialog::setUsedPositionCountsSlot (PositionCountsM
 
     unsigned int used_count, unused_count;
 
-    for (auto& cnt_it : counts)
+    for (auto& cnt_it : counts.pos_map)
     {
         ++row;
 
-        std::tie(used_count, unused_count) = cnt_it.second;
+        used_count = cnt_it.second.first;
+        unused_count = cnt_it.second.second;
 
         QLabel* dbcont_label = new QLabel(cnt_it.first.c_str());
         pos_used_grid_->addWidget(dbcont_label, row, 0);
@@ -278,7 +279,7 @@ void CalculateReferencesStatusDialog::setUsedPositionCountsSlot (PositionCountsM
 
 }
 
-void CalculateReferencesStatusDialog::setCalculateInfoSlot(CalculateReferencesStatusDialog::CalcInfoVector info)
+void CalculateReferencesStatusDialog::setCalculateInfoSlot(CalcInfoVectorStruct info)
 {
     loginf << "CalculateReferencesStatusDialog: setCalculateInfoSlot";
 
@@ -288,11 +289,12 @@ void CalculateReferencesStatusDialog::setCalculateInfoSlot(CalculateReferencesSt
 
     string text1, text2;
 
-    for (auto& txt_it : info)
+    for (auto& txt_it : info.info_vec)
     {
         ++row;
 
-        std::tie(text1, text2) = txt_it;
+        text1 = txt_it.first;
+        text2 = txt_it.second;
 
         calc_info_grid_->addWidget(new QLabel(text1.c_str()), row, 0);
 
@@ -302,12 +304,12 @@ void CalculateReferencesStatusDialog::setCalculateInfoSlot(CalculateReferencesSt
     }
 }
 
-void CalculateReferencesStatusDialog::setStatusSlot(const std::string& status)
+void CalculateReferencesStatusDialog::setStatusSlot(const QString& status)
 {
-    status_ = status;
+    status_ = status.toStdString();
 
     assert(status_label_);
-    status_label_->setText(status_.c_str());
+    status_label_->setText(status);
 
     updateTime();
 }

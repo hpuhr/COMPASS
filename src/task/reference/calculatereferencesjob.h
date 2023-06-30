@@ -4,10 +4,15 @@
 #include "job.h"
 #include "dbcontent/dbcontentcache.h"
 #include "calculatereferencestarget.h"
+#include "calculatereferencesstatusdialog.h"
+
+#include <QMap>
+#include <QPair>
 
 class CalculateReferencesTask;
 class CalculateReferencesStatusDialog;
 class DBContent;
+
 
 class CalculateReferencesJob : public Job
 {
@@ -35,7 +40,8 @@ protected:
 
     std::shared_ptr<Buffer> result_;
 
-    std::map<std::string, std::pair<unsigned int, unsigned int>> used_pos_counts_; // dbcont -> used, unused
+    PositionCountsMapStruct used_pos_counts_; // dbcont -> used, unused
+    CalcInfoVectorStruct info_;
     std::map<unsigned int, unsigned int> reftraj_counts_; // utn -> cnt
 
     bool insert_done_ {false};
