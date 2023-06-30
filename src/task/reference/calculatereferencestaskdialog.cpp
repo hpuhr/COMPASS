@@ -317,23 +317,23 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     addUncertainty("System Stddev", &P_std_box_, !is_appimage);
     addUncertainty("System Stddev (high)", &P_std_high_box_, !is_appimage);
 
-    addHeader("System Track Uncertainties");
+    //addHeader("System Track Uncertainties");
 
     R_std_syst_use_box_ = addCheckBox("Use Tracker Specific Uncertainties", 0, !is_appimage);
     newRow();
 
-    addUncertainty("Position Stddev", &R_std_syst_pos_box_, !is_appimage);
-    addUncertainty("Velocity Stddev", &R_std_syst_vel_box_, true);
-    addUncertainty("Acceleration Stddev", &R_std_syst_acc_box_, true);
+    addUncertainty("Tracker Position Stddev", &R_std_syst_pos_box_, !is_appimage);
+    addUncertainty("Tracker Velocity Stddev", &R_std_syst_vel_box_, true);
+    addUncertainty("Tracker Acceleration Stddev", &R_std_syst_acc_box_, !is_appimage);
 
-    addHeader("ADS-B Uncertainties");
+    //addHeader("ADS-B Uncertainties");
 
     R_std_adsb_use_box_ = addCheckBox("Use ADS-B Specific Uncertainties", 0, !is_appimage);
     newRow();
 
-    addUncertainty("Position Stddev", &R_std_adsb_pos_box_, !is_appimage);
-    addUncertainty("Velocity Stddev", &R_std_adsb_vel_box_, true);
-    addUncertainty("Acceleration Stddev", &R_std_adsb_acc_box_, true);
+    addUncertainty("ADS-B Position Stddev", &R_std_adsb_pos_box_, !is_appimage);
+    addUncertainty("ADS-B Velocity Stddev", &R_std_adsb_vel_box_, true);
+    addUncertainty("ADS-B Acceleration Stddev", &R_std_adsb_acc_box_, !is_appimage);
 
     //chain section
     addHeader("Chain Generation");
