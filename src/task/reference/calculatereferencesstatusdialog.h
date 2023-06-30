@@ -69,5 +69,7 @@ private:
 
 Q_DECLARE_METATYPE(CalculateReferencesStatusDialog::PositionCountsMap);
 Q_DECLARE_METATYPE(CalculateReferencesStatusDialog::CalcInfoVector);
+Q_DECLARE_METATYPE(std::string);
+
 
 #endif // CALCULATEREFERENCESSTATUSDIALOG_H

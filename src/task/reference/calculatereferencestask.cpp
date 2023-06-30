@@ -26,7 +26,7 @@
 using namespace std;
 using namespace Utils;
 using namespace dbContent;
-using namespace nlohmann;
+//using namespace nlohmann;
 
 CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
                                                  const std::string& instance_id,
@@ -58,10 +58,10 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     registerParameter("rec_resample_result_dt", &settings_.resample_result_Q_std, 10.0);
 
     registerParameter("use_tracker_data"  , &settings_.use_tracker_data, true);
-    registerParameter("data_sources_tracker", &settings_.data_sources_tracker, json::object());
+    //registerParameter("data_sources_tracker", &settings_.data_sources_tracker, json::object());
 
     registerParameter("use_adsb_data"  , &settings_.use_adsb_data, true);
-    registerParameter("data_sources_adsb", &settings_.data_sources_adsb, json::object());
+    //registerParameter("data_sources_adsb", &settings_.data_sources_adsb, json::object());
     
     // position usage
     registerParameter("filter_position_usage", &settings_.filter_position_usage, true);
