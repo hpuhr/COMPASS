@@ -44,8 +44,8 @@ class RecKalmanProjectionHandler
 public:
     struct Settings
     {
-        MapProjectionMode map_proj_mode          = MapProjectionMode::None; //projection mode
-        double            proj_max_dist_cart_sqr = 0.0;                     //maximum squared distance threshold for MapProjectionMode::Dynamic
+        MapProjectionMode map_proj_mode          = MapProjectionMode::MapProjectNone; //projection mode
+        double            proj_max_dist_cart_sqr = 0.0;                               //maximum squared distance threshold for MapProjectionMode::Dynamic
     };
 
     RecKalmanProjectionHandler(ReconstructorKalman* rec);

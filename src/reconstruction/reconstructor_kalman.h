@@ -90,21 +90,21 @@ public:
         double P_std      = 30.0;   // system noise (standard)
         double P_std_high = 1000.0; // system noise (high)
 
-        bool   smooth         = true; // use RTS smoother
-        size_t min_chain_size = 2;    // minimum number of connected points used as result (and input for RTS smoother)
+        size_t min_chain_size = 2;       // minimum number of connected points used as result (and input for RTS smoother)
+        double max_distance   = 50000.0; // maximum allowed distance of consecutive target reports in meters (0 = do not check)
+        double min_dt         = 1e-06;   // minimum allowed time difference of consecutive target reports in seconds (0 = do not check)
+        double max_dt         = 30.0;    // maximum allowed time difference of consecutive target reports in seconds (0 = do not check)
 
-        double max_distance = 50000.0; // maximum allowed distance of consecutive target reports in meters (0 = do not check)
-        double min_dt       = 1e-06;   // minimum allowed time difference of consecutive target reports in seconds (0 = do not check)
-        double max_dt       = 30.0;    // maximum allowed time difference of consecutive target reports in seconds (0 = do not check)
+        bool smooth = true; // use RTS smoother
 
         bool            resample_result = false;                      // resample result references using kalman infos
         double          resample_dt     = 1.0;                        // resampling step size in seconds
         double          resample_Q_std  = 10.0;                       // resampling process noise
         StateInterpMode interp_mode     = StateInterpMode::BlendVar;  // kalman state interpolation mode used during resampling
 
-        MapProjectionMode map_proj_mode          = MapProjectionMode::Dynamic; // map projection mode
-        double            max_proj_distance_cart = 20000.0;                    // maximum distance from the current map projection origin in meters 
-                                                                               // before changing the projection center
+        MapProjectionMode map_proj_mode          = MapProjectionMode::MapProjectDynamic; // map projection mode
+        double            max_proj_distance_cart = 20000.0;                              // maximum distance from the current map projection origin in meters 
+                                                                                         // before changing the projection center
     };
 
     ReconstructorKalman();

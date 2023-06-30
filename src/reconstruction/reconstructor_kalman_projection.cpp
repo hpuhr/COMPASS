@@ -62,12 +62,12 @@ void RecKalmanProjectionHandler::initProjection(Measurement& mm, bool project_mm
 void RecKalmanProjectionHandler::initProjection(double lat, 
                                                 double lon)
 {
-    if (settings_.map_proj_mode == MapProjectionMode::None)
+    if (settings_.map_proj_mode == MapProjectionMode::MapProjectNone)
         return;
 
     assert(proj_);
 
-    if (settings_.map_proj_mode == MapProjectionMode::Static)
+    if (settings_.map_proj_mode == MapProjectionMode::MapProjectStatic)
     {
         assert(rec_);
 
@@ -75,7 +75,7 @@ void RecKalmanProjectionHandler::initProjection(double lat,
         if (!proj_->valid())
             proj_->update(rec_->regionOfInterestWGS84());
     }
-    else if (settings_.map_proj_mode == MapProjectionMode::Dynamic)
+    else if (settings_.map_proj_mode == MapProjectionMode::MapProjectDynamic)
     {
         //update to measurement location
         proj_->update(lat,lon);
@@ -100,7 +100,7 @@ void RecKalmanProjectionHandler::project(double& x,
                                          double lat, 
                                          double lon) const
 {
-    if (settings_.map_proj_mode == MapProjectionMode::None)
+    if (settings_.map_proj_mode == MapProjectionMode::MapProjectNone)
         return;
 
     assert(proj_ && proj_->valid());
@@ -128,7 +128,7 @@ void RecKalmanProjectionHandler::unproject(double& lat,
     lat = ref.lat;
     lon = ref.lon;
 
-    if (settings_.map_proj_mode == MapProjectionMode::None)
+    if (settings_.map_proj_mode == MapProjectionMode::MapProjectNone)
         return;
 
     assert(proj_ && proj_->valid());
@@ -159,7 +159,7 @@ void RecKalmanProjectionHandler::unproject(std::vector<Reference>& references,
                                            const std::vector<Eigen::Vector2d>& proj_centers) const
 {
     //nothing to do?
-    if (settings_.map_proj_mode == MapProjectionMode::None)
+    if (settings_.map_proj_mode == MapProjectionMode::MapProjectNone)
         return;
 
     assert(references.size() == proj_centers.size());
@@ -173,7 +173,7 @@ void RecKalmanProjectionHandler::unproject(std::vector<Reference>& references,
  */
 bool RecKalmanProjectionHandler::projectionValid(const Reference& ref) const
 {
-    if (settings_.map_proj_mode == MapProjectionMode::Dynamic)
+    if (settings_.map_proj_mode == MapProjectionMode::MapProjectDynamic)
     {
         //dynamic projection mode => check if map prjection still valid
         assert(proj_ && proj_->valid());
@@ -197,7 +197,7 @@ bool RecKalmanProjectionHandler::projectionValid(const Reference& ref) const
 void RecKalmanProjectionHandler::changeProjection(Reference& ref,
                                                   kalman::KalmanState& state)
 {
-    if (settings_.map_proj_mode != MapProjectionMode::Dynamic)
+    if (settings_.map_proj_mode != MapProjectionMode::MapProjectDynamic)
         return;
 
     assert(rec_);
@@ -281,7 +281,7 @@ void RecKalmanProjectionHandler::xReprojected(kalman::Vector& x_repr,
 kalman::XTransferFunc RecKalmanProjectionHandler::reprojectionTransform(const KalmanChain& chain)
 {
     //only dynamic mode needs a valid transformation
-    if (settings_.map_proj_mode != MapProjectionMode::Dynamic)
+    if (settings_.map_proj_mode != MapProjectionMode::MapProjectDynamic)
         return {};
 
     auto repr_trafo = [ & ] (kalman::Vector& x_tr, const kalman::Vector& x, size_t idx_old, size_t idx_new)
@@ -299,7 +299,7 @@ kalman::XTransferFunc RecKalmanProjectionHandler::reprojectionTransform(const Ka
 */
 Eigen::Vector2d RecKalmanProjectionHandler::projectionCenter() const
 {
-    if (settings_.map_proj_mode == MapProjectionMode::None)
+    if (settings_.map_proj_mode == MapProjectionMode::MapProjectNone)
         return Eigen::Vector2d(0, 0);
 
     assert(proj_);
