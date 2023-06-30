@@ -21,7 +21,7 @@ using namespace dbContent::TargetReport;
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
-using namespace nlohmann;
+//using namespace nlohmann;
 
 namespace CalculateReferences {
 

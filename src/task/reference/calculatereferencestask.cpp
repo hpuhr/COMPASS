@@ -72,10 +72,10 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     registerParameter("rec_resample_result_qstd", &settings_.resample_result_Q_std, 10.0);
 
     registerParameter("use_tracker_data"  , &settings_.use_tracker_data, true);
-    //registerParameter("data_sources_tracker", &settings_.data_sources_tracker, json::object());
+    registerParameter("data_sources_tracker", &settings_.data_sources_tracker, nlohmann::json::object());
 
     registerParameter("use_adsb_data"  , &settings_.use_adsb_data, true);
-    //registerParameter("data_sources_adsb", &settings_.data_sources_adsb, json::object());
+    registerParameter("data_sources_adsb", &settings_.data_sources_adsb, nlohmann::json::object());
     
     // position usage
     registerParameter("filter_position_usage", &settings_.filter_position_usage, true);

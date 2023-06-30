@@ -166,4 +166,12 @@ The 'Live: Running' can be paused into the 'Live: Paused' mode, which allows off
 
 The 'Live' modes can be quit, after which the application returns to the 'Offline' mode, to allow inspection of the full database as always.
 
- 
+\subsection*{Calculation of Reference Trajectories}
+
+Based on the associated target reports, references can be calculated. Using a selection of data sources, with optional filters on position quality indicators, references are calculated using ADS-B and / or System Track target reports using a Kalman based algorithm with RTS smoothing. The resulting references are then written as 'RefTraj' data into the database. \\
+
+The main use case of calculated references is as reference data in evaluations. Special care should be taken that the reference accuracy needed for the respective evaluation is given.
+
+\subsection*{Evaluation}
+
+Based on reference and test data source(s), evaluation of configurable standards within defined airspace sectors can be performed. The results are given as sector averages as well as per-target statistics and can be inspected down to the per-target-report level if wanted. Certain targets can be removed from the evaluation (i.e. target not of interest, transponder issues), and evaluation report documents can be automatically generated as PDFs.
