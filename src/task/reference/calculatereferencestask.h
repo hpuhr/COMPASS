@@ -44,13 +44,13 @@ struct CalculateReferencesTaskSettings
     //default sensor specific uncertainties
     bool          use_R_std_cat021      = true;     //use adsb specific sensor noise
     double        R_std_pos_cat021      = 30.0;     //position observation noise adsb
-    double        R_std_vel_cat021      = 50.0;     //velocity observation noise adsb
-    double        R_std_acc_cat021      = 50.0;     //acceleration observation noise adsb
+    double        R_std_vel_cat021      = 10.0;     //velocity observation noise adsb
+    double        R_std_acc_cat021      = 10.0;     //acceleration observation noise adsb
 
     bool          use_R_std_cat062      = true;     //use systrack specific sensor noise
     double        R_std_pos_cat062      = 30.0;     //position observation noise systracks
-    double        R_std_vel_cat062      = 50.0;     //velocity observation noise systracks
-    double        R_std_acc_cat062      = 50.0;     //acceleration observation noise systracks
+    double        R_std_vel_cat062      = 20.0;     //velocity observation noise systracks
+    double        R_std_acc_cat062      = 20.0;     //acceleration observation noise systracks
 
     //chain related
     double        min_dt                = 0.0;      // minimum allowed timestep in seconds

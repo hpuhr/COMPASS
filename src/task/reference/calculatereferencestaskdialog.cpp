@@ -273,13 +273,13 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
         ++row;
     };
 
-    auto addUncertainty = [ & ] (const QString& name, QDoubleSpinBox** sb_ptr, bool visible)
+    auto addUncertainty = [ & ] (const QString& name, QDoubleSpinBox** sb_ptr, bool visible, const QString& unit)
     {
         auto sb = new QDoubleSpinBox;
         sb->setMinimum(0.0);
         sb->setMaximum(DBL_MAX);
         sb->setVisible(visible);
-        sb->setSuffix(" m");
+        sb->setSuffix(" " + unit);
 
         *sb_ptr = sb;
 
@@ -311,29 +311,29 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     //uncertainty section
     addHeader("Default Uncertainties");
 
-    addUncertainty("Measurement Stddev", &R_std_box_, !is_appimage);
-    addUncertainty("Measurement Stddev (high)", &R_std_high_box_, !is_appimage);
-    addUncertainty("Process Stddev", &Q_std_box_, true);
-    addUncertainty("System Stddev", &P_std_box_, !is_appimage);
-    addUncertainty("System Stddev (high)", &P_std_high_box_, !is_appimage);
+    addUncertainty("Measurement Stddev", &R_std_box_, !is_appimage, "m");
+    addUncertainty("Measurement Stddev (high)", &R_std_high_box_, !is_appimage, "m");
+    addUncertainty("Process Stddev", &Q_std_box_, true, "m");
+    addUncertainty("System Stddev", &P_std_box_, !is_appimage, "m");
+    addUncertainty("System Stddev (high)", &P_std_high_box_, !is_appimage, "m");
 
     //addHeader("System Track Uncertainties");
 
     R_std_syst_use_box_ = addCheckBox("Use Tracker Specific Uncertainties", 0, !is_appimage);
     newRow();
 
-    addUncertainty("Tracker Position Stddev", &R_std_syst_pos_box_, !is_appimage);
-    addUncertainty("Tracker Velocity Stddev", &R_std_syst_vel_box_, true);
-    addUncertainty("Tracker Acceleration Stddev", &R_std_syst_acc_box_, !is_appimage);
+    addUncertainty("Tracker Position Stddev", &R_std_syst_pos_box_, !is_appimage, "m");
+    addUncertainty("Tracker Velocity Stddev", &R_std_syst_vel_box_, true, "m/s");
+    addUncertainty("Tracker Acceleration Stddev", &R_std_syst_acc_box_, !is_appimage, "m/s²");
 
     //addHeader("ADS-B Uncertainties");
 
     R_std_adsb_use_box_ = addCheckBox("Use ADS-B Specific Uncertainties", 0, !is_appimage);
     newRow();
 
-    addUncertainty("ADS-B Position Stddev", &R_std_adsb_pos_box_, !is_appimage);
-    addUncertainty("ADS-B Velocity Stddev", &R_std_adsb_vel_box_, true);
-    addUncertainty("ADS-B Acceleration Stddev", &R_std_adsb_acc_box_, !is_appimage);
+    addUncertainty("ADS-B Position Stddev", &R_std_adsb_pos_box_, !is_appimage, "m");
+    addUncertainty("ADS-B Velocity Stddev", &R_std_adsb_vel_box_, true, "m/s");
+    addUncertainty("ADS-B Acceleration Stddev", &R_std_adsb_acc_box_, !is_appimage, "m/s²");
 
     //chain section
     addHeader("Chain Generation");

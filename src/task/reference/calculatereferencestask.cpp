@@ -48,13 +48,13 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
 
     registerParameter("rec_use_mm_stddev_cat021", &settings_.use_R_std_cat021, true);
     registerParameter("rec_mm_stddev_cat021_pos", &settings_.R_std_pos_cat021, 30.0);
-    registerParameter("rec_mm_stddev_cat021_vel", &settings_.R_std_vel_cat021, 50.0);
-    registerParameter("rec_mm_stddev_cat021_acc", &settings_.R_std_acc_cat021, 50.0);
+    registerParameter("rec_mm_stddev_cat021_vel", &settings_.R_std_vel_cat021, 10.0);
+    registerParameter("rec_mm_stddev_cat021_acc", &settings_.R_std_acc_cat021, 10.0);
 
     registerParameter("rec_use_mm_stddev_cat062", &settings_.use_R_std_cat062, true);
     registerParameter("rec_mm_stddev_cat062_pos", &settings_.R_std_pos_cat062, 30.0);
-    registerParameter("rec_mm_stddev_cat062_vel", &settings_.R_std_vel_cat062, 50.0);
-    registerParameter("rec_mm_stddev_cat062_acc", &settings_.R_std_acc_cat062, 50.0);
+    registerParameter("rec_mm_stddev_cat062_vel", &settings_.R_std_vel_cat062, 20.0);
+    registerParameter("rec_mm_stddev_cat062_acc", &settings_.R_std_acc_cat062, 20.0);
 
     registerParameter("rec_min_dt"        , &settings_.min_dt        ,  0.0);
     registerParameter("rec_max_dt"        , &settings_.max_dt        , 11.0);
