@@ -266,3 +266,38 @@ broken down into individual DSTypes.
 \paragraph{References Info} This section displays information about the reference computation result.
 It shows the number of reference trajectories created, the total number of created target reports, and 
 accuracy statistics, which can be used to quantify how well the reconstructor performed.
+
+After finishing, the progress dialog may also display error information. Reference computation can mainly fail in two ways. \\
+
+Badly configured data sources or non-optimal filter settings may result in no data going into the reference computation pipeline.
+This will result in the error message \textit{'No input data for reference computation'}. In this case it may help to 
+check the included data sources and the chosen filter settings in the reference computation configuration (see above). \\
+
+In case the reconstructor fails to generate any reference data for the included data, the error 
+\textit{'No reference data created'} will be shown. A non-optimal Kalman configuration might be the cause for this.
+
+\subsubsection{Reconstruction Preview}
+
+After selecting a desired set of parameters, it can be tiresome to run reference computation for the entire 
+set of targets in order to obtain a feedback on the quality of the result. In order to get a faster feedback on the 
+chosen parameter set, a \textit{Reconstruction Preview} can be executed for a single chosen track. 
+Unlike reference computation for all tracks, the computed reference trajectory will not be written to the database.
+Instead it will be visualized in an open OSGView as an annotation, along with additional intermediate data.
+This intermediate data can be especially useful to inspect the various stages of the Kalman process. \\
+
+For this feature, first a set of parameters can be selected in the \textit{Calculate References} dialog, as described above.
+Then the current settings are stored by closing the dialog again using the \textit{Close} button on the bottom left. \\
+
+Next, a desired Target can be selected in the \textit{Targets} tab of the main window (see \nameref{sec:ui_targets}).
+The reconstruction preview can be started by right-clicking on the selected target and choosing \textit{Reconstruction Preview}.
+
+\begin{figure}[H]
+    \center
+      \includegraphics[width=9cm]{figures/ui_task_references_dialog_result.png}
+    \caption{Calculate References Task - Calculate References Status Dialog}
+\end{figure}
+
+After reconstruction has finished, the results can be inspected in the \textit{Annotations} node of OSGView's \textit{Layer} tab. \\
+
+
+
