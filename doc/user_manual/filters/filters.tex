@@ -116,6 +116,16 @@ When active, this filter forces loading of data with the given track numbers, so
 
 Please note that ADS-B target reports can also contain a track number in ASTERIX, but since the information can not currently be mapped to the database (missing in schema), this filter does not influence ADS-B data loading.
 
+\subsection{MLAT RUs Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm,frame]{figures/filter_mlatrus.png}
+  \caption{MLAT RUs filter}
+\end{figure}
+
+When active, this filter forces loading of MLAT data where at least one of the given RUs participated.
+
 \subsection{Mode 3/A Codes Filter}
 
 \begin{figure}[H]
@@ -148,6 +158,28 @@ When active, this filter forces loading of data with a barometric altitude insid
 
 When active, this filter forces loading of data without any secondary attributes.
 
+\subsection{RefTraj Accuracy}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm,frame]{figures/filter_reftrajacc.png}
+  \caption{Timestamp filter}
+\end{figure}
+
+When active, this filter forces loading of RefTraj data with of a lower Square-Root-Sum value of the standard deviations than the given threshold.
+
+
+\subsection{Timestamp Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm,frame]{figures/filter_timestamp.png}
+  \caption{Timestamp filter}
+\end{figure}
+
+When active, this filter forces loading of data with the EPOCH timestamp inside the given thresholds (in YYYY-mm-DD HH:MM:SS.SSS).
+
+
 % 
 % \subsection{Tracker Multiple Sources Filter}
 % 
@@ -170,16 +202,6 @@ When active, this filter forces loading of data without any secondary attributes
 This filter works similiar to the 'Track Number' filter, but filters only CAT062 data, and allows for track numbers specific for each data source and existing lines, e.g. '1' or '1,2,3'.\\
 
 It can be used when e.g. several Tracker runs were added in diifferent lines, so that track numbers (from the same target) for each run can be specified seperately. \\
-
-\subsection{Timestamp Filter}
-
-\begin{figure}[H]
-  \center
-    \includegraphics[width=12cm,frame]{figures/filter_timestamp.png}
-  \caption{Timestamp filter}
-\end{figure}
-
-When active, this filter forces loading of data with the EPOCH timestamp inside the given thresholds (in YYYY-mm-DD HH:MM:SS.SSS).
 
 \subsection{UTN Filter}
 
