@@ -287,10 +287,10 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
         if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
             db_interface.deleteAllViewPoints();
 
-        assert (json_obj.contains("view_points"));
+        assert (json_obj.contains(VP_COLLECTION_ARRAY_KEY));
         
         //add new ones
-        json& view_points = json_obj.at("view_points");
+        json& view_points = json_obj.at(VP_COLLECTION_ARRAY_KEY);
         assert (view_points.size());
 
         unsigned int id;

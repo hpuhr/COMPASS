@@ -26,6 +26,13 @@
 
 using namespace nlohmann;
 
+const std::string VP_COLLECTION_CONTENT_VERSION {"0.3"};
+const std::string VP_COLLECTION_CONTENT_TYPE {"view_points"};
+
+const std::string VP_COLLECTION_CONTENT_VERSION_KEY {"content_version"};
+const std::string VP_COLLECTION_CONTENT_TYPE_KEY {"content_type"};
+const std::string VP_COLLECTION_ARRAY_KEY {"view_points"};
+
 const std::string VP_ID_KEY {"id"};
 const std::string VP_NAME_KEY {"name"};
 const std::string VP_TYPE_KEY {"type"};
@@ -181,14 +188,14 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
         if (!json_obj.is_object())
             throw std::runtime_error("current data is not an object");
 
-        if (!json_obj.contains("content_type")
-                || !json_obj.at("content_type").is_string()
-                || json_obj.at("content_type") != "view_points")
+        if (!json_obj.contains(VP_COLLECTION_CONTENT_TYPE_KEY)
+                || !json_obj.at(VP_COLLECTION_CONTENT_TYPE_KEY).is_string()
+                || json_obj.at(VP_COLLECTION_CONTENT_TYPE_KEY) != VP_COLLECTION_CONTENT_TYPE)
             throw std::runtime_error("current data is not view point content");
 
-        if (!json_obj.contains("content_version")
-                || !json_obj.at("content_version").is_string()
-                || json_obj.at("content_version") != "0.2")
+        if (!json_obj.contains(VP_COLLECTION_CONTENT_VERSION_KEY)
+                || !json_obj.at(VP_COLLECTION_CONTENT_VERSION_KEY).is_string()
+                || json_obj.at(VP_COLLECTION_CONTENT_VERSION_KEY) != VP_COLLECTION_CONTENT_VERSION)
             throw std::runtime_error("current data content version is not supported");
 
         if (json_obj.contains("view_point_context"))
@@ -246,10 +253,10 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
             }
         }
 
-        if (!json_obj.contains("view_points"))
+        if (!json_obj.contains(VP_COLLECTION_ARRAY_KEY))
             throw std::runtime_error("current data does not contain view points");
 
-        json& view_points = json_obj.at("view_points");
+        json& view_points = json_obj.at(VP_COLLECTION_ARRAY_KEY);
 
         if (!view_points.is_array())
             throw std::runtime_error("view_points is not an array");
