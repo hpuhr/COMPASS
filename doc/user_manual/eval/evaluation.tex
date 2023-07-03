@@ -26,7 +26,8 @@ Since the task only makes use of the Mode S address, non-Mode S data is not eval
 
 \subsection{Sector Altitude Filtering}
 
-If sectors with altitude limits are used, please be aware that target reports without a Mode C code can not be filtered by the set limit. Therefore such target reports are assumed to be inside in all sectors when inside the defined 2D polygons. \\
+If sectors with altitude limits are used, please be aware that target reports without a Mode C code can not be filtered by the set limit. Therefore such target reports are assumed to be inside in all 
+sectors when inside the defined 2D polygons. \\
 
 The 'inside-sector' check is always performed on the reference data only, therefore it is of importance to only use reference data with existing Mode C code data.
 
@@ -115,10 +116,18 @@ Since 'any' type of data can be selected for evaluation, this allows for the fol
 \end{itemize}
 \ \\
 
-Of course it is also possible to use e.g. an imported GPS trail as reference (see \nameref{sec:ui_import_gps}), although this is currently not tested for lack of test data. If you might be able to provide such test data, please contact the author. \\
+Of course it is also possible to use e.g. an imported GPS trail as reference (see \nameref{sec:ui_import_gps}), although this is currently not tested for lack of test data. 
+If you might be able to provide such test data, please contact the author. \\
 
 \subsubsection{Standard}
 In the center, using the 'Standard' drop-down menu, the current standard can be selected. To create/configure the standard please use the 'Standard' tab.
+
+\subsubsection{Minimum Height Filter}
+
+The option 'Sector Layers: Minimum Height Filter' can be used to select a sector layer, which then serves as a complex minimum height filter.
+The selected layer may consist of several sectors with configured minimum altitude, and data which does not lie inside the bounds and above the minimum altitude 
+of at least one of the selected layer's sectors will automatically be treated as if residing outside of any evaluation sector. 
+The filter thus acts as an additional precondition for data to be regarded by the evaluation.
 
 \subsubsection{Sector Layer/Requirement Mapping}
 
@@ -130,7 +139,16 @@ On the left, all existing sector layers are listed, in the shown example:
 \end{itemize}
 \ \\
 
-For each sector layer, the requirement groups (defined in the Standard tab) can be active/disabled. In the shown example, the existing requirement group 'Mandatory' is active in the sector layer.
+For each sector layer, the requirement groups (defined in the Standard tab) can be active/disabled. In the shown example, the existing requirement group 'Mandatory' is active in the sector layer. \\
+
+\textbf{Note}: When selecting a minimum height filter, it usually makes no sense to evaluate requirements in this layer.
+All requirement mappings thus should be deselected for this layer (see figure below).
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{figures/eval_unmap_min_height_filter.png}
+  \caption{Minimum Height Filter}
+\end{figure}
 
 \subsection{Targets Tab}
 
