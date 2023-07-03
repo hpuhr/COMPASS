@@ -375,7 +375,10 @@ boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::st
     //loginf << "Reconstructing " << dinfo << " - " << measurements_.size() << " measurement(s)";
 
     if (measurements_.empty())
+    {
+        //logerr << data_info << ": No measurements";
         return {};
+    }
 
     boost::optional<std::vector<Reference>> result;
 

@@ -73,6 +73,7 @@ public:
     void finalize () const;
 
     unsigned int size () const;
+    unsigned int ignoredSize() const;
 
     boost::posix_time::ptime timeBegin() const;
     std::string timeBeginStr() const;

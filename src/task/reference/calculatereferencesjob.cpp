@@ -50,7 +50,8 @@ void CalculateReferencesJob::run()
 {
     logdbg << "CalculateReferencesJob: run: start";
 
-    started_ = true;
+    started_      = true;
+    result_state_ = ResultOk;
 
     ptime start_time;
     ptime stop_time;
@@ -63,7 +64,7 @@ void CalculateReferencesJob::run()
 
     //status_dialog_.setStatus("Creating Targets");
 
-    createTargets();
+    size_t created_reports = createTargets();
 
     //status_dialog_.setStatus("Finalizing Targets");
 
@@ -82,7 +83,7 @@ void CalculateReferencesJob::run()
     calculateReferences();
 
     //write references to db if desired
-    if (task_.writeReferences())
+    if (task_.writeReferences() && result_ && result_->size())
     {
         //status_dialog_.setStatus("Writing References");
 
@@ -107,10 +108,19 @@ void CalculateReferencesJob::run()
     loginf << "CalculateReferencesJob: run: done ("
            << String::doubleToStringPrecision(load_time, 2) << " s).";
 
+    if (created_reports == 0)
+    {
+        result_state_ = ResultState::ResultNoInputData;
+    }
+    else if (!result_ || result_->size() == 0)
+    {
+        result_state_ = ResultState::ResultNoRefData;
+    }
+
     done_ = true;
 }
 
-void CalculateReferencesJob::createTargets()
+size_t CalculateReferencesJob::createTargets()
 {
     loginf << "CalculateReferencesJob: createTargets";
 
@@ -186,9 +196,25 @@ void CalculateReferencesJob::createTargets()
     for (auto& tgt_it : target_map)
         targets_.emplace_back(move(tgt_it.second));
 
+    size_t num_total   = 0;
+    size_t num_ignored = 0;
+
+    for (const auto& target : targets_)
+    {
+        for (const auto& ch : target->chains())
+        {
+            num_ignored += ch.second->ignoredSize();
+            num_total   += ch.second->size();
+        }
+    }
+
+    assert (num_total >= num_ignored);
+
     loginf << "CalculateReferencesJob: createTargets: done for " << targets_.size()
            << ", reports num_skipped " << num_skipped
            << " num_unassoc " << num_unassoc << " num_assoc " << num_assoc;
+
+    return (num_total - num_ignored);
 }
 
 void CalculateReferencesJob::filterPositionUsage(
@@ -446,7 +472,6 @@ void CalculateReferencesJob::filterPositionUsage(
 
     used_pos_counts_.pos_map[dbcontent_name] = {cat021_used_positions, cat021_ignored_positions};
 
-
     //typedef QMap<QString, QPair<unsigned int, unsigned int>> MyStringMap;
 
     qRegisterMetaType<PositionCountsMapStruct>("PositionCountsMapStruct");
@@ -454,8 +479,6 @@ void CalculateReferencesJob::filterPositionUsage(
     QMetaObject::invokeMethod(&status_dialog_, "setUsedPositionCountsSlot",
                               Qt::QueuedConnection,
                               Q_ARG(PositionCountsMapStruct, used_pos_counts_));
-
-
 }
 
 void CalculateReferencesJob::finalizeTargets()
@@ -550,73 +573,75 @@ void CalculateReferencesJob::calculateReferences()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    NullableVector<double>& x_stddev_vec = result_->get<double> (
-                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_).name());
-    NullableVector<double>& y_stddev_vec = result_->get<double> (
-                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_).name());
-
     unsigned int num_accs = 0;
     double acc;
     double acc_min = 0, acc_max = 0, acc_sum = 0;
 
-    for (unsigned int cnt=0; cnt < result_->size(); ++cnt)
-    {
-        if (!x_stddev_vec.isNull(cnt) && !y_stddev_vec.isNull(cnt))
-        {
-            acc = sqrt(pow(x_stddev_vec.get(cnt),2) + pow(y_stddev_vec.get(cnt),2));
-            acc_sum += acc;
-
-            if (num_accs)
-            {
-                acc_min = min(acc_min, acc);
-                acc_max = max(acc_max, acc);
-            }
-            else
-            {
-                acc_min = acc;
-                acc_max = acc;
-            }
-
-            ++num_accs;
-        }
-    }
-
     info_.info_vec.push_back({"Number of Targets", to_string(num_targets)});
-    info_.info_vec.push_back({"Number of Reference Target Reports", to_string(result_->size())});
+    info_.info_vec.push_back({"Number of Reference Target Reports", to_string(result_ ? result_->size() : 0)});
 
-    if (num_accs)
+    if (result_ && result_->size() > 0)
     {
-        double acc_avg = acc_sum / (double) num_accs;
-        double acc_stddev = 0;
+        NullableVector<double>& x_stddev_vec = result_->get<double> (
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_).name());
+        NullableVector<double>& y_stddev_vec = result_->get<double> (
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_).name());
 
         for (unsigned int cnt=0; cnt < result_->size(); ++cnt)
         {
             if (!x_stddev_vec.isNull(cnt) && !y_stddev_vec.isNull(cnt))
             {
                 acc = sqrt(pow(x_stddev_vec.get(cnt),2) + pow(y_stddev_vec.get(cnt),2));
+                acc_sum += acc;
 
-                acc_stddev += pow(acc - acc_avg, 2); // store as variance
+                if (num_accs)
+                {
+                    acc_min = min(acc_min, acc);
+                    acc_max = max(acc_max, acc);
+                }
+                else
+                {
+                    acc_min = acc;
+                    acc_max = acc;
+                }
+
+                ++num_accs;
             }
         }
 
-        acc_stddev /= num_accs;
-        acc_stddev = sqrt(acc_stddev); // var to std dev
+        if (num_accs)
+        {
+            double acc_avg = acc_sum / (double) num_accs;
+            double acc_stddev = 0;
 
-        info_.info_vec.push_back({"Accuracy Min [m]", String::doubleToStringPrecision(acc_min, 2).c_str()});
-        info_.info_vec.push_back({"Accuracy Max [m]", String::doubleToStringPrecision(acc_max, 2).c_str()});
+            for (unsigned int cnt=0; cnt < result_->size(); ++cnt)
+            {
+                if (!x_stddev_vec.isNull(cnt) && !y_stddev_vec.isNull(cnt))
+                {
+                    acc = sqrt(pow(x_stddev_vec.get(cnt),2) + pow(y_stddev_vec.get(cnt),2));
 
-        info_.info_vec.push_back({"Accuracy Avg [m]", String::doubleToStringPrecision(acc_avg, 2).c_str()});
-        info_.info_vec.push_back({"Accuracy StdDev [m]", String::doubleToStringPrecision(acc_stddev, 2).c_str()});
+                    acc_stddev += pow(acc - acc_avg, 2); // store as variance
+                }
+            }
+
+            acc_stddev /= num_accs;
+            acc_stddev = sqrt(acc_stddev); // var to std dev
+
+            info_.info_vec.push_back({"Accuracy Min [m]", String::doubleToStringPrecision(acc_min, 2).c_str()});
+            info_.info_vec.push_back({"Accuracy Max [m]", String::doubleToStringPrecision(acc_max, 2).c_str()});
+
+            info_.info_vec.push_back({"Accuracy Avg [m]", String::doubleToStringPrecision(acc_avg, 2).c_str()});
+            info_.info_vec.push_back({"Accuracy StdDev [m]", String::doubleToStringPrecision(acc_stddev, 2).c_str()});
+        }
     }
 
     qRegisterMetaType<CalcInfoVectorStruct>("CalcInfoVectorStruct");
-
 
     QMetaObject::invokeMethod(&status_dialog_, "setCalculateInfoSlot",
                               Qt::QueuedConnection,
                               Q_ARG(CalcInfoVectorStruct, info_));
 
-    loginf << "CalculateReferencesJob: calculateReferences: done, buffer size " << result_->size();
+    loginf << "CalculateReferencesJob: calculateReferences: done, buffer size " << (result_? result_->size() : 0);
 }
 
 void CalculateReferencesJob::writeReferences()

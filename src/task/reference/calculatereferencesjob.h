@@ -22,6 +22,13 @@ public slots:
     void insertDoneSlot();
 
 public:
+    enum ResultState
+    {
+        ResultOk = 0,
+        ResultNoInputData,
+        ResultNoRefData
+    };
+
     CalculateReferencesJob(CalculateReferencesTask& task,
                            CalculateReferencesStatusDialog& status_dialog,
                            std::shared_ptr<dbContent::Cache> cache);
@@ -30,6 +37,8 @@ public:
     nlohmann::json viewPointsJSON() const { return viewpoint_json_; }
 
     virtual void run();
+
+    ResultState resultState() const { return result_state_; }
 
 protected:
     CalculateReferencesTask& task_;
@@ -48,11 +57,13 @@ protected:
 
     nlohmann::json viewpoint_json_;
 
-    void createTargets();
+    size_t createTargets();
     void filterPositionUsage(std::map<unsigned int, std::unique_ptr<CalculateReferences::Target>>& target_map);
     void finalizeTargets();
     void calculateReferences();
     void writeReferences();
+
+    ResultState result_state_ = ResultOk;
 };
 
 #endif // CALCULATEREFERENCESJOB_H

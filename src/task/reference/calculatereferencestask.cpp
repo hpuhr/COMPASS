@@ -443,8 +443,15 @@ void CalculateReferencesTask::createDoneSlot()
 
     status_dialog_->setDone();
 
-    if (closeDialogAfterFinishing())
+    auto job_result = create_job_->resultState();
+
+    if (job_result != CalculateReferencesJob::ResultState::ResultOk || closeDialogAfterFinishing())
         closeStatusDialogSlot();
+
+    if (job_result == CalculateReferencesJob::ResultState::ResultNoInputData)
+        QMessageBox::critical(nullptr, "Error", "No input data for reference computation.\n\nCheck data sources and filter settings in\n[Main Menu -> Process -> Calculate References].");
+    else if (job_result == CalculateReferencesJob::ResultState::ResultNoRefData)
+        QMessageBox::critical(nullptr, "Error", "No reference data created.");
 
     create_job_ = nullptr;
 

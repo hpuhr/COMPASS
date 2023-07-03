@@ -696,7 +696,10 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(st
     init();
 
     if (measurements.size() < min_chain_size_)
+    {
+        logerr << data_info << ": Not enough measurements";
         return {};
+    }
 
     //init kalman using first target report
     auto& mm0 = measurements.at(0);
@@ -750,7 +753,10 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(st
     //finalize and check result
     auto result = finalize();
     if (!result.has_value() || result->size() < min_chain_size_)
+    {
+        logerr << data_info << ": Finalize failed";
         return {};
+    }
 
     return result;
 }

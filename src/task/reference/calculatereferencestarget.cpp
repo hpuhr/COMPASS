@@ -476,6 +476,7 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
 
             //reconstruct
             auto references = rec->reconstruct(dinfo);
+
             if (references.has_value())
                 storeReferences(references.value(), *rec);
         };
