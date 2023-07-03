@@ -441,17 +441,17 @@ void CalculateReferencesTask::createDoneSlot()
 
     assert (create_job_);
 
-    status_dialog_->setDone();
-
     auto job_result = create_job_->resultState();
 
-    if (job_result != CalculateReferencesJob::ResultState::ResultOk || closeDialogAfterFinishing())
-        closeStatusDialogSlot();
-
     if (job_result == CalculateReferencesJob::ResultState::ResultNoInputData)
-        QMessageBox::critical(nullptr, "Error", "No input data for reference computation.\n\nCheck data sources and filter settings in\n[Main Menu -> Process -> Calculate References].");
+        status_dialog_->setDone("Error: No input data for reference computation.\nCheck data sources and filter settings in\n[Main Menu -> Process -> Calculate References].");
     else if (job_result == CalculateReferencesJob::ResultState::ResultNoRefData)
-        QMessageBox::critical(nullptr, "Error", "No reference data created.");
+        status_dialog_->setDone("Error: No reference data created.");
+    else
+        status_dialog_->setDone();
+
+    if (job_result == CalculateReferencesJob::ResultState::ResultOk && closeDialogAfterFinishing())
+        closeStatusDialogSlot();
 
     create_job_ = nullptr;
 

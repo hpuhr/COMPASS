@@ -34,13 +34,9 @@ signals:
     void closeSignal();
 
 public:
-
-
     //typedef QMap<QString, QPair<unsigned int, unsigned int>> PositionCountsMap; // dbcont -> used, unused
 
     //typedef QList<QPair<QString, QString>> CalcInfoVector; // text pairs
-
-
 
 public slots:
     void okClickedSlot();
@@ -56,7 +52,7 @@ public:
 
     void markStartTime();
     void updateTime();
-    void setDone();
+    void setDone(const QString& result = "");
 
 private:
     CalculateReferencesTask& task_;
@@ -78,6 +74,7 @@ private:
     QGridLayout* calc_info_grid_ {nullptr};
 
     QLabel* status_label_{nullptr};
+    QLabel* result_label_{nullptr};
 
     QPushButton* ok_button_{nullptr};
 };

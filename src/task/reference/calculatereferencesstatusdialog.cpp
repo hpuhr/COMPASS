@@ -95,6 +95,10 @@ CalculateReferencesStatusDialog::CalculateReferencesStatusDialog(
     calc_info_grid_ = new QGridLayout();
     main_layout->addLayout(calc_info_grid_);
 
+    result_label_ = new QLabel("");
+    result_label_->setVisible(false);
+    main_layout->addWidget(result_label_);
+
     main_layout->addStretch();
 
     QHBoxLayout* button_layout = new QHBoxLayout();
@@ -124,7 +128,7 @@ void CalculateReferencesStatusDialog::markStartTime()
     done_ = false;
 }
 
-void CalculateReferencesStatusDialog::setDone()
+void CalculateReferencesStatusDialog::setDone(const QString& result)
 {
     assert(ok_button_);
 
@@ -136,6 +140,9 @@ void CalculateReferencesStatusDialog::setDone()
     loginf << "CalculateReferencesStatusDialog: setDone: done after " << elapsed_time_str_;
 
     ok_button_->setVisible(true);
+
+    result_label_->setVisible(!result.isEmpty());
+    result_label_->setText(result);
 }
 
 void CalculateReferencesStatusDialog::setLoadedCountsSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data)
