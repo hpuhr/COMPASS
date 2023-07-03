@@ -145,7 +145,7 @@ void EvaluationMainTabWidget::updateMinHeightFilterCombo()
     min_height_filter_combo_->clear();
     min_height_filter_combo_->addItem("None");
 
-    if (eval_man_.hasCurrentStandard() && eval_man_.sectorsLoaded())
+    if (eval_man_.sectorsLoaded())
     {
         for (const auto& sec_lay_it : eval_man_.sectorsLayers())
             min_height_filter_combo_->addItem(QString::fromStdString(sec_lay_it->name()));

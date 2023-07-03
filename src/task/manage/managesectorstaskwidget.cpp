@@ -153,7 +153,6 @@ void ManageSectorsTaskWidget::addManageTab()
 
     manage_tab_layout->addWidget(sector_table_);
 
-
     QFont font_bold;
     font_bold.setBold(true);
 
