@@ -612,7 +612,7 @@ void CalculateReferencesTaskDialog::writeOptions()
     s.R_std_high            = R_std_high_box_->value();
     s.Q_std                 = Q_std_box_->value();
     s.P_std                 = P_std_box_->value();
-    s.P_std_high            = P_std_box_->value();
+    s.P_std_high            = P_std_high_box_->value();
 
     s.use_R_std_cat021 = R_std_adsb_use_box_->isChecked();
     s.R_std_pos_cat021 = R_std_adsb_pos_box_->value();

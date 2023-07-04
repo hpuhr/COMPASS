@@ -28,6 +28,9 @@ using namespace Utils;
 using namespace dbContent;
 //using namespace nlohmann;
 
+const double CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault = 100.0;
+const double CalculateReferencesTaskSettings::HighValueDefault            = 1000.0;
+
 CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
                                                  const std::string& instance_id,
                                                  TaskManager& task_manager)
@@ -40,19 +43,19 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     registerParameter("rec_type"     , (int*)&settings_.rec_type     , CalculateReferencesTaskSettings::Rec_UMKalman2D);
     registerParameter("rec_proj_mode", (int*)&settings_.map_proj_mode, CalculateReferencesTaskSettings::MapProjectionMode::MapProjectDynamic);
 
-    registerParameter("rec_mm_stddev"        , &settings_.R_std     , 30.0  );
-    registerParameter("rec_mm_stddev_high"   , &settings_.R_std_high, 1000.0);
+    registerParameter("rec_mm_stddev"        , &settings_.R_std     , CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault);
+    registerParameter("rec_mm_stddev_high"   , &settings_.R_std_high, CalculateReferencesTaskSettings::HighValueDefault);
     registerParameter("rec_process_stddev"   , &settings_.Q_std     , 30.0  );
-    registerParameter("rec_state_stddev"     , &settings_.P_std     , 30.0  );
-    registerParameter("rec_state_stddev_high", &settings_.P_std_high, 1000.0);
+    registerParameter("rec_state_stddev"     , &settings_.P_std     , CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault);
+    registerParameter("rec_state_stddev_high", &settings_.P_std_high, CalculateReferencesTaskSettings::HighValueDefault);
 
     registerParameter("rec_use_mm_stddev_cat021", &settings_.use_R_std_cat021, true);
-    registerParameter("rec_mm_stddev_cat021_pos", &settings_.R_std_pos_cat021, 30.0);
+    registerParameter("rec_mm_stddev_cat021_pos", &settings_.R_std_pos_cat021, CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault);
     registerParameter("rec_mm_stddev_cat021_vel", &settings_.R_std_vel_cat021, 10.0);
     registerParameter("rec_mm_stddev_cat021_acc", &settings_.R_std_acc_cat021, 10.0);
 
     registerParameter("rec_use_mm_stddev_cat062", &settings_.use_R_std_cat062, true);
-    registerParameter("rec_mm_stddev_cat062_pos", &settings_.R_std_pos_cat062, 30.0);
+    registerParameter("rec_mm_stddev_cat062_pos", &settings_.R_std_pos_cat062, CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault);
     registerParameter("rec_mm_stddev_cat062_vel", &settings_.R_std_vel_cat062, 20.0);
     registerParameter("rec_mm_stddev_cat062_acc", &settings_.R_std_acc_cat062, 20.0);
 
