@@ -293,11 +293,53 @@ The reconstruction preview can be started by right-clicking on the selected targ
 
 \begin{figure}[H]
     \center
-      \includegraphics[width=9cm]{figures/ui_task_references_dialog_result.png}
-    \caption{Calculate References Task - Calculate References Status Dialog}
+      \includegraphics[width=9cm]{figures/ui_task_references_recprev_start.png}
+    \caption{Starting a Reconstruction Preview} 
 \end{figure}
 
-After reconstruction has finished, the results can be inspected in the \textit{Annotations} node of OSGView's \textit{Layer} tab. \\
+After reconstruction has finished, the results can be inspected in the \textit{Annotations} node of OSGView's \textit{Layer} tab.
 
+\begin{figure}[H]
+    \center
+      \includegraphics[width=12cm]{figures/ui_task_references_recprev_anno.png}
+    \caption{Reconstruction Preview - Annotations} 
+\end{figure}
 
+Up to three trajectories are shown in different colors, each of them obtaining positions, speed vectors and error ellipses,
+and each of them representing different stages of the reconstruction process.
 
+\paragraph{Kalman} Shows the estimates coming directly out of the Kalman filter.
+Using this annotation the performance of the Kalman filter can be visually inspected.
+
+\begin{figure}[H]
+    \center
+      \includegraphics[width=7cm]{figures/ui_task_references_recprev_kalman.png}
+    \caption{Reconstruction Preview - Annotation \textit{Kalman}} 
+\end{figure}
+
+\paragraph{Kalman (smoothed)} Shows the result of the RTS smoother (if smoothing enabled).
+Using this annotation the performance of the RTS smoother can be visually inspected.
+
+\begin{figure}[H]
+    \center
+      \includegraphics[width=7cm]{figures/ui_task_references_recprev_smoothed.png}
+    \caption{Reconstruction Preview - Annotation \textit{Kalman (smoothed)}} 
+\end{figure}
+
+\paragraph{Kalman (resampled)} Shows the homogeneously resampled Kalman states (if result resampling enabled).
+Using this annotation result resampling can be visually inspected.
+
+\begin{figure}[H]
+    \center
+      \includegraphics[width=7cm]{figures/ui_task_references_recprev_final.png}
+    \caption{Reconstruction Preview - Annotation \textit{Kalman (resampled)}} 
+\end{figure}
+
+Additionally, an annotation called \textit{Interpolated Tracks} shows the spline-resampled system tracks in grey color,
+if system track resampling is enabled.
+
+\begin{figure}[H]
+    \center
+      \includegraphics[width=7cm]{figures/ui_task_references_recprev_interp.png}
+    \caption{Reconstruction Preview - Annotation \textit{Interpolated Tracks}} 
+\end{figure}
