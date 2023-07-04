@@ -568,14 +568,58 @@ Also, a table is given for all single targets, sorted by PEx.
 \subsection{Identification Correct Periods}
 \label{sec:eval_req_id_correct_periods} 
 
-\hl{TODO}
-
 \subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_id_correct_periods.png}
+  \caption{Evaluation Identification Correct Periods requirement}
+\end{figure}
+
+\hl{TODO}
 
 \subsubsection{Result Values}
 
 \paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_body\_cut \\ \hline
+    Reqirement Group & Name of the requirement group & En-Route \\ \hline
+    Reqirement & Name of the requirement & Probability of Code Detection ACAD \\ \hline
+    Num Results & Total number of results & 317 \\ \hline
+    Num Usable Results & Number of usable results & 81 \\ \hline
+    Num Unusable Results & Number of unusable results & 236 \\ \hline
+    \#Updates/\#EUIs [1] & Total number update intervals & 4265 \\ \hline
+    \#MUIs [1] & Number of missed update intervals & 134 \\ \hline
+    PCAAD [\%] & Probability of Correct Aircraft Address Detection & 96.86 \\ \hline
+    Condition &  & >= 99.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+    \#Single Targets &  & 81 \\ \hline
+    \#Failed Single Targets &  & 2 \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
 \paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#EUIs [1] & Expected Update Intervals & 35 \\ \hline
+    \#MUIs [1] & Missed Update Intervals & 0 \\ \hline
+    PCAAD [\%] & Probability of Correct Aircraft Address Detection & 100 \\ \hline
+    Reference Period 1 & Time inside sector & [2023-06-30 16:03:14.056,2023-06-30 16:07:57.236] \\ \hline
+    Condition &  & >= 99.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
 
 \subsection{Identification False}
 \label{sec:eval_req_id_false} 
@@ -810,30 +854,133 @@ Also, a table is given for all single targets, sorted by PP.
 \subsection{Mode C Correct}
 \label{sec:eval_req_mc_correct} 
 
-\hl{TODO}
-
 \subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_mc_correct.png}
+  \caption{Evaluation Mode C Correct requirement}
+\end{figure}
+
+The 'Mode C Correct' requirement is used to calculate the probability of a target report having a correct and valid Mode C code. Correct in this context means there is Mode C information data available, and it is the same as in the reference (within a certain threshold). Only values which are valid and not garbled are used. \\
+
+\begin{itemize}  
+\item Probability [1]: Probability of correct Mode C code
+\item Probability Check Type: $\geq$
+\item Maximum Offset [ft]: Maximum absolute distance between reference and test value to be counted as correct
+\end{itemize}
+\ \\
 
 \subsubsection{Result Values}
 
 \paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_body\_cut \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Mode C Correct \\ \hline
+    Num Results & Total number of results & 317 \\ \hline
+    Num Usable Results & Number of usable results & 84 \\ \hline
+    Num Unusable Results & Number of unusable results & 233 \\ \hline
+    \#Updates & Total number target reports & 86477 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or Mode C & 26095 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 26095 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference Mode C & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 33243 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 27139 \\ \hline
+    \#CMC [1] & Number of updates with correct Mode C & 33207 \\ \hline
+    \#NCMC [1] & Number of updates with no correct Mode C & 36 \\ \hline
+    PC [\%] & Probability of correct Mode C & 99.89 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PC.
+
 \paragraph{Single Target}
 
-
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 1110 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or Mode C & 1 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 1 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference Mode C & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 200 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 909 \\ \hline
+    Max Dist. [ft] & Maximum offset & 300.00 \\ \hline
+    \#CMC [1] & Number of updates with correct Mode C & 198 \\ \hline
+    \#NCMC [1] & Number of updates with no correct Mode C & 2 \\ \hline
+    PC [\%] & Probability of correct Mode C & 99 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
 
 \subsection{Mode C Correct Periods}
 \label{sec:eval_req_mc_correct_periods} 
 
-\hl{TODO}
-
 \subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_mc_correct_periods.png}
+  \caption{Evaluation Mode C Correct Periods requirement}
+\end{figure}
+
+\hl{TODO}
 
 \subsubsection{Result Values}
 
 \paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_body\_cut \\ \hline
+    Reqirement Group & Name of the requirement group & En-Route \\ \hline
+    Reqirement & Name of the requirement & Probability of Code Detection MC \\ \hline
+    Num Results & Total number of results & 317 \\ \hline
+    Num Usable Results & Number of usable results & 81 \\ \hline
+    Num Unusable Results & Number of unusable results & 236 \\ \hline
+    \#Updates/\#EUIs [1] & Total number update intervals & 4265 \\ \hline
+    \#MUIs [1] & Number of missed update intervals & 0 \\ \hline
+    PCMCD [\%] & Probability of Correct Mode C Detection & 100.00 \\ \hline
+    Condition &  & >= 96.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+    \#Single Targets &  & 81 \\ \hline
+    \#Failed Single Targets &  & 0 \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
 \paragraph{Single Target}
 
-
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#EUIs [1] & Expected Update Intervals & 12 \\ \hline
+    \#MUIs [1] & Missed Update Intervals & 0 \\ \hline
+    PCMCD [\%] & Probability of Correct Mode C Detection & 100 \\ \hline
+    Reference Period 1 & Time inside sector & [2023-06-30 16:06:17.256,2023-06-30 16:07:56.984] \\ \hline
+    Condition &  & >= 96.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
 
 \subsection{Mode C False}
 \label{sec:eval_req_mc_false} 
@@ -1259,14 +1406,82 @@ Also, a table is given for all single targets, sorted by PCP.
 \subsection{Position Distance RMS}
 \label{sec:eval_req_pos_distance_rms} 
 
-\hl{TODO}
-
 \subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_pos_distance_rms.png}
+  \caption{Evaluation Position Latency requirement}
+\end{figure}
+
+The 'Position Distance' requirement is used to calculate if the RMS position error is larger than a defined threshold. \\
+
+The offset of the position (test vs. linear interpolated reference position) is used to calculate the RMS error distance for a number of target reports. The requirement is failed if the the calculated RMS value is larger than the defined threshold. \\
+
+\begin{itemize}  
+\item Threshold Value [m]: Maximum allowed RMS
+\end{itemize}
 
 \subsubsection{Result Values}
 
 \paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Position Correct \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 7359 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    DMin [m] & Minimum of distance & 0.23 \\ \hline
+    DMax [m] & Maximum of distance & 515.87 \\ \hline
+    DAvg [m] & Average of distance & 29.25 \\ \hline
+    DSDev [m] & Standard Deviation of distance & 23.12 \\ \hline
+    DVar [$m^2$] & Variance of distance & 534.32 \\ \hline
+    RMS & Root mean square & 37.28 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 9 \\ \hline
+    \#CP [1] & Number of updates with passed comparison  & 33234 \\ \hline
+    Condition &  & <= 350.000000 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by RMS.
+
 \paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 927 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 52 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 646 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 229 \\ \hline
+    DMin [m] & Minimum of distance & 58.89 \\ \hline
+    DMax [m] & Maximum of distance & 371.66 \\ \hline
+    DAvg [m] & Average of distance & 110.69 \\ \hline
+    DSDev [m] & Standard Deviation of distance & 59.38 \\ \hline
+    DVar [$m^2$] & Variance of distance & 125.61 \\ \hline
+    RMS & Root mean square & 3525.42 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 1 \\ \hline
+    \#CP [1] & Number of updates with passed comparison & 31 \\ \hline
+    Condition &  & <= 350.000000 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
 
 \subsection{Position Latency}
 \label{sec:eval_req_pos_latency} 
