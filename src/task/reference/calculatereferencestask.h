@@ -34,23 +34,26 @@ struct CalculateReferencesTaskSettings
     ReconstructorType rec_type      = ReconstructorType::Rec_UMKalman2D;
     MapProjectionMode map_proj_mode = MapProjectionMode::MapProjectDynamic;
 
+    static const double PosStdDevNotProvidedDefault;
+    static const double HighValueDefault;
+
     //default uncertainties
-    double        R_std                 = 30.0;     // observation noise (standard)
-    double        R_std_high            = 1000.0;   // observation noise (high)
-    double        Q_std                 = 30.0;     // process noise
-    double        P_std                 = 30.0;     // system noise (standard)
-    double        P_std_high            = 1000.0;   // system noise (high)
+    double        R_std                 = PosStdDevNotProvidedDefault;    // observation noise (standard)
+    double        R_std_high            = HighValueDefault;               // observation noise (high)
+    double        Q_std                 = 30.0;                           // process noise
+    double        P_std                 = PosStdDevNotProvidedDefault;    // system noise (standard)
+    double        P_std_high            = HighValueDefault;               // system noise (high)
 
     //default sensor specific uncertainties
-    bool          use_R_std_cat021      = true;     //use adsb specific sensor noise
-    double        R_std_pos_cat021      = 30.0;     //position observation noise adsb
-    double        R_std_vel_cat021      = 10.0;     //velocity observation noise adsb
-    double        R_std_acc_cat021      = 10.0;     //acceleration observation noise adsb
+    bool          use_R_std_cat021      = true;                            //use adsb specific sensor noise
+    double        R_std_pos_cat021      = PosStdDevNotProvidedDefault;     //position observation noise adsb
+    double        R_std_vel_cat021      = 10.0;                            //velocity observation noise adsb
+    double        R_std_acc_cat021      = 10.0;                            //acceleration observation noise adsb
 
-    bool          use_R_std_cat062      = true;     //use systrack specific sensor noise
-    double        R_std_pos_cat062      = 30.0;     //position observation noise systracks
-    double        R_std_vel_cat062      = 20.0;     //velocity observation noise systracks
-    double        R_std_acc_cat062      = 20.0;     //acceleration observation noise systracks
+    bool          use_R_std_cat062      = true;                            //use systrack specific sensor noise
+    double        R_std_pos_cat062      = PosStdDevNotProvidedDefault;     //position observation noise systracks
+    double        R_std_vel_cat062      = 20.0;                            //velocity observation noise systracks
+    double        R_std_acc_cat062      = 20.0;                            //acceleration observation noise systracks
 
     //chain related
     double        min_dt                = 0.0;      // minimum allowed timestep in seconds
