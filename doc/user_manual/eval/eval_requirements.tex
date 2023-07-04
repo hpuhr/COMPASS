@@ -93,7 +93,7 @@ Also, a table is given for all single targets, sorted by PD.
    \caption{Evaluation Dubious Targets}
 \end{figure}
 
-The 'Dubious Targets' requirement can be used to check for dubious for dubious movement from data-source. This requirement checks based on test data only, so the reference data is of no importance. \\
+The 'Dubious Targets' requirement can be used to check for dubious movement from data-source. This requirement checks based on test data only, so the reference data is of no importance. \\
 
 For each track number (existing in an UTN) a number of checks are performed, and a probability of dubious target report is calculated. Which checks are used can be defined as follows, but are focused on short tracks or physically dubious movement. \\
 
@@ -498,7 +498,8 @@ Also, a table is given for all single targets, sorted by PEx.
   \caption{Evaluation Identification Correct requirement}
 \end{figure}
 
-The 'Identification Correct' requirement is used to calculate the probability of a target report having a correct (secondary) identification. Correct in this context means there is identification data available, and it is the same as in the reference. \\
+The 'Identification Correct' requirement is used to calculate the probability of a target report having a correct (secondary) identification. Correct in this context means there is identification data available, 
+and it is the same as in the reference. \\
 
 \begin{itemize}  
 \item Probability [1]: Probability of correct identification
@@ -575,7 +576,21 @@ Also, a table is given for all single targets, sorted by PEx.
   \caption{Evaluation Identification Correct Periods requirement}
 \end{figure}
 
-\hl{TODO}
+This requirement calculates the probability of correct aircraft identification detection. \\
+
+For each target existing in the reference data (within the current sector) a test target's identification should
+be detected correctly within each test update interval. Correctly here means equality.
+Update intervals without correct identification are counted as misses, which are used to calculate the probability of correct aircraft
+identification detection, which has to fulfill a given threshold.
+
+\begin{itemize}
+    \item Probability [1]: Probability of correct aircraft identification detection
+    \item Probability Check Type: $\geq$
+    \item Update Interval [s]: Update interval of the test data
+    \item Use Miss Tolerance: Checkbox if miss tolerance should be used
+    \item Miss Tolerance [s]: Acceptable time delta for miss detection
+    \item Identification Type: Type of identification to check (\textit{Aircraft Address}, \textit{Aircraft ID} or \textit{Mode A})
+\end{itemize}
 
 \subsubsection{Result Values}
 
@@ -861,7 +876,8 @@ Also, a table is given for all single targets, sorted by PP.
   \caption{Evaluation Mode C Correct requirement}
 \end{figure}
 
-The 'Mode C Correct' requirement is used to calculate the probability of a target report having a correct and valid Mode C code. Correct in this context means there is Mode C information data available, and it is the same as in the reference (within a certain threshold). Only values which are valid and not garbled are used. \\
+The 'Mode C Correct' requirement is used to calculate the probability of a target report having a correct and valid Mode C code. 
+Correct in this context means there is Mode C information data available, and it is the same as in the reference (within a certain threshold). Only values which are valid and not garbled are used. \\
 
 \begin{itemize}  
 \item Probability [1]: Probability of correct Mode C code
@@ -936,7 +952,21 @@ Also, a table is given for all single targets, sorted by PC.
   \caption{Evaluation Mode C Correct Periods requirement}
 \end{figure}
 
-\hl{TODO}
+This requirement calculates the probability of correct Mode C detection. \\
+
+For each target existing in the reference data (within the current sector) a test target's Mode C code should
+be detected correctly within each test update interval. Correctly here means up to a certain configurable threshold.
+Update intervals without correct Mode C code are counted as misses, which are used to calculate the probability of correct Mode C
+detection, which has to fulfill a given threshold.
+
+\begin{itemize}  
+    \item Probability [1]: Probability of correct Mode C code detection
+    \item Probability Check Type: $\geq$
+    \item Update Interval [s]: Update interval of the test data
+    \item Use Miss Tolerance: Checkbox if miss tolerance should be used
+    \item Miss Tolerance [s]: Acceptable time delta for miss detection
+    \item Maximum Offset [ft]: Maximum absolute distance between reference and test value for Mode C code to be counted as correct
+\end{itemize}
 
 \subsubsection{Result Values}
 
