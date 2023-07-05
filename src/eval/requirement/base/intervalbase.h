@@ -66,6 +66,7 @@ struct Event
     std::string                     error;          // error description in case of an invalid update
     boost::posix_time::ptime        interval_time0; // start time of the event interval (note: =/= period start!)
     boost::posix_time::ptime        interval_time1; // end time of the event interval (note: =/= period end!)
+    bool                            had_ref_data;   // reference data was available
 
     uint32_t                        misses = 0;     // misses caused by the event
 };
@@ -95,7 +96,7 @@ public:
         {
             Valid = 0,     // update is valid
             Invalid,       // update is invalid
-            DataMissing    // reference data is missing => could not check validity
+            RefDataMissing // reference data is missing => could not check validity
         };
 
         Value        value = Value::Invalid; // validity value

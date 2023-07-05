@@ -97,8 +97,8 @@ IdentificationCorrectPeriod::Validity IdentificationCorrectPeriod::isValid(const
 
     auto id_name = identificationName(identification_type_);
 
-    v.value   = no_ref ? Validity::Value::DataMissing : (failed ? Validity::Value::Invalid : Validity::Value::Valid);
-    v.comment = no_ref ? "Reference " + id_name + " missing" : (failed ? id_name + " failed (" + cmp_res.second + ")" : "");
+    v.value   = no_ref ? Validity::Value::RefDataMissing : (failed ? Validity::Value::Invalid : Validity::Value::Valid);
+    v.comment = failed ? id_name + " failed (" + cmp_res.second + ")" : "";
 
     return v;
 }

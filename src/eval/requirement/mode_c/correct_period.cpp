@@ -83,8 +83,8 @@ ModeCCorrectPeriod::Validity ModeCCorrectPeriod::isValid(const dbContent::Target
 
     Validity v;
 
-    v.value   = no_ref ? Validity::Value::DataMissing : (failed ? Validity::Value::Invalid : Validity::Value::Valid);
-    v.comment = no_ref ? "Reference ModeC missing"   : (failed ? "ModeC failed (" + cmp_res.second + ")" : "");
+    v.value   = no_ref ? Validity::Value::RefDataMissing : (failed ? Validity::Value::Invalid : Validity::Value::Valid);
+    v.comment = failed ? "ModeC failed (" + cmp_res.second + ")" : "";
 
     return v;
 }
