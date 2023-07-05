@@ -37,6 +37,8 @@
 #include "eval/results/detection/single.h"
 #include "eval/results/position/distancejoined.h"
 #include "eval/results/position/distancesingle.h"
+#include "eval/results/position/distancermsjoined.h"
+#include "eval/results/position/distancermssingle.h"
 #include "eval/results/position/alongsingle.h"
 #include "eval/results/position/alongjoined.h"
 #include "eval/results/position/acrosssingle.h"
@@ -53,6 +55,7 @@
 #include "eval/results/identification/correctjoined.h"
 #include "eval/results/identification/falsesingle.h"
 #include "eval/results/identification/falsejoined.h"
+#include "eval/results/identification/correct_period.h"
 
 #include "eval/results/mode_a/presentsingle.h"
 #include "eval/results/mode_a/presentjoined.h"
@@ -62,6 +65,9 @@
 #include "eval/results/mode_c/presentjoined.h"
 #include "eval/results/mode_c/falsesingle.h"
 #include "eval/results/mode_c/falsejoined.h"
+#include "eval/results/mode_c/correctsingle.h"
+#include "eval/results/mode_c/correctjoined.h"
+#include "eval/results/mode_c/correct_period.h"
 
 using namespace EvaluationRequirementResult;
 
@@ -244,6 +250,10 @@ void HistogramGeneratorResults::updateFromResult(std::shared_ptr<EvaluationRequi
         updateCountResult(static_pointer_cast<SinglePositionDistance>(result));
     else if (result->type() == "JoinedPositionDistance")
         updateCountResult(static_pointer_cast<JoinedPositionDistance>(result));
+    else if (result->type() == "SinglePositionDistanceRMS")
+        updateCountResult(static_pointer_cast<SinglePositionDistanceRMS>(result));
+    else if (result->type() == "JoinedPositionDistanceRMS")
+        updateCountResult(static_pointer_cast<JoinedPositionDistanceRMS>(result));
     else if (result->type() == "SinglePositionAlong")
         updateCountResult(static_pointer_cast<SinglePositionAlong>(result));
     else if (result->type() == "JoinedPositionAlong")
@@ -274,6 +284,10 @@ void HistogramGeneratorResults::updateFromResult(std::shared_ptr<EvaluationRequi
         updateCountResult(static_pointer_cast<SingleIdentificationFalse>(result));
     else if (result->type() == "JoinedIdentificationFalse")
         updateCountResult(static_pointer_cast<JoinedIdentificationFalse>(result));
+    else if (result->type() == "SingleIdentificationCorrectPeriod")
+        updateCountResult(static_pointer_cast<SingleIdentificationCorrectPeriod>(result));
+    else if (result->type() == "JoinedIdentificationCorrectPeriod")
+        updateCountResult(static_pointer_cast<JoinedIdentificationCorrectPeriod>(result));
 
     else if (result->type() == "SingleModeAPresent")
         updateCountResult(static_pointer_cast<SingleModeAPresent>(result));
@@ -292,6 +306,14 @@ void HistogramGeneratorResults::updateFromResult(std::shared_ptr<EvaluationRequi
         updateCountResult(static_pointer_cast<SingleModeCFalse>(result));
     else if (result->type() == "JoinedModeCFalse")
         updateCountResult(static_pointer_cast<JoinedModeCFalse>(result));
+    else if (result->type() == "SingleModeCCorrect")
+        updateCountResult(static_pointer_cast<SingleModeCCorrect>(result));
+    else if (result->type() == "JoinedModeCCorrect")
+        updateCountResult(static_pointer_cast<JoinedModeCCorrect>(result));
+    else if (result->type() == "SingleModeCCorrectPeriod")
+        updateCountResult(static_pointer_cast<SingleModeCCorrectPeriod>(result));
+    else if (result->type() == "JoinedModeCCorrectPeriod")
+        updateCountResult(static_pointer_cast<JoinedModeCCorrectPeriod>(result));
     else
         throw runtime_error("HistogramGeneratorResults: updateFromResult: unknown result type '"+result->type()+"'");
 }
@@ -417,6 +439,24 @@ void HistogramGeneratorResults::updateCountResult (
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
     addFloatingPointResults<JoinedPositionDistance, SinglePositionDistance, Single>(dbcontent_name, result);
+}
+
+/**
+ */
+void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionDistanceRMS> result)
+{
+    assert (result);
+    std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    addFloatingPointResult(dbcontent_name, result);
+}
+
+/**
+ */
+void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionDistanceRMS> result)
+{
+    assert (result);
+    std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    addFloatingPointResults<JoinedPositionDistanceRMS, SinglePositionDistanceRMS, Single>(dbcontent_name, result);
 }
 
 /**
@@ -594,6 +634,38 @@ void HistogramGeneratorResults::updateCountResult (
 
 /**
  */
+void HistogramGeneratorResults::updateCountResult(std::shared_ptr<EvaluationRequirementResult::SingleIdentificationCorrectPeriod> result)
+{
+    logdbg << "HistogramGeneratorResults: updateCountResult: single identification correct period";
+
+    assert (result);
+
+    addStaticResult({ "#EUIs", 
+                      "#MUIs" }, 
+                    { (unsigned int)result->sumUIs(), 
+                      (unsigned int)result->missedUIs() });
+}
+
+/**
+ */
+void HistogramGeneratorResults::updateCountResult(std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationCorrectPeriod> result)
+{
+    logdbg << "HistogramGeneratorResults: updateCountResult: joined identification correct period";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Single>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleIdentificationCorrectPeriod>(result_it));
+        if (result_it->use())
+            updateCountResult (static_pointer_cast<SingleIdentificationCorrectPeriod>(result_it));
+    }
+}
+
+/**
+ */
 void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAPresent> result)
 {
     logdbg << "HistogramGeneratorResults: showResult: single mode a present";
@@ -630,7 +702,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
  */
 void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAFalse> result)
 {
-    logdbg << "HistogramGeneratorResults: showResult: single mode a false";
+    logdbg << "HistogramGeneratorResults: showResult: single mode 3/a false";
 
     assert (result);
 
@@ -666,7 +738,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
  */
 void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCPresent> result)
 {
-    logdbg << "HistogramGeneratorResults: showResult: single mode a present";
+    logdbg << "HistogramGeneratorResults: showResult: single mode c present";
 
     assert (result);
 
@@ -682,7 +754,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
  */
 void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCPresent> result)
 {
-    logdbg << "HistogramGeneratorResults: showResult: joined mode 3/a present";
+    logdbg << "HistogramGeneratorResults: showResult: joined mode c present";
 
     assert (result);
 
@@ -700,7 +772,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
  */
 void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCFalse> result)
 {
-    logdbg << "HistogramGeneratorResults: showResult: single mode c";
+    logdbg << "HistogramGeneratorResults: showResult: single mode c false";
 
     assert (result);
 
@@ -718,7 +790,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
  */
 void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCFalse> result)
 {
-    logdbg << "HistogramGeneratorResults: showResult: joined mode c";
+    logdbg << "HistogramGeneratorResults: showResult: joined mode c false";
 
     assert (result);
 
@@ -732,4 +804,68 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
     }
 }
 
+/**
+ */
+void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCCorrect> result)
+{
+    logdbg << "HistogramGeneratorResults: showResult: single mode c correct";
 
+    assert (result);
+
+    addStaticResult({ "#NoRef", 
+                      "#Correct",
+                      "#False" }, 
+                    { (unsigned int)result->numNoRefId(), 
+                      (unsigned int)result->numCorrect(),
+                      (unsigned int)result->numNotCorrect() });
+}
+
+/**
+ */
+void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCCorrect> result)
+{
+    logdbg << "HistogramGeneratorResults: showResult: joined mode c correct";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Single>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleModeCCorrect>(result_it));
+        if (result_it->use())
+            updateCountResult (static_pointer_cast<SingleModeCCorrect>(result_it));
+    }
+}
+
+/**
+ */
+void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCCorrectPeriod> result)
+{
+    logdbg << "HistogramGeneratorResults: updateCountResult: single mode c correct period";
+
+    assert (result);
+
+    addStaticResult({ "#EUIs", 
+                      "#MUIs" }, 
+                    { (unsigned int)result->sumUIs(), 
+                      (unsigned int)result->missedUIs() });
+}
+
+/**
+ */
+void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCCorrectPeriod> result)
+{
+    logdbg << "HistogramGeneratorResults: updateCountResult: joined mode c correct period";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Single>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleModeCCorrectPeriod>(result_it));
+        if (result_it->use())
+            updateCountResult (static_pointer_cast<SingleModeCCorrectPeriod>(result_it));
+    }
+}
