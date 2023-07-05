@@ -309,7 +309,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
         return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewable (bool add_highlight)
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -377,6 +377,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewab
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
+    //addAnnotationFeatures(*viewable_ptr, false, add_highlight);
     addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
@@ -413,16 +414,10 @@ bool SingleDetection::hasFailed() const
 
 void SingleDetection::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    addAnnotationFeatures(viewable, overview);
-
-    json& error_line_coordinates =
-            viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
-    json& error_point_coordinates =
-            viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");
-    json& ok_line_coordinates =
-            viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
-    json& ok_point_coordinates =
-            viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
+    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
+    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
+    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
 
     for (auto& detail_it : getDetails())
     {
