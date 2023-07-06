@@ -455,8 +455,6 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::getTargetError
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
-    //addAnnotationFeatures(*viewable_ptr, false, add_highlight);
-    loginf << "SinglePositionDistance: getTargetErrorsViewable: '" << viewable_ptr->at("annotations").dump(2) << "'";
     addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;

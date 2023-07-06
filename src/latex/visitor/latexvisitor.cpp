@@ -287,7 +287,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentText* e)
 void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 {
     assert (e);
-    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure" << e->name();
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure " << e->name();
 
 #if USE_EXPERIMENTAL_SOURCE == true
 
@@ -306,7 +306,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 
     image_prefix_ = e->getSubPath()+e->name();
 
-    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure" << e->name()
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure " << e->name()
            << " prefix " << image_prefix_;
 
     for (auto& view_it : view_man.getViews())
