@@ -182,6 +182,8 @@ public:
     void updateData(dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer);
 
     void deleteDBContentData();
+    void deleteDBContentData(unsigned int sac, unsigned int sic);
+    void deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id);
 
     //std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 

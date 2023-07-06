@@ -2,6 +2,10 @@ FROM debian:stretch
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+RUN sed -i -e 's/deb.debian.org/archive.debian.org/g' \
+           -e 's|security.debian.org|archive.debian.org/|g' \
+           -e '/stretch-updates/d' /etc/apt/sources.list
+
 RUN apt-get update
 RUN apt-get install -y openssl 
 
@@ -56,7 +60,7 @@ RUN sqlite3 -cmd "CREATE TABLE countries (id varchar(3), data json);insert into 
 
 RUN more /etc/apt/sources.list
 RUN cp /etc/apt/sources.list /etc/apt/sources.list~
-RUN echo 'deb-src http://deb.debian.org/debian stretch main' >> /etc/apt/sources.list
+RUN echo 'deb-src http://archive.debian.org/debian stretch main' >> /etc/apt/sources.list
 RUN more /etc/apt/sources.list
 RUN apt-get update
 

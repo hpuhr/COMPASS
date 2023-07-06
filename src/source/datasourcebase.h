@@ -75,6 +75,9 @@ public:
     void setFromJSONDeprecated (const nlohmann::json& j);
     void setFromJSON (const nlohmann::json& j);
 
+    bool isCalculatedReferenceSource();
+    void setCalculatedReferenceSource();
+
 protected:
     std::string ds_type_;
 

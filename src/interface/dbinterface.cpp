@@ -1289,6 +1289,36 @@ void DBInterface::deleteAll(const DBContent& dbcontent)
     connection_mutex_.unlock();
 }
 
+void DBInterface::deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic)
+{
+    loginf << "DBInterface: deleteContent: dbcontent " << dbcontent.name()
+           << " sac/sic " << sac << "/" << sic;
+
+    connection_mutex_.lock();
+    assert(db_connection_);
+
+    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, sac, sic);
+
+    db_connection_->execute(*command.get());
+
+    connection_mutex_.unlock();
+}
+
+void DBInterface::deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id)
+{
+    loginf << "DBInterface: deleteContent: dbcontent " << dbcontent.name()
+           << " sac/sic " << sac << "/" << sic << " line " << line_id;
+
+    connection_mutex_.lock();
+    assert(db_connection_);
+
+    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, sac, sic, line_id);
+
+    db_connection_->execute(*command.get());
+
+    connection_mutex_.unlock();
+}
+
 void DBInterface::createPropertiesTable()
 {
     assert(!existsPropertiesTable());

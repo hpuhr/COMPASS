@@ -841,7 +841,6 @@ void CreateAssociationsJob::saveAssociations()
         string utn_col_name =
                 dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).dbColumnName();
 
-
         PropertyList properties = buf_it.second->properties();
 
         for (auto& prop_it : properties.properties())

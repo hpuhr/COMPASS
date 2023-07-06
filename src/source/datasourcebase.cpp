@@ -477,6 +477,15 @@ void DataSourceBase::setFromJSON (const nlohmann::json& j)
         parseNetworkLineInfo();
 }
 
+bool DataSourceBase::isCalculatedReferenceSource()
+{
+    return info_.contains("calculated_reftraj") && info_.at("calculated_reftraj") == true;
+}
+void DataSourceBase::setCalculatedReferenceSource()
+{
+    info_["calculated_reftraj"] = true;
+}
+
 void DataSourceBase::parseNetworkLineInfo()
 {
     logdbg << "DataSourceBase: parseLineInfo: " << sac() << "/" << sic();

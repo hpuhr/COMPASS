@@ -665,6 +665,9 @@ void CalculateReferencesJob::writeReferences()
 
         src.name(settings.ds_name);
         src.dsType(dbcontent_name); // same as dstype
+        src.setCalculatedReferenceSource();
+
+        src_man.saveDBDataSources();
     }
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();

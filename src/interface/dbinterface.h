@@ -114,6 +114,8 @@ public:
 
     void deleteBefore(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);
     void deleteAll(const DBContent& dbcontent);
+    void deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic);
+    void deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id);
 
     size_t count(const std::string& table);
 

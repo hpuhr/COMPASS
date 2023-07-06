@@ -311,14 +311,38 @@ void CalculateReferencesTask::run()
     {
         status_dialog_->setStatusSlot("Deleting old References");
 
-        if (dbcontent_man.dbContent("RefTraj").existsInDB()) // TODO rework to only delete define data source + line
-            dbcontent_man.dbContent("RefTraj").deleteDBContentData();
+//        if (dbcontent_man.dbContent("RefTraj").existsInDB()) // TODO rework to only delete define data source + line
+//            dbcontent_man.dbContent("RefTraj").deleteDBContentData();
 
-        while (dbcontent_man.dbContent("RefTraj").isDeleting())
+//        while (dbcontent_man.dbContent("RefTraj").isDeleting())
+//        {
+//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//            QThread::msleep(10);
+//        }
+
+        DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+        for (auto& ds_it : ds_man.dbDataSources())
         {
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep(10);
+            if (ds_it->isCalculatedReferenceSource()
+                    && ds_it->sac() == settings_.ds_sac && ds_it->sic() == settings_.ds_sic
+                    && ds_it->hasNumInserted("RefTraj", settings_.ds_line))
+            {
+                status_dialog_->setStatusSlot(("Deleting From Data Source " + ds_it->name()).c_str());
+
+                dbcontent_man.dbContent("RefTraj").deleteDBContentData(settings_.ds_sac, settings_.ds_sic, settings_.ds_line);
+
+                while (dbcontent_man.dbContent("RefTraj").isDeleting())
+                {
+                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    QThread::msleep(10);
+                }
+
+                ds_it->clearNumInserted("RefTraj", settings_.ds_line);
+            }
         }
+
+        ds_man.saveDBDataSources();
     }
 
     status_dialog_->setStatusSlot("Loading Data");
