@@ -7,7 +7,7 @@
 #include <iomanip>
 
 //bool Transformation::in_appimage_ = COMPASS::isAppImage();
-const double Transformation::max_wgs_dist_ {0.1};
+const double Transformation::max_wgs_dist_ {0.2};
 
 Transformation::Transformation()
     : wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}

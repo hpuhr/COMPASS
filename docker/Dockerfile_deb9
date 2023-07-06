@@ -163,8 +163,10 @@ RUN cd NemaTode-master/build && make install
 
 #RUN apt-get install gdb -y
 RUN mkdir jasper
-RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
-RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
+#RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
+#RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
+RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
+RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
 RUN cd jasper && dpkg -i *.deb
 
 RUN ldconfig -v /usr/lib64/ /usr/local/
