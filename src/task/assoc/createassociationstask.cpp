@@ -206,10 +206,6 @@ void CreateAssociationsTask::run()
         }
     }
 
-    // TODO HACK
-//    if (dbcontent_man.dbContent("RefTraj").existsInDB())
-        //dbcontent_man.dbContent("RefTraj").deleteDBContentData();
-
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
     status_dialog_->setStatus("Loading Data");

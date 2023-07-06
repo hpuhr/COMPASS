@@ -311,15 +311,6 @@ void CalculateReferencesTask::run()
     {
         status_dialog_->setStatusSlot("Deleting old References");
 
-//        if (dbcontent_man.dbContent("RefTraj").existsInDB()) // TODO rework to only delete define data source + line
-//            dbcontent_man.dbContent("RefTraj").deleteDBContentData();
-
-//        while (dbcontent_man.dbContent("RefTraj").isDeleting())
-//        {
-//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-//            QThread::msleep(10);
-//        }
-
         DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
         for (auto& ds_it : ds_man.dbDataSources())
