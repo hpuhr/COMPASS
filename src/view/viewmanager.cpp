@@ -762,6 +762,7 @@ void ViewManager::databaseClosedSlot()
 {
     loginf << "ViewManager: databaseClosedSlot";
 
+    unsetCurrentViewPoint();
     clearDataInViews();
 
     for (auto& view_it : views_)
