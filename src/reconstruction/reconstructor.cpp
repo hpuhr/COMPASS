@@ -156,20 +156,17 @@ void Reconstructor::interpolateMeasurements(std::vector<Measurement>& measuremen
     measurements.resize(ni);
 
     for (size_t i = 0; i < ni; ++i)
-    {
         measurements[ i ] = mms_interp[ i ];
-    }
 
     if (hasViewPoint())
     {
         VPTrackData vp_data;
 
-        std::vector<Eigen::Vector2d> positions(ni);
+        vp_data.positions.resize(ni);
         for (size_t i = 0; i < ni; ++i)
-            positions[ i ] = measurements[ i ].position2D(CoordSystem::WGS84);
-  
-        vp_data.positions = std::move(positions);
-        vp_data.color     = ColorResampledMM;
+            vp_data.positions[ i ] = measurements[ i ].position2D(CoordSystem::WGS84);
+
+        vp_data.color = ColorResampledMM;
 
         vp_data_interp_.push_back(vp_data);
     }

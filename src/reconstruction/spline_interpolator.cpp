@@ -321,7 +321,7 @@ std::vector<MeasurementInterp> SplineInterpolator::interpolate(const std::vector
         auto res = interpolatePart(p);
 
         if (res.size() > 0)
-            interpolation.insert(interpolation.begin(), res.begin(), res.end());
+            interpolation.insert(interpolation.end(), res.begin(), res.end());
     }
     
     return interpolation;
