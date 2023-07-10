@@ -606,6 +606,8 @@ void EvaluationManager::databaseClosedSlot()
     widget()->setDisabled(true);
 
     emit sectorsChangedSignal();
+
+    viewable_data_cfg_ = nullptr;
 }
 
 void EvaluationManager::dataSourcesChangedSlot()
