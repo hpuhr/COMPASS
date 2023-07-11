@@ -70,6 +70,8 @@ protected:
         TypeHighlight
     };
 
+    std::map<AnnotationType, std::string> annotation_type_names_;
+
     unsigned int                utn_;    // used to generate result
     const EvaluationTargetData* target_; // used to generate result
 
@@ -82,9 +84,9 @@ protected:
 
     void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    void addAnnotationFeatures(nlohmann::json::object_t& viewable, 
-                               bool overview,
-                               bool add_highlight = false) const;
+//    void addAnnotationFeatures(nlohmann::json::object_t& viewable,
+//                               bool overview,
+//                               bool add_highlight = false) const;
 
     void addAnnotationPos(nlohmann::json::object_t& viewable,
                           const EvaluationDetail::Position& pos, 
@@ -93,8 +95,11 @@ protected:
                            const EvaluationDetail::Position& pos0, 
                            const EvaluationDetail::Position& pos1, 
                            AnnotationType type) const;
-    nlohmann::json& annotationPointCoords(nlohmann::json::object_t& viewable, AnnotationType type) const;
-    nlohmann::json& annotationLineCoords(nlohmann::json::object_t& viewable, AnnotationType type) const;
+
+    nlohmann::json& annotationPointCoords(nlohmann::json::object_t& viewable, AnnotationType type, bool overview=false) const;
+    nlohmann::json& annotationLineCoords(nlohmann::json::object_t& viewable, AnnotationType type, bool overview=false) const;
+    nlohmann::json& getOrCreateAnnotation(nlohmann::json::object_t& viewable, AnnotationType type, bool overview) const;
+    // creates if not existing
 };
 
 }

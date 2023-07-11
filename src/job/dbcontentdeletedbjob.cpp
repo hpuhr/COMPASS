@@ -32,6 +32,26 @@ void DBContentDeleteDBJob::setSpecificDBContent(const std::string& specific_dbco
     specific_dbcontent_ = specific_dbcontent;
 }
 
+void DBContentDeleteDBJob::setSpecificSacSic(unsigned int sac, unsigned int sic)
+{
+    assert (!use_before_timestamp_);
+    assert (use_specific_dbcontent_);
+
+    use_specific_sac_sic_ = true;
+    specific_sac_ = sac;
+    specific_sic_ = sic;
+}
+
+void DBContentDeleteDBJob::setSpecificLineId(unsigned int line_id)
+{
+    assert (!use_before_timestamp_);
+    assert (use_specific_dbcontent_);
+    assert (use_specific_sac_sic_);
+
+    use_specific_line_id_ = true;
+    specific_line_id_ = line_id;
+}
+
 void DBContentDeleteDBJob::run()
 {
     logdbg << "DBContentDeleteDBJob: run: start";
@@ -68,9 +88,31 @@ void DBContentDeleteDBJob::run()
     }
     else if (use_specific_dbcontent_)
     {
-        logdbg << "DBContentDeleteDBJob: run: deleting dbcontent for " << specific_dbcontent_;
-        assert (dbcont_man.existsDBContent(specific_dbcontent_));
-        db_interface_.deleteAll(dbcont_man.dbContent(specific_dbcontent_));
+        if (use_specific_line_id_)
+        {
+            loginf << "DBContentDeleteDBJob: run: deleting dbcontent for " << specific_dbcontent_
+                   << " for specific sac/sic + line";
+            assert (dbcont_man.existsDBContent(specific_dbcontent_));
+            assert (use_specific_sac_sic_);
+
+            db_interface_.deleteContent(dbcont_man.dbContent(specific_dbcontent_),
+                                        specific_sac_, specific_sic_, specific_line_id_);
+        }
+        else if (use_specific_sac_sic_)
+        {
+            loginf << "DBContentDeleteDBJob: run: deleting dbcontent for " << specific_dbcontent_
+                   << " for specific sac/sic";
+            assert (dbcont_man.existsDBContent(specific_dbcontent_));
+
+            db_interface_.deleteContent(dbcont_man.dbContent(specific_dbcontent_),
+                                        specific_sac_, specific_sic_);
+        }
+        else // all
+        {
+            logdbg << "DBContentDeleteDBJob: run: deleting dbcontent for " << specific_dbcontent_;
+            assert (dbcont_man.existsDBContent(specific_dbcontent_));
+            db_interface_.deleteAll(dbcont_man.dbContent(specific_dbcontent_));
+        }
     }
     else
         assert (false);

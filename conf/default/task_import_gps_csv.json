@@ -1,0 +1,16 @@
+{
+    "parameters": {
+        "callsign": "MLTTEST",
+        "current_filename": "/home/sk/data/porto/asc_ground_eval/test_drive/Porto.csv",
+        "ds_name": "GPS Trail",
+        "ds_sac": 0,
+        "ds_sic": 0,
+        "mode_3a_code": 3824,
+        "set_callsign": true,
+        "set_mode_3a_code": true,
+        "set_target_address": true,
+        "target_address": 4739744,
+        "timestamp_format": "%m/%d/%y %H:%M:%S%F",
+        "tod_offset": -18.0
+    }
+}

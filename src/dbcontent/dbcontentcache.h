@@ -54,7 +54,11 @@ inline bool Cache::hasVar(const std::string& dbcontent_name, const Property& var
 template <typename T>
 inline NullableVector<T>& Cache::getVar(const std::string& dbcontent_name, const Property& var_property)
 {
-    assert (hasVar<T>(dbcontent_name, var_property));
+    if (!hasVar<T>(dbcontent_name, var_property))
+    {
+        logerr << "Cache: getVar: dbcontent " << dbcontent_name << " property " << var_property.name() << " not present";
+        assert (hasVar<T>(dbcontent_name, var_property));
+    }
     return buffers_.at(dbcontent_name)->get<T>(var_property.name());
 }
 
@@ -69,7 +73,13 @@ inline bool Cache::hasMetaVar(const std::string& dbcontent_name, const Property&
 template <typename T>
 inline NullableVector<T>& Cache::getMetaVar(const std::string& dbcontent_name, const Property& metavar_property)
 {
-    assert (hasMetaVar<T>(dbcontent_name, metavar_property));
+    if (!hasMetaVar<T>(dbcontent_name, metavar_property))
+    {
+        assert (hasMetaVar<T>(dbcontent_name, metavar_property));
+        logerr << "Cache: getMetaVar: dbcontent " << dbcontent_name
+               << " property " << metavar_property.name() << " not present";
+    }
+
     assert (buffers_.at(dbcontent_name)->has<T>(meta_var_lookup_.at(dbcontent_name).at(metavar_property.name())));
     return buffers_.at(dbcontent_name)->get<T>(meta_var_lookup_.at(dbcontent_name).at(metavar_property.name()));
 }

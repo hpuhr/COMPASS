@@ -166,6 +166,54 @@
                     "unit": ""
                 }
             },
+            "JSONDataMapping116": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT001",
+                    "db_content_variable_name": "W/E Value",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "030.Warning/Error Conditions.W/E Value",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping117": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT001",
+                    "db_content_variable_name": "Track Quality",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "210.Track Quality.Value",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping118": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT001",
+                    "db_content_variable_name": "Plot Characteristics",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "130.Radar Plot Characteristics.Value",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
             "JSONDataMapping14": {
                 "parameters": {
                     "active": true,

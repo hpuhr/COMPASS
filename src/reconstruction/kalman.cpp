@@ -246,7 +246,7 @@ Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
 bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
                                std::vector<kalman::Matrix>& P_smooth,
                                const std::vector<KalmanState>& states,
-                               double smooth_scale)
+                               const XTransferFunc& x_tr)
 {
     if (states.empty())
         return true;
@@ -260,29 +260,23 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
     std::vector<kalman::Matrix> Pp(n);
     std::vector<kalman::Matrix> K (n);
 
-    const double smooth_scale_sqr = smooth_scale * smooth_scale;
-
     for (int i = 0; i < n; ++i)
     {
         x_smooth[ i ] = states[ i ].x;
-        P_smooth[ i ] = states[ i ].P * smooth_scale_sqr;
-        Pp      [ i ] = states[ i ].P * smooth_scale_sqr;
+        P_smooth[ i ] = states[ i ].P;
+        Pp      [ i ] = states[ i ].P;
         K       [ i ].setZero(dim_x, dim_x);
     }
 
     if (states.size() < 2)
         return true;
 
+    kalman::Vector x_smooth_1_tr;
+
     for (int k = n - 2; k >= 0; --k)
     {
-        //        const auto& F  = states[ k ].F;
-        //        const auto& Q  = states[ k ].Q;
-        //        auto        Ft = F.transpose();
-
-        //        Pp[ k ] = states[ k ].F * P_smooth[ k ] * Ft + Q;
-
-        const auto& F_1 = states[ k+1 ].F;
-        const auto& Q_1 = states[ k+1 ].Q;
+        const auto& F_1  = states[ k+1 ].F;
+        const auto& Q_1  = states[ k+1 ].Q;
         auto        F_1t = F_1.transpose();
 
         Pp[ k ] = states[ k+1 ].F * P_smooth[ k ] * F_1t + Q_1;
@@ -290,12 +284,13 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
         if (!Eigen::FullPivLU<Eigen::MatrixXd>(Pp[ k ]).isInvertible())
             return false;
 
-        //        K[ k ] = P_smooth[ k ] * Ft * Pp[ k ].inverse();
-        //        x_smooth[ k ] += K[ k ] * (x_smooth[ k+1 ] - F * x_smooth[ k ]);
-
         K[ k ] = P_smooth[ k ] * F_1t * Pp[ k ].inverse();
-        x_smooth[ k ] += K[ k ] * (x_smooth[ k+1 ] - F_1 * x_smooth[ k ]);
 
+        //get last smoothed state vector
+        if (x_tr) x_tr(x_smooth_1_tr, x_smooth[ k+1 ], k + 1, k);
+        const kalman::Vector& x_smooth_1 = x_tr ? x_smooth_1_tr : x_smooth[ k+1 ];
+
+        x_smooth[ k ] += K[ k ] * (x_smooth_1 - F_1 * x_smooth[ k ]);
         P_smooth[ k ] += K[ k ] * (P_smooth[ k+1 ] - Pp[ k ]) * ((const kalman::Matrix&)K[ k ]).transpose();
     }
 

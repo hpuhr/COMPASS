@@ -6,6 +6,7 @@
 #include "dbcontent/dbcontentcache.h"
 #include "task.h"
 //#include "global.h"
+#include "reconstruction/reconstructor_defs.h"
 
 #include <QObject>
 
@@ -22,31 +23,56 @@ class ViewableDataConfig;
 
 struct CalculateReferencesTaskSettings
 {
-    enum class ReconstructorType
+    enum ReconstructorType
     {
-        UMKalman2D = 0,
-        AMKalman2D
+        Rec_UMKalman2D = 0,
+        Rec_AMKalman2D
     };
 
-    double        R_std                 = 30.0;     // observation noise (standard)
-    double        R_std_high            = 1000.0;   // observation noise (high)
-    double        Q_std                 = 30.0;     // process noise
-    double        P_std                 = 30.0;     // system noise (standard)
-    double        P_std_high            = 1000.0;   // system noise (high)
+    typedef reconstruction::MapProjectionMode MapProjectionMode;
 
+    ReconstructorType rec_type      = ReconstructorType::Rec_UMKalman2D;
+    MapProjectionMode map_proj_mode = MapProjectionMode::MapProjectDynamic;
+
+    static const double PosStdDevNotProvidedDefault;
+    static const double HighValueDefault;
+
+    //default uncertainties
+    double        R_std                 = PosStdDevNotProvidedDefault;    // observation noise (standard)
+    double        R_std_high            = HighValueDefault;               // observation noise (high)
+    double        Q_std                 = 30.0;                           // process noise
+    double        P_std                 = PosStdDevNotProvidedDefault;    // system noise (standard)
+    double        P_std_high            = HighValueDefault;               // system noise (high)
+
+    //default sensor specific uncertainties
+    bool          use_R_std_cat021      = true;                            //use adsb specific sensor noise
+    double        R_std_pos_cat021      = PosStdDevNotProvidedDefault;     //position observation noise adsb
+    double        R_std_vel_cat021      = 10.0;                            //velocity observation noise adsb
+    double        R_std_acc_cat021      = 10.0;                            //acceleration observation noise adsb
+
+    bool          use_R_std_cat062      = true;                            //use systrack specific sensor noise
+    double        R_std_pos_cat062      = PosStdDevNotProvidedDefault;     //position observation noise systracks
+    double        R_std_vel_cat062      = 20.0;                            //velocity observation noise systracks
+    double        R_std_acc_cat062      = 20.0;                            //acceleration observation noise systracks
+
+    //chain related
     double        min_dt                = 0.0;      // minimum allowed timestep in seconds
-    double        max_dt                = 30.0;     // maximum allowed timestep in seconds
+    double        max_dt                = 11.0;     // maximum allowed timestep in seconds
     int           min_chain_size        = 2;        // minimum kalman chain size
 
-    bool          use_vel_mm            = true;     // track velocities in measurements
-    bool          smooth_rts            = true;     // enable RTS smoother
+    //systrack resampling related
+    bool          resample_systracks        = true; // resample system tracks using spline interpolation
+    double        resample_systracks_dt     = 1.0;  // resample interval in seconds
+    double        resample_systracks_max_dt = 30.0; // maximum timestep to interpolate
 
-    bool          resample_systracks    = true;     // resample system tracks using spline interpolation
-    double        resample_systracks_dt = 1.0;      // resample interval in seconds
-
+    //result resampling related
     bool          resample_result       = true;     // resample (and interpolate) reconstructor result by a fixed time interval
     double        resample_result_dt    = 2.0;      // result resampling time interval in seconds
+    double        resample_result_Q_std = 10.0;     // process noise used in result resampling
 
+    //additional options
+    bool          use_vel_mm            = true;     // track velocities in measurements
+    bool          smooth_rts            = true;     // enable RTS smoother
     bool          verbose               = false;    // reconstruction verbosity
     bool          generate_viewpoints   = false;    // generate viewpoints and add to viewpoints list
     bool          python_compatibility  = false;    // if true settings may be overriden to make rec compatible with python version
@@ -56,8 +82,6 @@ struct CalculateReferencesTaskSettings
 
     bool use_adsb_data {true};
     nlohmann::json data_sources_adsb;               // map, ds_id str -> active flag, true if not contained
-
-    ReconstructorType rec_type = ReconstructorType::UMKalman2D;
 
     bool filter_position_usage {true};
 
@@ -101,8 +125,6 @@ public slots:
 
     void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
-
-    void calculationStatusSlot(QString status);
 
     void closeStatusDialogSlot();
 

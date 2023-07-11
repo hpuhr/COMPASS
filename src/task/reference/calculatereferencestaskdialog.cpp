@@ -1,7 +1,11 @@
+
 #include "calculatereferencestaskdialog.h"
 #include "calculatereferencestask.h"
 #include "selectdatasourceswidget.h"
 #include "util/stringconv.h"
+#include "reconstruction/reconstructor_defs.h"
+#include "compass.h"
+#include "global.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -139,7 +143,7 @@ void CalculateReferencesTaskDialog::createPositionFilterSettingsWidget(QWidget* 
 
     auto addRow = [&] (const QString& name, QWidget* w)
     {
-        QLabel* label = new QLabel(name);
+        QLabel* label = new QLabel(name + ":");
         label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
         layout->addWidget(label, row, 0);
         if (w) layout->addWidget(w, row, 1);
@@ -190,7 +194,6 @@ void CalculateReferencesTaskDialog::createPositionFilterSettingsWidget(QWidget* 
     adsb_only_v12_positions_check_ = new QCheckBox("Only Use MOPS V1 / V2");
     addOptionalRow(adsb_only_v12_positions_check_, nullptr);
 
-
     adsb_only_high_nucp_nic_positions_check_ = new QCheckBox("Only Use High NUCp / NIC");
     addOptionalRow(adsb_only_high_nucp_nic_positions_check_, nullptr);
 
@@ -215,6 +218,8 @@ void CalculateReferencesTaskDialog::createPositionFilterSettingsWidget(QWidget* 
     adsb_minimum_sil_box_->setMaximum(5);
     addRow("Minimum Position SIL", adsb_minimum_sil_box_);
 
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding), layout->rowCount(), 0);
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 0, layout->columnCount());
 }
 
 void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
@@ -234,21 +239,22 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     int row = 0;
 
-    auto addRow = [&] (const QString& name, QWidget* w)
+    auto addLabel = [&] (const QString& name, int col, bool visible)
     {
-        QLabel* label = new QLabel(name);
+        QLabel* label = new QLabel(name + ":");
         label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-        layout->addWidget(label, row, 0);
-        if (w) layout->addWidget(w, row, 1);
-        ++row;
+        label->setVisible(visible);
+        layout->addWidget(label, row, col);
     };
 
-    auto addOptionalRow = [&] (QCheckBox* check_box, QWidget* w)
+    auto addCheckBox = [&] (const QString& name, int col, bool visible)
     {
+        QCheckBox* check_box = new QCheckBox(name);
         check_box->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-        layout->addWidget(check_box, row, 0);
-        if (w) layout->addWidget(w, row, 1);
-        ++row;
+        check_box->setVisible(visible);
+        layout->addWidget(check_box, row, col);
+
+        return check_box;
     };
 
     auto addHeader = [&] (const QString& name)
@@ -257,40 +263,77 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
         layout->addWidget(label, row++, 0);
     };
 
+    auto addWidget = [&] (QWidget* w, int col)
+    {
+        layout->addWidget(w, row, col);
+    };
+
+    auto newRow = [&] ()
+    {
+        ++row;
+    };
+
+    auto addUncertainty = [ & ] (const QString& name, QDoubleSpinBox** sb_ptr, bool visible, const QString& unit)
+    {
+        auto sb = new QDoubleSpinBox;
+        sb->setMinimum(0.0);
+        sb->setMaximum(DBL_MAX);
+        sb->setVisible(visible);
+        sb->setSuffix(" " + unit);
+
+        *sb_ptr = sb;
+
+        addLabel(name, 0, visible);
+        addWidget(sb, 2);
+        newRow();
+    };
+
+    bool is_appimage = COMPASS::instance().isAppImage();
+
     rec_type_box_ = new QComboBox;
     rec_type_box_->addItem("UMKalman2D");
 #if USE_EXPERIMENTAL_SOURCE
     rec_type_box_->addItem("AMKalman2D");
 #endif
-    addRow("Reconstructor", rec_type_box_);
+    addLabel("Reconstructor", 0, true);
+    addWidget(rec_type_box_, 2);
+    newRow();
+
+    map_mode_box_ = new QComboBox;
+    map_mode_box_->addItem("Static", QVariant((int)reconstruction::MapProjectionMode::MapProjectStatic));
+    map_mode_box_->addItem("Dynamic", QVariant((int)reconstruction::MapProjectionMode::MapProjectDynamic));
+    map_mode_box_->setVisible(!is_appimage);
+
+    addLabel("Map Projection", 0, !is_appimage);
+    addWidget(map_mode_box_, 2);
+    newRow();
 
     //uncertainty section
     addHeader("Default Uncertainties");
 
-    R_std_box_ = new QDoubleSpinBox;
-    R_std_box_->setMinimum(0.0);
-    R_std_box_->setMaximum(DBL_MAX);
-    addRow("Measurement Stddev", R_std_box_);
+    addUncertainty("Measurement Stddev", &R_std_box_, !is_appimage, "m");
+    addUncertainty("Measurement Stddev (high)", &R_std_high_box_, !is_appimage, "m");
+    addUncertainty("Process Stddev", &Q_std_box_, true, "m");
+    addUncertainty("System Stddev", &P_std_box_, !is_appimage, "m");
+    addUncertainty("System Stddev (high)", &P_std_high_box_, !is_appimage, "m");
 
-    R_std_high_box_ = new QDoubleSpinBox;
-    R_std_high_box_->setMinimum(0.0);
-    R_std_high_box_->setMaximum(DBL_MAX);
-    addRow("Measurement Stddev (high)", R_std_high_box_);
+    //addHeader("System Track Uncertainties");
 
-    Q_std_box_ = new QDoubleSpinBox;
-    Q_std_box_->setMinimum(0.0);
-    Q_std_box_->setMaximum(DBL_MAX);
-    addRow("Process Stddev", Q_std_box_);
+    R_std_syst_use_box_ = addCheckBox("Use Tracker Specific Uncertainties", 0, !is_appimage);
+    newRow();
 
-    P_std_box_ = new QDoubleSpinBox;
-    P_std_box_->setMinimum(0.0);
-    P_std_box_->setMaximum(DBL_MAX);
-    addRow("System Stddev", P_std_box_);
+    addUncertainty("Tracker Position Stddev", &R_std_syst_pos_box_, !is_appimage, "m");
+    addUncertainty("Tracker Velocity Stddev", &R_std_syst_vel_box_, true, "m/s");
+    addUncertainty("Tracker Acceleration Stddev", &R_std_syst_acc_box_, !is_appimage, "m/s²");
 
-    P_std_high_box_ = new QDoubleSpinBox;
-    P_std_high_box_->setMinimum(0.0);
-    P_std_high_box_->setMaximum(DBL_MAX);
-    addRow("System Stddev (high)", P_std_high_box_);
+    //addHeader("ADS-B Uncertainties");
+
+    R_std_adsb_use_box_ = addCheckBox("Use ADS-B Specific Uncertainties", 0, !is_appimage);
+    newRow();
+
+    addUncertainty("ADS-B Position Stddev", &R_std_adsb_pos_box_, !is_appimage, "m");
+    addUncertainty("ADS-B Velocity Stddev", &R_std_adsb_vel_box_, true, "m/s");
+    addUncertainty("ADS-B Acceleration Stddev", &R_std_adsb_acc_box_, !is_appimage, "m/s²");
 
     //chain section
     addHeader("Chain Generation");
@@ -299,48 +342,109 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     min_dt_box_->setMinimum(0.0);
     min_dt_box_->setMaximum(DBL_MAX);
     min_dt_box_->setSuffix(" s");
-    addRow("Minimum Time Step", min_dt_box_);
+
+    addLabel("Minimum Time Step", 0, true);
+    addWidget(min_dt_box_, 2);
+
+    newRow();
 
     max_dt_box_ = new QDoubleSpinBox;
     max_dt_box_->setMinimum(0.0);
     max_dt_box_->setMaximum(DBL_MAX);
     max_dt_box_->setSuffix(" s");
-    addRow("Maximum Time Step", max_dt_box_);
+
+    addLabel("Maximum Time Step", 0, true);
+    addWidget(max_dt_box_, 2);
+    newRow();
 
     min_chain_size_box_ = new QSpinBox;
     min_chain_size_box_->setMinimum(1);
     min_chain_size_box_->setMaximum(INT_MAX);
-    addRow("Minimum Chain Size", min_chain_size_box_);
+
+    addLabel("Minimum Chain Size", 0, true);
+    addWidget(min_chain_size_box_, 2);
+    newRow();
 
     //additional option section
     addHeader("Additional Options");
 
-    use_vel_mm_box_ = new QCheckBox("Use Velocity Measurements");
-    addOptionalRow(use_vel_mm_box_, nullptr);
+    smooth_box_ = addCheckBox("Smooth Results", 0, true);
+    newRow();
 
-    smooth_box_ = new QCheckBox("Smooth Results");
-    addOptionalRow(smooth_box_, nullptr);
+    //systemk track resampling
+    resample_systracks_box_ = addCheckBox("Resample System Tracks", 0, true);
 
-    resample_systracks_box_    = new QCheckBox("Resample System Tracks");
     resample_systracks_dt_box_ = new QDoubleSpinBox;
     resample_systracks_dt_box_->setMinimum(1.0);
     resample_systracks_dt_box_->setMaximum(DBL_MAX);
     resample_systracks_dt_box_->setSuffix(" s");
-    addOptionalRow(resample_systracks_box_, resample_systracks_dt_box_);
 
-    resample_result_box_    = new QCheckBox("Resample Result");
+    addLabel("Resample Interval", 1, true);
+    addWidget(resample_systracks_dt_box_, 2);
+    newRow();
+
+    resample_systracks_max_dt_box_ = new QDoubleSpinBox;
+    resample_systracks_max_dt_box_->setMinimum(1.0);
+    resample_systracks_max_dt_box_->setMaximum(DBL_MAX);
+    resample_systracks_max_dt_box_->setSuffix(" s");
+
+    addLabel("Maximum Time Step", 1, true);
+    addWidget(resample_systracks_max_dt_box_, 2);
+    newRow();
+
+    resample_result_box_= addCheckBox("Resample Result", 0, true);
+
     resample_result_dt_box_ = new QDoubleSpinBox;
     resample_result_dt_box_->setMinimum(1.0);
     resample_result_dt_box_->setMaximum(DBL_MAX);
     resample_result_dt_box_->setSuffix(" s");
-    addOptionalRow(resample_result_box_, resample_result_dt_box_);
 
-    verbose_box_ = new QCheckBox("Verbose");
-    addOptionalRow(verbose_box_, nullptr);
+    resample_result_Q_std_box_ = new QDoubleSpinBox;
+    resample_result_Q_std_box_->setMinimum(0.0);
+    resample_result_Q_std_box_->setMaximum(DBL_MAX);
+    resample_result_Q_std_box_->setSuffix(" m");
 
-    python_comp_box_ = new QCheckBox("Python Compatibility Mode");
-    addOptionalRow(python_comp_box_, nullptr);
+    addLabel("Resample Interval", 1, true);
+    addWidget(resample_result_dt_box_, 2);
+    newRow();
 
+    addLabel("Resample Process Stddev", 1, true);
+    addWidget(resample_result_Q_std_box_, 2);
+    newRow();
+
+    use_vel_mm_box_ = addCheckBox("Use Velocity Measurements", 0, !is_appimage);
+    newRow();
+
+    verbose_box_ = addCheckBox("Verbose", 0, !is_appimage);
+    newRow();
+
+    python_comp_box_ = addCheckBox("Python Compatibility Mode", 0, !is_appimage);
+    newRow();
+
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding), layout->rowCount(), 0);
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 0, layout->columnCount());
+
+    auto activityCB = [ & ]
+    {
+        resample_systracks_dt_box_->setEnabled(resample_systracks_box_->isChecked());
+        resample_systracks_max_dt_box_->setEnabled(resample_systracks_box_->isChecked());
+
+        resample_result_dt_box_->setEnabled(resample_result_box_->isChecked());
+        resample_result_Q_std_box_->setEnabled(resample_result_box_->isChecked());
+
+        R_std_syst_pos_box_->setEnabled(R_std_syst_use_box_->isChecked());
+        R_std_syst_vel_box_->setEnabled(R_std_syst_use_box_->isChecked());
+        R_std_syst_acc_box_->setEnabled(R_std_syst_use_box_->isChecked());
+
+        R_std_adsb_pos_box_->setEnabled(R_std_adsb_use_box_->isChecked());
+        R_std_adsb_vel_box_->setEnabled(R_std_adsb_use_box_->isChecked());
+        R_std_adsb_acc_box_->setEnabled(R_std_adsb_use_box_->isChecked());
+    };
+
+    connect(resample_systracks_box_, &QCheckBox::toggled, activityCB);
+    connect(resample_result_box_, &QCheckBox::toggled, activityCB);
+    connect(R_std_syst_use_box_, &QCheckBox::toggled, activityCB);
+    connect(R_std_adsb_use_box_, &QCheckBox::toggled, activityCB);
 }
 
 void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
@@ -367,7 +471,7 @@ void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
 
     auto addRow = [&] (const QString& name, QWidget* w)
     {
-        QLabel* label = new QLabel(name);
+        QLabel* label = new QLabel(name + ":");
         label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
         layout->addWidget(label, row, 0);
         if (w) layout->addWidget(w, row, 1);
@@ -401,6 +505,9 @@ void CalculateReferencesTaskDialog::createOutputSettingsWidget(QWidget* w)
     ds_line_box_->addItems({"1", "2", "3", "4"});
 
     addRow("Line ID", ds_line_box_);
+
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding), layout->rowCount(), 0);
+    layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 0, layout->columnCount());
 }
 
 void CalculateReferencesTaskDialog::readOptions()
@@ -429,12 +536,23 @@ void CalculateReferencesTaskDialog::readOptions()
     // kalman
 
     rec_type_box_->setCurrentIndex((int)s.rec_type);
+    map_mode_box_->setCurrentIndex(map_mode_box_->findData((int)s.map_proj_mode));
 
     R_std_box_->setValue(s.R_std);
     R_std_high_box_->setValue(s.R_std_high);
     Q_std_box_->setValue(s.Q_std);
     P_std_box_->setValue(s.P_std);
     P_std_high_box_->setValue(s.P_std_high);
+
+    R_std_adsb_use_box_->setChecked(s.use_R_std_cat021);
+    R_std_adsb_pos_box_->setValue(s.R_std_pos_cat021);
+    R_std_adsb_vel_box_->setValue(s.R_std_vel_cat021);
+    R_std_adsb_acc_box_->setValue(s.R_std_acc_cat021);
+
+    R_std_syst_use_box_->setChecked(s.use_R_std_cat062);
+    R_std_syst_pos_box_->setValue(s.R_std_pos_cat062);
+    R_std_syst_vel_box_->setValue(s.R_std_vel_cat062);
+    R_std_syst_acc_box_->setValue(s.R_std_acc_cat062);
 
     min_dt_box_->setValue(s.min_dt);
     max_dt_box_->setValue(s.max_dt);
@@ -445,9 +563,11 @@ void CalculateReferencesTaskDialog::readOptions()
 
     resample_systracks_box_->setChecked(s.resample_systracks);
     resample_systracks_dt_box_->setValue(s.resample_systracks_dt);
+    resample_systracks_max_dt_box_->setValue(s.resample_systracks_max_dt);
 
     resample_result_box_->setChecked(s.resample_result);
     resample_result_dt_box_->setValue(s.resample_result_dt);
+    resample_result_Q_std_box_->setValue(s.resample_result_Q_std);
 
     verbose_box_->setChecked(s.verbose);
     python_comp_box_->setChecked(s.python_compatibility);
@@ -486,12 +606,23 @@ void CalculateReferencesTaskDialog::writeOptions()
     // kalman
 
     s.rec_type              = (CalculateReferencesTaskSettings::ReconstructorType)rec_type_box_->currentIndex();
+    s.map_proj_mode         = (CalculateReferencesTaskSettings::MapProjectionMode)map_mode_box_->currentData().toInt();
 
     s.R_std                 = R_std_box_->value();
     s.R_std_high            = R_std_high_box_->value();
     s.Q_std                 = Q_std_box_->value();
     s.P_std                 = P_std_box_->value();
-    s.P_std_high            = P_std_box_->value();
+    s.P_std_high            = P_std_high_box_->value();
+
+    s.use_R_std_cat021 = R_std_adsb_use_box_->isChecked();
+    s.R_std_pos_cat021 = R_std_adsb_pos_box_->value();
+    s.R_std_vel_cat021 = R_std_adsb_vel_box_->value();
+    s.R_std_acc_cat021 = R_std_adsb_acc_box_->value();
+
+    s.use_R_std_cat062 = R_std_syst_use_box_->isChecked();
+    s.R_std_pos_cat062 = R_std_syst_pos_box_->value();
+    s.R_std_vel_cat062 = R_std_syst_vel_box_->value();
+    s.R_std_acc_cat062 = R_std_syst_acc_box_->value();
 
     s.min_dt                = min_dt_box_->value();
     s.max_dt                = max_dt_box_->value();
@@ -500,11 +631,13 @@ void CalculateReferencesTaskDialog::writeOptions()
     s.use_vel_mm            = use_vel_mm_box_->isChecked();
     s.smooth_rts            = smooth_box_->isChecked();
 
-    s.resample_systracks    = resample_systracks_box_->isChecked();
-    s.resample_systracks_dt = resample_systracks_dt_box_->value();
+    s.resample_systracks        = resample_systracks_box_->isChecked();
+    s.resample_systracks_dt     = resample_systracks_dt_box_->value();
+    s.resample_systracks_max_dt = resample_systracks_max_dt_box_->value();
 
     s.resample_result       = resample_result_box_->isChecked();
     s.resample_result_dt    = resample_result_dt_box_->value();
+    s.resample_result_Q_std = resample_result_Q_std_box_->value();
 
     s.verbose               = verbose_box_->isChecked();
     s.python_compatibility  = python_comp_box_->isChecked();
@@ -554,9 +687,11 @@ QWidget* CalculateReferencesTaskDialog::addScrollArea(QWidget* w) const
 void CalculateReferencesTaskDialog::updateSourcesWidgets()
 {
     assert (tracker_sources_);
+    tracker_sources_->updateSelected(task_.trackerDataSources());
     tracker_sources_->setEnabled(task_.useTrackerData());
 
     assert (adsb_sources_);
+    adsb_sources_->updateSelected(task_.adsbDataSources());
     adsb_sources_->setEnabled(task_.useADSBData());
 
 }
@@ -617,5 +752,3 @@ void CalculateReferencesTaskDialog::adsbSourcesChangedSlot(std::map<std::string,
     updateSourcesWidgets();
     updateButtons();
 }
-
-

@@ -143,7 +143,7 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
 
     QMenu menu;
 
-    QAction* action = new QAction("Show Intermediate Reconstruction Results", this);
+    QAction* action = new QAction("Reconstruction Preview", this);
     connect (action, &QAction::triggered, recCB);
     menu.addAction(action);
 

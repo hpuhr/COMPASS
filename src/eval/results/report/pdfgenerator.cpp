@@ -160,6 +160,8 @@ void PDFGenerator::run ()
                 break;
             }
 
+            loginf << "EvaluationResultsReportPDFGenerator: run: section '" << sec_it->heading() << "'";
+
             sec_it->accept(visitor);
 
             // update status

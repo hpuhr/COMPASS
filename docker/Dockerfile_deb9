@@ -2,6 +2,10 @@ FROM debian:stretch
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+RUN sed -i -e 's/deb.debian.org/archive.debian.org/g' \
+           -e 's|security.debian.org|archive.debian.org/|g' \
+           -e '/stretch-updates/d' /etc/apt/sources.list
+
 RUN apt-get update
 RUN apt-get install -y openssl 
 
@@ -56,7 +60,7 @@ RUN sqlite3 -cmd "CREATE TABLE countries (id varchar(3), data json);insert into 
 
 RUN more /etc/apt/sources.list
 RUN cp /etc/apt/sources.list /etc/apt/sources.list~
-RUN echo 'deb-src http://deb.debian.org/debian stretch main' >> /etc/apt/sources.list
+RUN echo 'deb-src http://archive.debian.org/debian stretch main' >> /etc/apt/sources.list
 RUN more /etc/apt/sources.list
 RUN apt-get update
 
@@ -159,8 +163,10 @@ RUN cd NemaTode-master/build && make install
 
 #RUN apt-get install gdb -y
 RUN mkdir jasper
-RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
-RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
+#RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
+#RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
+RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
+RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
 RUN cd jasper && dpkg -i *.deb
 
 RUN ldconfig -v /usr/lib64/ /usr/local/

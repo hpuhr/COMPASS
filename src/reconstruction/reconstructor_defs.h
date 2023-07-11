@@ -27,17 +27,31 @@
 namespace reconstruction
 {
 
-enum class CoordConversion
-{
-    NoConversion = 0,
-    WGS84ToCart
-};
-
 enum class CoordSystem
 {
     Unknown = 0,
     WGS84,
     Cart
+};
+
+enum MapProjectionMode
+{
+    MapProjectNone = 0, //no projection (cartesian coords pre-stored in the measurements are used,
+                        //unprojection to geodetic should happen outside of reconstructor)
+
+    MapProjectStatic,   //a single map projection is used for the whole track (origin of projection is set to
+                        //center of data bounds, might result in inaccuracies in locations far away from the projection center)
+    
+    MapProjectDynamic   //the map projection varies dynamically based on a maximum distance threshold (most accurate,
+                        //but results in some computation overhead)
+};
+
+enum class StateInterpMode
+{
+    BlendHalf,      // time-projected kalman states will be blended halfways
+    BlendLinear,    // time-projected kalman states will be blended linearly with time
+    BlendStdDev,    // states will be weighted by time-projected stddevs
+    BlendVar        // states will be weighted by time-projected variances
 };
 
 /**
@@ -71,6 +85,17 @@ struct Measurement
             return (Eigen::Vector3d(x, y, z.value()) - Eigen::Vector3d(other.x, other.y, other.z.value())).norm();
         
         return (Eigen::Vector2d(x, y) - Eigen::Vector2d(other.x, other.y)).norm();
+    }
+
+    double distanceSqr(const Measurement& other, CoordSystem cs) const
+    {
+        if (cs == CoordSystem::WGS84)
+            return (Eigen::Vector2d(lat, lon) - Eigen::Vector2d(other.lat, other.lon)).squaredNorm();
+
+        if (z.has_value() && other.z.has_value())
+            return (Eigen::Vector3d(x, y, z.value()) - Eigen::Vector3d(other.x, other.y, other.z.value())).squaredNorm();
+        
+        return (Eigen::Vector2d(x, y) - Eigen::Vector2d(other.x, other.y)).squaredNorm();
     }
 
     bool hasVelocity() const
@@ -174,10 +199,11 @@ struct Measurement
 */
 struct Reference : public Measurement
 {
-    bool reset_pos    = false; // is this a position where kalman filter was resetted (e.g. due to long time offset)
-    bool nospeed_pos  = false; // did this position not obtain speed information
-    bool noaccel_pos  = false; // did this position not obtain acceleration information
-    bool nostddev_pos = false; // did this position not obtain stddev information
+    bool reset_pos      = false; // is this a position where kalman filter was resetted (e.g. due to long time offset)
+    bool nospeed_pos    = false; // did this position not obtain speed information
+    bool noaccel_pos    = false; // did this position not obtain acceleration information
+    bool nostddev_pos   = false; // did this position not obtain stddev information
+    bool projchange_pos = false; // position where a change of map projection happened 
 
     bool ref_interp   = false; // reference has been interpolated (e.g. from kalman samples)
 

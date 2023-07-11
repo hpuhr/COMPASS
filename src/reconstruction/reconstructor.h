@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <QColor>
+#include <QRectF>
 
 namespace dbContent 
 {
@@ -32,10 +33,6 @@ namespace dbContent
 }
 
 class ViewPointGenVP;
-
-class OGRSpatialReference;
-class OGRCoordinateTransformation;
-
 class ViewPointGenAnnotation;
 
 namespace reconstruction
@@ -63,8 +60,6 @@ public:
 
     const dbContent::TargetReport::Chain* chainOfReference(const Reference& ref) const;
 
-    void setCoordConversion(CoordConversion coord_conv);
-
     void setVerbosity(int v) { verbosity_ = v; }
     int verbosity() const { return verbosity_; }
 
@@ -80,11 +75,12 @@ public:
     static const QColor ColorResampledMM;
 
 protected:
-    virtual boost::optional<std::vector<Reference>> reconstruct_impl(const std::vector<Measurement>& measurements, 
+    virtual boost::optional<std::vector<Reference>> reconstruct_impl(std::vector<Measurement>& measurements, 
                                                                      const std::string& data_info) = 0;
     virtual void reset_impl() {}
 
     double distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys) const;
+    double distanceSqr(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys) const;
 
     const boost::optional<Uncertainty>& sourceUncertainty(uint32_t source_id) const;
 
@@ -92,8 +88,7 @@ protected:
     ViewPointGenVP* viewPoint() const;
     int viewPointDetail() const;
 
-    Eigen::Vector2d transformBack(double x, double y) const;
-    Eigen::Vector2d transformBack(double x, double y, double vx, double vy) const;
+    QRectF regionOfInterestWGS84() const;
 
 private:
     struct DBContentInfo
@@ -120,19 +115,12 @@ private:
     SourceMap                                    sources_;
     std::map<std::string, DBContentInfo>         dbcontent_infos_;
     std::vector<boost::optional<Uncertainty>>    source_uncerts_;
-    std::unique_ptr<OGRSpatialReference>         ref_src_;
-    std::unique_ptr<OGRSpatialReference>         ref_dst_;
-    std::unique_ptr<OGRCoordinateTransformation> trafo_fwd_;
-    std::unique_ptr<OGRCoordinateTransformation> trafo_bwd_;
-    double                                       x_offs_       = 0.0;
-    double                                       y_offs_       = 0.0;
     boost::optional<double>                      min_height_;
     boost::optional<double>                      max_height_;
 
     uint32_t source_cnt_ = 0;
 
-    CoordConversion coord_conv_ = CoordConversion::WGS84ToCart;
-    int             verbosity_  = 1;
+    int verbosity_  = 1;
 
     mutable ViewPointGenVP*          viewpoint_ = nullptr;
     mutable std::vector<VPTrackData> vp_data_interp_;

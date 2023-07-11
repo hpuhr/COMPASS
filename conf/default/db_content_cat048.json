@@ -19,6 +19,32 @@
                     "unit": ""
                 }
             },
+            "Variable10": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "w_e_value",
+                    "description": "From 030.Warning/Error Conditions.W/E Value\n\n0 Not defined; never used.\n1 Multipath Reply (Reflection)\n2 Reply due to sidelobe interrogation/reception\n3 Split plot\n4 Second time around reply\n5 Angel\n6 Slow moving target correlated with road infrastructure (terrestrial vehicle)\n7 Fixed PSR plot\n8 Slow PSR target\n9 Low quality PSR plot\n10 Phantom SSR plot\n11 Non-Matching Mode-3/A Code\n12 Mode C code / Mode S altitude code abnormal value compared to the track\n13 Target in Clutter Area\n14 Maximum Doppler Response in Zero Filter\n15 Transponder anomaly detected\n16 Duplicated or Illegal Mode S Aircraft Address\n17 Mode S error correction applied\n18 Undecodable Mode C code / Mode S altitude code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "W/E Value",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable11": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "mode_s_mb_data",
+                    "description": "From 250.Mode S MB Data.MB Data\n\n56-bit message conveying Mode S Comm B message data",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode S MB Data",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "Variable2": {
                 "parameters": {
                     "data_type_str": "UCHAR",

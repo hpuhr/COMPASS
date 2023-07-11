@@ -26,7 +26,7 @@ public:
 
 protected:
     std::string title_;
-    const std::string& ds_type_;
+    std::string ds_type_;
 
     QGridLayout* data_source_layout_ {nullptr};
     std::map<unsigned int, QCheckBox*> data_sources_checkboxes_;

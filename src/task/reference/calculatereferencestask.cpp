@@ -26,7 +26,10 @@
 using namespace std;
 using namespace Utils;
 using namespace dbContent;
-using namespace nlohmann;
+//using namespace nlohmann;
+
+const double CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault = 100.0;
+const double CalculateReferencesTaskSettings::HighValueDefault            = 1000.0;
 
 CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
                                                  const std::string& instance_id,
@@ -37,14 +40,27 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     tooltip_ =
             "Allows calculation of references based on System Tracker and ADS-B data.";
 
-    registerParameter("rec_mm_stddev"        , &settings_.R_std     , 30.0  );
-    registerParameter("rec_mm_stddev_high"   , &settings_.R_std_high, 1000.0);
+    registerParameter("rec_type"     , (int*)&settings_.rec_type     , CalculateReferencesTaskSettings::Rec_UMKalman2D);
+    registerParameter("rec_proj_mode", (int*)&settings_.map_proj_mode, CalculateReferencesTaskSettings::MapProjectionMode::MapProjectDynamic);
+
+    registerParameter("rec_mm_stddev"        , &settings_.R_std     , CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault);
+    registerParameter("rec_mm_stddev_high"   , &settings_.R_std_high, CalculateReferencesTaskSettings::HighValueDefault);
     registerParameter("rec_process_stddev"   , &settings_.Q_std     , 30.0  );
-    registerParameter("rec_state_stddev"     , &settings_.P_std     , 30.0  );
-    registerParameter("rec_state_stddev_high", &settings_.P_std_high, 1000.0);
+    registerParameter("rec_state_stddev"     , &settings_.P_std     , CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault);
+    registerParameter("rec_state_stddev_high", &settings_.P_std_high, CalculateReferencesTaskSettings::HighValueDefault);
+
+    registerParameter("rec_use_mm_stddev_cat021", &settings_.use_R_std_cat021, true);
+    registerParameter("rec_mm_stddev_cat021_pos", &settings_.R_std_pos_cat021, CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault);
+    registerParameter("rec_mm_stddev_cat021_vel", &settings_.R_std_vel_cat021, 10.0);
+    registerParameter("rec_mm_stddev_cat021_acc", &settings_.R_std_acc_cat021, 10.0);
+
+    registerParameter("rec_use_mm_stddev_cat062", &settings_.use_R_std_cat062, true);
+    registerParameter("rec_mm_stddev_cat062_pos", &settings_.R_std_pos_cat062, CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault);
+    registerParameter("rec_mm_stddev_cat062_vel", &settings_.R_std_vel_cat062, 20.0);
+    registerParameter("rec_mm_stddev_cat062_acc", &settings_.R_std_acc_cat062, 20.0);
 
     registerParameter("rec_min_dt"        , &settings_.min_dt        ,  0.0);
-    registerParameter("rec_max_dt"        , &settings_.max_dt        , 30.0);
+    registerParameter("rec_max_dt"        , &settings_.max_dt        , 11.0);
     registerParameter("rec_min_chain_size", &settings_.min_chain_size,  2  );
 
     registerParameter("rec_use_velocity_mm", &settings_.use_vel_mm, true);
@@ -52,15 +68,17 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
 
     registerParameter("rec_resample_systracks"   , &settings_.resample_systracks   , true);
     registerParameter("rec_resample_systracks_dt", &settings_.resample_systracks_dt, 1.0 );
+    registerParameter("rec_resample_systracks_max_dt", &settings_.resample_systracks_max_dt, 30.0);
 
     registerParameter("rec_resample_result"   , &settings_.resample_result   , true);
     registerParameter("rec_resample_result_dt", &settings_.resample_result_dt, 2.0 );
+    registerParameter("rec_resample_result_qstd", &settings_.resample_result_Q_std, 10.0);
 
     registerParameter("use_tracker_data"  , &settings_.use_tracker_data, true);
-    registerParameter("data_sources_tracker", &settings_.data_sources_tracker, json::object());
+    registerParameter("data_sources_tracker", &settings_.data_sources_tracker, nlohmann::json::object());
 
     registerParameter("use_adsb_data"  , &settings_.use_adsb_data, true);
-    registerParameter("data_sources_adsb", &settings_.data_sources_adsb, json::object());
+    registerParameter("data_sources_adsb", &settings_.data_sources_adsb, nlohmann::json::object());
     
     // position usage
     registerParameter("filter_position_usage", &settings_.filter_position_usage, true);
@@ -109,6 +127,8 @@ CalculateReferencesTaskDialog* CalculateReferencesTask::dialog()
         connect(dialog_.get(), &CalculateReferencesTaskDialog::cancelSignal,
                 this, &CalculateReferencesTask::dialogCancelSlot);
     }
+    else
+        dialog_->updateSourcesWidgets();
 
     assert(dialog_);
     return dialog_.get();
@@ -280,7 +300,7 @@ void CalculateReferencesTask::run()
     connect(status_dialog_.get(), &CalculateReferencesStatusDialog::closeSignal,
             this, &CalculateReferencesTask::closeStatusDialogSlot);
     status_dialog_->markStartTime();
-    status_dialog_->setStatus("Initializing");
+    status_dialog_->setStatusSlot("Initializing");
     status_dialog_->show();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
@@ -289,19 +309,34 @@ void CalculateReferencesTask::run()
     //remove existing references if we want to write the new ones
     if (writeReferences())
     {
-        status_dialog_->setStatus("Deleting old References");
+        status_dialog_->setStatusSlot("Deleting old References");
 
-        if (dbcontent_man.dbContent("RefTraj").existsInDB()) // TODO rework to only delete define data source + line
-            dbcontent_man.dbContent("RefTraj").deleteDBContentData();
+        DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-        while (dbcontent_man.dbContent("RefTraj").isDeleting())
+        for (auto& ds_it : ds_man.dbDataSources())
         {
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep(10);
+            if (ds_it->isCalculatedReferenceSource()
+                    && ds_it->sac() == settings_.ds_sac && ds_it->sic() == settings_.ds_sic
+                    && ds_it->hasNumInserted("RefTraj", settings_.ds_line))
+            {
+                status_dialog_->setStatusSlot(("Deleting From Data Source " + ds_it->name()).c_str());
+
+                dbcontent_man.dbContent("RefTraj").deleteDBContentData(settings_.ds_sac, settings_.ds_sic, settings_.ds_line);
+
+                while (dbcontent_man.dbContent("RefTraj").isDeleting())
+                {
+                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    QThread::msleep(10);
+                }
+
+                ds_it->clearNumInserted("RefTraj", settings_.ds_line);
+            }
         }
+
+        ds_man.saveDBDataSources();
     }
 
-    status_dialog_->setStatus("Loading Data");
+    status_dialog_->setStatusSlot("Loading Data");
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
@@ -397,7 +432,7 @@ void CalculateReferencesTask::createDoneSlot()
         if (settings_.generate_viewpoints)
         {
             //load all created view points
-            status_dialog_->setStatus("Adding View Points");
+            status_dialog_->setStatusSlot("Adding View Points");
 
             COMPASS::instance().viewManager().loadViewPoints(j);
         }
@@ -409,7 +444,7 @@ void CalculateReferencesTask::createDoneSlot()
 
             if (j_vp.has_value() && j_vp->is_object())
             {
-                status_dialog_->setStatus("Loading View Point");
+                status_dialog_->setStatusSlot("Loading View Point");
 
                 nlohmann::json::object_t obj = j_vp.value();
 
@@ -420,13 +455,20 @@ void CalculateReferencesTask::createDoneSlot()
         }
     }
 
-    status_dialog_->setStatus("Done");
+    status_dialog_->setStatusSlot("Done");
 
     assert (create_job_);
 
-    status_dialog_->setDone();
+    auto job_result = create_job_->resultState();
 
-    if (closeDialogAfterFinishing())
+    if (job_result == CalculateReferencesJob::ResultState::ResultNoInputData)
+        status_dialog_->setDone("Error: No input data for reference computation.\nCheck data sources and filter settings in\n[Main Menu -> Process -> Calculate References].");
+    else if (job_result == CalculateReferencesJob::ResultState::ResultNoRefData)
+        status_dialog_->setDone("Error: No reference data created.");
+    else
+        status_dialog_->setDone();
+
+    if (job_result == CalculateReferencesJob::ResultState::ResultOk && closeDialogAfterFinishing())
         closeStatusDialogSlot();
 
     create_job_ = nullptr;
@@ -467,6 +509,7 @@ void CalculateReferencesTask::loadedDataSlot(
     data_ = data;
 
     assert (status_dialog_);
+
     status_dialog_->updateTime();
 }
 
@@ -487,7 +530,8 @@ void CalculateReferencesTask::loadingDoneSlot()
                this, &CalculateReferencesTask::loadingDoneSlot);
 
     assert(status_dialog_);
-    status_dialog_->setStatus("Loading done, starting calculation");
+    status_dialog_->setStatusSlot("Loading done, starting calculation");
+    status_dialog_->setLoadedCountsSlot(data_);
 
     dbcontent_man.clearData();
 
@@ -497,22 +541,14 @@ void CalculateReferencesTask::loadingDoneSlot()
 
     assert(!create_job_);
 
-    create_job_ = std::make_shared<CalculateReferencesJob>(*this, cache_);
+    create_job_ = std::make_shared<CalculateReferencesJob>(*this, *status_dialog_, cache_);
 
     connect(create_job_.get(), &CalculateReferencesJob::doneSignal, this,
             &CalculateReferencesTask::createDoneSlot, Qt::QueuedConnection);
     connect(create_job_.get(), &CalculateReferencesJob::obsoleteSignal, this,
             &CalculateReferencesTask::createObsoleteSlot, Qt::QueuedConnection);
-    connect(create_job_.get(), &CalculateReferencesJob::statusSignal, this,
-            &CalculateReferencesTask::calculationStatusSlot, Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(create_job_);
-}
-
-void CalculateReferencesTask::calculationStatusSlot(QString status)
-{
-    assert(status_dialog_);
-    status_dialog_->setStatus(status.toStdString());
 }
 
 void CalculateReferencesTask::closeStatusDialogSlot()

@@ -183,8 +183,7 @@ kalman::Vector Reconstructor_UMKalman2D::xVec(const Measurement& mm) const
 {
     kalman::Vector x(4);
 
-    x[ 0 ] = mm.x;
-    x[ 2 ] = mm.y;
+    ReconstructorKalman::xPos(x, mm);
 
     //start with zero velocity
     x[ 1 ] = 0.0;
@@ -197,6 +196,42 @@ kalman::Vector Reconstructor_UMKalman2D::xVec(const Measurement& mm) const
     }
 
     return x;
+}
+
+/**
+*/
+kalman::Vector Reconstructor_UMKalman2D::xVecInv(const kalman::Vector& x) const
+{
+    kalman::Vector x_inv = x;
+
+    x_inv[ 1 ] *= -1.0;
+    x_inv[ 3 ] *= -1.0;
+
+    return x_inv;
+}
+
+/**
+*/
+void Reconstructor_UMKalman2D::xVec(const kalman::Vector& x) const
+{
+    //update state vector after projection change
+    kalman_->setStateVec(x);
+}
+
+/**
+*/
+void Reconstructor_UMKalman2D::xPos(double& x, double& y, const kalman::Vector& x_vec) const
+{
+    x = x_vec[ 0 ];
+    y = x_vec[ 2 ];
+}
+
+/**
+*/
+void Reconstructor_UMKalman2D::xPos(kalman::Vector& x_vec, double x, double y) const
+{
+    x_vec[ 0 ] = x;
+    x_vec[ 2 ] = y;
 }
 
 /**
@@ -270,6 +305,20 @@ kalman::Vector Reconstructor_UMKalman2D::zVec(const Measurement& mm) const
 
 /**
 */
+double Reconstructor_UMKalman2D::xVar(const kalman::Matrix& P) const
+{
+    return P(0, 0);
+}
+
+/**
+*/
+double Reconstructor_UMKalman2D::yVar(const kalman::Matrix& P) const
+{
+    return P(2, 2);
+}
+
+/**
+*/
 void Reconstructor_UMKalman2D::storeState_impl(Reference& ref,
                                                const kalman::KalmanState& state) const
 {
@@ -314,11 +363,12 @@ boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::interpStep(const 
                                                                           const kalman::KalmanState& state1,
                                                                           double dt) const
 {
+#if 0
     kalman_->setX(state0.x);
     kalman_->setP(state0.P);
 
     auto F = helpers_umkalman2d::transitionMat(dt);
-    auto Q = helpers_umkalman2d::processMat(dt, qVar());
+    auto Q = helpers_umkalman2d::processMat(dt, qVarResample());
 
     kalman_->predict(F, Q);
 
@@ -328,16 +378,42 @@ boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::interpStep(const 
     new_state.F = F;
     new_state.Q = Q;
 
-    return new_state; 
+    return new_state;
+#else
+    bool forward = dt >= 0.0;
+
+    if (!forward)
+        dt = std::fabs(dt);
+
+    kalman_->setX(forward ? state0.x : xVecInv(state0.x));
+    kalman_->setP(state0.P);
+
+    auto F = helpers_umkalman2d::transitionMat(dt);
+    auto Q = helpers_umkalman2d::processMat(dt, qVarResample());
+
+    kalman_->predict(F, Q);
+
+    kalman::KalmanState new_state;
+    new_state.x = forward ? kalman_->getX() : xVecInv(kalman_->getX());
+    new_state.P = kalman_->getP();
+    new_state.F = F;
+    new_state.Q = Q;
+
+    return new_state;
+#endif
 }
 
 /**
 */
 bool Reconstructor_UMKalman2D::smoothChain_impl(std::vector<kalman::Vector>& x_smooth,
                                                 std::vector<kalman::Matrix>& P_smooth,
-                                                const KalmanChain& chain) const
+                                                const KalmanChain& chain,
+                                                const kalman::XTransferFunc& x_tr) const
 {
-    return kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, chain.kalman_states, baseConfig().smooth_scale);
+    return kalman::KalmanFilter::rtsSmoother(x_smooth, 
+                                             P_smooth, 
+                                             chain.kalman_states,
+                                             x_tr);
 }
 
 } // namespace reconstruction

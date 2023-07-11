@@ -232,6 +232,7 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
                            const boost::posix_time::ptime& time0,
                            const boost::posix_time::ptime& time1,
                            const std::string& error,
+                           bool has_ref_data,
                            bool compute_misses)
     {
         assert(time1 >= time0);
@@ -252,6 +253,8 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
             e.misses = numMisses(dt);
         }
 
+        e.had_ref_data = has_ref_data;
+
         events.push_back(e);
     };
 
@@ -260,14 +263,14 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     {
         for (const auto& update : period.getUpdates())
         {
-            logEvent(Event::TypeNoReference, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false);
+            logEvent(Event::TypeNoReference, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false, false);
         }
 
         return events;
     }
 
     //log period entered
-    logEvent(Event::TypeEnterPeriod, nullptr, period.begin(), period.end(), "", false);
+    logEvent(Event::TypeEnterPeriod, nullptr, period.begin(), period.end(), "", false, false);
 
     //inside sector period
     const auto& updates = period.getUpdates();
@@ -275,7 +278,7 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     if (updates.empty())
     {
         //no updates in period => add single event for this case
-        logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", true);
+        logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", false, true);
     }
     else
     {
@@ -285,6 +288,7 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
         size_t n = updates.size();
 
         const TimePeriodUpdate* valid_last = nullptr;
+        bool ref_data_missing = false;
 
         for (size_t i = 0; i < n; ++i)
         {
@@ -293,23 +297,19 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
             //check if update is valid
             auto validity = isValid(update.data_id, target_data, sector_layer, max_ref_time_diff);
 
-            //no ref data available for update => log and skip
-            if (validity.value == Validity::Value::DataMissing)
-            {
-                logEvent(Event::TypeDataMissing, &update, update.data_id.timestamp(), update.data_id.timestamp(), validity.comment, false);
-                continue;
-            }
-
             //invalid update => log and skip
             if (validity.value == Validity::Value::Invalid)
             {
-                logEvent(Event::TypeInvalid, &update, update.data_id.timestamp(), update.data_id.timestamp(), validity.comment, false);
+                logEvent(Event::TypeInvalid, &update, update.data_id.timestamp(), update.data_id.timestamp(), validity.comment, false, false);
                 continue;
             }
 
             //first valid update? => log
             if (!valid_last)
-                logEvent(Event::TypeFirstValidUpdateInPeriod, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false);
+                logEvent(Event::TypeFirstValidUpdateInPeriod, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false, false);
+
+            //was reference data missing? => yields a valid update (in dubio pro reo)
+            ref_data_missing = validity.value == Validity::Value::RefDataMissing;
             
             //valid update => check for misses
             logEvent(valid_last ? Event::TypeValid : Event::Type::TypeValidFirst,
@@ -317,6 +317,7 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
                      valid_last ? valid_last->data_id.timestamp() : period.begin(),      // time0 is either the last valid update or period begin
                      update.data_id.timestamp(),                                         // time1 always update time
                      "",
+                     !ref_data_missing,
                      true);                                                              // check misses in both cases
 
             valid_last = &updates[ i ];
@@ -325,19 +326,19 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
         //add event for last valid update
         if (valid_last)
         {
-            logEvent(Event::TypeLastValidUpdateInPeriod, valid_last, valid_last->data_id.timestamp(), valid_last->data_id.timestamp(), "", false);
-            logEvent(Event::TypeValidLast, valid_last, valid_last->data_id.timestamp(), period.end(), "", true);
+            logEvent(Event::TypeLastValidUpdateInPeriod, valid_last, valid_last->data_id.timestamp(), valid_last->data_id.timestamp(), "", false, false);
+            logEvent(Event::TypeValidLast, valid_last, valid_last->data_id.timestamp(), period.end(), "", !ref_data_missing, true);
         }
 
         //no valid updates in period => add single event for this case
         if (!valid_last)
         {
-            logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", true);
+            logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", false, true);
         }
     }
 
     //log period left
-    logEvent(Event::TypeLeavePeriod, nullptr, period.begin(), period.end(), "", false);
+    logEvent(Event::TypeLeavePeriod, nullptr, period.begin(), period.end(), "", false, false);
 
     return events;
 }
@@ -524,6 +525,10 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             break;
         }
     }
+
+    //add remark that reference data was missing
+    if (event.had_ref_data)
+        dinfo.evt_comment += " (no ref info)";
 
     return dinfo;
 }

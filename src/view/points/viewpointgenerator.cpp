@@ -16,6 +16,7 @@
  */
 
 #include "viewpointgenerator.h"
+#include "viewpoint.h"
 
 #include "util/stringconv.h"
 
@@ -713,8 +714,6 @@ bool ViewPointGenVP::hasAnnotations(const nlohmann::json& vp_json)
  * ViewPointGenerator
  ********************************************************************************/
 
-const std::string ViewPointGenerator::Version = "0.2";
-
 const std::string ViewPointGenerator::ViewPointsFieldVersion     = "content_version";
 const std::string ViewPointGenerator::ViewPointsFieldContentType = "content_type";
 const std::string ViewPointGenerator::ViewPointsFieldViewPoints  = "view_points";
@@ -747,7 +746,7 @@ void ViewPointGenerator::toJSON(nlohmann::json& j,
     nlohmann::json vp_content;
 
     vp_content[ViewPointsFieldContentType] = "view_points";
-    vp_content[ViewPointsFieldVersion    ] = Version;
+    vp_content[ViewPointsFieldVersion    ] = VP_COLLECTION_CONTENT_VERSION;
 
     nlohmann::json viewpoints = nlohmann::json::array();
 

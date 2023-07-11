@@ -552,7 +552,7 @@ void EvaluationFilterTabWidget::update()
 
     assert (min_reftraj_acc_edit_);
     min_reftraj_acc_edit_->setText(QString::number(eval_settings_.ref_traj_minimum_accuracy_));
-    time_begin_edit_->setEnabled(use_filter && eval_settings_.use_ref_traj_accuracy_filter_);
+    min_reftraj_acc_edit_->setEnabled(use_filter && eval_settings_.use_ref_traj_accuracy_filter_);
 
     // adsb
 

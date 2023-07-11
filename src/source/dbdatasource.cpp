@@ -68,6 +68,14 @@ bool DBDataSource::hasNumInserted(unsigned int line_id) const
     return false;
 }
 
+bool DBDataSource::hasNumInserted(const std::string& db_content, unsigned int line_id) const
+{
+    if (!num_inserted_.count(db_content))
+        return false;
+
+    return num_inserted_.at(db_content).count(line_id);
+}
+
 const std::map<std::string, std::map<unsigned int, unsigned int>>& DBDataSource::numInsertedMap() const
 {
     return num_inserted_;
@@ -114,6 +122,17 @@ void DBDataSource::clearNumInserted(const std::string& db_content)
 {
     if (num_inserted_.count(db_content))
         num_inserted_.erase(db_content);
+}
+
+void DBDataSource::clearNumInserted(const std::string& db_content, unsigned int line_id)
+{
+    if (!num_inserted_.count(db_content))
+        return;
+
+    if (!num_inserted_.at(db_content).count(line_id))
+        return;
+
+    num_inserted_.at(db_content).erase(line_id);
 }
 
 void DBDataSource::addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num)

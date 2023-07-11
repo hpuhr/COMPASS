@@ -510,6 +510,8 @@ void GPSTrailImportTask::run()
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_vy_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_));
 
     loginf << "GPSTrailImportTask: run: getting variables";
 
@@ -532,6 +534,9 @@ void GPSTrailImportTask::run()
     Variable& speed_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_);
     Variable& track_angle_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_);
 
+    Variable& xstddev_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_);
+    Variable& ystddev_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_);
+
     PropertyList properties;
     properties.addProperty(sac_var.name(), PropertyDataType::UCHAR);
     properties.addProperty(sic_var.name(), PropertyDataType::UCHAR);
@@ -541,6 +546,9 @@ void GPSTrailImportTask::run()
     properties.addProperty(ts_var.name(), PropertyDataType::TIMESTAMP);
     properties.addProperty(lat_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(long_var.name(), PropertyDataType::DOUBLE);
+
+    properties.addProperty(xstddev_var.name(), PropertyDataType::DOUBLE);
+    properties.addProperty(ystddev_var.name(), PropertyDataType::DOUBLE);
 
     if (set_mode_3a_code_)
         properties.addProperty(m3a_var.name(), PropertyDataType::UINT);
@@ -577,6 +585,9 @@ void GPSTrailImportTask::run()
     NullableVector<double>& vy_vec = buffer_->get<double>(vy_var.name());
     NullableVector<double>& speed_vec = buffer_->get<double>(speed_var.name());
     NullableVector<double>& track_angle_vec = buffer_->get<double>(track_angle_var.name());
+
+    NullableVector<double>& xstddev_vec = buffer_->get<double>(xstddev_var.name());
+    NullableVector<double>& ystddev_vec = buffer_->get<double>(ystddev_var.name());
 
     // BufferWrapper wrap (buffer_);
     // wrap.init();
@@ -688,6 +699,9 @@ void GPSTrailImportTask::run()
             vx_vec.set(cnt, vx);
             vy_vec.set(cnt, vy);
         }
+
+        xstddev_vec.set(cnt, fix_it.horizontalAccuracy());
+        ystddev_vec.set(cnt, fix_it.horizontalAccuracy());
 
         //        if (fix_it.travelAngle != 0.0) TODO
         //            head_vec.set(cnt, fix_it.travelAngle);

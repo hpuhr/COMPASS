@@ -452,13 +452,15 @@ bool ASTERIXJSONParser::parseTargetReport(const nlohmann::json& tr, Buffer& buff
 
                 break;
             }
-            case PropertyDataType::JSON:
+            case PropertyDataType::JSON: // only to be used for lists
             {
                 logdbg << "ASTERIXJSONParser: parseTargetReport: json " << current_var_name
                        << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<json>(current_var_name));
-                mandatory_missing =
-                        map_it->findAndSetValue(tr, buffer.get<json>(current_var_name), row_cnt);
+//                mandatory_missing =
+//                        map_it->findAndSetValue(tr, buffer.get<json>(current_var_name), row_cnt);
+
+                 map_it->findAndSetValues(tr, buffer.get<json>(current_var_name), row_cnt);
 
                 break;
             }

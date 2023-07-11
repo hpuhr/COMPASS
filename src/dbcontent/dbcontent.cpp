@@ -29,12 +29,12 @@
 #include "insertbufferdbjob.h"
 #include "jobmanager.h"
 #include "propertylist.h"
-#include "stringconv.h"
-#include "taskmanager.h"
+//#include "stringconv.h"
+//#include "taskmanager.h"
 #include "updatebufferdbjob.h"
-#include "viewmanager.h"
-#include "util/number.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "viewmanager.h"
+//#include "util/number.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "dbcontentdeletedbjob.h"
 
 #include <algorithm>
@@ -600,6 +600,43 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
 void DBContent::deleteDBContentData()
 {
     loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "'";
+
+    if (!existsInDB())
+        return;
+
+    assert (!delete_job_);
+
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
+    delete_job_->setSpecificDBContent(name_);
+
+    connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
+            Qt::QueuedConnection);
+
+    JobManager::instance().addDBJob(delete_job_);
+}
+
+void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic)
+{
+    loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic;
+
+    if (!existsInDB())
+        return;
+
+    assert (!delete_job_);
+
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
+    delete_job_->setSpecificDBContent(name_);
+
+    connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
+            Qt::QueuedConnection);
+
+    JobManager::instance().addDBJob(delete_job_);
+}
+
+void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id)
+{
+    loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic
+           << " line_id " << line_id;
 
     if (!existsInDB())
         return;

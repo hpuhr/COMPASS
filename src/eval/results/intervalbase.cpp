@@ -497,12 +497,12 @@ bool SingleIntervalBase::hasFailed() const
 */
 void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    addAnnotationFeatures(viewable, overview, true);
+    //addAnnotationFeatures(viewable, overview, true);
 
-    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError);
-    json& error_point_coordinates = annotationPointCoords(viewable, TypeError);
-    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk);
-    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk);
+    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
+    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
+    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
 
     for (auto& detail_it : getDetails())
     {
@@ -538,7 +538,7 @@ void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable, bool
 
 /**
 */
-void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable, 
+void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable,
                                         const EvaluationDetail& detail)
 {
     if (detail.numPositions() == 1)

@@ -242,6 +242,46 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcon
     return command;
 }
 
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
+        const DBContent& dbcontent, unsigned int sac, unsigned int sic)
+{
+    stringstream ss;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    ss << "DELETE FROM " << dbcontent.dbTableName() << " WHERE "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sac_id_).dbColumnName() << " = " << sac
+       << " AND "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sic_id_).dbColumnName() << " = " << sic;
+
+    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+    command->set(ss.str());
+    return command;
+}
+
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
+        const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id)
+{
+    stringstream ss;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    ss << "DELETE FROM " << dbcontent.dbTableName() << " WHERE "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sac_id_).dbColumnName() << " = " << sac
+       << " AND "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sic_id_).dbColumnName() << " = " << sic
+       << " AND "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_line_id_).dbColumnName() << " = " << line_id;
+
+    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+    command->set(ss.str());
+    return command;
+}
+
 //shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBContent& object)
 //{
 //    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE
@@ -682,9 +722,9 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
 
     ss << " FROM " << table_db_name;  // << table->getAllTableNames();
 
-    // check associations json_each
-//    if (filter.find("json_each.value") != std::string::npos)
-//        ss << ", json_each("+object.dbTableName()+".associations)";
+    // check contributing_receivers json_each
+    if (filter.find("json_each.value") != std::string::npos)
+        ss << ", json_each("+object.dbTableName()+".contributing_receivers)";
 
     // add extra from parts
 //    for (auto& from_part : extra_from_parts)

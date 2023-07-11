@@ -49,13 +49,6 @@ void Reconstructor::reset()
     measurements_.clear();
     sources_.clear();
     source_uncerts_.clear();
-    ref_src_.reset();
-    ref_dst_.reset();
-    trafo_fwd_.reset();
-    trafo_bwd_.reset();
-
-    x_offs_ = 0.0;
-    y_offs_ = 0.0;
 
     min_height_.reset();
     max_height_.reset();
@@ -94,13 +87,6 @@ ViewPointGenVP* Reconstructor::viewPoint() const
 int Reconstructor::viewPointDetail() const
 {
     return viewpoint_detail_;
-}
-
-/**
-*/
-void Reconstructor::setCoordConversion(CoordConversion coord_conv)
-{
-    coord_conv_ = coord_conv;
 }
 
 /**
@@ -170,20 +156,17 @@ void Reconstructor::interpolateMeasurements(std::vector<Measurement>& measuremen
     measurements.resize(ni);
 
     for (size_t i = 0; i < ni; ++i)
-    {
         measurements[ i ] = mms_interp[ i ];
-    }
 
     if (hasViewPoint())
     {
         VPTrackData vp_data;
 
-        std::vector<Eigen::Vector2d> positions(ni);
+        vp_data.positions.resize(ni);
         for (size_t i = 0; i < ni; ++i)
-            positions[ i ] = measurements[ i ].position2D(CoordSystem::WGS84);
-  
-        vp_data.positions = std::move(positions);
-        vp_data.color     = ColorResampledMM;
+            vp_data.positions[ i ] = measurements[ i ].position2D(CoordSystem::WGS84);
+
+        vp_data.color = ColorResampledMM;
 
         vp_data_interp_.push_back(vp_data);
     }
@@ -292,6 +275,40 @@ const dbContent::TargetReport::Chain* Reconstructor::chainOfReference(const Refe
 }
 
 /**
+ * WGS84 coordinate frame of stored measurements (x = lat, y = lon).
+ */
+QRectF Reconstructor::regionOfInterestWGS84() const
+{
+    assert(!measurements_.empty());
+
+    if (measurements_.empty())
+        return QRectF();
+    
+    double lat_min = measurements_[ 0 ].lat;
+    double lon_min = measurements_[ 0 ].lon;
+    double lat_max = measurements_[ 0 ].lat;
+    double lon_max = measurements_[ 0 ].lon;
+    
+    for (size_t i = 1; i < measurements_.size(); ++i)
+    {
+        const auto& mm  = measurements_[ i ];
+
+        if (mm.lat < lat_min) lat_min = mm.lat;
+        if (mm.lon < lon_min) lon_min = mm.lon;
+        if (mm.lat > lat_max) lat_max = mm.lat;
+        if (mm.lon > lon_max) lon_max = mm.lon;
+    }
+
+    //add epsilon
+    lat_min -= 1e-09;
+    lon_min -= 1e-09;
+    lat_max += 1e-09;
+    lon_max += 1e-09;
+
+    return QRectF(lat_min, lon_min, lat_max - lat_min, lon_max - lon_min);
+}
+
+/**
 */
 void Reconstructor::postprocessMeasurements()
 {
@@ -300,54 +317,6 @@ void Reconstructor::postprocessMeasurements()
 
     //sort measurements by timestamp
     std::sort(measurements_.begin(), measurements_.end(), mmSortPred);
-
-    //convert coordinates if needed
-    if (coord_conv_ == CoordConversion::WGS84ToCart)
-    {
-        double lat_min = measurements_[ 0 ].lat;
-        double lon_min = measurements_[ 0 ].lon;
-        double lat_max = measurements_[ 0 ].lat;
-        double lon_max = measurements_[ 0 ].lon;
-        
-        for (size_t i = 1; i < measurements_.size(); ++i)
-        {
-            const auto& mm  = measurements_[ i ];
-
-            if (mm.lat < lat_min) lat_min = mm.lat;
-            if (mm.lon < lon_min) lon_min = mm.lon;
-            if (mm.lat > lat_max) lat_max = mm.lat;
-            if (mm.lon > lon_max) lon_max = mm.lon;
-        }
-
-        double lat0 = (lat_max + lat_min) / 2;
-        double lon0 = (lon_max + lon_min) / 2;
-
-        ref_src_.reset(new OGRSpatialReference);
-        ref_src_->SetWellKnownGeogCS("WGS84");
-
-        ref_dst_.reset(new OGRSpatialReference);
-        ref_dst_->SetStereographic(lat0, lon0, 1.0, 0.0, 0.0);
-
-        trafo_fwd_.reset(OGRCreateCoordinateTransformation(ref_src_.get(), ref_dst_.get()));
-        trafo_bwd_.reset(OGRCreateCoordinateTransformation(ref_dst_.get(), ref_src_.get()));
-
-        for (auto& mm : measurements_)
-        {
-            mm.x = mm.lon;
-            mm.y = mm.lat;
-            trafo_fwd_->Transform(1, &mm.x, &mm.y);
-        }
-
-        x_offs_ = lon0;
-        y_offs_ = lat0;
-        trafo_fwd_->Transform(1, &x_offs_, &y_offs_);
-
-        for (auto& mm : measurements_)
-        {
-            mm.x -= x_offs_;
-            mm.y -= y_offs_;
-        }
-    }
 
     if (hasViewPoint())
     {
@@ -365,51 +334,34 @@ void Reconstructor::postprocessMeasurements()
 */
 void Reconstructor::postprocessReferences(std::vector<Reference>& references)
 {
-    //convert coordinates back if needed
-    if (coord_conv_ == CoordConversion::WGS84ToCart)
-    {
-        assert(trafo_bwd_);
-
-        for (auto& ref : references)
-        {
-            ref.x += x_offs_;
-            ref.y += y_offs_;
-
-            ref.lon = ref.x;
-            ref.lat = ref.y;
-            trafo_bwd_->Transform(1, &ref.lon, &ref.lat);
-        }
-    }
+    //nothing to do at the moment
 }
 
-/**
- * Transforms back a position to the input coordinate system.
- */
-Eigen::Vector2d Reconstructor::transformBack(double x, double y) const
-{
-    if (coord_conv_ == CoordConversion::WGS84ToCart)
-    {
-        assert(trafo_bwd_);
+// /**
+//  * Transforms back a position to the input coordinate system.
+//  */
+// Eigen::Vector2d Reconstructor::transformBack(double x, double y) const
+// {
+//     if (coord_conv_ == CoordConversion::WGS84ToCart)
+//     {
+//         assert(projector_measurements_);
 
-        double lon = x + x_offs_;
-        double lat = y + y_offs_;
+//         Eigen::Vector2d ll;
+//         projector_measurements_.unproject(ll[0], ll[1], x, y);
 
-        trafo_bwd_->Transform(1, &lon, &lat);
+//         return ll;
+//     }
 
-        x = lat;
-        y = lon;
-    }
+//     return Eigen::Vector2d(x, y);
+// }
 
-    return Eigen::Vector2d(x, y);
-}
-
-/**
- * Transforms back a vector to the input coordinate system.
- */
-Eigen::Vector2d Reconstructor::transformBack(double x, double y, double vx, double vy) const
-{
-    return transformBack(x + vx, y + vy) - transformBack(x, y);
-}
+// /**
+//  * Transforms back a vector to the input coordinate system.
+//  */
+// Eigen::Vector2d Reconstructor::transformBack(double x, double y, double vx, double vy) const
+// {
+//     return transformBack(x + vx, y + vy) - transformBack(x, y);
+// }
 
 /**
 */
@@ -420,7 +372,10 @@ boost::optional<std::vector<Reference>> Reconstructor::reconstruct(const std::st
     //loginf << "Reconstructing " << dinfo << " - " << measurements_.size() << " measurement(s)";
 
     if (measurements_.empty())
+    {
+        //logerr << data_info << ": No measurements";
         return {};
+    }
 
     boost::optional<std::vector<Reference>> result;
 
@@ -488,6 +443,13 @@ double Reconstructor::timestep(const Measurement& mm0, const Measurement& mm1)
 double Reconstructor::distance(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys) const
 {
     return mm0.distance(mm1, coord_sys);
+}
+
+/**
+*/
+double Reconstructor::distanceSqr(const Measurement& mm0, const Measurement& mm1, CoordSystem coord_sys) const
+{
+    return mm0.distanceSqr(mm1, coord_sys);
 }
 
 /**

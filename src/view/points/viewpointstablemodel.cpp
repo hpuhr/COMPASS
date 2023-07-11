@@ -481,14 +481,14 @@ void ViewPointsTableModel::exportViewPoints (const std::string& filename)
 
     json data;
 
-    data["content_type"] = "view_points";
-    data["content_version"] = "0.2";
+    data[VP_COLLECTION_CONTENT_TYPE_KEY   ] = VP_COLLECTION_CONTENT_TYPE;
+    data[VP_COLLECTION_CONTENT_VERSION_KEY] = VP_COLLECTION_CONTENT_VERSION;
 
     //data["view_point_context"] = json::object();
     //json& context = data.at("view_point_context");
 
-    data["view_points"] = json::array();
-    json& view_points = data.at("view_points");
+    data[VP_COLLECTION_ARRAY_KEY] = json::array();
+    json& view_points = data.at(VP_COLLECTION_ARRAY_KEY);
 
     unsigned int cnt = 0;
     for (auto& vp_it : view_points_)

@@ -1,6 +1,6 @@
+
 #ifndef CALCULATEREFERENCESTASKDIALOG_H
 #define CALCULATEREFERENCESTASKDIALOG_H
-
 
 #include <QDialog>
 
@@ -31,7 +31,6 @@ public slots:
     void trackerSourcesChangedSlot(std::map<std::string, bool> selection);
     void toggleADSBSourcesSlot();
     void adsbSourcesChangedSlot(std::map<std::string, bool> selection);
-
 
 public:
     CalculateReferencesTaskDialog(CalculateReferencesTask& task);
@@ -105,12 +104,23 @@ protected:
 
     // kalman
     QComboBox*      rec_type_box_ = nullptr;
+    QComboBox*      map_mode_box_ = nullptr;
 
     QDoubleSpinBox* R_std_box_      = nullptr;
     QDoubleSpinBox* R_std_high_box_ = nullptr;
     QDoubleSpinBox* Q_std_box_      = nullptr;
     QDoubleSpinBox* P_std_box_      = nullptr;
     QDoubleSpinBox* P_std_high_box_ = nullptr;
+
+    QCheckBox*      R_std_adsb_use_box_ = nullptr;
+    QDoubleSpinBox* R_std_adsb_pos_box_ = nullptr;
+    QDoubleSpinBox* R_std_adsb_vel_box_ = nullptr;
+    QDoubleSpinBox* R_std_adsb_acc_box_ = nullptr;
+
+    QCheckBox*      R_std_syst_use_box_ = nullptr;
+    QDoubleSpinBox* R_std_syst_pos_box_ = nullptr;
+    QDoubleSpinBox* R_std_syst_vel_box_ = nullptr;
+    QDoubleSpinBox* R_std_syst_acc_box_ = nullptr;
 
     QDoubleSpinBox* min_dt_box_         = nullptr;
     QDoubleSpinBox* max_dt_box_         = nullptr;
@@ -119,11 +129,13 @@ protected:
     QCheckBox*      use_vel_mm_box_ = nullptr;
     QCheckBox*      smooth_box_     = nullptr;
 
-    QCheckBox*      resample_systracks_box_    = nullptr;
-    QDoubleSpinBox* resample_systracks_dt_box_ = nullptr;
+    QCheckBox*      resample_systracks_box_        = nullptr;
+    QDoubleSpinBox* resample_systracks_dt_box_     = nullptr;
+    QDoubleSpinBox* resample_systracks_max_dt_box_ = nullptr;
 
-    QCheckBox*      resample_result_box_    = nullptr;
-    QDoubleSpinBox* resample_result_dt_box_ = nullptr;
+    QCheckBox*      resample_result_box_       = nullptr;
+    QDoubleSpinBox* resample_result_dt_box_    = nullptr;
+    QDoubleSpinBox* resample_result_Q_std_box_ = nullptr;
 
     QCheckBox*      verbose_box_     = nullptr;
     QCheckBox*      python_comp_box_ = nullptr;

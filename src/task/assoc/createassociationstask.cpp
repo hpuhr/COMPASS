@@ -20,6 +20,7 @@
 #include "compass.h"
 #include "createassociationstaskdialog.h"
 #include "createassociationsjob.h"
+#include "datasourcemanager.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
@@ -178,17 +179,36 @@ void CreateAssociationsTask::run()
     connect(status_dialog_.get(), &CreateAssociationsStatusDialog::closeSignal, this,
             &CreateAssociationsTask::closeStatusDialogSlot);
     status_dialog_->markStartTime();
-    status_dialog_->setStatus("Loading Data");
+
+    status_dialog_->setStatus("Deleting Previously Calculated RefTraj");
     status_dialog_->show();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
-    // TODO HACK
-    if (dbcontent_man.dbContent("RefTraj").existsInDB())
-        dbcontent_man.dbContent("RefTraj").deleteDBContentData();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    for (auto& ds_it : ds_man.dbDataSources())
+    {
+        if (ds_it->isCalculatedReferenceSource())
+        {
+            status_dialog_->setStatus("Deleting From Data Source " + ds_it->name());
+
+            dbcontent_man.dbContent("RefTraj").deleteDBContentData(ds_it->sac(), ds_it->sic());
+
+            while (dbcontent_man.dbContent("RefTraj").isDeleting())
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(10);
+            }
+
+            ds_it->clearNumInserted("RefTraj");
+        }
+    }
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
+
+    status_dialog_->setStatus("Loading Data");
 
     connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
             this, &CreateAssociationsTask::loadedDataSlot);

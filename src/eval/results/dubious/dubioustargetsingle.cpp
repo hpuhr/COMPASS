@@ -429,16 +429,13 @@ EvaluationRequirement::DubiousTarget* SingleDubiousTarget::req ()
 
 void SingleDubiousTarget::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    addAnnotationFeatures(viewable, overview);
 
-    json& error_line_coordinates =
-            viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
-    json& error_point_coordinates =
-            viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");
-    json& ok_line_coordinates =
-            viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
-    json& ok_point_coordinates =
-            viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
+    //addAnnotationFeatures(viewable, overview); // TODO rework
+
+    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
+    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
+    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
 
 
 }

@@ -1846,6 +1846,38 @@
                     "unit": ""
                 }
             },
+            "JSONDataMapping213": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT021",
+                    "db_content_variable_name": "Mode S MB Data",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "250.Mode S MB Data",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping214": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT021",
+                    "db_content_variable_name": "ACAS MB DATA",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "260.MB DATA",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
             "JSONDataMapping22": {
                 "parameters": {
                     "active": true,

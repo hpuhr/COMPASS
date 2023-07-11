@@ -40,7 +40,6 @@ public:
                     int missed_uis, 
                     TimePeriodCollection ref_periods);
 
-    //virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
@@ -80,7 +79,7 @@ protected:
     void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
+    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
 
     int sum_uis_    {0};
     int missed_uis_ {0};

@@ -57,6 +57,21 @@ unsigned int Chain::size () const
     return timestamp_index_lookup_.size();
 }
 
+unsigned int Chain::ignoredSize() const
+{
+    if (ignored_positions_.has_value())
+    {
+        unsigned int num_ignored = 0;
+
+        for (bool ignored : ignored_positions_.value())
+            if (ignored)
+                ++num_ignored;
+
+        return num_ignored;
+    }
+    return 0;
+}
+
 ptime Chain::timeBegin() const
 {
     if (timestamp_index_lookup_.size())
