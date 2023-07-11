@@ -28,27 +28,6 @@
 namespace EvaluationRequirement
 {
 
-class ExtraDataDetail
-{
-public:
-    ExtraDataDetail(
-            boost::posix_time::ptime timestamp, dbContent::TargetPosition pos_current,
-            bool inside, bool extra, bool ref_exists, const std::string& comment)
-        : timestamp_(timestamp), pos_current_(pos_current), inside_(inside), extra_(extra), ref_exists_(ref_exists),
-          comment_(comment)
-    {
-    }
-
-    boost::posix_time::ptime timestamp_;
-    dbContent::TargetPosition pos_current_;
-    bool inside_ {false};
-    bool extra_ {false};
-
-    bool ref_exists_ {false};
-
-    std::string comment_;
-};
-
 class ExtraData : public ProbabilityBase
 {
 public:

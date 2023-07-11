@@ -26,37 +26,6 @@
 namespace EvaluationRequirement
 {
 
-class DetectionDetail
-{
-public:
-    DetectionDetail(
-            boost::posix_time::ptime timestamp, QVariant d_tod,
-            bool miss_occurred, dbContent::TargetPosition pos_current,
-            bool ref_exists, int missed_uis, const std::string& comment)
-        : timestamp_(timestamp), d_tod_(d_tod), miss_occurred_(miss_occurred), pos_current_(pos_current),
-          ref_exists_(ref_exists), missed_uis_(missed_uis),
-          comment_(comment)
-    {
-    }
-
-    boost::posix_time::ptime timestamp_;
-    QVariant d_tod_;
-    bool miss_occurred_ {false};
-
-    dbContent::TargetPosition pos_current_;
-
-    bool ref_exists_ {false};
-
-    int missed_uis_ {0};
-    int max_gap_uis_ {0};
-    int no_ref_uis_ {0};
-
-    std::string comment_;
-
-    bool has_last_position_ {false};
-    dbContent::TargetPosition pos_last_;
-};
-
 class Detection : public ProbabilityBase
 {
 public:

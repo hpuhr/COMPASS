@@ -31,42 +31,6 @@
 namespace EvaluationRequirement
 {
 
-class DubiousTrackUpdateDetail
-{
-public:
-    DubiousTrackUpdateDetail(boost::posix_time::ptime timestamp, dbContent::TargetPosition pos)
-        : timestamp_(timestamp), pos_(pos)
-    {
-    }
-
-    boost::posix_time::ptime timestamp_;
-    dbContent::TargetPosition pos_;
-    std::map<std::string, std::string> dubious_comments_;
-
-    std::string dubiousReasonsString()
-    {
-        if (!dubious_comments_.size())
-            return "OK";
-
-        std::string str;
-
-        for (auto& reas_it : dubious_comments_)
-        {
-            if (str.size())
-                str += ", ";
-
-            str += reas_it.first;
-            if (reas_it.second.size())
-                str += "("+reas_it.second+")";
-        }
-
-        if (!str.size())
-            return "OK";
-        else
-            return str;
-    }
-};
-
 class DubiousTrack : public ProbabilityBase
 {
 public:
