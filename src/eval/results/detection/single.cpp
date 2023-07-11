@@ -304,9 +304,6 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
         if (detail.numPositions() >= 2)
             addAnnotationLine(*viewable_ptr, detail.position(0), detail.position(1), TypeHighlight);
 
-//        if (miss_occurred.value())
-//            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
-
         return viewable_ptr;
     }
     else
