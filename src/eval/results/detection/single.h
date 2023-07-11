@@ -40,7 +40,6 @@ public:
                     int missed_uis, 
                     TimePeriodCollection ref_periods);
 
-    //virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;

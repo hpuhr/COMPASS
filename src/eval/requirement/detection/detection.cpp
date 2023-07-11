@@ -345,7 +345,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         {
             if (!skip_no_data_details)
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "Outside of reference time periods");
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                          "Outside of reference time periods");
             }
 
             // TODO undetected previous miss possible
@@ -365,7 +366,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         {
             if (!skip_no_data_details)
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "At exact beginning of reference time period");
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                          "At exact beginning of reference time period");
             }
 
             continue;
@@ -380,7 +382,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             if (!skip_no_data_details)
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "Outside sector");
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                          "Outside sector");
             }
 
             was_outside = true;
@@ -397,11 +400,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             if (was_outside)
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "First target report after outside sector");
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                          "First target report after outside sector");
             }
             else // first in period
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "First target report in period " + to_string(period_index));
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                          "First target report in period " + to_string(period_index));
 
                 // check if begin time in period is miss
 
@@ -443,6 +448,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " ts " << Time::toString(timestamp) << " d_tod " << String::timeStringFromDouble(t_diff);
 
+        auto last_pos = target_data.tstChain().pos(last_ts);
+
         if (isMiss(t_diff))
         {
             sum_missed_uis += getNumMisses(t_diff);
@@ -458,9 +465,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                     +String::doubleToStringPrecision(missThreshold(), 2)
                     +"), last was "+Time::toString(last_ts);
 
-            auto last_pos = target_data.tstChain().pos(last_ts);
-
-            addDetail(timestamp, pos_current, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
+            addDetail(timestamp, pos_current, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                      comment);
         }
         else
         {
@@ -469,7 +475,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             std::string comment = "OK (DToD <= " + String::doubleToStringPrecision(missThreshold(), 2) + ")";
 
-            addDetail(timestamp, pos_current, {}, t_diff, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
+            addDetail(timestamp, pos_current, last_pos, t_diff, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                      comment);
         }
 
         period_last_tst_times[period_index] = timestamp;
