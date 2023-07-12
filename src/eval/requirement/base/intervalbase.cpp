@@ -536,7 +536,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
     }
 
     //add remark that reference data was missing
-    if (event.had_ref_data)
+    if (!event.had_ref_data)
         dinfo.evt_comment += " (no ref info)";
 
     return dinfo;
