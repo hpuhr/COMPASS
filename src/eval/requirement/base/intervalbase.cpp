@@ -166,7 +166,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
         addDetail(detail_info.evt_time, 
                   detail_info.evt_position, 
                   detail_info.evt_position_ref, 
-                  detail_info.evt_dt, 
+                  detail_info.evt_has_dt ? detail_info.evt_dt : QVariant(), 
                   detail_info.evt_has_misses, 
                   detail_info.evt_has_ref,
                   misses_total, 
@@ -390,6 +390,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
     IntervalBase::DetailInfo dinfo;
     dinfo.evt_has_misses = has_miss;
     dinfo.evt_dt         = event.dtSeconds();
+    dinfo.evt_has_dt     = false;
 
     switch (event.type)
     {
@@ -435,12 +436,14 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             assert(target_data.refChain().posOpt(event.interval_time0).has_value());
 
             dinfo.evt_time         = event.data_id.timestamp();
-            dinfo.evt_comment      = has_miss ? "Miss detected at start of current " + period + " " + miss + ", between " + evt_interval : "OK " + hit;
+            dinfo.evt_comment      = has_miss ? "Miss detected at start of current " + period + " " + miss + ", between " + evt_interval : 
+                                                "Begin of current " + period + " OK " + hit;
             dinfo.evt_position     = target_data.tstChain().pos(event.data_id);
             dinfo.evt_position_ref = target_data.refChain().pos(event.interval_time0);
             dinfo.evt_has_ref      = true;
+            dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = true;
-
+            
             break;
         }
         case Event::TypeValid:
@@ -453,6 +456,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_position     = target_data.tstChain().pos(event.data_id);
             dinfo.evt_position_ref = target_data.tstChain().pos(event.interval_time0);
             dinfo.evt_has_ref      = true;
+            dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = true;
 
             break;
@@ -468,6 +472,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_position     = target_data.tstChain().pos(event.data_id);
             dinfo.evt_position_ref = target_data.refChain().pos(event.interval_time1);
             dinfo.evt_has_ref      = true;
+            dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = true;
 
             break;
@@ -530,6 +535,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_position     = target_data.refChain().pos(event.interval_time1);
             dinfo.evt_position_ref = target_data.refChain().pos(event.interval_time0);
             dinfo.evt_has_ref      = true;
+            dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = has_miss;
 
             break;
