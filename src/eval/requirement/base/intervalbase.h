@@ -152,10 +152,12 @@ protected:
 private:
     std::vector<Event> periodEvents(const TimePeriod& period,
                                     const EvaluationTargetData& target_data,
-                                    const SectorLayer& sector_layer) const;
+                                    const SectorLayer& sector_layer,
+                                    bool skip_no_data_details) const;
     std::vector<Event> periodEvents(const TimePeriodCollection& periods,
                                     const EvaluationTargetData& target_data,
-                                    const SectorLayer& sector_layer) const;
+                                    const SectorLayer& sector_layer,
+                                    bool skip_no_data_details) const;
 
     float                  update_interval_s_;
     boost::optional<float> min_gap_length_s_;

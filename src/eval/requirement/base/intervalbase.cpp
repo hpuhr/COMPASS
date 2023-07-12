@@ -122,7 +122,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
     }
 
     //create events from periods
-    auto events = periodEvents(periods, target_data, sector_layer);
+    auto events = periodEvents(periods, target_data, sector_layer, skip_no_data_details);
 
     //process events and create details
     Details details;
@@ -188,7 +188,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
 */
 std::vector<Event> IntervalBase::periodEvents(const TimePeriodCollection& periods,
                                               const EvaluationTargetData& target_data,
-                                              const SectorLayer& sector_layer) const
+                                              const SectorLayer& sector_layer,
+                                              bool skip_no_data_details) const
 {
     std::vector<Event> events;
 
@@ -199,7 +200,7 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriodCollection& period
         const auto& period = periods.period(i);
 
         //create events for period
-        auto events_period = periodEvents(period, target_data, sector_layer);
+        auto events_period = periodEvents(period, target_data, sector_layer, skip_no_data_details);
 
         //period is inside period?
         if (period.type() == TimePeriod::Type::InsideSector)
@@ -223,7 +224,8 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriodCollection& period
 */
 std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
                                               const EvaluationTargetData& target_data,
-                                              const SectorLayer& sector_layer) const
+                                              const SectorLayer& sector_layer,
+                                              bool skip_no_data_details) const
 {
     std::vector<Event> events;
 
@@ -261,16 +263,20 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     //outside sector period => add all updates as OutsideSector
     if (period.type() == TimePeriod::Type::OutsideSector)
     {
-        for (const auto& update : period.getUpdates())
+        if (!skip_no_data_details)
         {
-            logEvent(Event::TypeNoReference, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false, false);
+            for (const auto& update : period.getUpdates())
+            {
+                logEvent(Event::TypeNoReference, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false, false);
+            }
         }
 
         return events;
     }
 
     //log period entered
-    logEvent(Event::TypeEnterPeriod, nullptr, period.begin(), period.end(), "", false, false);
+    if (!skip_no_data_details)
+        logEvent(Event::TypeEnterPeriod, nullptr, period.begin(), period.end(), "", false, false);
 
     //inside sector period
     const auto& updates = period.getUpdates();
@@ -278,7 +284,8 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     if (updates.empty())
     {
         //no updates in period => add single event for this case
-        logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", false, true);
+        if (!skip_no_data_details)
+            logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", false, false);
     }
     else
     {
@@ -333,12 +340,14 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
         //no valid updates in period => add single event for this case
         if (!valid_last)
         {
-            logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", false, true);
+            if (!skip_no_data_details)
+                logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", false, false);
         }
     }
 
     //log period left
-    logEvent(Event::TypeLeavePeriod, nullptr, period.begin(), period.end(), "", false, false);
+    if (!skip_no_data_details)
+        logEvent(Event::TypeLeavePeriod, nullptr, period.begin(), period.end(), "", false, false);
 
     return events;
 }
