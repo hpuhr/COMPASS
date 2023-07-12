@@ -1,26 +1,21 @@
 {
     "parameters": {
         "active_sources_ref": {
-            "RefTraj": {
-                "0": false
-            }
         },
         "active_sources_tst": {
-            "CAT062": {
-                "12990": false
-            }
         },
-        "current_standard": "",
+        "current_standard": "EUROCAE ED-142",
         "dbcontent_name_ref": "RefTraj",
-        "dbcontent_name_tst": "CAT062",
+        "dbcontent_name_tst": "CAT020",
+        "generate_details": true,
         "line_id_ref": 0,
         "line_id_tst": 0,
-        "load_timestamp_begin": "2023-04-22 11:00:00.000",
-        "load_timestamp_end": "2023-04-22 12:59:59.000",
+        "load_timestamp_begin": "1970-01-01 10:10:29.500",
+        "load_timestamp_end": "2022-10-04 10:31:58.804",
         "max_nacp": 5,
         "max_nic": 5,
         "max_nucp": 4,
-        "max_ref_time_diff": 4.0,
+        "max_ref_time_diff": 6.0,
         "max_sil_v1": 2,
         "max_sil_v2": 4,
         "min_height_filter_layer": "",
@@ -29,13 +24,14 @@
         "min_nucp": 4,
         "min_sil_v1": 2,
         "min_sil_v2": 4,
+        "ref_traj_minimum_accuracy": 50.0,
         "report_abstract": "",
-        "report_author": "sk",
+        "report_author": "",
         "report_include_target_details": false,
         "report_include_target_tr_details": false,
         "report_num_max_table_col_width": 18,
-        "report_num_max_table_rows": 1000,
-        "report_open_created_pdf": false,
+        "report_num_max_table_rows": 500,
+        "report_open_created_pdf": true,
         "report_run_pdflatex": true,
         "report_show_adsb_info": false,
         "report_skip_no_data_details": true,
@@ -43,21 +39,23 @@
         "report_split_results_by_aconly_ms": false,
         "report_split_results_by_mops": false,
         "report_wait_on_map_loading": true,
-        "result_detail_zoom": 0.02,
-        "show_ok_joined_target_reports": false,
+        "result_detail_zoom": 0.0020000000949949026,
+        "show_ok_joined_target_reports": true,
         "use_adsb_filter": false,
-        "use_grp_in_sector": {},
-        "use_load_filter": false,
-        "use_max_nacp": true,
-        "use_max_nic": true,
+        "use_grp_in_sector": {
+        },
+        "use_load_filter": true,
+        "use_max_nacp": false,
+        "use_max_nic": false,
         "use_max_nucp": true,
-        "use_max_sil_v1": true,
-        "use_max_sil_v2": true,
-        "use_min_nacp": true,
-        "use_min_nic": true,
+        "use_max_sil_v1": false,
+        "use_max_sil_v2": false,
+        "use_min_nacp": false,
+        "use_min_nic": false,
         "use_min_nucp": true,
-        "use_min_sil_v1": true,
-        "use_min_sil_v2": true,
+        "use_min_sil_v1": false,
+        "use_min_sil_v2": false,
+        "use_ref_traj_accuracy_filter_": true,
         "use_requirement": {},
         "use_time_filter": false,
         "use_timestamp_filter": false,
@@ -770,6 +768,87 @@
                     }
                 }
             },
+            "EvaluationStandardDubious Targets0": {
+                "parameters": {
+                    "name": "Dubious Targets"
+                },
+                "sub_configs": {
+                    "EvaluationRequirementGroup": {
+                        "EvaluationRequirementGroupOptional0": {
+                            "parameters": {
+                                "name": "Optional"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDubiousTargetConfig": {
+                                    "EvaluationRequirementDubiousTargetConfigDubious0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "dubious_prob": 0.05000000074505806,
+                                            "mark_primary_only": false,
+                                            "max_acceleration": 29.43000030517578,
+                                            "max_groundspeed_kts": 1333.0,
+                                            "max_rocd": 1000.0,
+                                            "max_turnrate": 30.0,
+                                            "maximum_comparison_time": 30.0,
+                                            "min_duration": 30.0,
+                                            "min_updates": 10,
+                                            "minimum_comparison_time": 1.0,
+                                            "name": "Dubious",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 1,
+                                            "short_name": "DTGT",
+                                            "use_max_acceleration": true,
+                                            "use_max_groundspeed": true,
+                                            "use_max_turnrate": true,
+                                            "use_min_duration": true,
+                                            "use_min_updates": true,
+                                            "use_rocd": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionAlongConfig": {
+                                    "EvaluationRequirementPositionAlongConfigPosition Along0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_abs_value": 400.0,
+                                            "name": "Position Along",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "PALNG"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigPosition Offset0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "failed_values_of_interest": true,
+                                            "name": "Position Offset",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "POFF",
+                                            "threshold_value": 500.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionLatencyConfig": {
+                                    "EvaluationRequirementPositionLatencyConfigPosition Latency0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_abs_value": 0.5,
+                                            "name": "Position Latency",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "PLTNY"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "EvaluationStandardEUROCAE ED-1160": {
                 "parameters": {
                     "name": "EUROCAE ED-116"
@@ -1210,43 +1289,61 @@
                                         }
                                     }
                                 },
-                                "EvaluationRequirementIdentificationCorrectConfig": {
-                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Code Detection ACAD0": {
+                                "EvaluationRequirementIdentificationCorrectPeriodConfig": {
+                                    "EvaluationRequirementIdentificationCorrectPeriodConfigProbability of Code Detection ACAD 20": {
                                         "parameters": {
                                             "comment": "Ref 3.3.6",
+                                            "hold_for_any_target": false,
+                                            "identification_type": 0,
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
                                             "name": "Probability of Code Detection ACAD",
                                             "prob": 0.9900000095367432,
                                             "prob_check_type": 3,
-                                            "require_correctness_of_all": false,
                                             "short_name": "PCD ACAD",
-                                            "use_mode_a": false,
-                                            "use_ms_ta": true,
-                                            "use_ms_ti": false
+                                            "update_interval": 8.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
                                         }
                                     },
-                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Code Detection M3A0": {
+                                    "EvaluationRequirementIdentificationCorrectPeriodConfigProbability of Code Detection M3A 20": {
                                         "parameters": {
                                             "comment": "Ref 3.3.6",
+                                            "hold_for_any_target": false,
+                                            "identification_type": 2,
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
                                             "name": "Probability of Code Detection M3A",
                                             "prob": 0.9800000190734863,
                                             "prob_check_type": 3,
-                                            "require_correctness_of_all": false,
                                             "short_name": "PCD M3A",
-                                            "use_mode_a": true,
-                                            "use_ms_ta": false,
-                                            "use_ms_ti": false
+                                            "update_interval": 8.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
                                         }
                                     }
                                 },
-                                "EvaluationRequirementModeCCorrectConfig": {
-                                    "EvaluationRequirementModeCCorrectConfigProbability of Code Detection MC0": {
+                                "EvaluationRequirementModeCCorrectPeriodConfig": {
+                                    "EvaluationRequirementModeCCorrectPeriodConfigProbability of Code Detection MC 20": {
                                         "parameters": {
-                                            "comment": "",
+                                            "comment": "Ref 3.3.6",
+                                            "hold_for_any_target": false,
                                             "max_distance_ft": 300.0,
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
                                             "name": "Probability of Code Detection MC",
                                             "prob": 0.9599999785423279,
                                             "prob_check_type": 3,
-                                            "short_name": "PCD MC"
+                                            "short_name": "PCD MC",
+                                            "update_interval": 8.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
                                         }
                                     }
                                 },
@@ -1889,6 +1986,26 @@
                                         }
                                     }
                                 },
+                                "EvaluationRequirementIdentificationCorrectPeriodConfig": {
+                                    "EvaluationRequirementIdentificationCorrectPeriodConfigIdentification Correct Periods0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "hold_for_any_target": false,
+                                            "identification_type": 0,
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Identification Correct Periods",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "PCID P",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                },
                                 "EvaluationRequirementIdentificationFalseConfig": {
                                     "EvaluationRequirementIdentificationFalseConfigIdentification False0": {
                                         "parameters": {
@@ -1927,6 +2044,38 @@
                                             "prob": 0.9800000190734863,
                                             "prob_check_type": 3,
                                             "short_name": "PMA"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementModeCCorrectConfig": {
+                                    "EvaluationRequirementModeCCorrectConfigMode C Correct0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_distance_ft": 300.0,
+                                            "name": "Mode C Correct",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "MCC"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementModeCCorrectPeriodConfig": {
+                                    "EvaluationRequirementModeCCorrectPeriodConfigMode C Correct Periods0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "hold_for_any_target": false,
+                                            "max_distance_ft": 300.0,
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Mode C Correct Periods",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "MCC P",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
                                         }
                                     }
                                 },
@@ -2017,6 +2166,16 @@
                                             "short_name": "PFP",
                                             "threshold_value": 500.0,
                                             "threshold_value_check_type": 3
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceRMSConfig": {
+                                    "EvaluationRequirementPositionDistanceRMSConfigPosition Correct RMS0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "Position Correct RMS",
+                                            "short_name": "PCP RMS",
+                                            "threshold_value": 300.0
                                         }
                                     }
                                 },
