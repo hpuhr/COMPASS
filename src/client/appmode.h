@@ -23,4 +23,11 @@ inline std::string toString(AppMode app_mode)
         throw std::runtime_error("Unkown AppMode "+std::to_string((unsigned int)app_mode));
 }
 
+enum class AppState
+{
+    Starting = 0,
+    Running,
+    Shutdown
+};
+
 #endif // APPMODE_H

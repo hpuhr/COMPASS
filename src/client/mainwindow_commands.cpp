@@ -1271,10 +1271,23 @@ void RTCommandExportEvaluationReport::assignVariables_impl(const VariablesMap& v
 
 // close db
 
+void RTCommandCloseDB::collectOptions_impl(OptionsDescription& options,
+                                           PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("strict", "fail if no database was opened");
+}
+
+void RTCommandCloseDB::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_CHECK_VAR(variables, "strict", strict_)
+}
+
 bool RTCommandCloseDB::run_impl()
 {
+    //lets return true if there's nothing to be done
     if (!COMPASS::instance().dbOpened())
-        return false;
+        return !strict_;
 
     if (COMPASS::instance().appMode() != AppMode::Offline)
         return false;

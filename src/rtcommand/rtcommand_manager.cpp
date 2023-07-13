@@ -22,6 +22,8 @@ bool RTCommandManager::open_port_ {false};
 
 RTCommandManager::CommandId RTCommandManager::command_count_ = 0;
 
+const std::string RTCommandManager::PingName = "ping";
+
 /**
  */
 RTCommandManager::RTCommandManager()
@@ -215,6 +217,30 @@ rtcommand::IssueInfo RTCommandManager::addCommand(const std::string& cmd_str, So
 {
     if (id)
         *id = -1;
+
+    //handle pings 
+    if (cmd_str == PingName)
+    {
+        rtcommand::IssueInfo info;
+        info.issued        = false;
+        info.error.code    = rtcommand::CmdErrorCode::NoError;
+        info.error.message = "";
+        info.command       = "ping";
+
+        return info;
+    }
+
+    //commands from the server are only added when app is properly running
+    if (source == Source::Server && COMPASS::instance().appState() != AppState::Running)
+    {
+        rtcommand::IssueInfo info;
+        info.issued        = false;
+        info.error.code    = rtcommand::CmdErrorCode::Issue_NotReady;
+        info.error.message = rtcommand::RTCommandResponse::errCode2String(info.error.code);
+        info.command       = ""; //can be left empty?
+
+        return info;
+    }
 
     //add command string to backlog
     if (!cmd_str.empty())

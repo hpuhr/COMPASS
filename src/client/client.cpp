@@ -367,13 +367,14 @@ void Client::run ()
         rt_man.addCommand(cmd);
     }
 
-
     if (export_eval_report_filename_.size())
         rt_man.addCommand("export_eval_report "+export_eval_report_filename_);
 
     if (quit_)
         rt_man.addCommand("quit");
 
+    //finally => set compass as running
+    COMPASS::instance().setAppState(AppState::Running);
 }
 
 Client::~Client()
@@ -548,6 +549,7 @@ void Client::checkAndSetupConfig()
 
 void Client::checkNeededActions()
 {
+    cout << "COMPASSClient: SAVE CONFIG: " << (no_config_save_ ? "NO" : "YES") << std::endl;
     cout << "COMPASSClient: checking if compass home directory exists ... ";
 
     bool home_subdir_exists = Files::directoryExists(HOME_SUBDIRECTORY);

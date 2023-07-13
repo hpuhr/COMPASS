@@ -92,6 +92,8 @@ protected:
 private:
     friend class rtcommand::RTCommandShell;
 
+    static const std::string PingName;
+
     static const size_t BacklogSize = 100;
 
     static CommandId command_count_;

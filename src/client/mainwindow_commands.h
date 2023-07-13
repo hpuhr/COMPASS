@@ -274,11 +274,12 @@ protected:
 // close_db
 struct RTCommandCloseDB : public rtcommand::RTCommand
 {
+    bool strict_ = false;
 protected:
     virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(close_db, "closes a currently opened database")
-    DECLARE_RTCOMMAND_NOOPTIONS
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 // quit
