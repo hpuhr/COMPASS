@@ -1416,43 +1416,61 @@
                                         }
                                     }
                                 },
-                                "EvaluationRequirementIdentificationCorrectConfig": {
-                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Code Detection ACAD0": {
+                                "EvaluationRequirementIdentificationCorrectPeriodConfig": {
+                                    "EvaluationRequirementIdentificationCorrectPeriodConfigProbability of Code Detection ACAD 20": {
                                         "parameters": {
                                             "comment": "Ref 3.3.6",
+                                            "hold_for_any_target": false,
+                                            "identification_type": 0,
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
                                             "name": "Probability of Code Detection ACAD",
                                             "prob": 0.9900000095367432,
                                             "prob_check_type": 3,
-                                            "require_correctness_of_all": false,
                                             "short_name": "PCD ACAD",
-                                            "use_mode_a": false,
-                                            "use_ms_ta": true,
-                                            "use_ms_ti": false
+                                            "update_interval": 5.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
                                         }
                                     },
-                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Code Detection M3A0": {
+                                    "EvaluationRequirementIdentificationCorrectPeriodConfigProbability of Code Detection M3A 20": {
                                         "parameters": {
                                             "comment": "Ref 3.3.6",
+                                            "hold_for_any_target": false,
+                                            "identification_type": 2,
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
                                             "name": "Probability of Code Detection M3A",
                                             "prob": 0.9800000190734863,
                                             "prob_check_type": 3,
-                                            "require_correctness_of_all": false,
                                             "short_name": "PCD M3A",
-                                            "use_mode_a": true,
-                                            "use_ms_ta": false,
-                                            "use_ms_ti": false
+                                            "update_interval": 5.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
                                         }
                                     }
                                 },
-                                "EvaluationRequirementModeCCorrectConfig": {
-                                    "EvaluationRequirementModeCCorrectConfigProbability of Code Detection MC0": {
+                                "EvaluationRequirementModeCCorrectPeriodConfig": {
+                                    "EvaluationRequirementModeCCorrectPeriodConfigProbability of Code Detection MC 20": {
                                         "parameters": {
-                                            "comment": "",
+                                            "comment": "Ref 3.3.6",
+                                            "hold_for_any_target": false,
                                             "max_distance_ft": 300.0,
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
                                             "name": "Probability of Code Detection MC",
                                             "prob": 0.9599999785423279,
                                             "prob_check_type": 3,
-                                            "short_name": "PCD MC"
+                                            "short_name": "PCD MC",
+                                            "update_interval": 5.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
                                         }
                                     }
                                 },
