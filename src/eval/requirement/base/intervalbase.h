@@ -86,6 +86,7 @@ public:
         boost::optional<dbContent::TargetPosition> evt_position_ref;  // event reference position (e.g. start of interval)
         bool                                       evt_has_misses;    // event has misses
         bool                                       evt_has_ref;       // event has reference
+        bool                                       evt_has_dt;        // event has a valid tod diff
 
         bool generate_detail = false; // generate a detail for this event
     };
