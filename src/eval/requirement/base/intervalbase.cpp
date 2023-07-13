@@ -122,7 +122,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
     }
 
     //create events from periods
-    auto events = periodEvents(periods, target_data, sector_layer);
+    auto events = periodEvents(periods, target_data, sector_layer, skip_no_data_details);
 
     //process events and create details
     Details details;
@@ -166,7 +166,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
         addDetail(detail_info.evt_time, 
                   detail_info.evt_position, 
                   detail_info.evt_position_ref, 
-                  detail_info.evt_dt, 
+                  detail_info.evt_has_dt ? detail_info.evt_dt : QVariant(), 
                   detail_info.evt_has_misses, 
                   detail_info.evt_has_ref,
                   misses_total, 
@@ -188,7 +188,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
 */
 std::vector<Event> IntervalBase::periodEvents(const TimePeriodCollection& periods,
                                               const EvaluationTargetData& target_data,
-                                              const SectorLayer& sector_layer) const
+                                              const SectorLayer& sector_layer,
+                                              bool skip_no_data_details) const
 {
     std::vector<Event> events;
 
@@ -199,7 +200,7 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriodCollection& period
         const auto& period = periods.period(i);
 
         //create events for period
-        auto events_period = periodEvents(period, target_data, sector_layer);
+        auto events_period = periodEvents(period, target_data, sector_layer, skip_no_data_details);
 
         //period is inside period?
         if (period.type() == TimePeriod::Type::InsideSector)
@@ -223,11 +224,13 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriodCollection& period
 */
 std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
                                               const EvaluationTargetData& target_data,
-                                              const SectorLayer& sector_layer) const
+                                              const SectorLayer& sector_layer,
+                                              bool skip_no_data_details) const
 {
     std::vector<Event> events;
 
-    auto logEvent = [ & ] (Event::Type type, 
+    auto logEvent = [ & ] (std::vector<Event>& events,
+                           Event::Type type, 
                            const TimePeriodUpdate* update,
                            const boost::posix_time::ptime& time0,
                            const boost::posix_time::ptime& time1,
@@ -261,16 +264,20 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     //outside sector period => add all updates as OutsideSector
     if (period.type() == TimePeriod::Type::OutsideSector)
     {
-        for (const auto& update : period.getUpdates())
+        if (!skip_no_data_details)
         {
-            logEvent(Event::TypeNoReference, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false, false);
+            for (const auto& update : period.getUpdates())
+            {
+                logEvent(events, Event::TypeNoReference, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", true, false);
+            }
         }
 
         return events;
     }
 
     //log period entered
-    logEvent(Event::TypeEnterPeriod, nullptr, period.begin(), period.end(), "", false, false);
+    if (!skip_no_data_details)
+        logEvent(events, Event::TypeEnterPeriod, nullptr, period.begin(), period.end(), "", true, false);
 
     //inside sector period
     const auto& updates = period.getUpdates();
@@ -278,7 +285,8 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     if (updates.empty())
     {
         //no updates in period => add single event for this case
-        logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", false, true);
+        if (!skip_no_data_details)
+            logEvent(events, Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", true, false);
     }
     else
     {
@@ -287,8 +295,9 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
 
         size_t n = updates.size();
 
-        const TimePeriodUpdate* valid_last = nullptr;
-        bool ref_data_missing = false;
+        const TimePeriodUpdate* valid_last     = nullptr;
+        bool                    had_ref_data   = true;
+        int                     valid_last_idx = -1;
 
         for (size_t i = 0; i < n; ++i)
         {
@@ -300,45 +309,54 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
             //invalid update => log and skip
             if (validity.value == Validity::Value::Invalid)
             {
-                logEvent(Event::TypeInvalid, &update, update.data_id.timestamp(), update.data_id.timestamp(), validity.comment, false, false);
+                logEvent(events, Event::TypeInvalid, &update, update.data_id.timestamp(), update.data_id.timestamp(), validity.comment, true, false);
                 continue;
             }
 
-            //first valid update? => log
-            if (!valid_last)
-                logEvent(Event::TypeFirstValidUpdateInPeriod, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", false, false);
-
             //was reference data missing? => yields a valid update (in dubio pro reo)
-            ref_data_missing = validity.value == Validity::Value::RefDataMissing;
-            
+            had_ref_data = validity.value != Validity::Value::RefDataMissing;
+
+            //first valid update? => log
+            if (!valid_last && !skip_no_data_details)
+                logEvent(events, Event::TypeFirstValidUpdateInPeriod, &update, update.data_id.timestamp(), update.data_id.timestamp(), "", had_ref_data, false);
+
             //valid update => check for misses
-            logEvent(valid_last ? Event::TypeValid : Event::Type::TypeValidFirst,
+            logEvent(events, 
+                     valid_last ? Event::TypeValid : Event::Type::TypeValidFirst,
                      &update,
                      valid_last ? valid_last->data_id.timestamp() : period.begin(),      // time0 is either the last valid update or period begin
                      update.data_id.timestamp(),                                         // time1 always update time
                      "",
-                     !ref_data_missing,
+                     had_ref_data,
                      true);                                                              // check misses in both cases
 
-            valid_last = &updates[ i ];
+            valid_last     = &updates[ i ];
+            valid_last_idx = (int)events.size();
         }
 
         //add event for last valid update
         if (valid_last)
         {
-            logEvent(Event::TypeLastValidUpdateInPeriod, valid_last, valid_last->data_id.timestamp(), valid_last->data_id.timestamp(), "", false, false);
-            logEvent(Event::TypeValidLast, valid_last, valid_last->data_id.timestamp(), period.end(), "", !ref_data_missing, true);
+            std::vector<Event> last_events;
+
+            if (!skip_no_data_details)
+                logEvent(last_events, Event::TypeLastValidUpdateInPeriod, valid_last, valid_last->data_id.timestamp(), valid_last->data_id.timestamp(), "", had_ref_data, false);
+            logEvent(last_events, Event::TypeValidLast, valid_last, valid_last->data_id.timestamp(), period.end(), "", had_ref_data, true);
+
+            events.insert(events.begin() + valid_last_idx, last_events.begin(), last_events.end());
         }
 
         //no valid updates in period => add single event for this case
         if (!valid_last)
         {
-            logEvent(Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", false, true);
+            if (!skip_no_data_details)
+                logEvent(events, Event::TypeEmptyPeriod, nullptr, period.begin(), period.end(), "", true, false);
         }
     }
 
     //log period left
-    logEvent(Event::TypeLeavePeriod, nullptr, period.begin(), period.end(), "", false, false);
+    if (!skip_no_data_details)
+        logEvent(events, Event::TypeLeavePeriod, nullptr, period.begin(), period.end(), "", true, false);
 
     return events;
 }
@@ -380,6 +398,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
     IntervalBase::DetailInfo dinfo;
     dinfo.evt_has_misses = has_miss;
     dinfo.evt_dt         = event.dtSeconds();
+    dinfo.evt_has_dt     = false;
 
     switch (event.type)
     {
@@ -425,12 +444,14 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             assert(target_data.refChain().posOpt(event.interval_time0).has_value());
 
             dinfo.evt_time         = event.data_id.timestamp();
-            dinfo.evt_comment      = has_miss ? "Miss detected at start of current " + period + " " + miss + ", between " + evt_interval : "OK " + hit;
+            dinfo.evt_comment      = has_miss ? "Miss detected at start of current " + period + " " + miss + ", between " + evt_interval : 
+                                                "Begin of current " + period + " OK " + hit;
             dinfo.evt_position     = target_data.tstChain().pos(event.data_id);
             dinfo.evt_position_ref = target_data.refChain().pos(event.interval_time0);
             dinfo.evt_has_ref      = true;
+            dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = true;
-
+            
             break;
         }
         case Event::TypeValid:
@@ -443,6 +464,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_position     = target_data.tstChain().pos(event.data_id);
             dinfo.evt_position_ref = target_data.tstChain().pos(event.interval_time0);
             dinfo.evt_has_ref      = true;
+            dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = true;
 
             break;
@@ -458,6 +480,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_position     = target_data.tstChain().pos(event.data_id);
             dinfo.evt_position_ref = target_data.refChain().pos(event.interval_time1);
             dinfo.evt_has_ref      = true;
+            dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = true;
 
             break;
@@ -520,6 +543,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_position     = target_data.refChain().pos(event.interval_time1);
             dinfo.evt_position_ref = target_data.refChain().pos(event.interval_time0);
             dinfo.evt_has_ref      = true;
+            dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = has_miss;
 
             break;
@@ -527,7 +551,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
     }
 
     //add remark that reference data was missing
-    if (event.had_ref_data)
+    if (!event.had_ref_data)
         dinfo.evt_comment += " (no ref info)";
 
     return dinfo;

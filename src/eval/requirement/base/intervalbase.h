@@ -86,6 +86,7 @@ public:
         boost::optional<dbContent::TargetPosition> evt_position_ref;  // event reference position (e.g. start of interval)
         bool                                       evt_has_misses;    // event has misses
         bool                                       evt_has_ref;       // event has reference
+        bool                                       evt_has_dt;        // event has a valid tod diff
 
         bool generate_detail = false; // generate a detail for this event
     };
@@ -152,10 +153,12 @@ protected:
 private:
     std::vector<Event> periodEvents(const TimePeriod& period,
                                     const EvaluationTargetData& target_data,
-                                    const SectorLayer& sector_layer) const;
+                                    const SectorLayer& sector_layer,
+                                    bool skip_no_data_details) const;
     std::vector<Event> periodEvents(const TimePeriodCollection& periods,
                                     const EvaluationTargetData& target_data,
-                                    const SectorLayer& sector_layer) const;
+                                    const SectorLayer& sector_layer,
+                                    bool skip_no_data_details) const;
 
     float                  update_interval_s_;
     boost::optional<float> min_gap_length_s_;

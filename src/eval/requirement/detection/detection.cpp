@@ -552,20 +552,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
            << " sum_uis " << sum_uis;
 
-//    if (sum_uis)
-//    {
-//        //assert (sum_uis >= max_gap_uis+no_ref_uis);
-//        assert (sum_missed_uis <= sum_uis);
-
-//        float pd = 1.0 - ((float)sum_missed_uis/(float)(sum_uis)); // -max_gap_uis-no_ref_uis
-
-//        logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
-//               << " pd " << String::percentToString(100.0 * pd) << " passed " << (pd >= minimum_probability_);
-//    }
-//    else
-//        logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
-//               << " no data for pd";
-
     return make_shared<EvaluationRequirementResult::SingleDetection>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, sum_uis, sum_missed_uis, ref_periods);
