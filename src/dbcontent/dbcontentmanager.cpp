@@ -1348,6 +1348,14 @@ nlohmann::json DBContentManager::targetInfoAsJSON(unsigned int utn) const
     return target_model_->targetAsJSON(utn);
 }
 
+nlohmann::json DBContentManager::targetStatsAsJSON() const
+{
+    assert (hasAssociations());
+    assert (hasTargetsInfo());
+
+    return target_model_->targetStatsAsJSON();
+}
+
 nlohmann::json DBContentManager::utnsAsJSON() const
 {
     assert (hasAssociations());

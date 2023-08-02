@@ -637,6 +637,42 @@ nlohmann::json TargetModel::targetAsJSON(unsigned int utn) const
     return data;
 }
 
+nlohmann::json TargetModel::targetStatsAsJSON() const
+{
+    nlohmann::json data;
+
+    size_t num_targets = target_data_.size();
+
+    size_t associated = 0;
+    size_t min_size   = std::numeric_limits<size_t>::max();
+    size_t max_size   = 0;
+    size_t mean_size  = 0;
+
+    for (const auto& target : target_data_)
+    {
+        size_t nu = target.numUpdates();
+
+        associated += nu;
+        mean_size  += nu;
+
+        if (nu > max_size) max_size = nu;
+        if (nu < min_size) min_size = nu;
+    }
+
+    if (num_targets == 0)
+        min_size = 0;
+    else
+        mean_size /= num_targets;
+
+    data["num_targets"  ] = num_targets;
+    data["min_updates"  ] = min_size;
+    data["max_updates"  ] = max_size;
+    data["avg_updates"  ] = mean_size;
+    data["total_updates"] = associated;
+
+    return data;
+}
+
 nlohmann::json TargetModel::utnsAsJSON() const
 {
     nlohmann::json data;

@@ -165,6 +165,7 @@ public:
 
     nlohmann::json targetsInfoAsJSON() const;
     nlohmann::json targetInfoAsJSON(unsigned int utn) const;
+    nlohmann::json targetStatsAsJSON() const;
     nlohmann::json utnsAsJSON() const;
 
     unsigned int maxLiveDataAgeCache() const;

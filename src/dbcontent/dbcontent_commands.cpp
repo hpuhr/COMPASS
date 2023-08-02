@@ -30,6 +30,7 @@
 REGISTER_RTCOMMAND(dbContent::RTCommandGetData)
 REGISTER_RTCOMMAND(dbContent::RTCommandGetUTNs)
 REGISTER_RTCOMMAND(dbContent::RTCommandGetTarget)
+REGISTER_RTCOMMAND(dbContent::RTCommandGetTargetStats)
 
 using namespace std;
 
@@ -45,6 +46,7 @@ void init_dbcontent_commands()
     dbContent::RTCommandGetData::init();
     dbContent::RTCommandGetUTNs::init();
     dbContent::RTCommandGetTarget::init();
+    dbContent::RTCommandGetTargetStats::init();
 }
 
 RTCommandGetData::RTCommandGetData()
@@ -281,7 +283,6 @@ void RTCommandGetUTNs::assignVariables_impl(const VariablesMap &vars)
     RTCOMMAND_CHECK_VAR(vars, "nodesc", no_desc_)
 }
 
-
 /***************************************************************************************
  * RTCommandGetTarget
  ***************************************************************************************/
@@ -341,6 +342,49 @@ void RTCommandGetTarget::collectOptions_impl(OptionsDescription &options,
 void RTCommandGetTarget::assignVariables_impl(const VariablesMap &vars)
 {
     RTCOMMAND_GET_VAR_OR_THROW(vars, "utn", unsigned int, utn_)
+}
+
+/***************************************************************************************
+ * RTCommandGetTargetStats
+ ***************************************************************************************/
+
+RTCommandGetTargetStats::RTCommandGetTargetStats()
+    : rtcommand::RTCommand()
+{
+}
+
+bool RTCommandGetTargetStats::run_impl()
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    if (!dbcontent_man.hasAssociations() || !dbcontent_man.hasTargetsInfo())
+    {
+        setResultMessage("No target information present");
+        return false;
+    }
+
+    return true;
+}
+
+bool RTCommandGetTargetStats::checkResult_impl()
+{
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    setJSONReply(dbcontent_man.targetStatsAsJSON());
+
+    return true;
 }
 
 } // namespace dbContent

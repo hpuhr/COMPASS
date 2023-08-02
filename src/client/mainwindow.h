@@ -43,9 +43,10 @@ class MainLoadWidget;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+signals:
+    void dataLoaded();
 
 public slots:
-
     void newDBSlot();
     void openExistingDBSlot();
     void openRecentDBSlot();

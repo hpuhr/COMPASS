@@ -74,6 +74,7 @@ public:
 
     nlohmann::json asJSON() const;
     nlohmann::json targetAsJSON(unsigned int utn) const;
+    nlohmann::json targetStatsAsJSON() const;
     nlohmann::json utnsAsJSON() const;
 
     void loadFromDB();
