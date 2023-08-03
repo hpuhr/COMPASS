@@ -54,6 +54,13 @@ void ASTERIXJSONMappingJob::run()
             return;
 
         unsigned int category{0};
+
+        if (!record.contains("category"))
+        {
+            logerr << "ASTERIXJSONMappingJob: run: record without category '" << record.dump(4) << "', skipping";
+            return;
+        }
+
         assert (record.contains("category"));
 
         category = record.at("category");
