@@ -23,7 +23,8 @@
 
 #include <boost/program_options.hpp>
 
-REGISTER_RTCOMMAND(dbContent::RTCommandGetDataSources)
+REGISTER_RTCOMMAND(dbContent::RTCommandGetConfigDataSources)
+REGISTER_RTCOMMAND(dbContent::RTCommandGetDBDataSources)
 REGISTER_RTCOMMAND(dbContent::RTCommandSetDataSources)
 
 using namespace std;
@@ -33,28 +34,51 @@ namespace dbContent
 
 void init_data_source_commands()
 {
-    dbContent::RTCommandGetDataSources::init();
+    dbContent::RTCommandGetConfigDataSources::init();
+    dbContent::RTCommandGetDBDataSources::init();
     dbContent::RTCommandSetDataSources::init();
 }
 
-// get
+// get from config
 
-RTCommandGetDataSources::RTCommandGetDataSources()
+RTCommandGetConfigDataSources::RTCommandGetConfigDataSources()
     : rtcommand::RTCommand()
 {
     condition.setDelay(10);
 }
 
-bool RTCommandGetDataSources::run_impl()
+bool RTCommandGetConfigDataSources::run_impl()
 {
     return true;
 }
 
-bool RTCommandGetDataSources::checkResult_impl()
+bool RTCommandGetConfigDataSources::checkResult_impl()
 {
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    setJSONReply(ds_man.getDataSourcesAsJSON());
+    setJSONReply(ds_man.getConfigDataSourcesAsJSON());
+
+    return true;
+}
+
+// get from db
+
+RTCommandGetDBDataSources::RTCommandGetDBDataSources()
+    : rtcommand::RTCommand()
+{
+    condition.setDelay(10);
+}
+
+bool RTCommandGetDBDataSources::run_impl()
+{
+    return true;
+}
+
+bool RTCommandGetDBDataSources::checkResult_impl()
+{
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    setJSONReply(ds_man.getDBDataSourcesAsJSON());
 
     return true;
 }

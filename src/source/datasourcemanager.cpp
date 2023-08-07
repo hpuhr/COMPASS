@@ -186,7 +186,6 @@ void DataSourceManager::importDataSourcesJSON(const nlohmann::json& j)
 
     for (auto& j_ds_it : j.at("data_sources").get<json::array_t>())
     {
-
         assert(j_ds_it.contains("ds_type"));
         assert(j_ds_it.contains("name"));
         assert(j_ds_it.contains("sac"));
@@ -235,7 +234,7 @@ void DataSourceManager::exportDataSources(const std::string& filename)
 {
     loginf << "DataSourceManager: exportDataSources: file '" << filename << "'";
 
-    json data = getDataSourcesAsJSON();
+    json data = getConfigDataSourcesAsJSON();
 
     std::ofstream file(filename);
     file << data.dump(4);
@@ -246,7 +245,7 @@ void DataSourceManager::exportDataSources(const std::string& filename)
     m_info.exec();
 }
 
-nlohmann::json DataSourceManager::getDataSourcesAsJSON()
+nlohmann::json DataSourceManager::getConfigDataSourcesAsJSON()
 {
     json data;
 
@@ -257,7 +256,29 @@ nlohmann::json DataSourceManager::getDataSourcesAsJSON()
     json& data_sources = data.at("data_sources");
 
     unsigned int cnt = 0;
+
     for (auto& ds_it : config_data_sources_)
+    {
+        data_sources[cnt] = ds_it->getAsJSON();
+        ++cnt;
+    }
+
+    return data;
+}
+
+nlohmann::json DataSourceManager::getDBDataSourcesAsJSON()
+{
+    json data;
+
+    data["content_type"] = "data_sources";
+    data["content_version"] = "0.2";
+
+    data["data_sources"] = json::array();
+    json& data_sources = data.at("data_sources");
+
+    unsigned int cnt = 0;
+
+    for (auto& ds_it : db_data_sources_)
     {
         data_sources[cnt] = ds_it->getAsJSON();
         ++cnt;

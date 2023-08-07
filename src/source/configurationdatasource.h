@@ -19,7 +19,6 @@ public:
     //ConfigurationDataSource() = default;
     virtual ~ConfigurationDataSource();
 
-    virtual nlohmann::json getAsJSON();
     virtual void setFromJSON(const nlohmann::json& j);
 
     DBDataSource* getAsNewDBDS();

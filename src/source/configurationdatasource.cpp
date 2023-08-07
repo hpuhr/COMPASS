@@ -52,27 +52,6 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
 
 ConfigurationDataSource::~ConfigurationDataSource()
 {
-
-}
-
-json ConfigurationDataSource::getAsJSON()
-{
-    json j;
-
-    j["ds_type"] = ds_type_;
-
-    j["sac"] = sac_;
-    j["sic"] = sic_;
-
-    j["name"] = name_;
-
-    if (has_short_name_)
-        j["short_name"] = short_name_;
-
-    if (!info_.is_null())
-        j["info"] = info_;
-
-    return j;
 }
 
 void ConfigurationDataSource::setFromJSON(const json& j)
