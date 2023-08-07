@@ -76,6 +76,8 @@ public:
 
     bool hasLiveData(unsigned int line, boost::posix_time::ptime current_ts) const;
 
+    virtual nlohmann::json getAsJSON() const override;
+
 protected:
     unsigned int id_{0};
 

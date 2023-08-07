@@ -477,7 +477,7 @@ void DataSourceBase::setFromJSON (const nlohmann::json& j)
         parseNetworkLineInfo();
 }
 
-json DataSourceBase::getAsJSON()
+json DataSourceBase::getAsJSON() const
 {
     json j;
 
