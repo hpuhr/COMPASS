@@ -127,7 +127,7 @@ void RTCommandManager::run()
             rtcommand::RTCommandResponse cmd_response(cmd_result);
 
             loginf << "RTCommandManager: run: result wait done, success " << cmd_response.isOk();
-            loginf << "RTCommandManager: run: respone = ";
+            loginf << "RTCommandManager: run: response = ";
             loginf << cmd_response.toJSONString();
 
             if (source == Source::Application)
