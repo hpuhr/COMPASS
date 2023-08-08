@@ -70,6 +70,7 @@ namespace EvaluationResultsReport
         SectionContentTable& getTable (const std::string& name);
         void addTable (const std::string& name, unsigned int num_columns, vector<string> headings,
                        bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
+        std::vector<std::string> getTableNames() const;
 
         bool hasFigure (const std::string& name);
         SectionContentFigure& getFigure (const std::string& name);

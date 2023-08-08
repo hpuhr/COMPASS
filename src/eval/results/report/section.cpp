@@ -161,6 +161,21 @@ namespace EvaluationResultsReport
         return *tmp;
     }
 
+    std::vector<std::string> Section::getTableNames() const
+    {
+        std::vector<std::string> names;
+
+        for (auto& cont_it : content_)
+        {
+            auto table = dynamic_cast<SectionContentTable*>(cont_it.get());
+
+            if (table)
+                names.push_back(table->name());
+        }
+
+        return names;
+    }
+
     void Section::addTable (const std::string& name, unsigned int num_columns,
                             vector<string> headings, bool sortable, unsigned int sort_column, Qt::SortOrder order)
     {
