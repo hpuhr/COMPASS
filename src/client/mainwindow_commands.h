@@ -292,6 +292,17 @@ protected:
     DECLARE_RTCOMMAND_NOOPTIONS
 };
 
+// get_events
+struct RTCommandGetEvents : public rtcommand::RTCommand
+{
+    bool fresh_ = false;
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(get_events, "retrieves the currently logged events")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
 }
 
 #endif // MAINWINDOW_COMMANDS_H

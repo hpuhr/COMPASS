@@ -55,6 +55,7 @@ REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
 REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
 REGISTER_RTCOMMAND(main_window::RTCommandExportEvaluationReport)
 REGISTER_RTCOMMAND(main_window::RTCommandQuit)
+REGISTER_RTCOMMAND(main_window::RTCommandGetEvents)
 
 namespace main_window
 {
@@ -81,6 +82,7 @@ void init_commands()
     main_window::RTCommandExportEvaluationReport::init();
     main_window::RTCommandCloseDB::init();
     main_window::RTCommandQuit::init();
+    main_window::RTCommandGetEvents::init();
 }
 
 // open_db
@@ -1308,6 +1310,69 @@ bool RTCommandQuit::run_impl()
     assert (main_window);
 
     QTimer::singleShot(100, [main_window] () { main_window->quitSlot(); });
+
+    return true;
+}
+
+// get_events
+
+void RTCommandGetEvents::collectOptions_impl(OptionsDescription& options,
+                                             PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("fresh", "return only fresh (unseen) events");
+}
+
+void RTCommandGetEvents::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_CHECK_VAR(variables, "fresh", fresh_)
+}
+
+bool RTCommandGetEvents::run_impl()
+{
+    auto createJSON = [ & ] (const Logger::Events& events)
+    {
+        nlohmann::json archive_json;
+
+        auto warnings = nlohmann::json::array();
+        auto errors   = nlohmann::json::array();
+        
+        auto it_wrn = events.find(log4cpp::Priority::WARN);
+        auto it_err = events.find(log4cpp::Priority::ERROR);
+
+        auto addEntry = [ & ] (nlohmann::json& arr, const Logger::Event& event)
+        {
+            nlohmann::json e;
+            e["id"       ] = event.id;
+            e["timestamp"] = Utils::Time::toString(boost::posix_time::from_time_t((time_t)event.timestamp));
+            e["message"  ] = event.message;
+            
+            arr.push_back(e);
+        };
+
+        //add warnings
+        if (it_wrn != events.end())
+        {
+            for (const auto& entry : it_wrn->second)
+                addEntry(warnings, entry);
+        }
+
+        //add errors
+        if (it_err != events.end())
+        {
+            for (const auto& entry : it_err->second)
+                addEntry(errors, entry);
+        }
+
+        archive_json["warnings"] = warnings;
+        archive_json["errors"]   = errors;
+
+        return archive_json;
+    };
+
+    auto json_obj = createJSON(fresh_ ? Logger::getInstance().getFreshEvents() : Logger::getInstance().getEvents());
+
+    setJSONReply(json_obj);
 
     return true;
 }

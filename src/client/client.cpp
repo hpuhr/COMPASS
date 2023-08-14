@@ -155,6 +155,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in OSGView'")
             ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
             ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
+            ("enable_event_log", po::bool_switch(&enable_event_log_), "collect warnings and errors in the event log")
             ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
@@ -463,7 +464,7 @@ void Client::checkAndSetupConfig()
         Files::verifyFileExists(log_config_path);
 
         cout << "COMPASSClient: initializing logger using '" << log_config_path << "'" << endl;
-        Logger::getInstance().init(log_config_path);
+        Logger::getInstance().init(log_config_path, enable_event_log_);
 
         loginf << "COMPASSClient: startup version " << VERSION;
         string config_version = config.getString("version");

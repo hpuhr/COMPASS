@@ -86,6 +86,7 @@ private:
     bool no_config_save_ {false};
 
     bool open_rt_cmd_port_ {false};
+    bool enable_event_log_ {false};
     bool quit_ {false};
 
     bool expert_mode_ {false};
