@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRANGE_H
-#define EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRANGE_H
+#ifndef EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRADARRANGE_H
+#define EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRADARRANGE_H
 
 #include "eval/results/position/positionbase.h"
 
@@ -24,12 +24,12 @@ namespace EvaluationRequirementResult
 {
 using namespace std;
 
-class SinglePositionRange;
+class SinglePositionRadarRange;
 
-class JoinedPositionRange : public JoinedPositionBase
+class JoinedPositionRadarRange : public JoinedPositionBase
 {
 public:
-    JoinedPositionRange(const std::string& result_id,
+    JoinedPositionRadarRange(const std::string& result_id,
                            std::shared_ptr<EvaluationRequirement::Base> requirement,
                            const SectorLayer& sector_layer,
                            EvaluationManager& eval_man);
@@ -50,8 +50,8 @@ public:
     void exportAsCSV();
 
 protected:
-    void addToValues (std::shared_ptr<SinglePositionRange> single_result);
-    void update();
+    void addToValues (std::shared_ptr<SinglePositionRadarRange> single_result);
+    void update() override;
 
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -64,4 +64,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRANGE_H
+#endif // EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRADARRANGE_H

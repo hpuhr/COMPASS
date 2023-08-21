@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/position/radarazimuth.h"
-#include "eval/results/position/azimuthsingle.h"
+#include "eval/results/position/radarazimuthsingle.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -35,7 +35,7 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-PositionAzimuth::PositionAzimuth(
+PositionRadarAzimuth::PositionRadarAzimuth(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man, float threshold_value)
     : Base(name, short_name, group_name, eval_man),
@@ -44,16 +44,16 @@ PositionAzimuth::PositionAzimuth(
 
 }
 
-float PositionAzimuth::thresholdValue() const
+float PositionRadarAzimuth::thresholdValue() const
 {
     return threshold_value_;
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> PositionAzimuth::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementPositionAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "EvaluationRequirementPositionRadarAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
            << " threshold_value " << threshold_value_;
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
@@ -68,7 +68,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAzimuth::evaluate (
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
 
-    typedef EvaluationRequirementResult::SinglePositionAzimuth Result;
+    typedef EvaluationRequirementResult::SinglePositionRadarAzimuth Result;
     typedef EvaluationDetail                                    Detail;
     typedef Result::EvaluationDetails                           Details;
     Details details;
@@ -244,7 +244,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAzimuth::evaluate (
         values.push_back(distance);
     }
 
-    //        logdbg << "EvaluationRequirementPositionAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
+    //        logdbg << "EvaluationRequirementPositionRadarAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
     //               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
     //               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
@@ -253,7 +253,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAzimuth::evaluate (
     assert (num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        loginf << "EvaluationRequirementPositionAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
+        loginf << "EvaluationRequirementPositionRadarAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_calc_errors " << num_pos_calc_errors
@@ -266,18 +266,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAzimuth::evaluate (
 
     //assert (details.size() == num_pos);
 
-    return make_shared<EvaluationRequirementResult::SinglePositionAzimuth>(
+    return make_shared<EvaluationRequirementResult::SinglePositionRadarAzimuth>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
                 values);
 }
 
-std::string PositionAzimuth::getConditionStr () const
+std::string PositionRadarAzimuth::getConditionStr () const
 {
     return "<= "+ to_string(threshold_value_);
 }
 
-std::string PositionAzimuth::getConditionResultStr (float rms_value) const
+std::string PositionRadarAzimuth::getConditionResultStr (float rms_value) const
 {
     return rms_value <= threshold_value_ ?  "Passed" : "Failed";
 }

@@ -28,7 +28,7 @@
 namespace EvaluationRequirement
 {
 
-PositionRangeConfigWidget::PositionRangeConfigWidget(PositionRangeConfig& cfg)
+PositionRadarRangeConfigWidget::PositionRadarRangeConfigWidget(PositionRadarRangeConfig& cfg)
     : BaseConfigWidget(cfg)
 {
     // max dist
@@ -36,15 +36,15 @@ PositionRangeConfigWidget::PositionRangeConfigWidget(PositionRangeConfig& cfg)
     threshold_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
     threshold_value_edit_->setToolTip("Minimum/Maximum allowed distance from test target report to reference");
     connect(threshold_value_edit_, &QLineEdit::textEdited,
-            this, &PositionRangeConfigWidget::thresholdValueEditSlot);
+            this, &PositionRadarRangeConfigWidget::thresholdValueEditSlot);
 
     form_layout_->addRow("Threshold Value [m]", threshold_value_edit_);
 
 }
 
-void PositionRangeConfigWidget::thresholdValueEditSlot(QString value)
+void PositionRadarRangeConfigWidget::thresholdValueEditSlot(QString value)
 {
-    loginf << "PositionRangeConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
+    loginf << "PositionRadarRangeConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -52,12 +52,12 @@ void PositionRangeConfigWidget::thresholdValueEditSlot(QString value)
     if (ok)
         config().thresholdValue(val);
     else
-        loginf << "PositionRangeConfigWidget: thresholdValueEditSlot: invalid value";
+        loginf << "PositionRadarRangeConfigWidget: thresholdValueEditSlot: invalid value";
 }
 
-PositionRangeConfig& PositionRangeConfigWidget::config()
+PositionRadarRangeConfig& PositionRadarRangeConfigWidget::config()
 {
-    PositionRangeConfig* config = dynamic_cast<PositionRangeConfig*>(&config_);
+    PositionRadarRangeConfig* config = dynamic_cast<PositionRadarRangeConfig*>(&config_);
     assert (config);
 
     return *config;

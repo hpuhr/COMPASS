@@ -28,7 +28,7 @@
 namespace EvaluationRequirement
 {
 
-PositionAzimuthConfigWidget::PositionAzimuthConfigWidget(PositionAzimuthConfig& cfg)
+PositionRadarAzimuthConfigWidget::PositionRadarAzimuthConfigWidget(PositionRadarAzimuthConfig& cfg)
     : BaseConfigWidget(cfg)
 {
     // max dist
@@ -36,15 +36,15 @@ PositionAzimuthConfigWidget::PositionAzimuthConfigWidget(PositionAzimuthConfig& 
     threshold_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
     threshold_value_edit_->setToolTip("Minimum/Maximum allowed distance from test target report to reference");
     connect(threshold_value_edit_, &QLineEdit::textEdited,
-            this, &PositionAzimuthConfigWidget::thresholdValueEditSlot);
+            this, &PositionRadarAzimuthConfigWidget::thresholdValueEditSlot);
 
     form_layout_->addRow("Threshold Value [m]", threshold_value_edit_);
 
 }
 
-void PositionAzimuthConfigWidget::thresholdValueEditSlot(QString value)
+void PositionRadarAzimuthConfigWidget::thresholdValueEditSlot(QString value)
 {
-    loginf << "PositionAzimuthConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
+    loginf << "PositionRadarAzimuthConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -52,12 +52,12 @@ void PositionAzimuthConfigWidget::thresholdValueEditSlot(QString value)
     if (ok)
         config().thresholdValue(val);
     else
-        loginf << "PositionAzimuthConfigWidget: thresholdValueEditSlot: invalid value";
+        loginf << "PositionRadarAzimuthConfigWidget: thresholdValueEditSlot: invalid value";
 }
 
-PositionAzimuthConfig& PositionAzimuthConfigWidget::config()
+PositionRadarAzimuthConfig& PositionRadarAzimuthConfigWidget::config()
 {
-    PositionAzimuthConfig* config = dynamic_cast<PositionAzimuthConfig*>(&config_);
+    PositionRadarAzimuthConfig* config = dynamic_cast<PositionRadarAzimuthConfig*>(&config_);
     assert (config);
 
     return *config;

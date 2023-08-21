@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/position/rangesingle.h"
-#include "eval/results/position/rangejoined.h"
+#include "eval/results/position/radarrangesingle.h"
+#include "eval/results/position/radarrangejoined.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/position/radarrange.h"
 #include "evaluationtargetdata.h"
@@ -40,7 +40,7 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-SinglePositionRange::SinglePositionRange(const std::string& result_id,
+SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
                                                      std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                      const SectorLayer& sector_layer,
                                                      unsigned int utn,
@@ -54,13 +54,13 @@ SinglePositionRange::SinglePositionRange(const std::string& result_id,
                                                      unsigned int num_comp_passed,
                                                      unsigned int num_comp_failed,
                                                      vector<double> values)
-    :   SinglePositionBase("SinglePositionRange", result_id, requirement, sector_layer, utn, target, eval_man, details,
+    :   SinglePositionBase("SinglePositionRadarRange", result_id, requirement, sector_layer, utn, target, eval_man, details,
                            num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values)
 {
     update();
 }
 
-void SinglePositionRange::update()
+void SinglePositionRadarRange::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
@@ -109,9 +109,9 @@ void SinglePositionRange::update()
     updateUseFromTarget();
 }
 
-void SinglePositionRange::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SinglePositionRadarRange::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    logdbg << "SinglePositionRange " <<  requirement_->name() <<": addToReport";
+    logdbg << "SinglePositionRadarRange " <<  requirement_->name() <<": addToReport";
 
     // add target to requirements->group->req
     addTargetToOverviewTable(root_item);
@@ -122,7 +122,7 @@ void SinglePositionRange::addToReport (std::shared_ptr<EvaluationResultsReport::
     // TODO add requirement description, methods
 }
 
-void SinglePositionRange::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SinglePositionRadarRange::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
@@ -143,7 +143,7 @@ void SinglePositionRange::addTargetToOverviewTable(shared_ptr<EvaluationResultsR
     }
 }
 
-void SinglePositionRange::addTargetDetailsToTable (
+void SinglePositionRadarRange::addTargetDetailsToTable (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     if (!section.hasTable(table_name))
@@ -176,7 +176,7 @@ void SinglePositionRange::addTargetDetailsToTable (
                 this, {utn_});
 }
 
-void SinglePositionRange::addTargetDetailsToTableADSB (
+void SinglePositionRadarRange::addTargetDetailsToTableADSB (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     if (!section.hasTable(table_name))
@@ -209,7 +209,7 @@ void SinglePositionRange::addTargetDetailsToTableADSB (
                 this, {utn_});
 }
 
-void SinglePositionRange::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SinglePositionRadarRange::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
@@ -217,8 +217,8 @@ void SinglePositionRange::addTargetDetailsToReport(shared_ptr<EvaluationResultsR
     if (!utn_req_section.hasTable("details_overview_table"))
         utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
 
-    std::shared_ptr<EvaluationRequirement::PositionRange> req =
-            std::static_pointer_cast<EvaluationRequirement::PositionRange>(requirement_);
+    std::shared_ptr<EvaluationRequirement::PositionRadarRange> req =
+            std::static_pointer_cast<EvaluationRequirement::PositionRadarRange>(requirement_);
     assert (req);
 
     EvaluationResultsReport::SectionContentTable& utn_req_table =
@@ -306,7 +306,7 @@ void SinglePositionRange::addTargetDetailsToReport(shared_ptr<EvaluationResultsR
     reportDetails(utn_req_section);
 }
 
-void SinglePositionRange::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+void SinglePositionRadarRange::reportDetails(EvaluationResultsReport::Section& utn_req_section)
 {
     if (!utn_req_section.hasTable(tr_details_table_name_))
         utn_req_section.addTable(tr_details_table_name_, 8,
@@ -340,7 +340,7 @@ void SinglePositionRange::reportDetails(EvaluationResultsReport::Section& utn_re
         }});
 }
 
-bool SinglePositionRange::hasViewableData (
+bool SinglePositionRadarRange::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -351,7 +351,7 @@ bool SinglePositionRange::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SinglePositionRange::viewableData(
+std::unique_ptr<nlohmann::json::object_t> SinglePositionRadarRange::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
@@ -364,7 +364,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionRange::viewableData(
     {
         unsigned int detail_cnt = annotation.toUInt();
 
-        loginf << "SinglePositionRange: viewableData: detail_cnt " << detail_cnt;
+        loginf << "SinglePositionRadarRange: viewableData: detail_cnt " << detail_cnt;
 
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr = getTargetErrorsViewable(true);
         assert (viewable_ptr);
@@ -391,7 +391,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionRange::viewableData(
         return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SinglePositionRange::getTargetErrorsViewable (bool add_highlight)
+std::unique_ptr<nlohmann::json::object_t> SinglePositionRadarRange::getTargetErrorsViewable (bool add_highlight)
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -464,9 +464,9 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionRange::getTargetErrorsVi
     return viewable_ptr;
 }
 
-void SinglePositionRange::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+void SinglePositionRadarRange::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    loginf << "SinglePositionRange: addAnnotations";
+    loginf << "SinglePositionRadarRange: addAnnotations";
 
     json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
     json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
@@ -510,7 +510,7 @@ void SinglePositionRange::addAnnotations(nlohmann::json::object_t& viewable, boo
     }
 }
 
-bool SinglePositionRange::hasReference (
+bool SinglePositionRadarRange::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -519,7 +519,7 @@ bool SinglePositionRange::hasReference (
         return false;;
 }
 
-std::string SinglePositionRange::reference(
+std::string SinglePositionRadarRange::reference(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasReference(table, annotation));
@@ -527,15 +527,15 @@ std::string SinglePositionRange::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-std::shared_ptr<Joined> SinglePositionRange::createEmptyJoined(const std::string& result_id)
+std::shared_ptr<Joined> SinglePositionRadarRange::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedPositionRange> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedPositionRadarRange> (result_id, requirement_, sector_layer_, eval_man_);
 }
 
-EvaluationRequirement::PositionRange* SinglePositionRange::req ()
+EvaluationRequirement::PositionRadarRange* SinglePositionRadarRange::req ()
 {
-    EvaluationRequirement::PositionRange* req =
-            dynamic_cast<EvaluationRequirement::PositionRange*>(requirement_.get());
+    EvaluationRequirement::PositionRadarRange* req =
+            dynamic_cast<EvaluationRequirement::PositionRadarRange*>(requirement_.get());
     assert (req);
     return req;
 }

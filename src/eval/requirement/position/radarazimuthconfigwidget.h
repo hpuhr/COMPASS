@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTPOSITIONAZIMUTHCONFIGWIDGET_H
-#define EVALUATIONREQUIREMENTPOSITIONAZIMUTHCONFIGWIDGET_H
+#ifndef EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIGWIDGET_H
+#define EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIGWIDGET_H
 
 #include "eval/requirement/base/baseconfigwidget.h"
 
@@ -29,9 +29,9 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-class PositionAzimuthConfig;
+class PositionRadarAzimuthConfig;
 
-class PositionAzimuthConfigWidget : public BaseConfigWidget
+class PositionRadarAzimuthConfigWidget : public BaseConfigWidget
 {
     Q_OBJECT
 
@@ -39,14 +39,14 @@ public slots:
     void thresholdValueEditSlot(QString value);
 
 public:
-    PositionAzimuthConfigWidget(PositionAzimuthConfig& cfg);
+    PositionRadarAzimuthConfigWidget(PositionRadarAzimuthConfig& cfg);
 
 protected:
     QLineEdit* threshold_value_edit_{nullptr};
 
-    PositionAzimuthConfig& config();
+    PositionRadarAzimuthConfig& config();
 };
 
 }
 
-#endif // EVALUATIONREQUIREMENTPOSITIONAZIMUTHCONFIGWIDGET_H
+#endif // EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIGWIDGET_H

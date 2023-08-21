@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTPOSITIONRANGECONFIG_H
-#define EVALUATIONREQUIREMENTPOSITIONRANGECONFIG_H
+#ifndef EVALUATIONREQUIREMENTPOSITIONRADARRANGECONFIG_H
+#define EVALUATIONREQUIREMENTPOSITIONRADARRANGECONFIG_H
 
 #include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
@@ -29,12 +29,12 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class PositionRangeConfig : public BaseConfig
+class PositionRadarRangeConfig : public BaseConfig
 {
 public:
-    PositionRangeConfig(const std::string& class_id, const std::string& instance_id,
+    PositionRadarRangeConfig(const std::string& class_id, const std::string& instance_id,
                         Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
-    virtual ~PositionRangeConfig();
+    virtual ~PositionRadarRangeConfig();
 
     std::shared_ptr<Base> createRequirement() override;
 
@@ -51,4 +51,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENTPOSITIONRANGECONFIG_H
+#endif // EVALUATIONREQUIREMENTPOSITIONRADARRANGECONFIG_H

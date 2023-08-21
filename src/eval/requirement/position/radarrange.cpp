@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/position/radarrange.h"
-#include "eval/results/position/rangesingle.h"
+#include "eval/results/position/radarrangesingle.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -39,7 +39,7 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-PositionRange::PositionRange(
+PositionRadarRange::PositionRadarRange(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man, float threshold_value)
     : Base(name, short_name, group_name, eval_man),
@@ -48,16 +48,16 @@ PositionRange::PositionRange(
 
 }
 
-float PositionRange::thresholdValue() const
+float PositionRadarRange::thresholdValue() const
 {
     return threshold_value_;
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
            << " threshold_value " << threshold_value_;
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
@@ -72,7 +72,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
 
-    typedef EvaluationRequirementResult::SinglePositionRange Result;
+    typedef EvaluationRequirementResult::SinglePositionRadarRange Result;
     typedef EvaluationDetail                                    Detail;
     typedef Result::EvaluationDetails                           Details;
     Details details;
@@ -208,7 +208,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
 
             if (!ds_unknown.count(tst_ds_id))
             {
-                logwrn << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
+                logwrn << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
                        << " unknown data source " << tst_ds_id << ", skipping";
                 ds_unknown.insert(tst_ds_id);
             }
@@ -282,7 +282,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
     assert (num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        loginf << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
+        loginf << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_calc_errors " << num_pos_calc_errors
@@ -295,18 +295,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
 
     //assert (details.size() == num_pos);
 
-    return make_shared<EvaluationRequirementResult::SinglePositionRange>(
+    return make_shared<EvaluationRequirementResult::SinglePositionRadarRange>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
                 values);
 }
 
-std::string PositionRange::getConditionStr () const
+std::string PositionRadarRange::getConditionStr () const
 {
     return "<= "+ to_string(threshold_value_);
 }
 
-std::string PositionRange::getConditionResultStr (float rms_value) const
+std::string PositionRadarRange::getConditionResultStr (float rms_value) const
 {
     return rms_value <= threshold_value_ ?  "Passed" : "Failed";
 }

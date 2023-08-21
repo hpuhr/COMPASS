@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONRANGE_H
-#define EVALUATIONREQUIREMENPOSITIONRANGE_H
+#ifndef EVALUATIONREQUIREMENPOSITIONRADARRANGE_H
+#define EVALUATIONREQUIREMENPOSITIONRADARRANGE_H
 
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/position/detail.h"
@@ -24,10 +24,10 @@
 namespace EvaluationRequirement
 {
 
-class PositionRange : public Base
+class PositionRadarRange : public Base
 {
 public:
-    PositionRange(
+    PositionRadarRange(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             EvaluationManager& eval_man, float threshold_value);
 
@@ -46,4 +46,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENPOSITIONRANGE_H
+#endif // EVALUATIONREQUIREMENPOSITIONRADARRANGE_H

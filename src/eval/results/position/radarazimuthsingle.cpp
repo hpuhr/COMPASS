@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/position/azimuthsingle.h"
-#include "eval/results/position/azimuthjoined.h"
+#include "eval/results/position/radarazimuthsingle.h"
+#include "eval/results/position/radarazimuthjoined.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/position/radarazimuth.h"
 #include "evaluationtargetdata.h"
@@ -40,7 +40,7 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-SinglePositionAzimuth::SinglePositionAzimuth(const std::string& result_id,
+SinglePositionRadarAzimuth::SinglePositionRadarAzimuth(const std::string& result_id,
                                                      std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                      const SectorLayer& sector_layer,
                                                      unsigned int utn,
@@ -54,13 +54,13 @@ SinglePositionAzimuth::SinglePositionAzimuth(const std::string& result_id,
                                                      unsigned int num_comp_passed,
                                                      unsigned int num_comp_failed,
                                                      vector<double> values)
-    :   SinglePositionBase("SinglePositionAzimuth", result_id, requirement, sector_layer, utn, target, eval_man, details,
+    :   SinglePositionBase("SinglePositionRadarAzimuth", result_id, requirement, sector_layer, utn, target, eval_man, details,
                            num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values)
 {
     update();
 }
 
-void SinglePositionAzimuth::update()
+void SinglePositionRadarAzimuth::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
@@ -109,9 +109,9 @@ void SinglePositionAzimuth::update()
     updateUseFromTarget();
 }
 
-void SinglePositionAzimuth::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SinglePositionRadarAzimuth::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    logdbg << "SinglePositionAzimuth " <<  requirement_->name() <<": addToReport";
+    logdbg << "SinglePositionRadarAzimuth " <<  requirement_->name() <<": addToReport";
 
     // add target to requirements->group->req
     addTargetToOverviewTable(root_item);
@@ -122,7 +122,7 @@ void SinglePositionAzimuth::addToReport (std::shared_ptr<EvaluationResultsReport
     // TODO add requirement description, methods
 }
 
-void SinglePositionAzimuth::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SinglePositionRadarAzimuth::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
@@ -143,7 +143,7 @@ void SinglePositionAzimuth::addTargetToOverviewTable(shared_ptr<EvaluationResult
     }
 }
 
-void SinglePositionAzimuth::addTargetDetailsToTable (
+void SinglePositionRadarAzimuth::addTargetDetailsToTable (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     if (!section.hasTable(table_name))
@@ -176,7 +176,7 @@ void SinglePositionAzimuth::addTargetDetailsToTable (
                 this, {utn_});
 }
 
-void SinglePositionAzimuth::addTargetDetailsToTableADSB (
+void SinglePositionRadarAzimuth::addTargetDetailsToTableADSB (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     if (!section.hasTable(table_name))
@@ -209,7 +209,7 @@ void SinglePositionAzimuth::addTargetDetailsToTableADSB (
                 this, {utn_});
 }
 
-void SinglePositionAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SinglePositionRadarAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
@@ -217,8 +217,8 @@ void SinglePositionAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationResult
     if (!utn_req_section.hasTable("details_overview_table"))
         utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
 
-    std::shared_ptr<EvaluationRequirement::PositionAzimuth> req =
-            std::static_pointer_cast<EvaluationRequirement::PositionAzimuth>(requirement_);
+    std::shared_ptr<EvaluationRequirement::PositionRadarAzimuth> req =
+            std::static_pointer_cast<EvaluationRequirement::PositionRadarAzimuth>(requirement_);
     assert (req);
 
     EvaluationResultsReport::SectionContentTable& utn_req_table =
@@ -306,7 +306,7 @@ void SinglePositionAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationResult
     reportDetails(utn_req_section);
 }
 
-void SinglePositionAzimuth::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+void SinglePositionRadarAzimuth::reportDetails(EvaluationResultsReport::Section& utn_req_section)
 {
     if (!utn_req_section.hasTable(tr_details_table_name_))
         utn_req_section.addTable(tr_details_table_name_, 8,
@@ -340,7 +340,7 @@ void SinglePositionAzimuth::reportDetails(EvaluationResultsReport::Section& utn_
         }});
 }
 
-bool SinglePositionAzimuth::hasViewableData (
+bool SinglePositionRadarAzimuth::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -351,7 +351,7 @@ bool SinglePositionAzimuth::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::viewableData(
+std::unique_ptr<nlohmann::json::object_t> SinglePositionRadarAzimuth::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
@@ -364,7 +364,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::viewableData(
     {
         unsigned int detail_cnt = annotation.toUInt();
 
-        loginf << "SinglePositionAzimuth: viewableData: detail_cnt " << detail_cnt;
+        loginf << "SinglePositionRadarAzimuth: viewableData: detail_cnt " << detail_cnt;
 
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr = getTargetErrorsViewable(true);
         assert (viewable_ptr);
@@ -391,7 +391,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::viewableData(
         return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::getTargetErrorsViewable (bool add_highlight)
+std::unique_ptr<nlohmann::json::object_t> SinglePositionRadarAzimuth::getTargetErrorsViewable (bool add_highlight)
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -464,9 +464,9 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::getTargetErrors
     return viewable_ptr;
 }
 
-void SinglePositionAzimuth::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+void SinglePositionRadarAzimuth::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    loginf << "SinglePositionAzimuth: addAnnotations";
+    loginf << "SinglePositionRadarAzimuth: addAnnotations";
 
     json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
     json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
@@ -510,7 +510,7 @@ void SinglePositionAzimuth::addAnnotations(nlohmann::json::object_t& viewable, b
     }
 }
 
-bool SinglePositionAzimuth::hasReference (
+bool SinglePositionRadarAzimuth::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -519,7 +519,7 @@ bool SinglePositionAzimuth::hasReference (
         return false;;
 }
 
-std::string SinglePositionAzimuth::reference(
+std::string SinglePositionRadarAzimuth::reference(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasReference(table, annotation));
@@ -527,15 +527,15 @@ std::string SinglePositionAzimuth::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-std::shared_ptr<Joined> SinglePositionAzimuth::createEmptyJoined(const std::string& result_id)
+std::shared_ptr<Joined> SinglePositionRadarAzimuth::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedPositionAzimuth> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedPositionRadarAzimuth> (result_id, requirement_, sector_layer_, eval_man_);
 }
 
-EvaluationRequirement::PositionAzimuth* SinglePositionAzimuth::req ()
+EvaluationRequirement::PositionRadarAzimuth* SinglePositionRadarAzimuth::req ()
 {
-    EvaluationRequirement::PositionAzimuth* req =
-            dynamic_cast<EvaluationRequirement::PositionAzimuth*>(requirement_.get());
+    EvaluationRequirement::PositionRadarAzimuth* req =
+            dynamic_cast<EvaluationRequirement::PositionRadarAzimuth*>(requirement_.get());
     assert (req);
     return req;
 }

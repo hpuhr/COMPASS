@@ -168,8 +168,8 @@ void Group::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "EvaluationRequirementPositionRangeConfig")
     {
-        EvaluationRequirement::PositionRangeConfig* config =
-                new EvaluationRequirement::PositionRangeConfig(
+        EvaluationRequirement::PositionRadarRangeConfig* config =
+                new EvaluationRequirement::PositionRadarRangeConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -178,8 +178,8 @@ void Group::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "EvaluationRequirementPositionAzimuthConfig")
     {
-        EvaluationRequirement::PositionAzimuthConfig* config =
-                new EvaluationRequirement::PositionAzimuthConfig(
+        EvaluationRequirement::PositionRadarAzimuthConfig* config =
+                new EvaluationRequirement::PositionRadarAzimuthConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
