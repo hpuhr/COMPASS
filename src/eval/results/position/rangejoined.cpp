@@ -18,7 +18,7 @@
 #include "eval/results/position/rangesingle.h"
 #include "eval/results/position/rangejoined.h"
 #include "eval/requirement/base/base.h"
-#include "eval/requirement/position/range.h"
+#include "eval/requirement/position/radarrange.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"

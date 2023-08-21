@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/position/azimuth.h"
+#include "eval/requirement/position/radarazimuth.h"
 #include "eval/results/position/azimuthsingle.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"

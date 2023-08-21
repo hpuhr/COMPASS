@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/position/rangeconfig.h"
-#include "eval/requirement/position/rangeconfigwidget.h"
+#include "eval/requirement/position/radarazimuthconfig.h"
+#include "eval/requirement/position/radarazimuthconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
@@ -31,7 +31,7 @@ using namespace std;
 
 namespace EvaluationRequirement
 {
-PositionRangeConfig::PositionRangeConfig(
+PositionAzimuthConfig::PositionAzimuthConfig(
         const std::string& class_id, const std::string& instance_id,
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
@@ -39,37 +39,37 @@ PositionRangeConfig::PositionRangeConfig(
     registerParameter("threshold_value", &threshold_value_, 50.0);
 }
 
-PositionRangeConfig::~PositionRangeConfig()
+PositionAzimuthConfig::~PositionAzimuthConfig()
 {
 
 }
 
-std::shared_ptr<Base> PositionRangeConfig::createRequirement()
+std::shared_ptr<Base> PositionAzimuthConfig::createRequirement()
 {
-    shared_ptr<PositionRange> req = make_shared<PositionRange>(
+    shared_ptr<PositionAzimuth> req = make_shared<PositionAzimuth>(
                 name_, short_name_, group_.name(), eval_man_, threshold_value_);
 
     return req;
 }
 
-float PositionRangeConfig::thresholdValue() const
+float PositionAzimuthConfig::thresholdValue() const
 {
     return threshold_value_;
 }
 
-void PositionRangeConfig::thresholdValue(float value)
+void PositionAzimuthConfig::thresholdValue(float value)
 {
     threshold_value_ = value;
 }
 
-void PositionRangeConfig::createWidget()
+void PositionAzimuthConfig::createWidget()
 {
     assert (!widget_);
-    widget_.reset(new PositionRangeConfigWidget(*this));
+    widget_.reset(new PositionAzimuthConfigWidget(*this));
     assert (widget_);
 }
 
-void PositionRangeConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void PositionAzimuthConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 

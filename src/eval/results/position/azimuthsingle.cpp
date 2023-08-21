@@ -18,7 +18,7 @@
 #include "eval/results/position/azimuthsingle.h"
 #include "eval/results/position/azimuthjoined.h"
 #include "eval/requirement/base/base.h"
-#include "eval/requirement/position/azimuth.h"
+#include "eval/requirement/position/radarazimuth.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"

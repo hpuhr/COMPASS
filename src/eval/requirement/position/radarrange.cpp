@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/position/range.h"
+#include "eval/requirement/position/radarrange.h"
 #include "eval/results/position/rangesingle.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"

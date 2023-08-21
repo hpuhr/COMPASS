@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/position/azimuthconfigwidget.h"
-#include "eval/requirement/position/azimuthconfig.h"
+#include "eval/requirement/position/radarazimuthconfigwidget.h"
+#include "eval/requirement/position/radarazimuthconfig.h"
 #include "textfielddoublevalidator.h"
 #include "eval/requirement/base/comparisontypecombobox.h"
 #include "logger.h"
