@@ -15,6 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "logger.h"
+#include "event_log.h"
 
 #include "config.h"
 #include "log4cpp/BasicLayout.hh"
@@ -26,48 +27,13 @@
 #include "log4cpp/AppenderSkeleton.hh"
 #include "log4cpp/LoggingEvent.hh"
 
+#include <boost/thread.hpp>
+
 //#define LOGGER_FIXED_LEVEL logINFO
 
-Logger::Logger() : console_appender_(0), file_appender_(0) {}
+#define MAX_EVENTS_PER_CATEGORY 1000
 
-namespace log_tools
-{
-    /**
-     * Adds events to the logger events where they can be browsed as needed.
-     */
-    class EventAppender : public log4cpp::AppenderSkeleton
-    {
-    public:
-        EventAppender(const std::string& name, Logger::Events* events) : log4cpp::AppenderSkeleton(name), events_(events) {}
-        virtual ~EventAppender() {}
-
-        virtual bool reopen() override { return true; }
-        virtual void close() override {}
-        virtual bool requiresLayout() const override { return false; }
-        virtual void setLayout(log4cpp::Layout* layout) override {}
-
-    protected:
-        virtual void _append(const log4cpp::LoggingEvent& event) override
-        {
-            if (events_ && (event.priority == log4cpp::Priority::WARN ||
-                            event.priority == log4cpp::Priority::ERROR))
-            {
-                //std::cout << "adding type " << event.priority << " log message '" << event.message << "' to archive" << std::endl;
-
-                Logger::Event evt;
-                evt.id        = event_ids_++;
-                evt.timestamp = event.timeStamp.getSeconds();
-                evt.message   = event.message;
-
-                (*events_)[ event.priority ].push_back(evt);
-            }
-        }
-
-    private:
-        Logger::Events* events_    = nullptr;
-        uint32_t        event_ids_ = 0;
-    };
-}
+Logger::Logger() : console_appender_(0), file_appender_(0), event_log_(new logger::EventLog(MAX_EVENTS_PER_CATEGORY)) {}
 
 void Logger::init(const std::string& log_config_filename, bool enable_event_log)
 {
@@ -86,7 +52,9 @@ void Logger::init(const std::string& log_config_filename, bool enable_event_log)
     log4cpp::PropertyConfigurator::configure(log_config_filename);
 
     if (enable_event_log)
-        log4cpp::Category::getRoot().addAppender(new log_tools::EventAppender("events", &events_));
+    {
+        log4cpp::Category::getRoot().addAppender(new logger::EventAppender("events", event_log_));
+    }
 #endif
 }
 
@@ -102,27 +70,15 @@ Logger::~Logger()
         delete file_appender_;
         file_appender_ = 0;
     }
+
+    delete event_log_;
+    event_log_ = nullptr;
 }
 
 /**
- * Retuns all collected events. 
+ * Retuns the event log.
  */
-const Logger::Events& Logger::getEvents() const 
-{ 
-    return events_; 
-}
-
-/**
- * Returns all events collected since the last call to getFreshEvents().
- */
-Logger::Events Logger::getFreshEvents() const
+const logger::EventLog* Logger::getEventLog() const
 {
-    Events events;
-
-    for (auto& priority_events : events_)
-        for (auto& evt : priority_events.second)
-            if (evt.consume())
-                events[priority_events.first].push_back(evt);
-
-    return events;
+    return event_log_;
 }

@@ -19,6 +19,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/tbbhack.h"
         "${CMAKE_CURRENT_LIST_DIR}/timeconv.h"
         "${CMAKE_CURRENT_LIST_DIR}/async.h"
+        "${CMAKE_CURRENT_LIST_DIR}/event_log.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/config.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/files.cpp"
@@ -30,6 +31,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/timeconv.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/stringconv.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/async.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/event_log.cpp"
 )
-
-

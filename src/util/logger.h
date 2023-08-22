@@ -30,6 +30,11 @@
     if (false) \
     log4cpp::Category::getRoot().debugStream()  // for improved performance
 
+namespace logger
+{
+    class EventLog;
+}
+
 /**
  * @brief Thread-safe logger
  *
@@ -56,15 +61,14 @@ class Logger : public Singleton
 
     typedef std::map<int, std::vector<Event>> Events;
 
-    const Events& getEvents() const;
-    Events getFreshEvents() const;
+    const logger::EventLog* getEventLog() const;
 
   protected:
     static Logger* log_instance_;
     log4cpp::Appender* console_appender_;
     log4cpp::Appender* file_appender_;
 
-    mutable Events events_;
+    logger::EventLog* event_log_ = nullptr;
 
     Logger();
 

@@ -24,6 +24,7 @@
 #include "rtcommand_registry.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
+#include "event_log.h"
 
 #include <QTimer>
 #include <QCoreApplication>
@@ -1320,57 +1321,22 @@ void RTCommandGetEvents::collectOptions_impl(OptionsDescription& options,
                                              PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("fresh", "return only fresh (unseen) events");
+        ("fresh", "return only fresh (unseen) events")
+        ("max_items", po::value<unsigned int>()->default_value(0), "maximum number of items to return");
 }
 
 void RTCommandGetEvents::assignVariables_impl(const VariablesMap& variables)
 {
     RTCOMMAND_CHECK_VAR(variables, "fresh", fresh_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "max_items", unsigned int, max_items_)
 }
 
 bool RTCommandGetEvents::run_impl()
 {
-    auto createJSON = [ & ] (const Logger::Events& events)
-    {
-        nlohmann::json archive_json;
+    auto query = max_items_ > 0 ? logger::EventQuery(fresh_, logger::EventQuery::Type::Newest, max_items_) :
+                                  logger::EventQuery(fresh_, logger::EventQuery::Type::All);
 
-        auto warnings = nlohmann::json::array();
-        auto errors   = nlohmann::json::array();
-        
-        auto it_wrn = events.find(log4cpp::Priority::WARN);
-        auto it_err = events.find(log4cpp::Priority::ERROR);
-
-        auto addEntry = [ & ] (nlohmann::json& arr, const Logger::Event& event)
-        {
-            nlohmann::json e;
-            e["id"       ] = event.id;
-            e["timestamp"] = Utils::Time::toString(boost::posix_time::from_time_t((time_t)event.timestamp));
-            e["message"  ] = event.message;
-            
-            arr.push_back(e);
-        };
-
-        //add warnings
-        if (it_wrn != events.end())
-        {
-            for (const auto& entry : it_wrn->second)
-                addEntry(warnings, entry);
-        }
-
-        //add errors
-        if (it_err != events.end())
-        {
-            for (const auto& entry : it_err->second)
-                addEntry(errors, entry);
-        }
-
-        archive_json["warnings"] = warnings;
-        archive_json["errors"]   = errors;
-
-        return archive_json;
-    };
-
-    auto json_obj = createJSON(fresh_ ? Logger::getInstance().getFreshEvents() : Logger::getInstance().getEvents());
+    auto json_obj = Logger::getInstance().getEventLog()->getEventsAsJSON(query);
 
     setJSONReply(json_obj);
 

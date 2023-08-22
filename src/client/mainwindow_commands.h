@@ -295,7 +295,9 @@ protected:
 // get_events
 struct RTCommandGetEvents : public rtcommand::RTCommand
 {
-    bool fresh_ = false;
+    bool         fresh_     = false;
+    unsigned int max_items_ = 0;
+
 protected:
     virtual bool run_impl() override;
 
