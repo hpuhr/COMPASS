@@ -35,9 +35,11 @@ EventLog::EventLog(size_t max_events_per_category)
 }
 
 /**
-*/
+ * Adds a new event to the event log under the given log priority.
+ */
 void EventLog::addEvent(const Event& evt, int priority)
 {
+    //thread safety first
     boost::lock_guard<boost::mutex> lock{event_mutex_};
 
     auto& buffer = events_[ priority ];
@@ -55,21 +57,29 @@ void EventLog::addEvent(const Event& evt, int priority)
 }
 
 /**
-*/
+ * Retrieves certain events using the given query.
+ */
 EventLog::EventMap EventLog::getEvents(const EventQuery& query) const
 {
     EventMap events;
 
+    //thread safety first
     boost::lock_guard<boost::mutex> lock{event_mutex_};
 
     for (auto& elem : events_)
     {
+        //correct event type?
+        if (query.event_type == EventQuery::EventType::Warnings && elem.first != log4cpp::Priority::WARN)
+            continue;
+        if (query.event_type == EventQuery::EventType::Errors && elem.first != log4cpp::Priority::ERROR)
+            continue;
+
         auto& evt_buffer = elem.second;
         auto& evts_out   = events[ elem.first ];
 
         //prereserve predicted size
         size_t n_buffer = evt_buffer.size();
-        size_t n_target = query.type == EventQuery::Type::All ? n_buffer : query.num_items;
+        size_t n_target = query.query_type == EventQuery::QueryType::All ? n_buffer : query.num_items;
         size_t n_res    = std::min(n_buffer, n_target);
 
         evts_out.reserve(n_res);
@@ -79,7 +89,7 @@ EventLog::EventMap EventLog::getEvents(const EventQuery& query) const
         for (auto it = evt_buffer.rbegin(); it != itend; ++it)
         {
             //query limit hit?
-            if (query.type != EventQuery::Type::All && evts_out.size() >= query.num_items)
+            if (query.query_type != EventQuery::QueryType::All && evts_out.size() >= query.num_items)
                 break;
 
             //only add fresh events?
@@ -96,7 +106,8 @@ EventLog::EventMap EventLog::getEvents(const EventQuery& query) const
 }
 
 /**
-*/
+ * Retrieves certain events as json using the given query.
+ */
 nlohmann::json EventLog::getEventsAsJSON(const EventQuery& query) const
 {
     auto createJSON = [ & ] (const logger::EventLog::EventMap& events)
@@ -154,6 +165,7 @@ nlohmann::json EventLog::getEventsAsJSON(const EventQuery& query) const
 */
 void EventAppender::_append(const log4cpp::LoggingEvent& event)
 {
+    //only collect warnings and errors
     if (event_log_ && (event.priority == log4cpp::Priority::WARN ||
                        event.priority == log4cpp::Priority::ERROR))
     {

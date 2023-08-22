@@ -46,10 +46,10 @@ struct Event
         return true;
     }
 
-    bool        fresh = true;
-    uint32_t    id;
-    int         timestamp;
-    std::string message;
+    bool        fresh = true; // event is fresh (was never queried)
+    uint32_t    id;           // event id
+    int         timestamp;    // timestamp as seconds since epoch
+    std::string message;      // event message
 };
 
 /**
@@ -57,19 +57,31 @@ struct Event
  */
 struct EventQuery
 {
-    enum class Type
+    enum class QueryType
     {
-        All = 0,
-        Newest
+        All = 0, // obtain all items
+        Newest   // obtain k-newest items
+    };
+
+    enum class EventType
+    {
+        All = 0,  // obtain all types of events
+        Warnings, // obtain only warnings
+        Errors    // obtain only errors
     };
 
     EventQuery(bool q_fresh_only = false,
-               Type q_type = Type::All, 
-               size_t q_num_items = 10) : fresh_only(q_fresh_only), type(q_type), num_items(q_num_items) {}
+               EventType q_event_type = EventType::All,
+               QueryType q_query_type = QueryType::All, 
+               size_t q_num_items = 10) : fresh_only(q_fresh_only), 
+                                          event_type(q_event_type), 
+                                          query_type(q_query_type), 
+                                          num_items (q_num_items ) {}
 
-    bool   fresh_only;
-    Type   type;
-    size_t num_items;
+    bool      fresh_only; // obtain only fresh items and mark them as consumed by doing so
+    EventType event_type; // type of events to collect
+    QueryType query_type; // query type
+    size_t    num_items;  // maximum number of items to retrieve
 };
 
 /**
@@ -93,14 +105,14 @@ public:
 private:
     mutable EventMapInternal events_;
     mutable boost::mutex     event_mutex_;
-
-    size_t max_events_;
+    size_t                   max_events_;  //maximum number of events per log priority
 
     static uint32_t          event_ids_;
 };
 
 /**
-*/
+ * Log appender for collecting important log messages in an event log.
+ */
 class EventAppender : public log4cpp::AppenderSkeleton
 {
 public:

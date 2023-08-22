@@ -1333,8 +1333,8 @@ void RTCommandGetEvents::assignVariables_impl(const VariablesMap& variables)
 
 bool RTCommandGetEvents::run_impl()
 {
-    auto query = max_items_ > 0 ? logger::EventQuery(fresh_, logger::EventQuery::Type::Newest, max_items_) :
-                                  logger::EventQuery(fresh_, logger::EventQuery::Type::All);
+    auto query = max_items_ > 0 ? logger::EventQuery(fresh_, logger::EventQuery::EventType::All, logger::EventQuery::QueryType::Newest, max_items_) :
+                                  logger::EventQuery(fresh_, logger::EventQuery::EventType::All, logger::EventQuery::QueryType::All);
 
     auto json_obj = Logger::getInstance().getEventLog()->getEventsAsJSON(query);
 
