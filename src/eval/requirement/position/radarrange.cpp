@@ -20,15 +20,11 @@
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
 
-#include "projection.h"
+#include "ogrprojection.h"
 #include "projectionmanager.h"
-#include "datasourcemanager.h"
-
-#include <ogr_spatialref.h>
 
 #include <algorithm>
 
@@ -79,17 +75,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
     ptime timestamp;
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
-
-    OGRSpatialReference local;
-
-    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
-
     dbContent::TargetPosition tst_pos;
-
-    double x_pos, y_pos;
-    double distance, angle, range;
 
     bool is_inside;
     boost::optional<dbContent::TargetPosition> ref_pos;
@@ -132,21 +118,38 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     };
 
     ProjectionManager& proj_man = ProjectionManager::instance();
-    assert(proj_man.hasCurrentProjection());
-    Projection& projection = proj_man.currentProjection();
-    projection.clearCoordinateSystems(); // to rebuild from data sources
-    projection.addAllRadarCoordinateSystems();
+
+    OGRProjection& projection = proj_man.ogrProjection();
+
+    if (!projection.radarCoordinateSystemsAdded())
+        projection.addAllRadarCoordinateSystems();
 
     unsigned int tst_ds_id;
-    set<unsigned int> ds_unknown;
+
+    double ref_range_m, ref_azm_deg, tst_range_m, tst_azm_deg;
+    double range_m_diff;
 
     for (const auto& tst_id : tst_data)
     {
         ++num_pos;
 
+        tst_ds_id = target_data.tstChain().dsID(tst_id);
+
+        if (!projection.hasCoordinateSystem(tst_ds_id))
+        {
+            if (!skip_no_data_details)
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_passed, num_comp_failed,
+                            "No data source info");
+
+            continue;
+        }
+
         timestamp = tst_id.first;
         tst_pos = target_data.tstChain().pos(tst_id);
-        tst_ds_id = target_data.tstChain().dsID(tst_id);
 
         comp_passed = false;
 
@@ -196,48 +199,35 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
         }
         ++num_pos_inside;
 
-        if (!projection.hasCoordinateSystem(tst_ds_id))
-        {
-            addDetail(timestamp, tst_pos,
-                        ref_pos, // ref_pos
-                        is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                        num_comp_passed, num_comp_failed,
-                        "Unknown Radar DS ID "+to_string(tst_ds_id));
-            ++num_pos_calc_errors;
-
-            if (!ds_unknown.count(tst_ds_id))
-            {
-                logwrn << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
-                       << " unknown data source " << tst_ds_id << ", skipping";
-                ds_unknown.insert(tst_ds_id);
-            }
-            continue;
-        }
-
-        local.SetStereographic(ref_pos->latitude_, ref_pos->longitude_, 1.0, 0.0, 0.0);
-
-        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
-
-        x_pos = tst_pos.longitude_;
-        y_pos = tst_pos.latitude_;
-
-        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+        ok = projection.wgs842PolarHorizontal(tst_ds_id, ref_pos->latitude_, ref_pos->longitude_, ref_azm_deg, ref_range_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
-                        ref_pos, // ref_pos
-                        is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                        num_comp_passed, num_comp_failed, 
-                        "Position transformation error");
+                      ref_pos, // ref_pos
+                      is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                      num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                      num_comp_passed, num_comp_failed,
+                      "Ref. position transformation error");
             ++num_pos_calc_errors;
             continue;
         }
 
-        distance = sqrt(pow(x_pos,2) + pow(y_pos,2));
+        ok = projection.wgs842PolarHorizontal(tst_ds_id, tst_pos.latitude_, tst_pos.longitude_, tst_azm_deg, tst_range_m);
+        if (!ok)
+        {
+            addDetail(timestamp, tst_pos,
+                      ref_pos, // ref_pos
+                      is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                      num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                      num_comp_passed, num_comp_failed,
+                      "Tst. position transformation error");
+            ++num_pos_calc_errors;
+            continue;
+        }
 
-        if (std::isnan(distance) || std::isinf(distance))
+        range_m_diff = ref_range_m - tst_range_m;
+
+        if (std::isnan(range_m_diff) || std::isinf(range_m_diff))
         {
             addDetail(timestamp, tst_pos,
                         ref_pos, // ref_pos
@@ -251,7 +241,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
         ++num_distances;
 
-        if (fabs(distance) <= threshold_value_) // for single value
+        if (fabs(range_m_diff) <= threshold_value_) // for single value
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -265,12 +255,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
         addDetail(timestamp, tst_pos,
                     ref_pos,
-                    is_inside, distance, comp_passed, // pos_inside, value, check_passed
+                    is_inside, range_m_diff, comp_passed, // pos_inside, value, check_passed
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_comp_passed, num_comp_failed,
                     comment);
 
-        values.push_back(distance);
+        values.push_back(range_m_diff);
     }
 
     //        logdbg << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_

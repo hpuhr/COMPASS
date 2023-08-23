@@ -80,4 +80,11 @@ std::string Projection::name() const { return name_; }
 
 void Projection::name(const std::string& name) { name_ = name; }
 
+bool Projection::radarCoordinateSystemsAdded()
+{
+    boost::mutex::scoped_lock locker(radar_coordinate_systems_mutex_);
+
+    return radar_coordinate_systems_added_;
+}
+
 void Projection::checkSubConfigurables() {}

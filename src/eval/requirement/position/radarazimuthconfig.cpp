@@ -36,7 +36,7 @@ PositionRadarAzimuthConfig::PositionRadarAzimuthConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0);
+    registerParameter("threshold_value", &threshold_value_, 0.1);
 }
 
 PositionRadarAzimuthConfig::~PositionRadarAzimuthConfig()

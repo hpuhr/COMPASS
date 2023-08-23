@@ -56,6 +56,11 @@ namespace EvaluationRequirementResult
     class SinglePositionLatency;
     class JoinedPositionLatency;
 
+    class SinglePositionRadarAzimuth;
+    class JoinedPositionRadarAzimuth;
+    class SinglePositionRadarRange;
+    class JoinedPositionRadarRange;
+
     class SingleSpeed;
     class JoinedSpeed;
 
@@ -124,6 +129,11 @@ private:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionAcross> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionLatency> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionLatency> result);
+
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionRadarAzimuth> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarAzimuth> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionRadarRange> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarRange> result);
 
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleSpeed> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedSpeed> result);

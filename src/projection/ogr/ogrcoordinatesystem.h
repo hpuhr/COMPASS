@@ -44,6 +44,9 @@ class OGRCoordinateSystem
     bool cartesian2WGS84(double x_pos_m, double y_pos_m, double& latitude_deg,
                          double& longitude_deg);
 
+    // azimuth_deg as math angle
+    bool wgs842PolarHorizontal(double latitude_deg, double longitude_deg, double& azimuth_deg, double& ground_range_m);
+
   protected:
     unsigned int id_{0};
     double latitude_deg_{0};

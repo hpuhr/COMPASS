@@ -236,15 +236,15 @@ void SinglePositionRadarAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationR
     utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
 
     // along
-    utn_req_table.addRow({"DMin [m]", "Minimum of distance",
+    utn_req_table.addRow({"DMin [m]", "Minimum of angle distance",
                           String::doubleToStringPrecision(value_min_,2).c_str()}, this);
-    utn_req_table.addRow({"DMax [m]", "Maximum of distance",
+    utn_req_table.addRow({"DMax [m]", "Maximum of angle distance",
                           String::doubleToStringPrecision(value_max_,2).c_str()}, this);
-    utn_req_table.addRow({"DAvg [m]", "Average of distance",
+    utn_req_table.addRow({"DAvg [m]", "Average of angle distance",
                           String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
-    utn_req_table.addRow({"DSDev [m]", "Standard Deviation of distance",
+    utn_req_table.addRow({"DSDev [m]", "Standard Deviation of angle distance",
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-    utn_req_table.addRow({"DVar [m^2]", "Variance of distance",
+    utn_req_table.addRow({"DVar [m^2]", "Variance of angle distance",
                           String::doubleToStringPrecision(value_rms_,2).c_str()}, this);
     utn_req_table.addRow({"RMS", "Root mean square",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);

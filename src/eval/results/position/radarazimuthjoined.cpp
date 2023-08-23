@@ -206,15 +206,15 @@ void JoinedPositionRadarAzimuth::addDetails(std::shared_ptr<EvaluationResultsRep
     sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
 
     // along
-    sec_det_table.addRow({"DMin [m]", "Minimum of distance",
+    sec_det_table.addRow({"DMin [m]", "Minimum of angle distance",
                           String::doubleToStringPrecision(value_min_,2).c_str()}, this);
-    sec_det_table.addRow({"DMax [m]", "Maximum of distance",
+    sec_det_table.addRow({"DMax [m]", "Maximum of angle distance",
                           String::doubleToStringPrecision(value_max_,2).c_str()}, this);
-    sec_det_table.addRow({"DAvg [m]", "Average of distance",
+    sec_det_table.addRow({"DAvg [m]", "Average of angle distance",
                           String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
-    sec_det_table.addRow({"DSDev [m]", "Standard Deviation of distance",
+    sec_det_table.addRow({"DSDev [m]", "Standard Deviation of angle distance",
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-    sec_det_table.addRow({"DVar [m^2]", "Variance of distance",
+    sec_det_table.addRow({"DVar [m^2]", "Variance of angle distance",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
     sec_det_table.addRow({"RMS", "Root mean square",
                           String::doubleToStringPrecision(value_rms_,2).c_str()}, this);
