@@ -371,7 +371,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionRadarAzimuth::viewableDa
 
         const auto& detail = getDetail(detail_cnt);
 
-        assert(detail.numPositions() == 1);
+        assert(detail.numPositions() >= 1);
 
         (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
         (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
