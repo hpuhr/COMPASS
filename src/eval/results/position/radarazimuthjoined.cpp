@@ -41,38 +41,38 @@ namespace EvaluationRequirementResult
 {
 
 JoinedPositionRadarAzimuth::JoinedPositionRadarAzimuth(const std::string& result_id,
-                                               std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                               const SectorLayer& sector_layer, 
-                                               EvaluationManager& eval_man)
-:   JoinedPositionBase("JoinedPositionRadarAzimuth", result_id, requirement, sector_layer, eval_man)
+                                                       std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                       const SectorLayer& sector_layer,
+                                                       EvaluationManager& eval_man)
+    :   JoinedPositionBase("JoinedPositionRadarAzimuth", result_id, requirement, sector_layer, eval_man)
 {
 }
 
-void JoinedPositionRadarAzimuth::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SinglePositionRadarAzimuth> other_sub =
-            std::static_pointer_cast<SinglePositionRadarAzimuth>(other);
-    assert (other_sub);
+//void JoinedPositionRadarAzimuth::join_impl(std::shared_ptr<Single> other)
+//{
+//    std::shared_ptr<SinglePositionRadarAzimuth> other_sub =
+//            std::static_pointer_cast<SinglePositionRadarAzimuth>(other);
+//    assert (other_sub);
 
-    addToValues(other_sub);
-}
+//    addToValues(other_sub);
+//}
 
-void JoinedPositionRadarAzimuth::addToValues (std::shared_ptr<SinglePositionRadarAzimuth> single_result)
-{
-    assert (single_result);
+//void JoinedPositionRadarAzimuth::addToValues (std::shared_ptr<SinglePositionRadarAzimuth> single_result)
+//{
+//    assert (single_result);
 
-    if (!single_result->use())
-        return;
+//    if (!single_result->use())
+//        return;
 
-    num_pos_         += single_result->numPos();
-    num_no_ref_      += single_result->numNoRef();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_passed_      += single_result->numPassed();
-    num_failed_      += single_result->numFailed();
+//    num_pos_         += single_result->numPos();
+//    num_no_ref_      += single_result->numNoRef();
+//    num_pos_outside_ += single_result->numPosOutside();
+//    num_pos_inside_  += single_result->numPosInside();
+//    num_passed_      += single_result->numPassed();
+//    num_failed_      += single_result->numFailed();
 
-    update();
-}
+//    update();
+//}
 
 void JoinedPositionRadarAzimuth::update()
 {
@@ -150,17 +150,8 @@ void JoinedPositionRadarAzimuth::addToOverviewTable(std::shared_ptr<EvaluationRe
             std::static_pointer_cast<EvaluationRequirement::PositionRadarAzimuth>(requirement_);
     assert (req);
 
-    //QVariant p_passed_var;
-
     QVariant calc_val;
     string result {"Unknown"};
-
-//    if (prob_.has_value())
-//    {
-//        p_passed_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
-
-//        result = req->getConditionResultStr(prob_.value());
-//    }
 
     if (num_passed_ + num_failed_)
     {
@@ -224,23 +215,14 @@ void JoinedPositionRadarAzimuth::addDetails(std::shared_ptr<EvaluationResultsRep
 
 
     // condition
-//    {
-//        QVariant p_passed_var;
+    sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
-//        if (prob_.has_value())
-//            p_passed_var = roundf(prob_.value() * 10000.0) / 100.0;
+    string result {"Unknown"};
 
-//        sec_det_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
+    if (num_failed_ + num_passed_)
+        result = req->getConditionResultStr(value_rms_);
 
-        sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
-
-        string result {"Unknown"};
-
-        if (num_failed_ + num_passed_)
-            result = req->getConditionResultStr(value_rms_);
-
-        sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
-//    }
+    sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
     // figure
     sector_section.addFigure("sector_overview", "Sector Overview",
@@ -310,26 +292,26 @@ std::string JoinedPositionRadarAzimuth::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedPositionRadarAzimuth::updatesToUseChanges_impl()
-{
-    loginf << "JoinedPositionRadarAzimuth: updatesToUseChanges";
+//void JoinedPositionRadarAzimuth::updatesToUseChanges_impl()
+//{
+//    loginf << "JoinedPositionRadarAzimuth: updatesToUseChanges";
 
-    num_pos_         = 0;
-    num_no_ref_      = 0;
-    num_pos_outside_ = 0;
-    num_pos_inside_  = 0;
-    num_failed_      = 0;
-    num_passed_      = 0;
+//    num_pos_         = 0;
+//    num_no_ref_      = 0;
+//    num_pos_outside_ = 0;
+//    num_pos_inside_  = 0;
+//    num_failed_      = 0;
+//    num_passed_      = 0;
 
-    for (auto result_it : results_)
-    {
-        std::shared_ptr<SinglePositionRadarAzimuth> result =
-                std::static_pointer_cast<SinglePositionRadarAzimuth>(result_it);
-        assert (result);
+//    for (auto result_it : results_)
+//    {
+//        std::shared_ptr<SinglePositionRadarAzimuth> result =
+//                std::static_pointer_cast<SinglePositionRadarAzimuth>(result_it);
+//        assert (result);
 
-        addToValues(result);
-    }
-}
+//        addToValues(result);
+//    }
+//}
 
 void JoinedPositionRadarAzimuth::exportAsCSV()
 {

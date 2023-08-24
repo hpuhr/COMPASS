@@ -30,6 +30,8 @@
 #include "util/timeconv.h"
 #include "util/number.h"
 
+#include <Eigen/Dense>
+
 #include <cassert>
 #include <algorithm>
 
@@ -41,21 +43,23 @@ namespace EvaluationRequirementResult
 {
 
 SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
-                                                     std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                                     const SectorLayer& sector_layer,
-                                                     unsigned int utn,
-                                                     const EvaluationTargetData* target,
-                                                     EvaluationManager& eval_man,
-                                                     const EvaluationDetails& details,
-                                                     unsigned int num_pos,
-                                                     unsigned int num_no_ref,
-                                                     unsigned int num_pos_outside,
-                                                     unsigned int num_pos_inside,
-                                                     unsigned int num_comp_passed,
-                                                     unsigned int num_comp_failed,
-                                                     vector<double> values)
+                                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                   const SectorLayer& sector_layer,
+                                                   unsigned int utn,
+                                                   const EvaluationTargetData* target,
+                                                   EvaluationManager& eval_man,
+                                                   const EvaluationDetails& details,
+                                                   unsigned int num_pos,
+                                                   unsigned int num_no_ref,
+                                                   unsigned int num_pos_outside,
+                                                   unsigned int num_pos_inside,
+                                                   unsigned int num_comp_passed,
+                                                   unsigned int num_comp_failed,
+                                                   vector<double> values,
+                                                   vector<double> ref_range_values, vector<double> tst_range_values)
     :   SinglePositionBase("SinglePositionRadarRange", result_id, requirement, sector_layer, utn, target, eval_man, details,
-                           num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values)
+                           num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values),
+      ref_range_values_(ref_range_values), tst_range_values_(tst_range_values)
 {
     update();
 }
@@ -66,6 +70,7 @@ void SinglePositionRadarRange::update()
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
     assert (values_.size() == num_passed_ + num_failed_);
+    assert (values_.size() == ref_range_values_.size() && ref_range_values_.size() == tst_range_values_.size());
 
     unsigned int num_distances = values_.size();
 
@@ -93,7 +98,28 @@ void SinglePositionRadarRange::update()
 
 
         assert (num_passed_ <= num_distances);
-        //prob_ = (float)num_passed_/(float)num_distances; no prob here
+
+
+        // linear regression
+
+        Eigen::MatrixXd x_mat = Eigen::MatrixXd::Ones(num_distances, 2);
+        Eigen::MatrixXd y_mat = Eigen::MatrixXd::Ones(num_distances, 1);
+
+        for (unsigned int cnt=0; cnt < num_distances; ++cnt)
+        {
+            x_mat(cnt, 0) = tst_range_values_.at(cnt);
+            y_mat(cnt, 0) = ref_range_values_.at(cnt);
+        }
+
+        Eigen::JacobiSVD<Eigen::MatrixXd> svd;
+
+        svd.compute(x_mat, Eigen::ComputeThinV | Eigen::ComputeThinU);
+        Eigen::MatrixXd x = svd.solve(y_mat);
+
+        //loginf << "x " << x;
+
+        range_gain_ = x(0, 0);
+        range_bias_ = x(1, 0);
     }
     else
     {
@@ -508,6 +534,15 @@ void SinglePositionRadarRange::addAnnotations(nlohmann::json::object_t& viewable
             }
         }
     }
+}
+
+const vector<double>& SinglePositionRadarRange::refRangeValues() const
+{
+    return ref_range_values_;
+}
+const vector<double>& SinglePositionRadarRange::tstRangeValues() const
+{
+    return tst_range_values_;
 }
 
 bool SinglePositionRadarRange::hasReference (

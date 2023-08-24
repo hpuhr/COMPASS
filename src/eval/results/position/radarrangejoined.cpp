@@ -30,6 +30,8 @@
 
 #include <QFileDialog>
 
+#include <Eigen/Dense>
+
 #include <algorithm>
 #include <cassert>
 #include <fstream>
@@ -41,45 +43,17 @@ namespace EvaluationRequirementResult
 {
 
 JoinedPositionRadarRange::JoinedPositionRadarRange(const std::string& result_id,
-                                               std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                               const SectorLayer& sector_layer, 
-                                               EvaluationManager& eval_man)
-:   JoinedPositionBase("JoinedPositionRadarRange", result_id, requirement, sector_layer, eval_man)
+                                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                   const SectorLayer& sector_layer,
+                                                   EvaluationManager& eval_man)
+    :   JoinedPositionBase("JoinedPositionRadarRange", result_id, requirement, sector_layer, eval_man)
 {
-}
-
-void JoinedPositionRadarRange::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SinglePositionRadarRange> other_sub =
-            std::static_pointer_cast<SinglePositionRadarRange>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedPositionRadarRange::addToValues (std::shared_ptr<SinglePositionRadarRange> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_pos_         += single_result->numPos();
-    num_no_ref_      += single_result->numNoRef();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_passed_      += single_result->numPassed();
-    num_failed_      += single_result->numFailed();
-
-    update();
 }
 
 void JoinedPositionRadarRange::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
-
-    //prob_.reset();
 
     vector<double> all_values = values();
 
@@ -112,7 +86,33 @@ void JoinedPositionRadarRange::update()
         value_rms_ = sqrt(value_rms_);
 
         assert (num_passed_ <= num_distances);
-        //prob_ = (float)num_passed_ / (float)num_distances;
+
+        // linear regression
+
+        vector<double> ref_range_values = refRangeValues();
+        vector<double> tst_range_values = tstRangeValues();
+
+        assert (all_values.size() == ref_range_values.size() && ref_range_values.size() == tst_range_values.size());
+
+        Eigen::MatrixXd x_mat = Eigen::MatrixXd::Ones(num_distances, 2);
+        Eigen::MatrixXd y_mat = Eigen::MatrixXd::Ones(num_distances, 1);
+
+        for (unsigned int cnt=0; cnt < num_distances; ++cnt)
+        {
+            x_mat(cnt, 0) = tst_range_values.at(cnt);
+            y_mat(cnt, 0) = ref_range_values.at(cnt);
+        }
+
+        Eigen::JacobiSVD<Eigen::MatrixXd> svd;
+
+        svd.compute(x_mat, Eigen::ComputeThinV | Eigen::ComputeThinU);
+        Eigen::MatrixXd x = svd.solve(y_mat);
+
+        loginf << "x " << x;
+
+        range_gain_ = x(0, 0);
+        range_bias_ = x(1, 0);
+
     }
     else
     {
@@ -150,17 +150,8 @@ void JoinedPositionRadarRange::addToOverviewTable(std::shared_ptr<EvaluationResu
             std::static_pointer_cast<EvaluationRequirement::PositionRadarRange>(requirement_);
     assert (req);
 
-    //QVariant p_passed_var;
-
     QVariant calc_val;
     string result {"Unknown"};
-
-//    if (prob_.has_value())
-//    {
-//        p_passed_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
-
-//        result = req->getConditionResultStr(prob_.value());
-//    }
 
     if (num_passed_ + num_failed_)
     {
@@ -224,23 +215,15 @@ void JoinedPositionRadarRange::addDetails(std::shared_ptr<EvaluationResultsRepor
 
 
     // condition
-//    {
-//        QVariant p_passed_var;
 
-//        if (prob_.has_value())
-//            p_passed_var = roundf(prob_.value() * 10000.0) / 100.0;
+    sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
-//        sec_det_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
+    string result {"Unknown"};
 
-        sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
+    if (num_failed_ + num_passed_)
+        result = req->getConditionResultStr(value_rms_);
 
-        string result {"Unknown"};
-
-        if (num_failed_ + num_passed_)
-            result = req->getConditionResultStr(value_rms_);
-
-        sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
-//    }
+    sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
     // figure
     sector_section.addFigure("sector_overview", "Sector Overview",
@@ -310,25 +293,40 @@ std::string JoinedPositionRadarRange::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedPositionRadarRange::updatesToUseChanges_impl()
+vector<double> JoinedPositionRadarRange::refRangeValues() const
 {
-    loginf << "JoinedPositionRadarRange: updatesToUseChanges";
+    vector<double> values;
 
-    num_pos_         = 0;
-    num_no_ref_      = 0;
-    num_pos_outside_ = 0;
-    num_pos_inside_  = 0;
-    num_failed_      = 0;
-    num_passed_      = 0;
-
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SinglePositionRadarRange> result =
-                std::static_pointer_cast<SinglePositionRadarRange>(result_it);
-        assert (result);
+        SinglePositionRadarRange* single_result = dynamic_cast<SinglePositionRadarRange*>(result_it.get());
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        values.insert(values.end(), single_result->refRangeValues().begin(), single_result->refRangeValues().end());
     }
+
+    return values;
+}
+
+vector<double> JoinedPositionRadarRange::tstRangeValues() const
+{
+    vector<double> values;
+
+    for (auto& result_it : results_)
+    {
+        SinglePositionRadarRange* single_result = dynamic_cast<SinglePositionRadarRange*>(result_it.get());
+        assert (single_result);
+
+        if (!single_result->use())
+            continue;
+
+        values.insert(values.end(), single_result->tstRangeValues().begin(), single_result->tstRangeValues().end());
+    }
+
+    return values;
 }
 
 void JoinedPositionRadarRange::exportAsCSV()

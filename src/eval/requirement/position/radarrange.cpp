@@ -87,6 +87,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     string comment;
 
     vector<double> values;
+    vector<double> ref_range_values;
+    vector<double> tst_range_values;
 
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
@@ -261,6 +263,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
                     comment);
 
         values.push_back(range_m_diff);
+        ref_range_values.push_back(ref_range_m);
+        tst_range_values.push_back(tst_range_m);
     }
 
     //        logdbg << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -282,13 +286,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
     assert (num_distances == num_comp_failed + num_comp_passed);
     assert (num_distances == values.size());
+    assert (values.size() == ref_range_values.size());
+    assert (values.size() == tst_range_values.size());
 
     //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionRadarRange>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
-                values);
+                values, ref_range_values, tst_range_values);
 }
 
 std::string PositionRadarRange::getConditionStr () const

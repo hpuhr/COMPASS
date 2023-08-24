@@ -32,19 +32,20 @@ class SinglePositionRadarRange : public SinglePositionBase
 {
 public:
     SinglePositionRadarRange(const std::string& result_id,
-                           std::shared_ptr<EvaluationRequirement::Base> requirement,
-                           const SectorLayer& sector_layer,
-                           unsigned int utn, 
-                           const EvaluationTargetData* target, 
-                           EvaluationManager& eval_man,
-                           const EvaluationDetails& details,
-                           unsigned int num_pos, 
-                           unsigned int num_no_ref,
-                           unsigned int num_pos_outside, 
-                           unsigned int num_pos_inside,
-                           unsigned int num_comp_passed,
-                           unsigned int num_comp_failed,
-                           vector<double> values);
+                             std::shared_ptr<EvaluationRequirement::Base> requirement,
+                             const SectorLayer& sector_layer,
+                             unsigned int utn,
+                             const EvaluationTargetData* target,
+                             EvaluationManager& eval_man,
+                             const EvaluationDetails& details,
+                             unsigned int num_pos,
+                             unsigned int num_no_ref,
+                             unsigned int num_pos_outside,
+                             unsigned int num_pos_inside,
+                             unsigned int num_comp_passed,
+                             unsigned int num_comp_failed,
+                             vector<double> values,
+                             vector<double> ref_range_values, vector<double> tst_range_values);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -64,7 +65,17 @@ public:
 
     void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
+    const vector<double>& refRangeValues() const;
+    const vector<double>& tstRangeValues() const;
+
 protected:
+
+    vector<double> ref_range_values_;
+    vector<double> tst_range_values_;
+
+    QVariant range_gain_;
+    QVariant range_bias_;
+
     void update();
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
