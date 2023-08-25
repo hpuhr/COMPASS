@@ -82,20 +82,15 @@ void SinglePositionRadarRange::update()
         value_avg_ = std::accumulate(values_.begin(), values_.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
-        value_rms_ = 0;
 
         for(auto val : values_)
         {
             value_var_ += pow(val - value_avg_, 2);
-
-            value_rms_ += pow(val, 2);
         }
+
         value_var_ /= (float)num_distances;
 
-
-        value_rms_ /= (float)num_distances;
-        value_rms_ = sqrt(value_rms_);
-
+        value_rms_ = 0; // not used
 
         assert (num_passed_ <= num_distances);
 
@@ -174,16 +169,12 @@ void SinglePositionRadarRange::addTargetDetailsToTable (
 {
     if (!section.hasTable(table_name))
     {
-        //Qt::SortOrder order = Qt::AscendingOrder;
-
-        //        if(req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN
-        //                || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
         Qt::SortOrder order = Qt::DescendingOrder;
 
 
-        section.addTable(table_name, 15,
+        section.addTable(table_name, 16,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "DMin", "DMax", "DAvg", "DSDev", "RMS", "#CF", "#CP"}, true, 12, order);
+                          "DMin", "DMax", "DAvg", "DSDev", "Bias", "Gain", "#CF", "#CP"}, true, 12, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -196,7 +187,8 @@ void SinglePositionRadarRange::addTargetDetailsToTable (
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
                  Number::round(sqrt(value_var_),2), // "DSDev"
-                 Number::round(value_rms_,2), // "RMS"
+                 range_bias_,
+                 range_gain_,
                  num_failed_, // "#DOK"
                  num_passed_}, // "#DNOK"
                 this, {utn_});
@@ -209,15 +201,12 @@ void SinglePositionRadarRange::addTargetDetailsToTableADSB (
     {
         Qt::SortOrder order = Qt::DescendingOrder;
 
-        section.addTable(table_name, 16,
+        section.addTable(table_name, 17,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "DMin", "DMax", "DAvg", "DSDev", "RMS", "#CF", "#CP", "MOPS"}, true, 10, order);
+                          "DMin", "DMax", "DAvg", "DSDev", "Bias", "Gain", "#CF", "#CP", "MOPS"}, true, 12, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
-
-    // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-    // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK", "MOPS", "NUCp/NIC", "NACp"
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -227,8 +216,9 @@ void SinglePositionRadarRange::addTargetDetailsToTableADSB (
                  Number::round(value_min_,2), // "DMin"
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
-                 Number::round(sqrt(value_var_),2), // "DSDev"
-                 Number::round(value_rms_,2), // "RMS"
+                 Number::round(sqrt(value_var_),2), // "DSDev",
+                 range_bias_,
+                 range_gain_,
                  num_failed_, // "#CF"
                  num_passed_, // "#CP"
                  target_->mopsVersionStr().c_str()}, // "MOPS"
@@ -252,9 +242,6 @@ void SinglePositionRadarRange::addTargetDetailsToReport(shared_ptr<EvaluationRes
 
     addCommonDetails(root_item);
 
-    // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-    // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK"
-
     utn_req_table.addRow({"Use", "To be used in results", use_}, this);
     utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
     utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
@@ -272,25 +259,23 @@ void SinglePositionRadarRange::addTargetDetailsToReport(shared_ptr<EvaluationRes
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     utn_req_table.addRow({"DVar [m^2]", "Variance of distance",
                           String::doubleToStringPrecision(value_rms_,2).c_str()}, this);
-    utn_req_table.addRow({"RMS", "Root mean square",
-                          String::doubleToStringPrecision(value_var_,2).c_str()}, this);
+
+    if (range_bias_.isValid())
+        utn_req_table.addRow({"Range Bias [m]", "Range bias (linear estimation)",
+                              String::doubleToStringPrecision(range_bias_.toDouble(),2).c_str()}, this);
+
+    if (range_gain_.isValid())
+        utn_req_table.addRow({"Range Gain [1]", "Range gain (linear estimation)",
+                              String::doubleToStringPrecision(range_gain_.toDouble(),5).c_str()}, this);
+
     utn_req_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_failed_}, this);
     utn_req_table.addRow({"#CP [1]", "Number of updates with passed comparison", num_passed_},
                          this);
     // condition
-    //    {
-    //        QVariant p_passed_var;
-
-    //        if (prob_.has_value())
-    //            p_passed_var = roundf(prob_.value() * 10000.0) / 100.0;
-
-    //        utn_req_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
-
     utn_req_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
     string result {"Unknown"};
 
-    //if (prob_.has_value())
     if (num_failed_ + num_passed_)
         result = req->getConditionResultStr(value_rms_);
 
@@ -300,7 +285,7 @@ void SinglePositionRadarRange::addTargetDetailsToReport(shared_ptr<EvaluationRes
     {
         root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
         utn_req_section.perTargetWithIssues(true);
-        //
+
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   [this](void) { return this->getTargetErrorsViewable(); });
     }
@@ -310,23 +295,6 @@ void SinglePositionRadarRange::addTargetDetailsToReport(shared_ptr<EvaluationRes
         utn_req_section.getText("target_errors_overview_no_figure").addText(
                     "No target errors found, therefore no figure was generated.");
     }
-
-    //    }
-
-    //    if (prob_.has_value() && prob_.value() != 1.0) // TODO
-    //    {
-    //        //        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-    //        //                                  [this](void) { return this->getTargetErrorsViewable(); });
-
-    //        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-    //                                  [this](void) { return this->getTargetErrorsViewable(); });
-    //    }
-    //    else
-    //    {
-    //        utn_req_section.addText("target_errors_overview_no_figure");
-    //        utn_req_section.getText("target_errors_overview_no_figure").addText(
-    //                    "No target errors found, therefore no figure was generated.");
-    //    }
 
     // add further details
     reportDetails(utn_req_section);
@@ -484,7 +452,6 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionRadarRange::getTargetErr
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
-    //addAnnotationFeatures(*viewable_ptr, false, add_highlight);
     addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;

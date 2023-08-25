@@ -73,8 +73,8 @@ protected:
     vector<double> ref_range_values_;
     vector<double> tst_range_values_;
 
-    QVariant range_gain_;
     QVariant range_bias_;
+    QVariant range_gain_;
 
     void update();
 

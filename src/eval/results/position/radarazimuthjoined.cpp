@@ -48,38 +48,10 @@ JoinedPositionRadarAzimuth::JoinedPositionRadarAzimuth(const std::string& result
 {
 }
 
-//void JoinedPositionRadarAzimuth::join_impl(std::shared_ptr<Single> other)
-//{
-//    std::shared_ptr<SinglePositionRadarAzimuth> other_sub =
-//            std::static_pointer_cast<SinglePositionRadarAzimuth>(other);
-//    assert (other_sub);
-
-//    addToValues(other_sub);
-//}
-
-//void JoinedPositionRadarAzimuth::addToValues (std::shared_ptr<SinglePositionRadarAzimuth> single_result)
-//{
-//    assert (single_result);
-
-//    if (!single_result->use())
-//        return;
-
-//    num_pos_         += single_result->numPos();
-//    num_no_ref_      += single_result->numNoRef();
-//    num_pos_outside_ += single_result->numPosOutside();
-//    num_pos_inside_  += single_result->numPosInside();
-//    num_passed_      += single_result->numPassed();
-//    num_failed_      += single_result->numFailed();
-
-//    update();
-//}
-
 void JoinedPositionRadarAzimuth::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
-
-    //prob_.reset();
 
     vector<double> all_values = values();
 
@@ -97,22 +69,17 @@ void JoinedPositionRadarAzimuth::update()
         value_avg_ = std::accumulate(all_values.begin(), all_values.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
-        value_rms_ = 0;
 
         for(auto val : all_values)
         {
             value_var_ += pow(val - value_avg_, 2);
-
-            value_rms_ += pow(val, 2);
         }
 
         value_var_ /= (float)num_distances;
 
-        value_rms_ /= (float)num_distances;
-        value_rms_ = sqrt(value_rms_);
+        value_rms_ = 0; // not used
 
         assert (num_passed_ <= num_distances);
-        //prob_ = (float)num_passed_ / (float)num_distances;
     }
     else
     {
@@ -155,8 +122,8 @@ void JoinedPositionRadarAzimuth::addToOverviewTable(std::shared_ptr<EvaluationRe
 
     if (num_passed_ + num_failed_)
     {
-        calc_val = String::doubleToStringPrecision(value_rms_,2).c_str();
-        result = req->getConditionResultStr(value_rms_);
+        calc_val = String::doubleToStringPrecision(value_avg_,2).c_str();
+        result = req->getConditionResultStr(value_avg_);
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -207,8 +174,6 @@ void JoinedPositionRadarAzimuth::addDetails(std::shared_ptr<EvaluationResultsRep
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     sec_det_table.addRow({"DVar [m^2]", "Variance of angle distance",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-    sec_det_table.addRow({"RMS", "Root mean square",
-                          String::doubleToStringPrecision(value_rms_,2).c_str()}, this);
     sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_failed_}, this);
     sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_passed_},
                          this);
@@ -220,7 +185,7 @@ void JoinedPositionRadarAzimuth::addDetails(std::shared_ptr<EvaluationResultsRep
     string result {"Unknown"};
 
     if (num_failed_ + num_passed_)
-        result = req->getConditionResultStr(value_rms_);
+        result = req->getConditionResultStr(value_avg_);
 
     sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

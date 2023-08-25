@@ -71,19 +71,15 @@ void JoinedPositionRadarRange::update()
         value_avg_ = std::accumulate(all_values.begin(), all_values.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
-        value_rms_ = 0;
 
         for(auto val : all_values)
         {
             value_var_ += pow(val - value_avg_, 2);
-
-            value_rms_ += pow(val, 2);
         }
 
         value_var_ /= (float)num_distances;
 
-        value_rms_ /= (float)num_distances;
-        value_rms_ = sqrt(value_rms_);
+        value_rms_ = 0; // not used
 
         assert (num_passed_ <= num_distances);
 
@@ -108,7 +104,7 @@ void JoinedPositionRadarRange::update()
         svd.compute(x_mat, Eigen::ComputeThinV | Eigen::ComputeThinU);
         Eigen::MatrixXd x = svd.solve(y_mat);
 
-        loginf << "x " << x;
+        //loginf << "x " << x;
 
         range_gain_ = x(0, 0);
         range_bias_ = x(1, 0);
@@ -155,8 +151,8 @@ void JoinedPositionRadarRange::addToOverviewTable(std::shared_ptr<EvaluationResu
 
     if (num_passed_ + num_failed_)
     {
-        calc_val = String::doubleToStringPrecision(value_rms_,2).c_str();
-        result = req->getConditionResultStr(value_rms_);
+        calc_val = String::doubleToStringPrecision(value_avg_,2).c_str();
+        result = req->getConditionResultStr(value_avg_);
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -207,12 +203,18 @@ void JoinedPositionRadarRange::addDetails(std::shared_ptr<EvaluationResultsRepor
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     sec_det_table.addRow({"DVar [m^2]", "Variance of distance",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-    sec_det_table.addRow({"RMS", "Root mean square",
-                          String::doubleToStringPrecision(value_rms_,2).c_str()}, this);
     sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_failed_}, this);
     sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_passed_},
                          this);
 
+
+    if (range_bias_.isValid())
+        sec_det_table.addRow({"Range Bias [m]", "Range bias (linear estimation)",
+                              String::doubleToStringPrecision(range_bias_.toDouble(),2).c_str()}, this);
+
+    if (range_gain_.isValid())
+        sec_det_table.addRow({"Range Gain [1]", "Range gain (linear estimation)",
+                              String::doubleToStringPrecision(range_gain_.toDouble(),5).c_str()}, this);
 
     // condition
 
@@ -221,7 +223,7 @@ void JoinedPositionRadarRange::addDetails(std::shared_ptr<EvaluationResultsRepor
     string result {"Unknown"};
 
     if (num_failed_ + num_passed_)
-        result = req->getConditionResultStr(value_rms_);
+        result = req->getConditionResultStr(value_avg_);
 
     sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
