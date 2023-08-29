@@ -24,6 +24,7 @@
 #include "viewabledataconfig.h"
 #include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgenerator.h"
+#include "datasourcecompoundcoverage.h"
 
 #include <QObject>
 
@@ -229,18 +230,12 @@ public:
     std::string dbContentNameRef() const;
     void dbContentNameRef(const std::string& name);
 
-//    unsigned int lineIDRef() const;
-//    void lineIDRef(unsigned int line_id_ref);
-
     bool hasValidReferenceDBContent ();
     std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[settings_.dbcontent_name_ref_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesRef();
 
     std::string dbContentNameTst() const;
     void dbContentNameTst(const std::string& name);
-
-//    unsigned int lineIDTst() const;
-//    void lineIDTst(unsigned int line_id_tst);
 
     bool hasValidTestDBContent ();
     std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[settings_.dbcontent_name_tst_]; } // can be used to set active bool
@@ -317,6 +312,8 @@ public:
     bool hasSelectedReferenceDataSources();
     bool hasSelectedTestDataSources();
 
+    const dbContent::DataSourceCompoundCoverage& tstSrcsCoverage() const;
+
 protected:
     COMPASS& compass_;
 
@@ -363,6 +360,8 @@ protected:
 
     bool use_fast_sector_inside_check_ = true;
 
+    dbContent::DataSourceCompoundCoverage tst_srcs_coverage_;
+
     virtual void checkSubConfigurables() override;
 
     void loadSectors();
@@ -376,6 +375,8 @@ protected:
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();
+
+    void updateCompoundCoverage(std::set<unsigned int> tst_sources);
 };
 
 #endif // EVALUATIONMANAGER_H

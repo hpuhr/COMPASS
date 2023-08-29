@@ -52,7 +52,7 @@ bool HistogramGenerator::hasValidResult() const
  */
 bool HistogramGenerator::refill()
 {
-    loginf << "HistogramGenerator: Refilling...";
+    loginf << "HistogramGenerator: refill";
 
     if (!hasData())
         return false;
@@ -65,13 +65,13 @@ bool HistogramGenerator::refill()
     if (!refill_impl())
         return false;
 
-    loginf << "HistogramGenerator: Finalizing results...";
+    loginf << "HistogramGenerator: refill: finalizing results";
 
     //compile results from intermediate data
     if (!finalizeResults())
         return false;
 
-    loginf << "HistogramGenerator: Refilled!";
+    loginf << "HistogramGenerator: refill: done";
 
     return true;
 }
