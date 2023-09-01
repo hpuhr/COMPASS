@@ -284,7 +284,7 @@ void DBInterface::createTable(const DBContent& object)
 
 bool DBInterface::existsPropertiesTable() { return existsTable(TABLE_NAME_PROPERTIES); }
 
-unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
+unsigned long DBInterface::getMaxRecordNumber(DBContent& object)
 {
     assert (dbOpen());
     assert(object.existsInDB());
@@ -300,8 +300,8 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 
     boost::mutex::scoped_lock locker(connection_mutex_);
 
-    shared_ptr<DBCommand> command = sql_generator_.getMaxUIntValueCommand(object.dbTableName(),
-                                                                             rec_num_var.dbColumnName());
+    shared_ptr<DBCommand> command = sql_generator_.getMaxULongIntValueCommand(object.dbTableName(),
+                                                                              rec_num_var.dbColumnName());
 
     shared_ptr<DBResult> result = db_connection_->execute(*command);
 
@@ -315,8 +315,8 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
         return 0;
     }
 
-    assert (!buffer->get<unsigned int>(rec_num_var.dbColumnName()).isNull(0));
-    return buffer->get<unsigned int>(rec_num_var.dbColumnName()).get(0);
+    assert (!buffer->get<unsigned long>(rec_num_var.dbColumnName()).isNull(0));
+    return buffer->get<unsigned long>(rec_num_var.dbColumnName()).get(0);
 }
 
 unsigned int DBInterface::getMaxRefTrackTrackNum()
@@ -1079,17 +1079,17 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
         assert (dbcontent.hasVariable(DBContent::meta_var_rec_num_.name()));
 
         Variable& rec_num_var = dbcontent.variable(DBContent::meta_var_rec_num_.name());
-        assert (rec_num_var.dataType() == PropertyDataType::UINT);
+        assert (rec_num_var.dataType() == PropertyDataType::ULONGINT);
 
         string rec_num_col_str = rec_num_var.dbColumnName();
-        assert (!buffer->has<unsigned int>(rec_num_col_str));
+        assert (!buffer->has<unsigned long>(rec_num_col_str));
 
-        buffer->addProperty(rec_num_col_str, PropertyDataType::UINT);
+        buffer->addProperty(rec_num_col_str, PropertyDataType::ULONGINT);
 
         assert (COMPASS::instance().dbContentManager().hasMaxRecordNumber());
-        unsigned int max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumber();
+        unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumber();
 
-        NullableVector<unsigned int>& rec_num_vec = buffer->get<unsigned int>(rec_num_col_str);
+        NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(rec_num_col_str);
 
         unsigned int buffer_size = buffer->size();
 

@@ -201,13 +201,13 @@ void ScatterPlotViewDataWidget::updateFromAllData()
 
             // add selected flags & rec_nums
             assert (buffer->has<bool>(DBContent::selected_var.name()));
-            assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
+            assert (buffer->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
 
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
-            NullableVector<unsigned int>& rec_num_vec = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
+            NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(DBContent::meta_var_rec_num_.name());
 
             std::vector<bool>& selected_data = selected_values_[dbcontent_name];
-            std::vector<unsigned int>& rec_num_data = rec_num_values_[dbcontent_name];
+            std::vector<unsigned long>& rec_num_data = rec_num_values_[dbcontent_name];
 
             unsigned int last_size = 0;
 
@@ -1510,17 +1510,17 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
-        assert (buf_it.second->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
-        NullableVector<unsigned int>& rec_num_vec = buf_it.second->get<unsigned int>(
+        assert (buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
+        NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
                     DBContent::meta_var_rec_num_.name());
 
-        std::map<unsigned int, std::vector<unsigned int>> rec_num_indexes =
+        std::map<unsigned long, std::vector<unsigned int>> rec_num_indexes =
                 rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
         // rec_num -> index
 
         std::vector<double>& x_values = x_values_.at(buf_it.first);
         std::vector<double>& y_values = y_values_.at(buf_it.first);
-        std::vector<unsigned int>& rec_num_values = rec_num_values_.at(buf_it.first);
+        std::vector<unsigned long>& rec_num_values = rec_num_values_.at(buf_it.first);
 
         assert (x_values.size() == y_values.size());
         assert (x_values.size() == rec_num_values.size());

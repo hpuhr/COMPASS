@@ -185,7 +185,7 @@ void CreateAssociationsJob::createTargetReports()
         size_t buffer_size = buffer->size();
 
         assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_rec_num_));
-        NullableVector<unsigned int>& rec_nums = cache_->getMetaVar<unsigned int>(
+        NullableVector<unsigned long>& rec_nums = cache_->getMetaVar<unsigned long>(
                     dbcontent_name, DBContent::meta_var_rec_num_);
 
         assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_datasource_id_));

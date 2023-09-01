@@ -167,6 +167,8 @@ public:
         name_ = name;
     }
 
+    unsigned int id();
+
     const std::string& info() const { return info_; }
     void info(const std::string& info) { info_ = info; }
 
@@ -213,6 +215,7 @@ protected:
     COMPASS& compass_;
     DBContentManager& dbcont_manager_;
     std::string name_;
+    unsigned int id_ {0};
     std::string info_;
     std::string db_table_name_;
     std::string ds_type_;

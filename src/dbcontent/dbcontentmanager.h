@@ -96,6 +96,7 @@ public:
     DBContentIterator begin() { return dbcontent_.begin(); }
     DBContentIterator end() { return dbcontent_.end(); }
     size_t size() { return dbcontent_.size(); }
+    unsigned int getMaxDBContentID();
 
     bool existsMetaVariable(const std::string& var_name);
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
@@ -128,8 +129,8 @@ public:
     std::string associationsID() const;
 
     bool hasMaxRecordNumber() const { return has_max_rec_num_; }
-    unsigned int maxRecordNumber() const;
-    void maxRecordNumber(unsigned int value);
+    unsigned long maxRecordNumber() const;
+    void maxRecordNumber(unsigned long value);
 
     bool hasMaxRefTrajTrackNum() const { return has_max_reftraj_track_num_; }
     unsigned int maxRefTrajTrackNum() const;
@@ -194,7 +195,7 @@ protected:
     std::string associations_id_;
 
     bool has_max_rec_num_ {false};
-    unsigned int max_rec_num_ {0};
+    unsigned long max_rec_num_ {0};
 
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};

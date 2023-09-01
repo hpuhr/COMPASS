@@ -176,7 +176,7 @@ void CreateARTASAssociationsJob::createUTNS()
     NullableVector<bool> track_coastings = buffer->get<bool>(task_.trackerCoastingVar()->name());
     NullableVector<string> tri_hashes = buffer->get<string>(task_.trackerTRIsVar()->name());
 
-    NullableVector<unsigned int> rec_nums = buffer->get<unsigned int>(
+    NullableVector<unsigned long> rec_nums = buffer->get<unsigned long>(
                 task_.keyVar()->getNameFor(tracker_dbcontent_name_));
     NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(
                 task_.timestampVar()->getNameFor(tracker_dbcontent_name_));
@@ -199,7 +199,7 @@ void CreateARTASAssociationsJob::createUTNS()
     bool ignore_track_end_associations = task_.ignoreTrackEndAssociations();
     bool ignore_track_coasting_associations = task_.ignoreTrackCoastingAssociations();
 
-    int rec_num;
+    unsigned long rec_num;
     boost::posix_time::ptime timestamp;
 
     int utn;
@@ -359,8 +359,8 @@ void CreateARTASAssociationsJob::createARTASAssociations()
     for (auto& ut_it : finished_tracks_)                    // utn -> UAT
         for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
             associations_[tracker_dbcontent_name_][assoc_it.first] =
-                    std::make_tuple(ut_it.first, std::vector<std::pair<std::string, unsigned int>>());
-            //tracker_object.addAssociation(assoc_it.first, ut_it.first, true, assoc_it.first);
+                    std::make_tuple(ut_it.first, std::vector<std::pair<std::string, unsigned long>>());
+            // dbcontent -> rec_num -> <utn, src rec_nums (dbcontent, rec_num)>
 }
 
 void CreateARTASAssociationsJob::saveAssociations()
@@ -379,9 +379,10 @@ void CreateARTASAssociationsJob::saveAssociations()
         unsigned int num_not_associated {0};
 
         string dbcontent_name = cont_assoc_it.first;
-        std::map<unsigned int,
-                std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>& associations
+        std::map<unsigned long,
+                std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned long>>>>& associations
                 = cont_assoc_it.second;
+        //rec_num -> <utn, src rec_nums (dbcontent, rec_num)>
 
         loginf << "CreateARTASAssociationsJob: saveAssociations: db content " << dbcontent_name;
 
@@ -519,11 +520,11 @@ void CreateARTASAssociationsJob::createSensorAssociations()
     string best_match_dubious_comment;
 
     string best_match_dbcontent_name;
-    int best_match_rec_num{-1};
+    unsigned long best_match_rec_num{0};
     boost::posix_time::ptime best_match_ts;
     boost::posix_time::ptime tri_ts;
 
-    typedef multimap<string, pair<int, boost::posix_time::ptime>>::iterator HashIterator;
+    typedef multimap<string, pair<unsigned long, boost::posix_time::ptime>>::iterator HashIterator;
     pair<HashIterator, HashIterator> possible_hash_matches;
 
     assert(!first_track_ts_.is_not_a_date_time());  // has to be set
@@ -560,7 +561,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                         for (HashIterator it = possible_hash_matches.first;
                              it != possible_hash_matches.second; ++it)
                         {
-                            pair<int, boost::posix_time::ptime>& match = it->second;  // rec_num, tod
+                            pair<unsigned long, boost::posix_time::ptime>& match = it->second;  // rec_num, tod
 
                             if (!isPossibleAssociation(tri_ts, match.second))
                                 continue;
@@ -647,7 +648,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
                     // add utn to non-tracker rec_num
                     associations_[best_match_dbcontent_name][best_match_rec_num] =
-                            make_tuple(ut_it.first, std::vector<std::pair<std::string, unsigned int>>());
+                            make_tuple(ut_it.first, std::vector<std::pair<std::string, unsigned long>>());
 
                     // add non-tracker rec_num to tracker src rec_nums
 
@@ -770,7 +771,7 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
     assert(buffer->has<string>(hash_var.name()));
     assert(buffer->has<boost::posix_time::ptime>(ts_var.name()));
 
-    NullableVector<unsigned int> rec_nums = buffer->get<unsigned int>(key_var.name());
+    NullableVector<unsigned long> rec_nums = buffer->get<unsigned long>(key_var.name());
     NullableVector<string> hashes = buffer->get<string>(hash_var.name());
     NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(ts_var.name());
 

@@ -70,6 +70,16 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     createSubConfigurables();
 
+    // check uniqueness of dbcontent ids
+    set<unsigned int> dbcont_ids;
+
+    for (auto& object_it : dbcontent_)
+    {
+        assert (object_it.second->id() < 256);
+        assert (dbcont_ids.count(object_it.second->id()) == 0);
+        dbcont_ids.insert(object_it.second->id());
+    }
+
     assert (label_generator_);
     label_generator_->checkLabelConfig(); // here because references meta variables
 
@@ -209,6 +219,16 @@ bool DBContentManager::hasData()
             return true;
 
     return false;
+}
+
+unsigned int DBContentManager::getMaxDBContentID()
+{
+    unsigned int ret = 0;
+
+    for (auto& object_it : dbcontent_)
+        ret = max(ret, object_it.second->id());
+
+    return ret;
 }
 
 bool DBContentManager::existsMetaVariable(const std::string& var_name)
@@ -1150,13 +1170,13 @@ void DBContentManager::updateNumLoadedCounts()
 }
 
 
-unsigned int DBContentManager::maxRecordNumber() const
+unsigned long DBContentManager::maxRecordNumber() const
 {
     assert (has_max_rec_num_);
     return max_rec_num_;
 }
 
-void DBContentManager::maxRecordNumber(unsigned int value)
+void DBContentManager::maxRecordNumber(unsigned long value)
 {
     logdbg << "DBContentManager: maxRecordNumber: " << value;
 
