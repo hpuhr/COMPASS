@@ -60,7 +60,7 @@ extern unsigned int dsIdFrom (unsigned int sac, unsigned int sic);
 extern unsigned int sacFromDsId (unsigned int ds_id);
 extern unsigned int sicFromDsId (unsigned int ds_id);
 
-extern unsigned long recNumAddDBContId (unsigned int rec_num_wo_dbcont_id, unsigned int dbcont_id);
+extern unsigned long recNumAddDBContId (unsigned long rec_num_wo_dbcont_id, unsigned int dbcont_id);
 extern unsigned int recNumGetDBContId (unsigned long rec_num);
 
 }  // namespace Number

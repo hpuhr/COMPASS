@@ -35,6 +35,7 @@
 #include "unitmanager.h"
 #include "files.h"
 #include "util/timeconv.h"
+#include "util/number.h"
 #include "sector.h"
 #include "sectorlayer.h"
 #include "evaluationmanager.h"
@@ -1092,11 +1093,13 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
         NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(rec_num_col_str);
 
         unsigned int buffer_size = buffer->size();
+        unsigned int dbcont_id = dbcontent.id();
+
 
         for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
         {
             ++max_rec_num;
-            rec_num_vec.set(cnt, max_rec_num);
+            rec_num_vec.set(cnt, Number::recNumAddDBContId(max_rec_num, dbcont_id));
         }
 
         COMPASS::instance().dbContentManager().maxRecordNumber(max_rec_num);
