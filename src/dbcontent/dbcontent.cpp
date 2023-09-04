@@ -103,6 +103,7 @@ const Property DBContent::var_cat021_nucv_nacv_ {"NUCr or NACv", PropertyDataTyp
 const Property DBContent::var_cat021_sil_ {"SIL", PropertyDataType::UCHAR};
 
 const Property DBContent::var_cat062_tris_ {"Target Report Identifiers", PropertyDataType::STRING};
+const Property DBContent::var_cat062_tri_recnums_ {"TRI Record Numbers", PropertyDataType::JSON};
 const Property DBContent::var_cat062_track_begin_ {"Track Begin", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_coasting_ {"Coasting", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_track_end_ {"Track End", PropertyDataType::BOOL};

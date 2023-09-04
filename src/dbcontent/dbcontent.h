@@ -129,6 +129,7 @@ public:
     static const Property var_cat021_sil_;
 
     static const Property var_cat062_tris_;
+    static const Property var_cat062_tri_recnums_;
     static const Property var_cat062_track_begin_;
     static const Property var_cat062_coasting_;
     static const Property var_cat062_track_end_;
