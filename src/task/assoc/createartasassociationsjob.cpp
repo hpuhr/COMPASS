@@ -76,7 +76,7 @@ void CreateARTASAssociationsJob::run()
 
     // create utns
     emit statusSignal("Creating UTNs");
-    createUTNS();
+    createUniqueARTASTracks();
 
     // create associations for artas tracks
     emit statusSignal("Creating ARTAS Associations");
@@ -148,7 +148,7 @@ size_t CreateARTASAssociationsJob::missingHashesAtBeginning() const
     return acceptable_missing_hashes_cnt_;
 }
 
-void CreateARTASAssociationsJob::createUTNS()
+void CreateARTASAssociationsJob::createUniqueARTASTracks()
 {
     loginf << "CreateARTASAssociationsJob: createUTNS";
 
@@ -161,25 +161,38 @@ void CreateARTASAssociationsJob::createUTNS()
     shared_ptr<Buffer> buffer = buffers_.at(tracker_dbcontent_name_);
     size_t buffer_size = buffer->size();
 
-    assert(buffer->has<unsigned int>(task_.trackerTrackNumVar()->name()));
-    assert(buffer->has<bool>(task_.trackerTrackBeginVar()->name()));
-    assert(buffer->has<bool>(task_.trackerTrackEndVar()->name()));
-    assert(buffer->has<bool>(task_.trackerCoastingVar()->name()));
-    assert(buffer->has<string>(task_.trackerTRIsVar()->name()));
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    assert(buffer->has<unsigned int>(task_.keyVar()->getNameFor(tracker_dbcontent_name_)));
-    assert(buffer->has<boost::posix_time::ptime>(task_.timestampVar()->getNameFor(tracker_dbcontent_name_)));
+    assert(buffer->has<unsigned int>(
+               dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_num_).name()));
+    assert(buffer->has<bool>(
+               dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_begin_).name()));
+    assert(buffer->has<bool>(
+               dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_end_).name()));
+    assert(buffer->has<bool>(
+               dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_coasting_).name()));
+    assert(buffer->has<string>(dbcont_man.getVariable(tracker_dbcontent_name_, DBContent::var_cat062_tris_).name()));
 
-    NullableVector<unsigned int> track_nums = buffer->get<unsigned int>(task_.trackerTrackNumVar()->name());
-    NullableVector<bool> track_begins = buffer->get<bool>(task_.trackerTrackBeginVar()->name());
-    NullableVector<bool> track_ends = buffer->get<bool>(task_.trackerTrackEndVar()->name());
-    NullableVector<bool> track_coastings = buffer->get<bool>(task_.trackerCoastingVar()->name());
-    NullableVector<string> tri_hashes = buffer->get<string>(task_.trackerTRIsVar()->name());
+    assert(buffer->has<unsigned long>(
+               dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_rec_num_).name()));
+    assert(buffer->has<boost::posix_time::ptime>(
+               dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_timestamp_).name()));
+
+    NullableVector<unsigned int> track_nums = buffer->get<unsigned int>(
+                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_num_).name());
+    NullableVector<bool> track_begins = buffer->get<bool>(
+                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_begin_).name());
+    NullableVector<bool> track_ends = buffer->get<bool>(
+                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_end_).name());
+    NullableVector<bool> track_coastings = buffer->get<bool>(
+                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_coasting_).name());
+    NullableVector<string> tri_hashes = buffer->get<string>(
+                dbcont_man.getVariable(tracker_dbcontent_name_, DBContent::var_cat062_tris_).name());
 
     NullableVector<unsigned long> rec_nums = buffer->get<unsigned long>(
-                task_.keyVar()->getNameFor(tracker_dbcontent_name_));
+                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_rec_num_).name());
     NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(
-                task_.timestampVar()->getNameFor(tracker_dbcontent_name_));
+                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_timestamp_).name());
 
     map<int, UniqueARTASTrack> current_tracks;  // utn -> unique track
     map<int, int> current_track_mappings;       // track_num -> utn
@@ -759,19 +772,17 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
 
     using namespace dbContent;
 
-    MetaVariable* key_meta_var = task_.keyVar();
-    MetaVariable* hash_meta_var = task_.hashVar();
-    MetaVariable* ts_meta_var = task_.timestampVar();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    Variable& key_var = key_meta_var->getFor(dbcontent_name);
-    Variable& hash_var = hash_meta_var->getFor(dbcontent_name);
-    Variable& ts_var = ts_meta_var->getFor(dbcontent_name);
+    Variable& rec_num_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_);
+    Variable& hash_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_artas_hash_);
+    Variable& ts_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
 
-    assert(buffer->has<unsigned int>(key_var.name()));
+    assert(buffer->has<unsigned int>(rec_num_var.name()));
     assert(buffer->has<string>(hash_var.name()));
     assert(buffer->has<boost::posix_time::ptime>(ts_var.name()));
 
-    NullableVector<unsigned long> rec_nums = buffer->get<unsigned long>(key_var.name());
+    NullableVector<unsigned long> rec_nums = buffer->get<unsigned long>(rec_num_var.name());
     NullableVector<string> hashes = buffer->get<string>(hash_var.name());
     NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(ts_var.name());
 

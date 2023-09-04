@@ -110,7 +110,7 @@ protected:
     volatile bool save_question_answered_{false};
     volatile bool save_question_answer_{false};
 
-    void createUTNS();
+    void createUniqueARTASTracks();
     void createARTASAssociations();
     void createSensorAssociations();
     void saveAssociations();
