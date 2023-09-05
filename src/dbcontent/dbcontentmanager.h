@@ -96,7 +96,10 @@ public:
     DBContentIterator begin() { return dbcontent_.begin(); }
     DBContentIterator end() { return dbcontent_.end(); }
     size_t size() { return dbcontent_.size(); }
+
     unsigned int getMaxDBContentID();
+    bool existsDBContentWithId (unsigned int id);
+    const std::string& dbContentWithId (unsigned int id);
 
     bool existsMetaVariable(const std::string& var_name);
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
@@ -217,8 +220,9 @@ protected:
     bool load_in_progress_{false};
     bool insert_in_progress_{false};
 
-    /// Container with all DBContent (DBContent name -> DBO pointer)
+    /// Container with all DBContent (DBContent name -> dbcont pointer)
     std::map<std::string, DBContent*> dbcontent_;
+    std::map<unsigned int, DBContent*> dbcontent_ids_;
     std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
     //std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;

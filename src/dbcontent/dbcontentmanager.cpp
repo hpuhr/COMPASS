@@ -132,9 +132,13 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "DBContent")
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
-        loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name();
+        loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name()
+               << " id " << object->id();
         assert(!dbcontent_.count(object->name()));
+        assert(!dbcontent_ids_.count(object->id()));
+
         dbcontent_[object->name()] = object;
+        dbcontent_ids_[object->id()] = object;
     }
     else if (class_id == "MetaVariable")
     {
@@ -229,6 +233,17 @@ unsigned int DBContentManager::getMaxDBContentID()
         ret = max(ret, object_it.second->id());
 
     return ret;
+}
+
+bool DBContentManager::existsDBContentWithId (unsigned int id)
+{
+    return dbcontent_ids_.count(id);
+}
+
+const std::string& DBContentManager::dbContentWithId (unsigned int id)
+{
+    assert (dbcontent_ids_.count(id));
+    return dbcontent_ids_.at(id)->name();
 }
 
 bool DBContentManager::existsMetaVariable(const std::string& var_name)
