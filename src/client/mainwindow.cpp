@@ -387,18 +387,18 @@ void MainWindow::createMenus ()
     process_menu_->setToolTipsVisible(true);
 
     QAction* calc_radar_plpos_action = new QAction(tr("Calculate Radar Plot Positions"));
-    calc_radar_plpos_action->setToolTip(tr("Calculate Radar Plot Positios, only needed if Radar Position information"
+    calc_radar_plpos_action->setToolTip(tr("Calculate Radar Plot Positions, only needed if Radar Position information"
                                            " was changed"));
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
-    QAction* assoc_action = new QAction(tr("Calculate Associations"));
+    QAction* assoc_action = new QAction(tr("Calculate Unique Targets"));
     assoc_action->setToolTip(tr("Create Unique Targets based on all DB Content"));
     connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsSlot);
     process_menu_->addAction(assoc_action);
 
-    QAction* assoc_artas_action = new QAction(tr("Calculate ARTAS TRI Associations"));
-    assoc_artas_action->setToolTip(tr("Create Unique Targets based on ARTAS TRI information"));
+    QAction* assoc_artas_action = new QAction(tr("Calculate ARTAS Target Report Usage"));
+    assoc_artas_action->setToolTip(tr("Create target report usage based on ARTAS TRI information"));
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
 

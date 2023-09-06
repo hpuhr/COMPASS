@@ -74,7 +74,7 @@ void CreateARTASAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: clearing associations";
 
-    emit statusSignal("Clearing Previous ARTAS Associations");
+    emit statusSignal("Clearing Previous ARTAS Target Report Usage");
     removePreviousAssociations();
 
     // create utns
@@ -82,7 +82,7 @@ void CreateARTASAssociationsJob::run()
     createUniqueARTASTracks();
 
     // create associations for artas tracks
-    emit statusSignal("Creating ARTAS Associations");
+    emit statusSignal("Creating ARTAS Target Report Usage");
     createARTASAssociations();
 
     // create associations for sensors
@@ -117,7 +117,7 @@ void CreateARTASAssociationsJob::run()
     }
 
     // save associations
-    emit statusSignal("Saving Associations");
+    emit statusSignal("Saving ARTAS Target Report Usage");
 
     saveAssociations();
 

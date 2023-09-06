@@ -105,6 +105,8 @@ public:
     virtual bool canRun() override;
     virtual void run() override;
 
+    bool wasRun();
+
     static const std::string DONE_PROPERTY_NAME;
 
 protected:

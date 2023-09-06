@@ -302,6 +302,11 @@ void CreateARTASAssociationsTask::run()
     //status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
 }
 
+bool CreateARTASAssociationsTask::wasRun()
+{
+    return COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+}
+
 void CreateARTASAssociationsTask::loadedDataDataSlot(
         const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
@@ -400,7 +405,6 @@ void CreateARTASAssociationsTask::createDoneSlot()
     if (save_associations_)
     {
         COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
-        //COMPASS::instance().dbContentManager().setAssociationsIdentifier("ARTAS");
 
         COMPASS::instance().interface().saveProperties();
 
