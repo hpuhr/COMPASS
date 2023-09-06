@@ -574,6 +574,7 @@ VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbcont
         read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_coasting_));
 
         read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat062_tris_));
+        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat062_tri_recnums_));
     }
     else
     {

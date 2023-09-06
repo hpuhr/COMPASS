@@ -92,8 +92,8 @@ void CreateARTASAssociationsJob::run()
     {
         stringstream ss;
         ss << "There are " << missing_hashes_cnt_ << " missing hashes and "
-           << dubious_associations_cnt_
-           << " dubious associations.\nDo you want to still save the associations?";
+           << dubious_associations_cnt_ << " dubious associations ("
+           << found_hashes_cnt_ << " found total).\nDo you want to still save the associations?";
         emit saveAssociationsQuestionSignal(ss.str().c_str());
 
         while (!save_question_answered_)
@@ -172,7 +172,7 @@ void CreateARTASAssociationsJob::createUniqueARTASTracks()
                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_begin_).name()));
     assert(buffer->has<bool>(
                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_end_).name()));
-    assert(buffer->has<bool>(
+    assert(buffer->has<unsigned char>(
                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_coasting_).name()));
     assert(buffer->has<string>(dbcont_man.getVariable(tracker_dbcontent_name_, DBContent::var_cat062_tris_).name()));
 
@@ -181,18 +181,18 @@ void CreateARTASAssociationsJob::createUniqueARTASTracks()
     assert(buffer->has<boost::posix_time::ptime>(
                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_timestamp_).name()));
 
-    NullableVector<unsigned int> track_nums = buffer->get<unsigned int>(
+    NullableVector<unsigned int> track_num_vec = buffer->get<unsigned int>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_num_).name());
-    NullableVector<bool> track_begins = buffer->get<bool>(
+    NullableVector<bool> track_begin_vec = buffer->get<bool>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_begin_).name());
-    NullableVector<bool> track_ends = buffer->get<bool>(
+    NullableVector<bool> track_end_vec = buffer->get<bool>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_end_).name());
-    NullableVector<bool> track_coastings = buffer->get<bool>(
+    NullableVector<unsigned char> track_coasting_vec = buffer->get<unsigned char>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_coasting_).name());
-    NullableVector<string> tri_hashes = buffer->get<string>(
+    NullableVector<string> tri_hash_vec = buffer->get<string>(
                 dbcont_man.getVariable(tracker_dbcontent_name_, DBContent::var_cat062_tris_).name());
 
-    NullableVector<unsigned long> rec_nums = buffer->get<unsigned long>(
+    NullableVector<unsigned long> rec_num_vec = buffer->get<unsigned long>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_rec_num_).name());
     NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_timestamp_).name());
@@ -231,35 +231,35 @@ void CreateARTASAssociationsJob::createUniqueARTASTracks()
         // new_track_created = false;
         finish_previous_track = false;
 
-        tri_set = !tri_hashes.isNull(cnt);
+        tri_set = !tri_hash_vec.isNull(cnt);
         if (tri_set)
-            tri = tri_hashes.get(cnt);
+            tri = tri_hash_vec.get(cnt);
         else
             tri = "";
 
-        assert(!track_nums.isNull(cnt));
-        track_num = track_nums.get(cnt);
+        assert(!track_num_vec.isNull(cnt));
+        track_num = track_num_vec.get(cnt);
 
-        track_begin_set = !track_begins.isNull(cnt);
+        track_begin_set = !track_begin_vec.isNull(cnt);
         if (track_begin_set)
-            track_begin = track_begins.get(cnt);
+            track_begin = track_begin_vec.get(cnt);
         else
             track_begin = false;
 
-        track_end_set = !track_ends.isNull(cnt);
+        track_end_set = !track_end_vec.isNull(cnt);
         if (track_end_set)
-            track_end = track_ends.get(cnt);
+            track_end = track_end_vec.get(cnt);
         else
             track_end = false;
 
-        track_coasting_set = !track_coastings.isNull(cnt);
+        track_coasting_set = !track_coasting_vec.isNull(cnt);
         if (track_coasting_set)
-            track_coasting = track_coastings.get(cnt);
+            track_coasting = track_coasting_vec.get(cnt) != 0;
         else
             track_coasting = false;
 
-        assert(!rec_nums.isNull(cnt));
-        rec_num = rec_nums.get(cnt);
+        assert(!rec_num_vec.isNull(cnt));
+        rec_num = rec_num_vec.get(cnt);
 
         assert(!ts_vec.isNull(cnt));
         timestamp = ts_vec.get(cnt);
@@ -409,11 +409,11 @@ void CreateARTASAssociationsJob::saveAssociations()
     string rec_num_var_name = rec_num_var.name();
     string tri_rec_num_var_name = tri_rec_num_var.name();
 
-    assert (buffers_.at(tracker_dbcontent_name_)->has<unsigned int>(rec_num_var_name));
+    assert (buffers_.at(tracker_dbcontent_name_)->has<unsigned long>(rec_num_var_name));
     assert (buffers_.at(tracker_dbcontent_name_)->has<json>(tri_rec_num_var_name));
 
-    NullableVector<unsigned int>& rec_num_vec =
-            buffers_.at(tracker_dbcontent_name_)->get<unsigned int>(rec_num_var_name);
+    NullableVector<unsigned long>& rec_num_vec =
+            buffers_.at(tracker_dbcontent_name_)->get<unsigned long>(rec_num_var_name);
     NullableVector<json>& tri_rec_num_vec = buffers_.at(tracker_dbcontent_name_)->get<json>(tri_rec_num_var_name);
 
     for (unsigned int cnt=0; cnt < buffers_.at(tracker_dbcontent_name_)->size(); ++cnt)
@@ -454,14 +454,13 @@ void CreateARTASAssociationsJob::saveAssociations()
     string rec_num_col_name = rec_num_var.dbColumnName();
     string tri_rec_num_col_name = tri_rec_num_var.dbColumnName();
 
-
     PropertyList properties = buffer->properties();
 
     for (auto& prop_it : properties.properties())
     {
         if (prop_it.name() == rec_num_var_name)
-            buffer->rename<unsigned int>(rec_num_var_name, rec_num_col_name);
-        else if (prop_it.name() == tri_rec_num_col_name)
+            buffer->rename<unsigned long>(rec_num_var_name, rec_num_col_name);
+        else if (prop_it.name() == tri_rec_num_var_name)
             buffer->rename<json>(tri_rec_num_var_name, tri_rec_num_col_name);
         else
             buffer->deleteProperty(prop_it);
@@ -757,7 +756,7 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
     Variable& hash_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_artas_hash_);
     Variable& ts_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
 
-    assert(buffer->has<unsigned int>(rec_num_var.name()));
+    assert(buffer->has<unsigned long>(rec_num_var.name()));
     assert(buffer->has<string>(hash_var.name()));
     assert(buffer->has<boost::posix_time::ptime>(ts_var.name()));
 
