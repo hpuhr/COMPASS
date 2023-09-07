@@ -184,7 +184,7 @@ void CreateAssociationsJob::createTargetReports()
         shared_ptr<Buffer> buffer = buf_it.second;
         size_t buffer_size = buffer->size();
 
-        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_rec_num_));
+        assert (cache_->hasMetaVar<unsigned long>(dbcontent_name, DBContent::meta_var_rec_num_));
         NullableVector<unsigned long>& rec_nums = cache_->getMetaVar<unsigned long>(
                     dbcontent_name, DBContent::meta_var_rec_num_);
 
@@ -761,7 +761,7 @@ void CreateAssociationsJob::createAssociations()
                     //dbo.addAssociation(tr_it.rec_num_, utn_ptr_it->utn_, false, 0);
 
                     associations_[dbo_it.first][tr_it.rec_num_] =
-                            std::make_tuple(utn_ptr_it->utn_, std::vector<std::pair<std::string, unsigned int>>());
+                            std::make_tuple(utn_ptr_it->utn_, std::vector<std::pair<std::string, unsigned long>>());
                 }
             }
         }
@@ -784,14 +784,14 @@ void CreateAssociationsJob::saveAssociations()
         unsigned int num_not_associated {0};
 
         string dbcontent_name = cont_assoc_it.first;
-        std::map<unsigned int,
-                std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>& associations
+        std::map<unsigned long,
+                std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned long>>>>& associations
                 = cont_assoc_it.second;
 
         loginf << "CreateAssociationsJob: saveAssociations: db content " << dbcontent_name;
 
-        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_rec_num_));
-        NullableVector<unsigned int>& rec_num_vec = cache_->getMetaVar<unsigned int>(
+        assert (cache_->hasMetaVar<unsigned long>(dbcontent_name, DBContent::meta_var_rec_num_));
+        NullableVector<unsigned long>& rec_num_vec = cache_->getMetaVar<unsigned long>(
                     dbcontent_name, DBContent::meta_var_rec_num_);
 
         assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
@@ -846,7 +846,7 @@ void CreateAssociationsJob::saveAssociations()
         for (auto& prop_it : properties.properties())
         {
             if (prop_it.name() == rec_num_var_name)
-                buf_it.second->rename<unsigned int>(rec_num_var_name, rec_num_col_name);
+                buf_it.second->rename<unsigned long>(rec_num_var_name, rec_num_col_name);
             else if (prop_it.name() == utn_var_name)
                 buf_it.second->rename<unsigned int>(utn_var_name, utn_col_name);
             else
