@@ -214,7 +214,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
                     PropertyDataType::DOUBLE);
         update_buffer_list.addProperty(
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name(),
-                    PropertyDataType::UINT); // must be at last position for update
+                    PropertyDataType::ULONGINT); // must be at last position for update
 
         std::shared_ptr<Buffer> update_buffer =
                 std::make_shared<Buffer>(update_buffer_list, dbcontent_name);
