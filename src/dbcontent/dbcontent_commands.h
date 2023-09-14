@@ -86,4 +86,18 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
+//get_target_stats
+struct RTCommandGetTargetStats : public rtcommand::RTCommand
+{
+public:
+    RTCommandGetTargetStats();
+
+protected:
+    virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
+
+    DECLARE_RTCOMMAND(get_target_stats, "retrieves statistics for the current targets")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
+
 } // namespace dbContent

@@ -349,4 +349,15 @@ bool DBDataSource::hasLiveData(unsigned int line, boost::posix_time::ptime curre
     return ret;
 }
 
+nlohmann::json DBDataSource::getAsJSON() const
+{
+    auto j = DataSourceBase::getAsJSON();
+
+    //add counts
+    if (!counts_.is_null())
+        j[ "counts" ] = counts_;
+
+    return j;
+}
+
 }

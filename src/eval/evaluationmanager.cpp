@@ -21,6 +21,7 @@
 #include "evaluationstandard.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/baseconfig.h"
+#include "eval/evaluation_commands.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
@@ -188,6 +189,7 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     createSubConfigurables();
 
+    init_evaluation_commands();
 }
 
 void EvaluationManager::init(QTabWidget* tab_widget)

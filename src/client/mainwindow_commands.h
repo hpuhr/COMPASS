@@ -274,11 +274,12 @@ protected:
 // close_db
 struct RTCommandCloseDB : public rtcommand::RTCommand
 {
+    bool strict_ = false;
 protected:
     virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(close_db, "closes a currently opened database")
-    DECLARE_RTCOMMAND_NOOPTIONS
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 // quit
@@ -289,6 +290,19 @@ protected:
 
     DECLARE_RTCOMMAND(quit, "quits the application")
     DECLARE_RTCOMMAND_NOOPTIONS
+};
+
+// get_events
+struct RTCommandGetEvents : public rtcommand::RTCommand
+{
+    bool         fresh_     = false;
+    unsigned int max_items_ = 0;
+
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(get_events, "retrieves the currently logged events")
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 }

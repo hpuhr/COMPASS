@@ -24,6 +24,10 @@
 
 #include <memory>
 
+#include <boost/optional.hpp>
+
+#include "json.h"
+
 class EvaluationManager;
 class EvaluationManagerWidget;
 
@@ -49,6 +53,8 @@ public:
 
     void selectId (const std::string& id);
     void reshowLastId ();
+
+    boost::optional<nlohmann::json> getTableData(const std::string& result_id, const std::string& table_id) const;
 
 protected:
     EvaluationManager& eval_man_;

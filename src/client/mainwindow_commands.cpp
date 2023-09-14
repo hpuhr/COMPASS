@@ -24,6 +24,7 @@
 #include "rtcommand_registry.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
+#include "event_log.h"
 
 #include <QTimer>
 #include <QCoreApplication>
@@ -55,6 +56,7 @@ REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
 REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
 REGISTER_RTCOMMAND(main_window::RTCommandExportEvaluationReport)
 REGISTER_RTCOMMAND(main_window::RTCommandQuit)
+REGISTER_RTCOMMAND(main_window::RTCommandGetEvents)
 
 namespace main_window
 {
@@ -81,6 +83,7 @@ void init_commands()
     main_window::RTCommandExportEvaluationReport::init();
     main_window::RTCommandCloseDB::init();
     main_window::RTCommandQuit::init();
+    main_window::RTCommandGetEvents::init();
 }
 
 // open_db
@@ -1271,10 +1274,23 @@ void RTCommandExportEvaluationReport::assignVariables_impl(const VariablesMap& v
 
 // close db
 
+void RTCommandCloseDB::collectOptions_impl(OptionsDescription& options,
+                                           PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("strict", "fail if no database was opened");
+}
+
+void RTCommandCloseDB::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_CHECK_VAR(variables, "strict", strict_)
+}
+
 bool RTCommandCloseDB::run_impl()
 {
+    //lets return true if there's nothing to be done
     if (!COMPASS::instance().dbOpened())
-        return false;
+        return !strict_;
 
     if (COMPASS::instance().appMode() != AppMode::Offline)
         return false;
@@ -1295,6 +1311,34 @@ bool RTCommandQuit::run_impl()
     assert (main_window);
 
     QTimer::singleShot(100, [main_window] () { main_window->quitSlot(); });
+
+    return true;
+}
+
+// get_events
+
+void RTCommandGetEvents::collectOptions_impl(OptionsDescription& options,
+                                             PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("fresh", "return only fresh (unseen) events")
+        ("max_items", po::value<unsigned int>()->default_value(0), "maximum number of items to return");
+}
+
+void RTCommandGetEvents::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_CHECK_VAR(variables, "fresh", fresh_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "max_items", unsigned int, max_items_)
+}
+
+bool RTCommandGetEvents::run_impl()
+{
+    auto query = max_items_ > 0 ? logger::EventQuery(fresh_, logger::EventQuery::EventType::All, logger::EventQuery::QueryType::Newest, max_items_) :
+                                  logger::EventQuery(fresh_, logger::EventQuery::EventType::All, logger::EventQuery::QueryType::All);
+
+    auto json_obj = Logger::getInstance().getEventLog()->getEventsAsJSON(query);
+
+    setJSONReply(json_obj);
 
     return true;
 }
