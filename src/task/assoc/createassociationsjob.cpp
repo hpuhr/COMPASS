@@ -776,7 +776,7 @@ void CreateAssociationsJob::saveAssociations()
 
     // write association info to buffers
 
-    unsigned int rec_num;
+    unsigned long rec_num;
 
     for (auto& cont_assoc_it : associations_) // dbcontent -> rec_nums
     {

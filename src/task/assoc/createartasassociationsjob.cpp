@@ -386,7 +386,7 @@ void CreateARTASAssociationsJob::saveAssociations()
 
     // write association info to buffers
 
-    unsigned int rec_num;
+    unsigned long rec_num;
 
     unsigned int num_associated {0};
     unsigned int num_not_associated {0};

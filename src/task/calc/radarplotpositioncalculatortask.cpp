@@ -219,7 +219,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
         std::shared_ptr<Buffer> update_buffer =
                 std::make_shared<Buffer>(update_buffer_list, dbcontent_name);
 
-        unsigned int rec_num;
+        unsigned long rec_num;
         unsigned int ds_id;
 
         double pos_azm_deg;
@@ -242,7 +242,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
         NullableVector<unsigned int>& read_ds_id_vec = read_buffer->get<unsigned int> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_).name());
-        NullableVector<unsigned int>& read_rec_num_vec = read_buffer->get<unsigned int> (
+        NullableVector<unsigned long>& read_rec_num_vec = read_buffer->get<unsigned long> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
         NullableVector<double>& read_range_vec = read_buffer->get<double> (
                     dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_range_).name());
@@ -255,7 +255,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name());
         NullableVector<double>& write_lon_vec = update_buffer->get<double> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name());
-        NullableVector<unsigned int>& write_rec_num_vec = update_buffer->get<unsigned int> (
+        NullableVector<unsigned long>& write_rec_num_vec = update_buffer->get<unsigned long> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
 
         assert (read_ds_id_vec.isNeverNull());

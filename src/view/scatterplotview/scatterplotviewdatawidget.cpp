@@ -1527,7 +1527,7 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
 
         double x, y;
         bool in_range;
-        unsigned int rec_num, index;
+        unsigned long rec_num, index;
 
         for (unsigned int cnt=0; cnt < x_values.size(); ++cnt)
         {
