@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/position/azimuthsingle.h"
-#include "eval/results/position/azimuthjoined.h"
+#include "eval/results/position/radarrangesingle.h"
+#include "eval/results/position/radarrangejoined.h"
 #include "eval/requirement/base/base.h"
-#include "eval/requirement/position/azimuth.h"
+#include "eval/requirement/position/radarrange.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -30,6 +30,8 @@
 #include "util/timeconv.h"
 #include "util/number.h"
 
+#include <Eigen/Dense>
+
 #include <cassert>
 #include <algorithm>
 
@@ -40,32 +42,35 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-SinglePositionAzimuth::SinglePositionAzimuth(const std::string& result_id,
-                                                     std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                                     const SectorLayer& sector_layer,
-                                                     unsigned int utn,
-                                                     const EvaluationTargetData* target,
-                                                     EvaluationManager& eval_man,
-                                                     const EvaluationDetails& details,
-                                                     unsigned int num_pos,
-                                                     unsigned int num_no_ref,
-                                                     unsigned int num_pos_outside,
-                                                     unsigned int num_pos_inside,
-                                                     unsigned int num_comp_passed,
-                                                     unsigned int num_comp_failed,
-                                                     vector<double> values)
-    :   SinglePositionBase("SinglePositionAzimuth", result_id, requirement, sector_layer, utn, target, eval_man, details,
-                           num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values)
+SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
+                                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                   const SectorLayer& sector_layer,
+                                                   unsigned int utn,
+                                                   const EvaluationTargetData* target,
+                                                   EvaluationManager& eval_man,
+                                                   const EvaluationDetails& details,
+                                                   unsigned int num_pos,
+                                                   unsigned int num_no_ref,
+                                                   unsigned int num_pos_outside,
+                                                   unsigned int num_pos_inside,
+                                                   unsigned int num_comp_passed,
+                                                   unsigned int num_comp_failed,
+                                                   vector<double> values,
+                                                   vector<double> ref_range_values, vector<double> tst_range_values)
+    :   SinglePositionBase("SinglePositionRadarRange", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                           num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values),
+      ref_range_values_(ref_range_values), tst_range_values_(tst_range_values)
 {
     update();
 }
 
-void SinglePositionAzimuth::update()
+void SinglePositionRadarRange::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
     assert (values_.size() == num_passed_ + num_failed_);
+    assert (values_.size() == ref_range_values_.size() && ref_range_values_.size() == tst_range_values_.size());
 
     unsigned int num_distances = values_.size();
 
@@ -77,23 +82,39 @@ void SinglePositionAzimuth::update()
         value_avg_ = std::accumulate(values_.begin(), values_.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
-        value_rms_ = 0;
 
         for(auto val : values_)
         {
             value_var_ += pow(val - value_avg_, 2);
-
-            value_rms_ += pow(val, 2);
         }
+
         value_var_ /= (float)num_distances;
 
-
-        value_rms_ /= (float)num_distances;
-        value_rms_ = sqrt(value_rms_);
-
+        value_rms_ = 0; // not used
 
         assert (num_passed_ <= num_distances);
-        //prob_ = (float)num_passed_/(float)num_distances; no prob here
+
+
+        // linear regression
+
+        Eigen::MatrixXd x_mat = Eigen::MatrixXd::Ones(num_distances, 2);
+        Eigen::MatrixXd y_mat = Eigen::MatrixXd::Ones(num_distances, 1);
+
+        for (unsigned int cnt=0; cnt < num_distances; ++cnt)
+        {
+            x_mat(cnt, 0) = tst_range_values_.at(cnt);
+            y_mat(cnt, 0) = ref_range_values_.at(cnt);
+        }
+
+        Eigen::JacobiSVD<Eigen::MatrixXd> svd;
+
+        svd.compute(x_mat, Eigen::ComputeThinV | Eigen::ComputeThinU);
+        Eigen::MatrixXd x = svd.solve(y_mat);
+
+        //loginf << "x " << x;
+
+        range_gain_ = x(0, 0);
+        range_bias_ = x(1, 0);
     }
     else
     {
@@ -109,9 +130,9 @@ void SinglePositionAzimuth::update()
     updateUseFromTarget();
 }
 
-void SinglePositionAzimuth::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SinglePositionRadarRange::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    logdbg << "SinglePositionAzimuth " <<  requirement_->name() <<": addToReport";
+    logdbg << "SinglePositionRadarRange " <<  requirement_->name() <<": addToReport";
 
     // add target to requirements->group->req
     addTargetToOverviewTable(root_item);
@@ -122,7 +143,7 @@ void SinglePositionAzimuth::addToReport (std::shared_ptr<EvaluationResultsReport
     // TODO add requirement description, methods
 }
 
-void SinglePositionAzimuth::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SinglePositionRadarRange::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
@@ -143,21 +164,17 @@ void SinglePositionAzimuth::addTargetToOverviewTable(shared_ptr<EvaluationResult
     }
 }
 
-void SinglePositionAzimuth::addTargetDetailsToTable (
+void SinglePositionRadarRange::addTargetDetailsToTable (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     if (!section.hasTable(table_name))
     {
-        //Qt::SortOrder order = Qt::AscendingOrder;
-
-        //        if(req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN
-        //                || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
         Qt::SortOrder order = Qt::DescendingOrder;
 
 
-        section.addTable(table_name, 15,
+        section.addTable(table_name, 16,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "DMin", "DMax", "DAvg", "DSDev", "RMS", "#CF", "#CP"}, true, 12, order);
+                          "DMin", "DMax", "DAvg", "DSDev", "Bias", "Gain", "#CF", "#CP"}, true, 12, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -170,28 +187,26 @@ void SinglePositionAzimuth::addTargetDetailsToTable (
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
                  Number::round(sqrt(value_var_),2), // "DSDev"
-                 Number::round(value_rms_,2), // "RMS"
+                 range_bias_,
+                 range_gain_,
                  num_failed_, // "#DOK"
                  num_passed_}, // "#DNOK"
                 this, {utn_});
 }
 
-void SinglePositionAzimuth::addTargetDetailsToTableADSB (
+void SinglePositionRadarRange::addTargetDetailsToTableADSB (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     if (!section.hasTable(table_name))
     {
         Qt::SortOrder order = Qt::DescendingOrder;
 
-        section.addTable(table_name, 16,
+        section.addTable(table_name, 17,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "DMin", "DMax", "DAvg", "DSDev", "RMS", "#CF", "#CP", "MOPS"}, true, 10, order);
+                          "DMin", "DMax", "DAvg", "DSDev", "Bias", "Gain", "#CF", "#CP", "MOPS"}, true, 12, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
-
-    // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-    // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK", "MOPS", "NUCp/NIC", "NACp"
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -201,15 +216,16 @@ void SinglePositionAzimuth::addTargetDetailsToTableADSB (
                  Number::round(value_min_,2), // "DMin"
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
-                 Number::round(sqrt(value_var_),2), // "DSDev"
-                 Number::round(value_rms_,2), // "RMS"
+                 Number::round(sqrt(value_var_),2), // "DSDev",
+                 range_bias_,
+                 range_gain_,
                  num_failed_, // "#CF"
                  num_passed_, // "#CP"
                  target_->mopsVersionStr().c_str()}, // "MOPS"
                 this, {utn_});
 }
 
-void SinglePositionAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SinglePositionRadarRange::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
@@ -217,17 +233,14 @@ void SinglePositionAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationResult
     if (!utn_req_section.hasTable("details_overview_table"))
         utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
 
-    std::shared_ptr<EvaluationRequirement::PositionAzimuth> req =
-            std::static_pointer_cast<EvaluationRequirement::PositionAzimuth>(requirement_);
+    std::shared_ptr<EvaluationRequirement::PositionRadarRange> req =
+            std::static_pointer_cast<EvaluationRequirement::PositionRadarRange>(requirement_);
     assert (req);
 
     EvaluationResultsReport::SectionContentTable& utn_req_table =
             utn_req_section.getTable("details_overview_table");
 
     addCommonDetails(root_item);
-
-    // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-    // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK"
 
     utn_req_table.addRow({"Use", "To be used in results", use_}, this);
     utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
@@ -246,25 +259,23 @@ void SinglePositionAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationResult
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     utn_req_table.addRow({"DVar [m^2]", "Variance of distance",
                           String::doubleToStringPrecision(value_rms_,2).c_str()}, this);
-    utn_req_table.addRow({"RMS", "Root mean square",
-                          String::doubleToStringPrecision(value_var_,2).c_str()}, this);
+
+    if (range_bias_.isValid())
+        utn_req_table.addRow({"Range Bias [m]", "Range bias (linear estimation)",
+                              String::doubleToStringPrecision(range_bias_.toDouble(),2).c_str()}, this);
+
+    if (range_gain_.isValid())
+        utn_req_table.addRow({"Range Gain [1]", "Range gain (linear estimation)",
+                              String::doubleToStringPrecision(range_gain_.toDouble(),5).c_str()}, this);
+
     utn_req_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_failed_}, this);
     utn_req_table.addRow({"#CP [1]", "Number of updates with passed comparison", num_passed_},
                          this);
     // condition
-    //    {
-    //        QVariant p_passed_var;
-
-    //        if (prob_.has_value())
-    //            p_passed_var = roundf(prob_.value() * 10000.0) / 100.0;
-
-    //        utn_req_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
-
     utn_req_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
     string result {"Unknown"};
 
-    //if (prob_.has_value())
     if (num_failed_ + num_passed_)
         result = req->getConditionResultStr(value_rms_);
 
@@ -274,7 +285,7 @@ void SinglePositionAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationResult
     {
         root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
         utn_req_section.perTargetWithIssues(true);
-        //
+
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   [this](void) { return this->getTargetErrorsViewable(); });
     }
@@ -285,32 +296,15 @@ void SinglePositionAzimuth::addTargetDetailsToReport(shared_ptr<EvaluationResult
                     "No target errors found, therefore no figure was generated.");
     }
 
-    //    }
-
-    //    if (prob_.has_value() && prob_.value() != 1.0) // TODO
-    //    {
-    //        //        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-    //        //                                  [this](void) { return this->getTargetErrorsViewable(); });
-
-    //        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-    //                                  [this](void) { return this->getTargetErrorsViewable(); });
-    //    }
-    //    else
-    //    {
-    //        utn_req_section.addText("target_errors_overview_no_figure");
-    //        utn_req_section.getText("target_errors_overview_no_figure").addText(
-    //                    "No target errors found, therefore no figure was generated.");
-    //    }
-
     // add further details
     reportDetails(utn_req_section);
 }
 
-void SinglePositionAzimuth::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+void SinglePositionRadarRange::reportDetails(EvaluationResultsReport::Section& utn_req_section)
 {
     if (!utn_req_section.hasTable(tr_details_table_name_))
         utn_req_section.addTable(tr_details_table_name_, 8,
-                                 {"ToD", "NoRef", "PosInside", "Azimuth", "CP", "#CF", "#CP", "Comment"});
+                                 {"ToD", "NoRef", "PosInside", "Range", "CP", "#CF", "#CP", "Comment"});
 
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
@@ -329,7 +323,7 @@ void SinglePositionAzimuth::reportDetails(EvaluationResultsReport::Section& utn_
                         { Time::toString(rq_det_it.timestamp()).c_str(),
                           !has_ref_pos,
                           rq_det_it.getValue(DetailKey::PosInside),
-                          rq_det_it.getValue(DetailKey::Value),                 // "Azimuth"
+                          rq_det_it.getValue(DetailKey::Value),                 // "Range"
                           rq_det_it.getValue(DetailKey::CheckPassed),           // CP"
                           rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#CF",
                           rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#CP"
@@ -340,7 +334,7 @@ void SinglePositionAzimuth::reportDetails(EvaluationResultsReport::Section& utn_
         }});
 }
 
-bool SinglePositionAzimuth::hasViewableData (
+bool SinglePositionRadarRange::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -351,7 +345,7 @@ bool SinglePositionAzimuth::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::viewableData(
+std::unique_ptr<nlohmann::json::object_t> SinglePositionRadarRange::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
@@ -364,14 +358,14 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::viewableData(
     {
         unsigned int detail_cnt = annotation.toUInt();
 
-        loginf << "SinglePositionAzimuth: viewableData: detail_cnt " << detail_cnt;
+        loginf << "SinglePositionRadarRange: viewableData: detail_cnt " << detail_cnt;
 
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr = getTargetErrorsViewable(true);
         assert (viewable_ptr);
 
         const auto& detail = getDetail(detail_cnt);
 
-        assert(detail.numPositions() == 1);
+        assert(detail.numPositions() >= 1);
 
         (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
         (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
@@ -391,7 +385,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::viewableData(
         return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::getTargetErrorsViewable (bool add_highlight)
+std::unique_ptr<nlohmann::json::object_t> SinglePositionRadarRange::getTargetErrorsViewable (bool add_highlight)
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -458,15 +452,14 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAzimuth::getTargetErrors
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
-    //addAnnotationFeatures(*viewable_ptr, false, add_highlight);
     addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
 
-void SinglePositionAzimuth::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+void SinglePositionRadarRange::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    loginf << "SinglePositionAzimuth: addAnnotations";
+    loginf << "SinglePositionRadarRange: addAnnotations";
 
     json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
     json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
@@ -510,7 +503,16 @@ void SinglePositionAzimuth::addAnnotations(nlohmann::json::object_t& viewable, b
     }
 }
 
-bool SinglePositionAzimuth::hasReference (
+const vector<double>& SinglePositionRadarRange::refRangeValues() const
+{
+    return ref_range_values_;
+}
+const vector<double>& SinglePositionRadarRange::tstRangeValues() const
+{
+    return tst_range_values_;
+}
+
+bool SinglePositionRadarRange::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -519,7 +521,7 @@ bool SinglePositionAzimuth::hasReference (
         return false;;
 }
 
-std::string SinglePositionAzimuth::reference(
+std::string SinglePositionRadarRange::reference(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasReference(table, annotation));
@@ -527,15 +529,15 @@ std::string SinglePositionAzimuth::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-std::shared_ptr<Joined> SinglePositionAzimuth::createEmptyJoined(const std::string& result_id)
+std::shared_ptr<Joined> SinglePositionRadarRange::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedPositionAzimuth> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedPositionRadarRange> (result_id, requirement_, sector_layer_, eval_man_);
 }
 
-EvaluationRequirement::PositionAzimuth* SinglePositionAzimuth::req ()
+EvaluationRequirement::PositionRadarRange* SinglePositionRadarRange::req ()
 {
-    EvaluationRequirement::PositionAzimuth* req =
-            dynamic_cast<EvaluationRequirement::PositionAzimuth*>(requirement_.get());
+    EvaluationRequirement::PositionRadarRange* req =
+            dynamic_cast<EvaluationRequirement::PositionRadarRange*>(requirement_.get());
     assert (req);
     return req;
 }

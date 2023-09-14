@@ -15,20 +15,16 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/position/range.h"
-#include "eval/results/position/rangesingle.h"
-#include "evaluationdata.h"
+#include "eval/requirement/position/radarazimuth.h"
+#include "eval/results/position/radarazimuthsingle.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "util/stringconv.h"
+#include "util/number.h"
+#include "ogrprojection.h"
+#include "projectionmanager.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
 
-#include "projection.h"
-#include "projectionmanager.h"
-#include "datasourcemanager.h"
-
-#include <ogr_spatialref.h>
 
 #include <algorithm>
 
@@ -39,7 +35,7 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-PositionRange::PositionRange(
+PositionRadarAzimuth::PositionRadarAzimuth(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man, float threshold_value)
     : Base(name, short_name, group_name, eval_man),
@@ -48,16 +44,16 @@ PositionRange::PositionRange(
 
 }
 
-float PositionRange::thresholdValue() const
+float PositionRadarAzimuth::thresholdValue() const
 {
     return threshold_value_;
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "EvaluationRequirementPositionRadarAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
            << " threshold_value " << threshold_value_;
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
@@ -72,24 +68,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
 
-    typedef EvaluationRequirementResult::SinglePositionRange Result;
+    typedef EvaluationRequirementResult::SinglePositionRadarAzimuth Result;
     typedef EvaluationDetail                                    Detail;
     typedef Result::EvaluationDetails                           Details;
     Details details;
 
+    unsigned int tst_ds_id;
     ptime timestamp;
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
-
-    OGRSpatialReference local;
-
-    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
-
     dbContent::TargetPosition tst_pos;
-
-    double x_pos, y_pos;
-    double distance, angle, range;
 
     bool is_inside;
     boost::optional<dbContent::TargetPosition> ref_pos;
@@ -131,22 +118,39 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
                                              .generalComment(comment));
     };
 
-    ProjectionManager& proj_man = ProjectionManager::instance();
-    assert(proj_man.hasCurrentProjection());
-    Projection& projection = proj_man.currentProjection();
-    projection.clearCoordinateSystems(); // to rebuild from data sources
-    projection.addAllRadarCoordinateSystems();
+    // prepare coordinate systems
 
-    unsigned int tst_ds_id;
-    set<unsigned int> ds_unknown;
+    ProjectionManager& proj_man = ProjectionManager::instance();
+
+    OGRProjection& projection = proj_man.ogrProjection();
+
+    if (!projection.radarCoordinateSystemsAdded())
+        projection.addAllRadarCoordinateSystems();
+
+    double ref_range_m, ref_azm_deg, tst_range_m, tst_azm_deg;
+    double azm_deg_diff;
 
     for (const auto& tst_id : tst_data)
     {
         ++num_pos;
 
+        tst_ds_id = target_data.tstChain().dsID(tst_id);
+
+        if (!projection.hasCoordinateSystem(tst_ds_id))
+        {
+            if (!skip_no_data_details)
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_passed, num_comp_failed,
+                            "No data source info");
+
+            continue;
+        }
+
         timestamp = tst_id.first;
         tst_pos = target_data.tstChain().pos(tst_id);
-        tst_ds_id = target_data.tstChain().dsID(tst_id);
 
         comp_passed = false;
 
@@ -196,62 +200,49 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
         }
         ++num_pos_inside;
 
-        if (!projection.hasCoordinateSystem(tst_ds_id))
-        {
-            addDetail(timestamp, tst_pos,
-                        ref_pos, // ref_pos
-                        is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                        num_comp_passed, num_comp_failed,
-                        "Unknown Radar DS ID "+to_string(tst_ds_id));
-            ++num_pos_calc_errors;
-
-            if (!ds_unknown.count(tst_ds_id))
-            {
-                logwrn << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
-                       << " unknown data source " << tst_ds_id << ", skipping";
-                ds_unknown.insert(tst_ds_id);
-            }
-            continue;
-        }
-
-        local.SetStereographic(ref_pos->latitude_, ref_pos->longitude_, 1.0, 0.0, 0.0);
-
-        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
-
-        x_pos = tst_pos.longitude_;
-        y_pos = tst_pos.latitude_;
-
-        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+        ok = projection.wgs842PolarHorizontal(tst_ds_id, ref_pos->latitude_, ref_pos->longitude_, ref_azm_deg, ref_range_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
-                        ref_pos, // ref_pos
-                        is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                        num_comp_passed, num_comp_failed, 
-                        "Position transformation error");
+                      ref_pos, // ref_pos
+                      is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                      num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                      num_comp_passed, num_comp_failed,
+                      "Ref. position transformation error");
             ++num_pos_calc_errors;
             continue;
         }
 
-        distance = sqrt(pow(x_pos,2) + pow(y_pos,2));
+        ok = projection.wgs842PolarHorizontal(tst_ds_id, tst_pos.latitude_, tst_pos.longitude_, tst_azm_deg, tst_range_m);
+        if (!ok)
+        {
+            addDetail(timestamp, tst_pos,
+                      ref_pos, // ref_pos
+                      is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                      num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                      num_comp_passed, num_comp_failed,
+                      "Tst. position transformation error");
+            ++num_pos_calc_errors;
+            continue;
+        }
 
-        if (std::isnan(distance) || std::isinf(distance))
+        azm_deg_diff = Number::calculateMinAngleDifference(ref_azm_deg, tst_azm_deg);
+
+        if (std::isnan(azm_deg_diff) || std::isinf(azm_deg_diff))
         {
             addDetail(timestamp, tst_pos,
                         ref_pos, // ref_pos
                         is_inside, {}, comp_passed, // pos_inside, value, check_passed
                         num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                         num_comp_passed, num_comp_failed, 
-                        "Range Invalid");
+                        "Azimuth Invalid");
             ++num_pos_calc_errors;
             continue;
         }
 
         ++num_distances;
 
-        if (fabs(distance) <= threshold_value_) // for single value
+        if (fabs(azm_deg_diff) <= threshold_value_) // for single value
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -265,15 +256,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
 
         addDetail(timestamp, tst_pos,
                     ref_pos,
-                    is_inside, distance, comp_passed, // pos_inside, value, check_passed
+                    is_inside, azm_deg_diff, comp_passed, // pos_inside, value, check_passed
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_comp_passed, num_comp_failed,
                     comment);
 
-        values.push_back(distance);
+        values.push_back(azm_deg_diff);
     }
 
-    //        logdbg << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
+    //        logdbg << "EvaluationRequirementPositionRadarAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
     //               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
     //               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
@@ -282,7 +273,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
     assert (num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        loginf << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
+        loginf << "EvaluationRequirementPositionRadarAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_calc_errors " << num_pos_calc_errors
@@ -295,18 +286,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRange::evaluate (
 
     //assert (details.size() == num_pos);
 
-    return make_shared<EvaluationRequirementResult::SinglePositionRange>(
+    return make_shared<EvaluationRequirementResult::SinglePositionRadarAzimuth>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
                 values);
 }
 
-std::string PositionRange::getConditionStr () const
+std::string PositionRadarAzimuth::getConditionStr () const
 {
     return "<= "+ to_string(threshold_value_);
 }
 
-std::string PositionRange::getConditionResultStr (float rms_value) const
+std::string PositionRadarAzimuth::getConditionResultStr (float rms_value) const
 {
     return rms_value <= threshold_value_ ?  "Passed" : "Failed";
 }

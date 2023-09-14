@@ -294,6 +294,7 @@ void EvaluationManager::loadData ()
     }
 
     std::set<unsigned int> line_tst_set = {settings_.line_id_tst_};
+    std::set<unsigned int> tst_sources;
 
     for (auto& ds_it : data_sources_tst_[settings_.dbcontent_name_tst_])
     {
@@ -312,8 +313,12 @@ void EvaluationManager::loadData ()
                 ds_ids.at(ds_id).insert(line_tst_set.begin(), line_tst_set.end());
             else
                 ds_ids.insert(make_pair(ds_id, line_tst_set));
+
+            tst_sources.insert(ds_id);
         }
     }
+
+    updateCompoundCoverage(tst_sources);
 
     ds_man.setLoadDSTypes(true); // load all ds types
     ds_man.setLoadOnlyDataSources(ds_ids); // limit loaded data sources
@@ -1695,6 +1700,11 @@ bool EvaluationManager::hasSelectedTestDataSources()
     return false;
 }
 
+const dbContent::DataSourceCompoundCoverage& EvaluationManager::tstSrcsCoverage() const
+{
+    return tst_srcs_coverage_;
+}
+
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
 {
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
@@ -2035,5 +2045,48 @@ void EvaluationManager::updateActiveDataSources() // save to config var
     settings_.active_sources_tst_ = data_sources_tst_;
 
     widget_->updateButtons();
+}
+
+void EvaluationManager::updateCompoundCoverage(std::set<unsigned int> tst_sources)
+{
+    loginf << "EvaluationManager: updateCompoundCoverage";
+
+    tst_srcs_coverage_.clear();
+
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    for (auto ds_id : tst_sources)
+    {
+        assert (ds_man.hasDBDataSource(ds_id));
+
+        dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
+
+        if (ds.hasRadarRanges())
+        {
+            bool range_max_set = false;
+            double range_max = 0;
+
+            for (auto range_it : ds.radarRanges())
+            {
+                if (range_max_set)
+                    range_max = max(range_max, range_it.second);
+                else
+                {
+                    range_max = range_it.second;
+                    range_max_set = true;
+                }
+            }
+
+            if (range_max_set && ds.hasPosition())
+            {
+                loginf << "EvaluationManager: updateCompoundCoverage: adding src " << ds.name()
+                       << " range " << range_max * NM2M;
+
+                tst_srcs_coverage_.addRangeCircle(ds_id, ds.latitude(), ds.longitude(), range_max * NM2M);
+            }
+        }
+    }
+
+    tst_srcs_coverage_.finalize();
 }
 

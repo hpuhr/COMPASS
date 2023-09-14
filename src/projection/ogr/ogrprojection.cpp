@@ -100,3 +100,13 @@ bool OGRProjection::polarToWGS84(unsigned int id, double azimuth_rad, double sla
 
     return ret;
 }
+
+
+bool OGRProjection::wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
+                                          double& azimuth_deg, double& ground_range_m)
+{
+    assert(hasCoordinateSystem(id));
+
+    return coordinate_systems_.at(id)->wgs842PolarHorizontal(latitude_deg, longitude_deg,
+                                                             azimuth_deg, ground_range_m);
+}

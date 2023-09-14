@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTPOSITIONRANGECONFIGWIDGET_H
-#define EVALUATIONREQUIREMENTPOSITIONRANGECONFIGWIDGET_H
+#ifndef EVALUATIONREQUIREMENTPOSITIONRADARRANGECONFIGWIDGET_H
+#define EVALUATIONREQUIREMENTPOSITIONRADARRANGECONFIGWIDGET_H
 
 #include "eval/requirement/base/baseconfigwidget.h"
 
@@ -29,9 +29,9 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-class PositionRangeConfig;
+class PositionRadarRangeConfig;
 
-class PositionRangeConfigWidget : public BaseConfigWidget
+class PositionRadarRangeConfigWidget : public BaseConfigWidget
 {
     Q_OBJECT
 
@@ -39,14 +39,14 @@ public slots:
     void thresholdValueEditSlot(QString value);
 
 public:
-    PositionRangeConfigWidget(PositionRangeConfig& cfg);
+    PositionRadarRangeConfigWidget(PositionRadarRangeConfig& cfg);
 
 protected:
     QLineEdit* threshold_value_edit_{nullptr};
 
-    PositionRangeConfig& config();
+    PositionRadarRangeConfig& config();
 };
 
 }
 
-#endif // EVALUATIONREQUIREMENTPOSITIONRANGECONFIGWIDGET_H
+#endif // EVALUATIONREQUIREMENTPOSITIONRADARRANGECONFIGWIDGET_H

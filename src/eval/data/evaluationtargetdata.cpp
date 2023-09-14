@@ -1196,6 +1196,10 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
             above_ok = false;
     }
 
+    // calc if insice test sensor coverage, true if not circles
+    bool inside_cov = inside_cov = eval_man_.tstSrcsCoverage().isInside(pos.latitude_, pos.longitude_);
+
+    // check sector layers
     for (const auto& sl : inside_sector_layers_)
     {
         auto layer = sl.first;
@@ -1203,10 +1207,15 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
 
         auto lidx = sl.second;
 
-        bool inside = above_ok && layer->isInside(pos, has_gb, gb_set);
+        if (!inside_cov) // outside test sensor coverage
+            mat(idx_internal, lidx) = false;
+        else // check with sectors
+        {
+            bool inside = above_ok && layer->isInside(pos, has_gb, gb_set);
 
-        //check pos against layer and write to mat
-        mat(idx_internal, lidx) = inside;
+            //check pos against layer and write to mat
+            mat(idx_internal, lidx) = inside;
+        }
     }
 
     mat(idx_internal, extra_offset     ) = has_gb;

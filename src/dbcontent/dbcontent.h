@@ -129,6 +129,7 @@ public:
     static const Property var_cat021_sil_;
 
     static const Property var_cat062_tris_;
+    static const Property var_cat062_tri_recnums_;
     static const Property var_cat062_track_begin_;
     static const Property var_cat062_coasting_;
     static const Property var_cat062_track_end_;
@@ -166,6 +167,8 @@ public:
         assert(name.size() > 0);
         name_ = name;
     }
+
+    unsigned int id();
 
     const std::string& info() const { return info_; }
     void info(const std::string& info) { info_ = info; }
@@ -213,6 +216,7 @@ protected:
     COMPASS& compass_;
     DBContentManager& dbcont_manager_;
     std::string name_;
+    unsigned int id_ {0};
     std::string info_;
     std::string db_table_name_;
     std::string ds_type_;

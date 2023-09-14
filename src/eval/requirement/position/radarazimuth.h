@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONAZIMUTH_H
-#define EVALUATIONREQUIREMENPOSITIONAZIMUTH_H
+#ifndef EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H
+#define EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H
 
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/position/detail.h"
@@ -24,10 +24,10 @@
 namespace EvaluationRequirement
 {
 
-class PositionAzimuth : public Base
+class PositionRadarAzimuth : public Base
 {
 public:
-    PositionAzimuth(
+    PositionRadarAzimuth(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             EvaluationManager& eval_man, float threshold_value);
 
@@ -46,4 +46,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENPOSITIONAZIMUTH_H
+#endif // EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H

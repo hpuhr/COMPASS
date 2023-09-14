@@ -15,23 +15,23 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRANGE_H
-#define EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRANGE_H
+#ifndef EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRADARAZIMUTH_H
+#define EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRADARAZIMUTH_H
 
 #include "eval/results/position/positionbase.h"
 
 namespace EvaluationRequirement
 {
-    class PositionRange;
+    class PositionRadarAzimuth;
 }
 
 namespace EvaluationRequirementResult
 {
 
-class SinglePositionRange : public SinglePositionBase
+class SinglePositionRadarAzimuth : public SinglePositionBase
 {
 public:
-    SinglePositionRange(const std::string& result_id,
+    SinglePositionRadarAzimuth(const std::string& result_id,
                            std::shared_ptr<EvaluationRequirement::Base> requirement,
                            const SectorLayer& sector_layer,
                            unsigned int utn, 
@@ -60,7 +60,7 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-    EvaluationRequirement::PositionRange* req ();
+    EvaluationRequirement::PositionRadarAzimuth* req ();
 
     void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
@@ -79,4 +79,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRANGE_H
+#endif // EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRADARAZIMUTH_H

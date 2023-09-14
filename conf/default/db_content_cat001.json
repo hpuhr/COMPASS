@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_cat001",
+        "id": 1,
         "info": "",
         "name": "CAT001"
     },
@@ -424,7 +425,7 @@
             },
             "VariableRadarrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",

@@ -70,6 +70,16 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     createSubConfigurables();
 
+    // check uniqueness of dbcontent ids
+    set<unsigned int> dbcont_ids;
+
+    for (auto& object_it : dbcontent_)
+    {
+        assert (object_it.second->id() < 256);
+        assert (dbcont_ids.count(object_it.second->id()) == 0);
+        dbcont_ids.insert(object_it.second->id());
+    }
+
     assert (label_generator_);
     label_generator_->checkLabelConfig(); // here because references meta variables
 
@@ -122,9 +132,13 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "DBContent")
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
-        loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name();
+        loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name()
+               << " id " << object->id();
         assert(!dbcontent_.count(object->name()));
+        assert(!dbcontent_ids_.count(object->id()));
+
         dbcontent_[object->name()] = object;
+        dbcontent_ids_[object->id()] = object;
     }
     else if (class_id == "MetaVariable")
     {
@@ -209,6 +223,27 @@ bool DBContentManager::hasData()
             return true;
 
     return false;
+}
+
+unsigned int DBContentManager::getMaxDBContentID()
+{
+    unsigned int ret = 0;
+
+    for (auto& object_it : dbcontent_)
+        ret = max(ret, object_it.second->id());
+
+    return ret;
+}
+
+bool DBContentManager::existsDBContentWithId (unsigned int id)
+{
+    return dbcontent_ids_.count(id);
+}
+
+const std::string& DBContentManager::dbContentWithId (unsigned int id)
+{
+    assert (dbcontent_ids_.count(id));
+    return dbcontent_ids_.at(id)->name();
 }
 
 bool DBContentManager::existsMetaVariable(const std::string& var_name)
@@ -1150,13 +1185,13 @@ void DBContentManager::updateNumLoadedCounts()
 }
 
 
-unsigned int DBContentManager::maxRecordNumber() const
+unsigned long DBContentManager::maxRecordNumber() const
 {
     assert (has_max_rec_num_);
     return max_rec_num_;
 }
 
-void DBContentManager::maxRecordNumber(unsigned int value)
+void DBContentManager::maxRecordNumber(unsigned long value)
 {
     logdbg << "DBContentManager: maxRecordNumber: " << value;
 

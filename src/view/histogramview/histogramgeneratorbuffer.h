@@ -111,7 +111,7 @@ protected:
             if (ok)
                 scanned_contents.push_back(elem.first);
             else
-                logwrn << "HistogramGeneratorBuffer: Could not scan buffer of DBContent " << elem.first;  
+                loginf << "HistogramGeneratorBuffer: could not scan buffer of DBContent " << elem.first;
         }
 
         //no data range available -> no good
@@ -143,7 +143,7 @@ protected:
             bool ok = addBuffer(elem.first, *elem.second);
 
             if (!ok)
-                logwrn << "HistogramGeneratorBuffer: Could not add buffer of DBContent " << elem.first;
+                loginf << "HistogramGeneratorBuffer: could not add buffer of DBContent " << elem.first;
         }
 
         return true;

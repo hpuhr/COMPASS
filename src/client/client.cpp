@@ -96,6 +96,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
             ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
+            ("override_cfg_path", po::value<std::string>(&override_cfg_path_),
+             "overrides 'default' config subfolder to other value, e.g. 'org'")
             ("expert_mode", po::bool_switch(&expert_mode_) ,"set expert mode")
             ("create_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
@@ -455,7 +457,14 @@ void Client::checkAndSetupConfig()
         assert(config.existsId("log_properties_file"));
         assert(config.existsId("save_config_on_exit"));
 
-        CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY + config.getString("configuration_path") + "/";
+        if (override_cfg_path_.size())
+        {
+            cout << "COMPASSClient: overriding config path to '" << override_cfg_path_ + "'" << endl;
+
+            CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY + override_cfg_path_ + "/";
+        }
+        else
+            CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY + config.getString("configuration_path") + "/";
 
         cout << "COMPASSClient: current configuration path is '" << CURRENT_CONF_DIRECTORY + "'"
              << endl;

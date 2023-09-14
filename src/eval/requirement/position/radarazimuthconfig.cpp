@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/position/azimuthconfig.h"
-#include "eval/requirement/position/azimuthconfigwidget.h"
+#include "eval/requirement/position/radarazimuthconfig.h"
+#include "eval/requirement/position/radarazimuthconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
@@ -31,45 +31,45 @@ using namespace std;
 
 namespace EvaluationRequirement
 {
-PositionAzimuthConfig::PositionAzimuthConfig(
+PositionRadarAzimuthConfig::PositionRadarAzimuthConfig(
         const std::string& class_id, const std::string& instance_id,
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0);
+    registerParameter("threshold_value", &threshold_value_, 0.1);
 }
 
-PositionAzimuthConfig::~PositionAzimuthConfig()
+PositionRadarAzimuthConfig::~PositionRadarAzimuthConfig()
 {
 
 }
 
-std::shared_ptr<Base> PositionAzimuthConfig::createRequirement()
+std::shared_ptr<Base> PositionRadarAzimuthConfig::createRequirement()
 {
-    shared_ptr<PositionAzimuth> req = make_shared<PositionAzimuth>(
+    shared_ptr<PositionRadarAzimuth> req = make_shared<PositionRadarAzimuth>(
                 name_, short_name_, group_.name(), eval_man_, threshold_value_);
 
     return req;
 }
 
-float PositionAzimuthConfig::thresholdValue() const
+float PositionRadarAzimuthConfig::thresholdValue() const
 {
     return threshold_value_;
 }
 
-void PositionAzimuthConfig::thresholdValue(float value)
+void PositionRadarAzimuthConfig::thresholdValue(float value)
 {
     threshold_value_ = value;
 }
 
-void PositionAzimuthConfig::createWidget()
+void PositionRadarAzimuthConfig::createWidget()
 {
     assert (!widget_);
-    widget_.reset(new PositionAzimuthConfigWidget(*this));
+    widget_.reset(new PositionRadarAzimuthConfigWidget(*this));
     assert (widget_);
 }
 
-void PositionAzimuthConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void PositionRadarAzimuthConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 

@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/position/rangesingle.h"
-#include "eval/results/position/rangejoined.h"
+#include "eval/results/position/radarazimuthsingle.h"
+#include "eval/results/position/radarazimuthjoined.h"
 #include "eval/requirement/base/base.h"
-#include "eval/requirement/position/range.h"
+#include "eval/requirement/position/radarazimuth.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -40,51 +40,23 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedPositionRange::JoinedPositionRange(const std::string& result_id,
-                                               std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                               const SectorLayer& sector_layer, 
-                                               EvaluationManager& eval_man)
-:   JoinedPositionBase("JoinedPositionRange", result_id, requirement, sector_layer, eval_man)
+JoinedPositionRadarAzimuth::JoinedPositionRadarAzimuth(const std::string& result_id,
+                                                       std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                       const SectorLayer& sector_layer,
+                                                       EvaluationManager& eval_man)
+    :   JoinedPositionBase("JoinedPositionRadarAzimuth", result_id, requirement, sector_layer, eval_man)
 {
 }
 
-void JoinedPositionRange::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SinglePositionRange> other_sub =
-            std::static_pointer_cast<SinglePositionRange>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedPositionRange::addToValues (std::shared_ptr<SinglePositionRange> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_pos_         += single_result->numPos();
-    num_no_ref_      += single_result->numNoRef();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_passed_      += single_result->numPassed();
-    num_failed_      += single_result->numFailed();
-
-    update();
-}
-
-void JoinedPositionRange::update()
+void JoinedPositionRadarAzimuth::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-    //prob_.reset();
-
     vector<double> all_values = values();
 
     if (all_values.size() != num_failed_ + num_passed_)
-        logerr << "JoinedPositionRange: update: wrong size all_values.size() " << all_values.size()
+        logerr << "JoinedPositionRadarAzimuth: update: wrong size all_values.size() " << all_values.size()
                << " num_failed_ " << num_failed_ << " num_passed_ " << num_passed_;
 
     assert (all_values.size() == num_failed_ + num_passed_);
@@ -97,22 +69,17 @@ void JoinedPositionRange::update()
         value_avg_ = std::accumulate(all_values.begin(), all_values.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
-        value_rms_ = 0;
 
         for(auto val : all_values)
         {
             value_var_ += pow(val - value_avg_, 2);
-
-            value_rms_ += pow(val, 2);
         }
 
         value_var_ /= (float)num_distances;
 
-        value_rms_ /= (float)num_distances;
-        value_rms_ = sqrt(value_rms_);
+        value_rms_ = 0; // not used
 
         assert (num_passed_ <= num_distances);
-        //prob_ = (float)num_passed_ / (float)num_distances;
     }
     else
     {
@@ -124,48 +91,39 @@ void JoinedPositionRange::update()
     }
 }
 
-void JoinedPositionRange::addToReport (
+void JoinedPositionRadarAzimuth::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    logdbg << "JoinedPositionRange " <<  requirement_->name() <<": addToReport";
+    logdbg << "JoinedPositionRadarAzimuth " <<  requirement_->name() <<": addToReport";
 
     if (!results_.size()) // some data must exist
     {
-        logerr << "JoinedPositionRange " <<  requirement_->name() <<": addToReport: no data";
+        logerr << "JoinedPositionRadarAzimuth " <<  requirement_->name() <<": addToReport: no data";
         return;
     }
 
-    logdbg << "JoinedPositionRange " <<  requirement_->name() << ": addToReport: adding joined result";
+    logdbg << "JoinedPositionRadarAzimuth " <<  requirement_->name() << ": addToReport: adding joined result";
 
     addToOverviewTable(root_item);
     addDetails(root_item);
 }
 
-void JoinedPositionRange::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void JoinedPositionRadarAzimuth::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
     // condition
-    std::shared_ptr<EvaluationRequirement::PositionRange> req =
-            std::static_pointer_cast<EvaluationRequirement::PositionRange>(requirement_);
+    std::shared_ptr<EvaluationRequirement::PositionRadarAzimuth> req =
+            std::static_pointer_cast<EvaluationRequirement::PositionRadarAzimuth>(requirement_);
     assert (req);
-
-    //QVariant p_passed_var;
 
     QVariant calc_val;
     string result {"Unknown"};
 
-//    if (prob_.has_value())
-//    {
-//        p_passed_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
-
-//        result = req->getConditionResultStr(prob_.value());
-//    }
-
     if (num_passed_ + num_failed_)
     {
-        calc_val = String::doubleToStringPrecision(value_rms_,2).c_str();
-        result = req->getConditionResultStr(value_rms_);
+        calc_val = String::doubleToStringPrecision(value_avg_,2).c_str();
+        result = req->getConditionResultStr(value_avg_);
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -175,15 +133,15 @@ void JoinedPositionRange::addToOverviewTable(std::shared_ptr<EvaluationResultsRe
                      calc_val, req->getConditionStr().c_str(), result.c_str()}, this, {});
 }
 
-void JoinedPositionRange::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void JoinedPositionRadarAzimuth::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
 
     if (!sector_section.hasTable("sector_details_table"))
         sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
 
-    std::shared_ptr<EvaluationRequirement::PositionRange> req =
-            std::static_pointer_cast<EvaluationRequirement::PositionRange>(requirement_);
+    std::shared_ptr<EvaluationRequirement::PositionRadarAzimuth> req =
+            std::static_pointer_cast<EvaluationRequirement::PositionRadarAzimuth>(requirement_);
     assert (req);
 
     EvaluationResultsReport::SectionContentTable& sec_det_table =
@@ -206,48 +164,37 @@ void JoinedPositionRange::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
     sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
 
     // along
-    sec_det_table.addRow({"DMin [m]", "Minimum of distance",
+    sec_det_table.addRow({"DMin [m]", "Minimum of angle distance",
                           String::doubleToStringPrecision(value_min_,2).c_str()}, this);
-    sec_det_table.addRow({"DMax [m]", "Maximum of distance",
+    sec_det_table.addRow({"DMax [m]", "Maximum of angle distance",
                           String::doubleToStringPrecision(value_max_,2).c_str()}, this);
-    sec_det_table.addRow({"DAvg [m]", "Average of distance",
+    sec_det_table.addRow({"DAvg [m]", "Average of angle distance",
                           String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
-    sec_det_table.addRow({"DSDev [m]", "Standard Deviation of distance",
+    sec_det_table.addRow({"DSDev [m]", "Standard Deviation of angle distance",
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-    sec_det_table.addRow({"DVar [m^2]", "Variance of distance",
+    sec_det_table.addRow({"DVar [m^2]", "Variance of angle distance",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-    sec_det_table.addRow({"RMS", "Root mean square",
-                          String::doubleToStringPrecision(value_rms_,2).c_str()}, this);
     sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_failed_}, this);
     sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_passed_},
                          this);
 
 
     // condition
-//    {
-//        QVariant p_passed_var;
+    sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
-//        if (prob_.has_value())
-//            p_passed_var = roundf(prob_.value() * 10000.0) / 100.0;
+    string result {"Unknown"};
 
-//        sec_det_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
+    if (num_failed_ + num_passed_)
+        result = req->getConditionResultStr(value_avg_);
 
-        sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
-
-        string result {"Unknown"};
-
-        if (num_failed_ + num_passed_)
-            result = req->getConditionResultStr(value_rms_);
-
-        sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
-//    }
+    sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
     // figure
     sector_section.addFigure("sector_overview", "Sector Overview",
                              [this](void) { return this->getErrorsViewable(); });
 }
 
-bool JoinedPositionRange::hasViewableData (
+bool JoinedPositionRadarAzimuth::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == req_overview_table_name_)
@@ -256,7 +203,7 @@ bool JoinedPositionRange::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionRange::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedPositionRadarAzimuth::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
@@ -264,7 +211,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionRange::viewableData(
     return getErrorsViewable();
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionRange::getErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> JoinedPositionRadarAzimuth::getErrorsViewable ()
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
             eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
@@ -294,7 +241,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionRange::getErrorsViewable
     return viewable_ptr;
 }
 
-bool JoinedPositionRange::hasReference (
+bool JoinedPositionRadarAzimuth::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == req_overview_table_name_)
@@ -303,37 +250,37 @@ bool JoinedPositionRange::hasReference (
         return false;;
 }
 
-std::string JoinedPositionRange::reference(
+std::string JoinedPositionRadarAzimuth::reference(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasReference(table, annotation));
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedPositionRange::updatesToUseChanges_impl()
+//void JoinedPositionRadarAzimuth::updatesToUseChanges_impl()
+//{
+//    loginf << "JoinedPositionRadarAzimuth: updatesToUseChanges";
+
+//    num_pos_         = 0;
+//    num_no_ref_      = 0;
+//    num_pos_outside_ = 0;
+//    num_pos_inside_  = 0;
+//    num_failed_      = 0;
+//    num_passed_      = 0;
+
+//    for (auto result_it : results_)
+//    {
+//        std::shared_ptr<SinglePositionRadarAzimuth> result =
+//                std::static_pointer_cast<SinglePositionRadarAzimuth>(result_it);
+//        assert (result);
+
+//        addToValues(result);
+//    }
+//}
+
+void JoinedPositionRadarAzimuth::exportAsCSV()
 {
-    loginf << "JoinedPositionRange: updatesToUseChanges";
-
-    num_pos_         = 0;
-    num_no_ref_      = 0;
-    num_pos_outside_ = 0;
-    num_pos_inside_  = 0;
-    num_failed_      = 0;
-    num_passed_      = 0;
-
-    for (auto result_it : results_)
-    {
-        std::shared_ptr<SinglePositionRange> result =
-                std::static_pointer_cast<SinglePositionRange>(result_it);
-        assert (result);
-
-        addToValues(result);
-    }
-}
-
-void JoinedPositionRange::exportAsCSV()
-{
-    loginf << "JoinedPositionRange: exportAsCSV";
+    loginf << "JoinedPositionRadarAzimuth: exportAsCSV";
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);

@@ -15,36 +15,37 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONAZIMUTH_H
-#define EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONAZIMUTH_H
+#ifndef EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRADARRANGE_H
+#define EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRADARRANGE_H
 
 #include "eval/results/position/positionbase.h"
 
 namespace EvaluationRequirement
 {
-    class PositionAzimuth;
+    class PositionRadarRange;
 }
 
 namespace EvaluationRequirementResult
 {
 
-class SinglePositionAzimuth : public SinglePositionBase
+class SinglePositionRadarRange : public SinglePositionBase
 {
 public:
-    SinglePositionAzimuth(const std::string& result_id,
-                           std::shared_ptr<EvaluationRequirement::Base> requirement,
-                           const SectorLayer& sector_layer,
-                           unsigned int utn, 
-                           const EvaluationTargetData* target, 
-                           EvaluationManager& eval_man,
-                           const EvaluationDetails& details,
-                           unsigned int num_pos, 
-                           unsigned int num_no_ref,
-                           unsigned int num_pos_outside, 
-                           unsigned int num_pos_inside,
-                           unsigned int num_comp_passed,
-                           unsigned int num_comp_failed,
-                           vector<double> values);
+    SinglePositionRadarRange(const std::string& result_id,
+                             std::shared_ptr<EvaluationRequirement::Base> requirement,
+                             const SectorLayer& sector_layer,
+                             unsigned int utn,
+                             const EvaluationTargetData* target,
+                             EvaluationManager& eval_man,
+                             const EvaluationDetails& details,
+                             unsigned int num_pos,
+                             unsigned int num_no_ref,
+                             unsigned int num_pos_outside,
+                             unsigned int num_pos_inside,
+                             unsigned int num_comp_passed,
+                             unsigned int num_comp_failed,
+                             vector<double> values,
+                             vector<double> ref_range_values, vector<double> tst_range_values);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -60,11 +61,21 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-    EvaluationRequirement::PositionAzimuth* req ();
+    EvaluationRequirement::PositionRadarRange* req ();
 
     void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
+    const vector<double>& refRangeValues() const;
+    const vector<double>& tstRangeValues() const;
+
 protected:
+
+    vector<double> ref_range_values_;
+    vector<double> tst_range_values_;
+
+    QVariant range_bias_;
+    QVariant range_gain_;
+
     void update();
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -79,4 +90,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONDISTANCERMS_H
+#endif // EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRADARRANGE_H
