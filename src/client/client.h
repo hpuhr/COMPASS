@@ -42,6 +42,8 @@ private:
     bool home_subdir_deletion_wanted_{false};
     bool config_and_data_copy_wanted_{false};
 
+    std::string override_cfg_path_;
+
     std::string create_new_sqlite3_db_filename_;
     std::string open_sqlite3_db_filename_;
 
