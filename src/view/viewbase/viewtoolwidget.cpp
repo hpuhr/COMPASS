@@ -3,6 +3,8 @@
 #include "viewtoolswitcher.h"
 #include "viewwidget.h"
 
+#include "ui_test_common.h"
+
 #include <QShortcut>
 #include <QToolButton>
 #include <QApplication>
@@ -102,6 +104,8 @@ namespace
 
         action->setText(full_name);
         action->setIcon(icon);
+
+        UI_TEST_OBJ_NAME(action, name)
 
         return action;
     }
