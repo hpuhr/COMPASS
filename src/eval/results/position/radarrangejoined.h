@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONAZIMUTH_H
-#define EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONAZIMUTH_H
+#ifndef EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRADARRANGE_H
+#define EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRADARRANGE_H
 
 #include "eval/results/position/positionbase.h"
 
@@ -24,12 +24,12 @@ namespace EvaluationRequirementResult
 {
 using namespace std;
 
-class SinglePositionAzimuth;
+class SinglePositionRadarRange;
 
-class JoinedPositionAzimuth : public JoinedPositionBase
+class JoinedPositionRadarRange : public JoinedPositionBase
 {
 public:
-    JoinedPositionAzimuth(const std::string& result_id,
+    JoinedPositionRadarRange(const std::string& result_id,
                            std::shared_ptr<EvaluationRequirement::Base> requirement,
                            const SectorLayer& sector_layer,
                            EvaluationManager& eval_man);
@@ -50,18 +50,21 @@ public:
     void exportAsCSV();
 
 protected:
-    void addToValues (std::shared_ptr<SinglePositionAzimuth> single_result);
-    void update();
+
+    QVariant range_gain_;
+    QVariant range_bias_;
+
+    void update() override;
 
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
     std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
 
-    virtual void join_impl(std::shared_ptr<Single> other) override;
-    virtual void updatesToUseChanges_impl() override;
+    vector<double> refRangeValues() const;
+    vector<double> tstRangeValues() const;
 };
 
 }
 
-#endif // EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONAZIMUTH_H
+#endif // EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRADARRANGE_H

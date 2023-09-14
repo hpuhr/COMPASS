@@ -15,13 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTPOSITIONAZIMUTHCONFIG_H
-#define EVALUATIONREQUIREMENTPOSITIONAZIMUTHCONFIG_H
+#ifndef EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H
+#define EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H
 
 #include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/position/azimuthconfigwidget.h"
-#include "eval/requirement/position/azimuth.h"
+#include "eval/requirement/position/radarazimuthconfigwidget.h"
+#include "eval/requirement/position/radarazimuth.h"
 
 class Group;
 class EvaluationStandard;
@@ -29,12 +29,12 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class PositionAzimuthConfig : public BaseConfig
+class PositionRadarAzimuthConfig : public BaseConfig
 {
 public:
-    PositionAzimuthConfig(const std::string& class_id, const std::string& instance_id,
+    PositionRadarAzimuthConfig(const std::string& class_id, const std::string& instance_id,
                         Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
-    virtual ~PositionAzimuthConfig();
+    virtual ~PositionRadarAzimuthConfig();
 
     std::shared_ptr<Base> createRequirement() override;
 
@@ -51,4 +51,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENTPOSITIONAZIMUTHCONFIG_H
+#endif // EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H

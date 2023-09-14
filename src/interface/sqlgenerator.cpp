@@ -326,6 +326,29 @@ std::shared_ptr<DBCommand> SQLGenerator::getMaxUIntValueCommand(const std::strin
     return command;
 }
 
+
+std::shared_ptr<DBCommand> SQLGenerator::getMaxULongIntValueCommand(const std::string& table_name,
+                                                                const std::string& col_name)
+{
+    PropertyList list;
+    list.addProperty(col_name, PropertyDataType::ULONGINT);
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+
+    stringstream ss;
+
+    ss << "SELECT MAX(" << col_name;
+
+    ss << ") FROM ";
+
+    ss << table_name << ";";
+
+    command->set(ss.str());
+    command->list(list);
+
+    return command;
+}
+
 shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBContent& adsb_obj)
 {
 

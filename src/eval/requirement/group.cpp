@@ -20,8 +20,8 @@
 #include "eval/requirement/detection/detectionconfig.h"
 #include "eval/requirement/position/distanceconfig.h"
 #include "eval/requirement/position/distancermsconfig.h"
-#include "eval/requirement/position/rangeconfig.h"
-#include "eval/requirement/position/azimuthconfig.h"
+#include "eval/requirement/position/radarrangeconfig.h"
+#include "eval/requirement/position/radarazimuthconfig.h"
 #include "eval/requirement/position/alongconfig.h"
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/latencyconfig.h"
@@ -67,8 +67,8 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementModeCCorrectPeriodConfig", "Mode C Correct (Periods)"},
     {"EvaluationRequirementPositionDistanceConfig", "Position Distance"},
     {"EvaluationRequirementPositionDistanceRMSConfig", "Position Distance RMS"},
-    {"EvaluationRequirementPositionRangeConfig", "Position Range"},
-    {"EvaluationRequirementPositionAzimuthConfig", "Position Azimuth"},
+    {"EvaluationRequirementPositionRadarRangeConfig", "Position Radar Range"},
+    {"EvaluationRequirementPositionRadarAzimuthConfig", "Position Radar Azimuth"},
     {"EvaluationRequirementPositionAlongConfig", "Position Along"},
     {"EvaluationRequirementPositionAcrossConfig", "Position Across"},
     {"EvaluationRequirementPositionLatencyConfig", "Position Latency"},
@@ -166,20 +166,20 @@ void Group::generateSubConfigurable(const std::string& class_id,
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
-    else if (class_id == "EvaluationRequirementPositionRangeConfig")
+    else if (class_id == "EvaluationRequirementPositionRadarRangeConfig")
     {
-        EvaluationRequirement::PositionRangeConfig* config =
-                new EvaluationRequirement::PositionRangeConfig(
+        EvaluationRequirement::PositionRadarRangeConfig* config =
+                new EvaluationRequirement::PositionRadarRangeConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
-    else if (class_id == "EvaluationRequirementPositionAzimuthConfig")
+    else if (class_id == "EvaluationRequirementPositionRadarAzimuthConfig")
     {
-        EvaluationRequirement::PositionAzimuthConfig* config =
-                new EvaluationRequirement::PositionAzimuthConfig(
+        EvaluationRequirement::PositionRadarAzimuthConfig* config =
+                new EvaluationRequirement::PositionRadarAzimuthConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 

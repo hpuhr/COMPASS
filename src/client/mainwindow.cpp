@@ -387,20 +387,20 @@ void MainWindow::createMenus ()
     process_menu_->setToolTipsVisible(true);
 
     QAction* calc_radar_plpos_action = new QAction(tr("Calculate Radar Plot Positions"));
-    calc_radar_plpos_action->setToolTip(tr("Calculate Radar Plot Positios, only needed if Radar Position information"
+    calc_radar_plpos_action->setToolTip(tr("Calculate Radar Plot Positions, only needed if Radar Position information"
                                            " was changed"));
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
-    QAction* assoc_action = new QAction(tr("Calculate Associations"));
+    QAction* assoc_action = new QAction(tr("Calculate Unique Targets"));
     assoc_action->setToolTip(tr("Create Unique Targets based on all DB Content"));
     connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsSlot);
     process_menu_->addAction(assoc_action);
 
-//    QAction* assoc_artas_action = new QAction(tr("Calculate Associations from ARTAS"));
-//    assoc_artas_action->setToolTip(tr("Create Unique Targets based on ARTAS TRI information"));
-//    connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
-//    process_menu_->addAction(assoc_artas_action);
+    QAction* assoc_artas_action = new QAction(tr("Calculate ARTAS Target Report Usage"));
+    assoc_artas_action->setToolTip(tr("Create target report usage based on ARTAS TRI information"));
+    connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
+    process_menu_->addAction(assoc_artas_action);
 
     calculate_references_action_ = new QAction(tr("Calculate References"));
     calculate_references_action_->setToolTip(tr("Calculate References from System Tracker and ADS-B data"));
@@ -1032,6 +1032,7 @@ void MainWindow::autoResumeTimerSlot()
     assert (!auto_resume_dialog_);
 
     auto_resume_dialog_.reset(new AutoResumeDialog(COMPASS::instance().autoLiveRunningResumeAskWaitTime() * 60));
+
     // min to s
     connect (auto_resume_dialog_.get(), &AutoResumeDialog::resumeSignal, this, &MainWindow::autoResumeResumeSlot);
     connect (auto_resume_dialog_.get(), &AutoResumeDialog::stayPausedSignal, this, &MainWindow::autoResumeStaySlot);

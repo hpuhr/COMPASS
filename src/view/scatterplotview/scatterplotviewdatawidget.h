@@ -150,7 +150,7 @@ protected:
     double y_min_ {0}, y_max_ {0};
 
     std::map<std::string, std::vector<bool>>         selected_values_;
-    std::map<std::string, std::vector<unsigned int>> rec_num_values_;
+    std::map<std::string, std::vector<unsigned long>> rec_num_values_;
 
     std::map<std::string, QColor> colors_;
 

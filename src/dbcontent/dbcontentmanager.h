@@ -97,6 +97,10 @@ public:
     DBContentIterator end() { return dbcontent_.end(); }
     size_t size() { return dbcontent_.size(); }
 
+    unsigned int getMaxDBContentID();
+    bool existsDBContentWithId (unsigned int id);
+    const std::string& dbContentWithId (unsigned int id);
+
     bool existsMetaVariable(const std::string& var_name);
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
     void renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name);
@@ -128,8 +132,8 @@ public:
     std::string associationsID() const;
 
     bool hasMaxRecordNumber() const { return has_max_rec_num_; }
-    unsigned int maxRecordNumber() const;
-    void maxRecordNumber(unsigned int value);
+    unsigned long maxRecordNumber() const;
+    void maxRecordNumber(unsigned long value);
 
     bool hasMaxRefTrajTrackNum() const { return has_max_reftraj_track_num_; }
     unsigned int maxRefTrajTrackNum() const;
@@ -195,7 +199,7 @@ protected:
     std::string associations_id_;
 
     bool has_max_rec_num_ {false};
-    unsigned int max_rec_num_ {0};
+    unsigned long max_rec_num_ {0};
 
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
@@ -217,8 +221,9 @@ protected:
     bool load_in_progress_{false};
     bool insert_in_progress_{false};
 
-    /// Container with all DBContent (DBContent name -> DBO pointer)
+    /// Container with all DBContent (DBContent name -> dbcont pointer)
     std::map<std::string, DBContent*> dbcontent_;
+    std::map<unsigned int, DBContent*> dbcontent_ids_;
     std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
     //std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;

@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_cat021",
+        "id": 21,
         "info": "",
         "name": "CAT021"
     },
@@ -2010,7 +2011,7 @@
             },
             "VariableADSBrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Ascending record number",
                     "dimension": "",

@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_cat020",
+        "id": 20,
         "info": "",
         "name": "CAT020"
     },
@@ -684,7 +685,7 @@
             },
             "VariableMLATrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "ascending record number",
                     "dimension": "",

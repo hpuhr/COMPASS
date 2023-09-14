@@ -47,6 +47,8 @@ public:
     std::string name() const;
     void name(const std::string& name);
 
+    bool radarCoordinateSystemsAdded();
+
 protected:
     ProjectionManager& proj_manager_;
 

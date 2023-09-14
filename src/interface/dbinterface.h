@@ -155,7 +155,7 @@ public:
 
     void clearTableContent(const std::string& table_name);
 
-    unsigned int getMaxRecordNumber(DBContent& object);
+    unsigned long getMaxRecordNumber(DBContent& object);
     unsigned int getMaxRefTrackTrackNum();
 
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,

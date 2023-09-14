@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRANGE_H
-#define EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRANGE_H
+#ifndef EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRADARAZIMUTH_H
+#define EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRADARAZIMUTH_H
 
 #include "eval/results/position/positionbase.h"
 
@@ -24,12 +24,12 @@ namespace EvaluationRequirementResult
 {
 using namespace std;
 
-class SinglePositionRange;
+class SinglePositionRadarAzimuth;
 
-class JoinedPositionRange : public JoinedPositionBase
+class JoinedPositionRadarAzimuth : public JoinedPositionBase
 {
 public:
-    JoinedPositionRange(const std::string& result_id,
+    JoinedPositionRadarAzimuth(const std::string& result_id,
                            std::shared_ptr<EvaluationRequirement::Base> requirement,
                            const SectorLayer& sector_layer,
                            EvaluationManager& eval_man);
@@ -50,18 +50,14 @@ public:
     void exportAsCSV();
 
 protected:
-    void addToValues (std::shared_ptr<SinglePositionRange> single_result);
-    void update();
+    void update() override;
 
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
     std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
-
-    virtual void join_impl(std::shared_ptr<Single> other) override;
-    virtual void updatesToUseChanges_impl() override;
 };
 
 }
 
-#endif // EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRANGE_H
+#endif // EVALUATIONREQUIREMENPOSITIONJOINEDPOSITIONRADARAZIMUTH_H

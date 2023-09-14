@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_cat062",
+        "id": 62,
         "info": "",
         "name": "CAT062"
     },
@@ -1722,7 +1723,7 @@
                     "unit": "Knots"
                 }
             },
-            "VariableTrackerhash_code0": {
+            "VariableTrackertri0": {
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "target_report_identifiers",
@@ -1732,6 +1733,19 @@
                     "name": "Target Report Identifiers",
                     "representation_str": "STANDARD",
                     "short_name": "TRI",
+                    "unit": ""
+                }
+            },
+            "VariableTrackertri_recnums0": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "target_report_identifier_recnums",
+                    "description": "From SPF.Target Report Identifiers.TRI\n\nARTAS associated record numbers",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "TRI Record Numbers",
+                    "representation_str": "STANDARD",
+                    "short_name": "TRI RecNums",
                     "unit": ""
                 }
             },
@@ -2075,7 +2089,7 @@
             },
             "VariableTrackerrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",

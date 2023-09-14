@@ -18,13 +18,12 @@
 #ifndef PROJECTIONMANAGER_H_
 #define PROJECTIONMANAGER_H_
 
-//#include "geomap.h"
-
 #include "configurable.h"
 #include "singleton.h"
 
 class ProjectionManagerWidget;
 class Projection;
+class OGRProjection;
 
 /**
  * @brief Singleton for coordinate projection handling
@@ -34,11 +33,11 @@ class Projection;
  */
 class ProjectionManager : public Singleton, public Configurable
 {
-  protected:
+protected:
     /// @brief Constructor
     ProjectionManager();
 
-  public:
+public:
     /// @brief Desctructor
     virtual ~ProjectionManager();
 
@@ -60,12 +59,18 @@ class ProjectionManager : public Singleton, public Configurable
     void currentProjectionName(const std::string& name);
 
     bool hasProjection(const std::string& name);
+    Projection& projection(const std::string& name);
     bool hasCurrentProjection();
     Projection& currentProjection();
 
     std::map<std::string, std::unique_ptr<Projection>>& projections();
 
-  protected:
+    OGRProjection& ogrProjection();
+
+    static const std::string RS2G_NAME;
+    static const std::string OGR_NAME;
+
+protected:
     //    float sdl_system_latitude_;
     //    float sdl_system_longitude_;
     //    t_Mapping_Info sdl_mapping_info_;

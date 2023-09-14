@@ -45,7 +45,7 @@ using namespace std;
 using namespace Utils;
 using namespace dbContent;
 
-const Property DBContent::meta_var_rec_num_ {"Record Number", PropertyDataType::UINT};
+const Property DBContent::meta_var_rec_num_ {"Record Number", PropertyDataType::ULONGINT};
 const Property DBContent::meta_var_datasource_id_ {"DS ID", PropertyDataType::UINT};
 const Property DBContent::meta_var_sac_id_ {"SAC", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_sic_id_ {"SIC", PropertyDataType::UCHAR};
@@ -103,8 +103,9 @@ const Property DBContent::var_cat021_nucv_nacv_ {"NUCr or NACv", PropertyDataTyp
 const Property DBContent::var_cat021_sil_ {"SIL", PropertyDataType::UCHAR};
 
 const Property DBContent::var_cat062_tris_ {"Target Report Identifiers", PropertyDataType::STRING};
+const Property DBContent::var_cat062_tri_recnums_ {"TRI Record Numbers", PropertyDataType::JSON};
 const Property DBContent::var_cat062_track_begin_ {"Track Begin", PropertyDataType::BOOL};
-const Property DBContent::var_cat062_coasting_ {"Coasting", PropertyDataType::BOOL};
+const Property DBContent::var_cat062_coasting_ {"Coasting", PropertyDataType::UCHAR};
 const Property DBContent::var_cat062_track_end_ {"Track End", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_mono_sensor_ {"Monosensor", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_type_lm_ {"Type LM", PropertyDataType::UCHAR};
@@ -127,6 +128,7 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
       dbcont_manager_(*manager)
 {
     registerParameter("name", &name_, "Undefined");
+    registerParameter("id", &id_, 0);
     registerParameter("info", &info_, "");
     registerParameter("db_table_name", &db_table_name_, "");
 
@@ -232,6 +234,11 @@ bool DBContent::hasVariableDBColumnName(const std::string& col_name) const
 
     return false;
 
+}
+
+unsigned int DBContent::id()
+{
+    return id_;
 }
 
 bool DBContent::hasKeyVariable()

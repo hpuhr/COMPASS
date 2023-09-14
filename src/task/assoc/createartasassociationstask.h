@@ -69,16 +69,6 @@ public:
     std::string currentDataSourceName() const;
     void currentDataSourceName(const std::string& currentDataSourceName);
 
-    dbContent::Variable* trackerDsIdVar() const;
-    dbContent::Variable* trackerTrackNumVar() const;
-    dbContent::Variable* trackerTrackBeginVar() const;
-    dbContent::Variable* trackerTrackEndVar() const;
-    dbContent::Variable* trackerCoastingVar() const;
-    dbContent::Variable* trackerTRIsVar() const;
-    dbContent::MetaVariable* keyVar() const;
-    dbContent::MetaVariable* hashVar() const;
-    dbContent::MetaVariable* timestampVar() const;
-
     float endTrackTime() const;
     void endTrackTime(float end_track_time);
 
@@ -115,22 +105,12 @@ public:
     virtual bool canRun() override;
     virtual void run() override;
 
+    bool wasRun();
+
     static const std::string DONE_PROPERTY_NAME;
 
 protected:
     std::string current_data_source_name_;
-
-    dbContent::Variable* tracker_ds_id_var_{nullptr};
-    dbContent::Variable* tracker_track_num_var_{nullptr};
-    dbContent::Variable* tracker_track_begin_var_{nullptr};
-    dbContent::Variable* tracker_track_end_var_{nullptr};
-    dbContent::Variable* tracker_track_coasting_var_{nullptr};
-    dbContent::Variable* tracker_tris_var_{nullptr};
-
-    dbContent::MetaVariable* rec_num_var_{nullptr};
-    dbContent::MetaVariable* hash_var_{nullptr}; // contains artas md5 for target reports, tris for tracker
-    dbContent::MetaVariable* timestamp_var_{nullptr};
-    dbContent::MetaVariable* utn_var_{nullptr};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
@@ -167,10 +147,6 @@ protected:
 
     std::shared_ptr<CreateARTASAssociationsJob> create_job_;
     bool create_job_done_{false};
-
-    void checkAndSetTrackerVariable(const std::string& name_str, dbContent::Variable** var);
-    void checkAndSetTrackerVariableFromMeta(const std::string& meta_name_str, dbContent::Variable** var);
-    void checkAndSetMetaVariable(const std::string& name_str, dbContent::MetaVariable** var);
 
     dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name);
 };

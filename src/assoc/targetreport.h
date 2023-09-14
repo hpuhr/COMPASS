@@ -20,7 +20,7 @@ namespace Association
         string dbcontent_name_;
         unsigned int ds_id_{0};
         unsigned int line_id_{0};
-        unsigned int rec_num_{0};
+        unsigned long rec_num_{0};
         boost::posix_time::ptime timestamp_;
 
         // mode s

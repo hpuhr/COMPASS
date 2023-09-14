@@ -11,7 +11,7 @@
 CreateAssociationsTaskDialog::CreateAssociationsTaskDialog(CreateAssociationsTask& task)
 : QDialog(), task_(task)
 {
-    setWindowTitle("Calculate Associations");
+    setWindowTitle("Calculate Unique Targets");
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
     setModal(true);

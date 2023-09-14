@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_reftraj",
+        "id": 255,
         "info": "",
         "name": "RefTraj"
     },
@@ -541,7 +542,7 @@
             },
             "VariableRefTrajrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",

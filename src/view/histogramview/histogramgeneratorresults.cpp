@@ -46,6 +46,11 @@
 #include "eval/results/position/latencysingle.h"
 #include "eval/results/position/latencyjoined.h"
 
+#include "eval/results/position/radarazimuthjoined.h"
+#include "eval/results/position/radarazimuthsingle.h"
+#include "eval/results/position/radarrangejoined.h"
+#include "eval/results/position/radarrangesingle.h"
+
 #include "eval/results/speed/speedjoined.h"
 #include "eval/results/speed/speedsingle.h"
 #include "eval/results/trackangle/trackanglejoined.h"
@@ -266,6 +271,15 @@ void HistogramGeneratorResults::updateFromResult(std::shared_ptr<EvaluationRequi
         updateCountResult(static_pointer_cast<SinglePositionLatency>(result));
     else if (result->type() == "JoinedPositionLatency")
         updateCountResult(static_pointer_cast<JoinedPositionLatency>(result));
+
+    else if (result->type() == "SinglePositionRadarAzimuth")
+        updateCountResult(static_pointer_cast<SinglePositionRadarAzimuth>(result));
+    else if (result->type() == "JoinedPositionRadarAzimuth")
+        updateCountResult(static_pointer_cast<JoinedPositionRadarAzimuth>(result));
+    else if (result->type() == "SinglePositionRadarRange")
+        updateCountResult(static_pointer_cast<SinglePositionRadarRange>(result));
+    else if (result->type() == "JoinedPositionRadarRange")
+        updateCountResult(static_pointer_cast<JoinedPositionRadarRange>(result));
 
     else if (result->type() == "SingleSpeed")
         updateCountResult(static_pointer_cast<SingleSpeed>(result));
@@ -517,6 +531,35 @@ void HistogramGeneratorResults::updateCountResult (
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
     addFloatingPointResults<JoinedPositionLatency, SinglePositionLatency, Single>(dbcontent_name, result);
+}
+
+void HistogramGeneratorResults::updateCountResult (
+        std::shared_ptr<EvaluationRequirementResult::SinglePositionRadarAzimuth> result)
+{
+    assert (result);
+    std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    addFloatingPointResult(dbcontent_name, result);
+}
+void HistogramGeneratorResults::updateCountResult (
+        std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarAzimuth> result)
+{
+    assert (result);
+    std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    addFloatingPointResults<JoinedPositionRadarAzimuth, SinglePositionRadarAzimuth, Single>(dbcontent_name, result);
+}
+void HistogramGeneratorResults::updateCountResult (
+        std::shared_ptr<EvaluationRequirementResult::SinglePositionRadarRange> result)
+{
+    assert (result);
+    std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    addFloatingPointResult(dbcontent_name, result);
+}
+void HistogramGeneratorResults::updateCountResult (
+        std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarRange> result)
+{
+    assert (result);
+    std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    addFloatingPointResults<JoinedPositionRadarRange, SinglePositionRadarRange, Single>(dbcontent_name, result);
 }
 
 /**
