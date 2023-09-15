@@ -640,7 +640,7 @@ void DBContentManager::clearData()
 
 void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>> data)
 {
-    loginf << "DBContentManager: insertData";
+    logdbg << "DBContentManager: insertData";
 
     while (load_in_progress_) // pending insert
     {
@@ -685,7 +685,7 @@ void DBContentManager::insertDone(DBContent& object)
 
 void DBContentManager::finishInserting()
 {
-    loginf << "DBContentManager: finishInserting";
+    logdbg << "DBContentManager: finishInserting";
 
     using namespace boost::posix_time;
 

@@ -275,9 +275,6 @@ void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
 
     for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
-        if (dbo_it.first == "CAT062")
-            continue;
-
         ++row;
 
         unsigned int total_cnt = 0;

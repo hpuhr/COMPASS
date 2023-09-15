@@ -424,21 +424,23 @@ void CreateARTASAssociationsJob::saveAssociations()
 
         if (cat062_associations_.count(rec_num))
         {
-            //if (utn_vec.isNull(cnt))
-            //utn_vec.set(cnt, get<0>(associations.at(rec_num)));
+            tri_rec_num_vec.set(cnt, cat062_associations_.at(rec_num));
 
-            tri_rec_num_vec.set(cnt,cat062_associations_.at(rec_num));
+            // do association counts
+            for (auto assoc_rec_num : cat062_associations_.at(rec_num))
+            {
+                const string& dbcont_name = dbcontent_man.dbContentWithId(Number::recNumGetDBContId(assoc_rec_num));
 
-            //else
-            //utn_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
+                if (!association_counts_.count(dbcont_name) && buffers_.count(dbcont_name))
+                    association_counts_[dbcont_name] = {buffers_.at(dbcont_name)->size(),0};
 
-
+                get<1>(association_counts_[dbcont_name])++;
+            }
 
             ++num_associated;
         }
         else
             ++num_not_associated;
-
     }
 
     association_counts_[tracker_dbcontent_name_] = {buffers_.at(tracker_dbcontent_name_)->size(), num_associated};
