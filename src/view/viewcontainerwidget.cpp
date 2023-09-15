@@ -52,7 +52,6 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
 
-
     //set a nice object name by which we can differentiate multiple windows in qt's object hierarchy
     UI_TEST_OBJ_NAME(this, QString::fromStdString(name_))
 

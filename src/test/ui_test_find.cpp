@@ -19,6 +19,9 @@
 #include "logger.h"
 #include "compass.h"
 
+#include <QWidget>
+#include <QAction>
+
 using namespace rtcommand;
 
 namespace ui_test
@@ -62,6 +65,21 @@ std::pair<FindObjectErrCode, QObject*> findObjectNoPath(QObject* parent, const Q
 
     if (obj_name.isEmpty() || parent->objectName() == obj_name)
         return std::make_pair(FindObjectErrCode::NoError, parent);
+
+    //look for child actions
+    // if (parent->isWidgetType())
+    // {
+    //     QWidget* w = dynamic_cast<QWidget*>(parent);
+
+    //     //try to find in actions
+    //     for (auto action : w->actions())
+    //     {
+    //         if (action->objectName() == obj_name)
+    //             return std::make_pair(FindObjectErrCode::NoError, action);
+    //     }
+        
+    //     //not found in actions, try to find as child
+    // }
 
     QObject* obj = parent->findChild<QObject*>(obj_name, Qt::FindChildrenRecursively);
     if (!obj)
