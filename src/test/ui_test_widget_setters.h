@@ -215,4 +215,20 @@ namespace ui_test
 
         return injectDialogEvent(widget, "", accept, delay);
     }
+
+    template<>
+    inline bool setUIElement(QWidget* widget, const QString& value, int delay, const SetUIHint& hint)
+    {
+        //value must not be empty
+        if (value.isEmpty())
+            return false;
+
+        //check if the given value is a slot name in the widget
+        if (widget->metaObject()->indexOfSlot((value + "()").toStdString().c_str()) < 0)
+            return false;
+        
+        //if yes try to invoke the slot
+        return injectWidgetEvent(widget, "", value, delay);
+    }
+
 } // namespace ui_test

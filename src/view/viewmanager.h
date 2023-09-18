@@ -88,6 +88,7 @@ class ViewManager : public QObject, public Configurable
     void viewShutdown(View* view, const std::string& err = "");
 
     std::map<std::string, ViewContainer*> getContainers() { return containers_; }
+    std::map<std::string, ViewContainerWidget*> getContainerWidgets() { return container_widgets_; }
     std::map<std::string, View*> getViews() { return views_; }
     dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
 

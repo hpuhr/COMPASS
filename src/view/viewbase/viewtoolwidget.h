@@ -18,6 +18,7 @@
 #pragma once
 
 #include "appmode.h"
+#include "json.h"
 
 #include <QToolBar>
 #include <QKeySequence>
@@ -88,6 +89,8 @@ public:
     void redrawDone();
 
     void appModeSwitch(AppMode app_mode);
+
+    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 
 private:
     struct Action

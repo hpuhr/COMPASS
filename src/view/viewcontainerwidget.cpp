@@ -29,6 +29,7 @@
 #include <QMoveEvent>
 #include <QResizeEvent>
 #include <QTabWidget>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QMessageBox>
 

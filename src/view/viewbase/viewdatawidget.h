@@ -18,6 +18,7 @@
 #pragma once
 
 #include "appmode.h"
+#include "json.h"
 
 #include <map>
 #include <memory>
@@ -55,6 +56,8 @@ public:
     bool showsData() const;
 
     virtual void appModeSwitch(AppMode app_mode) {} //reacts on switching the application mode
+
+    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 
 signals:
     void displayChanged();

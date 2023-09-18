@@ -18,6 +18,7 @@
 #pragma once
 
 #include "appmode.h"
+#include "json.h"
 
 #include <string>
 
@@ -58,6 +59,8 @@ public:
     void redrawDone();
 
     void appModeSwitch(AppMode app_mode);
+
+    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 
 private:
     static std::string messageFromState(State state);
