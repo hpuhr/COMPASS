@@ -304,7 +304,8 @@ void CreateARTASAssociationsTask::run()
 
 bool CreateARTASAssociationsTask::wasRun()
 {
-    return COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    return COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME)
+             && COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 }
 
 void CreateARTASAssociationsTask::loadedDataDataSlot(

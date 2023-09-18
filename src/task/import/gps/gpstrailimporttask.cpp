@@ -66,7 +66,7 @@ GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::s
 {
     tooltip_ = "Allows importing of GPS trails as NMEA into the opened database.";
 
-    registerParameter("current_filename", &current_filename_, "");
+    //registerParameter("current_filename", &current_filename_, "");
 
     registerParameter("ds_name", &ds_name_, "GPS Trail");
     registerParameter("ds_sac", &ds_sac_, 0);
@@ -92,8 +92,8 @@ GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::s
 
     createSubConfigurables();
 
-    if (current_filename_.size())
-        parseCurrentFile();
+    //if (current_filename_.size())
+    //    parseCurrentFile();
 }
 
 GPSTrailImportTask::~GPSTrailImportTask()
@@ -367,24 +367,32 @@ void GPSTrailImportTask::parseCurrentFile ()
 
     NMEAParser parser;
     GPSService gps(parser);
-    parser.log = false;
+    //parser.log = true;
 
     boost::posix_time::ptime last_ts;
 
     //cout << "Fix  Sats  Sig\t\tSpeed    Dir  Lat         , Lon           Accuracy" << endl;
     // Handle any changes to the GPS Fix... This is called whenever it's updated.
     gps.onUpdate += [&gps, this, &last_ts](){
-        //        loginf << "GPSTrailImportTask: parseCurrentFile: "
-        //               << " time " << gps.fix.timestamp.toString()
-        //               << " " << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ')
-        //               << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " "
-        //               << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   "
-        //               << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h ["
-        //               << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  "
-        //               << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E"
-        //               << "  +/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
+
+//        loginf << "GPSTrailImportTask: parseCurrentFile: "
+//               << " time " << gps.fix.timestamp.toString()
+//               << " year " << gps.fix.timestamp.year
+//               << " " << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ')
+//               << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " "
+//               << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   "
+//               << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h ["
+//               << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  "
+//               << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E"
+//               << "  +/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
 
         ++gps_fixes_cnt_;
+
+        if (!gps.fix.locked())
+        {
+            ++gps_fixes_skipped_lost_lock_;
+            return;
+        }
 
         if (gps.fix.quality == 0)
         {
@@ -442,6 +450,9 @@ void GPSTrailImportTask::parseCurrentFile ()
     if (gps_fixes_cnt_)
     {
         ss << "Read " << gps_fixes_cnt_ << " fixes.\n";
+        ss << "Skipped " << gps_fixes_skipped_lost_lock_
+           << " (" << String::percentToString(100.0*gps_fixes_skipped_lost_lock_/gps_fixes_cnt_) << "%)"
+           << " because of lost GNSS lock.\n";
         ss << "Skipped " << gps_fixes_skipped_quality_cnt_
            << " (" << String::percentToString(100.0*gps_fixes_skipped_quality_cnt_/gps_fixes_cnt_) << "%)"
            << " because of quality.\n";
@@ -451,8 +462,9 @@ void GPSTrailImportTask::parseCurrentFile ()
         ss << "Got " << gps_fixes_.size()
            << " (" << String::percentToString(100.0*gps_fixes_.size()/gps_fixes_cnt_) << "%) fixes.\n";
 
-        ss << "\n Timestamps\n  Begin: " << Time::toString(getTimeFrom(gps_fixes_.begin()->timestamp))
-           << "\n  End: " << Time::toString(getTimeFrom(gps_fixes_.rbegin()->timestamp)) << "\n";
+        if (gps_fixes_.size())
+            ss << "\n Timestamps\n  Begin: " << Time::toString(getTimeFrom(gps_fixes_.begin()->timestamp))
+               << "\n  End: " << Time::toString(getTimeFrom(gps_fixes_.rbegin()->timestamp)) << "\n";
 
         if (quality_counts_.size())
         {
