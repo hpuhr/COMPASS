@@ -24,6 +24,8 @@
 
 #include "configurable.h"
 #include "appmode.h"
+#include "ui_test_testable.h"
+#include "json.h"
 
 //class EventProcessor;
 class View;
@@ -91,7 +93,7 @@ The widget's container is only visible if the widget is set.
 The ViewWidget acts both to generate the basic layout and to handle interaction between all these components.
 It also serves as the View's main interface to all ui and display functionality.
 */
-class ViewWidget : public QWidget, public Configurable
+class ViewWidget : public QWidget, public Configurable, public ui_test::UITestable
 {
     Q_OBJECT
 public:
@@ -129,8 +131,11 @@ public:
 
     View* getView() { return view_; }
 
-    static QIcon getIcon(const std::string& fn);
+    nlohmann::json viewInfo(const std::string& what) const;
 
+    boost::optional<QString> uiGet(const QString& what = QString()) const override final;
+
+    static QIcon getIcon(const std::string& fn);
 protected:
     ViewToolWidget* getViewToolWidget() { assert(tool_widget_); return tool_widget_; }
     const ViewToolWidget* getViewToolWidget() const { assert(tool_widget_); return tool_widget_; }
@@ -156,6 +161,11 @@ protected:
      * Reimplement for specific initialization behavior.
      */
     virtual void init_impl() const {}
+
+    /**
+     * Reimplement to add additional information to the view's view info.
+     */
+    virtual nlohmann::json viewInfo_impl(const std::string& what) const { return {}; }
 
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);

@@ -145,10 +145,9 @@ void ViewContainer::addView(View* view)
 
     int index = tab_widget_->addTab(w, view_name);
 
-    //generate and set a nice object name which can be used to identify the view widget in the object hierarchy
-    UI_TEST_OBJ_NAME(w, view_name)
-
     QPushButton* manage_button = new QPushButton();
+    UI_TEST_OBJ_NAME(manage_button, view_name + " Manager"); //manage buttons can be reached via e.g. window1.osgview2_manager
+
     manage_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
     manage_button->setFixedSize(UI_ICON_SIZE);
     manage_button->setFlat(UI_ICON_BUTTON_FLAT);

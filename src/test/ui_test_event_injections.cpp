@@ -974,4 +974,31 @@ bool injectDialogEvent(QWidget* root,
     return true;
 }
 
+/**
+ * Triggers a slot in a widget.
+ */
+bool injectWidgetEvent(QWidget* root,
+                       const QString& obj_name,
+                       const QString& slot_name,
+                       int delay)
+{
+    if (slot_name.isEmpty())
+        return false;
+
+    auto obj = findObjectAs<QWidget>(root, obj_name);
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        logObjectError("injectWidgetEvent", obj_name, obj.first);
+        return false;
+    }
+
+    //check if a slot of this name exists
+    int idx = obj.second->metaObject()->indexOfSlot((slot_name + "()").toStdString().c_str());
+    if (idx < 0)
+        return false;
+
+    //try to invoke the slot (may fail if e.g. parameters are needed to invoke the slot)
+    return QMetaObject::invokeMethod(obj.second, slot_name.toStdString().c_str());
+}
+
 } // namespace ui_test

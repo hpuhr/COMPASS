@@ -18,6 +18,7 @@
 #pragma once
 
 #include "appmode.h"
+#include "json.h"
 
 #include <QWidget>
 
@@ -41,6 +42,8 @@ public:
     virtual void redrawStarted();
     virtual void redrawDone();
     virtual void appModeSwitch(AppMode app_mode);
+
+    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 
 protected:
     virtual void onDisplayChange_impl() {} 

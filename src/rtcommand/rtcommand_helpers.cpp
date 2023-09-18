@@ -140,6 +140,14 @@ std::pair<rtcommand::FindObjectErrCode, QObject *> getCommandReceiver(const std:
             return ui_test::findObject(container, remainder.c_str());
         }
     }
+    else if (first_part == "last_window")
+    {
+        auto container_widgets = COMPASS::instance().viewManager().getContainerWidgets();
+        if (container_widgets.empty())
+            return std::make_pair(FindObjectErrCode::NotFound, nullptr);
+
+        return ui_test::findObject(container_widgets.rbegin()->second, remainder.c_str());
+    }
     else if (first_part == "dialog")
     {
         return ui_test::findObject(activeDialog(), remainder.c_str());

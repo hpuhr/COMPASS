@@ -131,4 +131,8 @@ namespace ui_test
                            const QString& obj_name,
                            bool accept,
                            int delay = -1);
+    bool injectWidgetEvent(QWidget* root,
+                           const QString& obj_name,
+                           const QString& slot_name,
+                           int delay = -1);
 } // namespace ui_test

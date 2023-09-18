@@ -24,6 +24,7 @@
 #include "viewloadstatewidget.h"
 #include "files.h"
 #include "compass.h"
+#include "ui_test_common.h"
 
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -43,6 +44,9 @@ ViewWidget::ViewWidget(const std::string& class_id, const std::string& instance_
       Configurable(class_id, instance_id, config_parent),
       view_       (view)
 {
+    //generate and set a nice object name which can be used to identify the view widget in the object hierarchy
+    UI_TEST_OBJ_NAME(this, QString::fromStdString(view->getName()))
+
     setContentsMargins(0, 0, 0, 0);
 
     tool_switcher_.reset(new ViewToolSwitcher);
@@ -449,4 +453,32 @@ std::string ViewWidget::loadedMessage() const
     assert(isInit());
 
     return loadedMessage_impl();
+}
+
+/**
+ * Returns view-specific information as json struct.
+ */
+nlohmann::json ViewWidget::viewInfo(const std::string& what) const
+{
+    nlohmann::json info;
+
+    info[ "data"       ] = getViewDataWidget()->viewInfo(what);
+    info[ "config"     ] = getViewConfigWidget()->viewInfo(what);
+    info[ "load_state" ] = getViewLoadStateWidget()->viewInfo(what);
+    info[ "toolbar"    ] = getViewToolWidget()->viewInfo(what);
+
+    nlohmann::json info_additional = viewInfo_impl(what);
+    if (!info_additional.is_null())
+        info[ "additional" ] = info_additional;
+
+    return info;
+}
+
+/**
+ * Running the 'uiget' rtcommand on a view widget will yield view specific json information.
+ */
+boost::optional<QString> ViewWidget::uiGet(const QString& what) const
+{
+    std::string view_info = viewInfo(what.toStdString()).dump();
+    return QString::fromStdString(view_info);
 }
