@@ -37,7 +37,7 @@
 
 using namespace std;
 using namespace Utils;
-using namespace nlohmann;
+//using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
@@ -461,10 +461,10 @@ void SinglePositionRadarRange::addAnnotations(nlohmann::json::object_t& viewable
 {
     loginf << "SinglePositionRadarRange: addAnnotations";
 
-    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
-    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
-    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
-    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+    nlohmann::json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
+    nlohmann::json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+    nlohmann::json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
+    nlohmann::json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
 
     bool ok;
 

@@ -72,10 +72,13 @@ void DataSourceCompoundCoverage::finalize()
     assert (!is_finalized_);
 
     for (auto& rng_circ : range_circles_)
+    {
+        std::unique_ptr<OGRCoordinateSystem> ptr;
+        ptr.reset(new OGRCoordinateSystem(get<0>(rng_circ), get<1>(rng_circ), get<2>(rng_circ), 0));
+
         range_circles_cs_.emplace_back(
-                    std::pair<std::unique_ptr<OGRCoordinateSystem>, double>
-                    {new OGRCoordinateSystem(get<0>(rng_circ), get<1>(rng_circ), get<2>(rng_circ), 0),
-                     get<3>(rng_circ)});
+                    std::make_pair(std::move(ptr), get<3>(rng_circ)));
+    }
 
     is_finalized_ = true;
 }

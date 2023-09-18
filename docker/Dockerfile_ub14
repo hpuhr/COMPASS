@@ -152,7 +152,8 @@ RUN cd osgearth-osgearth-3.2/build && make install
 #RUN cd osgearth-osgearth-2.10.2/build && make -j 16
 #RUN cd osgearth-osgearth-2.10.2/build && make install
 
-RUN wget https://github.com/ckgt/NemaTode/archive/master.zip
+#RUN wget https://github.com/ckgt/NemaTode/archive/master.zip
+RUN wget https://github.com/hpuhr/NemaTode/archive/refs/heads/master.zip
 RUN unzip master.zip
 RUN mkdir NemaTode-master/build
 RUN cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..

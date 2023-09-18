@@ -20,6 +20,8 @@
 
 #include <ogr_spatialref.h>
 
+#undef PACKAGE_VERSION // required to remove the stupid PACKAGE_VERSION defined in gdal
+
 #include <memory>
 
 // class OGRProjection;
