@@ -60,6 +60,8 @@ ViewContainer::ViewContainer(const std::string& class_id, const std::string& ins
     logdbg << "ViewContainer: ctor: window " << window_cnt_;
     assert(tab_widget_);
 
+    creation_time_ = boost::posix_time::to_time_t(boost::posix_time::microsec_clock::local_time());
+
     disable_add_remove_views_ = COMPASS::instance().disableAddRemoveViews();
 
     if (window_cnt != 0)

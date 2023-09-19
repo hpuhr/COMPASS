@@ -90,6 +90,9 @@ class ViewManager : public QObject, public Configurable
     std::map<std::string, ViewContainer*> getContainers() { return containers_; }
     std::map<std::string, ViewContainerWidget*> getContainerWidgets() { return container_widgets_; }
     std::map<std::string, View*> getViews() { return views_; }
+    View* latestView();
+    ViewContainerWidget* latestViewContainer();
+    
     dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
 
     //@TODO: needed because of view container widget hack in ui_test_find.h

@@ -834,6 +834,39 @@ void ViewManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode
     }
 }
 
+View* ViewManager::latestView()
+{
+    time_t latest = std::numeric_limits<time_t>::min();
+    View* latest_view = nullptr;
+
+    for (const auto& elem : views_)
+    {
+        if (elem.second->created() > latest)
+        {
+            latest      = elem.second->created();
+            latest_view = elem.second;
+        }
+    }
+
+    return latest_view;
+}
+
+ViewContainerWidget* ViewManager::latestViewContainer()
+{
+    time_t latest = std::numeric_limits<time_t>::min();
+    ViewContainerWidget* latest_container = nullptr;
+
+    for (const auto& elem : container_widgets_)
+    {
+        if (elem.second->viewContainer().created() > latest)
+        {
+            latest           = elem.second->viewContainer().created();
+            latest_container = elem.second;
+        }
+    }
+
+    return latest_container;
+}
 
 // void ViewManager::saveViewAsTemplate (View *view, std::string template_name)
 //{

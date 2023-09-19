@@ -23,6 +23,9 @@
 #include "test/ui_test_find.h"
 #include "viewmanager.h"
 #include "viewcontainerwidget.h"
+#include "viewcontainer.h"
+#include "viewwidget.h"
+#include "view.h"
 
 #include <QDialog>
 #include <QMainWindow>
@@ -142,11 +145,24 @@ std::pair<rtcommand::FindObjectErrCode, QObject *> getCommandReceiver(const std:
     }
     else if (first_part == "last_window")
     {
-        auto container_widgets = COMPASS::instance().viewManager().getContainerWidgets();
-        if (container_widgets.empty())
+        auto last_window = COMPASS::instance().viewManager().latestViewContainer();
+        if (!last_window)
             return std::make_pair(FindObjectErrCode::NotFound, nullptr);
 
-        return ui_test::findObject(container_widgets.rbegin()->second, remainder.c_str());
+        return ui_test::findObject(last_window, remainder.c_str());
+    }
+    else if (first_part == "last_view")
+    {
+        auto last_view = COMPASS::instance().viewManager().latestView();
+        if (!last_view)
+            return std::make_pair(FindObjectErrCode::NotFound, nullptr);
+
+        //find view widget in central widget's children
+        auto view_widget = last_view->getCentralWidget()->findChild<ViewWidget*>();
+        if (!view_widget)
+            return std::make_pair(FindObjectErrCode::NotFound, nullptr);
+
+        return ui_test::findObject(view_widget, remainder.c_str());
     }
     else if (first_part == "dialog")
     {
