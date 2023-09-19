@@ -82,7 +82,7 @@ Below 3 buttons exist:
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_main.png}
+    \includegraphics[width=18cm]{figures/eval.png}
   \caption{Evaluation Main tab}
 \end{figure}
 
@@ -247,6 +247,7 @@ Currently, the following standards are (partly) supported:
 \item EUROCAE ED-117/A (\href{https://eshop.eurocae.net/eurocae-documents-and-reports/ed-117a/}{Link})
 \item EUROCAE ED-87C/E (\href{https://eshop.eurocae.net/eurocae-documents-and-reports/ed-87c/}{Link})
 \item EUROCAE ED-142 (\href{https://eshop.eurocae.net/eurocae-documents-and-reports/ed-142/}{Link})
+\item Radar: EUROCONTROL Standard Document for Radar Surveillance in En-Route Airspace and Major Terminal Areas (\href{https://www.eurocontrol.int/sites/default/files/publication/files/surveillance-standard-document-for-radar-surveillance-in-en-route-airspace-and-major-terminal-areas199703.pdf}{Link})
 \end{itemize}
 \ \\
 
@@ -313,12 +314,14 @@ The following requirements exist:
     \nameref{sec:eval_req_mc_correct_periods} & Calculates probability of correct Mode C code based on UIs \\ \hline
     \nameref{sec:eval_req_mc_false} & Calculates probability of false Mode C code \\ \hline
     \nameref{sec:eval_req_mc_present} & Calculates probability of Mode C code present \\ \hline
-    \nameref{sec:eval_req_pos_across} & Calculates the probability of the position across error begin within a threshold \\ \hline
-    \nameref{sec:eval_req_pos_along} & Calculates the probability of the position along error begin within a threshold \\ \hline
-    \nameref{sec:eval_req_pos_distance} & Calculates the probability of the position error begin within or outside a threshold \\ \hline
-    \nameref{sec:eval_req_pos_distance_rms} & Calculates the probability of the position error begin within or outside an RMS threshold \\ \hline
-    \nameref{sec:eval_req_pos_latency}  & Calculates the probability of the position latency begin within a threshold \\ \hline
-    \nameref{sec:eval_req_speed} & Calculates the probability of the speed error begin within or outside a threshold or percentage \\ \hline
+    \nameref{sec:eval_req_pos_across} & Calculates the probability of the position across error being within a threshold \\ \hline
+    \nameref{sec:eval_req_pos_along} & Calculates the probability of the position along error being within a threshold \\ \hline
+    \nameref{sec:eval_req_pos_distance} & Calculates the probability of the position error being within or outside a threshold \\ \hline
+    \nameref{sec:eval_req_pos_distance_rms} & Calculates the probability of the position error being within or outside an RMS threshold \\ \hline
+    \nameref{sec:eval_req_pos_radar_azm} & Calculates the probability of the position azimuth error being within or outside a threshold \\ \hline
+    \nameref{sec:eval_req_pos_radar_rng} & Calculates the probability of the position range error being within or outside a threshold \\ \hline
+    \nameref{sec:eval_req_pos_latency}  & Calculates the probability of the position latency being within a threshold \\ \hline
+    \nameref{sec:eval_req_speed} & Calculates the probability of the speed error being within or outside a threshold or percentage \\ \hline
 \end{tabularx}
 \end{table}
 \end{center}

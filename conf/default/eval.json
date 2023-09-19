@@ -2240,7 +2240,7 @@
                     "EvaluationRequirementGroup": {
                         "EvaluationRequirementGroupTest0": {
                             "parameters": {
-                                "name": "Test"
+                                "name": "Mandatory"
                             },
                             "sub_configs": {
                                 "EvaluationRequirementDetectionConfig": {
@@ -2253,7 +2253,7 @@
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.10000000149011612,
                                             "name": "Probability of Detection",
-                                            "prob": 0.9900000095367432,
+                                            "prob": 0.9700000286102295,
                                             "prob_check_type": 3,
                                             "short_name": "PD",
                                             "update_interval": 5.0,
@@ -2278,15 +2278,39 @@
                                         }
                                     }
                                 },
+                                "EvaluationRequirementModeAFalseConfig": {
+                                    "EvaluationRequirementModeAFalseConfigMode A False0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "Mode A False",
+                                            "prob": 0.10000000149011612,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFMA"
+                                        }
+                                    }
+                                },
                                 "EvaluationRequirementModeCCorrectConfig": {
                                     "EvaluationRequirementModeCCorrectConfigMode C Correct0": {
                                         "parameters": {
                                             "comment": "",
                                             "max_distance_ft": 300.0,
                                             "name": "Mode C Correct",
-                                            "prob": 0.9700000286102295,
+                                            "prob": 0.9599999785423279,
                                             "prob_check_type": 3,
                                             "short_name": "PMC"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementModeCFalseConfig": {
+                                    "EvaluationRequirementModeCFalseConfigMode C False0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_difference": 300.0,
+                                            "maximum_probability_false": 0.009999999776482582,
+                                            "name": "Mode C False",
+                                            "prob": 0.10000000149011612,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFMC"
                                         }
                                     }
                                 },
@@ -2296,7 +2320,7 @@
                                             "comment": "",
                                             "name": "Azimuth Error",
                                             "short_name": "AZM",
-                                            "threshold_value": 0.15000000596046448
+                                            "threshold_value": 0.07999999821186066
                                         }
                                     }
                                 },
@@ -2306,7 +2330,7 @@
                                             "comment": "",
                                             "name": "Range Error",
                                             "short_name": "RNG",
-                                            "threshold_value": 75.0
+                                            "threshold_value": 70.0
                                         }
                                     }
                                 }
@@ -2314,7 +2338,8 @@
                         }
                     }
                 }
-            }            
+            }
+          
         }
     }
 }

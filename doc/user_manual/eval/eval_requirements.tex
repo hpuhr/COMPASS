@@ -1594,6 +1594,182 @@ Also, a table is given for all single targets, sorted by PLTOK.
 \end{table}
 \end{center}
 
+
+%
+\subsection{Position Radar Azimuth}
+\label{sec:eval_req_pos_radar_azm} 
+
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_pos_radar_azm.png}
+  \caption{Evaluation Position Radar Azimuth requirement}
+\end{figure}
+
+The ’Position Radar Azimuth requirement is used to calculate the probability of a target report
+having an Radar azimuth error smaller than a defined threshold. The offset of the position
+(test vs. linear interpolated reference position) is used to calculate the azimuth error component
+w.r.t. the respective Radar. If the absolute value of this range
+position error is smaller or equal than the defined threshold, the target report is counted
+for the calculated probability CP. The CP must be greater or equal than the
+defined ’Probability’ for the requirement to pass.
+\ \\
+
+\begin{itemize}  
+\item Maximum Absolute Value [m]: Maximum azimuth offset allowed 
+\end{itemize}
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+  Sector Layer & Name of the sector layer & DOI  \\ \hline
+  Reqirement Group & Name of the requirement group & Test  \\ \hline
+  Reqirement & Name of the requirement & Azimuth Error  \\ \hline
+  Num Results & Total number of results & 368  \\ \hline
+  Num Usable Results & Number of usable results & 136  \\ \hline
+  Num Unusable Results & Number of unusable results & 232  \\ \hline
+  Use & To be used in results & true  \\ \hline
+  \#Pos [1] & Number of updates & 28705  \\ \hline
+  \#NoRef [1] & Number of updates w/o reference positions & 12861  \\ \hline
+  \#PosInside [1] & Number of updates inside sector & 15113  \\ \hline
+  \#PosOutside [1] & Number of updates outside sector & 731  \\ \hline
+  DMin [m] & Minimum of angle distance & -103.90  \\ \hline
+  DMax [m] & Maximum of angle distance & 28.27  \\ \hline
+  DAvg [m] & Average of angle distance & -0.01  \\ \hline
+  DSDev [m] & Standard Deviation of angle distance & 1.25  \\ \hline
+  DVar [$m^2$] & Variance of angle distance & 1.57  \\ \hline
+  \#CF [1] & Number of updates with failed comparison & 1860  \\ \hline
+  \#CP [1] & Number of updates with passed comparison  & 13253  \\ \hline
+  Condition &  & <= 0.080000  \\ \hline
+  Condition Fulfilled &  & Passed  \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by \#CF.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 394 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 72 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 285 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 37 \\ \hline
+    DMin [m] & Minimum of angle distance & -0.02 \\ \hline
+    DMax [m] & Maximum of angle distance & 0.15 \\ \hline
+    DAvg [m] & Average of angle distance & 0.09 \\ \hline
+    DSDev [m] & Standard Deviation of angle distance & 0.03 \\ \hline
+    DVar [$m^2$] & Variance of angle distance & 0.00 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 191 \\ \hline
+    \#CP [1] & Number of updates with passed comparison & 94 \\ \hline
+    Condition &  & <= 0.080000 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+
+\subsection{Position Radar Range}
+\label{sec:eval_req_pos_radar_rng} 
+
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_pos_radar_rng.png}
+  \caption{Evaluation Position Radar Range requirement}
+\end{figure}
+
+The ’Position Radar Range’ requirement is used to calculate the probability of a target report
+having an Radar range error smaller than a defined threshold. The offset of the position
+(test vs. linear interpolated reference position) is used to calculate the range error component
+w.r.t. the respective Radar. If the absolute value of this range
+position error is smaller or equal than the defined threshold, the target report is counted
+for the calculated probability CP. The CP must be greater or equal than the
+defined ’Probability’ for the requirement to pass.
+\ \\
+
+\begin{itemize}  
+\item Maximum Absolute Value [m]: Maximum range offset allowed 
+\end{itemize}
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+  Sector Layer & Name of the sector layer & DOI \\ \hline
+  Reqirement Group & Name of the requirement group & Test \\ \hline
+  Reqirement & Name of the requirement & Range Error \\ \hline
+  Num Results & Total number of results & 368 \\ \hline
+  Num Usable Results & Number of usable results & 136 \\ \hline
+  Num Unusable Results & Number of unusable results & 232 \\ \hline
+  Use & To be used in results & true \\ \hline
+  \#Pos [1] & Number of updates & 28705 \\ \hline
+  \#NoRef [1] & Number of updates w/o reference positions & 12861 \\ \hline
+  \#PosInside [1] & Number of updates inside sector & 15113 \\ \hline
+  \#PosOutside [1] & Number of updates outside sector & 731 \\ \hline
+  DMin [m] & Minimum of distance & -25389.26 \\ \hline
+  DMax [m] & Maximum of distance & 3216.65 \\ \hline
+  DAvg [m] & Average of distance & 15.11 \\ \hline
+  DSDev [m] & Standard Deviation of distance & 216.87 \\ \hline
+  DVar [$m^2$] & Variance of distance & 47034.17 \\ \hline
+  \#CF [1] & Number of updates with failed comparison & 1613 \\ \hline
+  \#CP [1] & Number of updates with passed comparison  & 13500 \\ \hline
+  Range Bias [m] & Range bias (linear estimation) & -1.42 \\ \hline
+  Range Gain [1] & Range gain (linear estimation) & 1.00014 \\ \hline
+  Condition &  & <= 70.000000 \\ \hline
+  Condition Fulfilled &  & Passed \\ \hline
+
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by \#CF.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 18 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 18 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    DMin [m] & Minimum of distance & -246.29 \\ \hline
+    DMax [m] & Maximum of distance & -2.50 \\ \hline
+    DAvg [m] & Average of distance & -19.56 \\ \hline
+    DSDev [m] & Standard Deviation of distance & 55.05 \\ \hline
+    DVar [$m^2$] & Variance of distance & 0.00 \\ \hline
+    Range Bias [m] & Range bias (linear estimation) & 43520.69 \\ \hline
+    Range Gain [1] & Range gain (linear estimation) & 0.80278 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 1 \\ \hline
+    \#CP [1] & Number of updates with passed comparison & 17 \\ \hline
+    Condition &  & <= 70.000000 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+%
+
 \subsection{Speed}
 \label{sec:eval_req_speed} 
 
