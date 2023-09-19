@@ -30,6 +30,8 @@
 
 #include <cassert>
 
+#include <boost/date_time/posix_time/conversion.hpp>
+
 unsigned int View::cnt_ = 0;
 
 /**
@@ -49,6 +51,8 @@ View::View(const std::string& class_id,
       container_(container)
 {
     logdbg << "View: constructor";
+
+    creation_time_ = boost::posix_time::to_time_t(boost::posix_time::microsec_clock::local_time());
 
     central_widget_ = new QWidget();
     //central_widget_->setAutoFillBackground(true);

@@ -462,6 +462,8 @@ nlohmann::json ViewWidget::viewInfo(const std::string& what) const
 {
     nlohmann::json info;
 
+    info[ "name"       ] = view_->getName();
+
     info[ "data"       ] = getViewDataWidget()->viewInfo(what);
     info[ "config"     ] = getViewConfigWidget()->viewInfo(what);
     info[ "load_state" ] = getViewLoadStateWidget()->viewInfo(what);

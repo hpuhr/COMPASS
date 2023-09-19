@@ -29,6 +29,8 @@
 #include <memory>
 #include <map>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 class ViewContainer;
 class ViewWidget;
 class QQWidget;
@@ -86,6 +88,8 @@ public:
     void emitSelectionChange();
 
     AppMode appMode() const { return app_mode_; }
+    
+    time_t created() const { return creation_time_; }
 
     virtual void accept(LatexVisitor& v) = 0;
 
@@ -123,6 +127,7 @@ private:
     unsigned int getInstanceKey();
 
     AppMode app_mode_;
+    time_t  creation_time_;
 
     /// Static member counter
     static unsigned int cnt_;
