@@ -66,6 +66,15 @@ namespace ui_test
         return true;
     }
     template<>
+    inline bool setUIElement(QMenu* widget, const QString& value, int delay, const SetUIHint& hint)
+    {
+        auto v = conversions::valueFromString<QStringList>(value);
+        if (!v)
+            return false;
+
+        return injectMenuEvent(widget, "", v.value(), delay);
+    }
+    template<>
     inline bool setUIElement(QMenuBar* widget, const QString& value, int delay, const SetUIHint& hint)
     {
         auto v = conversions::valueFromString<QStringList>(value);
@@ -77,7 +86,13 @@ namespace ui_test
     template<>
     inline bool setUIElement(QComboBox* widget, const QString& value, int delay, const SetUIHint& hint)
     {
-        return injectComboBoxEditEvent(widget, "", value, delay);
+        //check if the given value string is a number
+        auto v = conversions::valueFromString<int>(value);
+        if (v)
+            return injectComboBoxEditEvent(widget, "", v.value(), delay);
+            
+        //handle value string as entry text
+        return injectComboBoxEditEvent(widget, "", value, delay); 
     }
     template<>
     inline bool setUIElement(QTabWidget* widget, const QString& value, int delay, const SetUIHint& hint)

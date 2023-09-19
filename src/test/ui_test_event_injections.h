@@ -62,6 +62,14 @@ namespace ui_test
                           int y = -1, 
                           Qt::MouseButton button = Qt::LeftButton, 
                           int delay = -1);
+    bool injectRectEvent(QWidget* root,
+                         const QString& obj_name, 
+                         int x0 = -1, 
+                         int y0 = -1, 
+                         int x1 = -1, 
+                         int y1 = -1,
+                         Qt::MouseButton button = Qt::LeftButton, 
+                         int delay = -1);
 
     typedef std::function<bool()> EventFunc;
 
@@ -84,6 +92,10 @@ namespace ui_test
     bool injectComboBoxEditEvent(QWidget* root,
                                  const QString& obj_name,
                                  const QString& entry_txt,
+                                 int delay = -1);
+    bool injectComboBoxEditEvent(QWidget* root,
+                                 const QString& obj_name,
+                                 int entry_idx,
                                  int delay = -1);
     bool injectTabSelectionEvent(QWidget* root,
                                  const QString& obj_name,

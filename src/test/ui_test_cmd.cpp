@@ -17,6 +17,7 @@
 
 #include "ui_test_cmd.h"
 #include "ui_test_setget.h"
+#include "ui_test_inject.h"
 #include "rtcommand_registry.h"
 #include "json.h"
 
@@ -27,6 +28,7 @@
 
 REGISTER_RTCOMMAND(ui_test::RTCommandUISet)
 REGISTER_RTCOMMAND(ui_test::RTCommandUIGet)
+REGISTER_RTCOMMAND(ui_test::RTCommandUIInject)
 
 namespace ui_test
 {
@@ -182,6 +184,55 @@ void RTCommandUIGet::assignVariables_impl(const VariablesMap& variables)
     RTCommandUIObject::assignVariables_impl(variables);
 
     RTCOMMAND_GET_QSTRING_OR_THROW(variables, "what", what)
+}
+
+/*************************************************************************
+ * RTCommandUIInject
+ *************************************************************************/
+
+/**
+ */
+bool RTCommandUIInject::run_impl()
+{
+    auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
+    if (receiver.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        setResultMessage("Object '" + obj.toStdString() + "' not found");
+        return false;
+    }
+
+    bool ok = injectUIEvent(receiver.second, "", event, injection_delay);
+    if (!ok)
+    {
+        setResultMessage("Event '" + event.toStdString() + "' could not be injected into object '" + obj.toStdString() + "'");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ */
+void RTCommandUIInject::collectOptions_impl(OptionsDescription& options,
+                                         PosOptionsDescription& positional)
+{
+    //call base
+    RTCommandUIInjection::collectOptions_impl(options, positional);
+
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("event,e", po::value<std::string>()->default_value(""), "event to inject into the ui element");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "event", 2)
+}
+
+/**
+ */
+void RTCommandUIInject::assignVariables_impl(const VariablesMap& variables)
+{
+    //call base
+    RTCommandUIInjection::assignVariables_impl(variables);
+
+    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "event", event)
 }
 
 }

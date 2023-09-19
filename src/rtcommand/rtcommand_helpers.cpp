@@ -168,6 +168,10 @@ std::pair<rtcommand::FindObjectErrCode, QObject *> getCommandReceiver(const std:
     {
         return ui_test::findObject(activeDialog(), remainder.c_str());
     }   
+    else if (first_part == "popup")
+    {
+        return ui_test::findObject(QApplication::activePopupWidget(), remainder.c_str());
+    }
     else if (first_part == "compass")
     {
         std::pair<rtcommand::FindObjectErrCode, Configurable*> ret = COMPASS::instance().findSubConfigurable(remainder);
