@@ -2231,7 +2231,90 @@
                         }
                     }
                 }
-            }
+            },
+            "EvaluationStandardRadar0": {
+                "parameters": {
+                    "name": "Radar"
+                },
+                "sub_configs": {
+                    "EvaluationRequirementGroup": {
+                        "EvaluationRequirementGroupTest0": {
+                            "parameters": {
+                                "name": "Test"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Detection0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "hold_for_any_target": false,
+                                            "invert_prob": false,
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.10000000149011612,
+                                            "name": "Probability of Detection",
+                                            "prob": 0.9900000095367432,
+                                            "prob_check_type": 3,
+                                            "short_name": "PD",
+                                            "update_interval": 5.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementIdentificationCorrectConfig": {
+                                    "EvaluationRequirementIdentificationCorrectConfigMode A Correct0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "Mode A Correct",
+                                            "prob": 0.9800000190734863,
+                                            "prob_check_type": 3,
+                                            "require_correctness_of_all": false,
+                                            "short_name": "PMA",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": false,
+                                            "use_ms_ti": false
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementModeCCorrectConfig": {
+                                    "EvaluationRequirementModeCCorrectConfigMode C Correct0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_distance_ft": 300.0,
+                                            "name": "Mode C Correct",
+                                            "prob": 0.9700000286102295,
+                                            "prob_check_type": 3,
+                                            "short_name": "PMC"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionRadarAzimuthConfig": {
+                                    "EvaluationRequirementPositionRadarAzimuthConfigAzimuth0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "Azimuth Error",
+                                            "short_name": "AZM",
+                                            "threshold_value": 0.15000000596046448
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionRadarRangeConfig": {
+                                    "EvaluationRequirementPositionRadarRangeConfigRange0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "Range Error",
+                                            "short_name": "RNG",
+                                            "threshold_value": 75.0
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }            
         }
     }
 }

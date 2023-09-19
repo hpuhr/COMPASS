@@ -41,7 +41,7 @@ CreateAssociationsStatusDialog::CreateAssociationsStatusDialog(
 {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
-    setWindowTitle("Create Target Report Associations Status");
+    setWindowTitle("Calculate Unique Targets Status");
 
     setModal(true);
 

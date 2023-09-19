@@ -1,24 +1,24 @@
-\subsection{Calculate Associations for ARTAS}
+\subsection{Calculate ARTAS Target Report Usage}
 \label{sec:ui_associate_tr_artas}
 
-This task allows creation of UTNs and target report association based on ARTAS tracks and the TRI information. \\
+This task allows target report association based on ARTAS tracks and the TRI information. It is \textbf{not} related to the 'Calculate Unique Targets' task, but uses a completely different mechanism. \\
 
-Please note that if no ARTAS TRI SPF information exists in the database, these steps do not have to be performed.\\
+Please note that if no ARTAS TRI SPF information exists in the database, these steps can not be performed successfully.\\
 
 \begin{figure}[H]
   \center
     \includegraphics[width=16cm]{figures/artas_association_config.png}
-  \caption{Calculate Associations from ARTAS}
+  \caption{Calculate ARTAS Target Report Usage Configuration}
 \end{figure}
 
-In this task, the ARTAS association information stored in system track updates can be used to create UTN which associate each system track update to the used sensor target reports. \\
+In this task, the ARTAS association information stored in system track updates can be used to associate each system track update to the used sensor target reports. \\
 
-The following configuration options exist
+The following configuration options exist:
 
 \begin{itemize}  
 \item Tracker Data Source: Name of tracker data source from which associations shall be created.
 \item Data Variables: Definition of variables to be used in processing. Does not have to be changed.
-\item End Track Time (s): Track update gap time (in seconds) after which a new UTN will be created (even if no track begin/end flag is set).
+\item End Track Time (s): Track update gap time (in seconds) after which a new track will be created (even if no track begin/end flag is set).
 \item Association Time Past (s): Time window length (in seconds) into the past where sensor target reports are considered for association.
 \item Association Time Future (s): Time window length (in seconds) into the future where sensor target reports are considered for association.
 \item Acceptable Time for Misses (s): Time window length at the beginning and end of the recording (in seconds) where misses (not found hash codes) are acceptable.
@@ -31,9 +31,9 @@ The following configuration options exist
 \item Mark Track Coasting Associations Dubious: If set, assocations for system track updates where the track coasted flag is set are counted as dubious.
 \end{itemize}
 
-\paragraph{UTN Creation from System Track Numbers and End Track Time}: 
+\paragraph{Track Creation from System Track Numbers and End Track Time}: 
 
-The task should create a unique target number (UTN) for every ARTAS track. The track begin/end flags therefore are used to create new UTNs or finalize existing ones. To cover the case when such information is wrong or missing, the 'End Track Time' is used to check the time between track updates from one track number. If the gap is larger then the defined time, a new UTN is created even if no track begin/end flag was set.
+The task should create a unique target number for every ARTAS track. The track begin/end flags therefore are used to create new tracks or finalize existing ones. To cover the case when such information is wrong or missing, the 'End Track Time' is used to check the time between track updates from one track number. If the gap is larger then the defined time, a new track is created even if no track begin/end flag was set.
 
 \paragraph{Association Time Window}
 

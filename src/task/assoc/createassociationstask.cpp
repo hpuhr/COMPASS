@@ -48,11 +48,10 @@ const std::string CreateAssociationsTask::DONE_PROPERTY_NAME = "associations_cre
 CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
                                                const std::string& instance_id,
                                                TaskManager& task_manager)
-    : Task("CreateAssociationsTask", "Associate Target Reports", task_manager),
+    : Task("CreateAssociationsTask", "Calculate Unique Targets", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_assoc.json")
 {
-    tooltip_ =
-            "Allows creation of UTNs and target report association based on Mode S Addresses.";
+    tooltip_ = "Create Unique Targets based on all DB Content.";
 
     // common
     registerParameter("associate_non_mode_s", &associate_non_mode_s_, true);
