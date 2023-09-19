@@ -15,7 +15,7 @@ ViewDataWidget::ViewDataWidget(ViewWidget* view_widget, QWidget* parent, Qt::Win
 {
     assert(view_widget_);
 
-    setObjectName("data_widget");
+    setObjectName("datawidget");
 }
 
 /**

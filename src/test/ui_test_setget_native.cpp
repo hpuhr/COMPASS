@@ -60,6 +60,7 @@ bool setUIElementNative(QWidget* parent,
     //corresponding template specializations need to be defined in 
     //ui_test_widget_setters.h
     TRY_INVOKE_UI_SETTER(QLabel, w.second, value, delay, hint)
+    TRY_INVOKE_UI_SETTER(QMenu, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QMenuBar, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QComboBox, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QTabWidget, w.second, value, delay, hint)

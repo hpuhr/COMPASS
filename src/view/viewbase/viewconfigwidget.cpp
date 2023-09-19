@@ -11,6 +11,8 @@ ViewConfigWidget::ViewConfigWidget(ViewWidget* view_widget, QWidget* parent, Qt:
 ,   view_widget_(view_widget)
 {
     assert(view_widget_);
+
+    setObjectName("configwidget");
 }
 
 /**

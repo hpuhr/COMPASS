@@ -44,7 +44,7 @@ struct RTCommandUIObject : public rtcommand::RTCommand
  */
 struct RTCommandUIInjection : public RTCommandUIObject
 {
-    int  injection_delay = -1; //delay used for each UI injection
+    int injection_delay = -1; //delay used for each UI injection
     
     DECLARE_RTCOMMAND_OPTIONS
 };
@@ -74,11 +74,24 @@ protected:
 };
 
 /**
+ */
+struct RTCommandUIInject : public RTCommandUIInjection
+{
+    QString event;
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(uiinject, "injects an event into the given ui element")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+/**
 */
 inline void initUITestCommands()
 {
     RTCommandUISet::init();
     RTCommandUIGet::init();
+    RTCommandUIInject::init();
 }
 
 } // namespace ui_test
