@@ -11,7 +11,7 @@
 CreateARTASAssociationsTaskDialog::CreateARTASAssociationsTaskDialog(CreateARTASAssociationsTask& task)
 : QDialog(), task_(task)
 {
-    setWindowTitle("Calculate Associations from ARTAS");
+    setWindowTitle("Calculate ARTAS Target Report Usage");
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
     setModal(true);

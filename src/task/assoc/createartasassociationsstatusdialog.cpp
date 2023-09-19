@@ -41,7 +41,7 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(
 {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
-    setWindowTitle("Create ARTAS Associations Status");
+    setWindowTitle("Calculate ARTAS Target Report Usage Status");
 
     setModal(true);
 

@@ -78,11 +78,11 @@ void CreateARTASAssociationsJob::run()
     removePreviousAssociations();
 
     // create utns
-    emit statusSignal("Creating UTNs");
+    emit statusSignal("Creating Unique ARTAS Tracks");
     createUniqueARTASTracks();
 
     // create associations for artas tracks
-    emit statusSignal("Creating ARTAS Target Report Usage");
+    emit statusSignal("Calculate ARTAS Target Report Usage");
     createARTASAssociations();
 
     // create associations for sensors

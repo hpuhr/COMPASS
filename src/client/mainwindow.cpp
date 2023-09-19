@@ -138,7 +138,7 @@ MainWindow::MainWindow()
     QTabBar *tabBar = tab_widget_->tabBar();
 
     tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
-    //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0"));
+    //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0");
 
     COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
     COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
@@ -245,31 +245,31 @@ void MainWindow::createMenus ()
     menuBar()->setObjectName("mainmenu");
 
     // file menu
-    QMenu* file_menu = menuBar()->addMenu(tr("&File"));
+    QMenu* file_menu = menuBar()->addMenu("&File");
     file_menu->setObjectName("main_window_file_menu");
     file_menu->setToolTipsVisible(true);
 
     // db operations
-    new_db_action_ = new QAction(tr("&New"));
+    new_db_action_ = new QAction("&New");
     new_db_action_->setShortcuts(QKeySequence::New);
-    new_db_action_->setToolTip(tr("Create a new database"));
+    new_db_action_->setToolTip("Create a new database");
     connect(new_db_action_, &QAction::triggered, this, &MainWindow::newDBSlot);
     file_menu->addAction(new_db_action_);
 
-    open_existing_db_action_ = new QAction(tr("&Open"));
+    open_existing_db_action_ = new QAction("&Open");
     open_existing_db_action_->setShortcuts(QKeySequence::Open);
-    open_existing_db_action_->setToolTip(tr("Open an existing database"));
+    open_existing_db_action_->setToolTip("Open an existing database");
     connect(open_existing_db_action_, &QAction::triggered, this, &MainWindow::openExistingDBSlot);
     file_menu->addAction(open_existing_db_action_);
 
     open_recent_db_menu_ = file_menu->addMenu("Open Recent");
-    open_recent_db_menu_->setToolTip(tr("Open a recent database"));
+    open_recent_db_menu_->setToolTip("Open a recent database");
 
     open_recent_db_menu_->addSeparator();
 
     export_db_action_ = new QAction("&Export", file_menu);
     export_db_action_->setObjectName("main_window_exportdb_action");
-    export_db_action_->setToolTip(tr("Export database into file"));
+    export_db_action_->setToolTip("Export database into file");
     connect(export_db_action_, &QAction::triggered, this, &MainWindow::exportDBSlot);
     file_menu->addAction(export_db_action_);
 
@@ -277,8 +277,8 @@ void MainWindow::createMenus ()
     connect(clear_act, &QAction::triggered, this, &MainWindow::clearExistingDBsSlot);
     open_recent_db_menu_->addAction(clear_act);
 
-    close_db_action_ = new QAction(tr("&Close"));
-    close_db_action_->setToolTip(tr("Close opened database"));
+    close_db_action_ = new QAction("&Close");
+    close_db_action_->setToolTip("Close opened database");
     connect(close_db_action_, &QAction::triggered, this, &MainWindow::closeDBSlot);
     file_menu->addAction(close_db_action_);
 
@@ -297,121 +297,121 @@ void MainWindow::createMenus ()
     }
 
     // quit operations
-    quit_wo_cfg_sav_action_ = new QAction(tr("Quit &Without Saving Config"));
+    quit_wo_cfg_sav_action_ = new QAction("Quit &Without Saving Config");
     quit_wo_cfg_sav_action_->setShortcut(tr("Ctrl+W"));
-    quit_wo_cfg_sav_action_->setToolTip(tr("Quit the application withour saving the configuration"));
+    quit_wo_cfg_sav_action_->setToolTip("Quit the application withour saving the configuration");
     connect(quit_wo_cfg_sav_action_, &QAction::triggered, this, &MainWindow::quitWOConfigSlot);
     file_menu->addAction(quit_wo_cfg_sav_action_);
 
-    QAction* quit_act = new QAction(tr("&Quit"));
+    QAction* quit_act = new QAction("&Quit");
     quit_act->setShortcuts(QKeySequence::Quit);
-    //QKeySequence(tr("Ctrl+P"));
-    quit_act->setToolTip(tr("Quit the application"));
+    //QKeySequence("Ctrl+P");
+    quit_act->setToolTip("Quit the application");
     connect(quit_act, &QAction::triggered, this, &MainWindow::quitSlot);
     file_menu->addAction(quit_act);
 
     // import menu
 
-    import_menu_ = menuBar()->addMenu(tr("&Import"));
+    import_menu_ = menuBar()->addMenu("&Import");
     import_menu_->setToolTipsVisible(true);
 
-    QAction* import_ast_file_action = new QAction(tr("&ASTERIX Recording"));
+    QAction* import_ast_file_action = new QAction("&ASTERIX Recording");
     import_ast_file_action->setShortcut(tr("Ctrl+A"));
-    import_ast_file_action->setToolTip(tr("Import ASTERIX Recording File"));
+    import_ast_file_action->setToolTip("Import ASTERIX Recording File");
     connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
     import_menu_->addAction(import_ast_file_action);
 
     import_recent_asterix_menu_ = import_menu_->addMenu("Recent ASTERIX Recording");
-    import_recent_asterix_menu_->setToolTip(tr("Import a recent ASTERIX Recording File"));
+    import_recent_asterix_menu_->setToolTip("Import a recent ASTERIX Recording File");
 
-    QAction* import_ast_net_action = new QAction(tr("ASTERIX From Network"));
-    import_ast_net_action->setToolTip(tr("Import ASTERIX From Network"));
+    QAction* import_ast_net_action = new QAction("ASTERIX From Network");
+    import_ast_net_action->setToolTip("Import ASTERIX From Network");
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
     import_menu_->addAction(import_ast_net_action);
 
-    QAction* import_json_file_action = new QAction(tr("&JSON Recording"));
+    QAction* import_json_file_action = new QAction("&JSON Recording");
     import_json_file_action->setShortcut(tr("Ctrl+J"));
-    import_json_file_action->setToolTip(tr("Import JSON Recording File"));
+    import_json_file_action->setToolTip("Import JSON Recording File");
     connect(import_json_file_action, &QAction::triggered, this, &MainWindow::importJSONRecordingSlot);
     import_menu_->addAction(import_json_file_action);
 
-    QAction* import_gps_nmea_action = new QAction(tr("&GPS Trail NMEA"));
+    QAction* import_gps_nmea_action = new QAction("&GPS Trail NMEA");
     import_gps_nmea_action->setShortcut(tr("Ctrl+G"));
-    import_gps_nmea_action->setToolTip(tr("Import GPS Trail NMEA File"));
+    import_gps_nmea_action->setToolTip("Import GPS Trail NMEA File");
     connect(import_gps_nmea_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
     import_menu_->addAction(import_gps_nmea_action);
 
     // deactivated, just for porto?
-//    QAction* import_gps_csv_action = new QAction(tr("&GPS Trail CSV"));
-//    import_gps_csv_action->setToolTip(tr("Import GPS Trail CSV File"));
+//    QAction* import_gps_csv_action = new QAction("&GPS Trail CSV");
+//    import_gps_csv_action->setToolTip("Import GPS Trail CSV File");
 //    connect(import_gps_csv_action, &QAction::triggered, this, &MainWindow::importGPSCSVSlot);
 //    import_menu_->addAction(import_gps_csv_action);
 
     if (!COMPASS::instance().hideViewpoints())
     {
-        QAction* import_vp_file_action = new QAction(tr("&View Points"));
+        QAction* import_vp_file_action = new QAction("&View Points");
         import_vp_file_action->setShortcut(tr("Ctrl+V"));
-        import_vp_file_action->setToolTip(tr("Import View Points File"));
+        import_vp_file_action->setToolTip("Import View Points File");
         connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
         import_menu_->addAction(import_vp_file_action);
     }
 
     // configuration menu
-    config_menu_ = menuBar()->addMenu(tr("&Configuration"));
+    config_menu_ = menuBar()->addMenu("&Configuration");
     config_menu_->setToolTipsVisible(true);
 
     // configure operations
-    QAction* ds_action = new QAction(tr("Data Sources"));
-    ds_action->setToolTip(tr("Configure Data Sources"));
+    QAction* ds_action = new QAction("Data Sources");
+    ds_action->setToolTip("Configure Data Sources");
     connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
     config_menu_->addAction(ds_action);
 
-    QAction* meta_action = new QAction(tr("Meta Variables"));
+    QAction* meta_action = new QAction("Meta Variables");
 
     if (expert_mode)
-        meta_action->setToolTip(tr("Configure Meta Variables"));
+        meta_action->setToolTip("Configure Meta Variables");
     else
-        meta_action->setToolTip(tr("Show Meta Variables"));
+        meta_action->setToolTip("Show Meta Variables");
 
     connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
     config_menu_->addAction(meta_action);
 
-    sectors_action_ = new QAction(tr("Sectors"));
-    sectors_action_->setToolTip(tr("Configure Sectors (stored in Database)"));
+    sectors_action_ = new QAction("Sectors");
+    sectors_action_->setToolTip("Configure Sectors (stored in Database)");
     connect(sectors_action_, &QAction::triggered, this, &MainWindow::configureSectorsSlot);
     sectors_action_->setDisabled(true);
     config_menu_->addAction(sectors_action_);
 
     // process menu
-    process_menu_ = menuBar()->addMenu(tr("&Process"));
+    process_menu_ = menuBar()->addMenu("&Process");
     process_menu_->setToolTipsVisible(true);
 
-    QAction* calc_radar_plpos_action = new QAction(tr("Calculate Radar Plot Positions"));
-    calc_radar_plpos_action->setToolTip(tr("Calculate Radar Plot Positions, only needed if Radar Position information"
-                                           " was changed"));
+    QAction* calc_radar_plpos_action = new QAction("Calculate Radar Plot Positions");
+    calc_radar_plpos_action->setToolTip("Calculate Radar Plot Positions, only needed if Radar Position information"
+                                           " was changed");
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
-    QAction* assoc_action = new QAction(tr("Calculate Unique Targets"));
-    assoc_action->setToolTip(tr("Create Unique Targets based on all DB Content"));
+    QAction* assoc_action = new QAction("Calculate Unique Targets");
+    assoc_action->setToolTip("Create Unique Targets based on all DB Content");
     connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsSlot);
     process_menu_->addAction(assoc_action);
 
-    QAction* assoc_artas_action = new QAction(tr("Calculate ARTAS Target Report Usage"));
-    assoc_artas_action->setToolTip(tr("Create target report usage based on ARTAS TRI information"));
+    QAction* assoc_artas_action = new QAction("Calculate ARTAS Target Report Usage");
+    assoc_artas_action->setToolTip("Create target report usage based on ARTAS TRI information");
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
 
-    calculate_references_action_ = new QAction(tr("Calculate References"));
-    calculate_references_action_->setToolTip(tr("Calculate References from System Tracker and ADS-B data"));
+    calculate_references_action_ = new QAction("Calculate References");
+    calculate_references_action_->setToolTip("Calculate References from System Tracker and ADS-B data");
     connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesSlot);
     process_menu_->addAction(calculate_references_action_);
 
     // ui menu
-    ui_menu_ = menuBar()->addMenu(tr("&UI"));
+    ui_menu_ = menuBar()->addMenu("&UI");
     ui_menu_->setToolTipsVisible(true);
 
-    QAction* reset_views_action = new QAction(tr("Reset Views"));
+    QAction* reset_views_action = new QAction("Reset Views");
     reset_views_action->setToolTip(
                 "Enable all data sources, reset labels,\n"
                 "disable all filters and reset Views to startup configuration");
@@ -795,7 +795,7 @@ void MainWindow::importJSONRecordingSlot()
 void MainWindow::importGPSTrailSlot()
 {
     string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail", "",
-                                                   tr("Text Files (*.nmea *.txt)")).toStdString();
+                                                   "Text Files (*.nmea *.txt)").toStdString();
 
     if (filename.size() > 0)
     {
@@ -810,7 +810,7 @@ void MainWindow::importGPSTrailSlot()
 void MainWindow::importGPSCSVSlot()
 {
     string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV", "",
-                                                   tr("Text Files (*.csv *.txt)")).toStdString();
+                                                   "Text Files (*.csv *.txt)").toStdString();
 
     if (filename.size() > 0)
     {
@@ -1181,7 +1181,7 @@ void MainWindow::createDebugMenu()
         connect(action, &QAction::triggered, [ this ] () { this->showCommandShell(); });
 
         auto shortcut = new QShortcut(this);
-        shortcut->setKey(QKeySequence("Ctrl+Alt+S"));
+        shortcut->setKey(QKeySequence(tr("Ctrl+Alt+S")));
         connect(shortcut, &QShortcut::activated, [ this ] () { this->showCommandShell(); });
     }
 

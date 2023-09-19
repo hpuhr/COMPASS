@@ -680,7 +680,7 @@ void DBContentManager::insertDone(DBContent& object)
     if (done)
         finishInserting();
     else
-        loginf << "DBContentManager: insertDone: not done";
+        logdbg << "DBContentManager: insertDone: not done";
 }
 
 void DBContentManager::finishInserting()
