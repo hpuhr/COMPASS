@@ -18,12 +18,12 @@
 #ifndef EVALUATIONREQUIREMENTMODEAFALSE_H
 #define EVALUATIONREQUIREMENTMODEAFALSE_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
-class ModeAFalse : public Base
+class ModeAFalse : public ProbabilityBase
 {
 public:
     ModeAFalse(const std::string& name, const std::string& short_name, const std::string& group_name,

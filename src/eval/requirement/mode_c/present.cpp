@@ -17,11 +17,11 @@
 
 #include "eval/requirement/mode_c/present.h"
 #include "eval/results/mode_c/presentsingle.h"
-#include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "sectorlayer.h"
 
 using namespace std;
@@ -31,192 +31,213 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-    ModeCPresent::ModeCPresent(const std::string& name, const std::string& short_name, const std::string& group_name,
-                 float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-        : Base(name, short_name, group_name, prob, prob_check_type, eval_man)
+ModeCPresent::ModeCPresent(const std::string& name, const std::string& short_name, const std::string& group_name,
+                           float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man)
+{
+
+}
+
+std::shared_ptr<EvaluationRequirementResult::Single> ModeCPresent::evaluate (
+        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+        const SectorLayer& sector_layer)
+{
+    logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_;
+
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
+
+    ptime timestamp;
+
+    ptime ref_lower, ref_upper;
+
+    int num_updates {0};
+    int num_no_ref_pos {0};
+    //int num_no_ref_val {0};
+    int num_pos_outside {0};
+    int num_pos_inside {0};
+
+    int num_no_ref_id {0};
+    int num_present_id {0};
+    int num_missing_id {0};
+
+    typedef EvaluationRequirementResult::SingleModeCPresent Result;
+    typedef EvaluationDetail                                Detail;
+    typedef Result::EvaluationDetails                       Details;
+    Details details;
+
+    dbContent::TargetPosition pos_current;
+    //unsigned int code;
+    //bool code_ok;
+
+    bool code_present_ref;
+    bool code_present_tst;
+    bool code_missing;
+
+    //bool ref_exists;
+    bool is_inside;
+    //pair<dbContent::TargetPosition, bool> ret_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
+    bool ok;
+
+    string comment;
+    //bool lower_nok, upper_nok;
+
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_detail;
+
+    auto addDetail = [ & ] (const ptime& ts,
+            const dbContent::TargetPosition& tst_pos,
+            const QVariant& ref_exists,
+            const QVariant& pos_inside,
+            const QVariant& is_not_ok,
+            const QVariant& num_updates,
+            const QVariant& num_no_ref,
+            const QVariant& num_pos_inside,
+            const QVariant& num_pos_outside,
+            const QVariant& num_no_ref_id,
+            const QVariant& num_present_id,
+            const QVariant& num_missing_id,
+            const std::string& comment)
     {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::RefExists, ref_exists)
+                          .setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                          .setValue(Result::DetailKey::IsNotOk, is_not_ok)
+                          .setValue(Result::DetailKey::NumUpdates, num_updates)
+                          .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                          .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                          .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                          .setValue(Result::DetailKey::NumNoRefVal, num_no_ref_id)
+                          .setValue(Result::DetailKey::NumPresent, num_present_id)
+                          .setValue(Result::DetailKey::NumMissing, num_missing_id)
+                          .generalComment(comment));
+    };
 
-    }
-
-    std::shared_ptr<EvaluationRequirementResult::Single> ModeCPresent::evaluate (
-            const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
-            const SectorLayer& sector_layer)
+    for (const auto& tst_id : tst_data)
     {
-        logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_;
+        //ref_exists = false;
+        is_inside = false;
+        comment = "";
 
-        time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+        skip_detail = false;
 
-        const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+        ++num_updates;
 
-        ptime timestamp;
+        timestamp = tst_id.first;
+        pos_current = target_data.tstChain().pos(tst_id);
 
-        ptime ref_lower, ref_upper;
-
-        int num_updates {0};
-        int num_no_ref_pos {0};
-        //int num_no_ref_val {0};
-        int num_pos_outside {0};
-        int num_pos_inside {0};
-
-        int num_no_ref_id {0};
-        int num_present_id {0};
-        int num_missing_id {0};
-
-        vector<PresentDetail> details;
-        EvaluationTargetPosition pos_current;
-        //unsigned int code;
-        //bool code_ok;
-
-        bool code_present_ref;
-        bool code_present_tst;
-        bool code_missing;
-
-        //bool ref_exists;
-        bool is_inside;
-        pair<EvaluationTargetPosition, bool> ret_pos;
-        EvaluationTargetPosition ref_pos;
-        bool ok;
-
-        string comment;
-        //bool lower_nok, upper_nok;
-
-        bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
-        bool skip_detail;
-
-        bool has_ground_bit;
-        bool ground_bit_set;
-
-        for (const auto& tst_id : tst_data)
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
-            //ref_exists = false;
-            is_inside = false;
-            comment = "";
+            if (!skip_no_data_details)
+                addDetail(timestamp, pos_current,
+                          false, {}, false, // ref_exists, pos_inside, is_not_ok
+                          num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                          num_no_ref_id, num_present_id, num_missing_id, "No reference data");
 
-            skip_detail = false;
-
-            ++num_updates;
-
-            timestamp = tst_id.first;
-            pos_current = target_data.tstPosForTime(timestamp);
-
-            if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
-            {
-                if (!skip_no_data_details)
-                    details.push_back({timestamp, pos_current,
-                                       false, {}, false, // ref_exists, pos_inside, is_not_ok
-                                       num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                       num_no_ref_id, num_present_id, num_missing_id, "No reference data"});
-
-                ++num_no_ref_pos;
-                continue;
-            }
-
-            ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
-
-            ref_pos = ret_pos.first;
-            ok = ret_pos.second;
-
-            if (!ok)
-            {
-                if (!skip_no_data_details)
-                    details.push_back({timestamp, pos_current,
-                                       false, {}, false, // ref_exists, pos_inside, is_not_ok
-                                       num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                       num_no_ref_id, num_present_id, num_missing_id, "No reference position"});
-
-                ++num_no_ref_pos;
-                continue;
-            }
-            has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
-
-            if (has_ground_bit)
-                ground_bit_set = target_data.tstGroundBitForTime(timestamp);
-            else
-                ground_bit_set = false;
-
-            if (!ground_bit_set)
-                tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(
-                            timestamp, seconds(15));
-
-            is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
-
-            if (!is_inside)
-            {
-                if (!skip_no_data_details)
-                    details.push_back({timestamp, pos_current,
-                                       true, is_inside, false, // ref_exists, pos_inside, is_not_ok
-                                       num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                       num_no_ref_id, num_present_id, num_missing_id, "Outside sector"});
-
-                ++num_pos_outside;
-                continue;
-            }
-
-            ++num_pos_inside;
-
-            // check if ref code exists
-            code_present_ref = false;
-
-            tie(ref_lower, ref_upper) = target_data.refTimesFor(timestamp, max_ref_time_diff);
-
-            if ((!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())) // ref times possible
-            {
-                if ((!ref_lower.is_not_a_date_time() && target_data.hasRefModeCForTime(ref_lower))
-                        || (!ref_upper.is_not_a_date_time() && target_data.hasRefModeCForTime(ref_upper))) // ref value(s) exist
-                {
-                    code_present_ref = true;
-                }
-            }
-
-            code_present_tst = target_data.hasTstModeCForTime(timestamp);
-
-            code_missing = false;
-
-            if (code_present_ref)
-            {
-                if (code_present_tst)
-                {
-                    comment = "OK";
-                    ++num_present_id;
-                }
-                else
-                {
-                    comment = "Id missing";
-                    ++num_missing_id;
-
-                    code_missing = true;
-                }
-            }
-            else
-            {
-                comment = "No reference id";
-                ++num_no_ref_id;
-
-                // skip_detail?
-            }
-
-            if (!(skip_no_data_details && skip_detail))
-                details.push_back({timestamp, pos_current,
-                                   true, is_inside, code_missing, // ref_exists, pos_inside, is_not_ok
-                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                   num_no_ref_id, num_present_id, num_missing_id, comment});
+            ++num_no_ref_pos;
+            continue;
         }
 
-        logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
-               //<< " num_no_ref_val " << num_no_ref_val
-               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
-               << " num_no_ref_id " << num_no_ref_id << " num_present_id " << num_present_id
-               << " num_missing_id " << num_missing_id;
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
-        assert (num_pos_inside == num_no_ref_id+num_present_id+num_missing_id);
+//        ref_pos = ret_pos.first;
+//        ok = ret_pos.second;
 
-        //assert (details.size() == tst_data.size());
+        if (!ref_pos.has_value())
+        {
+            if (!skip_no_data_details)
+                addDetail(timestamp, pos_current,
+                          false, {}, false, // ref_exists, pos_inside, is_not_ok
+                          num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                          num_no_ref_id, num_present_id, num_missing_id, "No reference position");
 
-        return make_shared<EvaluationRequirementResult::SingleModeCPresent>(
-                    "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside,
-                    num_no_ref_id, num_present_id, num_missing_id, details);
+            ++num_no_ref_pos;
+            continue;
+        }
+
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+
+        if (!is_inside)
+        {
+            if (!skip_no_data_details)
+                addDetail(timestamp, pos_current,
+                          true, is_inside, false, // ref_exists, pos_inside, is_not_ok
+                          num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                          num_no_ref_id, num_present_id, num_missing_id, "Outside sector");
+
+            ++num_pos_outside;
+            continue;
+        }
+
+        ++num_pos_inside;
+
+        // check if ref code exists
+        code_present_ref = false;
+
+        tie(ref_lower, ref_upper) = target_data.mappedRefTimes(tst_id, max_ref_time_diff);
+
+        if ((!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())) // ref times possible
+        {
+            if ((!ref_lower.is_not_a_date_time()
+                 && target_data.refChain().modeC(ref_lower, false, false).has_value())
+                    || (!ref_upper.is_not_a_date_time()
+                        && target_data.refChain().modeC(ref_upper, false, false).has_value()))
+                // ref value(s) exist
+            {
+                code_present_ref = true;
+            }
+        }
+
+        code_present_tst = target_data.tstChain().modeC(tst_id, false, false).has_value();
+
+        code_missing = false;
+
+        if (code_present_ref)
+        {
+            if (code_present_tst)
+            {
+                comment = "OK";
+                ++num_present_id;
+            }
+            else
+            {
+                comment = "Id missing";
+                ++num_missing_id;
+
+                code_missing = true;
+            }
+        }
+        else
+        {
+            comment = "No reference id";
+            ++num_no_ref_id;
+
+            // skip_detail?
+        }
+
+        if (!(skip_no_data_details && skip_detail))
+            addDetail(timestamp, pos_current,
+                      true, is_inside, code_missing, // ref_exists, pos_inside, is_not_ok
+                      num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                      num_no_ref_id, num_present_id, num_missing_id, comment);
     }
+
+    logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
+           << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
+              //<< " num_no_ref_val " << num_no_ref_val
+           << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
+           << " num_no_ref_id " << num_no_ref_id << " num_present_id " << num_present_id
+           << " num_missing_id " << num_missing_id;
+
+    assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
+    assert (num_pos_inside == num_no_ref_id+num_present_id+num_missing_id);
+
+    //assert (details.size() == tst_data.size());
+
+    return make_shared<EvaluationRequirementResult::SingleModeCPresent>(
+                "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
+                eval_man_, details, num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside,
+                num_no_ref_id, num_present_id, num_missing_id);
+}
 }

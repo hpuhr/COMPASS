@@ -20,7 +20,13 @@
 
 
 #include "eval/results/single.h"
-#include "eval/requirement/speed/speed.h"
+
+#include <boost/optional.hpp>
+
+namespace EvaluationRequirement
+{
+    class Speed;
+}
 
 namespace EvaluationRequirementResult
 {
@@ -28,15 +34,21 @@ namespace EvaluationRequirementResult
 class SingleSpeed : public Single
 {
 public:
-    SingleSpeed(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer,
-            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            unsigned int num_pos, unsigned int num_no_ref,
-            unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_no_tst_value,
-            unsigned int num_comp_failed, unsigned int num_comp_passed,
-            vector<double> values,
-            std::vector<EvaluationRequirement::SpeedDetail> details);
+    SingleSpeed(const std::string& result_id, 
+                std::shared_ptr<EvaluationRequirement::Base> requirement,
+                const SectorLayer& sector_layer,
+                unsigned int utn, 
+                const EvaluationTargetData* target, 
+                EvaluationManager& eval_man,
+                const EvaluationDetails& details,
+                unsigned int num_pos, 
+                unsigned int num_no_ref,
+                unsigned int num_pos_outside, 
+                unsigned int num_pos_inside, 
+                unsigned int num_no_tst_value,
+                unsigned int num_comp_failed, 
+                unsigned int num_comp_passed,
+                vector<double> values);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -52,8 +64,6 @@ public:
 
     const vector<double>& values() const;
 
-    std::vector<EvaluationRequirement::SpeedDetail>& details();
-
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
     virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
@@ -66,27 +76,22 @@ public:
 
     EvaluationRequirement::Speed* req ();
 
+    enum DetailKey
+    {
+        Offset,         //float
+        CheckPassed,    //bool
+        PosInside,      //bool
+        NumPos,         //unsigned int
+        NumNoRef,       //unsigned int
+        NumInside,      //unsigned int
+        NumOutside,     //unsigned int
+        NumCheckFailed, //unsigned int
+        NumCheckPassed //unsigned int
+    };
+
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+
 protected:
-    unsigned int num_pos_ {0};
-    unsigned int num_no_ref_ {0};
-    unsigned int num_pos_outside_ {0};
-    unsigned int num_pos_inside_ {0};
-    unsigned int num_no_tst_value_ {0};
-    unsigned int num_comp_failed_ {0};
-    unsigned int num_comp_passed_ {0};
-
-    vector<double> values_;
-
-    double value_min_ {0};
-    double value_max_ {0};
-    double value_avg_ {0};
-    double value_var_ {0};
-
-    bool has_p_min_ {false};
-    float p_passed_{0};
-
-    std::vector<EvaluationRequirement::SpeedDetail> details_;
-
     void update();
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -95,7 +100,24 @@ protected:
     void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
+    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
+
+    unsigned int num_pos_          {0};
+    unsigned int num_no_ref_       {0};
+    unsigned int num_pos_outside_  {0};
+    unsigned int num_pos_inside_   {0};
+    unsigned int num_no_tst_value_ {0};
+    unsigned int num_comp_failed_  {0};
+    unsigned int num_comp_passed_  {0};
+
+    vector<double> values_;
+
+    double value_min_ {0};
+    double value_max_ {0};
+    double value_avg_ {0};
+    double value_var_ {0};
+
+    boost::optional<float> p_passed_;
 };
 
 }

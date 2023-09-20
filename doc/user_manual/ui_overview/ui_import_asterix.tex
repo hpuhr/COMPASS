@@ -14,7 +14,7 @@ There exist three tabs:
 
 \begin{itemize}
 \item Main: File label, input line, jASTERIX decoder settings
-\item Override: Data override settings
+\item Override / Filter: Data override settings
 \item Mappings: Definition of created database content based on decoded data
 \end{itemize}
 \ \\
@@ -39,13 +39,16 @@ Please note that the following ASTERIX categories, editions, reserved expansion 
   010 & 0.24 Sensis, 0.31  &  &  \\ \hline
   019 & 1.2, 1.3 & & \\ \hline
   020 & 1.5, 1.8 & 1.3 & \\ \hline
-  021 & 2.1, 2.4 & & \\ \hline
+  021 & 0.26, 2.1, 2.4 & 1.5 & \\ \hline
   023 & 1.2 & & \\ \hline
+  030 & 7.0 & & \\ \hline
   034 & 1.26 & & \\ \hline
   048 & 1.15, 1.23 & 1.9 & \\ \hline
   062 & 1.12, 1.16, 1.18 & 1.2 & ARTAS TRIs \\ \hline
   063 & 1.0, 1.1 & & \\ \hline
   065 & 1.2, 1.3 & & \\ \hline
+  247 & 1.2 & & \\ \hline
+  252 & 7.0 & & \\ \hline
 \end{tabular} \\
 \  \\
 
@@ -90,24 +93,35 @@ Using the 'Debug in Console' checkbox, additional debugging information is outpu
 The 'Cancel' button aborts the import. Using the 'Test Import' button the import process can be tested without inserting the data into the database. 
 The 'Import' button triggers the import of the selected file into into the database with the given options. This function can be run multiple times. \\
 
-\subsubsection{Override Tab}
+\subsubsection{Override / Filter Tab}
 \label{sec:task_import_asterix_override}
-
 
 \begin{figure}[H]
   \center
     \hspace*{-0.5cm}
     \includegraphics[width=17cm]{figures/asterix_import_data_override.png}
-  \caption{Task: Import ASTERIX data override}
+  \caption{Task: Import ASTERIX data Override / Filter}
 \end{figure}
 
-This feature should only be used in very specific circumstances. When activated, the function adds a Time of Day offset to all imported data, to compensate time offsets (e.g. when importing data from a replay). \\
+These features should only be used in very specific circumstances.
 
 \begin{itemize}
-\item 'Override Time of Day Active' checkbox: Determines if the override is active. Disabled by default.
+\item Time Correction
+\begin{itemize}
+\item Ignore 24h Time Jumps: Do not detect 24h time jumps in input data - import everything into same date
+\item Override Time of Day: Set offset, which will be added to the 'Time of Day'  item, to correct for unwanted time-shifts
 \item Time of Day Offset: Positive or negative offset to be added, in seconds. If the resulting value is out of bounds, it is adjusted to the [0, 86400] interval.
 \end{itemize}
+\item Filters
+\begin{itemize}
+\item Filter Time of Day: Use minimum / maximum times, everything outside will be ignored
+\item Filter Position: Use minimum / maximum rectangle in latitude and longitude
+\item Filter Mode C: Use minimum / maximum rectangle in Mode C. Target reports without Mode C will not be filtered.
+\end{itemize}
+\end{itemize}
 \ \\
+
+Please note that the filtering is applied after the (optional) 'Time of Day' correction is performed. Also, if any filters are active, the import status dialog may not be updated for some time and show wrong time estimates.
 
 \subsubsection{Mappings Tab}
 

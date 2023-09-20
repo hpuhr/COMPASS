@@ -56,12 +56,24 @@ namespace ui_test
                            const Qt::Key& key,
                            Qt::KeyboardModifiers modifier,
                            int delay = -1);
+    bool injectKeySequenceEvent(QWidget* root,
+                                const QString& obj_name,
+                                const QKeySequence& keys,
+                                int delay = -1);
     bool injectClickEvent(QWidget* root,
                           const QString& obj_name, 
                           int x = -1, 
                           int y = -1, 
                           Qt::MouseButton button = Qt::LeftButton, 
                           int delay = -1);
+    bool injectRectEvent(QWidget* root,
+                         const QString& obj_name, 
+                         int x0 = -1, 
+                         int y0 = -1, 
+                         int x1 = -1, 
+                         int y1 = -1,
+                         Qt::MouseButton button = Qt::LeftButton, 
+                         int delay = -1);
 
     typedef std::function<bool()> EventFunc;
 
@@ -84,6 +96,10 @@ namespace ui_test
     bool injectComboBoxEditEvent(QWidget* root,
                                  const QString& obj_name,
                                  const QString& entry_txt,
+                                 int delay = -1);
+    bool injectComboBoxEditEvent(QWidget* root,
+                                 const QString& obj_name,
+                                 int entry_idx,
                                  int delay = -1);
     bool injectTabSelectionEvent(QWidget* root,
                                  const QString& obj_name,
@@ -130,5 +146,9 @@ namespace ui_test
     bool injectDialogEvent(QWidget* root,
                            const QString& obj_name,
                            bool accept,
+                           int delay = -1);
+    bool injectWidgetEvent(QWidget* root,
+                           const QString& obj_name,
+                           const QString& slot_name,
                            int delay = -1);
 } // namespace ui_test

@@ -40,10 +40,10 @@ std::string comparisonTypeString(COMPARISON_TYPE type)
         return "<=";
     else if (type == GREATER_THAN)
         return ">";
-    else if (type == GREATER_THAN_OR_EUQAL)
+    else if (type == GREATER_THAN_OR_EQUAL)
         return ">=";
     else
-        throw std::runtime_error("EvaluationRequirement: comparisonTypeString: unkown type "
+        throw std::runtime_error("EvaluationRequirement: comparisonTypeString: unknown type "
                                  + std::to_string((unsigned int) type));
 }
 
@@ -55,10 +55,10 @@ std::string comparisonTypeLongString(COMPARISON_TYPE type)
         return "Less Than or Equal (<=)";
     else if (type == GREATER_THAN)
         return "Greater Than (>)";
-    else if (type == GREATER_THAN_OR_EUQAL)
+    else if (type == GREATER_THAN_OR_EQUAL)
         return "Greater Than or Equal (>=)";
     else
-        throw std::runtime_error("EvaluationRequirement: comparisonTypeString: unkown type "
+        throw std::runtime_error("EvaluationRequirement: comparisonTypeString: unknown type "
                                  + std::to_string((unsigned int) type));
 }
 
@@ -71,11 +71,6 @@ BaseConfig::BaseConfig(
     registerParameter("name", &name_, "");
     registerParameter("short_name", &short_name_, "");
     registerParameter("comment", &comment_, "");
-
-    registerParameter("prob", &prob_, 0.9);
-    registerParameter("prob_check_type", (unsigned int*)&prob_check_type_,
-                      (unsigned int)COMPARISON_TYPE::GREATER_THAN_OR_EUQAL);
-
 
     assert (name_.size());
     assert (short_name_.size());
@@ -177,26 +172,6 @@ void BaseConfig::shortName(const std::string& short_name)
 std::string BaseConfig::shortName() const
 {
     return short_name_;
-}
-
-float BaseConfig::prob() const
-{
-    return prob_;
-}
-
-void BaseConfig::prob(float value)
-{
-    prob_ = value;
-}
-
-COMPARISON_TYPE BaseConfig::probCheckType() const
-{
-    return prob_check_type_;
-}
-
-void BaseConfig::probCheckType(const COMPARISON_TYPE& prob_type)
-{
-    prob_check_type_ = prob_type;
 }
 
 void BaseConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)

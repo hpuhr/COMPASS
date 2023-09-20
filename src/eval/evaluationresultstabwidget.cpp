@@ -24,6 +24,7 @@
 #include "eval/results/report/treeitem.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttable.h"
 #include "files.h"
 #include "logger.h"
 
@@ -150,7 +151,7 @@ void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
 
     id_history_.push_back(item->id());
 
-    loginf << "EvaluationResultsTabWidget: itemClickedSlot: name " << item->name();
+    loginf << "EvaluationResultsTabWidget: itemClickedSlot: name " << item->name() << " id " << item->id();
 
     if (dynamic_cast<EvaluationResultsReport::RootItem*>(item))
     {
@@ -218,4 +219,69 @@ void EvaluationResultsTabWidget::updateBackButton ()
     assert (back_button_);
 
     back_button_->setEnabled(id_history_.size() > 1);
+}
+
+boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const std::string& result_id, const std::string& table_id) const
+{
+    QString result_id_corr = QString::fromStdString(result_id);
+
+    if (!result_id_corr.startsWith("Report:Results:"))
+    {
+        if (result_id_corr.startsWith("Results:"))
+            result_id_corr = "Report:" + result_id_corr;
+        else
+            result_id_corr = "Report:Results:" + result_id_corr;
+    }
+
+    QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(result_id_corr.toStdString());
+
+    if (!index.isValid())
+    {
+        logerr << "EvaluationResultsTabWidget: getTableData: id '" << result_id_corr.toStdString() << "' not found";
+        return {};
+    }
+
+    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
+    if (!item)
+    {
+        logerr << "EvaluationResultsTabWidget: getTableData: item null";
+        return {};
+    }
+
+    EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
+    if (!section)
+    {   
+        logerr << "EvaluationResultsTabWidget: getTableData: no section found";
+        return {};
+    }
+
+    if (!section->hasTable(table_id))
+    {
+        logerr << "EvaluationResultsTabWidget: getTableData: no table found";
+        return {};
+    }
+
+    const auto& table = section->getTable(table_id);
+
+    nlohmann::json json_data;
+
+    nlohmann::json header = nlohmann::json::array();
+    for (int col = 0; col < table.columnCount(); ++col)
+        header.push_back(table.headerData(col, Qt::Horizontal, Qt::DisplayRole).toString().toStdString());
+
+    nlohmann::json data = nlohmann::json::array();
+    for (int row = 0; row < table.rowCount(); ++row)
+    {
+        nlohmann::json table_row = nlohmann::json::array();
+
+        for (int col = 0; col < table.columnCount(); ++col)
+            table_row.push_back(table.data(table.index(row, col), Qt::DisplayRole).toString().toStdString());
+        
+        data.push_back(table_row);
+    }
+
+    json_data["header"] = header;
+    json_data["data"  ] = data;
+
+    return json_data;
 }

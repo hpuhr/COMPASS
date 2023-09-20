@@ -16,6 +16,8 @@
  */
 
 #include "listboxviewconfigwidget.h"
+#include "listboxviewwidget.h"
+#include "listboxview.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableorderedsetwidget.h"
@@ -24,6 +26,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "test/ui_test_common.h"
+#include "viewwidget.h"
 
 #include <QComboBox>
 #include <QCheckBox>
@@ -39,9 +42,8 @@
 using namespace Utils;
 using namespace std;
 
-ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, 
-                                                 QWidget* parent)
-:   ViewConfigWidget(parent), view_(view)
+ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget, QWidget* parent)
+:   ViewConfigWidget(view_widget, parent)
 {
     QTabWidget* tab_widget = new QTabWidget(this);
     tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
@@ -49,6 +51,7 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view,
     QVBoxLayout* vlayout = new QVBoxLayout;
     vlayout->setContentsMargins(0, 0, 0, 0);
 
+    view_ = view_widget->getView();
     assert(view_);
 
     // config
@@ -58,7 +61,6 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view,
 
         QFont font_bold;
         font_bold.setBold(true);
-
 
         // sets
 
@@ -106,8 +108,8 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view,
 
         updateSetWidget();
 
-        //    variable_set_widget_ = view_->getDataSource()->getSet()->widget();
-        //    connect(view_->getDataSource()->getSet(), &DBOVariableOrderedSet::variableAddedChangedSignal,
+        //    variable_set_widget_ = getView()->getDataSource()->getSet()->widget();
+        //    connect(getView()->getDataSource()->getSet(), &DBOVariableOrderedSet::variableAddedChangedSignal,
         //            this, &ListBoxViewConfigWidget::reloadWantedSlot);
         //    vlayout->addWidget(variable_set_widget_);
 
@@ -153,49 +155,10 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view,
     connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
     vlayout->addWidget(export_button_);
 
-    QFont font_status;
-    font_status.setItalic(true);
-
-    status_label_ = new QLabel();
-    status_label_->setFont(font_status);
-    status_label_->setVisible(false);
-    vlayout->addWidget(status_label_);
-
-    update_button_ = new QPushButton("Reload");
-    UI_TEST_OBJ_NAME(update_button_, update_button_->text())
-    connect(update_button_, &QPushButton::clicked, this,
-            &ListBoxViewConfigWidget::reloadRequestedSlot);
-    update_button_->setEnabled(reload_needed_);
-    vlayout->addWidget(update_button_);
-
     setLayout(vlayout);
-
-    setStatus("No Data Loaded", true);
 }
 
 ListBoxViewConfigWidget::~ListBoxViewConfigWidget() = default;
-
-void ListBoxViewConfigWidget::setStatus(const QString& text, bool visible, const QColor& color)
-{
-    assert (status_label_);
-    status_label_->setText(text);
-
-    QPalette palette = status_label_->palette();
-    palette.setColor(status_label_->foregroundRole(), color);
-    status_label_->setPalette(palette);
-
-    status_label_->setVisible(visible);
-}
-
-void ListBoxViewConfigWidget::appModeSwitch (AppMode app_mode)
-{
-    assert (update_button_);
-    update_button_->setHidden(app_mode == AppMode::LiveRunning);
-    assert (status_label_);
-    status_label_->setHidden(app_mode == AppMode::LiveRunning);
-    assert (export_button_);
-    export_button_->setHidden(app_mode == AppMode::LiveRunning);
-}
 
 void ListBoxViewConfigWidget::selectedSetSlot(const QString& text)
 {
@@ -209,7 +172,7 @@ void ListBoxViewConfigWidget::selectedSetSlot(const QString& text)
     updateSetButtons();
     updateSetWidget();
 
-    reloadWantedSlot();
+    getWidget()->notifyReloadNeeded();
 }
 
 void ListBoxViewConfigWidget::addSetSlot()
@@ -307,7 +270,6 @@ void ListBoxViewConfigWidget::renameSetSlot()
             QInputDialog::getText(nullptr, tr("Rename Variable List"),
                                   tr("Specify a (unique) name:"), QLineEdit::Normal,
                                   "", &ok);
-
     if (!ok)
         return;
 
@@ -344,7 +306,7 @@ void ListBoxViewConfigWidget::renameSetSlot()
     updateSetButtons();
     updateSetWidget();
 
-    reloadWantedSlot();
+    getWidget()->notifyReloadNeeded();
 }
 
 void ListBoxViewConfigWidget::removeSetSlot()
@@ -407,28 +369,6 @@ void ListBoxViewConfigWidget::exportDoneSlot(bool cancelled)
     }
 }
 
-void ListBoxViewConfigWidget::reloadWantedSlot()
-{
-    reload_needed_ = true;
-    updateUpdateButton();
-}
-
-void ListBoxViewConfigWidget::reloadRequestedSlot()
-{
-    assert(reload_needed_);
-
-    COMPASS::instance().dbContentManager().load();
-    reload_needed_ = false;
-
-    updateUpdateButton();
-}
-
-void ListBoxViewConfigWidget::updateUpdateButton()
-{
-    assert(update_button_);
-    update_button_->setEnabled(reload_needed_);
-}
-
 void ListBoxViewConfigWidget::updateSetBox()
 {
     loginf << "ListBoxViewConfigWidget: updateSetBox";
@@ -480,7 +420,7 @@ void ListBoxViewConfigWidget::updateSetWidget()
     assert (view_->getDataSource()->hasCurrentSet());
 
     connect(view_->getDataSource()->getSet(), &dbContent::VariableOrderedSet::variableAddedChangedSignal,
-            this, &ListBoxViewConfigWidget::reloadWantedSlot, Qt::UniqueConnection);
+            getWidget(), &ListBoxViewWidget::notifyReloadNeeded, Qt::UniqueConnection);
 
     QWidget* set_widget = view_->getDataSource()->getSet()->widget();
 
@@ -489,12 +429,4 @@ void ListBoxViewConfigWidget::updateSetWidget()
 
     loginf << "ListBoxViewConfigWidget: updateWidgetBox: setting '" << view_->getDataSource()->currentSetName() << "'";
     set_stack_->setCurrentWidget(set_widget);
-}
-
-void ListBoxViewConfigWidget::loadingStartedSlot()
-{
-    reload_needed_ = false;
-
-    updateUpdateButton();
-    setStatus("Loading Data", true);
 }

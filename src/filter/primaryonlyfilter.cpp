@@ -103,7 +103,7 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
         if (!first)
             ss << " AND";
 
-        ss << " " + var.dbColumnName() << " IN (1,3,6,7)";
+        ss << " (" + var.dbColumnName() << " IN (1,3,6,7) OR " << var.dbColumnName() << " IS NULL)";
 
         first = false;
     }

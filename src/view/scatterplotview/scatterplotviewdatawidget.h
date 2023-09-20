@@ -21,9 +21,9 @@
 #include "global.h"
 #include "nullablevector.h"
 #include "dbcontent/variable/variable.h"
-#include "scatterplotviewdatatoolwidget.h"
 #include "scatterplotviewchartview.h"
 #include "viewdatawidget.h"
+#include "util/timeconv.h"
 
 #include <QWidget>
 #include <QVariant>
@@ -32,6 +32,7 @@
 #include <limits>
 
 class ScatterPlotView;
+class ScatterPlotViewWidget;
 class ScatterPlotViewDataSource;
 
 //class QTabWidget;
@@ -48,6 +49,12 @@ namespace QtCharts {
     class QValueAxis;
 }
 
+enum ScatterPlotViewDataTool
+{
+    SP_NAVIGATE_TOOL = 0,
+    SP_ZOOM_RECT_TOOL,
+    SP_SELECT_TOOL
+};
 
 /**
  * @brief Widget with tab containing BufferTableWidgets in ScatterPlotView
@@ -56,18 +63,29 @@ namespace QtCharts {
 class ScatterPlotViewDataWidget : public ViewDataWidget
 {
     Q_OBJECT
+public:
+    /// @brief Constructor
+    ScatterPlotViewDataWidget(ScatterPlotViewWidget* view_widget,
+                              QWidget* parent = nullptr, 
+                              Qt::WindowFlags f = 0);
+    /// @brief Destructor
+    virtual ~ScatterPlotViewDataWidget();
 
-  signals:
+    ScatterPlotViewDataTool selectedTool() const;
+
+    bool xVarNotInBuffer() const;
+    bool yVarNotInBuffer() const;
+
+    QRectF getDataBounds() const;
+    QPixmap renderPixmap();
+    unsigned int nullValueCount() const;
+
+signals:
 //    void showOnlySelectedSignal(bool value);
 //    void usePresentationSignal(bool use_presentation);
 //    void showAssociationsSignal(bool value);
 
-  public slots:
-    void loadingStartedSlot();
-    /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
-    void loadingDoneSlot();
-
+public slots:
     void rectangleSelectedSlot (QPointF p1, QPointF p2);
 
     void invertSelectionSlot();
@@ -79,65 +97,19 @@ class ScatterPlotViewDataWidget : public ViewDataWidget
 
     void resetZoomSlot();
 
-  public:
-    /// @brief Constructor
-    ScatterPlotViewDataWidget(ScatterPlotView* view, 
-                              ScatterPlotViewDataSource* data_source,
-                              QWidget* parent = nullptr, 
-                              Qt::WindowFlags f = 0);
-    /// @brief Destructor
-    virtual ~ScatterPlotViewDataWidget();
-
-    void updatePlot();
-    void clear();
-
-    ScatterPlotViewDataTool selectedTool() const;
-
-    bool showsData() const;
-    bool xVarNotInBuffer() const;
-    bool yVarNotInBuffer() const;
-
-    QRectF getDataBounds() const;
-
-    QPixmap renderPixmap();
-
-    unsigned int nullValueCnt() const;
-
 protected:
-    ScatterPlotView* view_{nullptr};
-    /// Data source
-    ScatterPlotViewDataSource* data_source_{nullptr};
+    virtual void mouseMoveEvent(QMouseEvent* event) override;
 
-    std::map<std::string, std::shared_ptr<Buffer>> buffers_;
-    std::map<std::string, unsigned int> buffer_x_counts_;
-    std::map<std::string, unsigned int> buffer_y_counts_;
+    virtual void toolChanged_impl(int mode) override;
 
-    std::map<std::string, std::vector<double>> x_values_;
-    std::map<std::string, std::vector<double>> y_values_;
+    virtual void loadingStarted_impl() override;
+    virtual void loadingDone_impl() override;
+    virtual void updateData_impl(bool requires_reset) override;
+    virtual void clearData_impl() override;
+    virtual bool redrawData_impl(bool recompute) override;
+    virtual void liveReload_impl() override;
 
-    bool has_x_min_max_ {false};
-    double x_min_ {0}, x_max_ {0};
-
-    bool has_y_min_max_ {false};
-    double y_min_ {0}, y_max_ {0};
-
-    std::map<std::string, std::vector<bool>> selected_values_;
-    std::map<std::string, std::vector<unsigned int>> rec_num_values_;
-
-    std::map<std::string, QColor> colors_;
-
-    ScatterPlotViewDataTool selected_tool_{SP_NAVIGATE_TOOL};
-
-    QHBoxLayout* main_layout_ {nullptr};
-    //QtCharts::QChart* chart_ {nullptr};
-    //QtCharts::QChartView* chart_view_ {nullptr};
-    std::unique_ptr<QtCharts::ScatterPlotViewChartView> chart_view_ {nullptr};
-
-    bool shows_data_ {false};
-    bool x_var_not_in_buffer_ {false};
-    bool y_var_not_in_buffer_ {false};
-
-    unsigned int nan_value_cnt_ {0};
+    void resetCounts();
 
     bool canUpdateFromDataX(std::string dbcontent_name);
     void updateFromDataX(std::string dbcontent_name, unsigned int current_size);
@@ -145,9 +117,9 @@ protected:
     void updateFromDataY(std::string dbcontent_name, unsigned int current_size);
     void updateMinMax();
     void updateFromAllData();
-    void updateChart();
+    bool updateChart();
 
-    virtual void toolChanged_impl(int mode) override;
+    void selectData (double x_min, double x_max, double y_min, double y_max);
 
     template<typename T>
     void appendData(NullableVector<T>& data, std::vector<double>& target, unsigned int last_size,
@@ -162,9 +134,37 @@ protected:
         }
     }
 
-    virtual void mouseMoveEvent(QMouseEvent* event) override;
+    ScatterPlotView*           view_       {nullptr};
+    ScatterPlotViewDataSource* data_source_{nullptr};
 
-    void selectData (double x_min, double x_max, double y_min, double y_max);
+    std::map<std::string, unsigned int>            buffer_x_counts_;
+    std::map<std::string, unsigned int>            buffer_y_counts_;
+
+    std::map<std::string, std::vector<double>> x_values_;
+    std::map<std::string, std::vector<double>> y_values_;
+
+    bool has_x_min_max_ {false};
+    double x_min_ {0}, x_max_ {0};
+
+    bool has_y_min_max_ {false};
+    double y_min_ {0}, y_max_ {0};
+
+    std::map<std::string, std::vector<bool>>         selected_values_;
+    std::map<std::string, std::vector<unsigned long>> rec_num_values_;
+
+    std::map<std::string, QColor> colors_;
+
+    ScatterPlotViewDataTool selected_tool_{SP_NAVIGATE_TOOL};
+
+    QHBoxLayout*                                        main_layout_ {nullptr};
+    //QtCharts::QChart*                                 chart_       {nullptr};
+    //QtCharts::QChartView*                             chart_view_  {nullptr};
+    std::unique_ptr<QtCharts::ScatterPlotViewChartView> chart_view_  {nullptr};
+
+    bool x_var_not_in_buffer_ {false};
+    bool y_var_not_in_buffer_ {false};
+
+    unsigned int nan_value_cnt_ {0};
 };
 
 template<>

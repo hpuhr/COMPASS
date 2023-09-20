@@ -2,6 +2,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/report/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/detection/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/position/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/speed/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/trackangle/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/identification/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/mode_a/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/mode_c/CMakeLists.txt")
@@ -19,12 +20,18 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/base.h"
         "${CMAKE_CURRENT_LIST_DIR}/single.h"
         "${CMAKE_CURRENT_LIST_DIR}/joined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.h"
+        "${CMAKE_CURRENT_LIST_DIR}/presentbase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/falsebase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/intervalbase.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgeneratorwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/base.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/single.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/joined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/presentbase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/falsebase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/intervalbase.cpp"
     )
-
-

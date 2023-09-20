@@ -46,23 +46,23 @@
 #include <QHBoxLayout>
 #include <QTimer>
 
-EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
-    : QWidget(nullptr), eval_man_(eval_man)
+EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
+    : QWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings)
 {
     main_layout_ = new QVBoxLayout();
 
     tab_widget_ = new QTabWidget();
 
-    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, *this));
+    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, eval_settings_, *this));
     tab_widget_->addTab(main_tab_widget_.get(), "Main");
 
     targets_tab_widget_.reset(new EvaluationTargetsTabWidget(eval_man_, *this));
     tab_widget_->addTab(targets_tab_widget_.get(), "Targets");
 
-    filter_widget_.reset(new EvaluationFilterTabWidget(eval_man_, *this));
+    filter_widget_.reset(new EvaluationFilterTabWidget(eval_man_, eval_settings_, *this));
     tab_widget_->addTab(filter_widget_.get(), "Filter");
 
-    std_tab_widget_.reset(new EvaluationStandardTabWidget(eval_man_, *this));
+    std_tab_widget_.reset(new EvaluationStandardTabWidget(eval_man_, eval_settings_, *this));
     tab_widget_->addTab(std_tab_widget_.get(), "Standard");
 
     tab_widget_->addTab(&eval_man_.resultsGenerator().widget(), "Results Config");
@@ -171,7 +171,7 @@ void EvaluationManagerWidget::loadDataSlot()
 {
     loginf << "EvaluationManagerWidget: loadDataSlot";
 
-    if (!eval_man_.warningShown())
+    if (!eval_settings_.warning_shown_)
     {
         QMessageBox* mbox = new QMessageBox;
         mbox->setWindowTitle(tr("Warning"));
@@ -179,7 +179,7 @@ void EvaluationManagerWidget::loadDataSlot()
                       " for testing/validation purposes only.");
         mbox->exec();
 
-        eval_man_.warningShown(true);
+        eval_settings_.warning_shown_ = true;
     }
 
     eval_man_.loadData();
@@ -192,7 +192,6 @@ void EvaluationManagerWidget::evaluateSlot()
     eval_man_.evaluate();
 }
 
-
 void EvaluationManagerWidget::generateReportSlot()
 {
     loginf << "EvaluationManagerWidget: generateReportSlot";
@@ -200,3 +199,7 @@ void EvaluationManagerWidget::generateReportSlot()
     eval_man_.generateReport();
 }
 
+boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std::string& result_id, const std::string& table_id) const
+{
+    return results_tab_widget_->getTableData(result_id, table_id);
+}

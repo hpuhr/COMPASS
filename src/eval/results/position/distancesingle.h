@@ -18,40 +18,37 @@
 #ifndef EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONDISTANCE_H
 #define EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONDISTANCE_H
 
+#include "eval/results/position/positionbase.h"
 
-#include "eval/results/single.h"
-#include "eval/requirement/position/distance.h"
+namespace EvaluationRequirement
+{
+    class PositionDistance;
+}
 
 namespace EvaluationRequirementResult
 {
 
-class SinglePositionDistance : public Single
+class SinglePositionDistance : public SinglePositionBase
 {
 public:
-    SinglePositionDistance(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer,
-            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            unsigned int num_pos, unsigned int num_no_ref,
-            unsigned int num_pos_outside, unsigned int num_pos_inside,
-            unsigned int num_comp_failed, unsigned int num_comp_passed,
-            vector<double> values,
-            std::vector<EvaluationRequirement::PositionDetail> details);
+    SinglePositionDistance(const std::string& result_id, 
+                           std::shared_ptr<EvaluationRequirement::Base> requirement,
+                           const SectorLayer& sector_layer,
+                           unsigned int utn, 
+                           const EvaluationTargetData* target, 
+                           EvaluationManager& eval_man,
+                           const EvaluationDetails& details,
+                           unsigned int num_pos, 
+                           unsigned int num_no_ref,
+                           unsigned int num_pos_outside, 
+                           unsigned int num_pos_inside,
+                           unsigned int num_comp_passed,
+                           unsigned int num_comp_failed,
+                           vector<double> values);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
-
-    unsigned int numPos() const;
-    unsigned int numNoRef() const;
-    unsigned int numPosOutside() const;
-    unsigned int numPosInside() const;
-    unsigned int numCompFailed() const;
-    unsigned int numCompPassed() const;
-
-    const vector<double>& values() const;
-
-    std::vector<EvaluationRequirement::PositionDetail>& details();
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -65,26 +62,9 @@ public:
 
     EvaluationRequirement::PositionDistance* req ();
 
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+
 protected:
-    unsigned int num_pos_ {0};
-    unsigned int num_no_ref_ {0};
-    unsigned int num_pos_outside_ {0};
-    unsigned int num_pos_inside_ {0};
-    unsigned int num_comp_failed_ {0};
-    unsigned int num_comp_passed_ {0};
-
-    vector<double> values_;
-
-    double value_min_ {0};
-    double value_max_ {0};
-    double value_avg_ {0};
-    double value_var_ {0};
-
-    bool has_p_min_ {false};
-    float p_passed_{0};
-
-    std::vector<EvaluationRequirement::PositionDetail> details_;
-
     void update();
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -93,7 +73,8 @@ protected:
     void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
+    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
+
 };
 
 }

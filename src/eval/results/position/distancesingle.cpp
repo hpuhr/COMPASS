@@ -26,42 +26,48 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
-#include "stringconv.h"
-#include "number.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
+#include "util/number.h"
 
 #include <cassert>
 #include <algorithm>
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
 
-SinglePositionDistance::SinglePositionDistance(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        unsigned int num_pos, unsigned int num_no_ref,
-        unsigned int num_pos_outside, unsigned int num_pos_inside,
-        unsigned int num_comp_failed, unsigned int num_comp_passed,
-        vector<double> values,
-        std::vector<EvaluationRequirement::PositionDetail> details)
-    : Single("SinglePositionDistance", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
-      num_pos_inside_(num_pos_inside), num_comp_failed_(num_comp_failed), num_comp_passed_(num_comp_passed),
-      values_(values), details_(details)
+SinglePositionDistance::SinglePositionDistance(const std::string& result_id, 
+                                               std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                               const SectorLayer& sector_layer,
+                                               unsigned int utn,
+                                               const EvaluationTargetData* target,
+                                               EvaluationManager& eval_man,
+                                               const EvaluationDetails& details,
+                                               unsigned int num_pos,
+                                               unsigned int num_no_ref,
+                                               unsigned int num_pos_outside,
+                                               unsigned int num_pos_inside,
+                                               unsigned int num_comp_passed,
+                                               unsigned int num_comp_failed,
+                                               vector<double> values)
+    :   SinglePositionBase("SinglePositionDistance", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                           num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values)
 {
     update();
 }
-
 
 void SinglePositionDistance::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-    assert (values_.size() == num_comp_failed_+num_comp_passed_);
+    assert (values_.size() == num_passed_ + num_failed_);
+
+    prob_.reset();
 
     unsigned int num_distances = values_.size();
 
@@ -76,11 +82,8 @@ void SinglePositionDistance::update()
             value_var_ += pow(val - value_avg_, 2);
         value_var_ /= (float)num_distances;
 
-        assert (num_comp_failed_ <= num_distances);
-        p_passed_ = (float)num_comp_passed_/(float)num_distances;
-        has_p_min_ = true;
-
-        result_usable_ = true;
+        assert (num_passed_ <= num_distances);
+        prob_ = (float)num_passed_/(float)num_distances;
     }
     else
     {
@@ -88,12 +91,9 @@ void SinglePositionDistance::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
-
-        has_p_min_ = false;
-        p_passed_ = 0;
-
-        result_usable_ = false;
     }
+
+    result_usable_ = prob_.has_value();
 
     updateUseFromTarget();
 }
@@ -115,16 +115,17 @@ void SinglePositionDistance::addTargetToOverviewTable(shared_ptr<EvaluationResul
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-    if (eval_man_.reportShowAdsbInfo())
+    if (eval_man_.settings().report_show_adsb_info_)
         addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-        if (eval_man_.reportShowAdsbInfo())
+        if (eval_man_.settings().report_show_adsb_info_)
             addTargetDetailsToTableADSB(sum_section, target_table_name_);
         else
             addTargetDetailsToTable(sum_section, target_table_name_);
@@ -152,20 +153,20 @@ void SinglePositionDistance::addTargetDetailsToTable (
 
     QVariant p_min_var;
 
-    if (has_p_min_)
-        p_min_var = roundf(p_passed_ * 10000.0) / 100.0;
+    if (prob_.has_value())
+        p_min_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
                  Number::round(value_min_,2), // "DMin"
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
                  Number::round(sqrt(value_var_),2), // "DSDev"
-                 num_comp_failed_, // "#DOK"
-                 num_comp_passed_, // "#DNOK"
-                 p_min_var}, // "PDOK"
+                 num_failed_, // "#DOK"
+                 num_passed_, // "#DNOK"
+                 p_min_var},  // "PDOK"
                 this, {utn_});
 }
 
@@ -180,39 +181,36 @@ void SinglePositionDistance::addTargetDetailsToTableADSB (
                 || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
             order = Qt::DescendingOrder;
 
-        section.addTable(table_name, 18,
+        section.addTable(table_name, 16,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                           "DMin", "DMax", "DAvg", "DSDev", "#CF", "#CP", "PCP",
-                          "MOPS", "NUCp/NIC", "NACp"}, true, 14, order);
+                          "MOPS"}, true, 14, order);
     }
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
     QVariant prob_var;
 
-    if (has_p_min_)
-        prob_var = roundf(p_passed_ * 10000.0) / 100.0;
+    if (prob_.has_value())
+        prob_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
     // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK", "MOPS", "NUCp/NIC", "NACp"
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(),
                  Number::round(value_min_,2), // "DMin"
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
                  Number::round(sqrt(value_var_),2), // "DSDev"
-                 num_comp_failed_, // "#DOK"
-                 num_comp_passed_, // "#DNOK"
+                 num_failed_, // "#CF"
+                 num_passed_, // "#CP"
                  prob_var, // "PDOK"
-                 target_->mopsVersionStr().c_str(), // "MOPS"
-                 target_->nucpNicStr().c_str(), // "NUCp/NIC"
-                 target_->nacpStr().c_str()}, // "NACp"
+                 target_->mopsVersionStr().c_str()}, // "MOPS"
                 this, {utn_});
-
 }
 
 void SinglePositionDistance::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -252,16 +250,15 @@ void SinglePositionDistance::addTargetDetailsToReport(shared_ptr<EvaluationResul
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     utn_req_table.addRow({"DVar [m^2]", "Variance of distance",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-    utn_req_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
-    utn_req_table.addRow({"#CP [1]", "Number of updates with  passed comparison", num_comp_passed_},
+    utn_req_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_failed_}, this);
+    utn_req_table.addRow({"#CP [1]", "Number of updates with passed comparison", num_passed_},
                          this);
-
     // condition
     {
         QVariant p_passed_var;
 
-        if (has_p_min_)
-            p_passed_var = roundf(p_passed_ * 10000.0) / 100.0;
+        if (prob_.has_value())
+            p_passed_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
 
@@ -269,8 +266,8 @@ void SinglePositionDistance::addTargetDetailsToReport(shared_ptr<EvaluationResul
 
         string result {"Unknown"};
 
-        if (has_p_min_)
-            result = req->getResultConditionStr(p_passed_);
+        if (prob_.has_value())
+            result = req->getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -282,10 +279,13 @@ void SinglePositionDistance::addTargetDetailsToReport(shared_ptr<EvaluationResul
 
     }
 
-    if (has_p_min_ && p_passed_ != 1.0) // TODO
+    if (prob_.has_value() && prob_.value() != 1.0) // TODO
     {
+        //        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
+        //                                  [this](void) { return this->getTargetErrorsViewable(); });
+
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -307,22 +307,29 @@ void SinglePositionDistance::reportDetails(EvaluationResultsReport::Section& utn
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : details_)
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(),
-                     !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
-                     rq_det_it.value_,  // "Distance"
-                     rq_det_it.check_passed_, // CP"
-                     rq_det_it.num_check_failed_, // "#CF",
-                     rq_det_it.num_check_passed_, // "#CP"
-                     rq_det_it.comment_.c_str()}, // "Comment"
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            bool has_ref_pos = rq_det_it.numPositions() >= 2;
+
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          !has_ref_pos,
+                          rq_det_it.getValue(DetailKey::PosInside),
+                          rq_det_it.getValue(DetailKey::Value),                 // "Distance"
+                          rq_det_it.getValue(DetailKey::CheckPassed),           // CP"
+                          rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#CF",
+                          rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#CP"
+                          rq_det_it.comments().generalComment().c_str() }, // "Comment"
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SinglePositionDistance::hasViewableData (
@@ -330,7 +337,7 @@ bool SinglePositionDistance::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
         return true;
     else
         return false;
@@ -339,7 +346,6 @@ bool SinglePositionDistance::hasViewableData (
 std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -352,20 +358,24 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::viewableData(
 
         loginf << "SinglePositionDistance: viewableData: detail_cnt " << detail_cnt;
 
-        std::unique_ptr<nlohmann::json::object_t> viewable_ptr
-                = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+        std::unique_ptr<nlohmann::json::object_t> viewable_ptr = getTargetErrorsViewable(true);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::PositionDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.tst_pos_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.tst_pos_.longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        assert(detail.numPositions() >= 1);
 
-        if (!detail.check_passed_)
-            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+
+        auto check_passed = detail.getValueAs<bool>(CheckPassed);
+        assert(check_passed.has_value());
+
+        addAnnotationPos(*viewable_ptr, detail.position(0), TypeHighlight);
+        addAnnotationLine(*viewable_ptr, detail.position(0), detail.position(1), TypeHighlight);
 
         return viewable_ptr;
     }
@@ -373,8 +383,10 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::viewableData(
         return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::getTargetErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::getTargetErrorsViewable (bool add_highlight)
 {
+    loginf << "SinglePositionDistance: getTargetErrorsViewable";
+
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
 
@@ -383,38 +395,45 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::getTargetError
 
     bool failed_values_of_interest = req()->failedValuesOfInterest();
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if ((failed_values_of_interest && detail_it.check_passed_)
-                || (!failed_values_of_interest && !detail_it.check_passed_))
+        auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
+        assert(check_passed.has_value());
+
+        if ((failed_values_of_interest && check_passed.value()) ||
+                (!failed_values_of_interest && !check_passed.value()))
             continue;
+
+        assert(detail_it.numPositions() >= 1);
+
+        bool has_ref_pos = detail_it.numPositions() >= 2;
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.tst_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.tst_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-            lon_min = min(lon_min, detail_it.tst_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.tst_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.tst_pos_.latitude_;
-            lat_max = detail_it.tst_pos_.latitude_;
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-            lon_min = detail_it.tst_pos_.longitude_;
-            lon_max = detail_it.tst_pos_.longitude_;
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
             has_pos = true;
         }
 
-        if (detail_it.has_ref_pos_)
+        if (has_ref_pos)
         {
-            lat_min = min(lat_min, detail_it.ref_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.ref_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(1).latitude_);
+            lat_max = max(lat_max, detail_it.position(1).latitude_);
 
-            lon_min = min(lon_min, detail_it.ref_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.ref_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(1).longitude_);
+            lon_max = max(lon_max, detail_it.position(1).longitude_);
         }
     }
 
@@ -426,17 +445,67 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::getTargetError
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
         double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-        if (lat_w < eval_man_.resultDetailZoom())
-            lat_w = eval_man_.resultDetailZoom();
+        if (lat_w < eval_man_.settings().result_detail_zoom_)
+            lat_w = eval_man_.settings().result_detail_zoom_;
 
-        if (lon_w < eval_man_.resultDetailZoom())
-            lon_w = eval_man_.resultDetailZoom();
+        if (lon_w < eval_man_.settings().result_detail_zoom_)
+            lon_w = eval_man_.settings().result_detail_zoom_;
 
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
+    addAnnotations(*viewable_ptr, false, true);
+
     return viewable_ptr;
+}
+
+void SinglePositionDistance::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+{
+    loginf << "SinglePositionDistance: addAnnotations";
+
+    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
+    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
+    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+
+    bool failed_values_of_interest = req()->failedValuesOfInterest();
+    bool ok;
+
+    for (auto& detail_it : getDetails())
+    {
+        auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
+        assert(check_passed.has_value());
+
+        ok = ((failed_values_of_interest && check_passed.value()) ||
+              (!failed_values_of_interest && !check_passed.value()));
+
+        if (detail_it.numPositions() == 1) // no ref pos
+            continue;
+
+        assert (detail_it.numPositions() == 2);
+
+        if (!ok)
+        {
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
+
+            if (!overview)
+            {
+                error_line_coordinates.push_back(detail_it.position(0).asVector());
+                error_line_coordinates.push_back(detail_it.position(1).asVector());
+            }
+        }
+        else if (add_ok)
+        {
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+
+            if (!overview)
+            {
+                ok_line_coordinates.push_back(detail_it.position(0).asVector());
+                ok_line_coordinates.push_back(detail_it.position(1).asVector());
+            }
+        }
+    }
 }
 
 bool SinglePositionDistance::hasReference (
@@ -456,50 +525,9 @@ std::string SinglePositionDistance::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-unsigned int SinglePositionDistance::numCompFailed() const
-{
-    return num_comp_failed_;
-}
-
-unsigned int SinglePositionDistance::numCompPassed() const
-{
-    return num_comp_passed_;
-}
-
-
-const vector<double>& SinglePositionDistance::values() const
-{
-    return values_;
-}
-
-unsigned int SinglePositionDistance::numPosOutside() const
-{
-    return num_pos_outside_;
-}
-
-unsigned int SinglePositionDistance::numPosInside() const
-{
-    return num_pos_inside_;
-}
-
 std::shared_ptr<Joined> SinglePositionDistance::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedPositionDistance> (result_id, requirement_, sector_layer_, eval_man_);
-}
-
-unsigned int SinglePositionDistance::numPos() const
-{
-    return num_pos_;
-}
-
-unsigned int SinglePositionDistance::numNoRef() const
-{
-    return num_no_ref_;
-}
-
-std::vector<EvaluationRequirement::PositionDetail>& SinglePositionDistance::details()
-{
-    return details_;
 }
 
 EvaluationRequirement::PositionDistance* SinglePositionDistance::req ()
@@ -509,5 +537,6 @@ EvaluationRequirement::PositionDistance* SinglePositionDistance::req ()
     assert (req);
     return req;
 }
+
 
 }

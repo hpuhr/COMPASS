@@ -2,6 +2,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/base/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/detection/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/position/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/speed/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/trackangle/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/identification/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/mode_a/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/mode_c/CMakeLists.txt")
@@ -15,9 +16,9 @@ include_directories (
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/group.h"
-        "${CMAKE_CURRENT_LIST_DIR}/checkdetail.h"
-        "${CMAKE_CURRENT_LIST_DIR}/correctnessdetail.h"
-        "${CMAKE_CURRENT_LIST_DIR}/presentdetail.h"
+#        "${CMAKE_CURRENT_LIST_DIR}/checkdetail.h"
+#        "${CMAKE_CURRENT_LIST_DIR}/correctnessdetail.h"
+#        "${CMAKE_CURRENT_LIST_DIR}/presentdetail.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/group.cpp"
 )

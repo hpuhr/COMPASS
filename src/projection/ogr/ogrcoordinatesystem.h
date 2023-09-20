@@ -20,6 +20,8 @@
 
 #include <ogr_spatialref.h>
 
+#undef PACKAGE_VERSION // required to remove the stupid PACKAGE_VERSION defined in gdal
+
 #include <memory>
 
 // class OGRProjection;
@@ -43,6 +45,9 @@ class OGRCoordinateSystem
     /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
     bool cartesian2WGS84(double x_pos_m, double y_pos_m, double& latitude_deg,
                          double& longitude_deg);
+
+    // azimuth_deg as math angle
+    bool wgs842PolarHorizontal(double latitude_deg, double longitude_deg, double& azimuth_deg, double& ground_range_m);
 
   protected:
     unsigned int id_{0};

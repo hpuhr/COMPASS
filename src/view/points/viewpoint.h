@@ -23,6 +23,13 @@
 class ViewManager;
 class LatexVisitor;
 
+extern const std::string VP_COLLECTION_CONTENT_VERSION;
+extern const std::string VP_COLLECTION_CONTENT_TYPE;
+
+extern const std::string VP_COLLECTION_CONTENT_VERSION_KEY;
+extern const std::string VP_COLLECTION_CONTENT_TYPE_KEY;
+extern const std::string VP_COLLECTION_ARRAY_KEY;
+
 extern const std::string VP_ID_KEY;
 extern const std::string VP_NAME_KEY;
 extern const std::string VP_TYPE_KEY;
@@ -40,11 +47,16 @@ extern const std::string VP_POS_WIN_LON_KEY;
 extern const std::string VP_TIMESTAMP_KEY;
 extern const std::string VP_TIME_WIN_KEY;
 
+extern const std::string VP_ANNOTATION_KEY;
+
+// TODO add detail highlighting
+
+// TODO remove
 extern const std::string VP_EVAL_KEY;
 extern const std::string VP_EVAL_SHOW_RES_KEY;
 extern const std::string VP_EVAL_REQGRP_ID_KEY;
 extern const std::string VP_EVAL_RES_ID_KEY;
-extern const std::string VP_EVAL_HIGHDET_KEY;
+//extern const std::string VP_EVAL_HIGHDET_KEY;
 
 extern const std::string VP_SHOWSEC_KEY;
 
@@ -64,6 +76,11 @@ class ViewPoint : public ViewableDataConfig
     virtual void accept(LatexVisitor& v) const;
 
     const unsigned int id_;
+
+    static bool isValidJSON(nlohmann::json json_obj, 
+                            const std::string& json_filename = "", 
+                            std::string* err_msg = nullptr,
+                            bool verbose = false);
 
 protected:
     ViewManager& view_manager_;

@@ -16,8 +16,11 @@
  */
 
 #include "nullablevector.h"
+#include "timeconv.h"
 
 #include "util/tbbhack.h"
+
+using namespace Utils;
 
 template <>
 NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
@@ -132,4 +135,25 @@ void NullableVector<std::string>::append(unsigned int index, std::string value)
     unsetNull(index);
 
     // logdbg << "ArrayListTemplate: append: size " << size_ << " max_size " << max_size_;
+}
+
+template <>
+nlohmann::json NullableVector<boost::posix_time::ptime>::asJSON(unsigned int max_size)
+{
+    nlohmann::json list = nlohmann::json::array();
+
+    unsigned int size = buffer_.size();
+
+    if (max_size != 0)
+        size = std::min(size, max_size);
+
+    for (unsigned int cnt=0; cnt < size; ++cnt)
+    {
+        if (isNull(cnt))
+            list.push_back(nlohmann::json());
+        else
+            list.push_back(Time::toString(get(cnt)));
+    }
+
+    return list;
 }

@@ -21,18 +21,25 @@
 #include "eval/results/single.h"
 #include "eval/requirement/extra/data.h"
 
+#include <boost/optional.hpp>
+
 namespace EvaluationRequirementResult
 {
 
 class SingleExtraData : public Single
 {
 public:
-    SingleExtraData(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
-            EvaluationManager& eval_man,
-            bool ignore, unsigned int num_extra, unsigned int num_ok, bool has_extra_test_data,
-            std::vector<EvaluationRequirement::ExtraDataDetail> details);
+    SingleExtraData(const std::string& result_id, 
+                    std::shared_ptr<EvaluationRequirement::Base> requirement,
+                    const SectorLayer& sector_layer, 
+                    unsigned int utn, 
+                    const EvaluationTargetData* target,
+                    EvaluationManager& eval_man,
+                    const EvaluationDetails& details,
+                    bool ignore, 
+                    unsigned int num_extra, 
+                    unsigned int num_ok, 
+                    bool has_extra_test_data);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -53,17 +60,22 @@ public:
     unsigned int numOK() const;
     bool hasExtraTestData() const;
 
-    const std::vector<EvaluationRequirement::ExtraDataDetail>& details() const;
+    enum DetailKey
+    {
+        Inside,    //bool
+        Extra,     //bool
+        RefExists //bool
+    };
+
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
 protected:
-    bool ignore_ {false};
-    unsigned int num_extra_ {0};
-    unsigned int num_ok_ {0};
-    bool has_extra_test_data_ {false};
-    std::vector<EvaluationRequirement::ExtraDataDetail> details_;
+    bool         ignore_              {false};
+    unsigned int num_extra_           {0};
+    unsigned int num_ok_              {0};
+    bool         has_extra_test_data_ {false};
 
-    bool has_prob_ {false};
-    float prob_{0};
+    boost::optional<float> prob_;
 
     void updateProb();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -71,7 +83,7 @@ protected:
     void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
+    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
 };
 
 }

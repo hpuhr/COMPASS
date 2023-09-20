@@ -22,7 +22,12 @@
 
 #include <memory>
 
+#include <boost/optional.hpp>
+
+#include "json.hpp"
+
 class EvaluationManager;
+class EvaluationManagerSettings;
 class EvaluationMainTabWidget;
 class EvaluationFilterTabWidget;
 class EvaluationTargetsTabWidget;
@@ -44,7 +49,7 @@ private slots:
     void generateReportSlot();
 
 public:
-    EvaluationManagerWidget(EvaluationManager& eval_man);
+    EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
     virtual ~EvaluationManagerWidget();
 
     void updateDataSources();
@@ -56,8 +61,11 @@ public:
     void showResultId (const std::string& id);
     void reshowLastResultId();
 
+    boost::optional<nlohmann::json> getTableData(const std::string& result_id, const std::string& table_id) const;
+
 protected:
     EvaluationManager& eval_man_;
+    EvaluationManagerSettings& eval_settings_;
 
     QVBoxLayout* main_layout_{nullptr};
 

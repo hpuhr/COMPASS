@@ -27,6 +27,9 @@
 #include "projectionmanagerwidget.h"
 #include "rs2gprojection.h"
 
+const std::string ProjectionManager::RS2G_NAME = "RS2G";
+const std::string ProjectionManager::OGR_NAME = "OGR";
+
 ProjectionManager::ProjectionManager()
     : Configurable("ProjectionManager", "ProjectionManager0", 0, "projection.json")
 {
@@ -91,19 +94,19 @@ void ProjectionManager::generateSubConfigurable(const std::string& class_id,
 
 void ProjectionManager::checkSubConfigurables()
 {
-    if (!projections_.count("RS2G"))
+    if (!projections_.count(RS2G_NAME))
     {
         Configuration& configuration = addNewSubConfiguration("RS2GProjection");
 
-        configuration.addParameterString("name", "RS2G");
+        configuration.addParameterString("name", RS2G_NAME);
         generateSubConfigurable("RS2GProjection", configuration.getInstanceId());
     }
 
-    if (!projections_.count("OGR"))
+    if (!projections_.count(OGR_NAME))
     {
         Configuration& configuration = addNewSubConfiguration("OGRProjection");
 
-        configuration.addParameterString("name", "OGR");
+        configuration.addParameterString("name", OGR_NAME);
         generateSubConfigurable("OGRProjection", configuration.getInstanceId());
     }
 }
@@ -118,6 +121,12 @@ void ProjectionManager::currentProjectionName(const std::string& name)
 
 bool ProjectionManager::hasProjection(const std::string& name) { return projections_.count(name); }
 
+Projection& ProjectionManager::projection(const std::string& name)
+{
+    assert (hasProjection(name));
+    return *projections_.at(name);
+}
+
 bool ProjectionManager::hasCurrentProjection() { return hasProjection(current_projection_name_); }
 
 Projection& ProjectionManager::currentProjection()
@@ -128,6 +137,14 @@ Projection& ProjectionManager::currentProjection()
 std::map<std::string, std::unique_ptr<Projection>>& ProjectionManager::projections()
 {
     return projections_;
+}
+
+OGRProjection& ProjectionManager::ogrProjection()
+{
+    assert (hasProjection(OGR_NAME));
+    assert (projections_.at(OGR_NAME));
+    assert (dynamic_cast<OGRProjection*> (projections_.at(OGR_NAME).get()));
+    return *dynamic_cast<OGRProjection*> (projections_.at(OGR_NAME).get());
 }
 
 

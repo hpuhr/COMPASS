@@ -3,6 +3,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "util/timeconv.h"
+#include "global.h"
 
 #include <cassert>
 #include <sstream>
@@ -49,6 +50,22 @@ void Target::addAssociated (TargetReport* tr)
     }
     has_timestamps_ = true;
 
+
+    if (tr->has_mc_)
+    {
+        if (has_mode_c_)
+        {
+            mode_c_min_ = min(mode_c_min_, tr->mc_);
+            mode_c_max_ = max(mode_c_max_, tr->mc_);
+        }
+        else
+        {
+            mode_c_min_ = tr->mc_;
+            mode_c_max_ = tr->mc_;
+            has_mode_c_ = true;
+        }
+    }
+
     if (!ds_ids_.count(tr->ds_id_))
         ds_ids_.insert(tr->ds_id_);
 
@@ -71,6 +88,18 @@ void Target::addAssociated (TargetReport* tr)
 
         if (!tas_.count(tr->ta_))
             tas_.insert(tr->ta_);
+    }
+
+    if (tr->has_ti_)
+    {
+        if (!ids_.count(tr->ti_))
+            ids_.insert(tr->ti_);
+    }
+
+    if (tr->has_adsb_info_ && tr->has_mops_version_)
+    {
+        if (!mops_versions_.count(tr->mops_version_))
+            mops_versions_.insert(tr->mops_version_);
     }
 
     if (!tmp_)
@@ -302,7 +331,7 @@ std::pair<ptime, ptime> Target::timesFor (
     return {lower, upper};
 }
 
-std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTime (ptime timestamp, time_duration d_max) const
+std::pair<dbContent::TargetPosition, bool> Target::interpolatedPosForTime (ptime timestamp, time_duration d_max) const
 {
     ptime lower, upper;
 
@@ -314,8 +343,8 @@ std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTime (ptime 
     if (lower.is_not_a_date_time())
         return {{}, false};
 
-    EvaluationTargetPosition pos1 = posForExactTime(lower);
-    EvaluationTargetPosition pos2 = posForExactTime(upper);
+    dbContent::TargetPosition pos1 = posForExactTime(lower);
+    dbContent::TargetPosition pos2 = posForExactTime(upper);
     float d_t = Time::partialSeconds(upper - lower);
 
     logdbg << "Target: interpolatedPosForTime: d_t " << d_t;
@@ -332,35 +361,13 @@ std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTime (ptime 
         return {{}, false};
     }
 
-    //        OGRSpatialReference wgs84;
-    //        wgs84.SetWellKnownGeogCS("WGS84");
-    //        OGRSpatialReference local;
-    //        local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
-
     logdbg << "Target: interpolatedPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
     logdbg << "Target: interpolatedPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
-
-    //        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-    //        assert (ogr_geo2cart);
-    //        std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
-    //        assert (ogr_cart2geo);
 
     bool ok;
     double x_pos, y_pos;
 
-    //        if (in_appimage_) // inside appimage
-    //        {
-    //            x_pos = pos2.longitude_;
-    //            y_pos = pos2.latitude_;
-    //        }
-    //        else
-    //        {
-    //            x_pos = pos2.latitude_;
-    //            y_pos = pos2.longitude_;
-    //        }
-
     logdbg << "Target: interpolatedPosForTime: geo2cart";
-    //bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
 
     tie(ok, x_pos, y_pos) = trafo_.distanceCart(
                 pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
@@ -429,7 +436,7 @@ std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTime (ptime 
     return {{x_pos, y_pos, has_altitude, true, altitude}, true};
 }
 
-std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTimeFast (
+std::pair<dbContent::TargetPosition, bool> Target::interpolatedPosForTimeFast (
         ptime timestamp, time_duration d_max) const
 {
     ptime lower, upper;
@@ -442,8 +449,8 @@ std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTimeFast (
     if (lower.is_not_a_date_time())
         return {{}, false};
 
-    EvaluationTargetPosition pos1 = posForExactTime(lower);
-    EvaluationTargetPosition pos2 = posForExactTime(upper);
+    dbContent::TargetPosition pos1 = posForExactTime(lower);
+    dbContent::TargetPosition pos2 = posForExactTime(upper);
     float d_t = Time::partialSeconds(upper - lower);
 
     logdbg << "Target: interpolatedPosForTimeFast: d_t " << d_t;
@@ -515,13 +522,13 @@ TargetReport& Target::dataForExactTime (ptime timestamp) const
     return *assoc_trs_.at(timed_indexes_.at(timestamp));
 }
 
-EvaluationTargetPosition Target::posForExactTime (ptime timestamp) const
+dbContent::TargetPosition Target::posForExactTime (ptime timestamp) const
 {
     assert (hasDataForExactTime(timestamp));
 
     TargetReport& tr = dataForExactTime(timestamp);
 
-    EvaluationTargetPosition pos;
+    dbContent::TargetPosition pos;
 
     pos.latitude_ = tr.latitude_;
     pos.longitude_ = tr.longitude_;
@@ -885,24 +892,6 @@ void Target::calculateSpeeds()
         d_t = Time::partialSeconds(timestamp - timestamp_prev);
         assert (d_t >= 0);
 
-        //            local.SetStereographic(latitude, longitude, 1.0, 0.0, 0.0);
-
-        //            std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-        //            assert (ogr_geo2cart);
-
-        //            if (in_appimage_) // inside appimage
-        //            {
-        //                x_pos = longitude_prev;
-        //                y_pos = latitude_prev;
-        //            }
-        //            else
-        //            {
-        //                x_pos = latitude_prev;
-        //                y_pos = longitude_prev;
-        //            }
-
-        //            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-
         tie(ok, x_pos, y_pos) = trafo.distanceCart(
                     latitude, longitude, latitude_prev, longitude_prev);
 
@@ -952,7 +941,9 @@ void Target::removeNonModeSTRs()
     assoc_trs_.clear();
 
     tas_.clear();
+    ids_.clear();
     mas_.clear();
+    mops_versions_.clear();
     has_timestamps_ = false;
     has_speed_ = false;
     timed_indexes_.clear();
@@ -980,40 +971,13 @@ std::map <std::string, unsigned int> Target::getDBContentCounts()
 
 bool Target::hasADSBMOPSVersion()
 {
-    for (auto tr_it : assoc_trs_)
-    {
-        if (tr_it->has_adsb_info_ && tr_it->has_mops_version_)
-            return true;
-    }
-
-    return false;
+    return mops_versions_.size();
 }
-unsigned int Target::getADSBMOPSVersion()
+
+std::set<unsigned int> Target::getADSBMOPSVersions()
 {
     assert (hasADSBMOPSVersion());
 
-    bool mops_found{false};
-    unsigned int mops_value{0};
-
-    for (auto tr_it : assoc_trs_)
-    {
-        if (tr_it->has_adsb_info_ && tr_it->has_mops_version_)
-        {
-            if (mops_found)
-            {
-                if (tr_it->mops_version_ != mops_value)
-                    logwrn << "Target: getADSBMOPSVersion: utn " << utn_ << " has differing MOPS version values "
-                           << tr_it->mops_version_ << ", " << mops_value;
-            }
-            else
-            {
-                mops_value = tr_it->mops_version_;
-                mops_found = true;
-            }
-        }
-    }
-
-    assert (mops_found);
-    return mops_value;
+    return mops_versions_;
 }
 }

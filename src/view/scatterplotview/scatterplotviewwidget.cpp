@@ -16,6 +16,8 @@
  */
 
 #include "scatterplotviewwidget.h"
+#include "scatterplotviewconfigwidget.h"
+#include "scatterplotviewdatawidget.h"
 
 #include <QHBoxLayout>
 #include <QSettings>
@@ -23,71 +25,111 @@
 #include <QTabWidget>
 
 #include "scatterplotview.h"
-#include "scatterplotviewdatatoolwidget.h"
 #include "viewtoolwidget.h"
 #include "viewtoolswitcher.h"
 #include "files.h"
 
-/*
+/**
  */
-ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, const std::string& instance_id,
-                                     Configurable* config_parent, ScatterPlotView* view,
-                                     QWidget* parent)
-    : ViewWidget(class_id, instance_id, config_parent, view, parent)
+ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, 
+                                             const std::string& instance_id,
+                                             Configurable* config_parent, 
+                                             ScatterPlotView* view,
+                                             QWidget* parent)
+:   ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    createStandardLayout();
-
-    auto data_widget = new ScatterPlotViewDataWidget(getView(), view->getDataSource());
+    auto data_widget = new ScatterPlotViewDataWidget(this);
     setDataWidget(data_widget);
 
-    auto config_widget = new ScatterPlotViewConfigWidget(getView());
+    auto config_widget = new ScatterPlotViewConfigWidget(this);
     setConfigWidget(config_widget);
 
     typedef ScatterPlotViewDataTool Tool;
 
-    auto icon = [ = ] (const std::string& fn) 
+    auto activeIfDataShownCB = [ data_widget ] (QAction* a)
     {
-        return QIcon(Utils::Files::getIconFilepath(fn).c_str());
+        a->setEnabled(data_widget->showsData());
     };
 
     getViewToolSwitcher()->addTool(Tool::SP_NAVIGATE_TOOL, "Navigate", {}, QIcon(), Qt::OpenHandCursor);
-    getViewToolSwitcher()->addTool(Tool::SP_SELECT_TOOL, "Select", Qt::Key_S, icon("select_action.png"), Qt::CrossCursor);
-    getViewToolSwitcher()->addTool(Tool::SP_ZOOM_RECT_TOOL, "Zoom to Rectangle", Qt::Key_R, icon("zoom_select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->addTool(Tool::SP_SELECT_TOOL, "Select", Qt::Key_S, getIcon("select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->addTool(Tool::SP_ZOOM_RECT_TOOL, "Zoom to Rectangle", Qt::Key_R, getIcon("zoom_select_action.png"), Qt::CrossCursor);
 
     getViewToolSwitcher()->setDefaultTool(Tool::SP_NAVIGATE_TOOL);
     
-    getViewToolWidget()->addTool(Tool::SP_SELECT_TOOL);
-    getViewToolWidget()->addTool(Tool::SP_ZOOM_RECT_TOOL);
+    getViewToolWidget()->addTool(Tool::SP_SELECT_TOOL, activeIfDataShownCB);
+    getViewToolWidget()->addTool(Tool::SP_ZOOM_RECT_TOOL, activeIfDataShownCB);
 
     getViewToolWidget()->addSpacer();
 
-    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, icon("select_invert.png"));
-    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, icon("select_delete.png"));
+    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, activeIfDataShownCB, getIcon("select_invert.png"));
+    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, activeIfDataShownCB, getIcon("select_delete.png"));
 
     getViewToolWidget()->addSpacer();
 
-    getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, icon("zoom_home.png"), Qt::Key_Space);
-
-    getViewToolWidget()->addSeparator();
-    addConfigWidgetToggle();
+    getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, {}, getIcon("zoom_home.png"), Qt::Key_Space);
 }
 
 /**
  */
-ScatterPlotViewWidget::~ScatterPlotViewWidget()
-{
+ScatterPlotViewWidget::~ScatterPlotViewWidget() = default;
+
+/**
+ */
+ScatterPlotView* ScatterPlotViewWidget::getView() 
+{ 
+    auto view = dynamic_cast<ScatterPlotView*>(ViewWidget::getView());
+    assert(view);
+    return view;
 }
 
 /**
  */
 ScatterPlotViewDataWidget* ScatterPlotViewWidget::getViewDataWidget()
 {
-    return dynamic_cast<ScatterPlotViewDataWidget*>(ViewWidget::getViewDataWidget());
+    auto w = dynamic_cast<ScatterPlotViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
+}
+
+/**
+ */
+const ScatterPlotViewDataWidget* ScatterPlotViewWidget::getViewDataWidget() const
+{
+    auto w = dynamic_cast<const ScatterPlotViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 ScatterPlotViewConfigWidget* ScatterPlotViewWidget::getViewConfigWidget()
 {
-    return dynamic_cast<ScatterPlotViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    auto w = dynamic_cast<ScatterPlotViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
+}
+
+/**
+ */
+const ScatterPlotViewConfigWidget* ScatterPlotViewWidget::getViewConfigWidget() const
+{
+    auto w = dynamic_cast<const ScatterPlotViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
+}
+
+/**
+*/
+std::string ScatterPlotViewWidget::loadedMessage_impl() const
+{
+    return "Loaded with " + std::to_string(getViewDataWidget()->nullValueCount()) + " NULL values";
+}
+
+/**
+*/
+bool ScatterPlotViewWidget::reloadNeeded_impl() const
+{
+    return (getViewDataWidget()->xVarNotInBuffer() || 
+            getViewDataWidget()->yVarNotInBuffer());
 }

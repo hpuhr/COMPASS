@@ -22,9 +22,12 @@
 #include "task.h"
 
 #include <QObject>
-#include <memory>
 
 #include <nmeaparse/nmea.h>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <memory>
 
 class TaskManager;
 class GPSTrailImportTaskDialog;
@@ -50,11 +53,12 @@ public:
     GPSTrailImportTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     bool canImportFile();
-    virtual bool canRun();
-    virtual void run();
+
+    virtual bool canRun() override;
+    virtual void run() override;
 
     void importFilename(const std::string& filename);
     const std::string& importFilename() { return current_filename_; }
@@ -75,8 +79,17 @@ public:
     unsigned int dsSIC() const;
     void dsSIC(unsigned int sic);
 
+    bool useTodOffset() const;
+    void useTodOffset(bool value);
+
     float todOffset() const;
     void todOffset(float value);
+
+    bool useOverrideDate() const;
+    void useOverrideDate(bool value);
+
+    const boost::gregorian::date& overrideDate() const;
+    void overrideDate(const boost::gregorian::date& date);
 
     bool setMode3aCode() const;
     void setMode3aCode(bool value);
@@ -106,7 +119,12 @@ protected:
     unsigned int ds_sac_ {0};
     unsigned int ds_sic_ {0};
 
+    bool use_tod_offset_ {false};
     float tod_offset_ {0};
+
+    bool use_override_date_ {false};
+    std::string override_date_str_;
+    boost::gregorian::date override_date_;
 
     bool set_mode_3a_code_;
     unsigned int mode_3a_code_; // decimal
@@ -126,6 +144,7 @@ protected:
 
     std::map<unsigned int, unsigned int> quality_counts_;
     unsigned int gps_fixes_cnt_ {0};
+    unsigned int gps_fixes_skipped_lost_lock_ {0};
     unsigned int gps_fixes_skipped_quality_cnt_ {0};
     unsigned int gps_fixes_skipped_time_cnt_ {0};
 
@@ -143,7 +162,7 @@ protected:
 
     std::shared_ptr<Buffer> buffer_;
 
-    virtual void checkSubConfigurables() {}
+    virtual void checkSubConfigurables() override {}
 
     void parseCurrentFile ();
     //void checkParsedData (); // throws exceptions for errors

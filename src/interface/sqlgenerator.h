@@ -48,10 +48,16 @@ public:
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
 
     std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);
+    std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent);
+    std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent, unsigned int sac, unsigned int sic);
+    std::shared_ptr<DBCommand> getDeleteCommand(
+            const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id);
 
     //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBContent& object);
     std::shared_ptr<DBCommand> getMaxUIntValueCommand(const std::string& table_name,
                                                       const std::string& col_name);
+    std::shared_ptr<DBCommand> getMaxULongIntValueCommand(const std::string& table_name,
+                                                          const std::string& col_name);
     std::shared_ptr<DBCommand> getADSBInfoCommand(DBContent& adsb_obj);
 
 //    std::string getCreateAssociationTableStatement(const std::string& table_name);

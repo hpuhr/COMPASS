@@ -16,6 +16,8 @@
  */
 
 #include "listboxviewdatawidget.h"
+#include "listboxviewwidget.h"
+#include "listboxview.h"
 
 #include <QHBoxLayout>
 #include <QMessageBox>
@@ -30,12 +32,15 @@
 #include "listboxviewdatasource.h"
 #include "logger.h"
 
-ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, 
-                                             ListBoxViewDataSource* data_source,
+ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewWidget* view_widget, 
                                              QWidget* parent, 
                                              Qt::WindowFlags f)
-:   ViewDataWidget(parent, f), view_(view), data_source_(data_source)
+:   ViewDataWidget(view_widget, parent, f)
 {
+    view_ = view_widget->getView();
+    assert(view_);
+
+    data_source_ = view_->getDataSource();
     assert(data_source_);
 
     QHBoxLayout* layout = new QHBoxLayout();
@@ -45,28 +50,28 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view,
 
     for (auto& obj_it : COMPASS::instance().dbContentManager())
     {
-            if (!all_buffer_table_widget_)
-            {
-                all_buffer_table_widget_ = new AllBufferTableWidget(*view_, *data_source_);
-                tab_widget_->addTab(all_buffer_table_widget_, "All");
-                connect(all_buffer_table_widget_, &AllBufferTableWidget::exportDoneSignal, this,
-                        &ListBoxViewDataWidget::exportDoneSlot);
-                connect(this, &ListBoxViewDataWidget::showOnlySelectedSignal,
-                        all_buffer_table_widget_, &AllBufferTableWidget::showOnlySelectedSlot);
-                connect(this, &ListBoxViewDataWidget::usePresentationSignal,
-                        all_buffer_table_widget_, &AllBufferTableWidget::usePresentationSlot);
-            }
-
-            BufferTableWidget* buffer_table =
-                new BufferTableWidget(*obj_it.second, *view_, *data_source_);
-            tab_widget_->addTab(buffer_table, obj_it.first.c_str());
-            buffer_tables_[obj_it.first] = buffer_table;
-            connect(buffer_table, &BufferTableWidget::exportDoneSignal, this,
+        if (!all_buffer_table_widget_)
+        {
+            all_buffer_table_widget_ = new AllBufferTableWidget(*view_, *data_source_);
+            tab_widget_->addTab(all_buffer_table_widget_, "All");
+            connect(all_buffer_table_widget_, &AllBufferTableWidget::exportDoneSignal, this,
                     &ListBoxViewDataWidget::exportDoneSlot);
-            connect(this, &ListBoxViewDataWidget::showOnlySelectedSignal, buffer_table,
-                    &BufferTableWidget::showOnlySelectedSlot);
-            connect(this, &ListBoxViewDataWidget::usePresentationSignal, buffer_table,
-                    &BufferTableWidget::usePresentationSlot);
+            connect(this, &ListBoxViewDataWidget::showOnlySelectedSignal,
+                    all_buffer_table_widget_, &AllBufferTableWidget::showOnlySelectedSlot);
+            connect(this, &ListBoxViewDataWidget::usePresentationSignal,
+                    all_buffer_table_widget_, &AllBufferTableWidget::usePresentationSlot);
+        }
+
+        BufferTableWidget* buffer_table =
+            new BufferTableWidget(*obj_it.second, *view_, *data_source_);
+        tab_widget_->addTab(buffer_table, obj_it.first.c_str());
+        buffer_tables_[obj_it.first] = buffer_table;
+        connect(buffer_table, &BufferTableWidget::exportDoneSignal, this,
+                &ListBoxViewDataWidget::exportDoneSlot);
+        connect(this, &ListBoxViewDataWidget::showOnlySelectedSignal, buffer_table,
+                &BufferTableWidget::showOnlySelectedSlot);
+        connect(this, &ListBoxViewDataWidget::usePresentationSignal, buffer_table,
+                &BufferTableWidget::usePresentationSlot);
     }
 
     setLayout(layout);
@@ -78,11 +83,9 @@ ListBoxViewDataWidget::~ListBoxViewDataWidget()
     // buffer_tables_.clear();
 }
 
-void ListBoxViewDataWidget::clearData()
+void ListBoxViewDataWidget::clearData_impl()
 {
-    logdbg << "ListBoxViewDataWidget: clearData";
-
-    buffers_.clear();
+    logdbg << "ListBoxViewDataWidget: clearData_impl: begin";
 
     if (all_buffer_table_widget_)
         all_buffer_table_widget_->clear();
@@ -90,38 +93,48 @@ void ListBoxViewDataWidget::clearData()
     for (auto buffer_table : buffer_tables_)
         buffer_table.second->clear();
 
-    logdbg << "ListBoxViewDataWidget: clearData: end";
+    logdbg << "ListBoxViewDataWidget: clearData_impl: end";
 }
 
-void ListBoxViewDataWidget::loadingStartedSlot()
+void ListBoxViewDataWidget::loadingStarted_impl()
 {
-    clearData();
+    loginf << "ListBoxViewDataWidget: loadingStarted_impl";
+    //nothing to do yet
 }
 
-void ListBoxViewDataWidget::updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data,
-                                           bool requires_reset)
+void ListBoxViewDataWidget::updateData_impl(bool requires_reset)
 {
-    loginf << "ListBoxViewDataWidget: updateTables";
+    logdbg << "ListBoxViewDataWidget: updateData_impl: begin";
 
-//    assert(all_buffer_table_widget_);
-//    all_buffer_table_widget_->show(buffer);
+    //nothing to do yet
 
-//    assert(buffer_tables_.count(object.name()) > 0);
-//    buffer_tables_.at(object.name())->show(buffer);
+    //    assert(all_buffer_table_widget_);
+    //    all_buffer_table_widget_->show(buffer);
 
-    buffers_ = data;
+    //    assert(buffer_tables_.count(object.name()) > 0);
+    //    buffer_tables_.at(object.name())->show(buffer);
 
-    logdbg << "ListBoxViewDataWidget: updateTables: end";
+    logdbg << "ListBoxViewDataWidget: updateData_impl: end";
 }
 
-void ListBoxViewDataWidget::loadingDoneSlot()
+void ListBoxViewDataWidget::loadingDone_impl()
 {
-    loginf << "ListBoxViewDataWidget: loadingDoneSlot";
+    logdbg << "ListBoxViewDataWidget: loadingDone_impl: begin";
+
+    //default behavior
+    ViewDataWidget::loadingDone_impl();
+
+    logdbg << "ListBoxViewDataWidget: loadingDone_impl: end";
+}
+
+bool ListBoxViewDataWidget::redrawData_impl(bool recompute)
+{
+    logdbg << "ListBoxViewDataWidget: redrawData_impl: start - recompute = " << recompute;
 
     assert(all_buffer_table_widget_);
-    all_buffer_table_widget_->show(buffers_);
+    all_buffer_table_widget_->show(viewData());
 
-    for (auto& buf_it : buffers_)
+    for (auto& buf_it : viewData())
     {
         assert(buffer_tables_.count(buf_it.first) > 0);
         buffer_tables_.at(buf_it.first)->show(buf_it.second);
@@ -129,7 +142,14 @@ void ListBoxViewDataWidget::loadingDoneSlot()
 
     selectFirstSelectedRow();
 
-    emit dataLoaded();
+    logdbg << "ListBoxViewDataWidget: redrawData_impl: end";
+
+    return (all_buffer_table_widget_->rowCount() > 0);
+}
+
+void ListBoxViewDataWidget::liveReload_impl()
+{
+    //implement live reload behavior here
 }
 
 void ListBoxViewDataWidget::exportDataSlot(bool overwrite)

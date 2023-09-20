@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "rtcommand/rtcommand_helpers.h"
+
 #include <QString>
 #include <QStringList>
 
@@ -70,7 +72,7 @@ namespace ui_test
             if (value.isEmpty())
                 return {};
             
-            QStringList strings = value.split("|");
+            QStringList strings = rtcommand::parameterToStrings(value);
             if (strings.empty())
                 return {};
 
@@ -111,7 +113,7 @@ namespace ui_test
         template<>
         inline boost::optional<QString> stringFromValue(const QStringList& value, int prec)
         {
-            return value.join("|");
+            return rtcommand::parameterFromStrings(value);
         }
         template<>
         inline boost::optional<QString> stringFromValue(const bool& value, int prec)

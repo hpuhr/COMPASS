@@ -35,12 +35,13 @@
 #include "unitmanager.h"
 #include "files.h"
 #include "util/timeconv.h"
+#include "util/number.h"
 #include "sector.h"
 #include "sectorlayer.h"
 #include "evaluationmanager.h"
 #include "source/dbdatasource.h"
 #include "dbcontent/variable/metavariable.h"
-#include "dbcontent/target.h"
+#include "dbcontent/target/target.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -284,7 +285,7 @@ void DBInterface::createTable(const DBContent& object)
 
 bool DBInterface::existsPropertiesTable() { return existsTable(TABLE_NAME_PROPERTIES); }
 
-unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
+unsigned long DBInterface::getMaxRecordNumber(DBContent& object)
 {
     assert (dbOpen());
     assert(object.existsInDB());
@@ -300,8 +301,8 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 
     boost::mutex::scoped_lock locker(connection_mutex_);
 
-    shared_ptr<DBCommand> command = sql_generator_.getMaxUIntValueCommand(object.dbTableName(),
-                                                                             rec_num_var.dbColumnName());
+    shared_ptr<DBCommand> command = sql_generator_.getMaxULongIntValueCommand(object.dbTableName(),
+                                                                              rec_num_var.dbColumnName());
 
     shared_ptr<DBResult> result = db_connection_->execute(*command);
 
@@ -315,8 +316,8 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
         return 0;
     }
 
-    assert (!buffer->get<unsigned int>(rec_num_var.dbColumnName()).isNull(0));
-    return buffer->get<unsigned int>(rec_num_var.dbColumnName()).get(0);
+    assert (!buffer->get<unsigned long>(rec_num_var.dbColumnName()).isNull(0));
+    return buffer->get<unsigned long>(rec_num_var.dbColumnName()).get(0);
 }
 
 unsigned int DBInterface::getMaxRefTrackTrackNum()
@@ -743,10 +744,13 @@ std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
                         [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
         }
 
-        shared_ptr<Sector> new_sector = make_shared<Sector>(id, name, layer_name, json_str);
-        string layer_name = new_sector->layerName();
+        auto eval_sector = new Sector(id, name, layer_name, true);
+        bool ok = eval_sector->readJSON(json_str);
+        assert(ok);
 
-        (*lay_it)->addSector(new_sector);
+        string layer_name = eval_sector->layerName();
+
+        (*lay_it)->addSector(shared_ptr<Sector>(eval_sector));
         assert ((*lay_it)->hasSector(name));
 
         loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '"
@@ -797,7 +801,7 @@ void DBInterface::createViewPointsTable()
 {
     assert(!existsViewPointsTable());
 
-    setProperty("view_points_version", "0.2");
+    setProperty("view_points_version", VP_COLLECTION_CONTENT_VERSION);
 
     connection_mutex_.lock();
     db_connection_->executeSQL(sql_generator_.getTableViewPointsCreateStatement());
@@ -903,12 +907,10 @@ void DBInterface::createSectorsTable()
     updateTableInfo();
 }
 
-
 void DBInterface::clearSectorsTable()
 {
     clearTableContent(TABLE_NAME_SECTORS);
 }
-
 
 void DBInterface::saveSector(shared_ptr<Sector> sector)
 {
@@ -980,7 +982,7 @@ void DBInterface::clearTargetsTable()
     clearTableContent(TABLE_NAME_TARGETS);
 }
 
-std::map<unsigned int, std::shared_ptr<dbContent::Target>> DBInterface::loadTargets()
+std::vector<std::unique_ptr<dbContent::Target>> DBInterface::loadTargets()
 {
     loginf << "DBInterface: loadTargets";
 
@@ -1010,7 +1012,8 @@ std::map<unsigned int, std::shared_ptr<dbContent::Target>> DBInterface::loadTarg
     unsigned int utn;
     string json_str;
 
-    std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets;
+    std::vector<std::unique_ptr<dbContent::Target>> targets;
+    std::set<unsigned int> existing_utns;
 
     for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
@@ -1020,11 +1023,12 @@ std::map<unsigned int, std::shared_ptr<dbContent::Target>> DBInterface::loadTarg
         utn = utn_vec.get(cnt);
         json_str = json_vec.get(cnt);
 
-        assert (!targets.count(utn));
+        assert (!existing_utns.count(utn));
+        existing_utns.insert(utn);
 
-        shared_ptr<dbContent::Target> target = make_shared<dbContent::Target>(utn, nlohmann::json::parse(json_str));
+        //shared_ptr<dbContent::Target> target = make_shared<dbContent::Target>(utn, nlohmann::json::parse(json_str));
 
-        targets[utn] = target;
+        targets.emplace_back(new dbContent::Target(utn, nlohmann::json::parse(json_str)));
 
 //        loginf << "DBInterface: loadTargets: loaded target " << utn << " json '"
 //               << json_str << "'";
@@ -1033,7 +1037,7 @@ std::map<unsigned int, std::shared_ptr<dbContent::Target>> DBInterface::loadTarg
     return targets;
 }
 
-void DBInterface::saveTargets(std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets)
+void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets)
 {
     loginf << "DBInterface: saveTargets";
 
@@ -1045,11 +1049,20 @@ void DBInterface::saveTargets(std::map<unsigned int, std::shared_ptr<dbContent::
 
     for (auto& tgt_it : targets)
     {
-        string str = sql_generator_.getInsertTargetStatement(tgt_it.first, tgt_it.second->info().dump());
+        string str = sql_generator_.getInsertTargetStatement(tgt_it->utn_, tgt_it->info().dump());
         db_connection_->executeSQL(str);
     }
 
     loginf << "DBInterface: saveTargets: done";
+}
+
+void DBInterface::saveTarget(const std::unique_ptr<dbContent::Target>& target)
+{
+    loginf << "DBInterface: saveTarget: utn " << target->utn();
+
+    string str = sql_generator_.getInsertTargetStatement(target->utn_, target->info().dump());
+    // uses replace with utn as unique key
+    db_connection_->executeSQL(str);
 }
 
 
@@ -1067,24 +1080,26 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
         assert (dbcontent.hasVariable(DBContent::meta_var_rec_num_.name()));
 
         Variable& rec_num_var = dbcontent.variable(DBContent::meta_var_rec_num_.name());
-        assert (rec_num_var.dataType() == PropertyDataType::UINT);
+        assert (rec_num_var.dataType() == PropertyDataType::ULONGINT);
 
         string rec_num_col_str = rec_num_var.dbColumnName();
-        assert (!buffer->has<unsigned int>(rec_num_col_str));
+        assert (!buffer->has<unsigned long>(rec_num_col_str));
 
-        buffer->addProperty(rec_num_col_str, PropertyDataType::UINT);
+        buffer->addProperty(rec_num_col_str, PropertyDataType::ULONGINT);
 
         assert (COMPASS::instance().dbContentManager().hasMaxRecordNumber());
-        unsigned int max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumber();
+        unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumber();
 
-        NullableVector<unsigned int>& rec_num_vec = buffer->get<unsigned int>(rec_num_col_str);
+        NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(rec_num_col_str);
 
         unsigned int buffer_size = buffer->size();
+        unsigned int dbcont_id = dbcontent.id();
+
 
         for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
         {
             ++max_rec_num;
-            rec_num_vec.set(cnt, max_rec_num);
+            rec_num_vec.set(cnt, Number::recNumAddDBContId(max_rec_num, dbcont_id));
         }
 
         COMPASS::instance().dbContentManager().maxRecordNumber(max_rec_num);
@@ -1213,12 +1228,15 @@ void DBInterface::prepareRead(
     db_connection_->prepareCommand(read);
 }
 
-shared_ptr<Buffer> DBInterface::readDataChunk(const DBContent& dbobject)
+std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBContent& dbobject)
 {
     // locked by prepareRead
     assert(db_connection_);
 
-    shared_ptr<DBResult> result = db_connection_->stepPreparedCommand(read_chunk_size_);
+    shared_ptr<DBResult> result;
+    bool last_one = false;
+
+    std::tie(result, last_one) = db_connection_->stepPreparedCommand(read_chunk_size_);
 
     if (!result)
     {
@@ -1238,10 +1256,7 @@ shared_ptr<Buffer> DBInterface::readDataChunk(const DBContent& dbobject)
 
     assert(buffer);
 
-    bool last_one = db_connection_->getPreparedCommandDone();
-    buffer->lastOne(last_one);
-
-    return buffer;
+    return {buffer, last_one};
 }
 
 void DBInterface::finalizeReadStatement(const DBContent& dbobject)
@@ -1259,6 +1274,48 @@ void DBInterface::deleteBefore(const DBContent& dbcontent, boost::posix_time::pt
     assert(db_connection_);
 
     std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, before_timestamp);
+
+    db_connection_->execute(*command.get());
+
+    connection_mutex_.unlock();
+}
+
+void DBInterface::deleteAll(const DBContent& dbcontent)
+{
+    connection_mutex_.lock();
+    assert(db_connection_);
+
+    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent);
+
+    db_connection_->execute(*command.get());
+
+    connection_mutex_.unlock();
+}
+
+void DBInterface::deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic)
+{
+    loginf << "DBInterface: deleteContent: dbcontent " << dbcontent.name()
+           << " sac/sic " << sac << "/" << sic;
+
+    connection_mutex_.lock();
+    assert(db_connection_);
+
+    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, sac, sic);
+
+    db_connection_->execute(*command.get());
+
+    connection_mutex_.unlock();
+}
+
+void DBInterface::deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id)
+{
+    loginf << "DBInterface: deleteContent: dbcontent " << dbcontent.name()
+           << " sac/sic " << sac << "/" << sic << " line " << line_id;
+
+    connection_mutex_.lock();
+    assert(db_connection_);
+
+    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, sac, sic, line_id);
 
     db_connection_->execute(*command.get());
 

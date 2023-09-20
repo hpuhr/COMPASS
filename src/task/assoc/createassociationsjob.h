@@ -19,6 +19,7 @@
 #define CREATEASSOCIATIONSJOB_H
 
 #include "job.h"
+#include "dbcontent/dbcontentcache.h"
 #include "assoc/targetreport.h"
 #include "assoc/target.h"
 
@@ -39,7 +40,7 @@ signals:
 
 public:
     CreateAssociationsJob(CreateAssociationsTask& task, DBInterface& db_interface,
-                          std::map<std::string, std::shared_ptr<Buffer>> buffers);
+                          std::shared_ptr<dbContent::Cache> cache);
 
     virtual ~CreateAssociationsJob();
 
@@ -48,18 +49,18 @@ public:
     std::map<std::string, std::pair<unsigned int, unsigned int> > associationCounts() const;
 
 protected:
-    static bool in_appimage_;
+    //static bool in_appimage_;
 
     CreateAssociationsTask& task_;
     DBInterface& db_interface_;
-    std::map<std::string, std::shared_ptr<Buffer>> buffers_;
+    std::shared_ptr<dbContent::Cache> cache_;
 
     std::map<std::string, std::map<unsigned int, std::vector<Association::TargetReport>>> target_reports_;
     //dbo name->ds_id->trs
 
     std::map<std::string,
-        std::map<unsigned int,
-            std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>> associations_;
+        std::map<unsigned long,
+            std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned long>>>>> associations_;
     // dbcontent -> rec_num -> <utn, src rec_nums (dbcontent, rec_num)>
 
     std::map<std::string, std::pair<unsigned int,unsigned int>> association_counts_; // dbcontent -> total, assoc cnt

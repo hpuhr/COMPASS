@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "rtcommand_helpers.h"
+
 /**
  * Declares a new runtime command.
  * Add preferably at end of command class declaration.
@@ -93,16 +95,41 @@ protected:                                                                      
 #define RTCOMMAND_CHECK_VAR(Variables, Name, BoolVar) \
     BoolVar = Variables.count(Name) > 0;
 
+#define RTCOMMAND_GET_VAR(Variables, Name, Type, Var) \
+    if (Variables.count(Name))                        \
+        Var = Variables[Name].as<Type>();
+
 #define RTCOMMAND_GET_VAR_OR_THROW(Variables, Name, Type, Var)                                         \
     if (!Variables.count(Name))                                                                        \
         throw std::runtime_error(std::string("Could not retrieve rtcommand variable '") + Name + "'"); \
     Var = Variables[Name].as<Type>();
+
+#define RTCOMMAND_GET_STRINGLIST_OR_THROW(Variables, Name, Var)          \
+    {                                                                    \
+        std::string _##Var;                                              \
+        RTCOMMAND_GET_VAR_OR_THROW(Variables, Name, std::string, _##Var) \
+        Var = rtcommand::parameterToStrings(_##Var);                     \
+    }
+
+#define RTCOMMAND_GET_QSTRING(Variables, Name, Var)             \
+    {                                                           \
+        std::string _##Var;                                     \
+        RTCOMMAND_GET_VAR(Variables, Name, std::string, _##Var) \
+        Var = QString::fromStdString(_##Var);                   \
+    }
 
 #define RTCOMMAND_GET_QSTRING_OR_THROW(Variables, Name, Var)             \
     {                                                                    \
         std::string _##Var;                                              \
         RTCOMMAND_GET_VAR_OR_THROW(Variables, Name, std::string, _##Var) \
         Var = QString::fromStdString(_##Var);                            \
+    }
+
+#define RTCOMMAND_GET_QSTRINGLIST_OR_THROW(Variables, Name, Var)             \
+    {                                                                        \
+        std::string _##Var;                                                  \
+        RTCOMMAND_GET_VAR_OR_THROW(Variables, Name, std::string, _##Var)     \
+        Var = rtcommand::parameterToStrings(QString::fromStdString(_##Var)); \
     }
 
 /**

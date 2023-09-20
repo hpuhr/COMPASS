@@ -142,6 +142,30 @@ bool OGRCoordinateSystem::cartesian2WGS84(double x_pos, double y_pos, double& la
     return ret;
 }
 
+bool OGRCoordinateSystem::wgs842PolarHorizontal(
+        double latitude_deg, double longitude_deg, double& azimuth_deg, double& ground_range_m)
+{
+    double x_pos, y_pos;
+
+    x_pos = longitude_deg;
+    y_pos = latitude_deg;
+
+    bool ret = ogr_geo2cart_->Transform(1, &x_pos, &y_pos);
+
+    if (!ret)
+        logerr << "OGRCoordinateSystem: wgs842PolarHorizontal: error with latitude " << latitude_deg
+               << " longitude " << longitude_deg;
+
+//    x_pos_m = horizontal_range_m * sin(azimuth_rad);
+//    y_pos_m = horizontal_range_m * cos(azimuth_rad);
+
+    ground_range_m = sqrt(pow(x_pos,2) + pow(y_pos,2));
+    azimuth_deg = atan2(x_pos, y_pos) * RAD2DEG;
+
+    return true;
+
+}
+
 double OGRCoordinateSystem::getRadiusAt(double latitude_rad)
 {
     // see https://en.wikipedia.org/wiki/Reference_ellipsoid

@@ -60,6 +60,8 @@ class ViewContainer : public QObject, public Configurable
     void enableViewTab(QWidget* widget, bool value);
     void showView(QWidget* widget);
 
+    time_t created() const { return creation_time_; }
+
   protected:
     ViewManager& view_manager_;
 
@@ -69,6 +71,8 @@ class ViewContainer : public QObject, public Configurable
     bool disable_add_remove_views_ {false};
 
     std::vector<std::unique_ptr<View>> views_;
+
+    time_t creation_time_;
 
     //static unsigned int view_count_;
 

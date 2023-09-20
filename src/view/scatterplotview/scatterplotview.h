@@ -32,32 +32,21 @@ class MetaVariable;
 class ScatterPlotView : public View
 {
     Q_OBJECT
-  public slots:
+public slots:
     virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
-    void allLoadingDoneSlot();
 
-  signals:
+signals:
     void showOnlySelectedSignal(bool value);
     void usePresentationSignal(bool value);
     void showAssociationsSignal(bool value);
 
-  public:
+public:
     /// @brief Constructor
     ScatterPlotView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
     /// @brief Destructor
     virtual ~ScatterPlotView() override;
-
-    bool init() override;
-
-    virtual void loadingStarted() override;
-    virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
-    virtual void loadingDone() override;
-
-    virtual void clearData() override;
-
-    virtual void appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current) override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -68,8 +57,6 @@ class ScatterPlotView : public View
         assert(data_source_);
         return data_source_;
     }
-
-    ScatterPlotViewDataWidget* getDataWidget();
 
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
 
@@ -98,6 +85,15 @@ class ScatterPlotView : public View
     std::string dataVarYName() const;
 
 protected:
+    friend class LatexVisitor;
+
+    virtual void checkSubConfigurables() override;
+    virtual void updateSelection() override;
+
+    virtual bool init_impl() override;
+
+    ScatterPlotViewDataWidget* getDataWidget();
+
     /// For data display
     ScatterPlotViewWidget* widget_{nullptr};
     /// For data loading
@@ -108,11 +104,6 @@ protected:
 
     std::string data_var_y_dbo_;
     std::string data_var_y_name_;
-
-    virtual void checkSubConfigurables() override;
-    virtual void updateSelection() override;
-
-    void updateStatus();
 };
 
 #endif /* SCATTERPLOTVIEW_H_ */

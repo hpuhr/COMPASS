@@ -27,29 +27,19 @@ class ListBoxViewDataWidget;
 class ListBoxView : public View
 {
     Q_OBJECT
-  public slots:
+public slots:
     virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
 
-  signals:
+signals:
     void showOnlySelectedSignal(bool value);
     void usePresentationSignal(bool value);
     void showAssociationsSignal(bool value);
 
-  public:
+public:
     ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
     virtual ~ListBoxView() override;
-
-    bool init() override;
-
-    virtual void loadingStarted() override;
-    virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
-    virtual void loadingDone() override;
-
-    virtual void clearData() override;
-
-    virtual void appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current) override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -60,8 +50,6 @@ class ListBoxView : public View
         assert(data_source_);
         return data_source_;
     }
-
-    ListBoxViewDataWidget* getDataWidget();
 
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
 
@@ -76,7 +64,16 @@ class ListBoxView : public View
 
     virtual void accept(LatexVisitor& v) override;
 
-  protected:
+protected:
+    friend class LatexVisitor;
+
+    virtual void checkSubConfigurables() override;
+    virtual void updateSelection() override;
+
+    virtual bool init_impl() override;
+
+    ListBoxViewDataWidget* getDataWidget();
+
     ListBoxViewWidget* widget_{nullptr};
     ListBoxViewDataSource* data_source_{nullptr};
 
@@ -84,9 +81,6 @@ class ListBoxView : public View
     bool use_presentation_{true};
 
     bool overwrite_csv_{false}; // Overwrite during export, if not, it appends
-
-    virtual void checkSubConfigurables() override;
-    virtual void updateSelection() override;
 };
 
 #endif /* LISTBOXVIEW_H_ */

@@ -41,6 +41,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "viewmanager.h"
 #include "files.h"
+#include "ViewerWidget.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -286,7 +287,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentText* e)
 void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 {
     assert (e);
-    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure" << e->name();
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure " << e->name();
 
 #if USE_EXPERIMENTAL_SOURCE == true
 
@@ -305,7 +306,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 
     image_prefix_ = e->getSubPath()+e->name();
 
-    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure" << e->name()
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure " << e->name()
            << " prefix " << image_prefix_;
 
     for (auto& view_it : view_man.getViews())
@@ -448,7 +449,7 @@ void LatexVisitor::visit(OSGView* e)
 
     // normal screenshot
 
-    QImage screenshot = data_widget->grabFrameBuffer();
+    QImage screenshot = data_widget->osgViewerWidget()->grabFrameBuffer();
 
     std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
     assert (!screenshot.isNull());
@@ -470,7 +471,7 @@ void LatexVisitor::visit(OSGView* e)
         data_widget->zoomToDataSlot(); // TODO wrong
         data_widget->addDataMarker();
 
-        QImage overview_screenshot = data_widget->grabFrameBuffer();
+        QImage overview_screenshot = data_widget->osgViewerWidget()->grabFrameBuffer();
 
         data_widget->removeDataMarker();
 
@@ -519,7 +520,7 @@ void LatexVisitor::visit(ScatterPlotView* e)
         return;
 
     // normal screenshot
-    QPixmap pmap = data_widget->renderPixmap();;
+    QPixmap pmap = data_widget->renderPixmap();
 
     QImage screenshot = pmap.toImage();
 

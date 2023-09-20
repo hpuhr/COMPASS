@@ -20,7 +20,10 @@
 #include "eval/results/dubious/dubioustargetsingle.h"
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
+#include "util/number.h"
+#include "global.h"
 
 #include <cmath>
 
@@ -44,7 +47,7 @@ DubiousTarget::DubiousTarget(
         bool use_max_turnrate, float max_turnrate,
         bool use_rocd, float max_rocd, float dubious_prob,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       minimum_comparison_time_(minimum_comparison_time), maximum_comparison_time_(maximum_comparison_time),
       mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
       use_min_duration_(use_min_duration), min_duration_(Time::partialSeconds(min_duration)),
@@ -55,7 +58,6 @@ DubiousTarget::DubiousTarget(
 {
 }
 
-
 std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
@@ -65,11 +67,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
            << " use_min_updates " << use_min_updates_ << " min_updates " << min_updates_
            << " use_min_duration " << use_min_duration_ << " min_duration " << min_duration_;
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
-    EvaluationTargetPosition tst_pos;
-    bool has_ground_bit;
-    bool ground_bit_set;
+    dbContent::TargetPosition tst_pos;
 
     bool is_inside;
 
@@ -80,7 +80,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
     unsigned int num_pos_inside {0};
     unsigned int num_pos_inside_dubious {0};
 
-    DubiousTargetDetail detail_ (target_data.utn_);
+    typedef EvaluationRequirementResult::SingleDubiousTarget Result;
+    typedef EvaluationDetail                                 Detail;
+    
+    std::vector<Result::DetailData> detail_data(1);
+    auto& detail = detail_data[ 0 ];
+
+    auto genDetails = [ & ] ()
+    {
+        return Result::generateDetails(detail_data);
+    };
 
     bool do_not_evaluate_target = false;
 
@@ -92,71 +101,62 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
         // check if inside based on test position only
 
-        tst_pos = target_data.tstPosForTime(timestamp);
-
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
-        else
-            ground_bit_set = false;
-
-        is_inside = sector_layer.isInside(tst_pos, has_ground_bit, ground_bit_set);
+        tst_pos   = target_data.tstChain().pos(tst_id);
+        is_inside = target_data.tstPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
             ++num_pos_outside;
-
-            detail_.left_sector_ = true;
+            detail.left_sector = true;
 
             continue;
         }
 
-        detail_.left_sector_ = false;
+        detail.left_sector = false;
         ++num_pos_inside;
 
-        if (!detail_.first_inside_ && timestamp - detail_.tod_end_ > seconds(300)) // not first time and time gap too large, skip
+        if (!detail.first_inside && timestamp - detail.tod_end > seconds(300)) // not first time and time gap too large, skip
             continue;
 
-        ++detail_.num_pos_inside_;
+        ++detail.num_pos_inside;
 
-        detail_.updates_.emplace_back(timestamp, tst_pos);
+        detail.details.emplace_back(timestamp, tst_pos);
 
-        if (detail_.first_inside_) // do detail time & pos
+        if (detail.first_inside) // do detail time & pos
         {
-            detail_.tod_begin_ = timestamp;
-            detail_.tod_end_ = timestamp;
+            detail.tod_begin = timestamp;
+            detail.tod_end   = timestamp;
 
-            detail_.pos_begin_ = tst_pos;
-            detail_.pos_last_ = tst_pos;
+            detail.pos_begin = tst_pos;
+            detail.pos_last  = tst_pos;
 
-            detail_.first_inside_ = false;
+            detail.first_inside = false;
         }
         else
         {
-            detail_.tod_end_ = timestamp;
-            assert (detail_.tod_end_ >= detail_.tod_begin_);
-            detail_.duration_ = detail_.tod_end_ - detail_.tod_begin_;
+            detail.tod_end = timestamp;
 
-            detail_.pos_last_ = tst_pos;
+            assert (detail.tod_end >= detail.tod_begin);
+
+            detail.duration = detail.tod_end - detail.tod_begin;
+            detail.pos_last = tst_pos;
         }
 
         // do stats
-        if (!detail_.has_mode_ac_
-                && (target_data.hasTstModeAForTime(timestamp) || target_data.hasTstModeCForTime(timestamp)))
-            detail_.has_mode_ac_  = true;
+        if (!detail.has_mode_ac
+                && (target_data.tstChain().modeA(tst_id).has_value() || target_data.tstChain().modeC(tst_id).has_value()))
+            detail.has_mode_ac = true;
 
-        if (!detail_.has_mode_s_
-                && (target_data.hasTstTAForTime(timestamp) || target_data.hasTstCallsignForTime(timestamp)))
-            detail_.has_mode_s_  = true;
+        if (!detail.has_mode_s
+                && (target_data.tstChain().acad(tst_id).has_value() || target_data.tstChain().acid(tst_id).has_value()))
+            detail.has_mode_s = true;
     }
 
     if (!num_pos_inside)
     {
         return make_shared<EvaluationRequirementResult::SingleDubiousTarget>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious,
-                    detail_);
+                    eval_man_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious);
     }
 
     // have data, calculate
@@ -172,9 +172,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
     bool has_last_tod;
     ptime last_timestamp;
     float time_diff;
-    float acceleration;
-    float track_angle1, track_angle2, turnrate;
-    float rocd;
+    double acceleration;
+    double turnrate;
+    double rocd;
 
     all_updates_dubious = false;
     all_updates_dubious_reasons.clear();
@@ -184,63 +184,65 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
     dubious_turnrate_found = 0;
     dubious_rocd_found = 0;
 
-    if (!do_not_evaluate_target && mark_primary_only_ && !detail_.has_mode_ac_ && !detail_.has_mode_s_)
+    if (!do_not_evaluate_target && mark_primary_only_ && !detail.has_mode_ac && !detail.has_mode_s)
     {
-        detail_.dubious_reasons_["Pri."] = "";
+        detail.dubious_reasons["Pri."] = "";
 
         all_updates_dubious = true;
         all_updates_dubious_reasons["Pri."] = "";
     }
 
-    if (!do_not_evaluate_target && use_min_updates_ && !detail_.left_sector_
-            && detail_.num_pos_inside_ < min_updates_)
+    if (!do_not_evaluate_target && use_min_updates_ && !detail.left_sector && detail.num_pos_inside < min_updates_)
     {
-        detail_.dubious_reasons_["#Up"] = to_string(detail_.num_pos_inside_);
+        detail.dubious_reasons["#Up"] = to_string(detail.num_pos_inside);
 
         all_updates_dubious = true;
-        all_updates_dubious_reasons["#Up"] = to_string(detail_.num_pos_inside_);
+        all_updates_dubious_reasons["#Up"] = to_string(detail.num_pos_inside);
     }
 
-    if (!do_not_evaluate_target && use_min_duration_ && !detail_.left_sector_
-            && detail_.duration_ < min_duration_)
+    if (!do_not_evaluate_target && use_min_duration_ && !detail.left_sector && detail.duration < min_duration_)
     {
-        detail_.dubious_reasons_["Dur."] = Time::toString(detail_.duration_, 1);
+        detail.dubious_reasons["Dur."] = Time::toString(detail.duration, 1);
 
         all_updates_dubious = true;
-        all_updates_dubious_reasons["Dur."] = Time::toString(detail_.duration_, 1);
+        all_updates_dubious_reasons["Dur."] = Time::toString(detail.duration, 1);
     }
 
     has_last_tod = false;
 
-    DubiousTargetUpdateDetail* last_update {nullptr};
+    Detail* last_update {nullptr};
     Transformation trafo_;
 
     bool ok;
     double x_pos, y_pos;
     double distance, t_diff, spd;
 
-    for (DubiousTargetUpdateDetail& update : detail_.updates_)
+    double max_groundspeed_ms = max_groundspeed_kts_ * KNOTS2M_S;
+
+    for (auto& update : detail.details)
     {
         if (!do_not_evaluate_target && all_updates_dubious) // mark was primarty/short track if required
-            update.dubious_comments_ = all_updates_dubious_reasons;
+            Result::logComments(update, all_updates_dubious_reasons);
+
+        auto id = target_data.tstChain().dataID(update.timestamp());
+
+        auto tst_spd = target_data.tstChain().groundSpeed(id); // m/s
 
         if (!do_not_evaluate_target && use_max_groundspeed_)
         {
-            if (target_data.hasTstMeasuredSpeedForTime(update.timestamp_)
-                    && target_data.tstMeasuredSpeedForTime(update.timestamp_) > max_groundspeed_kts_)
+            if (tst_spd.has_value() && *tst_spd > max_groundspeed_ms)
             {
-                update.dubious_comments_["MSpd"] =
-                        String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(update.timestamp_), 1);
+                Result::logComment(update, "MSpd", String::doubleToStringPrecision(*tst_spd, 1));
 
                 ++dubious_groundspeed_found;
             }
             else if (last_update) // check last speed to last update
             {
                 tie(ok, x_pos, y_pos) = trafo_.distanceCart(
-                            last_update->pos_.latitude_, last_update->pos_.longitude_,
-                            update.pos_.latitude_, update.pos_.longitude_);
+                            last_update->position(0).latitude_, last_update->position(0).longitude_,
+                            update.position(0).latitude_, update.position(0).longitude_);
                 distance = sqrt(pow(x_pos, 2) + pow(y_pos, 2));
-                t_diff = Time::partialSeconds(update.timestamp_ - last_update->timestamp_);
+                t_diff = Time::partialSeconds(update.timestamp() - last_update->timestamp());
                 assert (t_diff >= 0);
 
                 if (t_diff > 0)
@@ -249,8 +251,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
                     if(spd > max_groundspeed_kts_)
                     {
-                        update.dubious_comments_["CSpd"] =
-                                String::doubleToStringPrecision(spd, 1);
+                        Result::logComment(update, "CSpd",
+                                           String::doubleToStringPrecision(spd, 1));
                         ++dubious_groundspeed_found;
                     }
                 }
@@ -259,60 +261,66 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
         if (has_last_tod)
         {
-            assert (update.timestamp_ >= last_timestamp);
-            time_diff = Time::partialSeconds(update.timestamp_ - last_timestamp);
+            assert (update.timestamp() >= last_timestamp);
+            time_diff = Time::partialSeconds(update.timestamp() - last_timestamp);
 
             if (!do_not_evaluate_target && time_diff >= minimum_comparison_time_
                     && time_diff <= maximum_comparison_time_)
             {
-                if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(update.timestamp_)
-                        && target_data.hasTstMeasuredSpeedForTime(last_timestamp))
-                {
+                auto id_last = target_data.tstChain().dataID(last_timestamp);
 
-                    acceleration = fabs(target_data.tstMeasuredSpeedForTime(update.timestamp_)
-                                        - target_data.tstMeasuredSpeedForTime(last_timestamp)) * KNOTS2M_S / time_diff;
+                auto tst_spd_last = target_data.tstChain().groundSpeed(id_last); // m/s
+
+                if (use_max_acceleration_ && tst_spd.has_value() && tst_spd_last.has_value())
+                {
+                    acceleration = fabs(*tst_spd - *tst_spd_last) / time_diff;
 
                     if (acceleration > max_acceleration_)
                     {
-                        update.dubious_comments_["Acc"] =
-                                String::doubleToStringPrecision(acceleration, 1);
+                        Result::logComment(update, "Acc",
+                                           String::doubleToStringPrecision(acceleration, 1));
 
                         ++dubious_acceleration_found;
                     }
                 }
 
-                if (!do_not_evaluate_target && use_max_turnrate_
-                        && target_data.hasTstMeasuredTrackAngleForTime(update.timestamp_)
-                        && target_data.hasTstMeasuredTrackAngleForTime(last_timestamp))
+                if (!do_not_evaluate_target && use_max_turnrate_)
                 {
-                    track_angle1 = target_data.tstMeasuredTrackAngleForTime(update.timestamp_);
-                    track_angle2 = target_data.tstMeasuredTrackAngleForTime(last_timestamp);
 
-                    turnrate = fabs(RAD2DEG*atan2(sin(DEG2RAD*(track_angle1-track_angle2)),
-                                                  cos(DEG2RAD*(track_angle1-track_angle2)))) / time_diff; // turn angle rate
+                    auto tst_track_angle = target_data.tstChain().trackAngle(id);
+                    auto tst_track_angle_last = target_data.tstChain().trackAngle(id_last);
 
-                    if (turnrate > max_turnrate_)
+                    if (tst_track_angle.has_value() && tst_track_angle_last.has_value())
                     {
-                        update.dubious_comments_["TR"] =
-                                String::doubleToStringPrecision(turnrate, 1);
 
-                        ++dubious_turnrate_found;
+                        turnrate = Number::calculateMinAngleDifference(*tst_track_angle_last, *tst_track_angle) / time_diff;
+
+                        if (fabs(turnrate) > max_turnrate_)
+                        {
+                            Result::logComment(update, "TR",
+                                               String::doubleToStringPrecision(turnrate, 1));
+
+                            ++dubious_turnrate_found;
+                        }
                     }
                 }
 
-                if (!do_not_evaluate_target && use_rocd_ && target_data.hasTstModeCForTime(update.timestamp_)
-                        && target_data.hasTstModeCForTime(last_timestamp))
+                if (!do_not_evaluate_target && use_rocd_)
                 {
+                    auto tst_mc = target_data.tstChain().modeC(id);
+                    auto tst_mc_last = target_data.tstChain().modeC(id_last);
 
-                    rocd = fabs(target_data.tstModeCForTime(update.timestamp_)
-                                - target_data.tstModeCForTime(last_timestamp)) / time_diff;
-
-                    if (rocd > max_rocd_)
+                    if (tst_mc.has_value() && tst_mc_last.has_value())
                     {
-                        update.dubious_comments_["ROCD"] =
-                                String::doubleToStringPrecision(rocd, 1);
 
-                        ++dubious_rocd_found;
+                        rocd = fabs(*tst_mc - *tst_mc_last) / time_diff;
+
+                        if (rocd > max_rocd_)
+                        {
+                            Result::logComment(update, "ROCD", String::doubleToStringPrecision(rocd, 1));
+
+                            ++dubious_rocd_found;
+                        }
                     }
                 }
             }
@@ -321,52 +329,51 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
         }
 
         // done
-        last_timestamp = update.timestamp_;
-        has_last_tod = true;
+        last_timestamp = update.timestamp();
+        has_last_tod   = true;
     }
 
     if (!do_not_evaluate_target && use_max_groundspeed_ && dubious_groundspeed_found > 0)
     {
-        detail_.dubious_reasons_["Spd"] = to_string(dubious_groundspeed_found);
+        detail.dubious_reasons["Spd"] = to_string(dubious_groundspeed_found);
     }
 
     if (!do_not_evaluate_target && use_max_acceleration_ && dubious_acceleration_found > 0)
     {
-        detail_.dubious_reasons_["Acc"] = to_string(dubious_acceleration_found);
+        detail.dubious_reasons["Acc"] = to_string(dubious_acceleration_found);
     }
 
     if (!do_not_evaluate_target && use_max_turnrate_ && dubious_turnrate_found > 0)
     {
-        detail_.dubious_reasons_["TR"] = to_string(dubious_turnrate_found);
+        detail.dubious_reasons["TR"] = to_string(dubious_turnrate_found);
     }
 
     if (!do_not_evaluate_target && use_rocd_ && dubious_rocd_found > 0)
     {
-        detail_.dubious_reasons_["ROCD"] = to_string(dubious_rocd_found);
+        detail.dubious_reasons["ROCD"] = to_string(dubious_rocd_found);
     }
 
-    detail_.num_pos_inside_dubious_ = detail_.getNumUpdatesDubious(); // num of tods with issues
+    detail.num_pos_inside_dubious = detail.numDubious(); // num of tods with issues
 
-    if (detail_.num_pos_inside_
-            && ((float) detail_.num_pos_inside_dubious_ /(float)(detail_.num_pos_inside_) > dubious_prob_))
+    if (detail.num_pos_inside && ((float) detail.num_pos_inside_dubious /(float)(detail.num_pos_inside) > dubious_prob_))
     {
-        detail_.is_dubious_ = true;
+        detail.is_dubious = true;
     }
     else
-        detail_.is_dubious_ = false;
+    {
+        detail.is_dubious = false;
+    }
 
     //        loginf << "EvaluationRequirementDubiousTarget '" << name_ << "': evaluate: utn " << target_data.utn_
     //               << " is_dubious_ " << track_detail.is_dubious_
     //               << " num_pos_inside_dubious_ " << track_detail.num_pos_inside_dubious_
     //               << " num_pos_inside_ " << track_detail.num_pos_inside_;
 
-
-    num_pos_inside_dubious += detail_.num_pos_inside_dubious_;
+    num_pos_inside_dubious += detail.num_pos_inside_dubious;
 
     return make_shared<EvaluationRequirementResult::SingleDubiousTarget>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious,
-                detail_);
+                eval_man_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious);
 }
 
 bool DubiousTarget::markPrimaryOnly() const

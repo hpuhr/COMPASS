@@ -161,6 +161,21 @@ namespace EvaluationResultsReport
         return *tmp;
     }
 
+    std::vector<std::string> Section::getTableNames() const
+    {
+        std::vector<std::string> names;
+
+        for (auto& cont_it : content_)
+        {
+            auto table = dynamic_cast<SectionContentTable*>(cont_it.get());
+
+            if (table)
+                names.push_back(table->name());
+        }
+
+        return names;
+    }
+
     void Section::addTable (const std::string& name, unsigned int num_columns,
                             vector<string> headings, bool sortable, unsigned int sort_column, Qt::SortOrder order)
     {
@@ -183,10 +198,10 @@ namespace EvaluationResultsReport
     }
 
     void Section::addFigure (const std::string& name, const string& caption,
-                             std::unique_ptr<nlohmann::json::object_t> viewable_data)
+                             std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc)
     {
         assert (!hasFigure(name));
-        content_.push_back(make_shared<SectionContentFigure>(name, caption, move(viewable_data), this, eval_man_));
+        content_.push_back(make_shared<SectionContentFigure>(name, caption, viewable_fnc, this, eval_man_));
         assert (hasFigure(name));
     }
 

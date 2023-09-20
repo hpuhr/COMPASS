@@ -36,17 +36,16 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedIdentificationFalse::JoinedIdentificationFalse(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, EvaluationManager& eval_man)
-    : Joined("JoinedIdentificationFalse", result_id, requirement, sector_layer, eval_man)
+JoinedIdentificationFalse::JoinedIdentificationFalse(const std::string& result_id, 
+                                                     std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                     const SectorLayer& sector_layer, 
+                                                     EvaluationManager& eval_man)
+:   JoinedFalseBase("JoinedIdentificationFalse", result_id, requirement, sector_layer, eval_man)
 {
 }
 
-void JoinedIdentificationFalse::join(std::shared_ptr<Base> other)
+void JoinedIdentificationFalse::join_impl(std::shared_ptr<Single> other)
 {
-    Joined::join(other);
-
     std::shared_ptr<SingleIdentificationFalse> other_sub =
             std::static_pointer_cast<SingleIdentificationFalse>(other);
     assert (other_sub);
@@ -61,14 +60,14 @@ void JoinedIdentificationFalse::addToValues (std::shared_ptr<SingleIdentificatio
     if (!single_result->use())
         return;
 
-    num_updates_ += single_result->numUpdates();
-    num_no_ref_pos_ += single_result->numNoRefPos();
-    num_no_ref_val_ += single_result->numNoRefValue();
+    num_updates_     += single_result->numUpdates();
+    num_no_ref_pos_  += single_result->numNoRefPos();
+    num_no_ref_val_  += single_result->numNoRefValue();
     num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_ += single_result->numPosInside();
-    num_unknown_ += single_result->numUnknown();
-    num_correct_ += single_result->numCorrect();
-    num_false_ += single_result->numFalse();
+    num_pos_inside_  += single_result->numPosInside();
+    num_unknown_     += single_result->numUnknown();
+    num_correct_     += single_result->numCorrect();
+    num_false_       += single_result->numFalse();
 
     updateProbabilities();
 }
@@ -78,15 +77,11 @@ void JoinedIdentificationFalse::updateProbabilities()
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
 
+    p_false_.reset();
+
     if (num_correct_+num_false_)
     {
         p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
-        has_p_false_ = true;
-    }
-    else
-    {
-        has_p_false_ = false;
-        p_false_ = 0;
     }
 }
 
@@ -122,10 +117,10 @@ void JoinedIdentificationFalse::addToOverviewTable(std::shared_ptr<EvaluationRes
 
         string result {"Unknown"};
 
-        if (has_p_false_)
+        if (p_false_.has_value())
         {
-            result = req-> getResultConditionStr(p_false_);
-            pf_var = String::percentToString(p_false_ * 100.0, req->getNumProbDecimals()).c_str();
+            result = req->getConditionResultStr(p_false_.value());
+            pf_var = String::percentToString(p_false_.value() * 100.0, req->getNumProbDecimals()).c_str();
         }
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -134,8 +129,6 @@ void JoinedIdentificationFalse::addToOverviewTable(std::shared_ptr<EvaluationRes
                          result_id_.c_str(), {num_correct_+num_false_},
                          pf_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
     }
-
-
 }
 
 void JoinedIdentificationFalse::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -170,8 +163,8 @@ void JoinedIdentificationFalse::addDetails(std::shared_ptr<EvaluationResultsRepo
 
         QVariant pf_var;
 
-        if (has_p_false_)
-            pf_var = String::percentToString(p_false_ * 100.0, req->getNumProbDecimals()).c_str();
+        if (p_false_.has_value())
+            pf_var = String::percentToString(p_false_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
         sec_det_table.addRow({"PF [%]", "Probability of identity false", pf_var}, this);
 
@@ -180,24 +173,15 @@ void JoinedIdentificationFalse::addDetails(std::shared_ptr<EvaluationResultsRepo
 
         string result {"Unknown"};
 
-        if (has_p_false_)
-            result = req-> getResultConditionStr(p_false_);
+        if (p_false_.has_value())
+            result = req->getConditionResultStr(p_false_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (has_p_false_ && p_false_ != 0.0)
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 getErrorsViewable());
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
+    sector_section.addFigure("sector_overview", "Sector Overview",
+                             [this](void) { return this->getErrorsViewable(); });
 }
 
 
@@ -236,14 +220,16 @@ std::unique_ptr<nlohmann::json::object_t> JoinedIdentificationFalse::getErrorsVi
     double lat_w = 1.1*(lat_max-lat_min)/2.0;
     double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    if (lat_w < eval_man_.resultDetailZoom())
-        lat_w = eval_man_.resultDetailZoom();
+    if (lat_w < eval_man_.settings().result_detail_zoom_)
+        lat_w = eval_man_.settings().result_detail_zoom_;
 
-    if (lon_w < eval_man_.resultDetailZoom())
-        lon_w = eval_man_.resultDetailZoom();
+    if (lon_w < eval_man_.settings().result_detail_zoom_)
+        lon_w = eval_man_.settings().result_detail_zoom_;
 
     (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }
@@ -268,16 +254,16 @@ std::string JoinedIdentificationFalse::reference(
     return nullptr;
 }
 
-void JoinedIdentificationFalse::updatesToUseChanges()
+void JoinedIdentificationFalse::updatesToUseChanges_impl()
 {
-    num_updates_ = 0;
-    num_no_ref_pos_ = 0;
-    num_no_ref_val_ = 0;
+    num_updates_     = 0;
+    num_no_ref_pos_  = 0;
+    num_no_ref_val_  = 0;
     num_pos_outside_ = 0;
-    num_pos_inside_ = 0;
-    num_unknown_ = 0;
-    num_correct_ = 0;
-    num_false_ = 0;
+    num_pos_inside_  = 0;
+    num_unknown_     = 0;
+    num_correct_     = 0;
+    num_false_       = 0;
 
     for (auto result_it : results_)
     {

@@ -29,6 +29,8 @@
 #include <QListWidget>
 #include <QPushButton>
 #include <QToolButton>
+#include <QApplication>
+#include <QClipboard>
 
 namespace rtcommand
 {
@@ -144,8 +146,14 @@ RTCommandShell::RTCommandShell(QWidget* parent)
     backlog_button_->setToolTip("Show command backlog");
     layout_h->addWidget(backlog_button_);
 
+    copy_button_ = new QToolButton;
+    copy_button_->setIcon(icon("save.png"));
+    copy_button_->setToolTip("Copy last reply");
+    layout_h->addWidget(copy_button_);
+
     connect(cmd_edit_, &QLineEdit::returnPressed, this, &RTCommandShell::processCommand);
     connect(backlog_button_, &QToolButton::pressed, this, &RTCommandShell::showBacklog);
+    connect(copy_button_, &QToolButton::pressed, this, &RTCommandShell::copyLastReply);
 
     auto s_last = new QShortcut(cmd_edit_);
     s_last->setKey(Qt::Key_Up);
@@ -205,11 +213,23 @@ void RTCommandShell::showBacklog()
 
 /**
 */
+void RTCommandShell::copyLastReply() const
+{
+    if (last_reply_.isEmpty())
+        return;
+
+    qApp->clipboard()->setText(last_reply_);
+}
+
+/**
+*/
 void RTCommandShell::processCommand()
 {
     QString line = cmd_edit_->text().trimmed();
     
     cmd_edit_->setText("");
+    last_reply_ = "";
+    copy_button_->setEnabled(false);
     
     resetLocalBacklog();
 
@@ -235,12 +255,16 @@ void RTCommandShell::processCommand()
 
 /**
 */
-void RTCommandShell::receiveResult(std::string msg, std::string data, bool error)
+void RTCommandShell::receiveResult(const QString& msg, const QString& data, bool error)
 {
-    logResult(error ? msg : data, error);
+    logResult(error ? msg.toStdString() : data.toStdString(), error);
 
     enableCmdLine(true);
     cmd_edit_->setFocus();
+
+    last_reply_ = data;
+
+    copy_button_->setEnabled(!last_reply_.isEmpty());
 }
 
 /**

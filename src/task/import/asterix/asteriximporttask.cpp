@@ -52,6 +52,7 @@
 #include <QPushButton>
 
 #include <algorithm>
+#include <malloc.h>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -66,7 +67,7 @@ const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
-    : Task("ASTERIXImportTask", "Import ASTERIX Data", false, false, task_manager),
+    : Task("ASTERIXImportTask", "Import ASTERIX Data", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_asterix.json")
 {
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
@@ -81,6 +82,17 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
 
     registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
+
+    registerParameter("filter_tod_min", &filter_tod_min_, 0.0);
+    registerParameter("filter_tod_max", &filter_tod_max_, 24*3600.0 - 1);
+
+    registerParameter("filter_latitude_min", &filter_latitude_min_, -90.0);
+    registerParameter("filter_latitude_max", &filter_latitude_max_, 00.0);
+    registerParameter("filter_longitude_min", &filter_longitude_min_, -180.0);
+    registerParameter("filter_longitude_max", &filter_longitude_max_, 180.0);
+
+    registerParameter("filter_modec_min", &filter_modec_min_, -10000.0);
+    registerParameter("filter_modec_max", &filter_modec_max_, 50000.0);
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
@@ -531,30 +543,6 @@ void ASTERIXImportTask::debug(bool debug_jasterix)
     loginf << "ASTERIXImportTask: debug " << debug_jasterix_;
 }
 
-bool ASTERIXImportTask::checkPrerequisites()
-{
-    if (!COMPASS::instance().interface().ready())  // must be connected
-        return false;
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
-
-    return true;
-}
-
-bool ASTERIXImportTask::isRecommended()
-{
-    if (!checkPrerequisites())
-        return false;
-
-    if (COMPASS::instance().dbContentManager().hasData())
-        return false;
-
-    return true;
-}
-
-bool ASTERIXImportTask::isRequired() { return false; }
-
 bool ASTERIXImportTask::overrideTodActive() const { return override_tod_active_; }
 
 void ASTERIXImportTask::overrideTodActive(bool value)
@@ -572,6 +560,127 @@ void ASTERIXImportTask::overrideTodOffset(float value)
 
     override_tod_offset_ = value;
 }
+
+bool ASTERIXImportTask::filterTodActive() const
+{
+    return filter_tod_active_;
+}
+
+void ASTERIXImportTask::filterTodActive(bool value)
+{
+    filter_tod_active_ = value;
+}
+
+
+float ASTERIXImportTask::filterTodMin() const
+{
+    return filter_tod_min_;
+}
+
+void ASTERIXImportTask::filterTodMin(float value)
+{
+    filter_tod_min_ = value;
+}
+
+
+float ASTERIXImportTask::filterTodMax() const
+{
+    return filter_tod_max_;
+}
+
+void ASTERIXImportTask::filterTodMax(float value)
+{
+    filter_tod_max_ = value;
+}
+
+
+bool ASTERIXImportTask::filterPositionActive() const
+{
+    return filter_position_active_;
+}
+
+void ASTERIXImportTask::filterPositionActive(bool value)
+{
+    filter_position_active_ = value;
+}
+
+
+float ASTERIXImportTask::filterLatitudeMin() const
+{
+    return filter_latitude_min_;
+}
+
+void ASTERIXImportTask::filterLatitudeMin(float value)
+{
+    filter_latitude_min_ = value;
+}
+
+
+float ASTERIXImportTask::filterLatitudeMax() const
+{
+    return filter_latitude_max_;
+}
+
+void ASTERIXImportTask::filterLatitudeMax(float value)
+{
+    filter_latitude_max_ = value;
+}
+
+
+float ASTERIXImportTask::filterLongitudeMin() const
+{
+    return filter_longitude_min_;
+}
+
+void ASTERIXImportTask::filterLongitudeMin(float value)
+{
+    filter_longitude_min_ = value;
+}
+
+
+float ASTERIXImportTask::filterLongitudeMax() const
+{
+    return filter_longitude_max_;
+}
+
+void ASTERIXImportTask::filterLongitudeMax(float value)
+{
+    filter_longitude_max_ = value;
+}
+
+
+bool ASTERIXImportTask::filterModeCActive() const
+{
+    return filter_modec_active_;
+}
+
+void ASTERIXImportTask::filterModeCActive(bool value)
+{
+    filter_modec_active_ = value;
+}
+
+
+float ASTERIXImportTask::filterModeCMin() const
+{
+    return filter_modec_min_;
+}
+
+void ASTERIXImportTask::filterModeCMin(float value)
+{
+    filter_modec_min_ = value;
+}
+
+
+float ASTERIXImportTask::filterModeCMax() const
+{
+    return filter_modec_max_;
+}
+
+void ASTERIXImportTask::filterModeCMax(float value)
+{
+    filter_modec_max_ = value;
+}
+
 
 unsigned int ASTERIXImportTask::fileLineID() const
 {
@@ -617,6 +726,16 @@ void ASTERIXImportTask::maxNetworkLines(unsigned int value)
     assert (value > 0 && value <= 4);
 
     max_network_lines_ = value;
+}
+
+bool ASTERIXImportTask::ignoreTimeJumps() const
+{
+    return ignore_time_jumps_;
+}
+
+void ASTERIXImportTask::ignoreTimeJumps(bool value)
+{
+    ignore_time_jumps_ = value;
 }
 
 bool ASTERIXImportTask::isRunning() const
@@ -695,13 +814,13 @@ void ASTERIXImportTask::stop()
         QThread::msleep(1);
     }
 
-//    while (insertData)
-//    {
-//        loginf << "ASTERIXImportTask: stop: waiting for insert to finish";
-//        if (QCoreApplication::hasPendingEvents())
-//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-//        QThread::msleep(1);
-//    }
+    //    while (insertData)
+    //    {
+    //        loginf << "ASTERIXImportTask: stop: waiting for insert to finish";
+    //        if (QCoreApplication::hasPendingEvents())
+    //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    //        QThread::msleep(1);
+    //    }
 
     //    done_ = true; // set by checkAllDone
     //    running_ = false;
@@ -937,7 +1056,8 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
             return;
         }
 
-        if (maxLoadReached()) // break if too many packets in process, this slot is called again from insertDoneSlot
+        if (maxLoadReached())
+            // break if too many packets in process, this slot is called again from insertDoneSlot or postProcessDone
         {
             logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
             return;
@@ -962,7 +1082,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         return;
     }
 
-    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data total cnt " << num_packets_total_;
 
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
 
@@ -1050,7 +1170,14 @@ void ASTERIXImportTask::mapJSONDoneSlot()
         std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
                 make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_,
                                                    override_tod_active_, override_tod_offset_,
-                                                   check_future_ts);
+                                                   ignore_time_jumps_, check_future_ts,
+                                                   filter_tod_active_, filter_tod_min_,filter_tod_max_,
+                                                   filter_position_active_,
+                                                   filter_latitude_min_, filter_latitude_max_,
+                                                   filter_longitude_min_, filter_longitude_max_,
+                                                   filter_modec_active_,
+                                                   filter_modec_min_, filter_modec_max_
+                                                   );
 
         postprocess_jobs_.push_back(postprocess_job);
 
@@ -1118,13 +1245,26 @@ void ASTERIXImportTask::postprocessDoneSlot()
     for (auto& buf_it : job_buffers)
         buffer_cnt += buf_it.second->size();
 
+    logdbg << "ASTERIXImportTask: postprocessDoneSlot: buffer cnt " << buffer_cnt;
+
     if (buffer_cnt == 0)
     {
         // quit
         assert (num_packets_in_processing_);
         --num_packets_in_processing_;
 
+
+        logdbg << "ASTERIXImportTask: postprocessDoneSlot: no data,"
+               << " num_packets_in_processing_ " << num_packets_in_processing_
+               << " num_packets_total_ " << num_packets_total_;
+
         checkAllDone();
+
+        if (decode_job_ && decode_job_->hasData())
+        {
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: starting decoding of next chunk";
+            addDecodedASTERIXSlot(); // load next chunk
+        }
 
         return;
     }
@@ -1229,13 +1369,13 @@ void ASTERIXImportTask::insertDoneSlot()
 
     --num_packets_in_processing_;
 
-//    double insert_time_ms = (double)(
-//                boost::posix_time::microsec_clock::local_time() - insert_start_time_).total_microseconds() / 1000.0;
+    //    double insert_time_ms = (double)(
+    //                boost::posix_time::microsec_clock::local_time() - insert_start_time_).total_microseconds() / 1000.0;
 
-//    total_insert_time_ms_ += insert_time_ms;
+    //    total_insert_time_ms_ += insert_time_ms;
 
-//    loginf << "UGA insert time " << insert_time_ms
-//           << " ms total " << total_insert_time_ms_/1000.0 << " s" ;
+    //    loginf << "UGA insert time " << insert_time_ms
+    //           << " ms total " << total_insert_time_ms_/1000.0 << " s" ;
 
     if (queued_job_buffers_.size())
     {
@@ -1340,7 +1480,7 @@ void ASTERIXImportTask::checkAllDone()
 
         logdbg << "ASTERIXImportTask: checkAllDone: status logging";
 
-        if (!show_done_summary_)
+        if (!allow_user_interactions_)
         {
             logdbg << "ASTERIXImportTask: checkAllDone: deleting status widget";
         }
@@ -1348,6 +1488,8 @@ void ASTERIXImportTask::checkAllDone()
         COMPASS::instance().dataSourceManager().saveDBDataSources();
         emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
         COMPASS::instance().interface().saveProperties();
+
+        malloc_trim(0); // release unused memory
     }
 
     logdbg << "ASTERIXImportTask: checkAllDone: done";

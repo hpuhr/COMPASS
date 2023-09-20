@@ -154,6 +154,11 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
               object.name(), DBContent::meta_var_line_id_).dbColumnName()
        << ");";
 
+    ss << "\nCREATE INDEX UTN_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << COMPASS::instance().dbContentManager().metaGetVariable(
+              object.name(), DBContent::meta_var_utn_).dbColumnName()
+       << ");";
+
     loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
     return ss.str();
 }
@@ -222,6 +227,61 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
     return command;
 }
 
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcontent)
+{
+    //DELETE FROM table WHERE search_condition;
+
+    stringstream ss;
+
+    ss << "DELETE FROM " << dbcontent.dbTableName();
+
+    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+    command->set(ss.str());
+    return command;
+}
+
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
+        const DBContent& dbcontent, unsigned int sac, unsigned int sic)
+{
+    stringstream ss;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    ss << "DELETE FROM " << dbcontent.dbTableName() << " WHERE "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sac_id_).dbColumnName() << " = " << sac
+       << " AND "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sic_id_).dbColumnName() << " = " << sic;
+
+    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+    command->set(ss.str());
+    return command;
+}
+
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
+        const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id)
+{
+    stringstream ss;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    ss << "DELETE FROM " << dbcontent.dbTableName() << " WHERE "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sac_id_).dbColumnName() << " = " << sac
+       << " AND "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sic_id_).dbColumnName() << " = " << sic
+       << " AND "
+       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_line_id_).dbColumnName() << " = " << line_id;
+
+    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+    command->set(ss.str());
+    return command;
+}
+
 //shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBContent& object)
 //{
 //    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE
@@ -249,6 +309,29 @@ std::shared_ptr<DBCommand> SQLGenerator::getMaxUIntValueCommand(const std::strin
 {
     PropertyList list;
     list.addProperty(col_name, PropertyDataType::UINT);
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+
+    stringstream ss;
+
+    ss << "SELECT MAX(" << col_name;
+
+    ss << ") FROM ";
+
+    ss << table_name << ";";
+
+    command->set(ss.str());
+    command->list(list);
+
+    return command;
+}
+
+
+std::shared_ptr<DBCommand> SQLGenerator::getMaxULongIntValueCommand(const std::string& table_name,
+                                                                const std::string& col_name)
+{
+    PropertyList list;
+    list.addProperty(col_name, PropertyDataType::ULONGINT);
 
     shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
 
@@ -662,9 +745,9 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
 
     ss << " FROM " << table_db_name;  // << table->getAllTableNames();
 
-    // check associations json_each
+    // check contributing_receivers json_each
     if (filter.find("json_each.value") != std::string::npos)
-        ss << ", json_each("+object.dbTableName()+".associations)";
+        ss << ", json_each("+object.dbTableName()+".contributing_receivers)";
 
     // add extra from parts
 //    for (auto& from_part : extra_from_parts)

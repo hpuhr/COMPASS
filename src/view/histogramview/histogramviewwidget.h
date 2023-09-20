@@ -19,10 +19,10 @@
 #define HISTOGRAMVIEWWIDGET_H_
 
 #include "viewwidget.h"
-#include "histogramviewconfigwidget.h"
-#include "histogramviewdatawidget.h"
 
 class HistogramView;
+class HistogramViewDataWidget;
+class HistogramViewConfigWidget;
 
 class QSplitter;
 class QTabWidget;
@@ -35,12 +35,17 @@ class HistogramViewWidget : public ViewWidget
                       Configurable* config_parent, HistogramView* view, QWidget* parent = NULL);
     /// @brief Destructor
     virtual ~HistogramViewWidget();
+    
+    HistogramViewDataWidget* getViewDataWidget();
+    const HistogramViewDataWidget* getViewDataWidget() const;
+    HistogramViewConfigWidget* getViewConfigWidget();
+    const HistogramViewConfigWidget* getViewConfigWidget() const;
 
     /// @brief Returns the basis view
-    HistogramView* getView() { return (HistogramView*)view_; }
-    
-    virtual HistogramViewDataWidget* getViewDataWidget() override final;
-    virtual HistogramViewConfigWidget* getViewConfigWidget() override final;
+    HistogramView* getView();
+
+protected:
+    virtual bool reloadNeeded_impl() const override; 
 };
 
 #endif /* HISTOGRAMVIEWWIDGET_H_ */

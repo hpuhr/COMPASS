@@ -31,26 +31,10 @@
 using namespace nlohmann;
 using namespace std;
 
-unsigned int Buffer::ids_ = 0;
-
-
-Buffer::Buffer()
-{
-    logdbg << "Buffer: constructor: start";
-
-    id_ = ids_;
-    ++ids_;
-
-    logdbg << "Buffer: constructor: end";
-}
-
 Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
-    : dbcontent_name_(dbcontent_name), last_one_(false)
+    : dbcontent_name_(dbcontent_name) //, last_one_(false)
 {
     logdbg << "Buffer: constructor: start";
-
-    id_ = ids_;
-    ++ids_;
 
     for (unsigned int cnt = 0; cnt < properties.size(); cnt++)
         addProperty(properties.at(cnt));
@@ -58,12 +42,9 @@ Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
     logdbg << "Buffer: constructor: end";
 }
 
-/**
- * Calls clear.
- */
 Buffer::~Buffer()
 {
-    logdbg << "Buffer: destructor: dbo " << dbcontent_name_ << " id " << id_;
+    logdbg << "Buffer: destructor: dbo " << dbcontent_name_;
 
     properties_.clear();
 
@@ -100,12 +81,11 @@ bool Buffer::hasProperty(const Property& property)
     return false;
 }
 
-/**
- * \param id Unique property identifier
- * \param type Property data type
- *
- * \exception runtime_error if property id already in use
- */
+bool Buffer::hasAnyPropertyNamed (const std::string& property_name)
+{
+    return properties_.hasProperty(property_name);
+}
+
 void Buffer::addProperty(string id, PropertyDataType type)
 {
     logdbg << "Buffer: addProperty:  id '" << id << "' type " << Property::asString(type);
@@ -404,9 +384,6 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
 
     data_size_ += org_buffer.data_size_;
 
-    if (org_buffer.lastOne())
-        last_one_ = true;
-
     logdbg << "Buffer: seizeBuffer: end size " << size();
 }
 
@@ -668,8 +645,6 @@ void Buffer::printProperties()
         loginf << "'" << prop_it.name() << "' " << prop_it.dataTypeString();
 }
 
-bool Buffer::firstWrite() { return data_size_ == 0; }
-
 bool Buffer::isNull(const Property& property, unsigned int index)
 {
     if (BUFFER_PEDANTIC_CHECKING)
@@ -848,95 +823,6 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
     }
 }
 
-shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_properties)
-{
-    assert (size());
-    shared_ptr<Buffer> tmp_buffer{new Buffer()};
-
-    for (unsigned int cnt = 0; cnt < partial_properties.size(); ++cnt)
-    {
-        Property prop = partial_properties.at(cnt);
-
-        logdbg << "Buffer: getPartialCopy: adding property " << prop.name();
-        tmp_buffer->addProperty(prop);
-
-        switch (prop.dataType())
-        {
-            case PropertyDataType::BOOL:
-                logdbg << "Buffer: getPartialCopy: adding BOOL property " << prop.name()
-                       << " size " << get<bool>(prop.name()).size();
-                tmp_buffer->get<bool>(prop.name()).copyData(get<bool>(prop.name()));
-                break;
-            case PropertyDataType::CHAR:
-                logdbg << "Buffer: getPartialCopy: adding CHAR property " << prop.name()
-                          << " size " << get<char>(prop.name()).size();
-                tmp_buffer->get<char>(prop.name()).copyData(get<char>(prop.name()));
-                break;
-            case PropertyDataType::UCHAR:
-                logdbg << "Buffer: getPartialCopy: adding UCHAR property " << prop.name()
-                          << " size " << get<unsigned char>(prop.name()).size();
-                tmp_buffer->get<unsigned char>(prop.name())
-                    .copyData(get<unsigned char>(prop.name()));
-                break;
-            case PropertyDataType::INT:
-                logdbg << "Buffer: getPartialCopy: adding INT property " << prop.name()
-                          << " size " << get<int>(prop.name()).size();
-                tmp_buffer->get<int>(prop.name()).copyData(get<int>(prop.name()));
-                break;
-            case PropertyDataType::UINT:
-                logdbg << "Buffer: getPartialCopy: adding UINT property " << prop.name()
-                          << " size " << get<unsigned int>(prop.name()).size();
-                tmp_buffer->get<unsigned int>(prop.name()).copyData(get<unsigned int>(prop.name()));
-                break;
-            case PropertyDataType::LONGINT:
-                logdbg << "Buffer: getPartialCopy: adding LONGINT property " << prop.name()
-                          << " size " << get<long int>(prop.name()).size();
-                tmp_buffer->get<long int>(prop.name()).copyData(get<long int>(prop.name()));
-                break;
-            case PropertyDataType::ULONGINT:
-                logdbg << "Buffer: getPartialCopy: adding ULONGINT property " << prop.name()
-                          << " size " << get<unsigned long int>(prop.name()).size();
-                tmp_buffer->get<unsigned long int>(prop.name())
-                    .copyData(get<unsigned long int>(prop.name()));
-                break;
-            case PropertyDataType::FLOAT:
-                logdbg << "Buffer: getPartialCopy: adding FLOAT property " << prop.name()
-                          << " size " << get<float>(prop.name()).size();
-                tmp_buffer->get<float>(prop.name()).copyData(get<float>(prop.name()));
-                break;
-            case PropertyDataType::DOUBLE:
-                logdbg << "Buffer: getPartialCopy: adding DOUBLE property " << prop.name()
-                          << " size " << get<double>(prop.name()).size();
-                tmp_buffer->get<double>(prop.name()).copyData(get<double>(prop.name()));
-                break;
-            case PropertyDataType::STRING:
-                logdbg << "Buffer: getPartialCopy: adding STRING property " << prop.name()
-                          << " size " << get<string>(prop.name()).size();
-                tmp_buffer->get<string>(prop.name()).copyData(get<string>(prop.name()));
-                break;
-            case PropertyDataType::JSON:
-                logdbg << "Buffer: getPartialCopy: adding JSON property " << prop.name()
-                          << " size " << get<json>(prop.name()).size();
-                tmp_buffer->get<json>(prop.name()).copyData(get<json>(prop.name()));
-                break;
-            case PropertyDataType::TIMESTAMP:
-                logdbg << "Buffer: getPartialCopy: adding TIMESTAMP property " << prop.name()
-                          << " size " << get<boost::posix_time::ptime>(prop.name()).size();
-                tmp_buffer->get<boost::posix_time::ptime>(prop.name()).copyData(get<boost::posix_time::ptime>(prop.name()));
-                break;
-            default:
-                logerr << "Buffer: getPartialCopy: unknown property type "
-                       << Property::asString(prop.dataType());
-                throw runtime_error("Buffer: getPartialCopy: unknown property type " +
-                                         Property::asString(prop.dataType()));
-        }
-    }
-
-    assert (tmp_buffer->size());
-
-    return tmp_buffer;
-}
-
 nlohmann::json Buffer::asJSON(unsigned int max_size)
 {
     json j;
@@ -944,48 +830,77 @@ nlohmann::json Buffer::asJSON(unsigned int max_size)
     if (max_size == 0)
         max_size = data_size_;
 
-    for (unsigned int cnt=0; cnt < max_size; ++cnt)
-    {
-        j[cnt] = json::object();
+    for (auto& it : getArrayListMap<bool>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<char>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned char>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<int>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned int>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<long int>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned long int>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<float>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<double>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<string>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<json>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+        j[it.first] = it.second->asJSON(max_size);
 
-        for (auto& it : getArrayListMap<bool>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<char>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<unsigned char>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<int>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<unsigned int>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<long int>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<unsigned long int>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<float>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<double>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<string>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<json>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = Utils::Time::toString(it.second->get(cnt));
+    return j;
+}
 
-    }
+nlohmann::json Buffer::asJSON(std::set<std::string> variable_names, unsigned int max_size)
+{
+    json j;
+
+    if (max_size == 0)
+        max_size = data_size_;
+
+    for (auto& it : getArrayListMap<bool>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<char>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned char>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<int>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned int>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<long int>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned long int>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<float>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<double>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<string>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<json>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
 
     return j;
 }

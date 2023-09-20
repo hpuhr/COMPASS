@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_cat001",
+        "id": 1,
         "info": "",
         "name": "CAT001"
     },
@@ -84,6 +85,45 @@
                     "unit": ""
                 }
             },
+            "Variable16": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "w_e_value",
+                    "description": "From 030.Warning/Error Conditions.W/E Value\n\n0 no warning nor error condition;\n1 garbled reply;\n2 reflection;\n3 sidelobe reply;\n4 split plot;\n5 second time around reply;\n6 angels;\n7 terrestrial vehicles.\n64 possible wrong code in Mode-3/A;\n65 possible wrong altitude information, transmitted when the Code C credibility check fails together with the Mode-C code in binary notation;\n66 possible phantom MSSR plot;\n80 fixed PSR plot;\n81 slow PSR plot;\n82 low quality PSR plot.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "W/E Value",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable17": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "track_quality",
+                    "description": "From 210.Track Quality.Value\n\nQuality indicator\nActual bit signification is application dependent.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Quality",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable18": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "plot_characteristics",
+                    "description": "From 130.Radar Plot Characteristics.Value\n\nThis Data Item may contain parameters such as plot runlength (primary and secondary), difference between primary and secondary derived azimuth, pulse amplitude, etc.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Plot Characteristics",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "Variable3": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
@@ -136,16 +176,16 @@
                     "unit": ""
                 }
             },
-            "VariableRadarassociations0": {
+            "VariableRadarUTN0": {
                 "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "associations",
-                    "description": "Associations set as JSON object",
+                    "data_type_str": "UINT",
+                    "db_column_name": "utn",
+                    "description": "Unique Target Number",
                     "dimension": "",
                     "is_key": false,
-                    "name": "Associations",
+                    "name": "UTN",
                     "representation_str": "STANDARD",
-                    "short_name": "Assoc",
+                    "short_name": "UTN",
                     "unit": ""
                 }
             },
@@ -385,7 +425,7 @@
             },
             "VariableRadarrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",

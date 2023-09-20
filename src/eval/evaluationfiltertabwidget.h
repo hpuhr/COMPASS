@@ -6,6 +6,7 @@
 #include <memory>
 
 class EvaluationManager;
+class EvaluationManagerSettings;
 class EvaluationManagerWidget;
 
 class QLineEdit;
@@ -22,6 +23,9 @@ private slots:
     void toggleUseTimeSlot();
     void timeBeginEditedSlot (const QDateTime& datetime);
     void timeEndEditedSlot (const QDateTime& datetime);
+
+    void toggleUseRefTrajAccuracySlot();
+    void minRefTrajAccuracyEditedSlot (const QString& text);
 
     void toggleUseADSBSlot();
     void toggleUseV0Slot();
@@ -54,12 +58,14 @@ private slots:
     void maxSILv2PEditedSlot (const QString& text);
 
 public:
-    EvaluationFilterTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
+    EvaluationFilterTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
+                              EvaluationManagerWidget& man_widget);
 
     void update();
 
 protected:
     EvaluationManager& eval_man_;
+    EvaluationManagerSettings& eval_settings_;
     EvaluationManagerWidget& man_widget_;
 
     QCheckBox* use_filter_check_{nullptr};
@@ -67,6 +73,13 @@ protected:
     QCheckBox* use_time_check_{nullptr};
     QDateTimeEdit* time_begin_edit_{nullptr};
     QDateTimeEdit* time_end_edit_{nullptr};
+
+    // reftraj
+
+    QCheckBox* use_reftraj_acc_check_{nullptr};
+    QLineEdit* min_reftraj_acc_edit_{nullptr};
+
+    // adsb
 
     QCheckBox* use_adsb_check_{nullptr};
 

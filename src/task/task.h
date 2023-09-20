@@ -33,12 +33,9 @@ class Task : public QObject
     void doneSignal(std::string task_name);           // emitted when task is done
 
   public:
-    Task(const std::string& name, const std::string& gui_name, bool gui_only, bool expert_only,
-         TaskManager& task_manager)
+    Task(const std::string& name, const std::string& gui_name, TaskManager& task_manager)
         : name_(name),
           gui_name_(gui_name),
-          gui_only_(gui_only),
-          expert_only_(expert_only),
           task_manager_(task_manager)
     {
     }
@@ -49,38 +46,39 @@ class Task : public QObject
 //    virtual TaskWidget* widget() = 0;
 //    virtual void deleteWidget() = 0;
 
-    bool guiOnly() const { return gui_only_; }
+//    bool guiOnly() const { return gui_only_; }
 
     std::string guiName() const { return gui_name_; }
 
-    virtual bool checkPrerequisites() = 0;        // returns true can be shown, false if not yet
-    virtual bool canRun() { return !gui_only_; }  // returns true if can be run, to be overriden
-    virtual bool isRecommended() = 0;  // returns true if it is recommended to run this task
-    virtual bool isRequired() = 0;     // returns true if it is required to run this task
+//    virtual bool checkPrerequisites() = 0;        // returns true can be shown, false if not yet
+//    virtual bool canRun() { return !gui_only_; }  // returns true if can be run, to be overriden
+//    virtual bool isRecommended() = 0;  // returns true if it is recommended to run this task
+//    virtual bool isRequired() = 0;     // returns true if it is required to run this task
 
-    bool expertOnly() const { return expert_only_; }
+//    bool expertOnly() const { return expert_only_; }
 
     bool done() const { return done_; }
 
-    virtual void run() { assert(!gui_only_); }  // to be overriden by tasks that can run
+    virtual bool canRun() { return true; };
+    virtual void run() = 0;  // to be overriden by tasks that can run
     virtual void stop() { stopped_= true; } // should also set done_, stopped_ only to be set after shutdown
 
     TaskManager& manager() const { return task_manager_; }
 
     std::string tooltip() const { return tooltip_; }
 
-    bool showDoneSummary() const { return show_done_summary_; }
+    bool allowUserInteractions() const { return allow_user_interactions_; }
 
-    void showDoneSummary(bool value) { show_done_summary_ = value; }
+    void allowUserInteractions(bool value) { allow_user_interactions_ = value; }
 
   protected:
     std::string name_;
     std::string gui_name_;
-    bool gui_only_{false};
-    bool expert_only_{false};
+//    bool gui_only_{false};
+//    bool expert_only_{false};
     bool stopped_ {false};
     bool done_{false};
-    bool show_done_summary_{true};
+    bool allow_user_interactions_{true};
 
     std::string tooltip_;
 

@@ -30,7 +30,7 @@ namespace EvaluationRequirement
 {
 
 DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     assert (prob_edit_);
     prob_edit_->setToolTip("Probability of detection or miss (inverted probability)");
@@ -105,6 +105,16 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
             this, &DetectionConfigWidget::missToleranceEditSlot);
 
     form_layout_->addRow("Miss Tolerance [s]", miss_tolerance_edit_);
+
+    // hold_for_any_target_check_
+    hold_for_any_target_check_ = new QCheckBox ();
+    hold_for_any_target_check_->setChecked(config().holdForAnyTarget());
+    hold_for_any_target_check_->setToolTip("If requirement must hold for any target (all single targets)");
+    connect(hold_for_any_target_check_, &QCheckBox::clicked,
+            this, &DetectionConfigWidget::toggleHoldForAnyTargetSlot);
+
+    form_layout_->addRow("Hold for any target", hold_for_any_target_check_);
+
 
     updateActive();
 }
@@ -201,6 +211,14 @@ void DetectionConfigWidget::missToleranceEditSlot(QString value)
         config().missTolerance(val);
     else
         loginf << "EvaluationRequirementDetectionConfigWidget: missToleranceEditSlot: invalid value";
+}
+
+void DetectionConfigWidget::toggleHoldForAnyTargetSlot()
+{
+    loginf << "EvaluationRequirementDetectionConfigWidget: toggleHoldForAnyTargetSlot";
+
+    assert (hold_for_any_target_check_);
+    config().holdForAnyTarget(hold_for_any_target_check_->checkState() == Qt::Checked);
 }
 
 DetectionConfig& DetectionConfigWidget::config()

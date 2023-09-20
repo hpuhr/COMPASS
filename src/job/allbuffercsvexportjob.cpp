@@ -109,8 +109,8 @@ void AllBufferCSVExportJob::run()
             assert(buffer->has<bool>(DBContent::selected_var.name()));
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
-            assert(buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
-            NullableVector<unsigned int>& rec_num_vec = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
+            assert(buffer->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
+            NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(DBContent::meta_var_rec_num_.name());
 
             // check if skipped because not selected
             if (only_selected_ &&

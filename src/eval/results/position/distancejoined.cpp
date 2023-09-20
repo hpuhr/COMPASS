@@ -18,6 +18,7 @@
 #include "eval/results/position/distancesingle.h"
 #include "eval/results/position/distancejoined.h"
 #include "eval/requirement/base/base.h"
+#include "eval/requirement/position/distance.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -39,69 +40,64 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedPositionDistance::JoinedPositionDistance(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, EvaluationManager& eval_man)
-    : Joined("JoinedPositionDistance", result_id, requirement, sector_layer, eval_man)
+JoinedPositionDistance::JoinedPositionDistance(const std::string& result_id, 
+                                               std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                               const SectorLayer& sector_layer, 
+                                               EvaluationManager& eval_man)
+:   JoinedPositionBase("JoinedPositionDistance", result_id, requirement, sector_layer, eval_man)
 {
 }
 
+//void JoinedPositionDistance::join_impl(std::shared_ptr<Single> other)
+//{
+//    std::shared_ptr<SinglePositionDistance> other_sub =
+//            std::static_pointer_cast<SinglePositionDistance>(other);
+//    assert (other_sub);
 
-void JoinedPositionDistance::join(std::shared_ptr<Base> other)
-{
-    Joined::join(other);
+//    addToValues(other_sub);
+//}
 
-    std::shared_ptr<SinglePositionDistance> other_sub =
-            std::static_pointer_cast<SinglePositionDistance>(other);
-    assert (other_sub);
+//void JoinedPositionDistance::addToValues (std::shared_ptr<SinglePositionBase> single_result)
+//{
+//    assert (single_result);
 
-    addToValues(other_sub);
-}
+//    if (!single_result->use())
+//        return;
 
-void JoinedPositionDistance::addToValues (std::shared_ptr<SinglePositionDistance> single_result)
-{
-    assert (single_result);
+//    num_pos_         += single_result->numPos();
+//    num_no_ref_      += single_result->numNoRef();
+//    num_pos_outside_ += single_result->numPosOutside();
+//    num_pos_inside_  += single_result->numPosInside();
+//    num_passed_      += single_result->numPassed();
+//    num_failed_      += single_result->numFailed();
 
-    if (!single_result->use())
-        return;
-
-    num_pos_ += single_result->numPos();
-    num_no_ref_ += single_result->numNoRef();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_ += single_result->numPosInside();
-    num_comp_failed_ += single_result->numCompFailed();
-    num_comp_passed_ += single_result->numCompPassed();
-
-    const vector<double>& other_values = single_result->values();
-
-    values_.insert(values_.end(), other_values.begin(), other_values.end());
-
-    update();
-}
+//    update();
+//}
 
 void JoinedPositionDistance::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-    assert (values_.size() == num_comp_failed_+num_comp_passed_);
+    prob_.reset();
 
-    unsigned int num_distances = values_.size();
+    vector<double> all_values = values();
+    assert (all_values.size() == num_failed_ + num_passed_);
+    unsigned int num_distances = all_values.size();
 
     if (num_distances)
     {
-        value_min_ = *min_element(values_.begin(), values_.end());
-        value_max_ = *max_element(values_.begin(), values_.end());
-        value_avg_ = std::accumulate(values_.begin(), values_.end(), 0.0) / (float) num_distances;
+        value_min_ = *min_element(all_values.begin(), all_values.end());
+        value_max_ = *max_element(all_values.begin(), all_values.end());
+        value_avg_ = std::accumulate(all_values.begin(), all_values.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
-        for(auto val : values_)
+        for(auto val : all_values)
             value_var_ += pow(val - value_avg_, 2);
         value_var_ /= (float)num_distances;
 
-        assert (num_comp_failed_ <= num_distances);
-        p_passed_ = (float)num_comp_passed_/(float)num_distances;
-        has_p_min_ = true;
+        assert (num_passed_ <= num_distances);
+        prob_ = (float)num_passed_ / (float)num_distances;
     }
     else
     {
@@ -109,9 +105,6 @@ void JoinedPositionDistance::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
-
-        has_p_min_ = false;
-        p_passed_ = 0;
     }
 }
 
@@ -145,17 +138,17 @@ void JoinedPositionDistance::addToOverviewTable(std::shared_ptr<EvaluationResult
 
     string result {"Unknown"};
 
-    if (has_p_min_)
+    if (prob_.has_value())
     {
-        p_passed_var = String::percentToString(p_passed_ * 100.0, req->getNumProbDecimals()).c_str();
+        p_passed_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(p_passed_);
+        result = req->getConditionResultStr(prob_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                      +(requirement_->shortname()).c_str(),
-                     result_id_.c_str(), {num_comp_failed_+num_comp_passed_},
+                     result_id_.c_str(), {num_passed_ + num_failed_},
                      p_passed_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
 }
 
@@ -200,8 +193,8 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     sec_det_table.addRow({"DVar [m^2]", "Variance of distance",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-    sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
-    sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_comp_passed_},
+    sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_failed_}, this);
+    sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_passed_},
                          this);
 
 
@@ -209,8 +202,8 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
     {
         QVariant p_passed_var;
 
-        if (has_p_min_)
-            p_passed_var = roundf(p_passed_ * 10000.0) / 100.0;
+        if (prob_.has_value())
+            p_passed_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         sec_det_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
 
@@ -218,24 +211,15 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
 
         string result {"Unknown"};
 
-        if (has_p_min_)
-            result = req->getResultConditionStr(p_passed_);
+        if (prob_.has_value())
+            result = req->getConditionResultStr(prob_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (values_.size()) // TODO
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 getErrorsViewable());
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No data found, therefore no figure was generated.");
-    }
+    sector_section.addFigure("sector_overview", "Sector Overview",
+                             [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedPositionDistance::hasViewableData (
@@ -271,14 +255,16 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistance::getErrorsViewa
     double lat_w = 1.1*(lat_max-lat_min)/2.0;
     double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    if (lat_w < eval_man_.resultDetailZoom())
-        lat_w = eval_man_.resultDetailZoom();
+    if (lat_w < eval_man_.settings().result_detail_zoom_)
+        lat_w = eval_man_.settings().result_detail_zoom_;
 
-    if (lon_w < eval_man_.resultDetailZoom())
-        lon_w = eval_man_.resultDetailZoom();
+    if (lon_w < eval_man_.settings().result_detail_zoom_)
+        lon_w = eval_man_.settings().result_detail_zoom_;
 
     (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }
@@ -299,28 +285,26 @@ std::string JoinedPositionDistance::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedPositionDistance::updatesToUseChanges()
-{
-    loginf << "JoinedPositionDistance: updatesToUseChanges";
+//void JoinedPositionDistance::updatesToUseChanges_impl()
+//{
+//    loginf << "JoinedPositionDistance: updatesToUseChanges";
 
-    num_pos_ = 0;
-    num_no_ref_ = 0;
-    num_pos_outside_ = 0;
-    num_pos_inside_ = 0;
-    num_comp_failed_ = 0;
-    num_comp_passed_ = 0;
+//    num_pos_         = 0;
+//    num_no_ref_      = 0;
+//    num_pos_outside_ = 0;
+//    num_pos_inside_  = 0;
+//    num_failed_      = 0;
+//    num_passed_      = 0;
 
-    values_.clear();
+//    for (auto result_it : results_)
+//    {
+//        std::shared_ptr<SinglePositionDistance> result =
+//                std::static_pointer_cast<SinglePositionDistance>(result_it);
+//        assert (result);
 
-    for (auto result_it : results_)
-    {
-        std::shared_ptr<SinglePositionDistance> result =
-                std::static_pointer_cast<SinglePositionDistance>(result_it);
-        assert (result);
-
-        addToValues(result);
-    }
-}
+//        addToValues(result);
+//    }
+//}
 
 void JoinedPositionDistance::exportAsCSV()
 {
@@ -346,10 +330,12 @@ void JoinedPositionDistance::exportAsCSV()
         if (output_file)
         {
             output_file << "distance\n";
-            unsigned int size = values_.size();
+
+            vector<double> all_values = values();
+            unsigned int size = all_values.size();
 
             for (unsigned int cnt=0; cnt < size; ++cnt)
-                output_file << values_.at(cnt) << "\n";
+                output_file << all_values.at(cnt) << "\n";
         }
     }
 }

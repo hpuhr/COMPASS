@@ -26,29 +26,55 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 
 #include <cassert>
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
 
-SingleExtraData::SingleExtraData(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
-        EvaluationManager& eval_man,
-        bool ignore, unsigned int num_extra, unsigned int num_ok, bool has_extra_test_data,
-        std::vector<EvaluationRequirement::ExtraDataDetail> details)
-    : Single("SingleExtraData", result_id, requirement, sector_layer, utn, target, eval_man),
-      ignore_(ignore), num_extra_(num_extra), num_ok_(num_ok), has_extra_test_data_(has_extra_test_data),
-      details_(details)
+SingleExtraData::SingleExtraData(const std::string& result_id, 
+                                 std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                 const SectorLayer& sector_layer,
+                                 unsigned int utn,
+                                 const EvaluationTargetData* target,
+                                 EvaluationManager& eval_man,
+                                 const EvaluationDetails& details,
+                                 bool ignore,
+                                 unsigned int num_extra,
+                                 unsigned int num_ok,
+                                 bool has_extra_test_data)
+    :   Single("SingleExtraData", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   ignore_             (ignore)
+    ,   num_extra_          (num_extra)
+    ,   num_ok_             (num_ok)
+    ,   has_extra_test_data_(has_extra_test_data)
 {
-    //result_usable_ = !ignore;
-
     updateProb();
+}
+
+void SingleExtraData::updateProb()
+{
+    prob_.reset();
+
+    if (num_extra_ + num_ok_)
+    {
+        logdbg << "SingleExtraData: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
+               << " num_ok " << num_ok_;
+
+        prob_          = (float)num_extra_/(float)(num_extra_ + num_ok_);
+        result_usable_ = !ignore_;
+    }
+
+    if (!prob_.has_value())
+        result_usable_ = false;
+
+    updateUseFromTarget();
 }
 
 void SingleExtraData::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -64,34 +90,12 @@ void SingleExtraData::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     // TODO add requirement description, methods
 }
 
-void SingleExtraData::updateProb()
-{
-    if (num_extra_ + num_ok_)
-    {
-        logdbg << "SingleExtraData: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
-               << " num_ok " << num_ok_;
-
-        prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
-        has_prob_ = true;
-
-        result_usable_ = !ignore_;
-    }
-    else
-    {
-        prob_ = 0;
-        has_prob_ = false;
-
-        result_usable_ = false;
-    }
-
-    updateUseFromTarget();
-}
-
 void SingleExtraData::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
@@ -100,8 +104,8 @@ void SingleExtraData::addTargetDetailsToTable (
 {
     QVariant prob_var;
 
-    if (has_prob_)
-        prob_var = roundf(prob_ * 10000.0) / 100.0;
+    if (prob_.has_value())
+        prob_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     if (!section.hasTable(table_name))
         section.addTable(table_name, 14,
@@ -113,10 +117,10 @@ void SingleExtraData::addTargetDetailsToTable (
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(), target_->numTstUpdates(),
-                  ignore_, num_extra_+num_ok_, num_ok_, num_extra_, prob_var}, this, {utn_});
+                 ignore_, num_extra_+num_ok_, num_ok_, num_extra_, prob_var}, this, {utn_});
 }
 
 void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -148,8 +152,8 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     {
         QVariant prob_var;
 
-        if (has_prob_)
-            prob_var = roundf(prob_ * 10000.0) / 100.0;
+        if (prob_.has_value())
+            prob_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PEx [%]", "Probability of update with extra data", prob_var}, this);
 
@@ -157,8 +161,8 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
 
         string result {"Unknown"};
 
-        if (has_prob_)
-            result = req-> getResultConditionStr(prob_);
+        if (prob_.has_value())
+            result = req->getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -167,14 +171,13 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
             root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
             utn_req_section.perTargetWithIssues(true);
         }
-
     }
 
     // add figure
     if (!ignore_ && num_extra_)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -196,18 +199,24 @@ void SingleExtraData::reportDetails(EvaluationResultsReport::Section& utn_req_se
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : details_)
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(),
-                     rq_det_it.inside_, rq_det_it.extra_,
-                     rq_det_it.ref_exists_, rq_det_it.comment_.c_str()},
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailKey::Inside),
+                          rq_det_it.getValue(DetailKey::Extra),
+                          rq_det_it.getValue(DetailKey::RefExists),
+                          rq_det_it.comments().generalComment().c_str() },
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SingleExtraData::hasViewableData (
@@ -215,8 +224,8 @@ bool SingleExtraData::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-        else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
-            return true;
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
+        return true;
     else
         return false;
 }
@@ -224,8 +233,8 @@ bool SingleExtraData::hasViewableData (
 std::unique_ptr<nlohmann::json::object_t> SingleExtraData::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
+
     if (table.name() == target_table_name_)
     {
         return getTargetErrorsViewable();
@@ -238,13 +247,15 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraData::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::ExtraDataDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.pos_current_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.pos_current_.longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        assert(detail.numPositions() > 0);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
         return viewable_ptr;
     }
@@ -252,7 +263,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraData::viewableData(
         return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SingleExtraData::getTargetErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> SingleExtraData::getTargetErrorsViewable (bool add_highlight)
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -302,15 +313,17 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraData::getTargetErrorsViewab
     //        double lat_w = 1.1*(lat_max-lat_min)/2.0;
     //        double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    //        if (lat_w < eval_man_.resultDetailZoom())
-    //            lat_w = eval_man_.resultDetailZoom();
+    //        if (lat_w < eval_man_.settings().result_detail_zoom_)
+    //            lat_w = eval_man_.settings().result_detail_zoom_;
 
-    //        if (lon_w < eval_man_.resultDetailZoom())
-    //            lon_w = eval_man_.resultDetailZoom();
+    //        if (lon_w < eval_man_.settings().result_detail_zoom_)
+    //            lon_w = eval_man_.settings().result_detail_zoom_;
 
     //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     //    }
+
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -329,7 +342,7 @@ std::string SingleExtraData::reference(
 {
     assert (hasReference(table, annotation));
 
-    return "Report:Results:"+getTargetRequirementSectionID();
+    return "Report:Results:" + getTargetRequirementSectionID();
 }
 
 std::shared_ptr<Joined> SingleExtraData::createEmptyJoined(const std::string& result_id)
@@ -347,11 +360,6 @@ bool SingleExtraData::hasExtraTestData() const
     return has_extra_test_data_;
 }
 
-const std::vector<EvaluationRequirement::ExtraDataDetail>& SingleExtraData::details() const
-{
-    return details_;
-}
-
 unsigned int SingleExtraData::numExtra() const
 {
     return num_extra_;
@@ -360,6 +368,16 @@ unsigned int SingleExtraData::numExtra() const
 unsigned int SingleExtraData::numOK() const
 {
     return num_ok_;
+}
+
+void SingleExtraData::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+{
+     //addAnnotationFeatures(viewable, overview); // TODO rework
+
+     json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
+     json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+     json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
+     json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
 }
 
 }

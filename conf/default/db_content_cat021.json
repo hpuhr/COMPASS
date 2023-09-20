@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_cat021",
+        "id": 21,
         "info": "",
         "name": "CAT021"
     },
@@ -32,6 +33,136 @@
                     "unit": ""
                 }
             },
+            "Variable100": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_rrl_val",
+                    "description": "From REF.STA.RRL#VAL\n\nAircraft Status Reply Rate Limiting Value\n0 Reply Rate Limiting is not active\n1 Reply Rate Limiting is active",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA RRL VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable101": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_ps3_ep",
+                    "description": "From REF.STA.PS3#EP\n\nAircraft Status Priority Status for Version 3 ADS-B Systems Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA PS3 EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable102": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sta_ps3_val",
+                    "description": "From REF.STA.PS3#VAL\n\nAircraft Status Priority Status for Version 3 ADS-B Systems\n0 No emergency / not reported\n1 General emergency\n2 UAS/RPAS - Lost Link\n3 Minimum fuel\n4 No communications\n5 Unlawful interference\n6 Aircraft in Distress Automatic Activation\n7 Aircraft in Distress Manual Activation",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA PS3 VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable103": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_tpw_ep",
+                    "description": "From REF.STA.TPW#EP\n\nAircraft Status Transmit Power Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA TPW EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable104": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sta_tpw_val",
+                    "description": "From REF.STA.TPW#VAL\n\nAircraft Status Transmit Power Value\n0 Unavailable, Unknown, or less than 70 W\n1 70 W\n2 125 W\n3 200W",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA TPW VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable105": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_tsi_ep",
+                    "description": "From REF.STA.TSI#EP\n\nAircraft Status Transponder Side Indication Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA TSI EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable106": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sta_tsi_val",
+                    "description": "From REF.STA.TSI#VAL\n\nAircraft Status Transponder Side Indication Value\n0 Unknown\nTransponder #1 (left/pilot side or single)\n2 Transponder #2 (right/co-pilot side)\n3 Transponder #3 (auxiliary or Back-up)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA TSI VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable107": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_muo_ep",
+                    "description": "From REF.STA.MUO#EP\n\nAircraft Status Manned / Unmanned Operation Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA MUO EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable108": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_muo_val",
+                    "description": "From REF.STA.MUO#VAL\n\nAircraft Status Manned / Unmanned Operation Value\n0 Manned Operation\n1 Unmanned Operation",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA MUO VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable109": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_rwc_ep",
+                    "description": "From REF.STA.RWC#EP\n\nAircraft Status Remain Well Clear Corrective Alert Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA RWC EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "Variable11": {
                 "parameters": {
                     "data_type_str": "BOOL",
@@ -45,6 +176,136 @@
                     "unit": ""
                 }
             },
+            "Variable110": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_rwc_val",
+                    "description": "From REF.STA.RWC#VAL\n\nAircraft Status Remain Well Clear Corrective Alert Value\n0 RWC Corrective Alert not active\n1 RWC Corrective Alert active",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA RWC VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable111": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_daa_ep",
+                    "description": "From REF.STA.DAA#EP\n\nAircraft Status Detect and Avoid Capabilities Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA DAA EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable112": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sta_daa_val",
+                    "description": "From REF.STA.DAA#VAL\n\nAircraft Status Detect and Avoid Capabilities Value\n0 No RWC Capability\n1 RWC/RA/OCM Capability\n2 RWC/OCM Capability\n3 Invalid ASTERIX Value",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA DAA VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable113": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_df17ca_ep",
+                    "description": "From REF.STA.DF17CA#EP\n\nAircraft Status Transponder Capability Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA DF17CA EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable114": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sta_df17ca_val",
+                    "description": "From REF.STA.DF17CA#VAL\n\nAircraft Status Transponder Capability Value\nCA is transmitted in Downlink Format 17 messages.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA DF17CA VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable115": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_svh_ep",
+                    "description": "From REF.STA.SVH#EP\n\nAircraft Status Sense Vertical & Horizontal Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA SVH EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable116": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sta_svh_val",
+                    "description": "From REF.STA.SVH#VAL\n\nAircraft Status Sense Vertical & Horizontal Value\n0 Vertical Only\n1 Horizontal Only\n2 Blended\n3 Vertical Only or Horizontal Only per intruder",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA SVH VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable117": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_catc_ep",
+                    "description": "From REF.STA.CATC#EP\n\nAircraft Status CAS Type & Capability Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA CATC EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable118": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sta_catc_val",
+                    "description": "From REF.STA.CATC#VAL\n\nAircraft Status CAS Type & Capability Value\n0 Active CAS (TCAS II) or no CAS\n1 Active CAS (not TCAS II)\n2 Active CAS (not TCAS II) with OCM transmit capability\n3 Active CAS of Junior Status\n4 Passive CAS with 1030 TCAS Resolution Message receive capability\n5Passive CAS with only OCM receive capability\n6 Reserved for future use\n7 Reserved for future use",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA CATC VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable119": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_tao_ep",
+                    "description": "From REF.STA.TAO#EP\n\nTransponder Antenna Offset Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA TAO EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "Variable12": {
                 "parameters": {
                     "data_type_str": "BOOL",
@@ -55,6 +316,97 @@
                     "name": "List Lookup Check Failed",
                     "representation_str": "STANDARD",
                     "short_name": "LLC",
+                    "unit": ""
+                }
+            },
+            "Variable120": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sta_tao_val",
+                    "description": "From REF.STA.TAO#VAL\n\nAircraft Status Transponder Antenna Offset Value",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA TAO VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable121": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "true_north_heading",
+                    "description": "From REF.TNH.True North Heading\n\n(Element of Air Vector)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "True North Heading",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable122": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "selh_hrd",
+                    "description": "From REF.SelH.HRD\n\nSelected Heading Horizontal Reference Direction\n0 = True North\n1 = Magnetic North",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SelH HRD",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable123": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "selh_stat",
+                    "description": "From REF.SelH.Stat\n\nSelected Heading Status\n0 = Data is either unavailable or invalid.\n1 = Data is available and valid.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SelH Stat",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable124": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "selh",
+                    "description": "From REF.SelH.SelH\n\nSelected Heading",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SelH",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable125": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "mode_s_mb_data",
+                    "description": "From 250.Mode S MB Data.MB Data\n\n56-bit message conveying Mode S Comm B message data",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode S MB Data",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable126": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "acas_mb_data",
+                    "description": "From 260.MB DATA\n\n56-bit message conveying Mode S Comm B message data of BDS Register 3,0.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ACAS MB DATA",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
                     "unit": ""
                 }
             },
@@ -955,6 +1307,136 @@
                     "unit": ""
                 }
             },
+            "Variable80": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "barometric_pressure_setting",
+                    "description": "From REF.BPS.BPS\n\nBPS is the barometric pressure setting of the aircraft minus 800 hPa.\nA value of '0' indicates that in the aircraft a value of 800 hPa or less has been selected.\nA value of '409.5' indicates that in the aircraft a value of 1209.5 hPa or more has been selected.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Barometric Pressure Setting",
+                    "representation_str": "STANDARD",
+                    "short_name": "BPS",
+                    "unit": ""
+                }
+            },
+            "Variable81": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "gao_lateral",
+                    "description": "From REF.GAO.Lateral\n\nLateral axis GPS Antenna Offset",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "GAO Lateral",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable82": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "gao_longitudinal",
+                    "description": "From REF.GAO.Longitudinal\n\nLongitudinal axis GPS Antenna Offset",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "GAO Longitudinal",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable83": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "nav_ah",
+                    "description": "From REF.NAV.AH\n\n1 = Altitude Hold engaged",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "NAV AH",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable84": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "nav_am",
+                    "description": "From REF.NAV.AM\n\n1 = Approach Mode active",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "NAV AM",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable85": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "nav_ap",
+                    "description": "From REF.NAV.AP\n\n1 = Autopilot engaged",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "NAV AP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable86": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "nav_vnav",
+                    "description": "From REF.NAV.VN\n\n1 = VNAV Active (Vertical Navigation)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "NAV VNAV",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable87": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mfm_ep",
+                    "description": "From REF.NAV.MFM#EP\n\nStatus of MCP/FCU Mode Bits Element Populated Bit\n0  Element not populated\n1  Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "MFM EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable88": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mfm_val",
+                    "description": "From REF.NAV.MFM#VAL\n\nStatus of MCP/FCU Mode Bits Value\n0 MCP/FCU Mode Bits not populated\n1 MCP/FCU Mode Bits populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "MFM VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable89": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "sgv_gss",
+                    "description": "From REF.SGV.GSS\n\nSurface Ground Vector Ground speed, kts",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SGV GSS",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "Variable9": {
                 "parameters": {
                     "data_type_str": "BOOL",
@@ -965,6 +1447,149 @@
                     "name": "CPR Valid",
                     "representation_str": "STANDARD",
                     "short_name": "CPR",
+                    "unit": ""
+                }
+            },
+            "Variable90": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "sgv_hgt",
+                    "description": "From REF.SGV.HGT\n\nSurface Ground Vector Heading/Ground Track information, deg",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SGV HGT",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable91": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sgv_hrd",
+                    "description": "From REF.SGV.HRD\n\n0 True North\n1 Magnetic North",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SGV HRD",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable92": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sgv_hts",
+                    "description": "From REF.SGV.HTS\n\n0 Heading/Ground Track data is not valid\n1 Heading/Ground Track data is valid",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SGV HTS",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable93": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sgv_htt",
+                    "description": "From REF.SGV.HTT\n\n0 Heading data provided\n1 Ground Track provided",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SGV HTT",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable94": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sgv_stp",
+                    "description": "From REF.SGV.STP\n\n0 Aircraft has not stopped\n1 Aircraft has stopped",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SGV STP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable95": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_es",
+                    "description": "From REF.STA.ES\n\nAircraft Status ES IN Capability\n0 Target is not 1090 ES IN capable\n1 Target is 1090 ES IN capable",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA ES",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable96": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_uat",
+                    "description": "From REF.STA.UAT\n\nAircraft Status UAT IN Capability\n0 Target is not UAT IN capable\n1 Target is UAT IN capable",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA UAT",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable97": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_rce_ep",
+                    "description": "From REF.STA.RCE#EP\n\nAircraft Status Reduced Capability Equipment Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA RCE EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable98": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sta_rce_val",
+                    "description": "From REF.STA.RCE#VAL\n\nAircraft Status Reduced Capability Equipment Value\n0 Not RCE\n1 TABS\n2 Reserved for future use\n3 Other RCE",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA RCE VAL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable99": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "sta_rrl_ep",
+                    "description": "From REF.STA.RRL#EP\n\nAircraft Status Reply Rate Limiting Element Populated Bit\n0 Element not populated\n1 Element populated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "STA RRL EP",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableADSBUTN0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "utn",
+                    "description": "Unique Target Number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "UTN",
+                    "representation_str": "STANDARD",
+                    "short_name": "UTN",
                     "unit": ""
                 }
             },
@@ -1017,19 +1642,6 @@
                     "name": "Altitude Reporting Capability",
                     "representation_str": "STANDARD",
                     "short_name": "ARC",
-                    "unit": ""
-                }
-            },
-            "VariableADSBassociations0": {
-                "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "associations",
-                    "description": "Associations set as JSON object",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Associations",
-                    "representation_str": "STANDARD",
-                    "short_name": "Assoc",
                     "unit": ""
                 }
             },
@@ -1399,7 +2011,7 @@
             },
             "VariableADSBrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Ascending record number",
                     "dimension": "",

@@ -16,6 +16,7 @@
  */
 
 #include "histogramviewdatawidget.h"
+#include "histogramviewwidget.h"
 #include "histogramview.h"
 #include "compass.h"
 #include "buffer.h"
@@ -104,12 +105,15 @@ const QColor HistogramViewDataWidget::ColorRefTraj  = QColor("#FFA500");
 
 /**
  */
-HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramViewDataSource* data_source,
-                                                 QWidget* parent, Qt::WindowFlags f)
-:   ViewDataWidget(parent, f)
-,   view_         (view)
-,   data_source_  (data_source)
+HistogramViewDataWidget::HistogramViewDataWidget(HistogramViewWidget* view_widget, 
+                                                 QWidget* parent, 
+                                                 Qt::WindowFlags f)
+:   ViewDataWidget(view_widget, parent, f)
 {
+    view_ = view_widget->getView();
+    assert(view_);
+
+    data_source_ = view_->getDataSource();
     assert(data_source_);
 
     setContentsMargins(0, 0, 0, 0);
@@ -126,6 +130,8 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
     colors_["CAT048" ] = ColorCAT048;
     colors_["CAT062" ] = ColorCAT062;
     colors_["RefTraj"] = ColorRefTraj;
+
+    updateChart();
 }
 
 /**
@@ -134,16 +140,73 @@ HistogramViewDataWidget::~HistogramViewDataWidget() = default;
 
 /**
  */
-void HistogramViewDataWidget::clear ()
+void HistogramViewDataWidget::clearData_impl()
 {
-    loginf << "HistogramViewDataWidget: clear";
+    logdbg << "HistogramViewDataWidget: clearData_impl: start";
 
-    buffers_.clear();
     chart_view_.reset();
     histogram_generator_.reset();
 
-    shows_data_         = false;
     data_not_in_buffer_ = false;
+
+    logdbg << "HistogramViewDataWidget: clearData_impl: end";
+}
+
+/**
+ */
+void HistogramViewDataWidget::loadingStarted_impl()
+{
+    logdbg << "HistogramViewDataWidget: loadingStarted_impl: start";
+
+    //nothing to do yet
+
+    logdbg << "HistogramViewDataWidget: loadingStarted_impl: end";
+}
+
+/**
+ */
+void HistogramViewDataWidget::updateData_impl(bool requires_reset)
+{
+    logdbg << "HistogramViewDataWidget: updateData_impl: start";
+
+    histogram_generator_.reset(); //current generator makes no sense any more
+
+    logdbg << "HistogramViewDataWidget: updateData_impl: end";
+}
+
+/**
+ */
+void HistogramViewDataWidget::loadingDone_impl()
+{
+    logdbg << "HistogramViewDataWidget: loadingDone_impl: start";
+
+    //default behavior
+    ViewDataWidget::loadingDone_impl();
+
+    logdbg << "HistogramViewDataWidget: loadingDone_impl: end";
+}
+
+/**
+ */
+void HistogramViewDataWidget::liveReload_impl()
+{
+    //implement live reload behavior here
+}
+
+/**
+ */
+bool HistogramViewDataWidget::redrawData_impl(bool recompute)
+{
+    logdbg << "HistogramViewDataWidget: redrawData_impl: start - recompute = " << recompute;
+
+    if (recompute)
+        updateGenerator();
+    
+    bool drawn = updateChart();
+
+    logdbg << "HistogramViewDataWidget: redrawData_impl: end";
+
+    return drawn;
 }
 
 /**
@@ -182,13 +245,6 @@ QCursor HistogramViewDataWidget::currentCursor() const
 
 /**
  */
-bool HistogramViewDataWidget::showsData() const
-{
-    return shows_data_;
-}
-
-/**
- */
 QPixmap HistogramViewDataWidget::renderPixmap()
 {
     assert (chart_view_);
@@ -202,56 +258,28 @@ bool HistogramViewDataWidget::dataNotInBuffer() const
     return data_not_in_buffer_;
 }
 
-/**
- */
-void HistogramViewDataWidget::loadingStartedSlot()
-{
-    clear();
-    updateChart();
-}
 
 /**
  */
-void HistogramViewDataWidget::updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, 
-                                             bool requires_reset)
-{
-    logdbg << "HistogramViewDataWidget: updateDataSlot: start";
-
-    buffers_ = data;
-    histogram_generator_.reset(); //current generator makes no sense any more
-
-    logdbg << "HistogramViewDataWidget: updateDataSlot: end";
-}
-
-/**
- */
-void HistogramViewDataWidget::loadingDoneSlot()
-{
-    updateView();
-    emit dataLoaded();
-}
-
-/**
- */
-void HistogramViewDataWidget::updateView()
+void HistogramViewDataWidget::updateGenerator()
 {
     if (view_->showResults())
-        updateFromResults();
+        updateGeneratorFromResults();
     else
-        updateFromData();
-
-    updateChart();
+        updateGeneratorFromData();
 }
 
 /**
  */
-void HistogramViewDataWidget::updateFromData()
+void HistogramViewDataWidget::updateGeneratorFromData()
 {
-    loginf << "HistogramViewDataWidget: updateFromAllData";
+    loginf << "HistogramViewDataWidget: updateGeneratorFromData";
 
     histogram_generator_.reset();
 
-    shows_data_         = false;
+    if (viewData().empty())
+        return;
+
     data_not_in_buffer_ = false;
 
     //get variable
@@ -260,7 +288,7 @@ void HistogramViewDataWidget::updateFromData()
 
     if (!view_->hasDataVar())
     {
-        logwrn << "HistogramViewDataWidget: updateFromAllData: no data var";
+        logwrn << "HistogramViewDataWidget: updateGeneratorFromData: no data var";
         return;
     }
 
@@ -278,52 +306,52 @@ void HistogramViewDataWidget::updateFromData()
     {
         case PropertyDataType::BOOL:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<bool>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<bool>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::CHAR:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<char>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<char>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::UCHAR:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned char>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned char>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::INT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<int>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<int>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::UINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned int>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned int>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::LONGINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<long int>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<long int>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::ULONGINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned long int>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned long int>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::FLOAT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<float>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<float>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::DOUBLE:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<double>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<double>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::STRING:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<std::string>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<std::string>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::JSON:
@@ -333,12 +361,12 @@ void HistogramViewDataWidget::updateFromData()
         }
         case PropertyDataType::TIMESTAMP:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<boost::posix_time::ptime>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<boost::posix_time::ptime>(&viewData(), data_var, meta_var));
             break;
         }
         default:
         {
-            const std::string msg = "HistogramViewDataWidget: updateFromAllData: impossible for property type " + Property::asString(data_type);
+            const std::string msg = "HistogramViewDataWidget: updateGeneratorFromData: impossible for property type " + Property::asString(data_type);
 
             logerr << msg;
             throw std::runtime_error(msg);
@@ -361,9 +389,9 @@ void HistogramViewDataWidget::updateFromData()
 
 /**
  */
-void HistogramViewDataWidget::updateFromResults()
+void HistogramViewDataWidget::updateGeneratorFromResults()
 {
-    loginf << "HistogramViewDataWidget: updateResults";
+    loginf << "HistogramViewDataWidget: updateGeneratorFromResults";
 
     histogram_generator_.reset();
 
@@ -371,7 +399,6 @@ void HistogramViewDataWidget::updateFromResults()
 
     if (eval_man.hasResults() && view_->showResults())
     {
-        shows_data_         = false;
         data_not_in_buffer_ = false;
 
         string eval_grpreq = view_->evalResultGrpReq();
@@ -383,12 +410,12 @@ void HistogramViewDataWidget::updateFromResults()
     if (histogram_generator_)
         histogram_generator_->update();
 
-    loginf << "HistogramViewDataWidget: updateResults: done";
+    loginf << "HistogramViewDataWidget: updateGeneratorFromResults: done";
 }
 
 /**
  */
-void HistogramViewDataWidget::updateChart()
+bool HistogramViewDataWidget::updateChart()
 {
     loginf << "HistogramViewDataWidget: updateChart";
 
@@ -398,108 +425,28 @@ void HistogramViewDataWidget::updateChart()
     QChart* chart = new QChart();
     chart->setBackgroundRoundness(0);
     chart->layout()->setContentsMargins(0, 0, 0, 0);
-    chart->legend()->setVisible(true);
+
+    bool show_results  = view_->showResults();
+    bool use_log_scale = view_->useLogScale();
+
+    QString x_axis_name;
+    if (show_results)
+        x_axis_name = QString((view_->evalResultGrpReq() + ":" + view_->evalResultsID()).c_str());
+    else
+        x_axis_name = QString((view_->dataVarDBO() + ": " + view_->dataVarName()).c_str());
+
+    QString y_axis_name = "Count";
+
     chart->legend()->setAlignment(Qt::AlignBottom);
 
     //create bar series
     QBarSeries* chart_series = new QBarSeries();
     chart->addSeries(chart_series);
 
-    //create chart view
-    chart_view_.reset(new HistogramViewChartView(this, chart));
-    chart_view_->setRenderHint(QPainter::Antialiasing);
-    //chart_view_->setRubberBand(QChartView::RectangleRubberBand);
-
-    //    connect (chart_series_, &QBarSeries::clicked,
-    //             chart_view_, &HistogramViewChartView::seriesPressedSlot);
-    //    connect (chart_series_, &QBarSeries::released,
-    //             chart_view_, &HistogramViewChartView::seriesReleasedSlot);
-
-    connect (chart_view_.get(), &HistogramViewChartView::rectangleSelectedSignal,
-             this, &HistogramViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
-
-    main_layout_->addWidget(chart_view_.get());
-
-    if (!histogram_generator_)
-        return;
-
-    const auto& results = histogram_generator_->getResults();
-
-    bool show_results  = view_->showResults();
-    bool use_log_scale = view_->useLogScale();
-    bool add_null      = results.hasNullValues();
-    bool has_selected  = results.hasSelectedValues();
-
-    unsigned int max_count = 0;
-
-    auto addCount = [ & ] (QBarSet* set, unsigned int count) 
-    {
-        if (count > max_count)
-            max_count = count;
-
-        if (use_log_scale && count == 0)
-            *set << 10e-3; // Logarithms of zero and negative values are undefined.
-        else
-            *set << count;
-    };
-
-    //generate a bar set for each DBContent
-    for (const auto& elem : results.content_results)
-    {
-        const auto& r = elem.second;
-
-        const QString bar_legend_name = QString::fromStdString(elem.first) + " (" + QString::number(r.valid_count) + ")";
-
-        QBarSet* set = new QBarSet(bar_legend_name);
-
-        for (const auto& bin : r.bins)
-            addCount(set, bin.count);
-        
-        if (add_null)
-            addCount(set, r.null_count);
-        
-        set->setColor(colors_[elem.first]);
-        chart_series->append(set);
-    }
-
-    //generate selected bar set
-    if (has_selected)
-    {
-        const QString bar_legend_name = "Selected (" + QString::number(results.selected_count + results.null_selected_count) + ")";
-
-        QBarSet* set = new QBarSet(bar_legend_name);
-
-        for (auto bin : results.selected_counts)
-            addCount(set, bin);
-
-        if (add_null)
-            addCount(set, results.null_selected_count);
-
-        set->setColor(ColorSelected); 
-        chart_series->append(set);
-    }
-
-    //create categories
-    QStringList categories;
-    if (!results.content_results.empty())
-    {
-        const auto& r = results.content_results.begin()->second;
-        for (const auto& b : r.bins)
-            categories << QString::fromStdString(b.labels.label);
-    }
-
-    if (add_null)
-        categories << "NULL";
-
     //create x axis
     QBarCategoryAxis* chart_x_axis = new QBarCategoryAxis;
     chart_x_axis->setLabelsAngle(LabelAngleX);
-    chart_x_axis->append(categories);
-
-    if (show_results)
-        chart_x_axis->setTitleText((view_->evalResultGrpReq() + ":" + view_->evalResultsID()).c_str());
-    else
-        chart_x_axis->setTitleText((view_->dataVarDBO() + ": " + view_->dataVarName()).c_str());
+    chart_x_axis->setTitleText(x_axis_name);
 
     chart->addAxis(chart_x_axis, Qt::AlignBottom);
     chart_series->attachAxis(chart_x_axis);
@@ -507,50 +454,166 @@ void HistogramViewDataWidget::updateChart()
     //create y axis
     QAbstractAxis* chart_y_axis = nullptr;
 
-    if (use_log_scale)
+    auto generateYAxis = [ & ] (bool log_scale, double max_count)
     {
-        QLogValueAxis* tmp_chart_y_axis = new QLogValueAxis();
-        tmp_chart_y_axis->setLabelFormat("%g");
-        tmp_chart_y_axis->setBase(10.0);
-        //tmp_chart_y_axis->setMinorTickCount(10);
-        //tmp_chart_y_axis->setMinorTickCount(-1);
-        tmp_chart_y_axis->setRange(10e-2, std::pow(10.0, 1 + std::ceil(std::log10(max_count))));
+        if (log_scale)
+        {
+            QLogValueAxis* tmp_chart_y_axis = new QLogValueAxis;
+            tmp_chart_y_axis->setLabelFormat("%g");
+            tmp_chart_y_axis->setBase(10.0);
+            //tmp_chart_y_axis->setMinorTickCount(10);
+            //tmp_chart_y_axis->setMinorTickCount(-1);
+            tmp_chart_y_axis-> setRange(10e-2, std::pow(10.0, 1 + std::ceil(std::log10(max_count))));
 
-        chart_y_axis = tmp_chart_y_axis;
-    }
-    else
+            chart_y_axis = tmp_chart_y_axis;
+        }
+        else
+        {
+            chart_y_axis = new QValueAxis;
+            chart_y_axis->setRange(0, (int)max_count);
+        }
+        assert (chart_y_axis);
+
+        chart_y_axis->setTitleText(y_axis_name);
+
+        chart->addAxis(chart_y_axis, Qt::AlignLeft);
+        chart_series->attachAxis(chart_y_axis);
+    };
+
+    //we obtain valid data if a generator has been created and if the needed data is in the buffer
+    bool has_data = (histogram_generator_ != nullptr && !dataNotInBuffer());
+
+    if (has_data)
     {
-        chart_y_axis = new QValueAxis();
-        chart_y_axis->setRange(0, max_count);
+        //data available
+        
+        chart->legend()->setVisible(true);
+        
+        const auto& results = histogram_generator_->getResults();
+
+        bool add_null      = results.hasNullValues();
+        bool has_selected  = results.hasSelectedValues();
+
+        unsigned int max_count = 0;
+
+        auto addCount = [ & ] (QBarSet* set, unsigned int count) 
+        {
+            if (count > max_count)
+                max_count = count;
+
+            if (use_log_scale && count == 0)
+                *set << 10e-3; // Logarithms of zero and negative values are undefined.
+            else
+                *set << count;
+        };
+
+        //generate a bar set for each DBContent
+        for (const auto& elem : results.content_results)
+        {
+            const auto& r = elem.second;
+
+            const QString bar_legend_name = QString::fromStdString(elem.first) + " (" + QString::number(r.valid_count) + ")";
+
+            QBarSet* set = new QBarSet(bar_legend_name);
+
+            for (const auto& bin : r.bins)
+                addCount(set, bin.count);
+            
+            if (add_null)
+                addCount(set, r.null_count);
+            
+            set->setColor(colors_[elem.first]);
+            chart_series->append(set);
+        }
+
+        //generate selected bar set
+        if (has_selected)
+        {
+            const QString bar_legend_name = "Selected (" + QString::number(results.selected_count + results.null_selected_count) + ")";
+
+            QBarSet* set = new QBarSet(bar_legend_name);
+
+            for (auto bin : results.selected_counts)
+                addCount(set, bin);
+
+            if (add_null)
+                addCount(set, results.null_selected_count);
+
+            set->setColor(ColorSelected); 
+            chart_series->append(set);
+        }
+
+        //create categories
+        QStringList categories;
+        if (!results.content_results.empty())
+        {
+            const auto& r = results.content_results.begin()->second;
+            for (const auto& b : r.bins)
+                categories << QString::fromStdString(b.labels.label);
+        }
+
+        if (add_null)
+            categories << "NULL";
+
+        chart_x_axis->append(categories);
+
+        //to generate a safe range we set max count to 1
+        max_count = std::max(max_count, (unsigned)1);
+
+        generateYAxis(use_log_scale, max_count);
+
+        #if 0
+        //add outliers to legend
+        if (results.hasOutOfRangeValues())
+        {
+            auto outlier_count = results.not_inserted_count;
+
+            const QString name = "Out of range: " + QString::number(outlier_count);
+
+            chart_view_->addLegendOnlyItem(name, QColor(255, 255, 0));
+        }
+        #endif
     }
-    assert (chart_y_axis);
-
-    chart_y_axis->setTitleText("Count");
-
-    chart->addAxis(chart_y_axis, Qt::AlignLeft);
-    chart_series->attachAxis(chart_y_axis);
-
-#if 0
-    //add outliers to legend
-    if (results.hasOutOfRangeValues())
+    else 
     {
-        auto outlier_count = results.not_inserted_count;
+        //no data, generate empty display
 
-        const QString name = "Out of range: " + QString::number(outlier_count);
+        chart->legend()->setVisible(false);
 
-        chart_view_->addLegendOnlyItem(name, QColor(255, 255, 0));
+        //we need some bogus category in order to make the bar plot work
+        chart_x_axis->append("Category"); 
+
+        chart_x_axis->setLabelsVisible(false);
+        chart_x_axis->setGridLineVisible(false);
+        chart_x_axis->setMinorGridLineVisible(false);
+
+        //just generate linear axis
+        generateYAxis(false, 1);
+        
+        chart_y_axis->setLabelsVisible(false);
+        chart_y_axis->setGridLineVisible(false);
+        chart_y_axis->setMinorGridLineVisible(false);
     }
-#endif
 
     //update chart
     chart->update();
 
-    shows_data_ = true;
+    //create new chart view
+    chart_view_.reset(new HistogramViewChartView(this, chart));
 
-    //signal display changed to whom it may concern
-    emit displayChanged();
+    //    connect (chart_series_, &QBarSeries::clicked,
+    //             chart_view_, &HistogramViewChartView::seriesPressedSlot);
+    //    connect (chart_series_, &QBarSeries::released,
+    //             chart_view_, &HistogramViewChartView::seriesReleasedSlot);
+
+    connect (chart_view_.get(), &HistogramViewChartView::rectangleSelectedSignal,
+            this, &HistogramViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
+
+    main_layout_->addWidget(chart_view_.get());
 
     loginf << "HistogramViewDataWidget: updateChart: done";
+
+    return has_data;
 }
 
 /**
@@ -615,7 +678,7 @@ void HistogramViewDataWidget::invertSelectionSlot()
 {
     loginf << "HistogramViewDataWidget: invertSelectionSlot";
 
-    for (auto& buf_it : buffers_)
+    for (auto& buf_it : viewData())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
@@ -638,7 +701,7 @@ void HistogramViewDataWidget::clearSelectionSlot()
 {
     loginf << "HistogramViewDataWidget: clearSelectionSlot";
 
-    for (auto& buf_it : buffers_)
+    for (auto& buf_it : viewData())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
@@ -658,7 +721,7 @@ void HistogramViewDataWidget::resetZoomSlot()
 
     if (histogram_generator_ && histogram_generator_->subRangeActive())
     {
-        updateView();
+        redrawData(true); //@TODO: maybe redrawData(false) may suffice?
     }
     else if (chart_view_ && chart_view_->chart())
     {

@@ -28,7 +28,7 @@ namespace EvaluationRequirement
 {
 
 DubiousTrackConfigWidget::DubiousTrackConfigWidget(DubiousTrackConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     // use single ds_id
     eval_only_single_ds_id_check_ = new QCheckBox ();

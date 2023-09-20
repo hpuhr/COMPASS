@@ -18,41 +18,46 @@
 #ifndef EVALUATIONREQUIREMENSINGLEDUBIOSTRACK_H
 #define EVALUATIONREQUIREMENSINGLEDUBIOSTRACK_H
 
+#include "eval/results/dubious/dubiousbase.h"
 
-#include "eval/results/single.h"
-#include "eval/requirement/dubious/dubioustrack.h"
+namespace EvaluationRequirement
+{
+    class DubiousTrack;
+}
 
 namespace EvaluationRequirementResult
 {
 
-class SingleDubiousTrack : public Single
+/**
+*/
+class SingleDubiousTrack : public SingleDubiousBase
 {
 public:
-    SingleDubiousTrack(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer,
-            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            unsigned int num_updates,
-            unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_pos_inside_dubious,
-            unsigned int num_tracks, unsigned int num_tracks_dubious,
-            std::vector<EvaluationRequirement::DubiousTrackDetail> details);
+    SingleDubiousTrack(const std::string& result_id, 
+                       std::shared_ptr<EvaluationRequirement::Base> requirement,
+                       const SectorLayer& sector_layer,
+                       unsigned int utn, 
+                       const EvaluationTargetData* target, 
+                       EvaluationManager& eval_man,
+                       const EvaluationDetails& details,
+                       unsigned int num_updates,
+                       unsigned int num_pos_outside, 
+                       unsigned int num_pos_inside, 
+                       unsigned int num_pos_inside_dubious,
+                       unsigned int num_tracks, 
+                       unsigned int num_tracks_dubious);
+    virtual ~SingleDubiousTrack();
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    unsigned int numUpdates() const;
-    unsigned int numPosOutside() const;
-    unsigned int numPosInside() const;
-    unsigned int numPosInsideDubious() const;
     unsigned int numTracks() const;
     unsigned int numTracksDubious() const;
 
     float trackDurationAll() const;
     float trackDurationNondub() const;
     float trackDurationDubious() const;
-
-    const std::vector<EvaluationRequirement::DubiousTrackDetail>& details() const;
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -66,27 +71,9 @@ public:
 
     EvaluationRequirement::DubiousTrack* req ();
 
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
 protected:
-    unsigned int num_updates_ {0};
-    unsigned int num_pos_outside_ {0};
-    unsigned int num_pos_inside_ {0};
-    unsigned int num_pos_inside_dubious_ {0};
-    unsigned int num_tracks_ {0};
-    unsigned int num_tracks_dubious_ {0};
-
-    float track_duration_all_ {0};
-    float track_duration_nondub_ {0};
-    float track_duration_dubious_ {0};
-
-    std::vector<EvaluationRequirement::DubiousTrackDetail> details_;
-
-    bool has_p_dubious_track_ {false};
-    float p_dubious_track_{0};
-
-    bool has_p_dubious_update_ {false};
-    float p_dubious_update_{0};
-
     void update();
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -95,7 +82,14 @@ protected:
     void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
+    boost::optional<float> p_dubious_track_;
+
+    unsigned int num_tracks_             {0};
+    unsigned int num_tracks_dubious_     {0};
+
+    float track_duration_all_     {0};
+    float track_duration_nondub_  {0};
+    float track_duration_dubious_ {0};
 };
 
 }

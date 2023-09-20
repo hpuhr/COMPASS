@@ -22,6 +22,7 @@
 //#include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "sector.h"
+#include "airspace.h"
 #include "sectorlayer.h"
 #include "files.h"
 #include "importsectordialog.h"
@@ -43,6 +44,8 @@
 #include <QHeaderView>
 #include <QColorDialog>
 #include <QApplication>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 using namespace std;
 using namespace Utils;
@@ -59,7 +62,12 @@ ManageSectorsTaskWidget::ManageSectorsTaskWidget(ManageSectorsTask& task, QWidge
     addImportTab();
     addManageTab();
 
-    updateSectorTable();
+    updateSectorTableSlot();
+
+    QObject::connect(&COMPASS::instance(), &COMPASS::databaseOpenedSignal,
+                     this, &ManageSectorsTaskWidget::updateSectorTableSlot);
+    QObject::connect(&COMPASS::instance(), &COMPASS::databaseClosedSignal,
+                     this, &ManageSectorsTaskWidget::updateSectorTableSlot);
 
     setLayout(main_layout_);
 }
@@ -145,7 +153,6 @@ void ManageSectorsTaskWidget::addManageTab()
 
     manage_tab_layout->addWidget(sector_table_);
 
-
     QFont font_bold;
     font_bold.setBold(true);
 
@@ -168,6 +175,13 @@ void ManageSectorsTaskWidget::addManageTab()
                 &ManageSectorsTaskWidget::importSectorsSlot);
         button_layout->addWidget(import_button_);
 
+        QPushButton* import_airspace_button_ = new QPushButton("Import Air Space");
+        connect(import_airspace_button_, &QPushButton::clicked, this,
+                &ManageSectorsTaskWidget::importAirSpaceSectorsSlot);
+        button_layout->addWidget(import_airspace_button_);
+
+        import_airspace_button_->setVisible(!COMPASS::instance().isAppImage());
+
         manage_tab_layout->addLayout(button_layout);
     }
 
@@ -177,9 +191,9 @@ void ManageSectorsTaskWidget::addManageTab()
     tab_widget_->addTab(manage_tab_widget, "Manage");
 }
 
-void ManageSectorsTaskWidget::updateSectorTable()
+void ManageSectorsTaskWidget::updateSectorTableSlot()
 {
-    logdbg << "ManageSectorsTaskWidget: updateSectorTable";
+    logdbg << "ManageSectorsTaskWidget: updateSectorTableSlot";
 
     assert(sector_table_);
 
@@ -207,12 +221,11 @@ void ManageSectorsTaskWidget::updateSectorTable()
         for (auto& sec_it : sec_lay_it->sectors())
         {
             unsigned int sector_id = sec_it->id();
-            shared_ptr<Sector> sector = sec_it;
 
             col = 0;
 
             {  // Sector ID
-                QTableWidgetItem* item = new QTableWidgetItem(QString::number(sector->id()));
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(sec_it->id()));
                 item->setFlags(item->flags() ^ Qt::ItemIsEditable);
                 item->setData(Qt::UserRole, QVariant(sector_id));
                 sector_table_->setItem(row, col, item);
@@ -220,7 +233,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
             {  // Sector Name
                 ++col;
-                QTableWidgetItem* item = new QTableWidgetItem(sector->name().c_str());
+                QTableWidgetItem* item = new QTableWidgetItem(sec_it->name().c_str());
                 item->setFlags(item->flags() | Qt::ItemIsEditable);
                 item->setData(Qt::UserRole, QVariant(sector_id));
                 sector_table_->setItem(row, col, item);
@@ -238,7 +251,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
                 ++col;
                 QTableWidgetItem* item = new QTableWidgetItem();
                 item->setFlags(item->flags() | Qt::ItemIsEditable | Qt::ItemIsUserCheckable);
-                item->setCheckState(sec_it->exclude() ? Qt::Checked : Qt::Unchecked);
+                item->setCheckState(sec_it->isExclusionSector() ? Qt::Checked : Qt::Unchecked);
                 //item1->setCheckState();
                 item->setData(Qt::UserRole, QVariant(sector_id));
                 sector_table_->setItem(row, col, item);
@@ -246,7 +259,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
             {  // Num Points
                 ++col;
-                QTableWidgetItem* item = new QTableWidgetItem(QString::number(sector->points().size()));
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(sec_it->points().size()));
                 item->setFlags(item->flags() ^ Qt::ItemIsEditable);
                 item->setData(Qt::UserRole, QVariant(sector_id));
                 sector_table_->setItem(row, col, item);
@@ -254,10 +267,9 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
             {  // Altitude Minimum
                 ++col;
-                if (sector->hasMinimumAltitude())
+                if (sec_it->hasMinimumAltitude())
                 {
-                    QTableWidgetItem* item =
-                            new QTableWidgetItem(QString::number(sector->minimumAltitude()));
+                    QTableWidgetItem* item = new QTableWidgetItem(QString::number(sec_it->minimumAltitude()));
                     item->setFlags(item->flags() | Qt::ItemIsEditable);
                     item->setData(Qt::UserRole, QVariant(sector_id));
                     sector_table_->setItem(row, col, item);
@@ -274,10 +286,9 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
             {  // Altitude Maximum
                 ++col;
-                if (sector->hasMaximumAltitude())
+                if (sec_it->hasMaximumAltitude())
                 {
-                    QTableWidgetItem* item =
-                            new QTableWidgetItem(QString::number(sector->maximumAltitude()));
+                    QTableWidgetItem* item = new QTableWidgetItem(QString::number(sec_it->maximumAltitude()));
                     item->setFlags(item->flags() | Qt::ItemIsEditable);
                     item->setData(Qt::UserRole, QVariant(sector_id));
                     sector_table_->setItem(row, col, item);
@@ -297,7 +308,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
                 QPushButton* button = new QPushButton();
                 QPalette pal = button->palette();
-                pal.setColor(QPalette::Button, QColor(sector->colorStr().c_str()));
+                pal.setColor(QPalette::Button, QColor(sec_it->colorStr().c_str()));
                 //loginf << "UGA " << QColor(sector->colorStr().c_str()).name().toStdString();
                 button->setAutoFillBackground(true);
                 button->setPalette(pal);
@@ -306,7 +317,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
                 connect (button, &QPushButton::clicked, this, &ManageSectorsTaskWidget::changeSectorColorSlot);
 
-                button->setProperty("sector_id", QVariant(sector->id()));
+                button->setProperty("sector_id", QVariant(sec_it->id()));
                 sector_table_->setCellWidget(row, col, button);
             }
 
@@ -319,7 +330,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
                 connect (button, &QPushButton::clicked, this, &ManageSectorsTaskWidget::deleteSectorSlot);
 
-                button->setProperty("sector_id", QVariant(sector->id()));
+                button->setProperty("sector_id", QVariant(sec_it->id()));
                 sector_table_->setCellWidget(row, col, button);
             }
 
@@ -330,7 +341,6 @@ void ManageSectorsTaskWidget::updateSectorTable()
     sector_table_->resizeColumnsToContents();
 
     sector_table_->blockSignals(false);
-
     sector_table_->setDisabled(false);
 }
 
@@ -452,7 +462,7 @@ void ManageSectorsTaskWidget::importSlot()
         assert (task_.canImportFile());
         task_.importFile(dialog.layerName(), dialog.exclude(), dialog.color());
 
-        updateSectorTable();
+        updateSectorTableSlot();
     }
     else
         loginf << "ManageSectorsTaskWidget: importSlot: cancelled";
@@ -464,7 +474,6 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
 
     assert(item);
     assert(sector_table_);
-
 
     bool ok;
     unsigned int sector_id = item->data(Qt::UserRole).toUInt(&ok);
@@ -526,7 +535,7 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
             double value = item->text().toDouble(&ok);
 
             if (ok)
-                sector->minimumAltitude(value);
+                sector->setMinimumAltitude(value);
         }
     }
     else if (col_name == "Altitude Maximum")
@@ -538,13 +547,13 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
             double value = item->text().toDouble(&ok);
 
             if (ok)
-                sector->maximumAltitude(value);
+                sector->setMaximumAltitude(value);
         }
     }
     else
         assert(false);  // impossible
 
-    updateSectorTable();
+    updateSectorTableSlot();
 }
 
 void ManageSectorsTaskWidget::changeSectorColorSlot()
@@ -575,9 +584,8 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
     {
         loginf << "ManageSectorsTaskWidget: changeSectorColorSlot: color " << color.name().toStdString();
         sector->colorStr(color.name().toStdString());
-        updateSectorTable();
+        updateSectorTableSlot();
     }
-
 }
 
 void ManageSectorsTaskWidget::deleteSectorSlot()
@@ -600,7 +608,7 @@ void ManageSectorsTaskWidget::deleteSectorSlot()
 
     eval_man.deleteSector(sector);
 
-    updateSectorTable();
+    updateSectorTableSlot();
 }
 
 void ManageSectorsTaskWidget::exportSectorsSlot ()
@@ -636,7 +644,7 @@ void ManageSectorsTaskWidget::clearSectorsSlot ()
 
     COMPASS::instance().evaluationManager().deleteAllSectors();
 
-    updateSectorTable();
+    updateSectorTableSlot();
 }
 
 void ManageSectorsTaskWidget::importSectorsSlot ()
@@ -644,7 +652,7 @@ void ManageSectorsTaskWidget::importSectorsSlot ()
     loginf << "ManageSectorsTaskWidget: importSectorsSlot";
 
     QString filename =
-        QFileDialog::getOpenFileName(nullptr, "Export Sectors as JSON", "", "*.json");
+        QFileDialog::getOpenFileName(nullptr, "Import Sectors from JSON", "", "*.json");
 
     if (filename.size() > 0)
     {
@@ -662,5 +670,110 @@ void ManageSectorsTaskWidget::importSectorsJSON (const std::string& filename)
 
     COMPASS::instance().evaluationManager().importSectors(filename);
 
-    updateSectorTable();
+    updateSectorTableSlot();
+}
+
+void ManageSectorsTaskWidget::importAirSpaceSectorsSlot()
+{
+    loginf << "ManageSectorsTaskWidget: importAirSpaceSectorsSlot";
+
+    QString filename =
+        QFileDialog::getOpenFileName(nullptr, "Import Air Space Sectors from JSON", "", "*.json");
+
+    if (filename.isEmpty())
+        return;
+
+    importAirSpaceSectorsJSON(filename.toStdString());
+}
+
+void ManageSectorsTaskWidget::importAirSpaceSectorsJSON(const std::string& filename)
+{
+    loginf << "ManageSectorsTaskWidget: importSectorsJSON: filename '" << filename << "'";
+
+    assert (Files::fileExists(filename));
+
+    auto max_sector_id = COMPASS::instance().evaluationManager().getMaxSectorId();
+
+    AirSpace air_space;
+
+    if (!air_space.readJSON(filename, max_sector_id))
+    {
+        QMessageBox::critical(this, "Error", "Air space file could not be read.");
+        return;
+    }
+
+    QDialog dlg;
+    dlg.setWindowTitle("Choose sectors to import");
+
+    QVBoxLayout* layout = new QVBoxLayout;
+    dlg.setLayout(layout);
+
+    QTreeWidget* list = new QTreeWidget(&dlg);
+    list->setHeaderLabels({ "", "Sector", "Layer", "#Points", "Altitude min", "Altitude max" });
+    list->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
+    list->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
+    list->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::Stretch);
+    list->header()->setSectionResizeMode(3, QHeaderView::ResizeMode::ResizeToContents);
+    list->header()->setSectionResizeMode(4, QHeaderView::ResizeMode::ResizeToContents);
+    list->header()->setSectionResizeMode(5, QHeaderView::ResizeMode::ResizeToContents);
+
+    layout->addWidget(list);
+
+    QHBoxLayout* button_layout = new QHBoxLayout;
+    QPushButton* button_import = new QPushButton("Import");
+    QPushButton* button_cancel = new QPushButton("Cancel");
+
+    connect (button_import, &QPushButton::pressed, &dlg, &QDialog::accept);
+    connect (button_cancel, &QPushButton::pressed, &dlg, &QDialog::reject);
+
+    button_layout->addStretch(1);
+    button_layout->addWidget(button_import);
+    button_layout->addWidget(button_cancel);
+
+    layout->addLayout(button_layout);
+
+    auto layers = air_space.layers();
+
+    for (auto l : layers)
+    {
+        for (auto s : l->sectors())
+        {
+            QTreeWidgetItem* item = new QTreeWidgetItem;
+            item->setCheckState(0, Qt::CheckState::Checked);
+            item->setText(1, QString::fromStdString(s->name()));
+            item->setText(2, QString::fromStdString(l->name()));
+            item->setText(3, QString::number(s->points().size()));
+
+            bool has_alt_min = s->hasMinimumAltitude();
+            bool has_alt_max = s->hasMaximumAltitude();
+
+            item->setText(4, has_alt_min ? QString::number(s->minimumAltitude()) : "-");
+            item->setText(5, has_alt_max ? QString::number(s->maximumAltitude()) : "-");
+
+            list->addTopLevelItem(item);
+        }
+    }
+
+    dlg.resize(500, 800);
+
+    auto ret = dlg.exec();
+    if (ret == QDialog::Rejected)
+        return;
+
+    std::set<std::string> sectors_to_import;
+
+    for (int i = 0; i < list->topLevelItemCount(); ++i)
+    {
+        QTreeWidgetItem* item = list->topLevelItem(i);
+        if (item->checkState(0) == Qt::Checked)
+            sectors_to_import.insert(item->text(1).toStdString());
+    }
+
+    if (sectors_to_import.empty())
+        return;
+
+    if (!COMPASS::instance().evaluationManager().importAirSpace(air_space, sectors_to_import))
+        QMessageBox::critical(this, "Error", "Importing air space sectors failed.");
+
+    updateSectorTableSlot();
 }

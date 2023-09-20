@@ -22,6 +22,7 @@
 #include "buffer.h"
 #include "property.h"
 #include "stringconv.h"
+#include "json.hpp"
 
 //#include <tbb/tbb.h>
 
@@ -56,6 +57,8 @@ class NullableVector
 public:
     /// @brief Destructor
     virtual ~NullableVector() {}
+
+    void renameProperty(const std::string& name) { property_.rename(name); }
 
     /// @brief Sets all elements to false
     void clear();
@@ -139,6 +142,8 @@ public:
 
     std::vector<std::size_t> sortPermutation();
     void sortByPermutation(const std::vector<std::size_t>& perm);
+
+    nlohmann::json asJSON(unsigned int max_size=0);
 
 private:
     Property property_;
@@ -1194,6 +1199,27 @@ void NullableVector<T>::sortByPermutation(const std::vector<std::size_t>& perm)
     //    }
 }
 
+template <class T>
+nlohmann::json  NullableVector<T>::asJSON(unsigned int max_size)
+{
+    nlohmann::json list = nlohmann::json::array();
+
+    unsigned int size = buffer_.size();
+
+    if (max_size != 0)
+        size = std::min(size, max_size);
+
+    for (unsigned int cnt=0; cnt < size; ++cnt)
+    {
+        if (isNull(cnt))
+            list.push_back(nlohmann::json());
+        else
+            list.push_back(get(cnt));
+    }
+
+    return list;
+}
+
 // private stuff
 
 /// @brief Sets specific element to not Null value
@@ -1222,5 +1248,8 @@ void NullableVector<bool>::append(unsigned int index, bool value);
 
 template <>
 void NullableVector<std::string>::append(unsigned int index, std::string value);
+
+template <>
+nlohmann::json NullableVector<boost::posix_time::ptime>::asJSON(unsigned int max_size);
 
 #endif /* ARRAYLIST_H_ */

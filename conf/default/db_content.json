@@ -1,7 +1,15 @@
 {
     "parameters": {
+        "limit_max": 1000000,
+        "limit_min": 0,
+        "max_live_data_age_cache": 5,
+        "max_live_data_age_db": 60,
+        "order_variable_dbcontent_name": "Meta",
+        "order_variable_name": "Timestamp",
         "use_filters": false,
-        "use_limit": false
+        "use_limit": false,
+        "use_order": true,
+        "use_order_ascending": true
     },
     "sub_config_files": [
         {
@@ -44,14 +52,14 @@
         "DBContentLabelGenerator": {
             "DBContentLabelGenerator0": {
                 "parameters": {
-                    "auto_label": true,
+                    "auto_label": false,
                     "declutter_labels": true,
                     "filter_mode3a_active": false,
                     "filter_mode3a_values": "7000,7777",
                     "filter_modec_max_active": false,
-                    "filter_modec_max_value": 400.0,
+                    "filter_modec_max_value": 500.0,
                     "filter_modec_min_active": false,
-                    "filter_modec_min_value": 100.0,
+                    "filter_modec_min_value": 347.0,
                     "filter_modec_null_wanted": false,
                     "filter_primary_only_activ": false,
                     "filter_ta_active": false,
@@ -115,6 +123,7 @@
                             "4": "Mode C Code LM",
                             "5": "DS ID",
                             "6": "Ground Speed",
+                            "7": "Wake Turbulence Category FPL",
                             "8": "Timestamp"
                         },
                         "RefTraj": {
@@ -130,6 +139,7 @@
                     },
                     "label_directions": {
                         "0": 3,
+                        "10": 3,
                         "12241": 1,
                         "12639": 3,
                         "12750": 2,
@@ -138,7 +148,7 @@
                         "12760": 2,
                         "12761": 2,
                         "12762": 3,
-                        "12763": 0,
+                        "12763": 1,
                         "12770": 3,
                         "12798": 3,
                         "12820": 1,
@@ -153,9 +163,18 @@
                         "12830": 2,
                         "12831": 3,
                         "12990": 1,
+                        "20": 1,
                         "25005": 3,
                         "25006": 3,
                         "265": 3,
+                        "26527": 3,
+                        "26538": 3,
+                        "26542": 1,
+                        "26551": 3,
+                        "26582": 3,
+                        "26692": 3,
+                        "26693": 3,
+                        "30601": 3,
                         "30602": 3,
                         "30603": 0,
                         "30604": 1,
@@ -169,7 +188,27 @@
                         "6495": 3,
                         "8681": 3
                     },
+                    "label_ds_ids": {
+                        "0": true,
+                        "12820": true,
+                        "12821": true,
+                        "12822": true,
+                        "12823": true,
+                        "12824": true,
+                        "12825": true,
+                        "12826": true,
+                        "12827": true,
+                        "12828": true,
+                        "12830": true,
+                        "12831": true,
+                        "12990": true,
+                        "26582": true,
+                        "26692": false,
+                        "26693": false
+                    },
                     "label_lines": {
+                        "0": 0,
+                        "10": 0,
                         "12241": 0,
                         "12639": 0,
                         "12750": 0,
@@ -193,12 +232,57 @@
                         "12830": 0,
                         "12831": 0,
                         "12990": 0,
+                        "20": 0,
                         "25005": 0,
                         "25006": 0,
-                        "37494": 0
+                        "265": 0,
+                        "26527": 0,
+                        "26538": 0,
+                        "26542": 0,
+                        "26551": 0,
+                        "26582": 2,
+                        "26692": 0,
+                        "26693": 0,
+                        "30601": 0,
+                        "30602": 0,
+                        "30603": 0,
+                        "30604": 0,
+                        "30649": 0,
+                        "30650": 0,
+                        "37494": 0,
+                        "511": 0,
+                        "512": 0,
+                        "547": 0,
+                        "6427": 0,
+                        "6495": 0,
+                        "8681": 0
                     },
-                    "label_opacity": 0.8399999737739563,
+                    "label_opacity": 0.8500000238418579,
                     "max_declutter_labels": 100
+                }
+            }
+        },
+        "DBContentTargetModel": {
+            "DBContentTargetModel0": {
+                "parameters": {
+                    "filter_mode_a_code_blacklist": false,
+                    "filter_mode_a_code_values": "7000,7777",
+                    "filter_mode_a_codes": false,
+                    "filter_target_address_values": "",
+                    "filter_target_addresses": false,
+                    "filter_target_addresses_blacklist": false,
+                    "remove_mode_c_min_value": 3000.0,
+                    "remove_mode_c_values": true,
+                    "remove_modeac_onlys": false,
+                    "remove_not_detected_dbo_values": {
+                        "CAT001": false,
+                        "CAT021": true
+                    },
+                    "remove_not_detected_dbos": false,
+                    "remove_psr_only_targets": true,
+                    "remove_short_targets": false,
+                    "remove_short_targets_min_duration": 60.0,
+                    "remove_short_targets_min_updates": 10
                 }
             }
         },
@@ -327,57 +411,6 @@
                             "parameters": {
                                 "dbcontent_name": "RefTraj",
                                 "variable_name": "Aircraft Identification"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaVariableAssociations0": {
-                "parameters": {
-                    "name": "Associations"
-                },
-                "sub_configs": {
-                    "VariableDefinition": {
-                        "VariableDefinitionCAT001Associations0": {
-                            "parameters": {
-                                "dbcontent_name": "CAT001",
-                                "variable_name": "Associations"
-                            }
-                        },
-                        "VariableDefinitionCAT010Associations0": {
-                            "parameters": {
-                                "dbcontent_name": "CAT010",
-                                "variable_name": "Associations"
-                            }
-                        },
-                        "VariableDefinitionCAT020Associations0": {
-                            "parameters": {
-                                "dbcontent_name": "CAT020",
-                                "variable_name": "Associations"
-                            }
-                        },
-                        "VariableDefinitionCAT021Associations0": {
-                            "parameters": {
-                                "dbcontent_name": "CAT021",
-                                "variable_name": "Associations"
-                            }
-                        },
-                        "VariableDefinitionCAT048Associations0": {
-                            "parameters": {
-                                "dbcontent_name": "CAT048",
-                                "variable_name": "Associations"
-                            }
-                        },
-                        "VariableDefinitionCAT062Associations0": {
-                            "parameters": {
-                                "dbcontent_name": "CAT062",
-                                "variable_name": "Associations"
-                            }
-                        },
-                        "VariableDefinitionRefTrajAssociations0": {
-                            "parameters": {
-                                "dbcontent_name": "RefTraj",
-                                "variable_name": "Associations"
                             }
                         }
                     }
@@ -2055,6 +2088,57 @@
                             "parameters": {
                                 "dbcontent_name": "CAT062",
                                 "variable_name": "Type LM"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableUTN0": {
+                "parameters": {
+                    "name": "UTN"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001UTN0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "UTN"
+                            }
+                        },
+                        "VariableDefinitionCAT010UTN0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT010",
+                                "variable_name": "UTN"
+                            }
+                        },
+                        "VariableDefinitionCAT020UTN0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "UTN"
+                            }
+                        },
+                        "VariableDefinitionCAT021UTN0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "UTN"
+                            }
+                        },
+                        "VariableDefinitionCAT048UTNs0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "UTN"
+                            }
+                        },
+                        "VariableDefinitionCAT062UTN0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "UTN"
+                            }
+                        },
+                        "VariableDefinitionRefTrajUTN0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "UTN"
                             }
                         }
                     }

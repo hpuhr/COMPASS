@@ -1,6 +1,5 @@
 #include "eval/requirement/base/baseconfigwidget.h"
 #include "eval/requirement/base/baseconfig.h"
-#include "eval/requirement/base/comparisontypecombobox.h"
 #include "eval/requirement/group.h"
 #include "logger.h"
 
@@ -47,20 +46,6 @@ BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     connect(comment_edit, &QPlainTextEdit::textChanged, this, &BaseConfigWidget::changedCommentSlot);
 
     form_layout_->addRow("Comment", comment_edit);
-
-    // prob
-    prob_edit_ = new QLineEdit(QString::number(config_.prob()));
-    prob_edit_->setValidator(new QDoubleValidator(0.0000001, 1.0, 8, this));
-    connect(prob_edit_, &QLineEdit::textEdited,
-            this, &BaseConfigWidget::changedProbabilitySlot);
-
-    form_layout_->addRow("Probability [1]", prob_edit_);
-
-    // prob check type
-    check_type_box_ = new ComparisonTypeComboBox();
-    check_type_box_->setType(config_.probCheckType());
-    connect(check_type_box_, &ComparisonTypeComboBox::changedTypeSignal, this, &BaseConfigWidget::changedTypeSlot);
-    form_layout_->addRow("Probability Check Type", check_type_box_);
 
     main_layout->addLayout(form_layout_);
 
@@ -114,26 +99,6 @@ void BaseConfigWidget::changedCommentSlot()
     logdbg << "BaseConfigWidget: changedCommentSlot: comment '" << value_str << "'";
 
     config_.comment(value_str);
-}
-
-void BaseConfigWidget::changedProbabilitySlot(const QString& value)
-{
-    loginf << "BaseConfigWidget: changedProbabilitySlot: value " << value.toStdString();
-
-    bool ok;
-    float val = value.toFloat(&ok);
-
-    if (ok)
-        config_.prob(val);
-    else
-        loginf << "BaseConfigWidget: changedProbabilitySlot: invalid value";
-}
-
-void BaseConfigWidget::changedTypeSlot()
-{
-    assert (check_type_box_);
-    logdbg << "BaseConfigWidget: changedProbabilitySlot: value " << check_type_box_->getType();
-    config_.probCheckType(check_type_box_->getType());
 }
 
 }

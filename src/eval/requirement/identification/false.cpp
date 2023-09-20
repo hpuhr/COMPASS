@@ -17,11 +17,11 @@
 
 #include "eval/requirement/identification/false.h"
 #include "eval/results/identification/falsesingle.h"
-#include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "sectorlayer.h"
 
 using namespace std;
@@ -35,7 +35,7 @@ IdentificationFalse::IdentificationFalse(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         bool require_all_false, bool use_mode_a, bool use_ms_ta, bool use_ms_ti)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       require_all_false_(require_all_false),
       use_mode_a_(use_mode_a), use_ms_ta_(use_ms_ta), use_ms_ti_(use_ms_ti)
 {
@@ -47,9 +47,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
 {
     logdbg << "EvaluationRequirementIdentificationFalse '" << name_ << "': evaluate: utn " << target_data.utn_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     ptime timestamp;
 
@@ -62,13 +62,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
     int num_correct {0};
     int num_false {0};
 
-    vector<CheckDetail> details;
-    EvaluationTargetPosition pos_current;
+    typedef EvaluationRequirementResult::SingleIdentificationFalse Result;
+    typedef EvaluationDetail                                       Detail;
+    typedef Result::EvaluationDetails                              Details;
+    Details details;
+
+    dbContent::TargetPosition pos_current;
 
     bool ref_exists;
     bool is_inside;
-    pair<EvaluationTargetPosition, bool> ret_pos;
-    EvaluationTargetPosition ref_pos;
+    //pair<dbContent::TargetPosition, bool> ret_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
     ValueComparisonResult cmp_res_ti;
@@ -89,11 +93,35 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
 
     string comment;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
     bool skip_detail;
 
-    bool has_ground_bit;
-    bool ground_bit_set;
+    auto addDetail = [ & ] (const ptime& ts,
+                            const dbContent::TargetPosition& tst_pos,
+                            const QVariant& ref_exists,
+                            const QVariant& pos_inside,
+                            const QVariant& is_not_ok,
+                            const QVariant& num_updates,
+                            const QVariant& num_no_ref,
+                            const QVariant& num_pos_inside,
+                            const QVariant& num_pos_outside,
+                            const QVariant& num_unknown_id,
+                            const QVariant& num_correct_id,
+                            const QVariant& num_false_id,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::RefExists, ref_exists)
+                                             .setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailKey::IsNotOk, is_not_ok)
+                                             .setValue(Result::DetailKey::NumUpdates, num_updates)
+                                             .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                                             .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                                             .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                                             .setValue(Result::DetailKey::NumUnknownID, num_unknown_id)
+                                             .setValue(Result::DetailKey::NumCorrectID, num_correct_id)
+                                             .setValue(Result::DetailKey::NumFalseID, num_false_id)
+                                             .generalComment(comment));
+    };
 
     for (const auto& tst_id : tst_data)
     {
@@ -106,66 +134,56 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
         ++num_updates;
 
         timestamp = tst_id.first;
-        pos_current = target_data.tstPosForTime(timestamp);
+        pos_current = target_data.tstChain().pos(tst_id);
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                   num_unknown, num_correct, num_false, "No reference data"});
+                addDetail(timestamp, pos_current,
+                            false, {}, false, // ref_exists, pos_inside,
+                            num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                            num_unknown, num_correct, num_false, "No reference data");
 
             ++num_no_ref_pos;
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
+//        ref_pos = ret_pos.first;
+//        ok = ret_pos.second;
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                   num_unknown, num_correct, num_false, "No reference position"});
+                addDetail(timestamp, pos_current,
+                            false, {}, false, // ref_exists, pos_inside,
+                            num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                            num_unknown, num_correct, num_false, "No reference position");
 
             ++num_no_ref_pos;
             continue;
         }
         ref_exists = true;
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
-
-        is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, pos_current,
-                                   ref_exists, is_inside, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                   num_unknown, num_correct, num_false, "Outside sector"});
+                addDetail(timestamp, pos_current,
+                            ref_exists, is_inside, false, // ref_exists, pos_inside,
+                            num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                            num_unknown, num_correct, num_false, "Outside sector");
 
             ++num_pos_outside;
             continue;
         }
         ++num_pos_inside;
 
-        tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(timestamp, target_data, max_ref_time_diff);
-        tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(timestamp, target_data, max_ref_time_diff);
-        tie(cmp_res_ma, cmp_res_ma_comment) = compareModeA(timestamp, target_data, max_ref_time_diff);
+        tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(tst_id, target_data, max_ref_time_diff);
+        tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(tst_id, target_data, max_ref_time_diff);
+        tie(cmp_res_ma, cmp_res_ma_comment) = compareModeA(tst_id, target_data, max_ref_time_diff);
 
         any_false = false;
         all_false = true;
@@ -230,10 +248,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
             ++num_correct;
 
         if (!skip_detail)
-            details.push_back({timestamp, pos_current,
-                               ref_exists, is_inside, result_false,
-                               num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                               num_unknown, num_correct, num_false, comment});
+            addDetail(timestamp, pos_current,
+                        ref_exists, is_inside, result_false,
+                        num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                        num_unknown, num_correct, num_false, comment);
     }
 
     logdbg << "EvaluationRequirementIdentificationFalse '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -250,8 +268,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
 
     return make_shared<EvaluationRequirementResult::SingleIdentificationFalse>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
-                num_unknown, num_correct, num_false, details);
+                eval_man_, details, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
+                num_unknown, num_correct, num_false);
 }
 
 bool IdentificationFalse::requireAllFalse() const

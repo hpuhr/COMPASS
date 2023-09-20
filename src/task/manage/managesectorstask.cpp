@@ -39,7 +39,7 @@ using namespace std;
 
 ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
-    : Task("ManageSectorsTask", "Manage Sectors", true, false, task_manager),
+    : Task("ManageSectorsTask", "Manage Sectors", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_sectors.json")
 {
     registerParameter("current_filename", &current_filename_, "");
@@ -97,8 +97,6 @@ void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
         throw std::runtime_error("ManageSectorsTask: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
-
-bool ManageSectorsTask::checkPrerequisites() { return COMPASS::instance().interface().ready(); }
 
 void ManageSectorsTask::addFile(const std::string& filename)
 {
@@ -241,7 +239,7 @@ void ManageSectorsTask::importFile (const std::string& layer_name, bool exclude,
     msgBox.setText(QString("Import of ")+QString::number(found_sectors_num_)+" sectors done");
     msgBox.setIcon(QMessageBox::Information);
 
-    if (show_done_summary_)
+    if (allow_user_interactions_)
         msgBox.exec();
 
     loginf << "ManageSectorsTask: importFile: done";
@@ -462,6 +460,3 @@ void ManageSectorsTask::addSector (const std::string& sector_name, std::vector<s
     loginf << "ManageSectorsTask: addSector: adding layer '" << layer_name_ << "' name '" << sector_name;
     eval_man.createNewSector(sector_name, layer_name_, exclude_, color_, points);
 }
-
-
-

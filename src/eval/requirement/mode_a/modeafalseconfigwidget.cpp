@@ -29,21 +29,21 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-    ModeAFalseConfigWidget::ModeAFalseConfigWidget(ModeAFalseConfig& cfg)
-            : BaseConfigWidget(cfg)
-    {
-        assert (prob_edit_);
-        prob_edit_->setToolTip("Probability of false Mode 3/A code");
+ModeAFalseConfigWidget::ModeAFalseConfigWidget(ModeAFalseConfig& cfg)
+    : ProbabilityBaseConfigWidget(cfg)
+{
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability of false Mode 3/A code");
 
-        assert (check_type_box_);
-    }
+    assert (check_type_box_);
+}
 
 
-    ModeAFalseConfig& ModeAFalseConfigWidget::config()
-    {
-        ModeAFalseConfig* config = dynamic_cast<ModeAFalseConfig*>(&config_);
-        assert (config);
+ModeAFalseConfig& ModeAFalseConfigWidget::config()
+{
+    ModeAFalseConfig* config = dynamic_cast<ModeAFalseConfig*>(&config_);
+    assert (config);
 
-        return *config;
-    }
+    return *config;
+}
 }

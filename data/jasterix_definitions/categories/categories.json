@@ -43,7 +43,7 @@
     },
     "010":{
         "comment":"Category 010 Transmission of Monosensor Surface Movement Data",
-        "default_edition":"0.24_sensis",
+        "default_edition":"0.31",
         "default_mapping":"",
         "editions":{
             "0.24_sensis":{
@@ -114,7 +114,8 @@
     },
     "021":{
         "comment":"Category 021 ADS-B Reports",
-        "default_edition":"2.1",
+        "default_edition":"2.4",
+        "default_ref_edition":"1.5",
         "default_mapping":"",
         "editions":{
             "0.26":{
@@ -133,6 +134,13 @@
                 "file":"021/cat021_2.4.json"
             }
         },
+        "ref_editions":{
+            "1.5":{
+                "document":"EUROCONTROL-SPEC-0149-12-A",
+                "date":"21 December 2021",
+                "file":"021/cat021_ref_1.5.json"
+            }
+        },        
         "mappings":{
             "1.0":{
                 "comment":"conversion to general format 1.0",

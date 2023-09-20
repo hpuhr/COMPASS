@@ -30,7 +30,7 @@ namespace EvaluationRequirement
 {
 
 ModeCPresentConfigWidget::ModeCPresentConfigWidget(ModeCPresentConfig& cfg)
-    : BaseConfigWidget(cfg)
+    : ProbabilityBaseConfigWidget(cfg)
 {
     assert (prob_edit_);
     prob_edit_->setToolTip("Probability of Mode C code present");

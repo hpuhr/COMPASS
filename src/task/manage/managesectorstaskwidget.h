@@ -35,24 +35,29 @@ class ManageSectorsTaskWidget : public TaskWidget
 {
     Q_OBJECT
 public slots:
-  void expertModeChangedSlot();
+    void expertModeChangedSlot();
 
-  void addFileSlot();
-  void deleteFileSlot();
-  void deleteAllFilesSlot();
-  void selectedFileSlot();
-  void updateFileListSlot();
+    void addFileSlot();
+    void deleteFileSlot();
+    void deleteAllFilesSlot();
+    void selectedFileSlot();
+    void updateFileListSlot();
 
-  void importSlot();
+    void importSlot();
 
-  void sectorItemChangedSlot(QTableWidgetItem* item);
+    void sectorItemChangedSlot(QTableWidgetItem* item);
 
-  void changeSectorColorSlot();
-  void deleteSectorSlot();
+    void changeSectorColorSlot();
+    void deleteSectorSlot();
 
-  void exportSectorsSlot ();
-  void clearSectorsSlot ();
-  void importSectorsSlot ();
+    void exportSectorsSlot ();
+    void clearSectorsSlot ();
+    void importSectorsSlot ();
+
+    void updateSectorTableSlot();
+
+private slots:
+    void importAirSpaceSectorsSlot ();
 
 public:
     ManageSectorsTaskWidget(ManageSectorsTask& task, QWidget* parent = nullptr);
@@ -63,8 +68,12 @@ public:
     void updateParseMessage ();
 
     void importSectorsJSON (const std::string& filename);
+    void importAirSpaceSectorsJSON (const std::string& filename);
 
 protected:
+    void addImportTab();
+    void addManageTab();
+
     ManageSectorsTask& task_;
 
     QVBoxLayout* main_layout_{nullptr};
@@ -83,11 +92,6 @@ protected:
     QTableWidget* sector_table_{nullptr};
     QStringList table_columns_{"ID", "Sector Name",  "Layer Name", "Exclude", "Num Points", "Altitude Minimum",
                                "Altitude Maximum", "Color", "Delete"};
-
-    void addImportTab();
-    void addManageTab();
-
-    void updateSectorTable();
 };
 
 #endif // MANAGESECTORSTASKWIDGET_H

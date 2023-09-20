@@ -31,7 +31,6 @@
 #include <set>
 #include <vector>
 
-
 class DBInterface;
 class DBContentManager;
 class DataSourceManager;
@@ -84,10 +83,10 @@ public:
 
 protected:
     bool db_opened_{false};
-    bool shut_down_{false};
-
     bool expert_mode_ {false};
+
     AppMode app_mode_ {AppMode::Offline};
+    AppState app_state_ = AppState::Starting;
 
     bool hide_evaluation_ {false};
     bool hide_viewpoints_ {false};
@@ -126,6 +125,11 @@ protected:
 
     COMPASS();
 
+private:
+    friend class Client;
+
+    void setAppState(AppState state);
+
 public:
     static COMPASS& instance()
     {
@@ -141,6 +145,8 @@ public:
     void appMode(const AppMode& app_mode);
     std::string appModeStr() const;
 
+    AppState appState() const { return app_state_; }
+
     static bool isAppImage() { return is_app_image_; }
 
     static const std::map<AppMode, std::string>& appModes2Strings();
@@ -149,6 +155,7 @@ public:
     void expertMode(bool expert_mode);
 
     bool isShutDown() const;
+    bool isRunning() const;
 
     bool hideEvaluation() const;
     bool hideViewpoints() const;

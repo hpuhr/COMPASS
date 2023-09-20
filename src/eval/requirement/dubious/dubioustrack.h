@@ -18,8 +18,8 @@
 #ifndef EVALUATIONREQUIREMENTDUBIOUSTRACK_H
 #define EVALUATIONREQUIREMENTDUBIOUSTRACK_H
 
-#include "eval/requirement/base/base.h"
-#include "evaluationtargetposition.h"
+#include "eval/requirement/base/probabilitybase.h"
+#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 
@@ -31,111 +31,7 @@
 namespace EvaluationRequirement
 {
 
-class DubiousTrackUpdateDetail
-{
-public:
-    DubiousTrackUpdateDetail(boost::posix_time::ptime timestamp, EvaluationTargetPosition pos)
-        : timestamp_(timestamp), pos_(pos)
-    {
-    }
-
-    boost::posix_time::ptime timestamp_;
-    EvaluationTargetPosition pos_;
-    std::map<std::string, std::string> dubious_comments_;
-
-    std::string dubiousReasonsString()
-    {
-        if (!dubious_comments_.size())
-            return "OK";
-
-        std::string str;
-
-        for (auto& reas_it : dubious_comments_)
-        {
-            if (str.size())
-                str += ", ";
-
-            str += reas_it.first;
-            if (reas_it.second.size())
-                str += "("+reas_it.second+")";
-        }
-
-        if (!str.size())
-            return "OK";
-        else
-            return str;
-    }
-};
-
-class DubiousTrackDetail
-{
-public:
-    DubiousTrackDetail(unsigned int track_num, boost::posix_time::ptime ts_begin)
-        : track_num_(track_num), tod_begin_(ts_begin)
-    {
-        tod_end_ = tod_begin_;
-    }
-
-    bool first_inside_ {true};
-
-    unsigned int track_num_ {0};
-    boost::posix_time::ptime tod_begin_;
-    boost::posix_time::ptime tod_end_;
-    boost::posix_time::time_duration duration_;
-    //std::vector<float> tods_inside_;
-
-    unsigned int num_pos_inside_{0};
-    unsigned int num_pos_inside_dubious_{0};
-
-    //std::map<float, std::map<std::string, std::string>> tods_inside_dubious_; // tod -> type -> comment
-    std::vector<DubiousTrackUpdateDetail> updates_; // only for inside, also not dubious
-
-    bool has_mode_ac_ {false};
-    bool has_mode_s_ {false};
-
-    bool left_sector_ {false};
-
-    bool is_dubious_ {false};
-
-    std::map<std::string, std::string> dubious_reasons_; // type -> comment
-
-    EvaluationTargetPosition pos_begin_;
-    EvaluationTargetPosition pos_last_;
-
-    std::string dubiousReasonsString()
-    {
-        std::string str;
-
-        for (auto& reas_it : dubious_reasons_)
-        {
-            if (str.size())
-                str += ", ";
-
-            str += reas_it.first;
-            if (reas_it.second.size())
-                str += "("+reas_it.second+")";
-        }
-
-        if (!str.size())
-            return "OK";
-        else
-            return str;
-    }
-
-    unsigned int getNumUpdatesDubious()
-    {
-        unsigned int cnt = 0;
-
-        for (auto& update : updates_)
-            if (update.dubious_comments_.size())
-                ++cnt;
-
-        return cnt;
-    }
-};
-
-
-class DubiousTrack : public Base
+class DubiousTrack : public ProbabilityBase
 {
 public:
     DubiousTrack(const std::string& name, const std::string& short_name, const std::string& group_name,

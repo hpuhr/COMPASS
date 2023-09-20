@@ -16,6 +16,7 @@
  */
 
 #include "histogramviewconfigwidget.h"
+#include "histogramviewwidget.h"
 #include "histogramviewdatawidget.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
@@ -41,9 +42,10 @@ using namespace Utils;
 
 /**
  */
-HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidget* parent)
-    : ViewConfigWidget(parent), view_(view)
+HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_widget, QWidget* parent)
+:   ViewConfigWidget(view_widget, parent)
 {
+    view_ = view_widget->getView();
     assert(view_);
 
     setMinimumWidth(400);
@@ -200,29 +202,12 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
         updateInfo();
     }
 
-    QFont font_status;
-    font_status.setItalic(true);
-
-    status_label_ = new QLabel();
-    status_label_->setFont(font_status);
-    status_label_->setVisible(false);
-    vlayout->addWidget(status_label_);
-
-    reload_button_ = new QPushButton("Reload");
-    UI_TEST_OBJ_NAME(reload_button_, reload_button_->text())
-    
-    connect(reload_button_, &QPushButton::clicked, this,
-            &HistogramViewConfigWidget::reloadRequestedSlot);
-    vlayout->addWidget(reload_button_);
-
     setLayout(vlayout);
-
-    setStatus("No Data Loaded", true);
 }
 
 /**
  */
-HistogramViewConfigWidget::~HistogramViewConfigWidget() {}
+HistogramViewConfigWidget::~HistogramViewConfigWidget() = default;
 
 /**
  */
@@ -332,49 +317,7 @@ void HistogramViewConfigWidget::updateConfig()
 
 /**
  */
-void HistogramViewConfigWidget::setStatus (const QString& text, bool visible, const QColor& color)
-{
-    assert (status_label_);
-
-    status_label_->setText(text);
-    //status_label_->setStyleSheet("QLabel { color : "+color.name()+"; }");
-
-    QPalette palette = status_label_->palette();
-    palette.setColor(status_label_->foregroundRole(), color);
-
-    status_label_->setPalette(palette);
-    status_label_->setVisible(visible);
-}
-
-/**
- */
-void HistogramViewConfigWidget::appModeSwitch (AppMode app_mode)
-{
-    assert (reload_button_);
-    reload_button_->setHidden(app_mode == AppMode::LiveRunning);
-    assert (status_label_);
-    status_label_->setHidden(app_mode == AppMode::LiveRunning);
-}
-
-/**
- */
-void HistogramViewConfigWidget::reloadRequestedSlot()
-{
-    COMPASS::instance().dbContentManager().load();
-}
-
-/**
- */
-void HistogramViewConfigWidget::loadingStartedSlot()
-{
-    setDisabled(true); // reenabled in view
-
-    setStatus("Loading Data", true);
-}
-
-/**
- */
-void HistogramViewConfigWidget::onDisplayChange_impl() 
+void HistogramViewConfigWidget::onDisplayChange_impl()
 {
     updateInfo();
 }
@@ -383,10 +326,9 @@ void HistogramViewConfigWidget::onDisplayChange_impl()
  */
 void HistogramViewConfigWidget::updateInfo()
 {
-    HistogramViewDataWidget::ViewInfo info;
-
-    if (view_ && view_->hasDataWidget())
-        info = view_->getDataWidget()->getViewInfo();
+    auto data_widget = dynamic_cast<HistogramViewDataWidget*>(getWidget()->getViewDataWidget());
+    
+    HistogramViewDataWidget::ViewInfo info = data_widget->getViewInfo();
 
     auto setItalic = [ = ] (QLabel* label, bool ok) 
     {

@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_cat048",
+        "id": 48,
         "info": "",
         "name": "CAT048"
     },
@@ -16,6 +17,32 @@
                     "name": "Extended Range",
                     "representation_str": "STANDARD",
                     "short_name": "ERR",
+                    "unit": ""
+                }
+            },
+            "Variable10": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "w_e_value",
+                    "description": "From 030.Warning/Error Conditions.W/E Value\n\n0 Not defined; never used.\n1 Multipath Reply (Reflection)\n2 Reply due to sidelobe interrogation/reception\n3 Split plot\n4 Second time around reply\n5 Angel\n6 Slow moving target correlated with road infrastructure (terrestrial vehicle)\n7 Fixed PSR plot\n8 Slow PSR target\n9 Low quality PSR plot\n10 Phantom SSR plot\n11 Non-Matching Mode-3/A Code\n12 Mode C code / Mode S altitude code abnormal value compared to the track\n13 Target in Clutter Area\n14 Maximum Doppler Response in Zero Filter\n15 Transponder anomaly detected\n16 Duplicated or Illegal Mode S Aircraft Address\n17 Mode S error correction applied\n18 Undecodable Mode C code / Mode S altitude code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "W/E Value",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable11": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "mode_s_mb_data",
+                    "description": "From 250.Mode S MB Data.MB Data\n\n56-bit message conveying Mode S Comm B message data",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode S MB Data",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
                     "unit": ""
                 }
             },
@@ -136,6 +163,19 @@
                     "unit": ""
                 }
             },
+            "VariableRadarUTN0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "utn",
+                    "description": "Unique Target Number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "UTN",
+                    "representation_str": "STANDARD",
+                    "short_name": "UTN",
+                    "unit": ""
+                }
+            },
             "VariableRadaracas_aircraft_identification0": {
                 "parameters": {
                     "data_type_str": "BOOL",
@@ -211,19 +251,6 @@
                     "name": "Mode S Specific Service Capability",
                     "representation_str": "STANDARD",
                     "short_name": "MSSC",
-                    "unit": ""
-                }
-            },
-            "VariableRadarassociations0": {
-                "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "associations",
-                    "description": "Associations set as JSON object",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Associations",
-                    "representation_str": "STANDARD",
-                    "short_name": "Assoc",
                     "unit": ""
                 }
             },
@@ -554,7 +581,7 @@
             },
             "VariableRadarrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",

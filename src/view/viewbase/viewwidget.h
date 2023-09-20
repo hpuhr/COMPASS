@@ -23,6 +23,9 @@
 #include <QWidget>
 
 #include "configurable.h"
+#include "appmode.h"
+#include "ui_test_testable.h"
+#include "json.h"
 
 //class EventProcessor;
 class View;
@@ -30,6 +33,8 @@ class ViewToolWidget;
 class ViewDataWidget;
 class ViewConfigWidget;
 class ViewToolSwitcher;
+class ViewLoadStateWidget;
+class ViewLowerWidget;
 
 class QSplitter;
 class QLayout;
@@ -40,14 +45,55 @@ class QLayout;
 A view widget bases on a QWidget and provides a way to display
 the views data, which is held in a model.
 
-A view widget may hold an event processor, which is used to react in a specific
-way to mouse and keyboard events. A new ViewWidget will most likely introduce a new
-event processor.
+A ViewWidget consists of a standard layout with a set of typical components located at predefined regions of the widget.
+Some of them need to be derived and set manually in the derived ViewWidget's constructor, some are pregenerated and can
+be used directly.
+_____________________________________________________________________________
+|_ViewToolWidget_______________________________||ViewConfigWidget            |
+|                                              ||                            |
+| ViewDataWidget                               ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                DATA AREA                     <>       CONFIG AREA          |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||____________________________|
+|                                              ||ViewLoadStateWidget         |
+|______________________________________________||____________________________|
+|'Lower widget'                                                              |
+|____________________________________________________________________________|
 
-Sometimes a ViewWidget is composed of more ViewWidgets, f.e. to be able to set a different
-event processor for each part.
-  */
-class ViewWidget : public QWidget, public Configurable
+ViewDataWidget [derive]: Visualizes the data of the view (e.g. a graph). Located on the left side of the widget.
+Needs to be derived and then set via setDataWidget() in the constructor of the derived class.
+
+ViewConfigWidget [derive]: Implements a configuration area for the view located on the right side of the widget.
+Needs to be derived and then set via setConfigWidget() in the constructor of the derived class.
+
+ViewToolWidget: A toolbar located above the ViewDataWidget, holding the view's needed tool buttons and actions.
+This is a generic class which doesn't need to be derived, but is rather filled in the derived ViewWidget's constructor and
+provided with all needed callbacks. Interacts with the ViewDataWidget to switch the view's active tool and handles tool
+interaction like activating, deactivating and cancelling tools.
+
+ViewLoadStateWidget: A widget located below the configuration area. Provides state information for the view
+and means to update the view manually. Interacts with the ViewWidget and the ViewDataWidget to e.g.issue reloads and redraws,
+ot to obtain state information from them.
+
+'Lower widget': This is a widget residing on the bottom along the whole ViewWidget's width.
+Any QWidget derived class can be set as the 'lower widget' via setLowerWidget().
+The widget's container is only visible if the widget is set.
+
+The ViewWidget acts both to generate the basic layout and to handle interaction between all these components.
+It also serves as the View's main interface to all ui and display functionality.
+*/
+class ViewWidget : public QWidget, public Configurable, public ui_test::UITestable
 {
     Q_OBJECT
 public:
@@ -55,40 +101,103 @@ public:
                Configurable* config_parent, View* view, QWidget* parent = nullptr);
     virtual ~ViewWidget();
 
-    View* getView() { return view_; }
-
     void toggleConfigWidget();
 
-    virtual ViewDataWidget* getViewDataWidget() { return data_widget_; }
-    virtual ViewConfigWidget* getViewConfigWidget() { return config_widget_; }
+    void updateToolWidget();
+    void updateLoadState();
+    void updateComponents();
 
+    void loadingStarted();
+    void loadingDone();
+    void redrawStarted();
+    void redrawDone();
+    void appModeSwitch(AppMode app_mode);
+
+    void notifyReloadNeeded();
+    void notifyRedrawNeeded();
+
+    ViewDataWidget* getViewDataWidget() { assert(data_widget_); return data_widget_; }
+    const ViewDataWidget* getViewDataWidget() const { assert(data_widget_); return data_widget_; }
+    ViewConfigWidget* getViewConfigWidget() { assert(config_widget_); return config_widget_; }
+    const ViewConfigWidget* getViewConfigWidget() const { assert(config_widget_); return config_widget_; }
+
+    std::string loadedMessage() const;
+
+    bool reloadNeeded() const;
+    bool redrawNeeded() const;
+
+    void init();
+    bool isInit() const { return init_; }
+
+    View* getView() { return view_; }
+
+    nlohmann::json viewInfo(const std::string& what) const;
+
+    boost::optional<QString> uiGet(const QString& what = QString()) const override final;
+
+    static QIcon getIcon(const std::string& fn);
 protected:
-    ViewToolWidget* getViewToolWidget() { return tool_widget_; }
-    ViewToolSwitcher* getViewToolSwitcher() { return tool_switcher_.get(); }
+    ViewToolWidget* getViewToolWidget() { assert(tool_widget_); return tool_widget_; }
+    const ViewToolWidget* getViewToolWidget() const { assert(tool_widget_); return tool_widget_; }
+    ViewToolSwitcher* getViewToolSwitcher() { assert(tool_switcher_); return tool_switcher_.get(); }
+    const ViewToolSwitcher* getViewToolSwitcher() const { assert(tool_switcher_); return tool_switcher_.get(); }
+    ViewLoadStateWidget* getViewLoadStateWidget() { assert(state_widget_); return state_widget_; }
+    const ViewLoadStateWidget* getViewLoadStateWidget() const { assert(state_widget_); return state_widget_; }
 
-    QIcon getIcon(const std::string& fn) const;
+    /**
+     * Reimplement to provide the ViewLoadStateWidget with view specific load information.
+    */
+    virtual std::string loadedMessage_impl() const { return ""; }
+
+    /**
+     * Reimplement to dynamically provide the ViewLoadStateWidget with reload and redraw information.
+     * Note that redraws and reloads can also manually be issued via notifyReloadNeeded() and notifyRedrawNeeded(),
+     * so this is rather optional.
+     */
+    virtual bool reloadNeeded_impl() const { return false; };
+    virtual bool redrawNeeded_impl() const { return false; };
+
+    /**
+     * Reimplement for specific initialization behavior.
+     */
+    virtual void init_impl() const {}
+
+    /**
+     * Reimplement to add additional information to the view's view info.
+     */
+    virtual nlohmann::json viewInfo_impl(const std::string& what) const { return {}; }
 
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
-
-    void createStandardLayout();
-    void addConfigWidgetToggle();
-
-    /// The view the widget is part of
-    View* view_;
+    void setLowerWidget(QWidget* w);
 
 private:
+    void createStandardLayout();
     void connectWidgets();
 
+    /// The view the widget is part of
+    View* view_ = nullptr;
+
+    //containers
     QSplitter*      main_splitter_           = nullptr;
     QWidget*        data_widget_container_   = nullptr;
     QWidget*        config_widget_container_ = nullptr;
+    QWidget*        lower_widget_container_  = nullptr;
+    QWidget*        right_widget_            = nullptr;
 
-    ViewToolWidget*   tool_widget_   = nullptr;
-    ViewDataWidget*   data_widget_   = nullptr;
-    ViewConfigWidget* config_widget_ = nullptr;
+    //view widget components
+    ViewToolWidget*      tool_widget_   = nullptr;
+    ViewDataWidget*      data_widget_   = nullptr;
+    ViewConfigWidget*    config_widget_ = nullptr;
+    ViewLoadStateWidget* state_widget_  = nullptr;
+    QWidget*             lower_widget_  = nullptr;
 
     std::unique_ptr<ViewToolSwitcher> tool_switcher_;
+
+    bool init_ = false;
+
+    bool redraw_needed_ = false;
+    bool reload_needed_ = false;
 };
 
 #endif  // VIEWWIDGET_H

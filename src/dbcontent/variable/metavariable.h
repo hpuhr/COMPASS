@@ -63,6 +63,7 @@ public:
     void name(const std::string& name);
 
     std::string description() const;
+    std::string info() const;
 
     //    std::string getMinString() const;
     //    std::string getMaxString() const;

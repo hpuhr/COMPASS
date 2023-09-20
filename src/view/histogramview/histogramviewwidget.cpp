@@ -16,7 +16,8 @@
  */
 
 #include "histogramviewwidget.h"
-#include "histogramviewdatatoolwidget.h"
+#include "histogramviewconfigwidget.h"
+#include "histogramviewdatawidget.h"
 #include "files.h"
 #include "viewtoolswitcher.h"
 #include "viewtoolwidget.h"
@@ -28,66 +29,97 @@
 
 #include "histogramview.h"
 
-/*
+/**
  */
 HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std::string& instance_id,
                                      Configurable* config_parent, HistogramView* view,
                                      QWidget* parent)
     : ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    createStandardLayout();
-
-    auto data_widget = new HistogramViewDataWidget(getView(), view->getDataSource());
+    auto data_widget = new HistogramViewDataWidget(this);
     setDataWidget(data_widget);
 
-    auto config_widget = new HistogramViewConfigWidget(getView());
+    auto config_widget = new HistogramViewConfigWidget(this);
     setConfigWidget(config_widget);
 
     typedef HistogramViewDataTool Tool;
 
-    auto icon = [ = ] (const std::string& fn) 
+    auto activeIfDataShownCB = [ data_widget ] (QAction* a)
     {
-        return QIcon(Utils::Files::getIconFilepath(fn).c_str());
+        a->setEnabled(data_widget->showsData());
     };
 
     getViewToolSwitcher()->addTool(Tool::HG_DEFAULT_TOOL, "", {}, QIcon(), Qt::ArrowCursor);
-    getViewToolSwitcher()->addTool(Tool::HG_SELECT_TOOL, "Select", Qt::Key_S, icon("select_action.png"), Qt::CrossCursor);
-    getViewToolSwitcher()->addTool(Tool::HG_ZOOM_TOOL, "Zoom", Qt::Key_Z, icon("zoom_select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->addTool(Tool::HG_SELECT_TOOL, "Select", Qt::Key_S, getIcon("select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->addTool(Tool::HG_ZOOM_TOOL, "Zoom", Qt::Key_Z, getIcon("zoom_select_action.png"), Qt::CrossCursor);
     getViewToolSwitcher()->setDefaultTool(Tool::HG_DEFAULT_TOOL);
 
     //we could add the default action if we wanted
-    getViewToolWidget()->addTool(Tool::HG_SELECT_TOOL);
-    getViewToolWidget()->addTool(Tool::HG_ZOOM_TOOL);
+    getViewToolWidget()->addTool(Tool::HG_SELECT_TOOL, activeIfDataShownCB);
+    getViewToolWidget()->addTool(Tool::HG_ZOOM_TOOL, activeIfDataShownCB);
 
     getViewToolWidget()->addSpacer();
 
-    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, icon("select_invert.png"));
-    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, icon("select_delete.png"));
+    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, activeIfDataShownCB, getIcon("select_invert.png"));
+    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, activeIfDataShownCB, getIcon("select_delete.png"));
 
     getViewToolWidget()->addSpacer();
 
-    getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, icon("zoom_home.png"), Qt::Key_Space);
-
-    getViewToolWidget()->addSeparator();
-    addConfigWidgetToggle();
+    getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, {}, getIcon("zoom_home.png"), Qt::Key_Space);
 }
 
-/*
+/**
  */
-HistogramViewWidget::~HistogramViewWidget()
-{
-}
+HistogramViewWidget::~HistogramViewWidget() = default;
 
 /**
  */
 HistogramViewDataWidget* HistogramViewWidget::getViewDataWidget()
 {
-    return dynamic_cast<HistogramViewDataWidget*>(ViewWidget::getViewDataWidget());
+    auto w = dynamic_cast<HistogramViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
+}
+
+/**
+ */
+const HistogramViewDataWidget* HistogramViewWidget::getViewDataWidget() const
+{
+    auto w =  dynamic_cast<const HistogramViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 HistogramViewConfigWidget* HistogramViewWidget::getViewConfigWidget()
 {
-    return dynamic_cast<HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    auto w =  dynamic_cast<HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
+}
+
+/**
+ */
+const HistogramViewConfigWidget* HistogramViewWidget::getViewConfigWidget() const
+{
+    auto w =  dynamic_cast<const HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
+}
+
+/**
+ */
+HistogramView* HistogramViewWidget::getView() 
+{ 
+    auto view = dynamic_cast<HistogramView*>(ViewWidget::getView()); 
+    assert(view);
+    return view;
+}
+
+/**
+*/
+bool HistogramViewWidget::reloadNeeded_impl() const
+{
+    return getViewDataWidget()->dataNotInBuffer();
 }

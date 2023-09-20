@@ -44,7 +44,7 @@ struct RTCommandUIObject : public rtcommand::RTCommand
  */
 struct RTCommandUIInjection : public RTCommandUIObject
 {
-    int  injection_delay = -1; //delay used for each UI injection
+    int injection_delay = -1; //delay used for each UI injection
     
     DECLARE_RTCOMMAND_OPTIONS
 };
@@ -55,7 +55,7 @@ struct RTCommandUISet : public RTCommandUIInjection
 {
     QString value;
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(uiset, "sets an ui element to the given value")
     DECLARE_RTCOMMAND_OPTIONS
@@ -67,9 +67,21 @@ struct RTCommandUIGet : public RTCommandUIObject
 {
     QString what;
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(uiget, "retrieves the value of the given ui element")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+/**
+ */
+struct RTCommandUIInject : public RTCommandUIInjection
+{
+    QString event;
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(uiinject, "injects an event into the given ui element")
     DECLARE_RTCOMMAND_OPTIONS
 };
 
@@ -79,6 +91,7 @@ inline void initUITestCommands()
 {
     RTCommandUISet::init();
     RTCommandUIGet::init();
+    RTCommandUIInject::init();
 }
 
 } // namespace ui_test

@@ -47,8 +47,7 @@ const std::string RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME =
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::string& class_id,
                                                                  const std::string& instance_id,
                                                                  TaskManager& task_manager)
-    : Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", true, false,
-           task_manager),
+    : Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_radar_pos.json")
 {
     tooltip_ =
@@ -76,33 +75,6 @@ RadarPlotPositionCalculatorTaskDialog* RadarPlotPositionCalculatorTask::dialog()
     assert(dialog_);
     return dialog_.get();
 }
-
-bool RadarPlotPositionCalculatorTask::checkPrerequisites()
-{
-    if (!COMPASS::instance().interface().ready())
-        return false;
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ =
-                COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";  // set done flag
-
-    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
-
-    if (!dbcont_man.existsDBContent("Radar"))
-        return false;
-
-    return dbcont_man.dbContent("Radar").hasData();
-}
-
-bool RadarPlotPositionCalculatorTask::isRecommended()
-{
-    if (!checkPrerequisites())
-        return false;
-
-    return !done_;
-}
-
-bool RadarPlotPositionCalculatorTask::isRequired() { return false; }
 
 bool RadarPlotPositionCalculatorTask::canRun()
 {
@@ -209,14 +181,13 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
     assert(proj_man.hasCurrentProjection());
     Projection& projection = proj_man.currentProjection();
     projection.clearCoordinateSystems(); // to rebuild from data sources
+    projection.addAllRadarCoordinateSystems();
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method '"
            << projection.name() << "'";
 
-    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
-
     string dbcontent_name;
-    set<unsigned int> ds_wo_full_pos;
+    set<unsigned int> ds_unknown;
 
     for (auto& buf_it : data_)
     {
@@ -243,12 +214,12 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
                     PropertyDataType::DOUBLE);
         update_buffer_list.addProperty(
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name(),
-                    PropertyDataType::UINT); // must be at last position for update
+                    PropertyDataType::ULONGINT); // must be at last position for update
 
         std::shared_ptr<Buffer> update_buffer =
                 std::make_shared<Buffer>(update_buffer_list, dbcontent_name);
 
-        unsigned int rec_num;
+        unsigned long rec_num;
         unsigned int ds_id;
 
         double pos_azm_deg;
@@ -271,7 +242,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
         NullableVector<unsigned int>& read_ds_id_vec = read_buffer->get<unsigned int> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_).name());
-        NullableVector<unsigned int>& read_rec_num_vec = read_buffer->get<unsigned int> (
+        NullableVector<unsigned long>& read_rec_num_vec = read_buffer->get<unsigned long> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
         NullableVector<double>& read_range_vec = read_buffer->get<double> (
                     dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_range_).name());
@@ -284,7 +255,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name());
         NullableVector<double>& write_lon_vec = update_buffer->get<double> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name());
-        NullableVector<unsigned int>& write_rec_num_vec = update_buffer->get<unsigned int> (
+        NullableVector<unsigned long>& write_rec_num_vec = update_buffer->get<unsigned long> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
 
         assert (read_ds_id_vec.isNeverNull());
@@ -313,21 +284,15 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
             pos_range_m = 1852.0 * pos_range_nm;
 
-            if (!projection.hasCoordinateSystem(ds_id) && !ds_wo_full_pos.count(ds_id))
+            if (!projection.hasCoordinateSystem(ds_id))
             {
-                assert (ds_man.hasDBDataSource(ds_id));
-
-                dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
-
-                if (!ds.hasFullPosition())
+                if (!ds_unknown.count(ds_id))
                 {
-                    logwrn << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source " << ds.name()
-                           << " does not have full position information, skipping";
-                    ds_wo_full_pos.insert(ds_id);
-                    continue;
+                    logwrn << "RadarPlotPositionCalculatorTask: loadingDoneSlot: unknown data source " << ds_id
+                           << ", skipping";
+                    ds_unknown.insert(ds_id);
                 }
-
-                projection.addCoordinateSystem(ds_id, ds.latitude(), ds.longitude(), ds.altitude());
+                continue;
             }
 
             ret = projection.polarToWGS84(ds_id, pos_azm_rad, pos_range_m, has_altitude,
@@ -457,7 +422,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
         msg_box_->setText("Writing of object data done.");
         msg_box_->setStandardButtons(QMessageBox::Ok);
 
-        if (show_done_summary_)
+        if (allow_user_interactions_)
             msg_box_->exec();
 
         delete msg_box_;

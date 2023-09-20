@@ -20,13 +20,13 @@
 
 #include "configurable.h"
 #include "appmode.h"
+#include "dbfilterwidget.h"
 
 #include "json.hpp"
 
 #include <string>
 #include <vector>
 
-class DBFilterWidget;
 class DBFilterCondition;
 class FilterManager;
 class Buffer;

@@ -18,6 +18,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultstabwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatasourcewidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationsectorwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluation_commands.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagerwidget.cpp"
@@ -28,6 +29,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultstabwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatasourcewidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationsectorwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluation_commands.cpp"
 )
 
 

@@ -26,7 +26,8 @@ Since the task only makes use of the Mode S address, non-Mode S data is not eval
 
 \subsection{Sector Altitude Filtering}
 
-If sectors with altitude limits are used, please be aware that target reports without a Mode C code can not be filtered by the set limit. Therefore such target reports are assumed to be inside in all sectors when inside the defined 2D polygons. \\
+If sectors with altitude limits are used, please be aware that target reports without a Mode C code can not be filtered by the set limit. Therefore such target reports are assumed to be inside in all 
+sectors when inside the defined 2D polygons. \\
 
 The 'inside-sector' check is always performed on the reference data only, therefore it is of importance to only use reference data with existing Mode C code data.
 
@@ -58,7 +59,7 @@ Also, since target secondary attributes (currently only Mode S address) are also
 At the top, 6 tabs exist:
 \begin{itemize}  
 \item Main: Main configuration
-\item Targets: Table of existing targets (filled after data was loaded)
+\item Targets: Table of existing targets in reference / test data (filled after data was loaded)
 \item Filter: Filter which data is loaded, by time and/or ADS-B quality indicators
 \item Standard: Definition of standards, selection of current standard, configuration of requirements to be checked
 \item Results Config: Additional configration for the result generation
@@ -81,7 +82,7 @@ Below 3 buttons exist:
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_main.png}
+    \includegraphics[width=18cm]{figures/eval.png}
   \caption{Evaluation Main tab}
 \end{figure}
 
@@ -115,10 +116,18 @@ Since 'any' type of data can be selected for evaluation, this allows for the fol
 \end{itemize}
 \ \\
 
-Of course it is also possible to use e.g. an imported GPS trail as reference (see \nameref{sec:ui_import_gps}), although this is currently not tested for lack of test data. If you might be able to provide such test data, please contact the author. \\
+Of course it is also possible to use e.g. an imported GPS trail as reference (see \nameref{sec:ui_import_gps}), although this is currently not tested for lack of test data. 
+If you might be able to provide such test data, please contact the author. \\
 
 \subsubsection{Standard}
 In the center, using the 'Standard' drop-down menu, the current standard can be selected. To create/configure the standard please use the 'Standard' tab.
+
+\subsubsection{Minimum Height Filter}
+
+The option 'Sector Layers: Minimum Height Filter' can be used to select a sector layer, which then serves as a complex minimum height filter.
+The selected layer may consist of several sectors with configured minimum altitude, and data which does not lie inside the bounds and above the minimum altitude 
+of at least one of the selected layer's sectors will automatically be treated as if residing outside of any evaluation sector. 
+The filter thus acts as an additional precondition for data to be regarded by the evaluation.
 
 \subsubsection{Sector Layer/Requirement Mapping}
 
@@ -130,7 +139,16 @@ On the left, all existing sector layers are listed, in the shown example:
 \end{itemize}
 \ \\
 
-For each sector layer, the requirement groups (defined in the Standard tab) can be active/disabled. In the shown example, the existing requirement group 'Mandatory' is active in the sector layer.
+For each sector layer, the requirement groups (defined in the Standard tab) can be active/disabled. In the shown example, the existing requirement group 'Mandatory' is active in the sector layer. \\
+
+\textbf{Note}: When selecting a minimum height filter, it usually makes no sense to evaluate requirements in this layer.
+All requirement mappings thus should be deselected for this layer (see figure below).
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{figures/eval_unmap_min_height_filter.png}
+  \caption{Minimum Height Filter}
+\end{figure}
 
 \subsection{Targets Tab}
 
@@ -184,6 +202,7 @@ Below, the following elements exist:
 \begin{itemize}  
 \item 'Use Load Filter': Toggles usage of the load filter
 \item 'Use Timestamp Filter: Toggles usage of the timestamp filter
+\item 'Use RefTraj Accuracy Filter: Toggles usage of the minimum accuracy filter for DBContent RefTraj
 \item 'Use ADS-B Filter: Toggles usage of the ADS-B filter
 \item 'Use v0: Toggles usage of MOPS Version 0
 \item 'Use Min NUCp: Toggles usage of the minimum NUCp value filter
@@ -226,7 +245,9 @@ Currently, the following standards are (partly) supported:
 \begin{itemize}  
 \item EUROCAE ED-116 (\href{https://eshop.eurocae.net/eurocae-documents-and-reports/ed-116/}{Link})
 \item EUROCAE ED-117/A (\href{https://eshop.eurocae.net/eurocae-documents-and-reports/ed-117a/}{Link})
-\item EUROCAE ED-87C (\href{https://eshop.eurocae.net/eurocae-documents-and-reports/ed-87c/}{Link})
+\item EUROCAE ED-87C/E (\href{https://eshop.eurocae.net/eurocae-documents-and-reports/ed-87c/}{Link})
+\item EUROCAE ED-142 (\href{https://eshop.eurocae.net/eurocae-documents-and-reports/ed-142/}{Link})
+\item Radar: EUROCONTROL Standard Document for Radar Surveillance in En-Route Airspace and Major Terminal Areas (\href{https://www.eurocontrol.int/sites/default/files/publication/files/surveillance-standard-document-for-radar-surveillance-in-en-route-airspace-and-major-terminal-areas199703.pdf}{Link})
 \end{itemize}
 \ \\
 
@@ -285,16 +306,22 @@ The following requirements exist:
     \nameref{sec:eval_req_extra_data} & Calculates probability of unused test data (based on test data only) \\ \hline
     \nameref{sec:eval_req_extra_track} & Calculates probability of undetected tracks (based on reference data only) \\ \hline
     \nameref{sec:eval_req_id_correct} & Calculates probability of correct secondary identification \\ \hline
+    \nameref{sec:eval_req_id_correct_periods} & Calculates probability of correct secondary identification based on UIs \\ \hline
     \nameref{sec:eval_req_id_false} & Calculates probability of false secondary identification \\ \hline
     \nameref{sec:eval_req_m3a_false} & Calculates probability of false Mode 3/A code \\ \hline
     \nameref{sec:eval_req_m3a_present} & Calculates probability of Mode 3/A code present \\ \hline
+    \nameref{sec:eval_req_mc_correct} & Calculates probability of correct Mode C code \\ \hline
+    \nameref{sec:eval_req_mc_correct_periods} & Calculates probability of correct Mode C code based on UIs \\ \hline
     \nameref{sec:eval_req_mc_false} & Calculates probability of false Mode C code \\ \hline
     \nameref{sec:eval_req_mc_present} & Calculates probability of Mode C code present \\ \hline
-    \nameref{sec:eval_req_pos_across} & Calculates the probability of the position across error begin within a threshold \\ \hline
-    \nameref{sec:eval_req_pos_along} & Calculates the probability of the position along error begin within a threshold \\ \hline
-    \nameref{sec:eval_req_pos_distance} & Calculates the probability of the position error begin within or outside a threshold \\ \hline
-    \nameref{sec:eval_req_pos_latency}  & Calculates the probability of the position latency begin within a threshold \\ \hline
-    \nameref{sec:eval_req_speed} & Calculates the probability of the speed error begin within or outside a threshold or percentage \\ \hline
+    \nameref{sec:eval_req_pos_across} & Calculates the probability of the position across error being within a threshold \\ \hline
+    \nameref{sec:eval_req_pos_along} & Calculates the probability of the position along error being within a threshold \\ \hline
+    \nameref{sec:eval_req_pos_distance} & Calculates the probability of the position error being within or outside a threshold \\ \hline
+    \nameref{sec:eval_req_pos_distance_rms} & Calculates the probability of the position error being within or outside an RMS threshold \\ \hline
+    \nameref{sec:eval_req_pos_radar_azm} & Calculates the probability of the position azimuth error being within or outside a threshold \\ \hline
+    \nameref{sec:eval_req_pos_radar_rng} & Calculates the probability of the position range error being within or outside a threshold \\ \hline
+    \nameref{sec:eval_req_pos_latency}  & Calculates the probability of the position latency being within a threshold \\ \hline
+    \nameref{sec:eval_req_speed} & Calculates the probability of the speed error being within or outside a threshold or percentage \\ \hline
 \end{tabularx}
 \end{table}
 \end{center}
@@ -316,6 +343,25 @@ Each requirement has the following common attributes:
 \ \\
 
 For detailed information about each requirement please refer to section \nameref{sec:eval_requirements}.
+
+\subsection{Results Config Tab}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{figures/eval_results_config.png}
+  \caption{Evaluation Results tab}
+\end{figure}
+
+The following settings can be used to configure the content of the generated results:
+\begin{itemize}  
+\item Skip No Data Details: Skip per target report details of no evaluated data existsed (recomended)
+\item Split Results by MOPS Version: Split sector aggregations also by ADS-B MOPS Versions (unknown,V0,V1,V2)
+\item Split Results by Mode A/C Only and Mode S: Split sector aggregations also by Mode A/C Only and Mode S results
+\item Show ADS-B Info: Show ADS-B MOPS Version in results target lists
+\item Show OK data in Sector Results: Show also OK markings in sector aggregations (not only errors)
+\item Results Detail WGS84 Zoom Factor: Zoom factor in OSGView for target report details
+\end{itemize}
+\ \\
 
 \subsection{Results Tab}
 
@@ -358,52 +404,18 @@ After the loading and the post-processing have been performed, all targets are s
     \includegraphics[width=18cm,frame]{figures/eval_targets_loaded.png}
   \caption{Evaluation Targets tab after loading}
 \end{figure}
+\ \\
+
+Please note that the difference to the main 'Targets' tab list consists in only evaluation targets being shown - i.e. only targets which are present in the currently selected reference / test data.
 
 \subsection{Filtering Targets}
 \label{sec:eval_filter_targets} 
 
-The Targets tab is useful for removing certain targets from the evaluation ('Use' checkbox) and inspecting already removed ones. \\
+The Targets tab is useful for removing certain targets from the evaluation ('Use' checkbox) and inspecting already removed ones. 
 
 Single rows can be selected by clicking on them, which triggers a loading process showing this exact target (with all associated data) in the available Views. Please note that this does not require re-loading the evaluation data, but can be used at all times during the evaluation. \\
 
-The 'Change Usage' button can be used for the following actions:
-\begin{itemize}  
-\item Use All: Enable usage for all UTNs
-\item Use None: Disable usage for all UTNs
-\item Clear Comments: Clear comments of all UTNs
-\item Filter: Start 'Filter UTNs' dialog
-\end{itemize}
-\ \\
-
-The 'Filter UTNs' dialog can be used to dynamically filter UTNs based on the configurated values:
-
-\begin{figure}[H]
-    \includegraphics[width=15cm]{figures/eval_filter_utns.png}
-  \caption{Evaluation Filter UTNs dialog}
-\end{figure}
-
-\begin{itemize}  
-\item Remove Short Targets: Removes targets with a small number of target reports or duration
-\item Remove Primary-Only Targets: Removes primary-only targets (w/o secondary attributes)
-\item Remove Mode A/C Code onlys: Removes targets without Mode S attributes
-\item Remove by Mode A Code: Removes targets having a Mode A code given in the list
-\item Mode A Code Blacklist: Whether the Mode A codes should be used as blacklist or whitelist
-\item Remove by Mode C Code: Removes targets having a Mode C code smaller than the given value
-\item Remove by Target Address: Removes targets having a Mode S target address given in the list
-\item Target Address Blacklist: Whether the Target Addresses should be used as blacklist or whitelist
-\item Remove by Non-Detection of DBContent: Removes targets not being detected by a given DBContent
-\end{itemize}
-\ \\
-
-When the 'Run' button is clicked, all (enabled) targets are checked and are disabled if any of the selected filters apply.
-
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_targets_filtered.png}
-  \caption{Evaluation Targets tab after filtering}
-\end{figure}
-
-Please note that the 'Change Usage' button can be used also after the 'Evaluate' button is used, which automatically updates the evaluation results.
+To remove targets with certain parameters (e.g. primary-only, black-whitelisting, always low Mode C, ...) please refer to section \nameref{sec:ui_target_filtering}.
 
 \subsection{Evaluation}
 \label{sec:eval_run_eval} 
@@ -450,8 +462,8 @@ When single-clicking a row, the respective result error are shown in the existin
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/eval_results_pd_sum_osgview.png}
-  \caption{Evaluation results: Sector PD errors in OSGView}
+    \includegraphics[width=19cm,frame]{figures/eval_results_osgview.png}
+  \caption{Evaluation results: Sector errors in OSGView}
 \end{figure}
 
 When double-clicking a row, a step into the respective sector sum details is performed.
@@ -472,8 +484,8 @@ When single-clicking a row, the respective target data and result errors are sho
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_pd_single_osgview.png}
-  \caption{Evaluation results: Target PD Errors in OSGView}
+    \includegraphics[width=18cm,frame]{figures/eval_results_single_osgview.png}
+  \caption{Evaluation results: Target Errors in OSGView}
 \end{figure}
 
 When double-clicking a row, a step into the respective target details is performed.
@@ -482,8 +494,8 @@ When double-clicking a row, a step into the respective target details is perform
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_target_det_example.png}
-  \caption{Evaluation results: Per-Target PD Detail Example}
+    \includegraphics[width=18cm,frame]{figures/eval_results_target_example.png}
+  \caption{Evaluation results: Per-Target Detail Example}
 \end{figure}
 
 On the left side, the current position in the results sections is shown. On the right, the current results are shown. At the top, there is an overview table giving the details of the calculation results for the target in the respective sector layer and requirement. \\

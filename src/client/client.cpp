@@ -96,6 +96,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
             ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
+            ("override_cfg_path", po::value<std::string>(&override_cfg_path_),
+             "overrides 'default' config subfolder to other value, e.g. 'org'")
             ("expert_mode", po::bool_switch(&expert_mode_) ,"set expert mode")
             ("create_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
@@ -113,6 +115,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "imports ASTERIX file with given date, in YYYY-MM-DD format e.g. '2020-04-20'")
             ("import_asterix_file_time_offset", po::value<std::string>(&import_asterix_file_time_offset_),
              "used time offset during ASTERIX file import Time of Day override, in HH:MM:SS.ZZZ'")
+            ("import_asterix_ignore_time_jumps", po::bool_switch(&import_asterix_ignore_time_jumps_),
+             "imports ASTERIX file ignoring 24h time jumps")
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
@@ -139,6 +143,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
              "calculate radar plot positions")
             ("associate_data", po::bool_switch(&associate_data_), "associate target reports")
+            ("calculate_artas_tr_usage", po::bool_switch(&calculate_artas_tr_usage_), "associate target reports based on ARTAS usage")
+            ("calculate_references", po::bool_switch(&calculate_references_),
+             "calculate references from ADS-B and Tracker data")
             ("load_data", po::bool_switch(&load_data_), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
              "export view points report after start with given filename, e.g. '/data/db2/report.tex")
@@ -151,6 +158,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in OSGView'")
             ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
             ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
+            ("enable_event_log", po::bool_switch(&enable_event_log_), "collect warnings and errors in the event log")
             ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
@@ -211,6 +219,16 @@ void Client::run ()
 
     loginf << "COMPASSClient: started with " << num_threads << " threads";
 #endif
+
+//    unsigned int data_size = 10e6;
+//    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
+//        double x = 0;
+
+//        for (unsigned int cnt2=1; cnt2 < data_size * data_size; ++ cnt2)
+//            x += (data_size * cnt) % cnt2;
+
+//        loginf << x;
+//    });
 
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
@@ -293,6 +311,9 @@ void Client::run ()
         if (import_asterix_file_time_offset_.size())
             cmd += " --time_offset "+import_asterix_file_time_offset_;
 
+        if (import_asterix_ignore_time_jumps_)
+            cmd += " --ignore_time_jumps";
+
         rt_man.addCommand(cmd);
     }
     else if (import_asterix_network_)
@@ -331,6 +352,12 @@ void Client::run ()
     if (associate_data_)
         rt_man.addCommand("associate_data");
 
+    if (calculate_artas_tr_usage_)
+        rt_man.addCommand("calculate_artas_tr_usage");
+
+    if (calculate_references_)
+        rt_man.addCommand("calculate_references");
+
     if (load_data_)
         rt_man.addCommand("load_data");
 
@@ -347,13 +374,14 @@ void Client::run ()
         rt_man.addCommand(cmd);
     }
 
-
     if (export_eval_report_filename_.size())
         rt_man.addCommand("export_eval_report "+export_eval_report_filename_);
 
     if (quit_)
         rt_man.addCommand("quit");
 
+    //finally => set compass as running
+    COMPASS::instance().setAppState(AppState::Running);
 }
 
 Client::~Client()
@@ -433,7 +461,14 @@ void Client::checkAndSetupConfig()
         assert(config.existsId("log_properties_file"));
         assert(config.existsId("save_config_on_exit"));
 
-        CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY + config.getString("configuration_path") + "/";
+        if (override_cfg_path_.size())
+        {
+            cout << "COMPASSClient: overriding config path to '" << override_cfg_path_ + "'" << endl;
+
+            CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY + override_cfg_path_ + "/";
+        }
+        else
+            CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY + config.getString("configuration_path") + "/";
 
         cout << "COMPASSClient: current configuration path is '" << CURRENT_CONF_DIRECTORY + "'"
              << endl;
@@ -442,7 +477,7 @@ void Client::checkAndSetupConfig()
         Files::verifyFileExists(log_config_path);
 
         cout << "COMPASSClient: initializing logger using '" << log_config_path << "'" << endl;
-        Logger::getInstance().init(log_config_path);
+        Logger::getInstance().init(log_config_path, enable_event_log_);
 
         loginf << "COMPASSClient: startup version " << VERSION;
         string config_version = config.getString("version");
@@ -528,6 +563,7 @@ void Client::checkAndSetupConfig()
 
 void Client::checkNeededActions()
 {
+    cout << "COMPASSClient: SAVE CONFIG: " << (no_config_save_ ? "NO" : "YES") << std::endl;
     cout << "COMPASSClient: checking if compass home directory exists ... ";
 
     bool home_subdir_exists = Files::directoryExists(HOME_SUBDIRECTORY);

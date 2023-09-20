@@ -26,7 +26,8 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "number.h"
 
 #include <cassert>
@@ -34,34 +35,39 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
 
-SinglePositionAcross::SinglePositionAcross(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        unsigned int num_pos, unsigned int num_no_ref,
-        unsigned int num_pos_outside, unsigned int num_pos_inside,
-        unsigned int num_value_ok, unsigned int num_value_nok,
-        vector<double> values,
-        std::vector<EvaluationRequirement::PositionDetail> details)
-    : Single("SinglePositionAcross", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
-      num_pos_inside_(num_pos_inside), num_value_ok_(num_value_ok), num_value_nok_(num_value_nok),
-      values_(values), details_(details)
+SinglePositionAcross::SinglePositionAcross(const std::string& result_id, 
+                                           std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                           const SectorLayer& sector_layer,
+                                           unsigned int utn,
+                                           const EvaluationTargetData* target,
+                                           EvaluationManager& eval_man,
+                                           const EvaluationDetails& details,
+                                           unsigned int num_pos,
+                                           unsigned int num_no_ref,
+                                           unsigned int num_pos_outside,
+                                           unsigned int num_pos_inside,
+                                           unsigned int num_value_ok,
+                                           unsigned int num_value_nok,
+                                           vector<double> values)
+    :   SinglePositionBase("SinglePositionAcross", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                           num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_value_ok, num_value_nok, values)
 {
     update();
 }
-
 
 void SinglePositionAcross::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-    assert (values_.size() == num_value_ok_+num_value_nok_);
+    assert (values_.size() == num_passed_ + num_failed_);
+
+    prob_.reset();
 
     unsigned int num_distances = values_.size();
 
@@ -76,11 +82,8 @@ void SinglePositionAcross::update()
             value_var_ += pow(val - value_avg_, 2);
         value_var_ /= (float)num_distances;
 
-        assert (num_value_ok_ <= num_distances);
-        p_min_ = (float)num_value_ok_/(float)num_distances;
-        has_p_min_ = true;
-
-        result_usable_ = true;
+        assert (num_passed_ <= num_distances);
+        prob_ = (float)num_passed_/(float)num_distances;
     }
     else
     {
@@ -88,12 +91,9 @@ void SinglePositionAcross::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
-
-        has_p_min_ = false;
-        p_min_ = 0;
-
-        result_usable_ = false;
     }
+
+    result_usable_ = prob_.has_value();
 
     updateUseFromTarget();
 }
@@ -115,16 +115,17 @@ void SinglePositionAcross::addTargetToOverviewTable(shared_ptr<EvaluationResults
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-    if (eval_man_.reportShowAdsbInfo())
+    if (eval_man_.settings().report_show_adsb_info_)
         addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-        if (eval_man_.reportShowAdsbInfo())
+        if (eval_man_.settings().report_show_adsb_info_)
             addTargetDetailsToTableADSB(sum_section, target_table_name_);
         else
             addTargetDetailsToTable(sum_section, target_table_name_);
@@ -143,19 +144,19 @@ void SinglePositionAcross::addTargetDetailsToTable (
 
     QVariant p_min_var;
 
-    if (has_p_min_)
-        p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+    if (prob_.has_value())
+        p_min_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
                  Number::round(value_min_,2), // "ACMin"
                  Number::round(value_max_,2), // "ACMax"
                  Number::round(value_avg_,2), // "ACAvg"
                  Number::round(sqrt(value_var_),2), // "ACSDev"
-                 num_value_ok_, // "#ACOK"
-                 num_value_nok_, // "#ACNOK"
+                 num_passed_, // "#ACOK"
+                 num_failed_, // "#ACNOK"
                  p_min_var}, // "PACOK"
                 this, {utn_});
 }
@@ -164,36 +165,34 @@ void SinglePositionAcross::addTargetDetailsToTableADSB (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     if (!section.hasTable(table_name))
-        section.addTable(table_name, 18,
+        section.addTable(table_name, 16,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                           "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
-                          "MOPS", "NUCp/NIC", "NACp"}, true, 14);
+                          "MOPS"}, true, 14);
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
     QVariant p_min_var;
 
-    if (has_p_min_)
-        p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+    if (prob_.has_value())
+        p_min_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
     // "#ACOK", "#ACNOK", "PACOK", "#ACOK", "#ACNOK", "PACOK", "MOPS", "NUCp/NIC", "NACp"
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(),
                  Number::round(value_min_,2), // "ACMin"
                  Number::round(value_max_,2), // "ACMax"
                  Number::round(value_avg_,2), // "ACAvg"
                  Number::round(sqrt(value_var_),2), // "ACSDev"
-                 num_value_ok_, // "#ACOK"
-                 num_value_nok_, // "#ACNOK"
+                 num_passed_, // "#ACOK"
+                 num_failed_, // "#ACNOK"
                  p_min_var, // "PACOK"
-                 target_->mopsVersionStr().c_str(), // "MOPS"
-                 target_->nucpNicStr().c_str(), // "NUCp/NIC"
-                 target_->nacpStr().c_str()}, // "NACp"
+                 target_->mopsVersionStr().c_str()}, // "MOPS"
                 this, {utn_});
 
 }
@@ -235,16 +234,15 @@ void SinglePositionAcross::addTargetDetailsToReport(shared_ptr<EvaluationResults
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     utn_req_table.addRow({"ACVar [m^2]", "Variance of across-track error",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-    utn_req_table.addRow({"#ACOK [1]", "Number of updates with across-track error", num_value_ok_}, this);
-    utn_req_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable across-track error ", num_value_nok_},
+    utn_req_table.addRow({"#ACOK [1]", "Number of updates with across-track error", num_passed_}, this);
+    utn_req_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable across-track error ", num_failed_},
                          this);
-
     // condition
     {
         QVariant p_min_var;
 
-        if (has_p_min_)
-            p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+        if (prob_.has_value())
+            p_min_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PACOK [%]", "Probability of acceptable across-track error", p_min_var}, this);
 
@@ -252,8 +250,8 @@ void SinglePositionAcross::addTargetDetailsToReport(shared_ptr<EvaluationResults
 
         string result {"Unknown"};
 
-        if (has_p_min_)
-            result = req->getResultConditionStr(p_min_);
+        if (prob_.has_value())
+            result = req->getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Across Fulfilled", "", result.c_str()}, this);
 
@@ -262,13 +260,12 @@ void SinglePositionAcross::addTargetDetailsToReport(shared_ptr<EvaluationResults
             root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
             utn_req_section.perTargetWithIssues(true);
         }
-
     }
 
-    if (has_p_min_ && p_min_ != 1.0)
+    if (prob_.has_value() && prob_.value() != 1.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -292,22 +289,29 @@ void SinglePositionAcross::reportDetails(EvaluationResultsReport::Section& utn_r
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : details_)
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(),
-                     !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
-                     rq_det_it.value_,  // "DAcross"
-                     rq_det_it.check_passed_, // DAcrossOK"
-                     rq_det_it.num_check_failed_, // "#ACOK",
-                     rq_det_it.num_check_passed_, // "#ACNOK"
-                     rq_det_it.comment_.c_str()}, // "Comment"
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            bool has_ref_pos = rq_det_it.numPositions() >= 2;
+
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          !has_ref_pos,
+                          rq_det_it.getValue(DetailKey::PosInside),
+                          rq_det_it.getValue(DetailKey::Value),                 // "DAcross"
+                          rq_det_it.getValue(DetailKey::CheckPassed),           // DAcrossOK"
+                          rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#ACOK",
+                          rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#ACNOK"
+                          rq_det_it.comments().generalComment().c_str() }, // "Comment"
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SinglePositionAcross::hasViewableData (
@@ -315,16 +319,15 @@ bool SinglePositionAcross::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
         return true;
-    else
-        return false;
+    
+    return false;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SinglePositionAcross::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -337,28 +340,32 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAcross::viewableData(
 
         loginf << "SinglePositionAcross: viewableData: detail_cnt " << detail_cnt;
 
-        std::unique_ptr<nlohmann::json::object_t> viewable_ptr
-                = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+        std::unique_ptr<nlohmann::json::object_t> viewable_ptr = getTargetErrorsViewable(true);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::PositionDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.tst_pos_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.tst_pos_.longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        assert (detail.numPositions() >= 0);
 
-        if (!detail.check_passed_)
-            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+
+        auto check_passed = detail.getValueAs<bool>(CheckPassed);
+        assert(check_passed.has_value());
+
+        addAnnotationPos(*viewable_ptr, detail.position(0), TypeHighlight);
+        addAnnotationLine(*viewable_ptr, detail.position(0), detail.position(1), TypeHighlight);
 
         return viewable_ptr;
     }
-    else
-        return nullptr;
+    
+    return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SinglePositionAcross::getTargetErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> SinglePositionAcross::getTargetErrorsViewable (bool add_highlight)
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -366,37 +373,44 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAcross::getTargetErrorsV
     bool has_pos = false;
     double lat_min, lat_max, lon_min, lon_max;
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if (detail_it.check_passed_)
+        auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
+        assert(check_passed.has_value());
+
+        if (check_passed.value())
             continue;
+
+        assert(detail_it.numPositions() >= 1);
+
+        bool has_ref_pos = detail_it.numPositions() >= 2;
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.tst_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.tst_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-            lon_min = min(lon_min, detail_it.tst_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.tst_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.tst_pos_.latitude_;
-            lat_max = detail_it.tst_pos_.latitude_;
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-            lon_min = detail_it.tst_pos_.longitude_;
-            lon_max = detail_it.tst_pos_.longitude_;
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
             has_pos = true;
         }
 
-        if (detail_it.has_ref_pos_)
+        if (has_ref_pos)
         {
-            lat_min = min(lat_min, detail_it.ref_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.ref_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(1).latitude_);
+            lat_max = max(lat_max, detail_it.position(1).latitude_);
 
-            lon_min = min(lon_min, detail_it.ref_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.ref_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(1).longitude_);
+            lon_max = max(lon_max, detail_it.position(1).longitude_);
         }
     }
 
@@ -408,15 +422,18 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAcross::getTargetErrorsV
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
         double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-        if (lat_w < eval_man_.resultDetailZoom())
-            lat_w = eval_man_.resultDetailZoom();
+        if (lat_w < eval_man_.settings().result_detail_zoom_)
+            lat_w = eval_man_.settings().result_detail_zoom_;
 
-        if (lon_w < eval_man_.resultDetailZoom())
-            lon_w = eval_man_.resultDetailZoom();
+        if (lon_w < eval_man_.settings().result_detail_zoom_)
+            lon_w = eval_man_.settings().result_detail_zoom_;
 
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
+
+    //addAnnotationFeatures(*viewable_ptr, false, add_highlight);
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -438,30 +455,44 @@ std::string SinglePositionAcross::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-unsigned int SinglePositionAcross::numValueOk() const
+void SinglePositionAcross::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    return num_value_ok_;
-}
+    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
+    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
+    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
 
-unsigned int SinglePositionAcross::numValueNOk() const
-{
-    return num_value_nok_;
-}
+    for (auto& detail_it : getDetails())
+    {
+        auto check_passed = detail_it.getValueAsOrAssert<bool>(
+                    EvaluationRequirementResult::SinglePositionAcross::DetailKey::CheckPassed);
 
+        if (detail_it.numPositions() == 1) // no ref pos
+            continue;
 
-const vector<double>& SinglePositionAcross::values() const
-{
-    return values_;
-}
+        assert (detail_it.numPositions() == 2);
 
-unsigned int SinglePositionAcross::numPosOutside() const
-{
-    return num_pos_outside_;
-}
+        if (!check_passed)
+        {
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
 
-unsigned int SinglePositionAcross::numPosInside() const
-{
-    return num_pos_inside_;
+            if (!overview)
+            {
+                error_line_coordinates.push_back(detail_it.position(0).asVector());
+                error_line_coordinates.push_back(detail_it.position(1).asVector());
+            }
+        }
+        else if (add_ok)
+        {
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+
+            if (!overview)
+            {
+                ok_line_coordinates.push_back(detail_it.position(0).asVector());
+                ok_line_coordinates.push_back(detail_it.position(1).asVector());
+            }
+        }
+    }
 }
 
 std::shared_ptr<Joined> SinglePositionAcross::createEmptyJoined(const std::string& result_id)
@@ -469,18 +500,4 @@ std::shared_ptr<Joined> SinglePositionAcross::createEmptyJoined(const std::strin
     return make_shared<JoinedPositionAcross> (result_id, requirement_, sector_layer_, eval_man_);
 }
 
-unsigned int SinglePositionAcross::numPos() const
-{
-    return num_pos_;
-}
-
-unsigned int SinglePositionAcross::numNoRef() const
-{
-    return num_no_ref_;
-}
-
-std::vector<EvaluationRequirement::PositionDetail>& SinglePositionAcross::details()
-{
-    return details_;
-}
 }

@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_cat062",
+        "id": 62,
         "info": "",
         "name": "CAT062"
     },
@@ -342,6 +343,32 @@
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Feet"
+                }
+            },
+            "Variable122": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "acas_mb_data",
+                    "description": "From 380.ACS.MB Data\n\n56-bit message conveying Mode S Comm B message data of BDS Register 3,0",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ACAS MB Data",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable123": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "mode_s_mb_data",
+                    "description": "From 380.MB.Mode S MB Data.MB Data\n\n56-bit message conveying Mode S Comm B message data",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode S MB Data",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "Variable13": {
@@ -1592,6 +1619,19 @@
                     "unit": ""
                 }
             },
+            "VariableTrackerUTN0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "utn",
+                    "description": "Unique Target Number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "UTN",
+                    "representation_str": "STANDARD",
+                    "short_name": "UTN",
+                    "unit": ""
+                }
+            },
             "VariableTrackeralt_baro_more_reliable0": {
                 "parameters": {
                     "data_type_str": "BOOL",
@@ -1602,19 +1642,6 @@
                     "name": "Most Reliable Height",
                     "representation_str": "STANDARD",
                     "short_name": "MRH",
-                    "unit": ""
-                }
-            },
-            "VariableTrackerassociations0": {
-                "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "associations",
-                    "description": "Associations set as JSON object",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Associations",
-                    "representation_str": "STANDARD",
-                    "short_name": "Assoc",
                     "unit": ""
                 }
             },
@@ -1696,7 +1723,7 @@
                     "unit": "Knots"
                 }
             },
-            "VariableTrackerhash_code0": {
+            "VariableTrackertri0": {
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "target_report_identifiers",
@@ -1706,6 +1733,19 @@
                     "name": "Target Report Identifiers",
                     "representation_str": "STANDARD",
                     "short_name": "TRI",
+                    "unit": ""
+                }
+            },
+            "VariableTrackertri_recnums0": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "target_report_identifier_recnums",
+                    "description": "From SPF.Target Report Identifiers.TRI\n\nARTAS associated record numbers",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "TRI Record Numbers",
+                    "representation_str": "STANDARD",
+                    "short_name": "TRI RecNums",
                     "unit": ""
                 }
             },
@@ -2049,7 +2089,7 @@
             },
             "VariableTrackerrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",

@@ -66,6 +66,15 @@ namespace ui_test
         return true;
     }
     template<>
+    inline bool setUIElement(QMenu* widget, const QString& value, int delay, const SetUIHint& hint)
+    {
+        auto v = conversions::valueFromString<QStringList>(value);
+        if (!v)
+            return false;
+
+        return injectMenuEvent(widget, "", v.value(), delay);
+    }
+    template<>
     inline bool setUIElement(QMenuBar* widget, const QString& value, int delay, const SetUIHint& hint)
     {
         auto v = conversions::valueFromString<QStringList>(value);
@@ -77,7 +86,13 @@ namespace ui_test
     template<>
     inline bool setUIElement(QComboBox* widget, const QString& value, int delay, const SetUIHint& hint)
     {
-        return injectComboBoxEditEvent(widget, "", value, delay);
+        //check if the given value string is a number
+        auto v = conversions::valueFromString<int>(value);
+        if (v)
+            return injectComboBoxEditEvent(widget, "", v.value(), delay);
+            
+        //handle value string as entry text
+        return injectComboBoxEditEvent(widget, "", value, delay); 
     }
     template<>
     inline bool setUIElement(QTabWidget* widget, const QString& value, int delay, const SetUIHint& hint)
@@ -215,4 +230,20 @@ namespace ui_test
 
         return injectDialogEvent(widget, "", accept, delay);
     }
+
+    template<>
+    inline bool setUIElement(QWidget* widget, const QString& value, int delay, const SetUIHint& hint)
+    {
+        //value must not be empty
+        if (value.isEmpty())
+            return false;
+
+        //check if the given value is a slot name in the widget
+        if (widget->metaObject()->indexOfSlot((value + "()").toStdString().c_str()) < 0)
+            return false;
+        
+        //if yes try to invoke the slot
+        return injectWidgetEvent(widget, "", value, delay);
+    }
+
 } // namespace ui_test

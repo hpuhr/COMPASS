@@ -20,48 +20,54 @@
 
 #include "eval/results/joined.h"
 
+#include <boost/optional.hpp>
+
 namespace EvaluationRequirementResult
 {
-    class SingleDetection;
 
-    class JoinedDetection : public Joined
-    {
-    public:
-        JoinedDetection(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-                        const SectorLayer& sector_layer, EvaluationManager& eval_man);
+class SingleDetection;
 
-        virtual void join(std::shared_ptr<Base> other) override;
+class JoinedDetection : public Joined
+{
+public:
+    JoinedDetection(const std::string& result_id, 
+                    std::shared_ptr<EvaluationRequirement::Base> requirement,
+                    const SectorLayer& sector_layer, 
+                    EvaluationManager& eval_man);
 
-        //virtual void print() override;
-        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    //virtual void print() override;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
-        virtual void updatesToUseChanges() override;
+    virtual bool hasViewableData (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-        virtual bool hasViewableData (
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-        virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual bool hasReference (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual std::string reference(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-        virtual bool hasReference (
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-        virtual std::string reference(
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+protected:
+    void addToValues (std::shared_ptr<SingleDetection> single_result);
+    void updatePD();
 
-    protected:
-        int sum_uis_ {0};
-        int missed_uis_ {0};
+    void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-        bool has_pd_ {false};
-        float pd_{0};
+    std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
 
-        void addToValues (std::shared_ptr<SingleDetection> single_result);
-        void updatePD();
+    virtual void join_impl(std::shared_ptr<Single> other) override;
+    virtual void updatesToUseChanges_impl() override;
 
-        void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-        void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    unsigned int sum_uis_    {0};
+    unsigned int missed_uis_ {0};
 
-        std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
-    };
+    unsigned int num_single_targets_ {0};
+    unsigned int num_failed_single_targets_ {0};
+
+    boost::optional<float> pd_;
+};
 
 }
 

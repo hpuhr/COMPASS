@@ -60,6 +60,8 @@ ViewContainer::ViewContainer(const std::string& class_id, const std::string& ins
     logdbg << "ViewContainer: ctor: window " << window_cnt_;
     assert(tab_widget_);
 
+    creation_time_ = boost::posix_time::to_time_t(boost::posix_time::microsec_clock::local_time());
+
     disable_add_remove_views_ = COMPASS::instance().disableAddRemoveViews();
 
     if (window_cnt != 0)
@@ -145,10 +147,9 @@ void ViewContainer::addView(View* view)
 
     int index = tab_widget_->addTab(w, view_name);
 
-    //generate and set a nice object name which can be used to identify the view widget in the object hierarchy
-    UI_TEST_OBJ_NAME(w, view_name)
-
     QPushButton* manage_button = new QPushButton();
+    UI_TEST_OBJ_NAME(manage_button, view_name + " Manager"); //manage buttons can be reached via e.g. window1.osgview2_manager
+
     manage_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
     manage_button->setFixedSize(UI_ICON_SIZE);
     manage_button->setFlat(UI_ICON_BUTTON_FLAT);

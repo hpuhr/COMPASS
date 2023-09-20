@@ -23,35 +23,50 @@
 #include <memory>
 
 class Sector;
-class EvaluationTargetPosition;
 
+namespace dbContent {
+class TargetPosition;
+}
+
+/**
+*/
 class SectorLayer
 {
 public:
     SectorLayer(const std::string& name);
+    virtual ~SectorLayer() = default;
 
     std::string name() const;
 
     bool hasSector (const std::string& name);
-    void addSector (std::shared_ptr<Sector> sector);
     std::shared_ptr<Sector> sector (const std::string& name);
-    void removeSector (std::shared_ptr<Sector> sector);
 
-    unsigned int size () { return sectors_.size(); };
+    void addSector (std::shared_ptr<Sector> sector);
+    void removeSector (std::shared_ptr<Sector> sector);
+    void clearSectors();
+
+    unsigned int size () const { return sectors_.size(); };
 
     std::vector<std::shared_ptr<Sector>>& sectors() { return sectors_; }
-
-    bool isInside(const EvaluationTargetPosition& pos,
-                  bool has_ground_bit, bool ground_bit_set) const;
+    const std::vector<std::shared_ptr<Sector>>& sectors() const { return sectors_; }
 
     std::pair<double, double> getMinMaxLatitude() const;
     std::pair<double, double> getMinMaxLongitude() const;
 
+    virtual bool isInside(const dbContent::TargetPosition& pos,
+                          bool has_ground_bit, 
+                          bool ground_bit_set) const;
+
+    bool hasExclusionSector() const;
+
 protected:
+    void checkExclusion();
+
     const std::string name_;
 
     std::vector<std::shared_ptr<Sector>> sectors_;
-    bool has_exclude_sector_ {false};
+
+    unsigned int num_exclusion_sectors_ = 0;
 };
 
 #endif // SECTORLAYER_H

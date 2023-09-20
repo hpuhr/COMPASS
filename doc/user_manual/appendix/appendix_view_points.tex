@@ -33,6 +33,7 @@ The following content is commonly stored in a view point file:
  \item A list of data sources to be loaded
  \item A list of filters
  \item A list of context variables
+ \item A list of displayable annotations
   \end{itemize}
  \end{itemize}
 
@@ -67,9 +68,8 @@ The most simple example of a view points file is as follows:
         }
     ]
 }
-
 \end{lstlisting}
-\ \\
+%\ \\
 
 There is an encompassing JSON object, which contains the view point context (object) and view points (list with one entry). \\
 
@@ -93,7 +93,7 @@ In the context, optinally datasets can be added, which define related data to be
     ...
 }
 \end{lstlisting}
-\ \\
+%\ \\
 
 Each dataset has to have a filename. \\
 
@@ -118,13 +118,14 @@ Several datasets are also possible:
     ...
 }
 \end{lstlisting}
-\ \\
+%\ \\
 
 Each of the defined ASTERIX datasets will be automatically imported when using the 'Import View Points' task. \\
 
 Please note that the ASTERIX decoder settings have to be set correctly in the configuration and are the same for all files to be imported. \\
 
-For the tracker run comparison case, additional attributes are used. The assumption is that there are two recordings, each containing a tracker run, each of which will be imported into a separate line. The tracker runs will possibly also have the same SAC/SIC and a time shift, which can be corrected during ASTERIX import using the features described in \nameref{sec:task_import_asterix_override}. \\
+For the tracker run comparison case, additional attributes are used. The assumption is that there are two recordings, each containing a tracker run, each of which will be imported into a separate line. 
+The tracker runs will possibly also have the same SAC/SIC and a time shift, which can be corrected during ASTERIX import using the features described in \nameref{sec:task_import_asterix_override}. \\
 
 Such an import without overrides can look as follows:
 
@@ -149,9 +150,10 @@ Such an import without overrides can look as follows:
     ...
 }
 \end{lstlisting}
-\ \\
+%\ \\
 
-In this case, the first dataset will be imported into line L1 (0 as L1, default line) with a date '2021-01-02', while the second dataset will be imported in to L2 and time shifted by the 'time\_offset' (as Time of Day in seconds). \\
+In this case, the first dataset will be imported into line L1 (0 as L1, default line) with a date '2021-01-02', 
+while the second dataset will be imported in to L2 and time shifted by the 'time\_offset' (as Time of Day in seconds). \\
 
 Exact definition:
 
@@ -166,7 +168,7 @@ Exact definition:
 \end{tabularx}
 \end{table}
 \end{center}
-\ \\
+%\ \\
 
 \subsubsection{View Point}
 
@@ -250,7 +252,7 @@ In each View Point object, the following values can be defined:
 \end{tabularx}
 \end{table}
 \end{center}
-\ \\
+%\ \\
 
 If the 'data\_sources', 'data\_source\_types' or 'filters' attribute are not defined, all data will be loaded.
 
@@ -347,7 +349,7 @@ All possible filters existing in COMPASS can be set using view points, e.g.:
         }
         ...
 }
-\end{lstlisting}        
+\end{lstlisting}
 
 The filter values have to be defined exactly as a user would enter them in the DBFilter conditions in the GUI. \\
 
@@ -356,3 +358,340 @@ One exception are the data source filters, which need a 'active\_sources' condit
 For the 'Tracker Track Number' filter, the data source condition is identified by its data source name. Using the dataset in the context information, the view point file can ensure that the same name is used. \\
 
 Please \textbf{note} that setting custom filters (created by the user) is also possible using view points. Please contact the author for further information.
+
+\subsubsection{View Point Annotations}
+
+The 'annotations' attribute stores custom geometry information, which can be displayed in an OSGView. \\
+
+A simple example is shown below.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        "annotations" :
+        [
+            {
+                "name": "Point Annotation", 
+                "symbol_color" : "#0000FF",
+                "hidden": false,
+                "features":
+                [
+                    // List of features contained in the annotation 
+                    {
+                        "type": "feature",
+                        "geometry" :
+                        {
+                            "type": "points",
+                            "coordinates": 
+                            [
+                                [45.0, 18.0], [46.0, 19.0], [45.0, 20.0], [48.0, 20.0]
+                            ]
+                        },
+                        "properties":
+                        {
+                            "color": "#FF0000",
+                            "symbol": "square",
+                            "symbol_size": 24
+                        }
+                    }    
+                ]
+            }
+        ]
+        ...
+}
+\end{lstlisting}
+
+An annotation obtains: \\
+
+\begin{itemize}
+    \item 'name': Display name of the information.
+    \item 'symbol\textunderscore color': Color of the displayed annotation symbol in hex code.
+    \item 'hidden': The annotation should be displayed in OSGView's layer tree.
+    \item 'features': A list of features, describing displayable information. \\
+\end{itemize}
+
+Loading a viewpoint containing the example above will result in OSGView displaying the contained visual information,
+a set of point coordinates in this case. In addition, the created annotation is shown in OSGView's layer tab under the node \textit{Annotations}.
+A listed annotation can be shown or hidden by using the checkbox next to it. \\
+
+\textbf{Note} how the chosen 'name' and 'symbol\textunderscore color' reflect in the displayed annotation node.
+
+\begin{figure}[H]
+    \center
+      \includegraphics[width=12cm]{figures/viewpoints_anno_example.png}
+    \caption{View Point Annotations - Example} 
+\end{figure}
+
+Examples for the existing 'features' will be given below.
+
+\paragraph{Points} The 'points' feature displays a set of coordinates using a specified symbol.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "feature",
+            "geometry" :
+            {
+                "type": "points",
+                "coordinates": 
+                [
+                    [45.0, 18.0], [46.0, 19.0], [45.0, 20.0], [48.0, 20.0]
+                ]
+            },
+            "properties":
+            {
+                "color": "#FF0000",    // Color of the symbols in hex code
+                "symbol": "square",    // Symbol to be displayed, possible values 'square', 'cross', 'triangle' or 'circle'   
+                "symbol_size": 24      // Display size of the symbol
+            }
+        }
+        ...
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+    \center
+      \includegraphics[width=8cm]{figures/viewpoints_anno_example_points.png}
+    \caption{View Point Annotations - Points} 
+\end{figure}
+
+\paragraph{Lines} The 'lines' feature displays an array of lines. 
+Two consecutive coordinates hereby form an individual line, which means that the size of the coordinate array needs to be even.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "feature",
+            "geometry":
+            {
+                "type": "lines",
+                "coordinates": 
+                [
+                    [45.0, 18.0], [45.0, 20.0], [48.0, 20.0], [46.0, 19.0]
+                ]
+            },
+            "properties" :
+            {
+                "color": "#FFFFFF",  // Color of the displayed lines in hex code
+                "line_width": 3.5    // Width of the displayed lines
+            }
+        }
+        ...
+}
+\end{lstlisting}
+
+Here $[45.0, 18.0]$ and $[45.0, 20.0]$ form one line, and $[48.0, 20.0]$ and $[46.0, 19.0]$ another one.
+
+\begin{figure}[H]
+    \center
+        \includegraphics[width=8cm]{figures/viewpoints_anno_example_lines.png}
+    \caption{View Point Annotations - Lines} 
+\end{figure}
+
+\paragraph{Line Strings} The 'line\textunderscore string' feature displays a polygonal line connecting the provided coordinates.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "feature",
+            "geometry" :
+            {
+                "type": "line_string",
+                "coordinates": 
+                [
+                    [45.0, 18.0], [46.0, 19.0], [45.0, 20.0], [48.0, 20.0]
+                ]
+            },
+            "properties":
+            {
+                "color": "#0000FF", // Color of the displayed lines in hex code
+                "line_width": 1.5   // Width of the displayed lines
+            }
+        }
+        ...
+}
+\end{lstlisting}
+
+The displayed line connects the given coordinates, one after another.
+
+\begin{figure}[H]
+    \center
+        \includegraphics[width=8cm]{figures/viewpoints_anno_example_linestring.png}
+    \caption{View Point Annotations - Line Strings} 
+\end{figure}
+
+\paragraph{Ellipses} The 'ellipses' feature displays accuracy information as ellipses at the provided locations.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "feature",
+            "geometry":
+            {
+                "type": "ellipses",
+                "coordinates": 
+                [
+                    [44.0, 14.0], [44.0, 16.0], [47.0, 16.0], [45.0, 15.0]
+                ],
+                "sizes": 
+                [
+                    [10000.0, 20000.0, 1500000], [20000.0, 30000.0, 300000000], [50000.0, 60000.0, 50000433], [80000.0, 90000.0, 2]
+                ]
+            },
+            "properties" :
+            {
+                "color": "#0000FF",
+                "line_width": 2.7,
+                "num_points": 32     // Number of points used to approximate an ellipsis
+            }
+        }
+        ...
+}
+\end{lstlisting}
+
+The 'sizes' of the ellipses are provided as value triples (Standard deviation X, Standard deviation Y, Covariance XY).
+
+\begin{figure}[H]
+    \center
+        \includegraphics[width=8cm]{figures/viewpoints_anno_example_ellipses.png}
+    \caption{View Point Annotations - Ellipses} 
+\end{figure}
+
+\paragraph{Text} The 'text' feature displays a text box at a provided coordinate.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "text",
+            "text": "My Text",
+            "position": [12.0, 22.0],     // A single coordinate
+            "properties":
+            {
+                "color": "#AA00FF",       // Text color in hex code
+                "direction": "left-up",   // Alignment of the text relative to the provided coordinate, possible values 'right-up', 'right-down', 'left-up' or 'left-down'
+                "font_size": 10           // Displayed font size
+            }    
+        }
+        ...
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+    \center
+        \includegraphics[width=10cm]{figures/viewpoints_anno_example_text.png}
+    \caption{View Point Annotations - Text} 
+\end{figure}
+
+\textbf{Note} that coordinates always need to be provided as WGS84 latitude and longitude. \\
+
+\paragraph{Showing Color Arrays} In all examples provided above, a single color has been used for the geometry stored in a feature.
+In order to show each geometrical primitive in a separate color, the 'color' tag can be removed, and a 'colors' array provided instead.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "feature",
+            "geometry" :
+            {
+                "type": "points",
+                "coordinates": 
+                [
+                    [45.0, 18.0], [46.0, 19.0], [45.0, 20.0], [48.0, 20.0]
+                ],
+                "colors": [ "#AA00FF", "#AA66FF", "#AAAAFF", "#AAEEFF"]
+            },
+            "properties":
+            {
+                "symbol": "square",
+                "symbol_size": 24
+            }
+        }
+        ...
+}
+\end{lstlisting}
+
+This example will result in each point to be displayed in a separate color.
+
+\begin{figure}[H]
+    \center
+        \includegraphics[width=8cm]{figures/viewpoints_anno_example_colorvec.png}
+    \caption{View Point Annotations - Color vectors} 
+\end{figure}
+
+\textbf{Note}: A 'color' tag and a 'colors' array may not exist in a feature at the same time.
+
+\paragraph{Nesting Annotations} Annotations can be nested by providing them with their own 'annotations' array containing nested 
+annotations, as shown in the example below. This mechanism can be used to form more complex annotations, which can be switched on and off 
+individually.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        "annotations" :
+        [
+            {
+                "name": "Group1",
+                "symbol_color" : "#0000FF",
+                "annotations" :                  // Annotations inside an annotation
+                [
+                    {
+                        "name": "Nested annotation 1",
+                        "symbol_color" : "#0000FF",
+                        "features":
+                        [
+                            {
+                                "type": "text",
+                                "text": "Nested annotations are nice",
+                                "position": [12.0, 22.0],
+                                "properties":
+                                {
+                                    "color": "#0000FF",
+                                    "direction": "left-up",
+                                    "font_size": 10
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Group2",
+                "symbol_color" : "#FF00FF",
+                "annotations" :                // More Annotations inside an annotation
+                [
+                    {
+                        "name": "Nested annotation 2",
+                        "symbol_color" : "#FF00FF",
+                        "features":
+                        [
+                            {
+                                "type": "text",
+                                "text": "Nested annotations are nice",
+                                "position": [14.0, 24.0],
+                                "properties":
+                                {
+                                    "color": "#FF00FF",
+                                    "direction": "left-up",
+                                    "font_size": 10
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }                
+        ]
+        ... 
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+    \center
+        \includegraphics[width=14cm]{figures/viewpoints_anno_example_nested.png}
+    \caption{View Point Annotations - Nested Annotations} 
+\end{figure}

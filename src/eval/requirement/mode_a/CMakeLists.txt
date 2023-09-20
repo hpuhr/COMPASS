@@ -16,7 +16,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/present.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/falseconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/modeafalseconfigwidget.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/false.cpp"        
+        "${CMAKE_CURRENT_LIST_DIR}/false.cpp"
 )
 
 

@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTEXTRATRACKCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/extra/trackconfigwidget.h"
 #include "eval/requirement/extra/track.h"
 
@@ -32,7 +32,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-    class ExtraTrackConfig : public BaseConfig
+    class ExtraTrackConfig : public ProbabilityBaseConfig
     {
     public:
         ExtraTrackConfig(const std::string& class_id, const std::string& instance_id,

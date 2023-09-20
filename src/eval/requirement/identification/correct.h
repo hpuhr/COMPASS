@@ -18,12 +18,12 @@
 #ifndef EVALUATIONREQUIREMENTIDENTIFICATIONCORRECT_H
 #define EVALUATIONREQUIREMENTIDENTIFICATIONCORRECT_H
 
-#include "eval/requirement/base/base.h"
+#include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
-class IdentificationCorrect : public Base
+class IdentificationCorrect : public ProbabilityBase
 {
 public:
     IdentificationCorrect(

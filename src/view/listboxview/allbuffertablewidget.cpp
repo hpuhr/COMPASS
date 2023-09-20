@@ -65,6 +65,11 @@ AllBufferTableWidget::AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSou
 
 AllBufferTableWidget::~AllBufferTableWidget() {}
 
+int AllBufferTableWidget::rowCount() const
+{
+    return table_->model()->rowCount();
+}
+
 void AllBufferTableWidget::clear()
 {
     assert(model_);
@@ -122,7 +127,7 @@ void AllBufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSigna
 
 void AllBufferTableWidget::showOnlySelectedSlot(bool value)
 {
-    loginf << "AllBufferTableWidget: showOnlySelectedSlot: " << value;
+    logdbg << "AllBufferTableWidget: showOnlySelectedSlot: " << value;
 
     assert(model_);
     model_->showOnlySelected(value);

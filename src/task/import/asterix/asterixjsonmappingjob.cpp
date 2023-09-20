@@ -54,6 +54,13 @@ void ASTERIXJSONMappingJob::run()
             return;
 
         unsigned int category{0};
+
+        if (!record.contains("category"))
+        {
+            logerr << "ASTERIXJSONMappingJob: run: record without category '" << record.dump(4) << "', skipping";
+            return;
+        }
+
         assert (record.contains("category"));
 
         category = record.at("category");
@@ -78,12 +85,6 @@ void ASTERIXJSONMappingJob::run()
             logdbg << "ASTERIXJSONMappingJob: run: obj " << dbcontent_name << " parsing JSON";
 
             parsed = parser->parseJSON(record, *buffer);
-
-//            if (parsed)
-//            {
-//                logdbg << "ASTERIXJSONMappingJob: run: obj " << parser.dbObject().name() << " transforming buffer";
-//                //parser.transformBuffer(*buffer, buffer->size() - 1);
-//            }
 
             logdbg << "ASTERIXJSONMappingJob: run: obj " << dbcontent_name << " done";
 

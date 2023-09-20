@@ -26,28 +26,34 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 
 #include <cassert>
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
 
-SingleModeCPresent::SingleModeCPresent(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        int num_updates, int num_no_ref_pos, int num_pos_outside, int num_pos_inside,
-        int num_no_ref_id, int num_present_id, int num_missing_id,
-        std::vector<EvaluationRequirement::PresentDetail> details)
-    : Single("SingleModeCPresent", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos),
-      num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
-      num_no_ref_id_(num_no_ref_id),
-      num_present_id_(num_present_id), num_missing_id_(num_missing_id), details_(details)
+SingleModeCPresent::SingleModeCPresent(const std::string& result_id, 
+                                       std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                       const SectorLayer& sector_layer,
+                                       unsigned int utn,
+                                       const EvaluationTargetData* target,
+                                       EvaluationManager& eval_man,
+                                       const EvaluationDetails& details,
+                                       int num_updates,
+                                       int num_no_ref_pos,
+                                       int num_pos_outside,
+                                       int num_pos_inside,
+                                       int num_no_ref_id,
+                                       int num_present_id,
+                                       int num_missing_id)
+    :   SinglePresentBase("SingleModeAPresent", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                          num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside, num_no_ref_id, num_present_id, num_missing_id)
 {
     updateProbabilities();
 }
@@ -55,23 +61,14 @@ SingleModeCPresent::SingleModeCPresent(
 void SingleModeCPresent::updateProbabilities()
 {
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_id_+num_present_id_+num_missing_id_);
+    assert (num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);
 
-    if (num_no_ref_id_+num_present_id_+num_missing_id_)
+    if (num_no_ref_val_ + num_present_ + num_missing_)
     {
-        p_present_ = (float)(num_no_ref_id_+num_present_id_)
-                / (float)(num_no_ref_id_+num_present_id_+num_missing_id_);
-        has_p_present_ = true;
-
-        result_usable_ = true;
+        p_present_ = (float)(num_no_ref_val_ + num_present_) / (float)(num_no_ref_val_ + num_present_ + num_missing_);
     }
-    else
-    {
-        has_p_present_ = false;
-        p_present_ = 0;
 
-        result_usable_ = false;
-    }
+    result_usable_ = p_present_.has_value();
 
     updateUseFromTarget();
 }
@@ -93,7 +90,8 @@ void SingleModeCPresent::addTargetToOverviewTable(shared_ptr<EvaluationResultsRe
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
@@ -109,14 +107,14 @@ void SingleModeCPresent::addTargetDetailsToTable (
 
     QVariant pe_var;
 
-    if (has_p_present_)
-        pe_var = roundf(p_present_ * 10000.0) / 100.0;
+    if (p_present_.has_value())
+        pe_var = roundf(p_present_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-                 num_updates_, num_no_ref_pos_, num_no_ref_id_, num_present_id_, num_missing_id_,
+                 num_updates_, num_no_ref_pos_, num_no_ref_val_, num_present_, num_missing_,
                  pe_var}, this, {utn_});
 }
 
@@ -139,9 +137,9 @@ void SingleModeCPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
     utn_req_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
     utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
     utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-    utn_req_table.addRow({"#NoRefC [1]", "Number of updates without reference code", num_no_ref_id_}, this);
-    utn_req_table.addRow({"#Present [1]", "Number of updates with present tst code", num_present_id_}, this);
-    utn_req_table.addRow({"#Missing [1]", "Number of updates with missing tst code", num_missing_id_}, this);
+    utn_req_table.addRow({"#NoRefC [1]", "Number of updates without reference code", num_no_ref_val_}, this);
+    utn_req_table.addRow({"#Present [1]", "Number of updates with present tst code", num_present_}, this);
+    utn_req_table.addRow({"#Missing [1]", "Number of updates with missing tst code", num_missing_}, this);
 
     // condition
     {
@@ -151,8 +149,8 @@ void SingleModeCPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
 
         QVariant pe_var;
 
-        if (has_p_present_)
-            pe_var = roundf(p_present_ * 10000.0) / 100.0;
+        if (p_present_.has_value())
+            pe_var = roundf(p_present_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PP [%]", "Probability of Mode C present", pe_var}, this);
 
@@ -161,8 +159,8 @@ void SingleModeCPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
 
         string result {"Unknown"};
 
-        if (has_p_present_)
-            result = req->getResultConditionStr(p_present_);
+        if (p_present_.has_value())
+            result = req->getConditionResultStr(p_present_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -171,13 +169,12 @@ void SingleModeCPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
             root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
             utn_req_section.perTargetWithIssues(true);
         }
-
     }
 
-    if (has_p_present_ && p_present_ != 1.0)
+    if (p_present_.has_value() && p_present_.value() != 1.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -200,38 +197,46 @@ void SingleModeCPresent::reportDetails(EvaluationResultsReport::Section& utn_req
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : details_)
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(), rq_det_it.ref_exists_,
-                     !rq_det_it.is_not_ok_,
-                     rq_det_it.num_updates_, rq_det_it.num_no_ref_,
-                     rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_no_ref_id_,
-                     rq_det_it.num_present_id_, rq_det_it.num_missing_id_, rq_det_it.comment_.c_str()},
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailKey::RefExists),
+                          !rq_det_it.getValue(DetailKey::IsNotOk).toBool(),
+                          rq_det_it.getValue(DetailKey::NumUpdates),
+                          rq_det_it.getValue(DetailKey::NumNoRef),
+                          rq_det_it.getValue(DetailKey::NumInside),
+                          rq_det_it.getValue(DetailKey::NumOutside),
+                          rq_det_it.getValue(DetailKey::NumNoRefVal),
+                          rq_det_it.getValue(DetailKey::NumPresent),
+                          rq_det_it.getValue(DetailKey::NumMissing),
+                          rq_det_it.comments().generalComment().c_str() },
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
-
 
 bool SingleModeCPresent::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
         return true;
-    else
-        return false;
+    
+    return false;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -248,24 +253,26 @@ std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::PresentDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.pos_tst_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.pos_tst_.longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        assert(detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
         //            if (!detail.pos_ok_)
         //                (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
-    else
-        return nullptr;
+    
+    return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::getTargetErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::getTargetErrorsViewable (bool add_highlight)
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -273,26 +280,31 @@ std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::getTargetErrorsVie
     bool has_pos = false;
     double lat_min, lat_max, lon_min, lon_max;
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if (!detail_it.is_not_ok_)
+        assert(detail_it.numPositions() >= 1);
+
+        auto is_not_ok = detail_it.getValueAs<bool>(DetailKey::IsNotOk);
+        assert(is_not_ok.has_value());
+
+        if (!is_not_ok.value())
             continue;
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.pos_tst_.latitude_);
-            lat_max = max(lat_max, detail_it.pos_tst_.latitude_);
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-            lon_min = min(lon_min, detail_it.pos_tst_.longitude_);
-            lon_max = max(lon_max, detail_it.pos_tst_.longitude_);
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.pos_tst_.latitude_;
-            lat_max = detail_it.pos_tst_.latitude_;
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-            lon_min = detail_it.pos_tst_.longitude_;
-            lon_max = detail_it.pos_tst_.longitude_;
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
             has_pos = true;
         }
@@ -306,15 +318,18 @@ std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::getTargetErrorsVie
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
         double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-        if (lat_w < eval_man_.resultDetailZoom())
-            lat_w = eval_man_.resultDetailZoom();
+        if (lat_w < eval_man_.settings().result_detail_zoom_)
+            lat_w = eval_man_.settings().result_detail_zoom_;
 
-        if (lon_w < eval_man_.resultDetailZoom())
-            lon_w = eval_man_.resultDetailZoom();
+        if (lon_w < eval_man_.settings().result_detail_zoom_)
+            lon_w = eval_man_.settings().result_detail_zoom_;
 
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
+
+    //addAnnotationFeatures(*viewable_ptr, false, add_highlight);
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -324,8 +339,8 @@ bool SingleModeCPresent::hasReference (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else
-        return false;;
+    
+    return false;;
 }
 
 std::string SingleModeCPresent::reference(
@@ -336,49 +351,30 @@ std::string SingleModeCPresent::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
+void SingleModeCPresent::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+{
+    //addAnnotationFeatures(viewable, overview);
+
+    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+
+    for (auto& detail_it : getDetails())
+    {
+        auto is_not_ok = detail_it.getValueAsOrAssert<bool>(
+                    EvaluationRequirementResult::SingleModeCPresent::DetailKey::IsNotOk);
+
+        assert (detail_it.numPositions() >= 1);
+
+        if (is_not_ok)
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
+        else if (add_ok)
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+    }
+}
+
 std::shared_ptr<Joined> SingleModeCPresent::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedModeCPresent> (result_id, requirement_, sector_layer_, eval_man_);
-}
-
-int SingleModeCPresent::numNoRefPos() const
-{
-    return num_no_ref_pos_;
-}
-
-int SingleModeCPresent::numPosOutside() const
-{
-    return num_pos_outside_;
-}
-
-int SingleModeCPresent::numPosInside() const
-{
-    return num_pos_inside_;
-}
-
-int SingleModeCPresent::numUpdates() const
-{
-    return num_updates_;
-}
-
-int SingleModeCPresent::numNoRefC() const
-{
-    return num_no_ref_id_;
-}
-
-int SingleModeCPresent::numPresent() const
-{
-    return num_present_id_;
-}
-
-int SingleModeCPresent::numMissing() const
-{
-    return num_missing_id_;
-}
-
-std::vector<EvaluationRequirement::PresentDetail>& SingleModeCPresent::details()
-{
-    return details_;
 }
 
 }

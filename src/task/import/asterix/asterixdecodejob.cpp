@@ -446,18 +446,19 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
         logdbg << "ASTERIXDecodeJob: fileJasterixCallback: max_index " << max_index_
                << " perc " <<  String::percentToString((float) max_index_/(float) file_size_);
 
-//    while (!obsolete_ && pause_)  // block decoder until unpaused
-//        QThread::msleep(1);
+    ++signal_count_;
+
+    logdbg << "ASTERIXDecodeJob: fileJasterixCallback: emitting signal " << signal_count_;
 
     emit decodedASTERIXSignal();
+
+    logdbg << "ASTERIXDecodeJob: fileJasterixCallback: wait " << signal_count_;
 
     while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out
         QThread::msleep(1);
 
-//    if (!obsolete_)
-//        assert(!extracted_data_);
-//    else
-//        extracted_data_ = nullptr;
+    logdbg << "ASTERIXDecodeJob: fileJasterixCallback: waiting done " << signal_count_;
+
 }
 
 void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
@@ -568,7 +569,17 @@ void ASTERIXDecodeJob::countRecord(unsigned int category, nlohmann::json& record
     category_counts_[category] += 1;
 }
 
-std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const { return category_counts_; }
+std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const
+{
+    return category_counts_;
+}
+
+std::vector<std::unique_ptr<nlohmann::json>> ASTERIXDecodeJob::extractedData()
+{
+    logdbg << "ASTERIXDecodeJob: extractedData: signal cnt " << signal_count_;
+
+    return std::move(extracted_data_);
+}
 
 float ASTERIXDecodeJob::getFileDecodingProgress() const
 {

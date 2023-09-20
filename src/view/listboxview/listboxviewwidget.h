@@ -19,10 +19,10 @@
 #define LISTBOXVIEWWIDGET_H_
 
 #include "viewwidget.h"
-#include "listboxviewdatawidget.h"
-#include "listboxviewconfigwidget.h"
 
 class ListBoxView;
+class ListBoxViewDataWidget;
+class ListBoxViewConfigWidget;
 
 class QSplitter;
 class QTabWidget;
@@ -45,11 +45,13 @@ class ListBoxViewWidget : public ViewWidget
     /// @brief Destructor
     virtual ~ListBoxViewWidget();
 
-    /// @brief Returns the basis view
-    ListBoxView* getView() { return (ListBoxView*)view_; }
+    ListBoxViewDataWidget* getViewDataWidget();
+    const ListBoxViewDataWidget* getViewDataWidget() const;
+    ListBoxViewConfigWidget* getViewConfigWidget();
+    const ListBoxViewConfigWidget* getViewConfigWidget() const;
 
-    virtual ListBoxViewDataWidget* getViewDataWidget() override final;
-    virtual ListBoxViewConfigWidget* getViewConfigWidget() override final;
+    /// @brief Returns the basis view
+    ListBoxView* getView();
 };
 
 #endif /* LISTBOXVIEWWIDGET_H_ */

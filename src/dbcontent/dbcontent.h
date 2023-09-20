@@ -39,6 +39,7 @@ class DBContentReadDBJob;
 class InsertBufferDBJob;
 class UpdateBufferDBJob;
 class DBContentManager;
+class DBContentDeleteDBJob;
 
 namespace dbContent
 {
@@ -65,6 +66,8 @@ public slots:
 
     void updateProgressSlot(float percent);
     void updateDoneSlot();
+
+    void deleteJobDoneSlot();
 
 public:
     static const Property meta_var_rec_num_;
@@ -96,12 +99,12 @@ public:
     static const Property meta_var_detection_type_;
 
     static const Property meta_var_artas_hash_;
-    static const Property meta_var_associations_;
+    static const Property meta_var_utn_;
 
     static const Property meta_var_vx_;
     static const Property meta_var_vy_;
-    static const Property meta_var_ground_speed_;
-    static const Property meta_var_track_angle_;
+    static const Property meta_var_ground_speed_; // kts
+    static const Property meta_var_track_angle_; // deg
     static const Property meta_var_horizontal_man_;
 
     static const Property meta_var_x_stddev_;
@@ -122,16 +125,24 @@ public:
     static const Property var_cat021_mops_version_;
     static const Property var_cat021_nacp_;
     static const Property var_cat021_nucp_nic_;
+    static const Property var_cat021_nucv_nacv_;
     static const Property var_cat021_sil_;
 
     static const Property var_cat062_tris_;
+    static const Property var_cat062_tri_recnums_;
     static const Property var_cat062_track_begin_;
     static const Property var_cat062_coasting_;
     static const Property var_cat062_track_end_;
+    static const Property var_cat062_mono_sensor_;
+    static const Property var_cat062_type_lm_;
     static const Property var_cat062_baro_alt_;
+    static const Property var_cat062_fl_measured_; // trusted, not valid
 
     static const Property var_cat062_wtc_;
     static const Property var_cat062_callsign_fpl_;
+
+    static const Property var_cat062_vx_stddev_;
+    static const Property var_cat062_vy_stddev_;
 
     static const Property selected_var;
 
@@ -157,6 +168,8 @@ public:
         name_ = name;
     }
 
+    unsigned int id();
+
     const std::string& info() const { return info_; }
     void info(const std::string& info) { info_ = info; }
 
@@ -171,10 +184,15 @@ public:
     void insertData(std::shared_ptr<Buffer> buffer);
     void updateData(dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer);
 
+    void deleteDBContentData();
+    void deleteDBContentData(unsigned int sac, unsigned int sic);
+    void deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id);
+
     //std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 
     bool isLoading();
     bool isInserting();
+    bool isDeleting();
     //bool isPostProcessing();
     bool hasData();
     size_t count();
@@ -196,8 +214,9 @@ public:
 
 protected:
     COMPASS& compass_;
-    DBContentManager& dbo_manager_;
+    DBContentManager& dbcont_manager_;
     std::string name_;
+    unsigned int id_ {0};
     std::string info_;
     std::string db_table_name_;
     std::string ds_type_;
@@ -212,6 +231,7 @@ protected:
     bool insert_active_ {false};
     std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
+    std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
 
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, std::unique_ptr<dbContent::Variable>> variables_;

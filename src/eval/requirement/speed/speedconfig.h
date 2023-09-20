@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTSPEEDCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/probabilitybaseconfig.h"
 #include "eval/requirement/speed/speedconfigwidget.h"
 #include "eval/requirement/speed/speed.h"
 
@@ -29,7 +29,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class SpeedConfig : public BaseConfig
+class SpeedConfig : public ProbabilityBaseConfig
 {
 public:
     SpeedConfig(const std::string& class_id, const std::string& instance_id,
@@ -53,7 +53,7 @@ public:
     bool failedValuesOfInterest() const;
     void failedValuesOfInterest(bool value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
 protected:
     float threshold_value_ {0};

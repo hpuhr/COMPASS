@@ -22,6 +22,8 @@ bool RTCommandManager::open_port_ {false};
 
 RTCommandManager::CommandId RTCommandManager::command_count_ = 0;
 
+const std::string RTCommandManager::PingName = "ping";
+
 /**
  */
 RTCommandManager::RTCommandManager()
@@ -125,7 +127,7 @@ void RTCommandManager::run()
             rtcommand::RTCommandResponse cmd_response(cmd_result);
 
             loginf << "RTCommandManager: run: result wait done, success " << cmd_response.isOk();
-            loginf << "RTCommandManager: run: respone = ";
+            loginf << "RTCommandManager: run: response = ";
             loginf << cmd_response.toJSONString();
 
             if (source == Source::Application)
@@ -138,7 +140,9 @@ void RTCommandManager::run()
             {
                 std::string msg  = cmd_response.errorToString();
                 std::string data = cmd_response.stringifiedReply();
-                emit shellCommandProcessed(msg, data, cmd_response.error.hasError());
+                emit shellCommandProcessed(QString::fromStdString(msg), 
+                                           QString::fromStdString(data), 
+                                           cmd_response.error.hasError());
             }
             else if (source == Source::Server)
             {
@@ -213,6 +217,30 @@ rtcommand::IssueInfo RTCommandManager::addCommand(const std::string& cmd_str, So
 {
     if (id)
         *id = -1;
+
+    //handle pings 
+    if (cmd_str == PingName)
+    {
+        rtcommand::IssueInfo info;
+        info.issued        = false;
+        info.error.code    = rtcommand::CmdErrorCode::NoError;
+        info.error.message = "";
+        info.command       = "ping";
+
+        return info;
+    }
+
+    //commands from the server are only added when app is properly running
+    if (source == Source::Server && COMPASS::instance().appState() != AppState::Running)
+    {
+        rtcommand::IssueInfo info;
+        info.issued        = false;
+        info.error.code    = rtcommand::CmdErrorCode::Issue_NotReady;
+        info.error.message = rtcommand::RTCommandResponse::errCode2String(info.error.code);
+        info.command       = ""; //can be left empty?
+
+        return info;
+    }
 
     //add command string to backlog
     if (!cmd_str.empty())

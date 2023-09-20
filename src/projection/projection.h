@@ -20,11 +20,13 @@
 
 #include "configurable.h"
 
+#include <boost/thread/mutex.hpp>
+
 class ProjectionManager;
 
 class Projection : public Configurable
 {
-  public:
+public:
     Projection(const std::string& class_id, const std::string& instance_id,
                ProjectionManager& proj_manager);
     virtual ~Projection();
@@ -40,13 +42,20 @@ class Projection : public Configurable
                               bool has_baro_altitude, double baro_altitude_ft, double& latitude,
                               double& longitude) = 0;
 
+    void addAllRadarCoordinateSystems(); // only adds if not already added
+
     std::string name() const;
     void name(const std::string& name);
 
-  protected:
+    bool radarCoordinateSystemsAdded();
+
+protected:
     ProjectionManager& proj_manager_;
 
     std::string name_;
+
+    boost::mutex radar_coordinate_systems_mutex_;
+    bool radar_coordinate_systems_added_ {false};
 
     virtual void checkSubConfigurables();
 };

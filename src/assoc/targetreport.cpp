@@ -1,6 +1,7 @@
 #include "assoc/targetreport.h"
 #include "assoc/target.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 
 #include <cassert>
 #include <algorithm>

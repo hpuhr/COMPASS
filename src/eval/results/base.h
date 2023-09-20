@@ -18,6 +18,9 @@
 #ifndef EVALUATIONREQUIREMENTRESULTBASE_H
 #define EVALUATIONREQUIREMENTRESULTBASE_H
 
+#include "evaluationdetail.h"
+#include "eval/results/evaluationdetail.h"
+
 #include <QVariant>
 
 #include "json.hpp"
@@ -45,9 +48,20 @@ namespace EvaluationRequirementResult
 class Base
 {
 public:
-    Base(const std::string& type, const std::string& result_id,
-         std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
+    typedef std::vector<EvaluationDetail> EvaluationDetails;
+
+    enum class BaseType
+    {
+        Single = 0,
+        Joined
+    };
+
+    Base(const std::string& type, 
+         const std::string& result_id,
+         std::shared_ptr<EvaluationRequirement::Base> requirement, 
+         const SectorLayer& sector_layer,
          EvaluationManager& eval_man);
+    virtual ~Base();
 
     std::shared_ptr<EvaluationRequirement::Base> requirement() const;
 
@@ -57,8 +71,10 @@ public:
     std::string resultId() const;
     std::string reqGrpId() const;
 
-    virtual bool isSingle() const = 0;
-    virtual bool isJoined() const = 0;
+    virtual BaseType baseType() const = 0;
+
+    bool isSingle() const;
+    bool isJoined() const;
 
     bool use() const;
     void use(bool use);
@@ -73,9 +89,43 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
 
+    size_t numDetails() const;
+    const EvaluationDetails& getDetails() const;
+    const EvaluationDetail& getDetail(int idx) const;
+
     const static std::string req_overview_table_name_;
 
 protected:
+    /**
+     * Used to display a certain result parameter in the report as
+     * Name | Description | Value, e.g.
+     * PD [%]    Probability of Detection    98.4
+     */
+    struct ReportParam
+    {
+        ReportParam() = default;
+        ReportParam(const std::string& _name, 
+                    const std::string& _descr, 
+                    const QVariant& _value) : name(_name), descr(_descr), value(_value) {}
+
+        std::string name;
+        std::string descr;
+        QVariant    value;
+    };
+
+    EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
+            std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
+    virtual std::string getRequirementSectionID ();
+    virtual std::string getRequirementSumSectionID ();
+
+    EvaluationResultsReport::Section& getRequirementSection (
+            std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
+    void setDetails(const EvaluationDetails& details);
+    void addDetails(const EvaluationDetails& details);
+    void clearDetails();
+
     std::string type_;
     std::string result_id_;
     std::string req_grp_id_;
@@ -87,16 +137,8 @@ protected:
 
     EvaluationManager& eval_man_;
 
-    EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
-            std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-
-    virtual std::string getRequirementSectionID ();
-    virtual std::string getRequirementSumSectionID ();
-
-    EvaluationResultsReport::Section& getRequirementSection (
-            std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-
-
+private:
+    EvaluationDetails details_;
 };
 
 }

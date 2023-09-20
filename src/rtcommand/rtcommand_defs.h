@@ -33,6 +33,7 @@ enum class CmdErrorCode
     Issue_CommandStringMismatch = 102,
     Issue_CommandNotFound       = 103,
     Issue_CommandCreationFailed = 104,
+    Issue_NotReady              = 105,
 
     Config_CommandStringInvalid  = 200,
     Config_CommandStringMismatch = 201,

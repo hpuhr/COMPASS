@@ -9,6 +9,11 @@
             "path": "task_import_asterix.json"
         },
         {
+            "class_id": "CalculateReferencesTask",
+            "instance_id": "CalculateReferencesTask0",
+            "path": "task_calc_assoc.json"
+        },
+        {
             "class_id": "CreateARTASAssociationsTask",
             "instance_id": "CreateARTASAssociationsTask0",
             "path": "task_calc_artas_assoc.json"
@@ -19,9 +24,9 @@
             "path": "task_calc_assoc.json"
         },
         {
-            "class_id": "DatabaseOpenTask",
-            "instance_id": "DatabaseOpenTask0",
-            "path": "task_db_open.json"
+            "class_id": "GPSImportCSVTask",
+            "instance_id": "GPSImportCSVTask0",
+            "path": "task_import_gps_csv.json"
         },
         {
             "class_id": "GPSTrailImportTask",
@@ -32,11 +37,6 @@
             "class_id": "JSONImportTask",
             "instance_id": "JSONImportTask0",
             "path": "task_import_json.json"
-        },
-        {
-            "class_id": "ManageDBContentTask",
-            "instance_id": "ManageDBContentTask0",
-            "path": "task_manage_dbcontent.json"
         },
         {
             "class_id": "ManageSectorsTask",

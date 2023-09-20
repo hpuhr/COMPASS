@@ -22,6 +22,9 @@
 #include "global.h"
 #include "singleton.h"
 #include "buffer.h"
+#include "targetmodel.h"
+#include "dbcontent/dbcontentcache.h"
+#include "viewabledataconfig.h"
 
 #include <boost/optional.hpp>
 
@@ -43,6 +46,7 @@ class Variable;
 class MetaVariable;
 class VariableSet;
 class Target;
+class TargetListWidget;
 class LabelGenerator;
 class VariableSet;
 
@@ -71,26 +75,31 @@ signals:
     void loadingDoneSignal(); // emitted when all dbos have finished loading
     void insertDoneSignal(); // emitted when all dbos have finished loading
 
-public:
+    // if useInEval or comment changed signals, to be sent from model
+    void targetChangedSignal(unsigned int utn); // for one utn
+    void allTargetsChangedSignal(); // for more than 1 utn
 
+public:
     DBContentManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~DBContentManager();
 
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override;
 
     dbContent::LabelGenerator& labelGenerator();
 
     bool existsDBContent(const std::string& dbcontent_name);
     DBContent& dbContent(const std::string& dbcontent_name);
     void deleteDBContent(const std::string& dbcontent_name);
-    void deleteDBContent(boost::posix_time::ptime before_timestamp);
     bool hasData();
 
     using DBContentIterator = typename std::map<std::string, DBContent*>::iterator;
     DBContentIterator begin() { return dbcontent_.begin(); }
     DBContentIterator end() { return dbcontent_.end(); }
     size_t size() { return dbcontent_.size(); }
+
+    unsigned int getMaxDBContentID();
+    bool existsDBContentWithId (unsigned int id);
+    const std::string& dbContentWithId (unsigned int id);
 
     bool existsMetaVariable(const std::string& var_name);
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
@@ -112,6 +121,8 @@ public:
     void insertDone(DBContent& object); // to be called by dbo when it's insert is finished
     bool insertInProgress() const;
 
+    void deleteDBContentData(boost::posix_time::ptime before_timestamp);
+
     DBContentManagerWidget* widget();
 
     void quitLoading();
@@ -121,8 +132,8 @@ public:
     std::string associationsID() const;
 
     bool hasMaxRecordNumber() const { return has_max_rec_num_; }
-    unsigned int maxRecordNumber() const;
-    void maxRecordNumber(unsigned int value);
+    unsigned long maxRecordNumber() const;
+    void maxRecordNumber(unsigned long value);
 
     bool hasMaxRefTrajTrackNum() const { return has_max_reftraj_track_num_; }
     unsigned int maxRefTrajTrackNum() const;
@@ -147,27 +158,48 @@ public:
     bool metaCanGetVariable (const std::string& dbcont_name, const Property& meta_property);
     dbContent::Variable& metaGetVariable (const std::string& dbcont_name, const Property& meta_property);
 
-    bool hasTargetsInfo();
+    bool hasTargetsInfo() const;
     void clearTargetsInfo();
     bool existsTarget(unsigned int utn);
-    void createTarget(unsigned int utn);
-    std::shared_ptr<dbContent::Target> target(unsigned int utn);
+    void createNewTarget(unsigned int utn);
+    dbContent::Target& target(unsigned int utn);
+    void removeDBContentFromTargets(const std::string& dbcont_name);
+    void loadTargets();
     void saveTargets();
+
+    nlohmann::json targetsInfoAsJSON() const;
+    nlohmann::json targetInfoAsJSON(unsigned int utn) const;
+    nlohmann::json targetStatsAsJSON() const;
+    nlohmann::json utnsAsJSON() const;
 
     unsigned int maxLiveDataAgeCache() const;
 
     void resetToStartupConfiguration(); // only resets label generator
 
+    dbContent::TargetListWidget* targetListWidget();
+    void resizeTargetListWidget();
+
+    bool utnUseEval (unsigned int utn);
+    void utnUseEval (unsigned int utn, bool value);
+
+    std::string utnComment (unsigned int utn);
+    void utnComment (unsigned int utn, std::string value);
+
+    void autoFilterUTNS();
+    void showUTN (unsigned int utn);
+
 protected:
     COMPASS& compass_;
 
     std::unique_ptr<dbContent::LabelGenerator> label_generator_;
+    std::unique_ptr<dbContent::TargetModel> target_model_;
+    std::unique_ptr<dbContent::TargetListWidget> target_list_widget_;
 
     bool has_associations_{false};
     std::string associations_id_;
 
     bool has_max_rec_num_ {false};
-    unsigned int max_rec_num_ {0};
+    unsigned long max_rec_num_ {0};
 
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
@@ -189,11 +221,12 @@ protected:
     bool load_in_progress_{false};
     bool insert_in_progress_{false};
 
-    /// Container with all DBContent (DBContent name -> DBO pointer)
+    /// Container with all DBContent (DBContent name -> dbcont pointer)
     std::map<std::string, DBContent*> dbcontent_;
+    std::map<unsigned int, DBContent*> dbcontent_ids_;
     std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
-    std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
+    //std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
 
     std::unique_ptr<DBContentManagerWidget> widget_;
 
@@ -201,7 +234,9 @@ protected:
 
     std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
 
-    virtual void checkSubConfigurables();
+    std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
+
+    virtual void checkSubConfigurables() override;
     void finishLoading();
     void finishInserting();
 
@@ -216,6 +251,7 @@ protected:
 
     void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
 
+    void setViewableDataConfig (const nlohmann::json::object_t& data);
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

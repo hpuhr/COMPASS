@@ -88,11 +88,12 @@ private:
     void resetLocalBacklog();
     void updateCommandFromLocalBacklog();
     void showBacklog();
+    void copyLastReply() const;
     void processCommand();
     void log(const QString& txt, LogType log_type = LogType::Plain, bool indent = false);
     void logResult(std::string msg, bool error);
 
-    void receiveResult(std::string msg, std::string data, bool error);
+    void receiveResult(const QString& msg, const QString& data, bool error);
 
     void lastCmd();
     void nextCmd();
@@ -100,9 +101,12 @@ private:
     QTextEdit*   cmd_shell_;
     QLineEdit*   cmd_edit_;
     QToolButton* backlog_button_;
+    QToolButton* copy_button_;
 
     std::vector<std::string> local_backlog_;
     int                      local_backlog_index_ = -1;
+
+    QString last_reply_;
 };
 
 } // namespace rtcommand

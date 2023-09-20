@@ -70,11 +70,13 @@ namespace EvaluationResultsReport
         SectionContentTable& getTable (const std::string& name);
         void addTable (const std::string& name, unsigned int num_columns, vector<string> headings,
                        bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
+        std::vector<std::string> getTableNames() const;
 
         bool hasFigure (const std::string& name);
         SectionContentFigure& getFigure (const std::string& name);
         void addFigure (const std::string& name, const string& caption,
-                        std::unique_ptr<nlohmann::json::object_t> viewable_data);
+                        std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc);
+                        //std::unique_ptr<nlohmann::json::object_t> viewable_data);
 
         unsigned int numSections(); // all sections contained
         void addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details,

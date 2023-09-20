@@ -166,7 +166,7 @@ bool injectKeyCmdEvent(QWidget* root,
     
     auto injectionMsg = [ & ] (const std::string& obj_type) 
     {
-        loginf << "Injecting command";
+        loginf << "Injecting key into " << obj_type;
     };
  
     if (obj.second->isWidgetType())
@@ -178,6 +178,46 @@ bool injectKeyCmdEvent(QWidget* root,
     {
         injectionMsg("window");
         QTest::keyClick(dynamic_cast<QWindow*>(obj.second), key, modifier, delay);
+    }
+
+    return true;
+}
+
+/**
+*/
+bool injectKeySequenceEvent(QWidget* root,
+                            const QString& obj_name,
+                            const QKeySequence& keys,
+                            int delay)
+{
+    auto obj = findObject(root, obj_name);
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        logObjectError("injectKeySequenceEvent", obj_name, obj.first);
+        return false;
+    }
+    if (!obj.second->isWidgetType() && !obj.second->isWindowType())
+    {
+        logObjectError("injectKeySequenceEvent", obj_name, rtcommand::FindObjectErrCode::WrongType);
+        return false;
+    }
+    
+    auto injectionMsg = [ & ] (const std::string& obj_type) 
+    {
+        loginf << "Injecting key sequence into " << obj_type;
+    };
+ 
+    if (obj.second->isWidgetType())
+    {
+        injectionMsg("widget");
+        //@TODO: keySequence not available in appimage qt
+        //QTest::keySequence(dynamic_cast<QWidget*>(obj.second), keys);
+    }
+    else //window
+    {
+        injectionMsg("window");
+        //@TODO: keySequence not available in appimage qt
+        //QTest::keySequence(dynamic_cast<QWindow*>(obj.second), keys);
     }
 
     return true;
@@ -235,7 +275,56 @@ bool injectClickEvent(QWidget* root,
 }
 
 /**
- * 
+ */
+bool injectRectEvent(QWidget* root,
+                     const QString& obj_name, 
+                     int x0, 
+                     int y0, 
+                     int x1, 
+                     int y1,
+                     Qt::MouseButton button, 
+                     int delay)
+{
+    auto obj = findObject(root, obj_name);
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        logObjectError("injectRectEvent", obj_name, obj.first);
+        return false;
+    }
+
+    if (!obj.second->isWidgetType() && !obj.second->isWindowType())
+    {
+        logObjectError("injectRectEvent", obj_name, rtcommand::FindObjectErrCode::WrongType);
+        return false;
+    }
+
+    QPoint pos0(x0, y0);
+    QPoint pos1(x1, y1);
+
+    auto injectionMsg = [ & ] (const std::string& obj_type) 
+    {
+        loginf << "Injecting mouse button '" << (int)button << "' rectangle from (" << std::to_string(x0) << "," << std::to_string(y0) << ") to (" << std::to_string(x1) << "," << std::to_string(y1) << ")";
+    };
+
+    if (obj.second->isWidgetType())
+    {
+        injectionMsg("widget");
+        QTest::mousePress(dynamic_cast<QWidget*>(obj.second), button, 0, pos0, 0);
+        QTest::mouseMove(dynamic_cast<QWidget*>(obj.second), pos1, 0);
+        QTest::mouseRelease(dynamic_cast<QWidget*>(obj.second), button, 0, pos1, 0);
+    }
+    else //window
+    {
+        injectionMsg("window");
+        QTest::mousePress(dynamic_cast<QWindow*>(obj.second), button, 0, pos0, 0);
+        QTest::mouseMove(dynamic_cast<QWindow*>(obj.second), pos1, 0);
+        QTest::mouseRelease(dynamic_cast<QWindow*>(obj.second), button, 0, pos1, 0);
+    }
+
+    return true;
+}
+
+/**
  */
 bool injectPostModalEvent(const EventFunc& modal_trigger_cb,
                           const EventFunc& post_modal_cb)
@@ -546,6 +635,42 @@ bool injectComboBoxEditEvent(QWidget* root,
     }
 
     return (obj.second->currentIndex() == idx);
+}
+
+/**
+ * Inject a combo selection event into the given combo box object.
+ * 'entry_idx' is the index of the combo box entry to be selected.
+ */
+bool injectComboBoxEditEvent(QWidget* root,
+                             const QString& obj_name,
+                             int entry_idx,
+                             int delay)
+{
+    auto obj = findObjectAs<QComboBox>(root, obj_name);
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        logObjectError("injectComboBoxEditEvent", obj_name, obj.first);
+        return false;
+    }
+
+    if (entry_idx < 0 || entry_idx >= obj.second->count())
+    {
+        loginf << "injectComboBoxEditEvent: Index " << entry_idx << " out of bounds";
+        return false;
+    }
+
+    //move either up or down using key injections
+    int cur_idx = obj.second->currentIndex();
+    Qt::Key key = (entry_idx >= cur_idx ? Qt::Key_Down : Qt::Key_Up);
+
+    int cnt = 0;
+    while (obj.second->currentIndex() != entry_idx && cnt++ < obj.second->count())
+    {
+        if(!injectKeyEvent(obj.second, "", key))
+            return false;
+    }
+
+    return (obj.second->currentIndex() == entry_idx);
 }
 
 /**
@@ -972,6 +1097,33 @@ bool injectDialogEvent(QWidget* root,
         obj.second->reject();
 
     return true;
+}
+
+/**
+ * Triggers a slot in a widget.
+ */
+bool injectWidgetEvent(QWidget* root,
+                       const QString& obj_name,
+                       const QString& slot_name,
+                       int delay)
+{
+    if (slot_name.isEmpty())
+        return false;
+
+    auto obj = findObjectAs<QWidget>(root, obj_name);
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        logObjectError("injectWidgetEvent", obj_name, obj.first);
+        return false;
+    }
+
+    //check if a slot of this name exists
+    int idx = obj.second->metaObject()->indexOfSlot((slot_name + "()").toStdString().c_str());
+    if (idx < 0)
+        return false;
+
+    //try to invoke the slot (may fail if e.g. parameters are needed to invoke the slot)
+    return QMetaObject::invokeMethod(obj.second, slot_name.toStdString().c_str());
 }
 
 } // namespace ui_test

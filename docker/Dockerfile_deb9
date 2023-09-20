@@ -2,6 +2,10 @@ FROM debian:stretch
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+RUN sed -i -e 's/deb.debian.org/archive.debian.org/g' \
+           -e 's|security.debian.org|archive.debian.org/|g' \
+           -e '/stretch-updates/d' /etc/apt/sources.list
+
 RUN apt-get update
 RUN apt-get install -y openssl 
 
@@ -56,7 +60,7 @@ RUN sqlite3 -cmd "CREATE TABLE countries (id varchar(3), data json);insert into 
 
 RUN more /etc/apt/sources.list
 RUN cp /etc/apt/sources.list /etc/apt/sources.list~
-RUN echo 'deb-src http://deb.debian.org/debian stretch main' >> /etc/apt/sources.list
+RUN echo 'deb-src http://archive.debian.org/debian stretch main' >> /etc/apt/sources.list
 RUN more /etc/apt/sources.list
 RUN apt-get update
 
@@ -150,7 +154,8 @@ RUN cd osgearth-osgearth-3.2/build && make install
 #RUN cd osgearth-osgearth-2.10.2/build && make -j 16
 #RUN cd osgearth-osgearth-2.10.2/build && make install
 
-RUN wget https://github.com/ckgt/NemaTode/archive/master.zip
+#RUN wget https://github.com/ckgt/NemaTode/archive/master.zip
+RUN wget https://github.com/hpuhr/NemaTode/archive/refs/heads/master.zip
 RUN unzip master.zip
 RUN mkdir NemaTode-master/build
 RUN cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
@@ -159,8 +164,10 @@ RUN cd NemaTode-master/build && make install
 
 #RUN apt-get install gdb -y
 RUN mkdir jasper
-RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
-RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
+#RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
+#RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
+RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
+RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
 RUN cd jasper && dpkg -i *.deb
 
 RUN ldconfig -v /usr/lib64/ /usr/local/
@@ -169,6 +176,9 @@ RUN updatedb
 RUN locate libboost
 
 RUN apt install sudo
+
+RUN echo 'sk ALL=(ALL)  ALL' >> /etc/sudoers
+RUN more /etc/sudoers
 
 USER sk
 WORKDIR /app/workspace/compass/docker

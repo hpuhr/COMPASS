@@ -26,24 +26,34 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 
 #include <cassert>
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
 
-SingleExtraTrack::SingleExtraTrack(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
-        EvaluationManager& eval_man,
-        bool ignore, unsigned int num_inside, unsigned int num_extra, unsigned int num_ok,
-        std::vector<EvaluationRequirement::ExtraTrackDetail> details)
-    : Single("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, eval_man),
-      ignore_(ignore), num_inside_(num_inside), num_extra_(num_extra), num_ok_(num_ok), details_(details)
+SingleExtraTrack::SingleExtraTrack(const std::string& result_id, 
+                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                   const SectorLayer& sector_layer,
+                                   unsigned int utn,
+                                   const EvaluationTargetData* target,
+                                   EvaluationManager& eval_man,
+                                   const EvaluationDetails& details,
+                                   bool ignore,
+                                   unsigned int num_inside,
+                                   unsigned int num_extra,
+                                   unsigned int num_ok)
+    :   Single("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   ignore_    (ignore)
+    ,   num_inside_(num_inside)
+    ,   num_extra_ (num_extra)
+    ,   num_ok_    (num_ok)
 {
     //loginf << "SingleTrack: ctor: result_id " << result_id_ << " ignore " << ignore_;
 
@@ -67,23 +77,19 @@ void SingleExtraTrack::updateProb()
 {
     assert (num_inside_ >= num_extra_ + num_ok_);
 
+    prob_.reset();
+
     if (num_extra_ + num_ok_)
     {
         logdbg << "SingleTrack: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
                << " num_ok " << num_ok_;
 
-        prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
-        has_prob_ = true;
-
+        prob_          = (float)num_extra_/(float)(num_extra_ + num_ok_);
         result_usable_ = !ignore_;
     }
-    else
-    {
-        prob_ = 0;
-        has_prob_ = false;
 
+    if (!prob_.has_value())
         result_usable_ = false;
-    }
 
     updateUseFromTarget();
 }
@@ -92,7 +98,8 @@ void SingleExtraTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsRepo
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
@@ -101,8 +108,8 @@ void SingleExtraTrack::addTargetDetailsToTable (
 {
     QVariant prob_var;
 
-    if (has_prob_)
-        prob_var = roundf(prob_ * 10000.0) / 100.0;
+    if (prob_.has_value())
+        prob_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     if (!section.hasTable(table_name))
         section.addTable(table_name, 14,
@@ -113,7 +120,7 @@ void SingleExtraTrack::addTargetDetailsToTable (
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
                  target_->modeCMaxStr().c_str(), target_->numTstUpdates(),
                  ignore_, num_extra_+num_ok_, num_ok_, num_extra_, prob_var}, this, {utn_});
@@ -147,8 +154,8 @@ void SingleExtraTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
     {
         QVariant prob_var;
 
-        if (has_prob_)
-            prob_var = roundf(prob_ * 10000.0) / 100.0;
+        if (prob_.has_value())
+            prob_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PEx [%]", "Probability of update with extra track", prob_var}, this);
 
@@ -156,8 +163,8 @@ void SingleExtraTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
 
         string result {"Unknown"};
 
-        if (has_prob_)
-            result = req-> getResultConditionStr(prob_);
+        if (prob_.has_value())
+            result = req->getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -166,14 +173,13 @@ void SingleExtraTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
             root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
             utn_req_section.perTargetWithIssues(true);
         }
-
     }
 
     // add figure
     if (!ignore_ && num_extra_)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -195,18 +201,24 @@ void SingleExtraTrack::reportDetails(EvaluationResultsReport::Section& utn_req_s
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : details_)
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(),
-                     rq_det_it.inside_, rq_det_it.track_num_, rq_det_it.extra_,
-                     rq_det_it.comment_.c_str()},
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailKey::Inside),
+                          rq_det_it.getValue(DetailKey::TrackNum),
+                          rq_det_it.getValue(DetailKey::Extra),
+                          rq_det_it.comments().generalComment().c_str() },
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SingleExtraTrack::hasViewableData (
@@ -214,8 +226,8 @@ bool SingleExtraTrack::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-        else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
-            return true;
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
+        return true;
     else
         return false;
 }
@@ -223,8 +235,8 @@ bool SingleExtraTrack::hasViewableData (
 std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
+
     if (table.name() == target_table_name_)
     {
         return getTargetErrorsViewable();
@@ -237,21 +249,23 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::ExtraTrackDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.pos_current_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.pos_current_.longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        assert(detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
         return viewable_ptr;
     }
-    else
-        return nullptr;
+
+    return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::getTargetErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::getTargetErrorsViewable (bool add_highlight)
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -301,15 +315,17 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::getTargetErrorsViewa
     //        double lat_w = 1.1*(lat_max-lat_min)/2.0;
     //        double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    //        if (lat_w < eval_man_.resultDetailZoom())
-    //            lat_w = eval_man_.resultDetailZoom();
+    //        if (lat_w < eval_man_.settings().result_detail_zoom_)
+    //            lat_w = eval_man_.settings().result_detail_zoom_;
 
-    //        if (lon_w < eval_man_.resultDetailZoom())
-    //            lon_w = eval_man_.resultDetailZoom();
+    //        if (lon_w < eval_man_.settings().result_detail_zoom_)
+    //            lon_w = eval_man_.settings().result_detail_zoom_;
 
     //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     //    }
+
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -356,9 +372,14 @@ unsigned int SingleExtraTrack::numOK() const
     return num_ok_;
 }
 
-const std::vector<EvaluationRequirement::ExtraTrackDetail>& SingleExtraTrack::details() const
+void SingleExtraTrack::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-    return details_;
+    //addAnnotationFeatures(viewable, overview); // TODO rework
+
+    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
+    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
+    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
 }
 
 }

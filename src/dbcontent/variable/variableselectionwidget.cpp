@@ -185,9 +185,9 @@ bool VariableSelectionWidget::showDataType(PropertyDataType type)
 void VariableSelectionWidget::updateToolTip()
 {
     if (hasVariable())
-        setToolTip(selectedVariable().description().c_str());
+        setToolTip(selectedVariable().info().c_str());
     else if (hasMetaVariable())
-        setToolTip(selectedMetaVariable().description().c_str());
+        setToolTip(selectedMetaVariable().info().c_str());
     else
         setToolTip("");
 }
@@ -196,8 +196,6 @@ void VariableSelectionWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
 
 void VariableSelectionWidget::triggerSlot(QAction* action)
 {
-    std::cout << "TRIGGERED!!!!!!!!!!!!" << std::endl;
-
     assert(object_label_);
     assert(variable_label_);
 

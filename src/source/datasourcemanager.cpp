@@ -7,6 +7,7 @@
 #include "number.h"
 #include "files.h"
 #include "json.hpp"
+#include "datasource_commands.h"
 
 #include <QMessageBox>
 
@@ -32,6 +33,9 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
     createSubConfigurables();
 
     updateDSIdsAll();
+
+
+    dbContent::init_data_source_commands();
 }
 
 DataSourceManager::~DataSourceManager()
@@ -182,7 +186,6 @@ void DataSourceManager::importDataSourcesJSON(const nlohmann::json& j)
 
     for (auto& j_ds_it : j.at("data_sources").get<json::array_t>())
     {
-
         assert(j_ds_it.contains("ds_type"));
         assert(j_ds_it.contains("name"));
         assert(j_ds_it.contains("sac"));
@@ -231,6 +234,19 @@ void DataSourceManager::exportDataSources(const std::string& filename)
 {
     loginf << "DataSourceManager: exportDataSources: file '" << filename << "'";
 
+    json data = getConfigDataSourcesAsJSON();
+
+    std::ofstream file(filename);
+    file << data.dump(4);
+
+    QMessageBox m_info(QMessageBox::Information, "Export Data Sources",
+                       "File export: '"+QString(filename.c_str())+"' done.\n"
+                       +QString::number(config_data_sources_.size())+" Data Sources saved.", QMessageBox::Ok);
+    m_info.exec();
+}
+
+nlohmann::json DataSourceManager::getConfigDataSourcesAsJSON()
+{
     json data;
 
     data["content_type"] = "data_sources";
@@ -240,19 +256,35 @@ void DataSourceManager::exportDataSources(const std::string& filename)
     json& data_sources = data.at("data_sources");
 
     unsigned int cnt = 0;
+
     for (auto& ds_it : config_data_sources_)
     {
         data_sources[cnt] = ds_it->getAsJSON();
         ++cnt;
     }
 
-    std::ofstream file(filename);
-    file << data.dump(4);
+    return data;
+}
 
-    QMessageBox m_info(QMessageBox::Information, "Export Data Sources",
-                       "File export: '"+QString(filename.c_str())+"' done.\n"
-                       +QString::number(config_data_sources_.size())+" Data Sources saved.", QMessageBox::Ok);
-    m_info.exec();
+nlohmann::json DataSourceManager::getDBDataSourcesAsJSON()
+{
+    json data;
+
+    data["content_type"] = "data_sources";
+    data["content_version"] = "0.2";
+
+    data["data_sources"] = json::array();
+    json& data_sources = data.at("data_sources");
+
+    unsigned int cnt = 0;
+
+    for (auto& ds_it : db_data_sources_)
+    {
+        data_sources[cnt] = ds_it->getAsJSON();
+        ++cnt;
+    }
+
+    return data;
 }
 
 // ds id->dbcont->line->cnt
@@ -279,6 +311,15 @@ void DataSourceManager::setLoadedCounts(std::map<unsigned int, std::map<std::str
     }
 
     if (load_widget_ && load_widget_show_counts_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::clearInsertedCounts(const std::string& dbcontent_name)
+{
+    for (auto& db_src_it : db_data_sources_)
+        db_src_it->clearNumInserted(dbcontent_name);
+
+    if (load_widget_)
         load_widget_->updateContent();
 }
 
@@ -611,6 +652,11 @@ dbContent::ConfigurationDataSource& DataSourceManager::configDataSource (unsigne
     return *find_if(config_data_sources_.begin(), config_data_sources_.end(),
                     [ds_id] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
     { return s->id() == ds_id; } )->get();
+}
+
+const std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>>& DataSourceManager::configDataSources() const
+{
+    return config_data_sources_;
 }
 
 void DataSourceManager::checkSubConfigurables()

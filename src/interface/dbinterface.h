@@ -109,10 +109,13 @@ public:
                      std::string custom_filter_clause,
                      bool use_order = false, dbContent::Variable* order_variable = nullptr);
 
-    std::shared_ptr<Buffer> readDataChunk(const DBContent& dbcontent);
+    std::pair<std::shared_ptr<Buffer>, bool> readDataChunk(const DBContent& dbcontent); // last one flag
     void finalizeReadStatement(const DBContent& dbcontent);
 
     void deleteBefore(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);
+    void deleteAll(const DBContent& dbcontent);
+    void deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic);
+    void deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id);
 
     size_t count(const std::string& table);
 
@@ -146,12 +149,13 @@ public:
     bool existsTargetsTable();
     void createTargetsTable();
     void clearTargetsTable();
-    std::map<unsigned int, std::shared_ptr<dbContent::Target>> loadTargets();
-    void saveTargets(std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets);
+    std::vector<std::unique_ptr<dbContent::Target>> loadTargets();
+    void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets);
+    void saveTarget(const std::unique_ptr<dbContent::Target>& target);
 
     void clearTableContent(const std::string& table_name);
 
-    unsigned int getMaxRecordNumber(DBContent& object);
+    unsigned long getMaxRecordNumber(DBContent& object);
     unsigned int getMaxRefTrackTrackNum();
 
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,

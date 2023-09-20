@@ -25,6 +25,7 @@
 #include "global.h"
 
 class ListBoxView;
+class ListBoxViewWidget;
 class ListBoxViewDataSource;
 class QTabWidget;
 class AllBufferTableWidget;
@@ -41,15 +42,13 @@ class ListBoxViewDataWidget : public ViewDataWidget
     Q_OBJECT
 public:
     /// @brief Constructor
-    ListBoxViewDataWidget(ListBoxView* view, 
-                          ListBoxViewDataSource* data_source,
+    ListBoxViewDataWidget(ListBoxViewWidget* view_widget, 
                           QWidget* parent = nullptr, 
                           Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~ListBoxViewDataWidget();
 
     /// @brief Clears the table contents
-    void clearData();
     void resetModels();
     void updateToSelection();
 
@@ -63,11 +62,6 @@ signals:
     void usePresentationSignal(bool use_presentation);
 
 public slots:
-    void loadingStartedSlot();
-    /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
-    void loadingDoneSlot();
-
     void exportDataSlot(bool overwrite);
     void exportDoneSlot(bool cancelled);
 
@@ -76,6 +70,12 @@ public slots:
 
 protected:
     virtual void toolChanged_impl(int mode) override;
+    virtual void loadingStarted_impl() override;
+    virtual void loadingDone_impl() override;
+    virtual void updateData_impl(bool requires_reset) override;
+    virtual void clearData_impl() override;
+    virtual bool redrawData_impl(bool recompute) override;
+    virtual void liveReload_impl() override;
 
     ListBoxView*           view_{nullptr};
     /// Data source
@@ -85,8 +85,7 @@ protected:
     /// Container with all table widgets
     AllBufferTableWidget*  all_buffer_table_widget_{nullptr};
 
-    std::map<std::string, std::shared_ptr<Buffer>> buffers_;
-    std::map<std::string, BufferTableWidget*>      buffer_tables_;
+    std::map<std::string, BufferTableWidget*> buffer_tables_;
 };
 
 #endif /* LISTBOXVIEWDATAWIDGET_H_ */

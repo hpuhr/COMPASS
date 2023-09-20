@@ -82,11 +82,12 @@ class JSONImportTask : public Task, public Configurable
     JSONImportTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     bool canImportFile();
-    virtual bool canRun();
-    virtual void run();
+
+    virtual bool canRun() override;
+    virtual void run() override;
 
     void importFilename(const std::string& filename);
     const std::string& importFilename() { return import_filename_; }
@@ -101,10 +102,6 @@ class JSONImportTask : public Task, public Configurable
 
     std::string currentSchemaName() const;
     void currentSchemaName(const std::string& currentSchema);
-
-    virtual bool checkPrerequisites();
-    virtual bool isRecommended();
-    virtual bool isRequired();
 
     void test(bool test);
 
@@ -176,7 +173,7 @@ class JSONImportTask : public Task, public Configurable
 
     bool maxLoadReached();
 
-    virtual void checkSubConfigurables() {}
+    virtual void checkSubConfigurables() override {}
 };
 
 #endif  // JSONIMPORTERTASK_H

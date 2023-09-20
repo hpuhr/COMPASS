@@ -18,14 +18,16 @@
 #ifndef DBCONTENT_VARIABLE_H_
 #define DBCONTENT_VARIABLE_H_
 
-#include <QObject>
-#include <string>
-#include <vector>
-
 #include "configurable.h"
 #include "global.h"
 #include "property.h"
 #include "stringconv.h"
+#include "logger.h"
+
+#include <QObject>
+
+#include <string>
+#include <vector>
 
 class DBTableColumn;
 class DBContent;
@@ -81,6 +83,8 @@ class Variable : public QObject, public Property, public Configurable
     const std::string& description() const { return description_; }
     void description(const std::string& description) { description_ = description; }
 
+    std::string info() const;
+
     std::string dbColumnName() const;
     void dbColumnName(const std::string& value);
 
@@ -95,7 +99,7 @@ class Variable : public QObject, public Property, public Configurable
     std::string& dimension() { return dimension_; }                   // TODO should be const
     const std::string& unitConst() const { return unit_; }
     std::string& unit() { return unit_; }
-    std::string dimensionUnitStr();
+    std::string dimensionUnitStr() const;
 
     DBContent& dbObject() const
     {

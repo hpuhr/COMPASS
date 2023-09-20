@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTEXTRATRACKCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTEXTRATRACKCONFIGWIDGET_H
 
-#include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
     class ExtraTrackConfig;
 
-    class ExtraTrackConfigWidget : public BaseConfigWidget
+    class ExtraTrackConfigWidget : public ProbabilityBaseConfigWidget
     {
         Q_OBJECT
 

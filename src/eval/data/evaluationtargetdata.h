@@ -18,61 +18,36 @@
 #ifndef EVALUATIONTARGETDATA_H
 #define EVALUATIONTARGETDATA_H
 
-#include "evaluationtargetposition.h"
-#include "evaluationtargetvelocity.h"
-#include "projection/transformation.h"
+#include "dbcontent/target/targetreportchain.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
+#include <boost/optional.hpp>
 
+#include <vector>
 #include <map>
 #include <memory>
 #include <vector>
 #include <set>
 #include <string>
 
+#include <Eigen/Core>
+
 class Buffer;
 class EvaluationData;
 class EvaluationManager;
-//class Transformation;
-
-//class OGRSpatialReference;
-//class OGRCoordinateTransformation;
-
-class TstDataMapping // mapping to respective ref data
-{
-public:
-    boost::posix_time::ptime timestamp_; // timestmap of test
-
-    bool has_ref1_ {false};
-    boost::posix_time::ptime timestamp_ref1_;
-
-    bool has_ref2_ {false};
-    boost::posix_time::ptime timestamp_ref2_;
-
-    bool has_ref_pos_ {false};
-    EvaluationTargetPosition pos_ref_;
-
-    bool has_ref_spd_ {false};
-    EvaluationTargetVelocity posbased_spd_ref_;
-};
-
-class DataMappingTimes // mapping to respective tst data
-{
-public:
-    boost::posix_time::ptime timestamp_; // tod of test
-
-    bool has_other1_ {false};
-    boost::posix_time::ptime timestamp_other1_;
-
-    bool has_other2_ {false};
-    boost::posix_time::ptime timestamp_other2_;
-};
+class DBContentManager;
+class SectorLayer;
 
 class EvaluationTargetData
 {
 public:
-    EvaluationTargetData();
-    EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man);
+    typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> InsideCheckMatrix;
+
+    EvaluationTargetData(unsigned int utn, 
+                         EvaluationData& eval_data,
+                         std::shared_ptr<dbContent::Cache> cache,
+                         EvaluationManager& eval_man, 
+                         DBContentManager& dbcont_man);
     virtual ~EvaluationTargetData();
 
     void addRefIndex (boost::posix_time::ptime timestamp, unsigned int index);
@@ -96,11 +71,11 @@ public:
     std::string timeEndStr() const;
     boost::posix_time::time_duration timeDuration() const;
 
-    std::set<std::string> callsigns() const;
-    std::string callsignsStr() const;
+    std::set<std::string> acids() const;
+    std::string acidsStr() const;
 
-    std::set<unsigned int> targetAddresses() const;
-    std::string targetAddressesStr() const;
+    std::set<unsigned int> acads() const;
+    std::string acadsStr() const;
 
     std::set<unsigned int> modeACodes() const;
     std::string modeACodesStr() const;
@@ -112,85 +87,20 @@ public:
     std::string modeCMaxStr() const;
 
     bool isPrimaryOnly () const;
+    bool isModeS () const;
+    bool isModeACOnly () const;
 
     bool use() const;
-    void use(bool use);
 
-    const std::multimap<boost::posix_time::ptime, unsigned int>& refData() const;
-    const std::multimap<boost::posix_time::ptime, unsigned int>& tstData() const;
+    const dbContent::TargetReport::Chain& refChain() const;
+    const dbContent::TargetReport::Chain& tstChain() const;
 
-    // ref
-    bool hasRefDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
-    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> refTimesFor (
-            boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
-    // lower/upper times, {} if not existing
+//    bool canCheckTstMultipleSources() const;
+//    bool hasTstMultipleSources() const;
 
-    std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (
-            boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
-    // bool ok
-    std::pair<EvaluationTargetVelocity, bool> interpolatedRefPosBasedSpdForTime (
-            boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
-
-    bool hasRefPosForTime (boost::posix_time::ptime timestamp) const;
-    EvaluationTargetPosition refPosForTime (boost::posix_time::ptime timestamp) const;
-    EvaluationTargetVelocity refPosBasedSpdForTime (boost::posix_time::ptime timestamp) const;
-    std::pair<bool, float> estimateRefAltitude (boost::posix_time::ptime timestamp, unsigned int index) const;
-    // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
-
-    bool hasRefCallsignForTime (boost::posix_time::ptime timestamp) const;
-    std::string refCallsignForTime (boost::posix_time::ptime timestamp) const;
-
-    bool hasRefModeAForTime (boost::posix_time::ptime timestamp) const; // only if set, is v, not g
-    unsigned int refModeAForTime (boost::posix_time::ptime timestamp) const;
-
-    bool hasRefModeCForTime (boost::posix_time::ptime timestamp) const; // only if set, is v, not g
-    float refModeCForTime (boost::posix_time::ptime timestamp) const;
-
-    bool hasRefTAForTime (boost::posix_time::ptime timestamp) const;
-    unsigned int refTAForTime (boost::posix_time::ptime timestamp) const;
-
-    std::pair<bool,bool> refGroundBitForTime (boost::posix_time::ptime timestamp) const; // has gbs, gbs true
-    std::pair<bool,bool> interpolatedRefGroundBitForTime (
-            boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const; // has gbs, gbs true
-
-    // test
-    bool hasTstPosForTime (boost::posix_time::ptime timestamp) const;
-    EvaluationTargetPosition tstPosForTime (boost::posix_time::ptime timestamp) const;
-    std::pair<bool, float> estimateTstAltitude (boost::posix_time::ptime timestamp, unsigned int index) const;
-
-    bool hasTstCallsignForTime (boost::posix_time::ptime timestamp) const;
-    std::string tstCallsignForTime (boost::posix_time::ptime timestamp) const;
-
-    bool hasTstModeAForTime (boost::posix_time::ptime timestamp) const; // only if set, is v, not g
-    unsigned int tstModeAForTime (boost::posix_time::ptime timestamp) const;
-
-    bool hasTstModeCForTime (boost::posix_time::ptime timestamp) const; // only if set, is v, not g
-    float tstModeCForTime (boost::posix_time::ptime timestamp) const;
-
-    bool hasTstGroundBitForTime (boost::posix_time::ptime timestamp) const; // only if set
-    bool tstGroundBitForTime (boost::posix_time::ptime timestamp) const; // true is on ground
-
-    bool hasTstTAForTime (boost::posix_time::ptime timestamp) const;
-    unsigned int tstTAForTime (boost::posix_time::ptime timestamp) const;
-
-    std::pair<bool,bool> tstGroundBitForTimeInterpolated (boost::posix_time::ptime timestamp) const; // has gbs, gbs true
-
-    bool hasTstTrackNumForTime (boost::posix_time::ptime timestamp) const;
-    unsigned int tstTrackNumForTime (boost::posix_time::ptime timestamp) const;
-
-    // speed, track angle
-    bool hasTstMeasuredSpeedForTime (boost::posix_time::ptime timestamp) const;
-    float tstMeasuredSpeedForTime (boost::posix_time::ptime timestamp) const; // m/s
-
-    bool hasTstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const;
-    float tstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const; // deg
-
-    bool canCheckTstMultipleSources() const;
-    bool hasTstMultipleSources() const;
-
-    bool canCheckTrackLUDSID() const;
-    bool hasSingleLUDSID() const;
-    unsigned int singleTrackLUDSID() const;
+//    bool canCheckTrackLUDSID() const;
+//    bool hasSingleLUDSID() const;
+//    unsigned int singleTrackLUDSID() const;
 
     double latitudeMin() const;
     double latitudeMax() const;
@@ -201,37 +111,100 @@ public:
 
     bool hasADSBInfo() const;
     bool hasMOPSVersion() const;
-    unsigned int mopsVersion() const;
+    std::set<unsigned int> mopsVersions() const;
     std::string mopsVersionStr() const;
 
-    bool hasNucpNic() const;
-    std::string nucpNicStr() const;
-    bool hasNacp() const;
-    std::string nacpStr() const;
+//    bool hasNucpNic() const;
+//    std::string nucpNicStr() const;
+//    bool hasNacp() const;
+//    std::string nacpStr() const;
+
+    // ref
+    bool hasMappedRefData(const dbContent::TargetReport::Chain::DataID& tst_id,
+                          boost::posix_time::time_duration d_max) const;
+    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> mappedRefTimes(
+            const dbContent::TargetReport::Chain::DataID& tst_id,
+            boost::posix_time::time_duration d_max) const;
+    // lower/upper times, {} if not existing
+
+    boost::optional<dbContent::TargetPosition> mappedRefPos(
+            const dbContent::TargetReport::Chain::DataID& tst_id) const;
+    boost::optional<dbContent::TargetPosition> mappedRefPos(
+            const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const;
+    // bool ok
+    boost::optional<dbContent::TargetVelocity> mappedRefSpeed(
+            const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const;
+
+    boost::optional<bool> mappedRefGroundBit(
+            const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const; // gbs
+
+    // test
+    unsigned int tstDSID(const dbContent::TargetReport::Chain::DataID& ref_id) const;
+    boost::optional<bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& tst_id) const; // gds
+
+    // TODO d_max not used
+    boost::optional<bool> availableRefGroundBit(const dbContent::TargetReport::Chain::DataID& id,
+                                                const boost::posix_time::time_duration& d_max) const;
+    boost::optional<bool> availableTstGroundBit(const dbContent::TargetReport::Chain::DataID& id,
+                                                const boost::posix_time::time_duration& d_max) const;
+
+    bool refPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
+    bool refPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
+    bool refPosInside(const SectorLayer& layer,
+                      const dbContent::TargetReport::Chain::DataID& id) const;
+    bool tstPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
+    bool tstPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
+    bool tstPosInside(const SectorLayer& layer,
+                      const dbContent::TargetReport::Chain::DataID& id) const;
+    bool mappedRefPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
+    bool mappedRefPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
+    bool mappedRefPosInside(const SectorLayer& layer, 
+                            const dbContent::TargetReport::Chain::DataID& id) const;
+
+    static const int InterpGroundBitMaxSeconds = 15;
 
 protected:
-    //static bool in_appimage_;
+    void updateACIDs() const;
+    void updateACADs() const;
+    void updateModeACodes() const;
+    void updateModeCMinMax() const;
+    void updatePositionMinMax() const;
+//    //void updateADSBInfo() const;
 
-    EvaluationData* eval_data_ {nullptr};
-    EvaluationManager* eval_man_ {nullptr};
+    void calculateTestDataMappings() const;
+    void computeSectorInsideInfo() const;
+    void computeSectorInsideInfo(InsideCheckMatrix& mat, 
+                                 const dbContent::TargetPosition& pos,
+                                 unsigned int idx_internal,
+                                 const boost::optional<bool>& ground_bit,
+                                 const SectorLayer* min_height_filter = nullptr) const;
+    bool checkAbove(const InsideCheckMatrix& mat,
+                    const dbContent::TargetReport::Index& index) const;
+    bool checkGroundBit(const InsideCheckMatrix& mat,
+                        const dbContent::TargetReport::Index& index) const;
+    bool checkInside(const SectorLayer& layer,
+                     const InsideCheckMatrix& mat,
+                     const dbContent::TargetReport::Index& index) const;
+    
+    EvaluationData&    eval_data_;
+    std::shared_ptr<dbContent::Cache> cache_;
+    EvaluationManager& eval_man_;
+    DBContentManager&  dbcont_man_;
 
-    bool use_ {true};
+    dbContent::TargetReport::Chain ref_chain_;
+    dbContent::TargetReport::Chain tst_chain_;
 
-    std::multimap<boost::posix_time::ptime, unsigned int> ref_data_; // timestamp -> index
-    mutable std::vector<unsigned int> ref_indexes_;
-
-    std::multimap<boost::posix_time::ptime, unsigned int> tst_data_; // timestamp -> index
-    mutable std::vector<unsigned int> tst_indexes_;
-
-    mutable std::set<std::string> callsigns_;
-    mutable std::set<unsigned int> target_addresses_;
+    mutable std::vector<dbContent::TargetReport::DataMapping> tst_data_mappings_;
+    
+    mutable std::set<std::string> acids_;
+    mutable std::set<unsigned int> acads_;
     mutable std::set<unsigned int> mode_a_codes_;
 
-    mutable bool has_mode_c_ {false};
+    mutable bool  has_mode_c_ {false};
     mutable float mode_c_min_ {0};
     mutable float mode_c_max_ {0};
 
-    mutable bool has_pos_ {false};
+    mutable bool   has_pos_      {false};
     mutable double latitude_min_ {0};
     mutable double latitude_max_ {0};
 
@@ -239,34 +212,17 @@ protected:
     mutable double longitude_max_ {0};
 
     mutable bool has_adsb_info_ {false};
-    mutable bool has_mops_version_ {false};
-    mutable unsigned int mops_version_;
-    mutable bool has_nucp_nic_ {false};
-    mutable unsigned int min_nucp_nic_, max_nucp_nic_;
-    mutable bool has_nacp {false};
-    mutable unsigned int min_nacp_, max_nacp_;
+    mutable bool has_mops_versions_ {false};
+    mutable std::set<unsigned int> mops_versions_;
+    //    mutable bool has_nucp_nic_ {false};
+    //    mutable unsigned int min_nucp_nic_, max_nucp_nic_;
+    //    mutable bool has_nacp {false};
+    //    mutable unsigned int min_nacp_, max_nacp_;
 
-    mutable std::map<boost::posix_time::ptime, TstDataMapping> test_data_mappings_;
-
-//    std::unique_ptr<OGRSpatialReference> wgs84_;
-//    mutable std::unique_ptr<OGRSpatialReference> local_;
-    //mutable std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart_;
-    //mutable std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo_;
-    mutable Transformation trafo_;
-
-    void updateCallsigns() const;
-    void updateTargetAddresses() const;
-    void updateModeACodes() const;
-    void updateModeCMinMax() const;
-    void updatePositionMinMax() const;
-    //void updateADSBInfo() const;
-
-    void calculateTestDataMappings() const;
-    TstDataMapping calculateTestDataMapping(boost::posix_time::ptime timestamp) const; // test tod
-    void addRefPositiosToMapping (TstDataMapping& mapping) const;
-    void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
-
-    DataMappingTimes findTstTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
+    mutable InsideCheckMatrix                    inside_ref_;
+    mutable InsideCheckMatrix                    inside_tst_;
+    mutable InsideCheckMatrix                    inside_map_;
+    mutable std::map<const SectorLayer*, size_t> inside_sector_layers_;
 };
 
 #endif // EVALUATIONTARGETDATA_H

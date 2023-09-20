@@ -66,16 +66,11 @@ HistogramView::~HistogramView()
 
 /**
  */
-bool HistogramView::init()
+bool HistogramView::init_impl()
 {
-    View::init();
-
     createSubConfigurables();
 
     assert(data_source_);
-
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-    connect(&object_man, &DBContentManager::loadingDoneSignal, this, &HistogramView::allLoadingDoneSlot);
 
 //    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
 //            &HistogramViewDataWidget::loadingStartedSlot);
@@ -106,52 +101,6 @@ bool HistogramView::init()
             this, &HistogramView::resultsChangedSlot);
 
     return true;
-}
-
-/**
- */
-void HistogramView::loadingStarted()
-{
-    loginf << "HistogramView: loadingStarted";
-
-    getDataWidget()->loadingStartedSlot();
-}
-
-/**
- */
-void HistogramView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
-{
-    loginf << "HistogramView: loadedData";
-
-    getDataWidget()->updateDataSlot(data, requires_reset);
-}
-
-/**
- */
-void HistogramView::loadingDone()
-{
-    loginf << "HistogramView: loadingDone";
-
-    getDataWidget()->loadingDoneSlot();
-}
-
-/**
- */
-void HistogramView::clearData()
-{
-    loginf << "HistogramView: clearData";
-
-    getDataWidget()->clear();
-}
-
-/**
- */
-void HistogramView::appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current)
-{
-    loginf << "HistogramView: appModeSwitch: app_mode " << toString(app_mode_current)
-           << " prev " << toString(app_mode_previous);
-
-    widget_->getViewConfigWidget()->appModeSwitch(app_mode_current);
 }
 
 /**
@@ -189,13 +138,6 @@ void HistogramView::checkSubConfigurables()
     {
         generateSubConfigurable("HistogramViewWidget", "HistogramViewWidget0");
     }
-}
-
-/**
- */
-bool HistogramView::hasDataWidget() const
-{
-    return (widget_ && widget_->getViewDataWidget());
 }
 
 /**
@@ -256,7 +198,7 @@ void HistogramView::useLogScale(bool use_log_scale)
     HistogramViewDataWidget* data_widget = dynamic_cast<HistogramViewDataWidget*>(getDataWidget());
     assert (data_widget);
 
-    data_widget->updateChart();
+    data_widget->redrawData(false);
 }
 
 /**
@@ -302,10 +244,8 @@ void HistogramView::dataVar (Variable& var)
     assert (!isDataVarMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->updateView();
-
-    if (COMPASS::instance().appMode() != AppMode::LiveRunning && widget_->getViewDataWidget()->dataNotInBuffer())
-        widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
+    widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateComponents();
 }
 
 /**
@@ -330,10 +270,8 @@ void HistogramView::metaDataVar (MetaVariable& var)
     assert (isDataVarMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->updateView();
-
-    if (COMPASS::instance().appMode() != AppMode::LiveRunning && widget_->getViewDataWidget()->dataNotInBuffer())
-        widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
+    widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateComponents();
 }
 
 /**
@@ -357,7 +295,7 @@ void HistogramView::updateSelection()
     loginf << "HistogramView: updateSelection";
     assert(widget_);
     
-    widget_->getViewDataWidget()->updateView();
+    widget_->getViewDataWidget()->redrawData(true);
 
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
@@ -412,7 +350,8 @@ void HistogramView::evalResultGrpReq(const std::string& value)
 
     eval_results_grpreq_ = value;
 
-    widget_->getViewDataWidget()->updateView();
+    widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateComponents();
 }
 
 /**
@@ -433,7 +372,8 @@ void HistogramView::evalResultsID(const std::string& value)
 
     eval_results_id_ = value;
 
-    widget_->getViewDataWidget()->updateView();
+    widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateComponents();
 }
 
 /**
@@ -464,7 +404,8 @@ void HistogramView::showViewPointSlot (const ViewableDataConfig* vp)
 void HistogramView::onShowResultsChanged()
 {
     widget_->getViewConfigWidget()->updateConfig();
-    widget_->getViewDataWidget()->updateView();
+    widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateComponents();
 }
 
 /**
@@ -509,14 +450,12 @@ void HistogramView::resultsChangedSlot()
 
 /**
  */
-void HistogramView::allLoadingDoneSlot()
+void HistogramView::loadingDone()
 {
-    loginf << "HistogramView: allLoadingDoneSlot";
-    assert(widget_);
+    //finish loading procedures first by calling base
+    View::loadingDone();
 
-    widget_->getViewConfigWidget()->setDisabled(false);
-    widget_->getViewConfigWidget()->setStatus("", false);
-
+    //now update view to any existing results
     if (current_view_point_ && current_view_point_->data().contains("evaluation_results"))
     {
         //infer result visualization from view point
@@ -531,16 +470,16 @@ void HistogramView::allLoadingDoneSlot()
 
         //show_results_ = true;
 
-//        eval_highlight_details_.clear();
+        //eval_highlight_details_.clear();
 
-//        if (data.at("evaluation_results").contains("highlight_details"))
-//        {
-//            loginf << "OSGView: loadingDoneSlot: highlight_details "
-//                   << data.at("evaluation_results").at("highlight_details").dump();
+        //if (data.at("evaluation_results").contains("highlight_details"))
+        //{
+        //    loginf << "OSGView: loadingDoneSlot: highlight_details "
+        //           << data.at("evaluation_results").at("highlight_details").dump();
 
-//            vector<unsigned int> highlight_details = data.at("evaluation_results").at("highlight_details");
-//            eval_highlight_details_ = move(highlight_details);
-//        }
+        //    vector<unsigned int> highlight_details = data.at("evaluation_results").at("highlight_details");
+        //    eval_highlight_details_ = move(highlight_details);
+        //}
 
         resultsChangedSlot();
     }

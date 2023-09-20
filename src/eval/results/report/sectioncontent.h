@@ -41,7 +41,7 @@ namespace EvaluationResultsReport
 
         virtual void addToLayout (QVBoxLayout* layout) = 0; // add content to layout
 
-        virtual void accept(LatexVisitor& v) const = 0;
+        virtual void accept(LatexVisitor& v) = 0; // can not be const since on-demand tables
 
     protected:
         string name_;

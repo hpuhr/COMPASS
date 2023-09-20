@@ -101,6 +101,7 @@ std::string RTCommandResponse::errCode2String(CmdErrorCode code)
         STRINGIFY_ERR_CODE(Issue_CommandStringMismatch, "Issue failed: Command mismatch")
         STRINGIFY_ERR_CODE(Issue_CommandNotFound, "Issue failed: Command not found")
         STRINGIFY_ERR_CODE(Issue_CommandCreationFailed, "Issue failed: Command creation failed")
+        STRINGIFY_ERR_CODE(Issue_NotReady, "Issue failed: Application not ready")
 
         STRINGIFY_ERR_CODE(Config_CommandStringInvalid, "Configuration failed: Command string invalid")
         STRINGIFY_ERR_CODE(Config_CommandStringMismatch, "Configuration failed: Command mismatch")

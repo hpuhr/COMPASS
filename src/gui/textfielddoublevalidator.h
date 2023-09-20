@@ -39,7 +39,7 @@ class TextFieldDoubleValidator : public QDoubleValidator
 
     QValidator::State validate(QString& s, int& pos) const
     {
-        if (s.isEmpty())  //|| (s.startsWith("-") && s.length() == 1)
+        if (s.isEmpty() || (s.startsWith("-") && s.length() == 1))  //||
             return QValidator::Intermediate;
 
         if (decimals())

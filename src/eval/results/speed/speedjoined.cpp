@@ -18,6 +18,7 @@
 #include "eval/results/speed/speedsingle.h"
 #include "eval/results/speed/speedjoined.h"
 #include "eval/requirement/base/base.h"
+#include "eval/requirement/speed/speed.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -39,18 +40,16 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedSpeed::JoinedSpeed(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, EvaluationManager& eval_man)
-    : Joined("JoinedSpeed", result_id, requirement, sector_layer, eval_man)
+JoinedSpeed::JoinedSpeed(const std::string& result_id, 
+                         std::shared_ptr<EvaluationRequirement::Base> requirement,
+                         const SectorLayer& sector_layer, 
+                         EvaluationManager& eval_man)
+:   Joined("JoinedSpeed", result_id, requirement, sector_layer, eval_man)
 {
 }
 
-
-void JoinedSpeed::join(std::shared_ptr<Base> other)
+void JoinedSpeed::join_impl(std::shared_ptr<Single> other)
 {
-    Joined::join(other);
-
     std::shared_ptr<SingleSpeed> other_sub =
             std::static_pointer_cast<SingleSpeed>(other);
     assert (other_sub);
@@ -65,13 +64,13 @@ void JoinedSpeed::addToValues (std::shared_ptr<SingleSpeed> single_result)
     if (!single_result->use())
         return;
 
-    num_pos_ += single_result->numPos();
-    num_no_ref_ += single_result->numNoRef();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_ += single_result->numPosInside();
+    num_pos_          += single_result->numPos();
+    num_no_ref_       += single_result->numNoRef();
+    num_pos_outside_  += single_result->numPosOutside();
+    num_pos_inside_   += single_result->numPosInside();
     num_no_tst_value_ += single_result->numNoTstValues();
-    num_comp_failed_ += single_result->numCompFailed();
-    num_comp_passed_ += single_result->numCompPassed();
+    num_comp_failed_  += single_result->numCompFailed();
+    num_comp_passed_  += single_result->numCompPassed();
 
     const vector<double>& other_values = single_result->values();
 
@@ -86,6 +85,8 @@ void JoinedSpeed::update()
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
     assert (values_.size() == num_comp_failed_+num_comp_passed_);
+
+    p_passed_.reset();
 
     unsigned int num_speeds = values_.size();
 
@@ -102,7 +103,6 @@ void JoinedSpeed::update()
 
         assert (num_comp_failed_ <= num_speeds);
         p_passed_ = (float)num_comp_passed_/(float)num_speeds;
-        has_p_min_ = true;
     }
     else
     {
@@ -110,9 +110,6 @@ void JoinedSpeed::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
-
-        has_p_min_ = false;
-        p_passed_ = 0;
     }
 }
 
@@ -146,11 +143,11 @@ void JoinedSpeed::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::Ro
 
     string result {"Unknown"};
 
-    if (has_p_min_)
+    if (p_passed_.has_value())
     {
-        p_passed_var = String::percentToString(p_passed_ * 100.0, req->getNumProbDecimals()).c_str();
+        p_passed_var = String::percentToString(p_passed_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(p_passed_);
+        result = req->getConditionResultStr(p_passed_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -205,14 +202,12 @@ void JoinedSpeed::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> 
     sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
     sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_comp_passed_},
                          this);
-
-
     // condition
     {
         QVariant p_passed_var;
 
-        if (has_p_min_)
-            p_passed_var = roundf(p_passed_ * 10000.0) / 100.0;
+        if (p_passed_.has_value())
+            p_passed_var = roundf(p_passed_.value() * 10000.0) / 100.0;
 
         sec_det_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
 
@@ -220,24 +215,15 @@ void JoinedSpeed::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> 
 
         string result {"Unknown"};
 
-        if (has_p_min_)
-            result = req->getResultConditionStr(p_passed_);
+        if (p_passed_.has_value())
+            result = req->getConditionResultStr(p_passed_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (has_p_min_ && p_passed_ != 1.0) // TODO
-    {
-        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 getErrorsViewable());
-    }
-    else
-    {
-        sector_section.addText("sector_errors_overview_no_figure");
-        sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
+    sector_section.addFigure("sector_overview", "Sector Overview",
+                             [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedSpeed::hasViewableData (
@@ -273,14 +259,16 @@ std::unique_ptr<nlohmann::json::object_t> JoinedSpeed::getErrorsViewable ()
     double lat_w = 1.1*(lat_max-lat_min)/2.0;
     double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-    if (lat_w < eval_man_.resultDetailZoom())
-        lat_w = eval_man_.resultDetailZoom();
+    if (lat_w < eval_man_.settings().result_detail_zoom_)
+        lat_w = eval_man_.settings().result_detail_zoom_;
 
-    if (lon_w < eval_man_.resultDetailZoom())
-        lon_w = eval_man_.resultDetailZoom();
+    if (lon_w < eval_man_.settings().result_detail_zoom_)
+        lon_w = eval_man_.settings().result_detail_zoom_;
 
     (*viewable_ptr)["speed_window_latitude"] = lat_w;
     (*viewable_ptr)["speed_window_longitude"] = lon_w;
+
+    addAnnotationsFromSingles(*viewable_ptr);
 
     return viewable_ptr;
 }
@@ -301,17 +289,17 @@ std::string JoinedSpeed::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedSpeed::updatesToUseChanges()
+void JoinedSpeed::updatesToUseChanges_impl()
 {
     loginf << "JoinedSpeed: updatesToUseChanges";
 
-    num_pos_ = 0;
-    num_no_ref_ = 0;
-    num_pos_outside_ = 0;
-    num_pos_inside_ = 0;
+    num_pos_          = 0;
+    num_no_ref_       = 0;
+    num_pos_outside_  = 0;
+    num_pos_inside_   = 0;
     num_no_tst_value_ = 0;
-    num_comp_failed_ = 0;
-    num_comp_passed_ = 0;
+    num_comp_failed_  = 0;
+    num_comp_passed_  = 0;
 
     values_.clear();
 

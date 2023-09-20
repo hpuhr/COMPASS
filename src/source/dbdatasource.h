@@ -36,11 +36,14 @@ public:
     bool hasNumInserted() const;
     bool hasNumInserted(const std::string& db_content) const;
     bool hasNumInserted(unsigned int line_id) const;
+    bool hasNumInserted(const std::string& db_content, unsigned int line_id) const;
     const std::map<std::string, std::map<unsigned int, unsigned int>>& numInsertedMap() const;
     std::map<unsigned int, unsigned int> numInsertedLinesMap() const;
     std::map<std::string, unsigned int> numInsertedSummedLinesMap() const;
 
     void addNumInserted(const std::string& db_content, unsigned int line_id, unsigned int num);
+    void clearNumInserted(const std::string& db_content);
+    void clearNumInserted(const std::string& db_content, unsigned int line_id);
 
     void addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num);
     unsigned int numLoaded (unsigned int line_id);
@@ -72,6 +75,8 @@ public:
     boost::posix_time::ptime maxTimestamp(unsigned int line) const;
 
     bool hasLiveData(unsigned int line, boost::posix_time::ptime current_ts) const;
+
+    virtual nlohmann::json getAsJSON() const override;
 
 protected:
     unsigned int id_{0};

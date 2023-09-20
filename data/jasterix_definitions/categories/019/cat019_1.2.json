@@ -269,53 +269,35 @@
             "type":"item",
             "data_fields":[
                 {
-                    "name":"reference_transponder_detailed_status_bf",
-                    "type":"fixed_bitfield",
-                    "length":1,
+                    "name":"Reference Transponder Detailed Status",
+                    "type":"extendable",
                     "items":[
-                        {
-                            "name":"Ref Trans 1 Status",
-                            "comment":"3 Good\n2 Faulted\n1 Warning\n0",
-                            "type":"fixed_bits",
-                            "start_bit":6,
-                            "bit_length":2
-                        },
-                        {
-                            "name":"Ref Trans 2 Status",
-                            "comment":"3 Good\n2 Faulted\n1 Warning\n0",
-                            "type":"fixed_bits",
-                            "start_bit":2,
-                            "bit_length":2
-                        },
-                        {
-                            "name":"FX",
-                            "type":"fixed_bits",
-                            "start_bit":0,
-                            "bit_length":1
-                        }
-                    ]
-                },
-                {
-                    "name":"reference_transponder_detailed_status_bf2",
-                    "type":"fixed_bitfield",
-                    "length":1,
-                    "optional":true,
-                    "optional_variable_name":"FX",
-                    "optional_variable_value":1,
-                    "items":[
-                        {
-                            "name":"Ref Trans 3 Status",
-                            "comment":"3 Good\n2 Faulted\n1 Warning\n0",
-                            "type":"fixed_bits",
-                            "start_bit":6,
-                            "bit_length":2
-                        },
-                        {
-                            "name":"Ref Trans 4 Status",
-                            "comment":"3 Good\n2 Faulted\n1 Warning\n0",
-                            "type":"fixed_bits",
-                            "start_bit":2,
-                            "bit_length":2
+                            {
+                                "name":"Reference Transponder Detailed Status",
+                                "type":"fixed_bitfield",
+                                "length":1,
+                                "items":[
+                            {
+                                "name":"Ref Trans 1 Status",
+                                "comment":"3 Good\n2 Faulted\n1 Warning\n0",
+                                "type":"fixed_bits",
+                                "start_bit":6,
+                                "bit_length":2
+                            },
+                            {
+                                "name":"Ref Trans 2 Status",
+                                "comment":"3 Good\n2 Faulted\n1 Warning\n0",
+                                "type":"fixed_bits",
+                                "start_bit":2,
+                                "bit_length":2
+                            },
+                            {
+                                "name":"extend",
+                                "type":"fixed_bits",
+                                "start_bit":0,
+                                "bit_length":1
+                            }
+                            ]
                         }
                     ]
                 }

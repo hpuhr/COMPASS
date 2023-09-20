@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_reftraj",
+        "id": 255,
         "info": "",
         "name": "RefTraj"
     },
@@ -305,16 +306,16 @@
                     "unit": ""
                 }
             },
-            "VariableRefTrajassociations0": {
+            "VariableRefTrajUTN0": {
                 "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "associations",
-                    "description": "Associations set as JSON object",
+                    "data_type_str": "UINT",
+                    "db_column_name": "utn",
+                    "description": "Unique Target Number",
                     "dimension": "",
                     "is_key": false,
-                    "name": "Associations",
+                    "name": "UTN",
                     "representation_str": "STANDARD",
-                    "short_name": "Assoc",
+                    "short_name": "UTN",
                     "unit": ""
                 }
             },
@@ -541,7 +542,7 @@
             },
             "VariableRefTrajrec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",

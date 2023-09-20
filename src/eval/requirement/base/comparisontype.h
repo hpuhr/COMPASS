@@ -11,7 +11,7 @@ enum COMPARISON_TYPE {
     LESS_THAN=0, // <
     LESS_THAN_OR_EQUAL, // <=
     GREATER_THAN, // >
-    GREATER_THAN_OR_EUQAL // >=
+    GREATER_THAN_OR_EQUAL // >=
 };
 
 extern std::string comparisonTypeString(COMPARISON_TYPE type);

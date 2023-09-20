@@ -118,6 +118,7 @@ void ViewToolSwitcher::endCurrentTool()
 }
 
 /**
+ * Returns the current tool id.
  */
 int ViewToolSwitcher::currentTool() const
 {
@@ -125,6 +126,7 @@ int ViewToolSwitcher::currentTool() const
 }
 
 /**
+ * Returns the current tool's cursor.
  */
 QCursor ViewToolSwitcher::currentCursor() const
 {
@@ -136,6 +138,7 @@ QCursor ViewToolSwitcher::currentCursor() const
 }
 
 /**
+ * Returns the current tool's name.
  */
 QString ViewToolSwitcher::currentName() const
 {
@@ -147,6 +150,7 @@ QString ViewToolSwitcher::currentName() const
 }
 
 /**
+ * Returns the tool of the given id, or nullptr if the id wasn't found.
  */
 const ViewToolSwitcher::Tool* ViewToolSwitcher::getTool(int id) const
 {
@@ -158,6 +162,7 @@ const ViewToolSwitcher::Tool* ViewToolSwitcher::getTool(int id) const
 }
 
 /**
+ * Checks if a tool of the given id was added to the switcher.
  */
 bool ViewToolSwitcher::hasTool(int id) const
 {

@@ -41,7 +41,7 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(
 {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
-    setWindowTitle("Create ARTAS Associations Status");
+    setWindowTitle("Calculate ARTAS Target Report Usage Status");
 
     setModal(true);
 
@@ -275,9 +275,6 @@ void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
 
     for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
-        if (dbo_it.first == "CAT062")
-            continue;
-
         ++row;
 
         unsigned int total_cnt = 0;

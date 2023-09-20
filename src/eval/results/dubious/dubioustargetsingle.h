@@ -18,34 +18,34 @@
 #ifndef EVALUATIONREQUIREMENSINGLEDUBIOSTARGET_H
 #define EVALUATIONREQUIREMENSINGLEDUBIOSTARGET_H
 
+#include "eval/results/dubious/dubiousbase.h"
 
-#include "eval/results/single.h"
-#include "eval/requirement/dubious/dubioustarget.h"
+namespace EvaluationRequirement
+{
+    class DubiousTarget;
+}
 
 namespace EvaluationRequirementResult
 {
 
-class SingleDubiousTarget : public Single
+class SingleDubiousTarget : public SingleDubiousBase
 {
 public:
-    SingleDubiousTarget(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer,
-            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            unsigned int num_updates,
-            unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_pos_inside_dubious,
-            EvaluationRequirement::DubiousTargetDetail details);
+    SingleDubiousTarget(const std::string& result_id, 
+                        std::shared_ptr<EvaluationRequirement::Base> requirement,
+                        const SectorLayer& sector_layer,
+                        unsigned int utn, 
+                        const EvaluationTargetData* target, 
+                        EvaluationManager& eval_man,
+                        const EvaluationDetails& details,
+                        unsigned int num_updates,
+                        unsigned int num_pos_outside, 
+                        unsigned int num_pos_inside, 
+                        unsigned int num_pos_inside_dubious);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
-
-    unsigned int numUpdates() const;
-    unsigned int numPosOutside() const;
-    unsigned int numPosInside() const;
-    unsigned int numPosInsideDubious() const;
-
-    const EvaluationRequirement::DubiousTargetDetail& detail() const;
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -59,21 +59,9 @@ public:
 
     EvaluationRequirement::DubiousTarget* req ();
 
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
 protected:
-    unsigned int num_updates_ {0};
-    unsigned int num_pos_outside_ {0};
-    unsigned int num_pos_inside_ {0};
-    unsigned int num_pos_inside_dubious_ {0};
-
-    EvaluationRequirement::DubiousTargetDetail detail_;
-
-    bool has_p_dubious_target_ {false};
-    float p_dubious_target_{0};
-
-    bool has_p_dubious_update_ {false};
-    float p_dubious_update_{0};
-
     void update();
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -82,7 +70,7 @@ protected:
     void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
+    boost::optional<float> p_dubious_target_;
 };
 
 }

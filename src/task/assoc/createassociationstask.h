@@ -21,10 +21,12 @@
 #include "configurable.h"
 #include "createassociationsstatusdialog.h"
 #include "dbcontent/variable/variableset.h"
+#include "dbcontent/dbcontentcache.h"
 #include "task.h"
 #include "global.h"
 
 #include <QObject>
+
 #include <memory>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -39,7 +41,6 @@ namespace dbContent
 {
 class Variable;
 class MetaVariable;
-
 }
 
 class CreateAssociationsTask : public Task, public Configurable
@@ -67,25 +68,8 @@ public:
 
     CreateAssociationsTaskDialog* dialog();
 
-    dbContent::MetaVariable* keyVar() const;
-    dbContent::MetaVariable* dsIdVar() const;
-    dbContent::MetaVariable* lineIdVar() const;
-    dbContent::MetaVariable* timestampVar() const;
-    dbContent::MetaVariable* targetAddrVar() const;
-    dbContent::MetaVariable* targetIdVar() const;
-    dbContent::MetaVariable* trackNumVar() const;
-    dbContent::MetaVariable* trackEndVar() const;
-    dbContent::MetaVariable* mode3AVar() const;
-    dbContent::MetaVariable* modeCVar() const;
-    dbContent::MetaVariable* latitudeVar() const;
-    dbContent::MetaVariable* longitudeVar() const;
-
-    virtual bool checkPrerequisites();
-    virtual bool isRecommended();
-    virtual bool isRequired() { return false; }
-
-    bool canRun();
-    void run();
+    virtual bool canRun() override;
+    virtual void run() override;
 
     static const std::string DONE_PROPERTY_NAME;
 
@@ -143,21 +127,9 @@ public:
     double contMaxDistanceAcceptableTracker() const;
     void contMaxDistanceAcceptableTracker(double value);
 
-protected:
-    dbContent::MetaVariable* rec_num_var_{nullptr};
-    dbContent::MetaVariable* ds_id_var_{nullptr};
-    dbContent::MetaVariable* line_id_var_{nullptr};
-    dbContent::MetaVariable* ts_var_{nullptr};
-    dbContent::MetaVariable* target_addr_var_{nullptr};
-    dbContent::MetaVariable* target_id_var_{nullptr};
-    dbContent::MetaVariable* track_num_var_{nullptr};
-    dbContent::MetaVariable* track_end_var_{nullptr};
-    dbContent::MetaVariable* mode_3a_var_{nullptr};
-    dbContent::MetaVariable* mode_c_var_{nullptr};
-    dbContent::MetaVariable* latitude_var_{nullptr};
-    dbContent::MetaVariable* longitude_var_{nullptr};
-    dbContent::MetaVariable* associations_var_{nullptr};
+    const std::set<unsigned int>& modeAConspicuityCodes() const;
 
+protected:
     bool associate_non_mode_s_ {true};
     bool clean_dubious_utns_ {true};
     bool mark_dubious_utns_unused_ {false};
@@ -187,6 +159,9 @@ protected:
     double max_distance_acceptable_sensor_ {2*NM2M};
     double max_altitude_diff_sensor_ {300.0};
 
+    // other
+    std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal
+
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
@@ -194,13 +169,12 @@ protected:
 
     std::unique_ptr<CreateAssociationsStatusDialog> status_dialog_;
 
+    std::shared_ptr<dbContent::Cache> cache_;
+
     std::map<std::string, std::shared_ptr<Buffer>> data_;
-    bool dbo_loading_done_{false};
 
     std::shared_ptr<CreateAssociationsJob> create_job_;
     bool create_job_done_{false};
-
-    void checkAndSetMetaVariable(const std::string& name_str, dbContent::MetaVariable** var);
 
     dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name);
 };

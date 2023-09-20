@@ -8,29 +8,37 @@
 #include "jsonimporttask.h"
 #include "gpstrailimporttask.h"
 #include "evaluationmanager.h"
+#include "dbcontentmanager.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createassociationstask.h"
+#include "createartasassociationstask.h"
+#include "calculatereferencestask.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
-#include "viewpointsimporttaskdialog.h"
+//#include "viewpointsimporttaskdialog.h"
+#include "eval/results/report/pdfgeneratordialog.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
 #include "evaluationmanager.h"
 #include "logger.h"
 #include "util/files.h"
 #include "rtcommand_registry.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
+#include "event_log.h"
 
 #include <QTimer>
 #include <QCoreApplication>
 #include <QThread>
 
 #include <boost/program_options.hpp>
+#include <boost/filesystem/path.hpp>
 
 using namespace std;
 using namespace Utils;
 
 REGISTER_RTCOMMAND(main_window::RTCommandOpenDB)
+REGISTER_RTCOMMAND(main_window::RTCommandOpenRecentDB)
 REGISTER_RTCOMMAND(main_window::RTCommandCreateDB)
 REGISTER_RTCOMMAND(main_window::RTCommandCloseDB)
 REGISTER_RTCOMMAND(main_window::RTCommandImportDataSourcesFile)
@@ -43,11 +51,14 @@ REGISTER_RTCOMMAND(main_window::RTCommandImportGPSTrail)
 REGISTER_RTCOMMAND(main_window::RTCommandImportSectorsJSON)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateRadarPlotPositions)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateAssociations)
+REGISTER_RTCOMMAND(main_window::RTCommandCalculateARTASAssociations)
+REGISTER_RTCOMMAND(main_window::RTCommandCalculateReferences)
 REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
 REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
 REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
 REGISTER_RTCOMMAND(main_window::RTCommandExportEvaluationReport)
 REGISTER_RTCOMMAND(main_window::RTCommandQuit)
+REGISTER_RTCOMMAND(main_window::RTCommandGetEvents)
 
 namespace main_window
 {
@@ -55,6 +66,7 @@ namespace main_window
 void init_commands()
 {
     main_window::RTCommandOpenDB::init();
+    main_window::RTCommandOpenRecentDB::init();
     main_window::RTCommandCreateDB::init();
     main_window::RTCommandImportDataSourcesFile::init();
     main_window::RTCommandImportViewPointsFile::init();
@@ -66,17 +78,19 @@ void init_commands()
     main_window::RTCommandImportSectorsJSON::init();
     main_window::RTCommandCalculateRadarPlotPositions::init();
     main_window::RTCommandCalculateAssociations::init();
+    main_window::RTCommandCalculateReferences::init();
     main_window::RTCommandLoadData::init();
     main_window::RTCommandExportViewPointsReport::init();
     main_window::RTCommandEvaluate::init();
     main_window::RTCommandExportEvaluationReport::init();
     main_window::RTCommandCloseDB::init();
     main_window::RTCommandQuit::init();
+    main_window::RTCommandGetEvents::init();
 }
 
-// open db
+// open_db
 
-rtcommand::IsValid  RTCommandOpenDB::valid() const
+rtcommand::IsValid RTCommandOpenDB::valid() const
 {
     CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
     CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename_), string("File '")+filename_+"' does not exist")
@@ -84,7 +98,7 @@ rtcommand::IsValid  RTCommandOpenDB::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandOpenDB::run_impl() const
+bool RTCommandOpenDB::run_impl()
 {
     if (!filename_.size())
     {
@@ -132,6 +146,96 @@ void RTCommandOpenDB::assignVariables_impl(const VariablesMap& variables)
     RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
 }
 
+// open_recent_db
+
+std::string RTCommandOpenRecentDB::getPath() const
+{
+    vector<string> recent_file_list = COMPASS::instance().dbFileList();
+    if (recent_file_list.empty())
+        return "";
+
+    if (!filename.empty())
+    {
+        for (const auto& fn : recent_file_list)
+        {
+            if (boost::filesystem::path(fn).filename() == filename)
+                return fn;
+        }
+        return "";
+    }
+
+    if (index >= 0)
+    {
+        if (index < (int)recent_file_list.size())
+            return recent_file_list[index];
+        
+        return "";
+    }
+
+    return recent_file_list.front();
+}
+
+rtcommand::IsValid RTCommandOpenRecentDB::valid() const
+{
+    auto fn = getPath();
+
+    CHECK_RTCOMMAND_INVALID_CONDITION(fn.empty(), "No recent file found")
+
+    return RTCommand::valid();
+}
+
+bool RTCommandOpenRecentDB::run_impl()
+{
+    auto fn = getPath();
+
+    if (fn.empty())
+    {
+        setResultMessage("No recent file found");
+        return false;
+    }
+
+    if (!Files::fileExists(fn))
+    {
+        setResultMessage("File '"+fn+"' does not exist");
+        return false;
+    }
+
+    if (COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database already opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
+    assert (main_window);
+
+    main_window->openExistingDB(fn);
+
+    return COMPASS::instance().dbOpened();
+}
+
+void RTCommandOpenRecentDB::collectOptions_impl(OptionsDescription& options,
+                                                PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename,f", po::value<std::string>()->default_value(""), "filename listed in the recent file history, e.g. ’file1.db’")
+        ("index,i", po::value<int>()->default_value(-1), "index in the recent file history");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandOpenRecentDB::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "index", int, index)
+}
+
 // create db
 
 rtcommand::IsValid  RTCommandCreateDB::valid() const
@@ -141,7 +245,7 @@ rtcommand::IsValid  RTCommandCreateDB::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandCreateDB::run_impl() const
+bool RTCommandCreateDB::run_impl()
 {
     if (!filename_.size())
     {
@@ -193,7 +297,7 @@ rtcommand::IsValid  RTCommandImportDataSourcesFile::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandImportDataSourcesFile::run_impl() const
+bool RTCommandImportDataSourcesFile::run_impl()
 {
     if (!filename_.size())
     {
@@ -253,7 +357,7 @@ rtcommand::IsValid  RTCommandImportViewPointsFile::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandImportViewPointsFile::run_impl() const
+bool RTCommandImportViewPointsFile::run_impl()
 {
     if (!filename_.size())
     {
@@ -288,7 +392,7 @@ bool RTCommandImportViewPointsFile::run_impl() const
         return false;
     }
 
-    vp_import_task.showDoneSummary(false);
+    vp_import_task.allowUserInteractions(false);
 
     vp_import_task.run();
     assert (vp_import_task.done());
@@ -360,7 +464,7 @@ rtcommand::IsValid  RTCommandImportASTERIXFile::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandImportASTERIXFile::run_impl() const
+bool RTCommandImportASTERIXFile::run_impl()
 {
     if (!filename_.size())
     {
@@ -419,6 +523,11 @@ bool RTCommandImportASTERIXFile::run_impl() const
             import_task.overrideTodActive(true);
             import_task.overrideTodOffset(time_offset);
         }
+
+        if (ignore_time_jumps_)
+        {
+
+        }
     }
     catch (exception& e)
     {
@@ -437,7 +546,7 @@ bool RTCommandImportASTERIXFile::run_impl() const
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     import_task.run(false); // no test
 
@@ -467,6 +576,7 @@ void RTCommandImportASTERIXFile::collectOptions_impl(OptionsDescription& options
     ADD_RTCOMMAND_OPTIONS(options)
         ("time_offset,t", po::value<std::string>()->default_value(""),
          "imports ASTERIX file with given Time of Day override, in HH:MM:SS.ZZZ’");
+    ADD_RTCOMMAND_OPTIONS(options)("ignore_time_jumps,i", "ignore 24h time jumps");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
 }
@@ -478,6 +588,7 @@ void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variab
     RTCOMMAND_GET_VAR_OR_THROW(variables, "line", std::string, line_id_)
     RTCOMMAND_GET_VAR_OR_THROW(variables, "date", std::string, date_str_)
     RTCOMMAND_GET_VAR_OR_THROW(variables, "time_offset", std::string, time_offset_str_)
+    RTCOMMAND_CHECK_VAR(variables, "ignore_time_jumps", ignore_time_jumps_)
 }
 
 // import asterix network
@@ -502,7 +613,7 @@ rtcommand::IsValid  RTCommandImportASTERIXNetworkStart::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandImportASTERIXNetworkStart::run_impl() const
+bool RTCommandImportASTERIXNetworkStart::run_impl()
 {
     if (!COMPASS::instance().dbOpened())
     {
@@ -549,7 +660,7 @@ bool RTCommandImportASTERIXNetworkStart::run_impl() const
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     import_task.run(false); // no test
 
@@ -592,7 +703,7 @@ RTCommandImportASTERIXNetworkStop::RTCommandImportASTERIXNetworkStop()
     condition.setDelay(500); // think about max duration
 }
 
-bool RTCommandImportASTERIXNetworkStop::run_impl() const
+bool RTCommandImportASTERIXNetworkStop::run_impl()
 {
     if (!COMPASS::instance().dbOpened())
     {
@@ -614,7 +725,7 @@ bool RTCommandImportASTERIXNetworkStop::run_impl() const
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
     assert (main_window);
@@ -646,7 +757,7 @@ rtcommand::IsValid  RTCommandImportJSONFile::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandImportJSONFile::run_impl() const
+bool RTCommandImportJSONFile::run_impl()
 {
     if (!filename_.size())
     {
@@ -682,7 +793,7 @@ bool RTCommandImportJSONFile::run_impl() const
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     import_task.run();
 
@@ -718,7 +829,7 @@ rtcommand::IsValid  RTCommandImportGPSTrail::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandImportGPSTrail::run_impl() const
+bool RTCommandImportGPSTrail::run_impl()
 {
     if (!filename_.size())
     {
@@ -754,7 +865,7 @@ bool RTCommandImportGPSTrail::run_impl() const
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     import_task.run();
 
@@ -784,7 +895,7 @@ rtcommand::IsValid  RTCommandImportSectorsJSON::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandImportSectorsJSON::run_impl() const
+bool RTCommandImportSectorsJSON::run_impl()
 {
     if (!filename_.size())
     {
@@ -836,7 +947,7 @@ RTCommandCalculateRadarPlotPositions::RTCommandCalculateRadarPlotPositions()
     condition.setSignal("compass.taskmanager.radarplotpositioncalculatortask.doneSignal(std::string)", -1); // think about max duration
 }
 
-bool RTCommandCalculateRadarPlotPositions::run_impl() const
+bool RTCommandCalculateRadarPlotPositions::run_impl()
 {
     if (!COMPASS::instance().dbOpened())
     {
@@ -858,7 +969,7 @@ bool RTCommandCalculateRadarPlotPositions::run_impl() const
         return false;
     }
 
-    task.showDoneSummary(false);
+    task.allowUserInteractions(false);
     task.run();
 
     // if ok
@@ -872,7 +983,7 @@ RTCommandCalculateAssociations::RTCommandCalculateAssociations()
     condition.setSignal("compass.taskmanager.createassociationstask.doneSignal(std::string)", -1); // think about max duration
 }
 
-bool RTCommandCalculateAssociations::run_impl() const
+bool RTCommandCalculateAssociations::run_impl()
 {
     if (!COMPASS::instance().dbOpened())
     {
@@ -894,7 +1005,80 @@ bool RTCommandCalculateAssociations::run_impl() const
         return false;
     }
 
-    task.showDoneSummary(false);
+    task.allowUserInteractions(false);
+    task.run();
+
+    // if ok
+    return true;
+}
+
+
+// associate ARTAS target reports
+RTCommandCalculateARTASAssociations::RTCommandCalculateARTASAssociations()
+    : rtcommand::RTCommand()
+{
+    condition.setSignal("compass.taskmanager.createartasassociationstask.doneSignal(std::string)", -1); // think about max duration
+}
+
+bool RTCommandCalculateARTASAssociations::run_impl()
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    CreateARTASAssociationsTask& task = COMPASS::instance().taskManager().createArtasAssociationsTask();
+
+    if(!task.canRun())
+    {
+        setResultMessage("Calculate ARTAS associations task can not be run");
+        return false;
+    }
+
+    task.allowUserInteractions(false);
+    task.run();
+
+    // if ok
+    return true;
+}
+
+// calc ref
+RTCommandCalculateReferences::RTCommandCalculateReferences()
+    : rtcommand::RTCommand()
+{
+    condition.setSignal("compass.taskmanager.calculatereferencestask.doneSignal(std::string)", -1); // think about max duration
+}
+
+bool RTCommandCalculateReferences::run_impl()
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    CalculateReferencesTask& task = COMPASS::instance().taskManager().calculateReferencesTask();
+
+    if(!task.canRun())
+    {
+        setResultMessage("Calculate references task can not be run");
+        return false;
+    }
+
+    task.allowUserInteractions(false);
     task.run();
 
     // if ok
@@ -908,7 +1092,7 @@ RTCommandLoadData::RTCommandLoadData()
     condition.setSignal("compass.dbcontentmanager.loadingDoneSignal", -1); // think about max duration
 }
 
-bool RTCommandLoadData::run_impl() const
+bool RTCommandLoadData::run_impl()
 {
     if (!COMPASS::instance().dbOpened())
     {
@@ -939,7 +1123,7 @@ rtcommand::IsValid  RTCommandExportViewPointsReport::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandExportViewPointsReport::run_impl() const
+bool RTCommandExportViewPointsReport::run_impl()
 {
     if (!filename_.size())
     {
@@ -994,7 +1178,7 @@ void RTCommandExportViewPointsReport::assignVariables_impl(const VariablesMap& v
 }
 
 // evaluate
-bool RTCommandEvaluate::run_impl() const
+bool RTCommandEvaluate::run_impl()
 {
     if (!COMPASS::instance().dbOpened())
     {
@@ -1010,6 +1194,9 @@ bool RTCommandEvaluate::run_impl() const
 
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
     assert (main_window);
+
+    if (run_filter_)
+        COMPASS::instance().dbContentManager().autoFilterUTNS();
 
     main_window->showEvaluationTab();
 
@@ -1032,9 +1219,6 @@ bool RTCommandEvaluate::run_impl() const
     }
 
     assert (eval_man.dataLoaded());
-
-    if (run_filter_)
-        eval_man.autofilterUTNs();
 
     if (!eval_man.canEvaluate())
     {
@@ -1069,7 +1253,7 @@ rtcommand::IsValid  RTCommandExportEvaluationReport::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandExportEvaluationReport::run_impl() const
+bool RTCommandExportEvaluationReport::run_impl()
 {
     if (!filename_.size())
     {
@@ -1128,10 +1312,23 @@ void RTCommandExportEvaluationReport::assignVariables_impl(const VariablesMap& v
 
 // close db
 
-bool RTCommandCloseDB::run_impl() const
+void RTCommandCloseDB::collectOptions_impl(OptionsDescription& options,
+                                           PosOptionsDescription& positional)
 {
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("strict", "fail if no database was opened");
+}
+
+void RTCommandCloseDB::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_CHECK_VAR(variables, "strict", strict_)
+}
+
+bool RTCommandCloseDB::run_impl()
+{
+    //lets return true if there's nothing to be done
     if (!COMPASS::instance().dbOpened())
-        return false;
+        return !strict_;
 
     if (COMPASS::instance().appMode() != AppMode::Offline)
         return false;
@@ -1146,12 +1343,40 @@ bool RTCommandCloseDB::run_impl() const
 
 // quit app
 
-bool RTCommandQuit::run_impl() const
+bool RTCommandQuit::run_impl()
 {
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
     assert (main_window);
 
     QTimer::singleShot(100, [main_window] () { main_window->quitSlot(); });
+
+    return true;
+}
+
+// get_events
+
+void RTCommandGetEvents::collectOptions_impl(OptionsDescription& options,
+                                             PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("fresh", "return only fresh (unseen) events")
+        ("max_items", po::value<unsigned int>()->default_value(0), "maximum number of items to return");
+}
+
+void RTCommandGetEvents::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_CHECK_VAR(variables, "fresh", fresh_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "max_items", unsigned int, max_items_)
+}
+
+bool RTCommandGetEvents::run_impl()
+{
+    auto query = max_items_ > 0 ? logger::EventQuery(fresh_, logger::EventQuery::EventType::All, logger::EventQuery::QueryType::Newest, max_items_) :
+                                  logger::EventQuery(fresh_, logger::EventQuery::EventType::All, logger::EventQuery::QueryType::All);
+
+    auto json_obj = Logger::getInstance().getEventLog()->getEventsAsJSON(query);
+
+    setJSONReply(json_obj);
 
     return true;
 }

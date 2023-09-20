@@ -51,6 +51,7 @@ void RS2GProjection::addCoordinateSystem(unsigned int id, double latitude_deg, d
 void RS2GProjection::clearCoordinateSystems()
 {
     coordinate_systems_.clear();
+    radar_coordinate_systems_added_ = false;
 }
 
 bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,

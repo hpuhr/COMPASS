@@ -23,11 +23,14 @@
 #include "viewwidget.h"
 #include "viewpoint.h"
 #include "compass.h"
+#include "viewdatawidget.h"
 
 #include <QVBoxLayout>
 #include <QWidget>
 
 #include <cassert>
+
+#include <boost/date_time/posix_time/conversion.hpp>
 
 unsigned int View::cnt_ = 0;
 
@@ -37,7 +40,9 @@ unsigned int View::cnt_ = 0;
 @param instance_id Configurable instance id.
 @param w ViewContainerWidget the view is embedded in, configurable parent.
  */
-View::View(const std::string& class_id, const std::string& instance_id, ViewContainer* container,
+View::View(const std::string& class_id, 
+           const std::string& instance_id, 
+           ViewContainer* container,
            ViewManager& view_manager)
     : Configurable(class_id, instance_id, container),
       view_manager_(view_manager),
@@ -46,6 +51,8 @@ View::View(const std::string& class_id, const std::string& instance_id, ViewCont
       container_(container)
 {
     logdbg << "View: constructor";
+
+    creation_time_ = boost::posix_time::to_time_t(boost::posix_time::microsec_clock::local_time());
 
     central_widget_ = new QWidget();
     //central_widget_->setAutoFillBackground(true);
@@ -93,6 +100,18 @@ bool View::init()
 
     // add view to container widget
     //container_->addView(this);
+
+    app_mode_ = COMPASS::instance().appMode();
+
+    // invoke derive class (will create subconfigurables, such as view widget)
+    if (!init_impl())
+        return false;
+    
+    auto w = getWidget();
+    assert (w);
+
+    //init view widget
+    w->init();
 
     return true;
 }
@@ -198,4 +217,47 @@ void View::selectionChangedSlot()
     //        selection_change_emitted_ = false;
     //    else // only update if not self-emitted
     updateSelection();
+}
+
+void View::loadingStarted()
+{
+    loginf << "View: loadingStarted";
+
+    if (widget_)
+        widget_->loadingStarted();
+}
+
+void View::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "View: loadedData";
+
+    if (widget_ && widget_->getViewDataWidget())
+        widget_->getViewDataWidget()->updateData(data, requires_reset);
+}
+
+void View::loadingDone()
+{
+    loginf << "View: loadingDone";
+
+    if (widget_)
+        widget_->loadingDone();
+}
+
+void View::clearData()
+{
+    loginf << "View: clearData";
+
+    if (widget_ && widget_->getViewDataWidget())
+        widget_->getViewDataWidget()->clearData();
+}
+
+void View::appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current)
+{
+    loginf << "View: appModeSwitch: app_mode " << toString(app_mode_current)
+           << " prev " << toString(app_mode_previous);
+
+    app_mode_ = app_mode_current;
+
+    if (widget_)
+        widget_->appModeSwitch(app_mode_current);
 }

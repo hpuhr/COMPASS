@@ -35,7 +35,7 @@ ExtraData::ExtraData(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         float min_duration, unsigned int min_num_updates, bool ignore_primary_only)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       min_duration_(Time::partialSeconds(min_duration)),
       min_num_updates_(min_num_updates), ignore_primary_only_(ignore_primary_only)
 {
@@ -65,7 +65,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
            << " min_duration " << min_duration_ << " min_num_updates " << min_num_updates_
            << " ignore_primary_only " << ignore_primary_only_ << " prob " << prob_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
     bool ignore = false;
 
     // create ref time periods, irrespective of inside
@@ -73,12 +73,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
 
     unsigned int num_ref_inside = 0;
     ptime timestamp;
-    bool has_ground_bit;
-    bool ground_bit_set;
     bool inside;
 
     {
-        const std::multimap<ptime, unsigned int>& ref_data = target_data.refData();
+        const auto& ref_data = target_data.refChain().timestampIndexes();
 
         bool first {true};
 
@@ -87,10 +85,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             timestamp = ref_it.first;
 
             // for ref
-            tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitForTimeInterpolated(timestamp);
-
-            inside = target_data.hasRefPosForTime(timestamp)
-                    && sector_layer.isInside(target_data.refPosForTime(timestamp), has_ground_bit, ground_bit_set);
+            inside = target_data.refPosInside(sector_layer, ref_it);
 
             if (inside)
                 ++num_ref_inside;
@@ -120,49 +115,53 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     ptime tod_min, tod_max;
     unsigned int num_ok = 0;
     unsigned int num_extra = 0;
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
-    vector<ExtraDataDetail> details;
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    typedef EvaluationRequirementResult::SingleExtraData Result;
+    typedef EvaluationDetail                             Detail;
+    typedef Result::EvaluationDetails                    Details;
+    Details details;
+
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+
+    auto addDetail = [ & ] (const ptime& ts,
+                            const dbContent::TargetPosition& tst_pos,
+                            const QVariant& inside,
+                            const QVariant& extra,
+                            const QVariant& ref_exists,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::Inside, inside)
+                                             .setValue(Result::DetailKey::Extra, extra)
+                                             .setValue(Result::DetailKey::RefExists, ref_exists)
+                                             .generalComment(comment));
+    };
 
     {
-        const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+        const auto& tst_data = target_data.tstChain().timestampIndexes();
 
         for (auto& tst_it : tst_data)
         {
             timestamp = tst_it.first;
 
-            assert (target_data.hasTstPosForTime(timestamp));
-            tst_pos = target_data.tstPosForTime(timestamp);
+            tst_pos = target_data.tstChain().pos(tst_it);
 
             is_inside_ref_time_period = ref_periods.isInside(timestamp);
 
             if (is_inside_ref_time_period)
             {
                 ++num_ok;
-                details.push_back({timestamp, tst_pos, true, false, true, "OK"}); // inside, extra, ref
+                addDetail(timestamp, tst_pos, true, false, true, "OK"); // inside, extra, ref
                 continue;
             }
 
             // no ref
-
-            has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
-
-            if (has_ground_bit)
-                ground_bit_set = target_data.tstGroundBitForTime(timestamp);
-            else
-                ground_bit_set = false;
-
-            if (!ground_bit_set)
-                tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(
-                            timestamp, seconds(15));
-
-            inside = sector_layer.isInside(tst_pos, has_ground_bit, ground_bit_set);
+            inside = target_data.tstPosInside(sector_layer, tst_it);
 
             if (inside)
             {
                 ++num_extra;
-                details.push_back({timestamp, tst_pos, true, true, false, "Extra"}); // inside, extra, ref
+                addDetail(timestamp, tst_pos, true, true, false, "Extra"); // inside, extra, ref
 
                 if (!has_tod)
                 {
@@ -177,7 +176,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
                 }
             }
             else if (skip_no_data_details)
-                details.push_back({timestamp, tst_pos, false, false, false, "Tst outside"}); // inside, extra, ref
+                addDetail(timestamp, tst_pos, false, false, false, "Tst outside"); // inside, extra, ref
         }
     }
 
@@ -198,6 +197,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleExtraData>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, ignore, num_extra, num_ok, has_extra_test_data, details);
+                eval_man_, details, ignore, num_extra, num_ok, has_extra_test_data);
 }
 }

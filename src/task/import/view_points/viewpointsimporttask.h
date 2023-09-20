@@ -44,7 +44,7 @@ public:
     virtual ~ViewPointsImportTask();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     ViewPointsImportTaskDialog* dialog();
 
@@ -53,11 +53,8 @@ public:
 
     std::string currentError() const;
 
-    virtual bool checkPrerequisites() override;
-    virtual bool isRecommended() override;
-    virtual bool isRequired() override;
-
     bool canImport ();
+
     virtual bool canRun() override;
     virtual void run() override;
     virtual void stop() override;
@@ -72,7 +69,7 @@ protected:
 
     std::unique_ptr<ViewPointsImportTaskDialog> dialog_;
 
-    virtual void checkSubConfigurables() {}
+    virtual void checkSubConfigurables() override {}
 
     void parseCurrentFile ();
     void checkParsedData (); // throws exceptions for errors

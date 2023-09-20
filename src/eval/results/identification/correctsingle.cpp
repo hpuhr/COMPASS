@@ -26,28 +26,40 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 
 #include <cassert>
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
 
-SingleIdentificationCorrect::SingleIdentificationCorrect(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        unsigned int num_updates, unsigned int num_no_ref_pos, unsigned int num_no_ref_id,
-        unsigned int num_pos_outside, unsigned int num_pos_inside,
-        unsigned int num_correct, unsigned int num_not_correct,
-        std::vector<EvaluationRequirement::CorrectnessDetail> details)
-    : Single("SingleIdentificationCorrect", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_id_(num_no_ref_id),
-      num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
-      num_correct_(num_correct), num_not_correct_(num_not_correct), details_(details)
+SingleIdentificationCorrect::SingleIdentificationCorrect(const std::string& result_id, 
+                                                         std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                         const SectorLayer& sector_layer,
+                                                         unsigned int utn,
+                                                         const EvaluationTargetData* target,
+                                                         EvaluationManager& eval_man,
+                                                         const EvaluationDetails& details,
+                                                         unsigned int num_updates,
+                                                         unsigned int num_no_ref_pos,
+                                                         unsigned int num_no_ref_id,
+                                                         unsigned int num_pos_outside,
+                                                         unsigned int num_pos_inside,
+                                                         unsigned int num_correct,
+                                                         unsigned int num_not_correct)
+    :   Single("SingleIdentificationCorrect", result_id, requirement, sector_layer, utn, target, eval_man, details)
+    ,   num_updates_    (num_updates)
+    ,   num_no_ref_pos_ (num_no_ref_pos)
+    ,   num_no_ref_id_  (num_no_ref_id)
+    ,   num_pos_outside_(num_pos_outside)
+    ,   num_pos_inside_ (num_pos_inside)
+    ,   num_correct_    (num_correct)
+    ,   num_not_correct_(num_not_correct)
 {
     updatePID();
 }
@@ -57,20 +69,14 @@ void SingleIdentificationCorrect::updatePID()
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_id_+num_correct_+num_not_correct_);
 
+    pid_.reset();
+
     if (num_correct_+num_not_correct_)
     {
         pid_ = (float)num_correct_/(float)(num_correct_+num_not_correct_);
-        has_pid_ = true;
-
-        result_usable_ = true;
     }
-    else
-    {
-        pid_ = 0;
-        has_pid_ = false;
 
-        result_usable_ = false;
-    }
+    result_usable_ = pid_.has_value();
 
     updateUseFromTarget();
 }
@@ -92,7 +98,8 @@ void SingleIdentificationCorrect::addTargetToOverviewTable(shared_ptr<Evaluation
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+    if (eval_man_.settings().report_split_results_by_mops_
+            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
@@ -108,23 +115,23 @@ void SingleIdentificationCorrect::addTargetDetailsToTable (
 
     QVariant pd_var;
 
-    if (has_pid_)
-        pd_var = roundf(pid_ * 10000.0) / 100.0;
+    if (pid_.has_value())
+        pd_var = roundf(pid_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
-                {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-                 target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-                 num_updates_, num_no_ref_pos_+num_no_ref_id_, num_correct_, num_not_correct_,
-                 pd_var}, this, {utn_});
+                { utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+                  target_->acidsStr().c_str(), target_->acadsStr().c_str(),
+                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+                  num_updates_, num_no_ref_pos_+num_no_ref_id_, num_correct_, num_not_correct_,
+                  pd_var}, this, {utn_});
 }
 
 void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     QVariant pd_var;
 
-    if (has_pid_)
-        pd_var = roundf(pid_ * 10000.0) / 100.0;
+    if (pid_.has_value())
+        pd_var = roundf(pid_.value() * 10000.0) / 100.0;
 
     root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
@@ -158,8 +165,8 @@ void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<Evaluation
 
     string result {"Unknown"};
 
-    if (has_pid_)
-        result = req-> getResultConditionStr(pid_);
+    if (pid_.has_value())
+        result = req->getConditionResultStr(pid_.value());
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -169,11 +176,10 @@ void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<Evaluation
         utn_req_section.perTargetWithIssues(true);
     }
 
-
-    if (has_pid_ && pid_ != 1.0)
+    if (pid_.has_value() && pid_.value() != 1.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {
@@ -195,20 +201,29 @@ void SingleIdentificationCorrect::reportDetails(EvaluationResultsReport::Section
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
-    unsigned int detail_cnt = 0;
-
-    for (auto& rq_det_it : details_)
+    utn_req_details_table.setCreateOnDemand(
+                [this, &utn_req_details_table](void)
     {
-        utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(), rq_det_it.ref_exists_,
-                     !rq_det_it.is_not_correct_,
-                     rq_det_it.num_updates_, rq_det_it.num_no_ref_,
-                     rq_det_it.num_inside_, rq_det_it.num_outside_,
-                     rq_det_it.num_correct_, rq_det_it.num_not_correct_, rq_det_it.comment_.c_str()},
-                    this, detail_cnt);
 
-        ++detail_cnt;
-    }
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : getDetails())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailKey::RefExists),
+                          !rq_det_it.getValue(DetailKey::IsNotCorrect).toBool(),
+                          rq_det_it.getValue(DetailKey::NumUpdates),
+                          rq_det_it.getValue(DetailKey::NumNoRef),
+                          rq_det_it.getValue(DetailKey::NumInside),
+                          rq_det_it.getValue(DetailKey::NumOutside),
+                          rq_det_it.getValue(DetailKey::NumCorrect),
+                          rq_det_it.getValue(DetailKey::NumNotCorrect),
+                          rq_det_it.comments().generalComment().c_str() },
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }});
 }
 
 bool SingleIdentificationCorrect::hasViewableData (
@@ -216,16 +231,15 @@ bool SingleIdentificationCorrect::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
         return true;
-    else
-        return false;
+    
+    return false;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -242,24 +256,26 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::viewableD
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::CorrectnessDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.pos_tst_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.pos_tst_.longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        assert (detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
         //            if (!detail.pos_ok_)
         //                (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
-    else
-        return nullptr;
+    
+    return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::getTargetErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::getTargetErrorsViewable (bool add_highlight)
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -267,26 +283,31 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::getTarget
     bool has_pos = false;
     double lat_min, lat_max, lon_min, lon_max;
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if (!detail_it.is_not_correct_)
+        auto is_not_correct = detail_it.getValueAs<bool>(DetailKey::IsNotCorrect);
+        assert(is_not_correct.has_value());
+
+        if (!is_not_correct.value())
             continue;
+
+        assert(detail_it.numPositions());
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.pos_tst_.latitude_);
-            lat_max = max(lat_max, detail_it.pos_tst_.latitude_);
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-            lon_min = min(lon_min, detail_it.pos_tst_.longitude_);
-            lon_max = max(lon_max, detail_it.pos_tst_.longitude_);
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.pos_tst_.latitude_;
-            lat_max = detail_it.pos_tst_.latitude_;
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-            lon_min = detail_it.pos_tst_.longitude_;
-            lon_max = detail_it.pos_tst_.longitude_;
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
             has_pos = true;
         }
@@ -300,15 +321,18 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::getTarget
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
         double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-        if (lat_w < eval_man_.resultDetailZoom())
-            lat_w = eval_man_.resultDetailZoom();
+        if (lat_w < eval_man_.settings().result_detail_zoom_)
+            lat_w = eval_man_.settings().result_detail_zoom_;
 
-        if (lon_w < eval_man_.resultDetailZoom())
-            lon_w = eval_man_.resultDetailZoom();
+        if (lon_w < eval_man_.settings().result_detail_zoom_)
+            lon_w = eval_man_.settings().result_detail_zoom_;
 
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
+
+    //addAnnotationFeatures(*viewable_ptr, false, add_highlight);
+    addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
 }
@@ -328,6 +352,25 @@ std::string SingleIdentificationCorrect::reference(
     assert (hasReference(table, annotation));
 
     return "Report:Results:"+getTargetRequirementSectionID();
+}
+
+void SingleIdentificationCorrect::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+{
+    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
+    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+
+    for (auto& detail_it : getDetails())
+    {
+        auto is_not_correct = detail_it.getValueAsOrAssert<bool>(
+                    EvaluationRequirementResult::SingleIdentificationCorrect::DetailKey::IsNotCorrect);
+
+        assert (detail_it.numPositions() >= 1);
+
+        if (is_not_correct)
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
+        else if (add_ok)
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+    }
 }
 
 std::shared_ptr<Joined> SingleIdentificationCorrect::createEmptyJoined(const std::string& result_id)
@@ -369,11 +412,5 @@ unsigned int SingleIdentificationCorrect::numNotCorrect() const
 {
     return num_not_correct_;
 }
-
-std::vector<EvaluationRequirement::CorrectnessDetail>& SingleIdentificationCorrect::details()
-{
-    return details_;
-}
-
 
 }

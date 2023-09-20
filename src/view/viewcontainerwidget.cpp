@@ -29,6 +29,7 @@
 #include <QMoveEvent>
 #include <QResizeEvent>
 #include <QTabWidget>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QMessageBox>
 
@@ -51,7 +52,6 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
     registerParameter("min_height", &min_height_, 900);
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
-
 
     //set a nice object name by which we can differentiate multiple windows in qt's object hierarchy
     UI_TEST_OBJ_NAME(this, QString::fromStdString(name_))

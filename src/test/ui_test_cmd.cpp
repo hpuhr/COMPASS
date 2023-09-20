@@ -17,6 +17,7 @@
 
 #include "ui_test_cmd.h"
 #include "ui_test_setget.h"
+#include "ui_test_inject.h"
 #include "rtcommand_registry.h"
 #include "json.h"
 
@@ -27,6 +28,7 @@
 
 REGISTER_RTCOMMAND(ui_test::RTCommandUISet)
 REGISTER_RTCOMMAND(ui_test::RTCommandUIGet)
+REGISTER_RTCOMMAND(ui_test::RTCommandUIInject)
 
 namespace ui_test
 {
@@ -86,7 +88,7 @@ void RTCommandUIInjection::assignVariables_impl(const VariablesMap& variables)
 
 /**
  */
-bool RTCommandUISet::run_impl() const
+bool RTCommandUISet::run_impl()
 {
     auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
     if (receiver.first != rtcommand::FindObjectErrCode::NoError)
@@ -135,7 +137,7 @@ void RTCommandUISet::assignVariables_impl(const VariablesMap& variables)
 
 /**
  */
-bool RTCommandUIGet::run_impl() const
+bool RTCommandUIGet::run_impl()
 {
     auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
     if (receiver.first != rtcommand::FindObjectErrCode::NoError)
@@ -182,6 +184,60 @@ void RTCommandUIGet::assignVariables_impl(const VariablesMap& variables)
     RTCommandUIObject::assignVariables_impl(variables);
 
     RTCOMMAND_GET_QSTRING_OR_THROW(variables, "what", what)
+}
+
+/*************************************************************************
+ * RTCommandUIInject
+ *************************************************************************/
+
+/**
+ * Inject UI events into UI objects, e.g.
+ * uiinject mouse(left,click,50,40)  => inject a mouse click at (50,40)
+ *          mouse(right,click,-1,-1) => inject a mouse click at the middle of the widget
+ *          mouse(left,click,50%,50%) => inject a mouse click at the middle of the widget
+ *          mouse(left,rect,0,0,100,100) => press the mouse at (0,0), move to (100,100) and release the mouse
+ */
+bool RTCommandUIInject::run_impl()
+{
+    auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
+    if (receiver.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        setResultMessage("Object '" + obj.toStdString() + "' not found");
+        return false;
+    }
+
+    bool ok = injectUIEvent(receiver.second, "", event, injection_delay);
+    if (!ok)
+    {
+        setResultMessage("Event '" + event.toStdString() + "' could not be injected into object '" + obj.toStdString() + "'");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ */
+void RTCommandUIInject::collectOptions_impl(OptionsDescription& options,
+                                         PosOptionsDescription& positional)
+{
+    //call base
+    RTCommandUIInjection::collectOptions_impl(options, positional);
+
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("event,e", po::value<std::string>()->default_value(""), "event to inject into the ui element");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "event", 2)
+}
+
+/**
+ */
+void RTCommandUIInject::assignVariables_impl(const VariablesMap& variables)
+{
+    //call base
+    RTCommandUIInjection::assignVariables_impl(variables);
+
+    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "event", event)
 }
 
 }

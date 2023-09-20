@@ -68,9 +68,16 @@ bool DBDataSource::hasNumInserted(unsigned int line_id) const
     return false;
 }
 
+bool DBDataSource::hasNumInserted(const std::string& db_content, unsigned int line_id) const
+{
+    if (!num_inserted_.count(db_content))
+        return false;
+
+    return num_inserted_.at(db_content).count(line_id);
+}
+
 const std::map<std::string, std::map<unsigned int, unsigned int>>& DBDataSource::numInsertedMap() const
 {
-    assert (hasNumInserted());
     return num_inserted_;
 }
 
@@ -109,6 +116,23 @@ void DBDataSource::addNumInserted(const std::string& db_content, unsigned int li
     num_inserted_[db_content][line_id] += num;
 
     counts_ = num_inserted_;
+}
+
+void DBDataSource::clearNumInserted(const std::string& db_content)
+{
+    if (num_inserted_.count(db_content))
+        num_inserted_.erase(db_content);
+}
+
+void DBDataSource::clearNumInserted(const std::string& db_content, unsigned int line_id)
+{
+    if (!num_inserted_.count(db_content))
+        return;
+
+    if (!num_inserted_.at(db_content).count(line_id))
+        return;
+
+    num_inserted_.at(db_content).erase(line_id);
 }
 
 void DBDataSource::addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num)
@@ -323,6 +347,17 @@ bool DBDataSource::hasLiveData(unsigned int line, boost::posix_time::ptime curre
 //        loginf << "DBDataSource: hasLiveData: name " << name_ << " no maxTS";
 
     return ret;
+}
+
+nlohmann::json DBDataSource::getAsJSON() const
+{
+    auto j = DataSourceBase::getAsJSON();
+
+    //add counts
+    if (!counts_.is_null())
+        j[ "counts" ] = counts_;
+
+    return j;
 }
 
 }

@@ -21,6 +21,7 @@
 #include <QDialog>
 
 class EvaluationManager;
+class EvaluationManagerSettings;
 
 class QPushButton;
 class QLabel;
@@ -58,7 +59,7 @@ public slots:
     void cancelSlot();
 
 public:
-    PDFGeneratorDialog(PDFGenerator& generator, EvaluationManager& eval_man,
+    PDFGeneratorDialog(PDFGenerator& generator, EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
                        QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
     void updateFileInfo ();
@@ -73,6 +74,7 @@ public:
 protected:
     PDFGenerator& generator_;
     EvaluationManager& eval_man_;
+    EvaluationManagerSettings& eval_settings_;
 
     QWidget* config_container_ {nullptr};
 

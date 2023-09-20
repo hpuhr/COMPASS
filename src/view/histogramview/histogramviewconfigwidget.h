@@ -23,6 +23,7 @@
 #include "appmode.h"
 
 class HistogramView;
+class HistogramViewWidget;
 
 namespace dbContent {
 class VariableOrderedSetWidget;
@@ -44,7 +45,7 @@ class HistogramViewConfigWidget : public ViewConfigWidget
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void dataSourceToggled();
     void selectedVariableChangedSlot();
 
@@ -53,26 +54,19 @@ class HistogramViewConfigWidget : public ViewConfigWidget
 //    void exportSlot();
 //    void exportDoneSlot(bool cancelled);
 
-    void reloadRequestedSlot();
-    void loadingStartedSlot();
-
-  public:
-    HistogramViewConfigWidget(HistogramView* view, QWidget* parent = nullptr);
+public:
+    HistogramViewConfigWidget(HistogramViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~HistogramViewConfigWidget();
 
     void updateConfig();
 
-    virtual void setStatus(const QString& text, bool visible, const QColor& color = Qt::black) override;
-
-    void appModeSwitch (AppMode app_mode);
-
-  protected:
+protected:
     void updateEvalConfig();
     void updateInfo();
 
     virtual void onDisplayChange_impl() override;
 
-    HistogramView* view_;
+    HistogramView* view_ = nullptr;
 
     // data variable
     QRadioButton*                       selected_var_check_ {nullptr}; // active if variable data is shown
@@ -93,9 +87,7 @@ class HistogramViewConfigWidget : public ViewConfigWidget
     QLabel*       info_zoom_label       = nullptr;
 
     // general
-    QCheckBox*    log_check_    {nullptr};
-    QLabel*       status_label_ {nullptr};
-    QPushButton*  reload_button_{nullptr};
+    QCheckBox*    log_check_{nullptr};
 };
 
 #endif /* HISTOGRAMVIEWCONFIGWIDGET_H_ */

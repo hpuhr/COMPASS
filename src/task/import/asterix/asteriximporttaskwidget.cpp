@@ -136,7 +136,7 @@ void ASTERIXImportTaskWidget::addOverrideTab()
     assert(tab_widget_);
 
     override_widget_ = new ASTERIXOverrideWidget(task_, this);
-    tab_widget_->addTab(override_widget_, "Override");
+    tab_widget_->addTab(override_widget_, "Override/Filter");
 }
 
 void ASTERIXImportTaskWidget::addMappingsTab()

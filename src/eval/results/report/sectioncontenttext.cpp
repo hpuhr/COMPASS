@@ -51,7 +51,7 @@ void SectionContentText::addToLayout (QVBoxLayout* layout)
     }
 }
 
-void SectionContentText::accept(LatexVisitor& v) const
+void SectionContentText::accept(LatexVisitor& v)
 {
     loginf << "SectionContentText: accept";
     v.visit(this);

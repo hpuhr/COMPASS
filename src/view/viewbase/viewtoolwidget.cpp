@@ -1,6 +1,9 @@
 
 #include "viewtoolwidget.h"
 #include "viewtoolswitcher.h"
+#include "viewwidget.h"
+
+#include "ui_test_common.h"
 
 #include <QShortcut>
 #include <QToolButton>
@@ -10,10 +13,14 @@
 
 /**
  */
-ViewToolWidget::ViewToolWidget(ViewToolSwitcher* tool_switcher, QWidget* parent)
+ViewToolWidget::ViewToolWidget(ViewWidget* view_widget, 
+                               ViewToolSwitcher* tool_switcher, 
+                               QWidget* parent)
 :   QToolBar      (parent)
+,   view_widget_  (view_widget)
 ,   tool_switcher_(tool_switcher)
 {
+    assert(view_widget_);
     assert(tool_switcher_);
 
     connect(tool_switcher_, &ViewToolSwitcher::toolChanged, this, &ViewToolWidget::toolSwitched);
@@ -22,10 +29,28 @@ ViewToolWidget::ViewToolWidget(ViewToolSwitcher* tool_switcher, QWidget* parent)
 }
 
 /**
- */
-void ViewToolWidget::addTool(int id)
+*/
+void ViewToolWidget::addAction(int id, QAction* action, bool is_tool)
 {
-    if (tool_actions_.find(id) != tool_actions_.end())
+    if (actions_.find(id) != actions_.end())
+        throw std::runtime_error("ViewToolWidget::addAction: duplicate id");
+
+    Action a;
+    a.action  = action;
+    a.is_tool = is_tool;
+
+    actions_[ id ] = a;
+
+    QToolBar::addAction(action);
+}
+
+/**
+ * Adds the tool of the given id to the toolbar.
+ * Note: The tool needs to be added to the ViewToolSwitcher beforehand.
+ */
+void ViewToolWidget::addTool(int id, const UpdateCallback& cb_update)
+{
+    if (actions_.find(id) != actions_.end())
         throw std::runtime_error("ViewToolWidget::addTool: duplicate id");
 
     if (!tool_switcher_->hasTool(id))
@@ -51,9 +76,10 @@ void ViewToolWidget::addTool(int id)
 
     connect(action, &QAction::toggled, cb);
 
-    tool_actions_[ id ] = action;
+    if (cb_update)
+        update_callbacks_.push_back([=] () { cb_update(action); });
 
-    addAction(action);
+    addAction(id, action, true);
 }
 
 namespace 
@@ -79,31 +105,75 @@ namespace
         action->setText(full_name);
         action->setIcon(icon);
 
+        UI_TEST_OBJ_NAME(action, name)
+
         return action;
     }
 }
 
 /**
+ * Adds an action with callback to the toolbar.
+ * Internally called version.
  */
-void ViewToolWidget::addActionCallback(const QString& name,
-                                       const Callback& cb,
-                                       const QIcon& icon,
-                                       const QKeySequence& key_combination)
+QAction* ViewToolWidget::addActionCallback_internal(const QString& name,
+                                                    const Callback& cb,
+                                                    const UpdateCallback& cb_update,
+                                                    const QIcon& icon,
+                                                    const QKeySequence& key_combination)
 {
     QAction* action = generateCallbackAction(name, icon, key_combination);
     
     connect(action, &QAction::triggered, cb);
 
-    addAction(action);
+    if (cb_update)
+        update_callbacks_.push_back([=] () { cb_update(action); });
+
+    return action;
 }
 
 /**
+ * Adds an action with callback to the toolbar.
  */
 void ViewToolWidget::addActionCallback(const QString& name,
-                                       const ToggleCallback& cb,
+                                       const Callback& cb,
+                                       const UpdateCallback& cb_update,
                                        const QIcon& icon,
-                                       const QKeySequence& key_combination,
-                                       bool checked)
+                                       const QKeySequence& key_combination)
+{
+    auto action = addActionCallback_internal(name, cb, cb_update, icon, key_combination);
+
+    QToolBar::addAction(action);
+}
+
+/**
+ * Adds an action with callback to the toolbar.
+ * This version stores the action under an id which can be used to retrieve the action later on.
+ */
+void ViewToolWidget::addActionCallback(int id,
+                                       const QString& name,
+                                       const Callback& cb,
+                                       const UpdateCallback& cb_update,
+                                       const QIcon& icon,
+                                       const QKeySequence& key_combination)
+{
+    if (actions_.find(id) != actions_.end())
+        throw std::runtime_error("ViewToolWidget::addActionCallback: duplicate id");
+
+    auto action = addActionCallback_internal(name, cb, cb_update, icon, key_combination);
+
+    addAction(id, action, false);
+}
+
+/**
+ * Adds a checkable action with callback to the toolbar.
+ * Internally called version.
+ */
+QAction* ViewToolWidget::addActionCallback_internal(const QString& name,
+                                                    const ToggleCallback& cb,
+                                                    const UpdateCallback& cb_update,
+                                                    const QIcon& icon,
+                                                    const QKeySequence& key_combination,
+                                                    bool checked)
 {
     QAction* action = generateCallbackAction(name, icon, key_combination);
     action->setCheckable(true);
@@ -111,27 +181,197 @@ void ViewToolWidget::addActionCallback(const QString& name,
     
     connect(action, &QAction::toggled, cb);
 
-    addAction(action);
+    if (cb_update)
+        update_callbacks_.push_back([=] () { cb_update(action); });
+
+    return action;
 }
 
 /**
+ * Adds a checkable action with callback to the toolbar.
+ */
+void ViewToolWidget::addActionCallback(const QString& name,
+                                       const ToggleCallback& cb,
+                                       const UpdateCallback& cb_update,
+                                       const QIcon& icon,
+                                       const QKeySequence& key_combination,
+                                       bool checked)
+{
+    auto action = addActionCallback_internal(name, cb, cb_update, icon, key_combination, checked);
+
+    QToolBar::addAction(action);
+}
+
+/**
+ * Adds a spacer item to the toolbar.
  */
 void ViewToolWidget::addSpacer()
 {
+    //add spacer widget.
     QWidget* w = new QWidget;
     w->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    addWidget(w);
+    auto action = addWidget(w);
+
+    spacers_.insert(action);
+}
+
+/**
+ * Adds a checkable action with callback to the toolbar.
+ * This version stores the action under an id which can be used to retrieve the action later on.
+ */
+void ViewToolWidget::addActionCallback(int id,
+                                       const QString& name,
+                                       const ToggleCallback& cb,
+                                       const UpdateCallback& cb_update,
+                                       const QIcon& icon,
+                                       const QKeySequence& key_combination,
+                                       bool checked)
+{
+    if (actions_.find(id) != actions_.end())
+        throw std::runtime_error("ViewToolWidget::addActionCallback: duplicate id");
+
+    auto action = addActionCallback_internal(name, cb, cb_update, icon, key_combination, checked);
+
+    addAction(id, action, false);
+}
+
+/**
+ * Adds a separator only if it makes sense (e.g. not adding a separator twice etc.).
+*/
+void ViewToolWidget::addSeparatorIfValid()
+{
+    if (!separatorValid())
+        return;
+
+    addSeparator();
+}
+
+/**
+ * Adds a button for toggling the config widget, that is part of the ViewWidget.
+*/
+void ViewToolWidget::addConfigWidgetToggle()
+{
+    //add spacer if no spacer yet
+    if (spacers_.empty())
+        addSpacer();
+
+    //add separator if needed
+    addSeparatorIfValid();
+
+    //add toggle callback
+    addActionCallback("Toggle Configuration Panel", [=] (bool on) { view_widget_->toggleConfigWidget(); }, {}, ViewWidget::getIcon("configuration.png"), Qt::Key_C, true);
+}
+
+/**
+ * Checks if the given action is a spacer item.
+ */
+bool ViewToolWidget::actionIsSpacer(QAction* action) const
+{
+    if (spacers_.empty())
+        return false;
+
+    return (spacers_.find(action) != spacers_.end());
+}
+
+/**
+ * Checks if adding a separator makes sense.
+*/
+bool ViewToolWidget::separatorValid() const
+{
+    //no items yet?
+    if (actions().count() < 1)
+        return false;
+
+    auto last_action = actions().back();
+
+    //last action already is separator?
+    if (last_action->isSeparator())
+        return false;
+
+    //last action is a spacer item?
+    if (actionIsSpacer(last_action))
+        return false;
+
+    //last item should be a normal item
+    return true;
 }
 
 /**
  */
 void ViewToolWidget::toolSwitched(int id, const QCursor& cursor)
 {
-    for (auto& t : tool_actions_)
+    for (auto& t : actions_)
     {
-        t.second->blockSignals(true);
-        t.second->setChecked(t.first == id);
-        t.second->blockSignals(false);
+        if (!t.second.is_tool)
+            continue;
+
+        t.second.action->blockSignals(true);
+        t.second.action->setChecked(t.first == id);
+        t.second.action->blockSignals(false);
     }
+}
+
+/**
+ * Enable/disable the action with the given id.
+*/
+void ViewToolWidget::enableAction(int id, bool enable)
+{
+    auto it = actions_.find(id);
+    if (it == actions_.end())
+        return;
+
+    it->second.action->setEnabled(enable);
+}
+
+/**
+ * Invoke all added item update callbacks.
+ */
+void ViewToolWidget::updateItems()
+{
+    for (auto& cb : update_callbacks_)
+        cb();
+}
+
+/**
+ * React on loading start.
+ */
+void ViewToolWidget::loadingStarted()
+{
+    updateItems();
+    setEnabled(false);
+}
+
+/**
+ * React on loading end.
+ */
+void ViewToolWidget::loadingDone()
+{
+    updateItems();
+    setEnabled(true);
+}
+
+/**
+ * React on manual redraw start.
+*/
+void ViewToolWidget::redrawStarted()
+{
+    setEnabled(false);
+}
+
+/**
+ * React on manual redraw end.
+*/
+void ViewToolWidget::redrawDone()
+{
+    setEnabled(true);
+}
+
+/**
+ * React on app switch.
+*/
+void ViewToolWidget::appModeSwitch(AppMode app_mode)
+{
+    //update items as their state might depend on app mode
+    updateItems();
 }

@@ -24,6 +24,7 @@
 
 class VariableOrderedSetWidget;
 class ListBoxView;
+class ListBoxViewWidget;
 
 class QComboBox;
 class QCheckBox;
@@ -40,12 +41,8 @@ class ListBoxViewConfigWidget : public ViewConfigWidget
 {
     Q_OBJECT
 public:
-    ListBoxViewConfigWidget(ListBoxView* view, QWidget* parent = nullptr);
+    ListBoxViewConfigWidget(ListBoxViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ListBoxViewConfigWidget();
-
-    virtual void setStatus(const QString& text, bool visible, const QColor& color = Qt::black) override;
-
-    void appModeSwitch (AppMode app_mode);
 
 public slots:
     void selectedSetSlot(const QString& text);
@@ -60,10 +57,6 @@ public slots:
     void exportSlot();
     void exportDoneSlot(bool cancelled);
 
-    void reloadWantedSlot();
-    void reloadRequestedSlot();
-    void loadingStartedSlot();
-
 signals:
     void exportSignal(bool overwrite);
 
@@ -73,7 +66,7 @@ protected:
     void updateSetButtons();
     void updateSetWidget();
 
-    ListBoxView*    view_;
+    ListBoxView*    view_ = nullptr;
 
     QComboBox*      set_box_{nullptr};
     QPushButton*    add_set_button_{nullptr};
@@ -89,10 +82,6 @@ protected:
     QCheckBox*      overwrite_check_{nullptr};
 
     QPushButton*    export_button_{nullptr};
-
-    QLabel*         status_label_ {nullptr};
-    QPushButton*    update_button_{nullptr};
-    bool            reload_needed_{true};
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

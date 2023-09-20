@@ -22,6 +22,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 namespace EvaluationRequirementResult
 {
@@ -43,6 +44,8 @@ namespace EvaluationRequirementResult
 
     class SinglePositionDistance;
     class JoinedPositionDistance;
+    class SinglePositionDistanceRMS;
+    class JoinedPositionDistanceRMS;
 
     class SinglePositionAlong;
     class JoinedPositionAlong;
@@ -53,13 +56,23 @@ namespace EvaluationRequirementResult
     class SinglePositionLatency;
     class JoinedPositionLatency;
 
+    class SinglePositionRadarAzimuth;
+    class JoinedPositionRadarAzimuth;
+    class SinglePositionRadarRange;
+    class JoinedPositionRadarRange;
+
     class SingleSpeed;
     class JoinedSpeed;
+
+    class SingleTrackAngle;
+    class JoinedTrackAngle;
 
     class SingleIdentificationCorrect;
     class JoinedIdentificationCorrect;
     class SingleIdentificationFalse;
     class JoinedIdentificationFalse;
+    class SingleIdentificationCorrectPeriod;
+    class JoinedIdentificationCorrectPeriod;
 
     class SingleModeAPresent;
     class JoinedModeAPresent;
@@ -70,6 +83,10 @@ namespace EvaluationRequirementResult
     class JoinedModeCPresent;
     class SingleModeCFalse;
     class JoinedModeCFalse;
+    class SingleModeCCorrect;
+    class JoinedModeCCorrect;
+    class SingleModeCCorrectPeriod;
+    class JoinedModeCCorrectPeriod;
 }
 
 /**
@@ -104,6 +121,8 @@ private:
 
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionDistance> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionDistance> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionDistanceRMS> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionDistanceRMS> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionAlong> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionAlong> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionAcross> result);
@@ -111,13 +130,22 @@ private:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionLatency> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionLatency> result);
 
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionRadarAzimuth> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarAzimuth> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionRadarRange> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarRange> result);
+
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleSpeed> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedSpeed> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleTrackAngle> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedTrackAngle> result);
 
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleIdentificationCorrect> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationCorrect> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleIdentificationFalse> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationFalse> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleIdentificationCorrectPeriod> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationCorrectPeriod> result);
 
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAPresent> result);
@@ -127,6 +155,10 @@ private:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCFalse> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCFalse> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCCorrect> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCCorrect> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCCorrectPeriod> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCCorrectPeriod> result);
 
     void addStaticResult(const std::vector<std::string>& ids, const std::vector<unsigned int>& counts);
 

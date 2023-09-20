@@ -32,20 +32,43 @@ std::vector<std::string> TCPSession::getStrData()
 
 void TCPSession::sendStrData(const std::string& str)
 {
-    str.copy(data_, str.size());
+    unsigned int required_size = str.size() + 1;
+
+    if (!data_) // init if required
+    {
+        if (required_size > data_size_)
+            data_size_ = required_size;
+
+        data_.reset(new char [data_size_]);
+    }
+    else if (required_size > data_size_) // check size
+    {
+        data_size_ = required_size;
+        data_.reset(new char [data_size_]);
+    }
+
+    assert (data_);
+    str.copy(data_.get(), str.size());
     do_write(str.size());
 }
 
 void TCPSession::do_read()
 {
     auto self(shared_from_this());
-    socket_.async_read_some(boost::asio::buffer(data_, max_length),
+
+    if (!data_)
+        data_.reset(new char [data_size_]);
+
+    assert (data_);
+    socket_.async_read_some(boost::asio::buffer(data_.get(), data_size_),
                             [this, self](boost::system::error_code ec, std::size_t length)
     {
         if (!ec)
         {
+            assert (data_);
+
             std::string tmp;
-            tmp.assign(data_, length);
+            tmp.assign(data_.get(), length);
 
             vector<string> string_vec = String::split(tmp, '\n');
 
@@ -61,8 +84,10 @@ void TCPSession::do_read()
 
 void TCPSession::do_write(std::size_t length)
 {
+    assert (data_);
+
     auto self(shared_from_this());
-    boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
+    boost::asio::async_write(socket_, boost::asio::buffer(data_.get(), length),
                              [this, self](boost::system::error_code ec, std::size_t /*length*/)
     {
         assert (!ec);

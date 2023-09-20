@@ -3,8 +3,8 @@ from threading import *
 import random
 import time
 
-#osgview_str = "window1.osgview3"
-osgview_str = "osgview3" # for main window
+osgview_str = "window5.osgview1"
+#osgview_str = "osgview3" # for main window
 
 def set_slider_values(serversocket, server, num_times, wait_time_s):
 
@@ -76,8 +76,8 @@ def main():
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
-    #host = "127.0.0.1"
-    host = "192.168.0.234"
+    host = "127.0.0.1"
+    #host = "192.168.0.234"
     port = 27960
     
     server = (host, port)
@@ -89,20 +89,20 @@ def main():
         print("loop cnt {}".format(cnt))
         # assume in live running
         
-        if random.randint(0, 1) == 1: # switch to live paused
-            switch_live_mode(serversocket, server, 10)
-            switched_to_live_paused = True
-        else:
-            switched_to_live_paused = False
+        #if random.randint(0, 1) == 1: # switch to live paused
+        #    switch_live_mode(serversocket, server, 10)
+        #    switched_to_live_paused = True
+        #else:
+        #    switched_to_live_paused = False
     
         #set_slider_values(serversocket, server, num_times, max_wait_time_s)
         set_slider_values(serversocket, server, 10, 5)
         
-        if switched_to_live_paused:
-            if random.randint(0, 1) == 1: # switch to live running
-                switch_live_mode(serversocket, server, 10)
-            else:
-                reset_views(serversocket, server, 20)
+        #if switched_to_live_paused:
+        #    if random.randint(0, 1) == 1: # switch to live running
+        #        switch_live_mode(serversocket, server, 10)
+        #    else:
+        #        reset_views(serversocket, server, 20)
     
     #for cnt in range(5):
     #    switch_live_mode(serversocket, server)

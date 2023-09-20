@@ -42,6 +42,8 @@ private:
     bool home_subdir_deletion_wanted_{false};
     bool config_and_data_copy_wanted_{false};
 
+    std::string override_cfg_path_;
+
     std::string create_new_sqlite3_db_filename_;
     std::string open_sqlite3_db_filename_;
 
@@ -51,6 +53,7 @@ private:
     std::string import_asterix_file_line_;
     std::string import_asterix_date_;
     std::string import_asterix_file_time_offset_;
+    bool import_asterix_ignore_time_jumps_ {false};
 
     bool import_asterix_network_ {false};
     std::string import_asterix_network_time_offset_;
@@ -68,6 +71,9 @@ private:
 
     bool calculate_radar_plot_positions_ {false};
     bool associate_data_ {false};
+    bool calculate_artas_tr_usage_ {false};
+
+    bool calculate_references_ {false};
 
     bool load_data_ {false};
 
@@ -83,6 +89,7 @@ private:
     bool no_config_save_ {false};
 
     bool open_rt_cmd_port_ {false};
+    bool enable_event_log_ {false};
     bool quit_ {false};
 
     bool expert_mode_ {false};

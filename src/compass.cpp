@@ -36,6 +36,7 @@
 #include "rtcommand_runner.h"
 #include "rtcommand_manager.h"
 #include "rtcommand.h"
+#include "util/timeconv.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -125,6 +126,10 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     QObject::connect(this, &COMPASS::databaseClosedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
 
+    // data sources changed
+    QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
+            eval_manager_.get(), &EvaluationManager::dataSourcesChangedSlot); // update if data sources changed
+
     // data exchange
     QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingStartedSignal,
                      view_manager_.get(), &ViewManager::loadingStartedSlot);
@@ -141,6 +146,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     rtcommand::RTCommandHelp::init();
 
+    appMode(app_mode_);
+
     logdbg << "COMPASS: constructor: end";
 }
 
@@ -148,7 +155,7 @@ COMPASS::~COMPASS()
 {
     logdbg << "COMPASS: destructor: start";
 
-    if (!shut_down_)
+    if (app_state_ != AppState::Shutdown)
     {
         logerr << "COMPASS: destructor: not shut down";
         shutdown();
@@ -162,6 +169,13 @@ COMPASS::~COMPASS()
     assert (!eval_manager_);
 
     logdbg << "COMPASS: destructor: end";
+}
+
+void COMPASS::setAppState(AppState state)
+{
+    app_state_ = state;
+
+    //notify someone about changed app state?
 }
 
 void COMPASS::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
@@ -436,13 +450,13 @@ void COMPASS::shutdown()
 {
     loginf << "COMPASS: database shutdown";
 
-    if (shut_down_)
+    if (app_state_ == AppState::Shutdown)
     {
         logerr << "COMPASS: already shut down";
         return;
     }
 
-    shut_down_ = true;
+    app_state_ = AppState::Shutdown;
 
     assert(task_manager_);
     task_manager_->shutdown();
@@ -460,7 +474,6 @@ void COMPASS::shutdown()
         dbcontent_manager_->saveTargets();
     dbcontent_manager_ = nullptr;
 
-    RTCommandManager::instance().shutdown();
     JobManager::instance().shutdown();
 
     assert(eval_manager_);
@@ -482,6 +495,9 @@ void COMPASS::shutdown()
     db_interface_ = nullptr;
 
     //main_window_ = nullptr;
+
+    //shut down command manager at the end
+    RTCommandManager::instance().shutdown();
 
     loginf << "COMPASS: shutdown: end";
 }
@@ -557,7 +573,12 @@ bool COMPASS::hideEvaluation() const
 
 bool COMPASS::isShutDown() const
 {
-    return shut_down_;
+    return (app_state_ == AppState::Shutdown);
+}
+
+bool COMPASS::isRunning() const
+{
+    return (app_state_ == AppState::Running);
 }
 
 bool COMPASS::expertMode() const
@@ -718,4 +739,3 @@ void COMPASS::addDBFileToList(const std::string filename)
         db_file_list_ = tmp_list;
     }
 }
-

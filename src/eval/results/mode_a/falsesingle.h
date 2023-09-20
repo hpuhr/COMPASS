@@ -18,38 +18,33 @@
 #ifndef EVALUATIONREQUIREMENTMODEAFALSERESULT_H
 #define EVALUATIONREQUIREMENTMODEAFALSERESULT_H
 
-#include "eval/results/single.h"
-#include "eval/requirement/mode_a/false.h"
-#include "eval/requirement/checkdetail.h"
+#include "eval/results/falsebase.h"
 
 namespace EvaluationRequirementResult
 {
 
-class SingleModeAFalse : public Single
+class SingleModeAFalse : public SingleFalseBase
 {
 public:
-    SingleModeAFalse(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer,
-            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_updates, int num_no_ref_pos, int num_no_ref, int num_pos_outside, int num_pos_inside,
-            int num_unknown, int num_correct, int num_false,
-            std::vector<EvaluationRequirement::CheckDetail> details);
+    SingleModeAFalse(const std::string& result_id, 
+                     std::shared_ptr<EvaluationRequirement::Base> requirement,
+                     const SectorLayer& sector_layer,
+                     unsigned int utn, 
+                     const EvaluationTargetData* target, 
+                     EvaluationManager& eval_man,
+                     const EvaluationDetails& details,
+                     int num_updates, 
+                     int num_no_ref_pos, 
+                     int num_no_ref, 
+                     int num_pos_outside, 
+                     int num_pos_inside,
+                     int num_unknown, 
+                     int num_correct, 
+                     int num_false);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
-
-    int numUpdates() const;
-    int numNoRefPos() const;
-    int numNoRefValue() const;
-    int numPosOutside() const;
-    int numPosInside() const;
-    int numUnknown() const;
-    int numCorrect() const;
-    int numFalse() const;
-
-    std::vector<EvaluationRequirement::CheckDetail>& details();
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -61,29 +56,16 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
+    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
 protected:
-    int num_updates_ {0};
-    int num_no_ref_pos_ {0};
-    int num_no_ref_val_ {0};
-    int num_pos_outside_ {0};
-    int num_pos_inside_ {0};
-    int num_unknown_ {0};
-    int num_correct_ {0};
-    int num_false_ {0};
-
-    bool has_p_false_ {false};
-    float p_false_{0};
-
-    std::vector<EvaluationRequirement::CheckDetail> details_;
-
     void updateProbabilities();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
     void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
+    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
 };
 
 }

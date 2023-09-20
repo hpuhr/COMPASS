@@ -29,7 +29,8 @@ namespace Time
 {
 extern const std::string QT_DATETIME_FORMAT;
 
-extern boost::posix_time::ptime fromString(std::string value);
+extern boost::posix_time::ptime fromString(const std::string& value);
+extern boost::posix_time::ptime fromString(const std::string& value, const std::string& facet);
 extern boost::posix_time::ptime fromLong(unsigned long value);
 extern long toLong(boost::posix_time::ptime value);
 extern std::string toString(boost::posix_time::ptime value, unsigned int partial_digits=3);

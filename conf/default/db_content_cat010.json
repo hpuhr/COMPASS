@@ -1,6 +1,7 @@
 {
     "parameters": {
         "db_table_name": "data_cat010",
+        "id": 10,
         "info": "",
         "name": "CAT010"
     },
@@ -799,6 +800,19 @@
                     "unit": ""
                 }
             },
+            "Variable64": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "mode_s_mb_data",
+                    "description": "From 250.Mode S MB Data.MB Data\n\n56-bit message conveying Mode S Comm B message data",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode S MB Data",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "Variable7": {
                 "parameters": {
                     "data_type_str": "UCHAR",
@@ -851,16 +865,16 @@
                     "unit": ""
                 }
             },
-            "Variableassociations0": {
+            "VariableUTN0": {
                 "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "associations",
-                    "description": "Associations set as JSON object",
+                    "data_type_str": "UINT",
+                    "db_column_name": "utn",
+                    "description": "Unique Target Number",
                     "dimension": "",
                     "is_key": false,
-                    "name": "Associations",
+                    "name": "UTN",
                     "representation_str": "STANDARD",
-                    "short_name": "Assoc",
+                    "short_name": "UTN",
                     "unit": ""
                 }
             },
@@ -905,7 +919,7 @@
             },
             "Variablerec_num0": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "ULONGINT",
                     "db_column_name": "record_number",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",

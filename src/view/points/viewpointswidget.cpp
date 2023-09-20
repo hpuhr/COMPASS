@@ -160,6 +160,7 @@ void ViewPointsWidget::loadViewPoints()
     loginf << "ViewPointsWidget: loadViewPoints";
 
     assert (table_model_);
+    table_model_->clearViewPoints();
     table_model_->loadViewPoints();
 
     assert (table_view_);

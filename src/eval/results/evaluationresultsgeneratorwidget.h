@@ -25,28 +25,35 @@ class QCheckBox;
 
 class EvaluationResultsGenerator;
 class EvaluationManager;
+class EvaluationManagerSettings;
 
 class EvaluationResultsGeneratorWidget : public QWidget
 {
     Q_OBJECT
 private slots:
     void toggleSplitResultsByMOPSSlot();
+    void toggleSplitResultsByMACMSSlot();
     void toggleShowAdsbInfoSlot();
+    void toggleShowOKJoinedSlot();
     void toggleSkipNoDataDetailsSlot();
 
     void resultDetailZoomEditSlot(QString value);
 
 public:
-    EvaluationResultsGeneratorWidget(EvaluationResultsGenerator& results_gen, EvaluationManager& eval_man);
+    EvaluationResultsGeneratorWidget(EvaluationResultsGenerator& results_gen,
+                                     EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
     virtual ~EvaluationResultsGeneratorWidget();
 
 protected:
     EvaluationResultsGenerator& results_gen_;
     EvaluationManager& eval_man_;
+    EvaluationManagerSettings& eval_settings_;
 
     QCheckBox* skip_no_data_details_check_ {nullptr};
     QCheckBox* split_results_by_mops_check_ {nullptr};
+    QCheckBox* split_results_by_mac_ms_check_ {nullptr};
     QCheckBox* show_adsb_info_check_ {nullptr};
+    QCheckBox* show_ok_joined_target_reports_check_ {nullptr};
 
     QLineEdit* result_detail_zoom_edit_{nullptr};
 };

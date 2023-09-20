@@ -20,47 +20,87 @@
 
 #include "eval/results/base.h"
 
+#include <vector>
+
+#include <boost/optional.hpp>
+
 namespace EvaluationRequirementResult
 {
-    using namespace std;
 
-    class Joined;
+using namespace std;
 
-    class Single : public Base
+class Joined;
+
+class Single : public Base
+{
+public:
+    Single(const std::string& type, 
+            const std::string& result_id,
+            std::shared_ptr<EvaluationRequirement::Base> requirement, 
+            const SectorLayer& sector_layer,
+            unsigned int utn, 
+            const EvaluationTargetData* target, 
+            EvaluationManager& eval_man,
+            const EvaluationDetails& details);
+    virtual ~Single();
+
+    virtual BaseType baseType() const override { return BaseType::Single; }
+
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
+
+    virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
+
+    unsigned int utn() const;
+    const EvaluationTargetData* target() const;
+
+    void updateUseFromTarget ();
+
+    std::unique_ptr<EvaluationDetails> generateDetails() const;
+
+    const static std::string tr_details_table_name_;
+    const static std::string target_table_name_;
+
+    virtual void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) = 0;
+
+protected:
+    enum AnnotationType
     {
-    public:
-        Single(const std::string& type, const std::string& result_id,
-               std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
-               unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man);
-
-        virtual bool isSingle() const override { return true; }
-        virtual bool isJoined() const override { return false; }
-
-        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
-
-        virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
-
-        unsigned int utn() const;
-        const EvaluationTargetData* target() const;
-
-        void updateUseFromTarget ();
-
-        const static std::string tr_details_table_name_;
-        const static std::string target_table_name_;
-
-    protected:
-        unsigned int utn_; // used to generate result
-        const EvaluationTargetData* target_; // used to generate result
-
-        bool result_usable_ {true}; // whether valid data exists, changed in subclass
-
-        std::string getTargetSectionID();
-        std::string getTargetRequirementSectionID();
-
-        virtual std::string getRequirementSectionID () override;
-
-        void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
+        TypeOk = 0,
+        TypeError,
+        TypeHighlight
     };
+
+    std::map<AnnotationType, std::string> annotation_type_names_;
+
+    unsigned int                utn_;    // used to generate result
+    const EvaluationTargetData* target_; // used to generate result
+
+    bool result_usable_ {true}; // whether valid data exists, changed in subclass
+
+    std::string getTargetSectionID();
+    std::string getTargetRequirementSectionID();
+
+    virtual std::string getRequirementSectionID () override;
+
+    void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
+//    void addAnnotationFeatures(nlohmann::json::object_t& viewable,
+//                               bool overview,
+//                               bool add_highlight = false) const;
+
+    void addAnnotationPos(nlohmann::json::object_t& viewable,
+                          const EvaluationDetail::Position& pos, 
+                          AnnotationType type) const;
+    void addAnnotationLine(nlohmann::json::object_t& viewable,
+                           const EvaluationDetail::Position& pos0, 
+                           const EvaluationDetail::Position& pos1, 
+                           AnnotationType type) const;
+
+    nlohmann::json& annotationPointCoords(nlohmann::json::object_t& viewable, AnnotationType type, bool overview=false) const;
+    nlohmann::json& annotationLineCoords(nlohmann::json::object_t& viewable, AnnotationType type, bool overview=false) const;
+    nlohmann::json& getOrCreateAnnotation(nlohmann::json::object_t& viewable, AnnotationType type, bool overview) const;
+    // creates if not existing
+};
 
 }
 

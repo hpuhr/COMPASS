@@ -30,6 +30,11 @@
     if (false) \
     log4cpp::Category::getRoot().debugStream()  // for improved performance
 
+namespace logger
+{
+    class EventLog;
+}
+
 /**
  * @brief Thread-safe logger
  *
@@ -37,10 +42,33 @@
  */
 class Logger : public Singleton
 {
+  public:
+    struct Event
+    {
+        bool consume()
+        {
+            if (!fresh)
+                return false;
+            fresh = false;
+            return true;
+        }
+
+        bool        fresh = true;
+        uint32_t    id;
+        int         timestamp;
+        std::string message;
+    };
+
+    typedef std::map<int, std::vector<Event>> Events;
+
+    const logger::EventLog* getEventLog() const;
+
   protected:
     static Logger* log_instance_;
     log4cpp::Appender* console_appender_;
     log4cpp::Appender* file_appender_;
+
+    logger::EventLog* event_log_ = nullptr;
 
     Logger();
 
@@ -51,7 +79,7 @@ class Logger : public Singleton
         return instance;
     }
 
-    void init(const std::string& log_config_filename);
+    void init(const std::string& log_config_filename, bool enable_event_log = false);
 
     virtual ~Logger();
 };

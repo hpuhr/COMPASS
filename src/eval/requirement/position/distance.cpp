@@ -20,7 +20,8 @@
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "sectorlayer.h"
 
 #include <ogr_spatialref.h>
@@ -39,7 +40,7 @@ PositionDistance::PositionDistance(
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         float threshold_value, COMPARISON_TYPE threshold_value_check_type,
         bool failed_values_of_interest)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
       threshold_value_(threshold_value), threshold_value_check_type_(threshold_value_check_type),
       failed_values_of_interest_(failed_values_of_interest)
 {
@@ -68,9 +69,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     logdbg << "EvaluationRequirementPositionDistance '" << name_ << "': evaluate: utn " << target_data.utn_
            << " threshold_value " << threshold_value_ << " threshold_value_check_type " << threshold_value_check_type_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     unsigned int num_pos {0};
     unsigned int num_no_ref {0};
@@ -80,7 +81,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
 
-    std::vector<EvaluationRequirement::PositionDetail> details;
+    typedef EvaluationRequirementResult::SinglePositionDistance Result;
+    typedef EvaluationDetail                                    Detail;
+    typedef Result::EvaluationDetails                           Details;
+    Details details;
 
     ptime timestamp;
 
@@ -91,14 +95,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
     std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
-    EvaluationTargetPosition tst_pos;
+    dbContent::TargetPosition tst_pos;
 
     double x_pos, y_pos;
     double distance;
 
     bool is_inside;
-    pair<EvaluationTargetPosition, bool> ret_pos;
-    EvaluationTargetPosition ref_pos;
+    //boost::optional<dbContent::TargetPosition> ret_pos;
+    boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
     bool comp_passed;
@@ -108,103 +112,109 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
     vector<double> values;
 
-    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
-    bool has_ground_bit;
-    bool ground_bit_set;
+    auto addDetail = [ & ] (const ptime& ts,
+                            const dbContent::TargetPosition& tst_pos,
+                            const boost::optional<dbContent::TargetPosition>& ref_pos,
+                            const QVariant& pos_inside,
+                            const QVariant& offset,
+                            const QVariant& check_passed,
+                            const QVariant& num_pos,
+                            const QVariant& num_no_ref,
+                            const QVariant& num_pos_inside,
+                            const QVariant& num_pos_outside,
+                            const QVariant& num_comp_passed,
+                            const QVariant& num_comp_failed,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::CheckPassed, check_passed)
+                                             .setValue(Result::DetailKey::NumPos, num_pos)
+                                             .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                                             .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                                             .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                                             .setValue(Result::DetailKey::NumCheckPassed, num_comp_passed)
+                                             .setValue(Result::DetailKey::NumCheckFailed, num_comp_failed)
+                                             .addPosition(ref_pos)
+                                             .generalComment(comment));
+    };
 
     for (const auto& tst_id : tst_data)
     {
         ++num_pos;
 
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPosForTime(timestamp);
+        tst_pos = target_data.tstChain().pos(tst_id);
 
         comp_passed = false;
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "No reference data"});
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_passed, num_comp_failed,
+                            "No reference data");
 
             ++num_no_ref;
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
+//        ref_pos = ret_pos.first;
+//        ok = ret_pos.second;
 
-        if (!ok)
+        if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "No reference position"});
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_passed, num_comp_failed,
+                            "No reference position");
 
             ++num_no_ref;
             continue;
         }
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
-
-        is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   true, ref_pos, // has_ref_pos, ref_pos
-                                   is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "Outside sector"});
+                addDetail(timestamp, tst_pos,
+                            ref_pos, // ref_pos
+                            is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_passed, num_comp_failed, 
+                            "Outside sector");
             ++num_pos_outside;
             continue;
         }
         ++num_pos_inside;
 
-        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+        local.SetStereographic(ref_pos->latitude_, ref_pos->longitude_, 1.0, 0.0, 0.0);
 
         ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-        if (in_appimage_) // inside appimage
-        {
-            x_pos = tst_pos.longitude_;
-            y_pos = tst_pos.latitude_;
-        }
-        else
-        {
-            x_pos = tst_pos.latitude_;
-            y_pos = tst_pos.longitude_;
-        }
+        x_pos = tst_pos.longitude_;
+        y_pos = tst_pos.latitude_;
 
         ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ok)
         {
-            details.push_back({timestamp, tst_pos,
-                               true, ref_pos, // has_ref_pos, ref_pos
-                               is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                               num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                               num_comp_failed, num_comp_passed,
-                               "Position transformation error"});
+            addDetail(timestamp, tst_pos,
+                        ref_pos, // ref_pos
+                        is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                        num_comp_passed, num_comp_failed, 
+                        "Position transformation error");
             ++num_pos_calc_errors;
             continue;
         }
@@ -213,12 +223,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
         if (std::isnan(distance) || std::isinf(distance))
         {
-            details.push_back({timestamp, tst_pos,
-                               true, ref_pos, // has_ref_pos, ref_pos
-                               is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                               num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                               num_comp_failed, num_comp_passed,
-                               "Distance Invalid"});
+            addDetail(timestamp, tst_pos,
+                        ref_pos, // ref_pos
+                        is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                        num_comp_passed, num_comp_failed, 
+                        "Distance Invalid");
             ++num_pos_calc_errors;
             continue;
         }
@@ -237,12 +247,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
             comment = "Failed";
         }
 
-        details.push_back({timestamp, tst_pos,
-                           true, ref_pos,
-                           is_inside, distance, comp_passed, // pos_inside, value, check_passed
-                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                           num_comp_failed, num_comp_passed,
-                           comment});
+        addDetail(timestamp, tst_pos,
+                    ref_pos,
+                    is_inside, distance, comp_passed, // pos_inside, value, check_passed
+                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                    num_comp_passed, num_comp_failed,
+                    comment);
 
         values.push_back(distance);
     }
@@ -264,15 +274,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
-    assert (num_distances == num_comp_failed+num_comp_passed);
+    assert (num_distances == num_comp_failed + num_comp_passed);
     assert (num_distances == values.size());
 
     //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_failed, num_comp_passed,
-                values, details);
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
+                values);
 }
 
 }

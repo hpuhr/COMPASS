@@ -25,7 +25,8 @@
 #include "dbcontent/dbcontentmanagerwidget.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-#include "dbcontent/target.h"
+#include "dbcontent/target/target.h"
+#include "dbcontent/target/targetlistwidget.h"
 #include "logger.h"
 #include "dbcontent/variable/metavariable.h"
 #include "datasourcemanager.h"
@@ -42,6 +43,7 @@
 #include "dbcontentdeletedbjob.h"
 #include "taskmanager.h"
 #include "asteriximporttask.h"
+#include "dbcontent_commands.h"
 
 #include "util/tbbhack.h"
 
@@ -68,12 +70,24 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     createSubConfigurables();
 
+    // check uniqueness of dbcontent ids
+    set<unsigned int> dbcont_ids;
+
+    for (auto& object_it : dbcontent_)
+    {
+        assert (object_it.second->id() < 256);
+        assert (dbcont_ids.count(object_it.second->id()) == 0);
+        dbcont_ids.insert(object_it.second->id());
+    }
+
     assert (label_generator_);
     label_generator_->checkLabelConfig(); // here because references meta variables
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
     // for signal about new data
     qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");
+
+    dbContent::init_dbcontent_commands();
 }
 
 DBContentManager::~DBContentManager()
@@ -110,12 +124,21 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
         assert (!label_generator_);
         label_generator_.reset(new dbContent::LabelGenerator(class_id, instance_id, *this));
     }
+    else if (class_id == "DBContentTargetModel")
+    {
+        assert (!target_model_);
+        target_model_.reset(new dbContent::TargetModel(class_id, instance_id, *this));
+    }
     else if (class_id == "DBContent")
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
-        loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name();
+        loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name()
+               << " id " << object->id();
         assert(!dbcontent_.count(object->name()));
+        assert(!dbcontent_ids_.count(object->id()));
+
         dbcontent_[object->name()] = object;
+        dbcontent_ids_[object->id()] = object;
     }
     else if (class_id == "MetaVariable")
     {
@@ -143,6 +166,12 @@ void DBContentManager::checkSubConfigurables()
     {
         generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
         assert (label_generator_);
+    }
+
+    if (!target_model_)
+    {
+        generateSubConfigurable("DBContentTargetModel", "DBContentTargetModel0");
+        assert (target_model_);
     }
 }
 
@@ -172,18 +201,19 @@ void DBContentManager::deleteDBContent(const std::string& dbcontent_name)
     emit dbObjectsChangedSignal();
 }
 
-void DBContentManager::deleteDBContent(boost::posix_time::ptime before_timestamp)
+void DBContentManager::deleteDBContentData(boost::posix_time::ptime before_timestamp)
 {
-    loginf << "DBContentManager: deleteDBContent";
+    loginf << "DBContentManager: deleteDBContentData";
 
     assert (!delete_job_);
 
-    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface(), before_timestamp);
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
+    delete_job_->setBeforeTimestamp(before_timestamp);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContentManager::deleteJobDoneSlot,
             Qt::QueuedConnection);
-    JobManager::instance().addDBJob(delete_job_);
 
+    JobManager::instance().addDBJob(delete_job_);
 }
 
 bool DBContentManager::hasData()
@@ -193,6 +223,27 @@ bool DBContentManager::hasData()
             return true;
 
     return false;
+}
+
+unsigned int DBContentManager::getMaxDBContentID()
+{
+    unsigned int ret = 0;
+
+    for (auto& object_it : dbcontent_)
+        ret = max(ret, object_it.second->id());
+
+    return ret;
+}
+
+bool DBContentManager::existsDBContentWithId (unsigned int id)
+{
+    return dbcontent_ids_.count(id);
+}
+
+const std::string& DBContentManager::dbContentWithId (unsigned int id)
+{
+    assert (dbcontent_ids_.count(id));
+    return dbcontent_ids_.at(id)->name();
 }
 
 bool DBContentManager::existsMetaVariable(const std::string& var_name)
@@ -360,7 +411,7 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
 void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data)
 {
-    loginf << "DBContentManager: addLoadedData";
+    logdbg << "DBContentManager: addLoadedData";
 
     // newest data batch has been finalized, ready to be added
 
@@ -375,19 +426,19 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
         if (data_.count(buf_it.first))
         {
-            loginf << "DBContentManager: addLoadedData: adding buffer dbo " << buf_it.first
+            logdbg << "DBContentManager: addLoadedData: adding buffer dbo " << buf_it.first
                    << " adding size " << buf_it.second->size() << " current size " << data_.at(buf_it.first)->size();
 
             data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
 
-            loginf << "DBContentManager: addLoadedData: new buffer dbo " << buf_it.first
+            logdbg << "DBContentManager: addLoadedData: new buffer dbo " << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
         else
         {
             data_[buf_it.first] = move(buf_it.second);
 
-            loginf << "DBContentManager: addLoadedData: created buffer dbo " << buf_it.first
+            logdbg << "DBContentManager: addLoadedData: created buffer dbo " << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
 
@@ -397,6 +448,9 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
     if (something_changed)
     {
         updateNumLoadedCounts();
+
+        logdbg << "DBContentManager: addLoadedData: emitting signal";
+
         emit loadedDataSignal(data_, false);
     }
 }
@@ -463,10 +517,9 @@ void DBContentManager::databaseOpenedSlot()
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
 
-    targets_ = COMPASS::instance().interface().loadTargets();
+    loadTargets();
 
     emit associationStatusChangedSignal();
-
 
     loginf << "DBContentManager: databaseOpenedSlot: done";
 }
@@ -487,7 +540,7 @@ void DBContentManager::databaseClosedSlot()
     for (auto& object : dbcontent_)
         object.second->databaseClosedSlot();
 
-    targets_.clear();
+    target_model_->clear();
 
     timestamp_min_.reset();
     timestamp_max_.reset();
@@ -498,45 +551,6 @@ void DBContentManager::databaseClosedSlot()
 
     associationStatusChangedSignal();
 }
-
-//void DBContentManager::databaseContentChangedSlot()
-//{
-//    loginf << "DBContentManager: databaseContentChangedSlot";
-
-//    // emit databaseContentChangedSignal();
-
-//    //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-//    //    loginf << "DBContentManager: databaseContentChangedSlot";
-
-//    //    if (COMPASS::instance().interface().hasProperty("associations_generated"))
-//    //    {
-//    //        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
-//    //        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
-
-//    //        has_associations_ =
-//    //                COMPASS::instance().interface().getProperty("associations_generated") == "1";
-//    //        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
-//    //        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
-//    //    }
-//    //    else
-//    //    {
-//    //        has_associations_ = false;
-//    //        associations_dbo_ = "";
-//    //        associations_ds_ = "";
-//    //    }
-
-//    //    for (auto& object : objects_)
-//    //        object.second->updateToDatabaseContent();
-
-//    //    QApplication::restoreOverrideCursor();
-
-//    if (load_widget_)
-//        load_widget_->update();
-
-//    //emit dbObjectsChangedSignal();
-
-//}
 
 void DBContentManager::loadingDone(DBContent& object)
 {
@@ -837,7 +851,7 @@ void DBContentManager::finishInserting()
 
         logdbg << "DBContentManager: finishInserting: deleting data before " << Time::toString(old_time);
 
-        deleteDBContent(old_time);
+        deleteDBContentData(old_time);
     }
 
     logdbg << "DBContentManager: finishInserting: clear old took "
@@ -973,11 +987,11 @@ void DBContentManager::addInsertedDataToChache()
         }
 
         // add assoc property if required
-        Variable& assoc_var = metaGetVariable(buf_it->first, DBContent::meta_var_associations_);
-        Property assoc_prop (assoc_var.dbColumnName(), assoc_var.dataType());
+        Variable& utn_var = metaGetVariable(buf_it->first, DBContent::meta_var_utn_);
+        Property utn_prop (utn_var.dbColumnName(), utn_var.dataType());
 
-        if (!buf_it->second->hasProperty(assoc_prop))
-            buf_it->second->addProperty(assoc_prop);
+        if (!buf_it->second->hasProperty(utn_prop))
+            buf_it->second->addProperty(utn_prop);
 
         // change db column names to dbo var names
         buf_it->second->transformVariables(read_set, true);
@@ -1141,7 +1155,7 @@ void DBContentManager::cutCachedData()
 
 void DBContentManager::updateNumLoadedCounts()
 {
-    loginf << "DBContentManager: updateNumLoadedCounts";
+    logdbg << "DBContentManager: updateNumLoadedCounts";
 
     // ds id->dbcont->line->cnt
     std::map<unsigned int, std::map<std::string,
@@ -1171,13 +1185,13 @@ void DBContentManager::updateNumLoadedCounts()
 }
 
 
-unsigned int DBContentManager::maxRecordNumber() const
+unsigned long DBContentManager::maxRecordNumber() const
 {
     assert (has_max_rec_num_);
     return max_rec_num_;
 }
 
-void DBContentManager::maxRecordNumber(unsigned int value)
+void DBContentManager::maxRecordNumber(unsigned long value)
 {
     logdbg << "DBContentManager: maxRecordNumber: " << value;
 
@@ -1304,40 +1318,85 @@ dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcon
     return metaVariable(meta_property.name()).getFor(dbcont_name);
 }
 
-bool DBContentManager::hasTargetsInfo()
+bool DBContentManager::hasTargetsInfo() const
 {
-    return targets_.size();
+    return target_model_->hasTargetsInfo();
 }
 
 void DBContentManager::clearTargetsInfo()
 {
-    targets_.clear();
-    COMPASS::instance().interface().clearTargetsTable();
+    target_model_->clearTargetsInfo();
 }
 
 bool DBContentManager::existsTarget(unsigned int utn)
 {
-    return targets_.count(utn);
+    return target_model_->existsTarget(utn);
 }
 
-void DBContentManager::createTarget(unsigned int utn)
+void DBContentManager::createNewTarget(unsigned int utn)
 {
-    assert (!existsTarget(utn));
-
-    targets_.emplace(utn, make_shared<dbContent::Target>(utn, nlohmann::json::object()));
-
-    assert (existsTarget(utn));
+    target_model_->createNewTarget(utn);
 }
 
-std::shared_ptr<dbContent::Target> DBContentManager::target(unsigned int utn)
+dbContent::Target& DBContentManager::target(unsigned int utn)
 {
     assert (existsTarget(utn));
-    return targets_.at(utn);
+    return target_model_->target(utn);
+}
+
+void DBContentManager::removeDBContentFromTargets(const std::string& dbcont_name)
+{
+    target_model_->removeDBContentFromTargets(dbcont_name);
+    saveTargets();
+}
+
+void DBContentManager::loadTargets()
+{
+    loginf << "DBContentManager: loadTargets";
+
+    target_model_->loadFromDB();
+
+    if (target_list_widget_)
+        target_list_widget_->resizeColumnsToContents();
 }
 
 void DBContentManager::saveTargets()
 {
-    COMPASS::instance().interface().saveTargets(targets_);
+    loginf << "DBContentManager: saveTargets";
+
+    target_model_->saveToDB();
+}
+
+nlohmann::json DBContentManager::targetsInfoAsJSON() const
+{
+    assert (hasAssociations());
+    assert (hasTargetsInfo());
+
+    return target_model_->asJSON();
+}
+
+nlohmann::json DBContentManager::targetInfoAsJSON(unsigned int utn) const
+{
+    assert (hasAssociations());
+    assert (hasTargetsInfo());
+
+    return target_model_->targetAsJSON(utn);
+}
+
+nlohmann::json DBContentManager::targetStatsAsJSON() const
+{
+    assert (hasAssociations());
+    assert (hasTargetsInfo());
+
+    return target_model_->targetStatsAsJSON();
+}
+
+nlohmann::json DBContentManager::utnsAsJSON() const
+{
+    assert (hasAssociations());
+    assert (hasTargetsInfo());
+
+    return target_model_->utnsAsJSON();
 }
 
 unsigned int DBContentManager::maxLiveDataAgeCache() const
@@ -1356,6 +1415,23 @@ void DBContentManager::resetToStartupConfiguration()
         generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
         assert (label_generator_);
     }
+}
+
+dbContent::TargetListWidget* DBContentManager::targetListWidget()
+{
+    if (!target_list_widget_)
+    {
+        assert (target_model_);
+        target_list_widget_.reset (new dbContent::TargetListWidget(*target_model_, *this));
+    }
+
+    return target_list_widget_.get();
+}
+
+void DBContentManager::resizeTargetListWidget()
+{
+    if (target_list_widget_)
+        target_list_widget_->resizeColumnsToContents();
 }
 
 //void DBContentManager::updateMetaVarNames()
@@ -1425,8 +1501,8 @@ void DBContentManager::addStandardVariables(std::string dbcont_name, dbContent::
     assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_associations_));
-    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_associations_));
+    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_utn_));
+    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_utn_));
 }
 
 MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
@@ -1442,3 +1518,66 @@ MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
     assert(meta_cfg_dialog_);
     return meta_cfg_dialog_.get();
 }
+
+void DBContentManager::setViewableDataConfig (const nlohmann::json::object_t& data)
+{
+    viewable_data_cfg_.reset(new ViewableDataConfig(data));
+
+    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+}
+
+bool DBContentManager::utnUseEval (unsigned int utn)
+{
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    return target_model_->target(utn).useInEval();
+}
+
+void DBContentManager::utnUseEval (unsigned int utn, bool value)
+{
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    target_model_->setUseTargetData(utn, value);
+
+    // eval man
+    //    data_.setUseTargetData(utn, value);
+    //    updateResultsToUseChangeOf(utn);
+}
+
+std::string DBContentManager::utnComment (unsigned int utn)
+{
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    return target_model_->target(utn).comment();
+}
+
+void DBContentManager::utnComment (unsigned int utn, std::string value)
+{
+    loginf << "DBContentManager: utnComment: utn " << utn << " comment '" << value << "'";
+
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    target_model_->setTargetDataComment(utn, value);
+}
+
+void DBContentManager::autoFilterUTNS()
+{
+    assert (target_model_);
+    target_model_->setUseByFilter();
+
+    //    data_.setUseAllTargetData(true);
+    //    data_.clearComments();
+    //    data_.setUseByFilter();
+}
+
+void DBContentManager::showUTN (unsigned int utn)
+{
+    loginf << "DBContentManager: showUTN: utn " << utn;
+
+    nlohmann::json data;
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
+
+    loginf << "DBContentManager: showUTN: showing";
+    setViewableDataConfig(data);
+}
+
