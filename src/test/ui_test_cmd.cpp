@@ -191,6 +191,11 @@ void RTCommandUIGet::assignVariables_impl(const VariablesMap& variables)
  *************************************************************************/
 
 /**
+ * Inject UI events into UI objects, e.g.
+ * uiinject mouse(left,click,50,40)  => inject a mouse click at (50,40)
+ *          mouse(right,click,-1,-1) => inject a mouse click at the middle of the widget
+ *          mouse(left,click,50%,50%) => inject a mouse click at the middle of the widget
+ *          mouse(left,rect,0,0,100,100) => press the mouse at (0,0), move to (100,100) and release the mouse
  */
 bool RTCommandUIInject::run_impl()
 {

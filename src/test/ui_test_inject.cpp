@@ -37,6 +37,25 @@ bool injectUIEvent(QWidget* parent,
     if (w.first != rtcommand::FindObjectErrCode::NoError)
         return false;
 
+    auto splitEvent = [ & ] (QString& evt_type, QStringList& params, const QString& str)
+    {
+        int idx = str.indexOf("(", 0);
+        if (idx < 1)
+            return false;
+
+        evt_type = str.mid(0, idx);
+
+        auto param_str = str.mid(idx);
+        if (!param_str.startsWith("(") || !param_str.endsWith(")"))
+            return false;
+
+        param_str = param_str.mid(1, param_str.count() - 2);
+
+        params = param_str.split(",");
+
+        return true;
+    };
+
     auto mouseButtonFromString = [ & ] (const QString& str)
     {
         if (str == "left")
@@ -78,13 +97,12 @@ bool injectUIEvent(QWidget* parent,
         if (s.endsWith("%"))
         {
             percent = true;
-            s = s.chopped(1);
+            s.chop(1);
         }
 
         if (s.isEmpty())
             return c;
 
-        
         bool ok;
         double v = s.toDouble(&ok);
 
@@ -97,23 +115,21 @@ bool injectUIEvent(QWidget* parent,
         return c;
     };
 
-    if (event.startsWith("mouse"))
+    QString evt_type;
+    QStringList params;
+    if (!splitEvent(evt_type, params, event))
+        return false;
+
+    if (evt_type == "mouse")
     {
-        auto param_str = QString(event).remove("mouse");
-
-        if (!param_str.startsWith("(") || !param_str.endsWith(")"))
-            return false;
-
-        param_str = param_str.mid(1, param_str.count() - 2);
-
-        auto params = param_str.split(",");
         if (params.size() < 2)
             return false;
 
         auto button = mouseButtonFromString(params[ 0 ]);
         auto action = mouseActionFromString(params[ 1 ]);
 
-        if (button == Qt::NoButton || action == MouseAction::NoAction)
+        if (button == Qt::NoButton || 
+            action == MouseAction::NoAction)
             return false;
 
         if (action == MouseAction::Click)
@@ -144,15 +160,17 @@ bool injectUIEvent(QWidget* parent,
             return false;
         }
     }
-    else if (event.endsWith("wheel"))
+    else if (evt_type == "wheel")
     {
         //@TODO
         return false;
     }
-    else if (event.endsWith("keys"))
+    else if (evt_type == "keys")
     {
-        //@TODO
-        return false;
+        if (params.size() != 1)
+            return false;
+
+        return injectKeySequenceEvent(w.second, "", QKeySequence(params[ 0 ]));
     }
 
     //unknown event

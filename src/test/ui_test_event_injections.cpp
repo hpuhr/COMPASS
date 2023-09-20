@@ -166,7 +166,7 @@ bool injectKeyCmdEvent(QWidget* root,
     
     auto injectionMsg = [ & ] (const std::string& obj_type) 
     {
-        loginf << "Injecting command";
+        loginf << "Injecting key into " << obj_type;
     };
  
     if (obj.second->isWidgetType())
@@ -178,6 +178,46 @@ bool injectKeyCmdEvent(QWidget* root,
     {
         injectionMsg("window");
         QTest::keyClick(dynamic_cast<QWindow*>(obj.second), key, modifier, delay);
+    }
+
+    return true;
+}
+
+/**
+*/
+bool injectKeySequenceEvent(QWidget* root,
+                            const QString& obj_name,
+                            const QKeySequence& keys,
+                            int delay)
+{
+    auto obj = findObject(root, obj_name);
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        logObjectError("injectKeySequenceEvent", obj_name, obj.first);
+        return false;
+    }
+    if (!obj.second->isWidgetType() && !obj.second->isWindowType())
+    {
+        logObjectError("injectKeySequenceEvent", obj_name, rtcommand::FindObjectErrCode::WrongType);
+        return false;
+    }
+    
+    auto injectionMsg = [ & ] (const std::string& obj_type) 
+    {
+        loginf << "Injecting key sequence into " << obj_type;
+    };
+ 
+    if (obj.second->isWidgetType())
+    {
+        injectionMsg("widget");
+        //@TODO: keySequence not available in appimage qt
+        //QTest::keySequence(dynamic_cast<QWidget*>(obj.second), keys);
+    }
+    else //window
+    {
+        injectionMsg("window");
+        //@TODO: keySequence not available in appimage qt
+        //QTest::keySequence(dynamic_cast<QWindow*>(obj.second), keys);
     }
 
     return true;
