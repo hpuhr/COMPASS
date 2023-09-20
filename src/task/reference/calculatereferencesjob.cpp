@@ -646,6 +646,8 @@ void CalculateReferencesJob::calculateReferences()
 
 void CalculateReferencesJob::writeReferences()
 {
+    loginf << "CalculateReferencesJob: writeReferences";
+
     string dbcontent_name = "RefTraj";
 
     const CalculateReferencesTaskSettings& settings = task_.settings();

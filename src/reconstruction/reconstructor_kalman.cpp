@@ -697,7 +697,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(st
 
     if (measurements.size() < min_chain_size_)
     {
-        logerr << data_info << ": Not enough measurements";
+        logwrn << "ReconstructorKalman: reconstruct_impl: " << data_info << ": not enough measurements";
         return {};
     }
 
@@ -719,7 +719,8 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(st
         if (dt <= base_config_.min_dt)
         {
             if (verbosity() > 0)
-                loginf << data_info << ": Skipping very small timestep of " << dt << " @ mm=" << i << " t=" << mm.t;
+                loginf << "ReconstructorKalman: reconstruct_impl: " << data_info
+                       << ": Skipping very small timestep of " << dt << " @ mm=" << i << " t=" << mm.t;
             
             continue;
         }
@@ -732,7 +733,8 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(st
         if (!state.has_value())
         {
             //@TODO: what to do?
-            logerr << data_info << ": Kalman step failed @ mm=" << i << " t=" << mm.t;
+            logwrn << "ReconstructorKalman: reconstruct_impl: "
+                   << data_info << ": Kalman step failed @ mm=" << i << " t=" << mm.t;
             return {};
         }
 
@@ -754,7 +756,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(st
     auto result = finalize();
     if (!result.has_value() || result->size() < min_chain_size_)
     {
-        logerr << data_info << ": Finalize failed";
+        logwrn << "ReconstructorKalman: reconstruct_impl: " << data_info << ": finalize failed";
         return {};
     }
 
