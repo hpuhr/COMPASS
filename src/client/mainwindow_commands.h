@@ -205,6 +205,18 @@ protected:
     DECLARE_RTCOMMAND_NOOPTIONS
 };
 
+// calc ARTAS assoc
+struct RTCommandCalculateARTASAssociations : public rtcommand::RTCommand
+{
+    RTCommandCalculateARTASAssociations();
+
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(calculate_artas_tr_usage, "associate target reports based on ARTAS usage")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
+
 // calc ref
 struct RTCommandCalculateReferences : public rtcommand::RTCommand
 {

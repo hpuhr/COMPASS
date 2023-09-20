@@ -187,7 +187,7 @@ void ViewPointsImportTask::run()
     DBInterface& db_interface = COMPASS::instance().interface();
 
     // check and clear existing ones
-    if(db_interface.existsViewPointsTable() && db_interface.viewPoints().size() && show_done_summary_)
+    if(db_interface.existsViewPointsTable() && db_interface.viewPoints().size() && allow_user_interactions_)
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(
@@ -290,7 +290,7 @@ void ViewPointsImportTask::run()
                 asterix_importer_task.importFilename(filename);
 
                 assert(asterix_importer_task.canRun());
-                asterix_importer_task.showDoneSummary(false);
+                asterix_importer_task.allowUserInteractions(false);
 
                 //widget->runCurrentTaskSlot();
                 loginf << "ViewPointsImportTask: import: running task";

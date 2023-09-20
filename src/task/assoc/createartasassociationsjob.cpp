@@ -88,7 +88,7 @@ void CreateARTASAssociationsJob::run()
     // create associations for sensors
     createSensorAssociations();
 
-    if (missing_hashes_cnt_ || dubious_associations_cnt_)
+    if (task_.allowUserInteractions() && (missing_hashes_cnt_ || dubious_associations_cnt_))
     {
         stringstream ss;
         ss << "There are " << missing_hashes_cnt_ << " missing hashes and "

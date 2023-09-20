@@ -275,7 +275,7 @@ bool CalculateReferencesTask::writeReferences() const
 
 bool CalculateReferencesTask::closeDialogAfterFinishing() const
 {
-    return (!show_done_summary_ || !utns_.empty());
+    return (!allow_user_interactions_ || !utns_.empty());
 }
 
 void CalculateReferencesTask::runUTN(unsigned int utn)

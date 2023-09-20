@@ -897,7 +897,7 @@ void JSONImportTask::updateMsgBox()
 {
     logdbg << "JSONImporterTask: updateMsgBox";
 
-    if (all_done_ && !show_done_summary_)
+    if (all_done_ && !allow_user_interactions_)
     {
         if (msg_box_)
             msg_box_->close();

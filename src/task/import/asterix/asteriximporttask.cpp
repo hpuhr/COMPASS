@@ -1480,7 +1480,7 @@ void ASTERIXImportTask::checkAllDone()
 
         logdbg << "ASTERIXImportTask: checkAllDone: status logging";
 
-        if (!show_done_summary_)
+        if (!allow_user_interactions_)
         {
             logdbg << "ASTERIXImportTask: checkAllDone: deleting status widget";
         }

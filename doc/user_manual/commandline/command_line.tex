@@ -68,6 +68,8 @@ Allowed options:
                                         '/data/sectors.json'
   --calculate_radar_plot_positions      calculate radar plot positions
   --associate_data                      associate target reports
+  --calculate_artas_tr_usage            associate target reports based on ARTAS
+                                        usage  
   --load_data                           load data after start
   --export_view_points_report arg       export view points report after start 
                                         with given filename, e.g. 
@@ -225,6 +227,10 @@ After a database was opened, adds the sectors defined in supplied filename using
 \subsection{--associate\_data}
 
 After a database with imported content exists, create target report associations using the task described in \nameref{sec:ui_associate_tr}.
+
+\subsection{--calculate\_artas\_tr\_usage}
+
+After a database with imported content exists, target report association can be calculated based on ARTAS tracks using the task described in \nameref{sec:ui_associate_tr_artas}.
 
 \subsection{--load\_data}
 

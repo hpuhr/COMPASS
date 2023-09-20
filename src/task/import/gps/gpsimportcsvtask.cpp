@@ -666,7 +666,7 @@ void GPSImportCSVTask::insertDoneSlot()
     msg_box.setText("Import of "+QString::number(gps_positions_.size())+" GPS fixes done.");
     msg_box.setStandardButtons(QMessageBox::Ok);
 
-    if (show_done_summary_)
+    if (allow_user_interactions_)
         msg_box.exec();
 
     emit doneSignal(name_);

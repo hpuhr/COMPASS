@@ -392,7 +392,7 @@ void CreateARTASAssociationsTask::createDoneSlot()
 
     status_dialog_->setDone();
 
-    if (!show_done_summary_)
+    if (!allow_user_interactions_)
         status_dialog_->close();
 
     create_job_ = nullptr;

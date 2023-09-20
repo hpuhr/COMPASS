@@ -11,6 +11,7 @@
 #include "dbcontentmanager.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createassociationstask.h"
+#include "createartasassociationstask.h"
 #include "calculatereferencestask.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
@@ -50,6 +51,7 @@ REGISTER_RTCOMMAND(main_window::RTCommandImportGPSTrail)
 REGISTER_RTCOMMAND(main_window::RTCommandImportSectorsJSON)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateRadarPlotPositions)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateAssociations)
+REGISTER_RTCOMMAND(main_window::RTCommandCalculateARTASAssociations)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateReferences)
 REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
 REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
@@ -390,7 +392,7 @@ bool RTCommandImportViewPointsFile::run_impl()
         return false;
     }
 
-    vp_import_task.showDoneSummary(false);
+    vp_import_task.allowUserInteractions(false);
 
     vp_import_task.run();
     assert (vp_import_task.done());
@@ -544,7 +546,7 @@ bool RTCommandImportASTERIXFile::run_impl()
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     import_task.run(false); // no test
 
@@ -658,7 +660,7 @@ bool RTCommandImportASTERIXNetworkStart::run_impl()
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     import_task.run(false); // no test
 
@@ -723,7 +725,7 @@ bool RTCommandImportASTERIXNetworkStop::run_impl()
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
     assert (main_window);
@@ -791,7 +793,7 @@ bool RTCommandImportJSONFile::run_impl()
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     import_task.run();
 
@@ -863,7 +865,7 @@ bool RTCommandImportGPSTrail::run_impl()
         return false;
     }
 
-    import_task.showDoneSummary(false);
+    import_task.allowUserInteractions(false);
 
     import_task.run();
 
@@ -967,7 +969,7 @@ bool RTCommandCalculateRadarPlotPositions::run_impl()
         return false;
     }
 
-    task.showDoneSummary(false);
+    task.allowUserInteractions(false);
     task.run();
 
     // if ok
@@ -1003,13 +1005,49 @@ bool RTCommandCalculateAssociations::run_impl()
         return false;
     }
 
-    task.showDoneSummary(false);
+    task.allowUserInteractions(false);
     task.run();
 
     // if ok
     return true;
 }
 
+
+// associate ARTAS target reports
+RTCommandCalculateARTASAssociations::RTCommandCalculateARTASAssociations()
+    : rtcommand::RTCommand()
+{
+    condition.setSignal("compass.taskmanager.createartasassociationstask.doneSignal(std::string)", -1); // think about max duration
+}
+
+bool RTCommandCalculateARTASAssociations::run_impl()
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    CreateARTASAssociationsTask& task = COMPASS::instance().taskManager().createArtasAssociationsTask();
+
+    if(!task.canRun())
+    {
+        setResultMessage("Calculate ARTAS associations task can not be run");
+        return false;
+    }
+
+    task.allowUserInteractions(false);
+    task.run();
+
+    // if ok
+    return true;
+}
 
 // calc ref
 RTCommandCalculateReferences::RTCommandCalculateReferences()
@@ -1040,7 +1078,7 @@ bool RTCommandCalculateReferences::run_impl()
         return false;
     }
 
-    task.showDoneSummary(false);
+    task.allowUserInteractions(false);
     task.run();
 
     // if ok

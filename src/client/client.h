@@ -71,6 +71,7 @@ private:
 
     bool calculate_radar_plot_positions_ {false};
     bool associate_data_ {false};
+    bool calculate_artas_tr_usage_ {false};
 
     bool calculate_references_ {false};
 

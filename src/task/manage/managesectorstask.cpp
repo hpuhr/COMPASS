@@ -239,7 +239,7 @@ void ManageSectorsTask::importFile (const std::string& layer_name, bool exclude,
     msgBox.setText(QString("Import of ")+QString::number(found_sectors_num_)+" sectors done");
     msgBox.setIcon(QMessageBox::Information);
 
-    if (show_done_summary_)
+    if (allow_user_interactions_)
         msgBox.exec();
 
     loginf << "ManageSectorsTask: importFile: done";

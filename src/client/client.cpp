@@ -143,6 +143,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
              "calculate radar plot positions")
             ("associate_data", po::bool_switch(&associate_data_), "associate target reports")
+            ("calculate_artas_tr_usage", po::bool_switch(&calculate_artas_tr_usage_), "associate target reports based on ARTAS usage")
+            ("calculate_references", po::bool_switch(&calculate_references_),
+             "calculate references from ADS-B and Tracker data")
             ("calculate_references", po::bool_switch(&calculate_references_),
              "calculate references from ADS-B and Tracker data")
             ("load_data", po::bool_switch(&load_data_), "load data after start")
@@ -350,6 +353,9 @@ void Client::run ()
 
     if (associate_data_)
         rt_man.addCommand("associate_data");
+
+    if (calculate_artas_tr_usage_)
+        rt_man.addCommand("calculate_artas_tr_usage");
 
     if (calculate_references_)
         rt_man.addCommand("calculate_references");

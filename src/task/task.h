@@ -67,9 +67,9 @@ class Task : public QObject
 
     std::string tooltip() const { return tooltip_; }
 
-    bool showDoneSummary() const { return show_done_summary_; }
+    bool allowUserInteractions() const { return allow_user_interactions_; }
 
-    void showDoneSummary(bool value) { show_done_summary_ = value; }
+    void allowUserInteractions(bool value) { allow_user_interactions_ = value; }
 
   protected:
     std::string name_;
@@ -78,7 +78,7 @@ class Task : public QObject
 //    bool expert_only_{false};
     bool stopped_ {false};
     bool done_{false};
-    bool show_done_summary_{true};
+    bool allow_user_interactions_{true};
 
     std::string tooltip_;
 
