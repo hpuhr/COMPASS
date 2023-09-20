@@ -604,6 +604,11 @@ std::pair<bool, float> Chain::estimateAltitude (const boost::posix_time::ptime& 
 
     if (found_prev && found_after)
     {
+        if (timestamp_after == timestamp_prev || timestamp_prev == timestamp)
+        { // all same time
+            return {true, altitude_prev};
+        }
+
         if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
         {
             logerr << "Chain: estimateRefAltitude: ts_prev " << Time::toString(timestamp_prev)
