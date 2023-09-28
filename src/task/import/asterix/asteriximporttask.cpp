@@ -782,9 +782,7 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot()
         error_message_ = decode_job_->errorMessage();
 
         QMessageBox msgBox;
-        msgBox.setText(
-                    ("Decoding error: " + error_message_ + "\n\nPlease check the decoder settings.")
-                    .c_str());
+        msgBox.setText(("Decoding error: " + error_message_ + "\n\nPlease check the decoder settings.").c_str());
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
     }
@@ -1297,10 +1295,13 @@ void ASTERIXImportTask::updateFileProgressDialog(bool force)
 
     if (decode_job_)
     {
-        file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
+        rec_text = "\n\nRecords/s: Unknown";
+        rem_text = "Remaining: Unknown";
 
-        rec_text = "\n\nRecords/s: "+to_string((unsigned int) decode_job_->getRecordsPerSecond());
-        rem_text = "Remaining: "+String::timeStringFromDouble(decode_job_->getRemainingTime() + 1.0, false);
+        //file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
+
+        //rec_text = "\n\nRecords/s: "+to_string((unsigned int) decode_job_->getRecordsPerSecond());
+        //rem_text = "Remaining: "+String::timeStringFromDouble(decode_job_->getRemainingTime() + 1.0, false);
     }
     else
     {
