@@ -46,12 +46,7 @@ class ASTERIXDecodeJob : public Job
     ASTERIXDecodeJob(ASTERIXImportTask& task, const ASTERIXImportTaskSettings& settings, ASTERIXPostProcess& post_process);
     virtual ~ASTERIXDecodeJob();
 
-//    void setDecodeFile (const std::string& filename,
-//                        const std::string& framing);
 
-//    void setDecodeUDPStreams (
-//            const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines);
-//    // ds_id -> (ip,port)
 
     virtual void run() override;
     virtual void setObsolete() override;
@@ -78,19 +73,13 @@ class ASTERIXDecodeJob : public Job
 private:
     ASTERIXImportTask& task_;
     const ASTERIXImportTaskSettings& settings_;
-    //bool test_{false};
     ASTERIXPostProcess& post_process_;
 
     bool decode_file_ {false};
-//    std::string filename_;
-//    unsigned int file_line_id_;
-//    std::string framing_;
 
     bool decode_udp_streams_ {false};
     std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> ds_lines_;
     // ds_id -> line str ->(ip, port)
-
-    //volatile bool pause_{false};
 
     boost::posix_time::ptime start_time_;
 

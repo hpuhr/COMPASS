@@ -160,9 +160,6 @@ class ASTERIXImportTask : public Task, public Configurable
     std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { assert (jasterix_); return jasterix_; }
     void refreshjASTERIX();
 
-//    const std::string& currentFraming() const;
-//    void currentFraming(const std::string& current_framing);
-
     bool hasConfiguratonFor(unsigned int category);
     bool decodeCategory(unsigned int category);
     void decodeCategory(unsigned int category, bool decode);
@@ -175,66 +172,7 @@ class ASTERIXImportTask : public Task, public Configurable
 
     std::shared_ptr<ASTERIXJSONParsingSchema> schema() const;
 
-//    bool debug() const;
-//    void debug(bool debug);
-
-    // override
-
-//    bool overrideTodActive() const;
-//    void overrideTodActive(bool value);
-
-//    float overrideTodOffset() const;
-//    void overrideTodOffset(float value);
-
-    // filter
-//    bool filterTodActive() const;
-//    void filterTodActive(bool value);
-
-//    float filterTodMin() const;
-//    void filterTodMin(float value);
-
-//    float filterTodMax() const;
-//    void filterTodMax(float value);
-
-//    bool filterPositionActive() const;
-//    void filterPositionActive(bool value);
-
-//    float filterLatitudeMin() const;
-//    void filterLatitudeMin(float value);
-
-//    float filterLatitudeMax() const;
-//    void filterLatitudeMax(float value);
-
-//    float filterLongitudeMin() const;
-//    void filterLongitudeMin(float value);
-
-//    float filterLongitudeMax() const;
-//    void filterLongitudeMax(float value);
-
-//    bool filterModeCActive() const;
-//    void filterModeCActive(bool value);
-
-//    float filterModeCMin() const;
-//    void filterModeCMin(float value);
-
-//    float filterModeCMax() const;
-//    void filterModeCMax(float value);
-
-//    unsigned int fileLineID() const;
-//    void fileLineID(unsigned int value);
-
-//    const boost::posix_time::ptime &date() const;
-//    void date(const boost::posix_time::ptime& date);
-
-//    void importAsterixNetworkIgnoreFutureTimestamp (bool value);
-
     unsigned int numPacketsInProcessing() const;
-
-//    unsigned int maxNetworkLines() const;
-//    void maxNetworkLines(unsigned int value);
-
-//    bool ignoreTimeJumps() const;
-//    void ignoreTimeJumps(bool value);
 
     ASTERIXImportTaskSettings& settings();
 

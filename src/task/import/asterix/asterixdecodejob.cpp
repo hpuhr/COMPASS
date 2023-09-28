@@ -45,7 +45,6 @@ ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, const ASTERIXImportT
                                    ASTERIXPostProcess& post_process)
     : Job("ASTERIXDecodeJob"),
       task_(task), settings_(settings),
-      //test_(test),
       post_process_(post_process), receive_semaphore_((unsigned int) 0)
 {
     logdbg << "ASTERIXDecodeJob: ctor";
@@ -81,44 +80,6 @@ ASTERIXDecodeJob::~ASTERIXDecodeJob()
     loginf << "ASTERIXDecodeJob: dtor";
     assert (done_);
 }
-
-//void ASTERIXDecodeJob::setDecodeFile (const std::string& filename,
-//                                      const std::string& framing)
-//{
-//    loginf << "ASTERIXDecodeJob: setDecodeFile: file '" << filename << "' framing '" << framing << "'";
-
-//    settings_.currentFilename() = filename;
-//    file_line_id_ = task_.fileLineID();
-//    framing_ = framing;
-
-//    assert (Files::fileExists(filename));
-//    file_size_ = Files::fileSize(filename);
-
-//    decode_file_ = true;
-//    assert (!decode_udp_streams_);
-//}
-
-
-//void ASTERIXDecodeJob::setDecodeUDPStreams (
-//        const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines)
-//{
-//    ds_lines_ = ds_lines;
-
-//    loginf << "ASTERIXDecodeJob: setDecodeUDPStreams: streams:";
-
-//    for (auto& ds_it : ds_lines_)
-//    {
-//        loginf << ds_it.first << ":";
-
-//        for (auto& line_it : ds_it.second)
-//            loginf << "\t" << line_it.first << " " << line_it.second->asString();
-//    }
-
-//    decode_udp_streams_ = true;
-//    assert (!decode_file_);
-
-//    framing_ = ""; // only netto content
-//}
 
 void ASTERIXDecodeJob::run()
 {
@@ -554,27 +515,8 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
         JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
     }
 
-    //    while (!obsolete_ && pause_)  // block decoder until unpaused
-    //        QThread::msleep(1);
-
     if (data->at("data_blocks").size())
     {
-//        if (extracted_data_)
-//        {
-//            // add to existing data
-//            assert(extracted_data_->is_object());
-//            assert(extracted_data_->contains("data_blocks"));
-//            assert(extracted_data_->at("data_blocks").is_array());
-//            assert(tmp_extracted_data->at("data_blocks").is_array());
-
-//            if (tmp_extracted_data->at("data_blocks").size())
-//                extracted_data_->at("data_blocks").insert(extracted_data_->at("data_blocks").end(),
-//                                                          tmp_extracted_data->at("data_blocks").begin(),
-//                                                          tmp_extracted_data->at("data_blocks").end());
-//        }
-//        else
-//            extracted_data_ = std::move(tmp_extracted_data);
-
         extracted_data_.emplace_back(std::move(data));
     }
 

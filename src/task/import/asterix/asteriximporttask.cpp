@@ -17,21 +17,16 @@
 
 #include "asteriximporttask.h"
 #include "asterixcategoryconfig.h"
-//#include "asteriximporttaskwidget.h"
 #include "compass.h"
 #include "buffer.h"
 #include "configurable.h"
-//#include "createartasassociationstask.h"
 #include "dbinterface.h"
-//#include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-//#include "dbcontent/variable/variable.h"
 #include "datasourcemanager.h"
 #include "files.h"
 #include "jobmanager.h"
 #include "logger.h"
 #include "asteriximporttaskdialog.h"
-//#include "radarplotpositioncalculatortask.h"
 #include "stringconv.h"
 #include "system.h"
 #include "taskmanager.h"
@@ -103,19 +98,9 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     jASTERIX::frame_chunk_size = unlimited_chunk_size;
     jASTERIX::data_block_chunk_size = unlimited_chunk_size;
 
-    jasterix_ = std::make_shared<jASTERIX::jASTERIX>(jasterix_definition_path, false,
-                                                     settings_.debug_jasterix_, true);
+    refreshjASTERIX(); // needed for available framings check etc.
 
     createSubConfigurables();
-
-//    std::vector<std::string> framings = jasterix_->framings();
-//    if (std::find(framings.begin(), framings.end(), settings_.current_file_framing_) == framings.end())
-//    {
-//        loginf << "ASTERIXImportTask: constructor: resetting to no framing";
-//        settings_.current_file_framing_ = "";
-//    }
-
-    refreshjASTERIX(); // needed for available framings check etc.
 
     logdbg << "ASTERIXImportTask: constructor: thread " << QThread::currentThreadId()
            << " main " << QApplication::instance()->thread()->currentThreadId();
@@ -263,7 +248,6 @@ void ASTERIXImportTask::asterixDecoderConfig(const std::string& asterix_decoder_
             category_configs_.at(cat).spf(spf_ed);
         }
     }
-
 }
 
 void ASTERIXImportTask::checkSubConfigurables()
@@ -377,13 +361,6 @@ bool ASTERIXImportTask::isImportNetwork()
 {
     return !settings_.import_file_;
 }
-
-//const std::string& ASTERIXImportTask::currentFraming() const { return current_file_framing_; }
-
-//void ASTERIXImportTask::currentFraming(const std::string& current_framing)
-//{
-//    current_file_framing_ = current_framing;
-//}
 
 bool ASTERIXImportTask::hasConfiguratonFor(unsigned int category)
 {
@@ -533,212 +510,10 @@ void ASTERIXImportTask::spfEditionForCategory(unsigned int category, const std::
 
 std::shared_ptr<ASTERIXJSONParsingSchema> ASTERIXImportTask::schema() const { return schema_; }
 
-//bool ASTERIXImportTask::debug() const { return settings_.debug_jasterix_; }
-
-//void ASTERIXImportTask::debug(bool debug_jasterix)
-//{
-//    settings_.debug_jasterix_ = debug_jasterix;
-
-//    assert(jasterix_);
-//    jasterix_->setDebug(settings_.debug_jasterix_);
-
-//    loginf << "ASTERIXImportTask: debug " << debug_jasterix_;
-//}
-
-//bool ASTERIXImportTask::overrideTodActive() const { return override_tod_active_; }
-
-//void ASTERIXImportTask::overrideTodActive(bool value)
-//{
-//    loginf << "ASTERIXImportTask: overrideActive: value " << value;
-
-//    override_tod_active_ = value;
-//}
-
-//float ASTERIXImportTask::overrideTodOffset() const { return override_tod_offset_; }
-
-//void ASTERIXImportTask::overrideTodOffset(float value)
-//{
-//    loginf << "ASTERIXImportTask: overrideTodOffset: value " << value;
-
-//    override_tod_offset_ = value;
-//}
-
-//bool ASTERIXImportTask::filterTodActive() const
-//{
-//    return filter_tod_active_;
-//}
-
-//void ASTERIXImportTask::filterTodActive(bool value)
-//{
-//    filter_tod_active_ = value;
-//}
-
-
-//float ASTERIXImportTask::filterTodMin() const
-//{
-//    return filter_tod_min_;
-//}
-
-//void ASTERIXImportTask::filterTodMin(float value)
-//{
-//    filter_tod_min_ = value;
-//}
-
-
-//float ASTERIXImportTask::filterTodMax() const
-//{
-//    return filter_tod_max_;
-//}
-
-//void ASTERIXImportTask::filterTodMax(float value)
-//{
-//    filter_tod_max_ = value;
-//}
-
-
-//bool ASTERIXImportTask::filterPositionActive() const
-//{
-//    return filter_position_active_;
-//}
-
-//void ASTERIXImportTask::filterPositionActive(bool value)
-//{
-//    filter_position_active_ = value;
-//}
-
-
-//float ASTERIXImportTask::filterLatitudeMin() const
-//{
-//    return filter_latitude_min_;
-//}
-
-//void ASTERIXImportTask::filterLatitudeMin(float value)
-//{
-//    filter_latitude_min_ = value;
-//}
-
-
-//float ASTERIXImportTask::filterLatitudeMax() const
-//{
-//    return filter_latitude_max_;
-//}
-
-//void ASTERIXImportTask::filterLatitudeMax(float value)
-//{
-//    filter_latitude_max_ = value;
-//}
-
-
-//float ASTERIXImportTask::filterLongitudeMin() const
-//{
-//    return filter_longitude_min_;
-//}
-
-//void ASTERIXImportTask::filterLongitudeMin(float value)
-//{
-//    filter_longitude_min_ = value;
-//}
-
-
-//float ASTERIXImportTask::filterLongitudeMax() const
-//{
-//    return filter_longitude_max_;
-//}
-
-//void ASTERIXImportTask::filterLongitudeMax(float value)
-//{
-//    filter_longitude_max_ = value;
-//}
-
-
-//bool ASTERIXImportTask::filterModeCActive() const
-//{
-//    return filter_modec_active_;
-//}
-
-//void ASTERIXImportTask::filterModeCActive(bool value)
-//{
-//    filter_modec_active_ = value;
-//}
-
-
-//float ASTERIXImportTask::filterModeCMin() const
-//{
-//    return filter_modec_min_;
-//}
-
-//void ASTERIXImportTask::filterModeCMin(float value)
-//{
-//    filter_modec_min_ = value;
-//}
-
-
-//float ASTERIXImportTask::filterModeCMax() const
-//{
-//    return filter_modec_max_;
-//}
-
-//void ASTERIXImportTask::filterModeCMax(float value)
-//{
-//    filter_modec_max_ = value;
-//}
-
-
-//unsigned int ASTERIXImportTask::fileLineID() const
-//{
-//    return file_line_id_;
-//}
-
-//void ASTERIXImportTask::fileLineID(unsigned int value)
-//{
-//    loginf << "ASTERIXImportTask: fileLineID: value " << value;
-
-//    file_line_id_ = value;
-//}
-
-//const boost::posix_time::ptime &ASTERIXImportTask::date() const
-//{
-//    return date_;
-//}
-
-//void ASTERIXImportTask::date(const boost::posix_time::ptime& date)
-//{
-//    date_ = date;
-//}
-
-//void ASTERIXImportTask::importAsterixNetworkIgnoreFutureTimestamp (bool value)
-//{
-//    loginf << "ASTERIXImportTask: importAsterixNetworkIgnoreFutureTimestamp: value " << value;
-//    network_ignore_future_ts_ = value;
-//}
-
 unsigned int ASTERIXImportTask::numPacketsInProcessing() const
 {
     return num_packets_in_processing_;
 }
-
-//unsigned int ASTERIXImportTask::maxNetworkLines() const
-//{
-//    return max_network_lines_;
-//}
-
-//void ASTERIXImportTask::maxNetworkLines(unsigned int value)
-//{
-//    loginf << "ASTERIXImportTask: maxNetworkLines: value " << value;
-//    assert (value > 0 && value <= 4);
-
-//    max_network_lines_ = value;
-//}
-
-//bool ASTERIXImportTask::ignoreTimeJumps() const
-//{
-//    return ignore_time_jumps_;
-//}
-
-//void ASTERIXImportTask::ignoreTimeJumps(bool value)
-//{
-//    ignore_time_jumps_ = value;
-//}
 
 ASTERIXImportTaskSettings& ASTERIXImportTask::settings()
 {
@@ -808,6 +583,7 @@ void ASTERIXImportTask::stop()
     while(json_map_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for map job to finish";
+
         if (QCoreApplication::hasPendingEvents())
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
@@ -816,21 +592,11 @@ void ASTERIXImportTask::stop()
     while(postprocess_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for post-process job to finish";
+
         if (QCoreApplication::hasPendingEvents())
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
     }
-
-    //    while (insertData)
-    //    {
-    //        loginf << "ASTERIXImportTask: stop: waiting for insert to finish";
-    //        if (QCoreApplication::hasPendingEvents())
-    //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-    //        QThread::msleep(1);
-    //    }
-
-    //    done_ = true; // set by checkAllDone
-    //    running_ = false;
 
     loginf << "ASTERIXImportTask: stop done";
 }
@@ -956,17 +722,6 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         COMPASS::instance().dataSourceManager().createNetworkDBDataSources();
 
     decode_job_ = make_shared<ASTERIXDecodeJob>(*this, settings_, post_process_);
-
-//    if (settings_.import_file_)
-//        decode_job_->setDecodeFile(settings_.current_filename_, settings_.current_file_framing_); // do file import
-//    else
-//    {
-//        COMPASS::instance().dataSourceManager().createNetworkDBDataSources();
-//        decode_job_->setDecodeUDPStreams(COMPASS::instance().dataSourceManager().getNetworkLines()); // record from network
-//    }
-
-
-
 
     connect(decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
             &ASTERIXImportTask::decodeASTERIXObsoleteSlot, Qt::QueuedConnection);
