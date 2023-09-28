@@ -141,6 +141,8 @@ void DBDataSourceWidget::recreateWidgets()
             grid_layout_->addWidget(content_labels_.at(ds_content_name), row, 1);
             grid_layout_->addWidget(loaded_cnt_labels_.at(ds_content_name), row, 2);
             grid_layout_->addWidget(total_cnt_labels_.at(ds_content_name), row, 3);
+
+            ++row;
         }
     }
 
