@@ -21,7 +21,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "compass.h"
-#include "mainwindow.h"
+#include "datasourcemanager.h""
 #include "util/files.h"
 #include "udpreceiver.h"
 
@@ -41,14 +41,39 @@ using namespace nlohmann;
 using namespace Utils;
 using namespace std;
 
-ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, bool test,
+ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, const ASTERIXImportTaskSettings& settings,
                                    ASTERIXPostProcess& post_process)
     : Job("ASTERIXDecodeJob"),
-      task_(task),
-      test_(test),
+      task_(task), settings_(settings),
+      //test_(test),
       post_process_(post_process), receive_semaphore_((unsigned int) 0)
 {
     logdbg << "ASTERIXDecodeJob: ctor";
+
+
+    if (settings_.importFile())
+    {
+        assert (Files::fileExists(settings_.currentFilename()));
+        file_size_ = Files::fileSize(settings_.currentFilename());
+
+        decode_file_ = true;
+        assert (!decode_udp_streams_);
+    }
+    else
+    {
+        ds_lines_ = COMPASS::instance().dataSourceManager().getNetworkLines();
+
+        for (auto& ds_it : ds_lines_)
+        {
+            loginf << ds_it.first << ":";
+
+            for (auto& line_it : ds_it.second)
+                loginf << "\t" << line_it.first << " " << line_it.second->asString();
+        }
+
+        decode_udp_streams_ = true;
+        assert (!decode_file_);
+    }
 }
 
 ASTERIXDecodeJob::~ASTERIXDecodeJob()
@@ -57,43 +82,43 @@ ASTERIXDecodeJob::~ASTERIXDecodeJob()
     assert (done_);
 }
 
-void ASTERIXDecodeJob::setDecodeFile (const std::string& filename,
-                                      const std::string& framing)
-{
-    loginf << "ASTERIXDecodeJob: setDecodeFile: file '" << filename << "' framing '" << framing << "'";
+//void ASTERIXDecodeJob::setDecodeFile (const std::string& filename,
+//                                      const std::string& framing)
+//{
+//    loginf << "ASTERIXDecodeJob: setDecodeFile: file '" << filename << "' framing '" << framing << "'";
 
-    filename_ = filename;
-    file_line_id_ = task_.fileLineID();
-    framing_ = framing;
+//    settings_.currentFilename() = filename;
+//    file_line_id_ = task_.fileLineID();
+//    framing_ = framing;
 
-    assert (Files::fileExists(filename));
-    file_size_ = Files::fileSize(filename);
+//    assert (Files::fileExists(filename));
+//    file_size_ = Files::fileSize(filename);
 
-    decode_file_ = true;
-    assert (!decode_udp_streams_);
-}
+//    decode_file_ = true;
+//    assert (!decode_udp_streams_);
+//}
 
 
-void ASTERIXDecodeJob::setDecodeUDPStreams (
-        const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines)
-{
-    ds_lines_ = ds_lines;
+//void ASTERIXDecodeJob::setDecodeUDPStreams (
+//        const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines)
+//{
+//    ds_lines_ = ds_lines;
 
-    loginf << "ASTERIXDecodeJob: setDecodeUDPStreams: streams:";
+//    loginf << "ASTERIXDecodeJob: setDecodeUDPStreams: streams:";
 
-    for (auto& ds_it : ds_lines_)
-    {
-        loginf << ds_it.first << ":";
+//    for (auto& ds_it : ds_lines_)
+//    {
+//        loginf << ds_it.first << ":";
 
-        for (auto& line_it : ds_it.second)
-            loginf << "\t" << line_it.first << " " << line_it.second->asString();
-    }
+//        for (auto& line_it : ds_it.second)
+//            loginf << "\t" << line_it.first << " " << line_it.second->asString();
+//    }
 
-    decode_udp_streams_ = true;
-    assert (!decode_file_);
+//    decode_udp_streams_ = true;
+//    assert (!decode_file_);
 
-    framing_ = ""; // only netto content
-}
+//    framing_ = ""; // only netto content
+//}
 
 void ASTERIXDecodeJob::run()
 {
@@ -133,21 +158,22 @@ void ASTERIXDecodeJob::setObsolete()
 
 void ASTERIXDecodeJob::doFileDecoding()
 {
-    loginf << "ASTERIXDecodeJob: doFileDecoding: file '" << filename_ << "' framing '" << framing_ << "'";
+    loginf << "ASTERIXDecodeJob: doFileDecoding: file '" << settings_.currentFilename()
+           << "' framing '" << settings_.current_file_framing_ << "'";
 
     assert (decode_file_);
 
     auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
             size_t num_records, size_t numErrors) {
-        this->fileJasterixCallback(std::move(data), this->file_line_id_, num_frames, num_records, numErrors);
+        this->fileJasterixCallback(std::move(data), settings_.file_line_id_, num_frames, num_records, numErrors);
     };
 
     try
     {
-        if (framing_ == "")
-            task_.jASTERIX()->decodeFile(filename_, callback);
+        if (settings_.current_file_framing_ == "")
+            task_.jASTERIX()->decodeFile(settings_.currentFilename(), callback);
         else
-            task_.jASTERIX()->decodeFile(filename_, framing_, callback);
+            task_.jASTERIX()->decodeFile(settings_.currentFilename(), settings_.current_file_framing_, callback);
     }
     catch (std::exception& e)
     {
@@ -167,7 +193,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     vector<unique_ptr<UDPReceiver>> udp_receivers;
 
-    int max_lines = task_.maxNetworkLines();
+    int max_lines = settings_.max_network_lines_;
 
     loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: max lines " << max_lines;
 
@@ -368,7 +394,7 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     max_index_ = 0;
 
-    if (framing_ == "")
+    if (settings_.current_file_framing_ == "")
     {
         assert(extracted_data_.back()->contains("data_blocks"));
         assert(extracted_data_.back()->at("data_blocks").is_array());
@@ -498,7 +524,7 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
 
     max_index_ = 0;
 
-    assert (framing_ == "");
+    assert (settings_.current_file_framing_ == "");
     assert(data->contains("data_blocks"));
     assert(data->at("data_blocks").is_array());
 

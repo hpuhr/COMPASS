@@ -505,12 +505,12 @@ bool RTCommandImportASTERIXFile::run_impl()
         if (line_id_.size())
         {
             unsigned int file_line = String::lineFromStr(line_id_);
-            import_task.fileLineID(file_line);
+            import_task.settings().file_line_id_ = file_line;
         }
 
         if (date_str_.size())
         {
-            import_task.date(Time::fromDateString(date_str_));
+            import_task.settings().date_ = Time::fromDateString(date_str_);
         }
 
         if (time_offset_str_.size())
@@ -520,8 +520,8 @@ bool RTCommandImportASTERIXFile::run_impl()
             double time_offset = String::timeFromString(time_offset_str_, &ok);
             assert (ok); // was checked in valid
 
-            import_task.overrideTodActive(true);
-            import_task.overrideTodOffset(time_offset);
+            import_task.settings().override_tod_active_ = true;
+            import_task.settings().override_tod_offset_ = time_offset;
         }
 
         if (ignore_time_jumps_)
@@ -591,6 +591,183 @@ void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variab
     RTCOMMAND_CHECK_VAR(variables, "ignore_time_jumps", ignore_time_jumps_)
 }
 
+// import asterix files
+
+RTCommandImportASTERIXFiles::RTCommandImportASTERIXFiles()
+    : rtcommand::RTCommand()
+{
+    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal(std::string)", -1); // think about max duration
+}
+
+rtcommand::IsValid RTCommandImportASTERIXFiles::valid() const
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filenames_.size(), "Filenames empty")
+
+    for (const auto& filename : String::split(filenames_, ';'))
+        CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename), "File '"+filename+"' does not exist")
+
+    if (framing_.size()) // ’none’, ’ioss’, ’ioss_seq’, ’rff’
+    {
+        CHECK_RTCOMMAND_INVALID_CONDITION(
+                    !(framing_ == "none" || framing_ == "ioss" || framing_ == "ioss_seq" || framing_ == "rff"),
+                    string("Framing '")+framing_+"' does not exist")
+    }
+
+    if (line_id_.size())
+    {
+        CHECK_RTCOMMAND_INVALID_CONDITION(
+                    !(line_id_ == "L1" || line_id_ == "L2" || line_id_ == "L3" || line_id_ == "L4"),
+                    "Line '"+line_id_+"' does not exist")
+    }
+
+    if (date_str_.size())
+    {
+        boost::posix_time::ptime date = Time::fromDateString(date_str_);
+        CHECK_RTCOMMAND_INVALID_CONDITION(date.is_not_a_date_time(), "Given date '"+date_str_+"' invalid")
+    }
+
+    if (time_offset_str_.size())
+    {
+        bool ok {true};
+
+        String::timeFromString(time_offset_str_, &ok);
+
+        CHECK_RTCOMMAND_INVALID_CONDITION(!ok, "Given time offset '"+time_offset_str_+"' invalid")
+    }
+
+    return RTCommand::valid();
+}
+
+bool RTCommandImportASTERIXFiles::run_impl()
+{
+    if (!filenames_.size())
+    {
+        setResultMessage("Filenames empty");
+        return false;
+    }
+
+    for (const auto& filename : String::split(filenames_, ';'))
+    {
+        if (!Files::fileExists(filename))
+        {
+            setResultMessage("File '"+filename+"' does not exist");
+            return false;
+        }
+    }
+
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    try
+    {
+        if (framing_.size())
+        {
+            if (framing_ == "none")
+                import_task.asterixFileFraming("");
+            else
+                import_task.asterixFileFraming(framing_);
+        }
+
+        if (line_id_.size())
+        {
+            unsigned int file_line = String::lineFromStr(line_id_);
+            import_task.settings().file_line_id_ = file_line;
+        }
+
+        if (date_str_.size())
+        {
+            import_task.settings().date_ = Time::fromDateString(date_str_);
+        }
+
+        if (time_offset_str_.size())
+        {
+            bool ok {true};
+
+            double time_offset = String::timeFromString(time_offset_str_, &ok);
+            assert (ok); // was checked in valid
+
+            import_task.settings().override_tod_active_ = true;
+            import_task.settings().override_tod_offset_ = time_offset;
+        }
+
+        if (ignore_time_jumps_)
+        {
+
+        }
+    }
+    catch (exception& e)
+    {
+        logerr << "RTCommandImportASTERIXFiles: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
+        return false;
+    }
+
+    assert (filenames_.size());
+
+    import_task.importFilename(filenames_);
+
+    if (!import_task.canRun())
+    {
+        setResultMessage("ASTERIX task can not be run"); // should never happen, checked before
+        return false;
+    }
+
+    import_task.allowUserInteractions(false);
+
+    import_task.run(false); // no test
+
+    // handle errors
+
+    // if shitty
+    //setResultMessage("VP error case 3");
+    //return false;
+
+    // if ok
+    return true;
+}
+
+void RTCommandImportASTERIXFiles::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filenames", po::value<std::string>()->required(), "given filenames, e.g. '/data/file1.ff;/data/file2.ff'");
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("framing,f", po::value<std::string>()->default_value(""),
+         "imports ASTERIX file with given  ASTERIX framing, e.g. ’none’, ’ioss’, ’ioss_seq’, ’rff’");
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("line,l", po::value<std::string>()->default_value(""), "imports ASTERIX file with given line e.g. ’L2’");
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("date,d", po::value<std::string>()->default_value(""),
+         "imports ASTERIX file with given date, in YYYY-MM-DD format e.g. ’2020-04-20’");
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("time_offset,t", po::value<std::string>()->default_value(""),
+         "imports ASTERIX file with given Time of Day override, in HH:MM:SS.ZZZ’");
+    ADD_RTCOMMAND_OPTIONS(options)("ignore_time_jumps,i", "ignore 24h time jumps");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filenames", 1) // give position
+}
+
+void RTCommandImportASTERIXFiles::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filenames", std::string, filenames_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "framing", std::string, framing_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "line", std::string, line_id_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "date", std::string, date_str_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "time_offset", std::string, time_offset_str_)
+    RTCOMMAND_CHECK_VAR(variables, "ignore_time_jumps", ignore_time_jumps_)
+}
+
 // import asterix network
 
 RTCommandImportASTERIXNetworkStart::RTCommandImportASTERIXNetworkStart()
@@ -638,12 +815,12 @@ bool RTCommandImportASTERIXNetworkStart::run_impl()
             double time_offset = String::timeFromString(time_offset_str_, &ok);
             assert (ok); // was checked in valid
 
-            import_task.overrideTodActive(true);
-            import_task.overrideTodOffset(time_offset);
+            import_task.settings().override_tod_active_ = true;
+            import_task.settings().override_tod_offset_ = time_offset;
         }
 
         if (max_lines_ != -1)
-            import_task.maxNetworkLines(max_lines_);
+            import_task.settings().max_network_lines_ = max_lines_;
     }
     catch (exception& e)
     {

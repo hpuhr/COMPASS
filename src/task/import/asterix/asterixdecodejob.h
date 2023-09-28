@@ -30,6 +30,7 @@
 #include <boost/thread/mutex.hpp>
 
 class ASTERIXImportTask;
+class ASTERIXImportTaskSettings;
 class ASTERIXPostProcess;
 
 const unsigned int MAX_UDP_READ_SIZE=1024*1024;
@@ -42,15 +43,15 @@ class ASTERIXDecodeJob : public Job
     void decodedASTERIXSignal();
 
   public:
-    ASTERIXDecodeJob(ASTERIXImportTask& task, bool test, ASTERIXPostProcess& post_process);
+    ASTERIXDecodeJob(ASTERIXImportTask& task, const ASTERIXImportTaskSettings& settings, ASTERIXPostProcess& post_process);
     virtual ~ASTERIXDecodeJob();
 
-    void setDecodeFile (const std::string& filename,
-                        const std::string& framing);
+//    void setDecodeFile (const std::string& filename,
+//                        const std::string& framing);
 
-    void setDecodeUDPStreams (
-            const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines);
-    // ds_id -> (ip,port)
+//    void setDecodeUDPStreams (
+//            const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines);
+//    // ds_id -> (ip,port)
 
     virtual void run() override;
     virtual void setObsolete() override;
@@ -58,9 +59,6 @@ class ASTERIXDecodeJob : public Job
     size_t numFrames() const;
     size_t numRecords() const;
     size_t numErrors() const;
-
-//    void pause() { pause_ = true; }
-//    void unpause() { pause_ = false; }
 
     bool hasData() { return extracted_data_.size();}
 
@@ -79,13 +77,14 @@ class ASTERIXDecodeJob : public Job
 
 private:
     ASTERIXImportTask& task_;
-    bool test_{false};
+    const ASTERIXImportTaskSettings& settings_;
+    //bool test_{false};
     ASTERIXPostProcess& post_process_;
 
     bool decode_file_ {false};
-    std::string filename_;
-    unsigned int file_line_id_;
-    std::string framing_;
+//    std::string filename_;
+//    unsigned int file_line_id_;
+//    std::string framing_;
 
     bool decode_udp_streams_ {false};
     std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> ds_lines_;

@@ -95,7 +95,7 @@ void ASTERIXImportTaskWidget::addMainTab()
 
             //loginf << "UGA " << Time::toDateString(task_.date());
 
-            QDate date = QDate::fromString(Time::toDateString(task_.date()).c_str(), "yyyy-MM-dd");
+            QDate date = QDate::fromString(Time::toDateString(task_.settings().date_).c_str(), "yyyy-MM-dd");
             //loginf << "UGA2 " << date.toString().toStdString();
 
             date_edit->setDate(date);
@@ -118,7 +118,7 @@ void ASTERIXImportTaskWidget::addMainTab()
     // final stuff
     {
         debug_check_ = new QCheckBox("Debug in Console");
-        debug_check_->setChecked(task_.debug());
+        debug_check_->setChecked(task_.settings().debug_jasterix_);
         connect(debug_check_, &QCheckBox::clicked, this,
                 &ASTERIXImportTaskWidget::debugChangedSlot);
         main_tab_layout->addWidget(debug_check_);
@@ -369,7 +369,7 @@ void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 
     assert (line_id > 0 && line_id <= 4);
 
-    task_.fileLineID(line_id-1);
+    task_.settings().file_line_id_ = line_id-1;
 }
 
 void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)
@@ -378,7 +378,7 @@ void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)
 
     loginf << "ASTERIXImportTaskWidget: dateChangedSlot: " << tmp;
 
-    task_.date(Time::fromDateString(tmp));
+    task_.settings().date_ = Time::fromDateString(tmp);
 }
 
 void ASTERIXImportTaskWidget::updateParserBox()
@@ -402,7 +402,7 @@ void ASTERIXImportTaskWidget::debugChangedSlot()
     QCheckBox* box = dynamic_cast<QCheckBox*>(sender());
     assert(box);
 
-    task_.debug(box->checkState() == Qt::Checked);
+    task_.settings().debug_jasterix_ = box->checkState() == Qt::Checked;
 }
 
 //void ASTERIXImportTaskWidget::runStarted()

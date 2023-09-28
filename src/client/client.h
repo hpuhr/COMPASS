@@ -50,6 +50,7 @@ private:
     std::string import_data_sources_filename_;
 
     std::string import_asterix_filename_;
+    std::string import_asterix_filenames_;
     std::string import_asterix_file_line_;
     std::string import_asterix_date_;
     std::string import_asterix_file_time_offset_;

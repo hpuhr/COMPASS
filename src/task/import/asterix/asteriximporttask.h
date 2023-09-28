@@ -49,6 +49,59 @@ namespace jASTERIX
 class jASTERIX;
 }
 
+class ASTERIXImportTaskSettings
+{
+public:
+    // registered
+    bool debug_jasterix_;
+    nlohmann::json file_list_;
+    std::string current_file_framing_;
+
+    unsigned int num_packets_overload_ {60};
+
+    float override_tod_offset_{0};
+    float filter_tod_min_{0};
+    float filter_tod_max_{0};
+
+    double filter_latitude_min_{0};
+    double filter_latitude_max_{0};
+    double filter_longitude_min_{0};
+    double filter_longitude_max_{0};
+
+    float filter_modec_min_{0};
+    float filter_modec_max_{0};
+
+    // unregistered, for passing on
+
+    unsigned int file_line_id_ {0};
+    boost::posix_time::ptime date_;
+
+    unsigned int max_network_lines_ {4};
+
+    bool test_{false};
+
+    bool override_tod_active_{false};
+
+    bool ignore_time_jumps_{false};
+    bool network_ignore_future_ts_ {false};
+
+    bool filter_tod_active_{false};
+    bool filter_position_active_{false};
+    bool filter_modec_active_{false};
+
+    bool importFile() const { return import_file_; }
+
+    std::string currentFilename() const { return current_filename_; }
+
+private:
+    friend class ASTERIXImportTask;
+
+    bool import_file_ {false}; // false = network, true file
+
+    std::string current_filename_;
+
+};
+
 class ASTERIXImportTask : public Task, public Configurable
 {
     Q_OBJECT
@@ -99,17 +152,16 @@ class ASTERIXImportTask : public Task, public Configurable
     void clearFileList ();
 
     void importFilename(const std::string& filename);
-    const std::string& importFilename() { return current_filename_; }
+    const std::string& importFilename() { return settings_.current_filename_; }
 
     void importNetwork();
     bool isImportNetwork();
 
-    std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { return jasterix_; }
+    std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { assert (jasterix_); return jasterix_; }
     void refreshjASTERIX();
 
-    const std::string& currentFraming() const;
-
-    void currentFraming(const std::string& current_framing);
+//    const std::string& currentFraming() const;
+//    void currentFraming(const std::string& current_framing);
 
     bool hasConfiguratonFor(unsigned int category);
     bool decodeCategory(unsigned int category);
@@ -123,107 +175,78 @@ class ASTERIXImportTask : public Task, public Configurable
 
     std::shared_ptr<ASTERIXJSONParsingSchema> schema() const;
 
-    bool debug() const;
-    void debug(bool debug);
+//    bool debug() const;
+//    void debug(bool debug);
 
     // override
 
-    bool overrideTodActive() const;
-    void overrideTodActive(bool value);
+//    bool overrideTodActive() const;
+//    void overrideTodActive(bool value);
 
-    float overrideTodOffset() const;
-    void overrideTodOffset(float value);
+//    float overrideTodOffset() const;
+//    void overrideTodOffset(float value);
 
     // filter
-    bool filterTodActive() const;
-    void filterTodActive(bool value);
+//    bool filterTodActive() const;
+//    void filterTodActive(bool value);
 
-    float filterTodMin() const;
-    void filterTodMin(float value);
+//    float filterTodMin() const;
+//    void filterTodMin(float value);
 
-    float filterTodMax() const;
-    void filterTodMax(float value);
+//    float filterTodMax() const;
+//    void filterTodMax(float value);
 
-    bool filterPositionActive() const;
-    void filterPositionActive(bool value);
+//    bool filterPositionActive() const;
+//    void filterPositionActive(bool value);
 
-    float filterLatitudeMin() const;
-    void filterLatitudeMin(float value);
+//    float filterLatitudeMin() const;
+//    void filterLatitudeMin(float value);
 
-    float filterLatitudeMax() const;
-    void filterLatitudeMax(float value);
+//    float filterLatitudeMax() const;
+//    void filterLatitudeMax(float value);
 
-    float filterLongitudeMin() const;
-    void filterLongitudeMin(float value);
+//    float filterLongitudeMin() const;
+//    void filterLongitudeMin(float value);
 
-    float filterLongitudeMax() const;
-    void filterLongitudeMax(float value);
+//    float filterLongitudeMax() const;
+//    void filterLongitudeMax(float value);
 
-    bool filterModeCActive() const;
-    void filterModeCActive(bool value);
+//    bool filterModeCActive() const;
+//    void filterModeCActive(bool value);
 
-    float filterModeCMin() const;
-    void filterModeCMin(float value);
+//    float filterModeCMin() const;
+//    void filterModeCMin(float value);
 
-    float filterModeCMax() const;
-    void filterModeCMax(float value);
+//    float filterModeCMax() const;
+//    void filterModeCMax(float value);
 
-    unsigned int fileLineID() const;
-    void fileLineID(unsigned int value);
+//    unsigned int fileLineID() const;
+//    void fileLineID(unsigned int value);
 
-    const boost::posix_time::ptime &date() const;
-    void date(const boost::posix_time::ptime& date);
+//    const boost::posix_time::ptime &date() const;
+//    void date(const boost::posix_time::ptime& date);
 
-    void importAsterixNetworkIgnoreFutureTimestamp (bool value);
+//    void importAsterixNetworkIgnoreFutureTimestamp (bool value);
 
     unsigned int numPacketsInProcessing() const;
 
-    unsigned int maxNetworkLines() const;
-    void maxNetworkLines(unsigned int value);
+//    unsigned int maxNetworkLines() const;
+//    void maxNetworkLines(unsigned int value);
 
-    bool ignoreTimeJumps() const;
-    void ignoreTimeJumps(bool value);
+//    bool ignoreTimeJumps() const;
+//    void ignoreTimeJumps(bool value);
+
+    ASTERIXImportTaskSettings& settings();
 
 protected:
-    bool debug_jasterix_;
+
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
 
-    bool import_file_ {false}; // false = network, true file
-
-    nlohmann::json file_list_;
-    std::string current_filename_;
-    std::string current_file_framing_;
-    unsigned int file_line_id_ {0};
-    boost::posix_time::ptime date_;
-
-    unsigned int max_network_lines_ {4};
-
-    bool test_{false};
-
-    bool override_tod_active_{false};
-    float override_tod_offset_{0};
-    bool ignore_time_jumps_{false};
-
-    bool filter_tod_active_{false};
-    float filter_tod_min_{0};
-    float filter_tod_max_{0};
-
-    bool filter_position_active_{false};
-    float filter_latitude_min_{0};
-    float filter_latitude_max_{0};
-    float filter_longitude_min_{0};
-    float filter_longitude_max_{0};
-
-    bool filter_modec_active_{false};
-    float filter_modec_min_{0};
-    float filter_modec_max_{0};
+    ASTERIXImportTaskSettings settings_;
 
     bool running_ {false};
 
-    bool network_ignore_future_ts_ {false};
-
-    unsigned int num_packets_overload_ {60};
     unsigned int num_packets_in_processing_{0};
     unsigned int num_packets_total_{0};
 
