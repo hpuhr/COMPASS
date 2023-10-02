@@ -1309,6 +1309,6 @@ void ASTERIXImportTask::updateFileProgressDialog(bool force)
     }
     else
     {
-        file_progress_dialog_->setLabelText("Starting decoding...");
+        file_progress_dialog_->setLabelText("Please wait...");
     }
 }

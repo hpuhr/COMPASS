@@ -128,8 +128,6 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
         post_process_.postProcess(category, record);
     };
 
-    //max_index_ = 0;
-
     if (settings_.current_file_framing_ == "")
     {
         assert(extracted_data_.back()->contains("data_blocks"));
@@ -149,8 +147,6 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
             assert (data_block.contains("content"));
             assert(data_block.at("content").is_object());
-            //assert (data_block.at("content").contains("index"));
-            //max_index_ = data_block.at("content").at("index");
 
             if (category == 1)
                 checkCAT001SacSics(data_block);
@@ -173,10 +169,6 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
                 continue;
 
             assert(frame.at("content").is_object());
-
-            assert(frame.at("content").is_object());
-            //assert (frame.at("content").contains("index"));
-            //max_index_ = frame.at("content").at("index");
 
             if (!frame.at("content").contains("data_blocks"))  // frame with errors
                 continue;
@@ -202,10 +194,6 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
             }
         }
     }
-
-//    if (decode_file_ && file_size_)
-//        logdbg << "ASTERIXDecodeJob: fileJasterixCallback: max_index " << max_index_
-//               << " perc " <<  String::percentToString((float) max_index_/(float) file_size_);
 
     ++signal_count_;
 
@@ -255,8 +243,6 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
         post_process_.postProcess(category, record);
     };
 
-    //max_index_ = 0;
-
     assert (settings_.current_file_framing_ == "");
     assert(data->contains("data_blocks"));
     assert(data->at("data_blocks").is_array());
@@ -276,8 +262,6 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
 
         assert (data_block.contains("content"));
         assert(data_block.at("content").is_object());
-        //assert (data_block.at("content").contains("index"));
-        //max_index_ = data_block.at("content").at("index");
 
         if (category == 1)
             checkCAT001SacSics(data_block);
@@ -305,7 +289,6 @@ void ASTERIXDecodeJob::countRecord(unsigned int category, nlohmann::json& record
     logdbg << "ASTERIXDecodeJob: countRecord: cat " << category << " record '" << record.dump(4)
            << "'";
 
-    count_total_++;
     category_counts_[category] += 1;
 }
 
@@ -321,11 +304,6 @@ std::vector<std::unique_ptr<nlohmann::json>> ASTERIXDecodeJob::extractedData()
     return std::move(extracted_data_);
 }
 
-
-size_t ASTERIXDecodeJob::countTotal() const
-{
-    return count_total_;
-}
 
 bool ASTERIXDecodeJob::hasStatusInfo()
 {

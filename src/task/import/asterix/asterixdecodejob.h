@@ -61,8 +61,6 @@ public:
     std::string statusInfoString();
     float statusInfoProgress(); // percent
 
-    size_t countTotal() const;
-
     void forceBlockingDataProcessing();
 
 private:
@@ -76,45 +74,17 @@ private:
 
     ASTERIXPostProcess& post_process_;
 
-//    bool decode_file_ {false};
-
-//    bool decode_udp_streams_ {false};
-//    std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> ds_lines_;
-//    // ds_id -> line str ->(ip, port)
-
     boost::posix_time::ptime start_time_;
 
     size_t num_frames_{0};
     size_t num_records_{0};
     size_t num_errors_{0};
 
-//    size_t file_size_{0};
-//    size_t max_index_{0};
-
-//    bool error_{false};
-//    std::string error_message_;
-
-//    boost::interprocess::interprocess_semaphore receive_semaphore_;
-//    std::map<unsigned int, std::unique_ptr<boost::array<char, MAX_ALL_RECEIVE_SIZE>>> receive_buffers_copy_; // line->buf
-//    std::map<unsigned int, size_t> receive_copy_buffer_sizes_; // line -> len
-
-//    boost::mutex receive_buffers_mutex_;
-//    std::map<unsigned int, std::unique_ptr<boost::array<char, MAX_ALL_RECEIVE_SIZE>>> receive_buffers_; // line -> buf
-//    std::map<unsigned int, size_t> receive_buffer_sizes_; // line -> len
-
-//    boost::posix_time::ptime last_receive_decode_time_;
-
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data_;
 
-    size_t count_total_ {0};
     std::map<unsigned int, size_t> category_counts_;
 
     unsigned int signal_count_ {0};
-
-//    void doFileDecoding();
-//    void doUDPStreamDecoding();
-
-//    void storeReceivedData (unsigned int line, const char* data, unsigned int length);
 
     void fileJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
                               size_t num_records, size_t numErrors);

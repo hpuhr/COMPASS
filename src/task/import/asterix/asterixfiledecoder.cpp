@@ -7,6 +7,7 @@
 
 using namespace Utils;
 using namespace std;
+using namespace nlohmann;
 
 ASTERIXFileDecoder::ASTERIXFileDecoder (
         ASTERIXDecodeJob& job, ASTERIXImportTask& task, const ASTERIXImportTaskSettings& settings)
@@ -26,6 +27,8 @@ void ASTERIXFileDecoder::start()
 {
     assert (!running_);
 
+    start_time_ = boost::posix_time::microsec_clock::local_time();
+
     running_ = true;
 
     loginf << "ASTERIXFileDecoder: start: file '" << settings_.currentFilename()
@@ -33,6 +36,45 @@ void ASTERIXFileDecoder::start()
 
     auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
             size_t num_records, size_t numErrors) {
+
+        // get last index
+
+        if (settings_.current_file_framing_ == "")
+        {
+            assert(data->contains("data_blocks"));
+            assert(data->at("data_blocks").is_array());
+
+            if (data->at("data_blocks").size())
+            {
+                json& data_block = data->at("data_blocks").back();
+
+                assert (data_block.contains("content"));
+                assert(data_block.at("content").is_object());
+                assert (data_block.at("content").contains("index"));
+                max_index_ = data_block.at("content").at("index");
+            }
+
+        }
+        else
+        {
+            assert(data->contains("frames"));
+            assert(data->at("frames").is_array());
+
+            if (data->at("frames").size())
+            {
+                json& frame = data->at("frames").back();
+
+                if (frame.contains("content"))
+                {
+                    assert(frame.at("content").is_object());
+                    assert (frame.at("content").contains("index"));
+                    max_index_ = frame.at("content").at("index");
+                }
+            }
+        }
+
+        num_records_total_ += num_records;
+
         job_.fileJasterixCallback(std::move(data), settings_.file_line_id_, num_frames, num_records, numErrors);
     };
 
@@ -64,67 +106,42 @@ void ASTERIXFileDecoder::stop()
 
 std::string ASTERIXFileDecoder::statusInfoString()
 {
-    return "UGA";
-
     string text = "File '"+settings_.currentFilename()+"'";
     string rec_text;
     string rem_text;
 
-//    if (decode_job_)
-//    {
-//        rec_text = "\n\nRecords/s: Unknown";
-//        rem_text = "Remaining: Unknown";
+    rec_text = "\n\nRecords/s: "+to_string((unsigned int) getRecordsPerSecond());
+    rem_text = "Remaining: "+String::timeStringFromDouble(getRemainingTime() + 1.0, false);
 
-//        //file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
+    int num_filler = text.size() - rec_text.size() - rem_text.size();
 
-//        //rec_text = "\n\nRecords/s: "+to_string((unsigned int) decode_job_->getRecordsPerSecond());
-//        //rem_text = "Remaining: "+String::timeStringFromDouble(decode_job_->getRemainingTime() + 1.0, false);
-//    }
-//    else
-//    {
-//        rec_text = "\n\nRecords/s: Unknown";
-//        rem_text = "Remaining: Unknown";
-//    }
+    if (num_filler < 1)
+        num_filler = 1;
 
-//    //string pack_text = "\npacks: "+to_string(num_packets_in_processing_) + " total " + to_string(num_packets_total_);
-
-//    int num_filler = text.size() - rec_text.size() - rem_text.size();
-//    if (num_filler < 1)
-//        num_filler = 1;
-
-//    file_progress_dialog_->setLabelText((text + rec_text + std::string(num_filler, ' ') + rem_text).c_str());
+    return text + rec_text + std::string(num_filler, ' ') + rem_text;
 }
 
 float ASTERIXFileDecoder::statusInfoProgress() // percent
 {
-    return 50;
+    return 100.0 * (float) max_index_/(float) file_size_;
 }
 
-//float ASTERIXDecodeJob::getFileDecodingProgress() const
-//{
-//    assert (decode_file_ && file_size_);
+float ASTERIXFileDecoder::getRecordsPerSecond() const
+{
+    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
+                               - start_time_).total_milliseconds()/1000.0;
 
-//    return 100.0 * (float) max_index_/(float) file_size_;
-//}
+    return (float) num_records_total_ / elapsed_s;
+}
 
-//float ASTERIXDecodeJob::getRecordsPerSecond() const
-//{
-//    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
-//                               - start_time_).total_milliseconds()/1000.0;
+float ASTERIXFileDecoder::getRemainingTime() const
+{
+    size_t remaining_rec = file_size_ - max_index_;
 
-//    return (float) count_total_ / elapsed_s;
-//}
+    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
+                               - start_time_).total_milliseconds()/1000.0;
 
-//float ASTERIXDecodeJob::getRemainingTime() const
-//{
-//    assert (decode_file_ && file_size_);
+    float index_per_s = (float) max_index_ / elapsed_s;
 
-//    size_t remaining_rec = file_size_ - max_index_;
-
-//    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
-//                               - start_time_).total_milliseconds()/1000.0;
-
-//    float index_per_s = (float) max_index_ / elapsed_s;
-
-//    return (float) remaining_rec / index_per_s;
-//}
+    return (float) remaining_rec / index_per_s;
+}
