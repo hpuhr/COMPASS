@@ -23,19 +23,11 @@
 
 #include "json.hpp"
 
-//#include <boost/array.hpp>
-//#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-//#include <boost/thread/mutex.hpp>
-
-//#include <functional>
 
 class ASTERIXImportTask;
 class ASTERIXImportTaskSettings;
 class ASTERIXPostProcess;
-
-//const unsigned int MAX_UDP_READ_SIZE=1024*1024;
-//const unsigned int MAX_ALL_RECEIVE_SIZE=100*1024*1024;
 
 // is a job, creates specifc reader/decoder, does post-processing
 class ASTERIXDecodeJob : public Job
@@ -65,9 +57,9 @@ public:
 
     std::vector<std::unique_ptr<nlohmann::json>> extractedData();
 
-//    float getFileDecodingProgress() const;
-//    float getRecordsPerSecond() const;
-//    float getRemainingTime() const;
+    bool hasStatusInfo();
+    std::string statusInfoString();
+    float statusInfoProgress(); // percent
 
     size_t countTotal() const;
 

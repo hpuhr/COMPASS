@@ -62,6 +62,44 @@ void ASTERIXFileDecoder::stop()
     }
 }
 
+std::string ASTERIXFileDecoder::statusInfoString()
+{
+    return "UGA";
+
+    string text = "File '"+settings_.currentFilename()+"'";
+    string rec_text;
+    string rem_text;
+
+//    if (decode_job_)
+//    {
+//        rec_text = "\n\nRecords/s: Unknown";
+//        rem_text = "Remaining: Unknown";
+
+//        //file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
+
+//        //rec_text = "\n\nRecords/s: "+to_string((unsigned int) decode_job_->getRecordsPerSecond());
+//        //rem_text = "Remaining: "+String::timeStringFromDouble(decode_job_->getRemainingTime() + 1.0, false);
+//    }
+//    else
+//    {
+//        rec_text = "\n\nRecords/s: Unknown";
+//        rem_text = "Remaining: Unknown";
+//    }
+
+//    //string pack_text = "\npacks: "+to_string(num_packets_in_processing_) + " total " + to_string(num_packets_total_);
+
+//    int num_filler = text.size() - rec_text.size() - rem_text.size();
+//    if (num_filler < 1)
+//        num_filler = 1;
+
+//    file_progress_dialog_->setLabelText((text + rec_text + std::string(num_filler, ' ') + rem_text).c_str());
+}
+
+float ASTERIXFileDecoder::statusInfoProgress() // percent
+{
+    return 50;
+}
+
 //float ASTERIXDecodeJob::getFileDecodingProgress() const
 //{
 //    assert (decode_file_ && file_size_);

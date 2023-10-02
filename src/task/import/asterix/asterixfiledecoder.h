@@ -12,6 +12,10 @@ public:
     virtual void start() override;
     virtual void stop() override;
 
+    virtual bool hasStatusInfo() override { return true; };
+    virtual std::string statusInfoString() override;
+    virtual float statusInfoProgress() override; // percent
+
     //    float getFileDecodingProgress() const;
     //    float getRecordsPerSecond() const;
     //    float getRemainingTime() const;

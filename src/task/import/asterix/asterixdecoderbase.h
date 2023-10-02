@@ -23,6 +23,10 @@ public:
     bool error() const;
     std::string errorMessage() const;
 
+    virtual bool hasStatusInfo() { return false; };
+    virtual std::string statusInfoString() { return ""; }
+    virtual float statusInfoProgress() { return 0; } // percent
+
 protected:
     ASTERIXDecodeJob& job_;
     ASTERIXImportTask& task_;

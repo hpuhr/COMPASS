@@ -32,6 +32,8 @@
 #include "taskmanager.h"
 #include "mainwindow.h"
 #include "stringconv.h"
+#include "projection.h"
+#include "projectionmanager.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
@@ -714,6 +716,14 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         jasterix_->category(cat_it.first)->setCurrentSPFEdition(cat_it.second.spf());
     }
 
+    // set up projections
+    ProjectionManager& proj_man = ProjectionManager::instance();
+
+    assert(proj_man.hasCurrentProjection());
+    Projection& projection = proj_man.currentProjection();
+    projection.clearCoordinateSystems(); // to rebuild from data sources
+    projection.addAllRadarCoordinateSystems();
+
     loginf << "ASTERIXImportTask: run: starting decode job";
 
     assert(decode_job_ == nullptr);
@@ -1271,6 +1281,8 @@ void ASTERIXImportTask::updateFileProgressDialog(bool force)
     if (stopped_)
         return;
 
+    assert (settings_.import_file_);
+
     if (!file_progress_dialog_)
     {
         file_progress_dialog_.reset(
@@ -1289,31 +1301,14 @@ void ASTERIXImportTask::updateFileProgressDialog(bool force)
 
     last_file_progress_time_ = boost::posix_time::microsec_clock::local_time();
 
-    string text = "File '"+settings_.currentFilename()+"'";
-    string rec_text;
-    string rem_text;
-
     if (decode_job_)
     {
-        rec_text = "\n\nRecords/s: Unknown";
-        rem_text = "Remaining: Unknown";
-
-        //file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
-
-        //rec_text = "\n\nRecords/s: "+to_string((unsigned int) decode_job_->getRecordsPerSecond());
-        //rem_text = "Remaining: "+String::timeStringFromDouble(decode_job_->getRemainingTime() + 1.0, false);
+        assert (decode_job_->hasStatusInfo());
+        file_progress_dialog_->setLabelText(decode_job_->statusInfoString().c_str());
+        file_progress_dialog_->setValue(decode_job_->statusInfoProgress());
     }
     else
     {
-        rec_text = "\n\nRecords/s: Unknown";
-        rem_text = "Remaining: Unknown";
+        file_progress_dialog_->setLabelText("Starting decoding...");
     }
-
-    //string pack_text = "\npacks: "+to_string(num_packets_in_processing_) + " total " + to_string(num_packets_total_);
-
-    int num_filler = text.size() - rec_text.size() - rem_text.size();
-    if (num_filler < 1)
-        num_filler = 1;
-
-    file_progress_dialog_->setLabelText((text + rec_text + std::string(num_filler, ' ') + rem_text).c_str());
 }

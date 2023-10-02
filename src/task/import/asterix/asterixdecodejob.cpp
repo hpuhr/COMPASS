@@ -327,6 +327,24 @@ size_t ASTERIXDecodeJob::countTotal() const
     return count_total_;
 }
 
+bool ASTERIXDecodeJob::hasStatusInfo()
+{
+    return decoder_ && decoder_->hasStatusInfo();
+}
+
+std::string ASTERIXDecodeJob::statusInfoString()
+{
+    assert (hasStatusInfo());
+    return decoder_->statusInfoString();
+}
+
+float ASTERIXDecodeJob::statusInfoProgress() // percent
+{
+    assert (hasStatusInfo());
+    return decoder_->statusInfoProgress();
+}
+
+
 void ASTERIXDecodeJob::forceBlockingDataProcessing()
 {
     loginf << "ASTERIXDecodeJob: forceBlockingDataProcessing: emitting signal";
