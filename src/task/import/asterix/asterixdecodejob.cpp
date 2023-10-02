@@ -19,19 +19,10 @@
 #include "asteriximporttask.h"
 #include "json.h"
 #include "logger.h"
-//#include "stringconv.h"
-//#include "compass.h"
-//#include "datasourcemanager.h""
-//#include "util/files.h"
-//#include "udpreceiver.h"
-
-//#include <jasterix/jasterix.h>
+#include "asterixfiledecoder.h"
+#include "asterixnetworkdecoder.h"
 
 #include <QThread>
-
-//#include <boost/bind.hpp>
-//#include <boost/thread.hpp>
-//#include <boost/interprocess/sync/scoped_lock.hpp>
 
 #include <chrono>
 #include <thread>
@@ -45,11 +36,15 @@ ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, const ASTERIXImportT
                                    ASTERIXPostProcess& post_process)
     : Job("ASTERIXDecodeJob"),
       task_(task), settings_(settings),
-      post_process_(post_process)//, receive_semaphore_((unsigned int) 0)
+      post_process_(post_process)
 {
     logdbg << "ASTERIXDecodeJob: ctor";
 
-    decoder_.reset(new ASTERIXDecoderBase(*this, task_, settings_));
+
+    if (settings_.importFile())
+        decoder_.reset(new ASTERIXFileDecoder(*this, task_, settings_));
+    else
+        decoder_.reset(new ASTERIXNetworkDecoder(*this, task_, settings_));
 }
 
 ASTERIXDecodeJob::~ASTERIXDecodeJob()
@@ -242,8 +237,6 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
     //loginf << "ASTERIXDecodeJob: fileJasterixCallback: data '" << data->dump(2) << "'";
     loginf << "ASTERIXDecodeJob: netJasterixCallback: line_id " << line_id << " num_records " << num_records;
 
-    //std::unique_ptr<nlohmann::json> tmp_extracted_data = std::move(data);
-
     num_frames_ = num_frames;
     num_records_ = num_records;
     num_errors_ = num_errors;
@@ -327,35 +320,6 @@ std::vector<std::unique_ptr<nlohmann::json>> ASTERIXDecodeJob::extractedData()
 
     return std::move(extracted_data_);
 }
-
-//float ASTERIXDecodeJob::getFileDecodingProgress() const
-//{
-//    assert (decode_file_ && file_size_);
-
-//    return 100.0 * (float) max_index_/(float) file_size_;
-//}
-
-//float ASTERIXDecodeJob::getRecordsPerSecond() const
-//{
-//    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
-//                               - start_time_).total_milliseconds()/1000.0;
-
-//    return (float) count_total_ / elapsed_s;
-//}
-
-//float ASTERIXDecodeJob::getRemainingTime() const
-//{
-//    assert (decode_file_ && file_size_);
-
-//    size_t remaining_rec = file_size_ - max_index_;
-
-//    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
-//                               - start_time_).total_milliseconds()/1000.0;
-
-//    float index_per_s = (float) max_index_ / elapsed_s;
-
-//    return (float) remaining_rec / index_per_s;
-//}
 
 
 size_t ASTERIXDecodeJob::countTotal() const

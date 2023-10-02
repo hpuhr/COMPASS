@@ -25,7 +25,7 @@
 
 //#include <boost/array.hpp>
 //#include <boost/interprocess/sync/interprocess_semaphore.hpp>
-//#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 //#include <boost/thread/mutex.hpp>
 
 //#include <functional>
@@ -74,7 +74,8 @@ public:
     void forceBlockingDataProcessing();
 
 private:
-    friend class ASTERIXDecoderBase;
+    friend class ASTERIXFileDecoder;
+    friend class ASTERIXNetworkDecoder;
 
     ASTERIXImportTask& task_;
     const ASTERIXImportTaskSettings& settings_;

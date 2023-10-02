@@ -24,7 +24,7 @@
 #include "json.hpp"
 #include "asterixjsonmappingjob.h"
 #include "asterixpostprocessjob.h"
-#include "jsonmappingstubsjob.h"
+//#include "jsonmappingstubsjob.h"
 #include "asterixjsonparsingschema.h"
 #include "task.h"
 #include "appmode.h"
