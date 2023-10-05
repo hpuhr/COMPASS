@@ -377,7 +377,8 @@ void GPSTrailImportTask::parseCurrentFile ()
 
 //        loginf << "GPSTrailImportTask: parseCurrentFile: "
 //               << " time " << gps.fix.timestamp.toString()
-//               << " year " << gps.fix.timestamp.year
+//               << " rawTime " << gps.fix.timestamp.rawTime
+//               << " rawDate " << gps.fix.timestamp.rawDate
 //               << " " << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ')
 //               << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " "
 //               << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   "
@@ -388,9 +389,15 @@ void GPSTrailImportTask::parseCurrentFile ()
 
         ++gps_fixes_cnt_;
 
-        if (!gps.fix.locked())
+//        if (!gps.fix.locked())
+//        {
+//            ++gps_fixes_skipped_lost_lock_;
+//            return;
+//        }
+
+        if (gps.fix.timestamp.rawDate == 0 && gps.fix.timestamp.rawTime == 0)
         {
-            ++gps_fixes_skipped_lost_lock_;
+            ++gps_fixes_zero_datetime_;
             return;
         }
 
@@ -402,15 +409,23 @@ void GPSTrailImportTask::parseCurrentFile ()
 
         if (gps_fixes_.size() && last_ts == getTimeFrom(gps.fix.timestamp))
         {
-            ++gps_fixes_skipped_time_cnt_;
+            if (gps_fixes_.back().latitude == gps.fix.latitude
+                    && gps_fixes_.back().longitude == gps.fix.longitude)
+                ++gps_fixes_skipped_time_cnt_;
+            else // different position
+            {
+                gps_fixes_.back() = gps.fix;
+            }
             return;
         }
+        else // new
+        {
+            quality_counts_[gps.fix.quality] += 1;
 
-        quality_counts_[gps.fix.quality] += 1;
+            gps_fixes_.push_back(gps.fix);
 
-        gps_fixes_.push_back(gps.fix);
-
-        last_ts = getTimeFrom(gps.fix.timestamp);
+            last_ts = getTimeFrom(gps.fix.timestamp);
+        }
     };
 
     // From a file
@@ -450,15 +465,19 @@ void GPSTrailImportTask::parseCurrentFile ()
     if (gps_fixes_cnt_)
     {
         ss << "Read " << gps_fixes_cnt_ << " fixes.\n";
-        ss << "Skipped " << gps_fixes_skipped_lost_lock_
-           << " (" << String::percentToString(100.0*gps_fixes_skipped_lost_lock_/gps_fixes_cnt_) << "%)"
-           << " because of lost GNSS lock.\n";
+        ss << "Skipped " << gps_fixes_zero_datetime_
+           << " (" << String::percentToString(100.0*gps_fixes_zero_datetime_/gps_fixes_cnt_) << "%)"
+           << " because of zero date and time.\n";
+
+//        ss << "Skipped " << gps_fixes_skipped_lost_lock_
+//           << " (" << String::percentToString(100.0*gps_fixes_skipped_lost_lock_/gps_fixes_cnt_) << "%)"
+//           << " because of lost GNSS lock.\n";
         ss << "Skipped " << gps_fixes_skipped_quality_cnt_
            << " (" << String::percentToString(100.0*gps_fixes_skipped_quality_cnt_/gps_fixes_cnt_) << "%)"
-           << " because of quality.\n";
+           << " because of invalid quality.\n";
         ss << "Skipped " << gps_fixes_skipped_time_cnt_
            << " (" << String::percentToString(100.0*gps_fixes_skipped_time_cnt_/gps_fixes_cnt_) << "%)"
-           << " because of same time.\n";
+           << " because of same time and position.\n";
         ss << "Got " << gps_fixes_.size()
            << " (" << String::percentToString(100.0*gps_fixes_.size()/gps_fixes_cnt_) << "%) fixes.\n";
 
