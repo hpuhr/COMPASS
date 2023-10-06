@@ -491,6 +491,7 @@ bool RTCommandImportASTERIXFile::run_impl()
     }
 
     ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
+    unsigned int file_line {0};
 
     try
     {
@@ -502,10 +503,10 @@ bool RTCommandImportASTERIXFile::run_impl()
                 import_task.asterixFileFraming(framing_);
         }
 
+
         if (line_id_.size())
         {
-            unsigned int file_line = String::lineFromStr(line_id_);
-            import_task.settings().file_line_id_ = file_line;
+            file_line = String::lineFromStr(line_id_);
         }
 
         if (date_str_.size())
@@ -537,8 +538,9 @@ bool RTCommandImportASTERIXFile::run_impl()
     }
 
     assert (filename_.size());
+    assert (Files::fileExists(filename_));
 
-    import_task.importFilename(filename_);
+    import_task.addImportFileName(filename_, file_line);
 
     if (!import_task.canRun())
     {
@@ -669,6 +671,8 @@ bool RTCommandImportASTERIXFiles::run_impl()
 
     ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
 
+    unsigned int file_line {0};
+
     try
     {
         if (framing_.size())
@@ -681,8 +685,7 @@ bool RTCommandImportASTERIXFiles::run_impl()
 
         if (line_id_.size())
         {
-            unsigned int file_line = String::lineFromStr(line_id_);
-            import_task.settings().file_line_id_ = file_line;
+            file_line = String::lineFromStr(line_id_);
         }
 
         if (date_str_.size())
@@ -713,9 +716,15 @@ bool RTCommandImportASTERIXFiles::run_impl()
         return false;
     }
 
-    assert (filenames_.size());
 
-    import_task.importFilename(filenames_);
+    assert (filenames_.size());
+    auto filenames = String::split(filenames_, ';');
+
+    for (auto& filename : filenames)
+    {
+        assert (Files::fileExists(filename));
+        import_task.addImportFileName(filename, file_line);
+    }
 
     if (!import_task.canRun())
     {

@@ -369,7 +369,9 @@ void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 
     assert (line_id > 0 && line_id <= 4);
 
-    task_.settings().file_line_id_ = line_id-1;
+    assert (false); // TODO
+
+    //task_.settings().file_line_id_ = line_id-1;
 }
 
 void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)
@@ -426,7 +428,7 @@ void ASTERIXImportTaskWidget::updateSourceLabel()
     if (task_.isImportNetwork())
         source_label_->setText("Source: Network");
     else // file
-        source_label_->setText(("Source: "+task_.importFilename()).c_str());
+        source_label_->setText(("Source: \n"+task_.importFilenamesStr()).c_str());
 }
 
 ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
@@ -438,7 +440,7 @@ void ASTERIXImportTaskWidget::testImportSlot()
 {
     loginf << "ASTERIXImportTaskWidget: testImportSlot";
 
-    if (!task_.canImportFile())
+    if (!task_.canImportFiles())
     {
         QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Test Import Failed",
                               "Please select a file in the list.", QMessageBox::Ok);

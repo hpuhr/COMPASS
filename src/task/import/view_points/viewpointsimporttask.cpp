@@ -246,18 +246,16 @@ void ViewPointsImportTask::run()
 
                 ASTERIXImportTask& asterix_importer_task = task_manager_.asterixImporterTask();
 
+                unsigned int line_id {0};
+
                 // line
                 if (ds_it.contains("line_id"))
                 {
                     assert (ds_it.at("line_id").is_number_unsigned());
-                    unsigned int line_id = ds_it.at("line_id");
+                    line_id = ds_it.at("line_id");
 
                     loginf << "ViewPointsImportTask: import: line_id " << line_id;
-
-                    asterix_importer_task.settings().file_line_id_ =  line_id;
                 }
-                else
-                    asterix_importer_task.settings().file_line_id_  = 0; // import to L1 if not set
 
 
                 if (ds_it.contains("time_offset"))
@@ -287,7 +285,7 @@ void ViewPointsImportTask::run()
                     asterix_importer_task.settings().date_ = date;
                 }
 
-                asterix_importer_task.importFilename(filename);
+                asterix_importer_task.addImportFileName(filename, line_id);
 
                 assert(asterix_importer_task.canRun());
                 asterix_importer_task.allowUserInteractions(false);

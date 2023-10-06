@@ -725,17 +725,41 @@ void MainWindow::importAsterixRecordingSlot()
 {
     loginf << "MainWindow: importAsterixRecordingSlot";
 
-    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
+    QFileDialog dialog(this, "Import ASTERIX File(s)");
+    dialog.setViewMode(QFileDialog::Detail);
+    dialog.setFileMode(QFileDialog::ExistingFiles);
 
-    if (filename.size() > 0)
+    ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    task.clearImportFilesInfo();
+
+    if (dialog.exec())
     {
-        COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
+        QStringList filenames = dialog.selectedFiles();
+
+        for (auto& filename : filenames)
+        {
+            assert (Files::fileExists(filename.toStdString()));
+            task.addImportFileName(filename.toStdString());
+        }
 
         updateMenus();
 
-        COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
-        COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+        task.dialog()->updateSource();
+        task.dialog()->show();
     }
+
+//    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
+
+//    if (filename.size() > 0)
+//    {
+//        //COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
+
+//        updateMenus();
+
+//        COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
+//        COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+//    }
 }
 
 void MainWindow::importRecentAsterixRecordingSlot()
@@ -749,7 +773,7 @@ void MainWindow::importRecentAsterixRecordingSlot()
 
     assert (filename.size());
 
-    COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename);
+    COMPASS::instance().taskManager().asterixImporterTask().addImportFileName(filename);
 
     updateMenus();
 

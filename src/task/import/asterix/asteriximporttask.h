@@ -48,6 +48,16 @@ namespace jASTERIX
 class jASTERIX;
 }
 
+struct ASTERIXFileInfo
+{
+    std::string filename_;
+    unsigned int line_id_ {0};
+
+    bool decoding_ok_ {false};
+    std::string decoding_info_str_;
+};
+
+
 class ASTERIXImportTaskSettings
 {
 public:
@@ -72,7 +82,7 @@ public:
 
     // unregistered, for passing on
 
-    unsigned int file_line_id_ {0};
+    //unsigned int file_line_id_ {0};
     boost::posix_time::ptime date_;
 
     unsigned int max_network_lines_ {4};
@@ -88,16 +98,27 @@ public:
     bool filter_position_active_{false};
     bool filter_modec_active_{false};
 
-    bool importFile() const { return import_file_; }
+    bool importFile() const { return import_files_; }
 
-    std::string currentFilename() const { return current_filename_; }
+    std::vector<ASTERIXFileInfo>& filesInfo() { return files_info_; }
+    const std::vector<ASTERIXFileInfo>& filesInfo() const { return files_info_; }
+
+    void clearImportFilenames () { files_info_.clear(); }
+    void addImportFilename(const std::string& filename, unsigned int line_id)
+    {
+        files_info_.push_back(ASTERIXFileInfo());
+        files_info_.back().filename_ = filename;
+        files_info_.back().line_id_ = line_id;
+    }
+
 
 private:
     friend class ASTERIXImportTask;
 
-    bool import_file_ {false}; // false = network, true file
+    bool import_files_ {false}; // false = network, true file
 
-    std::string current_filename_;
+    //std::string current_filename_;
+    std::vector<ASTERIXFileInfo> files_info_;
 
 };
 
@@ -137,7 +158,7 @@ class ASTERIXImportTask : public Task, public Configurable
     void asterixFileFraming(const std::string& asterix_framing);
     void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
 
-    bool canImportFile();
+    bool canImportFiles();
 
     virtual bool canRun() override;
     virtual void run() override;
@@ -150,8 +171,10 @@ class ASTERIXImportTask : public Task, public Configurable
     void addFile(const std::string& filename);
     void clearFileList ();
 
-    void importFilename(const std::string& filename);
-    const std::string& importFilename() { return settings_.current_filename_; }
+    void addImportFileName(const std::string& filename, unsigned int line_id=0);
+    std::vector<ASTERIXFileInfo>& filesInfo() { return settings_.filesInfo(); }
+    std::string importFilenamesStr() const;
+    void clearImportFilesInfo ();
 
     void importNetwork();
     bool isImportNetwork();

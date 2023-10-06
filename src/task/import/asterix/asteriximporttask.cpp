@@ -72,7 +72,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("debug_jasterix", &settings_.debug_jasterix_, false);
 
     registerParameter("file_list", &settings_.file_list_, json::array());
-    registerParameter("current_file_framing", &settings_.current_file_framing_, "");
+    //registerParameter("current_file_framing", &settings_.current_file_framing_, "");
 
     registerParameter("num_packets_overload", &settings_.num_packets_overload_, 60);
 
@@ -335,25 +335,55 @@ void ASTERIXImportTask::clearFileList ()
     settings_.file_list_.clear();
 }
 
-void ASTERIXImportTask::importFilename(const std::string& filename)
+void ASTERIXImportTask::addImportFileName(const std::string& filename, unsigned int line_id)
 {
-    loginf << "ASTERIXImportTask: currentFilename: filename '" << filename << "'";
+    loginf << "ASTERIXImportTask: addImportFileName: adding '" << filename << " line " << line_id;
 
-    settings_.current_filename_ = filename;
-    settings_.import_file_ = true;
+    assert (Files::fileExists(filename));
 
-    addFile(filename);
+    settings_.addImportFilename(filename, line_id);
+    settings_.import_files_ = true;
 
     if (dialog_)
         dialog_->updateButtons();
 }
 
+
+std::string ASTERIXImportTask::importFilenamesStr() const
+{
+    string ret;
+
+    for (auto& file_info : settings_.filesInfo())
+        ret += file_info.filename_ + "\n";
+
+    return ret;
+}
+
+void ASTERIXImportTask::clearImportFilesInfo ()
+{
+    settings_.clearImportFilenames();
+}
+
+//void ASTERIXImportTask::importFilename(const std::string& filename)
+//{
+//    loginf << "ASTERIXImportTask: currentFilename: filename '" << filename << "'";
+
+//    settings_.current_filename_ = filename;
+//    settings_.import_file_ = true;
+
+//    addFile(filename);
+
+//    if (dialog_)
+//        dialog_->updateButtons();
+//}
+
 void ASTERIXImportTask::importNetwork()
 {
     loginf << "ASTERIXImportTask: importNetwork";
 
-    settings_.current_filename_ = "";
-    settings_.import_file_ = false;
+    //settings_.current_filename_ = "";
+    settings_.file_list_.clear();
+    settings_.import_files_ = false;
 
     if (dialog_)
         dialog_->updateButtons();
@@ -361,7 +391,7 @@ void ASTERIXImportTask::importNetwork()
 
 bool ASTERIXImportTask::isImportNetwork()
 {
-    return !settings_.import_file_;
+    return !settings_.import_files_;
 }
 
 bool ASTERIXImportTask::hasConfiguratonFor(unsigned int category)
@@ -527,25 +557,34 @@ bool ASTERIXImportTask::isRunning() const
     return running_;
 }
 
-bool ASTERIXImportTask::canImportFile()
+bool ASTERIXImportTask::canImportFiles()
 {
-    if (!settings_.current_filename_.size())
-        return false;
+//    if (!settings_.current_filename_.size())
+//        return false;
     
-    if (!Files::fileExists(settings_.current_filename_))
+//    if (!Files::fileExists(settings_.current_filename_))
+//    {
+//        loginf << "ASTERIXImportTask: canImportFile: not possible since file '"
+//               << settings_.current_filename_ << "'does not exist";
+//        return false;
+//    }
+
+    if (!filesInfo().size())
     {
-        loginf << "ASTERIXImportTask: canImportFile: not possible since file '"
-               << settings_.current_filename_ << "'does not exist";
+        loginf << "ASTERIXImportTask: canImportFile: not possible since no files given";
+
         return false;
     }
+
+    // TODO: check if files can be decoded without errors
 
     return true;
 }
 
 bool ASTERIXImportTask::canRun()
 {
-    if (settings_.import_file_)
-        return canImportFile(); // set file exists
+    if (settings_.import_files_)
+        return canImportFiles(); // set file exists
     else
         return COMPASS::instance().dataSourceManager().getNetworkLines().size(); // there are network lines defined
 }
@@ -609,7 +648,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     assert (!running_);
 
-    if (!settings_.import_file_)
+    if (!settings_.import_files_)
         COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
 
     running_ = true;
@@ -627,12 +666,12 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     float free_ram = System::getFreeRAMinGB();
 
-    loginf << "ASTERIXImportTask: run: filename " << settings_.current_filename_ << " test " << settings_.test_
+    loginf << "ASTERIXImportTask: run: filenames " << importFilenamesStr() << " test " << settings_.test_
            << " free RAM " << free_ram << " GB";
 
     assert(canRun());
 
-    if (settings_.import_file_)
+    if (settings_.import_files_)
     {
         last_file_progress_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -728,7 +767,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     assert(decode_job_ == nullptr);
 
-    if (!settings_.import_file_)
+    if (!settings_.import_files_)
         COMPASS::instance().dataSourceManager().createNetworkDBDataSources();
 
     decode_job_ = make_shared<ASTERIXDecodeJob>(*this, settings_, post_process_);
@@ -823,7 +862,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: errors " << decode_job_->numErrors()
            << " num records " << jasterix_->numRecords();
 
-    if (settings_.import_file_)
+    if (settings_.import_files_)
     {
         if (file_progress_dialog_->wasCanceled())
         {
@@ -881,7 +920,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     std::vector<std::string> keys;
 
-    if (settings_.current_file_framing_ == "" || !settings_.import_file_) // force netto when doing network import
+    if (settings_.current_file_framing_ == "" || !settings_.import_files_) // force netto when doing network import
         keys = {"data_blocks", "content", "records"};
     else
         keys = {"frames", "content", "data_blocks", "content", "records"};
@@ -935,7 +974,7 @@ void ASTERIXImportTask::mapJSONDoneSlot()
         return;
     }
 
-    bool check_future_ts = !settings_.import_file_;
+    bool check_future_ts = !settings_.import_files_;
 
     if (settings_.network_ignore_future_ts_)
         check_future_ts = false;
@@ -1281,12 +1320,12 @@ void ASTERIXImportTask::updateFileProgressDialog(bool force)
     if (stopped_)
         return;
 
-    assert (settings_.import_file_);
+    assert (settings_.import_files_);
 
     if (!file_progress_dialog_)
     {
         file_progress_dialog_.reset(
-                    new QProgressDialog(("File '"+settings_.currentFilename()+"'").c_str(), "Abort", 0, 100));
+                    new QProgressDialog(("Files '" + importFilenamesStr() + "'").c_str(), "Abort", 0, 100));
         file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
         file_progress_dialog_->setWindowModality(Qt::ApplicationModal);
 

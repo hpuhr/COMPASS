@@ -2,6 +2,7 @@
 #define ASTERIXFILEDECODER_H
 
 #include "asterixdecoderbase.h"
+#include "asteriximporttask.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -19,6 +20,8 @@ public:
     virtual float statusInfoProgress() override; // percent
 
 private:
+    unsigned int current_file_count_ {0};
+    std::vector<ASTERIXFileInfo> files_info_;
 
     size_t file_size_{0};
     size_t max_index_{0};
@@ -30,6 +33,9 @@ private:
     float getRecordsPerSecond() const;
     float getRemainingTime() const;
 
+    bool hasCurrentFileToDo(); // still something to decode
+    void doCurrentFile();
+    std::string getCurrentFilename();
 };
 
 #endif // ASTERIXFILEDECODER_H

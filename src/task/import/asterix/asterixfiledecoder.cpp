@@ -13,8 +13,16 @@ ASTERIXFileDecoder::ASTERIXFileDecoder (
         ASTERIXDecodeJob& job, ASTERIXImportTask& task, const ASTERIXImportTaskSettings& settings)
     : ASTERIXDecoderBase(job, task, settings)
 {
-    assert (Files::fileExists(settings_.currentFilename()));
-    file_size_ = Files::fileSize(settings_.currentFilename());
+    file_size_ = 0;
+
+    files_info_ = settings_.filesInfo();
+    assert (files_info_.size());
+
+    for (const auto& file_info : files_info_)
+    {
+        assert (Files::fileExists(file_info.filename_));
+        file_size_ = Files::fileSize(file_info.filename_);
+    }
 }
 
 
@@ -31,10 +39,82 @@ void ASTERIXFileDecoder::start()
 
     running_ = true;
 
-    loginf << "ASTERIXFileDecoder: start: file '" << settings_.currentFilename()
+    while (running_ && hasCurrentFileToDo())
+        doCurrentFile();
+
+}
+
+void ASTERIXFileDecoder::stop()
+{
+    if (running_)
+    {
+        running_ = false;
+
+        // stop decoding
+        task_.jASTERIX()->stopFileDecoding();
+    }
+}
+
+std::string ASTERIXFileDecoder::statusInfoString()
+{
+    string text = "File '" + getCurrentFilename() + "'";
+    string rec_text;
+    string rem_text;
+
+    rec_text = "\n\nRecords/s: "+to_string((unsigned int) getRecordsPerSecond());
+    rem_text = "Remaining: "+String::timeStringFromDouble(getRemainingTime() + 1.0, false);
+
+    int num_filler = text.size() - rec_text.size() - rem_text.size();
+
+    if (num_filler < 1)
+        num_filler = 1;
+
+    return text + rec_text + std::string(num_filler, ' ') + rem_text;
+}
+
+float ASTERIXFileDecoder::statusInfoProgress() // percent
+{
+    return 100.0 * (float) max_index_/(float) file_size_;
+}
+
+float ASTERIXFileDecoder::getRecordsPerSecond() const
+{
+    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
+                               - start_time_).total_milliseconds()/1000.0;
+
+    return (float) num_records_total_ / elapsed_s;
+}
+
+float ASTERIXFileDecoder::getRemainingTime() const
+{
+    size_t remaining_rec = file_size_ - max_index_;
+
+    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
+                               - start_time_).total_milliseconds()/1000.0;
+
+    float index_per_s = (float) max_index_ / elapsed_s;
+
+    return (float) remaining_rec / index_per_s;
+}
+
+bool ASTERIXFileDecoder::hasCurrentFileToDo() // still something to decode
+{
+    return current_file_count_ < files_info_.size();
+}
+
+void ASTERIXFileDecoder::doCurrentFile()
+{
+    assert (hasCurrentFileToDo());
+
+    task_.refreshjASTERIX();
+
+    string current_filename = files_info_.at(current_file_count_).filename_;
+    unsigned int current_file_line = files_info_.at(current_file_count_).line_id_;
+
+    loginf << "ASTERIXFileDecoder: doCurrentFile: file '" << current_filename
            << "' framing '" << settings_.current_file_framing_ << "'";
 
-    auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
+    auto callback = [this, current_file_line](std::unique_ptr<nlohmann::json> data, size_t num_frames,
             size_t num_records, size_t numErrors) {
 
         // get last index
@@ -75,73 +155,28 @@ void ASTERIXFileDecoder::start()
 
         num_records_total_ += num_records;
 
-        job_.fileJasterixCallback(std::move(data), settings_.file_line_id_, num_frames, num_records, numErrors);
+        job_.fileJasterixCallback(std::move(data), current_file_line, num_frames, num_records, numErrors);
     };
 
     try
     {
         if (settings_.current_file_framing_ == "")
-            task_.jASTERIX()->decodeFile(settings_.currentFilename(), callback);
+            task_.jASTERIX()->decodeFile(current_filename, callback);
         else
-            task_.jASTERIX()->decodeFile(settings_.currentFilename(), settings_.current_file_framing_, callback);
+            task_.jASTERIX()->decodeFile(current_filename, settings_.current_file_framing_, callback);
     }
     catch (std::exception& e)
     {
-        logerr << "ASTERIXFileDecoder: start: decoding error '" << e.what() << "'";
+        logerr << "ASTERIXFileDecoder: doCurrentFile: decoding error '" << e.what() << "'";
         error_ = true;
         error_message_ = e.what();
     }
+
+    ++current_file_count_;
 }
 
-void ASTERIXFileDecoder::stop()
+std::string ASTERIXFileDecoder::getCurrentFilename()
 {
-    if (running_)
-    {
-        running_ = false;
-
-        // stop decoding
-        task_.jASTERIX()->stopFileDecoding();
-    }
-}
-
-std::string ASTERIXFileDecoder::statusInfoString()
-{
-    string text = "File '"+settings_.currentFilename()+"'";
-    string rec_text;
-    string rem_text;
-
-    rec_text = "\n\nRecords/s: "+to_string((unsigned int) getRecordsPerSecond());
-    rem_text = "Remaining: "+String::timeStringFromDouble(getRemainingTime() + 1.0, false);
-
-    int num_filler = text.size() - rec_text.size() - rem_text.size();
-
-    if (num_filler < 1)
-        num_filler = 1;
-
-    return text + rec_text + std::string(num_filler, ' ') + rem_text;
-}
-
-float ASTERIXFileDecoder::statusInfoProgress() // percent
-{
-    return 100.0 * (float) max_index_/(float) file_size_;
-}
-
-float ASTERIXFileDecoder::getRecordsPerSecond() const
-{
-    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
-                               - start_time_).total_milliseconds()/1000.0;
-
-    return (float) num_records_total_ / elapsed_s;
-}
-
-float ASTERIXFileDecoder::getRemainingTime() const
-{
-    size_t remaining_rec = file_size_ - max_index_;
-
-    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
-                               - start_time_).total_milliseconds()/1000.0;
-
-    float index_per_s = (float) max_index_ / elapsed_s;
-
-    return (float) remaining_rec / index_per_s;
+    assert (current_file_count_ < files_info_.size());
+    return files_info_.at(current_file_count_).filename_;
 }
