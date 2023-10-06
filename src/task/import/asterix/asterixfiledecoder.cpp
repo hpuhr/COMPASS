@@ -13,7 +13,7 @@ ASTERIXFileDecoder::ASTERIXFileDecoder (
         ASTERIXDecodeJob& job, ASTERIXImportTask& task, const ASTERIXImportTaskSettings& settings)
     : ASTERIXDecoderBase(job, task, settings)
 {
-    file_size_ = 0;
+    total_file_size_ = 0;
 
     files_info_ = settings_.filesInfo();
     assert (files_info_.size());
@@ -21,7 +21,7 @@ ASTERIXFileDecoder::ASTERIXFileDecoder (
     for (const auto& file_info : files_info_)
     {
         assert (Files::fileExists(file_info.filename_));
-        file_size_ = Files::fileSize(file_info.filename_);
+        total_file_size_ += Files::fileSize(file_info.filename_);
     }
 }
 
@@ -57,24 +57,26 @@ void ASTERIXFileDecoder::stop()
 
 std::string ASTERIXFileDecoder::statusInfoString()
 {
-    string text = "File '" + getCurrentFilename() + "'";
-    string rec_text;
-    string rem_text;
+    string text;
 
-    rec_text = "\n\nRecords/s: "+to_string((unsigned int) getRecordsPerSecond());
-    rem_text = "Remaining: "+String::timeStringFromDouble(getRemainingTime() + 1.0, false);
+    for (const auto& file_info : files_info_)
+    {
+        if (file_info.filename_ == getCurrentFilename())
+            text += "<p align=\"left\"><b>" + file_info.filename_ + "</b>";
+        else
+            text += "<p align=\"left\">"+file_info.filename_ + "";
+    }
 
-    int num_filler = text.size() - rec_text.size() - rem_text.size();
 
-    if (num_filler < 1)
-        num_filler = 1;
+    text += "<br><p align=\"left\">Records/s: "+to_string((unsigned int) getRecordsPerSecond());
+    text += "<p align=\"right\">Remaining: "+String::timeStringFromDouble(getRemainingTime() + 1.0, false);
 
-    return text + rec_text + std::string(num_filler, ' ') + rem_text;
+    return text ;
 }
 
 float ASTERIXFileDecoder::statusInfoProgress() // percent
 {
-    return 100.0 * (float) max_index_/(float) file_size_;
+    return 100.0 * (float) (done_files_total_size_ + current_file_max_index_)/(float) total_file_size_;
 }
 
 float ASTERIXFileDecoder::getRecordsPerSecond() const
@@ -87,12 +89,12 @@ float ASTERIXFileDecoder::getRecordsPerSecond() const
 
 float ASTERIXFileDecoder::getRemainingTime() const
 {
-    size_t remaining_rec = file_size_ - max_index_;
+    size_t remaining_rec = total_file_size_ - done_files_total_size_ - current_file_max_index_;
 
     float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
                                - start_time_).total_milliseconds()/1000.0;
 
-    float index_per_s = (float) max_index_ / elapsed_s;
+    float index_per_s = (float) (done_files_total_size_ + current_file_max_index_) / elapsed_s;
 
     return (float) remaining_rec / index_per_s;
 }
@@ -131,7 +133,7 @@ void ASTERIXFileDecoder::doCurrentFile()
                 assert (data_block.contains("content"));
                 assert(data_block.at("content").is_object());
                 assert (data_block.at("content").contains("index"));
-                max_index_ = data_block.at("content").at("index");
+                current_file_max_index_ = data_block.at("content").at("index");
             }
 
         }
@@ -148,7 +150,7 @@ void ASTERIXFileDecoder::doCurrentFile()
                 {
                     assert(frame.at("content").is_object());
                     assert (frame.at("content").contains("index"));
-                    max_index_ = frame.at("content").at("index");
+                    current_file_max_index_ = frame.at("content").at("index");
                 }
             }
         }
@@ -172,6 +174,8 @@ void ASTERIXFileDecoder::doCurrentFile()
         error_message_ = e.what();
     }
 
+    done_files_total_size_ += Files::fileSize(files_info_.at(current_file_count_).filename_);
+    current_file_max_index_ = 0;
     ++current_file_count_;
 }
 

@@ -23,8 +23,9 @@ private:
     unsigned int current_file_count_ {0};
     std::vector<ASTERIXFileInfo> files_info_;
 
-    size_t file_size_{0};
-    size_t max_index_{0};
+    size_t total_file_size_{0};
+    size_t done_files_total_size_{0};
+    size_t current_file_max_index_{0};
 
      boost::posix_time::ptime start_time_;
 

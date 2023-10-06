@@ -1326,7 +1326,7 @@ void ASTERIXImportTask::updateFileProgressDialog(bool force)
     {
         file_progress_dialog_.reset(
                     new QProgressDialog(("Files '" + importFilenamesStr() + "'").c_str(), "Abort", 0, 100));
-        file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
+        file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording(s)");
         file_progress_dialog_->setWindowModality(Qt::ApplicationModal);
 
         force = true;
