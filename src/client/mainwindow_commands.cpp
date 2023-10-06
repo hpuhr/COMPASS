@@ -44,6 +44,7 @@ REGISTER_RTCOMMAND(main_window::RTCommandCloseDB)
 REGISTER_RTCOMMAND(main_window::RTCommandImportDataSourcesFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportViewPointsFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXFile)
+REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXFiles)
 REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXNetworkStart)
 REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXNetworkStop)
 REGISTER_RTCOMMAND(main_window::RTCommandImportJSONFile)
@@ -71,6 +72,7 @@ void init_commands()
     main_window::RTCommandImportDataSourcesFile::init();
     main_window::RTCommandImportViewPointsFile::init();
     main_window::RTCommandImportASTERIXFile::init();
+    main_window::RTCommandImportASTERIXFiles::init();
     main_window::RTCommandImportASTERIXNetworkStart::init();
     main_window::RTCommandImportASTERIXNetworkStop::init();
     main_window::RTCommandImportJSONFile::init();
@@ -605,7 +607,7 @@ rtcommand::IsValid RTCommandImportASTERIXFiles::valid() const
 {
     CHECK_RTCOMMAND_INVALID_CONDITION(!filenames_.size(), "Filenames empty")
 
-    for (const auto& filename : String::split(filenames_, ';'))
+    for (const auto& filename : split_filenames_)
         CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename), "File '"+filename+"' does not exist")
 
     if (framing_.size()) // ’none’, ’ioss’, ’ioss_seq’, ’rff’
@@ -648,7 +650,7 @@ bool RTCommandImportASTERIXFiles::run_impl()
         return false;
     }
 
-    for (const auto& filename : String::split(filenames_, ';'))
+    for (const auto& filename : split_filenames_)
     {
         if (!Files::fileExists(filename))
         {
@@ -718,11 +720,13 @@ bool RTCommandImportASTERIXFiles::run_impl()
 
 
     assert (filenames_.size());
-    auto filenames = String::split(filenames_, ';');
 
-    for (auto& filename : filenames)
+    for (const auto& filename : split_filenames_)
     {
+        loginf << "RTCommandImportASTERIXFiles: run_impl: file '" << filename << "'";
+
         assert (Files::fileExists(filename));
+
         import_task.addImportFileName(filename, file_line);
     }
 
@@ -770,6 +774,15 @@ void RTCommandImportASTERIXFiles::collectOptions_impl(OptionsDescription& option
 void RTCommandImportASTERIXFiles::assignVariables_impl(const VariablesMap& variables)
 {
     RTCOMMAND_GET_VAR_OR_THROW(variables, "filenames", std::string, filenames_)
+
+    for (string filename : String::split(filenames_, ';'))
+    {
+        if(filename.rfind("~", 0) == 0)  // change tilde to home path
+            filename.replace(0, 1, QDir::homePath().toStdString());
+
+        split_filenames_.push_back(filename);
+    }
+
     RTCOMMAND_GET_VAR_OR_THROW(variables, "framing", std::string, framing_)
     RTCOMMAND_GET_VAR_OR_THROW(variables, "line", std::string, line_id_)
     RTCOMMAND_GET_VAR_OR_THROW(variables, "date", std::string, date_str_)

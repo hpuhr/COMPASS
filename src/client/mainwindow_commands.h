@@ -109,6 +109,7 @@ protected:
 struct RTCommandImportASTERIXFiles : public rtcommand::RTCommand
 {
     std::string filenames_;
+    std::vector<std::string> split_filenames_;
     std::string framing_;
     std::string line_id_;
     std::string date_str_;
