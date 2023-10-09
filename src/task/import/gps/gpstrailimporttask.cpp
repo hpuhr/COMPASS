@@ -690,8 +690,11 @@ void GPSTrailImportTask::run()
         else
         {
             timestamp = getTimeFrom(fix_it.timestamp);
-            timestamp += Time::partialSeconds(tod_offset_); // add time offset
+
         }
+
+        if (use_tod_offset_)
+            timestamp += Time::partialSeconds(tod_offset_); // add time offset
 
         sac_vec.set(cnt, ds_sac_);
         sic_vec.set(cnt, ds_sic_);
