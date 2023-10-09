@@ -423,6 +423,7 @@ void ViewPointsWidget::exportSlot()
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
     dialog.setNameFilter("JSON Files (*.json)");
     dialog.setDefaultSuffix("json");
     dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);

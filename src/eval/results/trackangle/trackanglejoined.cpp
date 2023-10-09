@@ -27,6 +27,7 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "compass.h"
 
 #include <QFileDialog>
 
@@ -320,6 +321,7 @@ void JoinedTrackAngle::exportAsCSV()
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
     dialog.setNameFilter("CSV Files (*.csv)");
     dialog.setDefaultSuffix("csv");
     dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);

@@ -19,6 +19,7 @@
 #include "viewpointsreportgenerator.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
+#include "compass.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -252,6 +253,7 @@ void ViewPointsReportGeneratorDialog::setPathSlot ()
 {
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
     dialog.setNameFilter("TEX Files (*.tex)");
     dialog.setDefaultSuffix("tex");
     dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);

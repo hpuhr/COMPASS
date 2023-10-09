@@ -19,14 +19,6 @@
 
 #include "buffertablewidget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QFileDialog>
-#include <QKeyEvent>
-#include <QMessageBox>
-#include <QTableView>
-#include <QVBoxLayout>
-
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "buffertablemodel.h"
@@ -36,6 +28,15 @@
 #include "dbcontent/variable/variableset.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
+#include "compass.h"
+
+#include <QApplication>
+#include <QClipboard>
+#include <QFileDialog>
+#include <QKeyEvent>
+#include <QMessageBox>
+#include <QTableView>
+#include <QVBoxLayout>
 
 // using namespace Utils;
 
@@ -94,6 +95,7 @@ void BufferTableWidget::exportSlot(bool overwrite)
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
     dialog.setNameFilter("CSV Files (*.csv)");
     dialog.setDefaultSuffix("csv");
     dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);

@@ -14,7 +14,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QShortcut>
 #include <QKeyEvent>

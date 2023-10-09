@@ -631,7 +631,8 @@ void MainWindow::newDBSlot()
 {
     loginf << "MainWindow: newDBSlot";
 
-    string filename = QFileDialog::getSaveFileName(this, "New SQLite3 File").toStdString();
+    string filename = QFileDialog::getSaveFileName(
+                this, "New SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         createDB(filename);
@@ -641,7 +642,8 @@ void MainWindow::openExistingDBSlot()
 {
     loginf << "MainWindow: openExistingDBSlot";
 
-    string filename = QFileDialog::getOpenFileName(this, "Open SQLite3 File").toStdString();
+    string filename = QFileDialog::getOpenFileName(
+                this, "Open SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         openExistingDB(filename);
@@ -665,7 +667,8 @@ void MainWindow::exportDBSlot()
 {
     loginf << "MainWindow: exportDBSlot";
 
-    string filename = QFileDialog::getSaveFileName(this, "Export DB SQLite3 File").toStdString();
+    string filename = QFileDialog::getSaveFileName(
+                this, "Export DB SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
     {
@@ -728,6 +731,7 @@ void MainWindow::importAsterixRecordingSlot()
     QFileDialog dialog(this, "Import ASTERIX File(s)");
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setFileMode(QFileDialog::ExistingFiles);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
 
     ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
 
@@ -741,6 +745,7 @@ void MainWindow::importAsterixRecordingSlot()
         {
             assert (Files::fileExists(filename.toStdString()));
             task.addImportFileName(filename.toStdString());
+            COMPASS::instance().lastUsedPath(filename.toStdString());
         }
 
         updateMenus();
@@ -802,11 +807,14 @@ void MainWindow::importAsterixFromNetworkSlot()
 
 void MainWindow::importJSONRecordingSlot()
 {
-    string filename = QFileDialog::getOpenFileName(this, "Import JSON File", "", "JSON Files (*.json *.zip)").toStdString();
+    string filename = QFileDialog::getOpenFileName(
+                this, "Import JSON File", COMPASS::instance().lastUsedPath().c_str(),
+                "JSON Files (*.json *.zip)").toStdString();
 
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().jsonImporterTask().importFilename(filename); // also adds
+        COMPASS::instance().lastUsedPath(filename);
 
         updateMenus();
 
@@ -818,12 +826,14 @@ void MainWindow::importJSONRecordingSlot()
 
 void MainWindow::importGPSTrailSlot()
 {
-    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail", "",
+    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail",
+                                                   COMPASS::instance().lastUsedPath().c_str(),
                                                    "Text Files (*.nmea *.txt)").toStdString();
 
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().gpsTrailImportTask().importFilename(filename);
+        COMPASS::instance().lastUsedPath(filename);
 
         updateMenus();
 
@@ -833,12 +843,14 @@ void MainWindow::importGPSTrailSlot()
 
 void MainWindow::importGPSCSVSlot()
 {
-    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV", "",
+    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV",
+                                                   COMPASS::instance().lastUsedPath().c_str(),
                                                    "Text Files (*.csv *.txt)").toStdString();
 
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().gpsImportCSVTask().importFilename(filename);
+        COMPASS::instance().lastUsedPath(filename);
 
         updateMenus();
 
@@ -848,11 +860,13 @@ void MainWindow::importGPSCSVSlot()
 
 void MainWindow::importViewPointsSlot()
 {
-    string filename = QFileDialog::getOpenFileName(this, "Import View Points", "", "*.json").toStdString();
+    string filename = QFileDialog::getOpenFileName(this, "Import View Points",
+                                                   COMPASS::instance().lastUsedPath().c_str(), "*.json").toStdString();
 
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().viewPointsImportTask().importFilename(filename);
+        COMPASS::instance().lastUsedPath(filename);
 
         updateMenus();
 

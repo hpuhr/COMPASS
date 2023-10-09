@@ -32,7 +32,6 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDesktopServices>
-#include <QFileDialog>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QLabel>
@@ -40,6 +39,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QUrl>
 
 using namespace std;
 using namespace Utils;

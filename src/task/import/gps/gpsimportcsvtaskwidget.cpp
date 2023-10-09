@@ -24,7 +24,6 @@
 #include "textfieldhexvalidator.h"
 #include "textfieldoctvalidator.h"
 
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>

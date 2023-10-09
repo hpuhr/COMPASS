@@ -25,7 +25,6 @@
 
 #include <QCheckBox>
 #include <QComboBox>
-#include <QFileDialog>
 #include <QFormLayout>
 #include <QFrame>
 #include <QInputDialog>
@@ -180,89 +179,6 @@ void ASTERIXImportTaskWidget::addMappingsTab()
 }
 
 ASTERIXImportTaskWidget::~ASTERIXImportTaskWidget() { config_widget_ = nullptr; }
-
-//void ASTERIXImportTaskWidget::addFileSlot()
-//{
-//    QFileDialog dialog(this);
-//    dialog.setWindowTitle("Add ASTERIX File(s)");
-//    // dialog.setDirectory(QDir::homePath());
-//    dialog.setFileMode(QFileDialog::ExistingFiles);
-//    // dialog.setNameFilter(trUtf8("Splits (*.000 *.001)"));
-//    QStringList fileNames;
-//    if (dialog.exec())
-//    {
-//        for (auto& filename : dialog.selectedFiles())
-//            addFile(filename.toStdString());
-//    }
-//}
-
-//void ASTERIXImportTaskWidget::addFile(const std::string& filename)
-//{
-//    if (!task_.hasFile(filename))
-//        task_.addFile(filename);
-//}
-
-//void ASTERIXImportTaskWidget::selectFile(const std::string& filename)
-//{
-//    assert(task_.hasFile(filename));
-//    task_.importFilename(filename);
-
-//    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
-//    assert (items.size() > 0);
-
-//    for (auto item_it : items)
-//    {
-//        assert (item_it);
-//        file_list_->setCurrentItem(item_it);
-//    }
-//}
-
-//void ASTERIXImportTaskWidget::deleteFileSlot()
-//{
-//    loginf << "ASTERIXImportTaskWidget: deleteFileSlot";
-
-//    if (!file_list_->currentItem() || !task_.importFilename().size())
-//    {
-//        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Deletion Failed",
-//                              "Please select a file in the list.", QMessageBox::Ok);
-//        m_warning.exec();
-//        return;
-//    }
-
-//    assert(task_.importFilename().size());
-//    assert(task_.hasFile(task_.importFilename()));
-//    task_.removeCurrentFilename();
-//}
-
-//void ASTERIXImportTaskWidget::deleteAllFiles()
-//{
-//    loginf << "ASTERIXImportTaskWidget: deleteAllFiles";
-//    task_.removeAllFiles();
-//}
-
-//void ASTERIXImportTaskWidget::selectedFileSlot()
-//{
-//    loginf << "ASTERIXImportTaskWidget: selectedFileSlot";
-//    assert(file_list_->currentItem());
-
-//    QString filename = file_list_->currentItem()->text();
-//    assert(task_.hasFile(filename.toStdString()));
-//    task_.importFilename(filename.toStdString());
-//}
-
-//void ASTERIXImportTaskWidget::updateFileListSlot()
-//{
-//    assert(file_list_);
-
-//    file_list_->clear();
-
-//    for (auto it : task_.fileList())
-//    {
-//        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
-//        if (it.first == task_.importFilename())
-//            file_list_->setCurrentItem(item);
-//    }
-//}
 
 void ASTERIXImportTaskWidget::addParserSlot()
 {

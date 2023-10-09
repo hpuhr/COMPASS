@@ -31,7 +31,6 @@
 #include "util/timeconv.h"
 
 #include <QCheckBox>
-#include <QFileDialog>
 #include <QFormLayout>
 #include <QFrame>
 #include <QInputDialog>

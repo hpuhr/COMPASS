@@ -81,6 +81,9 @@ public:
 
     MainWindow& mainWindow();
 
+    std::string lastUsedPath();
+    void lastUsedPath(const std::string& last_path);
+
 protected:
     bool db_opened_{false};
     bool expert_mode_ {false};
@@ -116,6 +119,8 @@ protected:
 
     std::string last_db_filename_;
     nlohmann::json db_file_list_;
+
+    std::string last_path_;
 
     bool db_export_in_progress_ {false};
 

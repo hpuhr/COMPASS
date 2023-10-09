@@ -5,6 +5,7 @@
 #include "datasourcecreatedialog.h"
 #include "util/number.h"
 #include "logger.h"
+#include "compass.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -210,7 +211,9 @@ void DataSourcesConfigurationDialog::importClickedSlot()
 {
     loginf << "DataSourcesConfigurationDialog: importClickedSlot";
 
-    string filename = QFileDialog::getOpenFileName(this, "Import Data Sources", "", "*.json").toStdString();
+    string filename = QFileDialog::getOpenFileName(
+                this, "Import Data Sources",
+                COMPASS::instance().lastUsedPath().c_str(), "*.json").toStdString();
 
     if (filename.size() > 0)
     {
@@ -250,7 +253,9 @@ void DataSourcesConfigurationDialog::exportClickedSlot()
 {
     loginf << "DataSourcesConfigurationDialog: exportClickedSlot";
 
-    string filename = QFileDialog::getSaveFileName(this, "Export Data Sources as JSON", "", "*.json").toStdString();
+    string filename = QFileDialog::getSaveFileName(
+                this, "Export Data Sources as JSON",
+                COMPASS::instance().lastUsedPath().c_str(), "*.json").toStdString();
 
     if (filename.size() > 0)
     {

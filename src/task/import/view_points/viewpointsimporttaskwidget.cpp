@@ -23,7 +23,6 @@
 #include "stringconv.h"
 
 #include <QComboBox>
-#include <QFileDialog>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>

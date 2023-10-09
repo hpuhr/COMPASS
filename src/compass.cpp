@@ -62,6 +62,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     registerParameter("last_db_filename", &last_db_filename_, "");
     registerParameter("db_file_list", &db_file_list_, json::array());
 
+    registerParameter("last_path", &last_path_, "");
+
     registerParameter("hide_evaluation", &hide_evaluation_, false);
     registerParameter("hide_viewpoints", &hide_viewpoints_, false);
 
@@ -291,6 +293,7 @@ void COMPASS::openDBFile(const std::string& filename)
         assert (db_interface_->dbOpen());
 
         addDBFileToList(filename);
+        lastUsedPath(Files::getDirectoryFromPath(filename));
 
         db_opened_ = true;
 
@@ -329,6 +332,7 @@ void COMPASS::createNewDBFile(const std::string& filename)
     assert (db_interface_->dbOpen());
 
     addDBFileToList(filename);
+    lastUsedPath(Files::getDirectoryFromPath(filename));
 
     db_opened_ = true;
 
@@ -362,6 +366,8 @@ void COMPASS::exportDBFile(const std::string& filename)
     }
 
     db_interface_->exportDBFile(filename);
+    lastUsedPath(filename);
+
 
     msg_box->close();
     delete msg_box;
@@ -510,6 +516,17 @@ MainWindow& COMPASS::mainWindow()
     assert(main_window_);
     return *main_window_;
 }
+
+std::string COMPASS::lastUsedPath()
+{
+    return last_path_;
+}
+
+void COMPASS::lastUsedPath(const std::string& last_path)
+{
+    last_path_ = last_path;
+}
+
 
 bool COMPASS::disableConfirmResetViews() const
 {

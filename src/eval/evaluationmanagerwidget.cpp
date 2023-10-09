@@ -33,7 +33,6 @@
 
 #include <QCheckBox>
 #include <QComboBox>
-#include <QFileDialog>
 #include <QFormLayout>
 #include <QFrame>
 #include <QInputDialog>
