@@ -745,7 +745,7 @@ void MainWindow::importAsterixRecordingSlot()
         {
             assert (Files::fileExists(filename.toStdString()));
             task.addImportFileName(filename.toStdString());
-            COMPASS::instance().lastUsedPath(filename.toStdString());
+            COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename.toStdString()));
         }
 
         updateMenus();
@@ -814,7 +814,7 @@ void MainWindow::importJSONRecordingSlot()
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().jsonImporterTask().importFilename(filename); // also adds
-        COMPASS::instance().lastUsedPath(filename);
+        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
         updateMenus();
 
@@ -833,7 +833,7 @@ void MainWindow::importGPSTrailSlot()
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().gpsTrailImportTask().importFilename(filename);
-        COMPASS::instance().lastUsedPath(filename);
+        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
         updateMenus();
 
@@ -850,7 +850,7 @@ void MainWindow::importGPSCSVSlot()
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().gpsImportCSVTask().importFilename(filename);
-        COMPASS::instance().lastUsedPath(filename);
+        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
         updateMenus();
 
@@ -866,7 +866,7 @@ void MainWindow::importViewPointsSlot()
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().viewPointsImportTask().importFilename(filename);
-        COMPASS::instance().lastUsedPath(filename);
+        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
         updateMenus();
 

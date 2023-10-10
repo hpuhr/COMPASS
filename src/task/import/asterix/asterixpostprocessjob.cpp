@@ -477,6 +477,9 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         {
             if (!projection.hasCoordinateSystem(ds_id_it))
             {
+                if (ds_man.hasConfigDataSource(ds_id_it) && ds_man.configDataSource(ds_id_it).dsType() != "Radar")
+                    continue; // ok for non-radars
+
                 logwrn << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: data source id "
                        << ds_id_it << " not set up"; // should have been in ASTERIX import task
             }

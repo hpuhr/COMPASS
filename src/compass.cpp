@@ -366,7 +366,7 @@ void COMPASS::exportDBFile(const std::string& filename)
     }
 
     db_interface_->exportDBFile(filename);
-    lastUsedPath(filename);
+    lastUsedPath(Files::getDirectoryFromPath(filename));
 
 
     msg_box->close();
@@ -519,11 +519,13 @@ MainWindow& COMPASS::mainWindow()
 
 std::string COMPASS::lastUsedPath()
 {
+    loginf << "COMPASS: lastUsedPath: return '" << last_path_ << "'";
     return last_path_;
 }
 
 void COMPASS::lastUsedPath(const std::string& last_path)
 {
+    loginf << "COMPASS: lastUsedPath: set '" << last_path << "'";
     last_path_ = last_path;
 }
 
