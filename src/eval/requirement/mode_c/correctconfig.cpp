@@ -36,7 +36,7 @@ ModeCCorrectConfig::ModeCCorrectConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("max_distance_ft", &max_distance_ft_, 300);
+    registerParameter("max_distance_ft", &max_distance_ft_, 300.0f);
 
 }
 

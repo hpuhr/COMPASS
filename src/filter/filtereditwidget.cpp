@@ -183,24 +183,23 @@ void FilterEditWidget::addCondition()
         filter_name + condition_variable_widget_->selectedVariable().name() + "Condition" +
         std::to_string(filter_->getNumConditions());  // TODO not the best way
 
-    Configuration& condition_configuration =
-        filter_->addNewSubConfiguration("DBFilterCondition", condition_name);
-    condition_configuration.addParameterString("operator", operator_str);
-    condition_configuration.addParameterString(
-        "variable_name", condition_variable_widget_->selectedVariable().name());
-    condition_configuration.addParameterString(
-        "variable_dbcontent_name", condition_variable_widget_->selectedVariable().dbContentName());
-    condition_configuration.addParameterBool("absolute_value",
-                                             condition_absolute_->checkState() == Qt::Checked);
-    condition_configuration.addParameterString("value", value);
+    auto condition_configuration = Configuration::create("DBFilterCondition", condition_name);
+
+    condition_configuration->addParameter<std::string>("operator", operator_str);
+    condition_configuration->addParameter<std::string>("variable_name", condition_variable_widget_->selectedVariable().name());
+    condition_configuration->addParameter<std::string>("variable_dbcontent_name", condition_variable_widget_->selectedVariable().dbContentName());
+    condition_configuration->addParameter<bool>("absolute_value", condition_absolute_->checkState() == Qt::Checked);
+    condition_configuration->addParameter<std::string>("value", value);
+    
     std::string reset_value;
     if (reset_value_str.compare("MIN") == 0 || reset_value_str.compare("MAX") == 0)
         reset_value = reset_value_str;
     else
         reset_value = value;
-    condition_configuration.addParameterString("reset_value", reset_value);
 
-    filter_->generateSubConfigurable("DBFilterCondition", condition_name);
+    condition_configuration->addParameter<std::string>("reset_value", reset_value);
+
+    filter_->generateSubConfigurableFromConfig(std::move(condition_configuration));
 
     updateConditionsGrid();
 }

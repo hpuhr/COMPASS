@@ -526,11 +526,11 @@ void Client::checkAndSetupConfig()
                             "COMPASS", "COMPASS0");
 
                 assert (compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
-                Configuration& task_man_config = compass_config.getSubConfiguration(
+                Configuration& task_man_config = compass_config.assertSubConfiguration(
                             "TaskManager", "TaskManager0");
 
                 assert (task_man_config.hasSubConfiguration("GPSTrailImportTask", "GPSTrailImportTask0"));
-                Configuration& gps_task_config = task_man_config.getSubConfiguration(
+                Configuration& gps_task_config = task_man_config.assertSubConfiguration(
                             "GPSTrailImportTask", "GPSTrailImportTask0");
 
                 gps_task_config.overrideJSONParameters(gps_config);
@@ -556,7 +556,7 @@ void Client::checkAndSetupConfig()
                             "COMPASS", "COMPASS0");
 
                 assert (compass_config.hasSubConfiguration("EvaluationManager", "EvaluationManager0"));
-                Configuration& eval_man_config = compass_config.getSubConfiguration(
+                Configuration& eval_man_config = compass_config.assertSubConfiguration(
                             "EvaluationManager", "EvaluationManager0");
 
                 eval_man_config.overrideJSONParameters(eval_config);

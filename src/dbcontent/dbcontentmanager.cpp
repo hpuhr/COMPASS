@@ -65,8 +65,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
 
-    registerParameter("max_live_data_age_cache", &max_live_data_age_cache_, 5);
-    registerParameter("max_live_data_age_db", &max_live_data_age_db_, 60);
+    registerParameter("max_live_data_age_cache", &max_live_data_age_cache_, 5u);
+    registerParameter("max_live_data_age_db", &max_live_data_age_db_, 60u);
 
     createSubConfigurables();
 

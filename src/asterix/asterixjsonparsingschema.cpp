@@ -5,7 +5,7 @@ ASTERIXJSONParsingSchema::ASTERIXJSONParsingSchema(const std::string& class_id, 
                                                    ASTERIXImportTask& task)
     : Configurable(class_id, instance_id, &task), task_(task)
 {
-    registerParameter("name", &name_, "");
+    registerParameter<std::string>("name", &name_, "");
 
     assert(name_.size());
 
@@ -29,16 +29,16 @@ ASTERIXJSONParsingSchema::ASTERIXJSONParsingSchema(const std::string& class_id, 
 //}
 
 void ASTERIXJSONParsingSchema::generateSubConfigurable(const std::string& class_id,
-                                                const std::string& instance_id)
+                                                       const std::string& instance_id)
 {
     if (class_id == "ASTERIXJSONParser")
     {
-        Configuration& sub_config = configuration().getSubConfiguration(class_id, instance_id);
+        const Configuration& sub_config = Configurable::getSubConfiguration(class_id, instance_id);
 
         unsigned int category;
 
-        if (sub_config.hasParameterConfigValueUint("category"))
-            category = sub_config.getParameterConfigValueUint("category");
+        if (sub_config.hasParameterConfigValue("category"))
+            category = sub_config.getParameterConfigValue<unsigned int>("category");
 
         assert(parsers_.find(category) == parsers_.end());
 
@@ -48,8 +48,10 @@ void ASTERIXJSONParsingSchema::generateSubConfigurable(const std::string& class_
         parsers_[category].reset(new ASTERIXJSONParser(class_id, instance_id, this, task_));
     }
     else
+    {
         throw std::runtime_error("ASTERIXJSONParsingSchema: generateSubConfigurable: unknown class_id " +
                                  class_id);
+    }
 }
 
 std::string ASTERIXJSONParsingSchema::name() const { return name_; }

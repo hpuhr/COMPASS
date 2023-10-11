@@ -42,29 +42,29 @@ LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& i
     registerParameter("label_config", &label_config_, json::object());
     registerParameter("label_ds_ids", &label_ds_ids_, json::object());
     registerParameter("declutter_labels", &declutter_labels_, true);
-    registerParameter("max_declutter_labels", &max_declutter_labels_, 200);
+    registerParameter("max_declutter_labels", &max_declutter_labels_, 200u);
 
     registerParameter("filter_mode3a_active", &filter_mode3a_active_, false);
-    registerParameter("filter_mode3a_values", &filter_mode3a_values_, "7000,7777");
+    registerParameter("filter_mode3a_values", &filter_mode3a_values_, std::string("7000,7777"));
     updateM3AValuesFromStr(filter_mode3a_values_);
 
     registerParameter("filter_modec_min_active", &filter_modec_min_active_, false);
-    registerParameter("filter_modec_min_value", &filter_modec_min_value_, 10);
+    registerParameter("filter_modec_min_value", &filter_modec_min_value_, 10.0f);
     registerParameter("filter_modec_max_active", &filter_modec_max_active_, false);
-    registerParameter("filter_modec_max_value", &filter_modec_max_value_, 400);
+    registerParameter("filter_modec_max_value", &filter_modec_max_value_, 400.0f);
     registerParameter("filter_modec_null_wanted", &filter_modec_null_wanted_, false);
 
     registerParameter("filter_ti_active", &filter_ti_active_, false);
-    registerParameter("filter_ti_values", &filter_ti_values_, "OE");
+    registerParameter("filter_ti_values", &filter_ti_values_, std::string("OE"));
     updateTIValuesFromStr(filter_ti_values_);
 
     registerParameter("filter_ta_active", &filter_ta_active_, false);
-    registerParameter("filter_ta_values", &filter_ta_values_, "AADDCC");
+    registerParameter("filter_ta_values", &filter_ta_values_, std::string("AADDCC"));
     updateTAValuesFromStr(filter_ta_values_);
 
     registerParameter("filter_primary_only_activ", &filter_primary_only_active_, false);
 
-    registerParameter("label_opacity", &label_opacity_, 0.9);
+    registerParameter("label_opacity", &label_opacity_, 0.9f);
 
     createSubConfigurables();
 }

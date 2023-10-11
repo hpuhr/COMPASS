@@ -66,32 +66,32 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 ,   results_gen_(*this, settings_)
 ,   pdf_gen_    (*this, settings_)
 {
-    registerParameter("dbcontent_name_ref", &settings_.dbcontent_name_ref_, "RefTraj");
-    registerParameter("line_id_ref", &settings_.line_id_ref_, 0);
+    registerParameter("dbcontent_name_ref", &settings_.dbcontent_name_ref_, std::string("RefTraj"));
+    registerParameter("line_id_ref", &settings_.line_id_ref_, 0u);
     registerParameter("active_sources_ref", &settings_.active_sources_ref_, json::object());
 
     data_sources_ref_ = settings_.active_sources_ref_.get<std::map<std::string, std::map<std::string, bool>>>();
 
      //j.at("foo").get<std::map<std::string, int>>();
 
-    registerParameter("dbcontent_name_tst", &settings_.dbcontent_name_tst_, "CAT062");
-    registerParameter("line_id_tst", &settings_.line_id_tst_, 0);
+    registerParameter("dbcontent_name_tst", &settings_.dbcontent_name_tst_, std::string("CAT062"));
+    registerParameter("line_id_tst", &settings_.line_id_tst_, 0u);
     registerParameter("active_sources_tst", &settings_.active_sources_tst_, json::object());
     data_sources_tst_ = settings_.active_sources_tst_.get<std::map<std::string, std::map<std::string, bool>>>();
 
-    registerParameter("current_standard", &settings_.current_standard_, "");
+    registerParameter("current_standard", &settings_.current_standard_, std::string());
 
     registerParameter("use_grp_in_sector", &settings_.use_grp_in_sector_, json::object());
     registerParameter("use_requirement", &settings_.use_requirement_, json::object());
 
-    registerParameter("max_ref_time_diff", &settings_.max_ref_time_diff_, 4.0);
+    registerParameter("max_ref_time_diff", &settings_.max_ref_time_diff_, 4.0f);
 
     // load filter
     registerParameter("use_load_filter", &settings_.use_load_filter_, false);
 
     registerParameter("use_timestamp_filter", &settings_.use_timestamp_filter_, false);
-    registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, "");
-    registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, "");
+    registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, std::string());
+    registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, std::string());
 
     if (settings_.load_timestamp_begin_str_.size())
         load_timestamp_begin_ = Time::fromString(settings_.load_timestamp_begin_str_);
@@ -100,7 +100,7 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
         load_timestamp_end_ = Time::fromString(settings_.load_timestamp_end_str_);
 
     registerParameter("use_ref_traj_accuracy_filter_", &settings_.use_ref_traj_accuracy_filter_, false);
-    registerParameter("ref_traj_minimum_accuracy", &settings_.ref_traj_minimum_accuracy_, 30.0);
+    registerParameter("ref_traj_minimum_accuracy", &settings_.ref_traj_minimum_accuracy_, 30.0f);
 
     registerParameter("use_adsb_filter", &settings_.use_adsb_filter_, false);
     registerParameter("use_v0", &settings_.use_v0_, true);
@@ -109,43 +109,43 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     // nucp
     registerParameter("use_min_nucp", &settings_.use_min_nucp_, true);
-    registerParameter("min_nucp", &settings_.min_nucp_, 4);
+    registerParameter("min_nucp", &settings_.min_nucp_, 4u);
 
     registerParameter("use_max_nucp", &settings_.use_max_nucp_, true);
-    registerParameter("max_nucp", &settings_.max_nucp_, 4);
+    registerParameter("max_nucp", &settings_.max_nucp_, 4u);
 
     // nic
     registerParameter("use_min_nic", &settings_.use_min_nic_, true);
-    registerParameter("min_nic", &settings_.min_nic_, 5);
+    registerParameter("min_nic", &settings_.min_nic_, 5u);
 
     registerParameter("use_max_nic", &settings_.use_max_nic_, true);
-    registerParameter("max_nic", &settings_.max_nic_, 5);
+    registerParameter("max_nic", &settings_.max_nic_, 5u);
 
     // nacp
     registerParameter("use_min_nacp", &settings_.use_min_nacp_, true);
-    registerParameter("min_nacp", &settings_.min_nacp_, 5);
+    registerParameter("min_nacp", &settings_.min_nacp_, 5u);
 
     registerParameter("use_max_nacp", &settings_.use_max_nacp_, true);
-    registerParameter("max_nacp", &settings_.max_nacp_, 5);
+    registerParameter("max_nacp", &settings_.max_nacp_, 5u);
 
     // sil v1
     registerParameter("use_min_sil_v1", &settings_.use_min_sil_v1_, true);
-    registerParameter("min_sil_v1", &settings_.min_sil_v1_, 2);
+    registerParameter("min_sil_v1", &settings_.min_sil_v1_, 2u);
 
     registerParameter("use_max_sil_v1", &settings_.use_max_sil_v1_, true);
-    registerParameter("max_sil_v1", &settings_.max_sil_v1_, 2);
+    registerParameter("max_sil_v1", &settings_.max_sil_v1_, 2u);
 
     // sil v2
     registerParameter("use_min_sil_v2", &settings_.use_min_sil_v2_, true);
-    registerParameter("min_sil_v2", &settings_.min_sil_v2_, 4);
+    registerParameter("min_sil_v2", &settings_.min_sil_v2_, 4u);
 
     registerParameter("use_max_sil_v2", &settings_.use_max_sil_v2_, true);
-    registerParameter("max_sil_v2", &settings_.max_sil_v2_, 4);
+    registerParameter("max_sil_v2", &settings_.max_sil_v2_, 4u);
 
     registerParameter("result_detail_zoom", &settings_.result_detail_zoom_, 0.02);
 
     // min height filter
-    registerParameter("min_height_filter_layer", &settings_.min_height_filter_layer_, "");
+    registerParameter("min_height_filter_layer", &settings_.min_height_filter_layer_, std::string());
 
     // report stuff
     registerParameter("report_skip_no_data_details", &settings_.report_skip_no_data_details_, true);
@@ -153,14 +153,14 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("report_split_results_by_aconly_ms", &settings_.report_split_results_by_aconly_ms_, false);
     registerParameter("report_show_adsb_info", &settings_.report_show_adsb_info_, false);
 
-    registerParameter("report_author", &settings_.report_author_, "");
+    registerParameter("report_author", &settings_.report_author_, std::string());
 
     if (!settings_.report_author_.size())
         settings_.report_author_ = System::getUserName();
     if (!settings_.report_author_.size())
         settings_.report_author_ = "User";
 
-    registerParameter("report_abstract", &settings_.report_abstract_, "");
+    registerParameter("report_abstract", &settings_.report_abstract_, std::string());
 
     registerParameter("report_include_target_details", &settings_.report_include_target_details_, false);
     registerParameter("report_skip_targets_wo_issues", &settings_.report_skip_targets_wo_issues_, false);
@@ -168,8 +168,8 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     registerParameter("show_ok_joined_target_reports", &settings_.show_ok_joined_target_reports_, false);
 
-    registerParameter("report_num_max_table_rows", &settings_.report_num_max_table_rows_, 1000);
-    registerParameter("report_num_max_table_col_width", &settings_.report_num_max_table_col_width_, 18);
+    registerParameter("report_num_max_table_rows", &settings_.report_num_max_table_rows_, 1000u);
+    registerParameter("report_num_max_table_col_width", &settings_.report_num_max_table_col_width_, 18u);
 
     registerParameter("report_wait_on_map_loading", &settings_.report_wait_on_map_loading_, true);
 
@@ -1464,16 +1464,10 @@ void EvaluationManager::copyCurrentStandard (const std::string& new_name)
     assert (hasCurrentStandard());
     assert (!hasStandard(new_name));
 
-    //Configuration new_config = currentStandard().configuration();
+    nlohmann::json data;
+    data["parameters"]["name"] = new_name;
 
-    nlohmann::json current_json_cfg;
-    currentStandard().configuration().generateJSON(current_json_cfg);
-    current_json_cfg["parameters"]["name"] = new_name;
-
-    Configuration& config = addNewSubConfiguration("EvaluationStandard");
-    config.parseJSONConfig(current_json_cfg);
-    //config.addParameterString("name", new_name);
-    generateSubConfigurable("EvaluationStandard", config.getInstanceId());
+    Configurable::generateSubConfigurableFromJSON(currentStandard(), data, "EvaluationStandard");
 
     settings_.current_standard_ = new_name;
 
@@ -1511,10 +1505,10 @@ void EvaluationManager::addStandard(const std::string& name)
 
     std::string instance = "EvaluationStandard" + name + "0";
 
-    Configuration& config = addNewSubConfiguration("EvaluationStandard", instance);
-    config.addParameterString("name", name);
+    auto config = Configuration::create("EvaluationStandard", instance);
+    config->addParameter<std::string>("name", name);
 
-    generateSubConfigurable("EvaluationStandard", instance);
+    generateSubConfigurableFromConfig(std::move(config));
 
     emit standardsChangedSignal();
 

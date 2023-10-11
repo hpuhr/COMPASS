@@ -68,7 +68,7 @@ DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
 {
     boost::mutex::scoped_lock locker(connection_mutex_);
 
-    registerParameter("read_chunk_size", &read_chunk_size_, 50000);
+    registerParameter("read_chunk_size", &read_chunk_size_, 50000u);
 
     createSubConfigurables();
 }
@@ -249,8 +249,7 @@ void DBInterface::checkSubConfigurables()
 {
     if (!db_connection_)
     {
-        addNewSubConfiguration("SQLiteConnection", "SQLite Connection");
-        generateSubConfigurable("SQLiteConnection", "SQLite Connection");
+        generateSubConfigurableFromConfig(Configuration::create("SQLiteConnection", "SQLite Connection"));
     }
 }
 

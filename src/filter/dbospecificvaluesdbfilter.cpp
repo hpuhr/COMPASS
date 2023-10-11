@@ -35,9 +35,9 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
 {
     logdbg << "DBOSpecificValuesDBFilter: constructor";
 
-    registerParameter("dbcontent_name", &dbcontent_name_, "");
-    registerParameter("variable_name", &variable_name_, "");
-    registerParameter("condition_operator", &condition_operator_, "");
+    registerParameter("dbcontent_name", &dbcontent_name_, std::string());
+    registerParameter("variable_name", &variable_name_, std::string());
+    registerParameter("condition_operator", &condition_operator_, std::string());
 
     // dbobject
     if (!COMPASS::instance().dbContentManager().existsDBContent(dbcontent_name_))
@@ -254,13 +254,13 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
 //        {
 //            logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables: creating new condition " << ds_name;
 //            Configuration& config = addNewSubConfiguration("DBFilterCondition", ds_name);
-//            config.addParameterString("reset_value", "4227");
-//            config.addParameterString("value", "4227");
-//            config.addParameterString("variable_dbcontent_name", dbcontent_name_);
-//            config.addParameterString("variable_name", variable_name_);
-//            config.addParameterBool("op_and", false);
-//            config.addParameterString("operator", condition_operator_);
-//            config.addParameterBool("display_instance_id", true);
+//            config.addParameter<std::string>("reset_value", "4227");
+//            config.addParameter<std::string>("value", "4227");
+//            config.addParameter<std::string>("variable_dbcontent_name", dbcontent_name_);
+//            config.addParameter<std::string>("variable_name", variable_name_);
+//            config.addParameter<bool>("op_and", false);
+//            config.addParameter<std::string>("operator", condition_operator_);
+//            config.addParameter<bool>("display_instance_id", true);
 //            generateSubConfigurable("DBFilterCondition", config.getInstanceId());
 //        }
 //    }

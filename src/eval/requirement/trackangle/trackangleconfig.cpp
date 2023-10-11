@@ -36,10 +36,10 @@ TrackAngleConfig::TrackAngleConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold", &threshold_, 15.0);
+    registerParameter("threshold", &threshold_, 15.0f);
 
     registerParameter("use_minimum_speed", &use_minimum_speed_, true);
-    registerParameter("minimum_speed", &minimum_speed_, 3.0);
+    registerParameter("minimum_speed", &minimum_speed_, 3.0f);
 
     registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,
                       (unsigned int) COMPARISON_TYPE::LESS_THAN_OR_EQUAL);

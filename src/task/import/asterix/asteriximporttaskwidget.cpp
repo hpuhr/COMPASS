@@ -215,11 +215,11 @@ void ASTERIXImportTaskWidget::addParserSlot()
 
         std::string instance = "ASTERIXJSONParserCAT" + to_string(cat) + "0";
 
-        Configuration& config = current->addNewSubConfiguration("ASTERIXJSONParser", instance);
-        config.addParameterUnsignedInt("category", cat);
-        config.addParameterString("dbcontent_name", dbcontent_name);
+        auto config = Configuration::create("ASTERIXJSONParser", instance);
+        config->addParameter<unsigned int>("category", cat);
+        config->addParameter<std::string>("dbcontent_name", dbcontent_name);
 
-        current->generateSubConfigurable("JSONObjectParser", instance);
+        current->generateSubConfigurableFromConfig(std::move(config));
         updateParserBox();
     }
 }

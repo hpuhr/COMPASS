@@ -50,10 +50,11 @@ void Dimension::generateSubConfigurable(const std::string& class_id, const std::
 
 void Dimension::addUnit(const std::string& name, double factor, const std::string& definition)
 {
-    Configuration& config = addNewSubConfiguration("Unit", name);
-    config.addParameterDouble("factor", factor);
-    config.addParameterString("definition", definition);
-    generateSubConfigurable("Unit", name);
+    auto config = Configuration::create("Unit", name);
+    config->addParameter<double>("factor", factor);
+    config->addParameter<std::string>("definition", definition);
+
+    generateSubConfigurableFromConfig(std::move(config));
 }
 
 bool Dimension::hasUnit(const std::string& unit) const { return units_.find(unit) != units_.end(); }

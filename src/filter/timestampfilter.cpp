@@ -15,8 +15,8 @@ TimestampFilter::TimestampFilter(const std::string& class_id, const std::string&
                                  Configurable* parent)
     : DBFilter(class_id, instance_id, parent, false)
 {
-    registerParameter("min_value", &min_value_str_, "");
-    registerParameter("max_value", &max_value_str_, "");
+    registerParameter("min_value", &min_value_str_, std::string());
+    registerParameter("max_value", &max_value_str_, std::string());
 
     if (min_value_str_.size())
         min_value_ = Time::fromString(min_value_str_);

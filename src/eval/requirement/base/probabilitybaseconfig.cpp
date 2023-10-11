@@ -7,7 +7,7 @@ ProbabilityBaseConfig::ProbabilityBaseConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("prob", &prob_, 0.9);
+    registerParameter("prob", &prob_, 0.9f);
     registerParameter("prob_check_type", (unsigned int*)&prob_check_type_,
                       (unsigned int)COMPARISON_TYPE::GREATER_THAN_OR_EQUAL);
 

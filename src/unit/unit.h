@@ -39,7 +39,7 @@ class Unit : public Configurable
     Unit(const std::string& class_id, const std::string& instance_id, Dimension& parent)
         : Configurable(class_id, instance_id, &parent)
     {
-        registerParameter("definition", &definition_, "");
+        registerParameter("definition", &definition_, std::string());
         registerParameter("factor", &factor_, 1.0);
 
         loginf << "Unit: constructor: dimension " << parent.instanceId() << " unit " << instance_id

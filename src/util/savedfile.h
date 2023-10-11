@@ -26,7 +26,7 @@ class SavedFile : public Configurable
     SavedFile(const std::string class_id, const std::string& instance_id, Configurable* parent)
         : Configurable(class_id, instance_id, parent)
     {
-        registerParameter("name", &name_, "");
+        registerParameter("name", &name_, std::string());
     }
     virtual ~SavedFile() {}
 

@@ -25,7 +25,7 @@ Projection::Projection(const std::string& class_id, const std::string& instance_
                        ProjectionManager& proj_manager)
     : Configurable(class_id, instance_id, &proj_manager), proj_manager_(proj_manager)
 {
-    registerParameter("name", &name_, "");
+    registerParameter("name", &name_, std::string());
 
     assert(name_.size());
 

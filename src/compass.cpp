@@ -59,7 +59,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     simple_config_.reset(new SimpleConfig("config.json"));
 
-    registerParameter("last_db_filename", &last_db_filename_, "");
+    registerParameter("last_db_filename", &last_db_filename_, std::string());
     registerParameter("db_file_list", &db_file_list_, json::array());
 
     vector<string> cleaned_file_list;
@@ -72,7 +72,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     }
     db_file_list_ = cleaned_file_list;
 
-    registerParameter("last_path", &last_path_, "");
+    registerParameter("last_path", &last_path_, {});
 
     if (!Files::directoryExists(last_path_))
         last_path_ = QDir::homePath().toStdString();
@@ -87,8 +87,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     registerParameter("disable_add_remove_views", &disable_add_remove_views_, false);
 
-    registerParameter("auto_live_running_resume_ask_time", &auto_live_running_resume_ask_time_, 60);
-    registerParameter("auto_live_running_resume_ask_wait_time", &auto_live_running_resume_ask_wait_time_, 1);
+    registerParameter("auto_live_running_resume_ask_time", &auto_live_running_resume_ask_time_, 60u);
+    registerParameter("auto_live_running_resume_ask_wait_time", &auto_live_running_resume_ask_wait_time_, 1u);
 
     registerParameter("disable_confirm_reset_views", &disable_confirm_reset_views_, false);
 
@@ -247,44 +247,37 @@ void COMPASS::checkSubConfigurables()
 {
     if (!db_interface_)
     {
-        addNewSubConfiguration("DBInterface", "DBInterface0");
-        generateSubConfigurable("DBInterface", "DBInterface0");
+        generateSubConfigurableFromConfig("DBInterface", "DBInterface0");
         assert(db_interface_);
     }
     if (!dbcontent_manager_)
     {
-        addNewSubConfiguration("DBContentManager", "DBContentManager0");
-        generateSubConfigurable("DBContentManager", "DBContentManager0");
+        generateSubConfigurableFromConfig("DBContentManager", "DBContentManager0");
         assert(dbcontent_manager_);
     }
     if (!ds_manager_)
     {
-        addNewSubConfiguration("DataSourceManager", "DataSourceManager0");
-        generateSubConfigurable("DataSourceManager", "DataSourceManager0");
+        generateSubConfigurableFromConfig("DataSourceManager", "DataSourceManager0");
         assert(dbcontent_manager_);
     }
     if (!filter_manager_)
     {
-        addNewSubConfiguration("FilterManager", "FilterManager0");
-        generateSubConfigurable("FilterManager", "FilterManager0");
+        generateSubConfigurableFromConfig("FilterManager", "FilterManager0");
         assert(filter_manager_);
     }
     if (!task_manager_)
     {
-        addNewSubConfiguration("TaskManager", "TaskManager0");
-        generateSubConfigurable("TaskManager", "TaskManager0");
+        generateSubConfigurableFromConfig("TaskManager", "TaskManager0");
         assert(task_manager_);
     }
     if (!view_manager_)
     {
-        addNewSubConfiguration("ViewManager", "ViewManager0");
-        generateSubConfigurable("ViewManager", "ViewManager0");
+        generateSubConfigurableFromConfig("ViewManager", "ViewManager0");
         assert(view_manager_);
     }
     if (!eval_manager_)
     {
-        addNewSubConfiguration("EvaluationManager", "EvaluationManager0");
-        generateSubConfigurable("EvaluationManager", "EvaluationManager0");
+        generateSubConfigurableFromConfig("EvaluationManager", "EvaluationManager0");
         assert(eval_manager_);
     }
 }

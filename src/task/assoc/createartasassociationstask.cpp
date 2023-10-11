@@ -53,22 +53,22 @@ CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& clas
             "Allows creation of target report association based on ARTAS tracks and the TRI "
         "information.";
 
-    registerParameter("current_data_source_name", &current_data_source_name_, "");
+    registerParameter("current_data_source_name", &current_data_source_name_, std::string());
 
     // time stuff
-    registerParameter("end_track_time", &end_track_time_, 300.0);
+    registerParameter("end_track_time", &end_track_time_, 300.0f);
 
-    registerParameter("association_time_past", &association_time_past_, 60.0);
-    registerParameter("association_time_future", &association_time_future_, 2.0);
+    registerParameter("association_time_past", &association_time_past_, 60.0f);
+    registerParameter("association_time_future", &association_time_future_, 2.0f);
 
-    registerParameter("misses_acceptable_time", &misses_acceptable_time_, 60.0);
+    registerParameter("misses_acceptable_time", &misses_acceptable_time_, 60.0f);
 
     registerParameter("associations_dubious_distant_time", &associations_dubious_distant_time_,
-                      30.0);
+                      30.0f);
     registerParameter("association_dubious_close_time_past", &association_dubious_close_time_past_,
-                      20.0);
+                      20.0f);
     registerParameter("association_dubious_close_time_future",
-                      &association_dubious_close_time_future_, 1.0);
+                      &association_dubious_close_time_future_, 1.0f);
 
     // track flag stuff
     registerParameter("ignore_track_end_associations", &ignore_track_end_associations_, true);

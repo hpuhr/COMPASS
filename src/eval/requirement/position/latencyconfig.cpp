@@ -36,12 +36,11 @@ PositionLatencyConfig::PositionLatencyConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("max_abs_value", &max_abs_value_, 0.050);
+    registerParameter("max_abs_value", &max_abs_value_, 0.050f);
 }
 
 PositionLatencyConfig::~PositionLatencyConfig()
 {
-
 }
 
 std::shared_ptr<Base> PositionLatencyConfig::createRequirement()

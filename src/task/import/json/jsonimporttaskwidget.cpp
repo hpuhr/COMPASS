@@ -253,10 +253,10 @@ void JSONImportTaskWidget::addSchemaSlot()
 
         std::string instance = "JSONParsingSchema" + name + "0";
 
-        Configuration& config = task_.addNewSubConfiguration("JSONParsingSchema", instance);
-        config.addParameterString("name", name);
+        auto config = Configuration::create("JSONParsingSchema", instance);
+        config->addParameter<std::string>("name", name);
 
-        task_.generateSubConfigurable("JSONParsingSchema", instance);
+        task_.generateSubConfigurableFromConfig(std::move(config));
         updateSchemasBox();
     }
 }
@@ -369,10 +369,10 @@ void JSONImportTaskWidget::addObjectParserSlot()
 
         std::string instance = "JSONObjectParser" + dbcontent_name + "0";
 
-        Configuration& config = current->addNewSubConfiguration("JSONObjectParser", instance);
-        config.addParameterString("dbcontent_name", dbcontent_name);
+        auto config = Configuration::create("JSONObjectParser", instance);
+        config->addParameter<std::string>("dbcontent_name", dbcontent_name);
 
-        current->generateSubConfigurable("JSONObjectParser", instance);
+        current->generateSubConfigurableFromConfig(std::move(config));
         updateParserBox();
     }
 }

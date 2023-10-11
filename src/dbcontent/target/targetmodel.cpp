@@ -25,7 +25,7 @@ TargetModel::TargetModel(const std::string& class_id, const std::string& instanc
     // remove utn stuff
     // shorts
     registerParameter("remove_short_targets", &remove_short_targets_, true);
-    registerParameter("remove_short_targets_min_updates", &remove_short_targets_min_updates_, 10);
+    registerParameter("remove_short_targets_min_updates", &remove_short_targets_min_updates_, 10u);
     registerParameter("remove_short_targets_min_duration", &remove_short_targets_min_duration_, 60.0);
     // psr
     registerParameter("remove_psr_only_targets", &remove_psr_only_targets_, true);
@@ -33,18 +33,17 @@ TargetModel::TargetModel(const std::string& class_id, const std::string& instanc
     registerParameter("remove_modeac_onlys", &remove_modeac_onlys_, false);
     registerParameter("filter_mode_a_codes", &filter_mode_a_codes_, false);
     registerParameter("filter_mode_a_code_blacklist", &filter_mode_a_code_blacklist_, true);
-    registerParameter("filter_mode_a_code_values", &filter_mode_a_code_values_, "7000,7777");
+    registerParameter("filter_mode_a_code_values", &filter_mode_a_code_values_, std::string("7000,7777"));
     // mc
     registerParameter("remove_mode_c_values", &remove_mode_c_values_, false);
-    registerParameter("remove_mode_c_min_value", &remove_mode_c_min_value_, 11000);
+    registerParameter("remove_mode_c_min_value", &remove_mode_c_min_value_, 11000.0f);
     // ta
     registerParameter("filter_target_addresses", &filter_target_addresses_, false);
     registerParameter("filter_target_addresses_blacklist", &filter_target_addresses_blacklist_, true);
-    registerParameter("filter_target_address_values", &filter_target_address_values_, "");
+    registerParameter("filter_target_address_values", &filter_target_address_values_, std::string());
     // dbo
     registerParameter("remove_not_detected_dbos", &remove_not_detected_dbos_, false);
     registerParameter("remove_not_detected_dbo_values", &remove_not_detected_dbo_values_, json::object());
-
 
     createSubConfigurables();
 }

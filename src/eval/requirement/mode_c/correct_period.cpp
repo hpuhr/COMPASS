@@ -144,7 +144,7 @@ ModeCCorrectPeriodConfig::ModeCCorrectPeriodConfig(const std::string& class_id,
 {
     configure(UseMissTol);
 
-    registerParameter("max_distance_ft", &max_distance_ft_, 300);
+    registerParameter("max_distance_ft", &max_distance_ft_, 300.0f);
 }
 
 /**

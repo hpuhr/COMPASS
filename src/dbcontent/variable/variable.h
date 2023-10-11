@@ -69,7 +69,7 @@ class Variable : public QObject, public Property, public Configurable
 
     bool operator==(const Variable& var);
 
-    void print();
+    void print() const;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);

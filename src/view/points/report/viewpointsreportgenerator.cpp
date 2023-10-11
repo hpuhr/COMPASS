@@ -53,14 +53,14 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
                                                      ViewManager& view_manager)
     : Configurable(class_id, instance_id, &view_manager), view_manager_(view_manager)
 {
-    registerParameter("author", &author_, "");
+    registerParameter("author", &author_, std::string());
 
     if (!author_.size())
         author_ = System::getUserName();
     if (!author_.size())
         author_ = "User";
 
-    registerParameter("abstract", &abstract_, "");
+    registerParameter("abstract", &abstract_, std::string());
 
     SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
     assert (sql_con);

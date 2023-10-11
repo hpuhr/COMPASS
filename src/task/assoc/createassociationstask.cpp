@@ -64,14 +64,14 @@ CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
 
     registerParameter("max_distance_quit_tracker", &max_distance_quit_tracker_, 10*NM2M); // kb 5nm
     registerParameter("max_distance_dubious_tracker", &max_distance_dubious_tracker_, 3*NM2M); //kb 2.5? 2.5 lowest
-    registerParameter("max_positions_dubious_tracker", &max_positions_dubious_tracker_, 5);
+    registerParameter("max_positions_dubious_tracker", &max_positions_dubious_tracker_, 5u);
 
     registerParameter("max_distance_acceptable_tracker", &max_distance_acceptable_tracker_, NM2M/2.0);
     registerParameter("max_altitude_diff_tracker", &max_altitude_diff_tracker_, 300.0);
 
-    registerParameter("min_updates_tracker", &min_updates_tracker_, 2); // kb 3!!!
+    registerParameter("min_updates_tracker", &min_updates_tracker_, 2u); // kb 3!!!
     registerParameter("prob_min_time_overlap_tracker", &prob_min_time_overlap_tracker_, 0.5); //kb 0.7
-    registerParameter("max_speed_tracker_kts", &max_speed_tracker_kts_, 100000);
+    registerParameter("max_speed_tracker_kts", &max_speed_tracker_kts_, 100000.0);
 
     registerParameter("cont_max_time_diff_tracker", &cont_max_time_diff_tracker_, 30.0);
     registerParameter("cont_max_distance_acceptable_tracker", &cont_max_distance_acceptable_tracker_, 1852.0);

@@ -43,12 +43,12 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
                                      DBFilter* filter_parent)
     : Configurable(class_id, instance_id, filter_parent), filter_parent_(filter_parent)
 {
-    registerParameter("operator", &operator_, ">");
+    registerParameter("operator", &operator_, std::string(">"));
     registerParameter("op_and", &op_and_, true);
     registerParameter("absolute_value", &absolute_value_, false);
 
-    registerParameter("variable_dbcontent_name", &variable_dbcontent_name_, "");
-    registerParameter("variable_name", &variable_name_, "");
+    registerParameter("variable_dbcontent_name", &variable_dbcontent_name_, std::string());
+    registerParameter("variable_name", &variable_name_, std::string());
 
     registerParameter("display_instance_id", &display_instance_id_, false);
 
@@ -56,7 +56,7 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
     // boost::algorithm::to_lower(variable_name_);
 
     registerParameter("reset_value", &reset_value_, std::string(""));
-    registerParameter("value", &value_, "");
+    registerParameter("value", &value_, std::string());
 
 //    if (usable_)
 //        value_invalid_ = checkValueInvalid(value_);

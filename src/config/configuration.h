@@ -22,10 +22,12 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+#include <memory>
 
 #include "configurableparameter.h"
 #include "json.hpp"
 #include "string.h"
+#include "logger.h"
 
 /*
  *  @brief Configuration storage and retrieval container class
@@ -40,91 +42,39 @@
  */
 class Configuration
 {
-  public:
+public:
+    typedef std::pair<std::string, std::string> SubConfigKey;
+    typedef std::unique_ptr<Configuration>      Ptr;
+
     /// @brief Constructor
-    Configuration(const std::string& class_id, const std::string& instance_id,
+    Configuration(const std::string& class_id, 
+                  const std::string& instance_id,
                   const std::string& configuration_filename = "");
 
-    /// @brief Copy constructor
-    Configuration(const Configuration& source);
     /// @brief Destructor
     virtual ~Configuration();
 
-    //    Configuration& operator= (const Configuration& source);
-    //    Configuration* clone ();
+    static Configuration::Ptr create(const std::string& class_id, 
+                                     const std::string& instance_id);
+    static Configuration::Ptr create(const std::string& class_id);
 
-    /// @brief Registers a boolean parameter
-    void registerParameter(const std::string& parameter_id, bool* pointer, bool default_value);
-    /// @brief Registers an int parameter
-    void registerParameter(const std::string& parameter_id, int* pointer, int default_value);
-    /// @brief Registers an unsigned int parameter
-    void registerParameter(const std::string& parameter_id, unsigned int* pointer,
-                           unsigned int default_value);
-    /// @brief Registers a float parameter
-    void registerParameter(const std::string& parameter_id, float* pointer, float default_value);
-    /// @brief Registers a double parameter
-    void registerParameter(const std::string& parameter_id, double* pointer, double default_value);
-    /// @brief Registers a string parameter
-    void registerParameter(const std::string& parameter_id, std::string* pointer,
-                           const std::string& default_value);
-    void registerParameter(const std::string& parameter_id, nlohmann::json* pointer,
-                           const nlohmann::json& default_value);
+    template <typename T>
+    void registerParameter(const std::string& parameter_id, T* pointer, const T& default_value);
+    template <typename T>
+    void addParameter(const std::string& parameter_id, const T& default_value);
+    template <typename T>
+    void updateParameterPointer(const std::string& parameter_id, T* pointer);
+    template <typename T>
+    void getParameter(const std::string& parameter_id, T& value) const;
 
-    /// @brief Updates a boolean parameter pointer
-    void updateParameterPointer(const std::string& parameter_id, bool* pointer);
-    /// @brief Updates an int parameter pointer
-    void updateParameterPointer(const std::string& parameter_id, int* pointer);
-    /// @brief Updates an unsigned int parameter pointer
-    void updateParameterPointer(const std::string& parameter_id, unsigned int* pointer);
-    /// @brief Updates a float parameter pointer
-    void updateParameterPointer(const std::string& parameter_id, float* pointer);
-    /// @brief Updates a double parameter pointer
-    void updateParameterPointer(const std::string& parameter_id, double* pointer);
-    /// @brief Updates a string parameter pointer
-    void updateParameterPointer(const std::string& parameter_id, std::string* pointer);
-    void updateParameterPointer(const std::string& parameter_id, nlohmann::json* pointer);
+    bool hasParameter(const std::string& parameter_id) const;
+    bool hasParameterConfigValue(const std::string& parameter_id) const;
 
-    /// @brief Adds a boolean parameter
-    void addParameterBool(const std::string& parameter_id, bool default_value);
-    /// @brief Adds an integer parameter
-    void addParameterInt(const std::string& parameter_id, int default_value);
-    /// @brief Adds an unsigned int parameter
-    void addParameterUnsignedInt(const std::string& parameter_id, unsigned int default_value);
-    /// @brief Adds a float parameter
-    void addParameterFloat(const std::string& parameter_id, float default_value);
-    /// @brief Adds a double parameter
-    void addParameterDouble(const std::string& parameter_id, double default_value);
-    /// @brief Adds a string parameter
-    void addParameterString(const std::string&, const std::string& default_value);
-    void addParameterJSON(const std::string&, const nlohmann::json& default_value);
+    template <typename T>
+    bool hasParameterOfType(const std::string& parameter_id) const;
 
-    /// @brief Writes data value if a boolean parameter to an argument
-    void getParameter(const std::string& parameter_id, bool& value);
-    /// @brief Writes data value if an integer parameter to an argument
-    void getParameter(const std::string& parameter_id, int& value);
-    /// @brief Writes data value if an unsigned int parameter to an argument
-    void getParameter(const std::string& parameter_id, unsigned int& value);
-    /// @brief Writes data value if a float parameter to an argument
-    void getParameter(const std::string& parameter_id, float& value);
-    /// @brief Writes data value if a double parameter to an argument
-    void getParameter(const std::string& parameter_id, double& value);
-    /// @brief Writes data value if a string parameter to an argument
-    void getParameter(const std::string& parameter_id, std::string& value);
-    void getParameter(const std::string& parameter_id, nlohmann::json& value);
-
-    bool hasParameterConfigValueBool(const std::string& parameter_id);
-    bool getParameterConfigValueBool(const std::string& parameter_id);
-    bool hasParameterConfigValueInt(const std::string& parameter_id);
-    int getParameterConfigValueInt(const std::string& parameter_id);
-    bool hasParameterConfigValueUint(const std::string& parameter_id);
-    unsigned int getParameterConfigValueUint(const std::string& parameter_id);
-    bool hasParameterConfigValueFloat(const std::string& parameter_id);
-    float getParameterConfigValueFloat(const std::string& parameter_id);
-    bool hasParameterConfigValueDouble(const std::string& parameter_id);
-    double getParameterConfigValueDouble(const std::string& parameter_id);
-    bool hasParameterConfigValueString(const std::string& parameter_id);
-    std::string getParameterConfigValueString(const std::string& parameter_id);
-    nlohmann::json getParameterConfigValueJSON(const std::string& parameter_id);
+    template <typename T>
+    T getParameterConfigValue(const std::string& parameter_id) const;
 
     // parses the member config file
     void parseJSONConfigFile();
@@ -137,37 +87,41 @@ class Configuration
     /// @brief Resets all values to their default values
     void resetToDefault();
 
-    /// @brief Creates added sub-configurables in configurable
-    void createSubConfigurables(Configurable* configurable);
-
     /// @brief Returns flag indicating if configuration has been used by a configurable
-    bool getUsed() { return used_; }
+    bool getUsed() const { return used_; }
 
     /// @brief Sets special filename for XML configuration
     void setConfigurationFilename(const std::string& configuration_filename);
     /// @brief Returns flag if special filename has been set
-    bool hasConfigurationFilename();
+    bool hasConfigurationFilename() const;
     /// @brief Return special filename
-    const std::string& getConfigurationFilename();
+    const std::string& getConfigurationFilename() const;
 
-    bool hasSubConfiguration(const std::string& class_id, const std::string& instance_id);
+    bool hasSubConfiguration(const std::string& class_id, 
+                             const std::string& instance_id) const;
+    bool hasSubConfiguration(const SubConfigKey& key) const;
+
     /// @brief Adds a new sub-configuration and returns reference
     Configuration& addNewSubConfiguration(const std::string& class_id,
                                           const std::string& instance_id);
     /// @brief Adds a new sub-configuration and returns reference
     Configuration& addNewSubConfiguration(const std::string& class_id);
     /// @brief Returns a sub-configuration, creates new empty one if non-existing
-    Configuration& addNewSubConfiguration(Configuration& configuration);
-    /// @brief Returns a specfigied sub-configuration
-    Configuration& getSubConfiguration(const std::string& class_id, const std::string& instance_id);
+    Configuration& addNewSubConfiguration(std::unique_ptr<Configuration>&& configuration);
+    /// @brief Returns a specified sub-configuration
+    Configuration& getSubConfiguration(const std::string& class_id, const std::string& instance_id) const;
+    /// @brief Creates a specified sub-configuration if needed and returns it
+    Configuration& assertSubConfiguration(const std::string& class_id, const std::string& instance_id);
     /// @brief Removes a sub-configuration
     void removeSubConfiguration(const std::string& class_id, const std::string& instance_id);
     void removeSubConfigurations(const std::string& class_id);
+    /// @brief Returns all subconfigurations
+    const std::map<SubConfigKey, std::unique_ptr<Configuration>>& subConfigurations() const { return sub_configurations_; }
 
     /// @brief Returns the instance identifier
-    const std::string& getInstanceId() { return instance_id_; }
+    const std::string& getInstanceId() const { return instance_id_; }
     /// @brief Returns the class identifier
-    const std::string& getClassId() { return class_id_; }
+    const std::string& getClassId() const { return class_id_; }
 
     /// @brief Sets the template flag and name
     // void setTemplate (bool template_flag, const std::string& template_name_);
@@ -177,9 +131,9 @@ class Configuration
     // const std::string& getTemplateName () { return template_name_; }
 
     /// @brief Checks if a specific template_name is already taken, true if free
-    bool getSubTemplateNameFree(const std::string& template_name);
+    //bool getSubTemplateNameFree(const std::string& template_name) const;
     /// @brief Adds a template configuration with a name
-    void addSubTemplate(Configuration* configuration, const std::string& template_name);
+    //void addSubTemplate(Configuration* configuration, const std::string& template_name);
 
     /// @brief Return contaienr with all configuration templates
     // std::map<std::string, Configuration>& getConfigurationTemplates () { return
@@ -190,7 +144,22 @@ class Configuration
 
     void overrideJSONParameters(nlohmann::json& parameters_config);
 
-  protected:
+    std::string newInstanceID(const std::string& class_id) const;
+
+protected:
+    void parseJSONSubConfigFile(const std::string& class_id, 
+                                const std::string& instance_id,
+                                const std::string& path);
+    void parseJSONParameters(nlohmann::json& parameters_config);
+    void parseJSONSubConfigs(nlohmann::json& sub_configs_config);
+
+    bool parameterInConfig(const std::string& parameter_id) const;
+
+    template <typename T>
+    T parameterValueFromConfig(const std::string& parameter_id) const;
+
+    nlohmann::json parameterValueFromConfig(const std::string& parameter_id) const;
+
     /// Class identifier
     std::string class_id_;
     /// Instance identifier
@@ -204,16 +173,11 @@ class Configuration
     // nlohmann::json org_config_sub_files_;
     // nlohmann::json org_config_sub_configs_;
 
-    /// Container for all parameters (parameter identifier -> ConfigurableParameterBase)
-    std::map<std::string, ConfigurableParameter<bool> > parameters_bool_;
-    std::map<std::string, ConfigurableParameter<int> > parameters_int_;
-    std::map<std::string, ConfigurableParameter<unsigned int> > parameters_uint_;
-    std::map<std::string, ConfigurableParameter<float> > parameters_float_;
-    std::map<std::string, ConfigurableParameter<double> > parameters_double_;
-    std::map<std::string, ConfigurableParameter<std::string> > parameters_string_;
-    std::map<std::string, ConfigurableParameter<nlohmann::json> > parameters_json_;
+    /// Container for all parameters (parameter identifier -> ConfigurableParameter ptr)
+    std::map<std::string, std::unique_ptr<ConfigurableParameter>> parameters_;
+
     /// Container for all added sub-configurables
-    std::map<std::pair<std::string, std::string>, Configuration> sub_configurations_;
+    std::map<SubConfigKey, std::unique_ptr<Configuration>> sub_configurations_;
 
     /// Flag which indicates if instance is a template
     // bool template_flag_ {false};
@@ -222,11 +186,10 @@ class Configuration
 
     /// Container with all configuration templates
     // std::map<std::string, Configuration> configuration_templates_;
+private:
+    Configuration(const std::string& class_id);
 
-    void parseJSONSubConfigFile(const std::string& class_id, const std::string& instance_id,
-                                const std::string& path);
-    void parseJSONParameters(nlohmann::json& parameters_config);
-    void parseJSONSubConfigs(nlohmann::json& sub_configs_config);
+    bool create_instance_name_ = false;
 };
 
 #endif /* CONFIGURATION_H_ */
