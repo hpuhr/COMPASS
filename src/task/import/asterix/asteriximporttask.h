@@ -55,6 +55,9 @@ struct ASTERIXFileInfo
 
     bool decoding_ok_ {false};
     std::string decoding_info_str_;
+
+    nlohmann::json analysis_info_;
+    bool errors_found_{false};
 };
 
 

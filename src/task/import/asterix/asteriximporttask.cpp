@@ -577,6 +577,21 @@ ASTERIXImportTaskSettings& ASTERIXImportTask::settings()
 
 void ASTERIXImportTask::testFileDecoding()
 {
+    unique_ptr<QMessageBox> msg_box{new QMessageBox};
+
+    assert(msg_box);
+    msg_box->setWindowTitle("Testing ASTERIX Files");
+    msg_box->setText("Please wait...");
+    msg_box->setStandardButtons(QMessageBox::NoButton);
+    msg_box->show();
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
+        QCoreApplication::processEvents();
+
     file_decoding_tested_ = true;
 
     file_decoding_errors_detected_ = false;
@@ -589,21 +604,20 @@ void ASTERIXImportTask::testFileDecoding()
 
         for (auto& file_info : filesInfo())
         {
-            json result;
-
-
             loginf << "ASTERIXImportTask: testFileDecoding: analyzing file '" << file_info.filename_
                    << "' framing '" << settings_.current_file_framing_ << "'";
 
             try
             {
+                file_info.errors_found_ = false;
+
                 if (settings_.current_file_framing_.size())
-                    result = *jasterix_->analyzeFile(file_info.filename_, settings_.current_file_framing_, record_limit);
+                    file_info.analysis_info_ = *jasterix_->analyzeFile(file_info.filename_, settings_.current_file_framing_, record_limit);
                 else
-                    result = *jasterix_->analyzeFile(file_info.filename_, record_limit);
+                    file_info.analysis_info_ = *jasterix_->analyzeFile(file_info.filename_, record_limit);
 
                 loginf << "ASTERIXImportTask: testFileDecoding: file '" << file_info.filename_
-                       << " json '" << result.dump(4) << "'";
+                       << " json '" << file_info.analysis_info_.dump(4) << "'";
 
     //            json '{
     //               "data_items": {},
@@ -612,12 +626,13 @@ void ASTERIXImportTask::testFileDecoding()
     //               "sensor_counts": {}
     //           }'
 
-                if(result.contains("num_errors"))
+                if(file_info.analysis_info_.contains("num_errors"))
                 {
-                    unsigned int num_errors = result.at("num_errors");
+                    unsigned int num_errors = file_info.analysis_info_.at("num_errors");
 
                     if (num_errors)
                     {
+                        file_info.errors_found_ = true;
                         file_decoding_errors_detected_ = true;
                         break;
                     }
@@ -630,10 +645,11 @@ void ASTERIXImportTask::testFileDecoding()
                 file_decoding_errors_detected_ = true;
                 break;
             }
-
-
         }
     }
+
+    msg_box->close();
+    QApplication::restoreOverrideCursor();
 
     if (dialog_)
         dialog_->updateButtons();
