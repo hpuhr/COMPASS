@@ -22,7 +22,7 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "logger.h"
-#include "propertylist.h"
+//#include "propertylist.h"
 #include "compass.h"
 #include "viewmanager.h"
 

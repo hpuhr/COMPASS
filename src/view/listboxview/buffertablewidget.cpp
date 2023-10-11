@@ -19,16 +19,17 @@
 
 #include "buffertablewidget.h"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "buffertablemodel.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableset.h"
+//#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variableset.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
 #include "compass.h"
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <QApplication>
 #include <QClipboard>

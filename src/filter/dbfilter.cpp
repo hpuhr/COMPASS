@@ -17,15 +17,16 @@
 
 #include "dbfilter.h"
 #include "dbfilterwidget.h"
-
-#include <QVBoxLayout>
-#include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
-
 #include "dbfiltercondition.h"
 #include "dbfilterwidget.h"
 #include "filtermanager.h"
 #include "logger.h"
+
+#include <QVBoxLayout>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+
 
 using namespace nlohmann;
 

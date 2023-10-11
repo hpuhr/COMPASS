@@ -18,11 +18,6 @@
 #include "listboxviewdatawidget.h"
 #include "listboxviewwidget.h"
 #include "listboxview.h"
-
-#include <QHBoxLayout>
-#include <QMessageBox>
-#include <QTabWidget>
-
 #include "allbuffertablewidget.h"
 #include "compass.h"
 #include "buffer.h"
@@ -31,6 +26,10 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
+
+#include <QHBoxLayout>
+#include <QMessageBox>
+#include <QTabWidget>
 
 ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewWidget* view_widget, 
                                              QWidget* parent, 

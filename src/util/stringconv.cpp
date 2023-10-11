@@ -1,7 +1,7 @@
 #include "stringconv.h"
-#include "global.h"
+//#include "global.h"
 #include "logger.h"
-#include "property.h"
+//#include "property.h"
 #include "util/timeconv.h"
 
 #include <boost/regex.hpp>

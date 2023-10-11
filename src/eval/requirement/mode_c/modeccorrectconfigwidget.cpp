@@ -17,12 +17,13 @@
 
 #include "eval/requirement/mode_c/modeccorrectconfigwidget.h"
 #include "eval/requirement/mode_c/correctconfig.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QDoubleValidator>
 
 using namespace std;
 

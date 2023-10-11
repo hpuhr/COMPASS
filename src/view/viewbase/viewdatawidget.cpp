@@ -1,7 +1,8 @@
 
 #include "viewdatawidget.h"
 #include "viewtoolswitcher.h"
-#include "buffer.h"
+#include "logger.h"
+//#include "buffer.h"
 
 #include <QApplication>
 

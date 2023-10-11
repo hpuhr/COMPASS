@@ -24,7 +24,7 @@
 #include "datasourcemanager.h"
 #include "dbcontentreaddbjob.h"
 #include "dbcontent/variable/variable.h"
-#include "dbtableinfo.h"
+//#include "dbtableinfo.h"
 #include "filtermanager.h"
 #include "insertbufferdbjob.h"
 #include "jobmanager.h"

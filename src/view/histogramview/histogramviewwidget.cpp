@@ -18,7 +18,7 @@
 #include "histogramviewwidget.h"
 #include "histogramviewconfigwidget.h"
 #include "histogramviewdatawidget.h"
-#include "files.h"
+//#include "files.h"
 #include "viewtoolswitcher.h"
 #include "viewtoolwidget.h"
 

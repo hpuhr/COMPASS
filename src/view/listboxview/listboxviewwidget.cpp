@@ -16,15 +16,14 @@
  */
 
 #include "listboxviewwidget.h"
+#include "listboxview.h"
+#include "listboxviewconfigwidget.h"
+#include "listboxviewdatawidget.h"
 
 #include <QHBoxLayout>
 #include <QSettings>
 #include <QSplitter>
 #include <QTabWidget>
-
-#include "listboxview.h"
-#include "listboxviewconfigwidget.h"
-#include "listboxviewdatawidget.h"
 
 /*
  */

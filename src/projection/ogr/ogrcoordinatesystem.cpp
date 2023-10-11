@@ -19,7 +19,7 @@
 
 #include "global.h"
 #include "logger.h"
-#include "ogrprojection.h"
+//#include "ogrprojection.h"
 
 using namespace std;
 

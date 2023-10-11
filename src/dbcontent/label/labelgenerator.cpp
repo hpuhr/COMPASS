@@ -2,9 +2,9 @@
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variableset.h"
-#include "dbcontent/label/labelgeneratorwidget.h"
+//#include "dbcontent/label/labelgeneratorwidget.h"
 #include "dbcontent/label/labelcontentdialog.h"
 #include "datasourcemanager.h"
 #include "dbdatasource.h"
@@ -15,9 +15,9 @@
 
 #include "global.h"
 
-#if USE_EXPERIMENTAL_SOURCE
-#include "geometryleafitemlabels.h"
-#endif
+//#if USE_EXPERIMENTAL_SOURCE
+//#include "geometryleafitemlabels.h"
+//#endif
 
 #include <QRect>
 

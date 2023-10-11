@@ -16,6 +16,14 @@
  */
 
 #include "dbcontent/variable/metavariablewidget.h"
+#include "compass.h"
+//#include "configuration.h"
+//#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variableselectionwidget.h"
+#include "logger.h"
+#include "dbcontent/variable/metavariable.h"
+//#include "stringconv.h"
 
 #include <QComboBox>
 #include <QGridLayout>
@@ -24,16 +32,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-#include "compass.h"
-#include "configuration.h"
-#include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variableselectionwidget.h"
-#include "logger.h"
-#include "dbcontent/variable/metavariable.h"
-#include "stringconv.h"
-
-using namespace Utils;
+//using namespace Utils;
 
 namespace dbContent
 {

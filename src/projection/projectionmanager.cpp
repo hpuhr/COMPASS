@@ -16,16 +16,17 @@
  */
 
 #include "projectionmanager.h"
+//#include "global.h"
+#include "logger.h"
+#include "ogrprojection.h"
+#include "projectionmanagerwidget.h"
+#include "rs2gprojection.h"
 
 #include <math.h>
 
 #include <cmath>
 
-#include "global.h"
-#include "logger.h"
-#include "ogrprojection.h"
-#include "projectionmanagerwidget.h"
-#include "rs2gprojection.h"
+
 
 const std::string ProjectionManager::RS2G_NAME = "RS2G";
 const std::string ProjectionManager::OGR_NAME = "OGR";

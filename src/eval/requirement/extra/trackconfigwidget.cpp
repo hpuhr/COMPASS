@@ -17,12 +17,13 @@
 
 #include "eval/requirement/extra/trackconfigwidget.h"
 #include "eval/requirement/extra/trackconfig.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QDoubleValidator>
 
 using namespace std;
 

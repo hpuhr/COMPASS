@@ -16,18 +16,18 @@
  */
 
 #include "histogramviewdatasource.h"
+#include "compass.h"
+//#include "configuration.h"
+//#include "configurationmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+//#include "job.h"
+#include "logger.h"
+//#include "viewpoint.h"
+#include "global.h"
 
 #include <QMessageBox>
 
-#include "compass.h"
-#include "configuration.h"
-#include "configurationmanager.h"
-#include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "job.h"
-#include "logger.h"
-#include "viewpoint.h"
-#include "global.h"
 
 #include <algorithm>
 #include <cassert>

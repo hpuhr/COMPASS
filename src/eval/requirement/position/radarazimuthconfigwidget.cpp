@@ -17,13 +17,14 @@
 
 #include "eval/requirement/position/radarazimuthconfigwidget.h"
 #include "eval/requirement/position/radarazimuthconfig.h"
-#include "textfielddoublevalidator.h"
-#include "eval/requirement/base/comparisontypecombobox.h"
+//#include "textfielddoublevalidator.h"
+//#include "eval/requirement/base/comparisontypecombobox.h"
 #include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QDoubleValidator>
 
 namespace EvaluationRequirement
 {

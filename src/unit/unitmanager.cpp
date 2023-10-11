@@ -16,11 +16,11 @@
  */
 
 #include "unitmanager.h"
+#include "dimension.h"
+#include "logger.h"
 
 #include <math.h>
 
-#include "dimension.h"
-#include "logger.h"
 
 UnitManager::UnitManager() : Configurable("UnitManager", "UnitManager0", 0, "units.json")
 {

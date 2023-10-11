@@ -17,7 +17,7 @@
 
 #include "utnfilterwidget.h"
 #include "utnfilter.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -25,7 +25,7 @@
 #include <QLineEdit>
 
 using namespace std;
-using namespace Utils;
+//using namespace Utils;
 
 UTNFilterWidget::UTNFilterWidget(UTNFilter& filter)
     : DBFilterWidget(filter), filter_(filter)

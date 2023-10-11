@@ -8,6 +8,7 @@
 #include "files.h"
 #include "json.hpp"
 #include "datasource_commands.h"
+#include "logger.h"
 
 #include <QMessageBox>
 

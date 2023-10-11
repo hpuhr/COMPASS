@@ -17,7 +17,7 @@
 
 #include "eval/requirement/position/latencyconfigwidget.h"
 #include "eval/requirement/position/latencyconfig.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "logger.h"
 #include "stringconv.h"
 

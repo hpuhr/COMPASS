@@ -5,10 +5,10 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/metavariable.h"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
 using namespace std;
-using namespace Utils;
+//using namespace Utils;
 using namespace nlohmann;
 using namespace dbContent;
 

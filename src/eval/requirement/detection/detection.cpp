@@ -17,7 +17,7 @@
 
 #include "eval/requirement/detection/detection.h"
 #include "eval/results/detection/single.h"
-#include "evaluationdata.h"
+//#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "evaluationdetail.h"
 #include "logger.h"

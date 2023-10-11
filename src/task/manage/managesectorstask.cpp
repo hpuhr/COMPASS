@@ -17,13 +17,13 @@
 
 #include "managesectorstask.h"
 #include "compass.h"
-#include "dbinterface.h"
+//#include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "managesectorstaskdialog.h"
 #include "taskmanager.h"
 #include "savedfile.h"
 #include "files.h"
-#include "sector.h"
+//#include "sector.h"
 
 #include "gdal.h"
 #include "gdal_priv.h"

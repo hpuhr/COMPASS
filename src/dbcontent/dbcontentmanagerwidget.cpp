@@ -17,9 +17,9 @@
 
 #include "dbcontent/dbcontentmanagerwidget.h"
 
-#include "compass.h"
+//#include "compass.h"
 #include "configuration.h"
-#include "configurationmanager.h"
+//#include "configurationmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentwidget.h"
@@ -28,7 +28,7 @@
 #include "global.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/metavariablewidget.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
 #include <QComboBox>
 #include <QGridLayout>

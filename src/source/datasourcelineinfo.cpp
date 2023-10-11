@@ -1,5 +1,6 @@
 #include "datasourcelineinfo.h"
-#include "number.h"
+#include "stringconv.h"
+#include "logger.h"
 
 using namespace Utils;
 using namespace std;

@@ -21,7 +21,7 @@
 #include "logger.h"
 
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 
 #include <QFormLayout>

@@ -17,7 +17,7 @@
 
 #include "eval/requirement/identification/identificationfalseconfigwidget.h"
 #include "eval/requirement/identification/falseconfig.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "logger.h"
 
 #include <QLineEdit>

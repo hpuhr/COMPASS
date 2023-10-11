@@ -16,14 +16,13 @@
  */
 
 #include "configuration.h"
-
-#include <fstream>
-#include <typeinfo>
-
 #include "configurable.h"
 #include "files.h"
 #include "logger.h"
 #include "stringconv.h"
+
+#include <fstream>
+#include <typeinfo>
 
 using namespace Utils;
 

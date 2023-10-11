@@ -17,18 +17,18 @@
 
 #include "scatterplotview.h"
 
-#include <QApplication>
-
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/metavariable.h"
-#include "scatterplotviewconfigwidget.h"
+//#include "scatterplotviewconfigwidget.h"
 #include "scatterplotviewdatasource.h"
 #include "scatterplotviewdatawidget.h"
 #include "scatterplotviewwidget.h"
 #include "logger.h"
 #include "latexvisitor.h"
+
+#include <QApplication>
 
 using namespace std;
 using namespace dbContent;

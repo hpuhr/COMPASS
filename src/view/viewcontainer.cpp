@@ -17,7 +17,7 @@
 
 #include "viewcontainer.h"
 
-#include "config.h"
+//#include "config.h"
 #include "files.h"
 #include "global.h"
 #include "listboxview.h"
@@ -25,7 +25,7 @@
 #include "scatterplotview.h"
 #include "logger.h"
 //#include "mainloadwidget.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "view.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"

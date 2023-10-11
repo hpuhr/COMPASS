@@ -18,14 +18,14 @@
 #include "listboxviewconfigwidget.h"
 #include "listboxviewwidget.h"
 #include "listboxview.h"
-#include "compass.h"
-#include "dbcontent/dbcontentmanager.h"
+//#include "compass.h"
+//#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableorderedsetwidget.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
-#include "stringconv.h"
-#include "test/ui_test_common.h"
+//#include "stringconv.h"
+//#include "test/ui_test_common.h"
 #include "viewwidget.h"
 
 #include <QComboBox>

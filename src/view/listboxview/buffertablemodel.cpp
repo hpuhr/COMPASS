@@ -17,19 +17,19 @@
 
 #include "buffertablemodel.h"
 
-#include <QApplication>
-
-#include "compass.h"
+//#include "compass.h"
 #include "buffer.h"
 #include "buffercsvexportjob.h"
 #include "buffertablewidget.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
+
+#include <QApplication>
 
 BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBContent& object,
                                    ListBoxViewDataSource& data_source)

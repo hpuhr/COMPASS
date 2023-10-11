@@ -16,7 +16,7 @@
  */
 
 #include "intervalbaseconfig.h"
-#include "intervalbaseconfigwidget.h"
+//#include "intervalbaseconfigwidget.h"
 
 #include "eval/requirement/group.h"
 #include "eval/results/report/section.h"

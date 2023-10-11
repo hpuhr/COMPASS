@@ -1,5 +1,5 @@
 #include "calculatereferencesstatusdialog.h"
-#include "createassociationstask.h"
+//#include "createassociationstask.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "compass.h"

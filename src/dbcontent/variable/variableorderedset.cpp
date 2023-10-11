@@ -17,7 +17,7 @@
 
 #include "dbcontent/variable/variableorderedset.h"
 #include "compass.h"
-#include "configurationmanager.h"
+//#include "configurationmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"

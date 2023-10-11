@@ -1,7 +1,7 @@
 #include "dbdatasourcewidget.h"
 #include "compass.h"
 #include "datasourcemanager.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "util/timeconv.h"
 #include "logger.h"
 

@@ -17,13 +17,14 @@
 
 #include "eval/requirement/trackangle/trackangleconfigwidget.h"
 #include "eval/requirement/trackangle/trackangleconfig.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "eval/requirement/base/comparisontypecombobox.h"
 #include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QDoubleValidator>
 
 namespace EvaluationRequirement
 {

@@ -17,7 +17,7 @@
 
 #include "viewpointsreportgeneratordialog.h"
 #include "viewpointsreportgenerator.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "logger.h"
 #include "compass.h"
 

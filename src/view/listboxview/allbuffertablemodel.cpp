@@ -26,7 +26,7 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableset.h"
+//#include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
 #include "listboxview.h"

@@ -22,7 +22,7 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
-#include "evaluationresultsgenerator.h"
+//#include "evaluationresultsgenerator.h"
 #include "sectorlayer.h"
 #include "viewpoint.h"
 

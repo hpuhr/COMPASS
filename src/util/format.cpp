@@ -16,12 +16,13 @@
  */
 
 #include "format.h"
+#include "logger.h"
 
 #include <algorithm>
 #include <cassert>
 #include <initializer_list>
 
-#include "logger.h"
+
 
 const std::vector<std::string> no_format = {""};
 const std::vector<std::string> bool_format = {"", "invert"};

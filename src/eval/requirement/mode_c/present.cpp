@@ -17,10 +17,10 @@
 
 #include "eval/requirement/mode_c/present.h"
 #include "eval/results/mode_c/presentsingle.h"
-#include "evaluationdata.h"
+//#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "util/stringconv.h"
+//#include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
 

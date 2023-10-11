@@ -16,19 +16,18 @@
  */
 
 #include "createartasassociationstaskwidget.h"
-
 #include "createartasassociationstask.h"
 #include "dbdatasourceselectioncombobox.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/dbcontent.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableselectionwidget.h"
-#include "logger.h"
-#include "dbcontent/variable/metavariable.h"
-#include "taskmanager.h"
-#include "QDoubleValidator"
+//#include "dbcontent/dbcontent.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variableselectionwidget.h"
+//#include "logger.h"
+//#include "dbcontent/variable/metavariable.h"
+//#include "taskmanager.h"
 
+#include <QDoubleValidator>
 #include <QCheckBox>
 #include <QGridLayout>
 #include <QLabel>

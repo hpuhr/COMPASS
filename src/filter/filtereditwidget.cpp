@@ -16,6 +16,19 @@
  */
 
 #include "filtereditwidget.h"
+//#include "compass.h"
+//#include "configurationmanager.h"
+#include "dbfilter.h"
+#include "dbfiltercondition.h"
+#include "dbfilterwidget.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableselectionwidget.h"
+#include "files.h"
+#include "filterconditionoperatorcombobox.h"
+#include "filterconditionresetvaluecombobox.h"
+//#include "filtermanager.h"
+#include "logger.h"
+//#include "stringconv.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -25,20 +38,6 @@
 #include <QListWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
-
-#include "compass.h"
-#include "configurationmanager.h"
-#include "dbfilter.h"
-#include "dbfiltercondition.h"
-#include "dbfilterwidget.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableselectionwidget.h"
-#include "files.h"
-#include "filterconditionoperatorcombobox.h"
-#include "filterconditionresetvaluecombobox.h"
-#include "filtermanager.h"
-#include "logger.h"
-#include "stringconv.h"
 
 using namespace Utils;
 

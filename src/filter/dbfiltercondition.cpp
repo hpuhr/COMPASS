@@ -18,21 +18,23 @@
 #include "dbfiltercondition.h"
 #include "compass.h"
 #include "dbfilter.h"
-#include "dbfilterwidget.h"
+//#include "dbfilterwidget.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
-#include "unit.h"
-#include "unitmanager.h"
+//#include "unit.h"
+//#include "unitmanager.h"
 #include "global.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QWidget>
+
 #include <boost/algorithm/string/join.hpp>
+
 #include <cassert>
 #include <sstream>
 //#include <boost/algorithm/string.hpp>

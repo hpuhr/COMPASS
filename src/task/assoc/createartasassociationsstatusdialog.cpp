@@ -19,7 +19,7 @@
 
 #include "compass.h"
 #include "createartasassociationstask.h"
-#include "dbcontent/dbcontent.h"
+//#include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "logger.h"
 #include "stringconv.h"

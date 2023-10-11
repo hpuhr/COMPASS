@@ -32,7 +32,7 @@
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "buffer.h"
-#include "sqliteconnection.h"
+//#include "sqliteconnection.h"
 
 #include <QApplication>
 #include <QMessageBox>

@@ -16,10 +16,10 @@
  */
 
 #include "dimension.h"
+#include "unit.h"
 
 #include <cmath>
 
-#include "unit.h"
 
 Dimension::Dimension(const std::string& class_id, const std::string& instance_id,
                      Configurable* parent)

@@ -16,13 +16,13 @@
  */
 
 #include "dbospecificvaluesdbfilter.h"
-#include "dbospecificvaluesdbfilterwidget.h"
+//#include "dbospecificvaluesdbfilterwidget.h"
 #include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "dbfiltercondition.h"
 #include "global.h"
 

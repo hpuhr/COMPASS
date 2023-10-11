@@ -1,5 +1,5 @@
 #include "mode3afilterwidget.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -7,7 +7,7 @@
 #include <QLineEdit>
 
 using namespace std;
-using namespace Utils;
+//using namespace Utils;
 
 Mode3AFilterWidget::Mode3AFilterWidget(Mode3AFilter& filter)
     : DBFilterWidget(filter), filter_(filter)

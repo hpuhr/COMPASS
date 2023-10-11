@@ -21,7 +21,9 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "compass.h"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
+
+#include <sstream>
 
 using namespace std;
 using namespace Utils;

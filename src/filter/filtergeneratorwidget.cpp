@@ -17,13 +17,13 @@
 
 #include "filtergeneratorwidget.h"
 #include "compass.h"
-#include "configurationmanager.h"
+//#include "configurationmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableselectionwidget.h"
 #include "filterconditionoperatorcombobox.h"
 #include "filtermanager.h"
 #include "dbcontent/variable/metavariable.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "global.h"
 
 #include <QCheckBox>

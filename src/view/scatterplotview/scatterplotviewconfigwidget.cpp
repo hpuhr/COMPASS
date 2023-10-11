@@ -16,15 +16,15 @@
  */
 
 #include "scatterplotviewconfigwidget.h"
-#include "compass.h"
+//#include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableselectionwidget.h"
 #include "scatterplotviewwidget.h"
 #include "scatterplotview.h"
-#include "scatterplotviewdatasource.h"
+//#include "scatterplotviewdatasource.h"
 #include "logger.h"
-#include "stringconv.h"
-#include "test/ui_test_common.h"
+//#include "stringconv.h"
+//#include "test/ui_test_common.h"
 
 #include <QCheckBox>
 #include <QLabel>

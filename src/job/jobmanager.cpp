@@ -16,15 +16,13 @@
  */
 
 #include "jobmanager.h"
-
-#include <qtimer.h>
-
-#include <QCoreApplication>
-#include <QThreadPool>
-
 #include "job.h"
 #include "logger.h"
 #include "stringconv.h"
+
+#include <QTimer>
+#include <QCoreApplication>
+#include <QThreadPool>
 
 using namespace Utils;
 

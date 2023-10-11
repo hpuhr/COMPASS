@@ -1,8 +1,8 @@
 #include "reftrajaccuracyfilterwidget.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
-#include "rangeedit.h"
+//#include "rangeedit.h"
 
 #include <QFormLayout>
 #include <QLabel>
@@ -10,7 +10,7 @@
 #include <QCheckBox>
 
 using namespace std;
-using namespace Utils;
+//using namespace Utils;
 
 RefTrajAccuracyFilterWidget::RefTrajAccuracyFilterWidget(RefTrajAccuracyFilter& filter)
     : DBFilterWidget(filter), filter_(filter)

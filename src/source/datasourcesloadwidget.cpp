@@ -22,7 +22,7 @@
 #include "datasourcemanager.h"
 #include "global.h"
 #include "stringconv.h"
-#include "viewmanager.h"
+//#include "viewmanager.h"
 #include "number.h"
 #include "files.h"
 

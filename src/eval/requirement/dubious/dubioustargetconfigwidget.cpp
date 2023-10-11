@@ -17,12 +17,13 @@
 
 #include "eval/requirement/dubious/dubioustargetconfigwidget.h"
 #include "eval/requirement/dubious/dubioustargetconfig.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QDoubleValidator>
 
 namespace EvaluationRequirement
 {

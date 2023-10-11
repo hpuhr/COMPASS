@@ -16,6 +16,13 @@
  */
 
 #include "dbfilterwidget.h"
+//#include "compass.h"
+#include "dbfilter.h"
+#include "dbfiltercondition.h"
+#include "files.h"
+//#include "filtermanager.h"
+#include "global.h"
+#include "logger.h"
 
 #include <QAction>
 #include <QCheckBox>
@@ -23,13 +30,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include "compass.h"
-#include "dbfilter.h"
-#include "dbfiltercondition.h"
-#include "files.h"
-#include "filtermanager.h"
-#include "global.h"
-#include "logger.h"
+
 
 using namespace Utils;
 

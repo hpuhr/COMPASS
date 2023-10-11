@@ -19,7 +19,7 @@
 #include "gpstrailimporttask.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "timeconv.h"
+//#include "timeconv.h"
 
 #include "textfielddoublevalidator.h"
 #include "textfieldhexvalidator.h"

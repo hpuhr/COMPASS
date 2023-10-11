@@ -21,7 +21,8 @@
 #include "viewmanager.h"
 //#include "viewmodel.h"
 #include "viewwidget.h"
-#include "viewpoint.h"
+//#include "viewpoint.h"
+#include "viewabledataconfig.h"
 #include "compass.h"
 #include "viewdatawidget.h"
 

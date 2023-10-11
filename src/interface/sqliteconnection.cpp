@@ -24,9 +24,9 @@
 #include "dbtableinfo.h"
 #include "logger.h"
 #include "property.h"
-#include "savedfile.h"
-#include "stringconv.h"
-#include "files.h"
+//#include "savedfile.h"
+//#include "stringconv.h"
+//#include "files.h"
 #include "util/timeconv.h"
 
 #include <QApplication>

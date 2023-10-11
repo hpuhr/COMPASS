@@ -26,7 +26,7 @@
 #include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
-#include "dbinterface.h"
+//#include "dbinterface.h"
 
 #include <QTableView>
 #include <QVBoxLayout>

@@ -17,15 +17,15 @@
 
 #include "configurationmanager.h"
 
-#include <fstream>
-
-#include "config.h"
+//#include "config.h"
 #include "configurable.h"
 #include "files.h"
-#include "global.h"
+//#include "global.h"
 #include "json.hpp"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
+
+#include <fstream>
 
 // using namespace tinyxml2;
 using namespace nlohmann;

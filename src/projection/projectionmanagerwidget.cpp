@@ -16,6 +16,10 @@
  */
 
 #include "projectionmanagerwidget.h"
+#include "logger.h"
+#include "projection.h"
+#include "projectionmanager.h"
+//#include "stringconv.h"
 
 #include <QComboBox>
 #include <QGridLayout>
@@ -26,10 +30,7 @@
 #include <QVBoxLayout>
 #include <cassert>
 
-#include "logger.h"
-#include "projection.h"
-#include "projectionmanager.h"
-#include "stringconv.h"
+
 
 ProjectionManagerWidget::ProjectionManagerWidget(ProjectionManager& proj_man, QWidget* parent,
                                                  Qt::WindowFlags f)

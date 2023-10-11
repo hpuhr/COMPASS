@@ -17,17 +17,17 @@
 
 #include "jsonimporttaskwidget.h"
 
-#include "compass.h"
-#include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentcombobox.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableselectionwidget.h"
+//#include "compass.h"
+//#include "dbcontent/dbcontent.h"
+//#include "dbcontent/dbcontentcombobox.h"
+//#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variableselectionwidget.h"
 #include "jsonimporttask.h"
 #include "jsonparsingschema.h"
 #include "logger.h"
 #include "dbcontent/selectdialog.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "util/timeconv.h"
 
 #include <QCheckBox>

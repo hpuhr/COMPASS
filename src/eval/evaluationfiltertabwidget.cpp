@@ -1,7 +1,7 @@
 #include "evaluationfiltertabwidget.h"
 #include "evaluationmanagerwidget.h"
 #include "evaluationmanager.h"
-#include "util/stringconv.h"
+//#include "util/stringconv.h"
 #include "textfielddoublevalidator.h"
 #include "util/timeconv.h"
 

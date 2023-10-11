@@ -1,6 +1,6 @@
 #include "targetmodel.h"
 #include "compass.h"
-#include "mainwindow.h"
+//#include "mainwindow.h"
 #include "dbinterface.h"
 #include "dbcontentmanager.h"
 #include "util/stringconv.h"

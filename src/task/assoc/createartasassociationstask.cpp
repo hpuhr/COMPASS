@@ -30,7 +30,7 @@
 #include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 #include "taskmanager.h"
-#include "sqliteconnection.h"
+//#include "sqliteconnection.h"
 #include "viewmanager.h"
 
 #include <QApplication>

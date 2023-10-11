@@ -18,7 +18,7 @@
 #include "eval/results/report/pdfgeneratordialog.h"
 #include "eval/results/report/pdfgenerator.h"
 #include "evaluationmanager.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "logger.h"
 #include "compass.h"
 

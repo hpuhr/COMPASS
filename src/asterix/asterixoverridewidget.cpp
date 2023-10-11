@@ -18,7 +18,7 @@
 #include "asterixoverridewidget.h"
 #include "asteriximporttask.h"
 #include "textfielddoublevalidator.h"
-#include "util/timeconv.h"
+//#include "util/timeconv.h"
 
 #include <QCheckBox>
 #include <QDoubleValidator>

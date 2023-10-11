@@ -16,7 +16,6 @@
  */
 
 #include "jsondatamapping.h"
-
 #include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"

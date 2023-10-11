@@ -15,15 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/position/distancesingle.h"
+//#include "eval/results/position/distancesingle.h"
 #include "eval/results/position/distancejoined.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/position/distance.h"
-#include "evaluationtargetdata.h"
+//#include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
