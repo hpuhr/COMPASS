@@ -741,12 +741,17 @@ void MainWindow::importAsterixRecordingSlot()
     {
         QStringList filenames = dialog.selectedFiles();
 
+        vector<string> filenames_vec;
+
         for (auto& filename : filenames)
         {
             assert (Files::fileExists(filename.toStdString()));
-            task.addImportFileName(filename.toStdString());
             COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename.toStdString()));
+
+            filenames_vec.push_back(filename.toStdString());
         }
+
+        task.addImportFileNames(filenames_vec);
 
         updateMenus();
 
@@ -778,7 +783,7 @@ void MainWindow::importRecentAsterixRecordingSlot()
 
     assert (filename.size());
 
-    COMPASS::instance().taskManager().asterixImporterTask().addImportFileName(filename);
+    COMPASS::instance().taskManager().asterixImporterTask().addImportFileNames({filename});
 
     updateMenus();
 

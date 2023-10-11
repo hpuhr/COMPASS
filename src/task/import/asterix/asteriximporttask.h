@@ -171,7 +171,7 @@ class ASTERIXImportTask : public Task, public Configurable
     void addFile(const std::string& filename);
     void clearFileList ();
 
-    void addImportFileName(const std::string& filename, unsigned int line_id=0);
+    void addImportFileNames(const std::vector<std::string>& filenames, unsigned int line_id=0);
     std::vector<ASTERIXFileInfo>& filesInfo() { return settings_.filesInfo(); }
     std::string importFilenamesStr() const;
     void clearImportFilesInfo ();
@@ -198,12 +198,17 @@ class ASTERIXImportTask : public Task, public Configurable
 
     ASTERIXImportTaskSettings& settings();
 
+    void testFileDecoding();
+
 protected:
 
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
 
     ASTERIXImportTaskSettings settings_;
+
+    bool file_decoding_tested_ {false};
+    bool file_decoding_errors_detected_ {false};
 
     bool running_ {false};
 

@@ -62,7 +62,20 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     registerParameter("last_db_filename", &last_db_filename_, "");
     registerParameter("db_file_list", &db_file_list_, json::array());
 
+    vector<string> cleaned_file_list;
+    // clean missing files
+
+    for (auto& filename : db_file_list_.get<std::vector<string>>())
+    {
+        if (Files::fileExists(filename))
+            cleaned_file_list.push_back(filename);
+    }
+    db_file_list_ = cleaned_file_list;
+
     registerParameter("last_path", &last_path_, "");
+
+    if (!Files::directoryExists(last_path_))
+        last_path_ = QDir::homePath().toStdString();
 
     registerParameter("hide_evaluation", &hide_evaluation_, false);
     registerParameter("hide_viewpoints", &hide_viewpoints_, false);

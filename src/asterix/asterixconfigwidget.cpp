@@ -122,6 +122,8 @@ void ASTERIXConfigWidget::refreshjASTERIXSlot()
     loginf << "ASTERIXConfigWidget: refreshjASTERIXSlot";
 
     task_.refreshjASTERIX();
+    task_.testFileDecoding(); // in case anything was changed
+
     updateSlot();
 }
 
@@ -143,6 +145,8 @@ void ASTERIXConfigWidget::framingChangedSlot()
         framing_edit_->setDisabled(true);
     else
         framing_edit_->setDisabled(false);
+
+    task_.testFileDecoding();
 }
 
 void ASTERIXConfigWidget::framingEditSlot()

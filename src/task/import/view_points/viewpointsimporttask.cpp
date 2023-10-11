@@ -285,7 +285,7 @@ void ViewPointsImportTask::run()
                     asterix_importer_task.settings().date_ = date;
                 }
 
-                asterix_importer_task.addImportFileName(filename, line_id);
+                asterix_importer_task.addImportFileNames({filename}, line_id);
 
                 assert(asterix_importer_task.canRun());
                 asterix_importer_task.allowUserInteractions(false);

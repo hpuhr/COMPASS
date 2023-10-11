@@ -72,7 +72,18 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("debug_jasterix", &settings_.debug_jasterix_, false);
 
     registerParameter("file_list", &settings_.file_list_, json::array());
-    //registerParameter("current_file_framing", &settings_.current_file_framing_, "");
+
+    vector<string> cleaned_file_list;
+    // clean missing files
+
+    for (auto& filename : settings_.file_list_.get<std::vector<string>>())
+    {
+        if (Files::fileExists(filename))
+            cleaned_file_list.push_back(filename);
+    }
+    settings_.file_list_ = cleaned_file_list;
+
+    registerParameter("current_file_framing", &settings_.current_file_framing_, "");
 
     registerParameter("num_packets_overload", &settings_.num_packets_overload_, 60);
 
@@ -335,14 +346,23 @@ void ASTERIXImportTask::clearFileList ()
     settings_.file_list_.clear();
 }
 
-void ASTERIXImportTask::addImportFileName(const std::string& filename, unsigned int line_id)
+void ASTERIXImportTask::addImportFileNames(const std::vector<std::string>& filenames, unsigned int line_id)
 {
-    loginf << "ASTERIXImportTask: addImportFileName: adding '" << filename << " line " << line_id;
+    for (const auto& filename : filenames)
+    {
 
-    assert (Files::fileExists(filename));
+        loginf << "ASTERIXImportTask: addImportFileNames: adding '" << filename << " line " << line_id;
 
-    settings_.addImportFilename(filename, line_id);
+        assert (Files::fileExists(filename));
+
+        settings_.addImportFilename(filename, line_id);
+    }
+
     settings_.import_files_ = true;
+
+    testFileDecoding();
+
+    // TODO update GUI
 
     if (dialog_)
         dialog_->updateButtons();
@@ -424,6 +444,8 @@ void ASTERIXImportTask::decodeCategory(unsigned int category, bool decode)
     }
     else
         category_configs_.at(category).decode(decode);
+
+    testFileDecoding();
 }
 
 std::string ASTERIXImportTask::editionForCategory(unsigned int category)
@@ -461,6 +483,8 @@ void ASTERIXImportTask::editionForCategory(unsigned int category, const std::str
     }
     else
         category_configs_.at(category).edition(edition);
+
+    testFileDecoding();
 }
 
 std::string ASTERIXImportTask::refEditionForCategory(unsigned int category)
@@ -499,6 +523,8 @@ void ASTERIXImportTask::refEditionForCategory(unsigned int category, const std::
     }
     else
         category_configs_.at(category).ref(ref);
+
+    testFileDecoding();
 }
 
 std::string ASTERIXImportTask::spfEditionForCategory(unsigned int category)
@@ -538,6 +564,8 @@ void ASTERIXImportTask::spfEditionForCategory(unsigned int category, const std::
     }
     else
         category_configs_.at(category).spf(spf);
+
+    testFileDecoding();
 }
 
 std::shared_ptr<ASTERIXJSONParsingSchema> ASTERIXImportTask::schema() const { return schema_; }
@@ -552,6 +580,70 @@ ASTERIXImportTaskSettings& ASTERIXImportTask::settings()
     return settings_;
 }
 
+void ASTERIXImportTask::testFileDecoding()
+{
+    file_decoding_tested_ = true;
+
+    file_decoding_errors_detected_ = false;
+
+    unsigned int record_limit = 10000;
+
+    if (filesInfo().size())
+    {
+        refreshjASTERIX();
+
+        for (auto& file_info : filesInfo())
+        {
+            json result;
+
+
+            loginf << "ASTERIXImportTask: testFileDecoding: analyzing file '" << file_info.filename_
+                   << "' framing '" << settings_.current_file_framing_ << "'";
+
+            try
+            {
+                if (settings_.current_file_framing_.size())
+                    result = *jasterix_->analyzeFile(file_info.filename_, settings_.current_file_framing_, record_limit);
+                else
+                    result = *jasterix_->analyzeFile(file_info.filename_, record_limit);
+
+                loginf << "ASTERIXImportTask: testFileDecoding: file '" << file_info.filename_
+                       << " json '" << result.dump(4) << "'";
+
+    //            json '{
+    //               "data_items": {},
+    //               "num_errors": 12,
+    //               "num_records": 919,
+    //               "sensor_counts": {}
+    //           }'
+
+                if(result.contains("num_errors"))
+                {
+                    unsigned int num_errors = result.at("num_errors");
+
+                    if (num_errors)
+                    {
+                        file_decoding_errors_detected_ = true;
+                        break;
+                    }
+                }
+            }
+            catch (exception& e)
+            {
+                loginf << "ASTERIXImportTask: testFileDecoding: exception '" << e.what() << "'";
+
+                file_decoding_errors_detected_ = true;
+                break;
+            }
+
+
+        }
+    }
+
+    if (dialog_)
+        dialog_->updateButtons();
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
@@ -559,15 +651,6 @@ bool ASTERIXImportTask::isRunning() const
 
 bool ASTERIXImportTask::canImportFiles()
 {
-//    if (!settings_.current_filename_.size())
-//        return false;
-    
-//    if (!Files::fileExists(settings_.current_filename_))
-//    {
-//        loginf << "ASTERIXImportTask: canImportFile: not possible since file '"
-//               << settings_.current_filename_ << "'does not exist";
-//        return false;
-//    }
 
     if (!filesInfo().size())
     {
@@ -576,7 +659,8 @@ bool ASTERIXImportTask::canImportFiles()
         return false;
     }
 
-    // TODO: check if files can be decoded without errors
+    if (file_decoding_tested_ && file_decoding_errors_detected_)
+        return false;
 
     return true;
 }
