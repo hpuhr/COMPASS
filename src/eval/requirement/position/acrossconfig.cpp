@@ -36,12 +36,11 @@ PositionAcrossConfig::PositionAcrossConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("max_abs_value", &max_abs_value_, 50.0);
+    registerParameter("max_abs_value", &max_abs_value_, 50.0f);
 }
 
 PositionAcrossConfig::~PositionAcrossConfig()
 {
-
 }
 
 std::shared_ptr<Base> PositionAcrossConfig::createRequirement()

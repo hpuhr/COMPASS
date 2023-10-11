@@ -36,7 +36,7 @@ PositionDistanceConfig::PositionDistanceConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0);
+    registerParameter("threshold_value", &threshold_value_, 50.0f);
     registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,
                       (unsigned int) COMPARISON_TYPE::LESS_THAN_OR_EQUAL);
     registerParameter("failed_values_of_interest", &failed_values_of_interest_, true);
@@ -44,7 +44,6 @@ PositionDistanceConfig::PositionDistanceConfig(
 
 PositionDistanceConfig::~PositionDistanceConfig()
 {
-
 }
 
 std::shared_ptr<Base> PositionDistanceConfig::createRequirement()

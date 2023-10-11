@@ -53,7 +53,7 @@ VariableOrderedSet::~VariableOrderedSet()
 }
 
 void VariableOrderedSet::generateSubConfigurable(const std::string& class_id,
-                                                    const std::string& instance_id)
+                                                 const std::string& instance_id)
 {
     logdbg << "VariableOrderedSet: generateSubConfigurable: class_id " << class_id
            << " instance_id " << instance_id;
@@ -102,12 +102,12 @@ void VariableOrderedSet::add(Variable& var)
     {
         std::string var_name = var.name();
 
-        Configuration& id_configuration = addNewSubConfiguration("VariableOrderDefinition");
-        id_configuration.addParameterString("dbcontent_name", var.dbContentName());
-        id_configuration.addParameterString("variable_name", var_name);
-        id_configuration.addParameterUnsignedInt("index",
+        auto id_configuration = Configuration::create("VariableOrderDefinition");
+        id_configuration->addParameter<std::string>("dbcontent_name", var.dbContentName());
+        id_configuration->addParameter<std::string>("variable_name", var_name);
+        id_configuration->addParameter<unsigned int>("index",
                                                  (unsigned int)variable_definitions_.size());
-        generateSubConfigurable("VariableOrderDefinition", id_configuration.getInstanceId());
+        generateSubConfigurableFromConfig(std::move(id_configuration));
 
         emit setChangedSignal();
         emit variableAddedChangedSignal();
@@ -120,12 +120,12 @@ void VariableOrderedSet::add(MetaVariable& var)
     {
         std::string var_name = var.name();
 
-        Configuration& id_configuration = addNewSubConfiguration("VariableOrderDefinition");
-        id_configuration.addParameterString("dbcontent_name", META_OBJECT_NAME);
-        id_configuration.addParameterString("variable_name", var_name);
-        id_configuration.addParameterUnsignedInt("index",
+        auto id_configuration = Configuration::create("VariableOrderDefinition");
+        id_configuration->addParameter<std::string>("dbcontent_name", META_OBJECT_NAME);
+        id_configuration->addParameter<std::string>("variable_name", var_name);
+        id_configuration->addParameter<unsigned int>("index",
                                                  (unsigned int)variable_definitions_.size());
-        generateSubConfigurable("VariableOrderDefinition", id_configuration.getInstanceId());
+        generateSubConfigurableFromConfig(std::move(id_configuration));
 
         emit setChangedSignal();
         emit variableAddedChangedSignal();
@@ -136,12 +136,12 @@ void VariableOrderedSet::add (const std::string& dbcontent_name, const std::stri
 {
     if (!hasVariable(dbcontent_name, var_name))
     {
-        Configuration& id_configuration = addNewSubConfiguration("VariableOrderDefinition");
-        id_configuration.addParameterString("dbcontent_name", dbcontent_name);
-        id_configuration.addParameterString("variable_name", var_name);
-        id_configuration.addParameterUnsignedInt("index",
+        auto id_configuration = Configuration::create("VariableOrderDefinition");
+        id_configuration->addParameter<std::string>("dbcontent_name", dbcontent_name);
+        id_configuration->addParameter<std::string>("variable_name", var_name);
+        id_configuration->addParameter<unsigned int>("index",
                                                  (unsigned int)variable_definitions_.size());
-        generateSubConfigurable("VariableOrderDefinition", id_configuration.getInstanceId());
+        generateSubConfigurableFromConfig(std::move(id_configuration));
 
         emit setChangedSignal();
         emit variableAddedChangedSignal();

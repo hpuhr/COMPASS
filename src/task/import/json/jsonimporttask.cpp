@@ -62,7 +62,7 @@ JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& i
 {
     tooltip_ = "Allows importing of JSON data in several variants into the opened database.";
 
-    registerParameter("current_schema_name", &current_schema_name_, "");
+    registerParameter("current_schema_name", &current_schema_name_, std::string());
 
     date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
 
@@ -78,9 +78,7 @@ void JSONImportTask::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "JSONParsingSchema")
     {
-        std::string name = configuration()
-                .getSubConfiguration(class_id, instance_id)
-                .getParameterConfigValueString("name");
+        std::string name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<std::string>("name");
 
         assert(schemas_.find(name) == schemas_.end());
 

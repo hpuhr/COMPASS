@@ -38,17 +38,17 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
     logdbg << "JSONDataMapping: constructor: this " << this;
 
     registerParameter("active", &active_, false);
-    registerParameter("json_key", &json_key_, "");
+    registerParameter("json_key", &json_key_, std::string());
 
-    registerParameter("db_content_name", &db_content_name_, "");
-    registerParameter("db_content_variable_name", &dbcontent_variable_name_, "");
+    registerParameter("db_content_name", &db_content_name_, std::string());
+    registerParameter("db_content_variable_name", &dbcontent_variable_name_, std::string());
 
-    registerParameter("comment", &comment_, "");
+    registerParameter("comment", &comment_, std::string());
 
     registerParameter("mandatory", &mandatory_, false);
 
-    registerParameter("format_data_type", &format_data_type_, "");
-    registerParameter("json_value_format", &json_value_format_, "");
+    registerParameter("format_data_type", &format_data_type_, std::string());
+    registerParameter("json_value_format", (std::string*)&json_value_format_, std::string());
 
 //    if (format_data_type_.size())
 //    {
@@ -57,8 +57,8 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
 //        json_value_format_ = Format(Property::asDataType(format_data_type_), json_value_format_);
 //    }
 
-    registerParameter("dimension", &dimension_, "");
-    registerParameter("unit", &unit_, "");
+    registerParameter("dimension", &dimension_, std::string());
+    registerParameter("unit", &unit_, std::string());
 
     registerParameter("in_array", &in_array_, false);
     registerParameter("append_value", &append_value_, false);

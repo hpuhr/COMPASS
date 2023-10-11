@@ -68,25 +68,25 @@ GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::s
 
     //registerParameter("current_filename", &current_filename_, "");
 
-    registerParameter("ds_name", &ds_name_, "GPS Trail");
-    registerParameter("ds_sac", &ds_sac_, 0);
-    registerParameter("ds_sic", &ds_sic_, 0);
+    registerParameter("ds_name", &ds_name_, std::string("GPS Trail"));
+    registerParameter("ds_sac", &ds_sac_, 0u);
+    registerParameter("ds_sic", &ds_sic_, 0u);
 
     registerParameter("use_tod_offset", &use_tod_offset_, false);
-    registerParameter("tod_offset", &tod_offset_, 0);
+    registerParameter("tod_offset", &tod_offset_, 0.0f);
 
     registerParameter("use_override_date", &use_override_date_, false);
-    registerParameter("override_date_str", &override_date_str_, "1970-01-01");
+    registerParameter("override_date_str", &override_date_str_, std::string("1970-01-01"));
     override_date_ = boost::gregorian::from_string(override_date_str_);
 
     registerParameter("set_mode_3a_code", &set_mode_3a_code_, false);
-    registerParameter("mode_3a_code", &mode_3a_code_, 0);
+    registerParameter("mode_3a_code", &mode_3a_code_, 0u);
 
     registerParameter("set_target_address", &set_target_address_, false);
-    registerParameter("target_address", &target_address_, 0);
+    registerParameter("target_address", &target_address_, 0u);
 
     registerParameter("set_callsign", &set_callsign_, false);
-    registerParameter("callsign", &callsign_, "");
+    registerParameter("callsign", &callsign_, std::string());
 
     //registerParameter("line_id", &line_id_, 0); always defaults to 0
 

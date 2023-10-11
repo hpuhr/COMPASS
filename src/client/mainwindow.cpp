@@ -821,7 +821,6 @@ void MainWindow::importJSONRecordingSlot()
         COMPASS::instance().taskManager().jsonImporterTask().dialog()->updateSource();
         COMPASS::instance().taskManager().jsonImporterTask().dialog()->show();
     }
-
 }
 
 void MainWindow::importGPSTrailSlot()

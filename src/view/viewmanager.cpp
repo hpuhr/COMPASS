@@ -209,14 +209,12 @@ void ViewManager::checkSubConfigurables()
 {
     if (containers_.size() == 0)
     {
-        addNewSubConfiguration("ViewContainer", "ViewContainer0");
-        generateSubConfigurable("ViewContainer", "ViewContainer0");
+        generateSubConfigurableFromConfig("ViewContainer", "ViewContainer0");
     }
 
     if (!view_points_report_gen_)
     {
-        addNewSubConfiguration("ViewPointsReportGenerator", "ViewPointsReportGenerator0");
-        generateSubConfigurable("ViewPointsReportGenerator", "ViewPointsReportGenerator0");
+        generateSubConfigurableFromConfig("ViewPointsReportGenerator", "ViewPointsReportGenerator0");
     }
 }
 
@@ -633,8 +631,7 @@ ViewContainerWidget* ViewManager::addNewContainerWidget()
     container_count_++;
     std::string container_widget_name = "ViewWindow" + std::to_string(container_count_);
 
-    addNewSubConfiguration("ViewContainerWidget", container_widget_name);
-    generateSubConfigurable("ViewContainerWidget", container_widget_name);
+    generateSubConfigurableFromConfig("ViewContainerWidget", container_widget_name);
 
     assert(container_widgets_.count(container_widget_name) == 1);
 

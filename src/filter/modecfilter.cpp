@@ -16,8 +16,8 @@ ModeCFilter::ModeCFilter(const std::string& class_id, const std::string& instanc
                        Configurable* parent)
     : DBFilter(class_id, instance_id, parent, false)
 {
-    registerParameter("min_value", &min_value_, -1000.0);
-    registerParameter("max_value", &max_value_, 10000.0);
+    registerParameter("min_value", &min_value_, -1000.0f);
+    registerParameter("max_value", &max_value_, 10000.0f);
     registerParameter("null_wanted", &null_wanted_, false);
 
     name_ = "Mode C Codes";

@@ -36,34 +36,34 @@ ADSBQualityFilter::ADSBQualityFilter(const std::string& class_id, const std::str
     registerParameter("use_v2", &use_v2_, true);
 
     registerParameter("use_min_nucp", &use_min_nucp_, true);
-    registerParameter("min_nucp", &min_nucp_, 4);
+    registerParameter("min_nucp", &min_nucp_, 4u);
 
     registerParameter("use_min_nic", &use_min_nic_, true);
-    registerParameter("min_nic", &min_nic_, 5);
+    registerParameter("min_nic", &min_nic_, 5u);
 
     registerParameter("use_min_nacp", &use_min_nacp_, true);
-    registerParameter("min_nacp", &min_nacp_, 5);
+    registerParameter("min_nacp", &min_nacp_, 5u);
 
     registerParameter("use_min_sil_v1", &use_min_sil_v1_, true);
-    registerParameter("min_sil_v1", &min_sil_v1_, 2);
+    registerParameter("min_sil_v1", &min_sil_v1_, 2u);
 
     registerParameter("use_min_sil_v2", &use_min_sil_v2_, true);
-    registerParameter("min_sil_v2", &min_sil_v2_, 4);
+    registerParameter("min_sil_v2", &min_sil_v2_, 4u);
 
     registerParameter("use_max_nucp", &use_max_nucp_, true);
-    registerParameter("max_nucp", &max_nucp_, 4);
+    registerParameter("max_nucp", &max_nucp_, 4u);
 
     registerParameter("use_max_nic", &use_max_nic_, true);
-    registerParameter("max_nic", &max_nic_, 5);
+    registerParameter("max_nic", &max_nic_, 5u);
 
     registerParameter("use_max_nacp", &use_max_nacp_, true);
-    registerParameter("max_nacp", &max_nacp_, 5);
+    registerParameter("max_nacp", &max_nacp_, 5u);
 
     registerParameter("use_max_sil_v1", &use_max_sil_v1_, true);
-    registerParameter("max_sil_v1", &max_sil_v1_, 2);
+    registerParameter("max_sil_v1", &max_sil_v1_, 2u);
 
     registerParameter("use_max_sil_v2", &use_max_sil_v2_, true);
-    registerParameter("max_sil_v2", &max_sil_v2_, 4);
+    registerParameter("max_sil_v2", &max_sil_v2_, 4u);
 
     name_ = "ADSB Quality";
 

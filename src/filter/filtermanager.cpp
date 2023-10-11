@@ -55,7 +55,7 @@ FilterManager::FilterManager(const std::string& class_id, const std::string& ins
     logdbg << "FilterManager: constructor";
 
     registerParameter("use_filters", &use_filters_, false);
-    registerParameter("db_id", &db_id_, "");
+    registerParameter("db_id", &db_id_, std::string());
 
     createSubConfigurables();
 }
@@ -104,9 +104,7 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "DBOSpecificValuesDBFilter")
     {
-        std::string dbcontent_name = configuration()
-                .getSubConfiguration(class_id, instance_id)
-                .getParameterConfigValueString("dbcontent_name");
+        std::string dbcontent_name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<std::string>("dbcontent_name");
 
         if (!checkDBContent(dbcontent_name))
         {
@@ -163,8 +161,8 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "UTNFilter")
     {
-        try
-        {
+        //try
+        //{
             if (hasSubConfigurable(class_id, instance_id))
             {
                 logerr << "FilterManager: generateSubConfigurable: utn filter "
@@ -175,18 +173,17 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             UTNFilter* filter = new UTNFilter(class_id, instance_id, this);
 
             filters_.emplace_back(filter);
-        }
-        catch (const std::exception& e)
-        {
-            loginf << "FilterManager: generateSubConfigurable: utn filter exception '"
-                   << e.what() << "', deleting";
-            configuration().removeSubConfiguration(class_id, instance_id);
-        }
+        //}
+        //catch (const std::exception& e)
+        //{
+        //    loginf << "FilterManager: generateSubConfigurable: utn filter exception '" << e.what() << "', deleting";
+        //    configuration().removeSubConfiguration(class_id, instance_id);
+        //}
     }
     else if (class_id == "ADSBQualityFilter")
     {
-        try
-        {
+        //try
+        //{
             if (hasSubConfigurable(class_id, instance_id))
             {
                 logerr << "FilterManager: generateSubConfigurable: adsb quality filter "
@@ -197,13 +194,12 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             ADSBQualityFilter* filter = new ADSBQualityFilter(class_id, instance_id, this);
 
             filters_.emplace_back(filter);
-        }
-        catch (const std::exception& e)
-        {
-            loginf << "FilterManager: generateSubConfigurable: data source filter exception '"
-                   << e.what() << "', deleting";
-            configuration().removeSubConfiguration(class_id, instance_id);
-        }
+        //}
+        //catch (const std::exception& e)
+        //{
+        //    loginf << "FilterManager: generateSubConfigurable: data source filter exception '" << e.what() << "', deleting";
+        //    configuration().removeSubConfiguration(class_id, instance_id);
+        //}
     }
     else if (class_id == "PrimaryOnlyFilter")
     {
@@ -253,8 +249,7 @@ void FilterManager::checkSubConfigurables()
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     { // no UTN filter
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
     classid = "TimestampFilter";
@@ -262,8 +257,7 @@ void FilterManager::checkSubConfigurables()
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     {
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
     classid = "TrackerTrackNumberFilter";
@@ -271,16 +265,14 @@ void FilterManager::checkSubConfigurables()
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     {
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
     classid = "RefTrajAccuracyFilter";
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     {
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
     classid = "MLATRUFilter";
@@ -288,8 +280,7 @@ void FilterManager::checkSubConfigurables()
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     {
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
 //    classid = "ADSBQualityFilter";

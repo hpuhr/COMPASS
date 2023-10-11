@@ -35,9 +35,9 @@ ModeCFalseConfig::ModeCFalseConfig(const std::string& class_id, const std::strin
                                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
+    registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01f);
 
-    registerParameter("max_difference", &max_difference_, 100);
+    registerParameter("max_difference", &max_difference_, 100.0f);
 }
 
 std::shared_ptr<Base> ModeCFalseConfig::createRequirement()

@@ -29,11 +29,11 @@ class ASTERIXCategoryConfig : public Configurable
                           const std::string& instance_id, Configurable* parent)
         : Configurable(class_id, instance_id, parent), category_(category)
     {
-        registerParameter("category", &category_, 0);
+        registerParameter("category", &category_, 0u);
         registerParameter("decode", &decode_, false);
-        registerParameter("edition", &edition_, "");
-        registerParameter("ref", &ref_, "");
-        registerParameter("spf", &spf_, "");
+        registerParameter("edition", &edition_, std::string());
+        registerParameter("ref", &ref_, std::string());
+        registerParameter("spf", &spf_, std::string());
     }
 
     virtual void generateSubConfigurable(const std::string& class_id,

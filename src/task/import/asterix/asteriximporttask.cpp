@@ -72,24 +72,24 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("debug_jasterix", &settings_.debug_jasterix_, false);
 
     registerParameter("file_list", &settings_.file_list_, json::array());
-    //registerParameter("current_file_framing", &settings_.current_file_framing_, "");
+    //registerParameter("current_file_framing", &settings_.current_file_framing_, std::string());
 
-    registerParameter("num_packets_overload", &settings_.num_packets_overload_, 60);
+    registerParameter("num_packets_overload", &settings_.num_packets_overload_, 60u);
 
     settings_.date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
 
-    registerParameter("override_tod_offset", &settings_.override_tod_offset_, 0.0);
+    registerParameter("override_tod_offset", &settings_.override_tod_offset_, 0.0f);
 
-    registerParameter("filter_tod_min", &settings_.filter_tod_min_, 0.0);
-    registerParameter("filter_tod_max", &settings_.filter_tod_max_, 24*3600.0 - 1);
+    registerParameter("filter_tod_min", &settings_.filter_tod_min_, 0.0f);
+    registerParameter("filter_tod_max", &settings_.filter_tod_max_, (float)(24*3600.0 - 1));
 
     registerParameter("filter_latitude_min", &settings_.filter_latitude_min_, -90.0);
     registerParameter("filter_latitude_max", &settings_.filter_latitude_max_, 00.0);
     registerParameter("filter_longitude_min", &settings_.filter_longitude_min_, -180.0);
     registerParameter("filter_longitude_max", &settings_.filter_longitude_max_, 180.0);
 
-    registerParameter("filter_modec_min", &settings_.filter_modec_min_, -10000.0);
-    registerParameter("filter_modec_max", &settings_.filter_modec_max_, 50000.0);
+    registerParameter("filter_modec_min", &settings_.filter_modec_min_, -10000.0f);
+    registerParameter("filter_modec_max", &settings_.filter_modec_max_, 50000.0f);
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
@@ -118,9 +118,7 @@ void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "ASTERIXCategoryConfig")
     {
-        unsigned int category = configuration()
-                .getSubConfiguration(class_id, instance_id)
-                .getParameterConfigValueUint("category");
+        unsigned int category = getSubConfiguration(class_id, instance_id).getParameterConfigValue<unsigned int>("category");
 
         assert(category_configs_.find(category) == category_configs_.end());
 
@@ -139,9 +137,7 @@ void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "ASTERIXJSONParsingSchema")
     {
-        std::string name = configuration()
-                .getSubConfiguration(class_id, instance_id)
-                .getParameterConfigValueString("name");
+        std::string name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<std::string>("name");
 
         assert(schema_ == nullptr);
         assert(name == "jASTERIX");
@@ -256,10 +252,9 @@ void ASTERIXImportTask::checkSubConfigurables()
 {
     if (schema_ == nullptr)
     {
-        Configuration& config =
-                addNewSubConfiguration("JSONParsingSchema", "JSONParsingSchemajASTERIX0");
-        config.addParameterString("name", "jASTERIX");
-        generateSubConfigurable("JSONParsingSchema", "JSONParsingSchemajASTERIX0");
+        auto config = Configuration::create("JSONParsingSchema", "JSONParsingSchemajASTERIX0");
+        config->addParameter<std::string>("name", "jASTERIX");
+        generateSubConfigurableFromConfig(std::move(config));
     }
 }
 
@@ -413,13 +408,13 @@ void ASTERIXImportTask::decodeCategory(unsigned int category, bool decode)
 
     if (!hasConfiguratonFor(category))
     {
-        Configuration& new_cfg = configuration().addNewSubConfiguration("ASTERIXCategoryConfig");
-        new_cfg.addParameterUnsignedInt("category", category);
-        new_cfg.addParameterBool("decode", decode);
-        new_cfg.addParameterString("edition", jasterix_->category(category)->defaultEdition());
-        new_cfg.addParameterString("ref", jasterix_->category(category)->defaultREFEdition());
+        auto new_cfg = Configuration::create("ASTERIXCategoryConfig");
+        new_cfg->addParameter<unsigned int>("category", category);
+        new_cfg->addParameter<bool>("decode", decode);
+        new_cfg->addParameter<std::string>("edition", jasterix_->category(category)->defaultEdition());
+        new_cfg->addParameter<std::string>("ref", jasterix_->category(category)->defaultREFEdition());
 
-        generateSubConfigurable("ASTERIXCategoryConfig", new_cfg.getInstanceId());
+        generateSubConfigurableFromConfig(std::move(new_cfg));
         assert(hasConfiguratonFor(category));
     }
     else
@@ -450,13 +445,13 @@ void ASTERIXImportTask::editionForCategory(unsigned int category, const std::str
 
     if (!hasConfiguratonFor(category))
     {
-        Configuration& new_cfg = configuration().addNewSubConfiguration("ASTERIXCategoryConfig");
-        new_cfg.addParameterUnsignedInt("category", category);
-        new_cfg.addParameterBool("decode", false);
-        new_cfg.addParameterString("edition", edition);
-        new_cfg.addParameterString("ref", jasterix_->category(category)->defaultREFEdition());
+        auto new_cfg = Configuration::create("ASTERIXCategoryConfig");
+        new_cfg->addParameter<unsigned int>("category", category);
+        new_cfg->addParameter<bool>("decode", false);
+        new_cfg->addParameter<std::string>("edition", edition);
+        new_cfg->addParameter<std::string>("ref", jasterix_->category(category)->defaultREFEdition());
 
-        generateSubConfigurable("ASTERIXCategoryConfig", new_cfg.getInstanceId());
+        generateSubConfigurableFromConfig(std::move(new_cfg));
         assert(hasConfiguratonFor(category));
     }
     else
@@ -488,13 +483,13 @@ void ASTERIXImportTask::refEditionForCategory(unsigned int category, const std::
 
     if (!hasConfiguratonFor(category))
     {
-        Configuration& new_cfg = configuration().addNewSubConfiguration("ASTERIXCategoryConfig");
-        new_cfg.addParameterUnsignedInt("category", category);
-        new_cfg.addParameterBool("decode", false);
-        new_cfg.addParameterString("edition", jasterix_->category(category)->defaultEdition());
-        new_cfg.addParameterString("ref", ref);
+        auto new_cfg = Configuration::create("ASTERIXCategoryConfig");
+        new_cfg->addParameter<unsigned int>("category", category);
+        new_cfg->addParameter<bool>("decode", false);
+        new_cfg->addParameter<std::string>("edition", jasterix_->category(category)->defaultEdition());
+        new_cfg->addParameter<std::string>("ref", ref);
 
-        generateSubConfigurable("ASTERIXCategoryConfig", new_cfg.getInstanceId());
+        generateSubConfigurableFromConfig(std::move(new_cfg));
         assert(hasConfiguratonFor(category));
     }
     else
@@ -527,13 +522,13 @@ void ASTERIXImportTask::spfEditionForCategory(unsigned int category, const std::
 
     if (!hasConfiguratonFor(category))
     {
-        Configuration& new_cfg = configuration().addNewSubConfiguration("ASTERIXCategoryConfig");
-        new_cfg.addParameterUnsignedInt("category", category);
-        new_cfg.addParameterBool("decode", false);
-        new_cfg.addParameterString("edition", jasterix_->category(category)->defaultEdition());
-        new_cfg.addParameterString("spf", spf);
+        auto new_cfg = Configuration::create("ASTERIXCategoryConfig");
+        new_cfg->addParameter<unsigned int>("category", category);
+        new_cfg->addParameter<bool>("decode", false);
+        new_cfg->addParameter<std::string>("edition", jasterix_->category(category)->defaultEdition());
+        new_cfg->addParameter<std::string>("spf", spf);
 
-        generateSubConfigurable("ASTERIXCategoryConfig", new_cfg.getInstanceId());
+        generateSubConfigurableFromConfig(std::move(new_cfg));
         assert(hasConfiguratonFor(category));
     }
     else

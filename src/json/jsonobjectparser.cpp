@@ -37,16 +37,16 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
                                    Configurable* parent)
     : Configurable(class_id, instance_id, parent)
 {
-    registerParameter("name", &name_, "");
+    registerParameter("name", &name_, std::string());
     registerParameter("active", &active_, true);
-    registerParameter("db_content_name", &db_content_name_, "");
+    registerParameter("db_content_name", &db_content_name_, std::string());
 
-    registerParameter("json_container_key", &json_container_key_, "");
-    registerParameter("json_key", &json_key_, "*");
-    registerParameter("json_value", &json_value_, "");
+    registerParameter("json_container_key", &json_container_key_, std::string());
+    registerParameter("json_key", &json_key_, std::string("*"));
+    registerParameter("json_value", &json_value_, std::string());
 
     registerParameter("override_data_source", &override_data_source_, false);
-    registerParameter("data_source_variable_name", &data_source_variable_name_, "");
+    registerParameter("data_source_variable_name", &data_source_variable_name_, std::string());
 
     assert(db_content_name_.size());
 
@@ -60,44 +60,6 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
     json_values_vector_ = String::split(json_value_, ',');
 
     assert (!override_data_source_); // TODO reimplement
-}
-
-JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
-{
-    name_ = other.name_;
-    db_content_name_ = other.db_content_name_;
-    dbcontent_ = other.dbcontent_;
-
-    json_container_key_ = other.json_container_key_;
-    json_key_ = other.json_key_;
-    json_value_ = other.json_value_;
-    json_values_vector_ = other.json_values_vector_;
-
-    data_mappings_ = std::move(other.data_mappings_);
-
-    var_list_ = other.var_list_;
-
-    override_data_source_ = other.override_data_source_;
-    data_source_variable_name_ = other.data_source_variable_name_;
-
-    initialized_ = other.initialized_;
-
-    not_parse_all_ = other.not_parse_all_;
-
-    list_ = other.list_;
-
-    other.configuration().updateParameterPointer("name", &name_);
-    other.configuration().updateParameterPointer("dbcontent_name", &db_content_name_);
-    other.configuration().updateParameterPointer("json_key", &json_key_);
-    other.configuration().updateParameterPointer("json_value", &json_value_);
-    other.configuration().updateParameterPointer("override_data_source", &override_data_source_);
-
-    widget_ = std::move(other.widget_);
-    if (widget_)
-        widget_->setParser(*this);
-    other.widget_ = nullptr;
-
-    return static_cast<JSONObjectParser&>(Configurable::operator=(std::move(other)));
 }
 
 void JSONObjectParser::generateSubConfigurable(const std::string& class_id,
@@ -597,18 +559,18 @@ void JSONObjectParser::checkIfKeysExistsInMappings(const std::string& location,
                << db_content_name_ << "'" << location << "' type " << j.type_name() << " value "
                << j.dump() << " in array " << is_in_array;
 
-        Configuration& new_cfg = configuration().addNewSubConfiguration("JSONDataMapping");
-        new_cfg.addParameterString("json_key", location);
-        new_cfg.addParameterString("dbcontent_name", db_content_name_);
+        auto new_cfg = Configuration::create("JSONDataMapping");
+        new_cfg->addParameter<std::string>("json_key", location);
+        new_cfg->addParameter<std::string>("dbcontent_name", db_content_name_);
 
         if (is_in_array)
-            new_cfg.addParameterBool("in_array", true);
+            new_cfg->addParameter<bool>("in_array", true);
 
         std::stringstream ss;
         ss << "Type " << j.type_name() << ", value " << j.dump();
-        new_cfg.addParameterString("comment", ss.str());
+        new_cfg->addParameter<std::string>("comment", ss.str());
 
-        generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+        generateSubConfigurableFromConfig(std::move(new_cfg));
     }
 }
 

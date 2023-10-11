@@ -40,8 +40,8 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     tooltip_ =
             "Allows calculation of references based on System Tracker and ADS-B data.";
 
-    registerParameter("rec_type"     , (int*)&settings_.rec_type     , CalculateReferencesTaskSettings::Rec_UMKalman2D);
-    registerParameter("rec_proj_mode", (int*)&settings_.map_proj_mode, CalculateReferencesTaskSettings::MapProjectionMode::MapProjectDynamic);
+    registerParameter("rec_type"     , (int*)&settings_.rec_type     , (int)CalculateReferencesTaskSettings::Rec_UMKalman2D);
+    registerParameter("rec_proj_mode", (int*)&settings_.map_proj_mode, (int)CalculateReferencesTaskSettings::MapProjectionMode::MapProjectDynamic);
 
     registerParameter("rec_mm_stddev"        , &settings_.R_std     , CalculateReferencesTaskSettings::PosStdDevNotProvidedDefault);
     registerParameter("rec_mm_stddev_high"   , &settings_.R_std_high, CalculateReferencesTaskSettings::HighValueDefault);
@@ -89,21 +89,21 @@ CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
     registerParameter("tracker_only_report_detection_nonpsronly_positions",
                       &settings_.tracker_only_report_detection_nonpsronly_positions, false);
     registerParameter("tracker_only_high_accuracy_postions", &settings_.tracker_only_high_accuracy_postions, true);
-    registerParameter("tracker_minimum_accuracy", &settings_.tracker_minimum_accuracy, 30);
+    registerParameter("tracker_minimum_accuracy", &settings_.tracker_minimum_accuracy, 30.0f);
 
     registerParameter("adsb_only_v12_positions", &settings_.adsb_only_v12_positions, true);
     registerParameter("adsb_only_high_nucp_nic_positions", &settings_.adsb_only_high_nucp_nic_positions, false);
-    registerParameter("adsb_minimum_nucp_nic", &settings_.adsb_minimum_nucp_nic, 4);
+    registerParameter("adsb_minimum_nucp_nic", &settings_.adsb_minimum_nucp_nic, 4u);
     registerParameter("adsb_only_high_nacp_positions", &settings_.adsb_only_high_nacp_positions, true);
-    registerParameter("adsb_minimum_nacp", &settings_.adsb_minimum_nacp, 4);
+    registerParameter("adsb_minimum_nacp", &settings_.adsb_minimum_nacp, 4u);
     registerParameter("adsb_only_high_sil_positions_", &settings_.adsb_only_high_sil_positions, false);
-    registerParameter("adsb_minimum_sil", &settings_.adsb_minimum_sil, 1);
+    registerParameter("adsb_minimum_sil", &settings_.adsb_minimum_sil, 1u);
 
     // output
-    registerParameter("ds_name", &settings_.ds_name, "CalcRefTraj");
-    registerParameter("ds_sac", &settings_.ds_sac, 0);
-    registerParameter("ds_sic", &settings_.ds_sic, 1);
-    registerParameter("ds_line", &settings_.ds_line, 0); // 0 ... 3
+    registerParameter("ds_name", &settings_.ds_name, std::string("CalcRefTraj"));
+    registerParameter("ds_sac", &settings_.ds_sac, 0u);
+    registerParameter("ds_sic", &settings_.ds_sic, 1u);
+    registerParameter("ds_line", &settings_.ds_line, 0u); // 0 ... 3
 
     assert (settings_.ds_line >= 0 && settings_.ds_line <= 3);
 

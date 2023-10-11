@@ -36,8 +36,8 @@ ExtraDataConfig::ExtraDataConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("min_duration", &min_duration_, 60.0);
-    registerParameter("min_num_updates", &min_num_updates_, 10);
+    registerParameter("min_duration", &min_duration_, 60.0f);
+    registerParameter("min_num_updates", &min_num_updates_, 10u);
     registerParameter("ignore_primary_only", &ignore_primary_only_, true);
 }
 

@@ -41,7 +41,7 @@ EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::s
     : Configurable(class_id, instance_id, &eval_man), EvaluationStandardTreeItem(&root_item_), eval_man_(eval_man),
       root_item_(*this)
 {
-    registerParameter("name", &name_, "");
+    registerParameter("name", &name_, std::string());
 
     assert (name_.size());
 
@@ -57,7 +57,6 @@ EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::s
 EvaluationStandard::~EvaluationStandard()
 {
 }
-
 
 void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
                                                  const std::string& instance_id)
@@ -100,10 +99,10 @@ void EvaluationStandard::addGroup (const std::string& name)
 
     std::string instance = "EvaluationRequirementGroup" + name + "0";
 
-    Configuration& config = addNewSubConfiguration("EvaluationRequirementGroup", instance);
-    config.addParameterString("name", name);
+    auto config = Configuration::create("EvaluationRequirementGroup", instance);
+    config->addParameter<std::string>("name", name);
 
-    generateSubConfigurable("EvaluationRequirementGroup", instance);
+    generateSubConfigurableFromConfig(std::move(config));
 
     assert (hasGroup(name));
 

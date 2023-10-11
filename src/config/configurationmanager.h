@@ -75,7 +75,7 @@ class ConfigurationManager : public Singleton
     /// Container with all root configurables (class id, instance id) -> Configurable
     std::map<std::pair<std::string, std::string>, Configurable&> root_configurables_;
     /// Container with all root configurations (class id, instance id) -> Configuration
-    std::map<std::pair<std::string, std::string>, Configuration> root_configurations_;
+    std::map<std::pair<std::string, std::string>, std::unique_ptr<Configuration>> root_configurations_;
     // Configuration dummy_configuration_;
 
     /// @brief Constructor

@@ -36,9 +36,9 @@ SpeedConfig::SpeedConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0);
+    registerParameter("threshold_value", &threshold_value_, 50.0f);
     registerParameter("use_percent_if_higher", &use_percent_if_higher_, false);
-    registerParameter("threshold_percent", &threshold_percent_, 10.0);
+    registerParameter("threshold_percent", &threshold_percent_, 10.0f);
 
     registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,
                       (unsigned int) COMPARISON_TYPE::LESS_THAN_OR_EQUAL);

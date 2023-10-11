@@ -48,10 +48,6 @@ class JSONObjectParser : public Configurable
     JSONObjectParser(const std::string& class_id, const std::string& instance_id,
                      Configurable* parent);
     JSONObjectParser() = default;
-    JSONObjectParser(JSONObjectParser&& other) { *this = std::move(other); }
-
-    /// @brief Move constructor
-    JSONObjectParser& operator=(JSONObjectParser&& other);
 
     DBContent& dbContent() const;
 

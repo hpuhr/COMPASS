@@ -32,7 +32,7 @@ RTCommandManager::RTCommandManager()
 {
     loginf << "JobManager: constructor";
 
-    registerParameter("port_num", &port_num_, 27960);
+    registerParameter("port_num", &port_num_, 27960u);
     registerParameter("db_file_list", &command_backlog_, nlohmann::json::array());
 }
 

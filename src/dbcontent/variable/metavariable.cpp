@@ -36,7 +36,7 @@ MetaVariable::MetaVariable(const std::string& class_id, const std::string& insta
       object_manager_(*object_manager),
       widget_(nullptr)
 {
-    registerParameter("name", &name_, "");
+    registerParameter("name", &name_, std::string());
 
     // DBOVAR LOWERCASE HACK
     // boost::algorithm::to_lower(name_);
@@ -168,11 +168,11 @@ void MetaVariable::addVariable(const std::string& dbcontent_name, const std::str
 
     std::string instance_id = "VariableDefinition" + dbcontent_name + dbovariable_name + "0";
 
-    Configuration& config = addNewSubConfiguration("VariableDefinition", instance_id);
-    config.addParameterString("dbcontent_name", dbcontent_name);
-    config.addParameterString("variable_name", dbovariable_name);
-    generateSubConfigurable("VariableDefinition", instance_id);
+    auto config = Configuration::create("VariableDefinition", instance_id);
+    config->addParameter<std::string>("dbcontent_name", dbcontent_name);
+    config->addParameter<std::string>("variable_name", dbovariable_name);
 
+    generateSubConfigurableFromConfig(std::move(config));
     updateDescription();
 }
 

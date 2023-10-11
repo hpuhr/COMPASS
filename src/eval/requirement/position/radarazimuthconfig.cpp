@@ -36,12 +36,11 @@ PositionRadarAzimuthConfig::PositionRadarAzimuthConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 0.1);
+    registerParameter("threshold_value", &threshold_value_, 0.1f);
 }
 
 PositionRadarAzimuthConfig::~PositionRadarAzimuthConfig()
 {
-
 }
 
 std::shared_ptr<Base> PositionRadarAzimuthConfig::createRequirement()

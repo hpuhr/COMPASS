@@ -18,7 +18,7 @@ RefTrajAccuracyFilter::RefTrajAccuracyFilter(const std::string& class_id, const 
                        Configurable* parent)
     : DBFilter(class_id, instance_id, parent, false)
 {
-    registerParameter("min_value", &min_value_, 30.0);
+    registerParameter("min_value", &min_value_, 30.0f);
 
     name_ = "RefTraj Accuracy";
 
