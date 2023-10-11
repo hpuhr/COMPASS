@@ -24,6 +24,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "dbfiltercondition.h"
+#include "global.h"
 
 using namespace Utils;
 using namespace nlohmann;

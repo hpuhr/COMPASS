@@ -26,6 +26,7 @@
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
+#include "global.h"
 
 #include <QHBoxLayout>
 #include <QLabel>

@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H
 
 #include "eval/requirement/base/base.h"
-#include "eval/requirement/position/detail.h"
+//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {

@@ -24,6 +24,7 @@
 #include "evaluationmanager.h"
 #include "evaluationresultsgenerator.h"
 #include "sectorlayer.h"
+#include "viewpoint.h"
 
 using namespace std;
 using namespace nlohmann;

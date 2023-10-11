@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTTRACKANGLECONFIG_H
 #define EVALUATIONREQUIREMENTTRACKANGLECONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/trackangle/trackangleconfigwidget.h"
-#include "eval/requirement/trackangle/trackangle.h"
+//#include "eval/requirement/trackangle/trackangleconfigwidget.h"
+//#include "eval/requirement/trackangle/trackangle.h"
 
 class Group;
 class EvaluationStandard;

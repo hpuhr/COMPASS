@@ -17,6 +17,7 @@
 
 #include "eval/requirement/position/radarazimuthconfig.h"
 #include "eval/requirement/position/radarazimuthconfigwidget.h"
+#include "eval/requirement/position/radarazimuth.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"

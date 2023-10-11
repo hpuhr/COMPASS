@@ -44,6 +44,7 @@
 #include "taskmanager.h"
 #include "asteriximporttask.h"
 #include "dbcontent_commands.h"
+#include "viewpoint.h"
 
 #include "util/tbbhack.h"
 

@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variabledefinition.h"
-#include "propertylist.h"
+//#include "propertylist.h"
 
 namespace dbContent
 {

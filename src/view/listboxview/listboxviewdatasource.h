@@ -18,9 +18,9 @@
 #ifndef LISTBOXVIEWDATASOURCE_H_
 #define LISTBOXVIEWDATASOURCE_H_
 
-#include "buffer.h"
+//#include "buffer.h"
 #include "configurable.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableorderedset.h"
 //#include "viewselection.h"
 

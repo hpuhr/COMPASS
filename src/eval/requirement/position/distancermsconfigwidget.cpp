@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/position/distanceconfigwidget.h"
+#include "eval/requirement/position/distancermsconfigwidget.h"
 #include "eval/requirement/position/distancermsconfig.h"
 #include "textfielddoublevalidator.h"
 #include "eval/requirement/base/comparisontypecombobox.h"

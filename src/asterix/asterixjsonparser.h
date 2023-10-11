@@ -2,13 +2,13 @@
 #define ASTERIXJSONPARSER_H
 
 #include "configurable.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-#include "format.h"
+//#include "format.h"
 #include "jsondatamapping.h"
 #include "asterixjsonparserwidget.h"
 #include "propertylist.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
 #include <jasterix/iteminfo.h>
 

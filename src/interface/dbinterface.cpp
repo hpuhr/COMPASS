@@ -42,6 +42,7 @@
 #include "source/dbdatasource.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/target/target.h"
+#include "viewpoint.h"
 
 #include <QApplication>
 #include <QMessageBox>

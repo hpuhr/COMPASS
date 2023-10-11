@@ -17,6 +17,7 @@
 
 #include "eval/requirement/speed/speedconfig.h"
 #include "eval/requirement/speed/speedconfigwidget.h"
+#include "eval/requirement/speed/speed.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"

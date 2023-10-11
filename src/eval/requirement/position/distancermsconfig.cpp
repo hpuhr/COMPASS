@@ -17,6 +17,7 @@
 
 #include "eval/requirement/position/distancermsconfig.h"
 #include "eval/requirement/position/distancermsconfigwidget.h"
+#include "eval/requirement/position/distancerms.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"

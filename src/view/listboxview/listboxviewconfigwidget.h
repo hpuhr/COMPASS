@@ -19,8 +19,8 @@
 #define LISTBOXVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-#include "dbcontent/variable/variable.h"
-#include "appmode.h"
+//#include "dbcontent/variable/variable.h"
+//#include "appmode.h"
 
 class VariableOrderedSetWidget;
 class ListBoxView;

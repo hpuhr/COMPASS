@@ -19,7 +19,7 @@
 #define COMPASS_H_
 
 #include "configurable.h"
-#include "propertylist.h"
+//#include "propertylist.h"
 #include "singleton.h"
 #include "json.hpp"
 #include "appmode.h"

@@ -20,6 +20,7 @@
 #include "rtcommand_registry.h"
 #include "datasourcemanager.h"
 #include "compass.h"
+#include "logger.h"
 
 #include <boost/program_options.hpp>
 

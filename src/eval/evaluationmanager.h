@@ -25,6 +25,7 @@
 #include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgenerator.h"
 #include "datasourcecompoundcoverage.h"
+#include "sector.h"
 
 #include <QObject>
 

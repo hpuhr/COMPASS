@@ -17,6 +17,7 @@
 
 #include "eval/requirement/position/distanceconfig.h"
 #include "eval/requirement/position/distanceconfigwidget.h"
+#include "eval/requirement/position/distance.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/probabilitybase.h"
 #include "eval/results/report/section.h"

@@ -17,6 +17,7 @@
 
 #include "eval/requirement/position/latencyconfig.h"
 #include "eval/requirement/position/latencyconfigwidget.h"
+#include "eval/requirement/position/latency.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"

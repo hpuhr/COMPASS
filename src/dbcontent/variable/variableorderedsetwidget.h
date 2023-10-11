@@ -24,7 +24,7 @@ class QListWidget;
 #include <QWidget>
 
 #include "dbcontent/variable/variableorderedset.h"
-#include "dbcontent/variable/variableselectionwidget.h"
+//#include "dbcontent/variable/variableselectionwidget.h"
 
 namespace dbContent
 {

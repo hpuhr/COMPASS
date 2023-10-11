@@ -16,6 +16,8 @@
  */
 
 #include "eval/requirement/mode_a/presentconfig.h"
+#include "eval/requirement/mode_a/modeapresentconfigwidget.h"
+#include "eval/requirement/mode_a/present.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"

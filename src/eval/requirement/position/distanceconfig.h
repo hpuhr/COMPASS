@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/position/distanceconfigwidget.h"
-#include "eval/requirement/position/distance.h"
+//#include "eval/requirement/position/distanceconfigwidget.h"
+//#include "eval/requirement/position/distance.h"
 
 class Group;
 class EvaluationStandard;

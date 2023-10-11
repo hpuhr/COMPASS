@@ -27,6 +27,7 @@
 #include "job.h"
 #include "logger.h"
 #include "viewpoint.h"
+#include "global.h"
 
 #include <algorithm>
 #include <cassert>

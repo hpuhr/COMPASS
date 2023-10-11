@@ -28,6 +28,7 @@
 #include "logger.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
+#include "viewpoint.h"
 
 #include <cassert>
 

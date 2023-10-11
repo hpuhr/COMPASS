@@ -20,7 +20,6 @@
 
 #include <vector>
 
-#include "logger.h"
 #include "property.h"
 
 /**
@@ -38,201 +37,62 @@ class PropertyList
 
   public:
     /// @brief Constructor
-    PropertyList() { logdbg << "PropertyList: constructor"; }
+    PropertyList();
     /// @brief Desctructor. Calls clear.
-    virtual ~PropertyList()
-    {
-        logdbg << "PropertyList: destructor: start";
-        clear();
-        logdbg << "PropertyList: destructor: end";
-    }
+    virtual ~PropertyList();
 
     /// @brief Copy constructor
-    PropertyList(const PropertyList& org)
-    {
-        properties_ = org.properties_;
-        // loginf << "PropertyList: constructor: properties " << properties_.size();
-    }
+    PropertyList(const PropertyList& org);
 
     /// @brief Copy operator
-    void operator=(const PropertyList& org) { properties_ = org.properties_; }
+    void operator=(const PropertyList& org);
 
-    void addPropertyList(const PropertyList& org)
-    {
-        properties_.insert(properties_.end(), org.properties_.begin(), org.properties_.end());
-    }
+    void addPropertyList(const PropertyList& org);
 
     /// @brief Adds a property
-    void addProperty(std::string id, PropertyDataType type)
-    {
-        logdbg << "PropertyList: addProperty: start";
-        logdbg << "PropertyList: addProperty:  id '" << id << "' type " << Property::asString(type);
-        assert(!id.empty());
-
-        if (hasProperty(id))
-        {
-            logwrn << "PropertyList: addProperty: property " << id << " already added";
-            return;
-        }
-
-        properties_.push_back(Property(id, type));
-        logdbg << "PropertyList: addProperty: end";
-    }
+    void addProperty(std::string id, PropertyDataType type);
 
     /// @brief Adds a property
-    void addProperty(Property& property)
-    {
-        logdbg << "PropertyList: addProperty: start";
+    void addProperty(Property& property);
 
-        if (hasProperty(property.name()))
-        {
-            logwrn << "PropertyList: addProperty: property " << property.name() << " already added";
-            return;
-        }
-
-        properties_.push_back(property);
-        logdbg << "PropertyList: addProperty: end";
-    }
-
-    void addProperty(const Property& property)
-    {
-        logdbg << "PropertyList: addProperty: start";
-
-        if (hasProperty(property.name()))
-        {
-            logwrn << "PropertyList: addProperty: property " << property.name() << " already added";
-            return;
-        }
-
-        properties_.push_back(property);
-        logdbg << "PropertyList: addProperty: end";
-    }
+    void addProperty(const Property& property);
 
     /// @brief Return container with all properties
     const std::vector<Property>& properties() const { return properties_; }
 
-    const Property& at(unsigned int index) const
-    {
-        assert(index < properties_.size());
-        return properties_.at(index);
-    }
-
+    const Property& at(unsigned int index) const;
     /**
      * @brief Removes a property
      *
      * \exception std::runtime_error if identifier not found
      */
-    void removeProperty(const std::string& id)
-    {
-        logdbg << "PropertyList: removeProperty: start";
-        assert(hasProperty(id));
-
-        std::vector<Property>::iterator it;
-
-        for (it = properties_.begin(); it != properties_.end(); it++)
-        {
-            if (it->name().compare(id) == 0)
-            {
-                properties_.erase(it);
-                logdbg << "PropertyList: removeProperty: end";
-                return;
-            }
-        }
-        logerr << "PropertyList: removeProperty: property " << id << " could not be removed";
-        assert(false);
-    }
+    void removeProperty(const std::string& id);
 
     /**
      * @brief Returns a property by id
      *
      * \exception std::runtime_error if identifier not found
      */
-    const Property& get(const std::string& id) const
-    {
-        logdbg << "PropertyList: get: start";
-        assert(hasProperty(id));
-
-        std::vector<Property>::const_iterator it;
-
-        for (it = properties_.begin(); it != properties_.end(); it++)
-        {
-            if (it->name().compare(id) == 0)
-            {
-                return *it;
-            }
-        }
-        logerr << "PropertyList: get: property " << id << " not found";
-        throw std::runtime_error("PropertyList: get: property " + id + " not found");
-    }
+    const Property& get(const std::string& id) const;
 
     /**
      * @brief Returns index of a property
      *
      * \exception std::runtime_error if identifier not found
      */
-    unsigned int getPropertyIndex(const std::string& id) const
-    {
-        logdbg << "PropertyList: getPropertyIndex: start";
-        if (!hasProperty(id))
-            throw std::runtime_error("PropertyList: getPropertyIndex: property " + id +
-                                     " does not exists");
-
-        unsigned int cnt = 0;
-        for (auto& it : properties_)
-        {
-            if (it.name() == id)
-            {
-                return cnt;
-            }
-            cnt++;
-        }
-        throw std::runtime_error("PropertyList: getPropertyIndex: property " + id + " not found");
-    }
+    unsigned int getPropertyIndex(const std::string& id) const;
 
     /// @brief Returns flag indicating if property is in list
-    bool hasProperty(const std::string& id) const
-    {
-        logdbg << "PropertyList: hasProperty: start";
+    bool hasProperty(const std::string& id) const;
 
-        for (auto& it : properties_)
-        {
-            if (it.name() == id)
-                return true;
-        }
-
-        return false;
-    }
-
-    bool hasProperty(const Property& prop) const
-    {
-        logdbg << "PropertyList: hasProperty: start";
-
-        for (auto& it : properties_)
-        {
-            if (it.name() == prop.name() && it.dataType() == prop.dataType())
-                return true;
-        }
-
-        return false;
-    }
+    bool hasProperty(const Property& prop) const;
 
     /// @brief Returns flag indicating if property with given indexis in list
     bool hasProperty(unsigned int index) const { return index < properties_.size(); }
     /// @brief Removes all properties
-    void clear()
-    {
-        logdbg << "PropertyList: clear: start";
-        properties_.clear();
-        logdbg << "PropertyList: clear: end";
-    }
+    void clear();
 
-    void print () const
-    {
-        for (auto& it : properties_)
-        {
-            loginf << "Property id '" << it.name() << "' type " << it.dataTypeString();
-        }
-    }
+    void print () const;
 
     /// @brief Return number of properties in list
     unsigned int size() const { return properties_.size(); }

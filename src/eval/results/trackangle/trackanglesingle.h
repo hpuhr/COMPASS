@@ -18,7 +18,6 @@
 #ifndef EVALUATIONREQUIREMENSINGLETRACKANGLE_H
 #define EVALUATIONREQUIREMENSINGLETRACKANGLE_H
 
-
 #include "eval/results/single.h"
 
 #include <boost/optional.hpp>

@@ -21,8 +21,8 @@
 #include <QWidget>
 #include <memory>
 
-#include "global.h"
-#include "propertylist.h"
+//#include "global.h"
+//#include "propertylist.h"
 
 class QTableView;
 // class QTableWidgetItem;

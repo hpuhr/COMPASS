@@ -29,6 +29,7 @@
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
+#include "global.h"
 
 using namespace Utils;
 using namespace std;

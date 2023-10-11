@@ -16,6 +16,7 @@
  */
 
 #include "eval/requirement/extra/trackconfig.h"
+#include "eval/requirement/extra/track.h"
 #include "eval/requirement/extra/trackconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"

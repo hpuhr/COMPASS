@@ -17,6 +17,7 @@
 
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/group.h"
+#include "eval/requirement/base/comparisontype.h"
 #include "logger.h"
 
 #include "eval/results/report/section.h"

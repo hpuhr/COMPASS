@@ -22,7 +22,7 @@
 
 #include <memory>
 
-#include "global.h"
+//#include "global.h"
 
 class ListBoxView;
 class ListBoxViewWidget;

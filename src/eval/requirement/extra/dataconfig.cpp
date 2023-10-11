@@ -16,6 +16,7 @@
  */
 
 #include "eval/requirement/extra/dataconfig.h"
+#include "eval/requirement/extra/data.h"
 #include "eval/requirement/extra/dataconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"

@@ -18,10 +18,9 @@
 #ifndef UpdateBufferDBJob_H_
 #define UpdateBufferDBJob_H_
 
-#include <list>
-
 #include "job.h"
 
+#include <list>
 #include <cassert>
 
 class Buffer;

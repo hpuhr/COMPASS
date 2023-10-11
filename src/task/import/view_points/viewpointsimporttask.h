@@ -20,11 +20,11 @@
 
 #include "configurable.h"
 #include "task.h"
+#include "json.hpp"
 
 #include <QObject>
-#include <memory>
 
-#include "json.hpp"
+#include <memory>
 
 class ViewPointsImportTaskDialog;
 class TaskManager;

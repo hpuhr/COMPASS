@@ -3,6 +3,7 @@
 #include "datasourcemanager.h"
 #include "stringconv.h"
 #include "util/timeconv.h"
+#include "logger.h"
 
 #include <QGridLayout>
 #include <QCheckBox>

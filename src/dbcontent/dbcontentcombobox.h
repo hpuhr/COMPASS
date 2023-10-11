@@ -21,7 +21,7 @@
 #include <QComboBox>
 
 #include "compass.h"
-#include "dbcontent/dbcontent.h"
+//#include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "global.h"
 

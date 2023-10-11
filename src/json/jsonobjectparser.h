@@ -19,13 +19,13 @@
 #define JSONOBJECTPARSER_H
 
 #include "configurable.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-#include "format.h"
+//#include "format.h"
 #include "jsondatamapping.h"
 #include "jsonobjectparserwidget.h"
 #include "propertylist.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
 #include <memory>
 #include <string>

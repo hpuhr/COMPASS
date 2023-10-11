@@ -16,6 +16,7 @@
  */
 
 #include "eval/requirement/identification/correctconfig.h"
+#include "eval/requirement/identification/correct.h"
 #include "eval/requirement/identification/identificationcorrectconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"

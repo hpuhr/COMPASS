@@ -17,6 +17,7 @@
 
 #include "eval/requirement/position/alongconfig.h"
 #include "eval/requirement/position/alongconfigwidget.h"
+#include "eval/requirement/position/along.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"

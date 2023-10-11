@@ -28,6 +28,7 @@
 #include "util/number.h"
 #include "util/timeconv.h"
 #include "sector/airspace.h"
+#include "sectorlayer.h"
 
 #include <boost/algorithm/string.hpp>
 

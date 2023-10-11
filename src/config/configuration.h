@@ -26,8 +26,8 @@
 
 #include "configurableparameter.h"
 #include "json.hpp"
-#include "string.h"
-#include "logger.h"
+//#include "string.h"
+//#include "logger.h"
 
 /*
  *  @brief Configuration storage and retrieval container class

@@ -28,6 +28,8 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "compass.h"
+#include "viewpoint.h"
+#include "sectorlayer.h"
 
 #include <QFileDialog>
 

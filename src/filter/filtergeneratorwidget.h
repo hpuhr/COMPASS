@@ -21,7 +21,7 @@
 #include <QDialog>
 #include <vector>
 
-#include "configuration.h"
+//#include "configuration.h"
 
 namespace dbContent
 {

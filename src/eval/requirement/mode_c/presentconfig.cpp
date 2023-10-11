@@ -16,6 +16,7 @@
  */
 
 #include "eval/requirement/mode_c/presentconfig.h"
+#include "eval/requirement/mode_c/present.h"
 #include "eval/requirement/mode_c/modecpresentconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"

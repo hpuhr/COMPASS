@@ -18,13 +18,13 @@
 #ifndef HISTOGRAMVIEWDATAWIDGET_H_
 #define HISTOGRAMVIEWDATAWIDGET_H_
 
-#include "global.h"
-#include "nullablevector.h"
-#include "dbcontent/variable/variable.h"
+//#include "global.h"
+//#include "nullablevector.h"
+//#include "dbcontent/variable/variable.h"
 #include "histogramviewchartview.h"
 #include "viewdatawidget.h"
-#include "histogram.h"
-#include "results/base.h"
+//#include "histogram.h"
+//#include "results/base.h"
 
 #include <QVariant>
 

@@ -8,6 +8,7 @@
 #include "dbcontentcache.h"
 #include "util/number.h"
 #include "util/timeconv.h"
+#include "global.h"
 
 #include <boost/algorithm/string.hpp>
 

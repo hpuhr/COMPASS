@@ -18,7 +18,7 @@
 #ifndef ALLBUFFERTABLEMODEL_H
 #define ALLBUFFERTABLEMODEL_H
 
-#include "dbcontent/variable/variableset.h"
+//#include "dbcontent/variable/variableset.h"
 
 #include <QAbstractTableModel>
 

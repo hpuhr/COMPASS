@@ -17,6 +17,7 @@
 
 #include "eval/requirement/position/radarrangeconfig.h"
 #include "eval/requirement/position/radarrangeconfigwidget.h"
+#include "eval/requirement/position/radarrange.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"

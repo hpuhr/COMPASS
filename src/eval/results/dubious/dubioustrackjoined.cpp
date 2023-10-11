@@ -27,6 +27,7 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "sectorlayer.h"
 
 #include <QFileDialog>
 

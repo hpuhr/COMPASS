@@ -18,9 +18,9 @@
 #ifndef EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H
 #define EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/mode_c/present.h"
+//#include "eval/requirement/mode_c/present.h"
 
 #include <memory>
 

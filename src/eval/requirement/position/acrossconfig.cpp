@@ -17,6 +17,7 @@
 
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/acrossconfigwidget.h"
+#include "eval/requirement/position/across.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"

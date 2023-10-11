@@ -17,6 +17,7 @@
 
 #include "eval/requirement/trackangle/trackangleconfig.h"
 #include "eval/requirement/trackangle/trackangleconfigwidget.h"
+#include "eval/requirement/trackangle/trackangle.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"

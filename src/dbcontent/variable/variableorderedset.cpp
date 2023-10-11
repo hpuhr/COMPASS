@@ -24,6 +24,7 @@
 #include "dbcontent/variable/variableorderedsetwidget.h"
 #include "dbcontent/variable/variableset.h"
 #include "dbcontent/variable/metavariable.h"
+#include "global.h"
 
 #include <algorithm>
 

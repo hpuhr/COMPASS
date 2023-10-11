@@ -19,7 +19,7 @@
 #define DATATYPEFORMATSELECTIONWIDGET_H
 
 #include "format.h"
-#include "property.h"
+//#include "property.h"
 
 #include <QMenu>
 #include <QPushButton>

@@ -16,6 +16,7 @@
  */
 
 #include "eval/requirement/detection/detectionconfig.h"
+#include "eval/requirement/detection/detection.h"
 #include "eval/requirement/detection/detectionconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"

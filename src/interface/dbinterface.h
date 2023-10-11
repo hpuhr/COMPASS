@@ -20,7 +20,7 @@
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
-#include "propertylist.h"
+//#include "propertylist.h"
 #include "sqlgenerator.h"
 
 #include <QObject>

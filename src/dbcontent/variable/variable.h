@@ -19,7 +19,7 @@
 #define DBCONTENT_VARIABLE_H_
 
 #include "configurable.h"
-#include "global.h"
+//#include "global.h"
 #include "property.h"
 #include "stringconv.h"
 #include "logger.h"

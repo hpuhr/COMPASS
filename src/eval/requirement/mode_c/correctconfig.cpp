@@ -16,6 +16,7 @@
  */
 
 #include "eval/requirement/mode_c/correctconfig.h"
+#include "eval/requirement/mode_c/correct.h"
 #include "eval/requirement/mode_c/modeccorrectconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"

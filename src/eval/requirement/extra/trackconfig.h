@@ -18,13 +18,12 @@
 #ifndef EVALUATIONREQUIREMENTEXTRATRACKCONFIG_H
 #define EVALUATIONREQUIREMENTEXTRATRACKCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/extra/trackconfigwidget.h"
-#include "eval/requirement/extra/track.h"
+//#include "eval/requirement/extra/trackconfigwidget.h"
+//#include "eval/requirement/extra/track.h"
 
 #include <memory>
-
 
 class Group;
 class EvaluationStandard;

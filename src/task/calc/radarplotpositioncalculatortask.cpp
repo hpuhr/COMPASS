@@ -32,6 +32,7 @@
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "datasourcemanager.h"
+#include "global.h"
 
 #include <QApplication>
 #include <QCoreApplication>

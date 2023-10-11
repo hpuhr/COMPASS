@@ -19,7 +19,7 @@
 #define STRINGREPRESENTATIONCOMBOBOX_H_
 
 #include "dbcontent/variable/variable.h"
-#include "global.h"
+//#include "global.h"
 #include "logger.h"
 
 #include <QComboBox>

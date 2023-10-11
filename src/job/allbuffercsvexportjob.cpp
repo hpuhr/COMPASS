@@ -26,6 +26,7 @@
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableorderedset.h"
 #include "dbcontent/variable/metavariable.h"
+#include "global.h"
 
 using namespace dbContent;
 

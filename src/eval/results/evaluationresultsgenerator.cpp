@@ -36,6 +36,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "global.h"
+#include "sectorlayer.h"
 
 #include <QProgressDialog>
 #include <QApplication>

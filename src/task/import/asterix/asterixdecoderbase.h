@@ -1,8 +1,6 @@
 #ifndef ASTERIXDECODERBASE_H
 #define ASTERIXDECODERBASE_H
 
-
-
 #include <string>
 
 class ASTERIXImportTask;

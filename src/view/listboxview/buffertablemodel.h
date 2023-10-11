@@ -18,10 +18,12 @@
 #ifndef BUFFERTABLEMODEL_H
 #define BUFFERTABLEMODEL_H
 
+#include "dbcontent/variable/variableset.h"
+
 #include <QAbstractTableModel>
+
 #include <memory>
 
-#include "dbcontent/variable/variableset.h"
 
 class Buffer;
 class DBContent;

@@ -1,7 +1,6 @@
 #ifndef LABELDIRECTION_H
 #define LABELDIRECTION_H
 
-
 namespace dbContent
 {
 

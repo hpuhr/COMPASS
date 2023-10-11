@@ -27,6 +27,8 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "viewpoint.h"
+#include "sectorlayer.h"
 
 #include <cassert>
 

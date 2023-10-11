@@ -18,7 +18,7 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
 
-#include "global.h"
+//#include "global.h"
 
 #include <QApplication>
 

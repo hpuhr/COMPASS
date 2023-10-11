@@ -25,10 +25,12 @@
 #include "compass.h"
 #include "dbinterface.h"
 #include "viewpointswidget.h"
+#include "logger.h"
+
+#include <QMessageBox>
 
 #include <fstream>
 
-#include <QMessageBox>
 
 using namespace nlohmann;
 using namespace Utils;

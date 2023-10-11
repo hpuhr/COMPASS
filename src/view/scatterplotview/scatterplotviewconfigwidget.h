@@ -19,8 +19,8 @@
 #define SCATTERPLOTVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-#include "dbcontent/variable/variable.h"
-#include "appmode.h"
+//#include "dbcontent/variable/variable.h"
+//#include "appmode.h"
 
 namespace dbContent
 {

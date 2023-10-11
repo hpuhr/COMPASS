@@ -12,6 +12,7 @@
 #include "dbcontent/variable/metavariable.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
+#include "global.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 

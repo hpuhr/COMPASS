@@ -38,8 +38,9 @@
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "stringconv.h"
-#include "stringconv.h"
 #include "util/timeconv.h"
+#include "global.h"
+#include "viewpoint.h"
 
 #include "json.hpp"
 

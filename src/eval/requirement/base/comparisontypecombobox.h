@@ -8,7 +8,6 @@
 namespace EvaluationRequirement
 {
 
-
 class ComparisonTypeComboBox : public QComboBox
 {
     Q_OBJECT

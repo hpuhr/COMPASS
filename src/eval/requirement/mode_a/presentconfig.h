@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTMODEARESENTCONFIG_H
 #define EVALUATIONREQUIREMENTMODEARESENTCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/mode_a/present.h"
-#include "eval/requirement/mode_a/modeapresentconfigwidget.h"
+//#include "eval/requirement/mode_a/present.h"
+//#include "eval/requirement/mode_a/modeapresentconfigwidget.h"
 
 #include <memory>
 

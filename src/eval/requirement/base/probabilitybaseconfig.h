@@ -2,6 +2,7 @@
 #define EVALUATIONREQUIREMENT_PROBABILITYBASECONFIG_H
 
 #include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/comparisontype.h"
 
 namespace EvaluationRequirement {
 

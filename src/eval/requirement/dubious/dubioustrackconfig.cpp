@@ -16,6 +16,7 @@
  */
 
 #include "dubioustrackconfig.h"
+#include "eval/requirement/dubious/dubioustrack.h"
 #include "dubioustrackconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
