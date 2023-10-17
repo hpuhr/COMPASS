@@ -38,6 +38,7 @@
 #include "viewpointsreportgeneratordialog.h"
 #include "util/timeconv.h"
 #include "viewpoint_commands.h"
+#include "global.h"
 
 #include "json.hpp"
 

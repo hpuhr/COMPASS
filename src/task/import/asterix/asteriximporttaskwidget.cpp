@@ -50,6 +50,7 @@ ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidge
     main_layout_->addWidget(tab_widget_);
 
     addMainTab();
+    addDecoderTab();
     addOverrideTab();
     addMappingsTab();
 
@@ -69,8 +70,12 @@ void ASTERIXImportTaskWidget::addMainTab()
     {
         QFormLayout* source_layout = new QFormLayout();
 
-        source_label_ = new QLabel();
-        source_layout->addWidget(source_label_);
+        sources_grid_ = new QGridLayout();
+        updateSourcesGrid();
+
+        main_tab_layout->addLayout(sources_grid_);
+
+        main_tab_layout->addStretch();
 
         if (task_.isImportNetwork())
         {
@@ -104,13 +109,8 @@ void ASTERIXImportTaskWidget::addMainTab()
             source_layout->addRow("UTC Day", date_edit);
         }
 
-        updateSourceLabel();
-
         main_tab_layout->addLayout(source_layout);
     }
-
-    config_widget_ = new ASTERIXConfigWidget(task_, this);
-    main_tab_layout->addWidget(config_widget_);
 
     main_tab_layout->addStretch();
 
@@ -128,6 +128,14 @@ void ASTERIXImportTaskWidget::addMainTab()
     main_tab_widget->setContentsMargins(0, 0, 0, 0);
     main_tab_widget->setLayout(main_tab_layout);
     tab_widget_->addTab(main_tab_widget, "Main");
+}
+
+void ASTERIXImportTaskWidget::addDecoderTab()
+{
+    assert(tab_widget_);
+
+    config_widget_ = new ASTERIXConfigWidget(task_, this);
+    tab_widget_->addTab(config_widget_, "Decoder");
 }
 
 void ASTERIXImportTaskWidget::addOverrideTab()
@@ -337,15 +345,45 @@ void ASTERIXImportTaskWidget::debugChangedSlot()
 //    test_button_->setDisabled(false);
 //}
 
-void ASTERIXImportTaskWidget::updateSourceLabel()
+void ASTERIXImportTaskWidget::updateSourcesGrid()
 {
-    assert (source_label_);
+    QLayoutItem* child;
+    while ((child = sources_grid_->takeAt(0)) != nullptr)
+    {
+        if (child->widget())
+            delete child->widget();
+        delete child;
+    }
+
+    unsigned int row{0};
 
     if (task_.isImportNetwork())
-        source_label_->setText("Source: Network");
-    else // file
-        source_label_->setText(("Source: \n"+task_.importFilenamesStr()).c_str());
+        sources_grid_->addWidget(new QLabel("Source: Network"), row, 0);
+    else // files
+    {
+        for (auto& file_info : task_.filesInfo())
+        {
+            sources_grid_->addWidget(new QLabel(file_info.filename_.c_str()), row, 0);
+
+            if (file_info.errors_found_)
+                sources_grid_->addWidget(new QLabel("Decoding Errors"), row, 1);
+            else
+                sources_grid_->addWidget(new QLabel("OK"), row, 1);
+
+            ++row;
+        }
+    }
 }
+
+//void ASTERIXImportTaskWidget::updateSourceLabel()
+//{
+//    assert (source_label_);
+
+//    if (task_.isImportNetwork())
+//        source_label_->setText("Source: Network");
+//    else // file
+//        source_label_->setText(("Source: \n"+task_.importFilenamesStr()).c_str());
+//}
 
 ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
 {

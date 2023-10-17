@@ -755,7 +755,7 @@ void MainWindow::importAsterixRecordingSlot()
 
         updateMenus();
 
-        task.dialog()->updateSource();
+        task.dialog()->updateSourcesInfo();
         task.dialog()->show();
     }
 
@@ -787,7 +787,7 @@ void MainWindow::importRecentAsterixRecordingSlot()
 
     updateMenus();
 
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSourcesInfo();
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
 }
 
@@ -806,7 +806,7 @@ void MainWindow::importAsterixFromNetworkSlot()
 
     COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
 
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSourcesInfo();
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
 }
 

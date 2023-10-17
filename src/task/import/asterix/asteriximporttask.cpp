@@ -652,7 +652,10 @@ void ASTERIXImportTask::testFileDecoding()
     QApplication::restoreOverrideCursor();
 
     if (dialog_)
+    {
+        dialog_->updateSourcesInfo();
         dialog_->updateButtons();
+    }
 }
 
 bool ASTERIXImportTask::isRunning() const
