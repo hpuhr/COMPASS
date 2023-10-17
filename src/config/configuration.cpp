@@ -28,6 +28,13 @@ using namespace Utils;
 
 using namespace nlohmann;
 
+const std::string Configuration::ParameterSection     = "parameters";
+const std::string Configuration::SubConfigSection     = "sub_configs";
+const std::string Configuration::SubConfigFileSection = "sub_config_files";
+const std::string Configuration::InstanceID           = "instance_id";
+const std::string Configuration::ClassID              = "class_id";
+const std::string Configuration::SubConfigFilePath    = "path";
+
 /*
  *  Initializes members
  *
@@ -161,7 +168,7 @@ bool Configuration::parameterInConfig(const std::string& parameter_id) const
 }
 
 /**
- * Default behavior for returning a parameter value from the json config.
+ * Return a parameter value from the json config.
  */
 template <typename T>
 T Configuration::parameterValueFromConfig(const std::string& parameter_id) const
@@ -169,30 +176,7 @@ T Configuration::parameterValueFromConfig(const std::string& parameter_id) const
     //check parameterInConfig(parameter_id) beforehand in order to prevent this
     assert(parameterInConfig(parameter_id));
 
-    T value;
-    try
-    {
-        //try to explicitely convert to the template type => might throw
-        value = org_config_parameters_.at(parameter_id).get<T>();
-    }
-    catch(...)
-    {
-        //bad conversion
-        assert(false);
-    }
-    
-    return value;
-}
-
-/**
- * Specialization for nlohmann::json, just return the json struct.
-*/
-nlohmann::json Configuration::parameterValueFromConfig(const std::string& parameter_id) const
-{
-    //check parameterInConfig(parameter_id) beforehand in order to prevent this
-    assert(parameterInConfig(parameter_id));
-
-    return org_config_parameters_.at(parameter_id);
+    return ConfigurableParameterT<T>::valueFromJSON(org_config_parameters_.at(parameter_id));
 }
 
 /**
@@ -358,11 +342,27 @@ void Configuration::parseJSONConfigFile()
 /**
  * Parses a given json config struct.
  */
-void Configuration::parseJSONConfig(nlohmann::json& config)
+void Configuration::parseJSONConfig(const nlohmann::json& config)
 {
-    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
-           << ": parseJSONConfig";
+    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": parseJSONConfig";
 
+    auto cb_params          = [ this ] (const nlohmann::json& config) { this->parseJSONParameters(config); };
+    auto cb_subconfigs      = [ this ] (const nlohmann::json& config) { this->parseJSONSubConfigs(config); };
+    auto cb_subconfig_files = [ this ] (const std::string& class_id,
+                                        const std::string& instance_id,
+                                        const std::string& path) { this->parseJSONSubConfigFile(class_id, instance_id, path); };
+
+    parseJSONConfig(config, cb_params, cb_subconfigs, cb_subconfig_files);
+}
+
+/**
+ * Parses a given json config struct and invoke the section-specific callbacks.
+ */
+void Configuration::parseJSONConfig(const nlohmann::json& config,
+                                    const std::function<void(const nlohmann::json&)>& parse_parameters_cb,
+                                    const std::function<void(const nlohmann::json&)>& parse_sub_configs_cb,
+                                    const std::function<void(const std::string&, const std::string&, const std::string&)>& parse_sub_config_files_cb)
+{
     assert(config.is_object());
 
     for (auto& it : config.items())
@@ -370,14 +370,14 @@ void Configuration::parseJSONConfig(nlohmann::json& config)
         if (it.value() == nullptr)  // empty
             continue;
 
-        if (it.key() == "parameters")
+        if (it.key() == ParameterSection)
         {
             assert(it.value().is_object());
 
             //parse parameters
-            parseJSONParameters(it.value());
+            parse_parameters_cb(it.value());
         }
-        else if (it.key() == "sub_config_files")
+        else if (it.key() == SubConfigFileSection)
         {
             std::string class_id;
             std::string instance_id;
@@ -387,30 +387,30 @@ void Configuration::parseJSONConfig(nlohmann::json& config)
 
             for (auto& file_cfg_it : it.value().get<json::array_t>())
             {
-                assert(file_cfg_it.contains("class_id"));
-                assert(file_cfg_it.contains("instance_id"));
-                assert(file_cfg_it.contains("path"));
+                assert(file_cfg_it.contains(ClassID));
+                assert(file_cfg_it.contains(InstanceID));
+                assert(file_cfg_it.contains(SubConfigFilePath));
 
-                class_id    = file_cfg_it.at("class_id");
-                instance_id = file_cfg_it.at("instance_id");
-                path        = file_cfg_it.at("path");
+                class_id    = file_cfg_it.at(ClassID);
+                instance_id = file_cfg_it.at(InstanceID);
+                path        = file_cfg_it.at(SubConfigFilePath);
 
                 assert(class_id.size() && instance_id.size() && path.size());
 
                 //parse subconfig file
-                parseJSONSubConfigFile(class_id, instance_id, path);
+                parse_sub_config_files_cb(class_id, instance_id, path);
             }
         }
-        else if (it.key() == "sub_configs")
+        else if (it.key() == SubConfigSection)
         {
             assert(it.value().is_object());
 
             //parse subconfigs
-            parseJSONSubConfigs(it.value());
+            parse_sub_configs_cb(it.value());
         }
         else
         {
-            throw std::runtime_error("Configuration class_id" + class_id_ + " instance_id " +
+            throw std::runtime_error("Configuration class_id " + class_id_ + " instance_id " +
                                      instance_id_ + ": parseJSONConfig: unknown key '" + it.key() +
                                      "'");
         }
@@ -469,34 +469,74 @@ void Configuration::overrideJSONParameters(nlohmann::json& parameters_config)
 /**
  * Parses config parameters from the provided json struct.
  */
-void Configuration::parseJSONParameters(nlohmann::json& parameters_config)
+void Configuration::parseJSONParameters(const nlohmann::json& parameters_config)
 {
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
            << ": parseJSONParameters";
 
+    auto cb = [ & ] (const std::string& key, const nlohmann::json& value)
+    {
+        //assert(value.is_primitive());
+        assert(!org_config_parameters_.contains(key));
+
+        // logdbg << "param key " << key << " value '" << value << "'";
+
+        org_config_parameters_[key] = value;
+    };
+
+    parseJSONParameters(parameters_config, cb);
+}
+
+/**
+*/
+void Configuration::parseJSONParameters(const nlohmann::json& parameters_config,
+                                        const std::function<void(const std::string&, const nlohmann::json&)>& parse_param_cb)
+{
     // is object
     assert(parameters_config.is_object());
 
     // store parameters in local json config
     for (auto& it : parameters_config.items())
-    {
-        //assert(it.value().is_primitive());
-        assert(!org_config_parameters_.contains(it.key()));
-
-        // logdbg << "param key " << it.key() << " value '" << it.value() << "'";
-
-        org_config_parameters_[it.key()] = it.value();
-    }
+        parse_param_cb(it.key(), it.value());
 }
 
 /**
  * Parses sub configurations from the provided json struct.
 */
-void Configuration::parseJSONSubConfigs(nlohmann::json& sub_configs_config)
+void Configuration::parseJSONSubConfigs(const nlohmann::json& sub_configs_config)
 {
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
            << ": parseJSONSubConfigs";
 
+    auto cb = [ & ] (const SubConfigKey& key, const nlohmann::json& value)
+    {
+        //        assert (!org_config_sub_configs_.contains(it.key()));
+        //        loginf << "sub-config key " << it.key();
+        //        org_config_sub_configs_[it.key()] = std::move(it.value()); // move out, might
+        //        be big
+
+        assert(sub_configurations_.find(key) == sub_configurations_.end());  // should not exist
+
+        logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+               << ": parseJSONSubConfigs: creating new configuration for class " << key.first
+               << " instance " << key.second;
+
+        //create new configuration for sub config
+        auto ptr = new Configuration(key.first, key.second);
+        sub_configurations_.insert(std::make_pair(key, std::unique_ptr<Configuration>(ptr)));
+
+        //parse sub config from json struct
+        sub_configurations_.at(key)->parseJSONConfig(value);
+    };
+
+    parseJSONSubConfigs(sub_configs_config, cb);
+}
+
+/**
+*/
+void Configuration::parseJSONSubConfigs(const nlohmann::json& sub_configs_config,
+                                        const std::function<void(const SubConfigKey&, const nlohmann::json&)>& parse_subconfig_cb)
+{
     // is object
     assert(sub_configs_config.is_object());
 
@@ -514,24 +554,9 @@ void Configuration::parseJSONSubConfigs(nlohmann::json& sub_configs_config)
             assert(sub_cfg_instance_it.value().is_object());
             instance_id = sub_cfg_instance_it.key();
 
-            //        assert (!org_config_sub_configs_.contains(it.key()));
-            //        loginf << "sub-config key " << it.key();
-            //        org_config_sub_configs_[it.key()] = std::move(it.value()); // move out, might
-            //        be big
-
             SubConfigKey key(class_id, instance_id);
-            assert(sub_configurations_.find(key) == sub_configurations_.end());  // should not exist
 
-            logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
-                   << ": parseJSONSubConfigs: creating new configuration for class " << class_id
-                   << " instance " << instance_id;
-
-            //create new configuration for sub config
-            auto ptr = new Configuration(class_id, instance_id);
-            sub_configurations_.insert(std::make_pair(key, std::unique_ptr<Configuration>(ptr)));
-
-            //parse sub config from json struct
-            sub_configurations_.at(key)->parseJSONConfig(sub_cfg_instance_it.value());
+            parse_subconfig_cb(key, sub_cfg_instance_it.value());
         }
     }
 }
@@ -561,21 +586,21 @@ void Configuration::writeJSON(nlohmann::json& parent_json) const
         std::ofstream file(file_path);
         file << config.dump(4);
 
-        if (!parent_json.contains("sub_config_files"))
-            parent_json["sub_config_files"] = json::array();
+        if (!parent_json.contains(SubConfigFileSection))
+            parent_json[SubConfigFileSection] = json::array();
 
-        assert(parent_json["sub_config_files"].is_array());
+        assert(parent_json[SubConfigFileSection].is_array());
 
         json sub_file_json = json::object();
-        sub_file_json["class_id"] = class_id_;
-        sub_file_json["instance_id"] = instance_id_;
-        sub_file_json["path"] = configuration_filename_;
+        sub_file_json[ClassID] = class_id_;
+        sub_file_json[InstanceID] = instance_id_;
+        sub_file_json[SubConfigFilePath] = configuration_filename_;
 
-        parent_json["sub_config_files"][parent_json["sub_config_files"].size()] = sub_file_json;
+        parent_json[SubConfigFileSection][parent_json[SubConfigFileSection].size()] = sub_file_json;
     }
     else  // add full config to parent
     {
-        parent_json["sub_configs"][class_id_][instance_id_] = std::move(config);
+        parent_json[SubConfigSection][class_id_][instance_id_] = std::move(config);
     }
 }
 
@@ -586,7 +611,7 @@ void Configuration::generateJSON(nlohmann::json& target) const
 {
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": generateJSON: writing into '" << target.dump(4) << "'";
 
-    json& param_config = target["parameters"];
+    json& param_config = target[ParameterSection];
 
     // original parameters, in case config was not used
 
@@ -784,6 +809,72 @@ void Configuration::removeSubConfigurations(const std::string& class_id)
 
     for (auto& sub_key_it : to_be_removed)
         sub_configurations_.erase(sub_key_it);
+}
+
+/**
+ * Connects a listener for receiving configuration change updates.
+*/
+boost::signals2::connection Configuration::connectListener(const std::function<void(const ParameterList&)>& cb)
+{
+    return changed_signal_.connect(cb);
+}
+
+/**
+ * Reconfigures the configuration's registered parameters and those of its subconfigurations.
+ */
+void Configuration::reconfigure(const nlohmann::json& config)
+{
+    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": reconfigure";
+
+    ParameterList param_list;
+
+    //callbacks used for parsing
+    auto cb_param = [ & ] (const std::string& key, const nlohmann::json& value)
+    {
+        //parameter must exist
+        assert(hasParameter(key));
+
+        //set parameter's internal pointer value
+        setParameterFromJSON(key, value);
+
+        param_list.push_back(key);
+    };
+    auto cb_params = [ & ] (const nlohmann::json& config)
+    {
+        //parse parameters
+        parseJSONParameters(config, cb_param);
+    };
+    auto cb_subconfig = [ & ] (const SubConfigKey& key, const nlohmann::json& config) 
+    { 
+        //subconfig must exist
+        assert(hasSubConfiguration(key));
+
+        //reconfigure subconfig
+        getSubConfiguration(key.first, key.second).reconfigure(config);
+    };
+    auto cb_subconfigs = [ & ] (const nlohmann::json& config) 
+    { 
+        //parse subconfigurations
+        parseJSONSubConfigs(config, cb_subconfig);
+    };
+
+    //parse config struct using the specified callbacks
+    parseJSONConfig(config, cb_params, cb_subconfigs, {});
+
+    //if my own parameters changed signal changes
+    if (!param_list.empty())
+        changed_signal_(param_list);
+}
+
+/**
+ * Sets the given parameter's value pointer to the given value.
+ */
+void Configuration::setParameterFromJSON(const std::string& parameter_id, const nlohmann::json& value)
+{
+    //needs to be registered
+    assert(hasParameter(parameter_id));
+
+    parameters_.at(parameter_id)->setValue(value);
 }
 
 // void Configuration::setTemplate (bool template_flag, const std::string& template_name)

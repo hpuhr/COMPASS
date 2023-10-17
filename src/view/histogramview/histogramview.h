@@ -83,6 +83,10 @@ public:
     bool hasViewPoint () { return current_view_point_ != nullptr; }
     const ViewableDataConfig& viewPoint() { assert (hasViewPoint()); return *current_view_point_; }
 
+    static const std::string ParamDataVarDBO;
+    static const std::string ParamDataVarName;
+    static const std::string ParamUseLogScale;
+
 public slots:
     virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
@@ -101,6 +105,8 @@ protected:
     virtual void updateSelection() override;
 
     virtual bool init_impl() override;
+
+    virtual ViewUpdate onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
 
     void onShowResultsChanged();
 
@@ -121,8 +127,6 @@ protected:
     std::string eval_results_id_;
 
     const ViewableDataConfig* current_view_point_ {nullptr};
-
-    
 };
 
 #endif /* HISTOGRAMVIEW_H_ */

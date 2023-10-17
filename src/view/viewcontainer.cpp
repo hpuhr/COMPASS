@@ -31,6 +31,8 @@
 #include "viewmanager.h"
 #include "ui_test_common.h"
 #include "compass.h"
+#include "rtcommand_helpers.h"
+#include "viewwidget.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -48,9 +50,12 @@
 using namespace Utils;
 using namespace std;
 
-ViewContainer::ViewContainer(const std::string& class_id, const std::string& instance_id,
-                             Configurable* parent, ViewManager* view_manager,
-                             QTabWidget* tab_widget, int window_cnt)
+ViewContainer::ViewContainer(const std::string& class_id, 
+                             const std::string& instance_id,
+                             Configurable* parent, 
+                             ViewManager* view_manager,
+                             QTabWidget* tab_widget, 
+                             int window_cnt)
     : QObject(),
       Configurable(class_id, instance_id, parent),
       view_manager_(*view_manager),
@@ -158,6 +163,13 @@ void ViewContainer::addView(View* view)
     manage_button->setDisabled(disable_add_remove_views_);
     connect(manage_button, SIGNAL(clicked()), this, SLOT(showViewMenuSlot()));
     tab_widget_->tabBar()->setTabButton(index, QTabBar::RightSide, manage_button);
+
+    //in localbuild we show some info about how the view is reachable via rtcommands
+    if (!COMPASS::instance().isAppImage())
+    {
+        QString tt = rtcommand::getTooltip(view->getViewWidget(), view);
+        tab_widget_->setTabToolTip(index, tt);
+    }
 }
 
 void ViewContainer::deleteViewSlot()

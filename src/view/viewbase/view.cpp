@@ -262,3 +262,26 @@ void View::appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current)
     if (widget_)
         widget_->appModeSwitch(app_mode_current);
 }
+
+void View::onConfigurationChanged(const std::vector<std::string>& changed_params)
+{
+    loginf << "View: onConfigurationChanged";
+
+    //check updated params and configure view update
+    auto view_update = onConfigurationChanged_impl(changed_params);
+
+    assert (widget_);
+    widget_->configChanged();
+
+    issueViewUpdate(view_update);
+}
+
+void View::issueViewUpdate(const ViewUpdate& vu)
+{
+    assert (widget_);
+
+    if (vu.redraw)
+        widget_->getViewDataWidget()->redrawData(vu.recompute);
+    if (vu.update_components)
+        widget_->updateComponents();
+}

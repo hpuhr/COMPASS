@@ -51,6 +51,10 @@ public:
     virtual ~ScatterPlotViewConfigWidget();
 
 protected:
+    virtual void onDisplayChange_impl() override;
+    void updateSelectedVarX();
+    void updateSelectedVarY();
+
     ScatterPlotView* view_ = nullptr;
 
     dbContent::VariableSelectionWidget* select_var_x_ {nullptr};

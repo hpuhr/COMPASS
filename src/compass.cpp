@@ -193,6 +193,11 @@ void COMPASS::setAppState(AppState state)
     //notify someone about changed app state?
 }
 
+std::string COMPASS::getPath() const
+{
+    return "";
+}
+
 void COMPASS::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
     logdbg << "COMPASS: generateSubConfigurable: class_id " << class_id << " instance_id "

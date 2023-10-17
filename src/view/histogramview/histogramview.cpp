@@ -33,16 +33,20 @@
 
 using namespace dbContent;
 
+const std::string HistogramView::ParamDataVarDBO  = "data_var_dbo";
+const std::string HistogramView::ParamDataVarName = "data_var_name";
+const std::string HistogramView::ParamUseLogScale = "use_log_scale";
+
 /**
  */
 HistogramView::HistogramView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)
     : View(class_id, instance_id, w, view_manager)
 {
-    registerParameter("data_var_dbo", &data_var_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_name", &data_var_name_, DBContent::meta_var_timestamp_.name());
+    registerParameter(ParamDataVarDBO, &data_var_dbo_, META_OBJECT_NAME);
+    registerParameter(ParamDataVarName, &data_var_name_, DBContent::meta_var_timestamp_.name());
 
-    registerParameter("use_log_scale", &use_log_scale_, true);
+    registerParameter(ParamUseLogScale, &use_log_scale_, true);
 
     // create sub done in init
 }
@@ -198,7 +202,7 @@ void HistogramView::useLogScale(bool use_log_scale)
     HistogramViewDataWidget* data_widget = dynamic_cast<HistogramViewDataWidget*>(getDataWidget());
     assert (data_widget);
 
-    data_widget->redrawData(false);
+    issueViewUpdate(ViewUpdate(true, false, false));
 }
 
 /**
@@ -243,9 +247,7 @@ void HistogramView::dataVar (Variable& var)
     assert (hasDataVar());
     assert (!isDataVarMeta());
 
-    assert (widget_);
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
+    issueViewUpdate(ViewUpdate(true, true, true));
 }
 
 /**
@@ -269,9 +271,7 @@ void HistogramView::metaDataVar (MetaVariable& var)
     assert (hasDataVar());
     assert (isDataVarMeta());
 
-    assert (widget_);
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
+    issueViewUpdate(ViewUpdate(true, true, true));
 }
 
 /**
@@ -286,6 +286,32 @@ std::string HistogramView::dataVarDBO() const
 std::string HistogramView::dataVarName() const
 {
     return data_var_name_;
+}
+
+/**
+ */
+View::ViewUpdate HistogramView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params)
+{
+    ViewUpdate update;
+
+    for (const auto& param : changed_params)
+    {
+        if (param == ParamDataVarDBO ||
+            param == ParamDataVarName)
+        {
+            assert (hasDataVar());
+
+            update.redraw            = true;
+            update.recompute         = true;
+            update.update_components = true;
+        }
+        else if(param == ParamUseLogScale)
+        {
+            update.redraw            = true;
+        }
+    }
+
+    return update;
 }
 
 /**

@@ -343,6 +343,21 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
+// reconfigure
+struct RTCommandReconfigure : public rtcommand::RTCommand
+{
+    std::string path;
+    std::string json_config;
+
+    virtual rtcommand::IsValid valid() const override;
+
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(reconfigure, "reconfigures the given configurable")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
 }
 
 #endif // MAINWINDOW_COMMANDS_H

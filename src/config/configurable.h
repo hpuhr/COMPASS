@@ -76,6 +76,8 @@ class Configurable
     /// @brief Reset parameters to their reset values
     virtual void resetToDefault();
 
+    virtual std::string getPath() const;
+
     /// @brief Override for creation of sub-configurables
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -107,6 +109,10 @@ class Configurable
     void writeJSON(nlohmann::json& parent_json) const;
     void generateJSON(nlohmann::json& target) const;
 
+    void reconfigure(const nlohmann::json& config);
+
+    static const char ConfigurablePathSeparator;
+
 protected:
     /// @brief Creates sub-configurables according to configuration
     void createSubConfigurables();
@@ -119,6 +125,9 @@ protected:
 
     /// @brief Override to check if required sub-configurables exist
     virtual void checkSubConfigurables();
+
+    /// @brief Reacts on configuration changes, override as needed
+    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) {}
 
     /// @brief Returns the given sub-configuration (e.g. in order to check certain parameter values in generateSubConfigurable())
     const Configuration& getSubConfiguration(const std::string& class_id,
@@ -142,6 +151,8 @@ protected:
     }
 
 private:
+    void configurationChanged(const std::vector<std::string>& changed_params);
+
     /// @brief Adds a configurable as a child
     Configuration& registerSubConfigurable(Configurable& child, bool config_must_exist = false);
     /// @brief Removes a child configurable
@@ -187,6 +198,8 @@ private:
 
     /// Container for all sub-configurables (class id + instance id -> Configurable)
     std::map<std::string, Configurable&> children_;
+
+    boost::signals2::connection config_changes_connection_;
 };
 
 #endif /* CONFIGURABLE_H_ */

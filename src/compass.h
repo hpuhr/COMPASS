@@ -60,6 +60,7 @@ public:
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
+    std::string getPath() const override final;
 
     void openDBFile(const std::string& filename);
     void createNewDBFile(const std::string& filename);

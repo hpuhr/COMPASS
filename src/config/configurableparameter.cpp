@@ -241,6 +241,17 @@ void ConfigurableParameterT<T>::update(T* pointer)
 }
 
 /**
+ * Sets the pointer value to the value contained in the json object.
+ */
+template <typename T>
+void ConfigurableParameterT<T>::setValue(const nlohmann::json& json_value)
+{
+    assert(hasStoredPointer());
+
+    *pointer_ = valueFromJSON(json_value);
+}
+
+/**
 */
 template <>
 std::string ConfigurableParameterT<float>::getParameterValueString() const
@@ -270,6 +281,29 @@ template <>
 std::string ConfigurableParameterT<nlohmann::json>::getParameterValueString() const
 {
     return getValuePointer()->dump(4);
+}
+
+/**
+*/
+template <typename T>
+T ConfigurableParameterT<T>::valueFromJSON(const nlohmann::json& json_value)
+{
+    if (std::is_same<T,nlohmann::json>::value == true)
+        return json_value;
+
+    T value;
+    try
+    {
+        //try to explicitely convert to the template type => might throw
+        value = json_value.get<T>();
+    }
+    catch(...)
+    {
+        //bad conversion
+        assert(false);
+    }
+    
+    return value;
 }
 
 template class ConfigurableParameterT<bool>;

@@ -33,15 +33,20 @@
 using namespace std;
 using namespace dbContent;
 
+const std::string ScatterPlotView::ParamDataVarXDBO  = "data_var_x_dbo";
+const std::string ScatterPlotView::ParamDataVarXName = "data_var_x_name";
+const std::string ScatterPlotView::ParamDataVarYDBO  = "data_var_y_dbo";
+const std::string ScatterPlotView::ParamDataVarYName = "data_var_y_name";
+
 ScatterPlotView::ScatterPlotView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)
     : View(class_id, instance_id, w, view_manager)
 {
-    registerParameter("data_var_x_dbo", &data_var_x_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_x_name", &data_var_x_name_, DBContent::meta_var_longitude_.name());
+    registerParameter(ParamDataVarXDBO, &data_var_x_dbo_, META_OBJECT_NAME);
+    registerParameter(ParamDataVarXName, &data_var_x_name_, DBContent::meta_var_longitude_.name());
 
-    registerParameter("data_var_y_dbo", &data_var_y_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_y_name", &data_var_y_name_, DBContent::meta_var_latitude_.name());
+    registerParameter(ParamDataVarYDBO, &data_var_y_dbo_, META_OBJECT_NAME);
+    registerParameter(ParamDataVarYName, &data_var_y_name_, DBContent::meta_var_latitude_.name());
 
     // create sub done in init
 }
@@ -229,9 +234,7 @@ void ScatterPlotView::dataVarX (Variable& var)
     assert (hasDataVarX());
     assert (!isDataVarXMeta());
 
-    assert (widget_);
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
+    issueViewUpdate(ViewUpdate(true, true, true));
 }
 
 MetaVariable& ScatterPlotView::metaDataVarX()
@@ -249,9 +252,7 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var)
     assert (hasDataVarX());
     assert (isDataVarXMeta());
 
-    assert (widget_);
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
+    issueViewUpdate(ViewUpdate(true, true, true));
 }
 
 
@@ -298,9 +299,7 @@ void ScatterPlotView::dataVarY (Variable& var)
     assert (hasDataVarY());
     assert (!isDataVarYMeta());
 
-    assert (widget_);
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
+    issueViewUpdate(ViewUpdate(true, true, true));
 }
 
 MetaVariable& ScatterPlotView::metaDataVarY()
@@ -318,9 +317,7 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var)
     assert (hasDataVarY());
     assert (isDataVarYMeta());
 
-    assert (widget_);
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
+    issueViewUpdate(ViewUpdate(true, true, true));
 }
 
 
@@ -334,6 +331,28 @@ std::string ScatterPlotView::dataVarYName() const
     return data_var_y_name_;
 }
 
+View::ViewUpdate ScatterPlotView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params) 
+{ 
+    ViewUpdate update;
+
+    for (const auto& param : changed_params)
+    {
+        if (param == ParamDataVarXDBO  ||
+            param == ParamDataVarXName ||
+            param == ParamDataVarYDBO  ||
+            param == ParamDataVarYName)
+        {
+            assert (hasDataVarX());
+            assert (hasDataVarY());
+
+            update.redraw            = true;
+            update.recompute         = true;
+            update.update_components = true;
+        }
+    }
+
+    return update;
+}
 
 void ScatterPlotView::updateSelection()
 {

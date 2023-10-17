@@ -88,8 +88,9 @@ public:
     void emitSelectionChange();
 
     AppMode appMode() const { return app_mode_; }
-    
     time_t created() const { return creation_time_; }
+
+    const ViewWidget* getViewWidget() const { assert (widget_); return widget_; }
 
     virtual void accept(LatexVisitor& v) = 0;
 
@@ -102,12 +103,32 @@ public slots:
     virtual void showViewPointSlot (const ViewableDataConfig* vp)=0;
 
 protected:
+    struct ViewUpdate
+    {
+        ViewUpdate() {}
+        ViewUpdate(bool _redraw,
+                   bool _recompute,
+                   bool _update_components) 
+        :   redraw           (_redraw           )
+        ,   recompute        (_redraw           )
+        ,   update_components(_update_components) {}
+                                           
+        bool redraw            = false;
+        bool recompute         = false;
+        bool update_components = false;
+    };
+
+    void issueViewUpdate(const ViewUpdate& vu);
+
     virtual void updateSelection() = 0;
     virtual bool init_impl() { return true; }
 
     void constructWidget();
     //void setModel(ViewModel* model);
     void setWidget(ViewWidget* widget);
+
+    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override final;
+    virtual ViewUpdate onConfigurationChanged_impl(const std::vector<std::string>& changed_params) = 0;
 
     /// @brief Returns the view's widget, override this method in derived classes.
     ViewWidget* getWidget() { assert (widget_); return widget_; }

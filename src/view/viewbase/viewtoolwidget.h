@@ -87,8 +87,8 @@ public:
     void loadingDone();
     void redrawStarted();
     void redrawDone();
-
     void appModeSwitch(AppMode app_mode);
+    void configChanged();
 
     virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 

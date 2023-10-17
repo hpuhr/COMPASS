@@ -112,6 +112,7 @@ public:
     void redrawStarted();
     void redrawDone();
     void appModeSwitch(AppMode app_mode);
+    void configChanged();
 
     void notifyReloadNeeded();
     void notifyRedrawNeeded();

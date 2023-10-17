@@ -56,6 +56,7 @@ public:
     bool showsData() const;
 
     virtual void appModeSwitch(AppMode app_mode) {} //reacts on switching the application mode
+    virtual void configChanged() {}                 //reacts on configuration changes
 
     virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 

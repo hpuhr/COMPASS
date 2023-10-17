@@ -76,13 +76,7 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
                                           PropertyDataType::FLOAT,
                                           PropertyDataType::DOUBLE,
                                           PropertyDataType::TIMESTAMP});
-        if (view_->hasDataVarX())
-        {
-            if (view_->isDataVarXMeta())
-                select_var_x_->selectedMetaVariable(view_->metaDataVarX());
-            else
-                select_var_x_->selectedVariable(view_->dataVarX());
-        }
+        updateSelectedVarX();
         connect(select_var_x_, &VariableSelectionWidget::selectionChanged, this,
                 &ScatterPlotViewConfigWidget::selectedVariableXChangedSlot);
         cfg_layout->addWidget(select_var_x_);
@@ -102,13 +96,7 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
                                           PropertyDataType::FLOAT,
                                           PropertyDataType::DOUBLE,
                                           PropertyDataType::TIMESTAMP});
-        if (view_->hasDataVarY())
-        {
-            if (view_->isDataVarYMeta())
-                select_var_y_->selectedMetaVariable(view_->metaDataVarY());
-            else
-                select_var_y_->selectedVariable(view_->dataVarY());
-        }
+        updateSelectedVarY();
         connect(select_var_y_, &VariableSelectionWidget::selectionChanged, this,
                 &ScatterPlotViewConfigWidget::selectedVariableYChangedSlot);
         cfg_layout->addWidget(select_var_y_);
@@ -146,7 +134,34 @@ void ScatterPlotViewConfigWidget::selectedVariableYChangedSlot()
         view_->dataVarY(select_var_y_->selectedVariable());
     else if (select_var_y_->hasMetaVariable())
         view_->metaDataVarY(select_var_y_->selectedMetaVariable());
+}
 
+void ScatterPlotViewConfigWidget::onDisplayChange_impl()
+{
+    updateSelectedVarX();
+    updateSelectedVarY();
+}
+
+void ScatterPlotViewConfigWidget::updateSelectedVarX()
+{
+    if (view_->hasDataVarX())
+    {
+        if (view_->isDataVarXMeta())
+            select_var_x_->selectedMetaVariable(view_->metaDataVarX());
+        else
+            select_var_x_->selectedVariable(view_->dataVarX());
+    }
+}
+
+void ScatterPlotViewConfigWidget::updateSelectedVarY()
+{
+    if (view_->hasDataVarY())
+    {
+        if (view_->isDataVarYMeta())
+            select_var_y_->selectedMetaVariable(view_->metaDataVarY());
+        else
+            select_var_y_->selectedVariable(view_->dataVarY());
+    }
 }
 
 //void ScatterPlotViewConfigWidget::exportSlot()

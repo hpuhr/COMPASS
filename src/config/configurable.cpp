@@ -27,6 +27,8 @@
 using namespace std;
 using namespace Utils;
 
+const char Configurable::ConfigurablePathSeparator = '.';
+
 /**
  * \param class_id Class identifier
  * \param instance_id Instance identifier
@@ -63,6 +65,9 @@ Configurable::Configurable(const std::string& class_id,
 
     assert(configuration_);
 
+    //connect to configuration to receive changes
+    config_changes_connection_ = configuration_->connectListener([ this ] (const std::vector<std::string>& params) { this->configurationChanged(params); });
+
     if (root_configuration_filename.size() != 0)
     {
         loginf << "Configurable: constructor: got root filename " << root_configuration_filename;
@@ -82,6 +87,8 @@ Configurable::Configurable(const std::string& class_id,
 Configurable::~Configurable()
 {
     logdbg << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_;
+
+    config_changes_connection_.disconnect();
 
     if (parent_)
     {
@@ -354,7 +361,7 @@ bool Configurable::hasSubConfigurable(const std::string& class_id,
 */
 std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConfigurable(const std::string& approx_name)
 {
-    vector<string> parts = String::split(approx_name, '.');
+    vector<string> parts = String::split(approx_name, ConfigurablePathSeparator);
 
     if (!parts.size())
         return {rtcommand::FindObjectErrCode::NotFound, nullptr};
@@ -379,9 +386,12 @@ Configurable* Configurable::getApproximateChildNamed (const std::string& approx_
     // find exact instance id
     std::string approx_name_lower = boost::algorithm::to_lower_copy(approx_name);
 
-    auto exact_instance_iter = std::find_if(children_.begin(), children_.end(),
-                            [approx_name_lower](const pair<std::string, Configurable&>& child_iter) -> bool {
-        return boost::algorithm::to_lower_copy(child_iter.second.instanceId()) == approx_name_lower; });
+    auto cb = [approx_name_lower](const std::pair<std::string, Configurable&>& child_iter)
+    {
+        return (boost::algorithm::to_lower_copy(child_iter.second.instanceId()) == approx_name_lower); 
+    };
+
+    auto exact_instance_iter = std::find_if(children_.begin(), children_.end(), cb);
 
     if (exact_instance_iter != children_.end())
         return &exact_instance_iter->second;
@@ -414,6 +424,41 @@ void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
     {
         it->second.setTmpDisableRemoveConfigOnDelete(value);
     }
+}
+
+/**
+*/
+void Configurable::reconfigure(const nlohmann::json& config)
+{
+    assert(configuration_);
+    configuration_->reconfigure(config);
+}
+
+/**
+ * Reacts on reconfigured configurations.
+*/
+void Configurable::configurationChanged(const std::vector<std::string>& changed_params)
+{
+    assert(configuration_);
+
+    //invoke deriveable method for specific behavior (e.g. widget updates)
+    onConfigurationChanged(changed_params);
+}
+
+/**
+ * Returns a unique path that can be used to find the configurable inside the configurable hierarchy.
+*/
+std::string Configurable::getPath() const
+{
+    std::string prefix;
+    if (parent_)
+    {
+        auto parent_path = parent_->getPath();
+        if (!parent_path.empty())
+            prefix = parent_path + ConfigurablePathSeparator;
+    }
+
+    return prefix + instance_id_;
 }
 
 // void Configurable::saveConfigurationAsTemplate (const std::string& template_name)

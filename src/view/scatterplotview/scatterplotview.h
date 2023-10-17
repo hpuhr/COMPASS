@@ -84,6 +84,11 @@ public:
     std::string dataVarYDBO() const;
     std::string dataVarYName() const;
 
+    static const std::string ParamDataVarXDBO;
+    static const std::string ParamDataVarXName;
+    static const std::string ParamDataVarYDBO;
+    static const std::string ParamDataVarYName;
+
 protected:
     friend class LatexVisitor;
 
@@ -91,6 +96,8 @@ protected:
     virtual void updateSelection() override;
 
     virtual bool init_impl() override;
+
+    virtual ViewUpdate onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
 
     ScatterPlotViewDataWidget* getDataWidget();
 

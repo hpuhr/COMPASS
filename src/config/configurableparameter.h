@@ -71,6 +71,10 @@ public:
     virtual void toJSON(nlohmann::json& json_obj) const = 0;
 
 protected:
+    friend class Configuration;
+
+    virtual void setValue(const nlohmann::json& json_value) = 0;
+
     /// Parameter identifier
     std::string parameter_id_;
 };
@@ -129,9 +133,13 @@ class ConfigurableParameterT : public ConfigurableParameter
     void update(T* pointer, const T& default_value, bool update_pointer);
     void update(T* pointer);
 
+    static T valueFromJSON(const nlohmann::json& json_value);
+
 protected:
     const T* getValuePointer() const;
     T* getValuePointer();
+
+    void setValue(const nlohmann::json& json_value) override final;
 
     /// Template pointer to real value
     T* pointer_ = nullptr;

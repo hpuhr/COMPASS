@@ -375,3 +375,12 @@ void ViewToolWidget::appModeSwitch(AppMode app_mode)
     //update items as their state might depend on app mode
     updateItems();
 }
+
+/**
+ * React on config changes.
+*/
+void ViewToolWidget::configChanged()
+{
+    //update items as their state might depend on config
+    updateItems();
+}

@@ -60,9 +60,13 @@ public:
 
     void updateConfig();
 
+    virtual void configChanged() override;
+
 protected:
     void updateEvalConfig();
     void updateInfo();
+    void updateSelectedVar();
+    void updateLogScale();
 
     virtual void onDisplayChange_impl() override;
 

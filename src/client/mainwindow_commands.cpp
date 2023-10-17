@@ -60,6 +60,7 @@ REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
 REGISTER_RTCOMMAND(main_window::RTCommandExportEvaluationReport)
 REGISTER_RTCOMMAND(main_window::RTCommandQuit)
 REGISTER_RTCOMMAND(main_window::RTCommandGetEvents)
+REGISTER_RTCOMMAND(main_window::RTCommandReconfigure);
 
 namespace main_window
 {
@@ -88,6 +89,7 @@ void init_commands()
     main_window::RTCommandCloseDB::init();
     main_window::RTCommandQuit::init();
     main_window::RTCommandGetEvents::init();
+    main_window::RTCommandReconfigure::init();
 }
 
 // open_db
@@ -1576,6 +1578,63 @@ bool RTCommandGetEvents::run_impl()
     auto json_obj = Logger::getInstance().getEventLog()->getEventsAsJSON(query);
 
     setJSONReply(json_obj);
+
+    return true;
+}
+
+// reconfigure
+
+rtcommand::IsValid RTCommandReconfigure::valid() const
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(path.empty(), "Path empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(json_config.empty(), "JSON config empty")
+
+    return RTCommand::valid(); 
+}
+
+void RTCommandReconfigure::collectOptions_impl(OptionsDescription& options,
+                                               PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("path", po::value<std::string>()->required(), "configurable to reconfigure")
+        ("config", po::value<std::string>()->required(), "json configuration to apply");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "path", 1)
+    ADD_RTCOMMAND_POS_OPTION(positional, "config", 2)
+}
+
+void RTCommandReconfigure::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "path", std::string, path)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "config", std::string, json_config)
+}
+
+bool RTCommandReconfigure::run_impl()
+{
+    //try to find configurable in root
+    auto find_result = COMPASS::instance().findSubConfigurable(path);
+    if (find_result.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        setResultMessage("Configurable '" + path + "' not found");
+        return false;
+    }
+
+    //reconfigure using json config
+    try
+    {
+        auto config = nlohmann::json::parse(json_config);
+        find_result.second->reconfigure(config);
+    }
+    catch(const std::exception& e)
+    {
+        setResultMessage("Reconfigure failed: " + std::string(e.what()));
+        return false;
+    }
+    catch(...)
+    {
+        setResultMessage("Reconfigure failed: Unknown error");
+        return false;
+    }
 
     return true;
 }

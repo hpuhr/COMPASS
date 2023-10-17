@@ -499,8 +499,7 @@ namespace rtcommand
 
         // parse command using collected options description
         po::variables_map vm;
-        QString parse_err;
-        if (!cmd.parse(vm, od, pod, true, &parse_err))
+        if (!cmd.parse(vm, od, pod, true, &err_msg))
         {
             // std::cout << "RTCommand::configure: Could not parse command" << std::endl;
             setError(CmdErrorCode::Config_ParseOptionsFailed, err_msg.toStdString());

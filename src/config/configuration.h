@@ -29,6 +29,8 @@
 //#include "string.h"
 //#include "logger.h"
 
+#include <boost/signals2.hpp>
+
 /*
  *  @brief Configuration storage and retrieval container class
  *
@@ -45,6 +47,7 @@ class Configuration
 public:
     typedef std::pair<std::string, std::string> SubConfigKey;
     typedef std::unique_ptr<Configuration>      Ptr;
+    typedef std::vector<std::string>            ParameterList;
 
     /// @brief Constructor
     Configuration(const std::string& class_id, 
@@ -78,7 +81,7 @@ public:
 
     // parses the member config file
     void parseJSONConfigFile();
-    void parseJSONConfig(nlohmann::json& config);
+    void parseJSONConfig(const nlohmann::json& config);
     // writes full json config or sub-file to parent
     void writeJSON(nlohmann::json& parent_json) const;
     // generates the full json config
@@ -146,19 +149,27 @@ public:
 
     std::string newInstanceID(const std::string& class_id) const;
 
+    boost::signals2::connection connectListener(const std::function<void(const ParameterList&)>& cb);
+    void reconfigure(const nlohmann::json& config);
+
+    static const std::string ParameterSection;
+    static const std::string SubConfigSection;
+    static const std::string SubConfigFileSection;
+    static const std::string InstanceID;
+    static const std::string ClassID;
+    static const std::string SubConfigFilePath;
+
 protected:
     void parseJSONSubConfigFile(const std::string& class_id, 
                                 const std::string& instance_id,
                                 const std::string& path);
-    void parseJSONParameters(nlohmann::json& parameters_config);
-    void parseJSONSubConfigs(nlohmann::json& sub_configs_config);
+    void parseJSONParameters(const nlohmann::json& parameters_config);
+    void parseJSONSubConfigs(const nlohmann::json& sub_configs_config);
 
     bool parameterInConfig(const std::string& parameter_id) const;
 
     template <typename T>
     T parameterValueFromConfig(const std::string& parameter_id) const;
-
-    nlohmann::json parameterValueFromConfig(const std::string& parameter_id) const;
 
     /// Class identifier
     std::string class_id_;
@@ -189,7 +200,20 @@ protected:
 private:
     Configuration(const std::string& class_id);
 
+    void parseJSONConfig(const nlohmann::json& config,
+                         const std::function<void(const nlohmann::json&)>& parse_parameters_cb,
+                         const std::function<void(const nlohmann::json&)>& parse_sub_configs_cb,
+                         const std::function<void(const std::string&, const std::string&, const std::string&)>& parse_sub_config_files_cb);
+    void parseJSONParameters(const nlohmann::json& parameters_config,
+                             const std::function<void(const std::string&, const nlohmann::json&)>& parse_param_cb);
+    void parseJSONSubConfigs(const nlohmann::json& sub_configs_config,
+                             const std::function<void(const SubConfigKey&, const nlohmann::json&)>& parse_subconfig_cb);
+
+    void setParameterFromJSON(const std::string& parameter_id, const nlohmann::json& value);
+
     bool create_instance_name_ = false;
+
+    boost::signals2::signal<void(const ParameterList&)> changed_signal_;
 };
 
 #endif /* CONFIGURATION_H_ */
