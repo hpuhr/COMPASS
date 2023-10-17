@@ -50,8 +50,9 @@ public:
     ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
 
+    virtual void configChanged() override;
+
 protected:
-    virtual void onDisplayChange_impl() override;
     void updateSelectedVarX();
     void updateSelectedVarY();
 

@@ -44,6 +44,8 @@ public:
     ListBoxViewConfigWidget(ListBoxViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ListBoxViewConfigWidget();
 
+    virtual void configChanged() override;
+
 public slots:
     void selectedSetSlot(const QString& text);
     void addSetSlot();
@@ -65,6 +67,8 @@ protected:
     void updateSetBox();
     void updateSetButtons();
     void updateSetWidget();
+
+    void updateCurrentSet();
 
     ListBoxView*    view_ = nullptr;
 

@@ -28,13 +28,19 @@
 #include "logger.h"
 #include "latexvisitor.h"
 
+const std::string ParamShowSelected    = "show_only_selected";
+const std::string ParamUsePresentation = "use_presentation";
+const std::string ParamOverwriteCSV    = "overwrite_csv";
+const std::string SubConfigDataSource  = "ListBoxViewDataSource";
+const std::string SubConfigViewWidget  = "ListBoxViewWidget";
+
 ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id,
                          ViewContainer* w, ViewManager& view_manager)
     : View(class_id, instance_id, w, view_manager)
 {
-    registerParameter("show_only_selected", &show_only_selected_, false);
-    registerParameter("use_presentation", &use_presentation_, true);
-    registerParameter("overwrite_csv", &overwrite_csv_, true);
+    registerParameter(ParamShowSelected, &show_only_selected_, false);
+    registerParameter(ParamUsePresentation, &use_presentation_, true);
+    registerParameter(ParamOverwriteCSV, &overwrite_csv_, true);
 }
 
 ListBoxView::~ListBoxView()
@@ -93,12 +99,12 @@ void ListBoxView::generateSubConfigurable(const std::string& class_id,
 {
     logdbg << "ListBoxView: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
-    if (class_id == "ListBoxViewDataSource")
+    if (class_id == SubConfigDataSource)
     {
         assert(!data_source_);
         data_source_ = new ListBoxViewDataSource(class_id, instance_id, this);
     }
-    else if (class_id == "ListBoxViewWidget")
+    else if (class_id == SubConfigViewWidget)
     {
         widget_ = new ListBoxViewWidget(class_id, instance_id, this, this, central_widget_);
         setWidget(widget_);
@@ -112,12 +118,12 @@ void ListBoxView::checkSubConfigurables()
 {
     if (!data_source_)
     {
-        generateSubConfigurable("ListBoxViewDataSource", "ListBoxViewDataSource0");
+        generateSubConfigurable(SubConfigDataSource, SubConfigDataSource + "0");
     }
 
     if (!widget_)
     {
-        generateSubConfigurable("ListBoxViewWidget", "ListBoxViewWidget0");
+        generateSubConfigurable(SubConfigViewWidget, SubConfigViewWidget + "0");
     }
 }
 
@@ -205,6 +211,33 @@ void ListBoxView::showViewPointSlot (const ViewableDataConfig* vp)
     assert (data_source_);
     data_source_->showViewPoint(vp);
     assert (widget_);
+}
+
+View::ViewUpdate ListBoxView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params)
+{
+    for (const auto& param : changed_params)
+    {
+        if (param == ParamShowSelected)
+        {
+            emit showOnlySelectedSignal(show_only_selected_); 
+        }
+        else if (param == ParamUsePresentation)
+        {
+            emit usePresentationSignal(use_presentation_);
+        }
+        else if (param == ParamOverwriteCSV)
+        {
+            //nothing to do
+        }
+        else if (param == SubConfigDataSource + Configurable::ConfigurablePathSeparator + ListBoxViewDataSource::ParamCurrentSet)
+        {
+            //update source
+            getDataSource()->currentSetName(getDataSource()->currentSetName());
+        }
+    }
+
+    //return empty view update (not needed explicitely for listboxview)
+    return {};
 }
 
 //void ListBoxView::allLoadingDoneSlot()

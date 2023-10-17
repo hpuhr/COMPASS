@@ -39,12 +39,14 @@ using namespace dbContent;
 
 const string DEFAULT_SET_NAME {"Default"};
 
+const std::string ListBoxViewDataSource::ParamCurrentSet = "current_set_name";
+
 ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)
     : QObject(),
       Configurable(class_id, instance_id, parent)
 {
-    registerParameter ("current_set_name", &current_set_name_, DEFAULT_SET_NAME);
+    registerParameter (ParamCurrentSet, &current_set_name_, DEFAULT_SET_NAME);
 
     createSubConfigurables();
 

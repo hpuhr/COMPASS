@@ -156,6 +156,8 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
     vlayout->addWidget(export_button_);
 
     setLayout(vlayout);
+
+    connect(view_->getDataSource(), &ListBoxViewDataSource::setChangedSignal, this, &ListBoxViewConfigWidget::configChanged);
 }
 
 ListBoxViewConfigWidget::~ListBoxViewConfigWidget() = default;
@@ -381,6 +383,14 @@ void ListBoxViewConfigWidget::updateSetBox()
         set_box_->addItem(set_it.first.c_str());
     }
 
+    updateCurrentSet();
+}
+
+void ListBoxViewConfigWidget::updateCurrentSet()
+{
+    assert(view_);
+    assert(view_->getDataSource());
+
     int index = set_box_->findText(view_->getDataSource()->currentSetName().c_str());
     if(index >= 0)
     {
@@ -429,4 +439,22 @@ void ListBoxViewConfigWidget::updateSetWidget()
 
     loginf << "ListBoxViewConfigWidget: updateWidgetBox: setting '" << view_->getDataSource()->currentSetName() << "'";
     set_stack_->setCurrentWidget(set_widget);
+}
+
+void ListBoxViewConfigWidget::configChanged()
+{
+    assert(view_);
+
+    //update ui for var set
+    updateCurrentSet();
+    updateSetButtons();
+    updateSetWidget();
+
+    //other ui elements
+    only_selected_check_->setChecked(view_->showOnlySelected());
+    presentation_check_->setChecked(view_->usePresentation());
+    overwrite_check_->setChecked(view_->overwriteCSV());
+
+    //notify reload
+    getWidget()->notifyReloadNeeded();
 }

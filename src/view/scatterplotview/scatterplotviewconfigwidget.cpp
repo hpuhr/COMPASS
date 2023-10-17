@@ -136,7 +136,7 @@ void ScatterPlotViewConfigWidget::selectedVariableYChangedSlot()
         view_->metaDataVarY(select_var_y_->selectedMetaVariable());
 }
 
-void ScatterPlotViewConfigWidget::onDisplayChange_impl()
+void ScatterPlotViewConfigWidget::configChanged()
 {
     updateSelectedVarX();
     updateSelectedVarY();

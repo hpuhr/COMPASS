@@ -822,11 +822,11 @@ boost::signals2::connection Configuration::connectListener(const std::function<v
 /**
  * Reconfigures the configuration's registered parameters and those of its subconfigurations.
  */
-void Configuration::reconfigure(const nlohmann::json& config)
+std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config)
 {
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": reconfigure";
 
-    ParameterList param_list;
+    std::set<std::string> param_set;
 
     //callbacks used for parsing
     auto cb_param = [ & ] (const std::string& key, const nlohmann::json& value)
@@ -837,7 +837,7 @@ void Configuration::reconfigure(const nlohmann::json& config)
         //set parameter's internal pointer value
         setParameterFromJSON(key, value);
 
-        param_list.push_back(key);
+        param_set.insert(key);
     };
     auto cb_params = [ & ] (const nlohmann::json& config)
     {
@@ -850,7 +850,9 @@ void Configuration::reconfigure(const nlohmann::json& config)
         assert(hasSubConfiguration(key));
 
         //reconfigure subconfig
-        getSubConfiguration(key.first, key.second).reconfigure(config);
+        auto params_subconfig = getSubConfiguration(key.first, key.second).reconfigure(config);
+        for (const auto& p : params_subconfig)
+            param_set.insert(key.first + Configurable::ConfigurablePathSeparator + p);
     };
     auto cb_subconfigs = [ & ] (const nlohmann::json& config) 
     { 
@@ -861,9 +863,13 @@ void Configuration::reconfigure(const nlohmann::json& config)
     //parse config struct using the specified callbacks
     parseJSONConfig(config, cb_params, cb_subconfigs, {});
 
+    ParameterList param_list(param_set.begin(), param_set.end());
+
     //if my own parameters changed signal changes
     if (!param_list.empty())
         changed_signal_(param_list);
+
+    return param_list;
 }
 
 /**

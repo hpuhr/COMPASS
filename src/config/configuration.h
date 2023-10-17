@@ -150,7 +150,7 @@ public:
     std::string newInstanceID(const std::string& class_id) const;
 
     boost::signals2::connection connectListener(const std::function<void(const ParameterList&)>& cb);
-    void reconfigure(const nlohmann::json& config);
+    std::vector<std::string> reconfigure(const nlohmann::json& config);
 
     static const std::string ParameterSection;
     static const std::string SubConfigSection;

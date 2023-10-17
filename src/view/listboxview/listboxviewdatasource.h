@@ -49,7 +49,8 @@ class ListBoxViewDataSource : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    ListBoxViewDataSource(const std::string& class_id, const std::string& instance_id,
+    ListBoxViewDataSource(const std::string& class_id, 
+                          const std::string& instance_id,
                           Configurable* parent);
     /// @brief Destructor
     virtual ~ListBoxViewDataSource();
@@ -73,6 +74,8 @@ class ListBoxViewDataSource : public QObject, public Configurable
 
     void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
     void showViewPoint (const ViewableDataConfig* vp);
+
+    static const std::string ParamCurrentSet;
 
 protected:
     std::string current_set_name_;
