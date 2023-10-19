@@ -58,6 +58,8 @@ GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWi
     updateConfig();
 
     setLayout(main_layout_);
+
+    connect(&task_, &GPSTrailImportTask::configChanged, this, &GPSTrailImportTaskWidget::updateConfig);
 }
 
 void GPSTrailImportTaskWidget::addMainTab()
