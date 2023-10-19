@@ -148,6 +148,7 @@ protected:
     //unsigned int gps_fixes_skipped_lost_lock_ {0}; removed since rtk does not set GPS lock
     unsigned int gps_fixes_skipped_quality_cnt_ {0};
     unsigned int gps_fixes_skipped_time_cnt_ {0};
+    unsigned int gps_fixes_without_speedvec_ {0};
 
     const std::map<unsigned int, std::string> quality_labels {
         {0, "Invalid"},

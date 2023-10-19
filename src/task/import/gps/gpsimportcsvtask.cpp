@@ -423,7 +423,7 @@ void GPSImportCSVTask::parseCurrentFile ()
                         fix.vx_ = v_x;
                         fix.vy_ = v_y;
                         fix.track_angle_ = RAD2DEG * track_angle;
-                        fix.speed_ = speed;
+                        fix.speed_ = M_S2KNOTS * speed;
                     }
                 }
             }

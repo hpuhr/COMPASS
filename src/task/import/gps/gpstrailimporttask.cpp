@@ -19,7 +19,6 @@
 #include "gpstrailimporttaskdialog.h"
 #include "compass.h"
 #include "dbinterface.h"
-//#include "savedfile.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "files.h"
@@ -28,10 +27,9 @@
 #include "dbcontent/variable/variable.h"
 #include "datasourcemanager.h"
 #include "buffer.h"
-//#include "dbcontent/variable/variableset.h"
-//#include "dbcontent/variable/metavariable.h"
 #include "util/number.h"
 #include "util/timeconv.h"
+#include "projection/transformation.h"
 
 #include <iostream>
 #include <fstream>
@@ -375,25 +373,25 @@ void GPSTrailImportTask::parseCurrentFile ()
     // Handle any changes to the GPS Fix... This is called whenever it's updated.
     gps.onUpdate += [&gps, this, &last_ts](){
 
-//        loginf << "GPSTrailImportTask: parseCurrentFile: "
-//               << " time " << gps.fix.timestamp.toString()
-//               << " rawTime " << gps.fix.timestamp.rawTime
-//               << " rawDate " << gps.fix.timestamp.rawDate
-//               << " " << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ')
-//               << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " "
-//               << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   "
-//               << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h ["
-//               << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  "
-//               << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E"
-//               << "  +/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
+        //        loginf << "GPSTrailImportTask: parseCurrentFile: "
+        //               << " time " << gps.fix.timestamp.toString()
+        //               << " rawTime " << gps.fix.timestamp.rawTime
+        //               << " rawDate " << gps.fix.timestamp.rawDate
+        //               << " " << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ')
+        //               << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " "
+        //               << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   "
+        //               << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h ["
+        //               << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  "
+        //               << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E"
+        //               << "  +/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
 
         ++gps_fixes_cnt_;
 
-//        if (!gps.fix.locked())
-//        {
-//            ++gps_fixes_skipped_lost_lock_;
-//            return;
-//        }
+        //        if (!gps.fix.locked())
+        //        {
+        //            ++gps_fixes_skipped_lost_lock_;
+        //            return;
+        //        }
 
         if (gps.fix.timestamp.rawDate == 0 && gps.fix.timestamp.rawTime == 0)
         {
@@ -405,6 +403,11 @@ void GPSTrailImportTask::parseCurrentFile ()
         {
             ++gps_fixes_skipped_quality_cnt_;
             return;
+        }
+
+        if (gps.fix.travelAngle == 0.0 && gps.fix.speed == 0.0)
+        {
+            ++gps_fixes_without_speedvec_;
         }
 
         if (gps_fixes_.size() && last_ts == getTimeFrom(gps.fix.timestamp))
@@ -469,9 +472,9 @@ void GPSTrailImportTask::parseCurrentFile ()
            << " (" << String::percentToString(100.0*gps_fixes_zero_datetime_/gps_fixes_cnt_) << "%)"
            << " because of zero date and time.\n";
 
-//        ss << "Skipped " << gps_fixes_skipped_lost_lock_
-//           << " (" << String::percentToString(100.0*gps_fixes_skipped_lost_lock_/gps_fixes_cnt_) << "%)"
-//           << " because of lost GNSS lock.\n";
+        //        ss << "Skipped " << gps_fixes_skipped_lost_lock_
+        //           << " (" << String::percentToString(100.0*gps_fixes_skipped_lost_lock_/gps_fixes_cnt_) << "%)"
+        //           << " because of lost GNSS lock.\n";
         ss << "Skipped " << gps_fixes_skipped_quality_cnt_
            << " (" << String::percentToString(100.0*gps_fixes_skipped_quality_cnt_/gps_fixes_cnt_) << "%)"
            << " because of invalid quality.\n";
@@ -480,6 +483,11 @@ void GPSTrailImportTask::parseCurrentFile ()
            << " because of same time and position.\n";
         ss << "Got " << gps_fixes_.size()
            << " (" << String::percentToString(100.0*gps_fixes_.size()/gps_fixes_cnt_) << "%) fixes.\n";
+
+        if (gps_fixes_without_speedvec_)
+            ss << "Got " << gps_fixes_without_speedvec_
+               << " (" << String::percentToString(100.0*gps_fixes_without_speedvec_/gps_fixes_cnt_)
+               << "%) without speed vector, will be calculated.\n";
 
         if (gps_fixes_.size())
             ss << "\n Timestamps\n  Begin: " << Time::toString(getTimeFrom(gps_fixes_.begin()->timestamp))
@@ -625,7 +633,6 @@ void GPSTrailImportTask::run()
 
     // NullableVector<double>& vx_vec = wrap.getNV<double> (DBContent::meta_var_vx_);
 
-    unsigned int cnt = 0;
     unsigned int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     assert (dbcontent_man.hasMaxRefTrajTrackNum());
@@ -653,17 +660,27 @@ void GPSTrailImportTask::run()
     boost::posix_time::ptime timestamp;
     double speed_ms, track_angle_rad, vx, vy;
 
+    // calc stuff
+    Transformation trafo_;
+    bool ok;
+    double calc_x_pos, calc_y_pos, calc_track_angle_rad, calc_speed_ms;
+    float d_t;
+
     loginf << "GPSTrailImportTask: run: filling buffer";
 
     boost::posix_time::ptime override_date_ts = boost::posix_time::ptime(override_date_);
 
     last_tod = -1; // impossible first value
 
-    for (auto& fix_it : gps_fixes_)
+    for (unsigned int cnt = 0; cnt < gps_fixes_.size(); ++cnt)
     {
+        auto fix_it = gps_fixes_.begin() + cnt;
+
         // tod
-        tod = fix_it.timestamp.hour*3600.0 + fix_it.timestamp.min*60.0 + fix_it.timestamp.sec;
-        tod += tod_offset_;
+        tod = fix_it->timestamp.hour*3600.0 + fix_it->timestamp.min*60.0 + fix_it->timestamp.sec;
+
+        if (use_tod_offset_)
+            tod += tod_offset_;
 
         // check for out-of-bounds because of midnight-jump
         while (tod < 0.0f)
@@ -689,12 +706,12 @@ void GPSTrailImportTask::run()
         }
         else
         {
-            timestamp = getTimeFrom(fix_it.timestamp);
+            timestamp = getTimeFrom(fix_it->timestamp);
 
         }
 
-        if (use_tod_offset_)
-            timestamp += Time::partialSeconds(tod_offset_); // add time offset
+        //        if (use_tod_offset_)
+        //            timestamp += Time::partialSeconds(tod_offset_); // add time offset
 
         sac_vec.set(cnt, ds_sac_);
         sic_vec.set(cnt, ds_sic_);
@@ -703,8 +720,8 @@ void GPSTrailImportTask::run()
 
         tod_vec.set(cnt, tod);
         ts_vec.set(cnt, timestamp);
-        lat_vec.set(cnt, fix_it.latitude);
-        long_vec.set(cnt, fix_it.longitude);
+        lat_vec.set(cnt, fix_it->latitude);
+        long_vec.set(cnt, fix_it->longitude);
 
         if (set_mode_3a_code_)
             buffer_->get<unsigned int>(m3a_var.name()).set(cnt, mode_3a_code_);
@@ -717,12 +734,13 @@ void GPSTrailImportTask::run()
 
         tn_vec.set(cnt, track_num);
 
-        if (fix_it.travelAngle != 0.0 && fix_it.speed != 0.0)
+        // groundspeed, track angle
+        if (fix_it->travelAngle != 0.0 && fix_it->speed != 0.0)
         {
-            track_angle_rad = DEG2RAD * fix_it.travelAngle;
-            speed_ms = fix_it.speed * 0.27778;
+            track_angle_rad = DEG2RAD * fix_it->travelAngle;
+            speed_ms = fix_it->speed * 0.27778;
 
-            track_angle_vec.set(cnt, fix_it.travelAngle);
+            track_angle_vec.set(cnt, fix_it->travelAngle);
             speed_vec.set(cnt, speed_ms * M_S2KNOTS);
 
             vx = sin(track_angle_rad) * speed_ms;
@@ -733,30 +751,74 @@ void GPSTrailImportTask::run()
             vx_vec.set(cnt, vx);
             vy_vec.set(cnt, vy);
         }
+        else if (cnt > 0) // derive speed vector from lat long positions
+        {
+            unsigned int prev_cnt = cnt - 1;
 
-        xstddev_vec.set(cnt, fix_it.horizontalAccuracy());
-        ystddev_vec.set(cnt, fix_it.horizontalAccuracy());
+            assert (!ts_vec.isNull(cnt) && !ts_vec.isNull(prev_cnt));
 
-        //        if (fix_it.travelAngle != 0.0) TODO
-        //            head_vec.set(cnt, fix_it.travelAngle);
+            d_t = Time::partialSeconds(ts_vec.get(cnt) - ts_vec.get(cnt - 1));
 
-        //        if (fix_it.speed != 0.0)
-        //            spd_vec.set(cnt, fix_it.speed*0.539957); // km/h to knots
+            if (d_t < 10.0) // limit time between
+            {
+                tie(ok, calc_x_pos, calc_y_pos) = trafo_.distanceCart(
+                            lat_vec.get(prev_cnt), long_vec.get(prev_cnt), lat_vec.get(cnt), long_vec.get(cnt));
+
+                if (!ok)
+                {
+                    logerr << "GPSTrailImportTask: run: error with latitude " << lat_vec.get(cnt)
+                           << " longitude " << long_vec.get(cnt);
+                }
+                else
+                {
+
+                    logdbg << "GPSTrailImportTask: run: offsets x " << fixed << calc_x_pos
+                           << " y " << fixed << calc_y_pos << " dist " << fixed << sqrt(pow(calc_x_pos,2)+pow(calc_y_pos,2));
+
+                    double calc_v_x = calc_x_pos/d_t;
+                    double calc_v_y = calc_y_pos/d_t;
+
+                    logdbg << "GPSTrailImportTask: run: calc_v_x " << calc_v_x
+                           << " calc_v_y " << calc_v_y << " d_t " << d_t;
+
+                    // x_pos long, y_pos lat
+
+                    logdbg << "GPSTrailImportTask: run: interpolated lat " << calc_x_pos << " long " << calc_y_pos;
+
+                    calc_track_angle_rad = atan2(calc_v_x,calc_v_y); // bearing rad
+                    calc_speed_ms = sqrt(pow(calc_v_x, 2) + pow(calc_v_y, 2));
+
+                    if (!std::isnan(calc_track_angle_rad) && !std::isinf(calc_track_angle_rad)
+                            && !std::isnan(calc_speed_ms) && !std::isinf(calc_speed_ms))
+                    {
+                        track_angle_vec.set(cnt, calc_track_angle_rad * RAD2DEG);
+                        speed_vec.set(cnt, calc_speed_ms * M_S2KNOTS);
+
+                        vx_vec.set(cnt, calc_v_x);
+                        vy_vec.set(cnt, calc_v_y);
+                    }
+                }
+            }
+        }
+
+        // accuracy
+        xstddev_vec.set(cnt, fix_it->horizontalAccuracy());
+        ystddev_vec.set(cnt, fix_it->horizontalAccuracy());
 
         last_tod = tod;
 
-        ++cnt;
+        //++cnt;
     }
 
-    //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
 
     dbcontent_man.maxRefTrajTrackNum(track_num+1); // increment for next
 
     loginf << "GPSTrailImportTask: run: inserting data";
 
-    connect(&dbcontent_man, &DBContentManager::insertDoneSignal, this, &GPSTrailImportTask::insertDoneSlot,
-            Qt::UniqueConnection);
+    connect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+            this, &GPSTrailImportTask::insertDoneSlot, Qt::UniqueConnection);
 
+    //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
     dbcontent_man.insertData({{dbcontent_name, buffer_}});
 }
 
