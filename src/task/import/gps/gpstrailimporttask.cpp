@@ -808,14 +808,6 @@ void GPSTrailImportTask::run()
 
         }
 
-<<<<<<< HEAD
-        //        if (use_tod_offset_)
-        //            timestamp += Time::partialSeconds(tod_offset_); // add time offset
-=======
-        if (settings_.use_tod_offset)
-            timestamp += Time::partialSeconds(settings_.tod_offset); // add time offset
->>>>>>> 7d0d345e291e6ef3d2f254bbe88a2d2fbc9251b6
-
         sac_vec.set(cnt, settings_.ds_sac);
         sic_vec.set(cnt, settings_.ds_sic);
         ds_id_vec.set(cnt, ds_id);
