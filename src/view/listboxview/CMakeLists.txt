@@ -14,6 +14,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/listboxviewconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/listboxviewdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/listboxviewwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/listboxviewsetconfigwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/allbuffertablemodel.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/allbuffertablewidget.cpp"
@@ -24,6 +25,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/listboxviewconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/listboxviewdatawidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/listboxviewwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/listboxviewsetconfigwidget.cpp"
 )
-
-

@@ -151,7 +151,7 @@ void ListBoxViewDataWidget::liveReload_impl()
     //implement live reload behavior here
 }
 
-void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
+void ListBoxViewDataWidget::exportDataSlot()
 {
     logdbg << "ListBoxViewDataWidget: exportDataSlot";
     assert(tab_widget_);
@@ -164,7 +164,7 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
 
     if (all_buffer_widget && !buffer_widget)
     {
-        all_buffer_widget->exportSlot(overwrite);
+        all_buffer_widget->exportSlot();
         return;
     }
 
@@ -179,10 +179,13 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
         return;
     }
 
-    buffer_widget->exportSlot(overwrite);
+    buffer_widget->exportSlot();
 }
 
-void ListBoxViewDataWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(cancelled); }
+void ListBoxViewDataWidget::exportDoneSlot(bool cancelled) 
+{ 
+    emit exportDoneSignal(cancelled); 
+}
 
 void ListBoxViewDataWidget::showOnlySelectedSlot(bool value)
 {

@@ -53,7 +53,7 @@ class BufferTableWidget : public QWidget
     void exportDoneSignal(bool cancelled);
 
   public slots:
-    void exportSlot(bool overwrite);
+    void exportSlot();
     void exportDoneSlot(bool cancelled);
 
     void showOnlySelectedSlot(bool value);

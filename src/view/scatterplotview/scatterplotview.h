@@ -42,6 +42,16 @@ signals:
     void showAssociationsSignal(bool value);
 
 public:
+    struct Settings
+    {
+        Settings();
+
+        std::string data_var_x_dbo;
+        std::string data_var_x_name;
+        std::string data_var_y_dbo;
+        std::string data_var_y_name;
+    };
+
     /// @brief Constructor
     ScatterPlotView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
@@ -106,11 +116,7 @@ protected:
     /// For data loading
     ScatterPlotViewDataSource* data_source_{nullptr};
 
-    std::string data_var_x_dbo_;
-    std::string data_var_x_name_;
-
-    std::string data_var_y_dbo_;
-    std::string data_var_y_name_;
+    Settings settings_;
 };
 
 #endif /* SCATTERPLOTVIEW_H_ */

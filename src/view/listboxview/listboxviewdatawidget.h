@@ -62,7 +62,7 @@ signals:
     void usePresentationSignal(bool use_presentation);
 
 public slots:
-    void exportDataSlot(bool overwrite);
+    void exportDataSlot();
     void exportDoneSlot(bool cancelled);
 
     void showOnlySelectedSlot(bool value);
