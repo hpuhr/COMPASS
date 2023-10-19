@@ -46,6 +46,8 @@ using namespace Utils;
 using namespace std;
 using namespace nmea;
 
+/**
+*/
 boost::posix_time::ptime getTimeFrom (const nmea::GPSTimestamp& ts)
 {
     return boost::posix_time::ptime(boost::gregorian::date(ts.year,
@@ -57,54 +59,72 @@ boost::posix_time::ptime getTimeFrom (const nmea::GPSTimestamp& ts)
                                     + Time::partialSeconds(ts.sec, true)); // add partial w/o s
 }
 
-GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,
+/**
+*/
+GPSTrailImportTask::Settings::Settings()
+:   ds_name           ("GPS Trail")
+,   ds_sac            (0)
+,   ds_sic            (0)
+,   use_tod_offset    (false)
+,   tod_offset        (0.0f)
+,   use_override_date (false)
+,   override_date_str ("1970-01-01")
+,   set_mode_3a_code  (false)
+,   mode_3a_code      (0)
+,   set_target_address(false)
+,   target_address    (0)
+,   set_callsign      (false)
+,   callsign          ("")
+{
+}
+
+/**
+*/
+GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, 
+                                       const std::string& instance_id,
                                        TaskManager& task_manager)
-    : Task("GPSTrailImportTask", "Import GPS Trail", task_manager),
-      Configurable(class_id, instance_id, &task_manager, "task_import_gps.json")
+:   Task        ("GPSTrailImportTask", "Import GPS Trail", task_manager)
+,   Configurable(class_id, instance_id, &task_manager, "task_import_gps.json")
 {
     tooltip_ = "Allows importing of GPS trails as NMEA into the opened database.";
 
-    //registerParameter("current_filename", &current_filename_, "");
+    registerParameter("ds_name", &settings_.ds_name, Settings().ds_name);
+    registerParameter("ds_sac", &settings_.ds_sac, Settings().ds_sac);
+    registerParameter("ds_sic", &settings_.ds_sic, Settings().ds_sic);
 
-    registerParameter("ds_name", &ds_name_, std::string("GPS Trail"));
-    registerParameter("ds_sac", &ds_sac_, 0u);
-    registerParameter("ds_sic", &ds_sic_, 0u);
+    registerParameter("use_tod_offset", &settings_.use_tod_offset, Settings().use_tod_offset);
+    registerParameter("tod_offset", &settings_.tod_offset, Settings().tod_offset);
 
-    registerParameter("use_tod_offset", &use_tod_offset_, false);
-    registerParameter("tod_offset", &tod_offset_, 0.0f);
+    registerParameter("use_override_date", &settings_.use_override_date, Settings().use_override_date);
+    registerParameter("override_date_str", &settings_.override_date_str, Settings().override_date_str);
+    override_date_ = boost::gregorian::from_string(settings_.override_date_str);
 
-    registerParameter("use_override_date", &use_override_date_, false);
-    registerParameter("override_date_str", &override_date_str_, std::string("1970-01-01"));
-    override_date_ = boost::gregorian::from_string(override_date_str_);
+    registerParameter("set_mode_3a_code", &settings_.set_mode_3a_code, Settings().set_mode_3a_code);
+    registerParameter("mode_3a_code", &settings_.mode_3a_code, Settings().mode_3a_code);
 
-    registerParameter("set_mode_3a_code", &set_mode_3a_code_, false);
-    registerParameter("mode_3a_code", &mode_3a_code_, 0u);
+    registerParameter("set_target_address", &settings_.set_target_address, Settings().set_target_address);
+    registerParameter("target_address", &settings_.target_address, Settings().target_address);
 
-    registerParameter("set_target_address", &set_target_address_, false);
-    registerParameter("target_address", &target_address_, 0u);
-
-    registerParameter("set_callsign", &set_callsign_, false);
-    registerParameter("callsign", &callsign_, std::string());
-
-    //registerParameter("line_id", &line_id_, 0); always defaults to 0
+    registerParameter("set_callsign", &settings_.set_callsign, Settings().set_callsign);
+    registerParameter("callsign", &settings_.callsign, Settings().callsign);
 
     createSubConfigurables();
-
-    //if (current_filename_.size())
-    //    parseCurrentFile();
 }
 
-GPSTrailImportTask::~GPSTrailImportTask()
-{
-}
+/**
+*/
+GPSTrailImportTask::~GPSTrailImportTask() = default;
 
+/**
+*/
 void GPSTrailImportTask::generateSubConfigurable(const std::string& class_id,
                                                  const std::string& instance_id)
 {
-    throw std::runtime_error("GPSTrailImportTask: generateSubConfigurable: unknown class_id " +
-                             class_id);
+    throw std::runtime_error("GPSTrailImportTask: generateSubConfigurable: unknown class_id " + class_id);
 }
 
+/**
+*/
 GPSTrailImportTaskDialog* GPSTrailImportTask::dialog()
 {
     if (!dialog_)
@@ -122,6 +142,8 @@ GPSTrailImportTaskDialog* GPSTrailImportTask::dialog()
     return dialog_.get();
 }
 
+/**
+*/
 void GPSTrailImportTask::importFilename(const std::string& filename)
 {
     loginf << "GPSTrailImportTask: importFilename: filename '" << filename << "'";
@@ -133,6 +155,8 @@ void GPSTrailImportTask::importFilename(const std::string& filename)
     emit statusChangedSignal(name_);
 }
 
+/**
+*/
 bool GPSTrailImportTask::checkPrerequisites()
 {
     if (!COMPASS::instance().interface().ready())  // must be connected
@@ -147,170 +171,227 @@ bool GPSTrailImportTask::checkPrerequisites()
     return true;
 }
 
+/**
+*/
 bool GPSTrailImportTask::isRecommended()
 {
     return false;
 }
 
+/**
+*/
 bool GPSTrailImportTask::isRequired() { return false; }
 
+/**
+*/
 std::string GPSTrailImportTask::currentError() const
 {
     return current_error_;
 }
 
+/**
+*/
 std::string GPSTrailImportTask::dsName() const
 {
-    return ds_name_;
+    return settings_.ds_name;
 }
 
+/**
+*/
 void GPSTrailImportTask::dsName(const std::string& ds_name)
 {
     loginf << "GPSTrailImportTask: dsName: value '" << ds_name << "'";
 
-    ds_name_ = ds_name;
+    settings_.ds_name = ds_name;
 }
 
+/**
+*/
 unsigned int GPSTrailImportTask::dsSAC() const
 {
-    return ds_sac_;
+    return settings_.ds_sac;
 }
 
+/**
+*/
 void GPSTrailImportTask::dsSAC(unsigned int ds_sac)
 {
     loginf << "GPSTrailImportTask: dsSAC: value " << ds_sac;
 
-    ds_sac_ = ds_sac;
+    settings_.ds_sac = ds_sac;
 }
 
+/**
+*/
 unsigned int GPSTrailImportTask::dsSIC() const
 {
-    return ds_sic_;
+    return settings_.ds_sic;
 }
 
+/**
+*/
 void GPSTrailImportTask::dsSIC(unsigned int ds_sic)
 {
     loginf << "GPSTrailImportTask: dsSIC: value " << ds_sic;
 
-    ds_sic_ = ds_sic;
+    settings_.ds_sic = ds_sic;
 }
 
+/**
+*/
 bool GPSTrailImportTask::useTodOffset() const
 {
-    return use_tod_offset_;
+    return settings_.use_tod_offset;
 }
 
+/**
+*/
 void GPSTrailImportTask::useTodOffset(bool value)
 {
     loginf << "GPSTrailImportTask: useTodOffset: value " << value;
 
-    use_tod_offset_ = value;
+    settings_.use_tod_offset = value;
 }
 
-
+/**
+*/
 float GPSTrailImportTask::todOffset() const
 {
-    return tod_offset_;
+    return settings_.tod_offset;
 }
 
+/**
+*/
 void GPSTrailImportTask::todOffset(float tod_offset)
 {
     loginf << "GPSTrailImportTask: todOffset: value " << tod_offset;
 
-    tod_offset_ = tod_offset;
+    settings_.tod_offset = tod_offset;
 }
 
-
+/**
+*/
 const boost::gregorian::date& GPSTrailImportTask::overrideDate() const
 {
     return override_date_;
 }
 
+/**
+*/
 void GPSTrailImportTask::overrideDate(const boost::gregorian::date& date)
 {
     override_date_ = date;
-    override_date_str_ = boost::gregorian::to_iso_extended_string(override_date_);
 
-    loginf << "GPSTrailImportTask: overrideDate: value '" << override_date_str_ << "'";
+    settings_.override_date_str = boost::gregorian::to_iso_extended_string(override_date_);
+
+    loginf << "GPSTrailImportTask: overrideDate: value '" << settings_.override_date_str << "'";
 }
 
+/**
+*/
 bool GPSTrailImportTask::setMode3aCode() const
 {
-    return set_mode_3a_code_;
+    return settings_.set_mode_3a_code;
 }
 
+/**
+*/
 void GPSTrailImportTask::setMode3aCode(bool value)
 {
     loginf << "GPSTrailImportTask: setMode3aCode: value " << value;
 
-    set_mode_3a_code_ = value;
+    settings_.set_mode_3a_code = value;
 }
 
+/**
+*/
 unsigned int GPSTrailImportTask::mode3aCode() const
 {
-    return mode_3a_code_;
+    return settings_.mode_3a_code;
 }
 
+/**
+*/
 void GPSTrailImportTask::mode3aCode(unsigned int value)
 {
     loginf << "GPSTrailImportTask: mode3aCode: value " << value;
 
-    mode_3a_code_ = value;
+    settings_.mode_3a_code = value;
 }
 
+/**
+*/
 bool GPSTrailImportTask::setTargetAddress() const
 {
-    return set_target_address_;
+    return settings_.set_target_address;
 }
 
+/**
+*/
 void GPSTrailImportTask::setTargetAddress(bool value)
 {
     loginf << "GPSTrailImportTask: setTargetAddress: value " << value;
 
-    set_target_address_ = value;
+    settings_.set_target_address = value;
 }
 
+/**
+*/
 unsigned int GPSTrailImportTask::targetAddress() const
 {
-    return target_address_;
+    return settings_.target_address;
 }
 
+/**
+*/
 void GPSTrailImportTask::targetAddress(unsigned int target_address)
 {
     loginf << "GPSTrailImportTask: targetAddress: value " << target_address;
 
-    target_address_ = target_address;
+    settings_.target_address = target_address;
 }
 
+/**
+*/
 bool GPSTrailImportTask::setCallsign() const
 {
-    return set_callsign_;
+    return settings_.set_callsign;
 }
 
+/**
+*/
 void GPSTrailImportTask::setCallsign(bool value)
 {
     loginf << "GPSTrailImportTask: setCallsign: value " << value;
 
-    set_callsign_ = value;
+    settings_.set_callsign = value;
 }
 
+/**
+*/
 std::string GPSTrailImportTask::callsign() const
 {
-    return callsign_;
+    return settings_.callsign;
 }
 
+/**
+*/
 void GPSTrailImportTask::callsign(const std::string& callsign)
 {
     loginf << "GPSTrailImportTask: callsign: value '" << callsign << "'";
 
-    callsign_ = callsign;
+    settings_.callsign = callsign;
 }
 
+/**
+*/
 unsigned int GPSTrailImportTask::lineID() const
 {
     return line_id_;
 }
 
+/**
+*/
 void GPSTrailImportTask::lineID(unsigned int line_id)
 {
     loginf << "GPSTrailImportTask: lineID: value " << line_id;
@@ -318,21 +399,29 @@ void GPSTrailImportTask::lineID(unsigned int line_id)
     line_id_ = line_id;
 }
 
+/**
+*/
 bool GPSTrailImportTask::useOverrideDate() const
 {
-    return use_override_date_;
+    return settings_.use_override_date;
 }
 
+/**
+*/
 void GPSTrailImportTask::useOverrideDate(bool value)
 {
-    use_override_date_ = value;
+    settings_.use_override_date = value;
 }
 
+/**
+*/
 std::string GPSTrailImportTask::currentText() const
 {
     return current_text_;
 }
 
+/**
+*/
 bool GPSTrailImportTask::canImportFile()
 {
     if (!current_filename_.size())
@@ -348,6 +437,8 @@ bool GPSTrailImportTask::canImportFile()
     return gps_fixes_.size(); // only if fixes exist
 }
 
+/**
+*/
 void GPSTrailImportTask::parseCurrentFile ()
 {
     loginf << "GPSTrailImportTask: parseCurrentFile: file '" << current_filename_ << "'";
@@ -519,8 +610,15 @@ void GPSTrailImportTask::parseCurrentFile ()
     QApplication::restoreOverrideCursor();
 }
 
-bool GPSTrailImportTask::canRun() { return canImportFile(); }
+/**
+*/
+bool GPSTrailImportTask::canRun() 
+{ 
+    return canImportFile(); 
+}
 
+/**
+*/
 void GPSTrailImportTask::run()
 {
     loginf << "GPSTrailImportTask: run: filename '" << current_filename_ << " fixes " << gps_fixes_.size();
@@ -589,13 +687,13 @@ void GPSTrailImportTask::run()
     properties.addProperty(xstddev_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(ystddev_var.name(), PropertyDataType::DOUBLE);
 
-    if (set_mode_3a_code_)
+    if (settings_.set_mode_3a_code)
         properties.addProperty(m3a_var.name(), PropertyDataType::UINT);
 
-    if (set_target_address_)
+    if (settings_.set_target_address)
         properties.addProperty(ta_var.name(), PropertyDataType::UINT);
 
-    if (set_callsign_)
+    if (settings_.set_callsign)
         properties.addProperty(ti_var.name(), PropertyDataType::STRING);
 
     properties.addProperty(tn_var.name(), PropertyDataType::UINT);
@@ -633,7 +731,7 @@ void GPSTrailImportTask::run()
 
     // NullableVector<double>& vx_vec = wrap.getNV<double> (DBContent::meta_var_vx_);
 
-    unsigned int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+    unsigned int ds_id = Number::dsIdFrom(settings_.ds_sac, settings_.ds_sic);
 
     assert (dbcontent_man.hasMaxRefTrajTrackNum());
     unsigned int track_num = dbcontent_man.maxRefTrajTrackNum();
@@ -651,7 +749,7 @@ void GPSTrailImportTask::run()
 
         dbContent::DBDataSource& src = src_man.dbDataSource(ds_id);
 
-        src.name(ds_name_);
+        src.name(settings_.ds_name);
         src.dsType(dbcontent_name); // same as dstype
 
     }
@@ -679,8 +777,8 @@ void GPSTrailImportTask::run()
         // tod
         tod = fix_it->timestamp.hour*3600.0 + fix_it->timestamp.min*60.0 + fix_it->timestamp.sec;
 
-        if (use_tod_offset_)
-            tod += tod_offset_;
+        if (settings_.use_tod_offset)
+            tod += settings_.tod_offset;
 
         // check for out-of-bounds because of midnight-jump
         while (tod < 0.0f)
@@ -693,7 +791,7 @@ void GPSTrailImportTask::run()
 
         // timestamp
 
-        if (use_override_date_)
+        if (settings_.use_override_date)
         {
             if (tod < last_tod) // 24h jump
             {
@@ -710,11 +808,16 @@ void GPSTrailImportTask::run()
 
         }
 
+<<<<<<< HEAD
         //        if (use_tod_offset_)
         //            timestamp += Time::partialSeconds(tod_offset_); // add time offset
+=======
+        if (settings_.use_tod_offset)
+            timestamp += Time::partialSeconds(settings_.tod_offset); // add time offset
+>>>>>>> 7d0d345e291e6ef3d2f254bbe88a2d2fbc9251b6
 
-        sac_vec.set(cnt, ds_sac_);
-        sic_vec.set(cnt, ds_sic_);
+        sac_vec.set(cnt, settings_.ds_sac);
+        sic_vec.set(cnt, settings_.ds_sic);
         ds_id_vec.set(cnt, ds_id);
         line_id_vec.set(cnt, line_id_);
 
@@ -723,14 +826,14 @@ void GPSTrailImportTask::run()
         lat_vec.set(cnt, fix_it->latitude);
         long_vec.set(cnt, fix_it->longitude);
 
-        if (set_mode_3a_code_)
-            buffer_->get<unsigned int>(m3a_var.name()).set(cnt, mode_3a_code_);
+        if (settings_.set_mode_3a_code)
+            buffer_->get<unsigned int>(m3a_var.name()).set(cnt, settings_.mode_3a_code);
 
-        if (set_target_address_)
-            buffer_->get<unsigned int>(ta_var.name()).set(cnt, target_address_);
+        if (settings_.set_target_address)
+            buffer_->get<unsigned int>(ta_var.name()).set(cnt, settings_.target_address);
 
-        if (set_callsign_)
-            buffer_->get<string>(ti_var.name()).set(cnt, callsign_);
+        if (settings_.set_callsign)
+            buffer_->get<string>(ti_var.name()).set(cnt, settings_.callsign);
 
         tn_vec.set(cnt, track_num);
 
@@ -822,6 +925,8 @@ void GPSTrailImportTask::run()
     dbcontent_man.insertData({{dbcontent_name, buffer_}});
 }
 
+/**
+*/
 void GPSTrailImportTask::insertDoneSlot()
 {
     loginf << "GPSTrailImportTask: insertDoneSlot";
@@ -852,6 +957,8 @@ void GPSTrailImportTask::insertDoneSlot()
     emit doneSignal(name_);
 }
 
+/**
+*/
 void GPSTrailImportTask::dialogImportSlot()
 {
     assert (canRun());
@@ -862,10 +969,19 @@ void GPSTrailImportTask::dialogImportSlot()
     run();
 }
 
+/**
+*/
 void GPSTrailImportTask::dialogCancelSlot()
 {
     assert (dialog_);
     dialog_->hide();
+}
+
+/**
+*/
+void GPSTrailImportTask::onConfigurationChanged(const std::vector<std::string>& changed_params)
+{
+    emit configChanged();
 }
 
 //void GPSTrailImportTask::checkParsedData ()

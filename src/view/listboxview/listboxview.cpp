@@ -28,21 +28,38 @@
 #include "logger.h"
 #include "latexvisitor.h"
 
+const std::string ParamCurrentSetName  = "current_set_name";
 const std::string ParamShowSelected    = "show_only_selected";
 const std::string ParamUsePresentation = "use_presentation";
-const std::string ParamOverwriteCSV    = "overwrite_csv";
 const std::string SubConfigDataSource  = "ListBoxViewDataSource";
 const std::string SubConfigViewWidget  = "ListBoxViewWidget";
 
-ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id,
-                         ViewContainer* w, ViewManager& view_manager)
-    : View(class_id, instance_id, w, view_manager)
+const std::string ListBoxView::DefaultSetName = "Default";
+
+/**
+*/
+ListBoxView::Settings::Settings()
+:   current_set_name  (DefaultSetName)
+,   show_only_selected(false)
+,   use_presentation  (true)
 {
-    registerParameter(ParamShowSelected, &show_only_selected_, false);
-    registerParameter(ParamUsePresentation, &use_presentation_, true);
-    registerParameter(ParamOverwriteCSV, &overwrite_csv_, true);
 }
 
+/**
+*/
+ListBoxView::ListBoxView(const std::string& class_id, 
+                         const std::string& instance_id,
+                         ViewContainer* w, 
+                         ViewManager& view_manager)
+:   View(class_id, instance_id, w, view_manager)
+{
+    registerParameter(ParamCurrentSetName, &settings_.current_set_name, Settings().current_set_name);
+    registerParameter(ParamShowSelected, &settings_.show_only_selected, Settings().show_only_selected);
+    registerParameter(ParamUsePresentation, &settings_.use_presentation, Settings().use_presentation);
+}
+
+/**
+*/
 ListBoxView::~ListBoxView()
 {
     if (data_source_)
@@ -58,6 +75,8 @@ ListBoxView::~ListBoxView()
     }
 }
 
+/**
+*/
 bool ListBoxView::init_impl()
 {
     createSubConfigurables();
@@ -88,12 +107,14 @@ bool ListBoxView::init_impl()
     connect(this, &ListBoxView::usePresentationSignal,
             widget_->getViewDataWidget(), &ListBoxViewDataWidget::usePresentationSlot);
 
-    widget_->getViewDataWidget()->showOnlySelectedSlot(show_only_selected_);
-    widget_->getViewDataWidget()->usePresentationSlot(use_presentation_);
+    widget_->getViewDataWidget()->showOnlySelectedSlot(settings_.show_only_selected);
+    widget_->getViewDataWidget()->usePresentationSlot(settings_.use_presentation);
 
     return true;
 }
 
+/**
+*/
 void ListBoxView::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
 {
@@ -102,7 +123,13 @@ void ListBoxView::generateSubConfigurable(const std::string& class_id,
     if (class_id == SubConfigDataSource)
     {
         assert(!data_source_);
-        data_source_ = new ListBoxViewDataSource(class_id, instance_id, this);
+        data_source_ = new ListBoxViewDataSource(settings_.current_set_name, class_id, instance_id, this);
+
+        //write current set back to local settings
+        connect(data_source_, &ListBoxViewDataSource::currentSetChangedSignal, [ this ] { this->settings_.current_set_name = data_source_->currentSetName(); });
+
+        //notify view that it needs to reload
+        connect(data_source_, &ListBoxViewDataSource::reloadNeeded, [ this ] { widget_->notifyReloadNeeded(); });
     }
     else if (class_id == SubConfigViewWidget)
     {
@@ -110,10 +137,14 @@ void ListBoxView::generateSubConfigurable(const std::string& class_id,
         setWidget(widget_);
     }
     else
+    {
         throw std::runtime_error("ListBoxView: generateSubConfigurable: unknown class_id " +
                                  class_id);
+    }
 }
 
+/**
+*/
 void ListBoxView::checkSubConfigurables()
 {
     if (!data_source_)
@@ -150,20 +181,22 @@ dbContent::VariableSet ListBoxView::getSet(const std::string& dbcontent_name)
 
 //}
 
-bool ListBoxView::usePresentation() const { return use_presentation_; }
+bool ListBoxView::usePresentation() const 
+{ 
+    return settings_.use_presentation; 
+}
 
 void ListBoxView::usePresentation(bool use_presentation)
 {
-    use_presentation_ = use_presentation;
+    settings_.use_presentation = use_presentation;
 
-    emit usePresentationSignal(use_presentation_);
+    emit usePresentationSignal(settings_.use_presentation);
 }
 
-bool ListBoxView::overwriteCSV() const { return overwrite_csv_; }
-
-void ListBoxView::overwriteCSV(bool overwrite_csv) { overwrite_csv_ = overwrite_csv; }
-
-bool ListBoxView::showOnlySelected() const { return show_only_selected_; }
+bool ListBoxView::showOnlySelected() const 
+{ 
+    return settings_.show_only_selected; 
+}
 
 void ListBoxView::showOnlySelected(bool value)
 {
@@ -171,7 +204,7 @@ void ListBoxView::showOnlySelected(bool value)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    show_only_selected_ = value;
+    settings_.show_only_selected = value;
 
     emit showOnlySelectedSignal(value);
 
@@ -188,7 +221,7 @@ void ListBoxView::updateSelection()
     loginf << "ListBoxView: updateSelection";
     assert(widget_);
 
-    if (show_only_selected_)
+    if (settings_.show_only_selected)
         widget_->getViewDataWidget()->updateToSelection();
     else
         widget_->getViewDataWidget()->resetModels();  // just updates the checkboxes
@@ -219,31 +252,19 @@ View::ViewUpdate ListBoxView::onConfigurationChanged_impl(const std::vector<std:
     {
         if (param == ParamShowSelected)
         {
-            emit showOnlySelectedSignal(show_only_selected_); 
+            emit showOnlySelectedSignal(settings_.show_only_selected); 
         }
         else if (param == ParamUsePresentation)
         {
-            emit usePresentationSignal(use_presentation_);
+            emit usePresentationSignal(settings_.use_presentation);
         }
-        else if (param == ParamOverwriteCSV)
+        else if (param == ParamCurrentSetName)
         {
-            //nothing to do
-        }
-        else if (param == SubConfigDataSource + Configurable::ConfigurablePathSeparator + ListBoxViewDataSource::ParamCurrentSet)
-        {
-            //update source
-            getDataSource()->currentSetName(getDataSource()->currentSetName());
+            //update current set in data source
+            getDataSource()->currentSetName(settings_.current_set_name, true);
         }
     }
 
     //return empty view update (not needed explicitely for listboxview)
     return {};
 }
-
-//void ListBoxView::allLoadingDoneSlot()
-//{
-//    loginf << "ListBoxView: allLoadingDoneSlot";
-//    assert(widget_);
-//    widget_->configWidget()->setStatus("", false);
-//    //widget_->getDataWidget()->selectFirstSelectedRow();
-//}

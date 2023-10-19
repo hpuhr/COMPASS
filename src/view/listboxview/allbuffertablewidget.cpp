@@ -87,7 +87,7 @@ void AllBufferTableWidget::show(std::map<std::string, std::shared_ptr<Buffer>> b
     table_->resizeColumnsToContents();
 }
 
-void AllBufferTableWidget::exportSlot(bool overwrite)
+void AllBufferTableWidget::exportSlot()
 {
     loginf << "AllBufferTableWidget: exportSlot";
 
@@ -97,9 +97,6 @@ void AllBufferTableWidget::exportSlot(bool overwrite)
     dialog.setNameFilter("CSV Files (*.csv)");
     dialog.setDefaultSuffix("csv");
     dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
-
-    if (!overwrite)
-        dialog.setOption(QFileDialog::DontConfirmOverwrite);
 
     QStringList file_names;
     if (dialog.exec())
@@ -117,7 +114,7 @@ void AllBufferTableWidget::exportSlot(bool overwrite)
 
         loginf << "AllBufferTableWidget: exportSlot: export filename " << filename.toStdString();
         assert(model_);
-        model_->saveAsCSV(filename.toStdString(), overwrite);
+        model_->saveAsCSV(filename.toStdString());
     }
     else
     {

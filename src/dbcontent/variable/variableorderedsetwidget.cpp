@@ -36,8 +36,10 @@ namespace dbContent
 {
 
 VariableOrderedSetWidget::VariableOrderedSetWidget(VariableOrderedSet& set,
-                                                         QWidget* parent, Qt::WindowFlags f)
-    : QWidget(parent, f), set_(set)
+                                                   QWidget* parent, 
+                                                   Qt::WindowFlags f)
+:   QWidget(parent, f)
+,   set_   (set)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
     main_layout->setContentsMargins(0, 0, 0, 0);

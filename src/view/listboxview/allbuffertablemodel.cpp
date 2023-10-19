@@ -562,16 +562,15 @@ void AllBufferTableModel::reset()
     endResetModel();
 }
 
-void AllBufferTableModel::saveAsCSV(const std::string& file_name, bool overwrite)
+void AllBufferTableModel::saveAsCSV(const std::string& file_name)
 {
-    loginf << "AllBufferTableModel: saveAsCSV: into filename " << file_name << " overwrite "
-           << overwrite;
+    loginf << "AllBufferTableModel: saveAsCSV: into filename " << file_name;
 
     if (!buffers_.size())
         return;
 
     AllBufferCSVExportJob* export_job = new AllBufferCSVExportJob(
-        buffers_, data_source_.getSet(), number_to_dbo_, row_indexes_, file_name, overwrite,
+        buffers_, data_source_.getSet(), number_to_dbo_, row_indexes_, file_name, true,
         show_only_selected_, use_presentation_);
 
     export_job_ = std::shared_ptr<AllBufferCSVExportJob>(export_job);

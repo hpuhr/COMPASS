@@ -35,17 +35,35 @@ class SavedFile;
 class DBContent;
 class Buffer;
 
+/**
+*/
 class GPSTrailImportTask : public Task, public Configurable
 {
     Q_OBJECT
 
-public slots:
-    void insertDoneSlot();
-
-    void dialogImportSlot();
-    void dialogCancelSlot();
-
 public:
+    struct Settings
+    {
+        Settings();
+
+        std::string  ds_name;
+        unsigned int ds_sac;
+        unsigned int ds_sic;
+
+        bool         use_tod_offset;
+        float        tod_offset;
+
+        bool         use_override_date;
+        std::string  override_date_str;
+        
+        bool         set_mode_3a_code;
+        unsigned int mode_3a_code;        // decimal
+        bool         set_target_address;
+        unsigned int target_address;      // decimal
+        bool         set_callsign;
+        std::string  callsign;
+    };
+
     GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,
                        TaskManager& task_manager);
     virtual ~GPSTrailImportTask();
@@ -112,28 +130,27 @@ public:
     unsigned int lineID() const;
     void lineID(unsigned int line_id);
 
+public slots:
+    void insertDoneSlot();
+
+    void dialogImportSlot();
+    void dialogCancelSlot();
+
+signals:
+    void configChanged();
+
 protected:
-    std::string current_filename_;
+    virtual void checkSubConfigurables() override {}
+    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
 
-    std::string ds_name_;
-    unsigned int ds_sac_ {0};
-    unsigned int ds_sic_ {0};
+    void parseCurrentFile ();
+    //void checkParsedData (); // throws exceptions for errors
 
-    bool use_tod_offset_ {false};
-    float tod_offset_ {0};
-
-    bool use_override_date_ {false};
-    std::string override_date_str_;
+    std::string            current_filename_;
     boost::gregorian::date override_date_;
+    unsigned int           line_id_ = 0;
 
-    bool set_mode_3a_code_;
-    unsigned int mode_3a_code_; // decimal
-    bool set_target_address_;
-    unsigned int target_address_; // decimal
-    bool set_callsign_;
-    std::string callsign_;
-
-    unsigned int line_id_ {0};
+    Settings settings_;
 
     std::unique_ptr<GPSTrailImportTaskDialog> dialog_;
 
@@ -163,11 +180,6 @@ protected:
     };
 
     std::shared_ptr<Buffer> buffer_;
-
-    virtual void checkSubConfigurables() override {}
-
-    void parseCurrentFile ();
-    //void checkParsedData (); // throws exceptions for errors
 };
 
 #endif // GPSTRAILIMPORTTASK_H
