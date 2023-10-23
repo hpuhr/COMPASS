@@ -60,6 +60,69 @@ using namespace std;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
+EvaluationManagerSettings::EvaluationManagerSettings()
+:   line_id_ref_                      (0)
+,   active_sources_ref_               ()
+,   line_id_tst_                      (0)
+,   active_sources_tst_               ()
+,   current_standard_                 ("")
+,   use_grp_in_sector_                ()
+,   use_requirement_                  ()
+,   max_ref_time_diff_                (4.0)
+,   load_only_sector_data_            (true)
+,   use_load_filter_                  (false)
+,   use_timestamp_filter_             (false)
+,   use_ref_traj_accuracy_filter_     (false)
+,   ref_traj_minimum_accuracy_        (30.0f)
+,   use_adsb_filter_                  (false)
+,   use_v0_                           (true)
+,   use_v1_                           (true)
+,   use_v2_                           (true)
+,   use_min_nucp_                     (true)
+,   min_nucp_                         (4u)
+,   use_max_nucp_                     (true)
+,   max_nucp_                         (4u)
+,   use_min_nic_                      (true)
+,   min_nic_                          (5u)
+,   use_max_nic_                      (true)
+,   max_nic_                          (5u)
+,   use_min_nacp_                     (true)
+,   min_nacp_                         (5u)
+,   use_max_nacp_                     (true)
+,   max_nacp_                         (5u)
+,   use_min_sil_v1_                   (true)
+,   min_sil_v1_                       (2u)
+,   use_max_sil_v1_                   (true)
+,   max_sil_v1_                       (2u)
+,   use_min_sil_v2_                   (true)
+,   min_sil_v2_                       (4u)
+,   use_max_sil_v2_                   (true)
+,   max_sil_v2_                       (4u)
+,   result_detail_zoom_               (0.02)
+,   min_height_filter_layer_          ("")
+,   report_skip_no_data_details_      (true)
+,   report_split_results_by_mops_     (false)
+,   report_split_results_by_aconly_ms_(false)
+,   report_show_adsb_info_            (false)
+,   report_author_                    ("")
+,   report_abstract_                  ("")
+,   report_include_target_details_    (false)
+,   report_skip_targets_wo_issues_    (false)
+,   report_include_target_tr_details_ (false)
+,   show_ok_joined_target_reports_    (false)
+,   report_num_max_table_rows_        (1000u)
+,   report_num_max_table_col_width_   (18u)
+,   report_wait_on_map_loading_       (true)
+,   report_run_pdflatex_              (true)
+,   report_open_created_pdf_          (false)
+,   warning_shown_                    (false)
+,   dbcontent_name_ref_               ("RefTraj")
+,   dbcontent_name_tst_               ("CAT062")
+,   load_timestamp_begin_str_         ("")
+,   load_timestamp_end_str_           ("")
+{
+}
+
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
 :   Configurable(class_id, instance_id, compass, "eval.json")
 ,   compass_    (*compass)
@@ -67,32 +130,34 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 ,   results_gen_(*this, settings_)
 ,   pdf_gen_    (*this, settings_)
 {
-    registerParameter("dbcontent_name_ref", &settings_.dbcontent_name_ref_, std::string("RefTraj"));
-    registerParameter("line_id_ref", &settings_.line_id_ref_, 0u);
-    registerParameter("active_sources_ref", &settings_.active_sources_ref_, json::object());
+    typedef EvaluationManagerSettings Settings;
+
+    registerParameter("dbcontent_name_ref", &settings_.dbcontent_name_ref_, Settings().dbcontent_name_ref_);
+    registerParameter("line_id_ref", &settings_.line_id_ref_, Settings().line_id_ref_);
+    registerParameter("active_sources_ref", &settings_.active_sources_ref_, Settings().active_sources_ref_);
 
     data_sources_ref_ = settings_.active_sources_ref_.get<std::map<std::string, std::map<std::string, bool>>>();
 
      //j.at("foo").get<std::map<std::string, int>>();
 
-    registerParameter("dbcontent_name_tst", &settings_.dbcontent_name_tst_, std::string("CAT062"));
-    registerParameter("line_id_tst", &settings_.line_id_tst_, 0u);
-    registerParameter("active_sources_tst", &settings_.active_sources_tst_, json::object());
+    registerParameter("dbcontent_name_tst", &settings_.dbcontent_name_tst_, Settings().dbcontent_name_tst_);
+    registerParameter("line_id_tst", &settings_.line_id_tst_, Settings().line_id_tst_);
+    registerParameter("active_sources_tst", &settings_.active_sources_tst_, Settings().active_sources_tst_);
     data_sources_tst_ = settings_.active_sources_tst_.get<std::map<std::string, std::map<std::string, bool>>>();
 
-    registerParameter("current_standard", &settings_.current_standard_, std::string());
+    registerParameter("current_standard", &settings_.current_standard_, Settings().current_standard_);
 
-    registerParameter("use_grp_in_sector", &settings_.use_grp_in_sector_, json::object());
-    registerParameter("use_requirement", &settings_.use_requirement_, json::object());
+    registerParameter("use_grp_in_sector", &settings_.use_grp_in_sector_, Settings().use_grp_in_sector_);
+    registerParameter("use_requirement", &settings_.use_requirement_, Settings().use_requirement_);
 
-    registerParameter("max_ref_time_diff", &settings_.max_ref_time_diff_, 4.0f);
+    registerParameter("max_ref_time_diff", &settings_.max_ref_time_diff_, Settings().max_ref_time_diff_);
 
     // load filter
-    registerParameter("use_load_filter", &settings_.use_load_filter_, false);
+    registerParameter("use_load_filter", &settings_.use_load_filter_, Settings().use_load_filter_);
 
-    registerParameter("use_timestamp_filter", &settings_.use_timestamp_filter_, false);
-    registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, std::string());
-    registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, std::string());
+    registerParameter("use_timestamp_filter", &settings_.use_timestamp_filter_, Settings().use_timestamp_filter_);
+    registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, Settings().load_timestamp_begin_str_);
+    registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, Settings().load_timestamp_end_str_);
 
     if (settings_.load_timestamp_begin_str_.size())
         load_timestamp_begin_ = Time::fromString(settings_.load_timestamp_begin_str_);
@@ -100,83 +165,83 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     if (settings_.load_timestamp_end_str_.size())
         load_timestamp_end_ = Time::fromString(settings_.load_timestamp_end_str_);
 
-    registerParameter("use_ref_traj_accuracy_filter_", &settings_.use_ref_traj_accuracy_filter_, false);
-    registerParameter("ref_traj_minimum_accuracy", &settings_.ref_traj_minimum_accuracy_, 30.0f);
+    registerParameter("use_ref_traj_accuracy_filter_", &settings_.use_ref_traj_accuracy_filter_, Settings().use_ref_traj_accuracy_filter_);
+    registerParameter("ref_traj_minimum_accuracy", &settings_.ref_traj_minimum_accuracy_, Settings().ref_traj_minimum_accuracy_);
 
-    registerParameter("use_adsb_filter", &settings_.use_adsb_filter_, false);
-    registerParameter("use_v0", &settings_.use_v0_, true);
-    registerParameter("use_v1", &settings_.use_v1_, true);
-    registerParameter("use_v2", &settings_.use_v2_, true);
+    registerParameter("use_adsb_filter", &settings_.use_adsb_filter_, Settings().use_adsb_filter_);
+    registerParameter("use_v0", &settings_.use_v0_, Settings().use_v0_);
+    registerParameter("use_v1", &settings_.use_v1_, Settings().use_v1_);
+    registerParameter("use_v2", &settings_.use_v2_, Settings().use_v2_);
 
     // nucp
-    registerParameter("use_min_nucp", &settings_.use_min_nucp_, true);
-    registerParameter("min_nucp", &settings_.min_nucp_, 4u);
+    registerParameter("use_min_nucp", &settings_.use_min_nucp_, Settings().use_min_nucp_);
+    registerParameter("min_nucp", &settings_.min_nucp_, Settings().min_nucp_);
 
-    registerParameter("use_max_nucp", &settings_.use_max_nucp_, true);
-    registerParameter("max_nucp", &settings_.max_nucp_, 4u);
+    registerParameter("use_max_nucp", &settings_.use_max_nucp_, Settings().use_max_nucp_);
+    registerParameter("max_nucp", &settings_.max_nucp_, Settings().max_nucp_);
 
     // nic
-    registerParameter("use_min_nic", &settings_.use_min_nic_, true);
-    registerParameter("min_nic", &settings_.min_nic_, 5u);
+    registerParameter("use_min_nic", &settings_.use_min_nic_, Settings().use_min_nic_);
+    registerParameter("min_nic", &settings_.min_nic_, Settings().min_nic_);
 
-    registerParameter("use_max_nic", &settings_.use_max_nic_, true);
-    registerParameter("max_nic", &settings_.max_nic_, 5u);
+    registerParameter("use_max_nic", &settings_.use_max_nic_, Settings().use_max_nic_);
+    registerParameter("max_nic", &settings_.max_nic_, Settings().max_nic_);
 
     // nacp
-    registerParameter("use_min_nacp", &settings_.use_min_nacp_, true);
-    registerParameter("min_nacp", &settings_.min_nacp_, 5u);
+    registerParameter("use_min_nacp", &settings_.use_min_nacp_, Settings().use_min_nacp_);
+    registerParameter("min_nacp", &settings_.min_nacp_, Settings().min_nacp_);
 
-    registerParameter("use_max_nacp", &settings_.use_max_nacp_, true);
-    registerParameter("max_nacp", &settings_.max_nacp_, 5u);
+    registerParameter("use_max_nacp", &settings_.use_max_nacp_, Settings().use_max_nacp_);
+    registerParameter("max_nacp", &settings_.max_nacp_, Settings().max_nacp_);
 
     // sil v1
-    registerParameter("use_min_sil_v1", &settings_.use_min_sil_v1_, true);
-    registerParameter("min_sil_v1", &settings_.min_sil_v1_, 2u);
+    registerParameter("use_min_sil_v1", &settings_.use_min_sil_v1_, Settings().use_min_sil_v1_);
+    registerParameter("min_sil_v1", &settings_.min_sil_v1_, Settings().min_sil_v1_);
 
-    registerParameter("use_max_sil_v1", &settings_.use_max_sil_v1_, true);
-    registerParameter("max_sil_v1", &settings_.max_sil_v1_, 2u);
+    registerParameter("use_max_sil_v1", &settings_.use_max_sil_v1_, Settings().use_max_sil_v1_);
+    registerParameter("max_sil_v1", &settings_.max_sil_v1_, Settings().max_sil_v1_);
 
     // sil v2
-    registerParameter("use_min_sil_v2", &settings_.use_min_sil_v2_, true);
-    registerParameter("min_sil_v2", &settings_.min_sil_v2_, 4u);
+    registerParameter("use_min_sil_v2", &settings_.use_min_sil_v2_, Settings().use_min_sil_v2_);
+    registerParameter("min_sil_v2", &settings_.min_sil_v2_, Settings().min_sil_v2_);
 
-    registerParameter("use_max_sil_v2", &settings_.use_max_sil_v2_, true);
-    registerParameter("max_sil_v2", &settings_.max_sil_v2_, 4u);
+    registerParameter("use_max_sil_v2", &settings_.use_max_sil_v2_, Settings().use_max_sil_v2_);
+    registerParameter("max_sil_v2", &settings_.max_sil_v2_, Settings().max_sil_v2_);
 
-    registerParameter("result_detail_zoom", &settings_.result_detail_zoom_, 0.02);
+    registerParameter("result_detail_zoom", &settings_.result_detail_zoom_, Settings().result_detail_zoom_);
 
     // min height filter
-    registerParameter("min_height_filter_layer", &settings_.min_height_filter_layer_, std::string());
+    registerParameter("min_height_filter_layer", &settings_.min_height_filter_layer_, Settings().min_height_filter_layer_);
 
     // report stuff
-    registerParameter("report_skip_no_data_details", &settings_.report_skip_no_data_details_, true);
-    registerParameter("report_split_results_by_mops", &settings_.report_split_results_by_mops_, false);
-    registerParameter("report_split_results_by_aconly_ms", &settings_.report_split_results_by_aconly_ms_, false);
-    registerParameter("report_show_adsb_info", &settings_.report_show_adsb_info_, false);
+    registerParameter("report_skip_no_data_details", &settings_.report_skip_no_data_details_, Settings().report_skip_no_data_details_);
+    registerParameter("report_split_results_by_mops", &settings_.report_split_results_by_mops_, Settings().report_split_results_by_mops_);
+    registerParameter("report_split_results_by_aconly_ms", &settings_.report_split_results_by_aconly_ms_, Settings().report_split_results_by_aconly_ms_);
+    registerParameter("report_show_adsb_info", &settings_.report_show_adsb_info_, Settings().report_show_adsb_info_);
 
-    registerParameter("report_author", &settings_.report_author_, std::string());
+    registerParameter("report_author", &settings_.report_author_, Settings().report_author_);
 
     if (!settings_.report_author_.size())
         settings_.report_author_ = System::getUserName();
     if (!settings_.report_author_.size())
         settings_.report_author_ = "User";
 
-    registerParameter("report_abstract", &settings_.report_abstract_, std::string());
+    registerParameter("report_abstract", &settings_.report_abstract_, Settings().report_abstract_);
 
-    registerParameter("report_include_target_details", &settings_.report_include_target_details_, false);
-    registerParameter("report_skip_targets_wo_issues", &settings_.report_skip_targets_wo_issues_, false);
-    registerParameter("report_include_target_tr_details", &settings_.report_include_target_tr_details_, false);
+    registerParameter("report_include_target_details", &settings_.report_include_target_details_, Settings().report_include_target_details_);
+    registerParameter("report_skip_targets_wo_issues", &settings_.report_skip_targets_wo_issues_, Settings().report_skip_targets_wo_issues_);
+    registerParameter("report_include_target_tr_details", &settings_.report_include_target_tr_details_, Settings().report_include_target_tr_details_);
 
-    registerParameter("show_ok_joined_target_reports", &settings_.show_ok_joined_target_reports_, false);
+    registerParameter("show_ok_joined_target_reports", &settings_.show_ok_joined_target_reports_, Settings().show_ok_joined_target_reports_);
 
-    registerParameter("report_num_max_table_rows", &settings_.report_num_max_table_rows_, 1000u);
-    registerParameter("report_num_max_table_col_width", &settings_.report_num_max_table_col_width_, 18u);
+    registerParameter("report_num_max_table_rows", &settings_.report_num_max_table_rows_, Settings().report_num_max_table_rows_);
+    registerParameter("report_num_max_table_col_width", &settings_.report_num_max_table_col_width_, Settings().report_num_max_table_col_width_);
 
-    registerParameter("report_wait_on_map_loading", &settings_.report_wait_on_map_loading_, true);
+    registerParameter("report_wait_on_map_loading", &settings_.report_wait_on_map_loading_, Settings().report_wait_on_map_loading_);
 
-    registerParameter("report_run_pdflatex", &settings_.report_run_pdflatex_, true);
+    registerParameter("report_run_pdflatex", &settings_.report_run_pdflatex_, Settings().report_run_pdflatex_);
 
-    registerParameter("report_open_created_pdf", &settings_.report_open_created_pdf_, false);
+    registerParameter("report_open_created_pdf", &settings_.report_open_created_pdf_, Settings().report_open_created_pdf_);
 
     bool pdflatex_found = System::exec("which pdflatex").size();
 
@@ -186,7 +251,7 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
         settings_.report_open_created_pdf_ = false;
     }
 
-    registerParameter("warning_shown", &settings_.warning_shown_, false);
+    registerParameter("warning_shown", &settings_.warning_shown_, Settings().warning_shown_);
 
     createSubConfigurables();
 
@@ -2085,3 +2150,11 @@ void EvaluationManager::updateCompoundCoverage(std::set<unsigned int> tst_source
     tst_srcs_coverage_.finalize();
 }
 
+/**
+*/
+void EvaluationManager::onConfigurationChanged(const std::vector<std::string>& changed_params)
+{
+    assert(widget_);
+
+    widget_->updateFromSettings();
+}

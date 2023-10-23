@@ -99,8 +99,16 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     setLayout(main_layout);
 }
 
-EvaluationResultsGeneratorWidget::~EvaluationResultsGeneratorWidget()
+EvaluationResultsGeneratorWidget::~EvaluationResultsGeneratorWidget() = default;
+
+void EvaluationResultsGeneratorWidget::updateFromSettings()
 {
+    skip_no_data_details_check_->setChecked(eval_settings_.report_skip_no_data_details_);
+    split_results_by_mops_check_->setChecked(eval_settings_.report_split_results_by_mops_);
+    split_results_by_mac_ms_check_->setChecked(eval_settings_.report_split_results_by_aconly_ms_);
+    show_adsb_info_check_->setChecked(eval_settings_.report_show_adsb_info_);
+    show_ok_joined_target_reports_check_->setChecked(eval_settings_.show_ok_joined_target_reports_);
+    result_detail_zoom_edit_->setText(QString::number(eval_settings_.result_detail_zoom_));
 }
 
 void EvaluationResultsGeneratorWidget::toggleSplitResultsByMOPSSlot()

@@ -101,10 +101,7 @@ EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man, Ev
     setLayout(main_layout_);
 }
 
-EvaluationManagerWidget::~EvaluationManagerWidget()
-{
-
-}
+EvaluationManagerWidget::~EvaluationManagerWidget() = default;
 
 void EvaluationManagerWidget::updateDataSources()
 {
@@ -145,6 +142,20 @@ void EvaluationManagerWidget::updateFilterWidget()
 {
     assert (filter_widget_);
     filter_widget_->update();
+}
+
+void EvaluationManagerWidget::updateResultsConfig()
+{
+    eval_man_.resultsGenerator().widget().updateFromSettings();
+}
+
+void EvaluationManagerWidget::updateFromSettings()
+{
+    updateDataSources();
+    updateSectors();
+    updateButtons();
+    updateFilterWidget();
+    updateResultsConfig();
 }
 
 void EvaluationManagerWidget::expandResults()
