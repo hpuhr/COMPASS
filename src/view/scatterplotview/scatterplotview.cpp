@@ -170,7 +170,7 @@ ScatterPlotViewDataWidget* ScatterPlotView::getDataWidget()
 */
 VariableSet ScatterPlotView::getSet(const std::string& dbcontent_name)
 {
-    loginf << "ScatterPlotView: getSet";
+    logdbg << "ScatterPlotView: getSet";
 
     assert(data_source_);
 
@@ -184,7 +184,7 @@ VariableSet ScatterPlotView::getSet(const std::string& dbcontent_name)
 
             if (meta_var.existsIn(dbcontent_name) && !set.hasVariable(meta_var.getFor(dbcontent_name)))
             {
-                loginf << "ScatterPlotView: getSet: adding x var " << meta_var.getFor(dbcontent_name).name();
+                logdbg << "ScatterPlotView: getSet: adding x var " << meta_var.getFor(dbcontent_name).name();
                 set.add(meta_var.getFor(dbcontent_name));
             }
         }
@@ -192,7 +192,7 @@ VariableSet ScatterPlotView::getSet(const std::string& dbcontent_name)
         {
             if (dataVarX().dbContentName() == dbcontent_name && !set.hasVariable(dataVarX()))
             {
-                loginf << "ScatterPlotView: getSet: adding x var " << dataVarX().name();
+                logdbg << "ScatterPlotView: getSet: adding x var " << dataVarX().name();
                 set.add(dataVarX());
             }
         }

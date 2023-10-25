@@ -720,7 +720,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
         {
             if (!properties_.hasProperty(db_column_name))
             {
-                logerr << "Buffer: transformVariables: property '" << db_column_name << "' not found";
+                //logerr << "Buffer: transformVariables: property '" << db_column_name << "' not found";
                 continue;
             }
 

@@ -175,7 +175,7 @@ Should only be called once to set the widget.
 void View::setWidget(ViewWidget* widget)
 {
     if (widget_)
-        throw std::runtime_error("View: setWidget: Widget already set.");
+        throw std::runtime_error("View: setWidget: widget already set");
 
     widget_ = widget;
     if (widget_)
@@ -222,7 +222,7 @@ void View::selectionChangedSlot()
 
 void View::loadingStarted()
 {
-    loginf << "View: loadingStarted";
+    logdbg << "View: loadingStarted";
 
     if (widget_)
         widget_->loadingStarted();
@@ -230,7 +230,7 @@ void View::loadingStarted()
 
 void View::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-    loginf << "View: loadedData";
+    logdbg << "View: loadedData";
 
     if (widget_ && widget_->getViewDataWidget())
         widget_->getViewDataWidget()->updateData(data, requires_reset);
@@ -238,7 +238,7 @@ void View::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data
 
 void View::loadingDone()
 {
-    loginf << "View: loadingDone";
+    logdbg << "View: loadingDone";
 
     if (widget_)
         widget_->loadingDone();
@@ -246,7 +246,7 @@ void View::loadingDone()
 
 void View::clearData()
 {
-    loginf << "View: clearData";
+    logdbg << "View: clearData";
 
     if (widget_ && widget_->getViewDataWidget())
         widget_->getViewDataWidget()->clearData();
@@ -254,7 +254,7 @@ void View::clearData()
 
 void View::appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current)
 {
-    loginf << "View: appModeSwitch: app_mode " << toString(app_mode_current)
+    logdbg << "View: appModeSwitch: app_mode " << toString(app_mode_current)
            << " prev " << toString(app_mode_previous);
 
     app_mode_ = app_mode_current;
@@ -265,7 +265,7 @@ void View::appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current)
 
 void View::onConfigurationChanged(const std::vector<std::string>& changed_params)
 {
-    loginf << "View: onConfigurationChanged";
+    logdbg << "View: onConfigurationChanged";
 
     //check updated params and configure view update
     auto view_update = onConfigurationChanged_impl(changed_params);
