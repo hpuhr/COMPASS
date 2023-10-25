@@ -805,7 +805,6 @@ void GPSTrailImportTask::run()
         else
         {
             timestamp = getTimeFrom(fix_it->timestamp);
-
         }
 
         sac_vec.set(cnt, settings_.ds_sac);

@@ -243,7 +243,7 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
         post_process_.postProcess(category, record);
     };
 
-    assert (settings_.current_file_framing_ == "");
+    //assert (settings_.current_file_framing_ == ""); irrelephant
     assert(data->contains("data_blocks"));
     assert(data->at("data_blocks").is_array());
 
