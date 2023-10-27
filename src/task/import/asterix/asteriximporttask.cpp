@@ -286,6 +286,10 @@ ASTERIXImportTaskDialog* ASTERIXImportTask::dialog()
     }
 
     assert(dialog_);
+
+    dialog_->updateSourcesInfo();
+    dialog_->updateButtons();
+
     return dialog_.get();
 
 }
@@ -600,51 +604,73 @@ void ASTERIXImportTask::testFileDecoding()
 
     if (filesInfo().size())
     {
-        refreshjASTERIX();
+        bool task_done = false;
 
-        for (auto& file_info : filesInfo())
-        {
-            loginf << "ASTERIXImportTask: testFileDecoding: analyzing file '" << file_info.filename_
-                   << "' framing '" << settings_.current_file_framing_ << "'";
+        std::future<void> pending_future = std::async(std::launch::async, [&] {
 
-            try
+            for (auto& file_info : filesInfo())
+                file_info.decoding_tried_ = false; // pre-init to false
+
+            for (auto& file_info : filesInfo())
             {
-                file_info.errors_found_ = false;
+                loginf << "ASTERIXImportTask: testFileDecoding: analyzing file '" << file_info.filename_
+                       << "' framing '" << settings_.current_file_framing_ << "'";
 
-                if (settings_.current_file_framing_.size())
-                    file_info.analysis_info_ = *jasterix_->analyzeFile(file_info.filename_, settings_.current_file_framing_, record_limit);
-                else
-                    file_info.analysis_info_ = *jasterix_->analyzeFile(file_info.filename_, record_limit);
-
-                loginf << "ASTERIXImportTask: testFileDecoding: file '" << file_info.filename_
-                       << " json '" << file_info.analysis_info_.dump(4) << "'";
-
-    //            json '{
-    //               "data_items": {},
-    //               "num_errors": 12,
-    //               "num_records": 919,
-    //               "sensor_counts": {}
-    //           }'
-
-                if(file_info.analysis_info_.contains("num_errors"))
+                try
                 {
+                    refreshjASTERIX();
+
+                    file_info.errors_found_ = false;
+                    file_info.decoding_tried_ = true;
+
+                    std::unique_ptr<nlohmann::json> analysis_info;
+
+                    if (settings_.current_file_framing_.size())
+                        analysis_info = jasterix_->analyzeFile(
+                                    file_info.filename_, settings_.current_file_framing_, record_limit);
+                    else
+                        analysis_info = jasterix_->analyzeFile(file_info.filename_, record_limit);
+
+                    assert (analysis_info);
+                    file_info.analysis_info_ = *analysis_info;
+
+                    loginf << "ASTERIXImportTask: testFileDecoding: file '" << file_info.filename_
+                           << " json '" << file_info.analysis_info_.dump(4) << "'";
+
+                    //            json '{
+                    //               "data_items": {},
+                    //               "num_errors": 12,
+                    //               "num_records": 919,
+                    //               "sensor_counts": {}
+                    //           }'
+
+                    assert (file_info.analysis_info_.contains("num_errors"));
+
                     unsigned int num_errors = file_info.analysis_info_.at("num_errors");
 
                     if (num_errors)
                     {
                         file_info.errors_found_ = true;
                         file_decoding_errors_detected_ = true;
-                        break;
+                        //break; // continue to test all
                     }
                 }
-            }
-            catch (exception& e)
-            {
-                loginf << "ASTERIXImportTask: testFileDecoding: exception '" << e.what() << "'";
+                catch (exception& e)
+                {
+                    loginf << "ASTERIXImportTask: testFileDecoding: exception '" << e.what() << "'";
 
-                file_decoding_errors_detected_ = true;
-                break;
+                    file_decoding_errors_detected_ = true;
+                    break;
+                }
             }
+
+            task_done = true;
+        });
+
+        while (!task_done && !file_decoding_errors_detected_)
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(100);
         }
     }
 

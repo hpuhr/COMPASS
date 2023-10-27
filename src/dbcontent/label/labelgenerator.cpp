@@ -103,6 +103,17 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
         acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
 
+    dbContent::Variable* acid_fpl_var {nullptr}; // only set in cat062
+
+    if (dbcontent_name == "CAT062")
+    {
+        assert (dbcont_manager_.canGetVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_));
+
+        acid_fpl_var = &dbcont_manager_.getVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_);
+
+        assert (buffer->has<string> (acid_fpl_var->name()));
+    }
+
     Variable* acad_var {nullptr};
     if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
         acad_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
@@ -123,6 +134,12 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
                  && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
         {
             main_id = buffer->get<string>(acid_var->name()).get(buffer_index);
+            main_id.erase(std::remove(main_id.begin(), main_id.end(), ' '), main_id.end());
+        }
+        else if (acid_fpl_var && buffer->has<string>(acid_fpl_var->name())
+                 && !buffer->get<string>(acid_fpl_var->name()).isNull(buffer_index))
+        {
+            main_id = buffer->get<string>(acid_fpl_var->name()).get(buffer_index);
             main_id.erase(std::remove(main_id.begin(), main_id.end(), ' '), main_id.end());
         }
         else if (acad_var && buffer->has<unsigned int>(acad_var->name()) &&
@@ -169,6 +186,18 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     // 2,2
     Variable& mc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
     string mc;
+
+    assert (false);
+//    dbContent::Variable* cat062_fl_meas_var {nullptr}; // only set in cat062
+
+//    if (dbcontent_name == "CAT062")
+//    {
+//        assert (dbcont_manager_.canGetVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_));
+
+//        acid_fpl_var = &dbcont_manager_.getVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_);
+
+//        assert (buffer->has<string> (acid_fpl_var->name()));
+//    }
 
     if (buffer->has<float>(mc_var.name()) &&
             !buffer->get<float>(mc_var.name()).isNull(buffer_index))
@@ -236,6 +265,17 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
             acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
 
+        dbContent::Variable* acid_fpl_var {nullptr}; // only set in cat062
+
+        if (dbcontent_name == "CAT062")
+        {
+            assert (dbcont_manager_.canGetVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_));
+
+            acid_fpl_var = &dbcont_manager_.getVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_);
+
+            assert (buffer->has<string> (acid_fpl_var->name()));
+        }
+
         Variable* acad_var {nullptr};
         if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
             acad_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
@@ -263,6 +303,13 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 value = buffer->get<string>(acid_var->name()).get(buffer_index);
                 value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
                 value += " ("+acid_var->name()+")";
+            }
+            else if (acid_fpl_var && buffer->has<string>(acid_fpl_var->name())
+                     && !buffer->get<string>(acid_fpl_var->name()).isNull(buffer_index))
+            {
+                value = buffer->get<string>(acid_fpl_var->name()).get(buffer_index);
+                value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
+                value += " ("+acid_fpl_var->name()+")";
             }
             else if (acad_var && buffer->has<unsigned int>(acad_var->name()) &&
                      !buffer->get<unsigned int>(acad_var->name()).isNull(buffer_index))

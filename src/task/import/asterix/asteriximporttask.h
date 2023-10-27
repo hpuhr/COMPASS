@@ -53,7 +53,7 @@ struct ASTERIXFileInfo
     std::string filename_;
     unsigned int line_id_ {0};
 
-    bool decoding_ok_ {false};
+    bool decoding_tried_ {false};
     std::string decoding_info_str_;
 
     nlohmann::json analysis_info_;
@@ -113,7 +113,6 @@ public:
         files_info_.back().filename_ = filename;
         files_info_.back().line_id_ = line_id;
     }
-
 
 private:
     friend class ASTERIXImportTask;

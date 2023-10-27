@@ -365,7 +365,9 @@ void ASTERIXImportTaskWidget::updateSourcesGrid()
         {
             sources_grid_->addWidget(new QLabel(file_info.filename_.c_str()), row, 0);
 
-            if (file_info.errors_found_)
+            if (!file_info.decoding_tried_)
+                sources_grid_->addWidget(new QLabel("?"), row, 1);
+            else if (file_info.errors_found_)
                 sources_grid_->addWidget(new QLabel("Decoding Errors"), row, 1);
             else
                 sources_grid_->addWidget(new QLabel("OK"), row, 1);

@@ -118,7 +118,8 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
 void UDPReceiver::handle_receive_from(const boost::system::error_code& error,
                                              size_t bytes_recvd)
 {
-    //loginf << "handle_receive_from: from " << sender_ip_ << ":" << port_ << " bytes " << bytes_recvd;
+    logdbg << "handle_receive_from: from " << sender_endpoint_.address().to_string() << ":"
+           << sender_endpoint_.port() << " bytes " << bytes_recvd;
 
     if (error && error != boost::asio::error::message_size)
     {
