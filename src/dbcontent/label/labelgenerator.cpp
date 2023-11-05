@@ -162,6 +162,9 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     if (acid_var && buffer->has<string>(acid_var->name())
             && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
         acid = buffer->get<string>(acid_var->name()).get(buffer_index);
+    else if (acid_fpl_var && buffer->has<string>(acid_fpl_var->name())
+             && !buffer->get<string>(acid_fpl_var->name()).isNull(buffer_index))
+        acid = buffer->get<string>(acid_fpl_var->name()).get(buffer_index);
 
     acid.erase(std::remove(acid.begin(), acid.end(), ' '), acid.end());
     tmp.push_back(acid);
@@ -184,26 +187,8 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     tmp.push_back(m3a);
 
     // 2,2
-    Variable& mc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
-    string mc;
 
-    assert (false);
-//    dbContent::Variable* cat062_fl_meas_var {nullptr}; // only set in cat062
-
-//    if (dbcontent_name == "CAT062")
-//    {
-//        assert (dbcont_manager_.canGetVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_));
-
-//        acid_fpl_var = &dbcont_manager_.getVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_);
-
-//        assert (buffer->has<string> (acid_fpl_var->name()));
-//    }
-
-    if (buffer->has<float>(mc_var.name()) &&
-            !buffer->get<float>(mc_var.name()).isNull(buffer_index))
-        mc = getModeCText(dbcontent_name, buffer_index, buffer);
-
-    tmp.push_back(mc);
+    tmp.push_back(getModeCText(dbcontent_name, buffer_index, buffer));
 
     if (round(current_lod_) == 2)
         return tmp;
@@ -850,12 +835,12 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
             cs_fpl_vec = &buffer->get<string> (cs_fpl_var->name());
         }
 
-//        if (acid_vec.isNull(index))
-//        {
-//            if (!filter_ti_null_wanted_
-//                    || (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : false))
-//                return false; // null not wanted
-//        }
+        //        if (acid_vec.isNull(index))
+        //        {
+        //            if (!filter_ti_null_wanted_
+        //                    || (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : false))
+        //                return false; // null not wanted
+        //        }
         if (acid_vec.isNull(index)
                 && (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : true)) // null or not found
         {
@@ -1357,6 +1342,35 @@ void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent:
         if (!read_set.hasVariable(var))
             read_set.add(var);
     }
+
+    if (dbcontent_name == "CAT062")
+    {
+        {
+            assert (dbcont_manager_.canGetVariable(dbcontent_name, DBContent::var_cat062_baro_alt_));
+
+            Variable& var = dbcont_manager_.getVariable(dbcontent_name, DBContent::var_cat062_baro_alt_);
+
+            if (!read_set.hasVariable(var))
+                read_set.add(var);
+        }
+
+        {
+            assert (dbcont_manager_.canGetVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
+            Variable& var = dbcont_manager_.getVariable(dbcontent_name, DBContent::var_cat062_fl_measured_);
+
+            if (!read_set.hasVariable(var))
+                read_set.add(var);
+        }
+
+        {
+            assert (dbcont_manager_.canGetVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_));
+            Variable& var = dbcont_manager_.getVariable(dbcontent_name, DBContent::var_cat062_callsign_fpl_);
+
+            if (!read_set.hasVariable(var))
+                read_set.add(var);
+        }
+    }
+
 }
 
 bool LabelGenerator::declutterLabels() const
@@ -1836,7 +1850,7 @@ std::string LabelGenerator::getMode3AText (const std::string& dbcontent_name,
     Variable& m3a_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
 
     if (buffer->has<unsigned int>(m3a_var.name()) &&
-                     !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
+            !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
     {
         text = m3a_var.getAsSpecialRepresentationString(
                     buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
@@ -1891,8 +1905,23 @@ std::string LabelGenerator::getModeCText (const std::string& dbcontent_name,
 
     Variable& mc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
 
+    dbContent::Variable* cat062_baro_alt_var {nullptr}; // only set in cat062
+    dbContent::Variable* cat062_fl_meas_var {nullptr}; // only set in cat062
+
+    if (dbcontent_name == "CAT062")
+    {
+        assert (dbcont_manager_.canGetVariable(dbcontent_name, DBContent::var_cat062_baro_alt_));
+        assert (dbcont_manager_.canGetVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
+
+        cat062_baro_alt_var = &dbcont_manager_.getVariable(dbcontent_name, DBContent::var_cat062_baro_alt_);
+        cat062_fl_meas_var = &dbcont_manager_.getVariable(dbcontent_name, DBContent::var_cat062_fl_measured_);
+
+        assert (buffer->has<float> (cat062_baro_alt_var->name()));
+        assert (buffer->has<float> (cat062_fl_meas_var->name()));
+    }
+
     if (buffer->has<float>(mc_var.name()) &&
-                     !buffer->get<float>(mc_var.name()).isNull(buffer_index))
+            !buffer->get<float>(mc_var.name()).isNull(buffer_index))
     {
         text = String::doubleToStringPrecision(buffer->get<float>(mc_var.name()).get(buffer_index)/100.0,2);
 
@@ -1923,6 +1952,18 @@ std::string LabelGenerator::getModeCText (const std::string& dbcontent_name,
 
         if (garbled)
             text += "G";
+    }
+    else if (cat062_baro_alt_var && buffer->has<float>(cat062_baro_alt_var->name()) &&
+             !buffer->get<float>(cat062_baro_alt_var->name()).isNull(buffer_index))
+    {
+        text = String::doubleToStringPrecision(
+                    buffer->get<float>(cat062_baro_alt_var->name()).get(buffer_index)/100.0,2);
+    }
+    else if (cat062_fl_meas_var && buffer->has<float>(cat062_fl_meas_var->name()) &&
+             !buffer->get<float>(cat062_fl_meas_var->name()).isNull(buffer_index))
+    {
+        text = String::doubleToStringPrecision(
+                    buffer->get<float>(cat062_fl_meas_var->name()).get(buffer_index)/100.0,2);
     }
 
     return text;

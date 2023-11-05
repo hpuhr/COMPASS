@@ -325,7 +325,7 @@ float ASTERIXDecodeJob::statusInfoProgress() // percent
 
 void ASTERIXDecodeJob::forceBlockingDataProcessing()
 {
-    loginf << "ASTERIXDecodeJob: forceBlockingDataProcessing: emitting signal";
+    logdbg << "ASTERIXDecodeJob: forceBlockingDataProcessing: emitting signal";
     emit decodedASTERIXSignal();
 
     while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out

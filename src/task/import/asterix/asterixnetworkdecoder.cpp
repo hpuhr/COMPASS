@@ -102,7 +102,7 @@ void ASTERIXNetworkDecoder::start()
                     && (boost::posix_time::microsec_clock::local_time()
                         - last_receive_decode_time_).total_milliseconds() > 1000)
             {
-                loginf << "ASTERIXNetworkDecoder: start: copying data "
+                logdbg << "ASTERIXNetworkDecoder: start: copying data "
                        << receive_buffer_sizes_.size() << " buffers  max " << MAX_ALL_RECEIVE_SIZE;
 
                 // copy data
@@ -128,7 +128,7 @@ void ASTERIXNetworkDecoder::start()
 
                 last_receive_decode_time_ = boost::posix_time::microsec_clock::local_time();
 
-                loginf << "ASTERIXNetworkDecoder: start: processing copied data";
+                logdbg << "ASTERIXNetworkDecoder: start: processing copied data";
 
                 for (auto& size_it : receive_copy_buffer_sizes_)
                 {
@@ -145,7 +145,7 @@ void ASTERIXNetworkDecoder::start()
                                                  size_it.second, callback);
                 }
 
-                loginf << "ASTERIXNetworkDecoder: start: done";
+                logdbg << "ASTERIXNetworkDecoder: start: done";
 
                 receive_copy_buffer_sizes_.clear();
 

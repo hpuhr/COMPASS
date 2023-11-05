@@ -37,9 +37,15 @@ DBDataSourceWidget::DBDataSourceWidget(DBDataSource& src, QWidget *parent)
 void DBDataSourceWidget::updateContent()
 {
     if (needsRecreate())
+    {
         recreateWidgets();
+    }
 
-    updateWidgets();
+    try {
+     updateWidgets();
+    } catch (std::exception& e) {
+        logerr << "UGA2 what " << e.what();
+    }
 
 }
 
@@ -239,7 +245,8 @@ void DBDataSourceWidget::updateWidgets()
             assert (line_buttons_.count(line_str));
             button = line_buttons_.at(line_str);
 
-            hidden = !net_lines.at(src_.id()).count(line_str); // hide if not defined
+            hidden = !net_lines.count(src_.id())
+                    || !net_lines.at(src_.id()).count(line_str); // hide if not defined
 
             button->setHidden(hidden);
 

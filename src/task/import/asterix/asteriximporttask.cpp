@@ -298,7 +298,7 @@ void ASTERIXImportTask::refreshjASTERIX()
 {
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
-    loginf << "ASTERIXImportTask: refreshjASTERIX: jasterix definition path '"
+    logdbg << "ASTERIXImportTask: refreshjASTERIX: jasterix definition path '"
            << jasterix_definition_path << "'";
     assert(Files::directoryExists(jasterix_definition_path));
 
@@ -308,8 +308,59 @@ void ASTERIXImportTask::refreshjASTERIX()
     std::vector<std::string> framings = jasterix_->framings();
     if (std::find(framings.begin(), framings.end(), settings_.current_file_framing_) == framings.end())
     {
-        loginf << "ASTERIXImportTask: refreshjASTERIX: resetting to no framing";
+        logdbg << "ASTERIXImportTask: refreshjASTERIX: resetting to no framing";
         settings_.current_file_framing_ = "";
+    }
+
+    // set category configs
+    jasterix_->decodeNoCategories();
+
+    for (auto& cat_it : category_configs_)
+    {
+        // loginf << "ASTERIXImportTask: importFile: setting category " << cat_it.first;
+
+        logdbg << "ASTERIXImportTask: refreshjASTERIX: setting cat " << cat_it.first << " decode "
+               << cat_it.second.decode() << " edition '" << cat_it.second.edition() << "' ref '"
+               << cat_it.second.ref() << "'";
+
+        if (!jasterix_->hasCategory(cat_it.first))
+        {
+            logwrn << "ASTERIXImportTask: refreshjASTERIX: cat '" << cat_it.first
+                   << "' not defined in decoder";
+            continue;
+        }
+
+        if (!jasterix_->category(cat_it.first)->hasEdition(cat_it.second.edition()))
+        {
+            logwrn << "ASTERIXImportTask: refreshjASTERIX: cat " << cat_it.first << " edition '"
+                   << cat_it.second.edition() << "' not defined in decoder";
+            continue;
+        }
+
+        if (cat_it.second.ref().size() &&  // only if value set
+                !jasterix_->category(cat_it.first)->hasREFEdition(cat_it.second.ref()))
+        {
+            logwrn << "ASTERIXImportTask: refreshjASTERIX: cat " << cat_it.first << " ref '"
+                   << cat_it.second.ref() << "' not defined in decoder";
+            continue;
+        }
+
+        if (cat_it.second.spf().size() &&  // only if value set
+                !jasterix_->category(cat_it.first)->hasSPFEdition(cat_it.second.spf()))
+        {
+            logwrn << "ASTERIXImportTask: refreshjASTERIX: cat " << cat_it.first << " spf '"
+                   << cat_it.second.spf() << "' not defined in decoder";
+            continue;
+        }
+
+        //        loginf << "ASTERIXImportTask: importFile: setting cat " <<  cat_it.first
+        //               << " decode flag " << cat_it.second.decode();
+        jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
+        logdbg << "ASTERIXImportTask: refreshjASTERIX: setting cat " <<  cat_it.first
+               << " edition " << cat_it.second.edition();
+        jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
+        jasterix_->category(cat_it.first)->setCurrentREFEdition(cat_it.second.ref());
+        jasterix_->category(cat_it.first)->setCurrentSPFEdition(cat_it.second.spf());
     }
 }
 
@@ -589,6 +640,8 @@ void ASTERIXImportTask::testFileDecoding()
     msg_box->setStandardButtons(QMessageBox::NoButton);
     msg_box->show();
 
+    refreshjASTERIX();
+
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
@@ -826,58 +879,9 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     loginf << "ASTERIXImportTask: run: setting categories";
 
+    refreshjASTERIX();
+
     jASTERIX::add_artas_md5_hash = true;
-
-    // set category configs
-    jasterix_->decodeNoCategories();
-
-    for (auto& cat_it : category_configs_)
-    {
-        // loginf << "ASTERIXImportTask: importFile: setting category " << cat_it.first;
-
-        loginf << "ASTERIXImportTask: run: setting cat " << cat_it.first << " decode "
-               << cat_it.second.decode() << " edition '" << cat_it.second.edition() << "' ref '"
-               << cat_it.second.ref() << "'";
-
-        if (!jasterix_->hasCategory(cat_it.first))
-        {
-            logwrn << "ASTERIXImportTask: run: cat '" << cat_it.first
-                   << "' not defined in decoder";
-            continue;
-        }
-
-        if (!jasterix_->category(cat_it.first)->hasEdition(cat_it.second.edition()))
-        {
-            logwrn << "ASTERIXImportTask: run: cat " << cat_it.first << " edition '"
-                   << cat_it.second.edition() << "' not defined in decoder";
-            continue;
-        }
-
-        if (cat_it.second.ref().size() &&  // only if value set
-                !jasterix_->category(cat_it.first)->hasREFEdition(cat_it.second.ref()))
-        {
-            logwrn << "ASTERIXImportTask: run: cat " << cat_it.first << " ref '"
-                   << cat_it.second.ref() << "' not defined in decoder";
-            continue;
-        }
-
-        if (cat_it.second.spf().size() &&  // only if value set
-                !jasterix_->category(cat_it.first)->hasSPFEdition(cat_it.second.spf()))
-        {
-            logwrn << "ASTERIXImportTask: run: cat " << cat_it.first << " spf '"
-                   << cat_it.second.spf() << "' not defined in decoder";
-            continue;
-        }
-
-        //        loginf << "ASTERIXImportTask: importFile: setting cat " <<  cat_it.first
-        //               << " decode flag " << cat_it.second.decode();
-        jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
-        loginf << "ASTERIXImportTask: run: setting cat " <<  cat_it.first
-               << " edition " << cat_it.second.edition();
-        jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
-        jasterix_->category(cat_it.first)->setCurrentREFEdition(cat_it.second.ref());
-        jasterix_->category(cat_it.first)->setCurrentSPFEdition(cat_it.second.spf());
-    }
 
     // set up projections
     ProjectionManager& proj_man = ProjectionManager::instance();
