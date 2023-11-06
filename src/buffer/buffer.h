@@ -93,10 +93,12 @@ public:
     void sortByProperty(const Property& property);
 
     template <typename T>
-    bool has(const std::string& id);
+    bool has(const std::string& id) const;
 
     template <typename T>
     NullableVector<T>& get(const std::string& id);
+    template <typename T>
+    const NullableVector<T>& get(const std::string& id) const;
 
     template <typename T>
     void rename(const std::string& id, const std::string& id_new);
@@ -128,9 +130,10 @@ protected:
     size_t data_size_ {0};
 
 private:
-
     template <typename T>
     inline std::map<std::string, std::shared_ptr<NullableVector<T>>>& getArrayListMap();
+    template <typename T>
+    inline const std::map<std::string, std::shared_ptr<NullableVector<T>>>& getArrayListMap() const;
     template <typename T>
     void renameArrayListMapEntry(const std::string& id, const std::string& id_new);
     template <typename T>
@@ -143,13 +146,28 @@ private:
 #include "nullablevector.h"
 
 template <typename T>
-inline bool Buffer::has(const std::string& id)
+inline bool Buffer::has(const std::string& id) const
 {
     return getArrayListMap<T>().count(id) != 0;
 }
 
 template <typename T>
 NullableVector<T>& Buffer::get(const std::string& id)
+{
+    if (!(std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
+          ArrayListMapTupel>::value>(array_list_tuple_)).count(id))
+        logerr << "Buffer: get: id '" << id << "' type " << typeid(T).name() << " not found";
+
+    assert ((std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
+             ArrayListMapTupel>::value>(array_list_tuple_)).count(id));
+
+    return *(std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
+             ArrayListMapTupel>::value>(array_list_tuple_))
+            .at(id);
+}
+
+template <typename T>
+const NullableVector<T>& Buffer::get(const std::string& id) const
 {
     if (!(std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
           ArrayListMapTupel>::value>(array_list_tuple_)).count(id))
@@ -188,6 +206,14 @@ void Buffer::remove(const std::string& id)
 
 template <typename T>
 std::map<std::string, std::shared_ptr<NullableVector<T>>>& Buffer::getArrayListMap()
+{
+    return std::get<
+            BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>, ArrayListMapTupel>::value>(
+                array_list_tuple_);
+}
+
+template <typename T>
+const std::map<std::string, std::shared_ptr<NullableVector<T>>>& Buffer::getArrayListMap() const
 {
     return std::get<
             BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>, ArrayListMapTupel>::value>(
