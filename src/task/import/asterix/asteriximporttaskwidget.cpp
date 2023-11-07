@@ -293,9 +293,7 @@ void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 
     assert (line_id > 0 && line_id <= 4);
 
-    assert (false); // TODO
-
-    //task_.settings().file_line_id_ = line_id-1;
+    task_.settings().file_line_id_ = line_id-1;
 }
 
 void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)

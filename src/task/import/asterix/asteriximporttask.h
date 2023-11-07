@@ -51,7 +51,7 @@ class jASTERIX;
 struct ASTERIXFileInfo
 {
     std::string filename_;
-    unsigned int line_id_ {0};
+    //unsigned int line_id_ {0}; // TODO rework
 
     bool decoding_tried_ {false};
     std::string decoding_info_str_;
@@ -85,7 +85,7 @@ public:
 
     // unregistered, for passing on
 
-    //unsigned int file_line_id_ {0};
+    unsigned int file_line_id_ {0};
     boost::posix_time::ptime date_;
 
     unsigned int max_network_lines_ {4};
@@ -111,7 +111,7 @@ public:
     {
         files_info_.push_back(ASTERIXFileInfo());
         files_info_.back().filename_ = filename;
-        files_info_.back().line_id_ = line_id;
+        //files_info_.back().line_id_ = line_id;
     }
 
 private:

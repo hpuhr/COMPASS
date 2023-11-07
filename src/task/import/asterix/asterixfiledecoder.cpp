@@ -111,7 +111,7 @@ void ASTERIXFileDecoder::doCurrentFile()
     task_.refreshjASTERIX();
 
     string current_filename = files_info_.at(current_file_count_).filename_;
-    unsigned int current_file_line = files_info_.at(current_file_count_).line_id_;
+    unsigned int current_file_line = settings_.file_line_id_; //files_info_.at(current_file_count_).line_id_;
 
     loginf << "ASTERIXFileDecoder: doCurrentFile: file '" << current_filename
            << "' framing '" << settings_.current_file_framing_ << "'";
