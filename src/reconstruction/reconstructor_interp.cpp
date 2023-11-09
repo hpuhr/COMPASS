@@ -27,7 +27,7 @@ namespace reconstruction
 {
 
 const QColor ReconstructorInterp::ColorOk    = QColor(255, 125, 0);
-const QColor ReconstructorInterp::ColorFishy = QColor(255, 255, 0);
+const QColor ReconstructorInterp::ColorFishy = QColor(255, 255, 0); 
 
 /**
 */
