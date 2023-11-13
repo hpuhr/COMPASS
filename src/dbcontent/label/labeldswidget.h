@@ -28,8 +28,7 @@ class LabelDSWidget : public QWidget
     void selectLineSlot();
 
 public:
-    LabelDSWidget(LabelGenerator& label_generator, QWidget* parent = 0,
-                               Qt::WindowFlags f = 0);
+    LabelDSWidget(LabelGenerator& label_generator, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~LabelDSWidget();
 
     void forceUpdateList();

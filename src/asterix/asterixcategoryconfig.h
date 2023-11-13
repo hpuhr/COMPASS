@@ -15,25 +15,39 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXCATEGORYCONFIG_H
-#define ASTERIXCATEGORYCONFIG_H
+#pragma once
 
 #include <string>
 
 #include "configurable.h"
 
+/**
+*/
 class ASTERIXCategoryConfig : public Configurable
 {
-  public:
-    ASTERIXCategoryConfig(unsigned int category, const std::string& class_id,
-                          const std::string& instance_id, Configurable* parent)
-        : Configurable(class_id, instance_id, parent), category_(category)
+public:
+    struct Config
     {
-        registerParameter("category", &category_, 0u);
-        registerParameter("decode", &decode_, false);
-        registerParameter("edition", &edition_, std::string());
-        registerParameter("ref", &ref_, std::string());
-        registerParameter("spf", &spf_, std::string());
+        unsigned int category = 0;
+        bool         decode   = false;
+        std::string  edition  = "";
+        std::string  ref      = "";
+        std::string  spf      = ""; 
+    };
+
+    ASTERIXCategoryConfig(unsigned int category, 
+                          const std::string& class_id,
+                          const std::string& instance_id, 
+                          Configurable* parent)
+    :   Configurable(class_id, instance_id, parent)
+    {
+        config_.category = category;
+
+        registerParameter("category", &config_.category, Config().category);
+        registerParameter("decode"  , &config_.decode  , Config().decode  );
+        registerParameter("edition" , &config_.edition , Config().edition );
+        registerParameter("ref"     , &config_.ref     , Config().ref     );
+        registerParameter("spf"     , &config_.spf     , Config().spf     );
     }
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -41,32 +55,28 @@ class ASTERIXCategoryConfig : public Configurable
     {
     }
 
-    unsigned int category() const { return category_; }
+    unsigned int category() const { return config_.category; }
 
-    bool decode() const { return decode_; }
-    void decode(bool decode) { decode_ = decode; }
+    bool decode() const { return config_.decode; }
+    void decode(bool decode) { config_.decode = decode; }
 
-    std::string edition() const { return edition_; }
+    std::string edition() const { return config_.edition; }
 
-    void edition(const std::string& edition) { edition_ = edition; }
+    void edition(const std::string& edition) { config_.edition = edition; }
 
-    std::string ref() const { return ref_; }
+    std::string ref() const { return config_.ref; }
 
-    void ref(const std::string& ref) { ref_ = ref; }
+    void ref(const std::string& ref) { config_.ref = ref; }
 
-    std::string spf() const { return spf_; }
+    std::string spf() const { return config_.spf; }
 
-    void spf(const std::string& spf) { spf_ = spf; }
+    void spf(const std::string& spf) { config_.spf = spf; }
 
-  private:
-    unsigned int category_;
-    bool decode_{false};
-    std::string edition_;
-    std::string ref_;
-    std::string spf_;
-
-  protected:
+protected:
     virtual void checkSubConfigurables() {}
-};
 
-#endif  // ASTERIXCATEGORYCONFIG_H
+    void onConfigurationChanged(const std::vector<std::string>& changed_params) override {}
+
+private:
+    Config config_;
+};
