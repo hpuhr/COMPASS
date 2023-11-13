@@ -62,6 +62,38 @@ const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
 //const float ram_threshold = 4.0;
 
+/**
+*/
+ASTERIXImportTaskSettings::ASTERIXImportTaskSettings()
+:   debug_jasterix_          (false)
+,   file_list_               (json::array())
+,   current_file_framing_    ("")
+,   num_packets_overload_    (60)
+,   override_tod_offset_     (0.0f)
+,   filter_tod_min_          (0.0f)
+,   filter_tod_max_          (24*3600.0 - 1)
+,   filter_latitude_min_     (-90.0)
+,   filter_latitude_max_     ( 00.0)
+,   filter_longitude_min_    (-180.0)
+,   filter_longitude_max_    ( 180.0)
+,   filter_modec_min_        (-10000.0f)
+,   filter_modec_max_        ( 50000.0f)
+,   file_line_id_            (0)
+,   date_                    ()
+,   max_network_lines_       (4)
+,   test_                    (false)
+,   override_tod_active_     (false)
+,   ignore_time_jumps_       (false)
+,   network_ignore_future_ts_(false)
+,   filter_tod_active_       (false)
+,   filter_position_active_  (false)
+,   filter_modec_active_     (false)
+,   import_files_            (false)
+{
+}
+
+/**
+*/
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
     : Task("ASTERIXImportTask", "Import ASTERIX Data", task_manager),
@@ -69,9 +101,9 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 {
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
 
-    registerParameter("debug_jasterix", &settings_.debug_jasterix_, false);
+    registerParameter("debug_jasterix", &settings_.debug_jasterix_, ASTERIXImportTaskSettings().debug_jasterix_);
 
-    registerParameter("file_list", &settings_.file_list_, json::array());
+    registerParameter("file_list", &settings_.file_list_, ASTERIXImportTaskSettings().file_list_);
 
     vector<string> cleaned_file_list;
     // clean missing files
@@ -83,24 +115,24 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     }
     settings_.file_list_ = cleaned_file_list;
 
-    registerParameter("current_file_framing", &settings_.current_file_framing_, string(""));
+    registerParameter("current_file_framing", &settings_.current_file_framing_, ASTERIXImportTaskSettings().current_file_framing_);
 
-    registerParameter("num_packets_overload", &settings_.num_packets_overload_, 60u);
+    registerParameter("num_packets_overload", &settings_.num_packets_overload_, ASTERIXImportTaskSettings().num_packets_overload_);
 
     settings_.date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
 
-    registerParameter("override_tod_offset", &settings_.override_tod_offset_, 0.0f);
+    registerParameter("override_tod_offset", &settings_.override_tod_offset_, ASTERIXImportTaskSettings().override_tod_offset_);
 
-    registerParameter("filter_tod_min", &settings_.filter_tod_min_, 0.0f);
-    registerParameter("filter_tod_max", &settings_.filter_tod_max_, (float)(24*3600.0 - 1));
+    registerParameter("filter_tod_min", &settings_.filter_tod_min_, ASTERIXImportTaskSettings().filter_tod_min_);
+    registerParameter("filter_tod_max", &settings_.filter_tod_max_, ASTERIXImportTaskSettings().filter_tod_max_);
 
-    registerParameter("filter_latitude_min", &settings_.filter_latitude_min_, -90.0);
-    registerParameter("filter_latitude_max", &settings_.filter_latitude_max_, 00.0);
-    registerParameter("filter_longitude_min", &settings_.filter_longitude_min_, -180.0);
-    registerParameter("filter_longitude_max", &settings_.filter_longitude_max_, 180.0);
+    registerParameter("filter_latitude_min", &settings_.filter_latitude_min_, ASTERIXImportTaskSettings().filter_latitude_min_);
+    registerParameter("filter_latitude_max", &settings_.filter_latitude_max_, ASTERIXImportTaskSettings().filter_latitude_max_);
+    registerParameter("filter_longitude_min", &settings_.filter_longitude_min_, ASTERIXImportTaskSettings().filter_longitude_min_);
+    registerParameter("filter_longitude_max", &settings_.filter_longitude_max_, ASTERIXImportTaskSettings().filter_longitude_max_);
 
-    registerParameter("filter_modec_min", &settings_.filter_modec_min_, -10000.0f);
-    registerParameter("filter_modec_max", &settings_.filter_modec_max_, 50000.0f);
+    registerParameter("filter_modec_min", &settings_.filter_modec_min_, ASTERIXImportTaskSettings().filter_modec_min_);
+    registerParameter("filter_modec_max", &settings_.filter_modec_max_, ASTERIXImportTaskSettings().filter_modec_max_);
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
@@ -1478,4 +1510,11 @@ void ASTERIXImportTask::updateFileProgressDialog(bool force)
     {
         file_progress_dialog_->setLabelText("Please wait...");
     }
+}
+
+/**
+*/
+void ASTERIXImportTask::onConfigurationChanged(const std::vector<std::string>& changed_params)
+{
+    emit configChanged();
 }

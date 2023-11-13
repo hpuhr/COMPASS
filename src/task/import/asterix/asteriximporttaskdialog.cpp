@@ -52,6 +52,8 @@ ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
     setLayout(main_layout);
 
     update();
+
+    connect(&task, &ASTERIXImportTask::configChanged, this, &ASTERIXImportTaskDialog::configChanged);
 }
 
 void ASTERIXImportTaskDialog::updateSourcesInfo()
@@ -87,7 +89,6 @@ void ASTERIXImportTaskDialog::testImportClickedSlot()
     emit testTmportSignal();
 }
 
-
 void ASTERIXImportTaskDialog::importClickedSlot()
 {
     emit importSignal();
@@ -96,4 +97,9 @@ void ASTERIXImportTaskDialog::importClickedSlot()
 void ASTERIXImportTaskDialog::cancelClickedSlot()
 {
     emit cancelSignal();
+}
+
+void ASTERIXImportTaskDialog::configChanged()
+{
+    //@TODO
 }

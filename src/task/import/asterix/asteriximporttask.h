@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXIMPORTTASK_H
-#define ASTERIXIMPORTTASK_H
+#pragma once
 
 #include "asterixdecodejob.h"
 #include "asterixpostprocess.h"
@@ -48,6 +47,8 @@ namespace jASTERIX
 class jASTERIX;
 }
 
+/**
+*/
 struct ASTERIXFileInfo
 {
     std::string filename_;
@@ -60,10 +61,26 @@ struct ASTERIXFileInfo
     bool errors_found_{false};
 };
 
-
+/**
+*/
 class ASTERIXImportTaskSettings
 {
 public:
+    ASTERIXImportTaskSettings();
+
+    bool importFile() const { return import_files_; }
+
+    std::vector<ASTERIXFileInfo>& filesInfo() { return files_info_; }
+    const std::vector<ASTERIXFileInfo>& filesInfo() const { return files_info_; }
+
+    void clearImportFilenames () { files_info_.clear(); }
+    void addImportFilename(const std::string& filename, unsigned int line_id)
+    {
+        files_info_.push_back(ASTERIXFileInfo());
+        files_info_.back().filename_ = filename;
+        //files_info_.back().line_id_ = line_id;
+    }
+
     // registered
     bool debug_jasterix_;
     nlohmann::json file_list_;
@@ -101,19 +118,6 @@ public:
     bool filter_position_active_{false};
     bool filter_modec_active_{false};
 
-    bool importFile() const { return import_files_; }
-
-    std::vector<ASTERIXFileInfo>& filesInfo() { return files_info_; }
-    const std::vector<ASTERIXFileInfo>& filesInfo() const { return files_info_; }
-
-    void clearImportFilenames () { files_info_.clear(); }
-    void addImportFilename(const std::string& filename, unsigned int line_id)
-    {
-        files_info_.push_back(ASTERIXFileInfo());
-        files_info_.back().filename_ = filename;
-        //files_info_.back().line_id_ = line_id;
-    }
-
 private:
     friend class ASTERIXImportTask;
 
@@ -121,14 +125,18 @@ private:
 
     //std::string current_filename_;
     std::vector<ASTERIXFileInfo> files_info_;
-
 };
 
+/**
+*/
 class ASTERIXImportTask : public Task, public Configurable
 {
     Q_OBJECT
 
-  public slots:
+signals:
+    void configChanged();
+
+public slots:
     void dialogImportSlot();
     void dialogTestImportSlot();
     void dialogCancelSlot();
@@ -147,7 +155,7 @@ class ASTERIXImportTask : public Task, public Configurable
 
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
-  public:
+public:
     ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                       TaskManager& task_manager);
     virtual ~ASTERIXImportTask();
@@ -203,6 +211,15 @@ class ASTERIXImportTask : public Task, public Configurable
     void testFileDecoding();
 
 protected:
+    virtual void checkSubConfigurables() override;
+
+    void insertData(); // inserts queued job buffers
+    void checkAllDone();
+
+    bool maxLoadReached();
+    void updateFileProgressDialog(bool force=false);
+
+    void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
 
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
@@ -249,14 +266,4 @@ protected:
 
     bool insert_slot_connected_ {false};
     bool all_done_{false};
-
-    virtual void checkSubConfigurables() override;
-
-    void insertData(); // inserts queued job buffers
-    void checkAllDone();
-
-    bool maxLoadReached();
-    void updateFileProgressDialog(bool force=false);
 };
-
-#endif  // ASTERIXIMPORTTASK_H
