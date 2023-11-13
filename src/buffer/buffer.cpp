@@ -155,11 +155,11 @@ void Buffer::addProperty(string id, PropertyDataType type)
             getArrayListMap<json>()[id] = shared_ptr<NullableVector<json>>(
                 new NullableVector<json>(property, *this));
             break;
-    case PropertyDataType::TIMESTAMP:
-        assert(getArrayListMap<boost::posix_time::ptime>().count(id) == 0);
-        getArrayListMap<boost::posix_time::ptime>()[id] = shared_ptr<NullableVector<boost::posix_time::ptime>>(
-            new NullableVector<boost::posix_time::ptime>(property, *this));
-        break;
+        case PropertyDataType::TIMESTAMP:
+            assert(getArrayListMap<boost::posix_time::ptime>().count(id) == 0);
+            getArrayListMap<boost::posix_time::ptime>()[id] = shared_ptr<NullableVector<boost::posix_time::ptime>>(
+                new NullableVector<boost::posix_time::ptime>(property, *this));
+            break;
         default:
             logerr << "Buffer: addProperty: unknown property type " << Property::asString(type);
             throw runtime_error("Buffer: addProperty: unknown property type " +

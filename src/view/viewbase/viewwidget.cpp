@@ -25,6 +25,8 @@
 #include "files.h"
 #include "compass.h"
 #include "ui_test_common.h"
+#include "dbcontentmanager.h"
+#include "dbcontent.h"
 
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -232,9 +234,21 @@ void ViewWidget::setConfigWidget(ViewConfigWidget* w)
         throw std::runtime_error("ViewWidget::setConfigWidget: Null pointer passed");
     if (!config_widget_container_)
         throw std::runtime_error("ViewWidget::setConfigWidget: No container to add to");
-    if (config_widget_)
-        throw std::runtime_error("ViewWidget::setConfigWidget: Already set");
 
+    //remove old config widget?
+    if (config_widget_)
+    {
+        config_widget_container_->layout()->removeWidget(config_widget_);
+
+        //setLayout() can only be called on widgets without layout
+        //the old layout can be removed by just deleting it
+        delete config_widget_container_->layout();
+
+        delete config_widget_;
+        config_widget_ = nullptr;
+    }
+
+    //add new config widget
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
 
@@ -436,6 +450,21 @@ void ViewWidget::notifyReloadNeeded()
 }
 
 /**
+ * Manually notifies the widget that a refresh is needed, determined if redraw or reload, and updates the load state widget accordingly.
+*/
+void ViewWidget::notifyRefreshNeeded()
+{
+    bool has_varset = isVariableSetLoaded();
+
+    std::cout << "has varset: " << has_varset << std::endl;
+
+    if (has_varset)
+        notifyRedrawNeeded();
+    else
+        notifyReloadNeeded();
+}
+
+/**
  * Checks if a reload is needed.
 */
 bool ViewWidget::reloadNeeded() const
@@ -493,4 +522,12 @@ boost::optional<QString> ViewWidget::uiGet(const QString& what) const
 {
     std::string view_info = viewInfo(what.toStdString()).dump();
     return QString::fromStdString(view_info);
+}
+
+/**
+*/
+bool ViewWidget::isVariableSetLoaded() const
+{
+    assert(data_widget_);
+    return data_widget_->isVariableSetLoaded();
 }

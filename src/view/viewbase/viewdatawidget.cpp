@@ -1,8 +1,11 @@
 
 #include "viewdatawidget.h"
+#include "viewwidget.h"
+#include "view.h"
 #include "viewtoolswitcher.h"
 #include "logger.h"
-//#include "buffer.h"
+#include "buffer.h"
+#include "variable.h"
 
 #include <QApplication>
 
@@ -196,4 +199,25 @@ void ViewDataWidget::liveReload()
 
     //signal that live data has been loaded
     emit liveDataLoaded();
+}
+
+/**
+*/
+bool ViewDataWidget::isVariableSetLoaded() const
+{
+    const auto& view_data = viewData();
+    if (view_data.empty())
+        return false;
+
+    for (const auto& dbcontent_data : view_data)
+    {
+        auto var_set = view_widget_->getView()->getSet(dbcontent_data.first);
+        for (auto var : var_set.getSet())
+        {
+            if (!dbcontent_data.second->hasAnyPropertyNamed(var->name()))
+                return false;
+        }
+    }
+
+    return true;
 }

@@ -116,6 +116,7 @@ public:
 
     void notifyReloadNeeded();
     void notifyRedrawNeeded();
+    void notifyRefreshNeeded();
 
     ViewDataWidget* getViewDataWidget() { assert(data_widget_); return data_widget_; }
     const ViewDataWidget* getViewDataWidget() const { assert(data_widget_); return data_widget_; }
@@ -137,6 +138,7 @@ public:
     boost::optional<QString> uiGet(const QString& what = QString()) const override final;
 
     static QIcon getIcon(const std::string& fn);
+
 protected:
     ViewToolWidget* getViewToolWidget() { assert(tool_widget_); return tool_widget_; }
     const ViewToolWidget* getViewToolWidget() const { assert(tool_widget_); return tool_widget_; }
@@ -175,6 +177,8 @@ protected:
 private:
     void createStandardLayout();
     void connectWidgets();
+
+    bool isVariableSetLoaded() const;
 
     /// The view the widget is part of
     View* view_ = nullptr;

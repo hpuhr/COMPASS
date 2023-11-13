@@ -39,17 +39,16 @@ class DBContentManagerWidget;
 class DBSchemaManager;
 class DBContentDeleteDBJob;
 
-namespace dbContent {
-
-class MetaVariableConfigurationDialog;
-class Variable;
-class MetaVariable;
-class VariableSet;
-class Target;
-class TargetListWidget;
-class LabelGenerator;
-class VariableSet;
-
+namespace dbContent 
+{
+    class MetaVariableConfigurationDialog;
+    class Variable;
+    class MetaVariable;
+    class VariableSet;
+    class Target;
+    class TargetListWidget;
+    class LabelGenerator;
+    class VariableSet;
 }
 
 class DBContentManager : public QObject, public Configurable
