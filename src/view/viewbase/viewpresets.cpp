@@ -169,6 +169,7 @@ bool ViewPresets::updatePreset(View* view,
                                const std::string& name,
                                const std::string& category,
                                const std::string& description,
+                               bool update_view_config,
                                bool create_preview)
 {
     assert(view);
@@ -184,8 +185,9 @@ bool ViewPresets::updatePreset(View* view,
     //@TODO: update timestamp
     p.timestamp = "";
 
-    //collect json config
-    view->generateJSON(p.view_config);
+    //collect json config?
+    if (update_view_config)
+        view->generateJSON(p.view_config);
 
     //auto-create preview?
     if (create_preview)

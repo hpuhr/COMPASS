@@ -32,8 +32,12 @@ class View;
 class ViewPresets
 {
 public:
+    typedef std::pair<std::string, std::string> Key;
+
     struct Preset
     {
+        Key key() const { return Key(view, name); }
+
         std::string    name;
         std::string    category;
         std::string    description;
@@ -43,8 +47,7 @@ public:
         nlohmann::json view_config;
     };
 
-    typedef std::pair<std::string, std::string> Key;
-    typedef std::map<Key, Preset>               Presets;
+    typedef std::map<Key, Preset> Presets;
 
     ViewPresets();
     virtual ~ViewPresets() = default;
@@ -61,6 +64,7 @@ public:
                       const std::string& name,
                       const std::string& category,
                       const std::string& description,
+                      bool update_view_config = true,
                       bool create_preview = false);
 
     bool hasPreset(View* view, const std::string& name) const;

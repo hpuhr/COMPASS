@@ -50,7 +50,7 @@
 
 #include <cassert>
 
-//#define SCAN_PRESETS
+#define SCAN_PRESETS
 
 using namespace Utils;
 using namespace nlohmann;
