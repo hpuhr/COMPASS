@@ -8,6 +8,7 @@
 #include "variable.h"
 
 #include <QApplication>
+#include <QPainter>
 
 #include <iostream>
 
@@ -220,4 +221,18 @@ bool ViewDataWidget::isVariableSetLoaded() const
     }
 
     return true;
+}
+
+/**
+*/
+QImage ViewDataWidget::renderData()
+{
+    //per default just render the data widget's content
+    //note: does not work with opengl widgets such as osg view => derive as needed
+    QImage img(this->size(), QImage::Format_ARGB32);
+    QPainter painter(&img);
+
+    this->render(&painter);
+
+    return img;
 }

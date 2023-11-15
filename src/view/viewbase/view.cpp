@@ -285,3 +285,9 @@ void View::issueViewUpdate(const ViewUpdate& vu)
     if (vu.update_components)
         widget_->updateComponents();
 }
+
+QImage View::renderData() const
+{
+    assert (widget_);  
+    return widget_->getViewDataWidget()->renderData();
+}

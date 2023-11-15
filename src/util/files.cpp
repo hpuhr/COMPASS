@@ -20,6 +20,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QString>
+#include <QRegularExpression>
+
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -170,6 +172,19 @@ bool createMissingDirectories(const std::string& path)
     QDir dir = QDir::root();
     bool ret = dir.mkpath(path.c_str());
     return ret;
+}
+
+/**
+ */
+std::string normalizeFilename(const std::string& filename_without_ext)
+{
+    QString obj_name = QString::fromStdString(filename_without_ext).toLower();
+
+    obj_name.remove(QRegularExpression("^[-.:\\s]+"));
+    obj_name.remove(QRegularExpression("[-.:\\s]+$"));
+    obj_name.replace(QRegularExpression("[-.:\\s]+"), "_");
+
+    return obj_name.toStdString();
 }
 
 }  // namespace Files

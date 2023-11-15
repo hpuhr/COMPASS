@@ -59,6 +59,8 @@ std::string getDirectoryFromPath (const std::string& path);
 std::string getFilenameFromPath (const std::string& path);
 bool createMissingDirectories(const std::string& path); // true if successful
 
+std::string normalizeFilename(const std::string& filename_without_ext);
+
 }  // namespace Files
 }  // namespace Utils
 

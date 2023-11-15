@@ -2,12 +2,16 @@
 #include "viewtoolwidget.h"
 #include "viewtoolswitcher.h"
 #include "viewwidget.h"
+#include "view.h"
+#include "compass.h"
+#include "timeconv.h"
 
 #include "ui_test_common.h"
 
 #include <QShortcut>
 #include <QToolButton>
 #include <QApplication>
+#include <QFileDialog>
 
 #include <cassert>
 
@@ -245,6 +249,41 @@ void ViewToolWidget::addSeparatorIfValid()
         return;
 
     addSeparator();
+}
+
+/**
+ * Adds a button for toggling the config widget, that is part of the ViewWidget.
+*/
+void ViewToolWidget::addScreenshotButton()
+{
+    //add spacer if no spacer yet
+    if (spacers_.empty())
+        addSpacer();
+
+    //add separator if needed
+    addSeparatorIfValid();
+
+    auto screener_cb = [ = ] ()
+    {
+        auto timestamp = Utils::Time::toString(Utils::Time::currentUTCTime());
+
+        std::string fn_init = view_widget_->getView()->classId() + "_" + timestamp + ".png";
+        std::string path    = COMPASS::instance().lastUsedPath() + "/" + fn_init;
+
+        auto fn = QFileDialog::getSaveFileName(this, "Select screenshot file", QString::fromStdString(path), "*.png");
+        if (fn.isEmpty())
+            return;
+
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+
+        auto image = view_widget_->getView()->renderData();
+        image.save(fn);
+
+        QApplication::restoreOverrideCursor();
+    };
+
+    //add toggle callback
+    addActionCallback("Save Screenshot", screener_cb, {}, ViewWidget::getIcon("camera.png"), QKeySequence());
 }
 
 /**

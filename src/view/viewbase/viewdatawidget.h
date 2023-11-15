@@ -67,6 +67,8 @@ public:
 
     virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 
+    virtual QImage renderData();
+
 signals:
     void displayChanged();
     void dataLoaded();

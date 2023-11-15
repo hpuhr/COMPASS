@@ -27,6 +27,8 @@
 #include "ui_test_common.h"
 #include "dbcontentmanager.h"
 #include "dbcontent.h"
+#include "viewmanager.h"
+#include "viewpresetwidget.h"
 
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -131,6 +133,14 @@ void ViewWidget::createStandardLayout()
         left_layout->addWidget(data_widget_container_);
     }
 
+    //create preset widget
+    if (COMPASS::instance().viewManager().viewPresetsEnabled())
+    {
+        auto preset_widget = new ViewPresetWidget(view_, right_widget_);
+
+        right_layout->addWidget(preset_widget);
+    }
+
     //create config widget container
     {
         config_widget_container_ = new QWidget;
@@ -186,7 +196,10 @@ void ViewWidget::init()
     assert(tool_widget_);
     assert(state_widget_);
 
-    //ass toggle button for config widget
+    //add screenshot button
+    tool_widget_->addScreenshotButton();
+
+    //add toggle button for config widget
     tool_widget_->addConfigWidgetToggle();
 
     //call derived
