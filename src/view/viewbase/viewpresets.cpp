@@ -150,7 +150,7 @@ bool ViewPresets::createPreset(View* view,
     p.timestamp = "";
 
     //collect json config
-    view->generateJSON(p.view_config);
+    view->generateJSON(p.view_config, Configurable::JSONExportType::Preset);
 
     //auto-create create_preview?
     if (create_preview)
@@ -187,7 +187,7 @@ bool ViewPresets::updatePreset(View* view,
 
     //collect json config?
     if (update_view_config)
-        view->generateJSON(p.view_config);
+        view->generateJSON(p.view_config, Configurable::JSONExportType::Preset);
 
     //auto-create preview?
     if (create_preview)

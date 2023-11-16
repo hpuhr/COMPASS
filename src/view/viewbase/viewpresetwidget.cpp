@@ -280,8 +280,6 @@ void ViewPresetItemListWidget::addItem(ViewPresetItemWidget* item)
 */
 void ViewPresetItemListWidget::removeItem(ViewPresets::Key key)
 {
-    std::cout << "ViewPresetItemListWidget::removeItem" << std::endl;
-
     auto it = std::find_if(items_.begin(), items_.end(), [ & ] (ViewPresetItemWidget* item) { return item->getPreset()->key() == key; });
     assert(it != items_.end());
 
@@ -407,8 +405,6 @@ void ViewPresetWidget::addPreset()
 */
 void ViewPresetWidget::removePreset(ViewPresets::Key key)
 {
-    std::cout << "ViewPresetWidget::removePreset" << std::endl;
-
     auto& presets = COMPASS::instance().viewManager().viewPresets();
     presets.removePreset(view_, key.second);
 }
@@ -427,6 +423,10 @@ void ViewPresetWidget::modifyPreset(ViewPresets::Key key)
 */
 void ViewPresetWidget::applyPreset(ViewPresets::Key key)
 {
+    auto ret = QMessageBox::question(this, "Apply Preset", "Apply preset '" + QString::fromStdString(key.second) + "'?", QMessageBox::Yes, QMessageBox::No);
+    if (ret == QMessageBox::No)
+        return;
+
     const auto& preset = COMPASS::instance().viewManager().viewPresets().presets().at(key);
 
     QApplication::setOverrideCursor(Qt::WaitCursor);

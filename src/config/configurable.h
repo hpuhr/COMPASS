@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONFIGURABLE_H_
-#define CONFIGURABLE_H_
+#pragma once
 
 //#include <tinyxml2.h>
 #include <assert.h>
@@ -56,7 +55,9 @@
  */
 class Configurable
 {
-  public:
+public:
+    typedef Configuration::JSONExportType JSONExportType;
+
     /// @brief Constructor
     Configurable(const std::string& class_id, 
                  const std::string& instance_id,
@@ -106,8 +107,8 @@ class Configurable
 
     void setTmpDisableRemoveConfigOnDelete(bool value); // disabled removal of cfg on delete of instance
 
-    void writeJSON(nlohmann::json& parent_json) const;
-    void generateJSON(nlohmann::json& target) const;
+    void writeJSON(nlohmann::json& parent_json, JSONExportType export_type = JSONExportType::General) const;
+    void generateJSON(nlohmann::json& target, JSONExportType export_type = JSONExportType::General) const;
 
     void reconfigure(const nlohmann::json& config);
 
@@ -132,6 +133,11 @@ protected:
     /// @brief Returns the given sub-configuration (e.g. in order to check certain parameter values in generateSubConfigurable())
     const Configuration& getSubConfiguration(const std::string& class_id,
                                              const std::string& instance_id) const;
+
+    void addJSONExportFilter(JSONExportType export_type, 
+                             const std::string& class_id);
+    void addJSONExportFilter(JSONExportType export_type, 
+                             const std::vector<std::string>& class_ids);
 
     /// @brief Saves the specified child's configuration as template
     // void saveTemplateConfiguration (Configurable *child, const std::string& template_name);
@@ -201,5 +207,3 @@ private:
 
     boost::signals2::connection config_changes_connection_;
 };
-
-#endif /* CONFIGURABLE_H_ */

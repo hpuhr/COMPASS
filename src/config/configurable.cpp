@@ -242,18 +242,18 @@ const Configuration& Configurable::getSubConfiguration(const std::string& class_
 
 /**
 */
-void Configurable::writeJSON(nlohmann::json& parent_json) const
+void Configurable::writeJSON(nlohmann::json& parent_json, JSONExportType export_type) const
 {
     assert(configuration_);
-    configuration_->writeJSON(parent_json);
+    configuration_->writeJSON(parent_json, export_type);
 }
 
 /**
 */
-void Configurable::generateJSON(nlohmann::json& target) const
+void Configurable::generateJSON(nlohmann::json& target, JSONExportType export_type) const
 {
     assert(configuration_);
-    configuration_->generateJSON(target);
+    configuration_->generateJSON(target, export_type);
 }
 
 /**
@@ -459,6 +459,26 @@ std::string Configurable::getPath() const
     }
 
     return prefix + instance_id_;
+}
+
+/**
+ * Adds a new filtered class id to the export filter for the given export type.
+ */
+void Configurable::addJSONExportFilter(JSONExportType export_type, 
+                                       const std::string& class_id)
+{
+    assert(configuration_);
+    configuration_->addJSONExportFilter(export_type, class_id);
+}
+
+/**
+ * Adds new filtered class ids to the export filter for the given export type.
+ */
+void Configurable::addJSONExportFilter(JSONExportType export_type, 
+                                       const std::vector<std::string>& class_ids)
+{
+    assert(configuration_);
+    configuration_->addJSONExportFilter(export_type, class_ids);
 }
 
 // void Configurable::saveConfigurationAsTemplate (const std::string& template_name)

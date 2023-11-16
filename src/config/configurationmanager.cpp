@@ -214,7 +214,7 @@ void ConfigurationManager::saveJSONConfiguration()
             loginf << "ConfigurationManager: saveJSONConfiguration: configuration "
                    << it.second->getInstanceId() << " unused";
 
-            it.second->writeJSON(main_config);
+            it.second->writeJSON(main_config, Configuration::JSONExportType::General);
             // root_element->LinkEndChild(it.second.generateXMLElement(document));
         }
     }

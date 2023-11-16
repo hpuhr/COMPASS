@@ -469,7 +469,7 @@ void ViewWidget::notifyRefreshNeeded()
 {
     bool has_varset = isVariableSetLoaded();
 
-    std::cout << "has varset: " << has_varset << std::endl;
+    //std::cout << "has varset: " << has_varset << std::endl;
 
     if (has_varset)
         notifyRedrawNeeded();
