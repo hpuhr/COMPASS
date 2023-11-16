@@ -119,7 +119,7 @@ bool ViewPresets::readPreset(const std::string& fn)
 
 /**
 */
-QImage ViewPresets::renderPreview(View* view) const
+QImage ViewPresets::renderPreview(View* view)
 {
     auto preview = view->renderData();
     return preview.scaled(PreviewMaxSize, PreviewMaxSize, Qt::AspectRatioMode::KeepAspectRatio);
@@ -165,37 +165,26 @@ bool ViewPresets::createPreset(View* view,
 
 /**
 */
-bool ViewPresets::updatePreset(View* view, 
-                               const std::string& name,
-                               const std::string& category,
-                               const std::string& description,
-                               bool update_view_config,
-                               bool create_preview)
+void ViewPresets::updatePresetConfig(Preset& preset, View* view, bool update_preview)
 {
-    assert(view);
-    assert(!name.empty());
+    //collect json config
+    view->generateJSON(preset.view_config, Configurable::JSONExportType::Preset);
 
-    Key key(viewID(view), name);
+    if (update_preview)
+        preset.preview = renderPreview(view);
+}
+
+/**
+*/
+bool ViewPresets::writePreset(const Key& key) const
+{
     assert(presets_.count(key) != 0);
 
-    Preset& p = presets_[ key ];
-    p.description = description;
-    p.category    = category;
-
-    //@TODO: update timestamp
-    p.timestamp = "";
-
-    //collect json config?
-    if (update_view_config)
-        view->generateJSON(p.view_config, Configurable::JSONExportType::Preset);
-
-    //auto-create preview?
-    if (create_preview)
-        p.preview = renderPreview(view);
+    const Preset& p = presets_.at(key);
 
     bool ok = writePreset(p);
     if (!ok)
-        logwrn << "ViewPresets: updatePreset: could not write view preset '" << name << "'";
+        logwrn << "ViewPresets: writePreset: could not write view preset '" << key.second << "'";
 
     return ok;
 }
@@ -316,10 +305,8 @@ bool ViewPresets::writePreset(const Preset& preset) const
 
 /**
 */
-void ViewPresets::removePreset(View* view, 
-                               const std::string& name)
+void ViewPresets::removePreset(const Key& key)
 {
-    Key key(viewID(view), name);
     assert(presets_.count(key) > 0);
 
     const auto& preset = presets_.at(key);
@@ -343,6 +330,13 @@ void ViewPresets::removePreset(View* view,
 /**
 */
 const ViewPresets::Presets& ViewPresets::presets() const
+{
+    return presets_;
+}
+
+/**
+*/
+ViewPresets::Presets& ViewPresets::presets()
 {
     return presets_;
 }
@@ -417,5 +411,12 @@ std::vector<std::string> ViewPresets::categories(View* view) const
 bool ViewPresets::hasPreset(View* view, const std::string& name) const
 {
     Key key(viewID(view), name);
+    return presets_.count(key) > 0;
+}
+
+/**
+*/
+bool ViewPresets::hasPreset(const Key& key) const
+{
     return presets_.count(key) > 0;
 }

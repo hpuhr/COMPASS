@@ -20,7 +20,6 @@
 #include "viewpresets.h"
 
 #include <QWidget>
-#include <QFrame>
 
 class View;
 
@@ -29,16 +28,26 @@ class QToolButton;
 class QPushButton;
 class QLabel;
 class QVBoxLayout;
+class QLineEdit;
+class QTextEdit;
 
 class QDialog;
 
 /**
 */
-class ViewPresetItemWidget : public QFrame
+class ViewPresetItemWidget : public QWidget
 {
     Q_OBJECT
 public:
-    ViewPresetItemWidget(const ViewPresets::Preset* preset, QWidget* parent = nullptr);
+    enum class ItemState
+    {
+        Ready = 0,
+        Edit  = 1
+    };
+
+    ViewPresetItemWidget(const ViewPresets::Key& key,
+                         View* view,
+                         QWidget* parent = nullptr);
     virtual ~ViewPresetItemWidget() = default;
 
     const ViewPresets::Preset* getPreset() const { return preset_; }
@@ -46,29 +55,45 @@ public:
     void updateContents();
 
 signals:
-    void modifyPresetRequested(ViewPresets::Key key);
     void removePresetRequested(ViewPresets::Key key);
-    void applyPresetRequested(ViewPresets::Key key);
 
 protected:
+    void mousePressEvent(QMouseEvent *event) override;
     void enterEvent(QEvent* event) override;
     void leaveEvent(QEvent* event) override;
+    void hideEvent(QHideEvent *event) override;
 
 private:
     void createUI();
+    void setItemState(ItemState item_state);
+    void updateDescriptionEdit();
+    void updateCursors();
+    void updateActivity();
 
-    const ViewPresets::Preset* preset_ = nullptr;
+    void editDescriptionToggled(bool edit);
 
-    QLabel* category_label_    = nullptr;
-    QLabel* name_label_        = nullptr;
-    QLabel* preview_label_     = nullptr;
-    QLabel* description_label_ = nullptr;
+    void removeButtonPressed();
+    void updateButtonPressed();
+
+    void applyPreset();
+    bool updatePreset(const ViewPresets::Preset& preset);
+    
+    ViewPresets::Key     key_;
+    ViewPresets::Preset* preset_ = nullptr;
+    View*                view_   = nullptr;
+
+    QLabel*    category_label_        = nullptr;
+    QLabel*    name_label_            = nullptr;
+    QLabel*    preview_label_         = nullptr;
+    QLabel*    description_label_     = nullptr;
+    QTextEdit* description_edit_      = nullptr;
 
     QToolButton* remove_button_ = nullptr;
+    QToolButton* update_button_ = nullptr;
     QToolButton* edit_button_   = nullptr;
-    QToolButton* apply_button_  = nullptr;
 
-    bool inside_ = false;
+    ItemState item_state_ = ItemState::Ready;
+    bool      inside_     = false;
 };
 
 /**
@@ -83,17 +108,13 @@ public:
     void clear();
     void addItem(ViewPresetItemWidget* item);
 
-signals:
-    void removed(ViewPresets::Key key);
-    void modify(ViewPresets::Key key);
-    void apply(ViewPresets::Key key);
-
 private:
     void createUI();
     void removeItem(ViewPresets::Key key);
-    void modifyItem(ViewPresets::Key key);
 
-    QVBoxLayout* item_layout_;
+    QLineEdit*   filter_edit_ = nullptr;
+    QVBoxLayout* item_layout_ = nullptr;
+
     std::vector<ViewPresetItemWidget*> items_;
 };
 
@@ -111,12 +132,6 @@ private:
     void createUI();
     void refill();
     void addPreset();
-
-    void removePreset(ViewPresets::Key key);
-    void modifyPreset(ViewPresets::Key key);
-    void applyPreset(ViewPresets::Key key);
-
-    void configurePreset(const ViewPresets::Preset* preset);
 
     View* view_ = nullptr;
 

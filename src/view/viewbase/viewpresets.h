@@ -53,23 +53,24 @@ public:
     virtual ~ViewPresets() = default;
 
     bool scanForPresets();
-    bool createPreset(View* view, 
+
+    bool createPreset(View* view,
                       const std::string& name,
                       const std::string& category,
                       const std::string& description,
-                      bool create_preview = false);
-    void removePreset(View* view, 
-                      const std::string& name);
-    bool updatePreset(View* view, 
-                      const std::string& name,
-                      const std::string& category,
-                      const std::string& description,
-                      bool update_view_config = true,
-                      bool create_preview = false);
+                      bool create_preview = true);
+    void removePreset(const Key& key);
+    bool writePreset(const Key& key) const;
 
     bool hasPreset(View* view, const std::string& name) const;
+    bool hasPreset(const Key& key) const;
+
+    static void updatePresetConfig(Preset& preset, View* view, bool update_preview = true);
+    static QImage renderPreview(View* view);
 
     const Presets& presets() const;
+    Presets& presets();
+
     std::vector<Key> keysFor(View* view) const;
     std::vector<Key> keysFor(const std::string& category) const;
     std::vector<Key> keysFor(View* view, 
@@ -98,8 +99,6 @@ private:
     bool writePreview(const Preset& preset) const;
     bool writePreset(const Preset& preset) const;
     bool readPreset(const std::string& fn);
-
-    QImage renderPreview(View* view) const;
 
     std::string presetBaseName(const Preset& preset) const;
 
