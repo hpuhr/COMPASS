@@ -288,6 +288,12 @@ void View::issueViewUpdate(const ViewUpdate& vu)
 
 QImage View::renderData() const
 {
-    assert (widget_);  
+    assert (widget_ && widget_->getViewDataWidget());  
     return widget_->getViewDataWidget()->renderData();
+}
+
+QImage View::renderView() const
+{
+    assert (widget_);  
+    return widget_->renderContents();
 }

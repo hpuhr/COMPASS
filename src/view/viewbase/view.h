@@ -94,6 +94,7 @@ public:
     virtual void accept(LatexVisitor& v) = 0;
 
     QImage renderData() const;
+    QImage renderView() const;
 
 signals:
     void selectionChangedSignal();  // do not emit manually, call emitSelectionChange()

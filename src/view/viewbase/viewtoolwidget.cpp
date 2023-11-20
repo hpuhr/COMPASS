@@ -3,6 +3,7 @@
 #include "viewtoolswitcher.h"
 #include "viewwidget.h"
 #include "view.h"
+#include "viewscreenshotdialog.h"
 #include "compass.h"
 #include "timeconv.h"
 
@@ -263,6 +264,7 @@ void ViewToolWidget::addScreenshotButton()
     //add separator if needed
     addSeparatorIfValid();
 
+#if 0
     auto screener_cb = [ = ] ()
     {
         auto timestamp = Utils::Time::toString(Utils::Time::currentUTCTime());
@@ -281,6 +283,13 @@ void ViewToolWidget::addScreenshotButton()
 
         QApplication::restoreOverrideCursor();
     };
+#else
+    auto screener_cb = [ = ] ()
+    {
+        ViewScreenshotDialog dlg(view_widget_->getView(), this);
+        dlg.exec();
+    };
+#endif
 
     //add toggle callback
     addActionCallback("Save Screenshot", screener_cb, {}, ViewWidget::getIcon("camera.png"), QKeySequence());

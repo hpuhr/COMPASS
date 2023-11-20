@@ -33,6 +33,7 @@
 #include <QVBoxLayout>
 #include <QSplitter>
 #include <QSettings>
+#include <QPainter>
 
 /**
 @brief Constructor.
@@ -543,4 +544,24 @@ bool ViewWidget::isVariableSetLoaded() const
 {
     assert(data_widget_);
     return data_widget_->isVariableSetLoaded();
+}
+
+/**
+*/
+QImage ViewWidget::renderContents()
+{
+    assert (data_widget_);  
+    QImage data_img = data_widget_->renderData();
+
+    QImage img(this->size(), QImage::Format_ARGB32);
+    QPainter painter(&img);
+
+    render(&painter);
+
+    auto p0 = this->mapToGlobal(QPoint(0,0));
+    auto p1 = data_widget_->mapToGlobal(QPoint(0,0));
+
+    painter.drawImage(p1 - p0, data_img);
+
+    return img;
 }

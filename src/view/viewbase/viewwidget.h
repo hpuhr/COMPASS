@@ -137,6 +137,8 @@ public:
 
     boost::optional<QString> uiGet(const QString& what = QString()) const override final;
 
+    QImage renderContents();
+
     static QIcon getIcon(const std::string& fn);
 
 protected:
