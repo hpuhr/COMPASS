@@ -148,11 +148,15 @@ public:
     void updateContents();
     void addPreset();
 
+    static const double WidgetWFraction;
+    static const double WidgetHFraction;
+
 private:
     void createUI();
     void clear();
     void refill();
     void updateFilter();
+    void updateMinSize();
 
     void editPreset(ViewPresets::Key key);
     void removePreset(ViewPresets::Key key);

@@ -551,18 +551,22 @@ void ViewPresetItemWidget::leaveEvent(QEvent* event)
  * ViewPresetItemListWidget
  ********************************************************************************************/
 
+const double ViewPresetItemListWidget::WidgetWFraction = 0.4;
+const double ViewPresetItemListWidget::WidgetHFraction = 0.6;
+
 /**
 */
 ViewPresetItemListWidget::ViewPresetItemListWidget(View* view,
                                                    QWidget* parent)
-:   QWidget  (parent  )
-,   view_    (view    )
+:   QWidget(parent)
+,   view_  (view  )
 {
     createUI();
     updateContents();
 
     auto& presets = COMPASS::instance().viewManager().viewPresets();
 
+    //react on preset changes globally
     connect(&presets, &ViewPresets::presetAdded  , this, &ViewPresetItemListWidget::updateItem);
     connect(&presets, &ViewPresets::presetRemoved, this, &ViewPresetItemListWidget::removeItem);
     connect(&presets, &ViewPresets::presetRenamed, this, &ViewPresetItemListWidget::updateItem);
@@ -616,6 +620,7 @@ void ViewPresetItemListWidget::createUI()
 */
 void ViewPresetItemListWidget::addPreset()
 {
+    //show creation dialog
     ViewPresetEditDialog dlg(view_, nullptr, this);
     dlg.exec();
 }
@@ -627,7 +632,7 @@ void ViewPresetItemListWidget::clear()
     for (auto item : items_)
     {
         item_layout_->removeWidget(item);
-        item->deleteLater();
+        item->deleteLater(); //better to delete later
     }
     items_.clear();
 }
@@ -639,6 +644,7 @@ void ViewPresetItemListWidget::editPreset(ViewPresets::Key key)
     auto& presets = COMPASS::instance().viewManager().viewPresets();
     assert(presets.hasPreset(key));
 
+    //edit preset
     ViewPresetEditDialog dlg(view_, &presets.presets().at(key), this);
     if (dlg.exec() != QDialog::Accepted)
         return;
@@ -683,6 +689,7 @@ void ViewPresetItemListWidget::updateItem(ViewPresets::Key key)
     if (!ViewPresets::keyIsView(key, view_))
         return;
 
+    //just update complete content on item change
     updateContents();
 }
 
@@ -690,6 +697,7 @@ void ViewPresetItemListWidget::updateItem(ViewPresets::Key key)
 */
 void ViewPresetItemListWidget::updateContents()
 {
+    //refresh item widgets
     refill();
 }
 
@@ -699,14 +707,17 @@ void ViewPresetItemListWidget::refill()
 {
     blockSignals(true);
 
+    //clear items
     clear();
 
     const auto& presets = COMPASS::instance().viewManager().viewPresets();
 
+    //get preset keys for stored view type
     auto keys = presets.keysFor(view_);
 
     for (const auto& key : keys)
     {
+        //add item
         ViewPresetItemWidget* item = new ViewPresetItemWidget(key, view_, this);
         item->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -714,19 +725,22 @@ void ViewPresetItemListWidget::refill()
         connect(item, &ViewPresetItemWidget::editPreset  , this, &ViewPresetItemListWidget::editPreset  );
 
         item_layout_->addWidget(item);
-
         items_.push_back(item);
     }
+
+    //update visibility of items via filter
     updateFilter();
 
     blockSignals(false);
     
-    auto screen_size = QGuiApplication::primaryScreen()->size();
-    setMinimumSize(screen_size.height() * 0.4, screen_size.height() * 0.6);
+    updateMinSize();
 }
 
 namespace
 {
+    /**
+     * Check if preset name is part of filter clause.
+     */
     bool inFilter(const QString& filter, const ViewPresets::Preset* preset)
     {
         if (filter.isEmpty())
@@ -734,6 +748,7 @@ namespace
 
         QString name = QString::fromStdString(preset->name);
 
+        //check if name starts with filter and also check lower case version of name
         if (name.startsWith(filter) || name.toLower().startsWith(filter))
             return true;
 
@@ -749,6 +764,15 @@ void ViewPresetItemListWidget::updateFilter()
 
     for (auto item : items_)
         item->setVisible(inFilter(filter, item->getPreset()));
+}
+
+/**
+*/
+void ViewPresetItemListWidget::updateMinSize()
+{
+    //update minimum widget size to a fraction of screen height
+    auto screen_size = QGuiApplication::primaryScreen()->size();
+    setMinimumSize(screen_size.height() * WidgetWFraction, screen_size.height() * WidgetHFraction);
 }
 
 /********************************************************************************************
