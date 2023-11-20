@@ -125,7 +125,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     {
         string main_id("?");
 
-        if (buffer->has<unsigned int>(utn_var.name())
+        if (use_utn_as_id_ && buffer->has<unsigned int>(utn_var.name())
                 && !buffer->get<unsigned int>(utn_var.name()).isNull(buffer_index))
         {
             main_id = to_string(buffer->get<unsigned int>(utn_var.name()).get(buffer_index));
@@ -276,7 +276,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
             value = "?";
             unit = "";
 
-            if (buffer->has<unsigned int>(utn_var.name())
+            if (use_utn_as_id_ && buffer->has<unsigned int>(utn_var.name())
                     && !buffer->get<unsigned int>(utn_var.name()).isNull(buffer_index))
             {
                 value = to_string(buffer->get<unsigned int>(utn_var.name()).get(buffer_index));

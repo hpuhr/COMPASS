@@ -139,6 +139,8 @@ protected:
     nlohmann::json label_directions_;
     float label_distance_ {0.5}; // 0 ... 1
 
+    bool use_utn_as_id_ {false};
+
     nlohmann::json label_lines_;
 
     nlohmann::json label_config_;
