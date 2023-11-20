@@ -29,6 +29,272 @@
 #include <QScreen>
 
 /********************************************************************************************
+ * ViewPresetEditDialog
+ ********************************************************************************************/
+
+/**
+*/
+ViewPresetEditDialog::ViewPresetEditDialog(View* view, 
+                                           ViewPresets::Preset* preset, 
+                                           QWidget* parent)
+:   QDialog(parent)
+,   view_  (view  )
+,   preset_(preset)
+,   mode_  (preset == nullptr ? Mode::Create : Mode::Edit)
+{
+    assert(view_);
+
+    createUI();
+    configureUI();
+}
+
+/**
+*/
+void ViewPresetEditDialog::createUI()
+{
+    QVBoxLayout* main_layout = new QVBoxLayout;
+    setLayout(main_layout);
+
+    QGridLayout* layout = new QGridLayout;
+    main_layout->addLayout(layout);
+
+    QHBoxLayout* preview_layout = new QHBoxLayout;
+
+    preview_label_ = new QLabel;
+    preview_label_->setFixedSize(ViewPresets::PreviewMaxSize, ViewPresets::PreviewMaxSize);
+    preview_layout->addWidget(preview_label_);
+    preview_layout->addStretch(1);
+
+    auto name_label  = new QLabel("Name: ");
+    name_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    auto cat_label   = new QLabel("Category: ");
+    cat_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    auto descr_label = new QLabel("Description: ");
+    descr_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    descr_label->setAlignment(Qt::AlignTop);
+
+    auto preview_label = new QLabel("Preview: ");
+    preview_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    preview_label->setAlignment(Qt::AlignTop);
+
+    
+    layout->addWidget(name_label   , 0, 0);
+    layout->addWidget(cat_label    , 1, 0);
+    layout->addWidget(descr_label  , 2, 0);
+    layout->addWidget(preview_label, 3, 0);
+
+    name_edit_        = new QLineEdit;
+    category_edit_    = new QLineEdit;
+    description_edit_ = new QTextEdit;
+
+    description_edit_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    description_edit_->setAcceptRichText(false);
+
+    update_button_ = new QPushButton("Update view config");
+    update_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
+
+    config_label_ = new QLabel("");
+
+    layout->addWidget(name_edit_       , 0, 1);
+    layout->addWidget(category_edit_   , 1, 1);
+    layout->addWidget(description_edit_, 2, 1);
+    layout->addLayout(preview_layout   , 3, 1);
+    layout->addWidget(update_button_   , 4, 1);
+    layout->addWidget(config_label_    , 5, 1);
+
+    main_layout->addStretch(1);
+
+    QHBoxLayout* button_layout = new QHBoxLayout;
+    main_layout->addLayout(button_layout);
+
+    create_button_ = new QPushButton("Create");
+    copy_button_   = new QPushButton("Copy");
+    save_button_   = new QPushButton("Save");
+    
+    auto cancel_button = new QPushButton("Cancel");
+
+    button_layout->addWidget(cancel_button );
+    button_layout->addStretch(1);
+    button_layout->addWidget(create_button_);
+    button_layout->addWidget(copy_button_  );
+    button_layout->addWidget(save_button_  );
+    
+    connect(create_button_, &QPushButton::pressed, this, &ViewPresetEditDialog::createPreset);
+    connect(copy_button_  , &QPushButton::pressed, this, &ViewPresetEditDialog::copyPreset  );
+    connect(save_button_  , &QPushButton::pressed, this, &ViewPresetEditDialog::savePreset  );
+    connect(cancel_button , &QPushButton::pressed, this, &ViewPresetEditDialog::reject      );
+
+    connect(update_button_, &QPushButton::pressed, this, &ViewPresetEditDialog::updateConfigPressed);
+}
+
+/**
+*/
+void ViewPresetEditDialog::configureUI()
+{
+    bool create_mode = mode_ == Mode::Create;
+
+    setWindowTitle(create_mode ? "Create new preset" : "Edit preset");
+
+    create_button_->setVisible(create_mode);
+    copy_button_->setVisible(!create_mode);
+    save_button_->setVisible(!create_mode);
+    update_button_->setVisible(!create_mode);
+
+    if (create_mode)
+    {
+        updateConfig();
+    }
+    else
+    {
+        preset_backup_ = *preset_;
+        preset_update_ = *preset_;
+
+        name_edit_->setText(QString::fromStdString(preset_->name));
+        category_edit_->setText(QString::fromStdString(preset_->category));
+        description_edit_->setText(QString::fromStdString(preset_->description));
+    }
+
+    updatePreview();
+}
+
+/**
+*/
+void ViewPresetEditDialog::revert()
+{
+    assert(preset_);
+    *preset_ = preset_backup_;
+}
+
+/**
+*/
+bool ViewPresetEditDialog::checkName()
+{
+    auto& presets = COMPASS::instance().viewManager().viewPresets();
+
+    if (name_edit_->text().isEmpty())
+    {
+        QMessageBox::critical(this, "Error", "Please set a valid preset name.");
+        return false;
+    }
+
+    if (presets.hasPreset(view_, name_edit_->text().toStdString()))
+    {
+        QMessageBox::critical(this, "Error", "A preset of this name already exists, please select a unique name.");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+*/
+void ViewPresetEditDialog::createPreset()
+{
+    if (!checkName())
+        return;
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    updateMetaData();
+    bool ok = COMPASS::instance().viewManager().viewPresets().createPreset(preset_update_, view_);
+
+    QApplication::restoreOverrideCursor();
+
+    if (!ok)
+    {
+        QMessageBox::critical(this, "Error", "Creating new preset failed.");
+        return;
+    }
+
+    accept();
+}
+
+/**
+*/
+void ViewPresetEditDialog::copyPreset()
+{
+    assert(preset_);
+
+    if (!checkName())
+        return;
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    updateMetaData();
+    bool ok = COMPASS::instance().viewManager().viewPresets().createPreset(preset_update_, nullptr);
+
+    QApplication::restoreOverrideCursor();
+
+    if (!ok)
+    {
+        QMessageBox::critical(this, "Error", "Saving as new preset failed.");
+        return;
+    }
+
+    accept();
+}
+
+/**
+*/
+void ViewPresetEditDialog::savePreset()
+{
+    assert(preset_);
+
+    //if the name changed we need to check its validity
+    if (name_edit_->text().toStdString() != preset_backup_.name && !checkName())
+        return;
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    updateMetaData();
+    bool ok = COMPASS::instance().viewManager().viewPresets().updatePreset(preset_->key(), preset_update_);
+
+    QApplication::restoreOverrideCursor();
+
+    if (!ok)
+    {
+        QMessageBox::critical(this, "Error", "Saving preset failed.");
+        return;
+    }
+
+    accept();
+}
+
+/**
+*/
+void ViewPresetEditDialog::updateConfig()
+{
+    ViewPresets::updatePresetConfig(preset_update_, view_, true);
+}
+
+/**
+*/
+void ViewPresetEditDialog::updateMetaData()
+{
+    preset_update_.name        = name_edit_->text().toStdString();
+    preset_update_.category    = category_edit_->text().toStdString();
+    preset_update_.description = description_edit_->toPlainText().toStdString();
+}
+
+/**
+*/
+void ViewPresetEditDialog::updatePreview()
+{
+    preview_label_->setPixmap(QPixmap::fromImage(preset_update_.preview));
+}
+
+/**
+*/
+void ViewPresetEditDialog::updateConfigPressed()
+{
+    updateConfig();
+    updatePreview();
+    config_label_->setText("Configuration updated!");
+}
+
+/********************************************************************************************
  * ViewPresetItemWidget
  ********************************************************************************************/
 
@@ -38,26 +304,20 @@ ViewPresetItemWidget::ViewPresetItemWidget(const ViewPresets::Key& key,
                                            View* view,
                                            QWidget* parent)
 :   QWidget(parent)
-,   key_   (key   )
 ,   view_  (view  )
 {
-    assert(view_  );
+    assert(view_);
     
-    auto& presets = COMPASS::instance().viewManager().viewPresets();
-    assert(presets.hasPreset(key));
-
-    preset_ = &presets.presets().at(key);
-
     createUI();
-    updateContents();
-    
-    setItemState(ItemState::Ready);
+    updateContents(key);
 }
 
 /**
 */
 void ViewPresetItemWidget::createUI()
 {
+    setCursor(Qt::CursorShape::PointingHandCursor);
+
     QHBoxLayout* main_layout = new QHBoxLayout;
     main_layout->setMargin(0);
     main_layout->setSpacing(0);
@@ -168,31 +428,7 @@ void ViewPresetItemWidget::createUI()
             description_label_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
             description_label_->setAlignment(Qt::AlignTop);
 
-            description_edit_ = new QTextEdit;
-            description_edit_->setAcceptRichText(false);
-
             layout_descr->addWidget(description_label_);
-            layout_descr->addWidget(description_edit_ );
-
-            QVBoxLayout* layout_edit_button = new QVBoxLayout;
-            layout_edit_button->setMargin(0);
-            layout_edit_button->setSpacing(0);
-
-            edit_button_ = new QToolButton;
-            edit_button_->setIcon(QIcon(Utils::Files::getIconFilepath("edit_old.png").c_str()));
-            edit_button_->setToolTip("Edit description");
-            edit_button_->setIconSize(QSize(14, 14));
-            edit_button_->setAutoRaise(true);
-            edit_button_->setCheckable(true);
-
-            edit_button_->setVisible(false);
-
-            connect(edit_button_, &QToolButton::toggled, this, &ViewPresetItemWidget::editDescriptionToggled);
-
-            layout_edit_button->addWidget(edit_button_);
-            layout_edit_button->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding));
-
-            layout_descr->addLayout(layout_edit_button);
         }
 
         content_widget_layout->addWidget(info_widget);
@@ -204,36 +440,17 @@ void ViewPresetItemWidget::createUI()
     remove_button_->setToolTip("Remove preset");
     remove_button_->setAutoRaise(true);
 
-    update_button_ = new QToolButton;
-    update_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
-    update_button_->setToolTip("Update to current view config");
-    update_button_->setAutoRaise(true);
+    edit_button_ = new QToolButton;
+    edit_button_->setIcon(QIcon(Utils::Files::getIconFilepath("edit.png").c_str()));
+    edit_button_->setToolTip("Edit preset");
+    edit_button_->setAutoRaise(true);
 
     decoration_widget_layout->addWidget(remove_button_);
-    decoration_widget_layout->addWidget(update_button_);
+    decoration_widget_layout->addWidget(edit_button_);
     decoration_widget_layout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
     connect(remove_button_, &QToolButton::pressed, this, &ViewPresetItemWidget::removeButtonPressed);
-    connect(update_button_, &QToolButton::pressed, this, &ViewPresetItemWidget::updateButtonPressed);
-}
-
-/**
-*/
-void ViewPresetItemWidget::setItemState(ItemState item_state)
-{
-    item_state_ = item_state;
-
-    //update stuff on state change
-    updateActivity();
-    updateCursors();
-    updateDescriptionEdit();
-}
-
-/**
-*/
-void ViewPresetItemWidget::updateCursors()
-{
-    setCursor(item_state_ == ItemState::Edit ? Qt::CursorShape::ArrowCursor : Qt::CursorShape::PointingHandCursor);
+    connect(edit_button_  , &QToolButton::pressed, this, &ViewPresetItemWidget::editButtonPressed  );
 
     remove_button_->setCursor(Qt::CursorShape::ArrowCursor);
     edit_button_->setCursor(Qt::CursorShape::ArrowCursor);
@@ -241,43 +458,21 @@ void ViewPresetItemWidget::updateCursors()
 
 /**
 */
-void ViewPresetItemWidget::updateActivity()
+void ViewPresetItemWidget::updateContents(const ViewPresets::Key& key)
 {
-    remove_button_->setEnabled(item_state_ == ItemState::Ready);
-    update_button_->setEnabled(item_state_ == ItemState::Ready);
-}
+    auto& presets = COMPASS::instance().viewManager().viewPresets();
+    assert(presets.hasPreset(key));
 
-/**
-*/
-void ViewPresetItemWidget::updateDescriptionEdit()
-{
-    bool edit_mode = item_state_ == ItemState::Edit;
+    key_    = key;
+    preset_ = &presets.presets().at(key);
 
-    //need to deactivate edit button?
-    if (!edit_mode && edit_button_->isChecked())
-    {
-        edit_button_->blockSignals(true);
-        edit_button_->setChecked(false);
-        edit_button_->blockSignals(false);
-    }
-
-    if (edit_mode)
-    {
-        description_edit_->setFixedHeight(std::max(100, description_label_->height()));
-        description_edit_->setPlainText(description_label_->text());
-    }
-
-    description_label_->setVisible(!edit_mode);
-    description_edit_->setVisible(edit_mode);
+    updateContents();
 }
 
 /**
 */
 void ViewPresetItemWidget::updateContents()
 {
-    //revert any active editing on content update
-    setItemState(ItemState::Ready);
-
     category_label_->setVisible(!preset_->category.empty());
     category_label_->setText(QString::fromStdString(preset_->category));
 
@@ -291,41 +486,16 @@ void ViewPresetItemWidget::updateContents()
 
 /**
 */
-void ViewPresetItemWidget::editDescriptionToggled(bool edit)
-{
-    if (!edit)
-    {
-        description_label_->setText(description_edit_->toPlainText());
-
-        ViewPresets::Preset p = *preset_;
-        p.description = description_label_->text().toStdString();
-
-        updatePreset(p);
-    }
-
-    //set item state
-    setItemState(edit ? ItemState::Edit : ItemState::Ready);
-}
-
-/**
-*/
 void ViewPresetItemWidget::removeButtonPressed()
 {
-    auto& presets = COMPASS::instance().viewManager().viewPresets();
-    presets.removePreset(preset_->key());
-
-    emit removePresetRequested(preset_->key());
+    emit removePreset(key_);
 }
 
 /**
 */
-void ViewPresetItemWidget::updateButtonPressed()
+void ViewPresetItemWidget::editButtonPressed()
 {
-    ViewPresets::Preset p = *preset_;
-    ViewPresets::updatePresetConfig(p, view_, true);
-
-    updatePreset(p);
-    updateContents();
+    emit editPreset(key_);
 }
     
 /**
@@ -337,58 +507,20 @@ void ViewPresetItemWidget::applyPreset()
     //reconfigure view using the preset's view config
     view_->reconfigure(preset_->view_config);
 
-    //update item contents (preview image etc.)
-    updateContents();
-
     QApplication::restoreOverrideCursor();
-}
-
-/**
-*/
-bool ViewPresetItemWidget::updatePreset(const ViewPresets::Preset& preset)
-{
-    //backup current preset
-    ViewPresets::Preset p_backup = *preset_;
-
-    //set new preset
-    *preset_ = preset;
-
-    //write preset
-    const auto& presets = COMPASS::instance().viewManager().viewPresets();
-
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    bool ok = presets.writePreset(key_);
-
-    QApplication::restoreOverrideCursor();
-
-    if (!ok)
-    {
-        QMessageBox::critical(this, "Error", "Writing preset '" + QString::fromStdString(key_.second) + "' to disk failed.");
-
-        //revert to old version and update
-        *preset_ = p_backup;
-
-        updateContents();
-    }
-
-    return ok;
 }
 
 /**
 */
 void ViewPresetItemWidget::mousePressEvent(QMouseEvent *event)
 {
-    //allow mouse clicks only when item is ready
-    if (item_state_ == ItemState::Ready)
-    {
-        //handle parents mouse event
-        QWidget::mousePressEvent(event);
+    //handle parents mouse event
+    QWidget::mousePressEvent(event);
 
-        if (event->button() == Qt::LeftButton)
-        {
-            applyPreset();
-        }
+    if (event->button() == Qt::LeftButton)
+    {
+        //item clicked => apply preset
+        applyPreset();
     }
 }
 
@@ -415,23 +547,26 @@ void ViewPresetItemWidget::leaveEvent(QEvent* event)
     }
 }
 
-/**
-*/
-void ViewPresetItemWidget::hideEvent(QHideEvent *event)
-{
-    //revert any active editing on hide
-    setItemState(ItemState::Ready);
-}
-
 /********************************************************************************************
  * ViewPresetItemListWidget
  ********************************************************************************************/
 
 /**
 */
-ViewPresetItemListWidget::ViewPresetItemListWidget(QWidget* parent)
+ViewPresetItemListWidget::ViewPresetItemListWidget(View* view,
+                                                   QWidget* parent)
+:   QWidget  (parent  )
+,   view_    (view    )
 {
     createUI();
+    updateContents();
+
+    auto& presets = COMPASS::instance().viewManager().viewPresets();
+
+    connect(&presets, &ViewPresets::presetAdded  , this, &ViewPresetItemListWidget::updateItem);
+    connect(&presets, &ViewPresets::presetRemoved, this, &ViewPresetItemListWidget::removeItem);
+    connect(&presets, &ViewPresets::presetRenamed, this, &ViewPresetItemListWidget::updateItem);
+    connect(&presets, &ViewPresets::presetUpdated, this, &ViewPresetItemListWidget::updateItem);
 }
 
 /**
@@ -472,6 +607,17 @@ void ViewPresetItemListWidget::createUI()
 
     scroll_area->show();
     widget->show();
+
+    connect(filter_edit_, &QLineEdit::textChanged, this, &ViewPresetItemListWidget::updateFilter);
+}
+
+
+/**
+*/
+void ViewPresetItemListWidget::addPreset()
+{
+    ViewPresetEditDialog dlg(view_, nullptr, this);
+    dlg.exec();
 }
 
 /**
@@ -481,37 +627,128 @@ void ViewPresetItemListWidget::clear()
     for (auto item : items_)
     {
         item_layout_->removeWidget(item);
-        delete item;
+        item->deleteLater();
     }
     items_.clear();
 }
 
 /**
 */
-void ViewPresetItemListWidget::addItem(ViewPresetItemWidget* item)
+void ViewPresetItemListWidget::editPreset(ViewPresets::Key key)
 {
-    item->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    auto& presets = COMPASS::instance().viewManager().viewPresets();
+    assert(presets.hasPreset(key));
 
-    items_.push_back(item);
-    item_layout_->addWidget(item);
+    ViewPresetEditDialog dlg(view_, &presets.presets().at(key), this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+}
 
-    connect(item, &ViewPresetItemWidget::removePresetRequested, this, &ViewPresetItemListWidget::removeItem);
+/**
+*/
+void ViewPresetItemListWidget::removePreset(ViewPresets::Key key)
+{
+    auto& presets = COMPASS::instance().viewManager().viewPresets();
+    assert(presets.hasPreset(key));
+
+    //remove preset
+    presets.removePreset(key);
 }
 
 /**
 */
 void ViewPresetItemListWidget::removeItem(ViewPresets::Key key)
 {
+    //key does not concern me?
+    if (!ViewPresets::keyIsView(key, view_))
+        return;
+
     //get item
-    auto it = std::find_if(items_.begin(), items_.end(), [ & ] (ViewPresetItemWidget* item) { return item->getPreset()->key() == key; });
+    auto it = std::find_if(items_.begin(), items_.end(), [ & ] (ViewPresetItemWidget* item) { return item->key() == key; });
     assert(it != items_.end());
 
-    //remove from layout and delete item
+    //remove item from layout and delete
     item_layout_->removeWidget(*it);
     delete *it;
 
     //remove from items
     items_.erase(it);
+}
+
+/**
+*/
+void ViewPresetItemListWidget::updateItem(ViewPresets::Key key)
+{
+    //key does not concern me?
+    if (!ViewPresets::keyIsView(key, view_))
+        return;
+
+    updateContents();
+}
+
+/**
+*/
+void ViewPresetItemListWidget::updateContents()
+{
+    refill();
+}
+
+/**
+*/
+void ViewPresetItemListWidget::refill()
+{
+    blockSignals(true);
+
+    clear();
+
+    const auto& presets = COMPASS::instance().viewManager().viewPresets();
+
+    auto keys = presets.keysFor(view_);
+
+    for (const auto& key : keys)
+    {
+        ViewPresetItemWidget* item = new ViewPresetItemWidget(key, view_, this);
+        item->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        connect(item, &ViewPresetItemWidget::removePreset, this, &ViewPresetItemListWidget::removePreset);
+        connect(item, &ViewPresetItemWidget::editPreset  , this, &ViewPresetItemListWidget::editPreset  );
+
+        item_layout_->addWidget(item);
+
+        items_.push_back(item);
+    }
+    updateFilter();
+
+    blockSignals(false);
+    
+    auto screen_size = QGuiApplication::primaryScreen()->size();
+    setMinimumSize(screen_size.height() * 0.4, screen_size.height() * 0.6);
+}
+
+namespace
+{
+    bool inFilter(const QString& filter, const ViewPresets::Preset* preset)
+    {
+        if (filter.isEmpty())
+            return true;
+
+        QString name = QString::fromStdString(preset->name);
+
+        if (name.startsWith(filter) || name.toLower().startsWith(filter))
+            return true;
+
+        return false;
+    }
+}
+
+/**
+*/
+void ViewPresetItemListWidget::updateFilter()
+{
+    auto filter = filter_edit_->text();
+
+    for (auto item : items_)
+        item->setVisible(inFilter(filter, item->getPreset()));
 }
 
 /********************************************************************************************
@@ -527,7 +764,6 @@ ViewPresetWidget::ViewPresetWidget(View* view, QWidget* parent)
     assert(view_);
 
     createUI();
-    refill();
 }
 
 /**
@@ -543,7 +779,7 @@ void ViewPresetWidget::createUI()
     layout_h->setMargin(0);
     layout->addLayout(layout_h);
 
-    preset_list_ = new ViewPresetItemListWidget(this);
+    preset_list_ = new ViewPresetItemListWidget(view_, this);
 
     show_button_ = new QPushButton("Show Presets");
     layout_h->addWidget(show_button_);
@@ -564,125 +800,5 @@ void ViewPresetWidget::createUI()
 
     show_button_->setMenu(menu);
 
-    connect(add_button_, &QToolButton::pressed, this, &ViewPresetWidget::addPreset);
-}
-
-/**
-*/
-void ViewPresetWidget::refill()
-{
-    preset_list_->blockSignals(true);
-
-    preset_list_->clear();
-
-    const auto& presets = COMPASS::instance().viewManager().viewPresets();
-
-    auto keys = presets.keysFor(view_);
-
-    for (const auto& key : keys)
-    {
-        ViewPresetItemWidget* widget = new ViewPresetItemWidget(key, view_, preset_list_);
-        widget->updateContents();
-
-        preset_list_->addItem(widget);
-    }
-
-    preset_list_->blockSignals(false);
-    
-    auto screen_size = QGuiApplication::primaryScreen()->size();
-    preset_list_->setMinimumSize(screen_size.height() * 0.3, screen_size.height() * 0.6);
-}
-
-/**
-*/
-void ViewPresetWidget::addPreset()
-{
-    QDialog dlg;
-    dlg.setWindowTitle("Create new preset");
-
-    QVBoxLayout* main_layout = new QVBoxLayout;
-    dlg.setLayout(main_layout);
-
-    QGridLayout* layout = new QGridLayout;
-    main_layout->addLayout(layout);
-
-    auto name_label  = new QLabel("Name: ");
-    name_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    auto cat_label   = new QLabel("Category: ");
-    cat_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    auto descr_label = new QLabel("Description: ");
-    descr_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    descr_label->setAlignment(Qt::AlignTop);
-
-    layout->addWidget( name_label, 0, 0);
-    layout->addWidget(  cat_label, 1, 0);
-    layout->addWidget(descr_label, 2, 0);
-
-    auto name_edit  = new QLineEdit;
-    auto cat_edit   = new QLineEdit;
-
-    auto descr_edit = new QTextEdit;
-    descr_edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    descr_edit->setAcceptRichText(false);
-
-    layout->addWidget( name_edit, 0, 1);
-    layout->addWidget(  cat_edit, 1, 1);
-    layout->addWidget(descr_edit, 2, 1);
-
-    QHBoxLayout* button_layout = new QHBoxLayout;
-    main_layout->addLayout(button_layout);
-
-    QPushButton* ok_button     = new QPushButton("Create");
-    QPushButton* cancel_button = new QPushButton("Cancel");
-
-    button_layout->addStretch(1);
-    button_layout->addWidget(ok_button);
-    button_layout->addWidget(cancel_button);
-
-    auto& presets = COMPASS::instance().viewManager().viewPresets();
-
-    auto ok_callback = [ & ] ()
-    {
-        if (name_edit->text().isEmpty())
-        {
-            QMessageBox::critical(this, "Error", "Please set a valid preset name.");
-            return;
-        }
-        if (presets.hasPreset(view_, name_edit->text().toStdString()))
-        {
-            QMessageBox::critical(this, "Error", "A preset of this name already exists, please select a unique name.");
-            return;
-        }
-        dlg.accept();
-    };
-
-    connect(ok_button, &QPushButton::pressed, ok_callback);
-    connect(cancel_button, &QPushButton::pressed, &dlg, &QDialog::reject);
-
-    if (dlg.exec() == QDialog::Rejected)
-        return;
-
-    std::string name        = name_edit->text().toStdString();
-    std::string category    = cat_edit->text().toStdString();
-    std::string description = descr_edit->toPlainText().toStdString();
-
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    bool ok = presets.createPreset(view_, name, category, description, true);
-
-    QApplication::restoreOverrideCursor();
-
-    if (!ok)
-    {
-        QMessageBox::critical(this, "Error", "Creating new preset failed.");
-        return;
-    }
-
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    refill();
-
-    QApplication::restoreOverrideCursor();
+    connect(add_button_, &QToolButton::pressed, preset_list_, &ViewPresetItemListWidget::addPreset);
 }

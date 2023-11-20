@@ -55,9 +55,11 @@ std::string getImageFilepath(const std::string& filename);
 void deleteFile(const std::string& filename);
 void deleteFolder(const std::string& path);
 
-std::string getDirectoryFromPath (const std::string& path);
-std::string getFilenameFromPath (const std::string& path);
+std::string getDirectoryFromPath(const std::string& path);
+std::string getFilenameFromPath(const std::string& path);
 bool createMissingDirectories(const std::string& path); // true if successful
+
+std::string replaceExtension(const std::string& path, const std::string& new_ext_plus_point);
 
 std::string normalizeFilename(const std::string& filename_without_ext);
 

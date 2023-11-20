@@ -18,8 +18,11 @@
 #pragma once
 
 #include "viewpresets.h"
+#include "json.h"
 
 #include <QWidget>
+#include <QDialog>
+#include <QImage>
 
 class View;
 
@@ -35,65 +38,101 @@ class QDialog;
 
 /**
 */
+class ViewPresetEditDialog : public QDialog
+{
+public:
+    enum class Mode
+    {   
+        Create = 0,
+        Edit
+    };
+
+    ViewPresetEditDialog(View* view, ViewPresets::Preset* preset, QWidget* parent = nullptr);
+    virtual ~ViewPresetEditDialog() = default;
+
+private:
+    void createUI();
+    void configureUI();
+    void updatePreview();
+    void updateConfig();
+    void updateMetaData();
+
+    void revert();
+
+    bool checkName();
+
+    void createPreset();
+    void savePreset();
+    void copyPreset();
+    
+    void updateConfigPressed();
+
+    View*                view_   = nullptr;
+    ViewPresets::Preset* preset_ = nullptr;
+
+    QLineEdit* name_edit_        = nullptr;
+    QLineEdit* category_edit_    = nullptr;
+    QTextEdit* description_edit_ = nullptr;
+    QLabel*    preview_label_    = nullptr;
+    QLabel*    config_label_     = nullptr;
+
+    QPushButton* create_button_ = nullptr;
+    QPushButton* save_button_   = nullptr;
+    QPushButton* copy_button_   = nullptr;
+    QPushButton* update_button_ = nullptr;
+
+    ViewPresets::Preset preset_backup_;
+    ViewPresets::Preset preset_update_;
+
+    Mode mode_ = Mode::Create;
+};
+
+/**
+*/
 class ViewPresetItemWidget : public QWidget
 {
     Q_OBJECT
 public:
-    enum class ItemState
-    {
-        Ready = 0,
-        Edit  = 1
-    };
-
     ViewPresetItemWidget(const ViewPresets::Key& key,
                          View* view,
                          QWidget* parent = nullptr);
     virtual ~ViewPresetItemWidget() = default;
 
     const ViewPresets::Preset* getPreset() const { return preset_; }
+    const ViewPresets::Key& key() const { return key_; }
 
+    void updateContents(const ViewPresets::Key& key);
     void updateContents();
 
 signals:
-    void removePresetRequested(ViewPresets::Key key);
+    void removePreset(ViewPresets::Key key);
+    void editPreset(ViewPresets::Key key);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void enterEvent(QEvent* event) override;
     void leaveEvent(QEvent* event) override;
-    void hideEvent(QHideEvent *event) override;
 
 private:
     void createUI();
-    void setItemState(ItemState item_state);
-    void updateDescriptionEdit();
-    void updateCursors();
-    void updateActivity();
-
-    void editDescriptionToggled(bool edit);
 
     void removeButtonPressed();
-    void updateButtonPressed();
+    void editButtonPressed();
 
     void applyPreset();
-    bool updatePreset(const ViewPresets::Preset& preset);
     
-    ViewPresets::Key     key_;
-    ViewPresets::Preset* preset_ = nullptr;
-    View*                view_   = nullptr;
+    ViewPresets::Key           key_;
+    const ViewPresets::Preset* preset_ = nullptr;
+    View*                      view_   = nullptr;
 
-    QLabel*    category_label_        = nullptr;
-    QLabel*    name_label_            = nullptr;
-    QLabel*    preview_label_         = nullptr;
-    QLabel*    description_label_     = nullptr;
-    QTextEdit* description_edit_      = nullptr;
+    QLabel*      category_label_    = nullptr;
+    QLabel*      name_label_        = nullptr;
+    QLabel*      preview_label_     = nullptr;
+    QLabel*      description_label_ = nullptr;
+    QToolButton* remove_button_     = nullptr;
+    QToolButton* edit_button_       = nullptr;
 
-    QToolButton* remove_button_ = nullptr;
-    QToolButton* update_button_ = nullptr;
-    QToolButton* edit_button_   = nullptr;
-
-    ItemState item_state_ = ItemState::Ready;
-    bool      inside_     = false;
+    bool inside_ = false;
 };
 
 /**
@@ -102,15 +141,26 @@ class ViewPresetItemListWidget : public QWidget
 {
     Q_OBJECT
 public:
-    ViewPresetItemListWidget(QWidget* parent = nullptr);
+    ViewPresetItemListWidget(View* view,
+                             QWidget* parent = nullptr);
     virtual ~ViewPresetItemListWidget() = default;
 
-    void clear();
-    void addItem(ViewPresetItemWidget* item);
+    void updateContents();
+    void addPreset();
 
 private:
     void createUI();
+    void clear();
+    void refill();
+    void updateFilter();
+
+    void editPreset(ViewPresets::Key key);
+    void removePreset(ViewPresets::Key key);
+    
     void removeItem(ViewPresets::Key key);
+    void updateItem(ViewPresets::Key key);
+
+    View* view_ = nullptr;
 
     QLineEdit*   filter_edit_ = nullptr;
     QVBoxLayout* item_layout_ = nullptr;
