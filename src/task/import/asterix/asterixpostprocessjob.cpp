@@ -556,7 +556,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
     string speed_var_name;
     string track_angle_var_name;
 
-    double speed_ms, bearing_rad;
+    double speed_ms, track_angle_rad, track_angle_deg;
 
     for (auto& buf_it : buffers_)
     {
@@ -611,10 +611,15 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
                 continue;
 
             speed_ms = sqrt(pow(vx_vec.get(index), 2)+pow(vy_vec.get(index), 2)) ; // for 1s
-            bearing_rad = atan2(vx_vec.get(index), vy_vec.get(index));
+            track_angle_rad = atan2(vx_vec.get(index), vy_vec.get(index));
+
+            track_angle_deg = track_angle_rad * RAD2DEG;
+
+            if (track_angle_deg < 0)
+                track_angle_deg += 360.0;
 
             speed_vec.set(index, speed_ms * M_S2KNOTS);
-            track_angle_vec.set(index, bearing_rad * RAD2DEG);
+            track_angle_vec.set(index, track_angle_deg);
         }
     }
 }
