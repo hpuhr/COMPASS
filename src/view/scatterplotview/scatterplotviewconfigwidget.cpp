@@ -178,6 +178,12 @@ void ScatterPlotViewConfigWidget::updateSelectedVarY()
     }
 }
 
+void ScatterPlotViewConfigWidget::onDisplayChange_impl()
+{
+    assert (use_connection_lines_);
+    use_connection_lines_->setChecked(view_->useConnectionLines());
+}
+
 //void ScatterPlotViewConfigWidget::exportSlot()
 //{
 //    logdbg << "ScatterPlotViewConfigWidget: exportSlot";

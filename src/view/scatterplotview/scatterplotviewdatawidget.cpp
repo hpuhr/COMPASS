@@ -135,6 +135,14 @@ void ScatterPlotViewDataWidget::loadingDone_impl()
 {
     logdbg << "ScatterPlotViewDataWidget: loadingDone_impl: start";
 
+    if (view_->useConnectionLines() && loadedDataCount() > 100000) // disable connection lines
+    {
+        loginf << "ScatterPlotViewDataWidget: loadingDone_impl: loaded data >100k, disabling connection lines";
+
+        view_->useConnectionLines(false);
+        emit displayChanged();
+    }
+
     //default behavior
     ViewDataWidget::loadingDone_impl();
 

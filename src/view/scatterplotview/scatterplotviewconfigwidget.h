@@ -64,6 +64,8 @@ protected:
     dbContent::VariableSelectionWidget* select_var_y_ {nullptr};
 
     QCheckBox* use_connection_lines_ {nullptr};
+
+    virtual void onDisplayChange_impl() override;
 };
 
 #endif /* SCATTERPLOTVIEWCONFIGWIDGET_H_ */

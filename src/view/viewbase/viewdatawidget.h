@@ -53,6 +53,7 @@ public:
     void liveReload();
 
     bool hasData() const;
+    unsigned int loadedDataCount();
     bool showsData() const;
 
     virtual void appModeSwitch(AppMode app_mode) {} //reacts on switching the application mode
