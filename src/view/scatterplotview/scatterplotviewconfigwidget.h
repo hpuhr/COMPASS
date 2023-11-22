@@ -46,6 +46,8 @@ public slots:
     void selectedVariableXChangedSlot();
     void selectedVariableYChangedSlot();
 
+    void useConnectionLinesSlot();
+
 public:
     ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
@@ -60,6 +62,8 @@ protected:
 
     dbContent::VariableSelectionWidget* select_var_x_ {nullptr};
     dbContent::VariableSelectionWidget* select_var_y_ {nullptr};
+
+    QCheckBox* use_connection_lines_ {nullptr};
 };
 
 #endif /* SCATTERPLOTVIEWCONFIGWIDGET_H_ */

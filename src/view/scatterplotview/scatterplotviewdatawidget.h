@@ -165,6 +165,8 @@ protected:
     bool y_var_not_in_buffer_ {false};
 
     unsigned int nan_value_cnt_ {0};
+
+    void updateDataSeries(QtCharts::QChart* chart);
 };
 
 template<>

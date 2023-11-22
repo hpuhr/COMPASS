@@ -392,6 +392,19 @@ std::string ScatterPlotView::dataVarYName() const
     return settings_.data_var_y_name;
 }
 
+
+bool ScatterPlotView::useConnectionLines()
+{
+    return settings_.use_connection_lines;
+}
+
+void ScatterPlotView::useConnectionLines(bool value)
+{
+    settings_.use_connection_lines = value;
+
+    issueViewUpdate(ViewUpdate(true, false, false));
+}
+
 /**
 */
 View::ViewUpdate ScatterPlotView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params) 

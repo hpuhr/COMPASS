@@ -50,6 +50,8 @@ public:
         std::string data_var_x_name;
         std::string data_var_y_dbo;
         std::string data_var_y_name;
+
+        bool use_connection_lines {false};
     };
 
     /// @brief Constructor
@@ -93,6 +95,9 @@ public:
 
     std::string dataVarYDBO() const;
     std::string dataVarYName() const;
+
+    bool useConnectionLines();
+    void useConnectionLines(bool value);
 
     static const std::string ParamDataVarXDBO;
     static const std::string ParamDataVarXName;
