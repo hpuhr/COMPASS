@@ -680,6 +680,16 @@ void LabelGenerator::autoLOD(bool auto_lod)
     emit labelOptionsChangedSignal();
 }
 
+void LabelGenerator::toggleUseUTN()
+{
+    use_utn_as_id_ = !use_utn_as_id_;
+}
+
+bool LabelGenerator::useUTN()
+{
+    return use_utn_as_id_;
+}
+
 void LabelGenerator::addLabelDSID(unsigned int ds_id)
 {
     label_ds_ids_[to_string(ds_id)] = true;

@@ -58,6 +58,9 @@ public:
     float labelDistance() const;
     void labelDistance(float label_distance);
 
+    void toggleUseUTN();
+    bool useUTN();
+
     void addLabelDSID(unsigned int ds_id);
     void removeLabelDSID(unsigned int ds_id);
     void labelAllDSIDs();
