@@ -150,7 +150,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     {
         string main_id("?");
 
-        if (buffer->has<unsigned int>(utn_var.name())
+        if (use_utn_as_id_ && buffer->has<unsigned int>(utn_var.name())
                 && !buffer->get<unsigned int>(utn_var.name()).isNull(buffer_index))
         {
             main_id = to_string(buffer->get<unsigned int>(utn_var.name()).get(buffer_index));
@@ -301,7 +301,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
             value = "?";
             unit = "";
 
-            if (buffer->has<unsigned int>(utn_var.name())
+            if (use_utn_as_id_ && buffer->has<unsigned int>(utn_var.name())
                     && !buffer->get<unsigned int>(utn_var.name()).isNull(buffer_index))
             {
                 value = to_string(buffer->get<unsigned int>(utn_var.name()).get(buffer_index));
@@ -703,6 +703,16 @@ void LabelGenerator::autoLOD(bool auto_lod)
     auto_lod_ = auto_lod;
 
     emit labelOptionsChangedSignal();
+}
+
+void LabelGenerator::toggleUseUTN()
+{
+    use_utn_as_id_ = !use_utn_as_id_;
+}
+
+bool LabelGenerator::useUTN()
+{
+    return use_utn_as_id_;
 }
 
 void LabelGenerator::addLabelDSID(unsigned int ds_id)

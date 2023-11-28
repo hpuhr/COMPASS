@@ -101,6 +101,12 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
                 &ScatterPlotViewConfigWidget::selectedVariableYChangedSlot);
         cfg_layout->addWidget(select_var_y_);
 
+        use_connection_lines_ = new QCheckBox("Use Connection Lines");
+        use_connection_lines_->setChecked(view_->useConnectionLines());
+        connect(use_connection_lines_, &QCheckBox::clicked,
+                this, &ScatterPlotViewConfigWidget::useConnectionLinesSlot);
+        cfg_layout->addWidget(use_connection_lines_);
+
         cfg_layout->addStretch();
 
         cfg_widget->setLayout(cfg_layout);
@@ -136,6 +142,14 @@ void ScatterPlotViewConfigWidget::selectedVariableYChangedSlot()
         view_->metaDataVarY(select_var_y_->selectedMetaVariable());
 }
 
+void ScatterPlotViewConfigWidget::useConnectionLinesSlot()
+{
+    loginf << "ScatterPlotViewConfigWidget: useConnectionLinesSlot";
+
+    assert (use_connection_lines_);
+    view_->useConnectionLines(use_connection_lines_->checkState() == Qt::Checked);
+}
+
 void ScatterPlotViewConfigWidget::configChanged()
 {
     updateSelectedVarX();
@@ -162,6 +176,12 @@ void ScatterPlotViewConfigWidget::updateSelectedVarY()
         else
             select_var_y_->selectedVariable(view_->dataVarY());
     }
+}
+
+void ScatterPlotViewConfigWidget::onDisplayChange_impl()
+{
+    assert (use_connection_lines_);
+    use_connection_lines_->setChecked(view_->useConnectionLines());
 }
 
 //void ScatterPlotViewConfigWidget::exportSlot()

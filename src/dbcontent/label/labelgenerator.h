@@ -92,6 +92,9 @@ public:
     float labelDistance() const;
     void labelDistance(float label_distance);
 
+    void toggleUseUTN();
+    bool useUTN();
+
     void addLabelDSID(unsigned int ds_id);
     void removeLabelDSID(unsigned int ds_id);
     void labelAllDSIDs();
@@ -188,6 +191,17 @@ protected:
     bool show_decluttering_info_once_ {false};
 
     float label_distance_ {0.5}; // 0 ... 1
+
+    bool use_utn_as_id_ {false};
+
+    nlohmann::json label_lines_;
+
+    nlohmann::json label_config_;
+
+    nlohmann::json label_ds_ids_; // dsid str -> label flag
+
+    bool filter_mode3a_active_;
+    std::string filter_mode3a_values_;
 
     std::set<unsigned int> filter_m3a_values_set_; // dec
     bool filter_m3a_null_wanted_ {false};

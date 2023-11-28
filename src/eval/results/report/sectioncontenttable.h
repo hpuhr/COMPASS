@@ -28,6 +28,7 @@
 //#include "json.hpp"
 
 #include <vector>
+#include <functional>
 
 class ViewableDataConfig;
 

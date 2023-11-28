@@ -58,6 +58,7 @@ public:
     void liveReload();
 
     bool hasData() const;
+    unsigned int loadedDataCount();
     bool showsData() const;
 
     bool isVariableSetLoaded() const;

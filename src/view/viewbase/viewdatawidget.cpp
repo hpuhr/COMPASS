@@ -31,6 +31,16 @@ bool ViewDataWidget::hasData() const
     return !data_.empty();
 }
 
+unsigned int ViewDataWidget::loadedDataCount()
+{
+    unsigned int count = 0;
+
+    for (auto& buf_it : data_)
+        count += (*buf_it.second).size();
+
+    return count;
+}
+
 /**
  * Checks if the view currently shows any data.
  */

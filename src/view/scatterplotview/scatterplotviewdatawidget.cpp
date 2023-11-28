@@ -50,9 +50,9 @@ using namespace std;
 using namespace dbContent;
 
 ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view_widget,
-                                                     QWidget* parent, 
+                                                     QWidget* parent,
                                                      Qt::WindowFlags f)
-:   ViewDataWidget(view_widget, parent, f)
+    :   ViewDataWidget(view_widget, parent, f)
 {
     view_ = view_widget->getView();
     assert(view_);
@@ -135,6 +135,14 @@ void ScatterPlotViewDataWidget::loadingDone_impl()
 {
     logdbg << "ScatterPlotViewDataWidget: loadingDone_impl: start";
 
+    if (view_->useConnectionLines() && loadedDataCount() > 100000) // disable connection lines
+    {
+        loginf << "ScatterPlotViewDataWidget: loadingDone_impl: loaded data >100k, disabling connection lines";
+
+        view_->useConnectionLines(false);
+        emit displayChanged();
+    }
+
     //default behavior
     ViewDataWidget::loadingDone_impl();
 
@@ -158,7 +166,7 @@ bool ScatterPlotViewDataWidget::redrawData_impl(bool recompute)
     }
     bool drawn = updateChart();
 
-    logdbg << "ScatterPlotViewDataWidget: redrawData_impl: end"; 
+    logdbg << "ScatterPlotViewDataWidget: redrawData_impl: end";
 
     return drawn;
 }
@@ -1293,57 +1301,122 @@ bool ScatterPlotViewDataWidget::updateChart()
 
     chart->legend()->setAlignment(Qt::AlignBottom);
 
+    bool has_data = (x_values_.size() && y_values_.size() && !xVarNotInBuffer() && !yVarNotInBuffer());
+
+    updateDataSeries(chart);
+
+    chart->update();
+
+    chart_view_.reset(new ScatterPlotViewChartView(this, chart));
+
+    connect (chart_view_.get(), &ScatterPlotViewChartView::rectangleSelectedSignal,
+             this, &ScatterPlotViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
+
+    // queued needed, otherwise crash when signal is emitted in ScatterPlotViewChartView::seriesReleasedSlot
+
+    for (auto series_it : chart->series())
+    {
+        QScatterSeries* scat_series = dynamic_cast<QScatterSeries*>(series_it);
+        if (!scat_series)
+            continue;
+
+        assert (scat_series);
+
+        connect (scat_series, &QScatterSeries::pressed,
+                 chart_view_.get(), &ScatterPlotViewChartView::seriesPressedSlot);
+        connect (scat_series, &QScatterSeries::released,
+                 chart_view_.get(), &ScatterPlotViewChartView::seriesReleasedSlot);
+    }
+
+    main_layout_->addWidget(chart_view_.get());
+
+    return has_data;
+}
+
+void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
+{
+    //we obtain valid data if a data range is available and if the variables are available in the buffer data
+    bool has_data = (x_values_.size() && y_values_.size() && !xVarNotInBuffer() && !yVarNotInBuffer());
+
     auto createAxes = [ & ] ()
     {
         chart->createDefaultAxes();
 
         //config x axis
-        loginf << "ScatterPlotViewDataWidget: updateChart: title x ' "
-            << view_->dataVarXDBO()+": "+view_->dataVarXName() << "'";
+        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title x ' "
+               << view_->dataVarXDBO()+": "+view_->dataVarXName() << "'";
         assert (chart->axes(Qt::Horizontal).size() == 1);
         chart->axes(Qt::Horizontal).at(0)->setTitleText((view_->dataVarXDBO()+": "+view_->dataVarXName()).c_str());
 
         //config y axis
-        loginf << "ScatterPlotViewDataWidget: updateChart: title y ' "
-            << view_->dataVarYDBO()+": "+view_->dataVarYName() << "'";
+        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title y ' "
+               << view_->dataVarYDBO()+": "+view_->dataVarYName() << "'";
         assert (chart->axes(Qt::Vertical).size() == 1);
         chart->axes(Qt::Vertical).at(0)->setTitleText((view_->dataVarYDBO()+": "+view_->dataVarYName()).c_str());
     };
-
-    //we obtain valid data if a data range is available and if the variables are available in the buffer data
-    bool has_data = (x_values_.size() && y_values_.size() && !xVarNotInBuffer() && !yVarNotInBuffer());
 
     if (has_data)
     {
         //data available
 
         chart->legend()->setVisible(true);
-        
+
         unsigned int value_cnt {0};
         unsigned int dbo_value_cnt {0};
         nan_value_cnt_ = 0;
         unsigned int selected_cnt {0};
 
-        const double MarkerSize = 8.0;
+        const double marker_size = 8.0;
+
+        bool use_connection_lines = view_->useConnectionLines();
+
+        struct SymbolLineSeries { QScatterSeries* scatter_series;
+                                  QLineSeries* line_series;};
 
         //generate needed series and sort pointers
         //qtcharts when rendering opengl will sort the series into a map using the pointer of the series as a key
-        std::vector<QScatterSeries*> series(x_values_.size() + 1);
+        std::vector<SymbolLineSeries> series(x_values_.size() + 1);
+        //QLineSeries *whatcha;
         for (size_t i = 0; i < series.size(); ++i)
         {
-            series[ i ] = new QScatterSeries;
-            series[ i ]->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-            series[ i ]->setMarkerSize(MarkerSize);
-            series[ i ]->setUseOpenGL(true);
+            series[ i ].scatter_series = new QScatterSeries;
+            series[ i ].scatter_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+            series[ i ].scatter_series->setMarkerSize(marker_size);
+            series[ i ].scatter_series->setUseOpenGL(true);
+
+            if (use_connection_lines)
+            {
+                series[ i ].line_series = new QLineSeries;
+                QPen pen = series[ i ].line_series->pen();
+                pen.setWidth(2);
+                //pen.setBrush(QBrush("red")); // or just pen.setColor("red");
+                series[ i ].line_series->setPen(pen);
+
+                series[ i ].line_series->setUseOpenGL(true);
+            }
+            else
+                series[ i ].line_series = nullptr;
         }
-        std::sort(series.begin(), series.end()); //sort pointers to obtain correct render order
+        //std::sort(series.begin(), series.end()); //sort pointers to obtain correct render order
+
+        sort(series.begin(), series.end(),
+             [](SymbolLineSeries& a, SymbolLineSeries& b) {return a.scatter_series > b.scatter_series; });
 
         //the biggest pointer is thus the one for the selection, so the selection will be rendered on top
-        QScatterSeries* selected_series = series.back();
-        selected_series->setColor(Qt::yellow);
+        QScatterSeries* selected_symbol_series = series.back().scatter_series;
+        selected_symbol_series->setMarkerSize(marker_size-2);
+        selected_symbol_series->setColor(Qt::yellow);
+
+        QLineSeries* selected_line_series = nullptr;
+
+        if (use_connection_lines)
+        {
+            selected_line_series = series.back().line_series;
+            selected_line_series->setColor(Qt::yellow);
+        }
 
         //distribute sorted pointers to dbcontent types
-        std::map<std::string, QScatterSeries*> series_map;
+        std::map<std::string, SymbolLineSeries> series_map;
         {
             int cnt = 0;
             for (auto it = x_values_.begin(); it != x_values_.end(); ++it)
@@ -1359,8 +1432,16 @@ bool ScatterPlotViewDataWidget::updateChart()
             vector<bool>& selected_values = selected_values_[data.first];
             //vector<unsigned int>& rec_num_values = rec_num_values_[data.first];
 
-            QScatterSeries* chart_series = series_map[ data.first ];
-            chart_series->setColor(colors_[data.first]);
+            QScatterSeries* chart_symbol_series = series_map[ data.first ].scatter_series;
+            chart_symbol_series->setColor(colors_[data.first]);
+
+            QLineSeries* chart_line_series = nullptr;
+
+            if (use_connection_lines)
+            {
+                chart_line_series = series_map[ data.first ].line_series;
+                chart_line_series->setColor(colors_[data.first]);
+            }
 
             assert (x_values.size() == y_values.size());
             assert (x_values.size() == selected_values.size());
@@ -1376,12 +1457,26 @@ bool ScatterPlotViewDataWidget::updateChart()
 
                     if (selected_values.at(cnt))
                     {
-                        selected_series->append(x_values.at(cnt), y_values.at(cnt));
+                        selected_symbol_series->append(x_values.at(cnt), y_values.at(cnt));
+
+                        if (use_connection_lines)
+                        {
+                            assert (selected_line_series);
+                            selected_line_series->append(x_values.at(cnt), y_values.at(cnt));
+                        }
+
                         ++selected_cnt;
                     }
                     else
                     {
-                        chart_series->append(x_values.at(cnt), y_values.at(cnt));
+                        chart_symbol_series->append(x_values.at(cnt), y_values.at(cnt));
+
+                        if (use_connection_lines)
+                        {
+                            assert (chart_line_series);
+                            chart_line_series->append(x_values.at(cnt), y_values.at(cnt));
+                        }
+
                         ++sum_cnt;
                     }
                 }
@@ -1396,14 +1491,26 @@ bool ScatterPlotViewDataWidget::updateChart()
 
             if (sum_cnt)
             {
-                logdbg << "ScatterPlotViewDataWidget: updateChart: adding " << data.first << " (" << sum_cnt << ")";
+                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: adding " << data.first << " (" << sum_cnt << ")";
 
-                chart_series->setName((data.first+" ("+to_string(sum_cnt)+")").c_str());
-                chart->addSeries(chart_series);
+                chart_symbol_series->setName((data.first+" ("+to_string(sum_cnt)+")").c_str());
+                chart->addSeries(chart_symbol_series);
+
+                if (use_connection_lines)
+                {
+                    assert (chart_line_series);
+                    chart->addSeries(chart_line_series);
+                }
             }
             else
             {
-                delete chart_series;
+                delete chart_symbol_series;
+
+                if (use_connection_lines)
+                {
+                    assert (chart_line_series);
+                    delete chart_line_series;
+                }
             }
         }
 
@@ -1413,17 +1520,30 @@ bool ScatterPlotViewDataWidget::updateChart()
 
             if (selected_cnt > 0)
             {
-                logdbg << "ScatterPlotViewDataWidget: updateChart: adding " << " Selected (" << selected_cnt << ")";
+                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: adding " << " Selected (" << selected_cnt << ")";
 
                 //add series for selected values
-                selected_series->setName(("Selected ("+to_string(selected_cnt)+")").c_str());
-                chart->addSeries(selected_series);
+                selected_symbol_series->setName(("Selected ("+to_string(selected_cnt)+")").c_str());
+                chart->addSeries(selected_symbol_series);
+
+                if (use_connection_lines)
+                {
+                    assert (selected_line_series);
+                    chart->addSeries(selected_line_series);
+                }
             }
             else
             {
                 //series for selection not needed
-                delete selected_series;
-                selected_series = nullptr;
+                delete selected_symbol_series;
+                selected_symbol_series = nullptr;
+
+                if (use_connection_lines)
+                {
+                    assert (selected_line_series);
+                    delete selected_line_series;
+                    selected_line_series = nullptr;
+                }
             }
 
             createAxes();
@@ -1432,13 +1552,13 @@ bool ScatterPlotViewDataWidget::updateChart()
         {
             //no valid values at all
             has_data = false;
-            loginf << "ScatterPlotViewDataWidget: updateChart: no valid data";
+            loginf << "ScatterPlotViewDataWidget: updateDataSeries: no valid data";
         }
     }
     else
     {
         //bad data range or vars not in buffer
-        loginf << "ScatterPlotViewDataWidget: updateChart: no data, size x "
+        loginf << "ScatterPlotViewDataWidget: updateDataSeries: no data, size x "
                << x_values_.size() << " y " << y_values_.size();
     }
 
@@ -1460,33 +1580,6 @@ bool ScatterPlotViewDataWidget::updateChart()
         chart->axes(Qt::Vertical).at(0)->setGridLineVisible(false);
         chart->axes(Qt::Vertical).at(0)->setMinorGridLineVisible(false);
     }
-
-    chart->update();
-
-    chart_view_.reset(new ScatterPlotViewChartView(this, chart));
-
-    connect (chart_view_.get(), &ScatterPlotViewChartView::rectangleSelectedSignal,
-            this, &ScatterPlotViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
-
-    // queued needed, otherwise crash when signal is emitted in ScatterPlotViewChartView::seriesReleasedSlot
-
-    for (auto series_it : chart->series())
-    {
-        QScatterSeries* scat_series = dynamic_cast<QScatterSeries*>(series_it);
-        if (!scat_series)
-            continue;
-
-        assert (scat_series);
-
-        connect (scat_series, &QScatterSeries::pressed,
-                chart_view_.get(), &ScatterPlotViewChartView::seriesPressedSlot);
-        connect (scat_series, &QScatterSeries::released,
-                chart_view_.get(), &ScatterPlotViewChartView::seriesReleasedSlot);
-    }
-
-    main_layout_->addWidget(chart_view_.get());
-
-    return has_data;
 }
 
 void ScatterPlotViewDataWidget::mouseMoveEvent(QMouseEvent* event)

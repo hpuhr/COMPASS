@@ -22,6 +22,8 @@ public slots:
     void editSettingsSlot();
     void editDBContentSlot();
 
+    void toggleUseUTNSlot();
+
     void labelAllDSSlot();
     void labelNoDSSlot();
 
