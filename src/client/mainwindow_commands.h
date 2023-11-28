@@ -100,9 +100,35 @@ struct RTCommandImportASTERIXFile : public rtcommand::RTCommand
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(import_asterix_file, "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
+    DECLARE_RTCOMMAND(import_asterix_file,
+                      "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
     DECLARE_RTCOMMAND_OPTIONS
 };
+
+// import_asterix_files
+struct RTCommandImportASTERIXFiles : public rtcommand::RTCommand
+{
+    std::string filenames_;
+    std::vector<std::string> split_filenames_;
+    std::string framing_;
+    std::string line_id_;
+    std::string date_str_;
+    std::string time_offset_str_;
+    bool ignore_time_jumps_ {false};
+
+    virtual rtcommand::IsValid valid() const override;
+
+    RTCommandImportASTERIXFiles();
+
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(import_asterix_files,
+                      "imports multiple ASTERIX files with given filenames, e.g. '/data/file1.ff;/data/file2.ff'")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+
 
 // import_asterix_network
 struct RTCommandImportASTERIXNetworkStart : public rtcommand::RTCommand
@@ -314,6 +340,21 @@ protected:
     virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(get_events, "retrieves the currently logged events")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+// reconfigure
+struct RTCommandReconfigure : public rtcommand::RTCommand
+{
+    std::string path;
+    std::string json_config;
+
+    virtual rtcommand::IsValid valid() const override;
+
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(reconfigure, "reconfigures the given configurable")
     DECLARE_RTCOMMAND_OPTIONS
 };
 

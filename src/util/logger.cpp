@@ -17,15 +17,15 @@
 #include "logger.h"
 #include "event_log.h"
 
-#include "config.h"
-#include "log4cpp/BasicLayout.hh"
-#include "log4cpp/FileAppender.hh"
-#include "log4cpp/Layout.hh"
-#include "log4cpp/OstreamAppender.hh"
-#include "log4cpp/Priority.hh"
+//#include "config.h"
+//#include "log4cpp/BasicLayout.hh"
+//#include "log4cpp/FileAppender.hh"
+//#include "log4cpp/Layout.hh"
+//#include "log4cpp/OstreamAppender.hh"
+//#include "log4cpp/Priority.hh"
 #include "log4cpp/PropertyConfigurator.hh"
-#include "log4cpp/AppenderSkeleton.hh"
-#include "log4cpp/LoggingEvent.hh"
+//#include "log4cpp/AppenderSkeleton.hh"
+//#include "log4cpp/LoggingEvent.hh"
 
 #include <boost/thread.hpp>
 

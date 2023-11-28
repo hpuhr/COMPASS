@@ -29,6 +29,7 @@
 #include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "util/number.h"
+#include "viewpoint.h"
 
 #include <cassert>
 #include <algorithm>

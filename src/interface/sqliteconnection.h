@@ -27,7 +27,7 @@
 
 #include "configurable.h"
 
-#include "global.h"
+//#include "global.h"
 
 class Buffer;
 class DBInterface;

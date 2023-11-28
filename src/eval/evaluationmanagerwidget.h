@@ -56,6 +56,10 @@ public:
     void updateSectors();
     void updateButtons();
     void updateFilterWidget();
+    void updateResultsConfig();
+
+    void updateFromSettings();
+
     void expandResults();
 
     void showResultId (const std::string& id);

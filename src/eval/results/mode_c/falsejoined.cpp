@@ -19,14 +19,16 @@
 #include "eval/results/mode_c/falsejoined.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/mode_c/false.h"
-#include "evaluationtargetdata.h"
+//#include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
+#include "viewpoint.h"
+#include "sectorlayer.h"
 
 #include <cassert>
 

@@ -17,13 +17,14 @@
 
 #include "eval/requirement/position/distanceconfigwidget.h"
 #include "eval/requirement/position/distanceconfig.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "eval/requirement/base/comparisontypecombobox.h"
 #include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QDoubleValidator>
 
 namespace EvaluationRequirement
 {

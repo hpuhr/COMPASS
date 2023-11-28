@@ -23,27 +23,11 @@ JSONParsingSchema::JSONParsingSchema(const std::string& class_id, const std::str
                                      Configurable* parent)
     : Configurable(class_id, instance_id, parent)
 {
-    registerParameter("name", &name_, "");
+    registerParameter("name", &name_, std::string());
 
     assert(name_.size());
 
     createSubConfigurables();
-}
-
-JSONParsingSchema& JSONParsingSchema::operator=(JSONParsingSchema&& other)
-{
-    name_ = other.name_;
-
-    parsers_ = std::move(other.parsers_);
-
-    other.configuration().updateParameterPointer("name", &name_);
-
-    //    widget_ = std::move(other.widget_);
-    //    if (widget_)
-    //        widget_->setParser(*this);
-    //    other.widget_ = nullptr;
-
-    return static_cast<JSONParsingSchema&>(Configurable::operator=(std::move(other)));
 }
 
 void JSONParsingSchema::generateSubConfigurable(const std::string& class_id,
@@ -51,16 +35,16 @@ void JSONParsingSchema::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "JSONObjectParser")
     {
-        Configuration& sub_config = configuration().getSubConfiguration(class_id, instance_id);
+        const Configuration& sub_config = getSubConfiguration(class_id, instance_id);
 
         std::string name;
 
-        if (sub_config.hasParameterConfigValueString("name"))
-            name = sub_config.getParameterConfigValueString("name");
+        if (sub_config.hasParameterConfigValue("name"))
+            name = sub_config.getParameterConfigValue<std::string>("name");
 
         if (!name.size() &&
-            sub_config.hasParameterConfigValueString("dbcontent_name"))  // name not set hack
-            name = sub_config.getParameterConfigValueString("dbcontent_name");
+            sub_config.hasParameterConfigValue("dbcontent_name"))  // name not set hack
+            name = sub_config.getParameterConfigValue<std::string>("dbcontent_name");
 
         assert(name.size());
         assert(parsers_.find(name) == parsers_.end());

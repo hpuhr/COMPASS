@@ -18,7 +18,7 @@
 #ifndef MAINWINDOW_H_
 #define MAINWINDOW_H_
 
-#include "global.h"
+//#include "global.h"
 #include "appmode.h"
 #include "autoresumedialog.h"
 

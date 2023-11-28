@@ -33,6 +33,15 @@ class HistogramView : public View
 {
     Q_OBJECT
 public:
+    struct Settings
+    {
+        Settings();
+
+        std::string data_var_dbo;
+        std::string data_var_name;
+        bool        use_log_scale;
+    };
+
     /// @brief Constructor
     HistogramView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
@@ -83,6 +92,10 @@ public:
     bool hasViewPoint () { return current_view_point_ != nullptr; }
     const ViewableDataConfig& viewPoint() { assert (hasViewPoint()); return *current_view_point_; }
 
+    static const std::string ParamDataVarDBO;
+    static const std::string ParamDataVarName;
+    static const std::string ParamUseLogScale;
+
 public slots:
     virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
@@ -102,27 +115,25 @@ protected:
 
     virtual bool init_impl() override;
 
+    virtual ViewUpdate onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
+
     void onShowResultsChanged();
 
     HistogramViewDataWidget* getDataWidget();
 
     /// For data display
-    HistogramViewWidget*     widget_{nullptr};
+    HistogramViewWidget* widget_{nullptr};
     /// For data loading
     HistogramViewDataSource* data_source_{nullptr};
 
-    std::string data_var_dbo_;
-    std::string data_var_name_;
-
-    bool use_log_scale_ {false};
-
-    bool        show_results_{false}; // no results at first
     std::string eval_results_grpreq_;
-    std::string eval_results_id_;
+     std::string eval_results_id_;
+
+    bool show_results_{false}; // no results at first
 
     const ViewableDataConfig* current_view_point_ {nullptr};
 
-    
+    Settings settings_;
 };
 
 #endif /* HISTOGRAMVIEW_H_ */

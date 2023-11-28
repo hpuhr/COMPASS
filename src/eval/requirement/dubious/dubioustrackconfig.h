@@ -18,10 +18,10 @@
 #ifndef DUBIOUSTRACKCONFIG_H
 #define DUBIOUSTRACKCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/dubious/dubioustrackconfigwidget.h"
-#include "eval/requirement/dubious/dubioustrack.h"
+//#include "eval/requirement/dubious/dubioustrackconfigwidget.h"
+//#include "eval/requirement/dubious/dubioustrack.h"
 
 class Group;
 class EvaluationStandard;

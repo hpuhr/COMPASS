@@ -18,11 +18,6 @@
 #include "listboxviewdatawidget.h"
 #include "listboxviewwidget.h"
 #include "listboxview.h"
-
-#include <QHBoxLayout>
-#include <QMessageBox>
-#include <QTabWidget>
-
 #include "allbuffertablewidget.h"
 #include "compass.h"
 #include "buffer.h"
@@ -31,6 +26,10 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
+
+#include <QHBoxLayout>
+#include <QMessageBox>
+#include <QTabWidget>
 
 ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewWidget* view_widget, 
                                              QWidget* parent, 
@@ -152,7 +151,7 @@ void ListBoxViewDataWidget::liveReload_impl()
     //implement live reload behavior here
 }
 
-void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
+void ListBoxViewDataWidget::exportDataSlot()
 {
     logdbg << "ListBoxViewDataWidget: exportDataSlot";
     assert(tab_widget_);
@@ -165,7 +164,7 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
 
     if (all_buffer_widget && !buffer_widget)
     {
-        all_buffer_widget->exportSlot(overwrite);
+        all_buffer_widget->exportSlot();
         return;
     }
 
@@ -180,10 +179,13 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
         return;
     }
 
-    buffer_widget->exportSlot(overwrite);
+    buffer_widget->exportSlot();
 }
 
-void ListBoxViewDataWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(cancelled); }
+void ListBoxViewDataWidget::exportDoneSlot(bool cancelled) 
+{ 
+    emit exportDoneSignal(cancelled); 
+}
 
 void ListBoxViewDataWidget::showOnlySelectedSlot(bool value)
 {

@@ -7,8 +7,6 @@
 #include <tuple>
 #include <memory>
 
-
-
 namespace dbContent
 {
 

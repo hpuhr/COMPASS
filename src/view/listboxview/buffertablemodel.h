@@ -18,10 +18,12 @@
 #ifndef BUFFERTABLEMODEL_H
 #define BUFFERTABLEMODEL_H
 
+#include "dbcontent/variable/variableset.h"
+
 #include <QAbstractTableModel>
+
 #include <memory>
 
-#include "dbcontent/variable/variableset.h"
 
 class Buffer;
 class DBContent;
@@ -57,7 +59,7 @@ class BufferTableModel : public QAbstractTableModel
     void clearData();
     void setData(std::shared_ptr<Buffer> buffer);
 
-    void saveAsCSV(const std::string& file_name, bool overwrite);
+    void saveAsCSV(const std::string& file_name);
 
     void usePresentation(bool use_presentation);
     void showOnlySelected(bool value);

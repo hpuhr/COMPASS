@@ -18,16 +18,17 @@
 #include "scatterplotviewwidget.h"
 #include "scatterplotviewconfigwidget.h"
 #include "scatterplotviewdatawidget.h"
+#include "scatterplotview.h"
+#include "viewtoolwidget.h"
+#include "viewtoolswitcher.h"
+#include "files.h"
 
 #include <QHBoxLayout>
 #include <QSettings>
 #include <QSplitter>
 #include <QTabWidget>
 
-#include "scatterplotview.h"
-#include "viewtoolwidget.h"
-#include "viewtoolswitcher.h"
-#include "files.h"
+
 
 /**
  */

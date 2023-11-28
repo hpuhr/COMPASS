@@ -21,7 +21,7 @@
 #include <QWidget>
 #include <vector>
 
-#include "configuration.h"
+//#include "configuration.h"
 
 class FilterConditionOperatorComboBox;
 class FilterConditionResetValueComboBox;

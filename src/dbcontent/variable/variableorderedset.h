@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variabledefinition.h"
-#include "propertylist.h"
+//#include "propertylist.h"
 
 namespace dbContent
 {
@@ -40,7 +40,7 @@ class VariableOrderDefinition : public VariableDefinition
     VariableOrderDefinition(std::string class_id, std::string instance_id, Configurable* parent)
         : VariableDefinition(class_id, instance_id, parent)
     {
-        registerParameter("index", &index_, 0);
+        registerParameter<unsigned int>("index", &index_, 0);
     }
     virtual ~VariableOrderDefinition() {}
 

@@ -16,14 +16,13 @@
  */
 
 #include "buffercsvexportjob.h"
+//#include "compass.h"
+#include "dbcontent/dbcontent.h"
+//#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
 
 #include <fstream>
 #include <sstream>
-
-#include "compass.h"
-#include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variable.h"
 
 BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer,
                                        const dbContent::VariableSet& read_set, const std::string& file_name,

@@ -42,6 +42,7 @@ public:
     virtual void redrawStarted();
     virtual void redrawDone();
     virtual void appModeSwitch(AppMode app_mode);
+    virtual void configChanged();
 
     virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 

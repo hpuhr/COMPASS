@@ -186,11 +186,10 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
 
                     std::string instance = "MetaVariable" + var_it.first + "0";
 
-                    Configuration& config =
-                            dbo_man_.addNewSubConfiguration("MetaVariable", instance);
-                    config.addParameterString("name", var_it.first);
+                    auto config = Configuration::create("MetaVariable", instance);
+                    config->addParameter<std::string>("name", var_it.first);
 
-                    dbo_man_.generateSubConfigurable("MetaVariable", instance);
+                    dbo_man_.generateSubConfigurableFromConfig(std::move(config));
                 }
 
                 assert(dbo_man_.existsMetaVariable(var_it.first));

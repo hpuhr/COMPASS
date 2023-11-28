@@ -17,14 +17,15 @@
 
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/acrossconfigwidget.h"
+#include "eval/requirement/position/across.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
-using namespace Utils;
+//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -36,12 +37,11 @@ PositionAcrossConfig::PositionAcrossConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("max_abs_value", &max_abs_value_, 50.0);
+    registerParameter("max_abs_value", &max_abs_value_, 50.0f);
 }
 
 PositionAcrossConfig::~PositionAcrossConfig()
 {
-
 }
 
 std::shared_ptr<Base> PositionAcrossConfig::createRequirement()

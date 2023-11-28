@@ -16,7 +16,7 @@ MLATRUFilter::MLATRUFilter(const std::string& class_id, const std::string& insta
                      Configurable* parent)
     : DBFilter(class_id, instance_id, parent, false)
 {
-    registerParameter("rus_str", &rus_str_, "");
+    registerParameter("rus_str", &rus_str_, std::string());
     updateRUsFromStr(rus_str_);
 
     name_ = "MLAT RUs";

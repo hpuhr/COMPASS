@@ -16,10 +16,12 @@
  */
 
 #include "eval/requirement/identification/falseconfig.h"
+#include "eval/requirement/identification/identificationfalseconfigwidget.h"
+#include "eval/requirement/identification/false.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "stringconv.h"
 

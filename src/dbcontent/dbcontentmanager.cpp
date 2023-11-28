@@ -18,8 +18,8 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/label/labelgenerator.h"
 #include "compass.h"
-#include "mainwindow.h"
-#include "configurationmanager.h"
+//#include "mainwindow.h"
+//#include "configurationmanager.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanagerwidget.h"
@@ -31,19 +31,20 @@
 #include "dbcontent/variable/metavariable.h"
 #include "datasourcemanager.h"
 #include "stringconv.h"
-#include "number.h"
+//#include "number.h"
 #include "viewmanager.h"
 #include "jobmanager.h"
 #include "evaluationmanager.h"
 #include "filtermanager.h"
-#include "util/number.h"
-#include "util/system.h"
+//#include "util/number.h"
+//#include "util/system.h"
 #include "util/timeconv.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
 #include "dbcontentdeletedbjob.h"
-#include "taskmanager.h"
-#include "asteriximporttask.h"
+//#include "taskmanager.h"
+//#include "asteriximporttask.h"
 #include "dbcontent_commands.h"
+#include "viewpoint.h"
 
 #include "util/tbbhack.h"
 
@@ -65,8 +66,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
 
-    registerParameter("max_live_data_age_cache", &max_live_data_age_cache_, 5);
-    registerParameter("max_live_data_age_db", &max_live_data_age_db_, 60);
+    registerParameter("max_live_data_age_cache", &max_live_data_age_cache_, 5u);
+    registerParameter("max_live_data_age_db", &max_live_data_age_db_, 60u);
 
     createSubConfigurables();
 

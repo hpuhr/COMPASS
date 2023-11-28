@@ -17,12 +17,12 @@
 
 #pragma once
 
-#include "stringconv.h"
-#include "util/timeconv.h"
+//#include "stringconv.h"
+//#include "util/timeconv.h"
 #include "dbcontent/target/targetreportdefs.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
-#include "boost/date_time/time_duration.hpp"
+//#include "boost/date_time/time_duration.hpp"
 #include <boost/optional.hpp>
 
 #include <vector>

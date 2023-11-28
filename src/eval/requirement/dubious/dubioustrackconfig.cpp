@@ -16,15 +16,16 @@
  */
 
 #include "dubioustrackconfig.h"
+#include "eval/requirement/dubious/dubioustrack.h"
 #include "dubioustrackconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
-#include "stringconv.h"
+//#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttable.h"
+//#include "stringconv.h"
 
-using namespace Utils;
+//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -38,37 +39,36 @@ DubiousTrackConfig::DubiousTrackConfig(const std::string& class_id, const std::s
     prob_check_type_ = COMPARISON_TYPE::LESS_THAN_OR_EQUAL;
 
     registerParameter("eval_only_single_ds_id", &eval_only_single_ds_id_, false);
-    registerParameter("single_ds_id", &single_ds_id_, 0);
+    registerParameter("single_ds_id", &single_ds_id_, 0u);
 
-    registerParameter("minimum_comparison_time", &minimum_comparison_time_, 1.0);
-    registerParameter("maximum_comparison_time", &maximum_comparison_time_, 30.0);
+    registerParameter("minimum_comparison_time", &minimum_comparison_time_, 1.0f);
+    registerParameter("maximum_comparison_time", &maximum_comparison_time_, 30.0f);
 
     registerParameter("mark_primary_only", &mark_primary_only_, true);
 
     registerParameter("use_min_updates", &use_min_updates_, true);
-    registerParameter("min_updates", &min_updates_, 10);
+    registerParameter("min_updates", &min_updates_, 10u);
 
     registerParameter("use_min_duration", &use_min_duration_, true);
-    registerParameter("min_duration", &min_duration_, 30.0);
+    registerParameter("min_duration", &min_duration_, 30.0f);
 
     registerParameter("use_max_groundspeed", &use_max_groundspeed_, true);
-    registerParameter("max_groundspeed_kts", &max_groundspeed_kts_, 1333.0);
+    registerParameter("max_groundspeed_kts", &max_groundspeed_kts_, 1333.0f);
 
     registerParameter("use_max_acceleration", &use_max_acceleration_, true);
-    registerParameter("max_acceleration", &max_acceleration_, 29.43);
+    registerParameter("max_acceleration", &max_acceleration_, 29.43f);
 
     registerParameter("use_max_turnrate", &use_max_turnrate_, true);
-    registerParameter("max_turnrate", &max_turnrate_, 30.0);
+    registerParameter("max_turnrate", &max_turnrate_, 30.0f);
 
     registerParameter("use_rocd", &use_max_rocd_, true);
-    registerParameter("max_rocd", &max_rocd_, 1000.0);
+    registerParameter("max_rocd", &max_rocd_, 1000.0f);
 
-    registerParameter("dubious_prob", &dubious_prob_, 0.05);
+    registerParameter("dubious_prob", &dubious_prob_, 0.05f);
 }
 
 DubiousTrackConfig::~DubiousTrackConfig()
 {
-
 }
 
 bool DubiousTrackConfig::markPrimaryOnly() const

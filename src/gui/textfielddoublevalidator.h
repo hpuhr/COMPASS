@@ -21,7 +21,7 @@
 #include <QDoubleValidator>
 #include <QLineEdit>
 
-#include "logger.h"
+//#include "logger.h"
 
 class TextFieldDoubleValidator : public QDoubleValidator
 {

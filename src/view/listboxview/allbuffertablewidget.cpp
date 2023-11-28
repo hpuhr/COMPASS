@@ -20,12 +20,13 @@
 #include "allbuffertablewidget.h"
 #include "allbuffertablemodel.h"
 #include "buffer.h"
-#include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableset.h"
+//#include "dbcontent/dbcontent.h"
+//#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variableset.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
+#include "compass.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -86,18 +87,16 @@ void AllBufferTableWidget::show(std::map<std::string, std::shared_ptr<Buffer>> b
     table_->resizeColumnsToContents();
 }
 
-void AllBufferTableWidget::exportSlot(bool overwrite)
+void AllBufferTableWidget::exportSlot()
 {
     loginf << "AllBufferTableWidget: exportSlot";
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
     dialog.setNameFilter("CSV Files (*.csv)");
     dialog.setDefaultSuffix("csv");
     dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
-
-    if (!overwrite)
-        dialog.setOption(QFileDialog::DontConfirmOverwrite);
 
     QStringList file_names;
     if (dialog.exec())
@@ -115,7 +114,7 @@ void AllBufferTableWidget::exportSlot(bool overwrite)
 
         loginf << "AllBufferTableWidget: exportSlot: export filename " << filename.toStdString();
         assert(model_);
-        model_->saveAsCSV(filename.toStdString(), overwrite);
+        model_->saveAsCSV(filename.toStdString());
     }
     else
     {

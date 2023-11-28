@@ -22,212 +22,294 @@
 
 using namespace Utils;
 
-template <typename T>
-ConfigurableParameter<T>::ConfigurableParameter(const ConfigurableParameter& source)
+/************************************************************************************
+ * ConfigurableParameter
+ ************************************************************************************/
+
+/**
+*/
+ConfigurableParameter::ConfigurableParameter(const std::string& parameter_id)
+:   parameter_id_(parameter_id)
 {
-    operator=(source);
 }
 
-template <typename T>
-ConfigurableParameter<T>& ConfigurableParameter<T>::operator=(
-    const ConfigurableParameter<T>& source)
-{
-    parameter_id_ = source.parameter_id_;
-    pointer_ = nullptr;
-    if (source.pointer_)
-        config_value_ = *source.pointer_;
-    else
-        config_value_ = source.config_value_;
-    default_value_ = source.default_value_;
+// /**
+// */
+// ConfigurableParameter::ConfigurableParameter(const ConfigurableParameter& source)
+// {
+//     operator=(source);
+// }
 
-    return *this;
-}
+// /**
+// */
+// ConfigurableParameter& ConfigurableParameter::operator=(const ConfigurableParameter& source)
+// {
+//     parameter_id_ = source.parameter_id_;
 
-template <typename T>
-std::string ConfigurableParameter<T>::getParameterType() const
-{
-    throw std::runtime_error("ConfigurableParameter: getParameterType: unknown class type");
-}
+//     return *this;
+// }
 
-template <typename T>
-const std::string& ConfigurableParameter<T>::getParameterId() const
+/**
+*/
+const std::string& ConfigurableParameter::getParameterId() const
 {
     return parameter_id_;
 }
 
+/************************************************************************************
+ * ConfigurableParameterT
+ ************************************************************************************/
+
+/**
+*/
 template <typename T>
-T ConfigurableParameter<T>::getParameterValue() const
+ConfigurableParameterT<T>::ConfigurableParameterT(const std::string& parameter_id)
+:   ConfigurableParameter(parameter_id)
 {
-    if (pointer_)
-    {
-        assert(pointer_);
-        return *pointer_;
-    }
-    else
-        return config_value_;
 }
 
+/**
+*/
 template <typename T>
-std::string ConfigurableParameter<T>::getParameterValueString() const
+ConfigurableParameterT<T>::ConfigurableParameterT(const std::string& parameter_id,
+                                                  T* pointer,
+                                                  const T& config_value,
+                                                  const T& default_value)
+:   ConfigurableParameter(parameter_id)
+,   pointer_             (pointer)
+,   config_value_        (config_value)
+,   default_value_       (default_value)
 {
-    throw std::runtime_error("ConfigurableParameter: getParameterValue: unknown class type");
 }
 
+/**
+ * Returns the stored value of the parameter, either the value of the stored pointer or the stored config value.
+*/
 template <typename T>
-void ConfigurableParameter<T>::resetToDefault()
+const T* ConfigurableParameterT<T>::getValuePointer() const
+{
+    //return pointer if stored
+    if (hasStoredPointer())
+        return pointer_;
+
+    //otherwise return pointer to config value
+    return &config_value_;
+}
+
+/**
+ * Returns the stored value of the parameter, either the value of the stored pointer or the stored config value.
+*/
+template <typename T>
+T* ConfigurableParameterT<T>::getValuePointer()
+{
+    //return pointer if stored
+    if (hasStoredPointer())
+        return pointer_;
+
+    //otherwise return pointer to config value
+    return &config_value_;
+}
+
+/**
+*/
+template <typename T>
+T ConfigurableParameterT<T>::getParameterValue() const
+{
+    auto ptr = getValuePointer();
+    return *ptr;
+}
+
+/**
+*/
+template <typename T>
+const T& ConfigurableParameterT<T>::getDefaultValue() const
+{
+    return default_value_;
+}
+
+/**
+*/
+template <typename T>
+const T& ConfigurableParameterT<T>::getConfigValue() const
+{
+    return config_value_;
+}
+
+/**
+*/
+template <typename T>
+const T* ConfigurableParameterT<T>::getStoredPointer() const
+{
+    return pointer_;
+}
+
+/**
+*/
+template <typename T>
+bool ConfigurableParameterT<T>::hasStoredPointer() const
+{
+    return (pointer_ != nullptr);
+}
+
+/**
+*/
+template <typename T>
+std::string ConfigurableParameterT<T>::getParameterType() const
+{
+    //not implemented for this type, throw
+    throw std::runtime_error("ConfigurableParameter: getParameterType: unknown class type");
+}
+
+/**
+*/
+template <typename T>
+std::string ConfigurableParameterT<T>::getParameterValueString() const
+{
+    //basic version just uses to string (might result in compile time error if to_string is not available for type)
+    return std::to_string(getParameterValue());
+}
+
+/**
+*/
+template <typename T>
+void ConfigurableParameterT<T>::resetToDefault()
 {
     std::stringstream ss;
-    ss << "ConfigurableParameter: resetToDefault: parameter '" << parameter_id_
-       << "' default value '" << default_value_ << "'";
+    ss << "ConfigurableParameter: resetToDefault: parameter '" << parameter_id_ << "' default value '" << default_value_ << "'";
 
-    if (pointer_)
-    {
+    if (hasStoredPointer())
         ss << " ptr not null value '" << *pointer_ << "'";
-        *pointer_ = default_value_;
-    }
     else
-    {
         ss << " ptr null";
-        config_value_ = default_value_;
-    }
+
+    auto ptr = getValuePointer();
+    *ptr = default_value_;
 
     loginf << ss.str();
 }
 
-template <>
-std::string ConfigurableParameter<bool>::getParameterType() const
+/**
+*/
+template <typename T>
+void ConfigurableParameterT<T>::toJSON(nlohmann::json& json_obj) const
 {
-    return "ParameterBool";
+    json_obj[getParameterId()] = getParameterValue();
 }
 
-template <>
-std::string ConfigurableParameter<int>::getParameterType() const
+/**
+*/
+template <typename T>
+void ConfigurableParameterT<T>::update(T* pointer, 
+                                       const T& config_value, 
+                                       const T& default_value, 
+                                       bool update_pointer)
 {
-    return "ParameterInt";
+    assert(pointer);
+
+    pointer_       = pointer;
+    config_value_  = config_value;
+    default_value_ = default_value;
+
+    if (update_pointer)
+        *pointer = config_value_;
 }
 
-template <>
-std::string ConfigurableParameter<unsigned int>::getParameterType() const
+/**
+*/
+template <typename T>
+void ConfigurableParameterT<T>::update(T* pointer, 
+                                       const T& default_value, 
+                                       bool update_pointer)
 {
-    return "ParameterUnsignedInt";
+    assert(pointer);
+
+    pointer_       = pointer;
+    default_value_ = default_value;
+
+    if (update_pointer)
+        *pointer = config_value_;
 }
 
-template <>
-std::string ConfigurableParameter<float>::getParameterType() const
+/**
+*/
+template <typename T>
+void ConfigurableParameterT<T>::update(T* pointer)
 {
-    return "ParameterFloat";
+    assert(pointer);
+
+    pointer_ = pointer;
 }
 
-template <>
-std::string ConfigurableParameter<double>::getParameterType() const
+/**
+ * Sets the pointer value to the value contained in the json object.
+ */
+template <typename T>
+void ConfigurableParameterT<T>::setValue(const nlohmann::json& json_value)
 {
-    return "ParameterDouble";
+    assert(hasStoredPointer());
+
+    *pointer_ = valueFromJSON(json_value);
 }
 
+/**
+*/
 template <>
-std::string ConfigurableParameter<std::string>::getParameterType() const
+std::string ConfigurableParameterT<float>::getParameterValueString() const
 {
-    return "ParameterString";
+    return Utils::String::doubleToStringPrecision(getParameterValue(), 8);
 }
 
+/**
+*/
 template <>
-std::string ConfigurableParameter<nlohmann::json>::getParameterType() const
+std::string ConfigurableParameterT<double>::getParameterValueString() const
 {
-    return "ParameterJSON";
+    return Utils::String::doubleToStringPrecision(getParameterValue(), 12);
 }
 
+/**
+*/
 template <>
-std::string ConfigurableParameter<bool>::getParameterValueString() const
+std::string ConfigurableParameterT<std::string>::getParameterValueString() const
 {
-    if (pointer_)
+    return getParameterValue();
+}
+
+/**
+*/
+template <>
+std::string ConfigurableParameterT<nlohmann::json>::getParameterValueString() const
+{
+    return getValuePointer()->dump(4);
+}
+
+/**
+*/
+template <typename T>
+T ConfigurableParameterT<T>::valueFromJSON(const nlohmann::json& json_value)
+{
+    if (std::is_same<T,nlohmann::json>::value == true)
+        return json_value;
+
+    T value;
+    try
     {
-        assert(pointer_);
-        return std::to_string(*pointer_);
+        //try to explicitely convert to the template type => might throw
+        value = json_value.get<T>();
     }
-    else
-        return std::to_string(config_value_);
+    catch(...)
+    {
+        //bad conversion
+        assert(false);
+    }
+    
+    return value;
 }
 
-template <>
-std::string ConfigurableParameter<int>::getParameterValueString() const
-{
-    if (pointer_)
-    {
-        assert(pointer_);
-        return std::to_string(*pointer_);
-    }
-    else
-        return std::to_string(config_value_);
-}
-
-template <>
-std::string ConfigurableParameter<unsigned int>::getParameterValueString() const
-{
-    if (pointer_)
-    {
-        assert(pointer_);
-        return std::to_string(*pointer_);
-    }
-    else
-        return std::to_string(config_value_);
-}
-
-template <>
-std::string ConfigurableParameter<float>::getParameterValueString() const
-{
-    if (pointer_)
-    {
-        assert(pointer_);
-        return Utils::String::doubleToStringPrecision(*pointer_, 8);
-    }
-    else
-        return Utils::String::doubleToStringPrecision(config_value_, 8);
-}
-
-template <>
-std::string ConfigurableParameter<double>::getParameterValueString() const
-{
-    if (pointer_)
-    {
-        assert(pointer_);
-        return Utils::String::doubleToStringPrecision(*pointer_, 12);
-    }
-    else
-        return Utils::String::doubleToStringPrecision(config_value_, 12);
-}
-
-template <>
-std::string ConfigurableParameter<std::string>::getParameterValueString() const
-{
-    if (pointer_)
-    {
-        assert(pointer_);
-        return *pointer_;
-    }
-    else
-    {
-        return config_value_;
-    }
-}
-
-template <>
-std::string ConfigurableParameter<nlohmann::json>::getParameterValueString() const
-{
-    if (pointer_)
-    {
-        assert(pointer_);
-        return pointer_->dump(4);
-    }
-    else
-    {
-        return config_value_.dump(4);
-    }
-}
-
-template class ConfigurableParameter<bool>;
-template class ConfigurableParameter<int>;
-template class ConfigurableParameter<unsigned int>;
-template class ConfigurableParameter<float>;
-template class ConfigurableParameter<double>;
-template class ConfigurableParameter<std::string>;
-template class ConfigurableParameter<nlohmann::json>;
+template class ConfigurableParameterT<bool>;
+template class ConfigurableParameterT<int>;
+template class ConfigurableParameterT<unsigned int>;
+template class ConfigurableParameterT<float>;
+template class ConfigurableParameterT<double>;
+template class ConfigurableParameterT<std::string>;
+template class ConfigurableParameterT<nlohmann::json>;

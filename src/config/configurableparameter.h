@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONFIGURABLPPARAMETER_H
-#define CONFIGURABLPPARAMETER_H
+#pragma once
 
 #include <string>
 
@@ -24,89 +23,137 @@
 
 class Configurable;
 
+template<typename T>
+class ConfigurableParameterT;
+
 /**
- * @brief Configuration parameter template class
- *
- * @details Several types of parameters are implement here:
- * "ParameterBool", "ParameterInt", "ParameterUnsignedInt", "ParameterFloat", "ParameterDouble",
- * "ParameterString"
- *
- * For all such types one template class was implemented to unify setting and retrieving the XML
- * configuration.
+ * Base class for configurable parameters, used to hide the concrete value type.
  */
-template <class T>
 class ConfigurableParameter
 {
-  public:
-    /// Constructor, initializes members
-    explicit ConfigurableParameter() {}
+public:
+    explicit ConfigurableParameter(const std::string& parameter_id);
+    virtual ~ConfigurableParameter() = default;
 
-    /// Copy constructor, uses assignment operator
-    ConfigurableParameter(const ConfigurableParameter& source);
+    //ConfigurableParameter(const ConfigurableParameter& source);
+    //virtual ConfigurableParameter& operator=(const ConfigurableParameter& source);
 
-    /// Assignment operator, make deep copy and discards the pointer.
-    virtual ConfigurableParameter& operator=(const ConfigurableParameter& source);
+    template<typename T>
+    ConfigurableParameterT<T>* as()
+    {
+        ConfigurableParameterT<T>* param = dynamic_cast<ConfigurableParameterT<T>*>(this);
+        assert(param);
+        return param;
+    }
 
-    /// Destructor
-    virtual ~ConfigurableParameter() {}
+    template<typename T>
+    const ConfigurableParameterT<T>* as() const
+    {
+        const ConfigurableParameterT<T>* param = dynamic_cast<const ConfigurableParameterT<T>*>(this);
+        assert(param);
+        return param;
+    }
+
+    template<typename T>
+    bool isType() const
+    {
+        const ConfigurableParameterT<T>* param = dynamic_cast<const ConfigurableParameterT<T>*>(this);
+        return (param != nullptr);
+    }
+
+    /// Returns parameter identifier
+    const std::string& getParameterId() const;
+
+    virtual void resetToDefault() = 0;
+    virtual std::string getParameterType() const = 0;
+    virtual std::string getParameterValueString() const = 0;
+    virtual bool hasStoredPointer() const = 0;
+    virtual void toJSON(nlohmann::json& json_obj) const = 0;
+
+protected:
+    friend class Configuration;
+
+    virtual void setValue(const nlohmann::json& json_value) = 0;
 
     /// Parameter identifier
     std::string parameter_id_;
-    /// Template pointer to real value
-    T* pointer_{nullptr};
-    /// Template configuration value
-    T config_value_;
-    /// Template default value as given by registerParameter
-    T default_value_;
+};
+
+/**
+ * @brief Configuration parameter template class
+ *
+ * @details Implements a configurable parameter of a concrete type using a templated class.
+ */
+template <class T>
+class ConfigurableParameterT : public ConfigurableParameter
+{
+  public:
+    /// Constructor
+    explicit ConfigurableParameterT(const std::string& parameter_id);
+    explicit ConfigurableParameterT(const std::string& parameter_id,
+                                    T* pointer,
+                                    const T& config_value,
+                                    const T& default_value);
+    /// Destructor
+    virtual ~ConfigurableParameterT() = default;
+
+    /// Returns the parameter value
+    T getParameterValue() const;
+
+    /// Returns the default value
+    const T& getDefaultValue() const;
+
+    /// Returns the config value
+    const T& getConfigValue() const;
+
+    /// Returns the stored value pointer
+    const T* getStoredPointer() const;
 
     /**
      * Returns the parameter type as string
      *
      * \exception std::runtime_error if unknown class is used
      */
-    std::string getParameterType() const;
-
-    /// Returns parameter identifier
-    const std::string& getParameterId() const;
+    std::string getParameterType() const override final;
 
     /// Returns parameter value as string (using a stringstream)
-    std::string getParameterValueString() const;
-    T getParameterValue() const;
+    std::string getParameterValueString() const override final;
 
     /// Sets pointer_ to default value if valid, otherwise sets config_value_ to default_value_
-    void resetToDefault();
+    void resetToDefault() override final;
+
+    /// Checks if the parameter obtains a stored external pointer
+    bool hasStoredPointer() const override final;
+
+    /// Writes the parameter's value to the json object
+    void toJSON(nlohmann::json& json_obj) const override final;
+
+    /// Updates the parameter members
+    void update(T* pointer, const T& config_value, const T& default_value, bool update_pointer);
+    void update(T* pointer, const T& default_value, bool update_pointer);
+    void update(T* pointer);
+
+    static T valueFromJSON(const nlohmann::json& json_value);
+
+protected:
+    const T* getValuePointer() const;
+    T* getValuePointer();
+
+    void setValue(const nlohmann::json& json_value) override final;
+
+    /// Template pointer to real value
+    T* pointer_ = nullptr;
+    /// Template configuration value
+    T config_value_;
+    /// Template default value as given by registerParameter
+    T default_value_;
 };
 
-// template<> void A<int>::AFnc(); // <- note, no function body
-
 template <>
-std::string ConfigurableParameter<bool>::getParameterType() const;
+std::string ConfigurableParameterT<float>::getParameterValueString() const;
 template <>
-std::string ConfigurableParameter<int>::getParameterType() const;
+std::string ConfigurableParameterT<double>::getParameterValueString() const;
 template <>
-std::string ConfigurableParameter<unsigned int>::getParameterType() const;
+std::string ConfigurableParameterT<std::string>::getParameterValueString() const;
 template <>
-std::string ConfigurableParameter<float>::getParameterType() const;
-template <>
-std::string ConfigurableParameter<double>::getParameterType() const;
-template <>
-std::string ConfigurableParameter<std::string>::getParameterType() const;
-template <>
-std::string ConfigurableParameter<nlohmann::json>::getParameterType() const;
-
-template <>
-std::string ConfigurableParameter<bool>::getParameterValueString() const;
-template <>
-std::string ConfigurableParameter<int>::getParameterValueString() const;
-template <>
-std::string ConfigurableParameter<unsigned int>::getParameterValueString() const;
-template <>
-std::string ConfigurableParameter<float>::getParameterValueString() const;
-template <>
-std::string ConfigurableParameter<double>::getParameterValueString() const;
-template <>
-std::string ConfigurableParameter<std::string>::getParameterValueString() const;
-template <>
-std::string ConfigurableParameter<nlohmann::json>::getParameterValueString() const;
-
-#endif  // CONFIGURABLPPARAMETER_H
+std::string ConfigurableParameterT<nlohmann::json>::getParameterValueString() const;

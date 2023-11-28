@@ -16,11 +16,12 @@
  */
 
 #include "eval/requirement/detection/detectionconfig.h"
+#include "eval/requirement/detection/detection.h"
 #include "eval/requirement/detection/detectionconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "comparisontype.h"
 #include "stringconv.h"
@@ -37,18 +38,18 @@ DetectionConfig::DetectionConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("update_interval", &update_interval_s_, 1);
+    registerParameter("update_interval", &update_interval_s_, 1.0f);
 
     registerParameter("use_min_gap_length", &use_min_gap_length_, false);
-    registerParameter("min_gap_length_s", &min_gap_length_s_, 3.0);
+    registerParameter("min_gap_length_s", &min_gap_length_s_, 3.0f);
 
     registerParameter("use_max_gap_length", &use_max_gap_length_, false);
-    registerParameter("max_gap_length_s", &max_gap_length_s_, 5.0);
+    registerParameter("max_gap_length_s", &max_gap_length_s_, 5.0f);
 
     registerParameter("invert_prob", &invert_prob_, false);
 
     registerParameter("use_miss_tolerance", &use_miss_tolerance_, false);
-    registerParameter("miss_tolerance", &miss_tolerance_s_, 0.01);
+    registerParameter("miss_tolerance", &miss_tolerance_s_, 0.01f);
 
     registerParameter("hold_for_any_target", &hold_for_any_target_, false);
 }

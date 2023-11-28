@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "property/property.h"
+//#include "property/property.h"
 
 #include <iostream>
 

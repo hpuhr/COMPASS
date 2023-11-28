@@ -17,14 +17,15 @@
 
 #include "eval/requirement/speed/speedconfig.h"
 #include "eval/requirement/speed/speedconfigwidget.h"
+#include "eval/requirement/speed/speed.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
-#include "stringconv.h"
+//#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttable.h"
+//#include "stringconv.h"
 
-using namespace Utils;
+//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -36,9 +37,9 @@ SpeedConfig::SpeedConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0);
+    registerParameter("threshold_value", &threshold_value_, 50.0f);
     registerParameter("use_percent_if_higher", &use_percent_if_higher_, false);
-    registerParameter("threshold_percent", &threshold_percent_, 10.0);
+    registerParameter("threshold_percent", &threshold_percent_, 10.0f);
 
     registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,
                       (unsigned int) COMPARISON_TYPE::LESS_THAN_OR_EQUAL);

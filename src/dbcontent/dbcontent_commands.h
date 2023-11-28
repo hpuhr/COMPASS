@@ -34,6 +34,7 @@ extern void init_dbcontent_commands();
 // get_dbcontent_data --dbcontent CAT021 --variables "Timestamp|Time of Day|Latitude|Longitude|Associations" --utn 0
 // get_dbcontent_data --dbcontent CAT062 --variables Timestamp
 // get_dbcontent_data --dbcontent CAT062 --variables Timestamp --max_size 100
+
 struct RTCommandGetData : public rtcommand::RTCommand
 {
 public:

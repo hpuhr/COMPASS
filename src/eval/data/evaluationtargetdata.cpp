@@ -16,18 +16,19 @@
  */
 
 #include "evaluationtargetdata.h"
-#include "buffer.h"
+//#include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/target/target.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
-#include "util/number.h"
+//#include "util/number.h"
 #include "util/timeconv.h"
 #include "sector/airspace.h"
+#include "sectorlayer.h"
 
 #include <boost/algorithm/string.hpp>
 

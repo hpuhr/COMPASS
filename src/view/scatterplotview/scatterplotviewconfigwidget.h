@@ -19,8 +19,8 @@
 #define SCATTERPLOTVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-#include "dbcontent/variable/variable.h"
-#include "appmode.h"
+//#include "dbcontent/variable/variable.h"
+//#include "appmode.h"
 
 namespace dbContent
 {
@@ -46,15 +46,26 @@ public slots:
     void selectedVariableXChangedSlot();
     void selectedVariableYChangedSlot();
 
+    void useConnectionLinesSlot();
+
 public:
     ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
 
+    virtual void configChanged() override;
+
 protected:
+    void updateSelectedVarX();
+    void updateSelectedVarY();
+
     ScatterPlotView* view_ = nullptr;
 
     dbContent::VariableSelectionWidget* select_var_x_ {nullptr};
     dbContent::VariableSelectionWidget* select_var_y_ {nullptr};
+
+    QCheckBox* use_connection_lines_ {nullptr};
+
+    virtual void onDisplayChange_impl() override;
 };
 
 #endif /* SCATTERPLOTVIEWCONFIGWIDGET_H_ */

@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTDETECTIONCONFIG_H
 #define EVALUATIONREQUIREMENTDETECTIONCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/detection/detectionconfigwidget.h"
-#include "eval/requirement/detection/detection.h"
+//#include "eval/requirement/detection/detectionconfigwidget.h"
+//#include "eval/requirement/detection/detection.h"
 
 #include <memory>
 

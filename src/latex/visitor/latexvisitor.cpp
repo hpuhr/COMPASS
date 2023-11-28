@@ -19,7 +19,7 @@
 #include "latexdocument.h"
 #include "latexsection.h"
 #include "latextable.h"
-#include "lateximage.h"
+//#include "lateximage.h"
 #include "viewpoint.h"
 #include "listboxview.h"
 #include "listboxviewdatawidget.h"

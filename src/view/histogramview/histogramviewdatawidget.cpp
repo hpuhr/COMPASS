@@ -20,7 +20,7 @@
 #include "histogramview.h"
 #include "compass.h"
 #include "buffer.h"
-#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
@@ -32,43 +32,43 @@
 #include "histogramgeneratorbuffer.h"
 #include "histogramgeneratorresults.h"
 
-#include "eval/results/extra/datasingle.h"
-#include "eval/results/extra/datajoined.h"
-#include "eval/results/extra/tracksingle.h"
-#include "eval/results/extra/trackjoined.h"
+//#include "eval/results/extra/datasingle.h"
+//#include "eval/results/extra/datajoined.h"
+//#include "eval/results/extra/tracksingle.h"
+//#include "eval/results/extra/trackjoined.h"
 
-#include "eval/results/dubious/dubioustracksingle.h"
-#include "eval/results/dubious/dubioustrackjoined.h"
-#include "eval/results/dubious/dubioustargetsingle.h"
-#include "eval/results/dubious/dubioustargetjoined.h"
+//#include "eval/results/dubious/dubioustracksingle.h"
+//#include "eval/results/dubious/dubioustrackjoined.h"
+//#include "eval/results/dubious/dubioustargetsingle.h"
+//#include "eval/results/dubious/dubioustargetjoined.h"
 
-#include "eval/results/detection/joined.h"
-#include "eval/results/detection/single.h"
-#include "eval/results/position/distancejoined.h"
-#include "eval/results/position/distancesingle.h"
-#include "eval/results/position/alongsingle.h"
-#include "eval/results/position/alongjoined.h"
-#include "eval/results/position/acrosssingle.h"
-#include "eval/results/position/acrossjoined.h"
-#include "eval/results/position/latencysingle.h"
-#include "eval/results/position/latencyjoined.h"
+//#include "eval/results/detection/joined.h"
+//#include "eval/results/detection/single.h"
+//#include "eval/results/position/distancejoined.h"
+//#include "eval/results/position/distancesingle.h"
+//#include "eval/results/position/alongsingle.h"
+//#include "eval/results/position/alongjoined.h"
+//#include "eval/results/position/acrosssingle.h"
+//#include "eval/results/position/acrossjoined.h"
+//#include "eval/results/position/latencysingle.h"
+//#include "eval/results/position/latencyjoined.h"
 
-#include "eval/results/speed/speedjoined.h"
-#include "eval/results/speed/speedsingle.h"
+//#include "eval/results/speed/speedjoined.h"
+//#include "eval/results/speed/speedsingle.h"
 
-#include "eval/results/identification/correctsingle.h"
-#include "eval/results/identification/correctjoined.h"
-#include "eval/results/identification/falsesingle.h"
-#include "eval/results/identification/falsejoined.h"
+//#include "eval/results/identification/correctsingle.h"
+//#include "eval/results/identification/correctjoined.h"
+//#include "eval/results/identification/falsesingle.h"
+//#include "eval/results/identification/falsejoined.h"
 
-#include "eval/results/mode_a/presentsingle.h"
-#include "eval/results/mode_a/presentjoined.h"
-#include "eval/results/mode_a/falsesingle.h"
-#include "eval/results/mode_a/falsejoined.h"
-#include "eval/results/mode_c/presentsingle.h"
-#include "eval/results/mode_c/presentjoined.h"
-#include "eval/results/mode_c/falsesingle.h"
-#include "eval/results/mode_c/falsejoined.h"
+//#include "eval/results/mode_a/presentsingle.h"
+//#include "eval/results/mode_a/presentjoined.h"
+//#include "eval/results/mode_a/falsesingle.h"
+//#include "eval/results/mode_a/falsejoined.h"
+//#include "eval/results/mode_c/presentsingle.h"
+//#include "eval/results/mode_c/presentjoined.h"
+//#include "eval/results/mode_c/falsesingle.h"
+//#include "eval/results/mode_c/falsejoined.h"
 
 #include <QHBoxLayout>
 #include <QMessageBox>
@@ -102,6 +102,8 @@ const QColor HistogramViewDataWidget::ColorCAT021   = QColor("#6666FF");
 const QColor HistogramViewDataWidget::ColorCAT048   = QColor("#00FF00");
 const QColor HistogramViewDataWidget::ColorCAT062   = QColor("#CCCCCC");
 const QColor HistogramViewDataWidget::ColorRefTraj  = QColor("#FFA500");
+
+using namespace std;
 
 /**
  */

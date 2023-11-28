@@ -19,6 +19,7 @@
 #define DBCONTENT_DBCONTENTWIDGET_H_
 
 #include <QWidget>
+
 #include <map>
 
 class QLineEdit;

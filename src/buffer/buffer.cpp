@@ -17,16 +17,16 @@
 
 #include "buffer.h"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+//#include "boost/date_time/posix_time/posix_time.hpp"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
 #include "logger.h"
 #include "nullablevector.h"
-#include "string.h"
-#include "stringconv.h"
-#include "unit.h"
-#include "unitmanager.h"
-#include "util/timeconv.h"
+//#include "string.h"
+//#include "stringconv.h"
+//#include "unit.h"
+//#include "unitmanager.h"
+//#include "util/timeconv.h"
 
 using namespace nlohmann;
 using namespace std;
@@ -720,7 +720,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
         {
             if (!properties_.hasProperty(db_column_name))
             {
-                logerr << "Buffer: transformVariables: property '" << db_column_name << "' not found";
+                //logerr << "Buffer: transformVariables: property '" << db_column_name << "' not found";
                 continue;
             }
 

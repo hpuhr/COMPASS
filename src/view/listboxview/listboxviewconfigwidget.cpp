@@ -18,25 +18,16 @@
 #include "listboxviewconfigwidget.h"
 #include "listboxviewwidget.h"
 #include "listboxview.h"
-#include "compass.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variableorderedsetwidget.h"
-#include "listboxview.h"
-#include "listboxviewdatasource.h"
+#include "listboxviewsetconfigwidget.h"
+
 #include "logger.h"
-#include "stringconv.h"
-#include "test/ui_test_common.h"
 #include "viewwidget.h"
 
-#include <QComboBox>
 #include <QCheckBox>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QStackedWidget>
-#include <QInputDialog>
 #include <QTabWidget>
 
 using namespace Utils;
@@ -56,98 +47,41 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
 
     // config
     {
-        QWidget* cfg_widget = new QWidget();
-        QVBoxLayout* cfg_layout = new QVBoxLayout();
-
         QFont font_bold;
         font_bold.setBold(true);
 
-        // sets
+        QWidget* cfg_widget = new QWidget();
+        QVBoxLayout* cfg_layout = new QVBoxLayout();
 
         QLabel* set_label = new QLabel("Variable Lists");
         set_label->setFont(font_bold);
         cfg_layout->addWidget(set_label);
 
-        set_box_ = new QComboBox();
-        connect(set_box_, SIGNAL(activated(const QString&)), this, SLOT(selectedSetSlot(const QString&)));
+        set_config_widget_ = new ListBoxViewSetConfigWidget(view_->getDataSource(), this);
+        set_config_widget_->updateFromDataSource();
 
-        updateSetBox();
-
-        cfg_layout->addWidget(set_box_);
-
-        QHBoxLayout* set_manage_layout = new QHBoxLayout();
-
-        add_set_button_ = new QPushButton("Add");
-        connect(add_set_button_, &QPushButton::clicked, this, &ListBoxViewConfigWidget::addSetSlot);
-        set_manage_layout->addWidget(add_set_button_);
-
-        copy_set_button_ = new QPushButton("Copy");
-        connect(copy_set_button_, &QPushButton::clicked, this, &ListBoxViewConfigWidget::copySetSlot);
-        set_manage_layout->addWidget(copy_set_button_);
-
-        rename_set_button_ = new QPushButton("Rename");
-        connect(rename_set_button_, &QPushButton::clicked, this, &ListBoxViewConfigWidget::renameSetSlot);
-        set_manage_layout->addWidget(rename_set_button_);
-
-        remove_set_button_ = new QPushButton("Remove");
-        connect(remove_set_button_, &QPushButton::clicked, this, &ListBoxViewConfigWidget::removeSetSlot);
-        set_manage_layout->addWidget(remove_set_button_);
-
-        updateSetButtons();
-
-        cfg_layout->addLayout(set_manage_layout);
+        cfg_layout->addWidget(set_config_widget_);
 
         QFrame* line = new QFrame();
         line->setFrameShape(QFrame::HLine);
         line->setFrameShadow(QFrame::Sunken);
         cfg_layout->addWidget(line);
 
-        // set widget
-        set_stack_ = new QStackedWidget();
-        cfg_layout->addWidget(set_stack_);
-
-        updateSetWidget();
-
-        //    variable_set_widget_ = getView()->getDataSource()->getSet()->widget();
-        //    connect(getView()->getDataSource()->getSet(), &DBOVariableOrderedSet::variableAddedChangedSignal,
-        //            this, &ListBoxViewConfigWidget::reloadWantedSlot);
-        //    vlayout->addWidget(variable_set_widget_);
-
-        QFrame* line2 = new QFrame();
-        line2->setFrameShape(QFrame::HLine);
-        line2->setFrameShadow(QFrame::Sunken);
-        cfg_layout->addWidget(line2);
-
-        // rest
-
         only_selected_check_ = new QCheckBox("Show Only Selected");
         only_selected_check_->setChecked(view_->showOnlySelected());
-        connect(only_selected_check_, &QCheckBox::clicked, this,
-                &ListBoxViewConfigWidget::toggleShowOnlySeletedSlot);
+        connect(only_selected_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleShowOnlySeletedSlot);
         cfg_layout->addWidget(only_selected_check_);
 
         presentation_check_ = new QCheckBox("Use Presentation");
         presentation_check_->setChecked(view_->usePresentation());
-        connect(presentation_check_, &QCheckBox::clicked, this,
-                &ListBoxViewConfigWidget::toggleUsePresentation);
+        connect(presentation_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleUsePresentation);
         cfg_layout->addWidget(presentation_check_);
 
         //vlayout->addStretch();
 
-        overwrite_check_ = new QCheckBox("Overwrite Exported File");
-        overwrite_check_->setChecked(view_->overwriteCSV());
-        connect(overwrite_check_, &QCheckBox::clicked, this,
-                &ListBoxViewConfigWidget::toggleUseOverwrite);
-        cfg_layout->addWidget(overwrite_check_);
-
         cfg_widget->setLayout(cfg_layout);
-
         tab_widget->addTab(cfg_widget, "Config");
     }
-    //    QFrame* line3 = new QFrame();
-    //    line3->setFrameShape(QFrame::HLine);
-    //    line3->setFrameShadow(QFrame::Sunken);
-    //    vlayout->addWidget(line3);
 
     vlayout->addWidget(tab_widget);
 
@@ -159,166 +93,6 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
 }
 
 ListBoxViewConfigWidget::~ListBoxViewConfigWidget() = default;
-
-void ListBoxViewConfigWidget::selectedSetSlot(const QString& text)
-{
-    string name = text.toStdString();
-
-    loginf << "ListBoxViewConfigWidget: selectedSetSlot: name '" << name << "'";
-
-    assert (view_->getDataSource()->hasSet(name));
-    view_->getDataSource()->currentSetName(name);
-
-    updateSetButtons();
-    updateSetWidget();
-
-    getWidget()->notifyReloadNeeded();
-}
-
-void ListBoxViewConfigWidget::addSetSlot()
-{
-    loginf << "istBoxViewConfigWidget: addSetSlot";
-
-    bool ok;
-    QString text =
-            QInputDialog::getText(nullptr, tr("Add Variable List"),
-                                  tr("Specify a (unique) name:"), QLineEdit::Normal,
-                                  "", &ok);
-
-    if (!ok)
-        return;
-
-    std::string name;
-
-    if (!text.isEmpty())
-    {
-        name = text.toStdString();
-        if (!name.size())
-        {
-            QMessageBox m_warning(QMessageBox::Warning, "Add Variable List",
-                                  "List has to have a non-empty name.", QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        if (view_->getDataSource()->hasSet(name))
-        {
-            QMessageBox m_warning(QMessageBox::Warning, "Add Variable List",
-                                  "List with this name already exists.", QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-    }
-
-    view_->getDataSource()->addSet(name);
-    view_->getDataSource()->currentSetName(name);
-
-    updateSetBox();
-    updateSetButtons();
-    updateSetWidget();
-}
-
-void ListBoxViewConfigWidget::copySetSlot()
-{
-    loginf << "istBoxViewConfigWidget: copySetSlot";
-
-    bool ok;
-    QString text =
-            QInputDialog::getText(nullptr, tr("Copy Variable List"),
-                                  tr("Specify a (unique) name:"), QLineEdit::Normal,
-                                  "", &ok);
-
-    if (!ok)
-        return;
-
-    std::string new_name;
-
-    if (!text.isEmpty())
-    {
-        new_name = text.toStdString();
-        if (!new_name.size())
-        {
-            QMessageBox m_warning(QMessageBox::Warning, "Copy Variable List",
-                                  "List has to have a non-empty name.", QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        if (view_->getDataSource()->hasSet(new_name))
-        {
-            QMessageBox m_warning(QMessageBox::Warning, "Copy Variable List",
-                                  "List with this name already exists.", QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-    }
-
-    view_->getDataSource()->copySet(view_->getDataSource()->currentSetName(), new_name);
-    view_->getDataSource()->currentSetName(new_name);
-
-    updateSetBox();
-    updateSetButtons();
-    updateSetWidget();
-}
-
-void ListBoxViewConfigWidget::renameSetSlot()
-{
-    loginf << "istBoxViewConfigWidget: renameSetSlot";
-
-    bool ok;
-    QString text =
-            QInputDialog::getText(nullptr, tr("Rename Variable List"),
-                                  tr("Specify a (unique) name:"), QLineEdit::Normal,
-                                  "", &ok);
-    if (!ok)
-        return;
-
-    std::string new_name;
-
-    if (!text.isEmpty())
-    {
-        new_name = text.toStdString();
-        if (!new_name.size())
-        {
-            QMessageBox m_warning(QMessageBox::Warning, "Rename Variable List",
-                                  "List has to have a non-empty name.", QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        if (view_->getDataSource()->hasSet(new_name))
-        {
-            QMessageBox m_warning(QMessageBox::Warning, "Rename Variable List",
-                                  "List with this name already exists.", QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-    }
-
-    string old_name = view_->getDataSource()->currentSetName();
-
-    view_->getDataSource()->copySet(view_->getDataSource()->currentSetName(), new_name);
-    view_->getDataSource()->currentSetName(new_name);
-
-    view_->getDataSource()->removeSet(old_name);
-
-    updateSetBox();
-    updateSetButtons();
-    updateSetWidget();
-
-    getWidget()->notifyReloadNeeded();
-}
-
-void ListBoxViewConfigWidget::removeSetSlot()
-{
-    loginf << "istBoxViewConfigWidget: removeSetSlot";
-
-    view_->getDataSource()->removeSet(view_->getDataSource()->currentSetName());
-
-    updateSetBox();
-    updateSetButtons();
-    updateSetWidget();
-}
 
 void ListBoxViewConfigWidget::toggleShowOnlySeletedSlot()
 {
@@ -337,22 +111,13 @@ void ListBoxViewConfigWidget::toggleUsePresentation()
     view_->usePresentation(checked);
 }
 
-void ListBoxViewConfigWidget::toggleUseOverwrite()
-{
-    assert(overwrite_check_);
-    bool checked = overwrite_check_->checkState() == Qt::Checked;
-    logdbg << "ListBoxViewConfigWidget: toggleUseOverwrite: setting overwrite to " << checked;
-    view_->overwriteCSV(checked);
-}
-
 void ListBoxViewConfigWidget::exportSlot()
 {
     logdbg << "ListBoxViewConfigWidget: exportSlot";
-    assert(overwrite_check_);
     assert(export_button_);
 
     export_button_->setDisabled(true);
-    emit exportSignal(overwrite_check_->checkState() == Qt::Checked);
+    emit exportSignal();
 }
 
 void ListBoxViewConfigWidget::exportDoneSlot(bool cancelled)
@@ -369,64 +134,14 @@ void ListBoxViewConfigWidget::exportDoneSlot(bool cancelled)
     }
 }
 
-void ListBoxViewConfigWidget::updateSetBox()
+void ListBoxViewConfigWidget::configChanged()
 {
-    loginf << "ListBoxViewConfigWidget: updateSetBox";
+    assert(view_);
 
-    assert(set_box_);
-    set_box_->clear();
+    //update ui for var set
+    set_config_widget_->updateFromDataSource();
 
-    for (const auto& set_it : view_->getDataSource()->getSets())
-    {
-        set_box_->addItem(set_it.first.c_str());
-    }
-
-    int index = set_box_->findText(view_->getDataSource()->currentSetName().c_str());
-    if(index >= 0)
-    {
-        set_box_->setCurrentIndex(index);
-        loginf << "ListBoxViewConfigWidget: updateSetBox: setting '"
-               << view_->getDataSource()->currentSetName() << "'";
-    }
-}
-
-void ListBoxViewConfigWidget::updateSetButtons()
-{
-    loginf << "ListBoxViewConfigWidget: updateSetButtons";
-
-    if (!add_set_button_)
-        return;
-
-    bool is_default = view_->getDataSource()->currentSetName() == "Default";
-
-    assert (add_set_button_);
-    assert (copy_set_button_);
-    assert (rename_set_button_);
-    rename_set_button_->setDisabled(is_default);
-    assert (remove_set_button_);
-    remove_set_button_->setDisabled(is_default);
-}
-
-void ListBoxViewConfigWidget::updateSetWidget()
-{
-    loginf << "ListBoxViewConfigWidget: updateWidgetBox";
-
-    if (!set_stack_)
-    {
-        loginf << "ListBoxViewConfigWidget: updateWidgetBox: no stack";
-        return;
-    }
-
-    assert (view_->getDataSource()->hasCurrentSet());
-
-    connect(view_->getDataSource()->getSet(), &dbContent::VariableOrderedSet::variableAddedChangedSignal,
-            getWidget(), &ListBoxViewWidget::notifyReloadNeeded, Qt::UniqueConnection);
-
-    QWidget* set_widget = view_->getDataSource()->getSet()->widget();
-
-    if (set_stack_->indexOf(set_widget) < 0)
-        set_stack_->addWidget(set_widget);
-
-    loginf << "ListBoxViewConfigWidget: updateWidgetBox: setting '" << view_->getDataSource()->currentSetName() << "'";
-    set_stack_->setCurrentWidget(set_widget);
+    //other ui elements
+    only_selected_check_->setChecked(view_->showOnlySelected());
+    presentation_check_->setChecked(view_->usePresentation());
 }

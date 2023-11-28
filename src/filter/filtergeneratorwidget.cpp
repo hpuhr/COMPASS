@@ -16,6 +16,15 @@
  */
 
 #include "filtergeneratorwidget.h"
+#include "compass.h"
+//#include "configurationmanager.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableselectionwidget.h"
+#include "filterconditionoperatorcombobox.h"
+#include "filtermanager.h"
+#include "dbcontent/variable/metavariable.h"
+//#include "stringconv.h"
+#include "global.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -26,15 +35,6 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-
-#include "compass.h"
-#include "configurationmanager.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableselectionwidget.h"
-#include "filterconditionoperatorcombobox.h"
-#include "filtermanager.h"
-#include "dbcontent/variable/metavariable.h"
-#include "stringconv.h"
 
 using namespace Utils;
 
@@ -260,37 +260,39 @@ void FilterGeneratorWidget::accept()
 {
     std::string filter_name = filter_name_->text().toStdString();
 
-    Configuration& configuration =
-        COMPASS::instance().filterManager().addNewSubConfiguration("DBFilter", filter_name);
+    auto configuration = Configuration::create("DBFilter", filter_name);
 
     for (unsigned int cnt = 0; cnt < data_conditions_.size(); cnt++)
     {
         ConditionTemplate& data_condition = data_conditions_.at(cnt);
         std::string condition_name = filter_name + "Condition" + std::to_string(cnt);
 
-        Configuration& condition_configuration =
-            configuration.addNewSubConfiguration("DBFilterCondition", condition_name);
-        condition_configuration.addParameterString("operator", data_condition.operator_);
-        condition_configuration.addParameterString("variable_name", data_condition.variable_name_);
-        condition_configuration.addParameterString("variable_dbcontent_name",
-                                                   data_condition.variable_dbo_type_);
-        condition_configuration.addParameterBool("absolute_value", data_condition.absolute_value_);
-        condition_configuration.addParameterString("value", data_condition.value_);
+        Configuration& condition_configuration = configuration->addNewSubConfiguration("DBFilterCondition", condition_name);
+        condition_configuration.addParameter<std::string>("operator", data_condition.operator_);
+        condition_configuration.addParameter<std::string>("variable_name", data_condition.variable_name_);
+        condition_configuration.addParameter<std::string>("variable_dbcontent_name", data_condition.variable_dbo_type_);
+        condition_configuration.addParameter<bool>("absolute_value", data_condition.absolute_value_);
+        condition_configuration.addParameter<std::string>("value", data_condition.value_);
+
         std::string reset_value;
         if (data_condition.reset_value_.compare("MIN") == 0 ||
             data_condition.reset_value_.compare("MAX") == 0)
             reset_value = data_condition.reset_value_;
         else
             reset_value = data_condition.value_;
-        condition_configuration.addParameterString("reset_value", reset_value);
+        
+        condition_configuration.addParameter<std::string>("reset_value", reset_value);
 
         // configuration.addSubConfigurable ("DBFilterCondition", condition_name,
         // condition_config_name);
     }
 
-    COMPASS::instance().filterManager().generateSubConfigurable("DBFilter", filter_name);
+    COMPASS::instance().filterManager().generateSubConfigurableFromConfig(std::move(configuration));
 
     emit filterWidgetAction(true);
 }
 
-void FilterGeneratorWidget::cancel() { emit filterWidgetAction(false); }
+void FilterGeneratorWidget::cancel() 
+{ 
+    emit filterWidgetAction(false); 
+}

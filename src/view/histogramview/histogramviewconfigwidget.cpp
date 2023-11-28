@@ -18,13 +18,13 @@
 #include "histogramviewconfigwidget.h"
 #include "histogramviewwidget.h"
 #include "histogramviewdatawidget.h"
-#include "compass.h"
+//#include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableselectionwidget.h"
 #include "histogramview.h"
-#include "histogramviewdatasource.h"
+//#include "histogramviewdatasource.h"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "groupbox.h"
 #include "ui_test_common.h"
 
@@ -91,13 +91,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
                                             PropertyDataType::ULONGINT,
                                             PropertyDataType::FLOAT,
                                             PropertyDataType::DOUBLE});
-            if (view_->hasDataVar())
-            {
-                if (view_->isDataVarMeta())
-                    select_var_->selectedMetaVariable(view_->metaDataVar());
-                else
-                    select_var_->selectedVariable(view_->dataVar());
-            }
+            updateSelectedVar();
 
             connect(select_var_, &dbContent::VariableSelectionWidget::selectionChanged, this,
                     &HistogramViewConfigWidget::selectedVariableChangedSlot);
@@ -143,8 +137,9 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
         //general
         {
             log_check_ = new QCheckBox("Logarithmic Y Scale");
-            log_check_->setChecked(view_->useLogScale());
             UI_TEST_OBJ_NAME(log_check_, log_check_->text())
+
+            updateLogScale();
 
             connect(log_check_, &QCheckBox::clicked, this,
                     &HistogramViewConfigWidget::toggleLogScale);
@@ -359,4 +354,32 @@ void HistogramViewConfigWidget::updateInfo()
 
         info_zoom_label->setVisible(info.zoom_active);
     }
+}
+
+/**
+ */
+void HistogramViewConfigWidget::configChanged()
+{
+    updateSelectedVar();
+    updateLogScale();
+}
+
+/**
+ */
+void HistogramViewConfigWidget::updateSelectedVar()
+{
+    if (view_->hasDataVar())
+    {
+        if (view_->isDataVarMeta())
+            select_var_->selectedMetaVariable(view_->metaDataVar());
+        else
+            select_var_->selectedVariable(view_->dataVar());
+    }
+}
+
+/**
+ */
+void HistogramViewConfigWidget::updateLogScale()
+{
+    log_check_->setChecked(view_->useLogScale());
 }

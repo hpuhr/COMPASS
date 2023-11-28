@@ -26,9 +26,12 @@
 
 #include <boost/optional.hpp>
 
+class Configurable;
+
 class QMainWindow;
 class QDialog;
 class QObject;
+class QWidget;
 
 namespace rtcommand
 {
@@ -44,5 +47,10 @@ std::vector<std::string> parameterToStrings(const std::string& string_param);
 std::string parameterFromStrings(const std::vector<std::string>& strings);
 QStringList parameterToStrings(const QString& string_param);
 QString parameterFromStrings(const QStringList& strings);
+
+QString getObjectPath(const QObject* obj);
+
+QString getTooltip(const QObject* rtcmd_object = nullptr,
+                   const Configurable* rtcmd_configurable = nullptr);
 
 } // rtcommand

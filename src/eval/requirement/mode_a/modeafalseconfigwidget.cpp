@@ -17,8 +17,8 @@
 
 #include "eval/requirement/mode_a/modeafalseconfigwidget.h"
 #include "eval/requirement/mode_a/falseconfig.h"
-#include "textfielddoublevalidator.h"
-#include "logger.h"
+//#include "textfielddoublevalidator.h"
+//#include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>

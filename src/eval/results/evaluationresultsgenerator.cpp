@@ -23,19 +23,21 @@
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/single.h"
-#include "eval/results/detection/joined.h"
+//#include "eval/results/detection/joined.h"
+#include "eval/results/joined.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 
 #include "compass.h"
-#include "dbinterface.h"
-#include "sqliteconnection.h"
+//#include "dbinterface.h"
+//#include "sqliteconnection.h"
 
 #include "logger.h"
 #include "stringconv.h"
 #include "global.h"
+#include "sectorlayer.h"
 
 #include <QProgressDialog>
 #include <QApplication>

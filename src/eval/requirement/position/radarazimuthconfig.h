@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H
 
-#include "configurable.h"
-#include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/position/radarazimuthconfigwidget.h"
-#include "eval/requirement/position/radarazimuth.h"
+//#include "configurable.h"
+#include "eval/requirement/base/baseconfig.h"
+//#include "eval/requirement/position/radarazimuthconfigwidget.h"
+//#include "eval/requirement/position/radarazimuth.h"
 
 class Group;
 class EvaluationStandard;

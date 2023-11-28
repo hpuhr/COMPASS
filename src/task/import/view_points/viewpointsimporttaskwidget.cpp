@@ -17,13 +17,12 @@
 
 #include "viewpointsimporttaskwidget.h"
 #include "viewpointsimporttask.h"
-#include "compass.h"
-#include "global.h"
+//#include "compass.h"
+//#include "global.h"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
 #include <QComboBox>
-#include <QFileDialog>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>

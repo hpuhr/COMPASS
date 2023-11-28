@@ -20,19 +20,19 @@
 #include "taskmanager.h"
 #include "compass.h"
 #include "dbinterface.h"
-#include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/dbcontent.h"
+//#include "dbcontent/dbcontentmanager.h"
 #include "files.h"
 #include "logger.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
-#include "viewpointsimporttaskwidget.h"
-#include "global.h"
+//#include "viewpointsimporttaskwidget.h"
+//#include "global.h"
 #include "viewpoint.h"
 
 #include "asteriximporttask.h"
-#include "asteriximporttaskwidget.h"
-#include "asterixoverridewidget.h"
+//#include "asteriximporttaskwidget.h"
+//#include "asterixoverridewidget.h"
 #include "util/timeconv.h"
 
 #include <fstream>
@@ -246,18 +246,16 @@ void ViewPointsImportTask::run()
 
                 ASTERIXImportTask& asterix_importer_task = task_manager_.asterixImporterTask();
 
+                unsigned int line_id {0};
+
                 // line
                 if (ds_it.contains("line_id"))
                 {
                     assert (ds_it.at("line_id").is_number_unsigned());
-                    unsigned int line_id = ds_it.at("line_id");
+                    line_id = ds_it.at("line_id");
 
                     loginf << "ViewPointsImportTask: import: line_id " << line_id;
-
-                    asterix_importer_task.fileLineID(line_id);
                 }
-                else
-                    asterix_importer_task.fileLineID(0); // import to L1 if not set
 
 
                 if (ds_it.contains("time_offset"))
@@ -266,13 +264,13 @@ void ViewPointsImportTask::run()
 
                     float tod_offset = ds_it.at("time_offset");
 
-                    asterix_importer_task.overrideTodActive(true);
-                    asterix_importer_task.overrideTodOffset(tod_offset);
+                    asterix_importer_task.settings().filter_tod_active_ = true;
+                    asterix_importer_task.settings().override_tod_offset_ = tod_offset;
                 }
                 else
                 {
                     loginf << "ViewPointsImportTask: import: override information not set";
-                    asterix_importer_task.overrideTodActive(false);
+                    asterix_importer_task.settings().override_tod_offset_ = false;
                 }
 
                 if (ds_it.contains("date"))
@@ -284,10 +282,10 @@ void ViewPointsImportTask::run()
 
                     boost::posix_time::ptime date = Time::fromDateString(date_str);
 
-                    asterix_importer_task.date(date);
+                    asterix_importer_task.settings().date_ = date;
                 }
 
-                asterix_importer_task.importFilename(filename);
+                asterix_importer_task.addImportFileNames({filename}, line_id);
 
                 assert(asterix_importer_task.canRun());
                 asterix_importer_task.allowUserInteractions(false);

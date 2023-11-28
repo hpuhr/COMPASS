@@ -8,6 +8,7 @@
 #include "logger.h"
 #include "calculatereferencestask.h"
 #include "util/number.h"
+#include "global.h"
 
 #include "reconstruction/reconstructor_umkalman2d.h"
 

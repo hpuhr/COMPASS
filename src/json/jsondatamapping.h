@@ -24,7 +24,7 @@
 #include "format.h"
 #include "json.hpp"
 #include "jsondatamappingwidget.h"
-#include "logger.h"
+//#include "logger.h"
 #include "nullablevector.h"
 
 namespace dbContent {

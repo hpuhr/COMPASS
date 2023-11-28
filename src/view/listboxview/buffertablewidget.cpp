@@ -19,6 +19,18 @@
 
 #include "buffertablewidget.h"
 
+#include "buffer.h"
+#include "buffertablemodel.h"
+#include "dbcontent/dbcontent.h"
+//#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variableset.h"
+#include "listboxviewdatasource.h"
+#include "logger.h"
+#include "compass.h"
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include <QApplication>
 #include <QClipboard>
 #include <QFileDialog>
@@ -26,16 +38,6 @@
 #include <QMessageBox>
 #include <QTableView>
 #include <QVBoxLayout>
-
-#include "boost/date_time/posix_time/posix_time.hpp"
-#include "buffer.h"
-#include "buffertablemodel.h"
-#include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableset.h"
-#include "listboxviewdatasource.h"
-#include "logger.h"
 
 // using namespace Utils;
 
@@ -63,7 +65,7 @@ BufferTableWidget::BufferTableWidget(DBContent& object, ListBoxView& view,
     setLayout(layout);
 }
 
-BufferTableWidget::~BufferTableWidget() {}
+BufferTableWidget::~BufferTableWidget() = default;
 
 void BufferTableWidget::clear()
 {
@@ -72,8 +74,7 @@ void BufferTableWidget::clear()
     model_->clearData();
 }
 
-void BufferTableWidget::show(
-    std::shared_ptr<Buffer> buffer)  //, DBOVariableSet *variables, bool database_view
+void BufferTableWidget::show(std::shared_ptr<Buffer> buffer)  //, DBOVariableSet *variables, bool database_view
 {
     assert(buffer);
 
@@ -88,18 +89,16 @@ void BufferTableWidget::show(
     logdbg << " BufferTableWidget: show: end";
 }
 
-void BufferTableWidget::exportSlot(bool overwrite)
+void BufferTableWidget::exportSlot()
 {
     loginf << "BufferTableWidget: exportSlot: object " << object_.name();
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
     dialog.setNameFilter("CSV Files (*.csv)");
     dialog.setDefaultSuffix("csv");
     dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
-
-    if (!overwrite)
-        dialog.setOption(QFileDialog::DontConfirmOverwrite);
 
     QStringList file_names;
     if (dialog.exec())
@@ -117,7 +116,7 @@ void BufferTableWidget::exportSlot(bool overwrite)
 
         loginf << "BufferTableWidget: exportSlot: export filename " << filename.toStdString();
         assert(model_);
-        model_->saveAsCSV(filename.toStdString(), overwrite);
+        model_->saveAsCSV(filename.toStdString());
     }
     else
     {

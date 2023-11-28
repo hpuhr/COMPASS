@@ -18,7 +18,7 @@
 #include "jsonmappingjob.h"
 
 #include "buffer.h"
-#include "dbcontent/dbcontent.h"
+//#include "dbcontent/dbcontent.h"
 #include "json.h"
 #include "jsonobjectparser.h"
 #include "asterixjsonparser.h"

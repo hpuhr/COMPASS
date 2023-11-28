@@ -16,7 +16,7 @@ Mode3AFilter::Mode3AFilter(const std::string& class_id, const std::string& insta
                        Configurable* parent)
     : DBFilter(class_id, instance_id, parent, false)
 {
-    registerParameter("values_str", &values_str_, "");
+    registerParameter("values_str", &values_str_, std::string());
     updateValuesFromStr(values_str_);
 
     name_ = "Mode 3/A Codes";

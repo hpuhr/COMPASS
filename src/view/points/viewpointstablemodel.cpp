@@ -20,15 +20,17 @@
 #include "viewpoint.h"
 #include "json.hpp"
 #include "json.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "files.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "viewpointswidget.h"
+#include "logger.h"
+
+#include <QMessageBox>
 
 #include <fstream>
 
-#include <QMessageBox>
 
 using namespace nlohmann;
 using namespace Utils;

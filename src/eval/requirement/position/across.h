@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENPOSITIONACROSS_H
 
 #include "eval/requirement/base/probabilitybase.h"
-#include "eval/requirement/position/detail.h"
+//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {

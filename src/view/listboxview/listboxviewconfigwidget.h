@@ -19,19 +19,16 @@
 #define LISTBOXVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-#include "dbcontent/variable/variable.h"
-#include "appmode.h"
+//#include "dbcontent/variable/variable.h"
+//#include "appmode.h"
 
 class VariableOrderedSetWidget;
 class ListBoxView;
 class ListBoxViewWidget;
+class ListBoxViewSetConfigWidget;
 
-class QComboBox;
 class QCheckBox;
-class QLineEdit;
 class QPushButton;
-class QLabel;
-class QStackedWidget;
 
 /**
  * @brief Widget with configuration elements for a ListBoxView
@@ -44,44 +41,27 @@ public:
     ListBoxViewConfigWidget(ListBoxViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ListBoxViewConfigWidget();
 
-public slots:
-    void selectedSetSlot(const QString& text);
-    void addSetSlot();
-    void copySetSlot();
-    void renameSetSlot();
-    void removeSetSlot();
+    virtual void configChanged() override;
 
+public slots:
     void toggleShowOnlySeletedSlot();
     void toggleUsePresentation();
-    void toggleUseOverwrite();
     void exportSlot();
     void exportDoneSlot(bool cancelled);
 
 signals:
-    void exportSignal(bool overwrite);
+    void exportSignal();
 
 protected:
-    void updateUpdateButton();
-    void updateSetBox();
-    void updateSetButtons();
-    void updateSetWidget();
 
     ListBoxView*    view_ = nullptr;
-
-    QComboBox*      set_box_{nullptr};
-    QPushButton*    add_set_button_{nullptr};
-    QPushButton*    copy_set_button_{nullptr};
-    QPushButton*    rename_set_button_{nullptr};
-    QPushButton*    remove_set_button_{nullptr};
-
-    QStackedWidget* set_stack_{nullptr};
 
     QCheckBox*      only_selected_check_{nullptr};
     QCheckBox*      presentation_check_{nullptr};
 
-    QCheckBox*      overwrite_check_{nullptr};
-
     QPushButton*    export_button_{nullptr};
+
+    ListBoxViewSetConfigWidget* set_config_widget_ = nullptr;
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

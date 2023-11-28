@@ -1,17 +1,18 @@
 ﻿#include "dbcontent/dbcontent.h"
 #include "asterixpostprocessjob.h"
-#include "asteriximporttask.h"
+//#include "asteriximporttask.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "datasourcemanager.h"
 #include "buffer.h"
 #include "compass.h"
-#include "mainwindow.h"
+//#include "mainwindow.h"
 #include "projectionmanager.h"
 #include "projection.h"
 #include "json.hpp"
 #include "dbcontent/variable/metavariable.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
+#include "global.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -471,74 +472,18 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         NullableVector<double>& latitude_vec = buffer->get<double>(latitude_var_name);
         NullableVector<double>& longitude_vec = buffer->get<double>(longitude_var_name);
 
-
         // set up projections
 
         for (auto ds_id_it : datasource_vec.distinctValues())
         {
             if (!projection.hasCoordinateSystem(ds_id_it))
             {
-                if (!ds_man.hasConfigDataSource(ds_id_it) && !ds_man.hasDBDataSource(ds_id_it))
-                {
-                    logwrn << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: data source id "
-                           << ds_id_it << " not defined in config or db";
-                    continue;
-                }
+                if (ds_man.hasConfigDataSource(ds_id_it) && ds_man.configDataSource(ds_id_it).dsType() != "Radar")
+                    continue; // ok for non-radars
 
-                //                if (!dbo_man.hasDataSource(ds_id_it))
-                //                {
-                //                    if(dbo_man.canAddNewDataSourceFromConfig(ds_id_it))
-                //                        dbo_man.addNewDataSource(ds_id_it);
-                //                    else
-                //                    {
-                //                        logerr << "ASTERIXPostprocessJob: run: ds id " << ds_id_it << " unknown";
-                //                        continue;
-                //                    }
-                //                }
-
-                //                assert (dbo_man.hasDataSource(ds_id_it));
-
-                if (ds_man.hasConfigDataSource(ds_id_it))
-                {
-                    dbContent::ConfigurationDataSource& data_source = ds_man.configDataSource(ds_id_it);
-
-                    if (data_source.hasFullPosition())
-                    {
-                        loginf << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: adding proj ds " << ds_id_it
-                               << " lat/long " << data_source.latitude()
-                               << "," << data_source.longitude()
-                               << " alt " << data_source.altitude();
-
-                        projection.addCoordinateSystem(ds_id_it, data_source.latitude(),
-                                                       data_source.longitude(),
-                                                       data_source.altitude());
-                    }
-                    else
-                        logerr << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: config ds "
-                               << data_source.name()
-                               << " defined but missing position info";
-                }
-                else if (ds_man.hasDBDataSource(ds_id_it))
-                {
-                    dbContent::DBDataSource& data_source = ds_man.dbDataSource(ds_id_it);
-
-                    if (data_source.hasFullPosition())
-                    {
-                        loginf << "ASTERIXPostprocessJob: run: adding proj ds " << ds_id_it
-                               << " lat/long " << data_source.latitude()
-                               << "," << data_source.longitude()
-                               << " alt " << data_source.altitude();
-
-                        projection.addCoordinateSystem(ds_id_it, data_source.latitude(),
-                                                       data_source.longitude(),
-                                                       data_source.altitude());
-                    }
-                    else
-                        logerr << "ASTERIXPostprocessJob: run: ds " << data_source.name()
-                               << " defined but missing position info";
-                }
+                logwrn << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: data source id "
+                       << ds_id_it << " not set up"; // should have been in ASTERIX import task
             }
-
         }
 
         for (unsigned int cnt = 0; cnt < buffer_size; cnt++)
@@ -598,31 +543,6 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
             longitude_vec.set(cnt, lon);
         }
     }
-
-    // do first buffer sorting
-
-    //    loginf << "ASTERIXPostprocessJob: run: sorting buffers";
-
-    //    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
-    //    for (auto& buf_it : buffers_)
-    //    {
-    //        logdbg << "ASTERIXPostprocessJob: run: sorting buffer " << buf_it.first;
-
-    //        assert (dbo_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()));
-    //        assert (dbo_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
-
-    //        DBOVariable& tod_var = dbo_man.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
-
-    //        Property prop {tod_var.name(), tod_var.dataType()};
-
-    //        logdbg << "ASTERIXPostprocessJob: run: sorting by variable " << prop.name() << " " << prop.dataTypeString();
-
-    //        assert (buf_it.second->hasProperty(prop));
-
-    //        buf_it.second->sortByProperty(prop);
-    //    }
-
 }
 
 void ASTERIXPostprocessJob::doGroundSpeedCalculations()
@@ -636,7 +556,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
     string speed_var_name;
     string track_angle_var_name;
 
-    double speed_ms, bearing_rad;
+    double speed_ms, track_angle_rad, track_angle_deg;
 
     for (auto& buf_it : buffers_)
     {
@@ -691,10 +611,15 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
                 continue;
 
             speed_ms = sqrt(pow(vx_vec.get(index), 2)+pow(vy_vec.get(index), 2)) ; // for 1s
-            bearing_rad = atan2(vx_vec.get(index), vy_vec.get(index));
+            track_angle_rad = atan2(vx_vec.get(index), vy_vec.get(index));
+
+            track_angle_deg = track_angle_rad * RAD2DEG;
+
+            if (track_angle_deg < 0)
+                track_angle_deg += 360.0;
 
             speed_vec.set(index, speed_ms * M_S2KNOTS);
-            track_angle_vec.set(index, bearing_rad * RAD2DEG);
+            track_angle_vec.set(index, track_angle_deg);
         }
     }
 }

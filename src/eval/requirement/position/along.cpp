@@ -17,10 +17,10 @@
 
 #include "eval/requirement/position/along.h"
 #include "eval/results/position/alongsingle.h"
-#include "evaluationdata.h"
+//#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "util/stringconv.h"
+//#include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
 

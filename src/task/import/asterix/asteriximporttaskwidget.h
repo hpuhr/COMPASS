@@ -36,6 +36,7 @@ class QStackedWidget;
 class QCheckBox;
 class QTabWidget;
 class QLabel;
+class QGridLayout;
 
 class ASTERIXImportTaskWidget : public QWidget
 {
@@ -56,7 +57,8 @@ class ASTERIXImportTaskWidget : public QWidget
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImportTaskWidget();
 
-    void updateSourceLabel();
+//    void updateSourceLabel();
+    void updateSourcesGrid();
 
     ASTERIXOverrideWidget* overrideWidget() const;
 
@@ -67,7 +69,9 @@ protected:
 
     QTabWidget* tab_widget_{nullptr};
 
-    QLabel* source_label_{nullptr};
+    //QLabel* source_label_{nullptr};
+
+    QGridLayout* sources_grid_{nullptr}; // network or files
 
     QComboBox* object_parser_box_{nullptr};
     QPushButton* add_object_parser_button_{nullptr};
@@ -82,6 +86,7 @@ protected:
     QCheckBox* limit_ram_check_{nullptr};
 
     void addMainTab();
+    void addDecoderTab();
     void addOverrideTab();
     void addMappingsTab();
 

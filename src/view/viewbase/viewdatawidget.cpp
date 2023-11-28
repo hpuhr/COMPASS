@@ -1,6 +1,7 @@
 
 #include "viewdatawidget.h"
 #include "viewtoolswitcher.h"
+#include "logger.h"
 #include "buffer.h"
 
 #include <QApplication>
@@ -24,6 +25,16 @@ ViewDataWidget::ViewDataWidget(ViewWidget* view_widget, QWidget* parent, Qt::Win
 bool ViewDataWidget::hasData() const
 {
     return !data_.empty();
+}
+
+unsigned int ViewDataWidget::loadedDataCount()
+{
+    unsigned int count = 0;
+
+    for (auto& buf_it : data_)
+        count += (*buf_it.second).size();
+
+    return count;
 }
 
 /**

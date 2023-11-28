@@ -56,6 +56,14 @@ void ViewConfigWidget::appModeSwitch(AppMode app_mode)
 }
 
 /**
+ * Reacts on config changes.
+*/
+void ViewConfigWidget::configChanged()
+{
+    //per default do nothing
+}
+
+/**
  * Reacts on changes in the display (e.g. if display information should be visualized in the config widget).
  * (Note: Only called if both config and data widget exist)
  */

@@ -16,14 +16,16 @@
  */
 
 #include "eval/requirement/mode_a/presentconfig.h"
+#include "eval/requirement/mode_a/modeapresentconfigwidget.h"
+#include "eval/requirement/mode_a/present.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
-using namespace Utils;
+//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 

@@ -17,10 +17,11 @@
 
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/group.h"
+#include "eval/requirement/base/comparisontype.h"
 #include "logger.h"
 
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 
 #include <QFormLayout>
@@ -68,9 +69,9 @@ BaseConfig::BaseConfig(
     : Configurable(class_id, instance_id, &group), EvaluationStandardTreeItem(&group),
       group_(group), standard_(standard), eval_man_(eval_man)
 {
-    registerParameter("name", &name_, "");
-    registerParameter("short_name", &short_name_, "");
-    registerParameter("comment", &comment_, "");
+    registerParameter("name", &name_, std::string());
+    registerParameter("short_name", &short_name_, std::string());
+    registerParameter("comment", &comment_, std::string());
 
     assert (name_.size());
     assert (short_name_.size());

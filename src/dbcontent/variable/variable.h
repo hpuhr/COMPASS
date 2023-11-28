@@ -19,7 +19,7 @@
 #define DBCONTENT_VARIABLE_H_
 
 #include "configurable.h"
-#include "global.h"
+//#include "global.h"
 #include "property.h"
 #include "stringconv.h"
 #include "logger.h"
@@ -69,7 +69,7 @@ class Variable : public QObject, public Property, public Configurable
 
     bool operator==(const Variable& var);
 
-    void print();
+    void print() const;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);

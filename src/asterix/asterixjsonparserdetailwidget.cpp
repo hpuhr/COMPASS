@@ -2,12 +2,12 @@
 #include "datatypeformatselectionwidget.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableselectionwidget.h"
-#include "files.h"
-#include "jsonobjectparser.h"
+//#include "files.h"
+//#include "jsonobjectparser.h"
 #include "logger.h"
 #include "unitselectionwidget.h"
 #include "compass.h"
-#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variableeditdialog.h"
 #include "dbcontent/variable/variablecreatedialog.h"
@@ -520,12 +520,13 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
 
         string json_key = parser_.unmappedJSONKey(entry_index_);
 
-        Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
-        new_cfg.addParameterString("json_key", json_key);
-        new_cfg.addParameterString("db_content_name", parser_.dbContentName());
-        new_cfg.addParameterString("db_content_variable_name", dbo_var_sel_->selectedVariable().name());
+        auto new_cfg = Configuration::create("JSONDataMapping");
 
-        parser_.generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+        new_cfg->addParameter<std::string>("json_key", json_key);
+        new_cfg->addParameter<std::string>("db_content_name", parser_.dbContentName());
+        new_cfg->addParameter<std::string>("db_content_variable_name", dbo_var_sel_->selectedVariable().name());
+
+        parser_.generateSubConfigurableFromConfig(std::move(new_cfg));
 
         parser_.doMappingChecks();
 
@@ -611,17 +612,17 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
         {
             assert (!parser_.dbContent().hasVariable(dialog.name()));
 
-            Configuration& new_cfg = parser_.dbContent().configuration().addNewSubConfiguration("Variable");
-            new_cfg.addParameterString("name", dialog.name());
-            new_cfg.addParameterString("short_name", dialog.shortName());
-            new_cfg.addParameterString("description", dialog.description());
-            new_cfg.addParameterString("db_column_name", dialog.dbColumnName());
-            new_cfg.addParameterString("data_type_str", dialog.dataTypeStr());
-            new_cfg.addParameterString("representation_str", dialog.representationStr());
-            new_cfg.addParameterString("dimension", dialog.dimension());
-            new_cfg.addParameterString("unit", dialog.unit());
+            auto new_cfg = Configuration::create("Variable");
+            new_cfg->addParameter<std::string>("name", dialog.name());
+            new_cfg->addParameter<std::string>("short_name", dialog.shortName());
+            new_cfg->addParameter<std::string>("description", dialog.description());
+            new_cfg->addParameter<std::string>("db_column_name", dialog.dbColumnName());
+            new_cfg->addParameter<std::string>("data_type_str", dialog.dataTypeStr());
+            new_cfg->addParameter<std::string>("representation_str", dialog.representationStr());
+            new_cfg->addParameter<std::string>("dimension", dialog.dimension());
+            new_cfg->addParameter<std::string>("unit", dialog.unit());
 
-            parser_.dbContent().generateSubConfigurable("Variable", new_cfg.getInstanceId());
+            parser_.dbContent().generateSubConfigurableFromConfig(std::move(new_cfg));
 
             assert (parser_.dbContent().hasVariable(dialog.name()));
         }
@@ -639,12 +640,12 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
         {
             assert (!parser_.hasJSONKeyInMapping(json_key));
 
-            Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
-            new_cfg.addParameterString("json_key", json_key);
-            new_cfg.addParameterString("db_content_name", parser_.dbContentName());
-            new_cfg.addParameterString("db_content_variable_name", dialog.name());
+            auto new_cfg = Configuration::create("JSONDataMapping");
+            new_cfg->addParameter<std::string>("json_key", json_key);
+            new_cfg->addParameter<std::string>("db_content_name", parser_.dbContentName());
+            new_cfg->addParameter<std::string>("db_content_variable_name", dialog.name());
 
-            parser_.generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+            parser_.generateSubConfigurableFromConfig(std::move(new_cfg));
 
             parser_.doMappingChecks();
 

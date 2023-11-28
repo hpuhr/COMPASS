@@ -17,15 +17,15 @@
 
 #include "configurationmanager.h"
 
-#include <fstream>
-
-#include "config.h"
+//#include "config.h"
 #include "configurable.h"
 #include "files.h"
-#include "global.h"
+//#include "global.h"
 #include "json.hpp"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
+
+#include <fstream>
 
 // using namespace tinyxml2;
 using namespace nlohmann;
@@ -84,10 +84,11 @@ Configuration& ConfigurationManager::registerRootConfigurable(Configurable& conf
             << "ConfigurationManager: getRootConfiguration: creating new configuration for class "
             << configurable.classId() << " instance " << configurable.instanceId();
 
-        root_configurations_.insert(std::pair<std::pair<std::string, std::string>, Configuration>(
-            key, Configuration(configurable.classId(), configurable.instanceId())));
+        auto ptr = new Configuration(configurable.classId(), configurable.instanceId());
+
+        root_configurations_.insert(std::make_pair(key, std::unique_ptr<Configuration>(ptr)));
     }
-    return root_configurations_.at(key);
+    return *root_configurations_.at(key);
 }
 
 /**
@@ -150,12 +151,13 @@ void ConfigurationManager::parseJSONConfigurationFile(const std::string& filenam
                     loginf << "ConfigurationManager: parseJSONConfigurationFile: creating new "
                               "configuration for class "
                            << class_id << " instance " << instance_id;
-                    root_configurations_.insert(
-                        std::pair<std::pair<std::string, std::string>, Configuration>(
-                            key, Configuration(class_id, instance_id)));
 
-                    root_configurations_.at(key).setConfigurationFilename(path);
-                    root_configurations_.at(key).parseJSONConfigFile();
+                    auto ptr = new Configuration(class_id, instance_id);
+
+                    root_configurations_.insert(std::make_pair(key, std::unique_ptr<Configuration>(ptr)));
+
+                    root_configurations_.at(key)->setConfigurationFilename(path);
+                    root_configurations_.at(key)->parseJSONConfigFile();
                 }
             }
             else
@@ -185,7 +187,7 @@ bool ConfigurationManager::hasRootConfiguration(const std::string& class_id, con
 Configuration& ConfigurationManager::getRootConfiguration(const std::string& class_id, const std::string& instance_id)
 {
     assert (hasRootConfiguration(class_id, instance_id));
-    return root_configurations_.at({class_id, instance_id});
+    return *root_configurations_.at({class_id, instance_id});
 }
 
 void ConfigurationManager::saveJSONConfiguration()
@@ -196,11 +198,11 @@ void ConfigurationManager::saveJSONConfiguration()
 
     logdbg << "ConfigurationManager: saveJSONConfiguration";
 
-    for (auto& it : root_configurables_)  // iterate over root configurables
+    for (const auto& it : root_configurables_)  // iterate over root configurables
     {
         loginf << "ConfigurationManager: saveJSONConfiguration: for configurable "
                << it.first.second;
-        it.second.configuration().writeJSON(main_config);
+        it.second.writeJSON(main_config);
         // root_element->LinkEndChild(it.second.configuration().generateXMLElement(document));
     }
 
@@ -210,8 +212,9 @@ void ConfigurationManager::saveJSONConfiguration()
             root_configurables_.end())  // unused root configuration, not yet in save_info
         {
             loginf << "ConfigurationManager: saveJSONConfiguration: configuration "
-                   << it.second.getInstanceId() << " unused";
-            it.second.writeJSON(main_config);
+                   << it.second->getInstanceId() << " unused";
+
+            it.second->writeJSON(main_config);
             // root_element->LinkEndChild(it.second.generateXMLElement(document));
         }
     }

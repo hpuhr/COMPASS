@@ -16,16 +16,17 @@
  */
 
 #include "projectionmanager.h"
+//#include "global.h"
+#include "logger.h"
+#include "ogrprojection.h"
+#include "projectionmanagerwidget.h"
+#include "rs2gprojection.h"
 
 #include <math.h>
 
 #include <cmath>
 
-#include "global.h"
-#include "logger.h"
-#include "ogrprojection.h"
-#include "projectionmanagerwidget.h"
-#include "rs2gprojection.h"
+
 
 const std::string ProjectionManager::RS2G_NAME = "RS2G";
 const std::string ProjectionManager::OGR_NAME = "OGR";
@@ -35,7 +36,7 @@ ProjectionManager::ProjectionManager()
 {
     loginf << "ProjectionManager: constructor";
 
-    registerParameter("current_projection_name", &current_projection_name_, "RS2G");
+    registerParameter("current_projection_name", &current_projection_name_, std::string("RS2G"));
 
     //    // init sdl
     //    t_GPos geo_pos;
@@ -70,9 +71,7 @@ void ProjectionManager::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "RS2GProjection")
     {
-        std::string name = configuration()
-                               .getSubConfiguration(class_id, instance_id)
-                               .getParameterConfigValueString("name");
+        std::string name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<std::string>("name");
 
         assert(!projections_.count(name));
 
@@ -80,9 +79,7 @@ void ProjectionManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "OGRProjection")
     {
-        std::string name = configuration()
-                               .getSubConfiguration(class_id, instance_id)
-                               .getParameterConfigValueString("name");
+        std::string name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<std::string>("name");
 
         assert(!projections_.count(name));
 
@@ -96,18 +93,18 @@ void ProjectionManager::checkSubConfigurables()
 {
     if (!projections_.count(RS2G_NAME))
     {
-        Configuration& configuration = addNewSubConfiguration("RS2GProjection");
+        auto configuration = Configuration::create("RS2GProjection");
 
-        configuration.addParameterString("name", RS2G_NAME);
-        generateSubConfigurable("RS2GProjection", configuration.getInstanceId());
+        configuration->addParameter<std::string>("name", RS2G_NAME);
+        generateSubConfigurableFromConfig(std::move(configuration));
     }
 
     if (!projections_.count(OGR_NAME))
     {
-        Configuration& configuration = addNewSubConfiguration("OGRProjection");
+        auto configuration = Configuration::create("OGRProjection");
 
-        configuration.addParameterString("name", OGR_NAME);
-        generateSubConfigurable("OGRProjection", configuration.getInstanceId());
+        configuration->addParameter<std::string>("name", OGR_NAME);
+        generateSubConfigurableFromConfig(std::move(configuration));
     }
 }
 

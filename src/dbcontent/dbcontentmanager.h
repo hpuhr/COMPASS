@@ -19,11 +19,11 @@
 #define DBCONTENT_DBCONTENTMANAGER_H_
 
 #include "configurable.h"
-#include "global.h"
-#include "singleton.h"
+//#include "global.h"
+//#include "singleton.h"
 #include "buffer.h"
 #include "targetmodel.h"
-#include "dbcontent/dbcontentcache.h"
+//#include "dbcontent/dbcontentcache.h"
 #include "viewabledataconfig.h"
 
 #include <boost/optional.hpp>

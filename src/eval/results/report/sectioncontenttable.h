@@ -25,9 +25,10 @@
 #include <QSortFilterProxyModel>
 #include <QBrush>
 
-#include "json.hpp"
+//#include "json.hpp"
 
 #include <vector>
+#include <functional>
 
 class ViewableDataConfig;
 

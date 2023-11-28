@@ -21,8 +21,9 @@
 #include "evaluationmanager.h"
 #include "evaluationstandardcombobox.h"
 #include "evaluationsectorwidget.h"
-#include "airspace.h"
+//#include "airspace.h"
 #include "logger.h"
+#include "sectorlayer.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

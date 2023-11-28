@@ -20,28 +20,29 @@
 #include "buffer.h"
 #include "config.h"
 #include "dbcommand.h"
-#include "dbcommandlist.h"
+//#include "dbcommandlist.h"
 #include "sqliteconnection.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "dbresult.h"
 #include "dbtableinfo.h"
-#include "dimension.h"
-#include "jobmanager.h"
+//#include "dimension.h"
+//#include "jobmanager.h"
 #include "sqliteconnection.h"
-#include "stringconv.h"
-#include "unit.h"
-#include "unitmanager.h"
+//#include "stringconv.h"
+//#include "unit.h"
+//#include "unitmanager.h"
 #include "files.h"
 #include "util/timeconv.h"
 #include "util/number.h"
 #include "sector.h"
 #include "sectorlayer.h"
-#include "evaluationmanager.h"
+//#include "evaluationmanager.h"
 #include "source/dbdatasource.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/target/target.h"
+#include "viewpoint.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -68,7 +69,7 @@ DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
 {
     boost::mutex::scoped_lock locker(connection_mutex_);
 
-    registerParameter("read_chunk_size", &read_chunk_size_, 50000);
+    registerParameter("read_chunk_size", &read_chunk_size_, 50000u);
 
     createSubConfigurables();
 }
@@ -249,8 +250,7 @@ void DBInterface::checkSubConfigurables()
 {
     if (!db_connection_)
     {
-        addNewSubConfiguration("SQLiteConnection", "SQLite Connection");
-        generateSubConfigurable("SQLiteConnection", "SQLite Connection");
+        generateSubConfigurableFromConfig(Configuration::create("SQLiteConnection", "SQLite Connection"));
     }
 }
 

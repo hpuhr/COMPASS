@@ -17,21 +17,22 @@
 
 #include "buffertablemodel.h"
 
-#include <QApplication>
-
-#include "compass.h"
+//#include "compass.h"
 #include "buffer.h"
 #include "buffercsvexportjob.h"
 #include "buffertablewidget.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
 
-BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBContent& object,
+#include <QApplication>
+
+BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, 
+                                   DBContent& object,
                                    ListBoxViewDataSource& data_source)
     : QAbstractTableModel(table_widget),
       table_widget_(table_widget),
@@ -46,7 +47,10 @@ BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBContent& o
     connect(&data_source_, &ListBoxViewDataSource::setChangedSignal, this, &BufferTableModel::setChangedSlot);
 }
 
-BufferTableModel::~BufferTableModel() { buffer_ = nullptr; }
+BufferTableModel::~BufferTableModel() 
+{ 
+    buffer_ = nullptr; 
+}
 
 void BufferTableModel::setChangedSlot()
 {
@@ -78,7 +82,9 @@ int BufferTableModel::columnCount(const QModelIndex& /*parent*/) const
     return read_set_.getSize() + 1;
 }
 
-QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant BufferTableModel::headerData(int section, 
+                                      Qt::Orientation orientation, 
+                                      int role) const
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -341,7 +347,9 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-bool BufferTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool BufferTableModel::setData(const QModelIndex& index, 
+                               const QVariant& value, 
+                               int role)
 {
     logdbg << "BufferTableModel: setData: checked row " << index.row() << " col " << index.column();
 
@@ -452,15 +460,12 @@ void BufferTableModel::reset()
     endResetModel();
 }
 
-void BufferTableModel::saveAsCSV(const std::string& file_name, bool overwrite)
+void BufferTableModel::saveAsCSV(const std::string& file_name)
 {
-    loginf << "BufferTableModel: saveAsCSV: into filename " << file_name << " overwrite "
-           << overwrite;
+    loginf << "BufferTableModel: saveAsCSV: into filename " << file_name;
 
     assert(buffer_);
-    BufferCSVExportJob* export_job =
-        new BufferCSVExportJob(buffer_, read_set_, file_name, overwrite, show_only_selected_,
-                               use_presentation_);
+    BufferCSVExportJob* export_job = new BufferCSVExportJob(buffer_, read_set_, file_name, true, show_only_selected_, use_presentation_);
 
     export_job_ = std::shared_ptr<BufferCSVExportJob>(export_job);
     connect(export_job, &BufferCSVExportJob::obsoleteSignal, this,

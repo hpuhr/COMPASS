@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTMODECFALSECONFIG_H
 #define EVALUATIONREQUIREMENTMODECFALSECONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/mode_c/false.h"
-#include "eval/requirement/mode_c/modecfalseconfigwidget.h"
+//#include "eval/requirement/mode_c/false.h"
+//#include "eval/requirement/mode_c/modecfalseconfigwidget.h"
 
 #include <memory>
 

@@ -37,6 +37,15 @@ signals:
     void showAssociationsSignal(bool value);
 
 public:
+    struct Settings
+    {
+        Settings();
+
+        std::string current_set_name;
+        bool        show_only_selected;
+        bool        use_presentation;
+    };
+
     ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
     virtual ~ListBoxView() override;
@@ -56,13 +65,12 @@ public:
     bool usePresentation() const;
     void usePresentation(bool use_presentation);
 
-    bool overwriteCSV() const;
-    void overwriteCSV(bool overwrite_csv);
-
     bool showOnlySelected() const;
     void showOnlySelected(bool value);
 
     virtual void accept(LatexVisitor& v) override;
+
+    static const std::string DefaultSetName;
 
 protected:
     friend class LatexVisitor;
@@ -72,15 +80,14 @@ protected:
 
     virtual bool init_impl() override;
 
+    virtual ViewUpdate onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
+
     ListBoxViewDataWidget* getDataWidget();
 
     ListBoxViewWidget* widget_{nullptr};
     ListBoxViewDataSource* data_source_{nullptr};
 
-    bool show_only_selected_{true};
-    bool use_presentation_{true};
-
-    bool overwrite_csv_{false}; // Overwrite during export, if not, it appends
+    Settings settings_;
 };
 
 #endif /* LISTBOXVIEW_H_ */

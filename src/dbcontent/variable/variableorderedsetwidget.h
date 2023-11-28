@@ -24,7 +24,7 @@ class QListWidget;
 #include <QWidget>
 
 #include "dbcontent/variable/variableorderedset.h"
-#include "dbcontent/variable/variableselectionwidget.h"
+//#include "dbcontent/variable/variableselectionwidget.h"
 
 namespace dbContent
 {
@@ -33,21 +33,21 @@ class VariableOrderedSetWidget : public QWidget
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void updateVariableListSlot();
     void removeSlot();
     void moveUpSlot();
     void moveDownSlot();
 
-  protected slots:
+protected slots:
     void triggerSlot(QAction* action);
     void showMenuSlot();
 
-  public:
+public:
     VariableOrderedSetWidget(VariableOrderedSet& set, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~VariableOrderedSetWidget();
 
-  protected:
+protected:
     VariableOrderedSet& set_;
     QMenu menu_;
 

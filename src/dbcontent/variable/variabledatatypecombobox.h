@@ -18,12 +18,13 @@
 #ifndef DBOVARIABLEDATATYPECOMBOBOX_H_
 #define DBOVARIABLEDATATYPECOMBOBOX_H_
 
+//#include "dbcontent/variable/variable.h"
+//#include "global.h"
+#include "property.h"
+#include "logger.h"
+
 #include <QComboBox>
 #include <stdexcept>
-
-#include "dbcontent/variable/variable.h"
-#include "global.h"
-#include "logger.h"
 
 namespace dbContent
 {

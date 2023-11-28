@@ -16,16 +16,17 @@
  */
 
 #include "allbuffercsvexportjob.h"
-
-#include <fstream>
-#include <sstream>
-
 #include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableorderedset.h"
 #include "dbcontent/variable/metavariable.h"
+#include "global.h"
+
+#include <fstream>
+#include <sstream>
+
 
 using namespace dbContent;
 

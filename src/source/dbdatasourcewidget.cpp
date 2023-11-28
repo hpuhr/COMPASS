@@ -1,8 +1,9 @@
 #include "dbdatasourcewidget.h"
 #include "compass.h"
 #include "datasourcemanager.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "util/timeconv.h"
+#include "logger.h"
 
 #include <QGridLayout>
 #include <QCheckBox>
@@ -36,9 +37,15 @@ DBDataSourceWidget::DBDataSourceWidget(DBDataSource& src, QWidget *parent)
 void DBDataSourceWidget::updateContent()
 {
     if (needsRecreate())
+    {
         recreateWidgets();
+    }
 
-    updateWidgets();
+    try {
+     updateWidgets();
+    } catch (std::exception& e) {
+        logerr << "UGA2 what " << e.what();
+    }
 
 }
 
@@ -141,6 +148,8 @@ void DBDataSourceWidget::recreateWidgets()
             grid_layout_->addWidget(content_labels_.at(ds_content_name), row, 1);
             grid_layout_->addWidget(loaded_cnt_labels_.at(ds_content_name), row, 2);
             grid_layout_->addWidget(total_cnt_labels_.at(ds_content_name), row, 3);
+
+            ++row;
         }
     }
 
@@ -236,7 +245,8 @@ void DBDataSourceWidget::updateWidgets()
             assert (line_buttons_.count(line_str));
             button = line_buttons_.at(line_str);
 
-            hidden = !net_lines.at(src_.id()).count(line_str); // hide if not defined
+            hidden = !net_lines.count(src_.id())
+                    || !net_lines.at(src_.id()).count(line_str); // hide if not defined
 
             button->setHidden(hidden);
 

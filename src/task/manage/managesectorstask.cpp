@@ -17,13 +17,13 @@
 
 #include "managesectorstask.h"
 #include "compass.h"
-#include "dbinterface.h"
+//#include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "managesectorstaskdialog.h"
 #include "taskmanager.h"
 #include "savedfile.h"
 #include "files.h"
-#include "sector.h"
+//#include "sector.h"
 
 #include "gdal.h"
 #include "gdal_priv.h"
@@ -42,7 +42,7 @@ ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::str
     : Task("ManageSectorsTask", "Manage Sectors", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_sectors.json")
 {
-    registerParameter("current_filename", &current_filename_, "");
+    registerParameter("current_filename", &current_filename_, std::string());
 
     createSubConfigurables();
 
@@ -110,9 +110,9 @@ void ManageSectorsTask::addFile(const std::string& filename)
     instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
                        instancename.end());
 
-    Configuration& config = addNewSubConfiguration("SectorsFile", "SectorsFile" + instancename);
-    config.addParameterString("name", filename);
-    generateSubConfigurable("SectorsFile", "SectorsFile" + instancename);
+    auto config = Configuration::create("SectorsFile", "SectorsFile" + instancename);
+    config->addParameter<std::string>("name", filename);
+    generateSubConfigurableFromConfig(std::move(config));
 
     current_filename_ = filename;
     parseCurrentFile(false);

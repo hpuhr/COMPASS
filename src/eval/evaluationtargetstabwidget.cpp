@@ -19,7 +19,7 @@
 
 #include "evaluationmanagerwidget.h"
 #include "evaluationmanager.h"
-#include "logger.h"
+//#include "logger.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

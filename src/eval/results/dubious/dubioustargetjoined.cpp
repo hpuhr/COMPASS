@@ -19,15 +19,16 @@
 #include "eval/results/dubious/dubioustargetjoined.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/dubious/dubioustarget.h"
-#include "evaluationtargetdata.h"
+//#include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
+#include "sectorlayer.h"
 
 #include <QFileDialog>
 

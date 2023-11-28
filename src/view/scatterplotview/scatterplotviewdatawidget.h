@@ -18,9 +18,9 @@
 #ifndef SCATTERPLOTVIEWDATAWIDGET_H_
 #define SCATTERPLOTVIEWDATAWIDGET_H_
 
-#include "global.h"
+//#include "global.h"
 #include "nullablevector.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "scatterplotviewchartview.h"
 #include "viewdatawidget.h"
 #include "util/timeconv.h"
@@ -165,6 +165,8 @@ protected:
     bool y_var_not_in_buffer_ {false};
 
     unsigned int nan_value_cnt_ {0};
+
+    void updateDataSeries(QtCharts::QChart* chart);
 };
 
 template<>

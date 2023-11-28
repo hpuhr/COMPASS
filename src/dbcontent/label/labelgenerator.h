@@ -58,6 +58,9 @@ public:
     float labelDistance() const;
     void labelDistance(float label_distance);
 
+    void toggleUseUTN();
+    bool useUTN();
+
     void addLabelDSID(unsigned int ds_id);
     void removeLabelDSID(unsigned int ds_id);
     void labelAllDSIDs();
@@ -138,6 +141,8 @@ protected:
 
     nlohmann::json label_directions_;
     float label_distance_ {0.5}; // 0 ... 1
+
+    bool use_utn_as_id_ {false};
 
     nlohmann::json label_lines_;
 

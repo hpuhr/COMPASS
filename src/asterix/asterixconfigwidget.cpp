@@ -32,7 +32,6 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDesktopServices>
-#include <QFileDialog>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QLabel>
@@ -40,6 +39,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QUrl>
 
 using namespace std;
 using namespace Utils;
@@ -122,6 +122,8 @@ void ASTERIXConfigWidget::refreshjASTERIXSlot()
     loginf << "ASTERIXConfigWidget: refreshjASTERIXSlot";
 
     task_.refreshjASTERIX();
+    task_.testFileDecoding(); // in case anything was changed
+
     updateSlot();
 }
 
@@ -137,18 +139,20 @@ void ASTERIXConfigWidget::framingChangedSlot()
     assert(framing_combo_);
     loginf << "ASTERIXConfigWidget: framingChangedSlot: " << framing_combo_->getFraming();
 
-    task_.currentFraming(framing_combo_->getFraming());
+    task_.settings().current_file_framing_ = framing_combo_->getFraming();
 
-    if (task_.currentFraming() == "")
+    if (task_.settings().current_file_framing_ == "")
         framing_edit_->setDisabled(true);
     else
         framing_edit_->setDisabled(false);
+
+    task_.testFileDecoding();
 }
 
 void ASTERIXConfigWidget::framingEditSlot()
 {
     std::string framing_path = "file:///" + task_.jASTERIX()->framingsFolderPath() + "/" +
-            task_.currentFraming() + ".json";
+            task_.settings().current_file_framing_ + ".json";
     loginf << "ASTERIXConfigWidget: framingEditSlot: path '" << framing_path << "'";
     QDesktopServices::openUrl(QUrl(framing_path.c_str()));
 }
@@ -159,9 +163,9 @@ void ASTERIXConfigWidget::updateFraming()
     assert(framing_edit_);
 
     framing_combo_->loadFramings();
-    framing_combo_->setFraming(task_.currentFraming());
+    framing_combo_->setFraming(task_.settings().current_file_framing_);
 
-    if (task_.currentFraming() == "")
+    if (task_.settings().current_file_framing_ == "")
         framing_edit_->setDisabled(true);
     else
         framing_edit_->setDisabled(false);

@@ -19,8 +19,8 @@
 #define HISTOGRAMVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-#include "dbcontent/variable/variable.h"
-#include "appmode.h"
+//#include "dbcontent/variable/variable.h"
+//#include "appmode.h"
 
 class HistogramView;
 class HistogramViewWidget;
@@ -60,9 +60,13 @@ public:
 
     void updateConfig();
 
+    virtual void configChanged() override;
+
 protected:
     void updateEvalConfig();
     void updateInfo();
+    void updateSelectedVar();
+    void updateLogScale();
 
     virtual void onDisplayChange_impl() override;
 

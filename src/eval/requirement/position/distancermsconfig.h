@@ -18,10 +18,12 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONDISTANCERMSCONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONDISTANCERMSCONFIG_H
 
-#include "configurable.h"
-#include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/position/distancermsconfigwidget.h"
-#include "eval/requirement/position/distancerms.h"
+//#include "configurable.h"
+//#include "eval/requirement/base/probabilitybaseconfig.h"
+//#include "eval/requirement/position/distancermsconfigwidget.h"
+//#include "eval/requirement/position/distancerms.h"
+
+#include "eval/requirement/base/baseconfig.h"
 
 class Group;
 class EvaluationStandard;

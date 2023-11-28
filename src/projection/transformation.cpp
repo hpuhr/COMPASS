@@ -1,6 +1,6 @@
 #include "transformation.h"
 #include "logger.h"
-#include "compass.h"
+//#include "compass.h"
 
 #include <ogr_spatialref.h>
 

@@ -19,7 +19,6 @@
 #include "managesectorstask.h"
 #include "logger.h"
 #include "compass.h"
-//#include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "sector.h"
 #include "airspace.h"
@@ -348,7 +347,7 @@ void ManageSectorsTaskWidget::addFileSlot()
 {
     QFileDialog dialog(this);
     dialog.setWindowTitle("Add Sector File(s)");
-    // dialog.setDirectory(QDir::homePath());
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
     dialog.setFileMode(QFileDialog::ExistingFiles);
     // dialog.setNameFilter(trUtf8("Splits (*.000 *.001)"));
     QStringList fileNames;
@@ -652,7 +651,8 @@ void ManageSectorsTaskWidget::importSectorsSlot ()
     loginf << "ManageSectorsTaskWidget: importSectorsSlot";
 
     QString filename =
-        QFileDialog::getOpenFileName(nullptr, "Import Sectors from JSON", "", "*.json");
+        QFileDialog::getOpenFileName(nullptr, "Import Sectors from JSON",
+                                     COMPASS::instance().lastUsedPath().c_str(), "*.json");
 
     if (filename.size() > 0)
     {
@@ -678,7 +678,8 @@ void ManageSectorsTaskWidget::importAirSpaceSectorsSlot()
     loginf << "ManageSectorsTaskWidget: importAirSpaceSectorsSlot";
 
     QString filename =
-        QFileDialog::getOpenFileName(nullptr, "Import Air Space Sectors from JSON", "", "*.json");
+        QFileDialog::getOpenFileName(nullptr, "Import Air Space Sectors from JSON",
+                                     COMPASS::instance().lastUsedPath().c_str(), "*.json");
 
     if (filename.isEmpty())
         return;

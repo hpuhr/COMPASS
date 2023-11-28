@@ -248,6 +248,14 @@ void LabelGeneratorWidget::editSettingsSlot()
 
     menu.addSeparator();
 
+    QAction* action_utn = new QAction("Use UTN as Identification", this);
+    action_utn->setCheckable(true);
+    action_utn->setChecked(label_generator_.useUTN());
+    connect (action_utn, &QAction::triggered, this, &LabelGeneratorWidget::toggleUseUTNSlot);
+    menu.addAction(action_utn);
+
+    menu.addSeparator();
+
     for (auto& db_cont_it : COMPASS::instance().dbContentManager())
     {
         QAction* action = new QAction(("Edit "+db_cont_it.first).c_str(), this);
@@ -269,6 +277,14 @@ void LabelGeneratorWidget::editDBContentSlot()
 
     label_generator_.editLabelContents(dbcontent_name);
 }
+
+void LabelGeneratorWidget::toggleUseUTNSlot()
+{
+    loginf << "LabelGeneratorWidget: toggleUseUTNSlot";
+
+    label_generator_.toggleUseUTN();
+}
+
 
 void LabelGeneratorWidget::labelAllDSSlot()
 {

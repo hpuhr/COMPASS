@@ -16,17 +16,17 @@
  */
 
 #include "listboxviewdatasource.h"
-
-#include <QMessageBox>
-
 #include "compass.h"
-#include "configuration.h"
-#include "configurationmanager.h"
+//#include "configuration.h"
+//#include "configurationmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "job.h"
+//#include "job.h"
 #include "logger.h"
-#include "viewpoint.h"
+//#include "viewpoint.h"
+#include "global.h"
+
+#include <QMessageBox>
 
 #include <algorithm>
 #include <cassert>
@@ -39,13 +39,14 @@ using namespace dbContent;
 
 const string DEFAULT_SET_NAME {"Default"};
 
-ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
-                                             const std::string& instance_id, Configurable* parent)
-    : QObject(),
-      Configurable(class_id, instance_id, parent)
+ListBoxViewDataSource::ListBoxViewDataSource(const std::string& current_set_name,
+                                             const std::string& class_id,
+                                             const std::string& instance_id, 
+                                             Configurable* parent)
+:   QObject()
+,   Configurable(class_id, instance_id, parent)
+,   current_set_name_(current_set_name)
 {
-    registerParameter ("current_set_name", &current_set_name_, DEFAULT_SET_NAME);
-
     createSubConfigurables();
 
     if (!hasCurrentSet())
@@ -53,8 +54,7 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
 
     assert (hasCurrentSet());
 
-    connect(getSet(), &VariableOrderedSet::setChangedSignal, this,
-            &ListBoxViewDataSource::setChangedSlot, Qt::UniqueConnection);
+    currentSetName(current_set_name_, false);
 }
 
 ListBoxViewDataSource::~ListBoxViewDataSource()
@@ -78,8 +78,10 @@ void ListBoxViewDataSource::generateSubConfigurable(const std::string& class_id,
         sets_[instance_id] = move(set);
     }
     else
+    {
         throw std::runtime_error(
             "ListBoxViewDataSource: generateSubConfigurable: unknown class_id " + class_id);
+    }
 }
 
 void ListBoxViewDataSource::checkSubConfigurables()
@@ -234,9 +236,8 @@ void ListBoxViewDataSource::removeSet (const std::string& name)
     sets_.erase(name);
 
     if (current_set_name_ == name)
-        current_set_name_ = DEFAULT_SET_NAME;
+        currentSetName(DEFAULT_SET_NAME);
 }
-
 
 VariableOrderedSet* ListBoxViewDataSource::getSet()
 {
@@ -305,7 +306,7 @@ std::string ListBoxViewDataSource::currentSetName() const
     return current_set_name_;
 }
 
-void ListBoxViewDataSource::currentSetName(const std::string& current_set_name)
+void ListBoxViewDataSource::currentSetName(const std::string& current_set_name, bool signal_reload)
 {
     loginf << "ListBoxViewDataSource: currentSetName: name '" << current_set_name << "'";
 
@@ -313,9 +314,14 @@ void ListBoxViewDataSource::currentSetName(const std::string& current_set_name)
     current_set_name_ = current_set_name;
 
     connect(getSet(), &VariableOrderedSet::setChangedSignal, this,
-            &ListBoxViewDataSource::setChangedSlot, Qt::UniqueConnection);
+            &ListBoxViewDataSource::setChangedSignal, Qt::UniqueConnection);
+    connect(getSet(), &VariableOrderedSet::setChangedSignal, this,
+            &ListBoxViewDataSource::reloadNeeded, Qt::UniqueConnection);
 
-    emit setChangedSignal();
+    emit currentSetChangedSignal();
+
+    if (signal_reload)
+        emit reloadNeeded();
 }
 
 bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
@@ -415,9 +421,4 @@ void ListBoxViewDataSource::addDefaultVariables (VariableOrderedSet& set)
     // Track Number
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_track_num_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_track_num_.name()));
-}
-
-void ListBoxViewDataSource::setChangedSlot()
-{
-    emit setChangedSignal();
 }

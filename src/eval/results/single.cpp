@@ -22,8 +22,9 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
-#include "evaluationresultsgenerator.h"
+//#include "evaluationresultsgenerator.h"
 #include "sectorlayer.h"
+#include "viewpoint.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -328,7 +329,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
                              "#FFFF00",
                              overview ? "circle" : "border",
                              "#FFFF00",
-                             overview ? 8 : 10,
+                             overview ? 8 : 12,
                              "#FFFF00",
                              4);
         }
@@ -376,11 +377,11 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
         {
             insertAnnotation(anno_name, anno_pos,
                              "#FF6666",
-                             overview ? "circle" : "border",
+                             overview ? "circle" : "border_thick",
                              "#FF6666",
-                             overview ? 8 : 10,
+                             overview ? 8 : 16,
                              "#FF6666",
-                             2);
+                             4);
         }
 
         assert (annos.at(anno_pos).at("name") == anno_name);

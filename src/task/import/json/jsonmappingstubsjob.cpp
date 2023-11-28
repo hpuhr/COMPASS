@@ -17,8 +17,8 @@
 
 #include "jsonmappingstubsjob.h"
 
-#include "buffer.h"
-#include "dbcontent/dbcontent.h"
+//#include "buffer.h"
+//#include "dbcontent/dbcontent.h"
 #include "json.h"
 #include "jsonobjectparser.h"
 

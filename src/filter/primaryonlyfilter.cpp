@@ -2,7 +2,7 @@
 #include "primaryonlyfilterwidget.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "compass.h"
 
 using namespace std;

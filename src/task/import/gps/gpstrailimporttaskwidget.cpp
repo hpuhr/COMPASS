@@ -19,13 +19,12 @@
 #include "gpstrailimporttask.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "timeconv.h"
+//#include "timeconv.h"
 
 #include "textfielddoublevalidator.h"
 #include "textfieldhexvalidator.h"
 #include "textfieldoctvalidator.h"
 
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -59,6 +58,8 @@ GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWi
     updateConfig();
 
     setLayout(main_layout_);
+
+    connect(&task_, &GPSTrailImportTask::configChanged, this, &GPSTrailImportTaskWidget::updateConfig);
 }
 
 void GPSTrailImportTaskWidget::addMainTab()

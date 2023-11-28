@@ -22,7 +22,7 @@
 
 #include <memory>
 
-#include "global.h"
+//#include "global.h"
 
 class ListBoxView;
 class ListBoxViewWidget;
@@ -62,7 +62,7 @@ signals:
     void usePresentationSignal(bool use_presentation);
 
 public slots:
-    void exportDataSlot(bool overwrite);
+    void exportDataSlot();
     void exportDoneSlot(bool cancelled);
 
     void showOnlySelectedSlot(bool value);

@@ -20,11 +20,11 @@
 #include "evaluationmanager.h"
 #include "dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "buffer.h"
-#include "stringconv.h"
-#include "compass.h"
+//#include "stringconv.h"
+//#include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "util/async.h"
 
@@ -275,9 +275,16 @@ void EvaluationData::finalize ()
     }
     QApplication::restoreOverrideCursor();
 
-    auto task = [&] (int cnt) { target_data_[cnt].finalize(); return true; };
+    if (!num_targets)
+    {
+        logerr << "EvaluationData: finalize: no targets loaded";
+    }
+    else
+    {
+        auto task = [&] (int cnt) { target_data_[cnt].finalize(); return true; };
 
-    Utils::Async::waitDialogAsyncArray(task, (int)num_targets, "Finalizing data");
+        Utils::Async::waitDialogAsyncArray(task, (int)num_targets, "Finalizing data");
+    }
 
     finalized_ = true;
 

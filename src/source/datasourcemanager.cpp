@@ -8,6 +8,7 @@
 #include "files.h"
 #include "json.hpp"
 #include "datasource_commands.h"
+#include "logger.h"
 
 #include <QMessageBox>
 
@@ -28,7 +29,7 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
     registerParameter("load_widget_show_counts", &load_widget_show_counts_, true);
     registerParameter("load_widget_show_lines", &load_widget_show_lines_, true);
 
-    registerParameter("ds_font_size", &ds_font_size_, 10);
+    registerParameter("ds_font_size", &ds_font_size_, 10u);
 
     createSubConfigurables();
 
@@ -615,14 +616,14 @@ void DataSourceManager::createConfigDataSource(unsigned int ds_id)
 {
     assert (!hasConfigDataSource(ds_id));
 
-    Configuration& new_cfg = configuration().addNewSubConfiguration("ConfigurationDataSource");
-    new_cfg.addParameterString("ds_type", "Other");
-    new_cfg.addParameterUnsignedInt("sac", Number::sacFromDsId(ds_id));
-    new_cfg.addParameterUnsignedInt("sic", Number::sicFromDsId(ds_id));
-    new_cfg.addParameterString("name", "Unknown ("+to_string(Number::sacFromDsId(ds_id))+"/"
-                                                  +to_string(Number::sicFromDsId(ds_id))+")");
+    auto new_cfg = Configuration::create("ConfigurationDataSource");
 
-    generateSubConfigurable("ConfigurationDataSource", new_cfg.getInstanceId());
+    new_cfg->addParameter<std::string>("ds_type", "Other");
+    new_cfg->addParameter<unsigned int>("sac", Number::sacFromDsId(ds_id));
+    new_cfg->addParameter<unsigned int>("sic", Number::sicFromDsId(ds_id));
+    new_cfg->addParameter<std::string>("name", "Unknown ("+to_string(Number::sacFromDsId(ds_id))+"/"+to_string(Number::sicFromDsId(ds_id))+")");
+
+    generateSubConfigurableFromConfig(std::move(new_cfg));
 
     updateDSIdsAll();
 }

@@ -18,9 +18,9 @@
 #ifndef LISTBOXVIEWDATASOURCE_H_
 #define LISTBOXVIEWDATASOURCE_H_
 
-#include "buffer.h"
+//#include "buffer.h"
 #include "configurable.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableorderedset.h"
 //#include "viewselection.h"
 
@@ -41,15 +41,17 @@ class ViewableDataConfig;
 class ListBoxViewDataSource : public QObject, public Configurable
 {
     Q_OBJECT
-  public slots:
-    void setChangedSlot();
 
   signals:
     void setChangedSignal();
+    void currentSetChangedSignal();
+    void reloadNeeded();
 
   public:
     /// @brief Constructor
-    ListBoxViewDataSource(const std::string& class_id, const std::string& instance_id,
+    ListBoxViewDataSource(const std::string& current_set_name,
+                          const std::string& class_id, 
+                          const std::string& instance_id,
                           Configurable* parent);
     /// @brief Destructor
     virtual ~ListBoxViewDataSource();
@@ -64,7 +66,7 @@ class ListBoxViewDataSource : public QObject, public Configurable
     void removeSet (const std::string& name);
 
     std::string currentSetName() const;
-    void currentSetName(const std::string& current_set_name);
+    void currentSetName(const std::string& current_set_name, bool signal_reload = true);
 
     /// @brief Returns variable read list
     dbContent::VariableOrderedSet* getSet();
@@ -75,6 +77,15 @@ class ListBoxViewDataSource : public QObject, public Configurable
     void showViewPoint (const ViewableDataConfig* vp);
 
 protected:
+    virtual void checkSubConfigurables();
+
+    bool addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set, true of added
+    void removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set
+
+    void addDefaultVariables (dbContent::VariableOrderedSet& set);
+
+    void currentSetNameInternal(const std::string& current_set_name);
+
     std::string current_set_name_;
 
     /// Variable read list
@@ -85,13 +96,6 @@ protected:
     //ViewSelectionEntries& selection_entries_;
 
     std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
-
-    virtual void checkSubConfigurables();
-
-    bool addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set, true of added
-    void removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set
-
-    void addDefaultVariables (dbContent::VariableOrderedSet& set);
 };
 
 #endif /* LISTBOXVIEWDATASOURCE_H_ */

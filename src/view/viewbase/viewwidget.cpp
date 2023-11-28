@@ -362,6 +362,16 @@ void ViewWidget::appModeSwitch(AppMode app_mode)
 }
 
 /**
+*/
+void ViewWidget::configChanged()
+{
+    //propagate to subwidgets (note: order might be important)
+    getViewConfigWidget()->configChanged();
+    getViewDataWidget()->configChanged();
+    getViewToolWidget()->configChanged();
+}
+
+/**
  * Updates the tool widget's items.
  */
 void ViewWidget::updateToolWidget()

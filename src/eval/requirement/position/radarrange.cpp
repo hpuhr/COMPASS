@@ -17,7 +17,7 @@
 
 #include "eval/requirement/position/radarrange.h"
 #include "eval/results/position/radarrangesingle.h"
-#include "evaluationdata.h"
+//#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
 #include "util/timeconv.h"

@@ -16,15 +16,16 @@
  */
 
 #include "eval/requirement/mode_c/correctconfig.h"
+#include "eval/requirement/mode_c/correct.h"
 #include "eval/requirement/mode_c/modeccorrectconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
-using namespace Utils;
+//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -36,7 +37,7 @@ ModeCCorrectConfig::ModeCCorrectConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("max_distance_ft", &max_distance_ft_, 300);
+    registerParameter("max_distance_ft", &max_distance_ft_, 300.0f);
 
 }
 

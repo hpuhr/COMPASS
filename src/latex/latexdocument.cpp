@@ -21,12 +21,14 @@
 #include "stringconv.h"
 #include "latexsection.h"
 
+#include <QDateTime>
+
 #include <memory>
 
 #include <fstream>
 #include <sstream>
 
-#include <QDateTime>
+
 
 using namespace std;
 using namespace Utils;

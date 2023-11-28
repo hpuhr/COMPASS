@@ -16,6 +16,13 @@
  */
 
 #include "viewmanagerwidget.h"
+//#include "global.h"
+#include "jobmanager.h"
+#include "logger.h"
+//#include "viewcontainer.h"
+//#include "viewcontainerwidget.h"
+#include "viewmanager.h"
+
 
 #include <QAction>
 #include <QLabel>
@@ -24,12 +31,6 @@
 #include <QVBoxLayout>
 #include <QVariant>
 
-#include "global.h"
-#include "jobmanager.h"
-#include "logger.h"
-#include "viewcontainer.h"
-#include "viewcontainerwidget.h"
-#include "viewmanager.h"
 
 ViewManagerWidget::ViewManagerWidget(ViewManager& view_manager)
     : view_manager_(view_manager), layout_(nullptr), cont_layout_(nullptr), add_button_(nullptr)

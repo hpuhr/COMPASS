@@ -1,5 +1,5 @@
 #include "acadfilterwidget.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -7,7 +7,7 @@
 #include <QLineEdit>
 
 using namespace std;
-using namespace Utils;
+//using namespace Utils;
 
 ACADFilterWidget::ACADFilterWidget(ACADFilter& filter)
     : DBFilterWidget(filter), filter_(filter)

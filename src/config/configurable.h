@@ -58,53 +58,42 @@ class Configurable
 {
   public:
     /// @brief Constructor
-    Configurable(const std::string& class_id, const std::string& instance_id,
+    Configurable(const std::string& class_id, 
+                 const std::string& instance_id,
                  Configurable* parent = nullptr,
                  const std::string& root_configuration_filename = "");
     /// @brief Default constructor, for STL containers
     Configurable() = default;
-    Configurable(const Configurable&) = delete;
 
+    Configurable(const Configurable&) = delete;
+    Configurable(const Configurable&&) = delete;
     Configurable& operator=(const Configurable& other) = delete;
-    /// @brief Move constructor
-    Configurable& operator=(Configurable&& other);
+    Configurable& operator=(Configurable&& other) = delete;
+
     /// @brief Destructor
     virtual ~Configurable();
 
     /// @brief Reset parameters to their reset values
     virtual void resetToDefault();
 
-    /// @brief Adds a new sub-configuration based on class id and instance id
-    Configuration& addNewSubConfiguration(const std::string& class_id,
-                                          const std::string& instance_id);
-    /// @brief Adds a new sub-configuration based on class id, instance id is generated
-    Configuration& addNewSubConfiguration(const std::string& class_id);
-    /// @brief Adds a new sub-configuration by reference and copy constructor
-    Configuration& addNewSubConfiguration(Configuration& configuration);
-    /// @brief Creates sub-configurables according to configuration
-    void createSubConfigurables();
+    virtual std::string getPath() const;
+
     /// @brief Override for creation of sub-configurables
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
+    void generateSubConfigurableFromConfig(std::unique_ptr<Configuration>&& config);
+    void generateSubConfigurableFromConfig(const std::string& class_id,
+                                           const std::string& instance_id);
+    void generateSubConfigurableFromJSON(const Configurable& configurable,
+                                         const nlohmann::json& additional_data = nlohmann::json(),
+                                         const std::string& class_id = std::string());
     /// @brief Returns if a specified sub-configurable exists
-    bool hasSubConfigurable(const std::string& class_id, const std::string& instance_id);
+    bool hasSubConfigurable(const std::string& class_id, const std::string& instance_id) const;
     // finds by approx name, either exact instance id or first matching class id
     std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurable(const std::string& approx_name);
     // returns nullptr if not found
-    Configurable* getApproximateChildNamed (const std::string& approx_name);
+    Configurable* getApproximateChildNamed(const std::string& approx_name);
 
-    Configurable& parent()
-    {
-        assert(parent_);
-        return *parent_;
-    }
-    void parent(Configurable& parent) { parent_ = &parent; }
-    /// @brief Returns configuration for this class
-    Configuration& configuration()
-    {
-        assert(configuration_);
-        return *configuration_;
-    }
     /// @brief Saves the current configuration as template at its parent
     // void saveConfigurationAsTemplate (const std::string& template_name);
 
@@ -117,7 +106,82 @@ class Configurable
 
     void setTmpDisableRemoveConfigOnDelete(bool value); // disabled removal of cfg on delete of instance
 
+    void writeJSON(nlohmann::json& parent_json) const;
+    void generateJSON(nlohmann::json& target) const;
+
+    void reconfigure(const nlohmann::json& config);
+
+    static const char ConfigurablePathSeparator;
+
+protected:
+    /// @brief Creates sub-configurables according to configuration
+    void createSubConfigurables();
+
+    /// @brief Registers a parameter of given type
+    template <typename T>
+    void registerParameter(const std::string& parameter_id, T* pointer, const T& default_value);
+    template <typename T>
+    T getParameterConfigValue(const std::string& parameter_id) const;
+
+    /// @brief Override to check if required sub-configurables exist
+    virtual void checkSubConfigurables();
+
+    /// @brief Reacts on configuration changes, override as needed
+    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) {}
+
+    /// @brief Returns the given sub-configuration (e.g. in order to check certain parameter values in generateSubConfigurable())
+    const Configuration& getSubConfiguration(const std::string& class_id,
+                                             const std::string& instance_id) const;
+
+    /// @brief Saves the specified child's configuration as template
+    // void saveTemplateConfiguration (Configurable *child, const std::string& template_name);
+
+    /// @brief Returns configuration for this class (const version)
+    const Configuration& getConfiguration() const
+    {
+        assert(configuration_);
+        return *configuration_;
+    }
+
+    /// @brief Returns the parent configurable for this class (const version)
+    const Configurable& getParent() const
+    {
+        assert(parent_);
+        return *parent_;
+    }
+
 private:
+    void configurationChanged(const std::vector<std::string>& changed_params);
+
+    /// @brief Adds a configurable as a child
+    Configuration& registerSubConfigurable(Configurable& child, bool config_must_exist = false);
+    /// @brief Removes a child configurable
+    void removeChildConfigurable(Configurable& child, bool remove_config = true);
+
+    /// @brief Adds a new sub-configuration based on class id and instance id
+    Configuration& addNewSubConfiguration(const std::string& class_id,
+                                          const std::string& instance_id);
+    /// @brief Adds a new sub-configuration based on class id, instance id is generated
+    Configuration& addNewSubConfiguration(const std::string& class_id);
+    /// @brief Adds a new sub-configuration by reference and copy constructor
+    Configuration& addNewSubConfiguration(std::unique_ptr<Configuration>&& configuration);
+
+    /// @brief Returns configuration for this class
+    Configuration& configuration()
+    {
+        assert(configuration_);
+        return *configuration_;
+    }
+
+    /// @brief Returns the parent configurable for this class
+    Configurable& parent()
+    {
+        assert(parent_);
+        return *parent_;
+    }
+
+    void parent(Configurable& parent) { parent_ = &parent; }
+
     /// Class identifier
     std::string class_id_;
     /// Instance identifier
@@ -135,33 +199,7 @@ private:
     /// Container for all sub-configurables (class id + instance id -> Configurable)
     std::map<std::string, Configurable&> children_;
 
-  protected:
-    /// @brief Registers a bool parameter
-    void registerParameter(const std::string& parameter_id, bool* pointer, bool default_value);
-    /// @brief Registers a int parameter
-    void registerParameter(const std::string& parameter_id, int* pointer, int default_value);
-    /// @brief Registers a unsigned int parameter
-    void registerParameter(const std::string& parameter_id, unsigned int* pointer,
-                           unsigned int default_value);
-    /// @brief Registers a float parameter
-    void registerParameter(const std::string& parameter_id, float* pointer, float default_value);
-    /// @brief Registers a double parameter
-    void registerParameter(const std::string& parameter_id, double* pointer, double default_value);
-    /// @brief Registers a string parameter
-    void registerParameter(const std::string& parameter_id, std::string* pointer,
-                           const std::string& default_value);
-    void registerParameter(const std::string& parameter_id, nlohmann::json* pointer,
-                           const nlohmann::json& default_value);
-
-    /// @brief Override to check if required sub-configurables exist
-    virtual void checkSubConfigurables();
-    /// @brief Saves the specified child's configuration as template
-    // void saveTemplateConfiguration (Configurable *child, const std::string& template_name);
-
-    /// @brief Adds a configurable as a child
-    Configuration& registerSubConfigurable(Configurable& child, bool config_must_exist = false);
-    /// @brief Removes a child configurable
-    void removeChildConfigurable(Configurable& child, bool remove_config = true);
+    boost::signals2::connection config_changes_connection_;
 };
 
 #endif /* CONFIGURABLE_H_ */

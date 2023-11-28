@@ -1,7 +1,6 @@
 #ifndef CREATEARTASASSOCIATIONSTASKDIALOG_H
 #define CREATEARTASASSOCIATIONSTASKDIALOG_H
 
-
 #include <QDialog>
 
 class CreateARTASAssociationsTask;

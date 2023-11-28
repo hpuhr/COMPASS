@@ -28,7 +28,7 @@
 
 #include <QDateTime>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+//#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <array>
 #include <bitset>
@@ -65,7 +65,7 @@ public:
     void clearData(); // removes all data
 
     /// @brief Returns const reference to a specific value
-    const T get(unsigned int index);
+    const T get(unsigned int index) const;
 
     // exists only for non-integral types
     template<typename T_ = T, typename std::enable_if<!std::is_integral<T_>::value>::type* = nullptr>
@@ -89,7 +89,7 @@ public:
     }
 
     /// @brief Returns string of a specific value
-    const std::string getAsString(unsigned int index);
+    const std::string getAsString(unsigned int index) const;
 
     /// @brief Sets specific value
     void set(unsigned int index, T value);
@@ -124,9 +124,9 @@ public:
     unsigned int size();
 
     /// @brief Checks if specific element is Null
-    bool isNull(unsigned int index);
+    bool isNull(unsigned int index) const;
 
-    bool isNeverNull();
+    bool isNeverNull() const;
 
     void swapData (unsigned int index1, unsigned int index2);
 
@@ -190,7 +190,7 @@ void NullableVector<T>::clearData() // removes all data
 }
 
 template <class T>
-const T NullableVector<T>::get(unsigned int index)
+const T NullableVector<T>::get(unsigned int index) const
 {
     logdbg << "NullableVector " << property_.name() << ": get: index " << index;
     if (BUFFER_PEDANTIC_CHECKING)
@@ -210,7 +210,7 @@ const T NullableVector<T>::get(unsigned int index)
 }
 
 template <class T>
-const std::string NullableVector<T>::getAsString(unsigned int index)
+const std::string NullableVector<T>::getAsString(unsigned int index) const
 {
     logdbg << "NullableVector " << property_.name() << ": getAsString";
     return Utils::String::getValueString(get(index));
@@ -408,7 +408,7 @@ void NullableVector<T>::setAllNull()
 
 /// @brief Checks if specific element is Null
 template <class T>
-bool NullableVector<T>::isNull(unsigned int index)
+bool NullableVector<T>::isNull(unsigned int index) const
 {
     logdbg << "NullableVector " << property_.name() << ": isNull: index " << index;
 
@@ -1064,7 +1064,7 @@ void NullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_remo
 }
 
 template <class T>
-bool NullableVector<T>::isNeverNull()
+bool NullableVector<T>::isNeverNull() const
 {
     logdbg << "NullableVector " << property_.name() << ": isNeverNull";
 

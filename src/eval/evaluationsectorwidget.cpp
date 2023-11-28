@@ -18,10 +18,10 @@
 #include "evaluationsectorwidget.h"
 #include "evaluationmanager.h"
 #include "sectorlayer.h"
-#include "sector.h"
+//#include "sector.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/base/baseconfig.h"
+//#include "eval/requirement/base/baseconfig.h"
 
 #include <QLabel>
 #include <QCheckBox>
