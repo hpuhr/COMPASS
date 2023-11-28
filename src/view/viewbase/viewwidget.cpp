@@ -25,10 +25,15 @@
 #include "files.h"
 #include "compass.h"
 #include "ui_test_common.h"
+#include "dbcontentmanager.h"
+#include "dbcontent.h"
+#include "viewmanager.h"
+#include "viewpresetwidget.h"
 
 #include <QVBoxLayout>
 #include <QSplitter>
 #include <QSettings>
+#include <QPainter>
 
 /**
 @brief Constructor.
@@ -129,6 +134,14 @@ void ViewWidget::createStandardLayout()
         left_layout->addWidget(data_widget_container_);
     }
 
+    //create preset widget
+    if (COMPASS::instance().viewManager().viewPresetsEnabled())
+    {
+        auto preset_widget = new ViewPresetWidget(view_, right_widget_);
+
+        right_layout->addWidget(preset_widget);
+    }
+
     //create config widget container
     {
         config_widget_container_ = new QWidget;
@@ -184,7 +197,10 @@ void ViewWidget::init()
     assert(tool_widget_);
     assert(state_widget_);
 
-    //ass toggle button for config widget
+    //add screenshot button
+    tool_widget_->addScreenshotButton();
+
+    //add toggle button for config widget
     tool_widget_->addConfigWidgetToggle();
 
     //call derived
@@ -232,9 +248,21 @@ void ViewWidget::setConfigWidget(ViewConfigWidget* w)
         throw std::runtime_error("ViewWidget::setConfigWidget: Null pointer passed");
     if (!config_widget_container_)
         throw std::runtime_error("ViewWidget::setConfigWidget: No container to add to");
-    if (config_widget_)
-        throw std::runtime_error("ViewWidget::setConfigWidget: Already set");
 
+    //remove old config widget?
+    if (config_widget_)
+    {
+        config_widget_container_->layout()->removeWidget(config_widget_);
+
+        //setLayout() can only be called on widgets without layout
+        //the old layout can be removed by just deleting it
+        delete config_widget_container_->layout();
+
+        delete config_widget_;
+        config_widget_ = nullptr;
+    }
+
+    //add new config widget
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
 
@@ -436,6 +464,21 @@ void ViewWidget::notifyReloadNeeded()
 }
 
 /**
+ * Manually notifies the widget that a refresh is needed, determined if redraw or reload, and updates the load state widget accordingly.
+*/
+void ViewWidget::notifyRefreshNeeded()
+{
+    bool has_varset = isVariableSetLoaded();
+
+    //std::cout << "has varset: " << has_varset << std::endl;
+
+    if (has_varset)
+        notifyRedrawNeeded();
+    else
+        notifyReloadNeeded();
+}
+
+/**
  * Checks if a reload is needed.
 */
 bool ViewWidget::reloadNeeded() const
@@ -493,4 +536,32 @@ boost::optional<QString> ViewWidget::uiGet(const QString& what) const
 {
     std::string view_info = viewInfo(what.toStdString()).dump();
     return QString::fromStdString(view_info);
+}
+
+/**
+*/
+bool ViewWidget::isVariableSetLoaded() const
+{
+    assert(data_widget_);
+    return data_widget_->isVariableSetLoaded();
+}
+
+/**
+*/
+QImage ViewWidget::renderContents()
+{
+    assert (data_widget_);  
+    QImage data_img = data_widget_->renderData();
+
+    QImage img(this->size(), QImage::Format_ARGB32);
+    QPainter painter(&img);
+
+    render(&painter);
+
+    auto p0 = this->mapToGlobal(QPoint(0,0));
+    auto p1 = data_widget_->mapToGlobal(QPoint(0,0));
+
+    painter.drawImage(p1 - p0, data_img);
+
+    return img;
 }

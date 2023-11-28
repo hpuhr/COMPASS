@@ -15,12 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWMANAGER_H_
-#define VIEWMANAGER_H_
+#pragma once
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
 #include "appmode.h"
+#include "viewpresets.h"
 
 #include <QObject>
 
@@ -39,6 +39,8 @@ class ViewPointsReportGenerator;
 class QWidget;
 class QTabWidget;
 
+/**
+*/
 class ViewManager : public QObject, public Configurable
 {
     Q_OBJECT
@@ -135,7 +137,16 @@ class ViewManager : public QObject, public Configurable
 
     bool isInitialized() const;
 
+    bool viewPresetsEnabled() const;
+    ViewPresets& viewPresets() { return presets_; }
+    const ViewPresets& viewPresets() const { return presets_; }
+
 protected:
+    virtual void checkSubConfigurables();
+
+    void enableStoredReadSets();
+    void disableStoredReadSets();
+
     COMPASS& compass_;
 
     //ViewManagerWidget* widget_{nullptr};
@@ -164,10 +175,5 @@ protected:
     bool use_tmp_stored_readset_ {false};
     std::map<std::string, dbContent::VariableSet> tmp_stored_readset_;
 
-    virtual void checkSubConfigurables();
-
-    void enableStoredReadSets();
-    void disableStoredReadSets();
+    ViewPresets presets_;
 };
-
-#endif /* VIEWMANAGER_H_ */

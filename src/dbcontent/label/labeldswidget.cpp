@@ -23,8 +23,7 @@ namespace dbContent
 {
 
 
-LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
-                                                       Qt::WindowFlags f)
+LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), label_generator_(label_generator)
 {
     arrow_lu_ = QIcon(Files::getIconFilepath("arrow_lu.png").c_str());
@@ -49,9 +48,7 @@ LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
             this, &LabelDSWidget::updateListSlot); // update if lines changed
 }
 
-LabelDSWidget::~LabelDSWidget()
-{
-}
+LabelDSWidget::~LabelDSWidget() = default;
 
 void LabelDSWidget::forceUpdateList()
 {

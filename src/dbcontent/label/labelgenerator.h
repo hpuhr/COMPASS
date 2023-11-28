@@ -29,12 +29,46 @@ signals:
     void labelOptionsChangedSignal();
     void labelLinesChangedSignal();
     void labelClearAllSignal();
-
+    void configChanged();
 
 public slots:
     void editLabelContentsDoneSlot();
 
 public:
+    struct Config
+    {
+        Config();
+
+        bool auto_label_ {true};
+
+        nlohmann::json label_directions_;
+        nlohmann::json label_lines_;
+        nlohmann::json label_config_;
+        nlohmann::json label_ds_ids_; // dsid str -> label flag
+
+        bool declutter_labels_ {true};
+        unsigned int max_declutter_labels_ {200};
+
+        bool filter_mode3a_active_;
+        std::string filter_mode3a_values_;
+
+        bool filter_modec_min_active_;
+        float filter_modec_min_value_ {0};
+        bool filter_modec_max_active_;
+        float filter_modec_max_value_ {0};
+        bool filter_modec_null_wanted_ {false};
+
+        bool filter_ti_active_;
+        std::string filter_ti_values_;
+
+        bool filter_ta_active_;
+        std::string filter_ta_values_;
+
+        bool filter_primary_only_active_ {false};
+
+        float label_opacity_ {0.9};
+    };
+
     LabelGenerator(const std::string& class_id, const std::string& instance_id,
                             DBContentManager& manager);
     virtual ~LabelGenerator();
@@ -129,56 +163,8 @@ public:
     void labelOpacity(float label_opacity);
 
 protected:
-    DBContentManager& dbcont_manager_;
-
-    bool auto_label_ {true};
-    bool auto_lod_ {true};
-    float current_lod_ {1}; // 1, 2, 3, float for filter function
-
-    bool declutter_labels_ {true};
-    unsigned int max_declutter_labels_ {200};
-    bool show_decluttering_info_once_ {false};
-
-    nlohmann::json label_directions_;
-    float label_distance_ {0.5}; // 0 ... 1
-
-    bool use_utn_as_id_ {false};
-
-    nlohmann::json label_lines_;
-
-    nlohmann::json label_config_;
-
-    nlohmann::json label_ds_ids_; // dsid str -> label flag
-
-    bool filter_mode3a_active_;
-    std::string filter_mode3a_values_;
-    std::set<unsigned int> filter_m3a_values_set_; // dec
-    bool filter_m3a_null_wanted_ {false};
-
-    bool filter_modec_min_active_;
-    float filter_modec_min_value_ {0};
-    bool filter_modec_max_active_;
-    float filter_modec_max_value_ {0};
-    bool filter_modec_null_wanted_ {false};
-
-    bool filter_ti_active_;
-    std::string filter_ti_values_;
-    std::set<std::string> filter_ti_values_set_;
-    bool filter_ti_null_wanted_ {false};
-
-    bool filter_ta_active_;
-    std::string filter_ta_values_;
-    std::set<unsigned int> filter_ta_values_set_; // dec
-    bool filter_ta_null_wanted_ {false};
-
-    bool filter_primary_only_active_ {false};
-
-    float label_opacity_ {0.9};
-
-    //std::set<GeometryLeafItemLabels*> item_labels_;
-    std::unique_ptr<LabelContentDialog> label_edit_dialog_;
-
     virtual void checkSubConfigurables();
+
     bool updateM3AValuesFromStr(const std::string& values);
     bool updateTIValuesFromStr(const std::string& values);
     bool updateTAValuesFromStr(const std::string& values);
@@ -192,6 +178,40 @@ protected:
                                unsigned int buffer_index, std::shared_ptr<Buffer>& buffer);
     std::string getModeCText (const std::string& dbcontent_name,
                               unsigned int buffer_index, std::shared_ptr<Buffer>& buffer);
+
+    void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
+
+    DBContentManager& dbcont_manager_;
+
+    Config config_;
+
+    bool  auto_lod_    {true};
+    float current_lod_ {1}; // 1, 2, 3, float for filter function
+
+    bool show_decluttering_info_once_ {false};
+
+    float label_distance_ {0.5}; // 0 ... 1
+
+    bool use_utn_as_id_ {false};
+
+    nlohmann::json label_lines_;
+
+    nlohmann::json label_config_;
+
+    nlohmann::json label_ds_ids_; // dsid str -> label flag
+
+    bool filter_mode3a_active_;
+    std::string filter_mode3a_values_;
+
+    std::set<unsigned int> filter_m3a_values_set_; // dec
+    bool filter_m3a_null_wanted_ {false};
+    std::set<std::string> filter_ti_values_set_;
+    bool filter_ti_null_wanted_ {false};
+    std::set<unsigned int> filter_ta_values_set_; // dec
+    bool filter_ta_null_wanted_ {false};
+
+    //std::set<GeometryLeafItemLabels*> item_labels_;
+    std::unique_ptr<LabelContentDialog> label_edit_dialog_;
 };
 
 }

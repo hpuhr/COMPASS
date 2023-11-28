@@ -564,15 +564,15 @@ void Configuration::parseJSONSubConfigs(const nlohmann::json& sub_configs_config
 /**
  * Writes full json config or sub-file to parent.
  */
-void Configuration::writeJSON(nlohmann::json& parent_json) const
+void Configuration::writeJSON(nlohmann::json& parent_json, 
+                              JSONExportType export_type) const
 {
-    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
-           << ": writeJSON";
+    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": writeJSON";
 
     assert(instance_id_.size() != 0);
 
     json config;  // my config
-    generateJSON(config);
+    generateJSON(config, export_type);
 
     if (configuration_filename_.size() > 0)  // if we had custom filename
     {
@@ -607,7 +607,8 @@ void Configuration::writeJSON(nlohmann::json& parent_json) const
 /**
  * Generates the full json config.
  */
-void Configuration::generateJSON(nlohmann::json& target) const
+void Configuration::generateJSON(nlohmann::json& target, 
+                                 JSONExportType export_type) const
 {
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": generateJSON: writing into '" << target.dump(4) << "'";
 
@@ -629,9 +630,15 @@ void Configuration::generateJSON(nlohmann::json& target) const
         par_it.second->toJSON(param_config);
     }
 
+    auto export_filters = jsonExportFilters(export_type);
+
     for (auto& config_it : sub_configurations_)
     {
-        config_it.second->writeJSON(target);
+        //apply class id based filter and skip sub-configurable?
+        if (export_filters && !export_filters->empty() && export_filters->count(config_it.second->getClassId()) > 0)
+            continue;
+
+        config_it.second->writeJSON(target, export_type);
     }
 }
 
@@ -881,6 +888,35 @@ void Configuration::setParameterFromJSON(const std::string& parameter_id, const 
     assert(hasParameter(parameter_id));
 
     parameters_.at(parameter_id)->setValue(value);
+}
+
+/**
+ * Adds a new filtered class id to the export filter for the given export type.
+ */
+void Configuration::addJSONExportFilter(JSONExportType export_type, 
+                                        const std::string& class_id)
+{
+    json_export_filters_[ export_type ].insert(class_id);
+}
+
+/**
+ * Adds new filtered class ids to the export filter for the given export type.
+ */
+void Configuration::addJSONExportFilter(JSONExportType export_type, 
+                                        const std::vector<std::string>& class_ids)
+{
+    json_export_filters_[ export_type ].insert(class_ids.begin(), class_ids.end());
+}
+
+/**
+ * Returns the filtered class ids of the export filter for the given export type.
+ */
+const std::set<std::string>* Configuration::jsonExportFilters(JSONExportType export_type) const
+{
+    if (json_export_filters_.empty() || json_export_filters_.count(export_type) == 0)
+        return nullptr;
+
+    return &json_export_filters_.at(export_type);
 }
 
 // void Configuration::setTemplate (bool template_flag, const std::string& template_name)

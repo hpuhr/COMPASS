@@ -32,39 +32,64 @@ using namespace Utils;
 namespace dbContent
 {
 
+LabelGenerator::Config::Config()
+:   auto_label_ (true)
+
+,   label_directions_           (json::object())
+,   label_lines_                (json::object())
+,   label_config_               (json::object())
+,   label_ds_ids_               (json::object())
+,   declutter_labels_           (true)
+,   max_declutter_labels_       (200)
+,   filter_mode3a_active_       (false)
+,   filter_mode3a_values_       ("7000,7777")
+,   filter_modec_min_active_    (false)
+,   filter_modec_min_value_     (10.0f)
+,   filter_modec_max_active_    (false)
+,   filter_modec_max_value_     (400.0f)
+,   filter_modec_null_wanted_   (false)
+,   filter_ti_active_           (false)
+,   filter_ti_values_           ("OE")
+,   filter_ta_active_           (false)
+,   filter_ta_values_           ("AADDCC")
+,   filter_primary_only_active_ (false)
+,   label_opacity_              (0.9f)
+{
+}
+
 LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& instance_id,
                                DBContentManager& manager)
     : Configurable(class_id, instance_id, &manager), dbcont_manager_(manager)
 {
-    registerParameter("auto_label", &auto_label_, true);
-    registerParameter("label_directions", &label_directions_, json::object());
-    registerParameter("label_lines", &label_lines_, json::object());
-    registerParameter("label_config", &label_config_, json::object());
-    registerParameter("label_ds_ids", &label_ds_ids_, json::object());
-    registerParameter("declutter_labels", &declutter_labels_, true);
-    registerParameter("max_declutter_labels", &max_declutter_labels_, 200u);
+    registerParameter("auto_label", &config_.auto_label_, Config().auto_label_);
+    registerParameter("label_directions", &config_.label_directions_, Config().label_directions_);
+    registerParameter("label_lines", &config_.label_lines_, Config().label_lines_);
+    registerParameter("label_config", &config_.label_config_, Config().label_config_);
+    registerParameter("label_ds_ids", &config_.label_ds_ids_, Config().label_ds_ids_);
+    registerParameter("declutter_labels", &config_.declutter_labels_, Config().declutter_labels_);
+    registerParameter("max_declutter_labels", &config_.max_declutter_labels_, Config().max_declutter_labels_);
 
-    registerParameter("filter_mode3a_active", &filter_mode3a_active_, false);
-    registerParameter("filter_mode3a_values", &filter_mode3a_values_, std::string("7000,7777"));
-    updateM3AValuesFromStr(filter_mode3a_values_);
+    registerParameter("filter_mode3a_active", &config_.filter_mode3a_active_, Config().filter_mode3a_active_);
+    registerParameter("filter_mode3a_values", &config_.filter_mode3a_values_, Config().filter_mode3a_values_);
+    updateM3AValuesFromStr(config_.filter_mode3a_values_);
 
-    registerParameter("filter_modec_min_active", &filter_modec_min_active_, false);
-    registerParameter("filter_modec_min_value", &filter_modec_min_value_, 10.0f);
-    registerParameter("filter_modec_max_active", &filter_modec_max_active_, false);
-    registerParameter("filter_modec_max_value", &filter_modec_max_value_, 400.0f);
-    registerParameter("filter_modec_null_wanted", &filter_modec_null_wanted_, false);
+    registerParameter("filter_modec_min_active", &config_.filter_modec_min_active_, Config().filter_modec_min_active_);
+    registerParameter("filter_modec_min_value", &config_.filter_modec_min_value_, Config().filter_modec_min_value_);
+    registerParameter("filter_modec_max_active", &config_.filter_modec_max_active_, Config().filter_modec_max_active_);
+    registerParameter("filter_modec_max_value", &config_.filter_modec_max_value_, Config().filter_modec_max_value_);
+    registerParameter("filter_modec_null_wanted", &config_.filter_modec_null_wanted_, Config().filter_modec_null_wanted_);
 
-    registerParameter("filter_ti_active", &filter_ti_active_, false);
-    registerParameter("filter_ti_values", &filter_ti_values_, std::string("OE"));
-    updateTIValuesFromStr(filter_ti_values_);
+    registerParameter("filter_ti_active", &config_.filter_ti_active_, Config().filter_ti_active_);
+    registerParameter("filter_ti_values", &config_.filter_ti_values_, Config().filter_ti_values_);
+    updateTIValuesFromStr(config_.filter_ti_values_);
 
-    registerParameter("filter_ta_active", &filter_ta_active_, false);
-    registerParameter("filter_ta_values", &filter_ta_values_, std::string("AADDCC"));
-    updateTAValuesFromStr(filter_ta_values_);
+    registerParameter("filter_ta_active", &config_.filter_ta_active_, Config().filter_ta_active_);
+    registerParameter("filter_ta_values", &config_.filter_ta_values_, Config().filter_ta_values_);
+    updateTAValuesFromStr(config_.filter_ta_values_);
 
-    registerParameter("filter_primary_only_activ", &filter_primary_only_active_, false);
+    registerParameter("filter_primary_only_activ", &config_.filter_primary_only_active_, Config().filter_primary_only_active_);
 
-    registerParameter("label_opacity", &label_opacity_, 0.9f);
+    registerParameter("label_opacity", &config_.label_opacity_, Config().label_opacity_);
 
     createSubConfigurables();
 }
@@ -621,12 +646,12 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
 
 bool LabelGenerator::autoLabel() const
 {
-    return auto_label_;
+    return config_.auto_label_;
 }
 
 void LabelGenerator::autoLabel(bool auto_label)
 {
-    auto_label_ = auto_label;
+    config_.auto_label_ = auto_label;
 
     emit labelOptionsChangedSignal();
 }
@@ -692,14 +717,14 @@ bool LabelGenerator::useUTN()
 
 void LabelGenerator::addLabelDSID(unsigned int ds_id)
 {
-    label_ds_ids_[to_string(ds_id)] = true;
+    config_.label_ds_ids_[to_string(ds_id)] = true;
 
     emit labelOptionsChangedSignal();
 }
 
 void LabelGenerator::removeLabelDSID(unsigned int ds_id)
 {
-    label_ds_ids_[to_string(ds_id)] = false;
+    config_.label_ds_ids_[to_string(ds_id)] = false;
 
     emit labelOptionsChangedSignal();
 }
@@ -709,14 +734,14 @@ void LabelGenerator::labelAllDSIDs()
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     for (const auto& ds_it : ds_man.dbDataSources())
-        label_ds_ids_[to_string(ds_it->id())] = true;
+        config_.label_ds_ids_[to_string(ds_it->id())] = true;
 
     emit labelOptionsChangedSignal();
 }
 
 void LabelGenerator::labelNoDSIDs()
 {
-    label_ds_ids_.clear();
+    config_.label_ds_ids_.clear();
 
     emit labelOptionsChangedSignal();
 }
@@ -728,7 +753,7 @@ void LabelGenerator::labelNoDSIDs()
 
 bool LabelGenerator::anyDSIDLabelWanted()
 {
-    for (auto& ds_it : label_ds_ids_.get<std::map<string, bool>>())
+    for (auto& ds_it : config_.label_ds_ids_.get<std::map<string, bool>>())
     {
         if (ds_it.second)
             return true;
@@ -739,8 +764,8 @@ bool LabelGenerator::anyDSIDLabelWanted()
 
 bool LabelGenerator::labelWanted(unsigned int ds_id)
 {
-    if (label_ds_ids_.contains(to_string(ds_id)))
-        return label_ds_ids_.at(to_string(ds_id));
+    if (config_.label_ds_ids_.contains(to_string(ds_id)))
+        return config_.label_ds_ids_.at(to_string(ds_id));
     else
         return false;
 }
@@ -775,7 +800,7 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
             return false;
     }
 
-    if (filter_mode3a_active_)
+    if (config_.filter_mode3a_active_)
     {
         if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_m3a_))
             return false;
@@ -795,7 +820,7 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
             return false; // set and not in values
     }
 
-    if (filter_modec_min_active_ || filter_modec_max_active_)
+    if (config_.filter_modec_min_active_ || config_.filter_modec_max_active_)
     {
         if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_mc_))
             return false;
@@ -808,20 +833,20 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
         if (data_vec.isNull(index))
         {
-            if (!filter_modec_null_wanted_)
+            if (!config_.filter_modec_null_wanted_)
                 return false; // null and not wanted
         }
         else
         {
-            if (filter_modec_min_active_ && data_vec.get(index)/100.0 < filter_modec_min_value_)
+            if (config_.filter_modec_min_active_ && data_vec.get(index)/100.0 < config_.filter_modec_min_value_)
                 return false;
 
-            if (filter_modec_max_active_ && data_vec.get(index)/100.0 > filter_modec_max_value_)
+            if (config_.filter_modec_max_active_ && data_vec.get(index)/100.0 > config_.filter_modec_max_value_)
                 return false;
         }
     }
 
-    if (filter_ti_active_)
+    if (config_.filter_ti_active_)
     {
         if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ti_))
             return false;
@@ -889,7 +914,7 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
         }
     }
 
-    if (filter_ta_active_)
+    if (config_.filter_ta_active_)
     {
         if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ta_))
             return false;
@@ -909,7 +934,7 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
             return false; // set and not in values
     }
 
-    if (filter_primary_only_active_)
+    if (config_.filter_primary_only_active_)
     {
         NullableVector<unsigned int>* m3a_vec {nullptr};
         if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_m3a_))
@@ -970,115 +995,115 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
 bool LabelGenerator::filterMode3aActive() const
 {
-    return filter_mode3a_active_;
+    return config_.filter_mode3a_active_;
 }
 
 void LabelGenerator::filterMode3aActive(bool filter_active)
 {
-    filter_mode3a_active_ = filter_active;
+    config_.filter_mode3a_active_ = filter_active;
 }
 
 std::string LabelGenerator::filterMode3aValues() const
 {
-    return filter_mode3a_values_;
+    return config_.filter_mode3a_values_;
 }
 
 void LabelGenerator::filterMode3aValues(const std::string &filter_values)
 {
-    filter_mode3a_values_ = filter_values;
-    updateM3AValuesFromStr(filter_mode3a_values_);
+    config_.filter_mode3a_values_ = filter_values;
+    updateM3AValuesFromStr(config_.filter_mode3a_values_);
 }
 
 bool LabelGenerator::filterTIActive() const
 {
-    return filter_ti_active_;
+    return config_.filter_ti_active_;
 }
 
 void LabelGenerator::filterTIActive(bool filter_active)
 {
-    filter_ti_active_ = filter_active;
+    config_.filter_ti_active_ = filter_active;
 }
 
 std::string LabelGenerator::filterTIValues() const
 {
-    return filter_ti_values_;
+    return config_.filter_ti_values_;
 }
 
 void LabelGenerator::filterTIValues(const std::string &filter_values)
 {
-    filter_ti_values_ = filter_values;
-    updateTIValuesFromStr(filter_ti_values_);
+    config_.filter_ti_values_ = filter_values;
+    updateTIValuesFromStr(config_.filter_ti_values_);
 }
 
 bool LabelGenerator::filterTAActive() const
 {
-    return filter_ta_active_;
+    return config_.filter_ta_active_;
 }
 
 void LabelGenerator::filterTAActive(bool filter_active)
 {
-    filter_ta_active_ = filter_active;
+    config_.filter_ta_active_ = filter_active;
 }
 
 std::string LabelGenerator::filterTAValues() const
 {
-    return filter_ta_values_;
+    return config_.filter_ta_values_;
 }
 
 void LabelGenerator::filterTAValues(const std::string &filter_values)
 {
-    filter_ta_values_ = filter_values;
-    updateTAValuesFromStr(filter_ta_values_);
+    config_.filter_ta_values_ = filter_values;
+    updateTAValuesFromStr(config_.filter_ta_values_);
 }
 
 bool LabelGenerator::filterModecMinActive() const
 {
-    return filter_modec_min_active_;
+    return config_.filter_modec_min_active_;
 }
 
 void LabelGenerator::filterModecMinActive(bool value)
 {
-    filter_modec_min_active_ = value;
+    config_.filter_modec_min_active_ = value;
 }
 
 float LabelGenerator::filterModecMinValue() const
 {
-    return filter_modec_min_value_;
+    return config_.filter_modec_min_value_;
 }
 
 void LabelGenerator::filterModecMinValue(float value)
 {
-    filter_modec_min_value_ = value;
+    config_.filter_modec_min_value_ = value;
 }
 
 bool LabelGenerator::filterModecMaxActive() const
 {
-    return filter_modec_max_active_;
+    return config_.filter_modec_max_active_;
 }
 
 void LabelGenerator::filterModecMaxActive(bool value)
 {
-    filter_modec_max_active_ = value;
+    config_.filter_modec_max_active_ = value;
 }
 
 float LabelGenerator::filterModecMaxValue() const
 {
-    return filter_modec_max_value_;
+    return config_.filter_modec_max_value_;
 }
 
 void LabelGenerator::filterModecMaxValue(float value)
 {
-    filter_modec_max_value_ = value;
+    config_.filter_modec_max_value_ = value;
 }
 
 bool LabelGenerator::filterModecNullWanted() const
 {
-    return filter_modec_null_wanted_;
+    return config_.filter_modec_null_wanted_;
 }
 
 void LabelGenerator::filterModecNullWanted(bool value)
 {
-    filter_modec_null_wanted_ = value;
+    config_.filter_modec_null_wanted_ = value;
 }
 
 void LabelGenerator::checkSubConfigurables()
@@ -1092,11 +1117,11 @@ void LabelGenerator::checkLabelConfig()
 
     for (auto& dbcont_it : dbcont_manager_)
     {
-        if (!label_config_.contains(dbcont_it.first)) // create
+        if (!config_.label_config_.contains(dbcont_it.first)) // create
         {
-            label_config_[dbcont_it.first] = json::object();
+            config_.label_config_[dbcont_it.first] = json::object();
 
-            json& dbcont_def = label_config_.at(dbcont_it.first);
+            json& dbcont_def = config_.label_config_.at(dbcont_it.first);
 
             for (unsigned int row=0; row < 3; row++)
             {
@@ -1144,9 +1169,9 @@ LabelDirection LabelGenerator::labelDirection (unsigned int ds_id)
 {
     string key = to_string(ds_id);
 
-    if (label_directions_.contains(key))
+    if (config_.label_directions_.contains(key))
     {
-        unsigned int direction = label_directions_.at(key);
+        unsigned int direction = config_.label_directions_.at(key);
         assert (direction <= 3);
         return LabelDirection(direction);
     }
@@ -1154,7 +1179,7 @@ LabelDirection LabelGenerator::labelDirection (unsigned int ds_id)
     {
         unsigned int direction = Number::randomNumber(0, 3.99);
         assert (direction <= 3);
-        label_directions_[key] = direction;
+        config_.label_directions_[key] = direction;
         return LabelDirection(direction);
     }
 }
@@ -1176,7 +1201,7 @@ float LabelGenerator::labelDirectionAngle (unsigned int ds_id)
 
 void LabelGenerator::labelDirection (unsigned int ds_id, LabelDirection direction)
 {
-    label_directions_[to_string(ds_id)] = direction;
+    config_.label_directions_[to_string(ds_id)] = direction;
 }
 
 void LabelGenerator::editLabelContents(const std::string& dbcontent_name)
@@ -1195,9 +1220,9 @@ unsigned int LabelGenerator::labelLine (unsigned int ds_id) // returns 0...3
 {
     string key = to_string(ds_id);
 
-    if (label_lines_.contains(key))
+    if (config_.label_lines_.contains(key))
     {
-        unsigned int line = label_lines_.at(key);
+        unsigned int line = config_.label_lines_.at(key);
         assert (line <= 3);
         return line;
     }
@@ -1213,7 +1238,7 @@ unsigned int LabelGenerator::labelLine (unsigned int ds_id) // returns 0...3
         if (ds.hasAnyNumLoaded())
             line = ds.getFirstLoadedLine();
 
-        label_lines_[key] = line;
+        config_.label_lines_[key] = line;
         return line;
     }
 }
@@ -1222,7 +1247,7 @@ void LabelGenerator::labelLine (unsigned int ds_id, unsigned int line)
 {
     assert (line <= 3);
     string key = to_string(ds_id);
-    label_lines_[key] = line;
+    config_.label_lines_[key] = line;
 }
 
 // updates lines to be label according to available lines with loaded data
@@ -1237,7 +1262,7 @@ void LabelGenerator::updateAvailableLabelLines()
 
     bool something_changed {false};
 
-    for (auto& line_it : label_lines_.get<std::map<std::string, unsigned int>>())
+    for (auto& line_it : config_.label_lines_.get<std::map<std::string, unsigned int>>())
     {
         ds_id = std::atoi(line_it.first.c_str());
         line_id = line_it.second;
@@ -1280,7 +1305,7 @@ void LabelGenerator::editLabelContentsDoneSlot()
     loginf << "LabelGenerator: editLabelContentsDoneSlot";
 
     assert (label_edit_dialog_);
-    label_config_ = label_edit_dialog_->labelConfig();
+    config_.label_config_ = label_edit_dialog_->labelConfig();
 
     label_edit_dialog_->close();
     label_edit_dialog_ = nullptr;
@@ -1288,14 +1313,14 @@ void LabelGenerator::editLabelContentsDoneSlot()
 
 nlohmann::json LabelGenerator::labelConfig() const
 {
-    return label_config_;
+    return config_.label_config_;
 }
 
 void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent::VariableSet& read_set)
 {
-    assert (label_config_.contains(dbcontent_name));
+    assert (config_.label_config_.contains(dbcontent_name));
 
-    json& dbcont_def = label_config_.at(dbcontent_name);
+    json& dbcont_def = config_.label_config_.at(dbcontent_name);
 
     DBContent& db_content = dbcont_manager_.dbContent(dbcontent_name);
 
@@ -1385,14 +1410,14 @@ void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent:
 
 bool LabelGenerator::declutterLabels() const
 {
-    return declutter_labels_;
+    return config_.declutter_labels_;
 }
 
 void LabelGenerator::declutterLabels(bool declutter_labels)
 {
-    declutter_labels_ = declutter_labels;
+    config_.declutter_labels_ = declutter_labels;
 
-    if (!declutter_labels_)
+    if (!config_.declutter_labels_)
         emit labelClearAllSignal(); // since since do not update otherwise - reason unknown
 
     emit labelOptionsChangedSignal(); // updates
@@ -1410,29 +1435,29 @@ void LabelGenerator::showDeclutteringInfoOnce(bool show_decluttering_info_once)
 
 unsigned int LabelGenerator::maxDeclutterlabels() const
 {
-    return max_declutter_labels_;
+    return config_.max_declutter_labels_;
 }
 
 bool LabelGenerator::filterPrimaryOnlyActive() const
 {
-    return filter_primary_only_active_;
+    return config_.filter_primary_only_active_;
 }
 
 void LabelGenerator::filterPrimaryOnlyActive(bool value)
 {
     loginf << "LabelGenerator: filterPrimaryOnlyActive: value " << value;
 
-    filter_primary_only_active_ = value;
+    config_.filter_primary_only_active_ = value;
 }
 
 float LabelGenerator::labelOpacity() const
 {
-    return label_opacity_;
+    return config_.label_opacity_;
 }
 
 void LabelGenerator::labelOpacity(float label_opacity)
 {
-    label_opacity_ = label_opacity;
+    config_.label_opacity_ = label_opacity;
 }
 
 float LabelGenerator::labelDistance() const
@@ -1543,9 +1568,9 @@ bool LabelGenerator::updateTAValuesFromStr(const std::string& values)
 std::string LabelGenerator::getVariableName(const std::string& dbcontent_name, unsigned int key)
 {
     assert (key != 0);
-    assert (label_config_.contains(dbcontent_name));
+    assert (config_.label_config_.contains(dbcontent_name));
 
-    json& dbcont_def = label_config_.at(dbcontent_name);
+    json& dbcont_def = config_.label_config_.at(dbcontent_name);
 
     if (!dbcont_def.contains(to_string(key)))
         return "";
@@ -1559,9 +1584,9 @@ std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, 
                                              std::shared_ptr<Buffer>& buffer, unsigned int index)
 {
     assert (key != 0);
-    assert (label_config_.contains(dbcontent_name));
+    assert (config_.label_config_.contains(dbcontent_name));
 
-    json& dbcont_def = label_config_.at(dbcontent_name);
+    json& dbcont_def = config_.label_config_.at(dbcontent_name);
 
     if (!dbcont_def.contains(to_string(key)))
         return "";
@@ -1836,9 +1861,9 @@ std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, 
 std::string LabelGenerator::getVariableUnit(const std::string& dbcontent_name, unsigned int key)
 {
     assert (key != 0);
-    assert (label_config_.contains(dbcontent_name));
+    assert (config_.label_config_.contains(dbcontent_name));
 
-    json& dbcont_def = label_config_.at(dbcontent_name);
+    json& dbcont_def = config_.label_config_.at(dbcontent_name);
 
     if (!dbcont_def.contains(to_string(key)))
         return "";
@@ -1908,6 +1933,7 @@ std::string LabelGenerator::getMode3AText (const std::string& dbcontent_name,
 
     return text;
 }
+
 std::string LabelGenerator::getModeCText (const std::string& dbcontent_name,
                                           unsigned int buffer_index, std::shared_ptr<Buffer>& buffer)
 {
@@ -1977,6 +2003,11 @@ std::string LabelGenerator::getModeCText (const std::string& dbcontent_name,
     }
 
     return text;
+}
+
+void LabelGenerator::onConfigurationChanged(const std::vector<std::string>& changed_params)
+{
+    emit configChanged();
 }
 
 }

@@ -77,6 +77,7 @@ public:
                            bool checked = false);
     void addSpacer();
     void addSeparatorIfValid();
+    void addScreenshotButton();
     void addConfigWidgetToggle();
 
     void enableAction(int id, bool enable);

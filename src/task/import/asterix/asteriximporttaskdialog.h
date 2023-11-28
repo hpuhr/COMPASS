@@ -29,6 +29,8 @@ public:
     void updateButtons();
 
 protected:
+    void configChanged();
+
     ASTERIXImportTask& task_;
 
     ASTERIXImportTaskWidget* task_widget_ {nullptr}; // owned here

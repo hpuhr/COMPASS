@@ -15,13 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONFIGURATION_H_
-#define CONFIGURATION_H_
+#pragma once
 
-#include <map>
 #include <string>
 #include <typeinfo>
 #include <vector>
+#include <set>
+#include <map>
 #include <memory>
 
 #include "configurableparameter.h"
@@ -45,6 +45,12 @@
 class Configuration
 {
 public:
+    enum class JSONExportType
+    {
+        General = 0,
+        Preset
+    };
+
     typedef std::pair<std::string, std::string> SubConfigKey;
     typedef std::unique_ptr<Configuration>      Ptr;
     typedef std::vector<std::string>            ParameterList;
@@ -83,9 +89,9 @@ public:
     void parseJSONConfigFile();
     void parseJSONConfig(const nlohmann::json& config);
     // writes full json config or sub-file to parent
-    void writeJSON(nlohmann::json& parent_json) const;
+    void writeJSON(nlohmann::json& parent_json, JSONExportType export_type) const;
     // generates the full json config
-    void generateJSON(nlohmann::json& target) const;
+    void generateJSON(nlohmann::json& target, JSONExportType export_type) const;
 
     /// @brief Resets all values to their default values
     void resetToDefault();
@@ -152,6 +158,12 @@ public:
     boost::signals2::connection connectListener(const std::function<void(const ParameterList&)>& cb);
     std::vector<std::string> reconfigure(const nlohmann::json& config);
 
+    void addJSONExportFilter(JSONExportType export_type, 
+                             const std::string& class_id);
+    void addJSONExportFilter(JSONExportType export_type, 
+                             const std::vector<std::string>& class_ids);
+    const std::set<std::string>* jsonExportFilters(JSONExportType export_type) const;
+
     static const std::string ParameterSection;
     static const std::string SubConfigSection;
     static const std::string SubConfigFileSection;
@@ -214,6 +226,6 @@ private:
     bool create_instance_name_ = false;
 
     boost::signals2::signal<void(const ParameterList&)> changed_signal_;
-};
 
-#endif /* CONFIGURATION_H_ */
+    std::map<JSONExportType, std::set<std::string>> json_export_filters_;
+};

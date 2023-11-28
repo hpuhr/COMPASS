@@ -50,6 +50,8 @@
 
 #include <cassert>
 
+#define SCAN_PRESETS
+
 using namespace Utils;
 using namespace nlohmann;
 
@@ -102,11 +104,16 @@ void ViewManager::init(QTabWidget* tab_widget)
 
     view_class_list_.append("ScatterPlotView");
 
+#ifdef SCAN_PRESETS
+    //scan view presets
+    if (!presets_.scanForPresets())
+        logwrn << "ViewManager: init: view presets could not be loaded";
+#endif
+
     initialized_ = true;
 
     createSubConfigurables();
 }
-
 
 void ViewManager::loadViewPoints()
 {
@@ -864,6 +871,15 @@ ViewContainerWidget* ViewManager::latestViewContainer()
     }
 
     return latest_container;
+}
+
+bool ViewManager::viewPresetsEnabled() const
+{
+#ifdef SCAN_PRESETS
+    return true;
+#else
+    return false;
+#endif
 }
 
 // void ViewManager::saveViewAsTemplate (View *view, std::string template_name)

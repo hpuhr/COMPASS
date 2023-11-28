@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEW_H
-#define VIEW_H
+#pragma once
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
@@ -94,6 +93,9 @@ public:
 
     virtual void accept(LatexVisitor& v) = 0;
 
+    QImage renderData() const;
+    QImage renderView() const;
+
 signals:
     void selectionChangedSignal();  // do not emit manually, call emitSelectionChange()
 
@@ -153,5 +155,3 @@ private:
     /// Static member counter
     static unsigned int cnt_;
 };
-
-#endif  // VIEW_H

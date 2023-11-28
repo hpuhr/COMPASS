@@ -20,6 +20,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QString>
+#include <QRegularExpression>
+
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -149,7 +151,7 @@ void deleteFolder(const std::string& path)
     dir.removeRecursively();
 }
 
-std::string getDirectoryFromPath (const std::string& path)
+std::string getDirectoryFromPath(const std::string& path)
 {
     boost::filesystem::path p(path);
     boost::filesystem::path dir = p.parent_path();
@@ -157,7 +159,7 @@ std::string getDirectoryFromPath (const std::string& path)
     return dir.string();
 }
 
-std::string getFilenameFromPath (const std::string& path)
+std::string getFilenameFromPath(const std::string& path)
 {
     boost::filesystem::path p(path);
     boost::filesystem::path file = p.filename();
@@ -170,6 +172,24 @@ bool createMissingDirectories(const std::string& path)
     QDir dir = QDir::root();
     bool ret = dir.mkpath(path.c_str());
     return ret;
+}
+
+std::string replaceExtension(const std::string& path, 
+                             const std::string& new_ext_plus_point)
+{
+    boost::filesystem::path p(path);
+    return p.replace_extension(new_ext_plus_point).string();
+}
+
+std::string normalizeFilename(const std::string& filename_without_ext)
+{
+    QString obj_name = QString::fromStdString(filename_without_ext).toLower();
+
+    obj_name.remove(QRegularExpression("^[-.:\\s]+"));
+    obj_name.remove(QRegularExpression("[-.:\\s]+$"));
+    obj_name.replace(QRegularExpression("[-.:\\s]+"), "_");
+
+    return obj_name.toStdString();
 }
 
 }  // namespace Files

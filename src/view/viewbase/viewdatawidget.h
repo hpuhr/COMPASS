@@ -29,6 +29,11 @@ class ViewWidget;
 class ViewToolSwitcher;
 class Buffer;
 
+namespace dbContent
+{
+    class Variable;
+}
+
 /**
  * Base class for view data widgets, which are held in the data area of the ViewWidget.
  * Used to display data in a view specific way, e.g. as a graph.
@@ -56,10 +61,14 @@ public:
     unsigned int loadedDataCount();
     bool showsData() const;
 
+    bool isVariableSetLoaded() const;
+
     virtual void appModeSwitch(AppMode app_mode) {} //reacts on switching the application mode
     virtual void configChanged() {}                 //reacts on configuration changes
 
     virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
+
+    virtual QImage renderData();
 
 signals:
     void displayChanged();
