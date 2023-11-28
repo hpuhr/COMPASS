@@ -632,7 +632,6 @@ void ViewPresetItemListWidget::createUI()
     connect(add_button, &QToolButton::pressed, this, &ViewPresetItemListWidget::addPreset);
 }
 
-
 /**
 */
 void ViewPresetItemListWidget::addPreset()
@@ -787,9 +786,11 @@ void ViewPresetItemListWidget::updateFilter()
 */
 void ViewPresetItemListWidget::updateMinSize()
 {
-    //update minimum widget size to a fraction of screen height
     auto screen_size = QGuiApplication::primaryScreen()->size();
-    setMinimumSize(screen_size.height() * WidgetWFraction, screen_size.height() * WidgetHFraction);
+    auto min_size    = std::min(screen_size.width(), screen_size.height());
+
+    //update minimum widget size to a fraction of the screen size
+    setMinimumSize(min_size * WidgetWFraction, screen_size.height() * WidgetHFraction);
 }
 
 /********************************************************************************************
