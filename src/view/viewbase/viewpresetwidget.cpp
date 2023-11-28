@@ -764,8 +764,8 @@ namespace
 
         QString name = QString::fromStdString(preset->name);
 
-        //check if name starts with filter and also check lower case version of name
-        if (name.startsWith(filter) || name.toLower().startsWith(filter))
+        //check if name starts with filter
+        if (name.toLower().startsWith(filter.toLower()))
             return true;
 
         return false;
