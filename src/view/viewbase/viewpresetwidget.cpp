@@ -582,9 +582,24 @@ void ViewPresetItemListWidget::createUI()
     layout->setSpacing(0);
     setLayout(layout);
 
+    layout->addSpacerItem(new QSpacerItem(1, 9, QSizePolicy::Fixed, QSizePolicy::Fixed));
+
+    QHBoxLayout* add_layout = new QHBoxLayout;
+    add_layout->setMargin(0);
+    layout->addLayout(add_layout);
+
+    QPushButton* add_button = new QPushButton;
+    add_button->setIcon(QIcon(Utils::Files::getIconFilepath("crosshair_fat.png").c_str()));
+    add_button->setText("Add preset");
+    add_layout->addWidget(add_button);
+
+    add_layout->addSpacerItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Fixed));
+
     filter_edit_ = new QLineEdit;
     filter_edit_->setPlaceholderText("Filter for preset name...");
-    layout->addWidget(filter_edit_);
+    add_layout->addWidget(filter_edit_);
+
+    layout->addSpacerItem(new QSpacerItem(1, 9, QSizePolicy::Fixed, QSizePolicy::Fixed));
 
     QWidget* widget = new QWidget;
     QVBoxLayout* widget_layout = new QVBoxLayout;
@@ -613,6 +628,7 @@ void ViewPresetItemListWidget::createUI()
     widget->show();
 
     connect(filter_edit_, &QLineEdit::textChanged, this, &ViewPresetItemListWidget::updateFilter);
+    connect(add_button, &QToolButton::pressed, this, &ViewPresetItemListWidget::addPreset);
 }
 
 
@@ -808,11 +824,6 @@ void ViewPresetWidget::createUI()
     show_button_ = new QPushButton("Show Presets");
     layout_h->addWidget(show_button_);
 
-    add_button_ = new QToolButton;
-    add_button_->setIcon(QIcon(Utils::Files::getIconFilepath("crosshair_fat.png").c_str()));
-    add_button_->setToolTip("Add new preset");
-    layout_h->addWidget(add_button_);
-
     layout_h->addStretch(1);
 
     //layout->addWidget(preset_list_);
@@ -823,6 +834,4 @@ void ViewPresetWidget::createUI()
     menu->addAction(action);
 
     show_button_->setMenu(menu);
-
-    connect(add_button_, &QToolButton::pressed, preset_list_, &ViewPresetItemListWidget::addPreset);
 }

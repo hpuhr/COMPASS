@@ -146,7 +146,6 @@ public:
     virtual ~ViewPresetItemListWidget() = default;
 
     void updateContents();
-    void addPreset();
 
     static const double WidgetWFraction;
     static const double WidgetHFraction;
@@ -157,6 +156,8 @@ private:
     void refill();
     void updateFilter();
     void updateMinSize();
+
+    void addPreset();
 
     void editPreset(ViewPresets::Key key);
     void removePreset(ViewPresets::Key key);
@@ -185,11 +186,9 @@ public:
 private:
     void createUI();
     void refill();
-    void addPreset();
 
     View* view_ = nullptr;
 
     ViewPresetItemListWidget* preset_list_   = nullptr;
     QPushButton*              show_button_   = nullptr;
-    QToolButton*              add_button_    = nullptr;
 };
