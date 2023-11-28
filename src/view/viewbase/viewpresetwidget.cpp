@@ -55,10 +55,21 @@ void ViewPresetEditDialog::createUI()
     QVBoxLayout* main_layout = new QVBoxLayout;
     setLayout(main_layout);
 
-    QGridLayout* layout = new QGridLayout;
-    main_layout->addLayout(layout);
+    QHBoxLayout* horz_layout = new QHBoxLayout;
+    main_layout->addLayout(horz_layout);
 
-    QHBoxLayout* preview_layout = new QHBoxLayout;
+    QVBoxLayout* preview_layout = new QVBoxLayout;
+    horz_layout->addLayout(preview_layout);
+
+    QFrame* line = new QFrame; 
+    line->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    line->setFrameShape(QFrame::VLine);
+    line->setFrameShadow(QFrame::Shadow::Plain);
+    line->setFixedWidth(20);
+    horz_layout->addWidget(line);
+
+    QGridLayout* content_layout = new QGridLayout;
+    horz_layout->addLayout(content_layout);
 
     preview_label_ = new QLabel;
     preview_label_->setFixedSize(ViewPresets::PreviewMaxSize, ViewPresets::PreviewMaxSize);
@@ -75,15 +86,9 @@ void ViewPresetEditDialog::createUI()
     descr_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     descr_label->setAlignment(Qt::AlignTop);
 
-    auto preview_label = new QLabel("Preview: ");
-    preview_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    preview_label->setAlignment(Qt::AlignTop);
-
-    
-    layout->addWidget(name_label   , 0, 0);
-    layout->addWidget(cat_label    , 1, 0);
-    layout->addWidget(descr_label  , 2, 0);
-    layout->addWidget(preview_label, 3, 0);
+    content_layout->addWidget(name_label   , 0, 0);
+    content_layout->addWidget(cat_label    , 1, 0);
+    content_layout->addWidget(descr_label  , 2, 0);
 
     name_edit_        = new QLineEdit;
     category_edit_    = new QLineEdit;
@@ -97,12 +102,11 @@ void ViewPresetEditDialog::createUI()
 
     config_label_ = new QLabel("");
 
-    layout->addWidget(name_edit_       , 0, 1);
-    layout->addWidget(category_edit_   , 1, 1);
-    layout->addWidget(description_edit_, 2, 1);
-    layout->addLayout(preview_layout   , 3, 1);
-    layout->addWidget(update_button_   , 4, 1);
-    layout->addWidget(config_label_    , 5, 1);
+    content_layout->addWidget(name_edit_       , 0, 1);
+    content_layout->addWidget(category_edit_   , 1, 1);
+    content_layout->addWidget(description_edit_, 2, 1);
+    content_layout->addWidget(update_button_   , 3, 1);
+    content_layout->addWidget(config_label_    , 4, 1);
 
     main_layout->addStretch(1);
 
