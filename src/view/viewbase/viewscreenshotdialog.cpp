@@ -88,7 +88,7 @@ void ViewScreenshotDialog::createUI()
     layout->addLayout(layout_buttons);
 
     QPushButton* button_cancel = new QPushButton("Cancel");
-    QPushButton* button_clipb  = new QPushButton("Copy to Clipboard");
+    QPushButton* button_clipb  = new QPushButton("Copy to clipboard");
     QPushButton* button_save   = new QPushButton("Save");
 
     layout_buttons->addWidget(button_cancel);
@@ -165,7 +165,7 @@ void ViewScreenshotDialog::save()
     std::string fn_init = view_->classId() + "_" + timestamp + ".png";
     std::string path    = COMPASS::instance().lastUsedPath() + "/" + fn_init;
 
-    auto fn = QFileDialog::getSaveFileName(this, "Select screenshot file", QString::fromStdString(path), "*.png");
+    auto fn = QFileDialog::getSaveFileName(this, "Select Screenshot File", QString::fromStdString(path), "*.png");
     if (fn.isEmpty())
         return;
 

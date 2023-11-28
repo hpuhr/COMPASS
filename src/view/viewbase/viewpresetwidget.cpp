@@ -135,7 +135,7 @@ void ViewPresetEditDialog::configureUI()
 {
     bool create_mode = mode_ == Mode::Create;
 
-    setWindowTitle(create_mode ? "Create new preset" : "Edit preset");
+    setWindowTitle(create_mode ? "Create New Preset" : "Edit Preset");
 
     create_button_->setVisible(create_mode);
     copy_button_->setVisible(!create_mode);
@@ -480,7 +480,7 @@ void ViewPresetItemWidget::updateContents()
 
     description_label_->setText(QString::fromStdString(preset_->description));
 
-    preview_label_->setText(preset_->preview.isNull() ? "No Preview Available" : "");
+    preview_label_->setText(preset_->preview.isNull() ? "No preview available" : "");
     preview_label_->setPixmap(preset_->preview.isNull() ? QPixmap() : QPixmap::fromImage(preset_->preview));
 }
 
