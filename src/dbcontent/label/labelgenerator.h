@@ -194,15 +194,6 @@ protected:
 
     bool use_utn_as_id_ {false};
 
-    nlohmann::json label_lines_;
-
-    nlohmann::json label_config_;
-
-    nlohmann::json label_ds_ids_; // dsid str -> label flag
-
-    bool filter_mode3a_active_;
-    std::string filter_mode3a_values_;
-
     std::set<unsigned int> filter_m3a_values_set_; // dec
     bool filter_m3a_null_wanted_ {false};
     std::set<std::string> filter_ti_values_set_;
