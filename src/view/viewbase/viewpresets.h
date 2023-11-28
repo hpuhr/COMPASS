@@ -43,16 +43,18 @@ public:
         //returns a unique key, being a combination of the view's class id and the preset name
         Key key() const { return Key(view, name); }
 
+        //serialized
         std::string    name;          // unique name of the preset
         std::string    category;      // category of the preset
         std::string    description;   // description of what the preset is about
         std::string    view;          // view the preset belongs to (= the view's configurable class id)
         std::string    timestamp;     // timestamp the preset config was generated
         std::string    app_version;   // version of the application the preset has been generated with
-        QImage         preview;       // a preview image generated from the view using the stored configuration
         nlohmann::json view_config;   // view configuration as json blob
 
+        //not serialized
         std::string    filename;      // filename of the preset on disk
+        QImage         preview;       // a preview image generated from the view using the stored configuration
     };
 
     typedef std::map<Key, Preset> Presets;

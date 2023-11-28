@@ -582,10 +582,11 @@ void ViewPresetItemListWidget::createUI()
     layout->setSpacing(0);
     setLayout(layout);
 
-    layout->addSpacerItem(new QSpacerItem(1, 9, QSizePolicy::Fixed, QSizePolicy::Fixed));
+    //layout->addSpacerItem(new QSpacerItem(1, 9, QSizePolicy::Fixed, QSizePolicy::Fixed));
 
     QHBoxLayout* add_layout = new QHBoxLayout;
-    add_layout->setMargin(0);
+    add_layout->setMargin(10);
+    add_layout->setSpacing(10);
     layout->addLayout(add_layout);
 
     QPushButton* add_button = new QPushButton;
@@ -593,13 +594,13 @@ void ViewPresetItemListWidget::createUI()
     add_button->setText("Add preset");
     add_layout->addWidget(add_button);
 
-    add_layout->addSpacerItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Fixed));
+    //add_layout->addSpacerItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Fixed));
 
     filter_edit_ = new QLineEdit;
     filter_edit_->setPlaceholderText("Filter for preset name...");
     add_layout->addWidget(filter_edit_);
 
-    layout->addSpacerItem(new QSpacerItem(1, 9, QSizePolicy::Fixed, QSizePolicy::Fixed));
+    //layout->addSpacerItem(new QSpacerItem(1, 9, QSizePolicy::Fixed, QSizePolicy::Fixed));
 
     QWidget* widget = new QWidget;
     QVBoxLayout* widget_layout = new QVBoxLayout;
