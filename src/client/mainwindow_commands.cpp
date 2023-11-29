@@ -20,6 +20,7 @@
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
 #include "evaluationmanager.h"
+#include "sectorlayer.h"
 #include "logger.h"
 #include "util/files.h"
 #include "rtcommand_registry.h"
@@ -1122,7 +1123,34 @@ bool RTCommandImportSectorsJSON::run_impl()
         return false;
     }
 
-    COMPASS::instance().evaluationManager().importSectors(filename_);
+    try
+    {
+        COMPASS::instance().evaluationManager().importSectors(filename_);
+    }
+    catch(const std::exception& e)
+    {
+        setResultMessage(e.what());
+        return false;
+    }
+    catch(...)
+    {
+        setResultMessage("Unknown error");
+        return false;
+    }
+
+    size_t num_sectors = 0;
+
+    const auto& sector_layers = COMPASS::instance().evaluationManager().sectorsLayers();
+
+    for (const auto& sl : sector_layers)
+        num_sectors += sl->size();
+    
+    //return some information on imported sectors
+    nlohmann::json reply;
+    reply[ "num_sector_layers" ] = sector_layers.size();
+    reply[ "num_sectors"       ] = num_sectors;
+
+    setJSONReply(reply);
 
     return true;
 }
