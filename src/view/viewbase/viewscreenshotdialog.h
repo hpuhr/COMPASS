@@ -33,7 +33,8 @@ public:
                          Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~ViewScreenshotDialog() = default;
 
-    static const int PreviewSize = 150;
+    static const int PreviewSize   = 200;
+    static const int PreviewBorder = 2;
 
 private:
     void createUI();
@@ -52,6 +53,4 @@ private:
     QImage screener_view_;
     QImage preview_data_;
     QImage preview_view_;
-    QImage preview_data_sel_;
-    QImage preview_view_sel_;
 };

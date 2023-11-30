@@ -20,6 +20,7 @@
 #include "viewwidget.h"
 #include "timeconv.h"
 #include "compass.h"
+#include "files.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -35,6 +36,91 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPainter>
+#include <QMouseEvent>
+
+namespace
+{
+    /**
+    */
+    class SelectableImage : public QLabel
+    {
+    public:
+        SelectableImage(const QImage& img, 
+                        int border = 2,
+                        const QColor& border_color = Qt::black,
+                        QWidget* parent = nullptr)
+        :   QLabel(parent)
+        {
+            setImage(img, border, border_color);
+            setCursor(Qt::PointingHandCursor);
+            
+            updateCurrentImage();
+        }
+        virtual ~SelectableImage() = default;
+
+        void setSelectionCallback(const std::function<void()>& selection_cb)
+        {
+            selection_cb_ = selection_cb;
+        }
+
+        void setSelected(bool selected)
+        {
+            if (selected == selected_)
+                return;
+
+            selected_ = selected;
+
+            updateCurrentImage();
+        }
+
+    protected:
+        void mousePressEvent(QMouseEvent *event) override
+        {
+            if (event->button() == Qt::LeftButton)
+            {
+                //select image
+                setSelected(true);
+
+                //invoke callback if set
+                if (selection_cb_)
+                    selection_cb_();
+            }
+        }
+
+    private:
+        void setImage(const QImage& img,
+                      int border,
+                      const QColor& border_color)
+        {
+            img_   = img;
+            img_b_ = img;
+
+            //generate border variant of the image for selection
+            QPainter painter(&img_b_);
+            painter.setRenderHint(QPainter::RenderHint::Antialiasing, false);
+
+            int b = std::max(0, border - 1) * 2 + 1;
+
+            QPen pen;
+            pen.setColor(border_color);
+            pen.setWidth(b);
+
+            painter.setPen(pen);
+            painter.drawRect(0, 0, img_.width() - 1, img_.height() - 1);
+        }
+
+        void updateCurrentImage()
+        {
+            setPixmap(QPixmap::fromImage(selected_ ? img_b_ : img_));
+        }
+
+        QImage img_;
+        QImage img_b_;
+        bool   selected_ = false;
+
+        std::function<void()> selection_cb_;
+    };
+}
 
 /**
 */
@@ -61,21 +147,29 @@ void ViewScreenshotDialog::createUI()
     QVBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    QLabel* label_preview_data = new QLabel;
-    label_preview_data->setPixmap(QPixmap::fromImage(preview_data_));
-
-    QLabel* label_preview_view = new QLabel;
-    label_preview_view->setPixmap(QPixmap::fromImage(preview_view_));
+    SelectableImage* image_preview_data = new SelectableImage(preview_data_, PreviewBorder, Qt::black);
+    SelectableImage* image_preview_view = new SelectableImage(preview_view_, PreviewBorder, Qt::black);
 
     QGridLayout* layout_previews = new QGridLayout;
+
+    QHBoxLayout* button_data_layout = new QHBoxLayout;
+    QHBoxLayout* button_view_layout = new QHBoxLayout;
 
     button_data_ = new QRadioButton("Data");
     button_view_ = new QRadioButton("View");
 
-    layout_previews->addWidget(label_preview_data, 0, 1);
-    layout_previews->addWidget(label_preview_view, 0, 2);
-    layout_previews->addWidget(button_data_      , 1, 1);
-    layout_previews->addWidget(button_view_      , 1, 2);
+    button_data_layout->addStretch(1);
+    button_data_layout->addWidget(button_data_);
+    button_data_layout->addStretch(1);
+
+    button_view_layout->addStretch(1);
+    button_view_layout->addWidget(button_view_);
+    button_view_layout->addStretch(1);
+
+    layout_previews->addWidget(image_preview_data, 0, 1);
+    layout_previews->addWidget(image_preview_view, 0, 2);
+    layout_previews->addLayout(button_data_layout, 1, 1);
+    layout_previews->addLayout(button_view_layout, 1, 2);
 
     layout_previews->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 0, 0);
     layout_previews->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 0, 3);
@@ -88,8 +182,11 @@ void ViewScreenshotDialog::createUI()
     layout->addLayout(layout_buttons);
 
     QPushButton* button_cancel = new QPushButton("Cancel");
-    QPushButton* button_clipb  = new QPushButton("Copy to clipboard");
-    QPushButton* button_save   = new QPushButton("Save");
+    QPushButton* button_clipb  = new QPushButton("Copy to Clipboard");
+    QPushButton* button_save   = new QPushButton("Save Image as...");
+
+    button_clipb->setIcon(QIcon(Utils::Files::getIconFilepath("copy.png").c_str()));
+    button_save->setIcon(QIcon(Utils::Files::getIconFilepath("save.png").c_str()));
 
     layout_buttons->addWidget(button_cancel);
     layout_buttons->addStretch(1);
@@ -98,15 +195,26 @@ void ViewScreenshotDialog::createUI()
 
     button_data_->setChecked(true);
 
-    auto selection_cb = [ = ] (bool data_selected)
+    auto selection_cb_radio = [ = ] (bool data_selected)
     {
-        label_preview_data->setPixmap(QPixmap::fromImage(data_selected ? preview_data_sel_ : preview_data_));
-        label_preview_view->setPixmap(QPixmap::fromImage(data_selected ? preview_view_ : preview_view_sel_));
+        image_preview_data->setSelected( data_selected);
+        image_preview_view->setSelected(!data_selected);
+    };
+    auto selection_cb_data = [ = ] ()
+    {
+        button_data_->setChecked(true);
+    };
+    auto selection_cb_view = [ = ] ()
+    {
+        button_view_->setChecked(true);
     };
 
-    selection_cb(true);
+    image_preview_data->setSelectionCallback(selection_cb_data);
+    image_preview_view->setSelectionCallback(selection_cb_view);
 
-    connect(button_data_, &QRadioButton::toggled, selection_cb);
+    selection_cb_radio(true);
+
+    connect(button_data_, &QRadioButton::toggled, selection_cb_radio);
 
     connect(button_cancel, &QPushButton::pressed, this, &ViewScreenshotDialog::reject         );
     connect(button_clipb , &QPushButton::pressed, this, &ViewScreenshotDialog::copyToClipboard);
@@ -120,14 +228,19 @@ void ViewScreenshotDialog::generateScreenshots()
     assert(view_);
 
     auto createPreview = [ & ] (QImage& preview,
-                                QImage& preview_selected,
                                 const QImage& img)
     {
+        //gray background for preview
         QImage preview_img(PreviewSize, PreviewSize, QImage::Format_RGB32);
         preview_img.fill(Qt::gray);
 
-        auto scaled_img = img.scaled(PreviewSize, PreviewSize, Qt::AspectRatioMode::KeepAspectRatio);
+        //scale down image and keep aspect
+        auto scaled_img = img.scaled(PreviewSize, 
+                                     PreviewSize, 
+                                     Qt::AspectRatioMode::KeepAspectRatio, 
+                                     Qt::TransformationMode::SmoothTransformation);
 
+        //center scaled image (aspect)
         int offsx = (PreviewSize - scaled_img.width() ) / 2;
         int offsy = (PreviewSize - scaled_img.height()) / 2;
 
@@ -135,17 +248,15 @@ void ViewScreenshotDialog::generateScreenshots()
         painter.drawImage(offsx, offsy, scaled_img);
 
         preview = preview_img;
-
-        painter.drawRect(0, 0, PreviewSize - 1, PreviewSize - 1);
-
-        preview_selected = preview_img;
     };
 
+    //obtain screenshots
     screener_data_ = view_->renderData();
     screener_view_ = view_->renderView();
 
-    createPreview(preview_data_, preview_data_sel_, screener_data_);
-    createPreview(preview_view_, preview_view_sel_, screener_view_);
+    //create preview versions
+    createPreview(preview_data_, screener_data_);
+    createPreview(preview_view_, screener_view_);
 }
 
 /**
