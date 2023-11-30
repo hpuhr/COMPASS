@@ -183,7 +183,7 @@ void ViewScreenshotDialog::createUI()
 
     QPushButton* button_cancel = new QPushButton("Cancel");
     QPushButton* button_clipb  = new QPushButton("Copy to Clipboard");
-    QPushButton* button_save   = new QPushButton("Save Image as...");
+    QPushButton* button_save   = new QPushButton(QString(" ") + "Save Image as..."); //offset a little from save icon
 
     button_clipb->setIcon(QIcon(Utils::Files::getIconFilepath("copy.png").c_str()));
     button_save->setIcon(QIcon(Utils::Files::getIconFilepath("save.png").c_str()));
