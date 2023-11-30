@@ -34,7 +34,7 @@ class QPushButton;
  * @brief Widget with configuration elements for a ListBoxView
  *
  */
-class ListBoxViewConfigWidget : public ViewConfigWidget
+class ListBoxViewConfigWidget : public TabStyleViewConfigWidget
 {
     Q_OBJECT
 public:

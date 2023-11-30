@@ -28,7 +28,6 @@
 #include "dbcontentmanager.h"
 #include "dbcontent.h"
 #include "viewmanager.h"
-#include "viewpresetwidget.h"
 
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -132,14 +131,6 @@ void ViewWidget::createStandardLayout()
         data_widget_container_->setContentsMargins(0, 0, 0, 0);
 
         left_layout->addWidget(data_widget_container_);
-    }
-
-    //create preset widget
-    if (COMPASS::instance().viewManager().viewPresetsEnabled())
-    {
-        auto preset_widget = new ViewPresetWidget(view_, right_widget_);
-
-        right_layout->addWidget(preset_widget);
     }
 
     //create config widget container

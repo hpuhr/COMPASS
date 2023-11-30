@@ -41,7 +41,7 @@ class GroupBox;
  * @brief Widget with configuration elements for a HistogramView
  *
  */
-class HistogramViewConfigWidget : public ViewConfigWidget
+class HistogramViewConfigWidget : public TabStyleViewConfigWidget
 {
     Q_OBJECT
 

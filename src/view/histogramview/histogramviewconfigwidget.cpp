@@ -43,21 +43,13 @@ using namespace Utils;
 /**
  */
 HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_widget, QWidget* parent)
-:   ViewConfigWidget(view_widget, parent)
+:   TabStyleViewConfigWidget(view_widget, parent)
 {
     view_ = view_widget->getView();
     assert(view_);
 
-    setMinimumWidth(400);
-
     QFont font_bold;
     font_bold.setBold(true);
-
-    QVBoxLayout* vlayout = new QVBoxLayout(this);
-    vlayout->setContentsMargins(0, 0, 0, 0);
-
-    QTabWidget* tab_widget = new QTabWidget(this);
-    tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
 
     bool show_result = view_->showResults() && view_->hasResultID();
 
@@ -153,10 +145,8 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
         
         cfg_widget->setLayout(cfg_layout);
 
-        tab_widget->addTab(cfg_widget, "Config");
+        getTabWidget()->addTab(cfg_widget, "Config");
     }
-
-    vlayout->addWidget(tab_widget);
 
     //info widget
     {
@@ -191,13 +181,11 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
         layout->addWidget(info_oor_label_      , 2, 1);
         layout->addWidget(info_zoom_label      , 3, 1);
 
-        vlayout->addWidget(info_widget_);
-        vlayout->addSpacerItem(new QSpacerItem(5, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
+        getMainLayout()->addWidget(info_widget_);
+        getMainLayout()->addSpacerItem(new QSpacerItem(5, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
 
         updateInfo();
     }
-
-    setLayout(vlayout);
 }
 
 /**

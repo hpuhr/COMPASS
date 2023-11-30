@@ -44,28 +44,30 @@ public:
     enum class Mode
     {   
         Create = 0,
-        Edit
+        Edit,
+        Copy
     };
 
-    ViewPresetEditDialog(View* view, ViewPresets::Preset* preset, QWidget* parent = nullptr);
+    ViewPresetEditDialog(View* view, ViewPresets::Preset* preset, Mode mode, QWidget* parent = nullptr);
     virtual ~ViewPresetEditDialog() = default;
 
 private:
     void createUI();
     void configureUI();
+
+    bool checkName();
+
+    void apply();
+    bool applyCreate();
+    bool applyEdit();
+    bool applyCopy();
+
     void updatePreview();
     void updateConfig();
     void updateMetaData();
 
-    void revert();
-
-    bool checkName();
-
-    void createPreset();
-    void savePreset();
-    void copyPreset();
-    
-    void updateConfigPressed();
+    QString windowTitle(Mode mode) const;
+    const QImage& previewImage(Mode mode) const;
 
     View*                view_   = nullptr;
     ViewPresets::Preset* preset_ = nullptr;
@@ -74,15 +76,8 @@ private:
     QLineEdit* category_edit_    = nullptr;
     QTextEdit* description_edit_ = nullptr;
     QLabel*    preview_label_    = nullptr;
-    QLabel*    config_label_     = nullptr;
 
-    QPushButton* create_button_ = nullptr;
-    QPushButton* save_button_   = nullptr;
-    QPushButton* copy_button_   = nullptr;
-    QPushButton* update_button_ = nullptr;
-
-    ViewPresets::Preset preset_backup_;
-    ViewPresets::Preset preset_update_;
+    ViewPresets::Preset preset_new_;
 
     Mode mode_ = Mode::Create;
 };
@@ -107,6 +102,9 @@ public:
 signals:
     void removePreset(ViewPresets::Key key);
     void editPreset(ViewPresets::Key key);
+    void copyPreset(ViewPresets::Key key);
+
+    void presetApplied(ViewPresets::Key key);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -118,6 +116,8 @@ private:
 
     void removeButtonPressed();
     void editButtonPressed();
+    void copyButtonPressed();
+    void saveButtonPressed();
 
     void applyPreset();
     
@@ -131,6 +131,8 @@ private:
     QLabel*      description_label_ = nullptr;
     QToolButton* remove_button_     = nullptr;
     QToolButton* edit_button_       = nullptr;
+    QToolButton* copy_button_       = nullptr;
+    QToolButton* save_button_       = nullptr;
 
     bool inside_ = false;
 };
@@ -150,6 +152,9 @@ public:
     static const double WidgetWFraction;
     static const double WidgetHFraction;
 
+signals:
+    void presetApplied(ViewPresets::Key key);
+
 private:
     void createUI();
     void clear();
@@ -161,6 +166,7 @@ private:
 
     void editPreset(ViewPresets::Key key);
     void removePreset(ViewPresets::Key key);
+    void copyPreset(ViewPresets::Key key);
     
     void removeItem(ViewPresets::Key key);
     void updateItem(ViewPresets::Key key);
@@ -185,10 +191,15 @@ public:
 
 private:
     void createUI();
-    void refill();
+    void updateContents();
+    void presetApplied(ViewPresets::Key key);
 
     View* view_ = nullptr;
 
-    ViewPresetItemListWidget* preset_list_   = nullptr;
-    QPushButton*              show_button_   = nullptr;
+    ViewPresetItemListWidget* preset_list_         = nullptr;
+    QPushButton*              show_button_         = nullptr;
+    QLabel*                   active_preset_label_ = nullptr;
+
+    ViewPresets::Key active_preset_;
+    bool             has_modifications_ = false;
 };

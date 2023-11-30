@@ -69,10 +69,10 @@ private:
 
     void updateData();
 
-    State        state_         = State::None;
+    State        state_          = State::None;
 
-    QLabel*      status_label_  = nullptr;
-    QPushButton* reload_button_ = nullptr;
+    QLabel*      status_label_   = nullptr;
+    QPushButton* refresh_button_ = nullptr;
 
-    ViewWidget*  view_widget_   = nullptr;
+    ViewWidget*  view_widget_    = nullptr;
 };

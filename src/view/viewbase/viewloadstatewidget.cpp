@@ -8,7 +8,7 @@
 
 #include <QPushButton>
 #include <QLabel>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 /**
 */
@@ -18,21 +18,27 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
 {
     assert (view_widget_);
 
-    QVBoxLayout* layout = new QVBoxLayout;
+    QHBoxLayout* layout = new QHBoxLayout;
+    layout->setMargin(0);
     setLayout(layout);
 
     QFont font_status;
     font_status.setItalic(true);
 
-    status_label_  = new QLabel("");
+    status_label_ = new QLabel("");
     status_label_->setFont(font_status);
 
-    reload_button_ = new QPushButton("Reload");
-    UI_TEST_OBJ_NAME(reload_button_, reload_button_->text())
-    connect(reload_button_, &QPushButton::clicked, this, [=] () { this->updateData(); });
+    refresh_button_ = new QPushButton;
+    refresh_button_->setToolTip("Refresh view");
+    //refresh_button_->setFlat(true);
+    refresh_button_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    refresh_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
 
+    UI_TEST_OBJ_NAME(refresh_button_, refresh_button_->text())
+    connect(refresh_button_, &QPushButton::pressed, this, [=] () { this->updateData(); });
+
+    layout->addWidget(refresh_button_);
     layout->addWidget(status_label_);
-    layout->addWidget(reload_button_);
 
     setState(State::NoData);
 }
@@ -61,7 +67,11 @@ void ViewLoadStateWidget::setState(State state)
 
     //the view widget may provide us with a special load message
     if (state == State::Loaded && view_widget_)
-        msg = view_widget_->loadedMessage();
+    {
+        auto load_message = view_widget_->loadedMessage();
+        if (!load_message.empty())
+            msg =  load_message;
+    }
 
     status_label_->setText(QString::fromStdString(msg));
 
@@ -71,8 +81,8 @@ void ViewLoadStateWidget::setState(State state)
 
     bool button_enabled = (state != State::Loading);
 
-    reload_button_->setText(QString::fromStdString(buttonTextFromState(state_)));
-    reload_button_->setEnabled(button_enabled);
+    //refresh_button_->setToolTip(QString::fromStdString(buttonTextFromState(state_)));
+    refresh_button_->setEnabled(button_enabled);
 }
 
 /**
@@ -160,7 +170,7 @@ void ViewLoadStateWidget::redrawDone()
 void ViewLoadStateWidget::appModeSwitch(AppMode app_mode)
 {
     //hide ui in live running mode (no manual updates)
-    reload_button_->setHidden(app_mode == AppMode::LiveRunning);
+    refresh_button_->setHidden(app_mode == AppMode::LiveRunning);
     status_label_->setHidden(app_mode == AppMode::LiveRunning);
 }
 
@@ -179,7 +189,7 @@ std::string ViewLoadStateWidget::messageFromState(State state)
             return "Redrawing...";
         case State::None:
         case State::Loaded:
-            return "";
+            return "Up-to-date";
         case State::ReloadRequired:
             return "Reload Required";
         case State::RedrawRequired:

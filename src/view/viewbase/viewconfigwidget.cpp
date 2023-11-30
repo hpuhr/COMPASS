@@ -1,8 +1,18 @@
 
 #include "viewconfigwidget.h"
 #include "viewwidget.h"
+#include "viewpresetwidget.h"
+#include "viewmanager.h"
+#include "compass.h"
 
 #include <iostream>
+
+#include <QTabWidget>
+#include <QVBoxLayout>
+
+/********************************************************************************************
+ * ViewConfigWidget
+ ********************************************************************************************/
 
 /**
 */
@@ -13,6 +23,8 @@ ViewConfigWidget::ViewConfigWidget(ViewWidget* view_widget, QWidget* parent, Qt:
     assert(view_widget_);
 
     setObjectName("configwidget");
+
+    setMinimumWidth(MinWidth);
 }
 
 /**
@@ -71,4 +83,33 @@ void ViewConfigWidget::onDisplayChange()
 {
     //invoke derived
     onDisplayChange_impl();
+}
+
+/********************************************************************************************
+ * TabStyleViewConfigWidget
+ ********************************************************************************************/
+
+/**
+*/
+TabStyleViewConfigWidget::TabStyleViewConfigWidget(ViewWidget* view_widget, QWidget* parent, Qt::WindowFlags f) 
+:   ViewConfigWidget(view_widget, parent, f)
+{
+    //create main layout
+    main_layout_ = new QVBoxLayout;
+    main_layout_->setMargin(0);
+    main_layout_->setContentsMargins(0, 0, 0, 0);
+    setLayout(main_layout_);
+
+    //create view preset widget
+    if (COMPASS::instance().viewManager().viewPresetsEnabled())
+    {
+        auto preset_widget = new ViewPresetWidget(getWidget()->getView(), this);
+        
+        main_layout_->addWidget(preset_widget);
+    }
+
+    //create tab widget
+    tab_widget_ = new QTabWidget(this);
+    tab_widget_->setStyleSheet("QTabBar::tab { height: "+ QString::number(TabHeight) + "px; }");
+    main_layout_->addWidget(tab_widget_);
 }

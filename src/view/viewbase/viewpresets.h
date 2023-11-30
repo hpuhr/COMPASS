@@ -35,6 +35,13 @@ class ViewPresets : public QObject
 public:
     typedef std::pair<std::string, std::string> Key;
 
+    enum class UpdateMode
+    {
+        MetaData = 0,
+        ViewConfig,
+        All
+    };
+
     /**
      * Struct defining a view preset.
      */
@@ -64,24 +71,31 @@ public:
 
     bool scanForPresets();
 
-    bool createPreset(View* view,
+    bool createPreset(const View* view,
                       const std::string& name,
                       const std::string& category,
                       const std::string& description,
                       bool create_preview = true);
-    bool createPreset(const Preset& preset, const View* view);
+    bool createPreset(const Preset& preset, 
+                      const View* view);
     void removePreset(const Key& key);
-    bool renamePreset(const Key& key, const std::string& new_name);
-    bool updatePreset(const Key& key, const Preset& preset);
+    bool renamePreset(const Key& key, 
+                      const std::string& new_name);
+    bool updatePreset(const Key& key, 
+                      const Preset* preset,
+                      const View* view, 
+                      UpdateMode mode = UpdateMode::All,
+                      bool update_preview = true);
     
     bool hasPreset(const View* view, const std::string& name) const;
     bool hasPreset(const Key& key) const;
     bool nameExists(const std::string& name, const View* view) const;
 
-    static void updatePresetConfig(Preset& preset, View* view, bool update_preview = true);
-    static QImage renderPreview(View* view);
+    static void updatePresetStamp(Preset& preset);
+    static void updatePresetConfig(Preset& preset, const View* view, bool update_preview = true);
+    static QImage renderPreview(const View* view);
 
-    static bool keyIsView(const Key& key, View* view);
+    static bool keyIsView(const Key& key, const View* view);
 
     const Presets& presets() const;
     Presets& presets();
@@ -112,7 +126,7 @@ public:
     static const int PreviewMaxSize = 100;
 
 signals:
-    void presetUpdated(Key key_before, Key key_after);
+    void presetUpdated(Key key);
     void presetAdded(Key key);
     void presetRemoved(Key key);
     void presetRenamed(Key key_old, Key key_new);
@@ -127,7 +141,7 @@ private:
     bool createPreset(const Preset& preset, const View* view, bool signal_changes);
     void removePreset(const Key& key, bool signal_changes);
     bool renamePreset(const Key& key, const std::string& new_name, bool signal_changes);
-    bool updatePreset(const Key& key, const Preset& preset, bool signal_changes);
+    bool updatePreset(const Key& key, const Preset* preset, const View* view, UpdateMode mode, bool update_preview, bool signal_changes);
 
     std::string uniqueBasename(const Preset& preset) const;
 

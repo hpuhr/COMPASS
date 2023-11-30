@@ -38,7 +38,7 @@ class QLineEdit;
  * @brief Widget with configuration elements for a ScatterPlotView
  *
  */
-class ScatterPlotViewConfigWidget : public ViewConfigWidget
+class ScatterPlotViewConfigWidget : public TabStyleViewConfigWidget
 {
     Q_OBJECT
 

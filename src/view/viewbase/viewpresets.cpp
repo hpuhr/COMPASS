@@ -18,7 +18,7 @@ const std::string ViewPresets::TagTimestamp   = "timestamp";
 const std::string ViewPresets::TagVersion     = "app_version";
 const std::string ViewPresets::TagConfig      = "view_config";
 
-const std::string ViewPresets::DirPresets     = "view_presets";
+const std::string ViewPresets::DirPresets     = "view";
 const std::string ViewPresets::DirPreviews    = "previews";
 
 const std::string ViewPresets::ExtPreset      = ".json";
@@ -77,7 +77,7 @@ std::string ViewPresets::presetPath(const Preset& preset) const
 */
 std::string ViewPresets::presetDir() const
 {
-    return HOME_DATA_DIRECTORY + "/" + DirPresets;
+    return HOME_PRESET_DIRECTORY + "/" + DirPresets;
 }
 
 /**
@@ -277,7 +277,7 @@ bool ViewPresets::writePreset(const Preset& preset) const
 /**
  * Creates a new preset for the given view and optionally a preview image.
  */
-bool ViewPresets::createPreset(View* view, 
+bool ViewPresets::createPreset(const View* view, 
                                const std::string& name,
                                const std::string& category,
                                const std::string& description,
@@ -293,12 +293,8 @@ bool ViewPresets::createPreset(View* view,
     p.description = description;
     p.category    = category;
 
-    //collect view json config
-    view->generateJSON(p.view_config, Configurable::JSONExportType::Preset);
-
-    //auto-create create_preview?
-    if (create_preview)
-        p.preview = renderPreview(view);
+    //update view config + preview
+    updatePresetConfig(p, view, create_preview);
 
     //create configured preset
     return createPreset(p, nullptr);
@@ -333,12 +329,6 @@ bool ViewPresets::createPreset(const Preset& preset, const View* view, bool sign
     auto key = p.key();
     assert(presets_.count(key) == 0);
 
-    //add timestamp
-    p.timestamp = Utils::Time::toString(Utils::Time::currentUTCTime());
-
-    //add app version
-    p.app_version = COMPASS::instance().config().getString("version");
-
     //create unique filename
     p.filename = uniqueBasename(p) + ExtPreset;
 
@@ -357,6 +347,7 @@ bool ViewPresets::createPreset(const Preset& preset, const View* view, bool sign
 
     return true;
 }
+
 
 /**
  * Removes the preset of the given key.
@@ -435,47 +426,77 @@ bool ViewPresets::renamePreset(const Key& key, const std::string& new_name, bool
  * Updates the preset under the given key to the passed preset.
  * Might cause a rename. If the update fails the old preset version will be restored.
  */
-bool ViewPresets::updatePreset(const Key& key, const Preset& preset)
+bool ViewPresets::updatePreset(const Key& key, 
+                               const Preset* preset, 
+                               const View* view, 
+                               UpdateMode mode,
+                               bool update_preview)
 {
-    return updatePreset(key, preset, true);
+    return updatePreset(key, preset, view, mode, update_preview, true);
 }
 
 /**
- * Updates the preset under the given key to the passed preset.
- * Might cause a rename. If the update fails the old preset version will be restored.
+ * Updates the preset under the given key to the data of the passed preset.
+ * If a view is given the presets config will be updated to the view config.
  * Internal version.
  */
-bool ViewPresets::updatePreset(const Key& key, const Preset& preset, bool signal_changes)
+bool ViewPresets::updatePreset(const Key& key, 
+                               const Preset* preset,
+                               const View* view, 
+                               UpdateMode mode,
+                               bool update_preview, 
+                               bool signal_changes)
 {
     assert(presets_.count(key) > 0);
-    assert(!preset.name.empty());
+    assert(preset != nullptr || view != nullptr);
 
     auto& preset_cur = presets_.at(key);
-    assert(preset_cur.view == preset.view);
 
-    //backup current preset state
+    //backup current preset version
     auto preset_backup = preset_cur;
 
-    //change preset, but use old name
-    preset_cur = preset;
-    preset_cur.name = preset_backup.name;
-
-    Key key_before = key;
-    Key key_after  = preset.key();
-
-    //either rename or just write changed preset
-    bool ok = (preset_cur.name != preset.name) ? renamePreset(key, preset.name, false) : 
-                                                 writePreset(key);
-    if (!ok)
+    //copy description etc from preset
+    if (mode == UpdateMode::MetaData || mode == UpdateMode::All)
     {
-        //revert to old version
+        if (preset)
+        {
+            preset_cur.description = preset->description;
+            preset_cur.category    = preset->category;
+        }
+    }
+
+    //change config?
+    if (mode == UpdateMode::ViewConfig || mode == UpdateMode::All)
+    {
+        if (view)
+        {
+            assert(viewID(view) == preset_cur.view);
+
+            //view provided => update to view config
+            updatePresetConfig(preset_cur, view, update_preview);
+        }
+        else if (preset && !preset->view_config.is_null())
+        {
+            assert(preset_cur.view == preset->view);
+
+            //config provided in passed preset => copy config related data
+            preset_cur.view_config = preset->view_config;
+            preset_cur.preview     = preset->preview;
+            preset_cur.timestamp   = preset->timestamp;
+            preset_cur.app_version = preset->app_version;
+        }
+    }
+
+    //try to write
+    if (!writePreset(preset_cur))
+    {
+        //fail => revert to old version
         preset_cur = preset_backup;
-        
         return false;
     }
 
     if (signal_changes)
-        emit presetUpdated(key_before, key_after);
+        emit presetUpdated(key);
 
     return true;
 }
@@ -500,9 +521,22 @@ bool ViewPresets::writePreset(const Key& key) const
 }
 
 /**
+ * Updates the presets "stamp", meaning timestamp and app version.
+ * This stamp is usually updated when setting a new view config.
+*/
+void ViewPresets::updatePresetStamp(Preset& preset)
+{
+    //add timestamp
+    preset.timestamp = Utils::Time::toString(Utils::Time::currentUTCTime());
+
+    //add app version
+    preset.app_version = COMPASS::instance().config().getString("version");
+}
+
+/**
  * Generates a preview image of the given view.
  */
-QImage ViewPresets::renderPreview(View* view)
+QImage ViewPresets::renderPreview(const View* view)
 {
     assert(view);
     
@@ -512,8 +546,10 @@ QImage ViewPresets::renderPreview(View* view)
 
 /**
  * Updates the presets config to the passed view's config, and optionally creates a preview image.
+ * Preferably use this method to update the presets view config, since it also updates the preset's stamp
+ * on config change.
  */
-void ViewPresets::updatePresetConfig(Preset& preset, View* view, bool update_preview)
+void ViewPresets::updatePresetConfig(Preset& preset, const View* view, bool update_preview)
 {
     assert(view);
     assert(preset.view.empty() || viewID(view) == preset.view);
@@ -523,11 +559,14 @@ void ViewPresets::updatePresetConfig(Preset& preset, View* view, bool update_pre
 
     if (update_preview)
         preset.preview = renderPreview(view);
+
+    //update signature on config modify
+    updatePresetStamp(preset);
 }
 
 /**
 */
-bool ViewPresets::keyIsView(const Key& key, View* view)
+bool ViewPresets::keyIsView(const Key& key, const View* view)
 {
     assert(view);
     return (viewID(view) == key.first);

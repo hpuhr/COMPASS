@@ -38,20 +38,12 @@ using namespace Utils;
 using namespace dbContent;
 
 ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, QWidget* parent)
-:   ViewConfigWidget(view_widget, parent)
+:   TabStyleViewConfigWidget(view_widget, parent)
 {
     //QVBoxLayout* vlayout = new QVBoxLayout;
 
-    setMinimumWidth(400);
-
     QFont font_bold;
     font_bold.setBold(true);
-
-    QVBoxLayout* vlayout = new QVBoxLayout(this);
-    vlayout->setContentsMargins(0, 0, 0, 0);
-
-    QTabWidget* tab_widget = new QTabWidget(this);
-    tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
 
     view_ = view_widget->getView();
     assert(view_);
@@ -111,12 +103,8 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
 
         cfg_widget->setLayout(cfg_layout);
 
-        tab_widget->addTab(cfg_widget, "Config");
+        getTabWidget()->addTab(cfg_widget, "Config");
     }
-
-    vlayout->addWidget(tab_widget);
-
-    setLayout(vlayout);
 }
 
 ScatterPlotViewConfigWidget::~ScatterPlotViewConfigWidget() = default;

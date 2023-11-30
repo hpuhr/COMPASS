@@ -34,14 +34,8 @@ using namespace Utils;
 using namespace std;
 
 ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget, QWidget* parent)
-:   ViewConfigWidget(view_widget, parent)
+:   TabStyleViewConfigWidget(view_widget, parent)
 {
-    QTabWidget* tab_widget = new QTabWidget(this);
-    tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
-
-    QVBoxLayout* vlayout = new QVBoxLayout;
-    vlayout->setContentsMargins(0, 0, 0, 0);
-
     view_ = view_widget->getView();
     assert(view_);
 
@@ -80,16 +74,13 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
         //vlayout->addStretch();
 
         cfg_widget->setLayout(cfg_layout);
-        tab_widget->addTab(cfg_widget, "Config");
-    }
 
-    vlayout->addWidget(tab_widget);
+        getTabWidget()->addTab(cfg_widget, "Config");
+    }
 
     export_button_ = new QPushButton("Export");
     connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
-    vlayout->addWidget(export_button_);
-
-    setLayout(vlayout);
+    getMainLayout()->addWidget(export_button_);
 }
 
 ListBoxViewConfigWidget::~ListBoxViewConfigWidget() = default;
