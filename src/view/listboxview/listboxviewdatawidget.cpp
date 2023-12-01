@@ -43,6 +43,7 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewWidget* view_widget,
     assert(data_source_);
 
     QHBoxLayout* layout = new QHBoxLayout();
+    layout->setMargin(0);
 
     tab_widget_ = new QTabWidget();
     layout->addWidget(tab_widget_);

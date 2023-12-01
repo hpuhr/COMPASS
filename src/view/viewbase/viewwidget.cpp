@@ -42,8 +42,11 @@
 @param view The view the view widget is part of.
 @param parent The widgets parent.
 */
-ViewWidget::ViewWidget(const std::string& class_id, const std::string& instance_id,
-                       Configurable* config_parent, View* view, QWidget* parent)
+ViewWidget::ViewWidget(const std::string& class_id, 
+                       const std::string& instance_id,
+                       Configurable* config_parent, 
+                       View* view, 
+                       QWidget* parent)
     : QWidget     (parent),
       Configurable(class_id, instance_id, config_parent),
       view_       (view)
@@ -75,19 +78,43 @@ ViewWidget::~ViewWidget()
  */
 void ViewWidget::createStandardLayout()
 {
+    //create main layout
     QVBoxLayout* main_layout = new QVBoxLayout;
     main_layout->setContentsMargins(0, 0, 0, 0);
     main_layout->setSpacing(0);
     main_layout->setMargin(0);
 
-    QHBoxLayout* hlayout = new QHBoxLayout;
-    hlayout->setContentsMargins(0, 0, 0, 0);
+    setLayout(main_layout);
 
-    main_layout->addLayout(hlayout);
+    //create tool widget
+    {
+        tool_widget_ = new ViewToolWidget(this, tool_switcher_.get(), this);
+        tool_widget_->setContentsMargins(0, 0, 0, 0);
 
+        if (COMPASS::instance().viewManager().viewPresetsEnabled())
+            tool_widget_->addPresetSelection();
+
+        main_layout->addWidget(tool_widget_);
+    }
+
+    //central layout
+    QHBoxLayout* central_layout = new QHBoxLayout;
+    central_layout->setContentsMargins(0, 0, 0, 0);
+    main_layout->addLayout(central_layout);
+    
+    //create lower widget container
+    {
+        lower_widget_container_ = new QWidget;
+        lower_widget_container_->setVisible(false);
+        lower_widget_container_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        main_layout->addWidget(lower_widget_container_);
+    }
+
+    //main splitter (containing a left and a right widget)
     main_splitter_ = new QSplitter;
     main_splitter_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     main_splitter_->setOrientation(Qt::Horizontal);
+    main_splitter_->setContentsMargins(0, 0, 0, 0);
 
     QSettings settings("COMPASS", instanceId().c_str());
 
@@ -95,7 +122,6 @@ void ViewWidget::createStandardLayout()
     const int ConfigWidgetStretch = 1;
 
     QWidget* left_widget = new QWidget;
-
     left_widget->setContentsMargins(0, 0, 0, 0);
 
     right_widget_ = new QWidget;
@@ -103,9 +129,11 @@ void ViewWidget::createStandardLayout()
 
     QVBoxLayout* left_layout = new QVBoxLayout;
     left_layout->setContentsMargins(0, 0, 0, 0);
+    left_layout->setMargin(0);
 
     QVBoxLayout* right_layout = new QVBoxLayout;
     right_layout->setContentsMargins(0, 0, 0, 0);
+    right_layout->setMargin(0);
 
     left_widget->setLayout(left_layout);
     right_widget_->setLayout(right_layout);
@@ -113,15 +141,7 @@ void ViewWidget::createStandardLayout()
     main_splitter_->addWidget(left_widget);
     main_splitter_->addWidget(right_widget_);
 
-    //create tool widget
-    {
-        tool_widget_ = new ViewToolWidget(this, tool_switcher_.get(), this);
-        tool_widget_->setContentsMargins(0, 0, 0, 0);
-
-        left_layout->addWidget(tool_widget_);
-    }
-
-    //create data widget container
+    //create data widget container in left widget
     {
         QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         size_policy.setHorizontalStretch(DataWidgetStretch);
@@ -133,7 +153,7 @@ void ViewWidget::createStandardLayout()
         left_layout->addWidget(data_widget_container_);
     }
 
-    //create config widget container
+    //create config widget container in right widget
     {
         config_widget_container_ = new QWidget;
 
@@ -141,29 +161,21 @@ void ViewWidget::createStandardLayout()
         size_policy.setHorizontalStretch(ConfigWidgetStretch);
 
         config_widget_container_->setSizePolicy(size_policy);
+        config_widget_container_->setContentsMargins(0, 0, 0, 0);
 
         right_layout->addWidget(config_widget_container_);
     }
 
-    //create load state widget
+    //create load state widget in right widget
     {
         state_widget_ = new ViewLoadStateWidget(this, right_widget_);
 
         right_layout->addWidget(state_widget_);
     }
 
-    //create lower widget container
-    {
-        lower_widget_container_ = new QWidget;
-        lower_widget_container_->setVisible(false);
-        lower_widget_container_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        main_layout->addWidget(lower_widget_container_);
-    }
-
+    //add main splitter to central layout and restore state from config
     main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
-    hlayout->addWidget(main_splitter_);
-
-    setLayout(main_layout);
+    central_layout->addWidget(main_splitter_);
 
     setFocusPolicy(Qt::StrongFocus);
 

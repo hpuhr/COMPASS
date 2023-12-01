@@ -100,13 +100,13 @@ TabStyleViewConfigWidget::TabStyleViewConfigWidget(ViewWidget* view_widget, QWid
     main_layout_->setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout_);
 
-    //create view preset widget
-    if (COMPASS::instance().viewManager().viewPresetsEnabled())
-    {
-        auto preset_widget = new ViewPresetWidget(getWidget()->getView(), this);
+    // //create view preset widget
+    // if (COMPASS::instance().viewManager().viewPresetsEnabled())
+    // {
+    //     auto preset_widget = new ViewPresetWidget(getWidget()->getView(), this);
         
-        main_layout_->addWidget(preset_widget);
-    }
+    //     main_layout_->addWidget(preset_widget);
+    // }
 
     //create tab widget
     tab_widget_ = new QTabWidget(this);

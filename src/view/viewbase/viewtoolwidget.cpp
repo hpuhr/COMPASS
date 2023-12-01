@@ -6,6 +6,7 @@
 #include "viewscreenshotdialog.h"
 #include "compass.h"
 #include "timeconv.h"
+#include "viewpresetwidget.h"
 
 #include "ui_test_common.h"
 
@@ -253,6 +254,19 @@ void ViewToolWidget::addSeparatorIfValid()
 }
 
 /**
+ * Adds controls for view preset selection.
+ */
+void ViewToolWidget::addPresetSelection()
+{
+    assert(view_widget_);
+
+    auto preset_widget = new ViewPresetWidget(view_widget_->getView(), this);
+    QToolBar::addWidget(preset_widget);
+
+    addSeparatorIfValid();
+}
+
+/**
  * Adds a button for toggling the config widget, that is part of the ViewWidget.
 */
 void ViewToolWidget::addScreenshotButton()
@@ -264,34 +278,13 @@ void ViewToolWidget::addScreenshotButton()
     //add separator if needed
     addSeparatorIfValid();
 
-#if 0
-    auto screener_cb = [ = ] ()
-    {
-        auto timestamp = Utils::Time::toString(Utils::Time::currentUTCTime());
-
-        std::string fn_init = view_widget_->getView()->classId() + "_" + timestamp + ".png";
-        std::string path    = COMPASS::instance().lastUsedPath() + "/" + fn_init;
-
-        auto fn = QFileDialog::getSaveFileName(this, "Select screenshot file", QString::fromStdString(path), "*.png");
-        if (fn.isEmpty())
-            return;
-
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-
-        auto image = view_widget_->getView()->renderData();
-        image.save(fn);
-
-        QApplication::restoreOverrideCursor();
-    };
-#else
     auto screener_cb = [ = ] ()
     {
         ViewScreenshotDialog dlg(view_widget_->getView(), this);
         dlg.exec();
     };
-#endif
 
-    //add toggle callback
+    //add callback
     addActionCallback("Save Screenshot", screener_cb, {}, ViewWidget::getIcon("camera.png"), QKeySequence());
 }
 

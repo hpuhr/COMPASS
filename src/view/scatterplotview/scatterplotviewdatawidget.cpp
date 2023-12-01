@@ -60,9 +60,8 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view
     data_source_ = view_->getDataSource();
     assert(data_source_);
 
-    setContentsMargins(0, 0, 0, 0);
-
     main_layout_ = new QHBoxLayout();
+    main_layout_->setMargin(0);
 
     setLayout(main_layout_);
 

@@ -49,9 +49,9 @@ A ViewWidget consists of a standard layout with a set of typical components loca
 Some of them need to be derived and set manually in the derived ViewWidget's constructor, some are pregenerated and can
 be used directly.
 _____________________________________________________________________________
-|_ViewToolWidget_______________________________||ViewConfigWidget            |
+|_ViewToolWidget_____________________________________________________________|           
 |                                              ||                            |
-| ViewDataWidget                               ||                            |
+| ViewDataWidget                               || ViewConfigWidget           |
 |                                              ||                            |
 |                                              ||                            |
 |                                              ||                            |

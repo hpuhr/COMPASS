@@ -993,8 +993,13 @@ void ViewPresetWidget::createUI()
 
     preset_list_ = new ViewPresetItemListWidget(view_, this);
 
-    show_button_ = new QPushButton("Presets");
+    show_button_ = new QToolButton;
+    show_button_->setText("Presets");
+    show_button_->setIcon(QIcon(Utils::Files::getIconFilepath("configuration.png").c_str()));
     show_button_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    show_button_->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
+    show_button_->setPopupMode(QToolButton::ToolButtonPopupMode::InstantPopup);
+    show_button_->setAutoRaise(true);
     layout->addWidget(show_button_);
 
     QMenu* menu = new QMenu;
@@ -1007,7 +1012,7 @@ void ViewPresetWidget::createUI()
     active_preset_label_ = new QLabel;
     layout->addWidget(active_preset_label_);
 
-
+    active_preset_label_->setVisible(false);
 
     connect(preset_list_, &ViewPresetItemListWidget::presetApplied, this, &ViewPresetWidget::presetApplied);
 }
