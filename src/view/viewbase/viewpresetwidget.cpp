@@ -355,6 +355,13 @@ ViewPresetItemWidget::ViewPresetItemWidget(const ViewPresets::Key& key,
 
 /**
 */
+void ViewPresetItemWidget::showSeparatorLine(bool show)
+{
+    separator_line_->setVisible(show);
+}
+
+/**
+*/
 void ViewPresetItemWidget::createUI()
 {
     setCursor(Qt::CursorShape::PointingHandCursor);
@@ -362,11 +369,34 @@ void ViewPresetItemWidget::createUI()
     const int DefaultMargin  = 5;
     const int DefaultSpacing = 5;
 
+    //outer layout (contains main layout and a horizontal separation line below)
+    QVBoxLayout* outer_layout = new QVBoxLayout;
+    outer_layout->setMargin(0);
+    outer_layout->setSpacing(0);
+    outer_layout->setContentsMargins(0, 0, 0, 0);
+    setLayout(outer_layout);
+
+    setContentsMargins(0, 0, 0, 0);
+
+    //main widget
+    main_widget_ = new QWidget;
+
     QHBoxLayout* main_layout = new QHBoxLayout;
     main_layout->setMargin(DefaultMargin);
     main_layout->setSpacing(DefaultSpacing);
-    setLayout(main_layout);
+    main_widget_->setLayout(main_layout);
 
+    outer_layout->addWidget(main_widget_);
+
+    //bottom separation line
+    separator_line_ = new QFrame;
+    separator_line_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    separator_line_->setFrameShape(QFrame::HLine);
+    separator_line_->setFrameShadow(QFrame::Shadow::Sunken);
+    separator_line_->setContentsMargins(0, 0, 0, 0);
+
+    outer_layout->addWidget(separator_line_);
+    
     //preview widget (left side, contains preview and modification buttons)
     QWidget* preview_widget = new QWidget(this);
     preview_widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -387,20 +417,9 @@ void ViewPresetItemWidget::createUI()
     content_widget_layout->setSpacing(0);
     content_widget->setLayout(content_widget_layout);
 
-    //decoration widget (right side, contains decorator buttons)
-    QWidget* decoration_widget = new QWidget(this);
-    decoration_widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    decoration_widget->setContentsMargins(0, 0, 0, 0);
-
-    QVBoxLayout* decoration_widget_layout = new QVBoxLayout;
-    decoration_widget_layout->setMargin(0);
-    decoration_widget_layout->setSpacing(0);
-    decoration_widget->setLayout(decoration_widget_layout);
-
     //add main widgets to main layout
     main_layout->addWidget(preview_widget);
     main_layout->addWidget(content_widget);
-    main_layout->addWidget(decoration_widget);
 
     //preview widget contents
     {
@@ -430,15 +449,41 @@ void ViewPresetItemWidget::createUI()
             preview_widget_layout->addWidget(preview_frame);
         }
 
-        //modification buttons
+        preview_widget_layout->addStretch(1);
+    }
+
+    //content widget contents
+    {
+        QWidget* info_widget = new QWidget;
+        info_widget->setContentsMargins(0, 0, 0, 0);
+        
+        QVBoxLayout* info_layout = new QVBoxLayout;
+        info_layout->setSpacing(1);
+        info_layout->setMargin(0);
+        info_widget->setLayout(info_layout);
+
+        QHBoxLayout* layout_header = new QHBoxLayout;
+        layout_header->setSpacing(1);
+        layout_header->setMargin(1);
+        info_layout->addLayout(layout_header);
+
+        //header
         {
-            QWidget* button_widget = new QWidget;
+            //category
+            category_label_ = new QLabel;
+            category_label_->setAlignment(Qt::AlignBottom);
 
-            QHBoxLayout* button_layout = new QHBoxLayout;
-            button_layout->setMargin(0);
-            button_layout->setSpacing(0);
-            button_widget->setLayout(button_layout);
+            QFont f = category_label_->font();
+            f.setBold(true);
+            f.setItalic(true);
+            f.setPointSize(f.pointSize() - 2);
+            category_label_->setFont(f);
 
+            layout_header->addWidget(category_label_);
+
+            layout_header->addStretch(1);
+
+            //buttons
             edit_button_ = new QToolButton;
             edit_button_->setIcon(QIcon(Utils::Files::getIconFilepath("edit_old.png").c_str()));
             edit_button_->setToolTip("Edit preset");
@@ -457,54 +502,40 @@ void ViewPresetItemWidget::createUI()
             save_button_->setAutoRaise(true);
             save_button_->setCursor(Qt::CursorShape::ArrowCursor);
 
-            button_layout->addWidget(edit_button_);
-            button_layout->addWidget(copy_button_);
-            button_layout->addWidget(save_button_);
-            button_layout->setSizeConstraint(QLayout::SizeConstraint::SetFixedSize);
+            remove_button_ = new QToolButton;
+            remove_button_->setIcon(QIcon(Utils::Files::getIconFilepath("delete.png").c_str()));
+            remove_button_->setToolTip("Remove preset");
+            remove_button_->setAutoRaise(true);
+            remove_button_->setCursor(Qt::CursorShape::ArrowCursor);
 
-            preview_widget_layout->addWidget(button_widget);
+            layout_header->addWidget(edit_button_);
+            layout_header->addWidget(copy_button_);
+            layout_header->addWidget(save_button_);
+
+#if 1
+            auto sep = new QFrame;
+            sep->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+            sep->setFrameShape(QFrame::VLine);
+            sep->setFrameShadow(QFrame::Shadow::Plain);
+            sep->setContentsMargins(0, 0, 0, 0);
+
+            layout_header->addWidget(sep);
+#else
+            layout_header->addSpacerItem(new QSpacerItem(DefaultSpacing * 4, 1, QSizePolicy::Fixed, QSizePolicy::Fixed));
+#endif
+
+            layout_header->addWidget(remove_button_);
 
             connect(edit_button_  , &QToolButton::pressed, this, &ViewPresetItemWidget::editButtonPressed  );
             connect(copy_button_  , &QToolButton::pressed, this, &ViewPresetItemWidget::copyButtonPressed  );
             connect(save_button_  , &QToolButton::pressed, this, &ViewPresetItemWidget::saveButtonPressed  );
+            connect(remove_button_, &QToolButton::pressed, this, &ViewPresetItemWidget::removeButtonPressed);
         }
 
-        preview_widget_layout->addStretch(1);
-    }
-
-    //content widget contents
-    {
-        QWidget* info_widget = new QWidget;
-        info_widget->setContentsMargins(0, 0, 0, 0);
-        
-        QVBoxLayout* info_layout = new QVBoxLayout;
-        info_layout->setSpacing(1);
-        info_layout->setMargin(0);
-        info_widget->setLayout(info_layout);
-
-        QHBoxLayout* layout_category = new QHBoxLayout;
-        layout_category->setSpacing(1);
-        layout_category->setMargin(1);
-        info_layout->addLayout(layout_category);
-
-        //category
-        {
-            category_label_ = new QLabel;
-            category_label_->setWordWrap(true);
-            category_label_->setAlignment(Qt::AlignTop);
-
-            QFont f = category_label_->font();
-            f.setBold(true);
-            f.setPointSize(f.pointSize() - 2);
-            category_label_->setFont(f);
-
-            layout_category->addWidget(category_label_);
-        }
-
-        QHBoxLayout* layout_header = new QHBoxLayout;
-        layout_header->setSpacing(1);
-        layout_header->setMargin(1);
-        info_layout->addLayout(layout_header);
+        QHBoxLayout* layout_name = new QHBoxLayout;
+        layout_name->setSpacing(1);
+        layout_name->setMargin(1);
+        info_layout->addLayout(layout_name);
 
         //name
         {
@@ -516,7 +547,7 @@ void ViewPresetItemWidget::createUI()
             f.setBold(true);
             name_label_->setFont(f);
 
-            layout_header->addWidget(name_label_);
+            layout_name->addWidget(name_label_);
         }
 
         //a little extra spacing between "header" and description
@@ -538,21 +569,6 @@ void ViewPresetItemWidget::createUI()
         }
 
         content_widget_layout->addWidget(info_widget);
-    }
-
-    //decoration widget contents
-    {
-        //decorator buttons
-        remove_button_ = new QToolButton;
-        remove_button_->setIcon(QIcon(Utils::Files::getIconFilepath("delete.png").c_str()));
-        remove_button_->setToolTip("Remove preset");
-        remove_button_->setAutoRaise(true);
-        remove_button_->setCursor(Qt::CursorShape::ArrowCursor);
-
-        decoration_widget_layout->addWidget(remove_button_);
-        decoration_widget_layout->addStretch(1);
-
-        connect(remove_button_, &QToolButton::pressed, this, &ViewPresetItemWidget::removeButtonPressed);
     }
 }
 
@@ -665,8 +681,8 @@ void ViewPresetItemWidget::enterEvent(QEvent* event)
     if (!inside_)
     {
         inside_ = true;
-        this->setBackgroundRole(QPalette::ColorRole::Highlight);
-        this->setAutoFillBackground(true);
+        main_widget_->setBackgroundRole(QPalette::ColorRole::Highlight);
+        main_widget_->setAutoFillBackground(true);
     }
 }
 
@@ -677,7 +693,8 @@ void ViewPresetItemWidget::leaveEvent(QEvent* event)
     if (inside_)
     {
         inside_ = false;
-        this->setBackgroundRole(QPalette::ColorRole::Background);
+        main_widget_->setBackgroundRole(QPalette::ColorRole::Background);
+        main_widget_->setAutoFillBackground(false);
     }
 }
 
@@ -737,7 +754,8 @@ void ViewPresetItemListWidget::createUI()
 
     item_layout_ = new QVBoxLayout;
     item_layout_->setMargin(0);
-    item_layout_->setSpacing(2);
+    item_layout_->setSpacing(0);
+    item_layout_->setContentsMargins(0, 0, 0, 0);
 
     widget_layout->addLayout(item_layout_);
     widget_layout->addStretch(1);

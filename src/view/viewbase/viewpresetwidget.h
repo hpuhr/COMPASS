@@ -33,6 +33,7 @@ class QLabel;
 class QVBoxLayout;
 class QLineEdit;
 class QTextEdit;
+class QFrame;
 
 class QDialog;
 
@@ -99,6 +100,8 @@ public:
     void updateContents(const ViewPresets::Key& key);
     void updateContents();
 
+    void showSeparatorLine(bool show);
+
 signals:
     void removePreset(ViewPresets::Key key);
     void editPreset(ViewPresets::Key key);
@@ -129,10 +132,14 @@ private:
     QLabel*      name_label_        = nullptr;
     QLabel*      preview_label_     = nullptr;
     QLabel*      description_label_ = nullptr;
+
     QToolButton* remove_button_     = nullptr;
     QToolButton* edit_button_       = nullptr;
     QToolButton* copy_button_       = nullptr;
     QToolButton* save_button_       = nullptr;
+
+    QWidget*     main_widget_       = nullptr;
+    QFrame*      separator_line_    = nullptr;
 
     bool inside_ = false;
 };
