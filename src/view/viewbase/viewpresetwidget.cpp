@@ -181,6 +181,9 @@ void ViewPresetEditDialog::configureUI()
         name_edit_->setText(QString::fromStdString(preset_->name));
         category_edit_->setText(QString::fromStdString(preset_->category));
         description_edit_->setText(QString::fromStdString(preset_->description));
+
+        name_edit_->setFrame(false);
+        name_edit_->setReadOnly(true);
     }
 
     updatePreview();
