@@ -47,7 +47,7 @@ namespace dbContent
     class VariableSet;
     class Target;
     class TargetListWidget;
-    class LabelGenerator;
+//    class LabelGenerator;
     class VariableSet;
 }
 
@@ -84,7 +84,7 @@ public:
 
     virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override;
 
-    dbContent::LabelGenerator& labelGenerator();
+//    dbContent::LabelGenerator& labelGenerator();
 
     bool existsDBContent(const std::string& dbcontent_name);
     DBContent& dbContent(const std::string& dbcontent_name);
@@ -190,7 +190,7 @@ public:
 protected:
     COMPASS& compass_;
 
-    std::unique_ptr<dbContent::LabelGenerator> label_generator_;
+//    std::unique_ptr<dbContent::LabelGenerator> label_generator_;
     std::unique_ptr<dbContent::TargetModel> target_model_;
     std::unique_ptr<dbContent::TargetListWidget> target_list_widget_;
 

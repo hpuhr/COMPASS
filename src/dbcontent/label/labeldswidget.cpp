@@ -44,7 +44,7 @@ LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent, Q
     connect(&COMPASS::instance().dataSourceManager(), &DataSourceManager::dataSourcesChangedSignal,
             this, &LabelDSWidget::updateListSlot); // update if data sources changed
 
-    connect(&COMPASS::instance().dbContentManager().labelGenerator(), &LabelGenerator::labelLinesChangedSignal,
+    connect(&label_generator, &LabelGenerator::labelLinesChangedSignal,
             this, &LabelDSWidget::updateListSlot); // update if lines changed
 }
 

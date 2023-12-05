@@ -81,8 +81,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
         dbcont_ids.insert(object_it.second->id());
     }
 
-    assert (label_generator_);
-    label_generator_->checkLabelConfig(); // here because references meta variables
+//    assert (label_generator_);
+//    label_generator_->checkLabelConfig(); // here because references meta variables
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
     // for signal about new data
@@ -108,11 +108,11 @@ DBContentManager::~DBContentManager()
     loginf << "DBContentManager: dtor: done";
 }
 
-dbContent::LabelGenerator& DBContentManager::labelGenerator()
-{
-    assert (label_generator_);
-    return *label_generator_;
-}
+//dbContent::LabelGenerator& DBContentManager::labelGenerator()
+//{
+//    assert (label_generator_);
+//    return *label_generator_;
+//}
 
 void DBContentManager::generateSubConfigurable(const std::string& class_id,
                                                const std::string& instance_id)
@@ -120,12 +120,7 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
 
-    if (class_id == "DBContentLabelGenerator")
-    {
-        assert (!label_generator_);
-        label_generator_.reset(new dbContent::LabelGenerator(class_id, instance_id, *this));
-    }
-    else if (class_id == "DBContentTargetModel")
+    if (class_id == "DBContentTargetModel")
     {
         assert (!target_model_);
         target_model_.reset(new dbContent::TargetModel(class_id, instance_id, *this));
@@ -163,11 +158,11 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
 
 void DBContentManager::checkSubConfigurables()
 {
-    if (!label_generator_)
-    {
-        generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
-        assert (label_generator_);
-    }
+//    if (!label_generator_)
+//    {
+//        generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
+//        assert (label_generator_);
+//    }
 
     if (!target_model_)
     {
@@ -368,7 +363,7 @@ void DBContentManager::load(const std::string& custom_filter_clause)
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
-    assert (label_generator_);
+    //assert (label_generator_);
 
     for (auto& object : dbcontent_)
     {
@@ -384,7 +379,7 @@ void DBContentManager::load(const std::string& custom_filter_clause)
             // add required vars for processing
             addStandardVariables(object.first, read_set);
 
-            label_generator_->addVariables(object.first, read_set);
+            //label_generator_->addVariables(object.first, read_set);
 
             if (eval_man.needsAdditionalVariables())
                 eval_man.addVariables(object.first, read_set);
@@ -437,7 +432,7 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
         }
         else
         {
-            data_[buf_it.first] = move(buf_it.second);
+            data_[buf_it.first] = std::move(buf_it.second);
 
             logdbg << "DBContentManager: addLoadedData: created buffer dbo " << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
@@ -599,7 +594,7 @@ void DBContentManager::finishLoading()
 
     emit loadingDoneSignal();
 
-    COMPASS::instance().dbContentManager().labelGenerator().updateAvailableLabelLines(); // update available lines
+    //COMPASS::instance().dbContentManager().labelGenerator().updateAvailableLabelLines(); // update available lines
 
     QApplication::restoreOverrideCursor();
 }
@@ -944,7 +939,7 @@ void DBContentManager::finishInserting()
 
     COMPASS::instance().dataSourceManager().updateWidget();
 
-    COMPASS::instance().dbContentManager().labelGenerator().updateAvailableLabelLines(); // update available lines
+    //COMPASS::instance().dbContentManager().labelGenerator().updateAvailableLabelLines(); // update available lines
 
     logdbg << "DBContentManager: finishInserting: update lines took "
            << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
@@ -955,7 +950,7 @@ void DBContentManager::addInsertedDataToChache()
 {
     loginf << "DBContentManager: addInsertedDataToChache";
 
-    assert (label_generator_);
+    //assert (label_generator_);
 
     //tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
 
@@ -970,7 +965,7 @@ void DBContentManager::addInsertedDataToChache()
 
         VariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it->first);
         addStandardVariables(buf_it->first, read_set);
-        label_generator_->addVariables(buf_it->first, read_set);
+        //label_generator_->addVariables(buf_it->first, read_set);
 
         vector<Property> buffer_properties_to_be_removed;
 
@@ -1407,15 +1402,15 @@ unsigned int DBContentManager::maxLiveDataAgeCache() const
 
 void DBContentManager::resetToStartupConfiguration()
 {
-    if (label_generator_)
-    {
-        label_generator_->setTmpDisableRemoveConfigOnDelete(true);
+//    if (label_generator_)
+//    {
+//        label_generator_->setTmpDisableRemoveConfigOnDelete(true);
 
-        label_generator_ = nullptr;
+//        label_generator_ = nullptr;
 
-        generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
-        assert (label_generator_);
-    }
+//        generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
+//        assert (label_generator_);
+//    }
 }
 
 dbContent::TargetListWidget* DBContentManager::targetListWidget()
