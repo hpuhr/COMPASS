@@ -196,10 +196,12 @@ public:
                      QWidget* parent = nullptr);
     virtual ~ViewPresetWidget() = default;
 
+    void updateContents();
+
 private:
     void createUI();
-    void updateContents();
     void presetApplied(ViewPresets::Key key);
+    void modified();
 
     View* view_ = nullptr;
 

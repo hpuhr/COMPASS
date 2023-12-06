@@ -70,10 +70,10 @@ public:
     bool hasDataVar ();
     bool isDataVarMeta ();
     dbContent::Variable& dataVar();
-    void dataVar (dbContent::Variable& var);
+    void dataVar (dbContent::Variable& var, bool notify_changes);
 
     dbContent::MetaVariable& metaDataVar();
-    void metaDataVar (dbContent::MetaVariable& var);
+    void metaDataVar (dbContent::MetaVariable& var, bool notify_changes);
 
     std::string dataVarDBO() const;
     std::string dataVarName() const;
@@ -115,7 +115,7 @@ protected:
 
     virtual bool init_impl() override;
 
-    virtual ViewUpdate onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
+    virtual bool refreshScreenOnNeededReload() const override { return true; }
 
     void onShowResultsChanged();
 

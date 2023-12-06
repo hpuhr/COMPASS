@@ -29,6 +29,7 @@ class ViewWidget;
 
 class QLabel;
 class QPushButton;
+class QToolButton;
 
 /**
  * Widget keeping/displaying the current data state and handling manual updates like reloading and redrawing.
@@ -62,17 +63,21 @@ public:
 
     virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 
+    static const int DefaultMargin = 4;
+
 private:
     static std::string messageFromState(State state);
     static QColor colorFromState(State state);
     static std::string buttonTextFromState(State state);
 
     void updateData();
+    void setAutoReload(bool enabled);
 
-    State        state_          = State::None;
+    State        state_              = State::None;
 
-    QLabel*      status_label_   = nullptr;
-    QPushButton* refresh_button_ = nullptr;
+    QLabel*      status_label_       = nullptr;
+    QPushButton* refresh_button_     = nullptr;
+    QToolButton* auto_reload_button_ = nullptr;
 
-    ViewWidget*  view_widget_    = nullptr;
+    ViewWidget*  view_widget_        = nullptr;
 };

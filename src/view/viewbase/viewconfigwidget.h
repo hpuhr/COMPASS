@@ -58,8 +58,7 @@ protected:
     ViewWidget* getWidget() { return view_widget_; }
 
 private:
-    ViewWidget*  view_widget_ = nullptr;
-    
+    ViewWidget* view_widget_ = nullptr;
 };
 
 /**

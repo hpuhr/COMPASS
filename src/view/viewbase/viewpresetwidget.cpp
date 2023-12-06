@@ -981,6 +981,8 @@ ViewPresetWidget::ViewPresetWidget(View* view, QWidget* parent)
 
     createUI();
     updateContents();
+
+    connect(view, &View::configChangedSignal, this, &ViewPresetWidget::modified);
 }
 
 /**
@@ -1043,6 +1045,15 @@ void ViewPresetWidget::updateContents()
         txt += "*";
 
     active_preset_label_->setText(txt);
+}
+
+/**
+*/
+void ViewPresetWidget::modified()
+{
+    has_modifications_ = true;
+
+    updateContents();
 }
 
 /**

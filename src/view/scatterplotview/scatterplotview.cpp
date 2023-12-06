@@ -263,7 +263,7 @@ Variable& ScatterPlotView::dataVarX()
 
 /**
 */
-void ScatterPlotView::dataVarX (Variable& var)
+void ScatterPlotView::dataVarX (Variable& var, bool notify_changes)
 {
     settings_.data_var_x_dbo  = var.dbContentName();
     settings_.data_var_x_name = var.name();
@@ -271,7 +271,12 @@ void ScatterPlotView::dataVarX (Variable& var)
     assert (hasDataVarX());
     assert (!isDataVarXMeta());
 
-    issueViewUpdate(ViewUpdate(true, true, true));
+    if (notify_changes)
+    {
+        updateView(VU_Complete);
+        if (getDataWidget()->xVarNotInBuffer())
+            notifyReloadNeeded();
+    }
 }
 
 /**
@@ -286,7 +291,7 @@ MetaVariable& ScatterPlotView::metaDataVarX()
 
 /**
 */
-void ScatterPlotView::metaDataVarX (MetaVariable& var)
+void ScatterPlotView::metaDataVarX (MetaVariable& var, bool notify_changes)
 {
     settings_.data_var_x_dbo  = META_OBJECT_NAME;
     settings_.data_var_x_name = var.name();
@@ -294,7 +299,12 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var)
     assert (hasDataVarX());
     assert (isDataVarXMeta());
 
-    issueViewUpdate(ViewUpdate(true, true, true));
+    if (notify_changes)
+    {
+        updateView(VU_Complete);
+        if (getDataWidget()->xVarNotInBuffer())
+            notifyReloadNeeded();
+    }
 }
 
 /**
@@ -344,7 +354,7 @@ Variable& ScatterPlotView::dataVarY()
 
 /**
 */
-void ScatterPlotView::dataVarY (Variable& var)
+void ScatterPlotView::dataVarY (Variable& var, bool notify_changes)
 {
     settings_.data_var_y_dbo  = var.dbContentName();
     settings_.data_var_y_name = var.name();
@@ -352,7 +362,12 @@ void ScatterPlotView::dataVarY (Variable& var)
     assert (hasDataVarY());
     assert (!isDataVarYMeta());
 
-    issueViewUpdate(ViewUpdate(true, true, true));
+    if (notify_changes)
+    {
+        updateView(VU_Complete);
+        if (getDataWidget()->yVarNotInBuffer())
+            notifyReloadNeeded();
+    }
 }
 
 /**
@@ -367,7 +382,7 @@ MetaVariable& ScatterPlotView::metaDataVarY()
 
 /**
 */
-void ScatterPlotView::metaDataVarY (MetaVariable& var)
+void ScatterPlotView::metaDataVarY (MetaVariable& var, bool notify_changes)
 {
     settings_.data_var_y_dbo  = META_OBJECT_NAME;
     settings_.data_var_y_name = var.name();
@@ -375,7 +390,12 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var)
     assert (hasDataVarY());
     assert (isDataVarYMeta());
 
-    issueViewUpdate(ViewUpdate(true, true, true));
+    if (notify_changes)
+    {
+        updateView(VU_Complete);
+        if (getDataWidget()->yVarNotInBuffer())
+            notifyReloadNeeded();
+    }
 }
 
 /**
@@ -392,43 +412,44 @@ std::string ScatterPlotView::dataVarYName() const
     return settings_.data_var_y_name;
 }
 
-
+/**
+*/
 bool ScatterPlotView::useConnectionLines()
 {
     return settings_.use_connection_lines;
 }
 
+/**
+*/
 void ScatterPlotView::useConnectionLines(bool value)
 {
     settings_.use_connection_lines = value;
 
-    issueViewUpdate(ViewUpdate(true, false, false));
+    updateView(VU_Redraw);
 }
 
 /**
 */
-View::ViewUpdate ScatterPlotView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params) 
-{ 
-    ViewUpdate update;
+// int ScatterPlotView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params) 
+// { 
+//     int flags = 0;
 
-    for (const auto& param : changed_params)
-    {
-        if (param == ParamDataVarXDBO  ||
-            param == ParamDataVarXName ||
-            param == ParamDataVarYDBO  ||
-            param == ParamDataVarYName)
-        {
-            assert (hasDataVarX());
-            assert (hasDataVarY());
+//     for (const auto& param : changed_params)
+//     {
+//         if (param == ParamDataVarXDBO  ||
+//             param == ParamDataVarXName ||
+//             param == ParamDataVarYDBO  ||
+//             param == ParamDataVarYName)
+//         {
+//             assert (hasDataVarX());
+//             assert (hasDataVarY());
 
-            update.redraw            = true;
-            update.recompute         = true;
-            update.update_components = true;
-        }
-    }
+//             flags |= VU_Complete;
+//         }
+//     }
 
-    return update;
-}
+//     return flags;
+// }
 
 /**
 */

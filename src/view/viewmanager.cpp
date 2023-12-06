@@ -779,6 +779,9 @@ void ViewManager::loadingStartedSlot()
     if (disable_data_distribution_)
         return;
 
+    //reset reload flag
+    reload_needed_ = false;
+
     loginf << "ViewManager: loadingStartedSlot";
 
     for (auto& view_it : views_)
@@ -880,6 +883,87 @@ bool ViewManager::viewPresetsEnabled() const
 #else
     return false;
 #endif
+}
+
+/**
+ * Notifies the view manager that the reload state in a view has changed, 
+ * determines the new global reload state, and informs all views about it.
+ */
+void ViewManager::notifyReloadStateChanged()
+{
+    //query views if one of them needs to reload
+    bool reload_needed = false;
+    for (const auto& elem : views_)
+    {
+        if (!elem.second->reloadNeeded())
+            continue;
+
+        logdbg << "ViewManager::notifyReloadStateChanged: view '" << elem.first << "' needs to reload";
+
+        reload_needed = true;
+        break;
+    }
+
+    logdbg << "ViewManager::notifyReloadStateChanged: reload needed before: " << reload_needed_ << ", now: " << reload_needed;
+
+    //reload state has not changed? => just return
+    if (reload_needed_ == reload_needed)
+        return;
+
+    reload_needed_ = reload_needed;
+
+    logdbg << "ViewManager::notifyReloadStateChanged: emitting new reload state " << reload_needed_;
+
+    //inform about changed reload state
+    emit reloadStateChanged();
+}
+
+/**
+ * Checks if a reload is needed (has been notified by a view).
+ */
+bool ViewManager::reloadNeeded() const
+{
+    return reload_needed_;
+}
+
+/**
+ */
+void ViewManager::enableAutomaticReload(bool enable)
+{
+    if (automatic_reload_ == enable)
+        return;
+
+    automatic_reload_ = enable;
+
+    //inform about changed auto-update state
+    emit automaticUpdatesChanged();
+}
+
+/**
+ */
+void ViewManager::enableAutomaticRedraw(bool enable)
+{
+    if (automatic_redraw_ == enable)
+        return;
+
+    automatic_redraw_ = enable;
+
+    //inform about changed auto-update state
+    emit automaticUpdatesChanged();
+}
+
+/**
+ */
+bool ViewManager::automaticReloadEnabled() const
+{
+    return automatic_reload_;
+}
+
+/**
+ */
+bool ViewManager::automaticRedrawEnabled() const
+{
+    return automatic_redraw_;
 }
 
 // void ViewManager::saveViewAsTemplate (View *view, std::string template_name)

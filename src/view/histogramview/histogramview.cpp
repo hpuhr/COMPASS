@@ -210,7 +210,7 @@ void HistogramView::useLogScale(bool use_log_scale)
     HistogramViewDataWidget* data_widget = dynamic_cast<HistogramViewDataWidget*>(getDataWidget());
     assert (data_widget);
 
-    issueViewUpdate(ViewUpdate(true, false, false));
+    updateView(VU_Redraw);
 }
 
 /**
@@ -246,7 +246,7 @@ Variable& HistogramView::dataVar()
 
 /**
  */
-void HistogramView::dataVar (Variable& var)
+void HistogramView::dataVar (Variable& var, bool notify_changes)
 {
     loginf << "HistogramView: dataVar: dbo " << var.dbContentName() << " name " << var.name();
 
@@ -256,7 +256,8 @@ void HistogramView::dataVar (Variable& var)
     assert (hasDataVar());
     assert (!isDataVarMeta());
 
-    issueViewUpdate(ViewUpdate(true, true, true));
+    if (notify_changes)
+        notifyRefreshNeeded();
 }
 
 /**
@@ -271,7 +272,7 @@ MetaVariable& HistogramView::metaDataVar()
 
 /**
  */
-void HistogramView::metaDataVar (MetaVariable& var)
+void HistogramView::metaDataVar (MetaVariable& var, bool notify_changes)
 {
     loginf << "HistogramView: metaDataVar: name " << var.name();
 
@@ -281,7 +282,8 @@ void HistogramView::metaDataVar (MetaVariable& var)
     assert (hasDataVar());
     assert (isDataVarMeta());
 
-    issueViewUpdate(ViewUpdate(true, true, true));
+    if (notify_changes)
+        notifyRefreshNeeded();
 }
 
 /**
@@ -300,29 +302,27 @@ std::string HistogramView::dataVarName() const
 
 /**
  */
-View::ViewUpdate HistogramView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params)
-{
-    ViewUpdate update;
+// int HistogramView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params)
+// {
+//     int flags = 0;
 
-    for (const auto& param : changed_params)
-    {
-        if (param == ParamDataVarDBO ||
-            param == ParamDataVarName)
-        {
-            assert (hasDataVar());
+//     for (const auto& param : changed_params)
+//     {
+//         if (param == ParamDataVarDBO ||
+//             param == ParamDataVarName)
+//         {
+//             assert (hasDataVar());
 
-            update.redraw            = true;
-            update.recompute         = true;
-            update.update_components = true;
-        }
-        else if(param == ParamUseLogScale)
-        {
-            update.redraw            = true;
-        }
-    }
+//             flags |= VU_Complete;
+//         }
+//         else if(param == ParamUseLogScale)
+//         {
+//             flags |= VU_Redraw;
+//         }
+//     }
 
-    return update;
-}
+//     return flags;
+// }
 
 /**
  */

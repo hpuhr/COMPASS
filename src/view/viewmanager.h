@@ -49,6 +49,8 @@ class ViewManager : public QObject, public Configurable
     void selectionChangedSignal();
     void unshowViewPointSignal (const ViewableDataConfig* vp);
     void showViewPointSignal (const ViewableDataConfig* vp);
+    void reloadStateChanged();
+    void automaticUpdatesChanged();
 
   public slots:
     void selectionChangedSlot();
@@ -141,6 +143,13 @@ class ViewManager : public QObject, public Configurable
     ViewPresets& viewPresets() { return presets_; }
     const ViewPresets& viewPresets() const { return presets_; }
 
+    void notifyReloadStateChanged();
+    bool reloadNeeded() const;
+    void enableAutomaticReload(bool enable);
+    void enableAutomaticRedraw(bool enable);
+    bool automaticReloadEnabled() const;
+    bool automaticRedrawEnabled() const;
+
 protected:
     virtual void checkSubConfigurables();
 
@@ -152,8 +161,12 @@ protected:
     //ViewManagerWidget* widget_{nullptr};
     ViewPointsWidget* view_points_widget_{nullptr};
 
-    bool initialized_{false};
-    bool processing_data_ {false};
+    bool initialized_      = false;
+    bool processing_data_  = false;
+
+    bool reload_needed_    = false;
+    bool automatic_reload_ = false;
+    bool automatic_redraw_ = true;
 
     QTabWidget* main_tab_widget_{nullptr};
 
