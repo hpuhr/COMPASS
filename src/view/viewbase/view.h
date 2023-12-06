@@ -143,10 +143,10 @@ protected:
     void setWidget(ViewWidget* widget);
 
     //can be used by derived views to signal certain changes in the view
-    void notifyViewUpdateNeeded(int flags);
+    void notifyViewUpdateNeeded(int flags, bool add = true);
+    void notifyRedrawNeeded(bool add = true);
+    void notifyReloadNeeded(bool add = true);
     void notifyRefreshNeeded();
-    void notifyRedrawNeeded();
-    void notifyReloadNeeded();
     void notifyConfigChanges();
 
     void updateView(int flags);

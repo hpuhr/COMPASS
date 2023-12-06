@@ -12,6 +12,8 @@
 #include <QToolButton>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QCheckBox>
 
 /**
 */
@@ -21,19 +23,27 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
 {
     assert (view_widget_);
 
-    QHBoxLayout* layout = new QHBoxLayout;
+    QVBoxLayout* layout = new QVBoxLayout;
     layout->setMargin(DefaultMargin);
     setLayout(layout);
 
+    QHBoxLayout* layout_h = new QHBoxLayout;
+    layout_h->setMargin(0);
+
+    QHBoxLayout* layout_buttons = new QHBoxLayout;
+    layout_buttons->setMargin(0);
+    layout_buttons->setSpacing(0);
+
+    layout->addLayout(layout_h);
+    layout_h->addLayout(layout_buttons);
+    
     QFont font_status;
     font_status.setItalic(true);
 
-    auto_reload_button_ = new QToolButton;
-    auto_reload_button_->setCheckable(true);
-    auto_reload_button_->setToolTip("Enable/disable auto-reload");
-    auto_reload_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
-
-    connect(auto_reload_button_, &QPushButton::toggled, this, &ViewLoadStateWidget::setAutoReload);
+    auto_refresh_button_ = new QToolButton;
+    auto_refresh_button_->setCheckable(true);
+    auto_refresh_button_->setToolTip("Enable/disable auto-reload");
+    auto_refresh_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
 
     refresh_button_ = new QPushButton;
     refresh_button_->setToolTip("Refresh view");
@@ -41,16 +51,27 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
     refresh_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
 
     UI_TEST_OBJ_NAME(refresh_button_, refresh_button_->text())
-    connect(refresh_button_, &QPushButton::pressed, this, [=] () { this->updateData(); });
+    
+    layout_buttons->addWidget(auto_refresh_button_);
+    layout_buttons->addWidget(refresh_button_);
 
     status_label_ = new QLabel("");
     status_label_->setFont(font_status);
+    layout_h->addWidget(status_label_);
 
-    layout->addWidget(auto_reload_button_);
-    layout->addWidget(refresh_button_);
-    layout->addWidget(status_label_);
+    auto_refresh_box_ = new QCheckBox("Auto-refresh");
+    
+    layout->addWidget(auto_refresh_box_);
+
+    auto_refresh_button_->setVisible(false);
+    auto_refresh_box_->setVisible(true);
 
     setState(State::NoData);
+
+    connect(refresh_button_, &QPushButton::pressed, this, [=] () { this->updateData(); });
+
+    connect(auto_refresh_button_, &QPushButton::toggled, this, &ViewLoadStateWidget::setAutoReload);
+    connect(auto_refresh_box_, &QPushButton::toggled, this, &ViewLoadStateWidget::setAutoReload);
 }
 
 /**
@@ -59,9 +80,9 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
 void ViewLoadStateWidget::updateData()
 {
     if (view_widget_->getViewDataWidget()->hasData() && (state_ == State::RedrawRequired || state_ == State::ReloadRequired))
-        view_widget_->getView()->updateView();
+        view_widget_->getView()->updateView(); //run view update
     else
-        COMPASS::instance().dbContentManager().load();
+        COMPASS::instance().dbContentManager().load(); //fallback: just reload
 }
 
 /**
@@ -89,6 +110,7 @@ void ViewLoadStateWidget::setState(State state)
     palette.setColor(status_label_->foregroundRole(), color);
     status_label_->setPalette(palette);
 
+    //update refresh button activity
     bool button_enabled = (state == State::NoData ||
                            state == State::RedrawRequired ||
                            state == State::ReloadRequired);
@@ -96,9 +118,14 @@ void ViewLoadStateWidget::setState(State state)
     //refresh_button_->setToolTip(QString::fromStdString(buttonTextFromState(state_)));
     refresh_button_->setEnabled(button_enabled);
 
-    auto_reload_button_->blockSignals(true);
-    auto_reload_button_->setChecked(COMPASS::instance().viewManager().automaticReloadEnabled());
-    auto_reload_button_->blockSignals(false);
+    //update auto-refresh button state
+    auto_refresh_button_->blockSignals(true);
+    auto_refresh_button_->setChecked(COMPASS::instance().viewManager().automaticReloadEnabled());
+    auto_refresh_button_->blockSignals(false);
+
+    auto_refresh_box_->blockSignals(true);
+    auto_refresh_box_->setChecked(COMPASS::instance().viewManager().automaticReloadEnabled());
+    auto_refresh_box_->blockSignals(false);
 }
 
 /**

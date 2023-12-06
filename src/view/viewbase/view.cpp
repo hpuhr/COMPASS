@@ -326,24 +326,26 @@ void View::viewManagerReloadStateChanged()
 {
     assert (widget_);
 
-    //inform components of changed reload state
+    //inform dependent components of changed reload state
     widget_->updateComponents();
 }
 
 /**
-*/
+ * Reacts on changed auto-update flags in the view manager.
+ */
 void View::viewManagerAutoUpdatesChanged()
 {
     assert (widget_);
 
     //run any needed automatic updates
-    runAutomaticUpdates();
+    //runAutomaticUpdates();
 
-    //inform components of changed auto-update state
+    //inform dependent components of changed reload state
     widget_->updateComponents();
 }
 
 /**
+ * Checks if THIS view needs a reload (this is different from the global reload flag in the view manager).
 */
 bool View::reloadNeeded() const
 {
@@ -351,72 +353,27 @@ bool View::reloadNeeded() const
 }
 
 /**
-*/
+ * Check if this view needs a redraw.
+ */
 bool View::redrawNeeded() const
 {
     return updateNeeded() && (issued_update_.value() & VU_Redraw);
 }
 
 /**
-*/
+ * Check if this view needs an update (redraw, reload, etc).
+ */
 bool View::updateNeeded() const
 {
     return issued_update_.has_value();
 }
 
 /**
-*/
+ * Check if the config of this view has been marked as changed.
+ */
 bool View::configChanged() const
 {
     return config_changed_;
-}
-
-/**
- * Informs the view that the given view update is needed.
- * (Note: the update is cached until the next call to updateView())
- */
-void View::notifyViewUpdateNeeded(int flags)
-{
-    assert (widget_);
-
-    //live mode updates are handled immediately in their own way
-    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
-    {
-        if (flags & VU_Reload)
-        {
-            //in live mode a view handles its reload internally in its data widget
-            widget_->getViewDataWidget()->liveReload();
-        }
-        else if (flags & VU_Redraw)
-        {
-            //just redraw
-            updateView(VU_PureRedraw);
-        }
-        return;
-    }
-
-    //check if this is the first update issued
-    bool update_components  = !updateNeeded();
-
-    //add update to issued updates
-    if (issued_update_.has_value())
-        issued_update_.value() |= flags; //add incrementally to existing update
-    else
-        issued_update_ = flags;
-
-    //check reload state after adding update
-    bool reload_view_needed = reloadNeeded();
-
-    //notify view if reload state has changed
-    if (view_manager_.reloadNeeded() != reload_view_needed)
-        view_manager_.notifyReloadStateChanged();
-
-    //run any needed automatic updates
-    runAutomaticUpdates();
-
-    //inform components if this is the first view update added
-    if (update_components)
-        widget_->updateComponents();
 }
 
 /**
@@ -444,48 +401,104 @@ void View::runAutomaticUpdates()
 }
 
 /**
+ * Informs the view that the given view update is needed.
+ * (Note: the update is cached until the next call to updateView())
+ * @param add If true the update is added incrementally to any existing update, if false it will overwrite any existing update.
+ */
+void View::notifyViewUpdateNeeded(int flags, bool add)
+{
+    assert (widget_);
+
+    //live mode updates are handled immediately in their own way
+    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
+    {
+        if (flags & VU_Reload)
+        {
+            //in live mode a view handles its reload internally in its data widget
+            widget_->getViewDataWidget()->liveReload();
+        }
+        else if (flags & VU_Redraw)
+        {
+            //just redraw
+            updateView(VU_PureRedraw);
+        }
+        return;
+    }
+
+    //check if this is the first update issued
+    bool update_components  = !updateNeeded();
+
+    //add update to issued updates
+    if (add && issued_update_.has_value())
+        issued_update_.value() |= flags; //add incrementally to existing update
+    else
+        issued_update_ = flags;
+
+    //check reload state after adding update
+    bool reload_view_needed = reloadNeeded();
+
+    //notify view if reload state has changed
+    if (view_manager_.reloadNeeded() != reload_view_needed)
+        view_manager_.notifyReloadStateChanged();
+
+    //run any needed automatic updates
+    runAutomaticUpdates();
+
+    //inform dependent components if this is the first view update added
+    if (update_components)
+        widget_->updateComponents();
+}
+
+/**
+ * Notifies the view that a view redraw is needed.
+ * @param add If true the update is added incrementally to any existing update, if false it will overwrite any existing update.
+ */
+void View::notifyRedrawNeeded(bool add)
+{
+    notifyViewUpdateNeeded(VU_RecomputedRedraw, add);
+}
+
+/**
+ * Notifies the view that a view reload is needed.
+ * @param add If true the update is added incrementally to any existing update, if false it will overwrite any existing update.
+ */
+void View::notifyReloadNeeded(bool add)
+{
+    notifyViewUpdateNeeded(VU_Reload, add);
+}
+
+/**
  * Notifies the view that a "refresh" is needed and determines what kind of update is needed.
+ * It is suggested to use this method in derived classes in order to notify the view about needed updates,
+ * since it can automatically determine what is needed.
+ * 
+ * (Note: this function will always reset any pending updates, as it determines the new needed update state on-the-fly)
  */
 void View::notifyRefreshNeeded()
 {
     assert(widget_);
 
-    //reset any issued updates, since here we can determine on-the-fly which updates are needed (either redraw or reload),
+    //reset already issued updates, since we can determine which updates are needed on-the-fly (either redraw or reload),
     //no matter what the last config state has looked like
     issued_update_.reset();
 
     //run a check if all needed variables are already loaded
     bool has_varset = widget_->isVariableSetLoaded();
+
     //std::cout << "has varset: " << has_varset << std::endl;
 
+    //update depending on that information
     bool reload_needed = !has_varset;
 
-    //update depending on that information
     if (reload_needed)
-        notifyReloadNeeded();
+        notifyReloadNeeded(false);
     else
-        notifyRedrawNeeded();
-}
-
-/**
- * Notifies the view that a view redraw is needed.
- */
-void View::notifyRedrawNeeded()
-{
-    notifyViewUpdateNeeded(VU_RecomputedRedraw);
-}
-
-/**
- * Notifies the view that a view reload is needed.
- */
-void View::notifyReloadNeeded()
-{
-    notifyViewUpdateNeeded(VU_Reload);
+        notifyRedrawNeeded(false);
 }
 
 /**
  * Informs the view that its config has been changed.
- * (used e.g. by view presets)
+ * (information e.g. used by view presets)
  */
 void View::notifyConfigChanges()
 {
@@ -501,32 +514,46 @@ void View::notifyConfigChanges()
 }
 
 /**
- * Updates the view using previously issued updates.
+ * Updates the view by applying all needed updates.
+ * This method can be used to keep the view up-to-date from the outside.
  */
 void View::updateView()
 {
     assert (widget_);
 
-    //no updates issued?
-    if (!issued_update_.has_value())
-        return;
+    int update_flags = 0;
 
-    bool components_updated = issued_update_.value() & VU_UpdateComponents;
-    bool view_reloaded      = issued_update_.value() & VU_Reload;
+    //add my own issued updates
+    if (issued_update_.has_value())
+    {
+        update_flags  |= issued_update_.value();
+        issued_update_.reset();
+    }
+
+    //add view manager's needed updates
+    if (view_manager_.reloadNeeded())
+    {
+        //viewmanager desires global reload
+        update_flags |= VU_Reload;
+    }
+
+    //nothing to do?
+    if (update_flags == 0)
+        return;    
+
+    bool components_updated = update_flags & VU_UpdateComponents;
+    bool view_reloaded      = update_flags & VU_Reload;
 
     //update view
-    updateView(issued_update_.value());
+    updateView(update_flags);
 
-    //reset update
-    issued_update_.reset();
-
-    //inform components now if not previously done by view update
+    //inform dependent components now if not previously done by view update
     if (!components_updated && !view_reloaded)
         widget_->updateComponents();
 }
 
 /**
- * Updates the view according to the given view update.
+ * Updates the view according to the given update flags.
 */
 void View::updateView(int flags)
 {
@@ -534,7 +561,7 @@ void View::updateView(int flags)
 
     if (flags & VU_Reload) //reload = complete update
     {
-        //start reload
+        //start reload (will reset all cached updates)
         COMPASS::instance().dbContentManager().load();
     }
     else //handle all other updates
@@ -547,7 +574,7 @@ void View::updateView(int flags)
 }
 
 /**
- * Reverts the config changes flag.
+ * Reverts the config change flag.
  * (used e.g. by view presets)
  */
 void View::syncConfig()

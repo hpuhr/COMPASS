@@ -30,6 +30,7 @@ class ViewWidget;
 class QLabel;
 class QPushButton;
 class QToolButton;
+class QCheckBox;
 
 /**
  * Widget keeping/displaying the current data state and handling manual updates like reloading and redrawing.
@@ -77,7 +78,8 @@ private:
 
     QLabel*      status_label_       = nullptr;
     QPushButton* refresh_button_     = nullptr;
-    QToolButton* auto_reload_button_ = nullptr;
+    QToolButton* auto_refresh_button_ = nullptr;
+    QCheckBox*   auto_refresh_box_    = nullptr;
 
     ViewWidget*  view_widget_        = nullptr;
 };

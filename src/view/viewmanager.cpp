@@ -910,11 +910,12 @@ void ViewManager::notifyReloadStateChanged()
     if (reload_needed_ == reload_needed)
         return;
 
+    //update global reload flag
     reload_needed_ = reload_needed;
 
     logdbg << "ViewManager::notifyReloadStateChanged: emitting new reload state " << reload_needed_;
 
-    //inform about changed reload state
+    //inform views about changed reload state
     emit reloadStateChanged();
 }
 
@@ -927,6 +928,7 @@ bool ViewManager::reloadNeeded() const
 }
 
 /**
+ * Enables/disables automatic reloading in the view manager and informs all views about it.
  */
 void ViewManager::enableAutomaticReload(bool enable)
 {
@@ -935,11 +937,12 @@ void ViewManager::enableAutomaticReload(bool enable)
 
     automatic_reload_ = enable;
 
-    //inform about changed auto-update state
+    //inform views about changed auto-update state
     emit automaticUpdatesChanged();
 }
 
 /**
+ * Enables/disables automatic redrawing in the view manager and informs all views about it.
  */
 void ViewManager::enableAutomaticRedraw(bool enable)
 {
