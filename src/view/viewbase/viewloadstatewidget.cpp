@@ -40,11 +40,6 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
     QFont font_status;
     font_status.setItalic(true);
 
-    auto_refresh_button_ = new QToolButton;
-    auto_refresh_button_->setCheckable(true);
-    auto_refresh_button_->setToolTip("Enable/disable auto-reload");
-    auto_refresh_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
-
     refresh_button_ = new QPushButton;
     refresh_button_->setToolTip("Refresh view");
     refresh_button_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
@@ -52,26 +47,15 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
 
     UI_TEST_OBJ_NAME(refresh_button_, refresh_button_->text())
     
-    layout_buttons->addWidget(auto_refresh_button_);
     layout_buttons->addWidget(refresh_button_);
 
     status_label_ = new QLabel("");
     status_label_->setFont(font_status);
     layout_h->addWidget(status_label_);
 
-    auto_refresh_box_ = new QCheckBox("Auto-refresh");
-    
-    layout->addWidget(auto_refresh_box_);
-
-    auto_refresh_button_->setVisible(false);
-    auto_refresh_box_->setVisible(true);
-
     setState(State::NoData);
 
     connect(refresh_button_, &QPushButton::pressed, this, [=] () { this->updateData(); });
-
-    connect(auto_refresh_button_, &QPushButton::toggled, this, &ViewLoadStateWidget::setAutoReload);
-    connect(auto_refresh_box_, &QPushButton::toggled, this, &ViewLoadStateWidget::setAutoReload);
 }
 
 /**
@@ -111,21 +95,18 @@ void ViewLoadStateWidget::setState(State state)
     status_label_->setPalette(palette);
 
     //update refresh button activity
+#if 1
+    //activate button if not loading
+    bool button_enabled = (state != State::Loading);
+#else
+    //activate button only if there is something to update
     bool button_enabled = (state == State::NoData ||
                            state == State::RedrawRequired ||
                            state == State::ReloadRequired);
+#endif
 
     //refresh_button_->setToolTip(QString::fromStdString(buttonTextFromState(state_)));
     refresh_button_->setEnabled(button_enabled);
-
-    //update auto-refresh button state
-    auto_refresh_button_->blockSignals(true);
-    auto_refresh_button_->setChecked(COMPASS::instance().viewManager().automaticReloadEnabled());
-    auto_refresh_button_->blockSignals(false);
-
-    auto_refresh_box_->blockSignals(true);
-    auto_refresh_box_->setChecked(COMPASS::instance().viewManager().automaticReloadEnabled());
-    auto_refresh_box_->blockSignals(false);
 }
 
 /**
@@ -159,14 +140,6 @@ void ViewLoadStateWidget::updateState()
         setState(State::RedrawRequired);
     else
         setState(State::Loaded); //everything up-to-date
-}
-
-/**
- * Enables/disables auto-reload.
- */
-void ViewLoadStateWidget::setAutoReload(bool enabled)
-{
-    COMPASS::instance().viewManager().enableAutomaticReload(enabled);
 }
 
 /**

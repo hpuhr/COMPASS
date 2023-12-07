@@ -63,6 +63,9 @@ ViewManager::ViewManager(const std::string& class_id, const std::string& instanc
     qRegisterMetaType<ViewPoint*>("ViewPoint*");
 
     init_view_point_commands();
+
+    registerParameter("automatic_reload", &config_.automatic_reload, Config().automatic_reload);
+    registerParameter("automatic_redraw", &config_.automatic_redraw, Config().automatic_redraw);
 }
 
 void ViewManager::init(QTabWidget* tab_widget)
@@ -932,10 +935,10 @@ bool ViewManager::reloadNeeded() const
  */
 void ViewManager::enableAutomaticReload(bool enable)
 {
-    if (automatic_reload_ == enable)
+    if (config_.automatic_reload == enable)
         return;
 
-    automatic_reload_ = enable;
+    config_.automatic_reload = enable;
 
     //inform views about changed auto-update state
     emit automaticUpdatesChanged();
@@ -946,10 +949,10 @@ void ViewManager::enableAutomaticReload(bool enable)
  */
 void ViewManager::enableAutomaticRedraw(bool enable)
 {
-    if (automatic_redraw_ == enable)
+    if (config_.automatic_redraw == enable)
         return;
 
-    automatic_redraw_ = enable;
+    config_.automatic_redraw = enable;
 
     //inform about changed auto-update state
     emit automaticUpdatesChanged();
@@ -959,14 +962,14 @@ void ViewManager::enableAutomaticRedraw(bool enable)
  */
 bool ViewManager::automaticReloadEnabled() const
 {
-    return automatic_reload_;
+    return config_.automatic_reload;
 }
 
 /**
  */
 bool ViewManager::automaticRedrawEnabled() const
 {
-    return automatic_redraw_;
+    return config_.automatic_redraw;
 }
 
 // void ViewManager::saveViewAsTemplate (View *view, std::string template_name)

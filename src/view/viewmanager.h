@@ -67,6 +67,12 @@ class ViewManager : public QObject, public Configurable
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
   public:
+    struct Config
+    {
+        bool automatic_reload = false;
+        bool automatic_redraw = true;
+    };
+
     ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~ViewManager();
 
@@ -161,12 +167,11 @@ protected:
     //ViewManagerWidget* widget_{nullptr};
     ViewPointsWidget* view_points_widget_{nullptr};
 
-    bool initialized_      = false;
-    bool processing_data_  = false;
+    Config config_;
 
-    bool reload_needed_    = false;
-    bool automatic_reload_ = false;
-    bool automatic_redraw_ = true;
+    bool initialized_     = false;
+    bool processing_data_ = false;
+    bool reload_needed_   = false;
 
     QTabWidget* main_tab_widget_{nullptr};
 
