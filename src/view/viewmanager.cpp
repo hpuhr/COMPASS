@@ -77,8 +77,7 @@ void ViewManager::init(QTabWidget* tab_widget)
 
     main_tab_widget_ = tab_widget;
 
-    connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
-             this, &ViewManager::appModeSwitchSlot);
+    connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal, this, &ViewManager::appModeSwitchSlot);
 
     // view point stuff
 
