@@ -69,7 +69,7 @@ class ViewManager : public QObject, public Configurable
   public:
     struct Config
     {
-        bool automatic_reload = false;
+        bool automatic_reload = true;
         bool automatic_redraw = true;
     };
 
