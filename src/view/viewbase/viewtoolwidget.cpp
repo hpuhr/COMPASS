@@ -6,7 +6,6 @@
 #include "viewscreenshotdialog.h"
 #include "compass.h"
 #include "timeconv.h"
-#include "viewpresetwidget.h"
 
 #include "ui_test_common.h"
 
@@ -223,6 +222,17 @@ void ViewToolWidget::addSpacer()
 }
 
 /**
+ * Adds a spacer item of a fixed size to the toolbar.
+ */
+void ViewToolWidget::addSpacer(int width)
+{
+    QWidget* w = new QWidget;
+    w->setFixedSize(width, 1);
+
+    addWidget(w);
+}   
+
+/**
  * Adds a checkable action with callback to the toolbar.
  * This version stores the action under an id which can be used to retrieve the action later on.
  */
@@ -251,19 +261,6 @@ void ViewToolWidget::addSeparatorIfValid()
         return;
 
     addSeparator();
-}
-
-/**
- * Adds controls for view preset selection.
- */
-void ViewToolWidget::addPresetSelection()
-{
-    assert(view_widget_);
-
-    auto preset_widget = new ViewPresetWidget(view_widget_->getView(), this);
-    QToolBar::addWidget(preset_widget);
-
-    addSeparatorIfValid();
 }
 
 /**

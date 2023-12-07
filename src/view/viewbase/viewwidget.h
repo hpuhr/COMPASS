@@ -51,7 +51,7 @@ A ViewWidget consists of a standard layout with a set of typical components loca
 Some of them need to be derived and set manually in the derived ViewWidget's constructor, some are pregenerated and can
 be used directly.
 _____________________________________________________________________________
-|_ViewToolWidget_____________________________________________________________|           
+|_ViewPresetWidget____|________ViewToolWidget________________________________|           
 |                                              ||                            |
 | ViewDataWidget                               || ViewConfigWidget           |
 |                                              ||                            |
@@ -78,6 +78,8 @@ Needs to be derived and then set via setDataWidget() in the constructor of the d
 
 ViewConfigWidget [derive]: Implements a configuration area for the view located on the right side of the widget.
 Needs to be derived and then set via setConfigWidget() in the constructor of the derived class.
+
+ViewPresetWidget: Widget for selecting and editing view presets. No need to derive.
 
 ViewToolWidget: A toolbar located above the ViewDataWidget, holding the view's needed tool buttons and actions.
 This is a generic class which doesn't need to be derived, but is rather filled in the derived ViewWidget's constructor and
@@ -168,6 +170,9 @@ protected:
 private:
     void createStandardLayout();
     void connectWidgets();
+
+    static const int PresetSelectionWidth  = 200;
+    static const int PresetSelectionSpacer = 20;
 
     /// The view the widget is part of
     View* view_ = nullptr;

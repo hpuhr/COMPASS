@@ -990,18 +990,18 @@ ViewPresetWidget::ViewPresetWidget(View* view, QWidget* parent)
 void ViewPresetWidget::createUI()
 {
     QHBoxLayout* layout = new QHBoxLayout;
-    layout->setMargin(0);
+    layout->setMargin(5);
     setLayout(layout);
 
     preset_list_ = new ViewPresetItemListWidget(view_, this);
 
     show_button_ = new QToolButton;
-    show_button_->setText("Presets");
-    show_button_->setIcon(QIcon(Utils::Files::getIconFilepath("configuration.png").c_str()));
-    show_button_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    show_button_->setIcon(QIcon(Utils::Files::getIconFilepath("preset.png").c_str()));
+    show_button_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     show_button_->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
     show_button_->setPopupMode(QToolButton::ToolButtonPopupMode::InstantPopup);
-    show_button_->setAutoRaise(true);
+    show_button_->setAutoRaise(false);
+    show_button_->setCursor(Qt::PointingHandCursor);
     layout->addWidget(show_button_);
 
     QMenu* menu = new QMenu;
@@ -1010,11 +1010,6 @@ void ViewPresetWidget::createUI()
     menu->addAction(action);
 
     show_button_->setMenu(menu);
-
-    active_preset_label_ = new QLabel;
-    layout->addWidget(active_preset_label_);
-
-    active_preset_label_->setVisible(false);
 
     connect(preset_list_, &ViewPresetItemListWidget::presetApplied, this, &ViewPresetWidget::presetApplied);
 }
@@ -1025,26 +1020,22 @@ void ViewPresetWidget::updateContents()
 {
     auto setFontItalic = [ & ] (bool italic)
     {
-        auto f = active_preset_label_->font();
+        auto f = show_button_->font();
         f.setItalic(italic);
 
-        active_preset_label_->setFont(f);
+        show_button_->setFont(f);
     };
 
-    if (active_preset_.first.empty() || active_preset_.second.empty())
-    {
-        active_preset_label_->setText("No active preset");
-        setFontItalic(true);
-        return;
-    }
+    bool has_preset = !active_preset_.first.empty() && !active_preset_.second.empty();
 
-    setFontItalic(false);
+    setFontItalic(!has_preset);
 
-    QString txt = QString::fromStdString(active_preset_.second);
-    if (has_modifications_)
+    QString txt = has_preset ? QString::fromStdString(active_preset_.second) : QString("No active preset");
+
+    if (has_preset && has_modifications_)
         txt += "*";
 
-    active_preset_label_->setText(txt);
+    show_button_->setText(txt);
 }
 
 /**

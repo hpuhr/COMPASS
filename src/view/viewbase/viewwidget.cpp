@@ -22,6 +22,7 @@
 #include "viewconfigwidget.h"
 #include "viewtoolswitcher.h"
 #include "viewloadstatewidget.h"
+#include "viewpresetwidget.h"
 #include "files.h"
 #include "compass.h"
 #include "ui_test_common.h"
@@ -86,15 +87,30 @@ void ViewWidget::createStandardLayout()
 
     setLayout(main_layout);
 
+    //create top layout
+    QHBoxLayout* top_layout = new QHBoxLayout;
+    top_layout->setContentsMargins(0, 0, 0, 0);
+    top_layout->setSpacing(0);
+    top_layout->setMargin(0);
+
+    main_layout->addLayout(top_layout);
+
+    //create preset selection
+    if (COMPASS::instance().viewManager().viewPresetsEnabled())
+    {
+        auto preset_widget = new ViewPresetWidget(view_, this);
+        preset_widget->setFixedWidth(PresetSelectionWidth);
+
+        top_layout->addWidget(preset_widget);
+        top_layout->addSpacerItem(new QSpacerItem(PresetSelectionSpacer, 1, QSizePolicy::Fixed, QSizePolicy::Preferred));
+    }
+
     //create tool widget
     {
         tool_widget_ = new ViewToolWidget(this, tool_switcher_.get(), this);
         tool_widget_->setContentsMargins(0, 0, 0, 0);
 
-        if (COMPASS::instance().viewManager().viewPresetsEnabled())
-            tool_widget_->addPresetSelection();
-
-        main_layout->addWidget(tool_widget_);
+        top_layout->addWidget(tool_widget_);
     }
 
     //central layout

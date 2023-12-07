@@ -76,8 +76,8 @@ public:
                            const QKeySequence& key_combination = QKeySequence(),
                            bool checked = false);
     void addSpacer();
+    void addSpacer(int width);
     void addSeparatorIfValid();
-    void addPresetSelection();
     void addScreenshotButton();
     void addConfigWidgetToggle();
 
@@ -93,9 +93,6 @@ public:
     void configChanged();
 
     virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
-
-    static const int PresetSelectionWidth  = 200;
-    static const int PresetSelectionSpacer =  50;
 
 private:
     struct Action

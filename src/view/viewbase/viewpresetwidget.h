@@ -205,9 +205,8 @@ private:
 
     View* view_ = nullptr;
 
-    ViewPresetItemListWidget* preset_list_         = nullptr;
-    QToolButton*              show_button_         = nullptr;
-    QLabel*                   active_preset_label_ = nullptr;
+    ViewPresetItemListWidget* preset_list_ = nullptr;
+    QToolButton*              show_button_ = nullptr;
 
     ViewPresets::Key active_preset_;
     bool             has_modifications_ = false;
