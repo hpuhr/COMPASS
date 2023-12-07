@@ -116,10 +116,3 @@ HistogramView* HistogramViewWidget::getView()
     assert(view);
     return view;
 }
-
-/**
-*/
-bool HistogramViewWidget::reloadNeeded_impl() const
-{
-    return getViewDataWidget()->dataNotInBuffer();
-}

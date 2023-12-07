@@ -347,10 +347,6 @@ void ViewWidget::loadingStarted()
 */
 void ViewWidget::loadingDone()
 {
-    //set back flag
-    reload_needed_ = false;
-    redraw_needed_ = false; //a reload should always result in a redraw anyway
-
     //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->loadingDone();
     getViewConfigWidget()->loadingDone();
@@ -372,9 +368,6 @@ void ViewWidget::redrawStarted()
 */
 void ViewWidget::redrawDone()
 {
-    //set back flag
-    redraw_needed_ = false;
-
     //propagate to subwidgets (note: order might be important)
     getViewConfigWidget()->redrawDone();
     getViewLoadStateWidget()->redrawDone();
@@ -434,74 +427,6 @@ void ViewWidget::updateComponents()
 }
 
 /**
- * Manually notifies the widget that a redraw is needed and updates the load state widget accordingly.
- * (Note: Might trigger an immediate redraw in live running mode)
- */
-void ViewWidget::notifyRedrawNeeded()
-{
-    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
-    {
-        //in live mode just redraw
-        getViewDataWidget()->redrawData(true, false);
-        return;
-    } 
-
-    redraw_needed_ = true;
-    updateLoadState();
-}
-
-/**
- * Manually notifies the widget that a reload is needed and updates the load state widget accordingly.
-*/
-void ViewWidget::notifyReloadNeeded()
-{
-    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
-    {
-        //in live mode a view handles its reload internally in its data widget
-        getViewDataWidget()->liveReload();
-        return;
-    }
-
-    reload_needed_ = true;
-    updateLoadState();
-}
-
-/**
- * Manually notifies the widget that a refresh is needed, determined if redraw or reload, and updates the load state widget accordingly.
-*/
-void ViewWidget::notifyRefreshNeeded()
-{
-    bool has_varset = isVariableSetLoaded();
-
-    //std::cout << "has varset: " << has_varset << std::endl;
-
-    if (has_varset)
-        notifyRedrawNeeded();
-    else
-        notifyReloadNeeded();
-}
-
-/**
- * Checks if a reload is needed.
-*/
-bool ViewWidget::reloadNeeded() const
-{
-    assert(isInit());
-
-    return (reload_needed_ || reloadNeeded_impl());
-}
-
-/**
- * Checks if a redraw is needed.
-*/
-bool ViewWidget::redrawNeeded() const
-{
-    assert(isInit());
-
-    return (redraw_needed_ || redrawNeeded_impl());
-}
-
-/**
  * Returns a view-specific loaded state message.
 */
 std::string ViewWidget::loadedMessage() const
@@ -518,6 +443,7 @@ nlohmann::json ViewWidget::viewInfo(const std::string& what) const
 {
     nlohmann::json info;
 
+    //add basic information
     info[ "name"       ] = view_->getName();
 
     info[ "data"       ] = getViewDataWidget()->viewInfo(what);
@@ -525,6 +451,7 @@ nlohmann::json ViewWidget::viewInfo(const std::string& what) const
     info[ "load_state" ] = getViewLoadStateWidget()->viewInfo(what);
     info[ "toolbar"    ] = getViewToolWidget()->viewInfo(what);
 
+    //add view-specific information
     nlohmann::json info_additional = viewInfo_impl(what);
     if (!info_additional.is_null())
         info[ "additional" ] = info_additional;

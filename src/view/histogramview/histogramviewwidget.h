@@ -43,9 +43,6 @@ class HistogramViewWidget : public ViewWidget
 
     /// @brief Returns the basis view
     HistogramView* getView();
-
-protected:
-    virtual bool reloadNeeded_impl() const override; 
 };
 
 #endif /* HISTOGRAMVIEWWIDGET_H_ */

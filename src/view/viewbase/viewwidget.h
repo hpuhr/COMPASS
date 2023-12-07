@@ -27,6 +27,8 @@
 #include "ui_test_testable.h"
 #include "json.h"
 
+#include <boost/optional.hpp>
+
 //class EventProcessor;
 class View;
 class ViewToolWidget;
@@ -114,10 +116,6 @@ public:
     void appModeSwitch(AppMode app_mode);
     void configChanged();
 
-    void notifyReloadNeeded();
-    void notifyRedrawNeeded();
-    void notifyRefreshNeeded();
-
     ViewDataWidget* getViewDataWidget() { assert(data_widget_); return data_widget_; }
     const ViewDataWidget* getViewDataWidget() const { assert(data_widget_); return data_widget_; }
     ViewConfigWidget* getViewConfigWidget() { assert(config_widget_); return config_widget_; }
@@ -125,11 +123,10 @@ public:
 
     std::string loadedMessage() const;
 
-    bool reloadNeeded() const;
-    bool redrawNeeded() const;
-
     void init();
     bool isInit() const { return init_; }
+
+    bool isVariableSetLoaded() const;
 
     View* getView() { return view_; }
 
@@ -151,16 +148,8 @@ protected:
 
     /**
      * Reimplement to provide the ViewLoadStateWidget with view specific load information.
-    */
-    virtual std::string loadedMessage_impl() const { return ""; }
-
-    /**
-     * Reimplement to dynamically provide the ViewLoadStateWidget with reload and redraw information.
-     * Note that redraws and reloads can also manually be issued via notifyReloadNeeded() and notifyRedrawNeeded(),
-     * so this is rather optional.
      */
-    virtual bool reloadNeeded_impl() const { return false; };
-    virtual bool redrawNeeded_impl() const { return false; };
+    virtual std::string loadedMessage_impl() const { return ""; }
 
     /**
      * Reimplement for specific initialization behavior.
@@ -180,8 +169,6 @@ private:
     void createStandardLayout();
     void connectWidgets();
 
-    bool isVariableSetLoaded() const;
-
     /// The view the widget is part of
     View* view_ = nullptr;
 
@@ -197,14 +184,12 @@ private:
     ViewDataWidget*      data_widget_   = nullptr;
     ViewConfigWidget*    config_widget_ = nullptr;
     ViewLoadStateWidget* state_widget_  = nullptr;
+    
     QWidget*             lower_widget_  = nullptr;
 
     std::unique_ptr<ViewToolSwitcher> tool_switcher_;
 
     bool init_ = false;
-
-    bool redraw_needed_ = false;
-    bool reload_needed_ = false;
 };
 
 #endif  // VIEWWIDGET_H

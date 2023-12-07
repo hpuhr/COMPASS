@@ -129,7 +129,7 @@ void ListBoxView::generateSubConfigurable(const std::string& class_id,
         connect(data_source_, &ListBoxViewDataSource::currentSetChangedSignal, [ this ] { this->settings_.current_set_name = data_source_->currentSetName(); });
 
         //notify view that it needs to reload
-        connect(data_source_, &ListBoxViewDataSource::reloadNeeded, [ this ] { widget_->notifyReloadNeeded(); });
+        connect(data_source_, &ListBoxViewDataSource::reloadNeeded, [ this ] { notifyViewUpdateNeeded(VU_Reload); });
     }
     else if (class_id == SubConfigViewWidget)
     {
@@ -246,7 +246,7 @@ void ListBoxView::showViewPointSlot (const ViewableDataConfig* vp)
     assert (widget_);
 }
 
-View::ViewUpdate ListBoxView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params)
+void ListBoxView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params)
 {
     for (const auto& param : changed_params)
     {
@@ -264,7 +264,4 @@ View::ViewUpdate ListBoxView::onConfigurationChanged_impl(const std::vector<std:
             getDataSource()->currentSetName(settings_.current_set_name, true);
         }
     }
-
-    //return empty view update (not needed explicitely for listboxview)
-    return {};
 }

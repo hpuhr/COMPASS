@@ -382,6 +382,16 @@ void MainWindow::createMenus ()
     sectors_action_->setDisabled(true);
     config_menu_->addAction(sectors_action_);
 
+    config_menu_->addSeparator();
+
+    ViewManager& view_manager = COMPASS::instance().viewManager();
+
+    auto auto_refresh_views_action = new QAction("Refresh Views Automatically");
+    auto_refresh_views_action->setCheckable(true);
+    auto_refresh_views_action->setChecked(view_manager.automaticReloadEnabled());
+    connect(auto_refresh_views_action, &QAction::toggled, &view_manager, &ViewManager::enableAutomaticReload);
+    config_menu_->addAction(auto_refresh_views_action);
+
     // process menu
     process_menu_ = menuBar()->addMenu("&Process");
     process_menu_->setToolTipsVisible(true);

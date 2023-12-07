@@ -80,7 +80,7 @@ protected:
 
     virtual bool init_impl() override;
 
-    virtual ViewUpdate onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
+    virtual void onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
 
     ListBoxViewDataWidget* getDataWidget();
 

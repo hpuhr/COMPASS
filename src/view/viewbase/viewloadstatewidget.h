@@ -62,6 +62,8 @@ public:
 
     virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
 
+    static const int DefaultMargin = 4;
+
 private:
     static std::string messageFromState(State state);
     static QColor colorFromState(State state);
@@ -69,10 +71,10 @@ private:
 
     void updateData();
 
-    State        state_          = State::None;
+    State        state_              = State::None;
 
-    QLabel*      status_label_   = nullptr;
-    QPushButton* refresh_button_ = nullptr;
+    QLabel*      status_label_       = nullptr;
+    QPushButton* refresh_button_     = nullptr;
 
-    ViewWidget*  view_widget_    = nullptr;
+    ViewWidget*  view_widget_        = nullptr;
 };

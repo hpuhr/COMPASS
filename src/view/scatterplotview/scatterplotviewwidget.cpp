@@ -126,11 +126,3 @@ std::string ScatterPlotViewWidget::loadedMessage_impl() const
 {
     return "Loaded with " + std::to_string(getViewDataWidget()->nullValueCount()) + " NULL values";
 }
-
-/**
-*/
-bool ScatterPlotViewWidget::reloadNeeded_impl() const
-{
-    return (getViewDataWidget()->xVarNotInBuffer() || 
-            getViewDataWidget()->yVarNotInBuffer());
-}

@@ -57,7 +57,6 @@ public:
     ScatterPlotView* getView();
 
 protected:
-    virtual bool reloadNeeded_impl() const override;
     virtual std::string loadedMessage_impl() const override;
 };
 

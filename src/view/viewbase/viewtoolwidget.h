@@ -129,6 +129,4 @@ private:
     std::map<int, Action> actions_;
     std::set<QAction*>    spacers_;
     std::vector<Callback> update_callbacks_;
-
-    
 };

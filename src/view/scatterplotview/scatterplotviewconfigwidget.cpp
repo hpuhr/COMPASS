@@ -114,9 +114,9 @@ void ScatterPlotViewConfigWidget::selectedVariableXChangedSlot()
     loginf << "ScatterPlotViewConfigWidget: selectedVariableChangedSlot";
 
     if (select_var_x_->hasVariable())
-        view_->dataVarX(select_var_x_->selectedVariable());
+        view_->dataVarX(select_var_x_->selectedVariable(), true);
     else if (select_var_x_->hasMetaVariable())
-        view_->metaDataVarX(select_var_x_->selectedMetaVariable());
+        view_->metaDataVarX(select_var_x_->selectedMetaVariable(), true);
 
 }
 
@@ -125,9 +125,9 @@ void ScatterPlotViewConfigWidget::selectedVariableYChangedSlot()
     loginf << "ScatterPlotViewConfigWidget: selectedVariableChangedSlot";
 
     if (select_var_y_->hasVariable())
-        view_->dataVarY(select_var_y_->selectedVariable());
+        view_->dataVarY(select_var_y_->selectedVariable(), true);
     else if (select_var_y_->hasMetaVariable())
-        view_->metaDataVarY(select_var_y_->selectedMetaVariable());
+        view_->metaDataVarY(select_var_y_->selectedMetaVariable(), true);
 }
 
 void ScatterPlotViewConfigWidget::useConnectionLinesSlot()

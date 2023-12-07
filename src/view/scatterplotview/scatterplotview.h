@@ -77,10 +77,10 @@ public:
     bool hasDataVarX ();
     bool isDataVarXMeta ();
     dbContent::Variable& dataVarX();
-    void dataVarX (dbContent::Variable& var);
+    void dataVarX (dbContent::Variable& var, bool notify_changes);
 
     dbContent::MetaVariable& metaDataVarX();
-    void metaDataVarX (dbContent::MetaVariable& var);
+    void metaDataVarX (dbContent::MetaVariable& var, bool notify_changes);
 
     std::string dataVarXDBO() const;
     std::string dataVarXName() const;
@@ -88,10 +88,10 @@ public:
     bool hasDataVarY ();
     bool isDataVarYMeta ();
     dbContent::Variable& dataVarY();
-    void dataVarY (dbContent::Variable& var);
+    void dataVarY (dbContent::Variable& var, bool notify_changes);
 
     dbContent::MetaVariable& metaDataVarY();
-    void metaDataVarY (dbContent::MetaVariable& var);
+    void metaDataVarY (dbContent::MetaVariable& var, bool notify_changes);
 
     std::string dataVarYDBO() const;
     std::string dataVarYName() const;
@@ -112,7 +112,7 @@ protected:
 
     virtual bool init_impl() override;
 
-    virtual ViewUpdate onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
+    virtual bool refreshScreenOnNeededReload() const override { return true; }
 
     ScatterPlotViewDataWidget* getDataWidget();
 

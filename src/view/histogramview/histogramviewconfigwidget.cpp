@@ -199,9 +199,9 @@ void HistogramViewConfigWidget::selectedVariableChangedSlot()
     loginf << "HistogramViewConfigWidget: selectedVariableChangedSlot";
 
     if (select_var_->hasVariable())
-        view_->dataVar(select_var_->selectedVariable());
+        view_->dataVar(select_var_->selectedVariable(), true);
     else if (select_var_->hasMetaVariable())
-        view_->metaDataVar(select_var_->selectedMetaVariable());
+        view_->metaDataVar(select_var_->selectedMetaVariable(), true);
 }
 
 /**

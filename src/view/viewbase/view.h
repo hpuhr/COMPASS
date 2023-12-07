@@ -29,6 +29,7 @@
 #include <map>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/optional/optional.hpp>
 
 class ViewContainer;
 class ViewWidget;
@@ -55,6 +56,14 @@ class View : public QObject, public Configurable
 {
     Q_OBJECT
 public:
+    enum ViewUpdateFlags
+    {
+        VU_UpdateComponents = 1 << 0, // update view components (load state, toolbar activity, etc)
+        VU_Redraw           = 1 << 1, // redraw view
+        VU_Recompute        = 1 << 2, // recompute intermediate view data from buffers
+        VU_Reload           = 1 << 3  // reload view (will overrule all other updates)
+    };
+
     View(const std::string& class_id, 
          const std::string& instance_id, 
          ViewContainer* container,
@@ -96,8 +105,22 @@ public:
     QImage renderData() const;
     QImage renderView() const;
 
+    bool reloadNeeded() const;
+    bool redrawNeeded() const;
+    bool updateNeeded() const;
+    bool configChanged() const;
+
+    void updateView();
+    void syncConfig();
+
+    //shortcut update flags
+    static const int VU_PureRedraw       = VU_Redraw;                                      // just redraw
+    static const int VU_RecomputedRedraw = VU_Redraw | VU_Recompute;                       // recompute + redraw
+    static const int VU_Complete         = VU_Redraw | VU_Recompute | VU_UpdateComponents; // complete view update (no reload though)
+
 signals:
     void selectionChangedSignal();  // do not emit manually, call emitSelectionChange()
+    void configChangedSignal();
 
 public slots:
     void selectionChangedSlot();
@@ -105,52 +128,51 @@ public slots:
     virtual void showViewPointSlot (const ViewableDataConfig* vp)=0;
 
 protected:
-    struct ViewUpdate
-    {
-        ViewUpdate() {}
-        ViewUpdate(bool _redraw,
-                   bool _recompute,
-                   bool _update_components) 
-        :   redraw           (_redraw           )
-        ,   recompute        (_redraw           )
-        ,   update_components(_update_components) {}
-                                           
-        bool redraw            = false;
-        bool recompute         = false;
-        bool update_components = false;
-    };
-
-    void issueViewUpdate(const ViewUpdate& vu);
-
     virtual void updateSelection() = 0;
     virtual bool init_impl() { return true; }
 
+    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override final;
+    virtual void onConfigurationChanged_impl(const std::vector<std::string>& changed_params) {};
+
+    virtual void viewManagerReloadStateChanged();
+    virtual void viewManagerAutoUpdatesChanged();
+
+    virtual bool refreshScreenOnNeededReload() const { return false; }
+
     void constructWidget();
-    //void setModel(ViewModel* model);
     void setWidget(ViewWidget* widget);
 
-    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override final;
-    virtual ViewUpdate onConfigurationChanged_impl(const std::vector<std::string>& changed_params) = 0;
+    //can be used by derived views to signal certain changes in the view
+    void notifyViewUpdateNeeded(int flags, bool add = true);
+    void notifyRedrawNeeded(bool add = true);
+    void notifyReloadNeeded(bool add = true);
+    void notifyRefreshNeeded();
+    void notifyConfigChanges();
+
+    void updateView(int flags);
 
     /// @brief Returns the view's widget, override this method in derived classes.
     ViewWidget* getWidget() { assert (widget_); return widget_; }
 
     ViewManager& view_manager_;
 
-    /// The view's model
-    //ViewModel* model_;
     /// The view's widget
     ViewWidget* widget_ {nullptr};
     /// The ViewContainerWidget the view is currently embedded in
     ViewContainer* container_ {nullptr};
     /// The widget containing the view's widget
-    QWidget* central_widget_;
+    QWidget* central_widget_ {nullptr};
 
 private:
     unsigned int getInstanceKey();
 
+    void runAutomaticUpdates();
+
     AppMode app_mode_;
     time_t  creation_time_;
+
+    boost::optional<int> issued_update_;
+    bool config_changed_ = false;
 
     /// Static member counter
     static unsigned int cnt_;

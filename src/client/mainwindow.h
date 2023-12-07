@@ -112,6 +112,14 @@ public:
     void updateBottomWidget();
 
 protected:
+    void createMenus ();
+    void createDebugMenu();
+
+    /// @brief Called when application closes
+    void closeEvent(QCloseEvent* event);
+
+    void shutdown();
+
     QTabWidget* tab_widget_{nullptr};
 
     QPushButton* add_view_button_{nullptr};
@@ -157,14 +165,6 @@ protected:
 
     std::unique_ptr<AutoResumeDialog> auto_resume_dialog_;
     QTimer* auto_resume_timer_ {nullptr};
-
-    void createMenus ();
-    void createDebugMenu();
-
-    /// @brief Called when application closes
-    void closeEvent(QCloseEvent* event);
-
-    void shutdown();
 
 private:
     void showCommandShell();

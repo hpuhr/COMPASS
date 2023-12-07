@@ -213,7 +213,8 @@ void ViewDataWidget::liveReload()
 }
 
 /**
-*/
+ * Checks if the required read set of the view is available in the loaded data.
+ */
 bool ViewDataWidget::isVariableSetLoaded() const
 {
     const auto& view_data = viewData();
@@ -234,7 +235,8 @@ bool ViewDataWidget::isVariableSetLoaded() const
 }
 
 /**
-*/
+ * Renders the data widget's contents.
+ */
 QImage ViewDataWidget::renderData()
 {
     //per default just render the data widget's content

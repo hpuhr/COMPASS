@@ -2,13 +2,18 @@
 #include "viewloadstatewidget.h"
 #include "viewwidget.h"
 #include "viewdatawidget.h"
+#include "view.h"
 #include "compass.h"
+#include "viewmanager.h"
 #include "dbcontentmanager.h"
 #include "ui_test_common.h"
 
 #include <QPushButton>
+#include <QToolButton>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QCheckBox>
 
 /**
 */
@@ -18,29 +23,39 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
 {
     assert (view_widget_);
 
-    QHBoxLayout* layout = new QHBoxLayout;
-    layout->setMargin(0);
+    QVBoxLayout* layout = new QVBoxLayout;
+    layout->setMargin(DefaultMargin);
     setLayout(layout);
 
+    QHBoxLayout* layout_h = new QHBoxLayout;
+    layout_h->setMargin(0);
+
+    QHBoxLayout* layout_buttons = new QHBoxLayout;
+    layout_buttons->setMargin(0);
+    layout_buttons->setSpacing(0);
+
+    layout->addLayout(layout_h);
+    layout_h->addLayout(layout_buttons);
+    
     QFont font_status;
     font_status.setItalic(true);
 
-    status_label_ = new QLabel("");
-    status_label_->setFont(font_status);
-
     refresh_button_ = new QPushButton;
     refresh_button_->setToolTip("Refresh view");
-    //refresh_button_->setFlat(true);
     refresh_button_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     refresh_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
 
     UI_TEST_OBJ_NAME(refresh_button_, refresh_button_->text())
-    connect(refresh_button_, &QPushButton::pressed, this, [=] () { this->updateData(); });
+    
+    layout_buttons->addWidget(refresh_button_);
 
-    layout->addWidget(refresh_button_);
-    layout->addWidget(status_label_);
+    status_label_ = new QLabel("");
+    status_label_->setFont(font_status);
+    layout_h->addWidget(status_label_);
 
     setState(State::NoData);
+
+    connect(refresh_button_, &QPushButton::pressed, this, [=] () { this->updateData(); });
 }
 
 /**
@@ -48,10 +63,10 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
 */
 void ViewLoadStateWidget::updateData()
 {
-    if (view_widget_->getViewDataWidget()->hasData() && state_ == State::RedrawRequired)
-        view_widget_->getViewDataWidget()->redrawData(true, true);
+    if (view_widget_->getViewDataWidget()->hasData() && (state_ == State::RedrawRequired || state_ == State::ReloadRequired))
+        view_widget_->getView()->updateView(); //run view update
     else
-        COMPASS::instance().dbContentManager().load();
+        COMPASS::instance().dbContentManager().load(); //fallback: just reload
 }
 
 /**
@@ -70,7 +85,7 @@ void ViewLoadStateWidget::setState(State state)
     {
         auto load_message = view_widget_->loadedMessage();
         if (!load_message.empty())
-            msg =  load_message;
+            msg += " - " + load_message;
     }
 
     status_label_->setText(QString::fromStdString(msg));
@@ -79,7 +94,16 @@ void ViewLoadStateWidget::setState(State state)
     palette.setColor(status_label_->foregroundRole(), color);
     status_label_->setPalette(palette);
 
+    //update refresh button activity
+#if 1
+    //activate button if not loading
     bool button_enabled = (state != State::Loading);
+#else
+    //activate button only if there is something to update
+    bool button_enabled = (state == State::NoData ||
+                           state == State::RedrawRequired ||
+                           state == State::ReloadRequired);
+#endif
 
     //refresh_button_->setToolTip(QString::fromStdString(buttonTextFromState(state_)));
     refresh_button_->setEnabled(button_enabled);
@@ -100,9 +124,13 @@ void ViewLoadStateWidget::updateState()
         return;
 
     //ask widget for special states
-    bool needs_reload = view_widget_->reloadNeeded();
-    bool needs_redraw = view_widget_->redrawNeeded();
+    bool needs_reload =  COMPASS::instance().viewManager().reloadNeeded();
+    bool needs_redraw =  view_widget_->getView()->updateNeeded();
     bool needs_data   = !view_widget_->getViewDataWidget()->hasData();
+
+    //std::cout << "needs reload: " << needs_reload << std::endl;
+    //std::cout << "needs redraw: " << needs_redraw << std::endl;
+    //std::cout << "needs data:   " << needs_data   << std::endl;
 
     if (needs_data)
         setState(State::NoData);
@@ -184,16 +212,16 @@ std::string ViewLoadStateWidget::messageFromState(State state)
         case State::NoData:
             return "No Data Loaded";
         case State::Loading:
-            return "Loading...";
+            return "Refreshing...";
         case State::Drawing:
-            return "Redrawing...";
+            return "Refreshing...";
         case State::None:
         case State::Loaded:
             return "Up-to-date";
         case State::ReloadRequired:
-            return "Reload Required";
+            return "Refresh Required";
         case State::RedrawRequired:
-            return "Redraw Required";
+            return "Refresh Required";
     }
     return "";
 }
