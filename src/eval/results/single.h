@@ -24,6 +24,8 @@
 
 #include <boost/optional.hpp>
 
+const double OSGVIEW_POS_WINDOW_SCALE {1.5};
+
 namespace EvaluationRequirementResult
 {
 
