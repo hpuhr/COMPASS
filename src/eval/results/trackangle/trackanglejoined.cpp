@@ -260,8 +260,8 @@ std::unique_ptr<nlohmann::json::object_t> JoinedTrackAngle::getErrorsViewable ()
     (*viewable_ptr)[VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
     (*viewable_ptr)[VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
 
-    double lat_w = OSGVIEW_POS_WINDOW_SCALE*(lat_max-lat_min)/2.0;
-    double lon_w = OSGVIEW_POS_WINDOW_SCALE*(lon_max-lon_min)/2.0;
+    double lat_w = lat_max-lat_min;
+    double lon_w = lon_max-lon_min;
 
     if (lat_w < eval_man_.settings().result_detail_zoom_)
         lat_w = eval_man_.settings().result_detail_zoom_;
@@ -269,8 +269,8 @@ std::unique_ptr<nlohmann::json::object_t> JoinedTrackAngle::getErrorsViewable ()
     if (lon_w < eval_man_.settings().result_detail_zoom_)
         lon_w = eval_man_.settings().result_detail_zoom_;
 
-    (*viewable_ptr)["trackangle_window_latitude"] = lat_w;
-    (*viewable_ptr)["trackangle_window_longitude"] = lon_w;
+    (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
+    (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
 
     addAnnotationsFromSingles(*viewable_ptr);
 

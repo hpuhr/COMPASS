@@ -157,64 +157,6 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousBase::getTargetErrorsView
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = 
         eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
 
-    //        bool has_pos = false;
-    //        double lat_min, lat_max, lon_min, lon_max;
-
-    //        bool failed_values_of_interest = req()->failedValuesOfInterest();
-
-    //        for (auto& detail_it : details_)
-    //        {
-    //            if ((failed_values_of_interest && detail_it.check_passed_)
-    //                    || (!failed_values_of_interest && !detail_it.check_passed_))
-    //                continue;
-
-    //            if (has_pos)
-    //            {
-    //                lat_min = min(lat_min, detail_it.tst_pos_.latitude_);
-    //                lat_max = max(lat_max, detail_it.tst_pos_.latitude_);
-
-    //                lon_min = min(lon_min, detail_it.tst_pos_.longitude_);
-    //                lon_max = max(lon_max, detail_it.tst_pos_.longitude_);
-    //            }
-    //            else // tst pos always set
-    //            {
-    //                lat_min = detail_it.tst_pos_.latitude_;
-    //                lat_max = detail_it.tst_pos_.latitude_;
-
-    //                lon_min = detail_it.tst_pos_.longitude_;
-    //                lon_max = detail_it.tst_pos_.longitude_;
-
-    //                has_pos = true;
-    //            }
-
-    //            if (detail_it.has_ref_pos_)
-    //            {
-    //                lat_min = min(lat_min, detail_it.ref_pos_.latitude_);
-    //                lat_max = max(lat_max, detail_it.ref_pos_.latitude_);
-
-    //                lon_min = min(lon_min, detail_it.ref_pos_.longitude_);
-    //                lon_max = max(lon_max, detail_it.ref_pos_.longitude_);
-    //            }
-    //        }
-
-    //        if (has_pos)
-    //        {
-    //            (*viewable_ptr)["speed_latitude"] = (lat_max+lat_min)/2.0;
-    //            (*viewable_ptr)["speed_longitude"] = (lon_max+lon_min)/2.0;;
-
-    //            double lat_w = OSGVIEW_POS_WINDOW_SCALE*(lat_max-lat_min)/2.0;
-    //            double lon_w = OSGVIEW_POS_WINDOW_SCALE*(lon_max-lon_min)/2.0;
-
-    //            if (lat_w < eval_man_.settings().result_detail_zoom_)
-    //                lat_w = eval_man_.settings().result_detail_zoom_;
-
-    //            if (lon_w < eval_man_.settings().result_detail_zoom_)
-    //                lon_w = eval_man_.settings().result_detail_zoom_;
-
-    //            (*viewable_ptr)["speed_window_latitude"] = lat_w;
-    //            (*viewable_ptr)["speed_window_longitude"] = lon_w;
-    //        }
-
     addAnnotations(*viewable_ptr, false, true);
 
     return viewable_ptr;
