@@ -149,6 +149,8 @@ void ViewPresetEditDialog::createUI()
     button_layout->addWidget(cancel_button );
     button_layout->addStretch(1);
     button_layout->addWidget(ok_button);
+
+    ok_button->setDefault(true);
     
     connect(ok_button    , &QPushButton::pressed, this, &ViewPresetEditDialog::apply );
     connect(cancel_button, &QPushButton::pressed, this, &ViewPresetEditDialog::reject);
