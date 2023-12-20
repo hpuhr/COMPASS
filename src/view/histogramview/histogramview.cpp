@@ -211,6 +211,7 @@ void HistogramView::useLogScale(bool use_log_scale)
     assert (data_widget);
 
     updateView(VU_Redraw);
+    notifyConfigChanges();
 }
 
 /**
@@ -313,30 +314,6 @@ std::string HistogramView::dataVarName() const
 {
     return settings_.data_var_name;
 }
-
-/**
- */
-// int HistogramView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params)
-// {
-//     int flags = 0;
-
-//     for (const auto& param : changed_params)
-//     {
-//         if (param == ParamDataVarDBO ||
-//             param == ParamDataVarName)
-//         {
-//             assert (hasDataVar());
-
-//             flags |= VU_Complete;
-//         }
-//         else if(param == ParamUseLogScale)
-//         {
-//             flags |= VU_Redraw;
-//         }
-//     }
-
-//     return flags;
-// }
 
 /**
  */

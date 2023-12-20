@@ -442,29 +442,6 @@ void ScatterPlotView::useConnectionLines(bool value)
 
 /**
 */
-// int ScatterPlotView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params) 
-// { 
-//     int flags = 0;
-
-//     for (const auto& param : changed_params)
-//     {
-//         if (param == ParamDataVarXDBO  ||
-//             param == ParamDataVarXName ||
-//             param == ParamDataVarYDBO  ||
-//             param == ParamDataVarYName)
-//         {
-//             assert (hasDataVarX());
-//             assert (hasDataVarY());
-
-//             flags |= VU_Complete;
-//         }
-//     }
-
-//     return flags;
-// }
-
-/**
-*/
 void ScatterPlotView::updateSelection()
 {
     loginf << "ScatterPlotView: updateSelection";
