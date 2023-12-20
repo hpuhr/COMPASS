@@ -428,10 +428,12 @@ void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
 
 /**
 */
-void Configurable::reconfigure(const nlohmann::json& config)
+void Configurable::reconfigure(const nlohmann::json& config,
+                               ReconfigureSubConfigMode sub_config_mode, 
+                               std::vector<SubConfigKey>* missing_keys)
 {
     assert(configuration_);
-    configuration_->reconfigure(config);
+    configuration_->reconfigure(config, sub_config_mode, missing_keys);
 }
 
 /**

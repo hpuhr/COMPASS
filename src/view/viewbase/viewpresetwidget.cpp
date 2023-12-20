@@ -648,20 +648,6 @@ void ViewPresetItemWidget::saveButtonPressed()
         QMessageBox::critical(this, "Error", "Preset could not be written.");
     }
 }
-    
-/**
-*/
-void ViewPresetItemWidget::applyPreset()
-{
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    //reconfigure view using the preset's view config
-    view_->reconfigure(preset_->view_config);
-
-    QApplication::restoreOverrideCursor();
-
-    emit presetApplied(key_);
-}
 
 /**
 */
@@ -673,7 +659,7 @@ void ViewPresetItemWidget::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton)
     {
         //item clicked => apply preset
-        applyPreset();
+        emit presetApplied(key_);
     }
 }
 
@@ -1004,12 +990,12 @@ void ViewPresetWidget::createUI()
     show_button_->setCursor(Qt::PointingHandCursor);
     layout->addWidget(show_button_);
 
-    QMenu* menu = new QMenu;
+    button_menu_ = new QMenu;
     auto action = new QWidgetAction(this);
     action->setDefaultWidget(preset_list_);
-    menu->addAction(action);
+    button_menu_->addAction(action);
 
-    show_button_->setMenu(menu);
+    show_button_->setMenu(button_menu_);
 
     connect(preset_list_, &ViewPresetItemListWidget::presetApplied, this, &ViewPresetWidget::presetApplied);
 }
@@ -1051,6 +1037,55 @@ void ViewPresetWidget::modified()
 */
 void ViewPresetWidget::presetApplied(ViewPresets::Key key)
 {
+    //hide the menu in case something unexpected happens (like an assert)
+    button_menu_->hide();
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    //apply preset
+    bool ok = true;
+    QString error;
+    std::vector<Configurable::SubConfigKey> missing_keys;
+
+    try
+    {
+        const auto& presets = COMPASS::instance().viewManager().viewPresets();
+        const auto& preset = presets.presets().at(key);
+
+        //reconfigure view using the preset's view config
+        view_->reconfigure(preset.view_config, Configurable::ReconfigureSubConfigMode::WarnIfMissing, &missing_keys);
+    }
+    catch(const std::exception& ex)
+    {
+        ok    = false;
+        error = ex.what();
+    }
+    catch(...)
+    {
+        ok    = false;
+        error = "Unknown error";
+    }
+
+    QApplication::restoreOverrideCursor();
+
+    //any errors?
+    if (!ok)
+    {
+        QMessageBox::critical(this, "Error", "View preset could not be applied: " + error);
+        return;
+    }
+
+    //any missing config keys found?
+    if (!missing_keys.empty())
+    {
+        QString msg = "The following view preset configuration key(s) could not be applied to the view.\n";
+        for (const auto& key : missing_keys)
+            msg += "   " + QString::fromStdString(key.first) + "." + QString::fromStdString(key.second) + "\n";
+
+        QMessageBox::warning(this, "Warning", msg);
+    }
+
+    //set new active preset and revert modifications
     active_preset_     = key;
     has_modifications_ = false;
 

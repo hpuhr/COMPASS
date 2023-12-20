@@ -56,7 +56,9 @@
 class Configurable
 {
 public:
-    typedef Configuration::JSONExportType JSONExportType;
+    typedef Configuration::JSONExportType           JSONExportType;
+    typedef Configuration::ReconfigureSubConfigMode ReconfigureSubConfigMode;
+    typedef Configuration::SubConfigKey             SubConfigKey;
 
     /// @brief Constructor
     Configurable(const std::string& class_id, 
@@ -110,7 +112,9 @@ public:
     void writeJSON(nlohmann::json& parent_json, JSONExportType export_type = JSONExportType::General) const;
     void generateJSON(nlohmann::json& target, JSONExportType export_type = JSONExportType::General) const;
 
-    void reconfigure(const nlohmann::json& config);
+    void reconfigure(const nlohmann::json& config, 
+                     ReconfigureSubConfigMode sub_config_mode, 
+                     std::vector<SubConfigKey>* missing_keys = nullptr);
 
     static const char ConfigurablePathSeparator;
 

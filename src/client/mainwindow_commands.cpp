@@ -1648,10 +1648,12 @@ bool RTCommandReconfigure::run_impl()
     }
 
     //reconfigure using json config
+    std::vector<Configurable::SubConfigKey> missing_keys;
+
     try
     {
         auto config = nlohmann::json::parse(json_config);
-        find_result.second->reconfigure(config);
+        find_result.second->reconfigure(config, Configurable::ReconfigureSubConfigMode::WarnIfMissing, &missing_keys);
     }
     catch(const std::exception& e)
     {
@@ -1663,6 +1665,23 @@ bool RTCommandReconfigure::run_impl()
         setResultMessage("Reconfigure failed: Unknown error");
         return false;
     }
+
+    nlohmann::json json_reply;
+
+    auto missing_keys_vec = nlohmann::json::array();
+    
+    for (const auto& key : missing_keys)
+    {
+        nlohmann::json entry;
+        entry[ "class_id"    ] = key.first;
+        entry[ "instance_id" ] = key.second;
+
+        missing_keys_vec.push_back(entry);
+    }
+
+    json_reply[ "missing_keys" ] = missing_keys_vec;
+
+    setJSONReply(json_reply);
 
     return true;
 }

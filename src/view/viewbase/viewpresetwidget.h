@@ -34,7 +34,7 @@ class QVBoxLayout;
 class QLineEdit;
 class QTextEdit;
 class QFrame;
-
+class QMenu;
 class QDialog;
 
 /**
@@ -106,7 +106,6 @@ signals:
     void removePreset(ViewPresets::Key key);
     void editPreset(ViewPresets::Key key);
     void copyPreset(ViewPresets::Key key);
-
     void presetApplied(ViewPresets::Key key);
 
 protected:
@@ -121,8 +120,6 @@ private:
     void editButtonPressed();
     void copyButtonPressed();
     void saveButtonPressed();
-
-    void applyPreset();
     
     ViewPresets::Key           key_;
     const ViewPresets::Preset* preset_ = nullptr;
@@ -207,6 +204,7 @@ private:
 
     ViewPresetItemListWidget* preset_list_ = nullptr;
     QToolButton*              show_button_ = nullptr;
+    QMenu*                    button_menu_ = nullptr;
 
     ViewPresets::Key active_preset_;
     bool             has_modifications_ = false;

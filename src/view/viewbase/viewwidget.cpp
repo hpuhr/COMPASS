@@ -208,7 +208,7 @@ void ViewWidget::init()
 {
     //init should only be called once
     if (isInit())
-        throw std::runtime_error("ViewWidget::init(): Called twice");
+        throw std::runtime_error("ViewWidget: init: Called twice");
 
     //check if all relevant widgets have been constructed
     assert(data_widget_);
@@ -236,11 +236,11 @@ void ViewWidget::init()
 void ViewWidget::setDataWidget(ViewDataWidget* w)
 {
     if (!w)
-        throw std::runtime_error("ViewWidget::setDataWidget: Null pointer passed");
+        throw std::runtime_error("ViewWidget: setDataWidget: Null pointer passed");
     if (!data_widget_container_)
-        throw std::runtime_error("ViewWidget::setDataWidget: No container to add to");
+        throw std::runtime_error("ViewWidget: setDataWidget: No container to add to");
     if (data_widget_)
-        throw std::runtime_error("ViewWidget::setDataWidget: Already set");
+        throw std::runtime_error("ViewWidget: setDataWidget: Already set");
     
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);

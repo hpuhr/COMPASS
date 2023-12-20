@@ -202,7 +202,7 @@ void ConfigurationManager::saveJSONConfiguration()
     {
         loginf << "ConfigurationManager: saveJSONConfiguration: for configurable "
                << it.first.second;
-        it.second.writeJSON(main_config);
+        it.second.writeJSON(main_config, Configuration::JSONExportType::General);
         // root_element->LinkEndChild(it.second.configuration().generateXMLElement(document));
     }
 

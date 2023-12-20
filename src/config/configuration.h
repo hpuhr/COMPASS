@@ -51,6 +51,13 @@ public:
         Preset
     };
 
+    enum class ReconfigureSubConfigMode
+    {
+        MustExist = 0,
+        WarnIfMissing,
+        CreateIfMissing
+    };
+
     typedef std::pair<std::string, std::string> SubConfigKey;
     typedef std::unique_ptr<Configuration>      Ptr;
     typedef std::vector<std::string>            ParameterList;
@@ -156,7 +163,9 @@ public:
     std::string newInstanceID(const std::string& class_id) const;
 
     boost::signals2::connection connectListener(const std::function<void(const ParameterList&)>& cb);
-    std::vector<std::string> reconfigure(const nlohmann::json& config);
+    std::vector<std::string> reconfigure(const nlohmann::json& config, 
+                                         ReconfigureSubConfigMode sub_config_mode,
+                                         std::vector<SubConfigKey>* missing_keys = nullptr);
 
     void addJSONExportFilter(JSONExportType export_type, 
                              const std::string& class_id);
