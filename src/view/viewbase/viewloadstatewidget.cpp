@@ -95,18 +95,29 @@ void ViewLoadStateWidget::setState(State state)
     status_label_->setPalette(palette);
 
     //update refresh button activity
-#if 1
-    //activate button if not loading
-    bool button_enabled = (state != State::Loading);
-#else
-    //activate button only if there is something to update
-    bool button_enabled = (state == State::NoData ||
-                           state == State::RedrawRequired ||
-                           state == State::ReloadRequired);
-#endif
+    if (inactive_mode_ == InactivityMode::Show)
+    {
+        //only deactivate during loading
+        refresh_button_->setEnabled(state != State::Loading);
+    }
+    else if (inactive_mode_ == InactivityMode::Disable)
+    {
+        //only set enabled if something is needed
+        refresh_button_->setEnabled(state == State::NoData         ||
+                                    state == State::RedrawRequired ||
+                                    state == State::ReloadRequired);
+    }
+    else // InactivityMode::Hide
+    {
+        //only set enabled if something is needed
+        refresh_button_->setEnabled(state == State::NoData         ||
+                                    state == State::RedrawRequired ||
+                                    state == State::ReloadRequired);
 
-    //refresh_button_->setToolTip(QString::fromStdString(buttonTextFromState(state_)));
-    refresh_button_->setEnabled(button_enabled);
+        //do not show if properly loaded
+        refresh_button_->setVisible(state != State::Loaded);
+        status_label_->setVisible(state != State::Loaded);
+    }
 }
 
 /**

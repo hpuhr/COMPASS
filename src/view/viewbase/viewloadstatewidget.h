@@ -47,6 +47,13 @@ public:
         RedrawRequired
     };
 
+    enum class InactivityMode
+    {
+        Show = 0,
+        Hide,
+        Disable
+    };
+
     ViewLoadStateWidget(ViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ViewLoadStateWidget() = default;
 
@@ -71,10 +78,11 @@ private:
 
     void updateData();
 
-    State        state_              = State::None;
+    State           state_         = State::None;
+    InactivityMode  inactive_mode_ = InactivityMode::Hide;
 
-    QLabel*      status_label_       = nullptr;
-    QPushButton* refresh_button_     = nullptr;
+    QLabel*        status_label_   = nullptr;
+    QPushButton*   refresh_button_ = nullptr;
 
-    ViewWidget*  view_widget_        = nullptr;
+    ViewWidget*    view_widget_    = nullptr;
 };
