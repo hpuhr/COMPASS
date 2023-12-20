@@ -239,7 +239,7 @@ void HistogramViewConfigWidget::toggleLogScale()
     assert(log_check_);
     bool checked = log_check_->checkState() == Qt::Checked;
     logdbg << "HistogramViewConfigWidget: toggleLogScale: setting overwrite to " << checked;
-    view_->useLogScale(checked);
+    view_->useLogScale(checked, true);
 }
 
 /**

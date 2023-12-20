@@ -65,7 +65,7 @@ public:
     virtual void accept(LatexVisitor& v) override;
 
     bool useLogScale() const;
-    void useLogScale(bool value);
+    void useLogScale(bool value, bool notify_changes);
 
     bool hasDataVar ();
     bool isDataVarMeta ();

@@ -203,15 +203,18 @@ bool HistogramView::useLogScale() const
 
 /**
  */
-void HistogramView::useLogScale(bool use_log_scale)
+void HistogramView::useLogScale(bool use_log_scale, bool notify_changes)
 {
     settings_.use_log_scale = use_log_scale;
 
     HistogramViewDataWidget* data_widget = dynamic_cast<HistogramViewDataWidget*>(getDataWidget());
     assert (data_widget);
 
-    updateView(VU_Redraw);
-    notifyConfigChanges();
+    if (notify_changes)
+    {
+        updateView(VU_Redraw);
+        notifyConfigChanges();
+    }
 }
 
 /**
