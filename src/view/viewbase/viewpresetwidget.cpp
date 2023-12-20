@@ -1092,4 +1092,6 @@ void ViewPresetWidget::presetApplied(ViewPresets::Key key)
     has_modifications_ = false;
 
     updateContents();
+
+    view_->syncConfig();
 }

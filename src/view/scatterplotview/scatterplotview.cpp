@@ -265,6 +265,10 @@ Variable& ScatterPlotView::dataVarX()
 */
 void ScatterPlotView::dataVarX (Variable& var, bool notify_changes)
 {
+    if (settings_.data_var_x_dbo == var.dbContentName() && 
+        settings_.data_var_x_name == var.name())
+        return;
+
     settings_.data_var_x_dbo  = var.dbContentName();
     settings_.data_var_x_name = var.name();
 
@@ -273,9 +277,8 @@ void ScatterPlotView::dataVarX (Variable& var, bool notify_changes)
 
     if (notify_changes)
     {
-        updateView(VU_Complete);
-        if (getDataWidget()->xVarNotInBuffer())
-            notifyReloadNeeded();
+        notifyRefreshNeeded();
+        notifyConfigChanges();
     }
 }
 
@@ -293,6 +296,10 @@ MetaVariable& ScatterPlotView::metaDataVarX()
 */
 void ScatterPlotView::metaDataVarX (MetaVariable& var, bool notify_changes)
 {
+    if (settings_.data_var_x_dbo == META_OBJECT_NAME && 
+        settings_.data_var_x_name == var.name())
+        return;
+
     settings_.data_var_x_dbo  = META_OBJECT_NAME;
     settings_.data_var_x_name = var.name();
 
@@ -301,9 +308,8 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var, bool notify_changes)
 
     if (notify_changes)
     {
-        updateView(VU_Complete);
-        if (getDataWidget()->xVarNotInBuffer())
-            notifyReloadNeeded();
+        notifyRefreshNeeded();
+        notifyConfigChanges();
     }
 }
 
@@ -356,6 +362,10 @@ Variable& ScatterPlotView::dataVarY()
 */
 void ScatterPlotView::dataVarY (Variable& var, bool notify_changes)
 {
+    if (settings_.data_var_y_dbo == var.dbContentName() && 
+        settings_.data_var_y_name == var.name())
+        return;
+
     settings_.data_var_y_dbo  = var.dbContentName();
     settings_.data_var_y_name = var.name();
 
@@ -364,9 +374,8 @@ void ScatterPlotView::dataVarY (Variable& var, bool notify_changes)
 
     if (notify_changes)
     {
-        updateView(VU_Complete);
-        if (getDataWidget()->yVarNotInBuffer())
-            notifyReloadNeeded();
+        notifyRefreshNeeded();
+        notifyConfigChanges();
     }
 }
 
@@ -384,6 +393,10 @@ MetaVariable& ScatterPlotView::metaDataVarY()
 */
 void ScatterPlotView::metaDataVarY (MetaVariable& var, bool notify_changes)
 {
+    if (settings_.data_var_y_dbo == META_OBJECT_NAME && 
+        settings_.data_var_y_name == var.name())
+        return;
+
     settings_.data_var_y_dbo  = META_OBJECT_NAME;
     settings_.data_var_y_name = var.name();
 
@@ -392,9 +405,8 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var, bool notify_changes)
 
     if (notify_changes)
     {
-        updateView(VU_Complete);
-        if (getDataWidget()->yVarNotInBuffer())
-            notifyReloadNeeded();
+        notifyRefreshNeeded();
+        notifyConfigChanges();
     }
 }
 

@@ -248,6 +248,10 @@ Variable& HistogramView::dataVar()
  */
 void HistogramView::dataVar (Variable& var, bool notify_changes)
 {
+    if (settings_.data_var_dbo == var.dbContentName() && 
+        settings_.data_var_name == var.name())
+        return;
+
     loginf << "HistogramView: dataVar: dbo " << var.dbContentName() << " name " << var.name();
 
     settings_.data_var_dbo  = var.dbContentName();
@@ -257,7 +261,10 @@ void HistogramView::dataVar (Variable& var, bool notify_changes)
     assert (!isDataVarMeta());
 
     if (notify_changes)
+    {
         notifyRefreshNeeded();
+        notifyConfigChanges();
+    }
 }
 
 /**
@@ -274,6 +281,10 @@ MetaVariable& HistogramView::metaDataVar()
  */
 void HistogramView::metaDataVar (MetaVariable& var, bool notify_changes)
 {
+    if (settings_.data_var_dbo == META_OBJECT_NAME && 
+        settings_.data_var_name == var.name())
+        return;
+    
     loginf << "HistogramView: metaDataVar: name " << var.name();
 
     settings_.data_var_dbo  = META_OBJECT_NAME;
@@ -283,7 +294,10 @@ void HistogramView::metaDataVar (MetaVariable& var, bool notify_changes)
     assert (isDataVarMeta());
 
     if (notify_changes)
+    {
         notifyRefreshNeeded();
+        notifyConfigChanges();
+    }
 }
 
 /**
