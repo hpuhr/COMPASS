@@ -17,7 +17,6 @@
 
 #include "dbcontent/variable/variableorderedset.h"
 #include "compass.h"
-//#include "configurationmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
@@ -28,6 +27,8 @@
 
 #include <algorithm>
 
+using namespace std;
+
 namespace dbContent
 {
 
@@ -35,7 +36,38 @@ VariableOrderedSet::VariableOrderedSet(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)
     : Configurable(class_id, instance_id, parent), widget_(nullptr)
 {
+    registerParameter("variable_definitions", &variable_definitions_, nlohmann::json::array());
+
     createSubConfigurables();
+
+    // check set contents
+
+    loginf << "VariableOrderedSet: ctor: checking";
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    std::vector<std::pair<std::string,std::string>> tmp_vec = definitions();
+
+    for (auto& def_it : tmp_vec)
+    {
+        if (def_it.first == META_OBJECT_NAME)
+        {
+            if (!dbcont_man.existsMetaVariable(def_it.second))
+            {
+                logwrn << "VariableOrderedSet: ctor: outdated meta variable " << def_it.second;
+                removeVariableAt(getIndexFor(def_it.first, def_it.second));
+            }
+        }
+        else if (!dbcont_man.existsDBContent(def_it.first) ||
+                 !dbcont_man.dbContent(def_it.first).hasVariable(def_it.second))
+        {
+            logwrn << "VariableOrderedSet: ctor: outdated dbcont name "
+                   << def_it.first << " variable " << def_it.second;
+            removeVariableAt(getIndexFor(def_it.first, def_it.second));
+        }
+    }
+
+    loginf << "VariableOrderedSet: ctor: checking done";
 }
 
 VariableOrderedSet::~VariableOrderedSet()
@@ -45,12 +77,6 @@ VariableOrderedSet::~VariableOrderedSet()
         delete widget_;
         widget_ = nullptr;
     }
-
-    for (auto it : variable_definitions_)
-    {
-        delete it.second;
-    }
-    variable_definitions_.clear();
 }
 
 void VariableOrderedSet::generateSubConfigurable(const std::string& class_id,
@@ -59,40 +85,7 @@ void VariableOrderedSet::generateSubConfigurable(const std::string& class_id,
     logdbg << "VariableOrderedSet: generateSubConfigurable: class_id " << class_id
            << " instance_id " << instance_id;
 
-    if (class_id.compare("VariableOrderDefinition") == 0)
-    {
-        VariableOrderDefinition* definition =
-            new VariableOrderDefinition(class_id, instance_id, this);
-
-        DBContentManager& manager = COMPASS::instance().dbContentManager();
-
-        if (definition->dbContentName() == META_OBJECT_NAME)
-        {
-            if (!manager.existsMetaVariable(definition->variableName()))
-            {
-                logwrn << "VariableOrderedSet: generateSubConfigurable: outdated meta variable "
-                       << definition->variableName();
-                delete definition;
-                return;
-            }
-        }
-        else if (!manager.existsDBContent(definition->dbContentName()) ||
-                 !manager.dbContent(definition->dbContentName()).hasVariable(definition->variableName()))
-        {
-            logwrn << "VariableOrderedSet: generateSubConfigurable: outdated name "
-                   << definition->dbContentName() << " variable " << definition->variableName();
-            delete definition;
-            return;
-        }
-
-        unsigned int index_new = definition->getIndex();
-        assert(variable_definitions_.find(index_new) == variable_definitions_.end());
-        variable_definitions_.insert(
-            std::pair<unsigned int, VariableOrderDefinition*>(index_new, definition));
-    }
-    else
-        throw std::runtime_error(
-            "VariableOrderedSet: generateSubConfigurable: unknown class_id " + class_id);
+    throw std::runtime_error("VariableOrderedSet: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void VariableOrderedSet::checkSubConfigurables() {}
@@ -101,14 +94,7 @@ void VariableOrderedSet::add(Variable& var)
 {
     if (!hasVariable(var))
     {
-        std::string var_name = var.name();
-
-        auto id_configuration = Configuration::create("VariableOrderDefinition");
-        id_configuration->addParameter<std::string>("dbcontent_name", var.dbContentName());
-        id_configuration->addParameter<std::string>("variable_name", var_name);
-        id_configuration->addParameter<unsigned int>("index",
-                                                 (unsigned int)variable_definitions_.size());
-        generateSubConfigurableFromConfig(std::move(id_configuration));
+        variable_definitions_.push_back({var.dbContentName(), var.name()});
 
         emit setChangedSignal();
         emit variableAddedChangedSignal();
@@ -119,14 +105,7 @@ void VariableOrderedSet::add(MetaVariable& var)
 {
     if (!hasMetaVariable(var))
     {
-        std::string var_name = var.name();
-
-        auto id_configuration = Configuration::create("VariableOrderDefinition");
-        id_configuration->addParameter<std::string>("dbcontent_name", META_OBJECT_NAME);
-        id_configuration->addParameter<std::string>("variable_name", var_name);
-        id_configuration->addParameter<unsigned int>("index",
-                                                 (unsigned int)variable_definitions_.size());
-        generateSubConfigurableFromConfig(std::move(id_configuration));
+        variable_definitions_.push_back({META_OBJECT_NAME, var.name()});
 
         emit setChangedSignal();
         emit variableAddedChangedSignal();
@@ -137,71 +116,20 @@ void VariableOrderedSet::add (const std::string& dbcontent_name, const std::stri
 {
     if (!hasVariable(dbcontent_name, var_name))
     {
-        auto id_configuration = Configuration::create("VariableOrderDefinition");
-        id_configuration->addParameter<std::string>("dbcontent_name", dbcontent_name);
-        id_configuration->addParameter<std::string>("variable_name", var_name);
-        id_configuration->addParameter<unsigned int>("index",
-                                                 (unsigned int)variable_definitions_.size());
-        generateSubConfigurableFromConfig(std::move(id_configuration));
+        variable_definitions_.push_back({dbcontent_name, var_name});
 
         emit setChangedSignal();
         emit variableAddedChangedSignal();
     }
 }
 
-
-// void VariableOrderedSet::add (const VariableOrderedSet &set)
-//{
-//    //const std::vector <DBOVariable &> &setset = set.getSet();
-//    //std::vector <DBOVariable*>::const_iterator it;
-
-//    for (auto it : set.getSet())
-//    {
-//        if (!hasVariable (it.second))
-//        {
-//            add (it.second);
-//        }
-//    }
-//}
-
-// void VariableOrderedSet::addOnly (VariableOrderedSet &set, const std::string &dbo_type)
-//{
-//  logdbg  << "VariableOrderedSet: addOnly: type " << dbo_type;
-//  std::vector <DBOVariable*> &setset = set.getSet();
-
-//  //loginf  << "VariableOrderedSet: addOnly: getset";
-//  std::vector <DBOVariable*>::iterator it;
-
-//  //loginf  << "VariableOrderedSet: addOnly: iterating";
-//  for (it=setset.begin(); it != setset.end(); it++)
-//  {
-//    if (find (set_.begin(), set_.end(), *it) == set_.end())
-//    {
-//      //loginf  << "VariableOrderedSet: addOnly: new var";
-//      if ((*it)->existsIn(dbo_type))
-//      {
-//        logdbg  << "VariableOrderedSet: addOnly: pushback";
-//        add ((*it)->getFor(dbo_type));
-//      }
-//    }
-//  }
-//  //loginf  << "VariableOrderedSet: addOnly: done";
-//}
-
 void VariableOrderedSet::removeVariableAt(unsigned int index)
 {
     loginf << "VariableOrderedSet: removeVariableAt: index " << index;
 
     assert(index < variable_definitions_.size());
-    assert(variable_definitions_.count(index) == 1);
 
-    // unsigned int tmp_i = variable_definitions_.at(index);
-    VariableOrderDefinition* tmp = variable_definitions_.at(index);
     variable_definitions_.erase(index);
-
-    delete tmp;
-
-    reorderVariables();
 
     emit setChangedSignal();
 }
@@ -210,16 +138,8 @@ void VariableOrderedSet::removeVariable(const Variable& variable)
 {
     assert (hasVariable(variable));
 
-    int index = -1;
-    for (auto it : variable_definitions_)
-        if (it.second->variableName() == variable.name() &&
-            it.second->dbContentName() == variable.dbObject().name())
-        {
-            index = it.first;
-            break;
-        }
+    unsigned int index =  getIndexFor(variable.dbContentName(), variable.name());
 
-    assert (index >= 0);
     removeVariableAt(index);
 }
 
@@ -227,34 +147,17 @@ void VariableOrderedSet::removeMetaVariable(const MetaVariable& variable)
 {
     assert (hasMetaVariable(variable));
 
-    int index = -1;
-    for (auto it : variable_definitions_)
-        if (it.second->variableName() == variable.name() &&
-            it.second->dbContentName() == META_OBJECT_NAME)
-        {
-            index = it.first;
-            break;
-        }
+    unsigned int index =  getIndexFor(META_OBJECT_NAME, variable.name());
 
-    assert (index >= 0);
     removeVariableAt(index);
 }
 
-
-void VariableOrderedSet::reorderVariables ()
+template <typename t> void vec_move(std::vector<t>& v, size_t old_index, size_t new_index)
 {
-    std::map<unsigned int, VariableOrderDefinition*> new_variable_definitions;
-
-    unsigned int key{0};
-
-    for (auto& def_it : variable_definitions_)
-    {
-        def_it.second->setIndex(key);
-        new_variable_definitions[key] = def_it.second;
-        ++key;
-    }
-
-    variable_definitions_ = new_variable_definitions;
+    if (old_index > new_index)
+        std::rotate(v.rend() - old_index - 1, v.rend() - old_index, v.rend() - new_index);
+    else
+        std::rotate(v.begin() + old_index, v.begin() + old_index + 1, v.begin() + new_index + 1);
 }
 
 void VariableOrderedSet::moveVariableUp(unsigned int index)
@@ -262,21 +165,17 @@ void VariableOrderedSet::moveVariableUp(unsigned int index)
     logdbg << "VariableOrderedSet: moveVariableUp: index " << index;
     assert(index < variable_definitions_.size());
 
-    auto it = variable_definitions_.find(index);
-    assert(it != variable_definitions_.end());
-
     if (index == 0)
     {
         logwrn << "VariableOrderedSet: moveVariableUp: tried to move up first variable";
         return;
     }
 
-    auto itprev = variable_definitions_.find(index - 1);
-    assert(itprev != variable_definitions_.end());
+    std::vector<std::pair<std::string,std::string>> tmp_vec = definitions();
 
-    std::swap(it->second, itprev->second);
-    it->second->setIndex(it->first);
-    itprev->second->setIndex(itprev->first);
+    vec_move(tmp_vec, index, index-1);
+
+    variable_definitions_ = tmp_vec;
 
     emit setChangedSignal();
 }
@@ -285,158 +184,105 @@ void VariableOrderedSet::moveVariableDown(unsigned int index)
     logdbg << "VariableOrderedSet: moveVariableDown: index " << index;
     assert(index < variable_definitions_.size());
 
-    auto it = variable_definitions_.find(index);
-    assert(it != variable_definitions_.end());
-
     if (index == variable_definitions_.size() - 1)
     {
         logerr << "VariableOrderedSet: moveVariableDown: tried to down up last variable";
         return;
     }
 
-    auto itnext = variable_definitions_.find(index + 1);
-    assert(itnext != variable_definitions_.end());
+    std::vector<std::pair<std::string,std::string>> tmp_vec = definitions();
 
-    std::swap(it->second, itnext->second);
-    it->second->setIndex(it->first);
-    itnext->second->setIndex(itnext->first);
+    vec_move(tmp_vec, index, index+1);
+
+    variable_definitions_ = tmp_vec;
 
     emit setChangedSignal();
 }
 
 VariableSet VariableOrderedSet::getFor(const std::string& dbcontent_name)
 {
-    loginf << "VariableOrderedSet: getFor: type " << dbcontent_name;
+    loginf << "VariableOrderedSet: getFor: dbcontent_name " << dbcontent_name;
 
-    DBContentManager& manager = COMPASS::instance().dbContentManager();
-    VariableSet type_set;
-    std::map<unsigned int, VariableOrderDefinition*>::iterator it;
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    for (it = variable_definitions_.begin(); it != variable_definitions_.end(); it++)
+    VariableSet per_dbcont_set;
+
+    std::vector<std::pair<std::string,std::string>> tmp_vec = definitions();
+
+    for (auto& def_it : tmp_vec)
     {
-        if (it->second->dbContentName() == META_OBJECT_NAME)
+        if (def_it.first == META_OBJECT_NAME)
         {
-            assert(manager.existsMetaVariable(it->second->variableName()));
-            if (manager.metaVariable(it->second->variableName()).existsIn(dbcontent_name))
-                type_set.add(manager.metaVariable(it->second->variableName()).getFor(dbcontent_name));
+            assert(dbcont_man.existsMetaVariable(def_it.second));
+            if (dbcont_man.metaVariable(def_it.second).existsIn(dbcontent_name))
+                per_dbcont_set.add(dbcont_man.metaVariable(def_it.second).getFor(dbcontent_name));
         }
-        else if (it->second->dbContentName() == dbcontent_name)
+        else if (def_it.first == dbcontent_name)
         {
-            assert(manager.existsDBContent(dbcontent_name));
-            assert(manager.dbContent(dbcontent_name).hasVariable(it->second->variableName()));
-            type_set.add(manager.dbContent(dbcontent_name).variable(it->second->variableName()));
+            assert(dbcont_man.existsDBContent(dbcontent_name));
+            assert(dbcont_man.dbContent(dbcontent_name).hasVariable(def_it.second));
+            per_dbcont_set.add(dbcont_man.dbContent(dbcontent_name).variable(def_it.second));
         }
     }
 
-    return type_set;
+    return per_dbcont_set;
 }
 
-VariableSet VariableOrderedSet::getExistingInDBFor(const std::string& dbcontent_name)
+std::vector<std::pair<std::string,std::string>> VariableOrderedSet::definitions() const
 {
-    logdbg << "VariableOrderedSet: getExistingInDBFor: type " << dbcontent_name;
-
-    DBContentManager& manager = COMPASS::instance().dbContentManager();
-    VariableSet type_set;
-    std::map<unsigned int, VariableOrderDefinition*>::iterator it;
-
-    for (it = variable_definitions_.begin(); it != variable_definitions_.end(); it++)
-    {
-        if (it->second->dbContentName() == META_OBJECT_NAME)
-        {
-            assert(manager.existsMetaVariable(it->second->variableName()));
-            if (manager.metaVariable(it->second->variableName()).existsIn(dbcontent_name))
-                type_set.add(manager.metaVariable(it->second->variableName()).getFor(dbcontent_name));
-        }
-        else if (it->second->dbContentName() == dbcontent_name)
-        {
-            assert(manager.existsDBContent(dbcontent_name));
-            assert(manager.dbContent(dbcontent_name).hasVariable(it->second->variableName()));
-            type_set.add(manager.dbContent(dbcontent_name).variable(it->second->variableName()));
-        }
-    }
-
-    return type_set;
+    return variable_definitions_.get<std::vector<std::pair<std::string,std::string>>>();
 }
 
-// DBOVariableSet VariableOrderedSet::getUnorderedSet () const
-//{
-//  logdbg  << "VariableOrderedSet: getSet";
-
-//  DBOVariableSet type_set;
-
-//  for (auto it : set_)
-//  {
-//      logdbg  << "VariableOrderedSet: getFor: add";
-//      type_set.add (it.second);
-//  }
-
-//  return type_set;
-//}
-
-VariableOrderDefinition& VariableOrderedSet::variableDefinition(unsigned int index) const
+std::pair<std::string,std::string> VariableOrderedSet::variableDefinition(unsigned int index) const
 {
-    assert(index < variable_definitions_.size());
-    return *variable_definitions_.at(index);
+    assert (index < variable_definitions_.size());
+    return definitions().at(index);
 }
 
-// void VariableOrderedSet::print () const
-//{
-//    logdbg  << "VariableOrderedSet: print: size" << set_.size() << " changed " << changed_;
-//    //std::vector <DBOVariable*>::iterator it;
-
-//    for (auto it : set_)
-//    {
-//        it.second.print();
-//    }
-//}
+unsigned int VariableOrderedSet::getSize() const
+{
+    return variable_definitions_.size();
+}
 
 bool VariableOrderedSet::hasVariable(const Variable& variable) const
 {
-    for (auto it : variable_definitions_)
-        if (it.second->variableName() == variable.name() &&
-            it.second->dbContentName() == variable.dbObject().name())
-            return true;
+    std::vector<std::pair<std::string,std::string>> tmp_vec = definitions();
 
-    return false;
+    return std::find(tmp_vec.begin(), tmp_vec.end(),
+                     std::pair<std::string,std::string>{variable.dbObject().name(), variable.name()}) != tmp_vec.end();
 }
 
 bool VariableOrderedSet::hasMetaVariable(const MetaVariable& variable) const
 {
-    for (auto it : variable_definitions_)
-        if (it.second->variableName() == variable.name() &&
-            it.second->dbContentName() == META_OBJECT_NAME)
-            return true;
+    std::vector<std::pair<std::string,std::string>> tmp_vec = definitions();
 
-    return false;
+    return std::find(tmp_vec.begin(), tmp_vec.end(),
+                     std::pair<std::string,std::string>{META_OBJECT_NAME, variable.name()}) != tmp_vec.end();
 }
 
 bool VariableOrderedSet::hasVariable(const std::string& dbcontent_name, const std::string& name) const
 {
-    for (auto it : variable_definitions_)
-        if (it.second->variableName() == name &&
-            it.second->dbContentName() == dbcontent_name)
-            return true;
+    std::vector<std::pair<std::string,std::string>> tmp_vec = definitions();
 
-    return false;
+    return std::find(tmp_vec.begin(), tmp_vec.end(),
+                     std::pair<std::string,std::string>{dbcontent_name, name}) != tmp_vec.end();
 }
 
-// PropertyList VariableOrderedSet::getPropertyList (const std::string &dbo_type)
-//{
-//  std::vector <DBOVariable*>::iterator it;
-//  PropertyList list;
+unsigned int VariableOrderedSet::getIndexFor(const std::string& dbcontent_name, const std::string var_name)
+{
+    std::vector<std::pair<std::string,std::string>> tmp_vec = definitions();
 
-//  for (it=set_.begin(); it != set_.end(); it++)
-//  {
-//    if ((*it)->existsIn(dbo_type))
-//    {
-//      logdbg  << "VariableOrderedSet: getPropertyList: getfor";
-//      DBOVariable *var = (*it)->getFor(dbo_type);
-//      list.addProperty (var->getId(), var->getDataType());
-//    }
-//  }
+    auto it = std::find(tmp_vec.begin(), tmp_vec.end(), std::pair<std::string,std::string>{dbcontent_name,var_name});
 
-//  return list;
-//}
+    // If element was found
+    assert (it != tmp_vec.end());
+
+    // calculating the index
+    int index = it - tmp_vec.begin();
+    assert (index >= 0);
+
+    return index;
+}
 
 VariableOrderedSetWidget* VariableOrderedSet::widget()
 {

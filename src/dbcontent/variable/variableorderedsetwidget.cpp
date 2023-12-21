@@ -220,31 +220,25 @@ void VariableOrderedSetWidget::updateVariableListSlot()
 
     logdbg << "VariableOrderedSetWidget: updateVariableListSlot: clear done";
 
-    const std::map<unsigned int, VariableOrderDefinition*>& variables = set_.definitions();
-    std::map<unsigned int, VariableOrderDefinition*>::const_iterator it;
-
     DBContentManager& manager = COMPASS::instance().dbContentManager();
-    VariableOrderDefinition* def = nullptr;
 
     string tooltip;
 
-    for (it = variables.begin(); it != variables.end(); it++)
+    for (const auto& def_it: set_.definitions())
     {
-        def = it->second;
-
-        if (def->dbContentName() == META_OBJECT_NAME)
+        if (def_it.first == META_OBJECT_NAME)
         {
-            assert(manager.existsMetaVariable(def->variableName()));
-            tooltip = manager.metaVariable(def->variableName()).info();
+            assert(manager.existsMetaVariable(def_it.second));
+            tooltip = manager.metaVariable(def_it.second).info();
         }
         else
         {
-            assert(manager.existsDBContent(def->dbContentName()));
-            assert(manager.dbContent(def->dbContentName()).hasVariable(def->variableName()));
-            tooltip = manager.dbContent(def->dbContentName()).variable(def->variableName()).info();
+            assert(manager.existsDBContent(def_it.first));
+            assert(manager.dbContent(def_it.first).hasVariable(def_it.second));
+            tooltip = manager.dbContent(def_it.first).variable(def_it.second).info();
         }
 
-        QListWidgetItem* item = new QListWidgetItem((def->dbContentName() + ", " + def->variableName()).c_str());
+        QListWidgetItem* item = new QListWidgetItem((def_it.first + ", " + def_it.second).c_str());
         item->setToolTip(tooltip.c_str());
 
         list_widget_->addItem(item);

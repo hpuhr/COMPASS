@@ -168,7 +168,7 @@ dbContent::VariableSet ListBoxView::getSet(const std::string& dbcontent_name)
 {
     assert(data_source_);
 
-    return data_source_->getSet()->getExistingInDBFor(dbcontent_name);
+    return data_source_->getSet()->getFor(dbcontent_name);
 }
 
 // void ListBoxView::selectionChanged()

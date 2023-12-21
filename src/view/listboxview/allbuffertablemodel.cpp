@@ -85,7 +85,7 @@ QVariant AllBufferTableModel::headerData(int section, Qt::Orientation orientatio
         col -= 2;  // for the actual properties
 
         assert(col < data_source_.getSet()->getSize());
-        std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
+        std::string variable_name = data_source_.getSet()->variableDefinition(col).second;
         return QString(variable_name.c_str());
     }
     else if (orientation == Qt::Vertical)
@@ -173,8 +173,9 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         //               << " show assoc " << show_associations_;
         assert(col < data_source_.getSet()->getSize());
 
-        std::string variable_dbcontent_name = data_source_.getSet()->variableDefinition(col).dbContentName();
-        std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
+        std::string variable_dbcontent_name, variable_name;
+
+        std::tie(variable_dbcontent_name, variable_name) = data_source_.getSet()->variableDefinition(col);
 
         DBContentManager& manager = COMPASS::instance().dbContentManager();
 

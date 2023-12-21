@@ -86,7 +86,7 @@ void AllBufferCSVExportJob::run()
 
         for (size_t col = 0; col < read_set_size; col++)
         {
-            ss << ";" << read_set_->variableDefinition(col).variableName();
+            ss << ";" << read_set_->variableDefinition(col).first;
         }
         output_file << ss.str() << "\n";
 
@@ -111,14 +111,14 @@ void AllBufferCSVExportJob::run()
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
             assert(buffer->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-            NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(DBContent::meta_var_rec_num_.name());
+            //NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(DBContent::meta_var_rec_num_.name());
 
             // check if skipped because not selected
             if (only_selected_ &&
                 (selected_vec.isNull(buffer_index) || !selected_vec.get(buffer_index)))
                 continue;
 
-            const PropertyList& properties = buffer->properties();
+            //const PropertyList& properties = buffer->properties();
             ss.str("");
 
             // set selected flag
@@ -133,8 +133,7 @@ void AllBufferCSVExportJob::run()
             {
                 value_str = "";
 
-                variable_dbcontent_name = read_set_->variableDefinition(col).dbContentName();
-                variable_name = read_set_->variableDefinition(col).variableName();
+                std::tie(variable_dbcontent_name, variable_name)  = read_set_->variableDefinition(col);
 
                 // check if data & variables exist
                 if (variable_dbcontent_name == META_OBJECT_NAME)

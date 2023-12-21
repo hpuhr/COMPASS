@@ -174,7 +174,7 @@ VariableSet ScatterPlotView::getSet(const std::string& dbcontent_name)
 
     assert(data_source_);
 
-    VariableSet set = data_source_->getSet()->getExistingInDBFor(dbcontent_name);
+    VariableSet set = data_source_->getSet()->getFor(dbcontent_name);
 
     if (hasDataVarX())
     {
