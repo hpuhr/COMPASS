@@ -24,8 +24,17 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
     assert (view_widget_);
 
     QVBoxLayout* layout = new QVBoxLayout;
-    layout->setMargin(DefaultMargin);
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
+
+    content_widget_ = new QWidget;
+    layout->addWidget(content_widget_);
+
+    QVBoxLayout* content_layout = new QVBoxLayout;
+    content_layout->setMargin(DefaultMargin);
+    content_widget_->setLayout(content_layout);
 
     QHBoxLayout* layout_h = new QHBoxLayout;
     layout_h->setMargin(0);
@@ -34,7 +43,7 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
     layout_buttons->setMargin(0);
     layout_buttons->setSpacing(0);
 
-    layout->addLayout(layout_h);
+    content_layout->addLayout(layout_h);
     layout_h->addLayout(layout_buttons);
     
     QFont font_status;
@@ -114,9 +123,8 @@ void ViewLoadStateWidget::setState(State state)
                                     state == State::RedrawRequired ||
                                     state == State::ReloadRequired);
 
-        //do not show if properly loaded
-        refresh_button_->setVisible(state != State::Loaded);
-        status_label_->setVisible(state != State::Loaded);
+        //do not show contents if properly loaded
+        content_widget_->setVisible(state != State::Loaded);
     }
 }
 
