@@ -96,8 +96,8 @@ TabStyleViewConfigWidget::TabStyleViewConfigWidget(ViewWidget* view_widget, QWid
 {
     //create main layout
     main_layout_ = new QVBoxLayout;
-    main_layout_->setMargin(0);
-    main_layout_->setContentsMargins(0, 0, 0, 0);
+    main_layout_->setMargin(1);
+    main_layout_->setContentsMargins(1, 1, 1, 1);
     setLayout(main_layout_);
 
     // //create view preset widget
@@ -110,6 +110,6 @@ TabStyleViewConfigWidget::TabStyleViewConfigWidget(ViewWidget* view_widget, QWid
 
     //create tab widget
     tab_widget_ = new QTabWidget(this);
-    tab_widget_->setStyleSheet("QTabBar::tab { height: "+ QString::number(TabHeight) + "px; }");
+    //tab_widget_->setStyleSheet("QTabBar::tab { height: "+ QString::number(TabHeight) + "px; }");
     main_layout_->addWidget(tab_widget_);
 }
