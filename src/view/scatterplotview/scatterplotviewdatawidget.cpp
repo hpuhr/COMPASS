@@ -1633,7 +1633,7 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
                 in_range =  x >= x_min && x <= x_max && y >= y_min && y <= y_max;
 
             assert (rec_num_indexes.count(rec_num));
-            std::vector<unsigned int>& indexes = rec_num_indexes.at((int)rec_num);
+            std::vector<unsigned int>& indexes = rec_num_indexes.at(rec_num);
             assert (indexes.size() == 1);
 
             index = indexes.at(0);
