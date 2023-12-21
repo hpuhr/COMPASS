@@ -150,6 +150,7 @@ void ViewWidget::createStandardLayout()
     QVBoxLayout* right_layout = new QVBoxLayout;
     right_layout->setContentsMargins(0, 0, 0, 0);
     right_layout->setMargin(0);
+    right_layout->setSpacing(0);
 
     left_widget->setLayout(left_layout);
     right_widget_->setLayout(right_layout);
