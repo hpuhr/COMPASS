@@ -34,14 +34,12 @@ public slots:
 signals:
     void showOnlySelectedSignal(bool value);
     void usePresentationSignal(bool value);
-    void showAssociationsSignal(bool value);
 
 public:
     struct Settings
     {
         Settings();
 
-        std::string current_set_name;
         bool        show_only_selected;
         bool        use_presentation;
     };
@@ -69,8 +67,6 @@ public:
     void showOnlySelected(bool value);
 
     virtual void accept(LatexVisitor& v) override;
-
-    static const std::string DefaultSetName;
 
 protected:
     friend class LatexVisitor;

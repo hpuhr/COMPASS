@@ -201,7 +201,7 @@ void VariableOrderedSet::moveVariableDown(unsigned int index)
 
 VariableSet VariableOrderedSet::getFor(const std::string& dbcontent_name)
 {
-    loginf << "VariableOrderedSet: getFor: dbcontent_name " << dbcontent_name;
+    logdbg << "VariableOrderedSet: getFor: dbcontent_name " << dbcontent_name;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 

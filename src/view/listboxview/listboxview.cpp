@@ -20,7 +20,6 @@
 #include <QApplication>
 
 #include "compass.h"
-//#include "dbcontent/dbcontentmanager.h"
 #include "listboxviewconfigwidget.h"
 #include "listboxviewdatasource.h"
 #include "listboxviewdatawidget.h"
@@ -28,19 +27,15 @@
 #include "logger.h"
 #include "latexvisitor.h"
 
-const std::string ParamCurrentSetName  = "current_set_name";
 const std::string ParamShowSelected    = "show_only_selected";
 const std::string ParamUsePresentation = "use_presentation";
 const std::string SubConfigDataSource  = "ListBoxViewDataSource";
 const std::string SubConfigViewWidget  = "ListBoxViewWidget";
 
-const std::string ListBoxView::DefaultSetName = "Default";
-
 /**
 */
 ListBoxView::Settings::Settings()
-:   current_set_name  (DefaultSetName)
-,   show_only_selected(false)
+:   show_only_selected(false)
 ,   use_presentation  (true)
 {
 }
@@ -53,7 +48,6 @@ ListBoxView::ListBoxView(const std::string& class_id,
                          ViewManager& view_manager)
 :   View(class_id, instance_id, w, view_manager)
 {
-    registerParameter(ParamCurrentSetName, &settings_.current_set_name, Settings().current_set_name);
     registerParameter(ParamShowSelected, &settings_.show_only_selected, Settings().show_only_selected);
     registerParameter(ParamUsePresentation, &settings_.use_presentation, Settings().use_presentation);
 }
@@ -83,24 +77,10 @@ bool ListBoxView::init_impl()
 
     assert(data_source_);
 
-//    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-//    connect(&object_man, &DBContentManager::loadingDoneSignal,
-//            this, &ListBoxView::allLoadingDoneSlot);
-//    connect(&object_man, &DBContentManager::loadingDoneSignal,
-//            widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
-
-//    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
-//            &ListBoxViewDataWidget::loadingStartedSlot);
-//    connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
-//            &ListBoxViewDataWidget::updateDataSlot);
-
     connect(widget_->getViewConfigWidget(), &ListBoxViewConfigWidget::exportSignal,
             widget_->getViewDataWidget(), &ListBoxViewDataWidget::exportDataSlot);
     connect(widget_->getViewDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
             widget_->getViewConfigWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
-
-//    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
-//            &ListBoxViewConfigWidget::loadingStartedSlot);
 
     connect(this, &ListBoxView::showOnlySelectedSignal,
             widget_->getViewDataWidget(), &ListBoxViewDataWidget::showOnlySelectedSlot);
@@ -123,10 +103,7 @@ void ListBoxView::generateSubConfigurable(const std::string& class_id,
     if (class_id == SubConfigDataSource)
     {
         assert(!data_source_);
-        data_source_ = new ListBoxViewDataSource(settings_.current_set_name, class_id, instance_id, this);
-
-        //write current set back to local settings
-        connect(data_source_, &ListBoxViewDataSource::currentSetChangedSignal, [ this ] { this->settings_.current_set_name = data_source_->currentSetName(); });
+        data_source_ = new ListBoxViewDataSource(class_id, instance_id, this);
 
         //notify view that it needs to reload
         connect(data_source_, &ListBoxViewDataSource::reloadNeeded, [ this ] { notifyViewUpdateNeeded(VU_Reload); });
@@ -170,16 +147,6 @@ dbContent::VariableSet ListBoxView::getSet(const std::string& dbcontent_name)
 
     return data_source_->getSet()->getFor(dbcontent_name);
 }
-
-// void ListBoxView::selectionChanged()
-//{
-//    //  assert (data_source_);
-//    //  data_source_->updateSelection();
-//}
-// void ListBoxView::selectionToBeCleared()
-//{
-
-//}
 
 bool ListBoxView::usePresentation() const 
 { 
@@ -257,11 +224,6 @@ void ListBoxView::onConfigurationChanged_impl(const std::vector<std::string>& ch
         else if (param == ParamUsePresentation)
         {
             emit usePresentationSignal(settings_.use_presentation);
-        }
-        else if (param == ParamCurrentSetName)
-        {
-            //update current set in data source
-            getDataSource()->currentSetName(settings_.current_set_name, true);
         }
     }
 }

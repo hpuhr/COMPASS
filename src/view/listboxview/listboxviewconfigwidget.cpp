@@ -18,10 +18,11 @@
 #include "listboxviewconfigwidget.h"
 #include "listboxviewwidget.h"
 #include "listboxview.h"
-#include "listboxviewsetconfigwidget.h"
+//#include "listboxviewsetconfigwidget.h"
 
 #include "logger.h"
 #include "viewwidget.h"
+#include "dbcontent/variable/variableorderedsetwidget.h"
 
 #include <QCheckBox>
 #include <QLabel>
@@ -47,12 +48,8 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
         QWidget* cfg_widget = new QWidget();
         QVBoxLayout* cfg_layout = new QVBoxLayout();
 
-        QLabel* set_label = new QLabel("Variable Lists");
-        set_label->setFont(font_bold);
-        cfg_layout->addWidget(set_label);
-
-        set_config_widget_ = new ListBoxViewSetConfigWidget(view_->getDataSource(), this);
-        set_config_widget_->updateFromDataSource();
+        set_config_widget_ = view_->getDataSource()->getSet()->widget();
+        //set_config_widget_->updateFromDataSource();
 
         cfg_layout->addWidget(set_config_widget_);
 
@@ -71,7 +68,7 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
         connect(presentation_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleUsePresentation);
         cfg_layout->addWidget(presentation_check_);
 
-        //vlayout->addStretch();
+        cfg_layout->addStretch();
 
         cfg_widget->setLayout(cfg_layout);
 
@@ -130,7 +127,8 @@ void ListBoxViewConfigWidget::configChanged()
     assert(view_);
 
     //update ui for var set
-    set_config_widget_->updateFromDataSource();
+    //set_config_widget_->updateFromDataSource();
+    set_config_widget_->updateVariableListSlot();
 
     //other ui elements
     only_selected_check_->setChecked(view_->showOnlySelected());

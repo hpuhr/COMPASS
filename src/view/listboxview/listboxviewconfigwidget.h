@@ -22,10 +22,12 @@
 //#include "dbcontent/variable/variable.h"
 //#include "appmode.h"
 
-class VariableOrderedSetWidget;
+namespace dbContent {
+    class VariableOrderedSetWidget;
+}
+
 class ListBoxView;
 class ListBoxViewWidget;
-class ListBoxViewSetConfigWidget;
 
 class QCheckBox;
 class QPushButton;
@@ -61,7 +63,7 @@ protected:
 
     QPushButton*    export_button_{nullptr};
 
-    ListBoxViewSetConfigWidget* set_config_widget_ = nullptr;
+    dbContent::VariableOrderedSetWidget* set_config_widget_ {nullptr};
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

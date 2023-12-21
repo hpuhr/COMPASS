@@ -31,47 +31,24 @@
 class Job;
 class ViewableDataConfig;
 
-/**
- * @brief Handles database queries and resulting data for ListBoxView
- *
- * Creates database queries for all contained DBContents when updateData () is called and
- * emits signal updateData() when resulting buffer is delivered by callback. Stores Buffers
- * and handles cleanup.
- */
 class ListBoxViewDataSource : public QObject, public Configurable
 {
     Q_OBJECT
 
   signals:
     void setChangedSignal();
-    void currentSetChangedSignal();
     void reloadNeeded();
 
   public:
-    /// @brief Constructor
-    ListBoxViewDataSource(const std::string& current_set_name,
-                          const std::string& class_id, 
+    ListBoxViewDataSource(const std::string& class_id,
                           const std::string& instance_id,
                           Configurable* parent);
-    /// @brief Destructor
     virtual ~ListBoxViewDataSource();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    bool hasCurrentSet();
-    bool hasSet (const std::string& name);
-    void addSet (const std::string& name);
-    void copySet (const std::string& name, const std::string& new_name);
-    void removeSet (const std::string& name);
-
-    std::string currentSetName() const;
-    void currentSetName(const std::string& current_set_name, bool signal_reload = true);
-
-    /// @brief Returns variable read list
     dbContent::VariableOrderedSet* getSet();
-
-    const std::map<std::string, std::unique_ptr<dbContent::VariableOrderedSet>>& getSets();
 
     void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
     void showViewPoint (const ViewableDataConfig* vp);
@@ -84,18 +61,10 @@ protected:
 
     void addDefaultVariables (dbContent::VariableOrderedSet& set);
 
-    void currentSetNameInternal(const std::string& current_set_name);
-
-    std::string current_set_name_;
-
     /// Variable read list
-    //DBOVariableOrderedSet* set_{nullptr};
-    std::map<std::string, std::unique_ptr<dbContent::VariableOrderedSet>> sets_;
+    std::unique_ptr<dbContent::VariableOrderedSet> set_;
 
-    /// Selected DBContent records
-    //ViewSelectionEntries& selection_entries_;
-
-    std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
+    std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DB cont->varname
 };
 
 #endif /* LISTBOXVIEWDATASOURCE_H_ */
