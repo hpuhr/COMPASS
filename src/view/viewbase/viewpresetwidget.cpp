@@ -524,6 +524,11 @@ void ViewPresetItemWidget::createUI()
             sep->setFrameShadow(QFrame::Shadow::Plain);
             sep->setContentsMargins(0, 0, 0, 0);
 
+            auto p = sep->palette();
+            p.setColor(QPalette::ColorRole::HighlightedText, p.color(QPalette::ColorRole::Foreground));
+
+            sep->setPalette(p);
+
             layout_header->addWidget(sep);
 #else
             layout_header->addSpacerItem(new QSpacerItem(DefaultSpacing * 4, 1, QSizePolicy::Fixed, QSizePolicy::Fixed));
