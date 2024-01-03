@@ -1004,12 +1004,12 @@ QString ViewPresetWidget::generateTooltip() const
 
     if (hasActivePreset())
     {
-        tt += "\n\nActive preset: " + QString::fromStdString(active_preset_.second);
-        tt += "\nUnsaved changes: " + QString(hasModifications() ? "Yes" : "No");
+        tt += "<br><br><b>Active preset</b>: " + QString::fromStdString(active_preset_.second);
+        tt += "<br><b>Unsaved changes</b>: " + QString(hasModifications() ? "Yes" : "No");
     }
     else
     {
-        tt += "\n\nNo active preset";
+        tt += "<br><br><i>No active preset</i>";
     }
 
     return tt;
