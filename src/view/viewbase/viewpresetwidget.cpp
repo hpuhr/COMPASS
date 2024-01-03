@@ -513,11 +513,13 @@ void ViewPresetItemWidget::createUI()
             remove_button_->setAutoRaise(true);
             remove_button_->setCursor(Qt::CursorShape::ArrowCursor);
 
+            //add modification buttons
             layout_header->addWidget(edit_button_);
             layout_header->addWidget(copy_button_);
             layout_header->addWidget(save_button_);
 
 #if 1
+            //add a vertical separator
             auto sep = new QFrame;
             sep->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
             sep->setFrameShape(QFrame::VLine);
@@ -531,9 +533,11 @@ void ViewPresetItemWidget::createUI()
 
             layout_header->addWidget(sep);
 #else
+            //add some space
             layout_header->addSpacerItem(new QSpacerItem(DefaultSpacing * 4, 1, QSizePolicy::Fixed, QSizePolicy::Fixed));
 #endif
 
+            //finally add remove button
             layout_header->addWidget(remove_button_);
 
             connect(edit_button_  , &QToolButton::pressed, this, &ViewPresetItemWidget::editButtonPressed  );
@@ -980,6 +984,51 @@ ViewPresetWidget::ViewPresetWidget(View* view, QWidget* parent)
 
 /**
 */
+bool ViewPresetWidget::hasActivePreset() const
+{
+    return (!active_preset_.first.empty() && !active_preset_.second.empty());
+}
+
+/**
+*/
+bool ViewPresetWidget::hasModifications() const
+{
+    return (hasActivePreset() && has_modifications_);
+}
+
+/**
+*/
+QString ViewPresetWidget::generateTooltip() const
+{
+    QString tt = "Press to open preset selection";
+
+    if (hasActivePreset())
+    {
+        tt += "\n\nActive preset: " + QString::fromStdString(active_preset_.second);
+        tt += "\nUnsaved changes: " + QString(hasModifications() ? "Yes" : "No");
+    }
+    else
+    {
+        tt += "\n\nNo active preset";
+    }
+
+    return tt;
+}
+
+/**
+*/
+QString ViewPresetWidget::generateButtonText() const
+{
+    QString txt = (hasActivePreset() ? QString::fromStdString(active_preset_.second) : QString("No active preset"));
+
+    if (hasModifications())
+        txt += "*";
+
+    return txt;
+}
+
+/**
+*/
 void ViewPresetWidget::createUI()
 {
     QHBoxLayout* layout = new QHBoxLayout;
@@ -1019,16 +1068,10 @@ void ViewPresetWidget::updateContents()
         show_button_->setFont(f);
     };
 
-    bool has_preset = !active_preset_.first.empty() && !active_preset_.second.empty();
+    setFontItalic(!hasActivePreset());
 
-    setFontItalic(!has_preset);
-
-    QString txt = has_preset ? QString::fromStdString(active_preset_.second) : QString("No active preset");
-
-    if (has_preset && has_modifications_)
-        txt += "*";
-
-    show_button_->setText(txt);
+    show_button_->setText(generateButtonText());
+    show_button_->setToolTip(generateTooltip());
 }
 
 /**

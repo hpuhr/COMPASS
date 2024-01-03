@@ -193,12 +193,19 @@ public:
                      QWidget* parent = nullptr);
     virtual ~ViewPresetWidget() = default;
 
+    bool hasActivePreset() const;
+    bool hasModifications() const;
+
     void updateContents();
 
 private:
     void createUI();
     void presetApplied(ViewPresets::Key key);
     void modified();
+
+    QString generateTooltip() const;
+    QString generateButtonText() const;
+
 
     View* view_ = nullptr;
 
