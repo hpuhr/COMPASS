@@ -158,7 +158,6 @@ bool ViewPresets::readPreset(const std::string& fn)
 
     //everything there?
     if (!data.contains(TagName)        ||
-        !data.contains(TagCategory)    ||
         !data.contains(TagView)        ||
         !data.contains(TagConfig))
         return false;
@@ -168,12 +167,13 @@ bool ViewPresets::readPreset(const std::string& fn)
         return false;
 
     Preset p;
-    p.category    = data[ TagCategory    ];
     p.name        = data[ TagName        ];
     p.view        = data[ TagView        ];
     p.view_config = data[ TagConfig      ];
 
     //optional tags
+    if (data.contains(TagCategory))
+        p.category = data[ TagCategory ];
     if (data.contains(TagDescription))
         p.description = data[ TagDescription ];
     if (data.contains(TagTimestamp))
