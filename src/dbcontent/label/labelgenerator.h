@@ -35,7 +35,6 @@ public slots:
     void editLabelContentsDoneSlot();
 
 public:
-
     LabelGenerator(DBContentManager& manager);
     virtual ~LabelGenerator();
 

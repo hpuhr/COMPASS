@@ -1653,7 +1653,7 @@ bool RTCommandReconfigure::run_impl()
     try
     {
         auto config = nlohmann::json::parse(json_config);
-        find_result.second->reconfigure(config, Configurable::ReconfigureSubConfigMode::WarnIfMissing, &missing_keys);
+        find_result.second->reconfigure(config, &missing_keys);
     }
     catch(const std::exception& e)
     {

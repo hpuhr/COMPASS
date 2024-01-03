@@ -96,6 +96,14 @@ public:
     std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurable(const std::string& approx_name);
     // returns nullptr if not found
     Configurable* getApproximateChildNamed(const std::string& approx_name);
+    const Configurable& getChild(const std::string& class_id,
+                                 const std::string& instance_id) const;
+    Configurable& getChild(const std::string& class_id,
+                           const std::string& instance_id);
+
+    /// @brief Returns the mode describing how missing subconfigurables will be treated when calling reconfigure().
+    ///        Standard value is MustExist, meaning that the application will assert on encountering a missing subconfigurable.
+    virtual ReconfigureSubConfigMode reconfigureSubConfigMode() const { return ReconfigureSubConfigMode::MustExist; }
 
     /// @brief Saves the current configuration as template at its parent
     // void saveConfigurationAsTemplate (const std::string& template_name);
@@ -113,8 +121,10 @@ public:
     void generateJSON(nlohmann::json& target, JSONExportType export_type = JSONExportType::General) const;
 
     void reconfigure(const nlohmann::json& config, 
-                     ReconfigureSubConfigMode sub_config_mode, 
                      std::vector<SubConfigKey>* missing_keys = nullptr);
+
+    static std::string keyID(const std::string& class_id,
+                             const std::string& instance_id);
 
     static const char ConfigurablePathSeparator;
 
@@ -209,5 +219,5 @@ private:
     /// Container for all sub-configurables (class id + instance id -> Configurable)
     std::map<std::string, Configurable&> children_;
 
-    boost::signals2::connection config_changes_connection_;
+    Configuration::ListenerConnections config_connections_;
 };

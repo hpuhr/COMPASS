@@ -67,7 +67,6 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     form_layout1->addRow(tr("Level of Detail"), lod_box);
 
     // opacity
-
     QSlider* opacity_slider = new QSlider(Qt::Horizontal);
     opacity_slider->setMinimum(0);
     opacity_slider->setMaximum(100);
@@ -102,7 +101,6 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     unsigned int row=0;
 
     // filters
-
     main_layout->addSpacing(10);
 
     main_layout->addWidget(new QLabel("Label Filters"));

@@ -821,21 +821,28 @@ void Configuration::removeSubConfigurations(const std::string& class_id)
 /**
  * Connects a listener for receiving configuration change updates.
 */
-boost::signals2::connection Configuration::connectListener(const std::function<void(const ParameterList&)>& cb)
+Configuration::ListenerConnections Configuration::connectListener(const std::function<void(const ParameterList&)>& cb_changed,
+                                                                  const std::function<void(const SubConfigKey&)>& cb_create_subconfig)
 {
-    return changed_signal_.connect(cb);
+    ListenerConnections c;
+    c.c_changed          = changed_signal_.connect(cb_changed);
+    c.c_create_subconfig = create_subconfig_signal_.connect(cb_create_subconfig);
+
+    return c;
 }
 
 /**
  * Reconfigures the configuration's registered parameters and those of its subconfigurations.
  */
 std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config, 
-                                                    ReconfigureSubConfigMode sub_config_mode,
+                                                    Configurable* configurable,
                                                     std::vector<SubConfigKey>* missing_keys)
 {
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": reconfigure";
 
     std::set<std::string> param_set;
+
+    auto mode = configurable ? configurable->reconfigureSubConfigMode() : ReconfigureSubConfigMode::MustExist;
 
     //callbacks used for parsing
     auto cb_param = [ & ] (const std::string& key, const nlohmann::json& value)
@@ -855,35 +862,51 @@ std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config
     };
     auto cb_subconfig = [ & ] (const SubConfigKey& key, const nlohmann::json& config)
     { 
-        //handle missing keys depending on mode
-        if (sub_config_mode == ReconfigureSubConfigMode::MustExist)
+        //subconfig missing?
+        if (!hasSubConfiguration(key))
         {
-            //subconfig must exist
-            assert(hasSubConfiguration(key));
-        } 
-        else if (sub_config_mode == ReconfigureSubConfigMode::WarnIfMissing)
-        {
-            if (!hasSubConfiguration(key))
+            //handle missing keys depending on mode
+            if (mode == ReconfigureSubConfigMode::CreateIfMissing)
+            {
+                assert(configurable);
+
+                //create new configuration for sub config
+                auto ptr = new Configuration(key.first, key.second);
+                sub_configurations_.insert(std::make_pair(key, std::unique_ptr<Configuration>(ptr)));
+
+                //parse sub config from json struct
+                sub_configurations_.at(key)->parseJSONConfig(config);
+
+                //tell configurable to create missing subconfigurable
+                configurable->generateSubConfigurable(key.first, key.second);
+            } 
+            else if (mode == ReconfigureSubConfigMode::WarnIfMissing)
             {
                 //collect missing key
                 if (missing_keys)
                     missing_keys->push_back(key);
 
                 logerr << "Configuration: reconfigure: sub-config " << key.first << "." << key.second 
-                    << " not found in config " << this->class_id_ << "." << this->instance_id_;
+                        << " not found in config " << this->class_id_ << "." << this->instance_id_;
 
                 //do not descend deeper
                 return;
             }
         }
-        else //ReconfigureSubConfigMode::CreateIfMissing
+
+        //subconfig must exist
+        assert(hasSubConfiguration(key));
+        
+        //get subconfigurable
+        Configurable* sub_configurable = nullptr;
+        if (configurable)
         {
-            //@TODO: add sub-config and teach configurable base class to create new sub-configurables
-            throw std::runtime_error("Configuration: reconfigure: mode CreateIfMissing not implemented");
+            assert(configurable->hasSubConfigurable(key.first, key.second));
+            sub_configurable = &configurable->getChild(key.first, key.second);
         }
 
         //reconfigure subconfig
-        auto params_subconfig = getSubConfiguration(key.first, key.second).reconfigure(config, sub_config_mode, missing_keys);
+        auto params_subconfig = getSubConfiguration(key.first, key.second).reconfigure(config, sub_configurable, missing_keys);
         for (const auto& p : params_subconfig)
             param_set.insert(key.first + Configurable::ConfigurablePathSeparator + p);
     };

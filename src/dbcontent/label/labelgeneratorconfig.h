@@ -45,8 +45,6 @@ struct LabelGeneratorConfig
     bool use_utn_as_id_ {false};
 };
 
-
-
 }
 
 #endif // LABELGENERATORCONFIG_H

@@ -1055,7 +1055,7 @@ void ViewPresetWidget::presetApplied(ViewPresets::Key key)
         const auto& preset = presets.presets().at(key);
 
         //reconfigure view using the preset's view config
-        view_->reconfigure(preset.view_config, Configurable::ReconfigureSubConfigMode::WarnIfMissing, &missing_keys);
+        view_->reconfigure(preset.view_config, &missing_keys);
     }
     catch(const std::exception& ex)
     {

@@ -45,10 +45,10 @@ Configurable::Configurable(const std::string& class_id,
                            const std::string& instance_id,
                            Configurable* parent, 
                            const std::string& root_configuration_filename)
-    : class_id_(class_id),
+    : class_id_   (class_id),
       instance_id_(instance_id),
-      key_id_(class_id + instance_id),
-      parent_(parent)
+      key_id_     (keyID(class_id, instance_id)),
+      parent_     (parent)
 {
     logdbg << "Configurable: constructor: class_id " << class_id_ << " instance_id " << instance_id_;
 
@@ -66,7 +66,8 @@ Configurable::Configurable(const std::string& class_id,
     assert(configuration_);
 
     //connect to configuration to receive changes
-    config_changes_connection_ = configuration_->connectListener([ this ] (const std::vector<std::string>& params) { this->configurationChanged(params); });
+    config_connections_ = configuration_->connectListener([ this ] (const std::vector<std::string>& params) { this->configurationChanged(params); },
+                                                          [ this ] (const SubConfigKey& key) { this->generateSubConfigurable(key.first, key.second); });
 
     if (root_configuration_filename.size() != 0)
     {
@@ -88,7 +89,9 @@ Configurable::~Configurable()
 {
     logdbg << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_;
 
-    config_changes_connection_.disconnect();
+    //@TODO: most likely destroying a connection will disconnect both parties automatically...
+    config_connections_.c_changed.disconnect();
+    config_connections_.c_create_subconfig.disconnect();
 
     if (parent_)
     {
@@ -113,6 +116,15 @@ Configurable::~Configurable()
                    << instance_id_ << " undelete child ptr " << &child_it.second;
         }
     }
+}
+
+/**
+ * Generates a unique key id from a given class id and instance id.
+*/
+std::string Configurable::keyID(const std::string& class_id,
+                                const std::string& instance_id)
+{
+    return class_id + instance_id;
 }
 
 /**
@@ -354,7 +366,7 @@ bool Configurable::hasSubConfigurable(const std::string& class_id,
 {
     assert(configuration_);
 
-    return (children_.find(class_id + instance_id) != children_.end());
+    return (children_.find(keyID(class_id, instance_id)) != children_.end());
 }
 
 /**
@@ -414,6 +426,24 @@ Configurable* Configurable::getApproximateChildNamed (const std::string& approx_
 
 /**
 */
+const Configurable& Configurable::getChild(const std::string& class_id,
+                                           const std::string& instance_id) const
+{
+    assert(hasSubConfigurable(class_id, instance_id));
+    return children_.at(keyID(class_id, instance_id));
+}
+
+/**
+*/
+Configurable& Configurable::getChild(const std::string& class_id,
+                                     const std::string& instance_id)
+{
+    assert(hasSubConfigurable(class_id, instance_id));
+    return children_.at(keyID(class_id, instance_id));
+}
+
+/**
+*/
 void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
 {
     logdbg << "Configurable::setTmpDisableRemoveConfigOnDelete: value " << value;
@@ -429,11 +459,10 @@ void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
 /**
 */
 void Configurable::reconfigure(const nlohmann::json& config,
-                               ReconfigureSubConfigMode sub_config_mode, 
                                std::vector<SubConfigKey>* missing_keys)
 {
     assert(configuration_);
-    configuration_->reconfigure(config, sub_config_mode, missing_keys);
+    configuration_->reconfigure(config, this, missing_keys);
 }
 
 /**

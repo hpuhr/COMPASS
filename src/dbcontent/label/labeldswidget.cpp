@@ -99,7 +99,7 @@ void LabelDSWidget::updateListSlot()
 
     QLabel* dir_label = new QLabel("Direction");
     dir_label->setFont(font_bold);
-    ds_grid_->addWidget(dir_label, row, 2);;
+    ds_grid_->addWidget(dir_label, row, 2);
 
     for (const auto& ds_it : ds_man.dbDataSources())
     {
