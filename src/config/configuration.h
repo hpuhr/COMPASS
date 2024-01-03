@@ -162,14 +162,7 @@ public:
 
     std::string newInstanceID(const std::string& class_id) const;
 
-    struct ListenerConnections
-    {
-        boost::signals2::connection c_changed;
-        boost::signals2::connection c_create_subconfig;
-    };
-
-    ListenerConnections connectListener(const std::function<void(const ParameterList&)>& cb_changed,
-                                        const std::function<void(const SubConfigKey&)>& cb_create_subconfig);
+    boost::signals2::connection connectListener(const std::function<void(const ParameterList&)>& changed_cb);
     std::vector<std::string> reconfigure(const nlohmann::json& config, 
                                          Configurable* configurable = nullptr,
                                          std::vector<SubConfigKey>* missing_keys = nullptr);
@@ -242,7 +235,6 @@ private:
     bool create_instance_name_ = false;
 
     boost::signals2::signal<void(const ParameterList&)> changed_signal_;
-    boost::signals2::signal<void(const SubConfigKey&)>  create_subconfig_signal_;
 
     std::map<JSONExportType, std::set<std::string>> json_export_filters_;
 };

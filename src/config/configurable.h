@@ -219,5 +219,5 @@ private:
     /// Container for all sub-configurables (class id + instance id -> Configurable)
     std::map<std::string, Configurable&> children_;
 
-    Configuration::ListenerConnections config_connections_;
+    boost::signals2::connection changed_connection_;
 };

@@ -66,8 +66,7 @@ Configurable::Configurable(const std::string& class_id,
     assert(configuration_);
 
     //connect to configuration to receive changes
-    config_connections_ = configuration_->connectListener([ this ] (const std::vector<std::string>& params) { this->configurationChanged(params); },
-                                                          [ this ] (const SubConfigKey& key) { this->generateSubConfigurable(key.first, key.second); });
+    changed_connection_ = configuration_->connectListener([ this ] (const std::vector<std::string>& params) { this->configurationChanged(params); });
 
     if (root_configuration_filename.size() != 0)
     {
@@ -90,8 +89,7 @@ Configurable::~Configurable()
     logdbg << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_;
 
     //@TODO: most likely destroying a connection will disconnect both parties automatically...
-    config_connections_.c_changed.disconnect();
-    config_connections_.c_create_subconfig.disconnect();
+    changed_connection_.disconnect();
 
     if (parent_)
     {

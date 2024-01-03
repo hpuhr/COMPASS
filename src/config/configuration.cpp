@@ -821,14 +821,9 @@ void Configuration::removeSubConfigurations(const std::string& class_id)
 /**
  * Connects a listener for receiving configuration change updates.
 */
-Configuration::ListenerConnections Configuration::connectListener(const std::function<void(const ParameterList&)>& cb_changed,
-                                                                  const std::function<void(const SubConfigKey&)>& cb_create_subconfig)
+boost::signals2::connection Configuration::connectListener(const std::function<void(const ParameterList&)>& changed_cb)
 {
-    ListenerConnections c;
-    c.c_changed          = changed_signal_.connect(cb_changed);
-    c.c_create_subconfig = create_subconfig_signal_.connect(cb_create_subconfig);
-
-    return c;
+    return changed_signal_.connect(changed_cb);
 }
 
 /**
