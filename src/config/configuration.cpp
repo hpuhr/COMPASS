@@ -729,7 +729,7 @@ Configuration& Configuration::addNewSubConfiguration(std::unique_ptr<Configurati
         configuration->instance_id_          = newInstanceID(configuration->getClassId());
         configuration->create_instance_name_ = false;
 
-        loginf << "Configuration::addNewSubConfiguration: Created instance " << configuration->instance_id_;
+        logdbg << "Configuration: addNewSubConfiguration: created instance " << configuration->instance_id_;
     }
 
     //logdbg << "Configuration::addNewSubConfiguration: Adding group of class " 
