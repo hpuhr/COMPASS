@@ -58,6 +58,12 @@ public:
         CreateIfMissing
     };
 
+    enum class ConfigSource
+    {
+        File = 0,
+        Preset
+    };
+
     typedef std::pair<std::string, std::string> SubConfigKey;
     typedef std::unique_ptr<Configuration>      Ptr;
     typedef std::vector<std::string>            ParameterList;

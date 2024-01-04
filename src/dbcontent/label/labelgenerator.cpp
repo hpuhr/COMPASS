@@ -588,6 +588,9 @@ bool LabelGenerator::autoLabel() const
 
 void LabelGenerator::autoLabel(bool auto_label)
 {
+    if (config_.auto_label_ != auto_label)
+        emit labelConfigChanged();
+
     config_.auto_label_ = auto_label;
 
     emit labelOptionsChangedSignal();
@@ -614,6 +617,9 @@ void LabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
     else if (config_.current_lod_ > 3)
         config_.current_lod_ = 3;
 
+    if (old_lod != config_.current_lod_)
+        emit labelConfigChanged();
+
     logdbg << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
            << num_labels_on_screen << " old " << (unsigned int) old_lod
            << " current " << round(config_.current_lod_) << " float " << config_.current_lod_;
@@ -626,9 +632,11 @@ unsigned int LabelGenerator::currentLOD() const
 
 void LabelGenerator::currentLOD(unsigned int current_lod)
 {
+    if (config_.auto_label_ != current_lod)
+        emit labelConfigChanged();
+
     config_.current_lod_ = current_lod;
 }
-
 
 bool LabelGenerator::autoLOD() const
 {
@@ -637,6 +645,9 @@ bool LabelGenerator::autoLOD() const
 
 void LabelGenerator::autoLOD(bool auto_lod)
 {
+    if (config_.auto_lod_ != auto_lod)
+        emit labelConfigChanged();
+
     config_.auto_lod_ = auto_lod;
 
     emit labelOptionsChangedSignal();
@@ -645,6 +656,8 @@ void LabelGenerator::autoLOD(bool auto_lod)
 void LabelGenerator::toggleUseUTN()
 {
     config_.use_utn_as_id_ = !config_.use_utn_as_id_;
+
+    emit labelConfigChanged();
 }
 
 bool LabelGenerator::useUTN()
@@ -656,6 +669,7 @@ void LabelGenerator::addLabelDSID(unsigned int ds_id)
 {
     config_.label_ds_ids_[to_string(ds_id)] = true;
 
+    emit labelConfigChanged();
     emit labelOptionsChangedSignal();
 }
 
@@ -663,6 +677,7 @@ void LabelGenerator::removeLabelDSID(unsigned int ds_id)
 {
     config_.label_ds_ids_[to_string(ds_id)] = false;
 
+    emit labelConfigChanged();
     emit labelOptionsChangedSignal();
 }
 
@@ -673,6 +688,7 @@ void LabelGenerator::labelAllDSIDs()
     for (const auto& ds_it : ds_man.dbDataSources())
         config_.label_ds_ids_[to_string(ds_it->id())] = true;
 
+    emit labelConfigChanged();
     emit labelOptionsChangedSignal();
 }
 
@@ -680,6 +696,7 @@ void LabelGenerator::labelNoDSIDs()
 {
     config_.label_ds_ids_.clear();
 
+    emit labelConfigChanged();
     emit labelOptionsChangedSignal();
 }
 
@@ -937,6 +954,9 @@ bool LabelGenerator::filterMode3aActive() const
 
 void LabelGenerator::filterMode3aActive(bool filter_active)
 {
+    if (config_.filter_mode3a_active_ != filter_active)
+        emit labelConfigChanged();
+
     config_.filter_mode3a_active_ = filter_active;
 }
 
@@ -947,6 +967,9 @@ std::string LabelGenerator::filterMode3aValues() const
 
 void LabelGenerator::filterMode3aValues(const std::string &filter_values)
 {
+    if (config_.filter_mode3a_values_ != filter_values)
+        emit labelConfigChanged();
+
     config_.filter_mode3a_values_ = filter_values;
     updateM3AValuesFromStr(config_.filter_mode3a_values_);
 }
@@ -958,6 +981,9 @@ bool LabelGenerator::filterTIActive() const
 
 void LabelGenerator::filterTIActive(bool filter_active)
 {
+    if (config_.filter_ti_active_ != filter_active)
+        emit labelConfigChanged();
+
     config_.filter_ti_active_ = filter_active;
 }
 
@@ -968,6 +994,9 @@ std::string LabelGenerator::filterTIValues() const
 
 void LabelGenerator::filterTIValues(const std::string &filter_values)
 {
+    if (config_.filter_ti_values_ != filter_values)
+        emit labelConfigChanged();
+
     config_.filter_ti_values_ = filter_values;
     updateTIValuesFromStr(config_.filter_ti_values_);
 }
@@ -979,6 +1008,9 @@ bool LabelGenerator::filterTAActive() const
 
 void LabelGenerator::filterTAActive(bool filter_active)
 {
+    if (config_.filter_ta_active_ != filter_active)
+        emit labelConfigChanged();
+
     config_.filter_ta_active_ = filter_active;
 }
 
@@ -989,6 +1021,9 @@ std::string LabelGenerator::filterTAValues() const
 
 void LabelGenerator::filterTAValues(const std::string &filter_values)
 {
+    if (config_.filter_ta_values_ != filter_values)
+        emit labelConfigChanged();
+
     config_.filter_ta_values_ = filter_values;
     updateTAValuesFromStr(config_.filter_ta_values_);
 }
@@ -1000,6 +1035,9 @@ bool LabelGenerator::filterModecMinActive() const
 
 void LabelGenerator::filterModecMinActive(bool value)
 {
+    if (config_.filter_modec_min_active_ != value)
+        emit labelConfigChanged();
+
     config_.filter_modec_min_active_ = value;
 }
 
@@ -1010,6 +1048,9 @@ float LabelGenerator::filterModecMinValue() const
 
 void LabelGenerator::filterModecMinValue(float value)
 {
+    if (config_.filter_modec_min_value_ != value)
+        emit labelConfigChanged();
+
     config_.filter_modec_min_value_ = value;
 }
 
@@ -1020,6 +1061,9 @@ bool LabelGenerator::filterModecMaxActive() const
 
 void LabelGenerator::filterModecMaxActive(bool value)
 {
+    if (config_.filter_modec_max_active_ != value)
+        emit labelConfigChanged();
+
     config_.filter_modec_max_active_ = value;
 }
 
@@ -1030,6 +1074,9 @@ float LabelGenerator::filterModecMaxValue() const
 
 void LabelGenerator::filterModecMaxValue(float value)
 {
+    if (config_.filter_modec_max_value_ != value)
+        emit labelConfigChanged();
+
     config_.filter_modec_max_value_ = value;
 }
 
@@ -1040,6 +1087,9 @@ bool LabelGenerator::filterModecNullWanted() const
 
 void LabelGenerator::filterModecNullWanted(bool value)
 {
+    if (config_.filter_modec_null_wanted_ != value)
+        emit labelConfigChanged();
+
     config_.filter_modec_null_wanted_ = value;
 }
 
@@ -1133,6 +1183,9 @@ float LabelGenerator::labelDirectionAngle (unsigned int ds_id)
 
 void LabelGenerator::labelDirection (unsigned int ds_id, LabelDirection direction)
 {
+    if (config_.label_directions_[to_string(ds_id)] != direction)
+        emit labelConfigChanged();
+
     config_.label_directions_[to_string(ds_id)] = direction;
 }
 
@@ -1179,6 +1232,10 @@ void LabelGenerator::labelLine (unsigned int ds_id, unsigned int line)
 {
     assert (line <= 3);
     string key = to_string(ds_id);
+
+    if (config_.label_lines_[key] != line)
+        emit labelConfigChanged();
+
     config_.label_lines_[key] = line;
 }
 
@@ -1231,13 +1288,17 @@ void LabelGenerator::updateAvailableLabelLines()
     }
 }
 
-
 void LabelGenerator::editLabelContentsDoneSlot()
 {
     loginf << "LabelGenerator: editLabelContentsDoneSlot";
 
+    auto cfg_new = label_edit_dialog_->labelConfig();
+
+    if (config_.label_config_ != cfg_new)
+        emit labelConfigChanged();
+
     assert (label_edit_dialog_);
-    config_.label_config_ = label_edit_dialog_->labelConfig();
+    config_.label_config_ = cfg_new;
 
     label_edit_dialog_->close();
     label_edit_dialog_ = nullptr;
@@ -1337,7 +1398,6 @@ void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent:
                 read_set.add(var);
         }
     }
-
 }
 
 bool LabelGenerator::declutterLabels() const
@@ -1347,6 +1407,9 @@ bool LabelGenerator::declutterLabels() const
 
 void LabelGenerator::declutterLabels(bool declutter_labels)
 {
+    if (config_.declutter_labels_ != declutter_labels)
+        emit labelConfigChanged();
+
     config_.declutter_labels_ = declutter_labels;
 
     if (!config_.declutter_labels_)
@@ -1379,6 +1442,9 @@ void LabelGenerator::filterPrimaryOnlyActive(bool value)
 {
     loginf << "LabelGenerator: filterPrimaryOnlyActive: value " << value;
 
+    if (config_.filter_primary_only_active_ != value)
+        emit labelConfigChanged();
+
     config_.filter_primary_only_active_ = value;
 }
 
@@ -1389,6 +1455,9 @@ float LabelGenerator::labelOpacity() const
 
 void LabelGenerator::labelOpacity(float label_opacity)
 {
+    if (config_.label_opacity_ != label_opacity)
+        emit labelConfigChanged();
+
     config_.label_opacity_ = label_opacity;
 }
 

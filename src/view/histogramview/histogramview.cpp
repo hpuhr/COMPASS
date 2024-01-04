@@ -213,7 +213,7 @@ void HistogramView::useLogScale(bool use_log_scale, bool notify_changes)
     if (notify_changes)
     {
         updateView(VU_Redraw);
-        notifyConfigChanges();
+        modified();
     }
 }
 
@@ -267,7 +267,7 @@ void HistogramView::dataVar (Variable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        notifyConfigChanges();
+        modified();
     }
 }
 
@@ -300,7 +300,7 @@ void HistogramView::metaDataVar (MetaVariable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        notifyConfigChanges();
+        modified();
     }
 }
 

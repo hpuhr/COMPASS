@@ -278,7 +278,7 @@ void ScatterPlotView::dataVarX (Variable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        notifyConfigChanges();
+        modified();
     }
 }
 
@@ -309,7 +309,7 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        notifyConfigChanges();
+        modified();
     }
 }
 
@@ -375,7 +375,7 @@ void ScatterPlotView::dataVarY (Variable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        notifyConfigChanges();
+        modified();
     }
 }
 
@@ -406,7 +406,7 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        notifyConfigChanges();
+        modified();
     }
 }
 

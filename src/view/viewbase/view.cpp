@@ -298,7 +298,28 @@ void View::onConfigurationChanged(const std::vector<std::string>& changed_params
 
     //signal view + config changes
     notifyRefreshNeeded();
-    notifyConfigChanges();
+
+    //every external configuration change potentially modifies the configuration
+    modified();
+}
+
+/**
+ * React on modifications in the configurable hierarchy.
+ */
+void View::onModified()
+{
+    //no preset? => no need to do anything
+    if (!active_preset_.has_value())
+        return;
+
+    //preset change already registered
+    if (preset_changed_)
+        return;
+
+    preset_changed_ = true;
+
+    //notify preset change
+    emit presetChangedSignal();
 }
 
 /**
@@ -366,14 +387,6 @@ bool View::redrawNeeded() const
 bool View::updateNeeded() const
 {
     return issued_update_.has_value();
-}
-
-/**
- * Check if the config of this view has been marked as changed.
- */
-bool View::configChanged() const
-{
-    return config_changed_;
 }
 
 /**
@@ -497,23 +510,6 @@ void View::notifyRefreshNeeded()
 }
 
 /**
- * Informs the view that its config has been changed.
- * (information e.g. used by view presets)
- */
-void View::notifyConfigChanges()
-{
-    assert (widget_);
-
-    //already signaled?
-    if (config_changed_)
-        return;
-
-    config_changed_ = true;
-
-    emit configChangedSignal();
-}
-
-/**
  * Updates the view by applying all needed updates.
  * This method can be used to keep the view up-to-date from the outside.
  */
@@ -574,20 +570,57 @@ void View::updateView(int flags)
 }
 
 /**
- * Reverts the config change flag.
- * (used e.g. by view presets)
+ * Applies the given preset to the view.
  */
-void View::syncConfig()
+bool View::applyPreset(const ViewPresets::Preset& preset,
+                       std::vector<SubConfigKey>* missing_keys,
+                       std::string* error)
 {
-    assert (widget_);
+    try
+    {
+        //reconfigure view using the preset's view config
+        reconfigure(preset.view_config, missing_keys);
+    }
+    catch(const std::exception& ex)
+    {
+        if (error)
+            *error = ex.what();
 
-    //already synced?
-    if (!config_changed_)
-        return;
+        return false;
+    }
+    catch(...)
+    {
+        if (error)
+            *error = "Unknown error";
 
-    //reset changes
-    config_changed_ = false;
+        return false;
+    }
 
-    //inform components
-    widget_->updateComponents();
+    //store preset and revert changes
+    active_preset_  = preset;
+    preset_changed_ = false;
+
+    //notify about preset changes
+    emit presetChangedSignal();
+
+    return true;
+}
+
+/**
+ * Return the active preset.
+ */
+const ViewPresets::Preset* View::activePreset() const
+{
+    if (!active_preset_.has_value())
+        return nullptr;
+
+    return &active_preset_.value();
+}
+
+/**
+ * Check if the currently stored preset has any modifications.
+ */
+bool View::presetChanged() const
+{
+    return (active_preset_.has_value() && preset_changed_);
 }

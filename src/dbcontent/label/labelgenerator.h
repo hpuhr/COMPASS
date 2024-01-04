@@ -21,11 +21,14 @@ namespace dbContent
 class LabelContentDialog;
 class VariableSet;
 
+/**
+*/
 class LabelGenerator : public QObject
 {
     Q_OBJECT
 
 signals:
+    void labelConfigChanged();
     void labelOptionsChangedSignal();
     void labelLinesChangedSignal();
     void labelClearAllSignal();

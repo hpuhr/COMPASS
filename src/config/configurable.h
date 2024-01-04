@@ -138,11 +138,18 @@ protected:
     template <typename T>
     T getParameterConfigValue(const std::string& parameter_id) const;
 
+    /// @brief Explicitely sets a parameter value
+    template <typename T>
+    void setParameter(T& param, const T& value);
+
     /// @brief Override to check if required sub-configurables exist
     virtual void checkSubConfigurables();
 
     /// @brief Reacts on configuration changes, override as needed
     virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) {}
+    
+    /// @brief Reacts on modification of the configurable or one of its subconfigurables
+    virtual void onModified() {}
 
     /// @brief Returns the given sub-configuration (e.g. in order to check certain parameter values in generateSubConfigurable())
     const Configuration& getSubConfiguration(const std::string& class_id,
@@ -152,6 +159,8 @@ protected:
                              const std::string& class_id);
     void addJSONExportFilter(JSONExportType export_type, 
                              const std::vector<std::string>& class_ids);
+
+    void modified();
 
     /// @brief Saves the specified child's configuration as template
     // void saveTemplateConfiguration (Configurable *child, const std::string& template_name);

@@ -22,6 +22,7 @@
 #include "viewcontainerwidget.h"
 #include "buffer.h"
 #include "appmode.h"
+#include "viewpresets.h"
 
 #include <QObject>
 
@@ -108,10 +109,15 @@ public:
     bool reloadNeeded() const;
     bool redrawNeeded() const;
     bool updateNeeded() const;
-    bool configChanged() const;
 
     void updateView();
-    void syncConfig();
+    
+    bool applyPreset(const ViewPresets::Preset& preset, 
+                     std::vector<SubConfigKey>* missing_keys = nullptr,
+                     std::string* error = nullptr);
+    const ViewPresets::Preset* activePreset() const;
+    bool presetChanged() const;
+    
 
     //shortcut update flags
     static const int VU_PureRedraw       = VU_Redraw;                                      // just redraw
@@ -120,7 +126,7 @@ public:
 
 signals:
     void selectionChangedSignal();  // do not emit manually, call emitSelectionChange()
-    void configChangedSignal();
+    void presetChangedSignal();
 
 public slots:
     void selectionChangedSlot();
@@ -133,6 +139,8 @@ protected:
 
     virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override final;
     virtual void onConfigurationChanged_impl(const std::vector<std::string>& changed_params) {};
+
+    virtual void onModified() override final;
 
     virtual void viewManagerReloadStateChanged();
     virtual void viewManagerAutoUpdatesChanged();
@@ -147,7 +155,6 @@ protected:
     void notifyRedrawNeeded(bool add = true);
     void notifyReloadNeeded(bool add = true);
     void notifyRefreshNeeded();
-    void notifyConfigChanges();
 
     void updateView(int flags);
 
@@ -172,7 +179,9 @@ private:
     time_t  creation_time_;
 
     boost::optional<int> issued_update_;
-    bool config_changed_ = false;
+
+    bool preset_changed_ = false;
+    boost::optional<ViewPresets::Preset> active_preset_;
 
     /// Static member counter
     static unsigned int cnt_;

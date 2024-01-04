@@ -979,21 +979,7 @@ ViewPresetWidget::ViewPresetWidget(View* view, QWidget* parent)
     createUI();
     updateContents();
 
-    connect(view, &View::configChangedSignal, this, &ViewPresetWidget::modified);
-}
-
-/**
-*/
-bool ViewPresetWidget::hasActivePreset() const
-{
-    return (!active_preset_.first.empty() && !active_preset_.second.empty());
-}
-
-/**
-*/
-bool ViewPresetWidget::hasModifications() const
-{
-    return (hasActivePreset() && has_modifications_);
+    connect(view, &View::presetChangedSignal, this, &ViewPresetWidget::updateContents);
 }
 
 /**
@@ -1002,10 +988,10 @@ QString ViewPresetWidget::generateTooltip() const
 {
     QString tt = "Press to open preset selection";
 
-    if (hasActivePreset())
+    if (view_->activePreset())
     {
-        tt += "<br><br><b>Active preset</b>: " + QString::fromStdString(active_preset_.second);
-        tt += "<br><b>Unsaved changes</b>: " + QString(hasModifications() ? "Yes" : "No");
+        tt += "<br><br><b>Active preset</b>: " + QString::fromStdString(view_->activePreset()->name);
+        tt += "<br><b>Unsaved changes</b>: " + QString(view_->presetChanged() ? "Yes" : "No");
     }
     else
     {
@@ -1019,9 +1005,9 @@ QString ViewPresetWidget::generateTooltip() const
 */
 QString ViewPresetWidget::generateButtonText() const
 {
-    QString txt = (hasActivePreset() ? QString::fromStdString(active_preset_.second) : QString("No active preset"));
+    QString txt = (view_->activePreset() ? QString::fromStdString(view_->activePreset()->name) : QString("No active preset"));
 
-    if (hasModifications())
+    if (view_->presetChanged())
         txt += "*";
 
     return txt;
@@ -1068,19 +1054,10 @@ void ViewPresetWidget::updateContents()
         show_button_->setFont(f);
     };
 
-    setFontItalic(!hasActivePreset());
+    setFontItalic(!view_->activePreset());
 
     show_button_->setText(generateButtonText());
     show_button_->setToolTip(generateTooltip());
-}
-
-/**
-*/
-void ViewPresetWidget::modified()
-{
-    has_modifications_ = true;
-
-    updateContents();
 }
 
 /**
@@ -1093,35 +1070,20 @@ void ViewPresetWidget::presetApplied(ViewPresets::Key key)
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
     //apply preset
-    bool ok = true;
-    QString error;
+    std::string error;
     std::vector<Configurable::SubConfigKey> missing_keys;
 
-    try
-    {
-        const auto& presets = COMPASS::instance().viewManager().viewPresets();
-        const auto& preset = presets.presets().at(key);
+    const auto& presets = COMPASS::instance().viewManager().viewPresets();
+    const auto& preset  = presets.presets().at(key);
 
-        //reconfigure view using the preset's view config
-        view_->reconfigure(preset.view_config, &missing_keys);
-    }
-    catch(const std::exception& ex)
-    {
-        ok    = false;
-        error = ex.what();
-    }
-    catch(...)
-    {
-        ok    = false;
-        error = "Unknown error";
-    }
+    bool ok = view_->applyPreset(preset, &missing_keys, &error);
 
     QApplication::restoreOverrideCursor();
 
     //any errors?
     if (!ok)
     {
-        QMessageBox::critical(this, "Error", "View preset could not be applied: " + error);
+        QMessageBox::critical(this, "Error", "View preset could not be applied: " + QString::fromStdString(error));
         return;
     }
 
@@ -1134,12 +1096,4 @@ void ViewPresetWidget::presetApplied(ViewPresets::Key key)
 
         QMessageBox::warning(this, "Warning", msg);
     }
-
-    //set new active preset and revert modifications
-    active_preset_     = key;
-    has_modifications_ = false;
-
-    updateContents();
-
-    view_->syncConfig();
 }

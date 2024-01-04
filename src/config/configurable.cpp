@@ -149,6 +149,16 @@ T Configurable::getParameterConfigValue(const std::string& parameter_id) const
     return configuration_->getParameterConfigValue<T>(parameter_id);
 }
 
+template <typename T>
+void Configurable::setParameter(T& param, const T& value)
+{
+    assert(configuration_);
+
+    param = value;
+
+
+}
+
 /**
 */
 Configuration& Configurable::registerSubConfigurable(Configurable& child, bool config_must_exist)
@@ -508,6 +518,19 @@ void Configurable::addJSONExportFilter(JSONExportType export_type,
 {
     assert(configuration_);
     configuration_->addJSONExportFilter(export_type, class_ids);
+}
+
+/**
+ * Signals changes in the configurable and propagates to its parents.
+ */
+void Configurable::modified()
+{
+    //invoke my own modification callback
+    onModified();
+
+    //propagate to parent
+    if (parent_)
+        parent_->modified();
 }
 
 // void Configurable::saveConfigurationAsTemplate (const std::string& template_name)
