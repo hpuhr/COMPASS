@@ -48,7 +48,7 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
         QWidget* cfg_widget = new QWidget();
         QVBoxLayout* cfg_layout = new QVBoxLayout();
 
-        set_config_widget_ = view_->getDataSource()->getSet()->widget();
+        set_config_widget_ = view_->getDataSource()->getSet()->createWidget();
         //set_config_widget_->updateFromDataSource();
 
         cfg_layout->addWidget(set_config_widget_);

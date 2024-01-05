@@ -33,8 +33,9 @@ namespace dbContent
 {
 
 VariableOrderedSet::VariableOrderedSet(const std::string& class_id,
-                                             const std::string& instance_id, Configurable* parent)
-    : Configurable(class_id, instance_id, parent), widget_(nullptr)
+                                       const std::string& instance_id, 
+                                       Configurable* parent)
+    : Configurable(class_id, instance_id, parent)
 {
     registerParameter("variable_definitions", &variable_definitions_, nlohmann::json::array());
 
@@ -70,14 +71,7 @@ VariableOrderedSet::VariableOrderedSet(const std::string& class_id,
     loginf << "VariableOrderedSet: ctor: checking done";
 }
 
-VariableOrderedSet::~VariableOrderedSet()
-{
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
-}
+VariableOrderedSet::~VariableOrderedSet() = default;
 
 void VariableOrderedSet::generateSubConfigurable(const std::string& class_id,
                                                  const std::string& instance_id)
@@ -95,6 +89,7 @@ void VariableOrderedSet::add(Variable& var)
     if (!hasVariable(var))
     {
         variable_definitions_.push_back({var.dbContentName(), var.name()});
+        notifyModifications();
 
         emit setChangedSignal();
         emit variableAddedChangedSignal();
@@ -106,6 +101,7 @@ void VariableOrderedSet::add(MetaVariable& var)
     if (!hasMetaVariable(var))
     {
         variable_definitions_.push_back({META_OBJECT_NAME, var.name()});
+        notifyModifications();
 
         emit setChangedSignal();
         emit variableAddedChangedSignal();
@@ -117,6 +113,7 @@ void VariableOrderedSet::add (const std::string& dbcontent_name, const std::stri
     if (!hasVariable(dbcontent_name, var_name))
     {
         variable_definitions_.push_back({dbcontent_name, var_name});
+        notifyModifications();
 
         emit setChangedSignal();
         emit variableAddedChangedSignal();
@@ -130,6 +127,7 @@ void VariableOrderedSet::removeVariableAt(unsigned int index)
     assert(index < variable_definitions_.size());
 
     variable_definitions_.erase(index);
+    notifyModifications();
 
     emit setChangedSignal();
 }
@@ -176,9 +174,11 @@ void VariableOrderedSet::moveVariableUp(unsigned int index)
     vec_move(tmp_vec, index, index-1);
 
     variable_definitions_ = tmp_vec;
+    notifyModifications();
 
     emit setChangedSignal();
 }
+
 void VariableOrderedSet::moveVariableDown(unsigned int index)
 {
     logdbg << "VariableOrderedSet: moveVariableDown: index " << index;
@@ -195,6 +195,7 @@ void VariableOrderedSet::moveVariableDown(unsigned int index)
     vec_move(tmp_vec, index, index+1);
 
     variable_definitions_ = tmp_vec;
+    notifyModifications();
 
     emit setChangedSignal();
 }
@@ -284,16 +285,9 @@ unsigned int VariableOrderedSet::getIndexFor(const std::string& dbcontent_name, 
     return index;
 }
 
-VariableOrderedSetWidget* VariableOrderedSet::widget()
+VariableOrderedSetWidget* VariableOrderedSet::createWidget()
 {
-    if (!widget_)
-    {
-        widget_ = new VariableOrderedSetWidget(*this);
-        connect(this, SIGNAL(setChangedSignal()), widget_, SLOT(updateVariableListSlot()));
-    }
-
-    assert(widget_);
-    return widget_;
+    return new VariableOrderedSetWidget(*this);
 }
 
 }

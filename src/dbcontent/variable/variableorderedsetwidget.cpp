@@ -111,6 +111,8 @@ VariableOrderedSetWidget::VariableOrderedSetWidget(VariableOrderedSet& set,
 
     setLayout(main_layout);
     updateMenuEntries();
+
+    connect(&set, SIGNAL(setChangedSignal()), this, SLOT(updateVariableListSlot()));
 }
 
 VariableOrderedSetWidget::~VariableOrderedSetWidget() {}

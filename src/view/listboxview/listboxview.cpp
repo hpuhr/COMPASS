@@ -155,7 +155,7 @@ bool ListBoxView::usePresentation() const
 
 void ListBoxView::usePresentation(bool use_presentation)
 {
-    settings_.use_presentation = use_presentation;
+    setParameter(settings_.use_presentation, use_presentation);
 
     emit usePresentationSignal(settings_.use_presentation);
 }
@@ -171,7 +171,7 @@ void ListBoxView::showOnlySelected(bool value)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    settings_.show_only_selected = value;
+    setParameter(settings_.show_only_selected, value);
 
     emit showOnlySelectedSignal(value);
 

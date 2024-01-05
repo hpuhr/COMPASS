@@ -839,17 +839,28 @@ std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config
 
     auto mode = configurable ? configurable->reconfigureSubConfigMode() : ReconfigureSubConfigMode::MustExist;
 
-    auto logError = [ & ] (const SubConfigKey& key)
+    auto logErrorSubConfig = [ & ] (const SubConfigKey& key)
     {
         logerr << "Configuration: reconfigure: sub-config " << key.first << "." << key.second 
+               << " not found in config " << this->class_id_ << "." << this->instance_id_;
+    };
+
+    auto logErrorParam = [ & ] (const std::string& name)
+    {
+        logerr << "Configuration: reconfigure: param " << name 
                << " not found in config " << this->class_id_ << "." << this->instance_id_;
     };
 
     //callbacks used for parsing
     auto cb_param = [ & ] (const std::string& key, const nlohmann::json& value)
     {
+        bool has_param = hasParameter(key);
+
+        if (!has_param)
+            logErrorParam(key);
+
         //parameter must exist
-        assert(hasParameter(key));
+        assert(has_param);
 
         //set parameter's internal pointer value
         setParameterFromJSON(key, value);
@@ -887,7 +898,7 @@ std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config
                 if (missing_keys)
                     missing_keys->push_back(key);
 
-                logError(key);
+                logErrorSubConfig(key);
 
                 //do not descend deeper
                 return;
@@ -897,7 +908,7 @@ std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config
         bool has_subconfig = hasSubConfiguration(key);
 
         if (!has_subconfig)
-            logError(key);
+            logErrorSubConfig(key);
 
         //subconfig must exist
         assert(has_subconfig);

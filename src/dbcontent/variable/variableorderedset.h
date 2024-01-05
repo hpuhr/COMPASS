@@ -74,12 +74,10 @@ class VariableOrderedSet : public QObject, public Configurable
     std::pair<std::string,std::string> variableDefinition(unsigned int index) const;
     unsigned int getSize() const;
 
-    VariableOrderedSetWidget* widget();
+    VariableOrderedSetWidget* createWidget();
 
   protected:
     nlohmann::json variable_definitions_; // json list of std::string pairs
-
-    VariableOrderedSetWidget* widget_;
 
     virtual void checkSubConfigurables();
 };
