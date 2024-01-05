@@ -205,7 +205,7 @@ bool HistogramView::useLogScale() const
  */
 void HistogramView::useLogScale(bool use_log_scale, bool notify_changes)
 {
-    settings_.use_log_scale = use_log_scale;
+    setParameter(settings_.use_log_scale, use_log_scale);
 
     HistogramViewDataWidget* data_widget = dynamic_cast<HistogramViewDataWidget*>(getDataWidget());
     assert (data_widget);
@@ -213,7 +213,6 @@ void HistogramView::useLogScale(bool use_log_scale, bool notify_changes)
     if (notify_changes)
     {
         updateView(VU_Redraw);
-        modified();
     }
 }
 
@@ -258,8 +257,8 @@ void HistogramView::dataVar (Variable& var, bool notify_changes)
 
     loginf << "HistogramView: dataVar: dbo " << var.dbContentName() << " name " << var.name();
 
-    settings_.data_var_dbo  = var.dbContentName();
-    settings_.data_var_name = var.name();
+    setParameter(settings_.data_var_dbo, var.dbContentName());
+    setParameter(settings_.data_var_name, var.name());
 
     assert (hasDataVar());
     assert (!isDataVarMeta());
@@ -267,7 +266,6 @@ void HistogramView::dataVar (Variable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        modified();
     }
 }
 
@@ -291,8 +289,8 @@ void HistogramView::metaDataVar (MetaVariable& var, bool notify_changes)
     
     loginf << "HistogramView: metaDataVar: name " << var.name();
 
-    settings_.data_var_dbo  = META_OBJECT_NAME;
-    settings_.data_var_name = var.name();
+    setParameter(settings_.data_var_dbo, META_OBJECT_NAME);
+    setParameter(settings_.data_var_name, var.name());
 
     assert (hasDataVar());
     assert (isDataVarMeta());
@@ -300,7 +298,6 @@ void HistogramView::metaDataVar (MetaVariable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        modified();
     }
 }
 

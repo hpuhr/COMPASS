@@ -149,14 +149,18 @@ T Configurable::getParameterConfigValue(const std::string& parameter_id) const
     return configuration_->getParameterConfigValue<T>(parameter_id);
 }
 
+/**
+ * Sets a parameter and handles notifications.
+*/
 template <typename T>
 void Configurable::setParameter(T& param, const T& value)
 {
-    assert(configuration_);
+    if (param == value)
+        return;
 
     param = value;
 
-
+    notifyModifications();
 }
 
 /**
@@ -523,14 +527,14 @@ void Configurable::addJSONExportFilter(JSONExportType export_type,
 /**
  * Signals changes in the configurable and propagates to its parents.
  */
-void Configurable::modified()
+void Configurable::notifyModifications()
 {
     //invoke my own modification callback
     onModified();
 
     //propagate to parent
     if (parent_)
-        parent_->modified();
+        parent_->notifyModifications();
 }
 
 // void Configurable::saveConfigurationAsTemplate (const std::string& template_name)
@@ -553,6 +557,14 @@ template void Configurable::registerParameter<float>(const std::string& paramete
 template void Configurable::registerParameter<double>(const std::string& parameter_id, double* pointer, const double& default_value);
 template void Configurable::registerParameter<std::string>(const std::string& parameter_id, std::string* pointer, const std::string& default_value);
 template void Configurable::registerParameter<nlohmann::json>(const std::string& parameter_id, nlohmann::json* pointer, const nlohmann::json& default_value);
+
+template void Configurable::setParameter<bool>(bool& param, const bool& value);
+template void Configurable::setParameter<int>(int& param, const int& value);
+template void Configurable::setParameter<unsigned int>(unsigned int& param, const unsigned int& value);
+template void Configurable::setParameter<float>(float& param, const float& value);
+template void Configurable::setParameter<double>(double& param, const double& value);
+template void Configurable::setParameter<std::string>(std::string& param, const std::string& value);
+template void Configurable::setParameter<nlohmann::json>(nlohmann::json& param, const nlohmann::json& value);
 
 template bool Configurable::getParameterConfigValue<bool>(const std::string& parameter_id) const;
 template int Configurable::getParameterConfigValue<int>(const std::string& parameter_id) const;

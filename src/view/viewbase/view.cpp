@@ -300,7 +300,7 @@ void View::onConfigurationChanged(const std::vector<std::string>& changed_params
     notifyRefreshNeeded();
 
     //every external configuration change potentially modifies the configuration
-    modified();
+    notifyModifications();
 }
 
 /**

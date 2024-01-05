@@ -269,8 +269,8 @@ void ScatterPlotView::dataVarX (Variable& var, bool notify_changes)
         settings_.data_var_x_name == var.name())
         return;
 
-    settings_.data_var_x_dbo  = var.dbContentName();
-    settings_.data_var_x_name = var.name();
+    setParameter(settings_.data_var_x_dbo, var.dbContentName());
+    setParameter(settings_.data_var_x_name, var.name());
 
     assert (hasDataVarX());
     assert (!isDataVarXMeta());
@@ -278,7 +278,6 @@ void ScatterPlotView::dataVarX (Variable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        modified();
     }
 }
 
@@ -300,8 +299,8 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var, bool notify_changes)
         settings_.data_var_x_name == var.name())
         return;
 
-    settings_.data_var_x_dbo  = META_OBJECT_NAME;
-    settings_.data_var_x_name = var.name();
+    setParameter(settings_.data_var_x_dbo, META_OBJECT_NAME);
+    setParameter(settings_.data_var_x_name, var.name());
 
     assert (hasDataVarX());
     assert (isDataVarXMeta());
@@ -309,7 +308,6 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        modified();
     }
 }
 
@@ -366,8 +364,8 @@ void ScatterPlotView::dataVarY (Variable& var, bool notify_changes)
         settings_.data_var_y_name == var.name())
         return;
 
-    settings_.data_var_y_dbo  = var.dbContentName();
-    settings_.data_var_y_name = var.name();
+    setParameter(settings_.data_var_y_dbo, var.dbContentName());
+    setParameter(settings_.data_var_y_name, var.name());
 
     assert (hasDataVarY());
     assert (!isDataVarYMeta());
@@ -375,7 +373,6 @@ void ScatterPlotView::dataVarY (Variable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        modified();
     }
 }
 
@@ -397,8 +394,8 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var, bool notify_changes)
         settings_.data_var_y_name == var.name())
         return;
 
-    settings_.data_var_y_dbo  = META_OBJECT_NAME;
-    settings_.data_var_y_name = var.name();
+    setParameter(settings_.data_var_y_dbo, META_OBJECT_NAME);
+    setParameter(settings_.data_var_y_name, var.name());
 
     assert (hasDataVarY());
     assert (isDataVarYMeta());
@@ -406,7 +403,6 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var, bool notify_changes)
     if (notify_changes)
     {
         notifyRefreshNeeded();
-        modified();
     }
 }
 

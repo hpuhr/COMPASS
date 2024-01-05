@@ -160,7 +160,7 @@ protected:
     void addJSONExportFilter(JSONExportType export_type, 
                              const std::vector<std::string>& class_ids);
 
-    void modified();
+    void notifyModifications();
 
     /// @brief Saves the specified child's configuration as template
     // void saveTemplateConfiguration (Configurable *child, const std::string& template_name);
