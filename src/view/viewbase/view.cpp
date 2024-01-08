@@ -32,6 +32,8 @@
 
 #include <cassert>
 
+#include <fstream>
+
 #include <boost/date_time/posix_time/conversion.hpp>
 
 unsigned int View::cnt_ = 0;
@@ -312,11 +314,29 @@ void View::onModified()
     if (!active_preset_.has_value())
         return;
 
+#if 1
     //preset change already registered
     if (preset_changed_)
         return;
 
     preset_changed_ = true;
+#else
+    //get current config
+    nlohmann::json cfg;
+    generateJSON(cfg, Configurable::JSONExportType::Preset);
+
+    //check if preset config has changed
+    preset_changed_ = (cfg != active_preset_->view_config);
+
+    if (preset_changed_)
+    {
+        auto d = nlohmann::json::diff(active_preset_->view_config, cfg);
+        std::cout << d.dump(4) << std::endl;
+
+        std::ofstream out("/home/mcphatty/test.json");
+        out << cfg.dump(4);
+    }
+#endif
 
     //notify preset change
     emit presetChangedSignal();
