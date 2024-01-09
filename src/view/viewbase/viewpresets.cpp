@@ -173,9 +173,9 @@ bool ViewPresets::readPreset(const std::string& fn)
 
     //optional tags
     if (data.contains(TagCategory))
-        p.category = data[ TagCategory ];
+        p.metadata.category = data[ TagCategory ];
     if (data.contains(TagDescription))
-        p.description = data[ TagDescription ];
+        p.metadata.description = data[ TagDescription ];
     if (data.contains(TagTimestamp))
         p.timestamp = data[ TagTimestamp ];
     if (data.contains(TagVersion))
@@ -235,8 +235,8 @@ bool ViewPresets::writePreset(const Preset& preset) const
     nlohmann::json obj;
     obj[ TagView        ] = preset.view;
     obj[ TagName        ] = preset.name;
-    obj[ TagDescription ] = preset.description;
-    obj[ TagCategory    ] = preset.category;
+    obj[ TagDescription ] = preset.metadata.description;
+    obj[ TagCategory    ] = preset.metadata.category;
     obj[ TagConfig      ] = preset.view_config;
 
     if (!preset.timestamp.empty())
@@ -279,8 +279,7 @@ bool ViewPresets::writePreset(const Preset& preset) const
  */
 bool ViewPresets::createPreset(const View* view, 
                                const std::string& name,
-                               const std::string& category,
-                               const std::string& description,
+                               const PresetMetadata& metadata,
                                bool create_preview)
 {
     assert(view);
@@ -288,10 +287,9 @@ bool ViewPresets::createPreset(const View* view,
 
     //config preset
     Preset p;
-    p.name        = name;
-    p.view        = viewID(view);
-    p.description = description;
-    p.category    = category;
+    p.name     = name;
+    p.view     = viewID(view);
+    p.metadata = metadata;
 
     //update view config + preview
     updatePresetConfig(p, view, create_preview);
@@ -432,16 +430,59 @@ bool ViewPresets::renamePreset(const Key& key, const std::string& new_name, cons
 }
 
 /**
+*/
+bool ViewPresets::copyPreset(const Key& key,
+                             const std::string& new_name,
+                             const boost::optional<PresetMetadata>& new_metadata,
+                             const View* view)
+{
+    return copyPreset(key, new_name, new_metadata, view, true);
+}
+
+/**
+*/
+bool ViewPresets::copyPreset(const Key& key,
+                             const std::string& new_name,
+                             const boost::optional<PresetMetadata>& new_metadata,
+                             const View* view, 
+                             bool signal_changes)
+{
+    assert(presets_.count(key) > 0);
+    assert(!new_name.empty() && new_name != key.second);
+
+    //copy preset and change name
+    Preset preset = presets_.at(key);
+    preset.name = new_name;
+
+    //if new metadata is provided store it
+    if (new_metadata.has_value())
+        preset.metadata = new_metadata.value();
+
+    //create preset under new name
+    if (!createPreset(preset, nullptr, false))
+        return false;
+
+    if (signal_changes)
+    {
+        emit presetCopied(key, preset.key());
+        emit presetEdited(EditAction(EditMode::Copy, key, preset.key(), false, view));
+    }
+
+    return true;
+}
+
+/**
  * Updates the preset under the given key to the passed preset.
  * Might cause a rename. If the update fails the old preset version will be restored.
  */
 bool ViewPresets::updatePreset(const Key& key, 
-                               const Preset* preset, 
-                               const View* view, 
                                UpdateMode mode,
+                               const Preset* preset,
+                               const View* view,   
+                               bool update_config_from_view,
                                bool update_preview)
 {
-    return updatePreset(key, preset, view, mode, update_preview, true);
+    return updatePreset(key, preset, view, update_config_from_view, mode, update_preview, true);
 }
 
 /**
@@ -452,12 +493,12 @@ bool ViewPresets::updatePreset(const Key& key,
 bool ViewPresets::updatePreset(const Key& key, 
                                const Preset* preset,
                                const View* view, 
+                               bool update_config_from_view, 
                                UpdateMode mode,
                                bool update_preview, 
                                bool signal_changes)
 {
     assert(presets_.count(key) > 0);
-    assert(preset != nullptr || view != nullptr);
 
     auto& preset_cur = presets_.at(key);
 
@@ -469,8 +510,12 @@ bool ViewPresets::updatePreset(const Key& key,
     {
         if (preset)
         {
-            preset_cur.description = preset->description;
-            preset_cur.category    = preset->category;
+            preset_cur.metadata = preset->metadata;
+        }
+        else
+        {
+            //no source provided for metadata update
+            return false;
         }
     }
 
@@ -479,8 +524,9 @@ bool ViewPresets::updatePreset(const Key& key,
     //change config?
     if (mode == UpdateMode::ViewConfig || mode == UpdateMode::All)
     {
-        if (view)
+        if (update_config_from_view)
         {
+            assert(view);
             assert(viewID(view) == preset_cur.view);
 
             //view provided => update to view config
@@ -497,6 +543,11 @@ bool ViewPresets::updatePreset(const Key& key,
             preset_cur.preview     = preset->preview;
             preset_cur.timestamp   = preset->timestamp;
             preset_cur.app_version = preset->app_version;
+        }
+        else
+        {
+            //no source provided for config update
+            return false;
         }
     }
 
@@ -640,7 +691,7 @@ std::vector<ViewPresets::Key> ViewPresets::keysFor(const std::string& category) 
     std::vector<Key> keys;
 
     for (const auto& p : presets_)
-        if (p.second.category == category)
+        if (p.second.metadata.category == category)
             keys.push_back(p.first);
 
     return keys;
@@ -657,7 +708,7 @@ std::vector<ViewPresets::Key> ViewPresets::keysFor(const View* view,
     std::vector<Key> keys;
 
     for (const auto& p : presets_)
-        if (p.second.view == viewID(view) && p.second.category == category)
+        if (p.second.view == viewID(view) && p.second.metadata.category == category)
             keys.push_back(p.first);
 
     return keys;
@@ -671,7 +722,7 @@ std::vector<std::string> ViewPresets::categories() const
     std::set<std::string> categories;
 
     for (const auto& p : presets_)
-        categories.insert(p.second.category);
+        categories.insert(p.second.metadata.category);
 
     return std::vector<std::string>(categories.begin(), categories.end());
 }
@@ -687,7 +738,7 @@ std::vector<std::string> ViewPresets::categories(const View* view) const
 
     for (const auto& p : presets_)
         if (p.second.view == viewID(view))
-            categories.insert(p.second.category);
+            categories.insert(p.second.metadata.category);
 
     return std::vector<std::string>(categories.begin(), categories.end());
 }

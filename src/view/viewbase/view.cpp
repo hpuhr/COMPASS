@@ -672,6 +672,13 @@ void View::presetEdited(ViewPresets::EditAction ea)
                 preset_changed_ = false;
         }
     }
+    else if (ea.mode == ViewPresets::EditMode::Copy)
+    {
+        if (!active_preset_.has_value())
+            return;
+
+        //@TODO: actions needed?
+    }
     else if (ea.mode == ViewPresets::EditMode::Rename)
     {
         if (!active_preset_.has_value())

@@ -22,6 +22,8 @@
 #include <map>
 #include <string>
 
+#include <boost/optional.hpp>
+
 #include <QImage>
 
 class View;
@@ -35,21 +37,31 @@ class ViewPresets : public QObject
 public:
     typedef std::pair<std::string, std::string> Key;
 
+    /**
+     * What data to update in a preset.
+     */
     enum class UpdateMode
     {
-        MetaData = 0,
-        ViewConfig,
-        All
+        MetaData = 0, // update metadata: name, category, etc.
+        ViewConfig,   // update view configuration
+        All           // update everything
     };
 
+    /**
+     * Type of preset edit action.
+     */
     enum class EditMode
     {
-        Add,
-        Remove,
-        Update,
-        Rename
+        Add,    // new preset added
+        Remove, // preset removed
+        Update, // preset data updated
+        Copy,   // preset copied to a new preset
+        Rename  // preset renamed
     };
 
+    /**
+     * Preset edit action.
+     */
     struct EditAction
     {
         EditAction(EditMode m, Key k, Key k2, bool cfg_change, const View* v) 
@@ -61,14 +73,24 @@ public:
 
         bool valid() const
         {
+            //at least the key should be valid
             return ViewPresets::keyValid(key);
         }
 
-        EditMode    mode;
-        Key         key;
-        Key         key2;
-        bool        config_changed;
-        const View* view;
+        EditMode    mode;           // type of edit action
+        Key         key;            // key of edited preset
+        Key         key2;           // new key of edited preset (e.g. rename, copy)
+        bool        config_changed; // view config has changed during the edit action
+        const View* view;           // view that issued the edit action
+    };
+
+    /**
+     * Metadata attached to a preset.
+     */
+    struct PresetMetadata
+    {
+        std::string category;    // category of the preset
+        std::string description; // description of what the preset is about
     };
 
     /**
@@ -81,8 +103,7 @@ public:
 
         //serialized
         std::string    name;          // unique name of the preset
-        std::string    category;      // category of the preset
-        std::string    description;   // description of what the preset is about
+        PresetMetadata metadata;      // preset metadata info
         std::string    view;          // view the preset belongs to (= the view's configurable class id)
         std::string    timestamp;     // timestamp the preset config was generated
         std::string    app_version;   // version of the application the preset has been generated with
@@ -102,20 +123,24 @@ public:
 
     bool createPreset(const View* view,
                       const std::string& name,
-                      const std::string& category,
-                      const std::string& description,
+                      const PresetMetadata& metadata,
                       bool create_preview = true);
     bool createPreset(const Preset& preset, 
-                      const View* view);
+                      const View* view = nullptr);
     void removePreset(const Key& key, 
                       const View* view = nullptr);
     bool renamePreset(const Key& key, 
                       const std::string& new_name,
                       const View* view = nullptr);
+    bool copyPreset(const Key& key,
+                    const std::string& new_name,
+                    const boost::optional<PresetMetadata>& new_metadata,
+                    const View* view = nullptr);
     bool updatePreset(const Key& key, 
+                      UpdateMode mode,
                       const Preset* preset,
                       const View* view,
-                      UpdateMode mode = UpdateMode::All,
+                      bool update_config_from_view = true,
                       bool update_preview = true);
     
     bool hasPreset(const View* view, const std::string& name) const;
@@ -161,6 +186,7 @@ signals:
     void presetUpdated(Key key);
     void presetAdded(Key key);
     void presetRemoved(Key key);
+    void presetCopied(Key key_old, Key key_new);
     void presetRenamed(Key key_old, Key key_new);
 
     void presetEdited(EditAction ea);
@@ -172,10 +198,28 @@ private:
     bool readPreset(const std::string& fn);
 
     //internal versions
-    bool createPreset(const Preset& preset, const View* view, bool signal_changes);
-    void removePreset(const Key& key, const View* view, bool signal_changes);
-    bool renamePreset(const Key& key, const std::string& new_name, const View* view, bool signal_changes);
-    bool updatePreset(const Key& key, const Preset* preset, const View* view, UpdateMode mode, bool update_preview, bool signal_changes);
+    bool createPreset(const Preset& preset, 
+                      const View* view, 
+                      bool signal_changes);
+    void removePreset(const Key& key, 
+                      const View* view, 
+                      bool signal_changes);
+    bool renamePreset(const Key& key, 
+                      const std::string& new_name, 
+                      const View* view, 
+                      bool signal_changes);
+    bool copyPreset(const Key& key,
+                    const std::string& new_name,
+                    const boost::optional<PresetMetadata>& new_metadata,
+                    const View* view, 
+                    bool signal_changes);
+    bool updatePreset(const Key& key, 
+                      const Preset* preset, 
+                      const View* view, 
+                      bool update_config_from_view, 
+                      UpdateMode mode, 
+                      bool update_preview, 
+                      bool signal_changes);
 
     std::string uniqueBasename(const Preset& preset) const;
 

@@ -167,8 +167,8 @@ void ViewPresetEditDialog::configureUI()
         assert(preset_);
 
         //fill in current metadata (skip name as the name has to change anyway)
-        category_edit_->setText(QString::fromStdString(preset_->category));
-        description_edit_->setText(QString::fromStdString(preset_->description));
+        category_edit_->setText(QString::fromStdString(preset_->metadata.category));
+        description_edit_->setText(QString::fromStdString(preset_->metadata.description));
     }
     else if (mode_ == Mode::Create)
     {
@@ -181,8 +181,8 @@ void ViewPresetEditDialog::configureUI()
 
         //fill in current metadata
         name_edit_->setText(QString::fromStdString(preset_->name));
-        category_edit_->setText(QString::fromStdString(preset_->category));
-        description_edit_->setText(QString::fromStdString(preset_->description));
+        category_edit_->setText(QString::fromStdString(preset_->metadata.category));
+        description_edit_->setText(QString::fromStdString(preset_->metadata.description));
 
         name_edit_->setFrame(false);
         name_edit_->setReadOnly(true);
@@ -211,9 +211,9 @@ void ViewPresetEditDialog::updateConfig()
 void ViewPresetEditDialog::updateMetaData()
 {
     //store current metadata to new preset
-    preset_new_.name        = name_edit_->text().toStdString();
-    preset_new_.category    = category_edit_->text().toStdString();
-    preset_new_.description = description_edit_->toPlainText().toStdString();
+    preset_new_.name                 = name_edit_->text().toStdString();
+    preset_new_.metadata.category    = category_edit_->text().toStdString();
+    preset_new_.metadata.description = description_edit_->toPlainText().toStdString();
 }
 
 /**
@@ -296,9 +296,9 @@ bool ViewPresetEditDialog::applyEdit()
 
     //edit existing preset with new metadata
     bool ok = COMPASS::instance().viewManager().viewPresets().updatePreset(preset_->key(), 
+                                                                           ViewPresets::UpdateMode::MetaData,
                                                                            &preset_new_,
-                                                                           nullptr,
-                                                                           ViewPresets::UpdateMode::MetaData);
+                                                                           view_);
     QApplication::restoreOverrideCursor();
 
     if (!ok)
@@ -326,8 +326,11 @@ bool ViewPresetEditDialog::applyCopy()
     //update new preset's metadata to form content
     updateMetaData();
 
-    //create new preset
-    bool ok = COMPASS::instance().viewManager().viewPresets().createPreset(preset_new_, view_);
+    //copy preset
+    bool ok = COMPASS::instance().viewManager().viewPresets().copyPreset(preset_->key(), 
+                                                                         preset_new_.name,
+                                                                         preset_new_.metadata,
+                                                                         view_);
 
     QApplication::restoreOverrideCursor();
 
@@ -603,12 +606,12 @@ void ViewPresetItemWidget::updateContents(const ViewPresets::Key& key)
 */
 void ViewPresetItemWidget::updateContents()
 {
-    category_label_->setVisible(!preset_->category.empty());
-    category_label_->setText(QString::fromStdString(preset_->category));
+    category_label_->setVisible(!preset_->metadata.category.empty());
+    category_label_->setText(QString::fromStdString(preset_->metadata.category));
 
     name_label_->setText(QString::fromStdString(preset_->name));
 
-    description_label_->setText(QString::fromStdString(preset_->description));
+    description_label_->setText(QString::fromStdString(preset_->metadata.description));
 
     preview_label_->setText(preset_->preview.isNull() ? "No preview available" : "");
     preview_label_->setPixmap(preset_->preview.isNull() ? QPixmap() : QPixmap::fromImage(preset_->preview));
@@ -645,7 +648,7 @@ void ViewPresetItemWidget::saveButtonPressed()
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
     //update preset view config
-    bool ok = presets.updatePreset(key_, nullptr, view_, ViewPresets::UpdateMode::ViewConfig, true);
+    bool ok = presets.updatePreset(key_, ViewPresets::UpdateMode::ViewConfig, nullptr, view_);
 
     QApplication::restoreOverrideCursor();
 
@@ -721,6 +724,7 @@ ViewPresetItemListWidget::ViewPresetItemListWidget(View* view,
     connect(&presets, &ViewPresets::presetAdded  , this, &ViewPresetItemListWidget::updateItem);
     connect(&presets, &ViewPresets::presetRemoved, this, &ViewPresetItemListWidget::removeItem);
     connect(&presets, &ViewPresets::presetRenamed, this, &ViewPresetItemListWidget::updateItem);
+    connect(&presets, &ViewPresets::presetCopied , this, &ViewPresetItemListWidget::updateItem);
     connect(&presets, &ViewPresets::presetUpdated, this, &ViewPresetItemListWidget::updateItem);
 }
 
@@ -830,7 +834,7 @@ void ViewPresetItemListWidget::removePreset(ViewPresets::Key key)
     assert(presets.hasPreset(key));
 
     //remove preset
-    presets.removePreset(key);
+    presets.removePreset(key, view_);
 }
 
 /**
