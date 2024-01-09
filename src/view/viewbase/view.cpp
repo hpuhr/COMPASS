@@ -624,7 +624,7 @@ bool View::applyPreset(const ViewPresets::Preset& preset,
 }
 
 /**
- * Syncs the currently stored preset from the view managers presets.
+ * Reacts on edited presets. Depending on the type of edit this might concern a view or not.
  */
 void View::presetEdited(ViewPresets::EditAction ea)
 {
