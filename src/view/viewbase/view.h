@@ -82,7 +82,6 @@ public:
     virtual void clearData();
     virtual void appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current);
 
-    unsigned int getKey();
     const std::string& getName() const;
 
     /// @brief Returns the view's central widget
@@ -117,7 +116,6 @@ public:
                      std::string* error = nullptr);
     const ViewPresets::Preset* activePreset() const;
     bool presetChanged() const;
-    
 
     //shortcut update flags
     static const int VU_PureRedraw       = VU_Redraw;                                      // just redraw
@@ -174,6 +172,8 @@ private:
     unsigned int getInstanceKey();
 
     void runAutomaticUpdates();
+
+    void presetEdited(ViewPresets::EditAction ea);
 
     AppMode app_mode_;
     time_t  creation_time_;

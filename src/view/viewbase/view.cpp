@@ -68,6 +68,7 @@ View::View(const std::string& class_id,
     connect(&view_manager_, &ViewManager::showViewPointSignal, this, &View::showViewPointSlot);
     connect(&view_manager_, &ViewManager::reloadStateChanged, this, &View::viewManagerReloadStateChanged);
     connect(&view_manager_, &ViewManager::automaticUpdatesChanged, this, &View::viewManagerAutoUpdatesChanged);
+    connect(&view_manager_, &ViewManager::presetEdited, this, &View::presetEdited);
 }
 
 /**
@@ -77,10 +78,6 @@ Just deleting a view is totally feasible and will remove the view from its ViewC
  */
 View::~View()
 {
-    // delete model
-//    if (model_)
-//        delete model_;
-
     // unregister from manager
     if (view_manager_.isRegistered(this))
         view_manager_.unregisterView(this);
@@ -624,6 +621,67 @@ bool View::applyPreset(const ViewPresets::Preset& preset,
     emit presetChangedSignal();
 
     return true;
+}
+
+/**
+ * Syncs the currently stored preset from the view managers presets.
+ */
+void View::presetEdited(ViewPresets::EditAction ea)
+{
+    assert(ea.valid());
+
+    const auto& presets = view_manager_.viewPresets().presets();
+
+    if (ea.mode == ViewPresets::EditMode::Add)
+    {
+        //if my view has added the preset => set active preset to new one
+        if (ea.view == this)
+        {
+            const auto& preset = presets.at(ea.key);
+
+            active_preset_  = preset;
+            preset_changed_ = false;
+        }
+    }
+    else if (ea.mode == ViewPresets::EditMode::Remove)
+    {
+        if (!active_preset_.has_value())
+            return;
+
+        //if my active preset has been removed => reset active preset
+        if (active_preset_->key() == ea.key)
+        {
+            active_preset_.reset();
+            preset_changed_ = false;
+        }
+    }
+    else if (ea.mode == ViewPresets::EditMode::Update)
+    {
+        if (!active_preset_.has_value())
+            return;
+        
+        //if my active preset is the updated preset => update local preset
+        if (active_preset_->key() == ea.key)
+        {
+            const auto& preset = presets.at(ea.key);
+
+            active_preset_  = preset;
+
+            //if the config has been updated the preset is synced to the current view config => reset changes
+            if (ea.config_changed)
+                preset_changed_ = false;
+        }
+    }
+    else if (ea.mode == ViewPresets::EditMode::Rename)
+    {
+        if (!active_preset_.has_value())
+            return;
+
+        //@TODO: actions needed?
+    }
+
+    //notify about preset changes
+    emit presetChangedSignal();
 }
 
 /**

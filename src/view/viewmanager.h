@@ -51,6 +51,7 @@ class ViewManager : public QObject, public Configurable
     void showViewPointSignal (const ViewableDataConfig* vp);
     void reloadStateChanged();
     void automaticUpdatesChanged();
+    void presetEdited(ViewPresets::EditAction ea);
 
   public slots:
     void selectionChangedSlot();

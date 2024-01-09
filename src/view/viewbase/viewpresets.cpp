@@ -343,7 +343,10 @@ bool ViewPresets::createPreset(const Preset& preset, const View* view, bool sign
     presets_[ key ] = p;
 
     if (signal_changes)
+    {
         emit presetAdded(key);
+        emit presetEdited(EditAction(EditMode::Add, key, {}, true, view));
+    }
 
     return true;
 }
@@ -352,16 +355,16 @@ bool ViewPresets::createPreset(const Preset& preset, const View* view, bool sign
 /**
  * Removes the preset of the given key.
  */
-void ViewPresets::removePreset(const Key& key)
+void ViewPresets::removePreset(const Key& key, const View* view)
 {
-    removePreset(key, true);
+    removePreset(key, view, true);
 }
 
 /**
  * Removes the preset of the given key.
  * Internal version.
  */
-void ViewPresets::removePreset(const Key& key, bool signal_changes)
+void ViewPresets::removePreset(const Key& key, const View* view, bool signal_changes)
 {
     assert(presets_.count(key) > 0);
 
@@ -383,16 +386,19 @@ void ViewPresets::removePreset(const Key& key, bool signal_changes)
     presets_.erase(key);
 
     if (signal_changes)
+    {
         emit presetRemoved(key);
+        emit presetEdited(EditAction(EditMode::Remove, key, {}, false, view));
+    }
 }
 
 /**
  * Renames the preset of the given key to the given name.
  * Will cause the original file to be deleted and a file to be generated under the new name.
  */
-bool ViewPresets::renamePreset(const Key& key, const std::string& new_name)
+bool ViewPresets::renamePreset(const Key& key, const std::string& new_name, const View* view)
 {
-    return renamePreset(key, new_name, true);
+    return renamePreset(key, new_name, view, true);
 }
 
 /**
@@ -400,7 +406,7 @@ bool ViewPresets::renamePreset(const Key& key, const std::string& new_name)
  * Will cause the original file to be deleted and a file to be generated under the new name.
  * Internal version.
  */
-bool ViewPresets::renamePreset(const Key& key, const std::string& new_name, bool signal_changes)
+bool ViewPresets::renamePreset(const Key& key, const std::string& new_name, const View* view, bool signal_changes)
 {
     assert(presets_.count(key) > 0);
     assert(!new_name.empty() && new_name != key.second);
@@ -414,10 +420,13 @@ bool ViewPresets::renamePreset(const Key& key, const std::string& new_name, bool
         return false;
 
     //only if creation succeeds remove preset under old name
-    removePreset(key, false);
+    removePreset(key, view, false);
 
     if (signal_changes)
+    {
         emit presetRenamed(key, preset.key());
+        emit presetEdited(EditAction(EditMode::Rename, key, preset.key(), false, view));
+    }
 
     return true;
 }
@@ -465,6 +474,8 @@ bool ViewPresets::updatePreset(const Key& key,
         }
     }
 
+    bool config_changed = false;
+
     //change config?
     if (mode == UpdateMode::ViewConfig || mode == UpdateMode::All)
     {
@@ -473,11 +484,13 @@ bool ViewPresets::updatePreset(const Key& key,
             assert(viewID(view) == preset_cur.view);
 
             //view provided => update to view config
-            updatePresetConfig(preset_cur, view, update_preview);
+            config_changed = updatePresetConfig(preset_cur, view, update_preview);
         }
         else if (preset && !preset->view_config.is_null())
         {
             assert(preset_cur.view == preset->view);
+
+            config_changed = preset_cur.view_config != preset->view_config;
 
             //config provided in passed preset => copy config related data
             preset_cur.view_config = preset->view_config;
@@ -496,7 +509,10 @@ bool ViewPresets::updatePreset(const Key& key,
     }
 
     if (signal_changes)
+    {
         emit presetUpdated(key);
+        emit presetEdited(EditAction(EditMode::Update, key, {}, config_changed, view));
+    }
 
     return true;
 }
@@ -549,19 +565,33 @@ QImage ViewPresets::renderPreview(const View* view)
  * Preferably use this method to update the presets view config, since it also updates the preset's stamp
  * on config change.
  */
-void ViewPresets::updatePresetConfig(Preset& preset, const View* view, bool update_preview)
+bool ViewPresets::updatePresetConfig(Preset& preset, const View* view, bool update_preview)
 {
     assert(view);
     assert(preset.view.empty() || viewID(view) == preset.view);
 
     //collect json config
-    view->generateJSON(preset.view_config, Configurable::JSONExportType::Preset);
+    nlohmann::json new_cfg;
+    view->generateJSON(new_cfg, Configurable::JSONExportType::Preset);
+
+    bool cfg_changed = new_cfg != preset.view_config;
+
+    preset.view_config = new_cfg;
 
     if (update_preview)
         preset.preview = renderPreview(view);
 
     //update signature on config modify
     updatePresetStamp(preset);
+
+    return cfg_changed;
+}
+
+/**
+*/
+bool ViewPresets::keyValid(const Key& key)
+{
+    return (!key.first.empty() && !key.second.empty());
 }
 
 /**

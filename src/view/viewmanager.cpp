@@ -112,6 +112,8 @@ void ViewManager::init(QTabWidget* tab_widget)
         logwrn << "ViewManager: init: view presets could not be loaded";
 #endif
 
+    connect(&presets_, &ViewPresets::presetEdited, this, &ViewManager::presetEdited);
+
     initialized_ = true;
 
     createSubConfigurables();

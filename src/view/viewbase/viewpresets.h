@@ -42,6 +42,35 @@ public:
         All
     };
 
+    enum class EditMode
+    {
+        Add,
+        Remove,
+        Update,
+        Rename
+    };
+
+    struct EditAction
+    {
+        EditAction(EditMode m, Key k, Key k2, bool cfg_change, const View* v) 
+        :   mode          (m)
+        ,   key           (k)
+        ,   key2          (k2)
+        ,   config_changed(cfg_change)
+        ,   view          (v) {}
+
+        bool valid() const
+        {
+            return ViewPresets::keyValid(key);
+        }
+
+        EditMode    mode;
+        Key         key;
+        Key         key2;
+        bool        config_changed;
+        const View* view;
+    };
+
     /**
      * Struct defining a view preset.
      */
@@ -78,12 +107,14 @@ public:
                       bool create_preview = true);
     bool createPreset(const Preset& preset, 
                       const View* view);
-    void removePreset(const Key& key);
+    void removePreset(const Key& key, 
+                      const View* view = nullptr);
     bool renamePreset(const Key& key, 
-                      const std::string& new_name);
+                      const std::string& new_name,
+                      const View* view = nullptr);
     bool updatePreset(const Key& key, 
                       const Preset* preset,
-                      const View* view, 
+                      const View* view,
                       UpdateMode mode = UpdateMode::All,
                       bool update_preview = true);
     
@@ -92,9 +123,10 @@ public:
     bool nameExists(const std::string& name, const View* view) const;
 
     static void updatePresetStamp(Preset& preset);
-    static void updatePresetConfig(Preset& preset, const View* view, bool update_preview = true);
+    static bool updatePresetConfig(Preset& preset, const View* view, bool update_preview = true);
     static QImage renderPreview(const View* view);
 
+    static bool keyValid(const Key& key);
     static bool keyIsView(const Key& key, const View* view);
 
     const Presets& presets() const;
@@ -131,6 +163,8 @@ signals:
     void presetRemoved(Key key);
     void presetRenamed(Key key_old, Key key_new);
 
+    void presetEdited(EditAction ea);
+
 private:
     bool writePreview(const Preset& preset) const;
     bool writePreset(const Preset& preset) const;
@@ -139,8 +173,8 @@ private:
 
     //internal versions
     bool createPreset(const Preset& preset, const View* view, bool signal_changes);
-    void removePreset(const Key& key, bool signal_changes);
-    bool renamePreset(const Key& key, const std::string& new_name, bool signal_changes);
+    void removePreset(const Key& key, const View* view, bool signal_changes);
+    bool renamePreset(const Key& key, const std::string& new_name, const View* view, bool signal_changes);
     bool updatePreset(const Key& key, const Preset* preset, const View* view, UpdateMode mode, bool update_preview, bool signal_changes);
 
     std::string uniqueBasename(const Preset& preset) const;
