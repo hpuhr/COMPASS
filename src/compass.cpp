@@ -18,15 +18,11 @@
 #include "compass.h"
 #include "config.h"
 #include "dbinterface.h"
-//#include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "datasourcemanager.h"
-//#include "dbtableinfo.h"
 #include "filtermanager.h"
-//#include "global.h"
 #include "jobmanager.h"
 #include "logger.h"
-//#include "projectionmanager.h"
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "evaluationmanager.h"
@@ -37,6 +33,7 @@
 #include "rtcommand_manager.h"
 #include "rtcommand.h"
 #include "util/timeconv.h"
+#include "fftmanager.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -108,6 +105,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     assert(task_manager_);
     assert(view_manager_);
     assert(eval_manager_);
+    assert (fft_manager_);
 
     rt_cmd_runner_.reset(new rtcommand::RTCommandRunner);
 
@@ -140,6 +138,11 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
                      eval_manager_.get(), &EvaluationManager::databaseOpenedSlot);
     QObject::connect(this, &COMPASS::databaseClosedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
+
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
+                     fft_manager_.get(), &FFTManager::databaseOpenedSlot);
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
+                     fft_manager_.get(), &FFTManager::databaseClosedSlot);
 
     // data sources changed
     QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
@@ -182,6 +185,7 @@ COMPASS::~COMPASS()
     assert(!task_manager_);
     assert(!view_manager_);
     assert (!eval_manager_);
+    assert (!fft_manager_);
 
     logdbg << "COMPASS: destructor: end";
 }
@@ -244,6 +248,12 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         eval_manager_.reset(new EvaluationManager(class_id, instance_id, this));
         assert(eval_manager_);
     }
+    else if (class_id == "FFTManager")
+    {
+        assert(!fft_manager_);
+        fft_manager_.reset(new FFTManager(class_id, instance_id, this));
+        assert(fft_manager_);
+    }
     else
         throw std::runtime_error("COMPASS: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -284,6 +294,11 @@ void COMPASS::checkSubConfigurables()
     {
         generateSubConfigurableFromConfig("EvaluationManager", "EvaluationManager0");
         assert(eval_manager_);
+    }
+    if (!fft_manager_)
+    {
+        generateSubConfigurableFromConfig("FFTManager", "FFTManager0");
+        assert(fft_manager_);
     }
 }
 
@@ -452,6 +467,12 @@ EvaluationManager& COMPASS::evaluationManager()
     return *eval_manager_;
 }
 
+FFTManager& COMPASS::fftManager()
+{
+    assert(fft_manager_);
+    return *fft_manager_;
+}
+
 rtcommand::RTCommandRunner& COMPASS::rtCmdRunner()
 {
     assert(rt_cmd_runner_);
@@ -485,6 +506,11 @@ void COMPASS::shutdown()
     if (db_interface_->dbOpen())
         ds_manager_->saveDBDataSources();
     ds_manager_ = nullptr;
+
+    assert(fft_manager_);
+    if (db_interface_->dbOpen())
+        fft_manager_->saveDBFFTs();
+    fft_manager_ = nullptr;
 
     assert(dbcontent_manager_);
     if (db_interface_->dbOpen())

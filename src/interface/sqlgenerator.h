@@ -46,6 +46,7 @@ public:
             bool use_order = false, dbContent::Variable* order_variable = nullptr);
 
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
+    std::shared_ptr<DBCommand> getFFTSelectCommand();
 
     std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);
     std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent);
@@ -68,6 +69,7 @@ public:
     //std::string getTableMinMaxCreateStatement();
     std::string getTablePropertiesCreateStatement();
     std::string getTableDataSourcesCreateStatement();
+    std::string getTableFFTsCreateStatement();
     std::string getTableSectorsCreateStatement();
     std::string getTableViewPointsCreateStatement();
     std::string getTableTargetsCreateStatement();
@@ -104,6 +106,7 @@ protected:
     //std::string table_minmax_create_statement_;
     std::string table_properties_create_statement_;
     std::string table_data_sources_create_statement_;
+    std::string table_ffts_create_statement_;
     std::string table_sectors_create_statement_;
     std::string table_view_points_create_statement_;
     std::string table_targets_create_statement_;

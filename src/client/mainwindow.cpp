@@ -22,7 +22,6 @@
 #include "configurationmanager.h"
 #include "datasourcemanager.h"
 #include "datasourcesconfigurationdialog.h"
-//#include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/target/targetlistwidget.h"
 #include "datasourcesloadwidget.h"
@@ -32,13 +31,10 @@
 #include "filtermanagerwidget.h"
 #include "global.h"
 #include "logger.h"
-//#include "stringconv.h"
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskdialog.h"
-//#include "viewpointsreportgenerator.h"
-//#include "viewpointsreportgeneratordialog.h"
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskdialog.h"
 #include "gpsimportcsvtask.h"
@@ -49,7 +45,8 @@
 #include "calculatereferencestaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
-//#include "viewwidget.h"
+#include "fftmanager.h"
+#include "fftsconfigurationdialog.h"
 #include "view.h"
 #include "ui_test_common.h"
 #include "ui_test_cmd.h"
@@ -365,6 +362,11 @@ void MainWindow::createMenus ()
     ds_action->setToolTip("Configure Data Sources");
     connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
     config_menu_->addAction(ds_action);
+
+    QAction* ffts_action = new QAction("FFTs");
+    ffts_action->setToolTip("Configure FFTs");
+    connect(ffts_action, &QAction::triggered, this, &MainWindow::configureFFTsSlot);
+    config_menu_->addAction(ffts_action);
 
     QAction* meta_action = new QAction("Meta Variables");
 
@@ -922,6 +924,14 @@ void MainWindow::configureDataSourcesSlot()
 
     COMPASS::instance().dataSourceManager().configurationDialog()->show();
 }
+
+void MainWindow::configureFFTsSlot()
+{
+    loginf << "MainWindow: configureFFTsSlot";
+
+    COMPASS::instance().fftManager().configurationDialog()->show();
+}
+
 
 void MainWindow::configureMetaVariablesSlot()
 {

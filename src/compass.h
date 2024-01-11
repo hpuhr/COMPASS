@@ -19,7 +19,6 @@
 #define COMPASS_H_
 
 #include "configurable.h"
-//#include "propertylist.h"
 #include "singleton.h"
 #include "json.hpp"
 #include "appmode.h"
@@ -40,6 +39,7 @@ class ViewManager;
 class SimpleConfig;
 class EvaluationManager;
 class MainWindow;
+class FFTManager;
 
 namespace rtcommand
 {
@@ -59,7 +59,7 @@ public:
     virtual ~COMPASS();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
     std::string getPath() const override final;
 
     void openDBFile(const std::string& filename);
@@ -77,6 +77,7 @@ public:
     SimpleConfig& config();
     EvaluationManager& evaluationManager();
     rtcommand::RTCommandRunner& rtCmdRunner();
+    FFTManager& fftManager();
 
     void shutdown();
 
@@ -115,6 +116,7 @@ protected:
     std::unique_ptr<TaskManager> task_manager_;
     std::unique_ptr<ViewManager> view_manager_;
     std::unique_ptr<EvaluationManager> eval_manager_;
+    std::unique_ptr<FFTManager> fft_manager_;
 
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
 
@@ -125,7 +127,7 @@ protected:
 
     bool db_export_in_progress_ {false};
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
 
     MainWindow* main_window_;
 

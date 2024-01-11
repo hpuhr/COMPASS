@@ -38,7 +38,7 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    std::vector<unsigned int> getAllDsIDs(); // both config and db
+    const std::vector<unsigned int>& getAllDsIDs(); // both config and db
 
     bool hasConfigDataSource(unsigned int ds_id);
     void createConfigDataSource(unsigned int ds_id);

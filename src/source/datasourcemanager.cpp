@@ -67,7 +67,7 @@ void DataSourceManager::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
-std::vector<unsigned int> DataSourceManager::getAllDsIDs()
+const std::vector<unsigned int>& DataSourceManager::getAllDsIDs()
 {
     return ds_ids_all_;
 }

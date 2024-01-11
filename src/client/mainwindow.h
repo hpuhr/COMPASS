@@ -66,6 +66,7 @@ public slots:
     void liveStopSlot();
 
     void configureDataSourcesSlot();
+    void configureFFTsSlot();
     void configureMetaVariablesSlot();
     void configureSectorsSlot();
 

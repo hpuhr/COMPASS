@@ -51,6 +51,8 @@ class SectorLayer;
 class SQLGenerator;
 class QWidget;
 
+class DBFFT;
+
 namespace dbContent
 {
 class DBDataSource;
@@ -92,10 +94,18 @@ public:
 
     SQLiteConnection& connection();
 
+    // data sources
     bool existsDataSourcesTable();
     void createDataSourcesTable();
     std::vector<std::unique_ptr<dbContent::DBDataSource>> getDataSources();
     void saveDataSources(const std::vector<std::unique_ptr<dbContent::DBDataSource>>& data_sources);
+    // clears previous and saves new ones
+
+    // ffts
+    bool existsFFTsTable();
+    void createFFTsTable();
+    std::vector<std::unique_ptr<DBFFT>> getFFTs();
+    void saveFFTs(const std::vector<std::unique_ptr<DBFFT>>& ffts);
     // clears previous and saves new ones
 
     // insert data and create associated data sources
