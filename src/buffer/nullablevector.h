@@ -125,7 +125,7 @@ public:
 
     /// @brief Checks if specific element is Null
     bool isNull(unsigned int index) const;
-
+    bool isAlwaysNull() const;
     bool isNeverNull() const;
 
     void swapData (unsigned int index1, unsigned int index2);
@@ -1061,6 +1061,24 @@ void NullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_remo
         assert (null_rm_cnt <= null_flags_.size());
         null_flags_.resize(null_flags_.size() - null_rm_cnt);
     }
+}
+
+template <class T>
+bool NullableVector<T>::isAlwaysNull() const
+{
+    logdbg << "NullableVector " << property_.name() << ": isAlwaysNull";
+
+    if (data_.size() == 0)
+        return true;
+
+
+    for (unsigned int cnt = 0; cnt < buffer_.data_size_; cnt++)
+    {
+        if (!isNull(cnt))
+            return false;
+    }
+
+    return true;
 }
 
 template <class T>

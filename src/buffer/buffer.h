@@ -115,6 +115,7 @@ public:
     void dbContentName(const std::string& dbcontent_name) { dbcontent_name_ = dbcontent_name; }
 
     bool isNull(const Property& property, unsigned int index);
+    void deleteEmptyProperties();
 
     void transformVariables(dbContent::VariableSet& list,
                             bool dbcol2dbovar);  // tc2dbovar true for db col -> dbo var, false dbo var -> db column

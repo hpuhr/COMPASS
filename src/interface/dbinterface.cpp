@@ -623,7 +623,10 @@ void DBInterface::saveFFTs(const std::vector<std::unique_ptr<DBFFT>>& ffts)
 
     assert (dbOpen());
 
-    clearTableContent(DBFFT::table_name_);
+    if (existsFFTsTable())
+        clearTableContent(DBFFT::table_name_);
+    else
+        createFFTsTable();
 
     PropertyList list;
     list.addProperty(DBFFT::name_column_);
@@ -1186,6 +1189,8 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
 
         COMPASS::instance().dbContentManager().maxRecordNumber(max_rec_num);
     }
+
+    buffer->deleteEmptyProperties();
 
     insertBuffer(dbcontent.dbTableName(), buffer);
 }
