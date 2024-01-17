@@ -576,7 +576,8 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
         dbContent::Variable& vx_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_);
         dbContent::Variable& vy_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_);
         dbContent::Variable& speed_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_);
-        dbContent::Variable& track_angle_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_);
+        dbContent::Variable& track_angle_var =
+                dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_);
 
         vx_var_name = vx_var.name();
         vy_var_name = vy_var.name();
@@ -591,8 +592,15 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
         if (!buffer->has<double>(vx_var_name) || !buffer->has<double>(vy_var_name))
             continue; // cant calculate
 
-        if (buffer->has<double>(speed_var_name) && buffer->has<double>(track_angle_var_name))
+        if (buffer->has<double>(speed_var_name) && buffer->has<double>(track_angle_var_name)
+                && buffer->get<double>(speed_var_name).isNeverNull()
+                && buffer->get<double>(track_angle_var_name).isNeverNull())
+        {
+            logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: "
+                   << dbcontent_name << " speed and track angle already set";
+
             continue; // no need for calculation
+        }
 
         if (!buffer->has<double>(speed_var_name))
             buffer->addProperty(speed_var_name, PropertyDataType::DOUBLE); // add if needed
@@ -605,9 +613,14 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
         NullableVector<double>& speed_vec = buffer->get<double>(speed_var_name);
         NullableVector<double>& track_angle_vec = buffer->get<double>(track_angle_var_name);
 
+        unsigned int cnt = 0;
+
         for (unsigned int index=0; index < buffer_size; index++)
         {
-            if (vx_vec.isNull(index) || vy_vec.isNull(index))
+            if (vx_vec.isNull(index) || vy_vec.isNull(index)) // can not calculate
+                continue;
+
+            if (!speed_vec.isNull(index) && !track_angle_vec.isNull(index)) // already set
                 continue;
 
             speed_ms = sqrt(pow(vx_vec.get(index), 2)+pow(vy_vec.get(index), 2)) ; // for 1s
@@ -620,7 +633,12 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
 
             speed_vec.set(index, speed_ms * M_S2KNOTS);
             track_angle_vec.set(index, track_angle_deg);
+
+            ++cnt;
         }
+
+        logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: "
+               << dbcontent_name << " speed and track angle calc " << cnt << " / " << buffer_size;
     }
 }
 

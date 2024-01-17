@@ -479,7 +479,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "ground_speed",
-                    "description": "From 200.Ground Speed\n\nMax. val. = 2 NM/s = 7200kt",
+                    "description": "From 200.Ground Speed\n\nMax. val. = 2 NM/s = 7200kt\n\nOr calculated from From 202.Vx, 202.Vy",
                     "dimension": "Speed",
                     "is_key": false,
                     "name": "Ground Speed",
@@ -492,7 +492,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle",
-                    "description": "From 200.Track Angle",
+                    "description": "From 200.Track Angle\n\nOr calculated from From 202.Vx, 202.Vy",
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Track Angle",

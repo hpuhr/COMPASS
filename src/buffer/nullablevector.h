@@ -1068,9 +1068,9 @@ bool NullableVector<T>::isNeverNull() const
 {
     logdbg << "NullableVector " << property_.name() << ": isNeverNull";
 
-    for (unsigned int cnt = 0; cnt < null_flags_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < buffer_.data_size_; cnt++)
     {
-        if (null_flags_.at(cnt))
+        if (isNull(cnt))
             return false;
     }
 
