@@ -545,6 +545,7 @@ bool RTCommandImportASTERIXFile::run_impl()
     assert (filename_.size());
     assert (Files::fileExists(filename_));
 
+    import_task.clearImportFilesInfo();
     import_task.addImportFileNames({filename_}, file_line);
 
     if (!import_task.canRun())
@@ -731,6 +732,7 @@ bool RTCommandImportASTERIXFiles::run_impl()
         assert (Files::fileExists(filename));
     }
 
+    import_task.clearImportFilesInfo();
     import_task.addImportFileNames(split_filenames_, file_line);
 
     if (!import_task.canRun())

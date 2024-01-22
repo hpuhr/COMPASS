@@ -67,7 +67,6 @@ std::string ASTERIXFileDecoder::statusInfoString()
             text += "<p align=\"left\">"+file_info.filename_ + "";
     }
 
-
     text += "<br><p align=\"left\">Records/s: "+to_string((unsigned int) getRecordsPerSecond());
     text += "<p align=\"right\">Remaining: "+String::timeStringFromDouble(getRemainingTime() + 1.0, false);
 
