@@ -512,6 +512,9 @@ bool RTCommandImportASTERIXFile::run_impl()
         if (line_id_.size())
         {
             file_line = String::lineFromStr(line_id_);
+
+            //@TODO: remove if per-file line id works as expected
+            import_task.settings().file_line_id_ = file_line;
         }
 
         if (date_str_.size())
@@ -692,6 +695,9 @@ bool RTCommandImportASTERIXFiles::run_impl()
         if (line_id_.size())
         {
             file_line = String::lineFromStr(line_id_);
+
+            //@TODO: remove if per-file line id works as expected
+            import_task.settings().file_line_id_ = file_line;
         }
 
         if (date_str_.size())
