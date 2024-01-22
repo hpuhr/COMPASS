@@ -79,7 +79,8 @@ class VariableOrderedSet : public QObject, public Configurable
   protected:
     nlohmann::json variable_definitions_; // json list of std::string pairs
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
+    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
 };
 
 }

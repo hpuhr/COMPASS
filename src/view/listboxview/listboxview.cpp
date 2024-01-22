@@ -226,4 +226,6 @@ void ListBoxView::onConfigurationChanged_impl(const std::vector<std::string>& ch
             emit usePresentationSignal(settings_.use_presentation);
         }
     }
+
+    
 }
