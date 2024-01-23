@@ -218,6 +218,11 @@ unsigned long recNumAddDBContId (unsigned long rec_num_wo_dbcont_id, unsigned in
     return rec_num_wo_dbcont_id << 8 | dbcont_id;
 }
 
+unsigned long recNumGetWithoutDBContId (unsigned long rec_num)
+{
+    return rec_num >> 8;
+}
+
 unsigned int recNumGetDBContId (unsigned long rec_num)
 {
     return rec_num & 0xFF; // first byte

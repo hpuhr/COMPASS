@@ -36,7 +36,7 @@
 #include "jobmanager.h"
 #include "evaluationmanager.h"
 #include "filtermanager.h"
-//#include "util/number.h"
+#include "util/number.h"
 //#include "util/system.h"
 #include "util/timeconv.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
@@ -475,7 +475,7 @@ void DBContentManager::databaseOpenedSlot()
 {
     loginf << "DBContentManager: databaseOpenedSlot";
 
-    loadMaxRecordNumber();
+    loadMaxRecordNumberWODBContentID();
     loadMaxRefTrajTrackNum();
 
     DBInterface& db_interface = COMPASS::instance().interface();
@@ -524,8 +524,8 @@ void DBContentManager::databaseClosedSlot()
 {
     loginf << "DBContentManager: databaseClosedSlot";
 
-    max_rec_num_ = 0;
-    has_max_rec_num_ = false;
+    max_rec_num_wo_dbcontid_ = 0;
+    has_max_rec_num_wo_dbcontid_ = false;
 
     max_reftraj_track_num_ = 0;
     has_max_reftraj_track_num_ = false;
@@ -1181,18 +1181,18 @@ void DBContentManager::updateNumLoadedCounts()
 }
 
 
-unsigned long DBContentManager::maxRecordNumber() const
+unsigned long DBContentManager::maxRecordNumberWODBContentID() const
 {
-    assert (has_max_rec_num_);
-    return max_rec_num_;
+    assert (has_max_rec_num_wo_dbcontid_);
+    return max_rec_num_wo_dbcontid_;
 }
 
-void DBContentManager::maxRecordNumber(unsigned long value)
+void DBContentManager::maxRecordNumberWODBContentID(unsigned long value)
 {
     logdbg << "DBContentManager: maxRecordNumber: " << value;
 
-    max_rec_num_ = value;
-    has_max_rec_num_ = true;
+    max_rec_num_wo_dbcontid_ = value;
+    has_max_rec_num_wo_dbcontid_ = true;
 }
 
 unsigned int DBContentManager::maxRefTrajTrackNum() const
@@ -1456,21 +1456,26 @@ bool DBContentManager::insertInProgress() const
     return insert_in_progress_;
 }
 
-void DBContentManager::loadMaxRecordNumber()
+void DBContentManager::loadMaxRecordNumberWODBContentID()
 {
     assert (COMPASS::instance().interface().dbOpen());
 
-    max_rec_num_ = 0;
+    max_rec_num_wo_dbcontid_ = 0;
+    unsigned long max_rec_num_with_dbcontid = 0;
 
     for (auto& obj_it : dbcontent_)
     {
         if (obj_it.second->existsInDB())
-            max_rec_num_ = max(COMPASS::instance().interface().getMaxRecordNumber(*obj_it.second), max_rec_num_);
+        {
+            max_rec_num_with_dbcontid = COMPASS::instance().interface().getMaxRecordNumber(*obj_it.second);
+            max_rec_num_wo_dbcontid_ = max(Number::recNumGetWithoutDBContId(max_rec_num_with_dbcontid),
+                                           max_rec_num_wo_dbcontid_);
+        }
     }
 
-    has_max_rec_num_ = true;
+    has_max_rec_num_wo_dbcontid_ = true;
 
-    loginf << "DBContentManager: loadMaxRecordNumber: " << max_rec_num_;
+    loginf << "DBContentManager: loadMaxRecordNumber: " << max_rec_num_wo_dbcontid_;
 }
 
 void DBContentManager::loadMaxRefTrajTrackNum()

@@ -130,9 +130,9 @@ public:
     void setAssociationsIdentifier(const std::string& assoc_id);
     std::string associationsID() const;
 
-    bool hasMaxRecordNumber() const { return has_max_rec_num_; }
-    unsigned long maxRecordNumber() const;
-    void maxRecordNumber(unsigned long value);
+    bool hasMaxRecordNumberWODBContentID() const { return has_max_rec_num_wo_dbcontid_; }
+    unsigned long maxRecordNumberWODBContentID() const;
+    void maxRecordNumberWODBContentID(unsigned long value);
 
     bool hasMaxRefTrajTrackNum() const { return has_max_reftraj_track_num_; }
     unsigned int maxRefTrajTrackNum() const;
@@ -197,8 +197,8 @@ protected:
     bool has_associations_{false};
     std::string associations_id_;
 
-    bool has_max_rec_num_ {false};
-    unsigned long max_rec_num_ {0};
+    bool has_max_rec_num_wo_dbcontid_ {false};
+    unsigned long max_rec_num_wo_dbcontid_ {0};
 
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
@@ -245,7 +245,7 @@ protected:
 
     void updateNumLoadedCounts(); // from data_
 
-    void loadMaxRecordNumber();
+    void loadMaxRecordNumberWODBContentID();
     void loadMaxRefTrajTrackNum();
 
     void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);

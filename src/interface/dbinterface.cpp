@@ -1172,8 +1172,8 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
 
         buffer->addProperty(rec_num_col_str, PropertyDataType::ULONGINT);
 
-        assert (COMPASS::instance().dbContentManager().hasMaxRecordNumber());
-        unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumber();
+        assert (COMPASS::instance().dbContentManager().hasMaxRecordNumberWODBContentID());
+        unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID();
 
         NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(rec_num_col_str);
 
@@ -1187,10 +1187,11 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
             rec_num_vec.set(cnt, Number::recNumAddDBContId(max_rec_num, dbcont_id));
         }
 
-        COMPASS::instance().dbContentManager().maxRecordNumber(max_rec_num);
+        COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID(max_rec_num);
     }
 
-    buffer->deleteEmptyProperties();
+    if (COMPASS::instance().appMode() != AppMode::LiveRunning) // is cleaned special there
+        buffer->deleteEmptyProperties();
 
     insertBuffer(dbcontent.dbTableName(), buffer);
 }
