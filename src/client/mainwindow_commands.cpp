@@ -119,8 +119,15 @@ bool RTCommandOpenDB::run_impl()
 
     if (COMPASS::instance().dbOpened())
     {
-        setResultMessage("Database already opened");
-        return false;
+        if (assure_open_ && COMPASS::instance().lastDbFilename() == filename_)
+        {
+            return true;
+        }
+        else
+        {
+            setResultMessage("Database already opened");
+            return false;
+        }
     }
 
     if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
@@ -141,7 +148,8 @@ void RTCommandOpenDB::collectOptions_impl(OptionsDescription& options,
                                           PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.db’");
+        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.db’")
+        ("assure_open", "Only opens the file if it is not already opened");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
 }
@@ -149,6 +157,7 @@ void RTCommandOpenDB::collectOptions_impl(OptionsDescription& options,
 void RTCommandOpenDB::assignVariables_impl(const VariablesMap& variables)
 {
     RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+    RTCOMMAND_CHECK_VAR(variables, "assure_open", assure_open_)
 }
 
 // open_recent_db

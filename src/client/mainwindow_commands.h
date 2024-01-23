@@ -12,6 +12,7 @@ extern void init_commands();
 struct RTCommandOpenDB : public rtcommand::RTCommand
 {
     std::string filename_;
+    bool        assure_open_ = false;
 
     virtual rtcommand::IsValid valid() const override;
 

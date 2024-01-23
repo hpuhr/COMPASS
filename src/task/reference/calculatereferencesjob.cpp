@@ -501,8 +501,9 @@ void CalculateReferencesJob::calculateReferences()
     //num_targets = 50; // only calculate part
 
     std::vector<std::shared_ptr<Buffer>> results;
-
     results.resize(num_targets);
+
+    std::vector<char> finished(num_targets, 0);
 
     //init viewpoints
     std::vector<ViewPointGenVP*> viewpoints(num_targets, nullptr);
@@ -542,6 +543,8 @@ void CalculateReferencesJob::calculateReferences()
 
             reftraj_counts_[targets_.at(tgt_cnt)->utn()] = results.at(tgt_cnt)->size(); // store count
 
+            finished[tgt_cnt] = 1;
+
             logdbg << "CalculateReferencesJob: calculateReferences: utn "
                    << targets_.at(tgt_cnt)->utn() << " done";
         });
@@ -551,18 +554,36 @@ void CalculateReferencesJob::calculateReferences()
 
     //    CALLGRIND_STOP_INSTRUMENTATION;
 
-    pending_future.wait(); // or do done flags for progress updates
+    //pending_future.wait(); // or do done flags for progress updates
+
+    while (pending_future.wait_for(std::chrono::seconds(1)) != std::future_status::ready)
+    {
+        size_t num_finished = 0;
+        for (auto f : finished)
+            if (f)
+                ++num_finished;
+
+        QString quota = "Calculating References " + QString::number(num_finished) + "/" + QString::number(num_targets);
+
+        QMetaObject::invokeMethod(&status_dialog_, "setStatusSlot",
+                                  Qt::QueuedConnection,
+                                  Q_ARG(QString, quota));
+    }
 
     for (auto& buf_it : results)
     {
         if (!buf_it->size())
             continue;
 
+        loginf << "BUFFER SIZE: " << buf_it->size();
+
         if (!result_)
             result_ = move(buf_it);
         else
             result_->seizeBuffer(*buf_it);
     }
+
+    loginf << "RESULT SIZE: " << result_->size();
 
     //create viewpoint json
     viewpoint_json_ = viewpoint_gen.toJSON(true, true);

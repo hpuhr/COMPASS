@@ -54,7 +54,7 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
     refresh_button_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     refresh_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
 
-    UI_TEST_OBJ_NAME(refresh_button_, refresh_button_->text())
+    UI_TEST_OBJ_NAME(refresh_button_, "refresh")
     
     layout_buttons->addWidget(refresh_button_);
 

@@ -200,6 +200,8 @@ MainWindow::MainWindow()
     connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
     bottom_layout->addWidget(load_button_);
 
+    load_button_->setObjectName("reload");
+
     bottom_widget->setLayout(bottom_layout);
 
     updateBottomWidget();
