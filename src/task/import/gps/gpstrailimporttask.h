@@ -138,6 +138,7 @@ public slots:
 
 signals:
     void configChanged();
+    void fileChanged();
 
 protected:
     virtual void checkSubConfigurables() override {}

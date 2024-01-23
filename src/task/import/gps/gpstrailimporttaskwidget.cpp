@@ -60,6 +60,7 @@ GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWi
     setLayout(main_layout_);
 
     connect(&task_, &GPSTrailImportTask::configChanged, this, &GPSTrailImportTaskWidget::updateConfig);
+    connect(&task_, &GPSTrailImportTask::fileChanged, this, &GPSTrailImportTaskWidget::updateText);
 }
 
 void GPSTrailImportTaskWidget::addMainTab()
@@ -74,7 +75,6 @@ void GPSTrailImportTaskWidget::addMainTab()
     // file stuff
     file_label_ = new QLabel(task_.importFilename().c_str());
     tab_layout->addWidget(file_label_);
-
 
     text_edit_ = new QTextEdit ();
     text_edit_->setReadOnly(true);
@@ -423,6 +423,8 @@ void GPSTrailImportTaskWidget::updateText ()
         ss << task_.currentText();
 
     text_edit_->setText(ss.str().c_str());
+
+    file_label_->setText(task_.importFilename().c_str());
 
     //    if (task_.currentError().size())
     //    {

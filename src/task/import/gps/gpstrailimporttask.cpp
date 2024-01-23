@@ -152,6 +152,7 @@ void GPSTrailImportTask::importFilename(const std::string& filename)
 
     parseCurrentFile();
 
+    emit fileChanged();
     emit statusChangedSignal(name_);
 }
 

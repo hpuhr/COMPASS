@@ -290,4 +290,11 @@ VariableOrderedSetWidget* VariableOrderedSet::createWidget()
     return new VariableOrderedSetWidget(*this);
 }
 
+void VariableOrderedSet::onConfigurationChanged(const std::vector<std::string>& changed_params)
+{
+    //set has definitely changed if the variable set has been overwritten
+    emit setChangedSignal();
+    emit variableAddedChangedSignal();
+}
+
 }
