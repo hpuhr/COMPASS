@@ -98,10 +98,10 @@ void ViewWidget::createStandardLayout()
     //create preset selection
     if (COMPASS::instance().viewManager().viewPresetsEnabled())
     {
-        auto preset_widget = new ViewPresetWidget(view_, this);
-        preset_widget->setFixedWidth(PresetSelectionWidth);
+        preset_widget_ = new ViewPresetWidget(view_, this);
+        preset_widget_->setFixedWidth(PresetSelectionWidth);
 
-        top_layout->addWidget(preset_widget);
+        top_layout->addWidget(preset_widget_);
         top_layout->addSpacerItem(new QSpacerItem(PresetSelectionSpacer, 1, QSizePolicy::Fixed, QSizePolicy::Preferred));
     }
 
@@ -456,22 +456,19 @@ std::string ViewWidget::loadedMessage() const
 /**
  * Returns view-specific information as json struct.
  */
-nlohmann::json ViewWidget::viewInfo(const std::string& what) const
+nlohmann::json ViewWidget::viewInfoJSON() const
 {
     nlohmann::json info;
 
-    //add basic information
-    info[ "name"       ] = view_->getName();
+    //add component information
+    info[ "data"       ] = getViewDataWidget()->viewInfoJSON();
+    info[ "config"     ] = getViewConfigWidget()->viewInfoJSON();
+    info[ "load_state" ] = getViewLoadStateWidget()->viewInfoJSON();
+    info[ "toolbar"    ] = getViewToolWidget()->viewInfoJSON();
+    info[ "presets"    ] = getViewPresetWidget() ? getViewPresetWidget()->viewInfoJSON() : nlohmann::json();
 
-    info[ "data"       ] = getViewDataWidget()->viewInfo(what);
-    info[ "config"     ] = getViewConfigWidget()->viewInfo(what);
-    info[ "load_state" ] = getViewLoadStateWidget()->viewInfo(what);
-    info[ "toolbar"    ] = getViewToolWidget()->viewInfo(what);
-
-    //add view-specific information
-    nlohmann::json info_additional = viewInfo_impl(what);
-    if (!info_additional.is_null())
-        info[ "additional" ] = info_additional;
+    //add view-specific widget information
+    viewInfoJSON_impl(info);
 
     return info;
 }
@@ -481,8 +478,19 @@ nlohmann::json ViewWidget::viewInfo(const std::string& what) const
  */
 boost::optional<QString> ViewWidget::uiGet(const QString& what) const
 {
-    std::string view_info = viewInfo(what.toStdString()).dump();
+    assert(view_);
+
+    std::string view_info = view_->viewInfoJSON().dump();
     return QString::fromStdString(view_info);
+}
+
+/**
+ * Running the 'uiget' rtcommand on a view widget will yield view specific json information.
+ */
+nlohmann::json ViewWidget::uiGetJSON(const QString& what) const
+{
+    assert(view_);
+    return view_->viewInfoJSON();
 }
 
 /**

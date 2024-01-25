@@ -516,3 +516,15 @@ void HistogramView::loadingDone()
         showResults(false);
     }
 }
+
+/**
+ */
+void HistogramView::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    info[ "use_log_scale"       ] = settings_.use_log_scale;
+    info[ "data_var_dbo"        ] = settings_.data_var_dbo;
+    info[ "data_var_name"       ] = settings_.data_var_name;
+    info[ "show_results"        ] = show_results_;
+    info[ "eval_results_grpreq" ] = eval_results_grpreq_;
+    info[ "eval_results_id_"    ] = eval_results_id_;
+}

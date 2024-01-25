@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "viewcomponent.h"
 #include "appmode.h"
 #include "json.h"
 
@@ -33,7 +34,7 @@ class QPushButton;
 /**
  * Widget keeping/displaying the current data state and handling manual updates like reloading and redrawing.
 */
-class ViewLoadStateWidget : public QWidget
+class ViewLoadStateWidget : public QWidget, public ViewComponent
 {
 public:
     enum class State
@@ -67,12 +68,16 @@ public:
 
     void appModeSwitch(AppMode app_mode);
 
-    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
+    nlohmann::json viewInfoJSON() const override final;
 
     static const int DefaultMargin = 4;
 
+protected:
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
+
 private:
     static std::string messageFromState(State state);
+    static std::string stringFromState(State state);
     static QColor colorFromState(State state);
     static std::string buttonTextFromState(State state);
 

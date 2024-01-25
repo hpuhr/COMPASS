@@ -19,6 +19,8 @@
 
 #include "ui_test_common.h"
 
+#include "json.h"
+
 #include <boost/optional.hpp>
 
 #include <QString>
@@ -37,5 +39,8 @@ namespace ui_test
     boost::optional<QString> getUIElementNative(QWidget* parent, 
                                                 const QString& obj_name,
                                                 const QString& what);
+    nlohmann::json getUIElementNativeJSON(QWidget* parent, 
+                                          const QString& obj_name,
+                                          const QString& what);
 
 } // namespace ui_test

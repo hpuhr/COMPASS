@@ -1,3 +1,19 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "viewloadstatewidget.h"
 #include "viewwidget.h"
@@ -246,6 +262,31 @@ std::string ViewLoadStateWidget::messageFromState(State state)
 }
 
 /**
+ * Returns a name string given a state.
+*/
+std::string ViewLoadStateWidget::stringFromState(State state)
+{
+    switch(state)
+    {
+        case State::NoData:
+            return "NoData";
+        case State::Loading:
+            return "Loading";
+        case State::Drawing:
+            return "Drawing";
+        case State::None:
+            return "None";
+        case State::Loaded:
+            return "Loaded";
+        case State::ReloadRequired:
+            return "ReloadRequired";
+        case State::RedrawRequired:
+            return "RedrawRequired";
+    }
+    return "";
+}
+
+/**
  * Returns a button label given a state.
 */
 std::string ViewLoadStateWidget::buttonTextFromState(State state)
@@ -277,4 +318,20 @@ QColor ViewLoadStateWidget::colorFromState(State state)
             return Qt::red;
     }
     return Qt::black;
+}
+
+/**
+ * Generates json view information.
+ */
+nlohmann::json ViewLoadStateWidget::viewInfoJSON() const
+{
+    nlohmann::json info;
+
+    //add general information
+    info[ "state" ] = stringFromState(state_);
+
+    //add view-specific information
+    viewInfoJSON_impl(info);
+
+    return info;
 }

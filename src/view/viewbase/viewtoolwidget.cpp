@@ -1,3 +1,19 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "viewtoolwidget.h"
 #include "viewtoolswitcher.h"
@@ -421,4 +437,35 @@ void ViewToolWidget::configChanged()
 {
     //update items as their state might depend on config
     updateItems();
+}
+
+/**
+ * Generates json view information.
+ */
+nlohmann::json ViewToolWidget::viewInfoJSON() const
+{
+    nlohmann::json info;
+
+    //add general information
+    nlohmann::json action_infos = nlohmann::json::array();
+
+    for (auto a : actions())
+    {
+        if (a->isSeparator())
+            continue;
+
+        nlohmann::json action_info;
+        action_info[ "name"      ] = a->text().toStdString();
+        action_info[ "checkable "] = a->isCheckable();
+        action_info[ "checked"   ] = a->isChecked();
+
+        action_infos.push_back(action_info);
+    }
+
+    info[ "actions" ] = action_infos;
+
+    //add view-specific information
+    viewInfoJSON_impl(info);
+
+    return info;
 }

@@ -56,7 +56,8 @@ class HistogramViewDataWidget : public ViewDataWidget
 public:
     /// @brief Constructor
     HistogramViewDataWidget(HistogramViewWidget* view_widget,
-                          QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+                            QWidget* parent = nullptr, 
+                            Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~HistogramViewDataWidget();
 
@@ -102,6 +103,8 @@ protected:
     virtual void clearData_impl() override;
     virtual bool redrawData_impl(bool recompute) override;
     virtual void liveReload_impl() override;
+
+    void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     void resetCounts();
 

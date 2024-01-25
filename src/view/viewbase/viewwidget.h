@@ -36,7 +36,7 @@ class ViewDataWidget;
 class ViewConfigWidget;
 class ViewToolSwitcher;
 class ViewLoadStateWidget;
-class ViewLowerWidget;
+class ViewPresetWidget;
 
 class QSplitter;
 class QLayout;
@@ -132,9 +132,10 @@ public:
 
     View* getView() { return view_; }
 
-    nlohmann::json viewInfo(const std::string& what) const;
+    nlohmann::json viewInfoJSON() const;
 
     boost::optional<QString> uiGet(const QString& what = QString()) const override final;
+    nlohmann::json uiGetJSON(const QString& what = QString()) const override final;
 
     QImage renderContents();
 
@@ -147,6 +148,8 @@ protected:
     const ViewToolSwitcher* getViewToolSwitcher() const { assert(tool_switcher_); return tool_switcher_.get(); }
     ViewLoadStateWidget* getViewLoadStateWidget() { assert(state_widget_); return state_widget_; }
     const ViewLoadStateWidget* getViewLoadStateWidget() const { assert(state_widget_); return state_widget_; }
+    ViewPresetWidget* getViewPresetWidget() { return preset_widget_; }
+    const ViewPresetWidget* getViewPresetWidget() const { return preset_widget_; }
 
     /**
      * Reimplement to provide the ViewLoadStateWidget with view specific load information.
@@ -161,7 +164,7 @@ protected:
     /**
      * Reimplement to add additional information to the view's view info.
      */
-    virtual nlohmann::json viewInfo_impl(const std::string& what) const { return {}; }
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
@@ -189,6 +192,7 @@ private:
     ViewDataWidget*      data_widget_   = nullptr;
     ViewConfigWidget*    config_widget_ = nullptr;
     ViewLoadStateWidget* state_widget_  = nullptr;
+    ViewPresetWidget*    preset_widget_ = nullptr;
     
     QWidget*             lower_widget_  = nullptr;
 

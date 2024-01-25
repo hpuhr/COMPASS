@@ -66,6 +66,7 @@ protected:
 struct RTCommandUIGet : public RTCommandUIObject
 {
     QString what;
+    bool    as_json = false;
 protected:
     virtual bool run_impl() override;
 

@@ -1,3 +1,19 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "viewpresetwidget.h"
 #include "compass.h"
@@ -1100,4 +1116,39 @@ void ViewPresetWidget::presetApplied(ViewPresets::Key key)
 
         QMessageBox::warning(this, "Warning", msg);
     }
+}
+
+/**
+ * Generates json view information.
+ */
+nlohmann::json ViewPresetWidget::viewInfoJSON() const
+{
+    assert(view_);
+
+    nlohmann::json info;
+
+    //add general information
+    nlohmann::json preset_infos = nlohmann::json::array();
+
+    const auto& presets = COMPASS::instance().viewManager().viewPresets().presets();
+
+    for (const auto& p : presets)
+    {
+        nlohmann::json preset_info;
+        preset_info[ "name"        ] =  p.second.name;
+        preset_info[ "timestamp"   ] =  p.second.timestamp;
+        preset_info[ "appversion"  ] =  p.second.app_version;
+        preset_info[ "has_preview" ] = !p.second.preview.isNull();
+
+        preset_infos.push_back(preset_info);
+    }
+
+    info[ "presets"        ] = preset_infos;
+    info[ "current_preset" ] = view_->activePreset() ? view_->activePreset()->name : "";
+    info[ "changes"        ] = view_->presetChanged();
+
+    //add view-specific information
+    viewInfoJSON_impl(info);
+
+    return info;
 }

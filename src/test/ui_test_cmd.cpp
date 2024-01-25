@@ -145,19 +145,40 @@ bool RTCommandUIGet::run_impl()
         setResultMessage("Object '" + obj.toStdString() + "' not found");
         return false;
     }
-    
-    auto res = getUIElement(receiver.second, "", what);
-    if (!res.has_value())
+
+    boost::optional<nlohmann::json> result;
+    std::string result_string;
+
+    if (as_json)
+    {
+        auto res = getUIElementJSON(receiver.second, "", what);
+        if (!res.is_null())
+        {
+            result = res;
+            result_string = res.dump(4);
+        }
+    }
+    else
+    {
+        auto res = getUIElement(receiver.second, "", what);
+        if (res.has_value())
+        {
+            result_string = res.value().toStdString();
+
+            nlohmann::json v;
+            v[ "value" ] = result_string;
+
+            result = v;
+        } 
+    }
+
+    if (!result.has_value())
     {
         setResultMessage("Value could not be retrieved from object '" + obj.toStdString() + "'");
         return false;
     }
-
-    const std::string value = res.value().toStdString();
-
-    nlohmann::json result;
-    result[ "value" ] = value;
-    setJSONReply(result, value);
+    
+    setJSONReply(result.value(), result_string);
 
     return true;
 }
@@ -171,7 +192,8 @@ void RTCommandUIGet::collectOptions_impl(OptionsDescription& options,
     RTCommandUIObject::collectOptions_impl(options, positional);
 
     ADD_RTCOMMAND_OPTIONS(options)
-        ("what,w", po::value<std::string>()->default_value(""), "which value to retrieve from the ui element (empty = default behavior)");
+        ("what,w", po::value<std::string>()->default_value(""), "which value to retrieve from the ui element (empty = default behavior)")
+        ("json", "if present, the result will be returned as a json struct instead of a string");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "what", 2)
 }
@@ -184,6 +206,7 @@ void RTCommandUIGet::assignVariables_impl(const VariablesMap& variables)
     RTCommandUIObject::assignVariables_impl(variables);
 
     RTCOMMAND_GET_QSTRING_OR_THROW(variables, "what", what)
+    RTCOMMAND_CHECK_VAR(variables, "json", as_json)
 }
 
 /*************************************************************************

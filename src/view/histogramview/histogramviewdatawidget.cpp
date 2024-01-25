@@ -753,3 +753,103 @@ HistogramViewDataWidget::ViewInfo HistogramViewDataWidget::getViewInfo() const
 
     return vi;
 }
+
+/**
+ */
+void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    bool valid = histogram_generator_ && histogram_generator_->hasValidResult();
+
+    info[ "result_valid" ] = valid;
+    
+    if (valid)
+    {
+        auto range       = histogram_generator_->currentRangeAsLabels();
+        bool zoom_active = histogram_generator_->subRangeActive();
+
+        info[ "result_range_min"      ] = range.first;
+        info[ "result_range_max"      ] = range.second;
+        info[ "result_zoom_active"    ] = zoom_active;
+        info[ "result_num_bins"       ] = histogram_generator_->currentBins();
+        info[ "result_oor_count"      ] = histogram_generator_->getResults().not_inserted_count;
+        info[ "result_null_count"     ] = histogram_generator_->getResults().null_count;
+        info[ "result_null_sel_count" ] = histogram_generator_->getResults().null_selected_count;
+        info[ "result_valid_count"    ] = histogram_generator_->getResults().valid_count;
+        //info[ "result_counts"         ] = histogram_generator_->getResults().valid_counts;
+        //info[ "result_sel_counts"     ] = histogram_generator_->getResults().selected_counts;
+        info[ "result_max_count"      ] = histogram_generator_->getResults().max_count + 100;
+
+        // std::vector<std::string> ranges;
+        // if (histogram_generator_->getResults().content_results.size() > 0)
+        // {
+        //     const auto& bins = histogram_generator_->getResults().content_results.begin()->second.bins;
+        //     if (bins.size() > 0)
+        //     {
+        //         for (const auto& bin : bins)
+        //             ranges.push_back(bin.labels.label_min);
+        //         ranges.push_back(bins.rbegin()->labels.label_max);
+        //     }
+        // }
+        // info[ "result_ranges" ] = ranges;
+
+        if (chart_view_)
+        {
+            nlohmann::json chart_info;
+
+            bool y_axis_log = dynamic_cast<QLogValueAxis*>(chart_view_->chart()->axisY()) != nullptr;
+
+            chart_info[ "x_axis_label" ] = chart_view_->chart()->axisX()->titleText().toStdString();
+            chart_info[ "y_axis_label" ] = chart_view_->chart()->axisY()->titleText().toStdString();
+            chart_info[ "y_axis_log"   ] = y_axis_log;
+            chart_info[ "num_series"   ] = chart_view_->chart()->series().count();
+
+            nlohmann::json series_infos = nlohmann::json::array();
+
+            std::vector<size_t> total_counts(histogram_generator_->currentBins(), 0);
+
+            auto series = chart_view_->chart()->series();
+            for (auto s : series)
+            {
+                QBarSeries* bar_series = dynamic_cast<QBarSeries*>(s);
+                assert(bar_series);
+
+                nlohmann::json series_info;
+                series_info[ "name"     ] = bar_series->name().toStdString();
+                series_info[ "num_sets" ] = bar_series->count();
+
+                nlohmann::json bset_infos = nlohmann::json::array();
+                for (auto bset : bar_series->barSets())
+                {
+                    std::vector<int> counts(bset->count());
+                    for (int i = 0; i < bset->count(); ++i)
+                    {
+                        counts[ i ] = (int)(*bset)[ i ];
+                        total_counts.at(i) += counts[ i ] + 10;
+                    }
+
+                    nlohmann::json bset_info;
+                    bset_info[ "name"       ] = bset->label().toStdString();
+                    bset_info[ "num_counts" ] = counts.size();
+                    bset_info[ "counts"     ] = counts;
+                    bset_info[ "color"      ] = bset->color().name().toStdString();
+
+                    bset_infos.push_back(bset_info);
+                }
+
+                series_info[ "sets" ] = bset_infos;
+
+                series_infos.push_back(series_info);
+            }
+
+            // size_t total_count = 0;
+            // for (auto c : total_counts)
+            //     total_count += c;
+
+            chart_info[ "series"       ] = series_infos;
+            chart_info[ "total_counts" ] = total_counts;
+            //chart_info[ "total_count"  ] = total_count;
+
+            info[ "chart" ] = chart_info;
+        }
+    }
+}

@@ -1,3 +1,19 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "viewdatawidget.h"
 #include "viewwidget.h"
@@ -6,6 +22,7 @@
 #include "logger.h"
 #include "buffer.h"
 #include "variable.h"
+#include "property.h"
 
 #include <QApplication>
 #include <QPainter>
@@ -247,4 +264,45 @@ QImage ViewDataWidget::renderData()
     this->render(&painter);
 
     return img;
+}
+
+/**
+ * Generates json view information.
+ */
+nlohmann::json ViewDataWidget::viewInfoJSON() const
+{
+    nlohmann::json info;
+
+    //add general information
+    info[ "has_data"    ] = hasData();
+    info[ "num_buffers" ] = data_.size();
+
+    nlohmann::json buffer_infos = nlohmann::json::array();
+    for (const auto& dbc_data : data_)
+    {
+        nlohmann::json buffer_info;
+        buffer_info[ "dbcontent" ] = dbc_data.first;
+        buffer_info[ "size"      ] = dbc_data.second->size();
+
+        // nlohmann::json props = nlohmann::json::array();
+        // for (const auto& p : dbc_data.second->properties().properties())
+        // {
+        //     nlohmann::json pinfo;
+        //     pinfo[ "name"      ] = p.name();
+        //     pinfo[ "data_type" ] = p.dataTypeString();
+
+        //     props.push_back(pinfo);
+        // }
+
+        // buffer_info[ "properties" ] = props;
+
+        buffer_infos.push_back(buffer_info);
+    }
+
+    info[ "buffers" ] = buffer_infos;
+
+    //add view-specific information
+    viewInfoJSON_impl(info);
+
+    return info;
 }

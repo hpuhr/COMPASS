@@ -39,6 +39,14 @@
     if (dynamic_cast<WidgetType*>(widget))                                             \
         return getUIElementValue<WidgetType>(dynamic_cast<WidgetType*>(widget), what);
 
+/**
+ * Attempts a cast of the given widget to the given type and invokes
+ * the templated json value getter if the cast succeeds.
+ */
+#define TRY_INVOKE_UI_GETTER_JSON(WidgetType, widget, what)                                    \
+    if (dynamic_cast<WidgetType*>(widget))                                                \
+        return getUIElementValueJSON<WidgetType>(dynamic_cast<WidgetType*>(widget), what);
+
 namespace ui_test
 {
 
@@ -110,6 +118,34 @@ boost::optional<QString> getUIElementNative(QWidget* parent,
     TRY_INVOKE_UI_GETTER(QAbstractSlider, w.second, what)
     //...maybe add special button getters
     TRY_INVOKE_UI_GETTER(QAbstractButton, w.second, what) //for all other buttons which were not handled before
+
+    return {};
+}
+
+/**
+ * Widget type agnostic json value getter.
+ * Checks on native Qt widgets.
+ */
+nlohmann::json getUIElementNativeJSON(QWidget* parent, 
+                                      const QString& obj_name,
+                                      const QString& what)
+{
+    auto w = findObjectAs<QObject>(parent, obj_name);
+    if (w.first != rtcommand::FindObjectErrCode::NoError)
+        return {};
+
+    TRY_INVOKE_UI_GETTER_JSON(QLabel, w.second, what)
+    TRY_INVOKE_UI_GETTER_JSON(QMenuBar, w.second, what)
+    TRY_INVOKE_UI_GETTER_JSON(QComboBox, w.second, what)
+    TRY_INVOKE_UI_GETTER_JSON(QTabWidget, w.second, what)
+    TRY_INVOKE_UI_GETTER_JSON(QToolBar, w.second, what)
+    TRY_INVOKE_UI_GETTER_JSON(QLineEdit, w.second, what)
+    TRY_INVOKE_UI_GETTER_JSON(QTextEdit, w.second, what)
+    TRY_INVOKE_UI_GETTER_JSON(QSpinBox, w.second, what)
+    TRY_INVOKE_UI_GETTER_JSON(QDoubleSpinBox, w.second, what)
+    TRY_INVOKE_UI_GETTER_JSON(QAbstractSlider, w.second, what)
+    //...maybe add special button getters
+    TRY_INVOKE_UI_GETTER_JSON(QAbstractButton, w.second, what) //for all other buttons which were not handled before
 
     return {};
 }

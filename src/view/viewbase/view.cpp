@@ -709,3 +709,26 @@ bool View::presetChanged() const
 {
     return (active_preset_.has_value() && preset_changed_);
 }
+
+/**
+ * Returns view-specific json information.
+ */
+nlohmann::json View::viewInfoJSON() const
+{
+    assert(widget_);
+
+    nlohmann::json info;
+
+    //add basic information
+    info[ "name" ] = getName();
+
+    //add widget information
+    info[ "ui"   ] = widget_->viewInfoJSON();
+
+    //add derived view information
+    nlohmann::json view_info;
+    viewInfoJSON_impl(view_info);
+    info[ "view" ] = view_info;
+
+    return info;
+}

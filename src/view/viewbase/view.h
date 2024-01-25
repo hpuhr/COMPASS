@@ -117,6 +117,8 @@ public:
     const ViewPresets::Preset* activePreset() const;
     bool presetChanged() const;
 
+    nlohmann::json viewInfoJSON() const;
+
     //shortcut update flags
     static const int VU_PureRedraw       = VU_Redraw;                                      // just redraw
     static const int VU_RecomputedRedraw = VU_Redraw | VU_Recompute;                       // recompute + redraw
@@ -144,6 +146,8 @@ protected:
     virtual void viewManagerAutoUpdatesChanged();
 
     virtual bool refreshScreenOnNeededReload() const { return false; }
+
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
     void constructWidget();
     void setWidget(ViewWidget* widget);

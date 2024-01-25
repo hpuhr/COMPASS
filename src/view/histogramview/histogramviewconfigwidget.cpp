@@ -27,6 +27,7 @@
 //#include "stringconv.h"
 #include "groupbox.h"
 #include "ui_test_common.h"
+#include "metavariable.h"
 
 #include <QCheckBox>
 #include <QLabel>
@@ -370,4 +371,24 @@ void HistogramViewConfigWidget::updateSelectedVar()
 void HistogramViewConfigWidget::updateLogScale()
 {
     log_check_->setChecked(view_->useLogScale());
+}
+
+/**
+ */
+void HistogramViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    if (select_var_->hasMetaVariable())
+        info[ "selected_var" ] = "Meta - " + select_var_->selectedMetaVariable().name();
+    else
+        info[ "selected_var" ] = select_var_->selectedVariable().dbContentName() + " - " + select_var_->selectedVariable().name();
+
+    info[ "log_enabled" ] = log_check_->isChecked();
+
+    info[ "info_zoom_active" ] = info_zoom_label->isVisible();
+    info[ "info_range_min"   ] = info_range_min_label_->text().toStdString();
+    info[ "info_range_max"   ] = info_range_max_label_->text().toStdString();
+    info[ "info_oor_count"   ] = info_oor_label_->text().toStdString();
+
+    info[ "result_active" ] = eval_results_check_->isChecked();
+    info[ "result_id"     ] = eval_results_grpreq_label_->text().toStdString() + " - " + eval_results_id_label_->text().toStdString();
 }

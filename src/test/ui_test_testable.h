@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "json.h"
+
 #include <boost/optional.hpp>
 
 #include <QString>
@@ -40,6 +42,7 @@ namespace ui_test
          * Override to make available for testing.
         */
         virtual boost::optional<QString> uiGet(const QString& what = QString()) const { return {}; }
+        virtual nlohmann::json uiGetJSON(const QString& what = QString()) const { return {}; }
 
         /**
          * Set the widgets contents from the given string using injected ui events.

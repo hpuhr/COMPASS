@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "viewcomponent.h"
 #include "appmode.h"
 #include "json.h"
 
@@ -32,7 +33,7 @@ class QVBoxLayout;
  * Base class for view configuration widgets, which are held in the configuration area of the ViewWidget.
  * Derive and reimplement as needed.
  */
-class ViewConfigWidget : public QWidget
+class ViewConfigWidget : public QWidget, public ViewComponent
 {
 public:
     ViewConfigWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
@@ -47,13 +48,13 @@ public:
     virtual void appModeSwitch(AppMode app_mode);
     virtual void configChanged();
 
-    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
+    nlohmann::json viewInfoJSON() const override final;
 
     static const int MinWidth  = 400;
     
-
 protected:
     virtual void onDisplayChange_impl() {} 
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
     ViewWidget* getWidget() { return view_widget_; }
 

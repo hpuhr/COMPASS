@@ -7,6 +7,7 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/view.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/viewcomponent.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewtoolwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewconfigwidget.h"
@@ -19,6 +20,7 @@ target_sources(compass
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/view.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/viewcomponent.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewtoolwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewdatawidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewconfigwidget.cpp"

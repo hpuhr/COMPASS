@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "viewcomponent.h"
 #include "viewpresets.h"
 #include "json.h"
 
@@ -186,7 +187,7 @@ private:
 /**
  * Widget governing a view's presets.
 */
-class ViewPresetWidget : public QWidget
+class ViewPresetWidget : public QWidget, public ViewComponent
 {
 public:
     ViewPresetWidget(View* view,
@@ -194,6 +195,11 @@ public:
     virtual ~ViewPresetWidget() = default;
 
     void updateContents();
+
+    nlohmann::json viewInfoJSON() const override final;
+
+protected:
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
 private:
     void createUI();

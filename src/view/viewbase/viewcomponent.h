@@ -17,27 +17,19 @@
 
 #pragma once
 
-#include "ui_test_common.h"
 #include "json.h"
 
-#include <boost/optional.hpp>
+#include <QWidget>
 
-class QWidget;
-class QString;
-
-namespace ui_test
+/**
+ * Base class for view configuration widgets, which are held in the configuration area of the ViewWidget.
+ * Derive and reimplement as needed.
+ */
+class ViewComponent
 {
-    
-    bool setUIElement(QWidget* parent, 
-                      const QString& obj_name, 
-                      const QString& value, 
-                      int delay = -1);
+public:
+    ViewComponent() = default;
+    virtual ~ViewComponent() = default;
 
-    boost::optional<QString> getUIElement(QWidget* parent, 
-                                          const QString& obj_name,
-                                          const QString& what);
-    nlohmann::json getUIElementJSON(QWidget* parent, 
-                                    const QString& obj_name,
-                                    const QString& what);
-
-} // namespace ui_test
+    virtual nlohmann::json viewInfoJSON() const;
+};

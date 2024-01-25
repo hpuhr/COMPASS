@@ -117,6 +117,8 @@ protected:
 
     virtual bool refreshScreenOnNeededReload() const override { return true; }
 
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
+
     void onShowResultsChanged();
 
     HistogramViewDataWidget* getDataWidget();

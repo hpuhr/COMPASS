@@ -69,6 +69,7 @@ protected:
     void updateLogScale();
 
     virtual void onDisplayChange_impl() override;
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     HistogramView* view_ = nullptr;
 
