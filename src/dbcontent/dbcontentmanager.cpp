@@ -16,10 +16,8 @@
  */
 
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/label/labelgenerator.h"
+//#include "dbcontent/label/labelgenerator.h"
 #include "compass.h"
-//#include "mainwindow.h"
-//#include "configurationmanager.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanagerwidget.h"
@@ -31,18 +29,14 @@
 #include "dbcontent/variable/metavariable.h"
 #include "datasourcemanager.h"
 #include "stringconv.h"
-//#include "number.h"
 #include "viewmanager.h"
 #include "jobmanager.h"
 #include "evaluationmanager.h"
 #include "filtermanager.h"
 #include "util/number.h"
-//#include "util/system.h"
 #include "util/timeconv.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
 #include "dbcontentdeletedbjob.h"
-//#include "taskmanager.h"
-//#include "asteriximporttask.h"
 #include "dbcontent_commands.h"
 #include "viewpoint.h"
 
@@ -81,9 +75,6 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
         dbcont_ids.insert(object_it.second->id());
     }
 
-//    assert (label_generator_);
-//    label_generator_->checkLabelConfig(); // here because references meta variables
-
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
     // for signal about new data
     qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");
@@ -107,12 +98,6 @@ DBContentManager::~DBContentManager()
 
     loginf << "DBContentManager: dtor: done";
 }
-
-//dbContent::LabelGenerator& DBContentManager::labelGenerator()
-//{
-//    assert (label_generator_);
-//    return *label_generator_;
-//}
 
 void DBContentManager::generateSubConfigurable(const std::string& class_id,
                                                const std::string& instance_id)
@@ -158,12 +143,6 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
 
 void DBContentManager::checkSubConfigurables()
 {
-//    if (!label_generator_)
-//    {
-//        generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
-//        assert (label_generator_);
-//    }
-
     if (!target_model_)
     {
         generateSubConfigurable("DBContentTargetModel", "DBContentTargetModel0");
@@ -244,25 +223,12 @@ const std::string& DBContentManager::dbContentWithId (unsigned int id)
 
 bool DBContentManager::existsMetaVariable(const std::string& var_name)
 {
-//    return std::find_if(meta_variables_.begin(), meta_variables_.end(),
-//                        [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; })
-//            != meta_variables_.end();
-
     return meta_variables_.count(var_name);
 }
 
 MetaVariable& DBContentManager::metaVariable(const std::string& var_name)
 {
     logdbg << "DBContentManager: metaVariable: name " << var_name;
-
-//    assert(existsMetaVariable(var_name));
-
-//    auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
-//                           [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; });
-
-//    assert (it != meta_variables_.end());
-
-//    return *it->get();
 
     assert (meta_variables_.count(var_name));
     return *(meta_variables_.at(var_name).get());
@@ -289,11 +255,6 @@ void DBContentManager::deleteMetaVariable(const std::string& var_name)
 {
     logdbg << "DBContentManager: deleteMetaVariable: name " << var_name;
     assert(existsMetaVariable(var_name));
-
-//    auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
-//                           [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; });
-
-//    assert (it != meta_variables_.end());
 
     meta_variables_.erase(var_name);
 
@@ -352,7 +313,7 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
     loginf << "DBContentManager: loadSlot: starting loading";
 
-    //data_.clear();
+    saveSelectedRecNums();
     clearData();
 
     load_in_progress_ = true;
@@ -362,8 +323,6 @@ void DBContentManager::load(const std::string& custom_filter_clause)
     DataSourceManager& ds_man =  COMPASS::instance().dataSourceManager();
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
-
-    //assert (label_generator_);
 
     for (auto& object : dbcontent_)
     {
@@ -444,6 +403,8 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
     if (something_changed)
     {
         updateNumLoadedCounts();
+
+        restoreSelectedRecNums();
 
         logdbg << "DBContentManager: addLoadedData: emitting signal";
 
@@ -589,6 +550,8 @@ void DBContentManager::finishLoading()
 {
     loginf << "DBContentManager: finishLoading: all done";
     load_in_progress_ = false;
+
+    tmp_selected_rec_nums_.clear();
 
     COMPASS::instance().viewManager().doViewPointAfterLoad();
 
@@ -1525,6 +1488,69 @@ void DBContentManager::setViewableDataConfig (const nlohmann::json::object_t& da
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
 
     COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+}
+
+void DBContentManager::saveSelectedRecNums()
+{
+    loginf << "DBContentManager: saveSelectedRecNums";
+
+    assert (!tmp_selected_rec_nums_.size());
+
+    for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
+    {
+        assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
+
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
+
+        assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
+        NullableVector<unsigned long> rec_num_vec = buf_it.second->get<unsigned long>(
+                    DBContent::meta_var_rec_num_.name());
+
+        for (unsigned int cnt=0; cnt < selected_vec.size(); ++cnt)
+        {
+            if (!selected_vec.isNull(cnt) && selected_vec.get(cnt))
+                tmp_selected_rec_nums_[buf_it.first].push_back(rec_num_vec.get(cnt));
+        }
+
+        loginf << "DBContentManager: saveSelectedRecNums: " << buf_it.first << " has "
+               << tmp_selected_rec_nums_[buf_it.first].size() << " selected" ;
+    }
+}
+
+void DBContentManager::restoreSelectedRecNums()
+{
+    loginf << "DBContentManager: restoreSelectedRecNums";
+
+    for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
+    {
+        if (!tmp_selected_rec_nums_.count(buf_it.first))
+            continue;
+
+        assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
+
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
+
+        assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
+        NullableVector<unsigned long> rec_num_vec = buf_it.second->get<unsigned long>(
+                    DBContent::meta_var_rec_num_.name());
+
+        // select existing, store still unselected
+
+        std::vector<unsigned long> not_yet_found_selected_rec_nums;
+
+        std::map<unsigned long, unsigned int> unique_rec_nums =
+                rec_num_vec.uniqueValuesWithIndexes();
+
+        for (unsigned long rec_num : tmp_selected_rec_nums_.at(buf_it.first))
+        {
+            if (unique_rec_nums.count(rec_num)) // previously selected found
+                selected_vec.set(unique_rec_nums.at(rec_num), true);
+            else // not found, store
+                not_yet_found_selected_rec_nums.push_back(rec_num);
+        }
+
+        tmp_selected_rec_nums_[buf_it.first] = not_yet_found_selected_rec_nums; // override previous
+    }
 }
 
 bool DBContentManager::utnUseEval (unsigned int utn)

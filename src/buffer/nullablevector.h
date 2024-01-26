@@ -116,6 +116,7 @@ public:
                                                                      unsigned int to_index);
     std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(
             const std::vector<unsigned int>& indexes);
+    std::map<T, unsigned int> uniqueValuesWithIndexes();
     std::vector<unsigned int> nullValueIndexes(unsigned int from_index, unsigned int to_index);
     std::vector<unsigned int> nullValueIndexes(const std::vector<unsigned int>& indexes);
 
@@ -784,6 +785,36 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
     }
 
     logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
+           << values.size();
+    return values;
+}
+
+template <class T>
+std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes()
+{
+    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
+
+    std::map<T, unsigned int> values;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert(data_.size() <= buffer_.data_size_);
+        assert(null_flags_.size() <= buffer_.data_size_);
+    }
+
+    for (unsigned int index = 0; index < data_.size(); ++index)
+    {
+        if (!isNull(index))  // not for null
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert(index < data_.size());
+
+            assert (!values.count(data_.at(index)));
+            values[data_.at(index)] = index;
+        }
+    }
+
+    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
            << values.size();
     return values;
 }
