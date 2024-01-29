@@ -41,6 +41,7 @@ public:
     void deleteConfigFFT(const std::string& name);
     ConfigurationFFT& configFFT(const std::string& name);
     const std::vector<std::unique_ptr<ConfigurationFFT>>& configFFTs() const;
+    void deleteAllConfigFFTs();
 
     bool hasDBFFT(const std::string& name);
     DBFFT& dbFFT(const std::string& name);

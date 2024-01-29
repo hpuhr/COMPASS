@@ -11,6 +11,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/dbfft.h"
         "${CMAKE_CURRENT_LIST_DIR}/ffttablemodel.h"
         "${CMAKE_CURRENT_LIST_DIR}/fftsconfigurationdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ffteditwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/fftmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/fftbase.cpp"
@@ -18,6 +19,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/dbfft.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/ffttablemodel.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/fftsconfigurationdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ffteditwidget.cpp"
         )
 
 
