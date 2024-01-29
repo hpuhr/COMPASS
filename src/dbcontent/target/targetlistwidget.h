@@ -2,6 +2,7 @@
 #define DBCONTENT_TARGETLISTWIDGET_H
 
 #include <QWidget>
+#include <QItemSelection>
 
 class DBContentManager;
 
@@ -28,6 +29,7 @@ public slots:
     void showFullUTNSlot ();
     void showSurroundingDataSlot ();
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 public:
     TargetListWidget(TargetModel& model, DBContentManager& dbcont_manager);

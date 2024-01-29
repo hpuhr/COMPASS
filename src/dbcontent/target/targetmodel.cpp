@@ -133,10 +133,16 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         else if (col_name == "Begin")
         {
             return target.timeBeginStr().c_str();
+            //return QDateTime::fromString(target.timeBeginStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
         }
         else if (col_name == "End")
         {
             return target.timeEndStr().c_str();
+            //return QDateTime::fromString(target.timeEndStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
+        }
+        else if (col_name == "Duration")
+        {
+            return target.timeDurationStr().c_str();
         }
         else if (col_name == "ACIDs")
         {

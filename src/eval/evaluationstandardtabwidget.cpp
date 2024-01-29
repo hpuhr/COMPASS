@@ -152,7 +152,7 @@ void EvaluationStandardTabWidget::addStandardSlot ()
             QInputDialog::getText(this, tr("Standard Name"),
                                   tr("Specify a (unique) standard name:"), QLineEdit::Normal, "", &ok);
 
-    if (ok && !text.isEmpty())
+    if (ok)
     {
         std::string name = text.toStdString();
 

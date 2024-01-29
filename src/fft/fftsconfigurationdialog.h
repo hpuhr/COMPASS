@@ -23,7 +23,6 @@ public slots:
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
 
     void newFFTClickedSlot();
-    void newFFTDoneSlot();
 
     void importClickedSlot();
     void deleteAllClickedSlot();
@@ -38,12 +37,12 @@ public:
     void endResetModel();
 
 protected:
-    FFTManager& ds_man_;
+    FFTManager& fft_man_;
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};
     FFTTableModel* table_model_;
 
-    //FFTEditWidget* edit_widget_ {nullptr};
+    FFTEditWidget* edit_widget_ {nullptr};
 };
 

@@ -29,6 +29,7 @@ const std::string QT_DATETIME_FORMAT {"yyyy-MM-dd hh:mm:ss.zzz"};
 string str_format = "%Y-%m-%d %H:%M:%S.%f";
 string date_str_format = "%Y-%m-%d";
 string time_str_format = "%H:%M:%S.%f";
+//string time_str_format = "%H:%M:%s *";
 boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
 
 boost::posix_time::ptime fromString(const std::string& value)
@@ -97,21 +98,52 @@ string toString(boost::posix_time::ptime value, unsigned int partial_digits)
 
 string toString(boost::posix_time::time_duration duration, unsigned int partial_digits)
 {
+    assert (partial_digits <= 3);
+
     ostringstream date_stream;
 
-    date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(time_str_format.c_str())));
-    date_stream << duration;
+    double msecs_float = duration.total_milliseconds();
 
-    string tmp = date_stream.str();
+    unsigned int hours = msecs_float / 3600000.0;
 
-    if (partial_digits == 3) // only remove microsecs
-        tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
-    else if (partial_digits == 0) // remove all partials and point
-        tmp.erase(tmp.length()-7);
-    else
-        tmp.erase(tmp.length()-3-(3-partial_digits));
+    msecs_float -= (hours * 3600000.0);
 
-    return tmp;
+    unsigned int minutes = msecs_float / 60000.0;
+
+    msecs_float -= (minutes * 60000.0);
+
+    unsigned int secs = msecs_float / 1000.0;
+
+    msecs_float -= (secs * 1000.0);
+
+    date_stream << std::setw(2) << std::setfill('0') << hours
+                << ":" << std::setw(2) << std::setfill('0')<< minutes
+                << ":" << std::setw(2) << std::setfill('0')<< secs;
+
+    if (partial_digits)
+    {
+        double factor = pow(10, 3-partial_digits);
+
+        unsigned int number = msecs_float * factor;
+
+        date_stream << "." << std::setw(partial_digits) << std::setfill('0') << number;
+    }
+
+    return date_stream.str();
+
+//    date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(time_str_format.c_str())));
+//    date_stream << duration;
+
+//    string tmp = date_stream.str();
+
+//    if (partial_digits == 3) // only remove microsecs
+//        tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
+//    else if (partial_digits == 0) // remove all partials and point
+//        tmp.erase(tmp.length()-7);
+//    else
+//        tmp.erase(tmp.length()-3-(3-partial_digits));
+
+//    return tmp;
 
 //    ostringstream os;
 //    auto f = new boost::posix_time::time_facet(time_str_format.c_str());

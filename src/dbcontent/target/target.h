@@ -70,6 +70,7 @@ public:
 
 protected:
     nlohmann::json info_;
+    mutable std::string time_duration_str_;
 };
 
 }

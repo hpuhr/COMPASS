@@ -133,7 +133,7 @@ public:
 protected:
     DBContentManager& dbcont_manager_;
 
-    QStringList table_columns_ {"Use", "UTN", "Comment", "#Updates", "Begin", "End", "ACIDs", "ACADs",
+    QStringList table_columns_ {"Use", "UTN", "Comment", "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs",
                                 "M3/A", "MC Min", "MC Max", "MOPS"};
 
     TargetCache target_data_;

@@ -94,6 +94,15 @@ const std::vector<std::unique_ptr<ConfigurationFFT>>& FFTManager::configFFTs() c
     return config_ffts_;
 }
 
+void FFTManager::deleteAllConfigFFTs()
+{
+    config_ffts_.clear();
+
+    updateFFTNamesAll();
+
+    emit fftsChangedSignal();
+}
+
 bool FFTManager::hasDBFFT(const string& name)
 {
     return find_if(db_ffts_.begin(), db_ffts_.end(),
@@ -132,7 +141,7 @@ void FFTManager::addNewFFT (const std::string& name)
 
         ConfigurationFFT& cfg_ds = configFFT(name);
 
-        db_ffts_.emplace_back(move(cfg_ds.getAsNewDBDS()));
+        db_ffts_.emplace_back(std::move(cfg_ds.getAsNewDBDS()));
         sortDBFFTs();
     }
     else

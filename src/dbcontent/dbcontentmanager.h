@@ -84,8 +84,6 @@ public:
 
     virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override;
 
-//    dbContent::LabelGenerator& labelGenerator();
-
     bool existsDBContent(const std::string& dbcontent_name);
     DBContent& dbContent(const std::string& dbcontent_name);
     void deleteDBContent(const std::string& dbcontent_name);
@@ -186,11 +184,11 @@ public:
 
     void autoFilterUTNS();
     void showUTN (unsigned int utn);
+    void showUTNs (std::vector<unsigned int> utns);
 
 protected:
     COMPASS& compass_;
 
-//    std::unique_ptr<dbContent::LabelGenerator> label_generator_;
     std::unique_ptr<dbContent::TargetModel> target_model_;
     std::unique_ptr<dbContent::TargetListWidget> target_list_widget_;
 
@@ -214,6 +212,7 @@ protected:
     boost::optional<double> longitude_max_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
+    std::map<std::string, std::vector<unsigned long>> tmp_selected_rec_nums_; // for storage between loads
 
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
 
@@ -224,8 +223,6 @@ protected:
     std::map<std::string, DBContent*> dbcontent_;
     std::map<unsigned int, DBContent*> dbcontent_ids_;
     std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
-
-    //std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
 
     std::unique_ptr<DBContentManagerWidget> widget_;
 
@@ -251,6 +248,9 @@ protected:
     void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
 
     void setViewableDataConfig (const nlohmann::json::object_t& data);
+
+    void saveSelectedRecNums();
+    void restoreSelectedRecNums();
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

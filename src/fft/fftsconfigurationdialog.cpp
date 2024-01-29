@@ -1,8 +1,7 @@
 #include "fftsconfigurationdialog.h"
 #include "ffttablemodel.h"
-//#include "ffteditwidget.h"
+#include "ffteditwidget.h"
 #include "fftmanager.h"
-//#include "fftcreatedialog.h"
 #include "util/number.h"
 #include "logger.h"
 #include "compass.h"
@@ -16,12 +15,13 @@
 #include <QHeaderView>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QInputDialog>
 
 using namespace std;
 using namespace Utils;
 
 FFTsConfigurationDialog::FFTsConfigurationDialog(FFTManager& ds_man)
-    : QDialog(), ds_man_(ds_man)
+    : QDialog(), fft_man_(ds_man)
 {
     setWindowTitle("Configure FFTs");
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
@@ -40,7 +40,7 @@ FFTsConfigurationDialog::FFTsConfigurationDialog(FFTManager& ds_man)
 
     QHBoxLayout* top_layout = new QHBoxLayout();
 
-    table_model_ = new FFTTableModel(ds_man_, *this);
+    table_model_ = new FFTTableModel(fft_man_, *this);
 
     proxy_model_ = new QSortFilterProxyModel();
     proxy_model_->setSourceModel(table_model_);
@@ -67,8 +67,8 @@ FFTsConfigurationDialog::FFTsConfigurationDialog(FFTManager& ds_man)
     table_view_->resizeRowsToContents();
     top_layout->addWidget(table_view_);
 
-//    edit_widget_ = new FFTEditWidget (ds_man_, *this);
-//    top_layout->addWidget(edit_widget_);
+    edit_widget_ = new FFTEditWidget (fft_man_, *this);
+    top_layout->addWidget(edit_widget_);
 
     main_layout->addLayout(top_layout);
 
@@ -135,76 +135,58 @@ void FFTsConfigurationDialog::endResetModel()
 
 void FFTsConfigurationDialog::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-//    assert (edit_widget_);
+    assert (edit_widget_);
 
-//    if (!current.isValid())
-//    {
-//        loginf << "FFTsConfigurationDialog: currentRowChanged: invalid index";
+    if (!current.isValid())
+    {
+        loginf << "FFTsConfigurationDialog: currentRowChanged: invalid index";
 
-//        edit_widget_->clear();
+        edit_widget_->clear();
 
-//        return;
-//    }
+        return;
+    }
 
-//    auto const source_index = proxy_model_->mapToSource(current);
-//    assert (source_index.isValid());
+    auto const source_index = proxy_model_->mapToSource(current);
+    assert (source_index.isValid());
 
-//    unsigned int id = table_model_->getIdOf(source_index);
+    string name = table_model_->getNameOf(source_index);
 
-//    loginf << "FFTsConfigurationDialog: currentRowChanged: current id " << id;
+    loginf << "FFTsConfigurationDialog: currentRowChanged: current name " << name;
 
-//    edit_widget_->showID(id);
+    edit_widget_->showFFT(name);
 }
 
 void FFTsConfigurationDialog::newFFTClickedSlot()
 {
     loginf << "FFTsConfigurationDialog: newFFTClickedSlot";
 
-//    create_dialog_.reset(new FFTCreateDialog(*this, ds_man_));
-//    connect(create_dialog_.get(), &FFTCreateDialog::doneSignal,
-//            this, &FFTsConfigurationDialog::newDSDoneSlot);
+    bool ok;
+    QString text =
+            QInputDialog::getText(this, tr("FFT Name"),
+                                  tr("Specify a (unique) FFT name:"), QLineEdit::Normal, "", &ok);
 
-//    create_dialog_->show();
-}
+    if (ok)
+    {
+        std::string name = text.toStdString();
 
-void FFTsConfigurationDialog::newFFTDoneSlot()
-{
-    loginf << "FFTsConfigurationDialog: newFFTDoneSlot";
+        if (!name.size())
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Adding FFT Failed",
+                                  "FFT has to have a non-empty name.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
 
-//    assert (create_dialog_);
+        if (fft_man_.hasConfigFFT(name) || fft_man_.hasDBFFT(name))
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Adding FFT Failed",
+                                  "FFT with this name already exists.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
 
-//    if (!create_dialog_->cancelled())
-//    {
-//        string ds_type = create_dialog_->dsType();
-
-//        unsigned int sac = create_dialog_->sac();
-//        unsigned int sic = create_dialog_->sic();
-
-//        loginf << "FFTsConfigurationDialog: newDSDoneSlot: ds_type " << ds_type
-//               << " sac " << sac << " sic " << sic;
-
-//        unsigned int ds_id = Number::dsIdFrom(sac, sic);
-
-//        assert (!ds_man_.hasConfigFFT(ds_id));
-
-//        beginResetModel();
-
-//        ds_man_.createConfigFFT(ds_id);
-//        assert (ds_man_.hasConfigFFT(ds_id));
-//        ds_man_.configFFT(ds_id).dsType(ds_type);
-
-//        endResetModel();
-
-//        auto const model_index = table_model_->dataSourceIndex(ds_id);
-
-//        auto const source_index = proxy_model_->mapFromSource(model_index);
-//        assert (source_index.isValid());
-
-//        table_view_->selectRow(source_index.row());
-//    }
-
-//    create_dialog_->close();
-//    create_dialog_ = nullptr;
+        fft_man_.addNewFFT(name);
+    }
 }
 
 void FFTsConfigurationDialog::importClickedSlot()
@@ -242,8 +224,8 @@ void FFTsConfigurationDialog::deleteAllClickedSlot()
 
         table_model_->beginModelReset();
 
-//        ds_man_.deleteAllConfigFFTs();
-//        edit_widget_->clear();
+        fft_man_.deleteAllConfigFFTs();
+        edit_widget_->clear();
 
         table_model_->endModelReset();
     }

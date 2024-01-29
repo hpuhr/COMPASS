@@ -602,6 +602,8 @@ void DataSourceManager::configurationDialogDoneSlot()
     config_dialog_->hide();
     config_dialog_ = nullptr;
 
+    saveDBDataSources();
+
     emit dataSourcesChangedSignal();
 }
 
