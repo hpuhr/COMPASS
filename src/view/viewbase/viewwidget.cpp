@@ -369,6 +369,8 @@ void ViewWidget::loadingDone()
     getViewConfigWidget()->loadingDone();
     getViewLoadStateWidget()->loadingDone();
     getViewToolWidget()->loadingDone();
+
+    emit viewRefreshed();
 }
 
 /**
@@ -389,6 +391,8 @@ void ViewWidget::redrawDone()
     getViewConfigWidget()->redrawDone();
     getViewLoadStateWidget()->redrawDone();
     getViewToolWidget()->redrawDone();
+
+    emit viewRefreshed();
 }
 
 /**

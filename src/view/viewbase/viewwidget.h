@@ -100,6 +100,10 @@ It also serves as the View's main interface to all ui and display functionality.
 class ViewWidget : public QWidget, public Configurable, public ui_test::UITestable
 {
     Q_OBJECT
+
+signals:
+    void viewRefreshed();
+
 public:
     ViewWidget(const std::string& class_id, const std::string& instance_id,
                Configurable* config_parent, View* view, QWidget* parent = nullptr);

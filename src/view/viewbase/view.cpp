@@ -552,7 +552,7 @@ void View::updateView()
 
     //nothing to do?
     if (update_flags == 0)
-        return;    
+        return; 
 
     bool components_updated = update_flags & VU_UpdateComponents;
     bool view_reloaded      = update_flags & VU_Reload;
@@ -580,7 +580,7 @@ void View::updateView(int flags)
     else //handle all other updates
     {
         if (flags & VU_Redraw)
-            widget_->getViewDataWidget()->redrawData(flags & VU_Recompute);
+            widget_->getViewDataWidget()->redrawData(flags & VU_Recompute, true);
         if (flags & VU_UpdateComponents)
             widget_->updateComponents();
     }

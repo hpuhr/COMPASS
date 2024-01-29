@@ -601,6 +601,7 @@ bool HistogramViewDataWidget::updateChart()
 
     //create new chart view
     chart_view_.reset(new HistogramViewChartView(this, chart));
+    chart_view_->setObjectName("chart_view");
 
     //    connect (chart_series_, &QBarSeries::clicked,
     //             chart_view_, &HistogramViewChartView::seriesPressedSlot);
@@ -767,30 +768,40 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
         auto range       = histogram_generator_->currentRangeAsLabels();
         bool zoom_active = histogram_generator_->subRangeActive();
 
+        const auto& results     = histogram_generator_->getResults();
+        const auto& dbc_results = results.content_results;
+
+        auto obtainRanges = [ & ] ()
+        {
+            if (dbc_results.size() == 0)
+                return std::vector<std::string>();
+            
+            const auto& bins = dbc_results.begin()->second.bins;
+            if (bins.size() == 0)
+                return std::vector<std::string>();
+
+            std::vector<std::string> ranges;
+            for (const auto& bin : bins)
+                    ranges.push_back(bin.labels.label_min);
+                ranges.push_back(bins.rbegin()->labels.label_max);
+
+            return ranges;
+        };
+
         info[ "result_range_min"      ] = range.first;
         info[ "result_range_max"      ] = range.second;
         info[ "result_zoom_active"    ] = zoom_active;
         info[ "result_num_bins"       ] = histogram_generator_->currentBins();
-        info[ "result_oor_count"      ] = histogram_generator_->getResults().not_inserted_count;
-        info[ "result_null_count"     ] = histogram_generator_->getResults().null_count;
-        info[ "result_null_sel_count" ] = histogram_generator_->getResults().null_selected_count;
-        info[ "result_valid_count"    ] = histogram_generator_->getResults().valid_count;
-        //info[ "result_counts"         ] = histogram_generator_->getResults().valid_counts;
-        //info[ "result_sel_counts"     ] = histogram_generator_->getResults().selected_counts;
-        info[ "result_max_count"      ] = histogram_generator_->getResults().max_count + 100;
-
-        // std::vector<std::string> ranges;
-        // if (histogram_generator_->getResults().content_results.size() > 0)
-        // {
-        //     const auto& bins = histogram_generator_->getResults().content_results.begin()->second.bins;
-        //     if (bins.size() > 0)
-        //     {
-        //         for (const auto& bin : bins)
-        //             ranges.push_back(bin.labels.label_min);
-        //         ranges.push_back(bins.rbegin()->labels.label_max);
-        //     }
-        // }
-        // info[ "result_ranges" ] = ranges;
+        info[ "result_oor_count"      ] = results.not_inserted_count;
+        info[ "result_null_count"     ] = results.null_count;
+        info[ "result_null_sel_count" ] = results.null_selected_count;
+        info[ "result_sel_count"      ] = results.selected_count;
+        info[ "result_valid_count"    ] = results.valid_count;
+        //info[ "result_counts"         ] = results.valid_counts;
+        //info[ "result_sel_counts"     ] = results.selected_counts;
+        info[ "result_max_count"      ] = results.max_count;
+        info[ "result_discrete"       ] = dbc_results.size() > 0 ? dbc_results.begin()->second.bins_are_categories : false;
+        //info[ "result_ranges"         ] = obtainRanges();
 
         if (chart_view_)
         {
@@ -805,7 +816,7 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
             nlohmann::json series_infos = nlohmann::json::array();
 
-            std::vector<size_t> total_counts(histogram_generator_->currentBins(), 0);
+            //std::vector<size_t> total_counts(histogram_generator_->currentBins(), 0);
 
             auto series = chart_view_->chart()->series();
             for (auto s : series)
@@ -824,7 +835,7 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
                     for (int i = 0; i < bset->count(); ++i)
                     {
                         counts[ i ] = (int)(*bset)[ i ];
-                        total_counts.at(i) += counts[ i ] + 10;
+                        //total_counts.at(i) += counts[ i ];
                     }
 
                     nlohmann::json bset_info;
@@ -846,7 +857,7 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
             //     total_count += c;
 
             chart_info[ "series"       ] = series_infos;
-            chart_info[ "total_counts" ] = total_counts;
+            //chart_info[ "total_counts" ] = total_counts;
             //chart_info[ "total_count"  ] = total_count;
 
             info[ "chart" ] = chart_info;

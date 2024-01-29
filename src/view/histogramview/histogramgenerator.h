@@ -67,6 +67,7 @@ public:
         std::vector<BinData> bin_data;        //per bin data
 
         bool         bins_are_sorted     = false;
+        bool         bins_are_categories = false;
 
         unsigned int null_count          = 0; //number of encountered null values
         unsigned int null_selected_count = 0; //number of encountered selected null values
@@ -89,6 +90,7 @@ public:
         unsigned int         max_count           = 0; //maximum encountered bin count
 
         bool                 bins_are_sorted     = false;
+        bool                 bins_are_categories = false;
     };
 
     typedef std::map<std::string, ContentResult> ContentResults;

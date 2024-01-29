@@ -64,6 +64,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
             selected_var_widget_ = new QWidget;
             selected_var_check_  = new QRadioButton("Show Variable Data");
             selected_var_check_->setChecked(!show_result);
+            UI_TEST_OBJ_NAME(selected_var_check_, selected_var_check_->text())
 
             connect(selected_var_check_, &QRadioButton::toggled, this,
                     &HistogramViewConfigWidget::dataSourceToggled);
@@ -100,6 +101,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
             eval_results_widget_ = new QWidget;
             eval_results_check_  = new QRadioButton("Show Evaluation Result Data");
             eval_results_check_->setChecked(show_result);
+            UI_TEST_OBJ_NAME(eval_results_check_, eval_results_check_->text())
 
             connect(eval_results_check_, &QRadioButton::toggled, this,
                     &HistogramViewConfigWidget::dataSourceToggled);

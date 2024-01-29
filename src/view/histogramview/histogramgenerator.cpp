@@ -204,6 +204,7 @@ bool HistogramGenerator::finalizeResults()
         r.not_inserted_count  = d.not_inserted_count;
 
         r.bins_are_sorted     = d.bins_are_sorted;
+        r.bins_are_categories = d.bins_are_categories;
 
         for (size_t i = 0; i < d.bin_data.size(); ++i)
         {
