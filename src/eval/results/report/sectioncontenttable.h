@@ -95,6 +95,7 @@ class SectionContentTable : public QAbstractItemModel, public SectionContent
 
 public slots:
     void currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous);
+    void clickedSlot(const QModelIndex& index);
     void doubleClickedSlot(const QModelIndex& index);
     void customContextMenuSlot(const QPoint& p);
     void addUTNSlot ();

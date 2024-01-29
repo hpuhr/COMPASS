@@ -115,8 +115,10 @@ void SectionContentTable::addToLayout (QVBoxLayout* layout)
         connect(table_view_, &QTableView::customContextMenuRequested,
                 this, &SectionContentTable::customContextMenuSlot);
 
-        connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
-                this, &SectionContentTable::currentRowChangedSlot);
+        //connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+        //        this, &SectionContentTable::currentRowChangedSlot);
+        connect(table_view_, &QTableView::pressed,
+                this, &SectionContentTable::clickedSlot);
         connect(table_view_, &QTableView::doubleClicked,
                 this, &SectionContentTable::doubleClickedSlot);
     }
@@ -458,15 +460,15 @@ void SectionContentTable::createOnDemandIfNeeded()
     }
 }
 
-void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)
+void SectionContentTable::clickedSlot(const QModelIndex& index)
 {
-    if (!current.isValid())
+    if (!index.isValid())
     {
-        loginf << "SectionContentTable: currentRowChangedSlot: invalid index";
+        loginf << "SectionContentTable: clickedSlot: invalid index";
         return;
     }
 
-    auto const source_index = proxy_model_->mapToSource(current);
+    auto const source_index = proxy_model_->mapToSource(index);
     assert (source_index.isValid());
 
     assert (source_index.row() >= 0);
@@ -477,7 +479,7 @@ void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, cons
     if (result_ptrs_.at(row_index)
             && result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
     {
-        loginf << "SectionContentTable: currentRowChangedSlot: index has associated viewable";
+        loginf << "SectionContentTable: clickedSlot: index has associated viewable";
 
         std::unique_ptr<nlohmann::json::object_t> viewable =
                 result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index));
@@ -485,6 +487,11 @@ void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, cons
 
         eval_man_.setViewableDataConfig(*viewable.get());
     }
+}
+
+void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)
+{
+    clickedSlot(current);
 }
 
 void SectionContentTable::doubleClickedSlot(const QModelIndex& index)

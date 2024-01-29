@@ -42,6 +42,7 @@ public slots:
     void showFullUTNSlot ();
     void showSurroundingDataSlot ();
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
+    void itemClicked(const QModelIndex& index);
 
 public:
     EvaluationDataWidget(EvaluationData& eval_data, EvaluationManager& eval_man);

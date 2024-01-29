@@ -143,7 +143,6 @@ void EvaluationResultsTabWidget::reshowLastId ()
     }
 }
 
-
 void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
 {
     TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
