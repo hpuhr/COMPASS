@@ -138,6 +138,10 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         {
             return target.timeEndStr().c_str();
         }
+        else if (col_name == "Duration")
+        {
+            return target.timeDurationStr().c_str();
+        }
         else if (col_name == "ACIDs")
         {
             return target.aircraftIdentificationsStr().c_str();

@@ -46,7 +46,7 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     table_view_->setSortingEnabled(true);
     table_view_->sortByColumn(1, Qt::AscendingOrder);
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
-    table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
+    table_view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
     //table_view_->setIconSize(QSize(24, 24));
     table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -57,8 +57,11 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     connect(table_view_, &QTableView::customContextMenuRequested,
             this, &TargetListWidget::customContextMenuSlot);
 
-    connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
-            this, &TargetListWidget::currentRowChanged);
+    //    connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+    //            this, &TargetListWidget::currentRowChanged);
+
+    connect(table_view_->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &TargetListWidget::selectionChanged);
 
     table_view_->resizeColumnsToContents();
     table_view_->resizeRowsToContents();
@@ -127,6 +130,7 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
     assert (table_view_);
 
     QModelIndex index = table_view_->indexAt(p);
+
     if (!index.isValid())
         return;
 
@@ -149,25 +153,25 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
 
     menu.exec(table_view_->viewport()->mapToGlobal(p));
 
-//    const EvaluationTargetData& target = eval_data_.getTargetOf(source_index);
+    //    const EvaluationTargetData& target = eval_data_.getTargetOf(source_index);
 
-//    unsigned int utn = target.utn_;
-//    loginf << "TargetListWidget: customContextMenuSlot: row " << index.row() << " utn " << utn;
-//    assert (eval_man_.getData().hasTargetData(utn));
+    //    unsigned int utn = target.utn_;
+    //    loginf << "TargetListWidget: customContextMenuSlot: row " << index.row() << " utn " << utn;
+    //    assert (eval_man_.getData().hasTargetData(utn));
 
-//    QMenu menu;
+    //    QMenu menu;
 
-//    QAction* action = new QAction("Show Full UTN", this);
-//    connect (action, &QAction::triggered, this, &TargetListWidget::showFullUTNSlot);
-//    action->setData(utn);
-//    menu.addAction(action);
+    //    QAction* action = new QAction("Show Full UTN", this);
+    //    connect (action, &QAction::triggered, this, &TargetListWidget::showFullUTNSlot);
+    //    action->setData(utn);
+    //    menu.addAction(action);
 
-//    QAction* action2 = new QAction("Show Surrounding Data", this);
-//    connect (action2, &QAction::triggered, this, &TargetListWidget::showSurroundingDataSlot);
-//    action2->setData(utn);
-//    menu.addAction(action2);
+    //    QAction* action2 = new QAction("Show Surrounding Data", this);
+    //    connect (action2, &QAction::triggered, this, &TargetListWidget::showSurroundingDataSlot);
+    //    action2->setData(utn);
+    //    menu.addAction(action2);
 
-//    menu.exec(table_view_->viewport()->mapToGlobal(p));
+    //    menu.exec(table_view_->viewport()->mapToGlobal(p));
 }
 
 void TargetListWidget::showFullUTNSlot ()
@@ -210,6 +214,32 @@ void TargetListWidget::currentRowChanged(const QModelIndex& current, const QMode
     loginf << "TargetListWidget: currentRowChanged: current target " << target.utn_;
 
     dbcont_manager_.showUTN(target.utn_);
+}
+
+void TargetListWidget::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+{
+    vector<unsigned int> selected_utns;
+
+    QModelIndex current_index;
+    const QModelIndexList items = table_view_->selectionModel()->selectedRows();
+
+    logdbg << "TargetListWidget: selectionChanged: list size " << items.count();
+
+    foreach (current_index, items)
+    {
+        auto const source_index = proxy_model_->mapToSource(current_index);
+        assert (source_index.isValid());
+
+        const dbContent::Target& target = model_.getTargetOf(source_index);
+
+        logdbg << "TargetListWidget: selectionChanged: utn " << target.utn_;
+
+        selected_utns.push_back(target.utn_);
+    }
+
+    logdbg << "TargetListWidget: selectionChanged: num targets " << selected_utns.size();
+
+    dbcont_manager_.showUTNs(selected_utns);
 }
 
 }

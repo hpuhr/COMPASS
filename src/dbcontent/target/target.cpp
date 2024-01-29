@@ -52,6 +52,8 @@ void Target::comment (const std::string& value)
 void Target::timeBegin(boost::posix_time::ptime value)
 {
     info_[KEY_TIME_BEGIN] = Time::toString(value);
+
+    time_duration_str_ = ""; // clear to force update
 }
 
 boost::posix_time::ptime Target::timeBegin() const
@@ -73,6 +75,8 @@ std::string Target::timeBeginStr() const
 void Target::timeEnd(boost::posix_time::ptime value)
 {
     info_[KEY_TIME_END] = Time::toString(value);
+
+    time_duration_str_ = ""; // clear to force update
 }
 
 boost::posix_time::ptime Target::timeEnd() const
@@ -98,7 +102,10 @@ boost::posix_time::time_duration Target::timeDuration() const
 
 std::string Target::timeDurationStr() const
 {
-    return Time::toString(timeDuration());
+    if (!time_duration_str_.size())
+        time_duration_str_ = Time::toString(timeDuration());
+
+    return time_duration_str_;
 }
 
 void Target::aircraftIdentifications(const std::set<std::string>& ids)

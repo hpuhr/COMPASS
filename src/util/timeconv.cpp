@@ -104,12 +104,12 @@ string toString(boost::posix_time::time_duration duration, unsigned int partial_
 
     string tmp = date_stream.str();
 
-    if (partial_digits == 3) // only remove microsecs
-        tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
-    else if (partial_digits == 0) // remove all partials and point
-        tmp.erase(tmp.length()-7);
-    else
-        tmp.erase(tmp.length()-3-(3-partial_digits));
+//    if (partial_digits == 3) // only remove microsecs
+//        tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
+//    else if (partial_digits == 0) // remove all partials and point
+//        tmp.erase(tmp.length()-7);
+//    else
+//        tmp.erase(tmp.length()-3-(3-partial_digits));
 
     return tmp;
 
