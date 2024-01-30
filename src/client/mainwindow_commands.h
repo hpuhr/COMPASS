@@ -359,6 +359,16 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
+// get_events
+struct RTCommandClientInfo : public rtcommand::RTCommand
+{
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(client_info, "retrieves information about the running compass client")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
+
 }
 
 #endif // MAINWINDOW_COMMANDS_H

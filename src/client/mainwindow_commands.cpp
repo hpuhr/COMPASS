@@ -26,6 +26,8 @@
 #include "rtcommand_registry.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
+#include "util/config.h"
+
 #include "event_log.h"
 
 #include <QTimer>
@@ -61,7 +63,8 @@ REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
 REGISTER_RTCOMMAND(main_window::RTCommandExportEvaluationReport)
 REGISTER_RTCOMMAND(main_window::RTCommandQuit)
 REGISTER_RTCOMMAND(main_window::RTCommandGetEvents)
-REGISTER_RTCOMMAND(main_window::RTCommandReconfigure);
+REGISTER_RTCOMMAND(main_window::RTCommandReconfigure)
+REGISTER_RTCOMMAND(main_window::RTCommandClientInfo)
 
 namespace main_window
 {
@@ -91,6 +94,7 @@ void init_commands()
     main_window::RTCommandQuit::init();
     main_window::RTCommandGetEvents::init();
     main_window::RTCommandReconfigure::init();
+    main_window::RTCommandClientInfo::init();
 }
 
 // open_db
@@ -1699,6 +1703,21 @@ bool RTCommandReconfigure::run_impl()
     json_reply[ "missing_keys" ] = missing_keys_vec;
 
     setJSONReply(json_reply);
+
+    return true;
+}
+
+// client_info
+
+bool RTCommandClientInfo::run_impl()
+{
+    nlohmann::json info;
+
+    info[ "appimage" ] = COMPASS::instance().isAppImage();
+    info[ "version"  ] = COMPASS::instance().config().getString("version");
+    info[ "appmode"  ] = COMPASS::instance().appModeStr();
+
+    setJSONReply(info);
 
     return true;
 }
