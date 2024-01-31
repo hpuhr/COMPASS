@@ -115,7 +115,7 @@ public:
     void updateLoadState();
     void updateComponents();
 
-    void refreshView();
+    bool refreshView();
 
     void loadingStarted();
     void loadingDone();

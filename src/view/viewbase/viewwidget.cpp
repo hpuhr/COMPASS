@@ -352,9 +352,15 @@ QIcon ViewWidget::getIcon(const std::string& fn)
 /**
  * Refresh the view depending on what is to do (e.g. reload, redraw or do nothing).
  * Will in all cases result in emitting the viewRefreshed() signal.
+ * Returns false if the view is already busy with a running refresh.
  */
-void ViewWidget::refreshView()
+bool ViewWidget::refreshView()
 {
+    // view already busy => return
+    // viewRefreshed() will be emitted after view has finished its current refresh
+    if (getViewLoadStateWidget()->viewBusy())
+        return false;
+
     if (getViewLoadStateWidget()->viewUpdateRequired())
     {
         // update required => run view update
@@ -382,6 +388,8 @@ void ViewWidget::refreshView()
         emit viewRefreshed();
     }
 #endif
+
+    return true;
 }
 
 /**
@@ -565,10 +573,6 @@ nlohmann::json ViewWidget::uiGetJSON(const QString& what) const
  */
 void ViewWidget::uiRefresh()
 {
-    //view already busy => return
-    if (getViewLoadStateWidget()->viewBusy())
-        return;
-
     //just refresh the view
     refreshView();
 }
