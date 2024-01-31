@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCATTERPLOTVIEWDATAWIDGET_H_
-#define SCATTERPLOTVIEWDATAWIDGET_H_
+#pragma once
 
 //#include "global.h"
 #include "nullablevector.h"
@@ -80,13 +79,24 @@ public:
     QPixmap renderPixmap();
     unsigned int nullValueCount() const;
 
+    static const double MarkerSize;
+    static const double MarkerSizeSelected;
+
+    static const std::string Color_CAT001;
+    static const std::string Color_CAT010;
+    static const std::string Color_CAT020;
+    static const std::string Color_CAT021;
+    static const std::string Color_CAT048;
+    static const std::string Color_RefTraj;
+    static const std::string Color_CAT062;
+
 signals:
 //    void showOnlySelectedSignal(bool value);
 //    void usePresentationSignal(bool use_presentation);
 //    void showAssociationsSignal(bool value);
 
 public slots:
-    void rectangleSelectedSlot (QPointF p1, QPointF p2);
+    void rectangleSelectedSlot(QPointF p1, QPointF p2);
 
     void invertSelectionSlot();
     void clearSelectionSlot();
@@ -108,6 +118,8 @@ protected:
     virtual void clearData_impl() override;
     virtual bool redrawData_impl(bool recompute) override;
     virtual void liveReload_impl() override;
+
+    void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     void resetCounts();
 
@@ -149,7 +161,7 @@ protected:
     bool has_y_min_max_ {false};
     double y_min_ {0}, y_max_ {0};
 
-    std::map<std::string, std::vector<bool>>         selected_values_;
+    std::map<std::string, std::vector<bool>>          selected_values_;
     std::map<std::string, std::vector<unsigned long>> rec_num_values_;
 
     std::map<std::string, QColor> colors_;
@@ -157,14 +169,16 @@ protected:
     ScatterPlotViewDataTool selected_tool_{SP_NAVIGATE_TOOL};
 
     QHBoxLayout*                                        main_layout_ {nullptr};
-    //QtCharts::QChart*                                 chart_       {nullptr};
-    //QtCharts::QChartView*                             chart_view_  {nullptr};
     std::unique_ptr<QtCharts::ScatterPlotViewChartView> chart_view_  {nullptr};
 
     bool x_var_not_in_buffer_ {false};
     bool y_var_not_in_buffer_ {false};
 
     unsigned int nan_value_cnt_ {0};
+    unsigned int valid_cnt_     {0};
+    unsigned int selected_cnt_  {0};
+
+    std::map<std::string, unsigned int> dbo_valid_counts_;
 
     void updateDataSeries(QtCharts::QChart* chart);
 };
@@ -188,5 +202,3 @@ inline void ScatterPlotViewDataWidget::appendData<boost::posix_time::ptime>(Null
         target.push_back(t);
     }
 }
-
-#endif /* SCATTERPLOTVIEWDATAWIDGET_H_ */
