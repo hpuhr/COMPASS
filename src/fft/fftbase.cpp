@@ -14,6 +14,7 @@ const string mode_3a_code_key = "mode_3a_code";
 
 FFTBase::FFTBase()
 {
+    info_ = json::object_t();
 }
 
 std::string FFTBase::name() const
@@ -33,6 +34,7 @@ nlohmann::json& FFTBase::info()
 
 void FFTBase::info(const nlohmann::json& info)
 {
+    assert (info.is_object());
     info_ = info;
 }
 
@@ -122,6 +124,7 @@ void FFTBase::setFromJSON (const nlohmann::json& j)
     name_ = j.at("name");
 
     assert(j.contains("info"));
+    assert (j.at("info").is_object());
     info_ = j.at("info");
 }
 

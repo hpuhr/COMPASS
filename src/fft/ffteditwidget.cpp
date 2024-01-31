@@ -284,10 +284,10 @@ void FFTEditWidget::deleteSlot()
     loginf << "FFTEditWidget: deleteSlot";
 
     assert (has_current_fft_);
-    assert (!current_fft_in_db_);
+    //assert (!current_fft_in_db_);
 
     dialog_.beginResetModel();
-    ds_man_.deleteConfigFFT(current_name_);
+    ds_man_.deleteFFT(current_name_);
     dialog_.endResetModel();
 
     clear();

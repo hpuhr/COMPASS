@@ -608,7 +608,7 @@ std::vector<std::unique_ptr<DBFFT>> DBInterface::getFFTs()
         src->name(buffer->get<string>(DBFFT::name_column_.name()).get(cnt));
 
         if (!buffer->get<string>(DBFFT::info_column_.name()).isNull(cnt))
-            src->info(buffer->get<string>(DBFFT::info_column_.name()).get(cnt));
+            src->info(nlohmann::json::parse(buffer->get<string>(DBFFT::info_column_.name()).get(cnt)));
 
         sources.emplace_back(std::move(src));
     }

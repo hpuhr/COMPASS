@@ -103,7 +103,7 @@ boost::posix_time::time_duration Target::timeDuration() const
 std::string Target::timeDurationStr() const
 {
     if (!time_duration_str_.size())
-        time_duration_str_ = Time::toString(timeDuration(), 0);
+        time_duration_str_ = Time::toString(timeDuration(), 1);
 
     return time_duration_str_;
 }

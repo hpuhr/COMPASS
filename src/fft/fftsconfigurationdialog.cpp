@@ -185,7 +185,27 @@ void FFTsConfigurationDialog::newFFTClickedSlot()
             return;
         }
 
+        beginResetModel();
+
         fft_man_.addNewFFT(name);
+
+        endResetModel();
+
+        QModelIndexList items = table_model_->match(
+                    table_model_->index(0, 0), Qt::DisplayRole, name.c_str(),
+                    -1, Qt::MatchExactly);
+        assert (items.size() == 1);
+
+        QModelIndex tmp = items.at(0);
+        assert (tmp.isValid());
+
+        auto const target_index = proxy_model_->mapFromSource(tmp);
+        assert (target_index.isValid());
+
+        table_view_->selectionModel()->setCurrentIndex(target_index,
+                                                       QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+
     }
 }
 

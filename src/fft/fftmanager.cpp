@@ -62,18 +62,29 @@ void FFTManager::createConfigFFT(const std::string& name)
     updateFFTNamesAll();
 }
 
-void FFTManager::deleteConfigFFT(const std::string& name)
+void FFTManager::deleteFFT(const std::string& name)
 {
-    loginf << "FFTManager: deleteConfigFFT: name " << name;
+    loginf << "FFTManager: deleteFFT: name " << name;
 
-    assert (hasConfigFFT(name));
-    assert (!hasDBFFT(name)); // can not delete config data sources in existing db
+    if (hasConfigFFT(name))
+    {
 
-    auto ds_it = find_if(config_ffts_.begin(), config_ffts_.end(),
-                         [name] (const std::unique_ptr<ConfigurationFFT>& s)
-    { return s->name() == name; } );
+        auto ds_it = find_if(config_ffts_.begin(), config_ffts_.end(),
+                             [name] (const std::unique_ptr<ConfigurationFFT>& s)
+        { return s->name() == name; } );
 
-    config_ffts_.erase(ds_it);
+        config_ffts_.erase(ds_it);
+    }
+
+    if (hasDBFFT(name))
+    {
+
+        auto ds_it = find_if(db_ffts_.begin(), db_ffts_.end(),
+                             [name] (const std::unique_ptr<DBFFT>& s)
+        { return s->name() == name; } );
+
+        db_ffts_.erase(ds_it);
+    }
 
     updateFFTNamesAll();
 

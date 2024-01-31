@@ -38,7 +38,6 @@ public:
 
     bool hasConfigFFT(const std::string& name);
     void createConfigFFT(const std::string& name);
-    void deleteConfigFFT(const std::string& name);
     ConfigurationFFT& configFFT(const std::string& name);
     const std::vector<std::unique_ptr<ConfigurationFFT>>& configFFTs() const;
     void deleteAllConfigFFTs();
@@ -48,6 +47,8 @@ public:
     bool canAddNewFFTFromConfig (const std::string& name);
     void addNewFFT (const std::string& name); // be sure not to call from different thread
     const std::vector<std::unique_ptr<DBFFT>>& dbFFTs() const;
+
+    void deleteFFT(const std::string& name);
 
     const std::vector<std::string>& getAllFFTNames(); // both config and db
 

@@ -104,29 +104,29 @@ string toString(boost::posix_time::time_duration duration, unsigned int partial_
 
     double msecs_float = duration.total_milliseconds();
 
-    unsigned int hours = msecs_float / 3600000.0;
+    unsigned int tmp_val = msecs_float / 3600000.0; // hours
 
-    msecs_float -= (hours * 3600000.0);
+    date_stream << std::setw(2) << std::setfill('0') << tmp_val;
 
-    unsigned int minutes = msecs_float / 60000.0;
+    msecs_float -= (tmp_val * 3600000.0);
 
-    msecs_float -= (minutes * 60000.0);
+    tmp_val = msecs_float / 60000.0; // minutes
+    date_stream << ":" << std::setw(2) << std::setfill('0') << tmp_val;
 
-    unsigned int secs = msecs_float / 1000.0;
+    msecs_float -= (tmp_val * 60000.0);
 
-    msecs_float -= (secs * 1000.0);
+    tmp_val = msecs_float / 1000.0; // seconds
+    date_stream << ":" << std::setw(2) << std::setfill('0') << tmp_val;
 
-    date_stream << std::setw(2) << std::setfill('0') << hours
-                << ":" << std::setw(2) << std::setfill('0')<< minutes
-                << ":" << std::setw(2) << std::setfill('0')<< secs;
+    msecs_float -= (tmp_val * 1000.0);
 
     if (partial_digits)
     {
         double factor = pow(10, 3-partial_digits);
 
-        unsigned int number = msecs_float * factor;
+        tmp_val = msecs_float * factor; // number after point
 
-        date_stream << "." << std::setw(partial_digits) << std::setfill('0') << number;
+        date_stream << "." << std::setw(partial_digits) << std::setfill('0') << tmp_val;
     }
 
     return date_stream.str();

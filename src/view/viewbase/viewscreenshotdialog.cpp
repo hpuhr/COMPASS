@@ -38,6 +38,8 @@
 #include <QPainter>
 #include <QMouseEvent>
 
+using namespace Utils;
+
 namespace
 {
     /**
@@ -276,7 +278,7 @@ void ViewScreenshotDialog::save()
     std::string fn_init = view_->classId() + "_" + timestamp + ".png";
     std::string path    = COMPASS::instance().lastUsedPath() + "/" + fn_init;
 
-    auto fn = QFileDialog::getSaveFileName(this, "Select Screenshot File", QString::fromStdString(path), "*.png");
+    QString fn = QFileDialog::getSaveFileName(this, "Select Screenshot File", QString::fromStdString(path), "*.png");
     if (fn.isEmpty())
         return;
 
@@ -286,8 +288,12 @@ void ViewScreenshotDialog::save()
 
     QApplication::restoreOverrideCursor();
 
-    if (!ok)
+    if (ok)
+        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(fn.toStdString().c_str()));
+    else
         QMessageBox::critical(this, "Error", "Screenshot could not be written.");
+
+
 
     accept();
 }
