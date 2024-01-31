@@ -25,7 +25,10 @@ DBFFT* ConfigurationFFT::getAsNewDBDS()
     new_fft->name(name_);
 
     if (!info_.is_null())
-        new_fft->info(info_.dump());
+    {
+        assert (info_.is_object());
+        new_fft->info(info_);
+    }
 
     loginf << "ConfigurationFFT: getAsNewDBDS: name " << new_fft->name()
             << " info '" << new_fft->info().dump() << "'";

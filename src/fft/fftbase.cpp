@@ -75,8 +75,7 @@ void FFTBase::mode3ACode(unsigned int value)
 bool FFTBase::hasPosition() const
 {
     return info_.contains(latitude_key)
-            && info_.contains(longitude_key)
-            && info_.contains(altitude_key);
+            && info_.contains(longitude_key);
 }
 
 void FFTBase::latitude (double value)

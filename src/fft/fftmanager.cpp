@@ -177,6 +177,11 @@ void FFTManager::addNewFFT (const std::string& name)
     loginf << "FFTManager: addNewFFT: name " << name << " done";
 }
 
+const std::vector<std::unique_ptr<DBFFT>>& FFTManager::dbFFTs() const
+{
+    return db_ffts_;
+}
+
 
 const std::vector<string>& FFTManager::getAllFFTNames() // both config and db
 {
@@ -249,14 +254,29 @@ void FFTManager::loadDBFFTs()
 
     DBInterface& db_interface = COMPASS::instance().interface();
 
+    // load from db
     if (db_interface.existsFFTsTable())
-    {
         db_ffts_ = db_interface.getFFTs();
+    else
+        db_interface.createFFTsTable();
 
-        updateFFTNamesAll();
+    bool new_created = false;
 
-        sortDBFFTs();
+    // create from config into db ones
+    for (const auto& cfg_fft_it : config_ffts_)
+    {
+        if (canAddNewFFTFromConfig(cfg_fft_it->name()))
+        {
+            addNewFFT(cfg_fft_it->name()); // creates from config if possible
+            new_created = true;
+        }
     }
+
+    if (new_created)
+        saveDBFFTs(); // save if new ones were created
+
+    updateFFTNamesAll();
+    sortDBFFTs();
 }
 
 void FFTManager::sortDBFFTs()
