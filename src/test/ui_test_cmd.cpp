@@ -18,6 +18,7 @@
 #include "ui_test_cmd.h"
 #include "ui_test_setget.h"
 #include "ui_test_inject.h"
+#include "ui_test_testable.h"
 #include "rtcommand_registry.h"
 #include "json.h"
 
@@ -29,6 +30,7 @@
 REGISTER_RTCOMMAND(ui_test::RTCommandUISet)
 REGISTER_RTCOMMAND(ui_test::RTCommandUIGet)
 REGISTER_RTCOMMAND(ui_test::RTCommandUIInject)
+REGISTER_RTCOMMAND(ui_test::RTCommandUIRefresh)
 
 namespace ui_test
 {
@@ -149,27 +151,41 @@ bool RTCommandUIGet::run_impl()
     boost::optional<nlohmann::json> result;
     std::string result_string;
 
-    if (as_json)
+    if (visible)
     {
-        auto res = getUIElementJSON(receiver.second, "", what);
-        if (!res.is_null())
-        {
-            result = res;
-            result_string = res.dump(4);
-        }
+        //retrieve ui element visibility
+        nlohmann::json v;
+        v[ "visible" ] = receiver.second->isVisible();
+
+        result        = v;
+        result_string = receiver.second->isVisible() ? "true" : "false";
     }
     else
     {
-        auto res = getUIElement(receiver.second, "", what);
-        if (res.has_value())
+        if (as_json)
         {
-            result_string = res.value().toStdString();
+            //retrieve ui element value as json
+            auto res = getUIElementJSON(receiver.second, "", what);
+            if (!res.is_null())
+            {
+                result = res;
+                result_string = res.dump(4);
+            }
+        }
+        else
+        {
+            //retrieve ui element value as string
+            auto res = getUIElement(receiver.second, "", what);
+            if (res.has_value())
+            {
+                result_string = res.value().toStdString();
 
-            nlohmann::json v;
-            v[ "value" ] = result_string;
+                nlohmann::json v;
+                v[ "value" ] = result_string;
 
-            result = v;
-        } 
+                result = v;
+            } 
+        }
     }
 
     if (!result.has_value())
@@ -193,7 +209,8 @@ void RTCommandUIGet::collectOptions_impl(OptionsDescription& options,
 
     ADD_RTCOMMAND_OPTIONS(options)
         ("what,w", po::value<std::string>()->default_value(""), "which value to retrieve from the ui element (empty = default behavior)")
-        ("json", "if present, the result will be returned as a json struct instead of a string");
+        ("json", "if present, the result will be returned as a json struct instead of a string")
+        ("visible", "if present, the visibility of the ui element will be returned");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "what", 2)
 }
@@ -207,6 +224,7 @@ void RTCommandUIGet::assignVariables_impl(const VariablesMap& variables)
 
     RTCOMMAND_GET_QSTRING_OR_THROW(variables, "what", what)
     RTCOMMAND_CHECK_VAR(variables, "json", as_json)
+    RTCOMMAND_CHECK_VAR(variables, "visible", visible)
 }
 
 /*************************************************************************
@@ -261,6 +279,37 @@ void RTCommandUIInject::assignVariables_impl(const VariablesMap& variables)
     RTCommandUIInjection::assignVariables_impl(variables);
 
     RTCOMMAND_GET_QSTRING_OR_THROW(variables, "event", event)
+}
+
+/*************************************************************************
+ * RTCommandUIRefresh
+ *************************************************************************/
+
+/**
+ * "Refreshes" the given UI element, whatever this means for the specific type of element.
+ * @TODO: This is only implemented for classes derived from UITestable at the moment.
+ */
+bool RTCommandUIRefresh::run_impl()
+{
+    auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
+    if (receiver.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        setResultMessage("Object '" + obj.toStdString() + "' not found");
+        return false;
+    }
+
+    //check if object is UITestable
+    auto testable = dynamic_cast<UITestable*>(receiver.second);
+    if (!testable)
+    {
+        setResultMessage("Object '" + obj.toStdString() + "' is not ui testable");
+        return false;
+    }
+
+    //refresh object
+    testable->uiRefresh();
+
+    return true;
 }
 
 }

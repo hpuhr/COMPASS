@@ -350,6 +350,41 @@ QIcon ViewWidget::getIcon(const std::string& fn)
 }
 
 /**
+ * Refresh the view depending on what is to do (e.g. reload, redraw or do nothing).
+ * Will in all cases result in emitting the viewRefreshed() signal.
+ */
+void ViewWidget::refreshView()
+{
+    if (getViewLoadStateWidget()->viewUpdateRequired())
+    {
+        // update required => run view update
+        // viewRefreshed() either emitted from triggered redraw or reload
+        getView()->updateView(); 
+    }
+    else if (getViewLoadStateWidget()->viewReloadRequired())
+    {
+        // reload required (most likely due to no data loaded yet) => reload view
+        // viewRefreshed() emitted from triggered reload
+        COMPASS::instance().dbContentManager().load(); 
+    }
+#if 0
+    else 
+    {
+        // fallback 1: be sceptical and reload in all other cases (will completely update the view)
+        // viewRefreshed() emitted from triggered reload
+        COMPASS::instance().dbContentManager().load(); // fallback: just reload
+    }
+#else
+    else
+    {
+        // fallback 2: trust the system and do nothing, but send the viewRefreshed() signal 
+        // to inform listeners that view is fresh
+        emit viewRefreshed();
+    }
+#endif
+}
+
+/**
 */
 void ViewWidget::loadingStarted()
 {
@@ -478,26 +513,6 @@ nlohmann::json ViewWidget::viewInfoJSON() const
 }
 
 /**
- * Running the 'uiget' rtcommand on a view widget will yield view specific json information.
- */
-boost::optional<QString> ViewWidget::uiGet(const QString& what) const
-{
-    assert(view_);
-
-    std::string view_info = view_->viewInfoJSON().dump();
-    return QString::fromStdString(view_info);
-}
-
-/**
- * Running the 'uiget' rtcommand on a view widget will yield view specific json information.
- */
-nlohmann::json ViewWidget::uiGetJSON(const QString& what) const
-{
-    assert(view_);
-    return view_->viewInfoJSON();
-}
-
-/**
 */
 bool ViewWidget::isVariableSetLoaded() const
 {
@@ -523,4 +538,37 @@ QImage ViewWidget::renderContents()
     painter.drawImage(p1 - p0, data_img);
 
     return img;
+}
+
+/**
+ * Running the 'uiget' rtcommand on a view widget will yield view specific json information.
+ */
+boost::optional<QString> ViewWidget::uiGet(const QString& what) const
+{
+    assert(view_);
+
+    std::string view_info = view_->viewInfoJSON().dump();
+    return QString::fromStdString(view_info);
+}
+
+/**
+ * Running the 'uiget' rtcommand on a view widget will yield view specific json information.
+ */
+nlohmann::json ViewWidget::uiGetJSON(const QString& what) const
+{
+    assert(view_);
+    return view_->viewInfoJSON();
+}
+
+/**
+ * Running the 'uirefresh' rtcommand will refresh the view depending on its load state.
+ */
+void ViewWidget::uiRefresh()
+{
+    //view already busy => return
+    if (getViewLoadStateWidget()->viewBusy())
+        return;
+
+    //just refresh the view
+    refreshView();
 }

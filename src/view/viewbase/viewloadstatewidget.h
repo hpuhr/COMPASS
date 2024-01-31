@@ -68,6 +68,10 @@ public:
 
     void appModeSwitch(AppMode app_mode);
 
+    bool viewUpdateRequired() const;
+    bool viewReloadRequired() const;
+    bool viewBusy() const;
+
     nlohmann::json viewInfoJSON() const override final;
 
     static const int DefaultMargin = 4;
