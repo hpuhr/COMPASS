@@ -68,6 +68,11 @@ class AllBufferTableWidget : public QWidget
     std::vector<std::vector<std::string>> getSelectedText (); // first is header
     std::vector<std::vector<std::string>> getText (unsigned int max_rows=30); // first is header
 
+    bool showOnlySelected() const;
+    bool usePresentation() const;
+
+    const QTableView* table() const { return table_; }
+
   protected:
     ListBoxView& view_;
     ListBoxViewDataSource& data_source_;

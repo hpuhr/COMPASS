@@ -77,6 +77,8 @@ protected:
     virtual bool redrawData_impl(bool recompute) override;
     virtual void liveReload_impl() override;
 
+    void viewInfoJSON_impl(nlohmann::json& info) const override;
+
     ListBoxView*           view_{nullptr};
     /// Data source
     ListBoxViewDataSource* data_source_{nullptr};

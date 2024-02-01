@@ -69,6 +69,9 @@ class AllBufferTableModel : public QAbstractTableModel
 
     std::pair<int,int> getSelectedRows(); // min, max, selected row
 
+    bool showOnlySelected() const { return show_only_selected_; }
+    bool usePresentation() const { return use_presentation_; }
+
   protected:
     AllBufferTableWidget* table_widget_{nullptr};
     ListBoxViewDataSource& data_source_;

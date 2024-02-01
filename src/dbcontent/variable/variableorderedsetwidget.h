@@ -47,6 +47,9 @@ public:
     VariableOrderedSetWidget(VariableOrderedSet& set, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~VariableOrderedSetWidget();
 
+    const QListWidget* listWidget() const { return list_widget_; }
+    const VariableOrderedSet& variableSet() const { return set_; }
+
 protected:
     VariableOrderedSet& set_;
     QMenu menu_;

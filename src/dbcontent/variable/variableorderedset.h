@@ -49,7 +49,7 @@ class VariableOrderedSet : public QObject, public Configurable
 
     void add(Variable& var);
     void add(MetaVariable& var);
-    void add (const std::string& dbcontent_name, const std::string var_name);
+    void add(const std::string& dbcontent_name, const std::string var_name);
 
     void removeVariableAt(unsigned int index);
     void removeVariable(const Variable& variable);

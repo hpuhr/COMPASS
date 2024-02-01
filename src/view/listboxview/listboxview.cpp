@@ -226,6 +226,13 @@ void ListBoxView::onConfigurationChanged_impl(const std::vector<std::string>& ch
             emit usePresentationSignal(settings_.use_presentation);
         }
     }
+}
 
-    
+/**
+ */
+void ListBoxView::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    info[ "variables"          ] = data_source_->getSet()->definitions();
+    info[ ParamShowSelected    ] = settings_.show_only_selected;
+    info[ ParamUsePresentation ] = settings_.use_presentation;
 }

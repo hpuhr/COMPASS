@@ -30,6 +30,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QTabWidget>
+#include <QListWidget>
 
 using namespace Utils;
 using namespace std;
@@ -133,4 +134,15 @@ void ListBoxViewConfigWidget::configChanged()
     //other ui elements
     only_selected_check_->setChecked(view_->showOnlySelected());
     presentation_check_->setChecked(view_->usePresentation());
+}
+
+void ListBoxViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    std::vector<std::string> variables;
+    for (int i = 0; i < set_config_widget_->listWidget()->count(); ++i)
+        variables.push_back(set_config_widget_->listWidget()->item(i)->text().toStdString());
+
+    info[ "variables"          ] = variables;
+    info[ "show_only_selected" ] = only_selected_check_->isChecked();
+    info[ "use_presentation"   ] = presentation_check_->isChecked();
 }

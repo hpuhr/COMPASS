@@ -78,6 +78,8 @@ protected:
 
     virtual void onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
 
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
+
     ListBoxViewDataWidget* getDataWidget();
 
     ListBoxViewWidget* widget_{nullptr};
