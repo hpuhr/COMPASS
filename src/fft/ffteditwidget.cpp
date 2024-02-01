@@ -5,6 +5,9 @@
 #include "fftsconfigurationdialog.h"
 #include "logger.h"
 #include "textfielddoublevalidator.h"
+#include "textfieldhexvalidator.h"
+#include "textfieldoctvalidator.h"
+#include "stringconv.h"
 
 #include <QLineEdit>
 #include <QPushButton>
@@ -16,6 +19,7 @@
 #include <QFormLayout>
 
 using namespace std;
+using namespace Utils;
 
 FFTEditWidget::FFTEditWidget(FFTManager& ds_man, FFTsConfigurationDialog& dialog)
     : ds_man_(ds_man), dialog_(dialog)
@@ -25,58 +29,80 @@ FFTEditWidget::FFTEditWidget(FFTManager& ds_man, FFTsConfigurationDialog& dialog
     QScrollArea* scroll_area = new QScrollArea();
     scroll_area->setWidgetResizable(true);
 
-    QWidget* main_widget = new QWidget();
+    main_widget_ = new QWidget();
 
     QVBoxLayout* main_layout = new QVBoxLayout();
     main_layout->setSizeConstraint(QLayout::SetMinimumSize);
 
-    QGridLayout* properties_layout_ = new QGridLayout();
+    QGridLayout* properties_layout = new QGridLayout();
 
     unsigned int row = 0;
 
     // "Name", "Short Name", "DSType", "SAC", "SIC"
 
     //name_edit_
-    properties_layout_->addWidget(new QLabel("Name"), row, 0);
+    properties_layout->addWidget(new QLabel("Name"), row, 0);
 
     name_edit_ = new QLineEdit();
     name_edit_->setReadOnly(true);
+    name_edit_->setDisabled(true);
     //connect(name_edit_, &QLineEdit::textEdited, this, &FFTEditWidget::nameEditedSlot);
-    properties_layout_->addWidget(name_edit_, row, 1);
+    properties_layout->addWidget(name_edit_, row, 1);
     row++;
 
-    // position_widget_
+    // secondary stuff
+    properties_layout->addWidget(new QLabel("Mode S Address (hexadecimal)"), row, 0);
 
-    position_widget_ = new QWidget();
-    position_widget_->setContentsMargins(0, 0, 0, 0);
+    mode_s_address_edit_ = new QLineEdit();
+    mode_s_address_edit_->setValidator(new TextFieldHexValidator(6));
+    connect(mode_s_address_edit_, &QLineEdit::textEdited, this, &FFTEditWidget::modeSAddressEditedSlot);
+    properties_layout->addWidget(mode_s_address_edit_, row, 1);
+    row++;
 
-    QGridLayout* position_layout = new QGridLayout();
-    //position_layout->setMargin(0);
+    properties_layout->addWidget(new QLabel("Mode 3/A Code (octal)"), row, 0);
 
-    position_layout->addWidget(new QLabel("Latitude"), 0, 0);
+    mode_3a_edit_ = new QLineEdit();
+    mode_3a_edit_->setValidator(new TextFieldOctValidator(4));
+    connect(mode_3a_edit_, &QLineEdit::textEdited, this, &FFTEditWidget::modeAEditedSlot);
+    properties_layout->addWidget(mode_3a_edit_, row, 1);
+    row++;
+
+
+    properties_layout->addWidget(new QLabel("Mode C Code [ft]"), row, 0);
+
+    mode_c_edit_ = new QLineEdit();
+    mode_c_edit_->setValidator(new TextFieldDoubleValidator(-10000, 100000, 2));
+    connect(mode_c_edit_, &QLineEdit::textEdited, this, &FFTEditWidget::modeCEditedSlot);
+    properties_layout->addWidget(mode_c_edit_, row, 1);
+    row++;
+
+    // positions
+
+    properties_layout->addWidget(new QLabel("Latitude"), row, 0);
 
     latitude_edit_ = new QLineEdit();
     latitude_edit_->setValidator(new TextFieldDoubleValidator(-90, 90, 12));
     connect(latitude_edit_, &QLineEdit::textEdited, this, &FFTEditWidget::latitudeEditedSlot);
-    position_layout->addWidget(latitude_edit_, 0, 1);
+    properties_layout->addWidget(latitude_edit_, row, 1);
+    row++;
 
-    position_layout->addWidget(new QLabel("Longitude"), 1, 0);
+    properties_layout->addWidget(new QLabel("Longitude"), row, 0);
 
     longitude_edit_ = new QLineEdit();
     longitude_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 12));
     connect(longitude_edit_, &QLineEdit::textEdited, this, &FFTEditWidget::longitudeEditedSlot);
-    position_layout->addWidget(longitude_edit_, 1, 1);
+    properties_layout->addWidget(longitude_edit_, row, 1);
+    row++;
 
-    position_layout->addWidget(new QLabel("Altitude"), 2, 0);
+    properties_layout->addWidget(new QLabel("Altitude"), row, 0);
 
     altitude_edit_ = new QLineEdit();
     altitude_edit_->setValidator(new TextFieldDoubleValidator(-10000, 10000, 12));
     connect(altitude_edit_, &QLineEdit::textEdited, this, &FFTEditWidget::altitudeEditedSlot);
-    position_layout->addWidget(altitude_edit_, 2, 1);
+    properties_layout->addWidget(altitude_edit_, row, 1);
+    row++;
 
-    position_widget_->setLayout(position_layout);
-
-    main_layout->addWidget(position_widget_);
+    main_layout->addLayout(properties_layout);
 
     main_layout->addStretch();
 
@@ -87,8 +113,8 @@ FFTEditWidget::FFTEditWidget(FFTManager& ds_man, FFTsConfigurationDialog& dialog
 
     updateContent();
 
-    main_widget->setLayout(main_layout);
-    scroll_area->setWidget(main_widget);
+    main_widget_->setLayout(main_layout);
+    scroll_area->setWidget(main_widget_);
 
     QVBoxLayout* top_lay = new QVBoxLayout();
     top_lay->setSizeConstraint(QLayout::SetMinimumSize);
@@ -122,113 +148,85 @@ void FFTEditWidget::clear()
 }
 
 
-//void FFTEditWidget::nameEditedSlot(const QString& value)
-//{
-//    string text = value.toStdString();
+void FFTEditWidget::modeSAddressEditedSlot(const QString& value_str)
+{
+    assert (mode_s_address_edit_);
 
-//    loginf << "FFTEditWidget: nameEditedSlot: '" << text << "'";
+    if (mode_s_address_edit_->hasAcceptableInput())
+    {
+        if (!value_str.size())
+        {
+            if (current_fft_in_db_)
+            {
+                assert (ds_man_.hasDBFFT(current_name_));
+                ds_man_.dbFFT(current_name_).clearModeSAddress();
+            }
 
-//    if (!text.size())
-//    {
-//        QMessageBox m_warning(QMessageBox::Warning, "Invalid Name",
-//                              "Empty names are not permitted. Please set another name.",
-//                              QMessageBox::Ok);
+            assert (ds_man_.hasConfigFFT(current_name_));
+            ds_man_.configFFT(current_name_).clearModeSAddress();
+        }
+        else
+        {
+            unsigned int value = String::intFromHexString(value_str.toStdString());
 
-//        m_warning.exec();
-//        return;
-//    }
+            if (current_fft_in_db_)
+            {
+                assert (ds_man_.hasDBFFT(current_name_));
+                ds_man_.dbFFT(current_name_).modeSAddress(value);
+            }
 
-//    assert (has_current_fft_);
+            assert (ds_man_.hasConfigFFT(current_name_));
+            ds_man_.configFFT(current_name_).modeSAddress(value);
+        }
+    }
+}
+void FFTEditWidget::modeAEditedSlot(const QString& value_str)
+{
+    assert (mode_3a_edit_);
 
-//    if (current_fft_in_db_)
-//    {
-//        assert (ds_man_.hasDBFFT(current_name_));
-//        ds_man_.dbFFT(current_name_).name(text);
-//    }
+    if (mode_3a_edit_->hasAcceptableInput())
+    {
+        if (!value_str.size())
+        {
+            if (current_fft_in_db_)
+            {
+                assert (ds_man_.hasDBFFT(current_name_));
+                ds_man_.dbFFT(current_name_).clearMode3ACode();
+            }
 
-//    assert (ds_man_.hasConfigFFT(current_name_));
-//    ds_man_.configFFT(current_name_).name(text);
+            assert (ds_man_.hasConfigFFT(current_name_));
+            ds_man_.configFFT(current_name_).clearMode3ACode();
+        }
+        else
+        {
+            unsigned int value = String::intFromOctalString(value_str.toStdString());
 
-//    dialog_.updateFFT(current_name_);
-//}
+            if (current_fft_in_db_)
+            {
+                assert (ds_man_.hasDBFFT(current_name_));
+                ds_man_.dbFFT(current_name_).mode3ACode(value);
+            }
 
-//void FFTEditWidget::shortNameEditedSlot(const QString& value)
-//{
-//    string text = value.toStdString();
+            assert (ds_man_.hasConfigFFT(current_name_));
+            ds_man_.configFFT(current_name_).mode3ACode(value);
+        }
+    }
+}
+void FFTEditWidget::modeCEditedSlot(const QString& value_str)
+{
+    float value = value_str.toFloat();
 
-//    loginf << "FFTEditWidget: shortNameEditedSlot: '" << text << "'";
+    loginf << "FFTEditWidget: modeCEditedSlot: '" << value << "'";
 
-//    assert (has_current_fft_);
+    if (current_fft_in_db_)
+    {
+        assert (ds_man_.hasDBFFT(current_name_));
+        ds_man_.dbFFT(current_name_).modeCCode(value);
+    }
 
-//    if (current_fft_in_db_)
-//    {
-//        assert (ds_man_.hasDBFFT(current_name_));
-//        ds_man_.dbFFT(current_name_).shortName(text);
-//    }
-
-//    assert (ds_man_.hasConfigFFT(current_name_));
-//    ds_man_.configFFT(current_name_).shortName(text);
-
-//    dialog_.updateFFT(current_name_);
-//}
-
-//void FFTEditWidget::dsTypeEditedSlot(const QString& value)
-//{
-//    string text = value.toStdString();
-
-//    loginf << "FFTEditWidget: dsTypeEditedSlot: '" << text << "'";
-
-//    assert (has_current_fft_);
-
-//    if (current_fft_in_db_)
-//    {
-//        assert (ds_man_.hasDBFFT(current_name_));
-//        ds_man_.dbFFT(current_name_).dsType(text);
-//    }
-
-//    assert (ds_man_.hasConfigFFT(current_name_));
-//    ds_man_.configFFT(current_name_).dsType(text);
-
-//    dialog_.updateFFT(current_name_);
-
-//    updateContent();
-//}
-
-//void FFTEditWidget::updateIntervalEditedSlot(const QString& value_str)
-//{
-//    string text = value_str.toStdString();
-
-//    loginf << "FFTEditWidget: updateIntervalEditedSlot: '" << text << "'";
-
-//    if (!value_str.size()) // remove if empty
-//    {
-//        if (current_fft_in_db_)
-//        {
-//            assert (ds_man_.hasDBFFT(current_name_));
-
-//            if (ds_man_.dbFFT(current_name_).hasUpdateInterval())
-//                ds_man_.dbFFT(current_name_).removeUpdateInterval();
-//        }
-
-//        assert (ds_man_.hasConfigFFT(current_name_));
-
-//        if (ds_man_.configFFT(current_name_).hasUpdateInterval())
-//            ds_man_.configFFT(current_name_).removeUpdateInterval();
-
-//        return;
-//    }
-
-//    float value = value_str.toFloat();
-
-//    if (current_fft_in_db_)
-//    {
-//        assert (ds_man_.hasDBFFT(current_name_));
-//        ds_man_.dbFFT(current_name_).updateInterval(value);
-//    }
-
-//    assert (ds_man_.hasConfigFFT(current_name_));
-//    ds_man_.configFFT(current_name_).updateInterval(value);
-//}
+    assert (ds_man_.hasConfigFFT(current_name_));
+    ds_man_.configFFT(current_name_).modeCCode(value);
+}
 
 void FFTEditWidget::latitudeEditedSlot(const QString& value_str)
 {
@@ -295,8 +293,8 @@ void FFTEditWidget::deleteSlot()
 
 void FFTEditWidget::updateContent()
 {
+    assert (main_widget_);
     assert (name_edit_);
-    assert (position_widget_);
     assert (delete_button_);
 
     if (!has_current_fft_)
@@ -304,9 +302,7 @@ void FFTEditWidget::updateContent()
         name_edit_->setText("");
         name_edit_->setDisabled(true);
 
-        position_widget_->setHidden(true);
-
-        delete_button_->setHidden(true);
+        main_widget_->setHidden(true);
     }
     else
     {
@@ -328,6 +324,21 @@ void FFTEditWidget::updateContent()
         name_edit_->setText(ds->name().c_str());
         name_edit_->setDisabled(false);
 
+        if (ds->hasModeSAddress())
+            mode_s_address_edit_->setText(String::octStringFromInt(ds->modeSAddress()).c_str());
+        else
+            mode_s_address_edit_->clear();
+
+        if (ds->hasMode3ACode())
+            mode_3a_edit_->setText(String::octStringFromInt(ds->mode3ACode()).c_str());
+        else
+            mode_3a_edit_->clear();
+
+        if (ds->hasModeCCode())
+            mode_c_edit_->setText(QString::number(ds->modeCCode()));
+        else
+            mode_c_edit_->clear();
+
         if (ds->hasPosition())
         {
             latitude_edit_->setText(QString::number(ds->latitude(), 'g', 12));
@@ -341,8 +352,6 @@ void FFTEditWidget::updateContent()
             altitude_edit_->setText("0");
         }
 
-        position_widget_->setHidden(false);
-
-        delete_button_->setHidden(false);
+        main_widget_->setHidden(false);
     }
 }

@@ -19,10 +19,17 @@ public:
     bool hasModeSAddress();
     unsigned int modeSAddress();
     void modeSAddress(unsigned int value);
+    void clearModeSAddress();
 
-    bool hasMode3Code();
+    bool hasMode3ACode();
     unsigned int mode3ACode();
     void mode3ACode(unsigned int value);
+    void clearMode3ACode();
+
+    bool hasModeCCode();
+    float modeCCode(); // ft
+    void modeCCode(float value);
+    void clearModeCCode();
 
     bool hasPosition() const;
 

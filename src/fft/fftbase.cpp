@@ -11,6 +11,7 @@ const string longitude_key = "longitude";
 const string altitude_key = "altitude";
 const string mode_s_address_key = "mode_s_address";
 const string mode_3a_code_key = "mode_3a_code";
+const string mode_c_code_key = "mode_c_code";
 
 FFTBase::FFTBase()
 {
@@ -57,19 +58,52 @@ void FFTBase::modeSAddress(unsigned int value)
     info_[mode_s_address_key] = value;
 }
 
-bool FFTBase::hasMode3Code()
+void FFTBase::clearModeSAddress()
+{
+    if (info_.contains(mode_s_address_key))
+        info_.erase(mode_s_address_key);
+}
+
+bool FFTBase::hasMode3ACode()
 {
     return info_.contains(mode_3a_code_key);
 }
 unsigned int FFTBase::mode3ACode()
 {
-    assert (hasMode3Code());
+    assert (hasMode3ACode());
     return info_.at(mode_3a_code_key);
 }
 
 void FFTBase::mode3ACode(unsigned int value)
 {
     info_[mode_3a_code_key] = value;
+}
+
+void FFTBase::clearMode3ACode()
+{
+    if (info_.contains(mode_3a_code_key))
+        info_.erase(mode_3a_code_key);
+}
+
+bool FFTBase::hasModeCCode()
+{
+    return info_.contains(mode_c_code_key);
+}
+float FFTBase::modeCCode()
+{
+    assert (hasModeCCode());
+    return info_.at(mode_c_code_key);
+}
+
+void FFTBase::modeCCode(float value)
+{
+    info_[mode_c_code_key] = value;
+}
+
+void FFTBase::clearModeCCode()
+{
+    if (info_.contains(mode_c_code_key))
+        info_.erase(mode_c_code_key);
 }
 
 bool FFTBase::hasPosition() const

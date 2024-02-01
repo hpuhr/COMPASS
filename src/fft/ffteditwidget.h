@@ -18,6 +18,10 @@ class FFTEditWidget : public QWidget
 public slots:
     //void nameEditedSlot(const QString& value);
 
+    void modeSAddressEditedSlot(const QString& value_str);
+    void modeAEditedSlot(const QString& value_str);
+    void modeCEditedSlot(const QString& value_str);
+
     void latitudeEditedSlot(const QString& value_str);
     void longitudeEditedSlot(const QString& value_str);
     void altitudeEditedSlot(const QString& value_str);
@@ -40,10 +44,16 @@ protected:
     std::string current_name_;
     bool current_fft_in_db_ {false};
 
+    QWidget* main_widget_{nullptr};
+
     QLineEdit* name_edit_{nullptr};
 
+    // secondary attributes
+    QLineEdit* mode_s_address_edit_{nullptr};
+    QLineEdit* mode_3a_edit_{nullptr};
+    QLineEdit* mode_c_edit_{nullptr};
+
     // position
-    QWidget* position_widget_{nullptr};
     QLineEdit* latitude_edit_{nullptr};
     QLineEdit* longitude_edit_{nullptr};
     QLineEdit* altitude_edit_{nullptr};
