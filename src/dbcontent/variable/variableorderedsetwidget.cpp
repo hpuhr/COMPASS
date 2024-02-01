@@ -22,6 +22,7 @@
 #include "dbcontent/variable/metavariable.h"
 #include "files.h"
 #include "global.h"
+#include "rtcommand.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -34,6 +35,8 @@ using namespace std;
 
 namespace dbContent
 {
+
+const std::string VariableOrderedSetWidget::VariableSeparator = ", ";
 
 VariableOrderedSetWidget::VariableOrderedSetWidget(VariableOrderedSet& set,
                                                    QWidget* parent, 
@@ -197,6 +200,7 @@ void VariableOrderedSetWidget::moveUpSlot()
     current_index_ = index - 1;
     list_widget_->setCurrentRow(current_index_);
 }
+
 void VariableOrderedSetWidget::moveDownSlot()
 {
     assert(list_widget_);
@@ -240,7 +244,7 @@ void VariableOrderedSetWidget::updateVariableListSlot()
             tooltip = manager.dbContent(def_it.first).variable(def_it.second).info();
         }
 
-        QListWidgetItem* item = new QListWidgetItem((def_it.first + ", " + def_it.second).c_str());
+        QListWidgetItem* item = new QListWidgetItem((def_it.first + VariableSeparator + def_it.second).c_str());
         item->setToolTip(tooltip.c_str());
 
         list_widget_->addItem(item);
@@ -253,6 +257,59 @@ void VariableOrderedSetWidget::updateVariableListSlot()
         list_widget_->setCurrentRow(current_index_);
         current_index_ = -1;
     }
+}
+
+boost::optional<QString> VariableOrderedSetWidget::uiGet(const QString& what) const
+{   
+    QStringList vars;
+
+    for (int i = 0; i < list_widget_->count(); ++i)
+        vars << list_widget_->item(i)->text();
+    
+    return vars.join(rtcommand::RTCommand::ParameterListSeparator);
+}
+
+nlohmann::json VariableOrderedSetWidget::uiGetJSON(const QString& what) const
+{
+    std::vector<std::string> vars;
+    for (int i = 0; i < list_widget_->count(); ++i)
+        vars.push_back(list_widget_->item(i)->text().toStdString());
+
+    nlohmann::json ui_info = vars;
+
+    return ui_info;
+}
+
+bool VariableOrderedSetWidget::uiSet(const QString& str)
+{
+    std::vector<std::pair<std::string,std::string>> vars;
+
+    QStringList var_strings = str.split(rtcommand::RTCommand::ParameterListSeparator);
+
+    QString sep  = QString::fromStdString(VariableSeparator);
+    int     nsep = sep.count();
+
+    for (const auto& vs : var_strings)
+    {
+        if (vs.count() < nsep + 2)
+            continue;
+
+        int idx = vs.indexOf(sep);
+        if (idx < 1 || idx >= vs.count() - nsep)
+            return false;
+
+        QString dbo   = vs.mid(0, idx);
+        QString param = vs.mid(idx + nsep);
+
+        if (dbo.isEmpty() || param.isEmpty())
+            return false;
+
+        vars.emplace_back(dbo.toStdString(), param.toStdString());
+    }
+
+    set_.set(vars);
+
+    return true;
 }
 
 }
