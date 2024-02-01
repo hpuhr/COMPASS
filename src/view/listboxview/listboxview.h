@@ -40,8 +40,8 @@ public:
     {
         Settings();
 
-        bool        show_only_selected;
-        bool        use_presentation;
+        bool show_only_selected;
+        bool use_presentation;
     };
 
     ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,

@@ -20,6 +20,8 @@
 #include "listboxview.h"
 //#include "listboxviewsetconfigwidget.h"
 
+#include "ui_test_common.h"
+
 #include "logger.h"
 #include "viewwidget.h"
 #include "dbcontent/variable/variableorderedsetwidget.h"
@@ -50,6 +52,7 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
         QVBoxLayout* cfg_layout = new QVBoxLayout();
 
         set_config_widget_ = view_->getDataSource()->getSet()->createWidget();
+        set_config_widget_->setObjectName("variables");
         //set_config_widget_->updateFromDataSource();
 
         cfg_layout->addWidget(set_config_widget_);
@@ -60,17 +63,19 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
         cfg_layout->addWidget(line);
 
         only_selected_check_ = new QCheckBox("Show Only Selected");
+        UI_TEST_OBJ_NAME(only_selected_check_, only_selected_check_->text())
         only_selected_check_->setChecked(view_->showOnlySelected());
         connect(only_selected_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleShowOnlySeletedSlot);
         cfg_layout->addWidget(only_selected_check_);
 
         presentation_check_ = new QCheckBox("Use Presentation");
+        UI_TEST_OBJ_NAME(presentation_check_, presentation_check_->text())
         presentation_check_->setChecked(view_->usePresentation());
         connect(presentation_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleUsePresentation);
         cfg_layout->addWidget(presentation_check_);
 
         cfg_layout->addStretch();
-
+        
         cfg_widget->setLayout(cfg_layout);
 
         getTabWidget()->addTab(cfg_widget, "Config");
