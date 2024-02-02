@@ -180,10 +180,10 @@ bool RTCommandUIGet::run_impl()
             {
                 result_string = res.value().toStdString();
 
-                nlohmann::json v;
-                v[ "value" ] = result_string;
+                //nlohmann::json v;
+                //v[ "value" ] = result_string;
 
-                result = v;
+                result = result_string;
             } 
         }
     }
