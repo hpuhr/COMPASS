@@ -20,6 +20,8 @@
 #include "listboxview.h"
 //#include "listboxviewsetconfigwidget.h"
 
+#include "ui_test_common.h"
+
 #include "logger.h"
 #include "viewwidget.h"
 #include "dbcontent/variable/variableorderedsetwidget.h"
@@ -30,6 +32,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QTabWidget>
+#include <QListWidget>
 
 using namespace Utils;
 using namespace std;
@@ -49,6 +52,7 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
         QVBoxLayout* cfg_layout = new QVBoxLayout();
 
         set_config_widget_ = view_->getDataSource()->getSet()->createWidget();
+        set_config_widget_->setObjectName("variables");
         //set_config_widget_->updateFromDataSource();
 
         cfg_layout->addWidget(set_config_widget_);
@@ -59,17 +63,19 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxViewWidget* view_widget,
         cfg_layout->addWidget(line);
 
         only_selected_check_ = new QCheckBox("Show Only Selected");
+        UI_TEST_OBJ_NAME(only_selected_check_, only_selected_check_->text())
         only_selected_check_->setChecked(view_->showOnlySelected());
         connect(only_selected_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleShowOnlySeletedSlot);
         cfg_layout->addWidget(only_selected_check_);
 
         presentation_check_ = new QCheckBox("Use Presentation");
+        UI_TEST_OBJ_NAME(presentation_check_, presentation_check_->text())
         presentation_check_->setChecked(view_->usePresentation());
         connect(presentation_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleUsePresentation);
         cfg_layout->addWidget(presentation_check_);
 
         cfg_layout->addStretch();
-
+        
         cfg_widget->setLayout(cfg_layout);
 
         getTabWidget()->addTab(cfg_widget, "Config");
@@ -133,4 +139,15 @@ void ListBoxViewConfigWidget::configChanged()
     //other ui elements
     only_selected_check_->setChecked(view_->showOnlySelected());
     presentation_check_->setChecked(view_->usePresentation());
+}
+
+void ListBoxViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    std::vector<std::string> variables;
+    for (int i = 0; i < set_config_widget_->listWidget()->count(); ++i)
+        variables.push_back(set_config_widget_->listWidget()->item(i)->text().toStdString());
+
+    info[ "variables"          ] = variables;
+    info[ "show_only_selected" ] = only_selected_check_->isChecked();
+    info[ "use_presentation"   ] = presentation_check_->isChecked();
 }

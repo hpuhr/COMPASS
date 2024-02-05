@@ -58,5 +58,10 @@ namespace ui_test
          * Override to make available for testing.
         */
         virtual QWidget* uiRerouteToNative() const { return nullptr; }
+
+        /**
+         * "Refreshes" the ui element, the meaning of it being specific to the implementation. 
+        */
+        virtual void uiRefresh() {}
     };
 }

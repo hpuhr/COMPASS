@@ -144,6 +144,18 @@ void BufferTableWidget::usePresentationSlot(bool use_presentation)
     table_->resizeColumnsToContents();
 }
 
+bool BufferTableWidget::showOnlySelected() const
+{
+    assert(model_);
+    return model_->showOnlySelected();
+}
+
+bool BufferTableWidget::usePresentation() const
+{
+    assert(model_);
+    return model_->usePresentation();
+}
+
 void BufferTableWidget::resetModel()
 {
     assert(model_);

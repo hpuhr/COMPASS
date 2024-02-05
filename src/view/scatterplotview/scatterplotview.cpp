@@ -33,10 +33,11 @@
 using namespace std;
 using namespace dbContent;
 
-const std::string ScatterPlotView::ParamDataVarXDBO  = "data_var_x_dbo";
-const std::string ScatterPlotView::ParamDataVarXName = "data_var_x_name";
-const std::string ScatterPlotView::ParamDataVarYDBO  = "data_var_y_dbo";
-const std::string ScatterPlotView::ParamDataVarYName = "data_var_y_name";
+const std::string ScatterPlotView::ParamDataVarXDBO        = "data_var_x_dbo";
+const std::string ScatterPlotView::ParamDataVarXName       = "data_var_x_name";
+const std::string ScatterPlotView::ParamDataVarYDBO        = "data_var_y_dbo";
+const std::string ScatterPlotView::ParamDataVarYName       = "data_var_y_name";
+const std::string ScatterPlotView::ParamUseConnectionLines = "use_connection_lines";
 
 /**
 */
@@ -472,4 +473,17 @@ void ScatterPlotView::showViewPointSlot (const ViewableDataConfig* vp)
     assert (data_source_);
     data_source_->showViewPoint(vp);
     assert (widget_);
+}
+
+/**
+ */
+void ScatterPlotView::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    info[ ParamDataVarXDBO  ] = settings_.data_var_x_dbo;
+    info[ ParamDataVarXName ] = settings_.data_var_x_name;
+
+    info[ ParamDataVarYDBO  ] = settings_.data_var_y_dbo;
+    info[ ParamDataVarYName ] = settings_.data_var_y_name;
+
+    info[ ParamUseConnectionLines ] = settings_.use_connection_lines;
 }

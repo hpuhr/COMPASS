@@ -76,6 +76,11 @@ class BufferTableWidget : public QWidget
     ListBoxView& view() const;
     void resizeColumns();
 
+    bool showOnlySelected() const;
+    bool usePresentation() const;
+
+    const QTableView* table() const { return table_; }
+
   protected:
     DBContent& object_;
     ListBoxView& view_;

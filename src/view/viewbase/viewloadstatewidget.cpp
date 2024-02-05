@@ -84,14 +84,41 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
 }
 
 /**
- * Triggered by the reload button. Updates the data depending on the action needed by the current state.
+*/
+bool ViewLoadStateWidget::viewUpdateRequired() const
+{
+    assert(view_widget_);
+
+    //@TODO: if the view has no data the state should actually be State::NoData, but for safety query data widget nontheless...
+    return (view_widget_->getViewDataWidget()->hasData() && (state_ == State::RedrawRequired || state_ == State::ReloadRequired));
+}
+
+/**
+*/
+bool ViewLoadStateWidget::viewReloadRequired() const
+{
+    assert(view_widget_);
+
+    return (!view_widget_->getViewDataWidget()->hasData() || state_ == State::NoData);
+}
+
+/**
+*/
+bool ViewLoadStateWidget::viewBusy() const
+{
+    return (state_ == State::Drawing || state_ == State::Loading);
+}
+
+/**
+ * Triggered by the refresh button. Updates the data depending on the action needed by the current state.
 */
 void ViewLoadStateWidget::updateData()
 {
-    if (view_widget_->getViewDataWidget()->hasData() && (state_ == State::RedrawRequired || state_ == State::ReloadRequired))
-        view_widget_->getView()->updateView(); //run view update
-    else
-        COMPASS::instance().dbContentManager().load(); //fallback: just reload
+    assert(view_widget_);
+
+    //actual update mechanic implemented in the view widget for broader access to this functionality.
+    //the view widget will then query the ViewLoadStateWidget for what to do.
+    view_widget_->refreshView();
 }
 
 /**
@@ -328,7 +355,8 @@ nlohmann::json ViewLoadStateWidget::viewInfoJSON() const
     nlohmann::json info;
 
     //add general information
-    info[ "state" ] = stringFromState(state_);
+    info[ "state"                  ] = stringFromState(state_);
+    info[ "refresh_button_visible" ] = refresh_button_->isVisible();
 
     //add view-specific information
     viewInfoJSON_impl(info);

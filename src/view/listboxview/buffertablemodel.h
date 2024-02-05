@@ -67,6 +67,9 @@ class BufferTableModel : public QAbstractTableModel
 
     void updateToSelection();
 
+    bool showOnlySelected() const { return show_only_selected_; }
+    bool usePresentation() const { return use_presentation_; }
+
   protected:
     BufferTableWidget* table_widget_{nullptr};
     DBContent& object_;

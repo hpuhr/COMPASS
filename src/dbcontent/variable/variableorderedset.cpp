@@ -120,6 +120,22 @@ void VariableOrderedSet::add (const std::string& dbcontent_name, const std::stri
     }
 }
 
+void VariableOrderedSet::set(const std::vector<std::pair<std::string,std::string>>& vars)
+{
+    variable_definitions_.clear();
+
+    for (const auto& var : vars)
+    {
+        if (!hasVariable(var.first, var.second))
+            variable_definitions_.push_back({ var.first, var.second });
+    }
+
+    notifyModifications();
+
+    emit setChangedSignal();
+    emit variableAddedChangedSignal();
+}
+
 void VariableOrderedSet::removeVariableAt(unsigned int index)
 {
     loginf << "VariableOrderedSet: removeVariableAt: index " << index;

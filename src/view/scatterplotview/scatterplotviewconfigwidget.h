@@ -58,6 +58,8 @@ protected:
     void updateSelectedVarX();
     void updateSelectedVarY();
 
+    void viewInfoJSON_impl(nlohmann::json& info) const override;
+
     ScatterPlotView* view_ = nullptr;
 
     dbContent::VariableSelectionWidget* select_var_x_ {nullptr};

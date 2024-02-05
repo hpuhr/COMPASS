@@ -30,6 +30,8 @@
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QTabWidget>
+#include <QTableView>
+#include <QHeaderView>
 
 ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewWidget* view_widget, 
                                              QWidget* parent, 
@@ -234,4 +236,59 @@ AllBufferTableWidget* ListBoxViewDataWidget::getAllBufferTableWidget ()
 void ListBoxViewDataWidget::toolChanged_impl(int mode)
 {
     //nothing to do here
+}
+
+void ListBoxViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    nlohmann::json table_infos = nlohmann::json::array();
+
+    auto addTable = [ & ] (const std::string& db_content, 
+                           const QTableView* table,
+                           bool show_only_selected,
+                           bool use_presentation)
+    {
+        nlohmann::json table_info;
+
+        table_info[ "content"            ] = db_content;
+        table_info[ "show_only_selected" ] = show_only_selected;
+        table_info[ "use_presentation"   ] = use_presentation;
+        table_info[ "count"              ] = table->model()->rowCount();
+
+        //get properties
+        std::vector<std::string> properties;
+        for(int i = 0; i < table->model()->columnCount(); i++)
+            properties.push_back(table->model()->headerData(i, Qt::Horizontal).toString().toStdString());
+        
+        table_info[ "properties" ] = properties;
+
+        //get line zero
+        std::vector<std::string> line0; 
+        if (table->model()->rowCount() > 0)
+        {
+            for(int i = 0; i < table->model()->columnCount(); i++)
+            {
+                auto index = table->model()->index(0, i);
+                line0.push_back(table->model()->data(index, Qt::DisplayRole).toString().toStdString());
+            }
+        }
+
+        table_info[ "line0" ] = line0;
+
+        table_infos.push_back(table_info);
+    };
+
+    addTable("All", 
+             all_buffer_table_widget_->table(), 
+             all_buffer_table_widget_->showOnlySelected(), 
+             all_buffer_table_widget_->usePresentation());
+
+    for (const auto& it : buffer_tables_)
+    {
+        addTable(it.first, 
+                 it.second->table(), 
+                 it.second->showOnlySelected(), 
+                 it.second->usePresentation());
+    }
+
+    info[ "tables" ] = table_infos;
 }

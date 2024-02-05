@@ -40,8 +40,8 @@ public:
     {
         Settings();
 
-        bool        show_only_selected;
-        bool        use_presentation;
+        bool show_only_selected;
+        bool use_presentation;
     };
 
     ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
@@ -77,6 +77,8 @@ protected:
     virtual bool init_impl() override;
 
     virtual void onConfigurationChanged_impl(const std::vector<std::string>& changed_params) override;
+
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     ListBoxViewDataWidget* getDataWidget();
 

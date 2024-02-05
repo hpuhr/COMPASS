@@ -40,8 +40,9 @@ class VariableOrderedSet : public QObject, public Configurable
     void variableAddedChangedSignal();
 
   public:
-    VariableOrderedSet(const std::string& class_id, const std::string& instance_id,
-                          Configurable* parent);
+    VariableOrderedSet(const std::string& class_id, 
+                       const std::string& instance_id,
+                       Configurable* parent);
     virtual ~VariableOrderedSet();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -49,7 +50,9 @@ class VariableOrderedSet : public QObject, public Configurable
 
     void add(Variable& var);
     void add(MetaVariable& var);
-    void add (const std::string& dbcontent_name, const std::string var_name);
+    void add(const std::string& dbcontent_name, const std::string var_name);
+
+    void set(const std::vector<std::pair<std::string,std::string>>& vars);
 
     void removeVariableAt(unsigned int index);
     void removeVariable(const Variable& variable);

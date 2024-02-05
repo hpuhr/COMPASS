@@ -55,6 +55,7 @@ signals:
     void exportSignal();
 
 protected:
+    void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     ListBoxView*    view_ = nullptr;
 

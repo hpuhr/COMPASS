@@ -103,6 +103,7 @@ public:
     static const std::string ParamDataVarXName;
     static const std::string ParamDataVarYDBO;
     static const std::string ParamDataVarYName;
+    static const std::string ParamUseConnectionLines;
 
 protected:
     friend class LatexVisitor;
@@ -113,6 +114,8 @@ protected:
     virtual bool init_impl() override;
 
     virtual bool refreshScreenOnNeededReload() const override { return true; }
+
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     ScatterPlotViewDataWidget* getDataWidget();
 

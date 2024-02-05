@@ -115,6 +115,8 @@ public:
     void updateLoadState();
     void updateComponents();
 
+    bool refreshView();
+
     void loadingStarted();
     void loadingDone();
     void redrawStarted();
@@ -140,6 +142,7 @@ public:
 
     boost::optional<QString> uiGet(const QString& what = QString()) const override final;
     nlohmann::json uiGetJSON(const QString& what = QString()) const override final;
+    void uiRefresh() override final;
 
     QImage renderContents();
 

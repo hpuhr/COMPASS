@@ -67,6 +67,7 @@ struct RTCommandUIGet : public RTCommandUIObject
 {
     QString what;
     bool    as_json = false;
+    bool    visible = false;
 protected:
     virtual bool run_impl() override;
 
@@ -87,12 +88,23 @@ protected:
 };
 
 /**
+ */
+struct RTCommandUIRefresh : public RTCommandUIObject
+{
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(uirefresh, "refreshes the given ui element")
+};
+
+/**
 */
 inline void initUITestCommands()
 {
     RTCommandUISet::init();
     RTCommandUIGet::init();
     RTCommandUIInject::init();
+    RTCommandUIRefresh::init();
 }
 
 } // namespace ui_test

@@ -16,15 +16,14 @@
  */
 
 #include "scatterplotviewconfigwidget.h"
-//#include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableselectionwidget.h"
 #include "scatterplotviewwidget.h"
 #include "scatterplotview.h"
-//#include "scatterplotviewdatasource.h"
 #include "logger.h"
-//#include "stringconv.h"
-//#include "test/ui_test_common.h"
+#include "variable.h"
+#include "metavariable.h"
+#include "ui_test_common.h"
 
 #include <QCheckBox>
 #include <QLabel>
@@ -68,6 +67,8 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
                                           PropertyDataType::FLOAT,
                                           PropertyDataType::DOUBLE,
                                           PropertyDataType::TIMESTAMP});
+        select_var_x_->setObjectName("variable_selection_x");
+
         updateSelectedVarX();
         connect(select_var_x_, &VariableSelectionWidget::selectionChanged, this,
                 &ScatterPlotViewConfigWidget::selectedVariableXChangedSlot);
@@ -88,6 +89,8 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
                                           PropertyDataType::FLOAT,
                                           PropertyDataType::DOUBLE,
                                           PropertyDataType::TIMESTAMP});
+        select_var_y_->setObjectName("variable_selection_y");
+
         updateSelectedVarY();
         connect(select_var_y_, &VariableSelectionWidget::selectionChanged, this,
                 &ScatterPlotViewConfigWidget::selectedVariableYChangedSlot);
@@ -95,6 +98,8 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
 
         use_connection_lines_ = new QCheckBox("Use Connection Lines");
         use_connection_lines_->setChecked(view_->useConnectionLines());
+        UI_TEST_OBJ_NAME(use_connection_lines_, use_connection_lines_->text())
+
         connect(use_connection_lines_, &QCheckBox::clicked,
                 this, &ScatterPlotViewConfigWidget::useConnectionLinesSlot);
         cfg_layout->addWidget(use_connection_lines_);
@@ -170,6 +175,21 @@ void ScatterPlotViewConfigWidget::onDisplayChange_impl()
 {
     assert (use_connection_lines_);
     use_connection_lines_->setChecked(view_->useConnectionLines());
+}
+
+void ScatterPlotViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    if (select_var_x_->hasMetaVariable())
+        info[ "selected_var_x" ] = "Meta - " + select_var_x_->selectedMetaVariable().name();
+    else
+        info[ "selected_var_x" ] = select_var_x_->selectedVariable().dbContentName() + " - " + select_var_x_->selectedVariable().name();
+
+    if (select_var_y_->hasMetaVariable())
+        info[ "selected_var_y" ] = "Meta - " + select_var_y_->selectedMetaVariable().name();
+    else
+        info[ "selected_var_y" ] = select_var_y_->selectedVariable().dbContentName() + " - " + select_var_y_->selectedVariable().name();
+
+    info[ "use_connection_lines" ] = use_connection_lines_->isChecked();
 }
 
 //void ScatterPlotViewConfigWidget::exportSlot()

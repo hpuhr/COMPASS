@@ -49,6 +49,17 @@ QT_CHARTS_USE_NAMESPACE
 using namespace std;
 using namespace dbContent;
 
+const double ScatterPlotViewDataWidget::MarkerSize         = 8.0;
+const double ScatterPlotViewDataWidget::MarkerSizeSelected = 6.0;
+
+const std::string ScatterPlotViewDataWidget::Color_CAT001  = "#00FF00";
+const std::string ScatterPlotViewDataWidget::Color_CAT010  = "#FFCC00";
+const std::string ScatterPlotViewDataWidget::Color_CAT020  = "#FF0000";
+const std::string ScatterPlotViewDataWidget::Color_CAT021  = "#6666FF";
+const std::string ScatterPlotViewDataWidget::Color_CAT048  = "#00FF00";
+const std::string ScatterPlotViewDataWidget::Color_RefTraj = "#FFA500";
+const std::string ScatterPlotViewDataWidget::Color_CAT062  = "#CCCCCC";
+
 ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view_widget,
                                                      QWidget* parent,
                                                      Qt::WindowFlags f)
@@ -65,13 +76,13 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view
 
     setLayout(main_layout_);
 
-    colors_["CAT001"] = QColor("#00FF00");
-    colors_["CAT010"] = QColor("#FFCC00");
-    colors_["CAT020"] = QColor("#FF0000");
-    colors_["CAT021"] = QColor("#6666FF");
-    colors_["CAT048"] = QColor("#00FF00");
-    colors_["RefTraj"] = QColor("#FFA500");
-    colors_["CAT062"] = QColor("#CCCCCC");
+    colors_["CAT001" ] = QColor(QString::fromStdString(Color_CAT001 ));
+    colors_["CAT010" ] = QColor(QString::fromStdString(Color_CAT010 ));
+    colors_["CAT020" ] = QColor(QString::fromStdString(Color_CAT020 ));
+    colors_["CAT021" ] = QColor(QString::fromStdString(Color_CAT021 ));
+    colors_["CAT048" ] = QColor(QString::fromStdString(Color_CAT048 ));
+    colors_["RefTraj"] = QColor(QString::fromStdString(Color_RefTraj));
+    colors_["CAT062" ] = QColor(QString::fromStdString(Color_CAT062 ));
 
     updateChart();
 }
@@ -99,6 +110,10 @@ void ScatterPlotViewDataWidget::resetCounts()
     y_var_not_in_buffer_ = false;
 
     nan_value_cnt_ = 0;
+    valid_cnt_     = 0;
+    selected_cnt_  = 0;
+
+    dbo_valid_counts_.clear();
 }
 
 void ScatterPlotViewDataWidget::clearData_impl()
@@ -1307,6 +1322,7 @@ bool ScatterPlotViewDataWidget::updateChart()
     chart->update();
 
     chart_view_.reset(new ScatterPlotViewChartView(this, chart));
+    chart_view_->setObjectName("chart_view");
 
     connect (chart_view_.get(), &ScatterPlotViewChartView::rectangleSelectedSignal,
              this, &ScatterPlotViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
@@ -1360,12 +1376,11 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
         chart->legend()->setVisible(true);
 
-        unsigned int value_cnt {0};
-        unsigned int dbo_value_cnt {0};
         nan_value_cnt_ = 0;
-        unsigned int selected_cnt {0};
+        valid_cnt_     = 0;
+        selected_cnt_  = 0;
 
-        const double marker_size = 8.0;
+        dbo_valid_counts_.clear();
 
         bool use_connection_lines = view_->useConnectionLines();
 
@@ -1374,13 +1389,15 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
         //generate needed series and sort pointers
         //qtcharts when rendering opengl will sort the series into a map using the pointer of the series as a key
+        //we exploit this behavior to obtain the correct render order for our data
+
+        //generate pointers
         std::vector<SymbolLineSeries> series(x_values_.size() + 1);
-        //QLineSeries *whatcha;
         for (size_t i = 0; i < series.size(); ++i)
         {
             series[ i ].scatter_series = new QScatterSeries;
             series[ i ].scatter_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-            series[ i ].scatter_series->setMarkerSize(marker_size);
+            series[ i ].scatter_series->setMarkerSize(MarkerSize);
             series[ i ].scatter_series->setUseOpenGL(true);
 
             if (use_connection_lines)
@@ -1396,14 +1413,14 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
             else
                 series[ i ].line_series = nullptr;
         }
-        //std::sort(series.begin(), series.end()); //sort pointers to obtain correct render order
 
+        //sort pointers to obtain correct render order (as it happens inside qtcharts)
         sort(series.begin(), series.end(),
              [](SymbolLineSeries& a, SymbolLineSeries& b) {return a.scatter_series > b.scatter_series; });
 
         //the biggest pointer is thus the one for the selection, so the selection will be rendered on top
         QScatterSeries* selected_symbol_series = series.back().scatter_series;
-        selected_symbol_series->setMarkerSize(marker_size-2);
+        selected_symbol_series->setMarkerSize(MarkerSizeSelected);
         selected_symbol_series->setColor(Qt::yellow);
 
         QLineSeries* selected_line_series = nullptr;
@@ -1422,14 +1439,15 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
                 series_map[ it->first ] = series[ cnt++ ];
         }
 
+        //now add data to series
         for (auto& data : x_values_)
         {
+            auto& dbo_value_cnt = dbo_valid_counts_[ data.first ];
             dbo_value_cnt = 0;
 
-            vector<double>& x_values = data.second;
-            vector<double>& y_values = y_values_[data.first];
-            vector<bool>& selected_values = selected_values_[data.first];
-            //vector<unsigned int>& rec_num_values = rec_num_values_[data.first];
+            vector<double>& x_values        = data.second;
+            vector<double>& y_values        = y_values_[data.first];
+            vector<bool>&   selected_values = selected_values_[data.first];
 
             QScatterSeries* chart_symbol_series = series_map[ data.first ].scatter_series;
             chart_symbol_series->setColor(colors_[data.first]);
@@ -1451,7 +1469,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
             {
                 if (!std::isnan(x_values.at(cnt)) && !std::isnan(y_values.at(cnt)))
                 {
-                    ++value_cnt;
+                    ++valid_cnt_;
                     ++dbo_value_cnt;
 
                     if (selected_values.at(cnt))
@@ -1464,7 +1482,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
                             selected_line_series->append(x_values.at(cnt), y_values.at(cnt));
                         }
 
-                        ++selected_cnt;
+                        ++selected_cnt_;
                     }
                     else
                     {
@@ -1513,16 +1531,16 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
             }
         }
 
-        if (value_cnt)
+        if (valid_cnt_)
         {
             //valid values found
 
-            if (selected_cnt > 0)
+            if (selected_cnt_ > 0)
             {
-                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: adding " << " Selected (" << selected_cnt << ")";
+                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: adding " << " Selected (" << selected_cnt_ << ")";
 
                 //add series for selected values
-                selected_symbol_series->setName(("Selected ("+to_string(selected_cnt)+")").c_str());
+                selected_symbol_series->setName(("Selected ("+to_string(selected_cnt_)+")").c_str());
                 chart->addSeries(selected_symbol_series);
 
                 if (use_connection_lines)
@@ -1610,8 +1628,8 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
                 rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
         // rec_num -> index
 
-        std::vector<double>& x_values = x_values_.at(buf_it.first);
-        std::vector<double>& y_values = y_values_.at(buf_it.first);
+        std::vector<double>&        x_values       = x_values_.at(buf_it.first);
+        std::vector<double>&        y_values       = y_values_.at(buf_it.first);
         std::vector<unsigned long>& rec_num_values = rec_num_values_.at(buf_it.first);
 
         assert (x_values.size() == y_values.size());
@@ -1651,6 +1669,112 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
     loginf << "ScatterPlotViewDataWidget: selectData: sel_cnt " << sel_cnt;
 
     emit view_->selectionChangedSignal();
+}
+
+/**
+ */
+void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    info[ "num_valid"   ] = valid_cnt_;
+    info[ "num_selected"] = selected_cnt_;
+    info[ "num_nan"     ] = nan_value_cnt_;
+
+    auto bounds       = getDataBounds();
+    bool bounds_valid = bounds.isValid();
+
+    info[ "data_bounds_valid" ] = bounds_valid;
+    info[ "data_bounds_xmin"  ] = bounds_valid ? bounds.left()   : 0.0;
+    info[ "data_bounds_ymin"  ] = bounds_valid ? bounds.top()    : 0.0;
+    info[ "data_bounds_xmax"  ] = bounds_valid ? bounds.right()  : 0.0;
+    info[ "data_bounds_ymax"  ] = bounds_valid ? bounds.bottom() : 0.0;
+    
+    nlohmann::json input_value_info = nlohmann::json::array();
+
+    for (const auto& it : x_values_)
+    {
+        nlohmann::json dbo_info;
+
+        const auto& y_values    = y_values_.at(it.first);
+        const auto& valid_count = dbo_valid_counts_.at(it.first);
+
+        dbo_info[ "dbo_type"       ] = it.first;
+        dbo_info[ "num_input_x"    ] = it.second.size();
+        dbo_info[ "num_input_y"    ] = y_values.size();
+        dbo_info[ "num_input_valid"] = valid_count;
+
+        input_value_info.push_back(dbo_info);
+    }
+
+    info[ "input_values" ] = input_value_info;
+
+    auto zoomActive = [ & ] (const QRectF& bounds_data, const QRectF& bounds_axis)
+    {
+        if (!bounds_data.isValid() || !bounds_axis.isValid())
+            return false;
+
+        return (bounds_axis.left()   > bounds_data.left()  ||
+                bounds_axis.right()  < bounds_data.right() ||
+                bounds_axis.top()    > bounds_data.top()   ||
+                bounds_axis.bottom() < bounds_data.bottom());
+    };
+
+    if (chart_view_)
+    {
+        nlohmann::json chart_info;
+
+        auto series = chart_view_->chart()->series();
+
+        chart_info[ "x_axis_label" ] = chart_view_->chart()->axisX()->titleText().toStdString();
+        chart_info[ "y_axis_label" ] = chart_view_->chart()->axisY()->titleText().toStdString();
+
+        auto axis_x = dynamic_cast<QValueAxis*>(chart_view_->chart()->axisX());
+        auto axis_y = dynamic_cast<QValueAxis*>(chart_view_->chart()->axisY());
+
+        bool   has_axis_bounds = (axis_x != nullptr && axis_y != nullptr);
+        QRectF axis_bounds     = has_axis_bounds ? QRectF(axis_x->min(), 
+                                                          axis_y->min(),
+                                                          axis_x->max() - axis_x->min(),
+                                                          axis_y->max() - axis_y->min()) : QRectF();
+
+        info[ "axis_bounds_valid" ] = has_axis_bounds;
+        info[ "axis_bounds_xmin"  ] = has_axis_bounds ? axis_bounds.left()   : 0.0;
+        info[ "axis_bounds_xmax"  ] = has_axis_bounds ? axis_bounds.right()  : 0.0;
+        info[ "axis_bounds_ymin"  ] = has_axis_bounds ? axis_bounds.top()    : 0.0;
+        info[ "axis_bounds_ymax"  ] = has_axis_bounds ? axis_bounds.bottom() : 0.0;
+
+        info[ "axis_zoom_active"  ] = zoomActive(bounds, axis_bounds);
+
+        chart_info[ "num_series"] = series.count();
+
+        nlohmann::json series_infos = nlohmann::json::array();
+
+        bool has_connection_lines = false;
+
+        for (auto s : series)
+        {
+            auto xy_series = dynamic_cast<QXYSeries*>(s);
+            if (!xy_series)
+                continue;
+
+            bool line_type = xy_series->type() == QAbstractSeries::SeriesType::SeriesTypeLine;
+
+            nlohmann::json series_info;
+            series_info[ "type"  ] = line_type ? "lines" : "points";
+            series_info[ "count" ] = xy_series->count();
+            series_info[ "name"  ] = xy_series->name().toStdString();
+            series_info[ "color" ] = xy_series->color().name().toStdString();
+
+            series_infos.push_back(series_info);
+
+            if (line_type)
+                has_connection_lines = true;
+        }
+
+        chart_info[ "series"               ] = series_infos;
+        chart_info[ "has_connection_lines" ] = has_connection_lines;
+
+        info[ "chart" ] = chart_info;
+    }
 }
 
 //void ScatterPlotViewDataWidget::showOnlySelectedSlot(bool value)
