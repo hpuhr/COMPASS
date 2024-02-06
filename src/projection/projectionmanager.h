@@ -24,6 +24,7 @@
 class ProjectionManagerWidget;
 class Projection;
 class OGRProjection;
+class Buffer;
 
 /**
  * @brief Singleton for coordinate projection handling
@@ -67,13 +68,16 @@ public:
 
     OGRProjection& ogrProjection();
 
+    // in place calculation, returns transformation errors count
+    unsigned int doRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
+    // returns transformation errors count, update buffers
+    std::pair<unsigned int, std::map<std::string, std::shared_ptr<Buffer>>>
+      doUpdateRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
+
     static const std::string RS2G_NAME;
     static const std::string OGR_NAME;
 
 protected:
-    //    float sdl_system_latitude_;
-    //    float sdl_system_longitude_;
-    //    t_Mapping_Info sdl_mapping_info_;
 
     std::string current_projection_name_;
 

@@ -136,6 +136,11 @@ double FFTBase::longitude () const
         return info_.at(longitude_key);
 }
 
+bool FFTBase::hasAltitude() const
+{
+    return info_.contains(altitude_key);
+}
+
 void FFTBase::altitude (double value)
 {
     info_[altitude_key] = value;
@@ -148,8 +153,6 @@ double FFTBase::altitude () const
     else
         return info_.at(altitude_key);
 }
-
-
 
 void FFTBase::setFromJSON (const nlohmann::json& j)
 {

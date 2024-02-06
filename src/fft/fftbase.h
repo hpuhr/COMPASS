@@ -39,9 +39,9 @@ public:
     void longitude (double value);
     double longitude () const;
 
+    bool hasAltitude() const;
     void altitude (double value);
     double altitude () const;
-
 
     void setFromJSON (const nlohmann::json& j);
 
