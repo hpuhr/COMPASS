@@ -470,11 +470,18 @@ void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
 
 /**
 */
-void Configurable::reconfigure(const nlohmann::json& config,
-                               std::vector<SubConfigKey>* missing_keys)
+Configurable::ReconfigureResult Configurable::reconfigure(const nlohmann::json& config,
+                                                          std::vector<MissingKey>* missing_subconfig_keys,
+                                                          std::vector<MissingKey>* missing_param_keys,
+                                                          bool assert_on_error,
+                                                          std::string* error)
 {
     assert(configuration_);
-    configuration_->reconfigure(config, this, missing_keys);
+    return configuration_->reconfigure(config,
+                                       this, 
+                                       missing_subconfig_keys, 
+                                       missing_param_keys, 
+                                       assert_on_error);
 }
 
 /**
@@ -535,6 +542,24 @@ void Configurable::notifyModifications()
     //propagate to parent
     if (parent_)
         parent_->notifyModifications();
+}
+
+/**
+ * @brief Returns the mode describing how missing subconfigurables will be treated when calling reconfigure().
+ * Standard value is MustExist, meaning that reconfigure() will fail on encountering a missing subconfigurable.
+ */
+Configurable::MissingKeyMode Configurable::reconfigureSubConfigMode() const 
+{ 
+    return MissingKeyMode::MustExist; 
+}
+
+/**
+ * @brief Returns the mode describing how missing parameters will be treated when calling reconfigure().
+ * Standard value is MustExist, meaning that reconfigure() will fail on encountering a missing parameter.
+ */
+Configurable::MissingKeyMode Configurable::reconfigureParameterMode() const 
+{ 
+    return MissingKeyMode::MustExist; 
 }
 
 // void Configurable::saveConfigurationAsTemplate (const std::string& template_name)

@@ -125,6 +125,15 @@ QStringList getFilesInDirectory(const std::string& path)
     return list;
 }
 
+QStringList getSubdirectories(const std::string& path)
+{
+    assert(directoryExists(path));
+    QDir directory(path.c_str());
+    QStringList list =
+        directory.entryList(QStringList({"*"}), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    return list;
+}
+
 std::string getIconFilepath(const std::string& filename)
 {
     std::string filepath = HOME_DATA_DIRECTORY + "icons/" + filename;

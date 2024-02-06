@@ -1668,43 +1668,79 @@ bool RTCommandReconfigure::run_impl()
         return false;
     }
 
-    //reconfigure using json config
-    std::vector<Configurable::SubConfigKey> missing_keys;
+    nlohmann::json config;
 
     try
     {
-        auto config = nlohmann::json::parse(json_config);
-        find_result.second->reconfigure(config, &missing_keys);
+        config = nlohmann::json::parse(json_config);
     }
     catch(const std::exception& e)
     {
-        setResultMessage("Reconfigure failed: " + std::string(e.what()));
+        setResultMessage("Parsing json config failed: " + std::string(e.what()));
         return false;
     }
     catch(...)
     {
-        setResultMessage("Reconfigure failed: Unknown error");
+        setResultMessage("Parsing json config failed: Unknown error");
         return false;
     }
 
+    //reconfigure using json config
+    std::vector<Configurable::MissingKey> missing_subconfig_keys;
+    std::vector<Configurable::MissingKey> missing_param_keys;
+
+    auto result = find_result.second->reconfigure(config, &missing_subconfig_keys, &missing_param_keys, false);
+
+    bool ok = false;
+
+    //everything ok?
+    if (result.first == Configurable::ReconfigureError::NoError)
+        ok = true;
+    else if (result.first == Configurable::ReconfigureError::GeneralError)
+        setResultMessage(result.second);
+    else if (result.first == Configurable::ReconfigureError::PreCheckFailed)
+        setResultMessage("Configuration incompatible");
+    else if (result.first == Configurable::ReconfigureError::ApplyFailed)
+        setResultMessage("Configuration could not be applied");
+    else // Configurable::ReconfigureError::UnknownError
+        setResultMessage("Unknown error");
+
+    auto missingKeyType2String = [ & ] (Configurable::MissingKeyType type)
+    {
+        if (type == Configurable::MissingKeyType::CreationFailed)
+            return "creation_failed";
+        else if (type == Configurable::MissingKeyType::Skipped)
+            return "skipped";
+        else if (type == Configurable::MissingKeyType::Missing)
+            return "missing";
+        return "";
+    };
+
+    auto createKeyInformation = [ & ] (const std::vector<Configurable::MissingKey>& keys)
+    {
+        auto missing_keys_vec = nlohmann::json::array();
+    
+        for (const auto& key : missing_subconfig_keys)
+        {
+            nlohmann::json entry;
+            entry[ "id"   ] = key.first;
+            entry[ "type" ] = missingKeyType2String(key.second);
+
+            missing_keys_vec.push_back(entry);
+        }
+
+        return missing_keys_vec;
+    };
+    
+    //store missing keys to reply
     nlohmann::json json_reply;
 
-    auto missing_keys_vec = nlohmann::json::array();
-    
-    for (const auto& key : missing_keys)
-    {
-        nlohmann::json entry;
-        entry[ "class_id"    ] = key.first;
-        entry[ "instance_id" ] = key.second;
-
-        missing_keys_vec.push_back(entry);
-    }
-
-    json_reply[ "missing_keys" ] = missing_keys_vec;
+    json_reply[ "missing_subconfig_keys" ] = createKeyInformation(missing_subconfig_keys);
+    json_reply[ "missing_param_keys"     ] = createKeyInformation(missing_param_keys    );
 
     setJSONReply(json_reply);
 
-    return true;
+    return ok;
 }
 
 // client_info

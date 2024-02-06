@@ -1090,32 +1090,27 @@ void ViewPresetWidget::presetApplied(ViewPresets::Key key)
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
     //apply preset
-    std::string error;
-    std::vector<Configurable::SubConfigKey> missing_keys;
-
     const auto& presets = COMPASS::instance().viewManager().viewPresets();
     const auto& preset  = presets.presets().at(key);
 
-    bool ok = view_->applyPreset(preset, &missing_keys, &error);
+    auto result = view_->applyPreset(preset, nullptr, nullptr);
 
     QApplication::restoreOverrideCursor();
 
+    boost::optional<QString> error;
+
+    if (result.first == View::ReconfigureError::PreCheckFailed)
+        error = "Checking preset failed: Preset not compatible with current software version.";
+    else if (result.first == View::ReconfigureError::ApplyFailed)
+        error = "Applying preset failed: Preset not compatible with current software version.";
+    else if (result.first == View::ReconfigureError::GeneralError)
+        error = "Applying preset failed: " + QString::fromStdString(result.second);
+    else if (result.first == View::ReconfigureError::UnknownError)
+        error = "Applying preset failed: Unknown error";
+
     //any errors?
-    if (!ok)
-    {
-        QMessageBox::critical(this, "Error", "View preset could not be applied: " + QString::fromStdString(error));
-        return;
-    }
-
-    //any missing config keys found?
-    if (!missing_keys.empty())
-    {
-        QString msg = "The following view preset configuration key(s) could not be applied to the view.\n";
-        for (const auto& key : missing_keys)
-            msg += "   " + QString::fromStdString(key.first) + "." + QString::fromStdString(key.second) + "\n";
-
-        QMessageBox::warning(this, "Warning", msg);
-    }
+    if (error.has_value())
+        QMessageBox::critical(this, "Error", error.value());
 }
 
 /**

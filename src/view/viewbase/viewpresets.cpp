@@ -60,16 +60,16 @@ std::string ViewPresets::uniqueBasename(const Preset& preset) const
     assert(!preset.view.empty());
     assert(!preset.name.empty());
 
-    std::string preset_dir = presetDir();
-    std::string fn_base    = PrefixPreset + preset.view + "_" + Utils::Files::normalizeFilename(preset.name);
+    std::string view_preset_dir = viewPresetDir(preset);
+    std::string fn_base         = PrefixPreset + Utils::Files::normalizeFilename(preset.name);
 
     //no preset dir yet? => return initial filename
-    if (!Utils::Files::directoryExists(preset_dir))
+    if (!Utils::Files::directoryExists(view_preset_dir))
         return fn_base;
 
     auto composePath = [ & ] (const std::string& basename)
     {
-        return preset_dir + "/" + basename + ExtPreset;
+        return view_preset_dir + "/" + basename + ExtPreset;
     };
 
     std::string  fn_base_unique = fn_base;
@@ -83,47 +83,75 @@ std::string ViewPresets::uniqueBasename(const Preset& preset) const
 }
 
 /**
-*/
-std::string ViewPresets::presetPath(const Preset& preset) const
-{
-    return presetDir() + "/" + presetFilename(preset);
-}
-
-/**
-*/
-std::string ViewPresets::presetDir() const
+ * Base directory for all view presets.
+ */
+std::string ViewPresets::viewPresetBaseDir() const
 {
     return HOME_PRESET_DIRECTORY + "/" + DirPresets;
 }
 
 /**
+ * Directory for all presets of a specific view type.
 */
-std::string ViewPresets::presetFilename(const Preset& preset) const
+std::string ViewPresets::viewPresetDir(const View* view) const
+{
+    assert(view);
+    return viewPresetBaseDir() + "/" + viewID(view);
+}
+
+/**
+ * Directory for all presets of a specific view type.
+*/
+std::string ViewPresets::viewPresetDir(const Preset& preset) const
+{
+    assert(!preset.view.empty());
+    return viewPresetBaseDir() + "/" + preset.view;
+}
+
+/**
+ * Filename for a view preset.
+*/
+std::string ViewPresets::viewPresetFilename(const Preset& preset) const
 {
     assert(!preset.filename.empty());
     return preset.filename;
 }
 
 /**
+ * Complete file path for a view preset.
 */
-std::string ViewPresets::previewPath(const Preset& preset) const
+std::string ViewPresets::viewPresetPath(const Preset& preset) const
 {
-    return previewDir() + "/" + previewFilename(preset);
+    return viewPresetDir(preset) + "/" + viewPresetFilename(preset);
 }
 
 /**
 */
-std::string ViewPresets::previewDir() const
+std::string ViewPresets::previewDir(const View* view) const
 {
-    return presetDir() + "/" + DirPreviews;
+    return viewPresetDir(view);
+}
+
+/**
+*/
+std::string ViewPresets::previewDir(const Preset& preset) const
+{
+    return viewPresetDir(preset);
 }
 
 /**
 */
 std::string ViewPresets::previewFilename(const Preset& preset) const
 {
-    return Utils::Files::replaceExtension(presetFilename(preset), ExtPreview);
+    return Utils::Files::replaceExtension(viewPresetFilename(preset), ExtPreview);
 }
+/**
+*/
+std::string ViewPresets::previewPath(const Preset& preset) const
+{
+    return previewDir(preset) + "/" + previewFilename(preset);
+}
+
 
 /**
  * Scans the preset directory for presets and collects them.
@@ -132,22 +160,52 @@ bool ViewPresets::scanForPresets()
 {
     presets_.clear();
 
-    auto preset_dir  = presetDir();
+    auto preset_base_dir  = viewPresetBaseDir();
 
-    if (!Utils::Files::directoryExists(preset_dir))
+    if (!Utils::Files::directoryExists(preset_base_dir))
     {
-        logwrn << "ViewPresets: scanForPresets: view preset directory not found";
+        logwrn << "ViewPresets: scanForPresets: view preset base directory not found";
         return true;
     }
 
-    auto files = Utils::Files::getFilesInDirectory(preset_dir);
+    auto sub_dirs = Utils::Files::getSubdirectories(preset_base_dir);
 
-    for (const auto& f : files)
+    for (const auto& sub_dir : sub_dirs)
     {
-        if (f.startsWith(QString::fromStdString(PrefixPreset)) && 
-            f.endsWith(QString::fromStdString(ExtPreset)) &&
-            !readPreset(preset_dir + "/" + f.toStdString()))
-            logwrn << "ViewPresets: scanForPresets: could not read view preset from " << f.toStdString();
+        std::string view_dir = preset_base_dir + "/" + sub_dir.toStdString();
+
+        auto files = Utils::Files::getFilesInDirectory(view_dir);
+
+        for (const auto& f : files)
+        {
+            //not a preset file?
+            if (!f.startsWith(QString::fromStdString(PrefixPreset)) ||
+                !f.endsWith(QString::fromStdString(ExtPreset)))
+                continue;
+
+            std::string preset_fn = view_dir + "/" + f.toStdString();
+            Preset p;
+
+            if (!readPreset(p, preset_fn))
+            {
+                logwrn << "ViewPresets: scanForPresets: Could not read preset '" << f.toStdString() << "'";
+                continue;
+            }
+                
+            //view id must match preset view directory
+            if (p.view != sub_dir.toStdString())
+            {
+                logwrn << "ViewPresets: scanForPresets: Skipping preset '" << f.toStdString() << "' - bad preset configuration";
+                continue;
+            }
+
+            //key must not exist
+            Key key(p.view, p.name);
+            assert(presets_.count(key) == 0);
+
+            //store preset
+            presets_[ key ] = p;
+        }
     }
 
     loginf << "ViewPresets: scanForPresets: read " << presets_.size() << " preset(s)";
@@ -158,8 +216,10 @@ bool ViewPresets::scanForPresets()
 /**
  * Reads a preset json file.
 */
-bool ViewPresets::readPreset(const std::string& fn)
+bool ViewPresets::readPreset(Preset& p, const std::string& fn)
 {
+    p = {};
+
     if (!Utils::Files::fileExists(fn))
         return false;
 
@@ -182,10 +242,13 @@ bool ViewPresets::readPreset(const std::string& fn)
     if (data[ TagConfig ].is_null() || !data[ TagConfig ].is_object())
         return false;
 
-    Preset p;
     p.name        = data[ TagName        ];
     p.view        = data[ TagView        ];
     p.view_config = data[ TagConfig      ];
+
+    //view must not be empty
+    if (p.view.empty())
+        return false;
 
     //optional tags
     if (data.contains(TagCategory))
@@ -197,10 +260,6 @@ bool ViewPresets::readPreset(const std::string& fn)
     if (data.contains(TagVersion))
         p.app_version = data[ TagVersion ];
 
-    //key must not exist
-    Key key(p.view, p.name);
-    assert(presets_.count(key) == 0);
-
     //remember filename the preset has been read from
     p.filename = Utils::Files::getFilenameFromPath(fn);
 
@@ -211,9 +270,6 @@ bool ViewPresets::readPreset(const std::string& fn)
         if (!p.preview.load(QString::fromStdString(preview_path)))
             logwrn << "ViewPresets: readPreset: could not read preview image for preset '" << p.name << "'";
     }
-
-    //store preset
-    presets_[ key ] = p;
 
     return true;
 }
@@ -228,12 +284,6 @@ bool ViewPresets::writePreview(const Preset& preset) const
 
     //obtain unique preview path
     std::string preview_path = previewPath(preset);
-    std::string preview_dir  = previewDir();
-
-    //create directories if needed
-    if (!Utils::Files::directoryExists(preview_dir) && 
-        !Utils::Files::createMissingDirectories(preview_dir))
-        return false;
 
     //write preview
     if (!preset.preview.save(QString::fromStdString(preview_path)))
@@ -247,6 +297,7 @@ bool ViewPresets::writePreview(const Preset& preset) const
 bool ViewPresets::writePreset(const Preset& preset) const
 {
     assert(!preset.filename.empty());
+    assert(!preset.view.empty());
 
     nlohmann::json obj;
     obj[ TagView        ] = preset.view;
@@ -259,19 +310,24 @@ bool ViewPresets::writePreset(const Preset& preset) const
         obj[ TagTimestamp   ] = preset.timestamp;
     if (!preset.app_version.empty())
         obj[ TagVersion ] = preset.app_version;
+    
+    //obtain unique preset path
+    std::string preset_base_dir = viewPresetBaseDir();
+    std::string preset_dir      = viewPresetDir(preset);
+    std::string preset_path     = viewPresetPath(preset);
+    
+    //create directories if needed
+    if (!Utils::Files::directoryExists(preset_base_dir) &&
+        !Utils::Files::createMissingDirectories(preset_base_dir))
+        return false;
+    
+    if (!Utils::Files::directoryExists(preset_dir) &&
+        !Utils::Files::createMissingDirectories(preset_dir))
+        return false;
 
     //try to write preview image
     if (!preset.preview.isNull() && !writePreview(preset))
         logwrn << "ViewPresets: writePreset: preview image for view preset '" << preset.name << "' could not be written";
-    
-    //obtain unique preset path
-    std::string preset_path = presetPath(preset);
-    std::string preset_dir  = presetDir();
-
-    //create directories if needed
-    if (!Utils::Files::directoryExists(preset_dir) &&
-        !Utils::Files::createMissingDirectories(preset_dir))
-        return false;
 
     //write json content
     std::string content = obj.dump(4);
@@ -384,7 +440,7 @@ void ViewPresets::removePreset(const Key& key, const View* view, bool signal_cha
 
     const auto& preset = presets_.at(key);
 
-    std::string preset_path  = presetPath(preset);
+    std::string preset_path  = viewPresetPath(preset);
     std::string preview_path = previewPath(preset);
 
     assert(Utils::Files::fileExists(preset_path));

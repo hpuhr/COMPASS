@@ -111,9 +111,9 @@ public:
 
     void updateView();
     
-    bool applyPreset(const ViewPresets::Preset& preset, 
-                     std::vector<SubConfigKey>* missing_keys = nullptr,
-                     std::string* error = nullptr);
+    ReconfigureResult applyPreset(const ViewPresets::Preset& preset, 
+                                 std::vector<MissingKey>* missing_subconfig_keys = nullptr,
+                                 std::vector<MissingKey>* missing_param_keys = nullptr);
     const ViewPresets::Preset* activePreset() const;
     bool presetChanged() const;
 

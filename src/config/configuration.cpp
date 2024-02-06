@@ -829,43 +829,160 @@ boost::signals2::connection Configuration::connectListener(const std::function<v
 /**
  * Reconfigures the configuration's registered parameters and those of its subconfigurations.
  */
-std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config, 
-                                                    Configurable* configurable,
-                                                    std::vector<SubConfigKey>* missing_keys)
+Configuration::ReconfigureResult Configuration::reconfigure(const nlohmann::json& config, 
+                                                            Configurable* configurable,
+                                                            std::vector<MissingKey>* missing_subconfig_keys,
+                                                            std::vector<MissingKey>* missing_param_keys,
+                                                            bool assert_on_error)
+{
+    try
+    {
+        //run precheck first in order to verify compatibility of passed json config
+        auto result_precheck = reconfigure_internal(config, 
+                                                    configurable, 
+                                                    missing_subconfig_keys,
+                                                    missing_param_keys,
+                                                    assert_on_error,
+                                                    true);
+        if (!result_precheck.first)
+            return ReconfigureResult(ReconfigureError::PreCheckFailed, "");
+
+        //check passed => reconfigure
+        auto result_apply = reconfigure_internal(config, 
+                                                 configurable, 
+                                                 missing_subconfig_keys,
+                                                 missing_param_keys,
+                                                 assert_on_error,
+                                                 false);
+        if (!result_apply.first)
+            return ReconfigureResult(ReconfigureError::ApplyFailed, "");
+    }
+    catch(const std::exception& e)
+    {
+        return ReconfigureResult(ReconfigureError::GeneralError, e.what());
+    }
+    catch(...)
+    {
+        return ReconfigureResult(ReconfigureError::UnknownError, "");
+    }
+    
+    return ReconfigureResult(ReconfigureError::NoError, "");
+}
+
+/**
+ * Reconfigures the configuration's registered parameters and those of its subconfigurations.
+ * Internal version.
+ */
+std::pair<bool,std::vector<std::string>> Configuration::reconfigure_internal(const nlohmann::json& config, 
+                                                                             Configurable* configurable,
+                                                                             std::vector<MissingKey>* missing_subconfig_keys,
+                                                                             std::vector<MissingKey>* missing_param_keys,
+                                                                             bool assert_on_error,
+                                                                             bool run_precheck)
 {
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": reconfigure";
 
+    if (missing_subconfig_keys)
+        missing_subconfig_keys->clear();
+    if (missing_param_keys)
+        missing_param_keys->clear();
+
     std::set<std::string> param_set;
 
-    auto mode = configurable ? configurable->reconfigureSubConfigMode() : ReconfigureSubConfigMode::MustExist;
+    auto mode_subconfig = configurable ? configurable->reconfigureSubConfigMode() : MissingKeyMode::MustExist;
+    auto mode_param     = configurable ? configurable->reconfigureParameterMode() : MissingKeyMode::MustExist;
 
-    auto logErrorSubConfig = [ & ] (const SubConfigKey& key)
+    auto logErrorSubConfig = [ & ] (const SubConfigKey& key, bool creation_failed)
     {
         logerr << "Configuration: reconfigure: sub-config " << key.first << "." << key.second 
-               << " not found in config " << this->class_id_ << "." << this->instance_id_;
+               << " not found in config " << this->class_id_ << "." << this->instance_id_ 
+               << (creation_failed ? " and could not be created" : "");
     };
 
-    auto logErrorParam = [ & ] (const std::string& name)
+    auto logErrorParam = [ & ] (const std::string& name, bool creation_failed)
     {
         logerr << "Configuration: reconfigure: param " << name 
-               << " not found in config " << this->class_id_ << "." << this->instance_id_;
+               << " not found in config " << this->class_id_ << "." << this->instance_id_
+               << (creation_failed ? " and could not be created" : "");
     };
 
+    auto logWarningSubConfig = [ & ] (const SubConfigKey& key)
+    {
+        logwrn << "Configuration: reconfigure: sub-config " << key.first << "." << key.second 
+               << " not found in config " << this->class_id_ << "." << this->instance_id_ << ", skipping";
+    };
+
+    auto logWarningParam = [ & ] (const std::string& name)
+    {
+        logwrn << "Configuration: reconfigure: param " << name 
+               << " not found in config " << this->class_id_ << "." << this->instance_id_ << ", skipping";
+    };
+
+    bool subconfigs_ok = true;
+    bool params_ok     = true;
+
+    std::string class_id = getClassId();
+    
     //callbacks used for parsing
     auto cb_param = [ & ] (const std::string& key, const nlohmann::json& value)
     {
+        //react on parameter missing?
+        if (!hasParameter(key))
+        {
+            if (mode_param == MissingKeyMode::CreateIfMissing)
+            {
+                if (run_precheck)
+                {
+                    //in case of precheck we assume that the parameter is added and return
+                    return;
+                }
+                else
+                {
+                    //@TODO: add parameter?
+                }
+            }
+            else if (mode_param == MissingKeyMode::SkipIfMissing)
+            {
+                //log...
+                logWarningParam(key);
+
+                if (missing_param_keys)
+                    missing_param_keys->push_back(MissingKey(Key(class_id, key), MissingKeyType::Skipped));
+
+                //---and skip
+                return;
+            }
+        }
+
+        //check again (might have been created)
         bool has_param = hasParameter(key);
 
         if (!has_param)
-            logErrorParam(key);
+        {
+            bool creation_failed = (mode_param == MissingKeyMode::CreateIfMissing);
 
-        //parameter must exist
-        assert(has_param);
+            //report error
+            logErrorParam(key, creation_failed);
+            params_ok = false;
 
-        //set parameter's internal pointer value
-        setParameterFromJSON(key, value);
+            if (missing_param_keys)
+                missing_param_keys->push_back(MissingKey(Key(class_id, key), creation_failed ? MissingKeyType::CreationFailed :
+                                                                                               MissingKeyType::Missing));
+            //assert for error tracking?
+            if (assert_on_error)
+                assert(has_param);
 
-        param_set.insert(key);
+            return;
+        }
+
+        if (!run_precheck)
+        {
+            //set parameter's internal pointer value
+            setParameterFromJSON(key, value);
+
+            //collect changed parameter
+            param_set.insert(key);
+        }
     };
     auto cb_params = [ & ] (const nlohmann::json& config)
     {
@@ -874,45 +991,65 @@ std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config
     };
     auto cb_subconfig = [ & ] (const SubConfigKey& key, const nlohmann::json& config)
     { 
-        //subconfig missing?
+        //react on subconfig missing?
         if (!hasSubConfiguration(key))
         {
-            //handle missing keys depending on mode
-            if (mode == ReconfigureSubConfigMode::CreateIfMissing)
+            if (mode_subconfig == MissingKeyMode::CreateIfMissing && configurable)
             {
-                assert(configurable);
+                if (run_precheck)
+                {
+                    //in case of precheck we assume that the subconfigurable is created and return
+                    return;
+                }
+                else
+                {
+                    //create new configuration for sub config
+                    auto ptr = new Configuration(key.first, key.second);
+                    sub_configurations_.insert(std::make_pair(key, std::unique_ptr<Configuration>(ptr)));
 
-                //create new configuration for sub config
-                auto ptr = new Configuration(key.first, key.second);
-                sub_configurations_.insert(std::make_pair(key, std::unique_ptr<Configuration>(ptr)));
+                    //parse sub config from json struct
+                    sub_configurations_.at(key)->parseJSONConfig(config);
 
-                //parse sub config from json struct
-                sub_configurations_.at(key)->parseJSONConfig(config);
-
-                //tell configurable to create missing subconfigurable
-                configurable->generateSubConfigurable(key.first, key.second);
-            } 
-            else if (mode == ReconfigureSubConfigMode::WarnIfMissing)
+                    //tell configurable to create missing subconfigurable
+                    configurable->generateSubConfigurable(key.first, key.second);
+                }
+            }
+            else if (mode_subconfig == MissingKeyMode::SkipIfMissing)
             {
-                //collect missing key
-                if (missing_keys)
-                    missing_keys->push_back(key);
+                //log...
+                logWarningSubConfig(key);
 
-                logErrorSubConfig(key);
+                if (missing_subconfig_keys)
+                    missing_subconfig_keys->push_back(MissingKey(key, MissingKeyType::Skipped));
 
-                //do not descend deeper
+                //...and skip
                 return;
             }
-        }
+        } 
 
+        //check again (might have been created)
         bool has_subconfig = hasSubConfiguration(key);
 
+        //still no subconfig?
         if (!has_subconfig)
-            logErrorSubConfig(key);
+        {
+            bool creation_failed = (mode_subconfig == MissingKeyMode::CreateIfMissing);
 
-        //subconfig must exist
-        assert(has_subconfig);
-        
+            //report error
+            logErrorSubConfig(key, creation_failed);
+            subconfigs_ok = false;
+
+            if (missing_subconfig_keys)
+                    missing_subconfig_keys->push_back(MissingKey(key, creation_failed ? MissingKeyType::CreationFailed :
+                                                                                        MissingKeyType::Missing));
+
+            //assert for error tracking?
+            if (assert_on_error)
+                assert(has_subconfig);
+
+            return;
+        }
+  
         //get subconfigurable
         Configurable* sub_configurable = nullptr;
         if (configurable)
@@ -922,9 +1059,23 @@ std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config
         }
 
         //reconfigure subconfig
-        auto params_subconfig = getSubConfiguration(key.first, key.second).reconfigure(config, sub_configurable, missing_keys);
-        for (const auto& p : params_subconfig)
-            param_set.insert(key.first + Configurable::ConfigurablePathSeparator + p);
+        std::vector<std::string> params_subconfig;
+        auto result_subconfig = getSubConfiguration(key.first, key.second).reconfigure_internal(config, 
+                                                                                                sub_configurable,
+                                                                                                missing_subconfig_keys,
+                                                                                                missing_param_keys,
+                                                                                                assert_on_error,
+                                                                                                run_precheck);
+        //collect changed params of subconfig
+        if (!run_precheck)
+        {
+            for (const auto& p : result_subconfig.second)
+                param_set.insert(key.first + Configurable::ConfigurablePathSeparator + p);
+        }
+
+        //reconfigure of subconfig ok?
+        if (!result_subconfig.first)
+            subconfigs_ok = false;
     };
     auto cb_subconfigs = [ & ] (const nlohmann::json& config) 
     { 
@@ -935,13 +1086,18 @@ std::vector<std::string> Configuration::reconfigure(const nlohmann::json& config
     //parse config struct using the specified callbacks
     parseJSONConfig(config, cb_params, cb_subconfigs, {});
 
-    ParameterList param_list(param_set.begin(), param_set.end());
+    std::vector<std::string> changed_keys;
+    
+    if (!run_precheck)
+    {
+        changed_keys.assign(param_set.begin(), param_set.end());
 
-    //if my own parameters changed signal changes
-    if (!param_list.empty())
-        changed_signal_(param_list);
+        //if my own parameters changed => signal changes
+        if (!changed_keys.empty())
+            changed_signal_(changed_keys);
+    }
 
-    return param_list;
+    return std::make_pair(subconfigs_ok && params_ok, changed_keys);
 }
 
 /**
