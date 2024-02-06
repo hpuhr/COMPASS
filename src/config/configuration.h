@@ -51,22 +51,47 @@ public:
         Preset
     };
 
-    enum class ReconfigureSubConfigMode
-    {
-        MustExist = 0,
-        WarnIfMissing,
-        CreateIfMissing
-    };
-
     enum class ConfigSource
     {
         File = 0,
         Preset
     };
 
-    typedef std::pair<std::string, std::string> SubConfigKey;
-    typedef std::unique_ptr<Configuration>      Ptr;
-    typedef std::vector<std::string>            ParameterList;
+    enum class KeyType
+    {
+        Parameter = 0,
+        SubConfig
+    };
+
+    enum class MissingKeyMode
+    {
+        MustExist = 0,    // key object must exist in config
+        CreateIfMissing,  // key object can be created if missing
+        SkipIfMissing     // key object can be skipped if missing
+    };
+
+    enum class MissingKeyType
+    {
+        Missing = 0,    // key should have existed but was missing
+        Skipped,        // key was skipped
+        CreationFailed  // key object should have been created but creation failed
+    };
+
+    enum class ReconfigureError
+    {
+        NoError = 0,
+        PreCheckFailed,
+        ApplyFailed,
+        GeneralError,
+        UnknownError
+    };
+
+    typedef std::pair<std::string, std::string>       Key;
+    typedef Key                                       SubConfigKey;
+    typedef std::unique_ptr<Configuration>            Ptr;
+    typedef std::vector<std::string>                  ParameterList;
+    typedef std::pair<ReconfigureError, std::string>  ReconfigureResult;
+    typedef std::pair<Key, MissingKeyType>            MissingKey;
 
     /// @brief Constructor
     Configuration(const std::string& class_id, 
@@ -169,9 +194,11 @@ public:
     std::string newInstanceID(const std::string& class_id) const;
 
     boost::signals2::connection connectListener(const std::function<void(const ParameterList&)>& changed_cb);
-    std::vector<std::string> reconfigure(const nlohmann::json& config, 
-                                         Configurable* configurable = nullptr,
-                                         std::vector<SubConfigKey>* missing_keys = nullptr);
+    ReconfigureResult reconfigure(const nlohmann::json& config, 
+                                  Configurable* configurable = nullptr,
+                                  std::vector<MissingKey>* missing_subconfig_keys = nullptr,
+                                  std::vector<MissingKey>* missing_param_keys = nullptr,
+                                  bool assert_on_error = false);
 
     void addJSONExportFilter(JSONExportType export_type, 
                              const std::string& class_id);
@@ -238,6 +265,12 @@ private:
 
     void setParameterFromJSON(const std::string& parameter_id, const nlohmann::json& value);
 
+    std::pair<bool,std::vector<std::string>> reconfigure_internal(const nlohmann::json& config, 
+                                                                  Configurable* configurable,
+                                                                  std::vector<MissingKey>* missing_subconfig_keys,
+                                                                  std::vector<MissingKey>* missing_param_keys,
+                                                                  bool assert_on_error,
+                                                                  bool run_precheck);
     bool create_instance_name_ = false;
 
     boost::signals2::signal<void(const ParameterList&)> changed_signal_;

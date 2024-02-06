@@ -195,7 +195,7 @@ private:
     bool writePreview(const Preset& preset) const;
     bool writePreset(const Preset& preset) const;
     bool writePreset(const Key& key) const;
-    bool readPreset(const std::string& fn);
+    bool readPreset(Preset& p, const std::string& fn);
 
     //internal versions
     bool createPreset(const Preset& preset, 
@@ -223,11 +223,15 @@ private:
 
     std::string uniqueBasename(const Preset& preset) const;
 
-    std::string presetDir() const;
-    std::string presetFilename(const Preset& preset) const;
-    std::string presetPath(const Preset& preset) const;
+    std::string viewPresetBaseDir() const;
 
-    std::string previewDir() const;
+    std::string viewPresetDir(const View* view) const;
+    std::string viewPresetDir(const Preset& preset) const;
+    std::string viewPresetFilename(const Preset& preset) const;
+    std::string viewPresetPath(const Preset& preset) const;
+
+    std::string previewDir(const View* view) const;
+    std::string previewDir(const Preset& preset) const;
     std::string previewFilename(const Preset& preset) const;
     std::string previewPath(const Preset& preset) const;
     

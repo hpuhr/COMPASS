@@ -56,10 +56,15 @@
 class Configurable
 {
 public:
-    typedef Configuration::JSONExportType           JSONExportType;
-    typedef Configuration::ReconfigureSubConfigMode ReconfigureSubConfigMode;
-    typedef Configuration::SubConfigKey             SubConfigKey;
-
+    typedef Configuration::JSONExportType    JSONExportType;
+    typedef Configuration::Key               Key;
+    typedef Configuration::SubConfigKey      SubConfigKey;
+    typedef Configuration::MissingKeyMode    MissingKeyMode;
+    typedef Configuration::MissingKeyType    MissingKeyType;
+    typedef Configuration::MissingKey        MissingKey;
+    typedef Configuration::ReconfigureError  ReconfigureError;
+    typedef Configuration::ReconfigureResult ReconfigureResult;
+    
     /// @brief Constructor
     Configurable(const std::string& class_id, 
                  const std::string& instance_id,
@@ -101,9 +106,8 @@ public:
     Configurable& getChild(const std::string& class_id,
                            const std::string& instance_id);
 
-    /// @brief Returns the mode describing how missing subconfigurables will be treated when calling reconfigure().
-    ///        Standard value is MustExist, meaning that the application will assert on encountering a missing subconfigurable.
-    virtual ReconfigureSubConfigMode reconfigureSubConfigMode() const { return ReconfigureSubConfigMode::MustExist; }
+    virtual MissingKeyMode reconfigureSubConfigMode() const;
+    virtual MissingKeyMode reconfigureParameterMode() const;
 
     /// @brief Saves the current configuration as template at its parent
     // void saveConfigurationAsTemplate (const std::string& template_name);
@@ -120,8 +124,11 @@ public:
     void writeJSON(nlohmann::json& parent_json, JSONExportType export_type = JSONExportType::General) const;
     void generateJSON(nlohmann::json& target, JSONExportType export_type = JSONExportType::General) const;
 
-    void reconfigure(const nlohmann::json& config, 
-                     std::vector<SubConfigKey>* missing_keys = nullptr);
+    ReconfigureResult reconfigure(const nlohmann::json& config,
+                                  std::vector<MissingKey>* missing_subconfig_keys = nullptr,
+                                  std::vector<MissingKey>* missing_param_keys = nullptr,
+                                  bool assert_on_error = false,
+                                  std::string* error = nullptr);
 
     static std::string keyID(const std::string& class_id,
                              const std::string& instance_id);

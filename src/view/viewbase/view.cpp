@@ -589,38 +589,27 @@ void View::updateView(int flags)
 /**
  * Applies the given preset to the view.
  */
-bool View::applyPreset(const ViewPresets::Preset& preset,
-                       std::vector<SubConfigKey>* missing_keys,
-                       std::string* error)
+View::ReconfigureResult View::applyPreset(const ViewPresets::Preset& preset,
+                                          std::vector<MissingKey>* missing_subconfig_keys,
+                                          std::vector<MissingKey>* missing_param_keys)
 {
-    try
+    
+    bool assert_on_errors = !COMPASS::instance().isAppImage();
+
+    auto result = reconfigure(preset.view_config, missing_subconfig_keys, missing_param_keys, assert_on_errors);
+    
+    //reconfigure succeeded?
+    if (result.first == ReconfigureError::NoError)
     {
-        //reconfigure view using the preset's view config
-        reconfigure(preset.view_config, missing_keys);
+        //store preset and revert changes
+        active_preset_  = preset;
+        preset_changed_ = false;
+
+        //notify about preset changes
+        emit presetChangedSignal();
     }
-    catch(const std::exception& ex)
-    {
-        if (error)
-            *error = ex.what();
-
-        return false;
-    }
-    catch(...)
-    {
-        if (error)
-            *error = "Unknown error";
-
-        return false;
-    }
-
-    //store preset and revert changes
-    active_preset_  = preset;
-    preset_changed_ = false;
-
-    //notify about preset changes
-    emit presetChangedSignal();
-
-    return true;
+        
+    return result;
 }
 
 /**
