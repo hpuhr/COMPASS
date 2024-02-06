@@ -383,9 +383,9 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     // add all data source types that need loading
-    if (data.contains(VP_DS_TYPES_KEY)) // the listed ones should be loaded
+    if (data.contains(ViewPoint::VP_DS_TYPES_KEY)) // the listed ones should be loaded
     {
-        const json& data_source_types  = data.at(VP_DS_TYPES_KEY);
+        const json& data_source_types  = data.at(ViewPoint::VP_DS_TYPES_KEY);
 
         std::set<std::string> ds_types = data_source_types.get<std::set<std::string>>();
 
@@ -401,9 +401,9 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     }
 
     // add all data sources that need loading
-    if (data.contains(VP_DS_KEY)) // the listed ones should be loaded
+    if (data.contains(ViewPoint::VP_DS_KEY)) // the listed ones should be loaded
     {
-        const json& data_sources  = data.at(VP_DS_KEY);
+        const json& data_sources  = data.at(ViewPoint::VP_DS_KEY);
 
         std::map<unsigned int, std::set<unsigned int>> ds_ids
                 = data_sources.get<std::map<unsigned int, std::set<unsigned int>>>(); // ds_id + line strs
@@ -421,13 +421,13 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     }
 
     // add filters
-    use_filters_ = data.contains(VP_FILTERS_KEY);
+    use_filters_ = data.contains(ViewPoint::VP_FILTERS_KEY);
 
     disableAllFilters();
 
-    if (data.contains(VP_FILTERS_KEY))
+    if (data.contains(ViewPoint::VP_FILTERS_KEY))
     {
-        const json& filters = data.at(VP_FILTERS_KEY);
+        const json& filters = data.at(ViewPoint::VP_FILTERS_KEY);
 
         logdbg << "FilterManager: showViewPointSlot: filter data '" << filters.dump(4) << "'";
 
@@ -462,16 +462,16 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     if (ds_man.dsTypeFiltered()) // ds types filters active
-        data[VP_DS_TYPES_KEY] = ds_man.wantedDSTypes(); // add all data sources that need loading
+        data[ViewPoint::VP_DS_TYPES_KEY] = ds_man.wantedDSTypes(); // add all data sources that need loading
 
     if (ds_man.loadDataSourcesFiltered()) // ds filters active
-        data[VP_DS_KEY] = ds_man.getLoadDataSources(); // add all data sources that need loading
+        data[ViewPoint::VP_DS_KEY] = ds_man.getLoadDataSources(); // add all data sources that need loading
 
     // add filters
     if (use_filters_)
     {
-        data[VP_FILTERS_KEY] = json::object();
-        json& filters = data.at(VP_FILTERS_KEY);
+        data[ViewPoint::VP_FILTERS_KEY] = json::object();
+        json& filters = data.at(ViewPoint::VP_FILTERS_KEY);
 
         for (auto& fil_it : filters_)
         {

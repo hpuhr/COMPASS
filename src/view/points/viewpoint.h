@@ -23,43 +23,6 @@
 class ViewManager;
 class LatexVisitor;
 
-extern const std::string VP_COLLECTION_CONTENT_VERSION;
-extern const std::string VP_COLLECTION_CONTENT_TYPE;
-
-extern const std::string VP_COLLECTION_CONTENT_VERSION_KEY;
-extern const std::string VP_COLLECTION_CONTENT_TYPE_KEY;
-extern const std::string VP_COLLECTION_ARRAY_KEY;
-
-extern const std::string VP_ID_KEY;
-extern const std::string VP_NAME_KEY;
-extern const std::string VP_TYPE_KEY;
-extern const std::string VP_STATUS_KEY;
-extern const std::string VP_COMMENT_KEY;
-
-extern const std::string VP_DS_TYPES_KEY;
-extern const std::string VP_DS_KEY;
-extern const std::string VP_FILTERS_KEY;
-
-extern const std::string VP_POS_LAT_KEY;
-extern const std::string VP_POS_LON_KEY;
-extern const std::string VP_POS_WIN_LAT_KEY;
-extern const std::string VP_POS_WIN_LON_KEY;
-extern const std::string VP_TIMESTAMP_KEY;
-extern const std::string VP_TIME_WIN_KEY;
-
-extern const std::string VP_ANNOTATION_KEY;
-
-// TODO add detail highlighting
-
-// TODO remove
-extern const std::string VP_EVAL_KEY;
-extern const std::string VP_EVAL_SHOW_RES_KEY;
-extern const std::string VP_EVAL_REQGRP_ID_KEY;
-extern const std::string VP_EVAL_RES_ID_KEY;
-//extern const std::string VP_EVAL_HIGHDET_KEY;
-
-extern const std::string VP_SHOWSEC_KEY;
-
 class ViewPoint : public ViewableDataConfig
 {
   public:
@@ -81,6 +44,37 @@ class ViewPoint : public ViewableDataConfig
                             const std::string& json_filename = "", 
                             std::string* err_msg = nullptr,
                             bool verbose = false);
+
+    static const std::string VP_COLLECTION_CONTENT_VERSION;
+    static const std::string VP_COLLECTION_CONTENT_TYPE;
+
+    static const std::string VP_COLLECTION_CONTENT_VERSION_KEY;
+    static const std::string VP_COLLECTION_CONTENT_TYPE_KEY;
+    static const std::string VP_COLLECTION_ARRAY_KEY;
+
+    static const std::string VP_CONTEXT_KEY;
+    static const std::string VP_CONTEXT_DATASETS_KEY;
+    static const std::string VP_CONTEXT_DATASET_FILENAME_KEY;
+
+    static const std::string VP_ID_KEY;
+    static const std::string VP_NAME_KEY;
+    static const std::string VP_TYPE_KEY ;
+    static const std::string VP_STATUS_KEY;
+    static const std::string VP_COMMENT_KEY;
+
+    static const std::string VP_DS_TYPES_KEY;
+    static const std::string VP_DS_KEY;
+    static const std::string VP_FILTERS_KEY;
+
+    static const std::string VP_POS_LAT_KEY;
+    static const std::string VP_POS_LON_KEY;
+    static const std::string VP_POS_WIN_LAT_KEY;
+    static const std::string VP_POS_WIN_LON_KEY;
+
+    static const std::string VP_TIMESTAMP_KEY;
+    static const std::string VP_TIME_WIN_KEY;
+
+    static const std::string VP_ANNOTATION_KEY;
 
 protected:
     ViewManager& view_manager_;

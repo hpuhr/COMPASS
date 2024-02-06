@@ -251,10 +251,10 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
 
     loginf << "Single: getOrCreateAnnotation: anno_name '" << anno_name << "' overview " << overview;
 
-    if (!viewable.count(VP_ANNOTATION_KEY))
-        viewable[VP_ANNOTATION_KEY] = json::array();
+    if (!viewable.count(ViewPoint::VP_ANNOTATION_KEY))
+        viewable[ViewPoint::VP_ANNOTATION_KEY] = json::array();
 
-    auto& annos = viewable.at(VP_ANNOTATION_KEY);
+    auto& annos = viewable.at(ViewPoint::VP_ANNOTATION_KEY);
     assert (annos.is_array());
 
     auto insertAnnotation = [ & ] (const std::string& name,

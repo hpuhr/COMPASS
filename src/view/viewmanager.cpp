@@ -297,21 +297,21 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
         if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
             db_interface.deleteAllViewPoints();
 
-        assert (json_obj.contains(VP_COLLECTION_ARRAY_KEY));
+        assert (json_obj.contains(ViewPoint::VP_COLLECTION_ARRAY_KEY));
         
         //add new ones
-        json& view_points = json_obj.at(VP_COLLECTION_ARRAY_KEY);
+        json& view_points = json_obj.at(ViewPoint::VP_COLLECTION_ARRAY_KEY);
         assert (view_points.size());
 
         unsigned int id;
         for (auto& vp_it : view_points.get<json::array_t>())
         {
-            assert (vp_it.contains(VP_ID_KEY));
+            assert (vp_it.contains(ViewPoint::VP_ID_KEY));
 
-            id = vp_it.at(VP_ID_KEY);
+            id = vp_it.at(ViewPoint::VP_ID_KEY);
 
-            if (!vp_it.contains(VP_STATUS_KEY))
-                vp_it[VP_STATUS_KEY] = "open";
+            if (!vp_it.contains(ViewPoint::VP_STATUS_KEY))
+                vp_it[ViewPoint::VP_STATUS_KEY] = "open";
 
             db_interface.setViewPoint(id, vp_it.dump());
         }
@@ -385,9 +385,9 @@ void ViewManager::doViewPointAfterLoad ()
 
     logdbg << "ViewManager: doViewPointAfterLoad: data '" << data.dump(4) << "'";
 
-    bool vp_contains_timestamp = data.contains(VP_TIMESTAMP_KEY);
+    bool vp_contains_timestamp = data.contains(ViewPoint::VP_TIMESTAMP_KEY);
     boost::posix_time::ptime vp_timestamp;
-    bool vp_contains_time_window = data.contains(VP_TIME_WIN_KEY);
+    bool vp_contains_time_window = data.contains(ViewPoint::VP_TIME_WIN_KEY);
     float vp_time_window;
     boost::posix_time::ptime vp_ts_min, vp_ts_max;
 
@@ -398,16 +398,16 @@ void ViewManager::doViewPointAfterLoad ()
     }
     else
     {
-        assert (data.at(VP_TIMESTAMP_KEY).is_string());
-        vp_timestamp = Time::fromString(data.at(VP_TIMESTAMP_KEY));
+        assert (data.at(ViewPoint::VP_TIMESTAMP_KEY).is_string());
+        vp_timestamp = Time::fromString(data.at(ViewPoint::VP_TIMESTAMP_KEY));
 
         loginf << "ViewManager: doViewPointAfterLoad: time " << Time::toString(vp_timestamp);
     }
 
     if (vp_contains_time_window)
     {
-        assert (data.at(VP_TIME_WIN_KEY).is_number());
-        vp_time_window = data.at(VP_TIME_WIN_KEY);
+        assert (data.at(ViewPoint::VP_TIME_WIN_KEY).is_number());
+        vp_time_window = data.at(ViewPoint::VP_TIME_WIN_KEY);
         vp_ts_min = vp_timestamp - Time::partialSeconds(vp_time_window / 2.0);
         vp_ts_max = vp_timestamp + Time::partialSeconds(vp_time_window / 2.0);
 

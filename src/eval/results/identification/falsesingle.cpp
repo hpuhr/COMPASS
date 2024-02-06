@@ -263,14 +263,14 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationFalse::viewableDat
 
         assert(detail.numPositions() >= 1);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
-        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
         //            if (!detail.pos_ok_)
-        //                (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
+        //                (*viewable_ptr)[ViewPoint::VP_EVAL_KEY][ViewPoint::VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
@@ -318,8 +318,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationFalse::getTargetEr
 
     if (has_pos)
     {
-        (*viewable_ptr)[VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-        (*viewable_ptr)[VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
+        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
+        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
 
         double lat_w = lat_max-lat_min;
         double lon_w = lon_max-lon_min;
@@ -330,8 +330,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationFalse::getTargetEr
         if (lon_w < eval_man_.settings().result_detail_zoom_)
             lon_w = eval_man_.settings().result_detail_zoom_;
 
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
     }
 
     //addAnnotationFeatures(*viewable_ptr, false, add_highlight);

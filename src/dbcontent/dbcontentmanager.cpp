@@ -1602,7 +1602,7 @@ void DBContentManager::showUTN (unsigned int utn)
     loginf << "DBContentManager: showUTN: utn " << utn;
 
     nlohmann::json data;
-    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
+    data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
     logdbg << "DBContentManager: showUTN: showing";
     setViewableDataConfig(data);
@@ -1613,7 +1613,7 @@ void DBContentManager::showUTNs (std::vector<unsigned int> utns)
     loginf << "DBContentManager: showUTNs: len " << utns.size();
 
     nlohmann::json data;
-    data[VP_FILTERS_KEY]["UTNs"]["utns"] = String::compress(utns, ',');
+    data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = String::compress(utns, ',');
 
     loginf << "DBContentManager: showUTNs: showing '" << String::compress(utns, ',') << "'";
     setViewableDataConfig(data);

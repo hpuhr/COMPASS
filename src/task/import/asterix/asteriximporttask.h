@@ -78,7 +78,7 @@ public:
     {
         files_info_.push_back(ASTERIXFileInfo());
         files_info_.back().filename_ = filename;
-        //files_info_.back().line_id_ = line_id;
+        //files_info_.back().line_id_ = line_id; // TODO
     }
 
     // registered

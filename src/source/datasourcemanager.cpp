@@ -174,7 +174,7 @@ void DataSourceManager::importDataSourcesJSON(const nlohmann::json& j)
     if (!j.contains("content_type")
             || !j.at("content_type").is_string()
             || j.at("content_type") != "data_sources")
-        throw std::runtime_error("current data is not view point content");
+        throw std::runtime_error("current data is not data sources content");
 
     if (!j.contains("content_version")
             || !j.at("content_version").is_string()

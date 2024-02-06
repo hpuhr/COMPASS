@@ -20,19 +20,13 @@
 #include "taskmanager.h"
 #include "compass.h"
 #include "dbinterface.h"
-//#include "dbcontent/dbcontent.h"
-//#include "dbcontent/dbcontentmanager.h"
 #include "files.h"
 #include "logger.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
-//#include "viewpointsimporttaskwidget.h"
-//#include "global.h"
 #include "viewpoint.h"
 
 #include "asteriximporttask.h"
-//#include "asteriximporttaskwidget.h"
-//#include "asterixoverridewidget.h"
 #include "util/timeconv.h"
 
 #include <fstream>
@@ -47,8 +41,6 @@
 using namespace std;
 using namespace nlohmann;
 using namespace Utils;
-
-//const std::string DONE_PROPERTY_NAME = "view_points_imported";
 
 ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const std::string& instance_id,
                                            TaskManager& task_manager)
@@ -216,23 +208,22 @@ void ViewPointsImportTask::run()
     QApplication::restoreOverrideCursor();
 
     // datasets
-    if (current_data_.contains("view_point_context"))
+    if (current_data_.contains(ViewPoint::VP_CONTEXT_KEY))
     {
-        json& context = current_data_.at("view_point_context");
+        json& context = current_data_.at(ViewPoint::VP_CONTEXT_KEY);
 
-        if (context.contains("datasets"))
+        if (context.contains(ViewPoint::VP_CONTEXT_DATASETS_KEY))
         {
-            for (auto& ds_it : context.at("datasets").get<json::array_t>())
+            for (auto& ds_it : context.at(ViewPoint::VP_CONTEXT_DATASETS_KEY).get<json::array_t>())
             {
-                std::string name;
+//                std::string name;
 
-                if (ds_it.contains("name"))
-                    name= ds_it.at("name");
+//                if (ds_it.contains("name"))
+//                    name = ds_it.at("name");
 
-                std::string filename = ds_it.at("filename");
+                std::string filename = ds_it.at(ViewPoint::VP_CONTEXT_DATASET_FILENAME_KEY);
 
-                loginf << "ViewPointsImportTask: import: importing dataset name '" << name
-                       << "' file '" << filename << "'";
+                loginf << "ViewPointsImportTask: import: importing dataset file '" << filename << "'";
 
                 if (!Files::fileExists(filename))
                 {
@@ -244,7 +235,7 @@ void ViewPointsImportTask::run()
                     assert (Files::fileExists(filename));
                 }
 
-                ASTERIXImportTask& asterix_importer_task = task_manager_.asterixImporterTask();
+                ASTERIXImportTask& task = task_manager_.asterixImporterTask();
 
                 unsigned int line_id {0};
 
@@ -253,6 +244,8 @@ void ViewPointsImportTask::run()
                 {
                     assert (ds_it.at("line_id").is_number_unsigned());
                     line_id = ds_it.at("line_id");
+
+                    task.settings().file_line_id_ = line_id;
 
                     loginf << "ViewPointsImportTask: import: line_id " << line_id;
                 }
@@ -264,13 +257,13 @@ void ViewPointsImportTask::run()
 
                     float tod_offset = ds_it.at("time_offset");
 
-                    asterix_importer_task.settings().filter_tod_active_ = true;
-                    asterix_importer_task.settings().override_tod_offset_ = tod_offset;
+                    task.settings().filter_tod_active_ = true;
+                    task.settings().override_tod_offset_ = tod_offset;
                 }
                 else
                 {
                     loginf << "ViewPointsImportTask: import: override information not set";
-                    asterix_importer_task.settings().override_tod_offset_ = false;
+                    task.settings().override_tod_offset_ = false;
                 }
 
                 if (ds_it.contains("date"))
@@ -282,25 +275,26 @@ void ViewPointsImportTask::run()
 
                     boost::posix_time::ptime date = Time::fromDateString(date_str);
 
-                    asterix_importer_task.settings().date_ = date;
+                    task.settings().date_ = date;
                 }
 
-                asterix_importer_task.addImportFileNames({filename}, line_id);
+                task.clearImportFilesInfo();
+                task.addImportFileNames({filename}, line_id);
 
-                assert(asterix_importer_task.canRun());
-                asterix_importer_task.allowUserInteractions(false);
+                assert(task.canRun());
+                task.allowUserInteractions(false);
 
                 //widget->runCurrentTaskSlot();
                 loginf << "ViewPointsImportTask: import: running task";
-                asterix_importer_task.run();
+                task.run();
 
-                while (!asterix_importer_task.done())
+                while (!task.done())
                 {
                     QCoreApplication::processEvents();
                     QThread::msleep(1);
                 }
 
-                loginf << "ViewPointsImportTask: import: importing dataset '" << name << "' done";
+                loginf << "ViewPointsImportTask: import: importing dataset file '" << filename << "' done";
 
             }
 

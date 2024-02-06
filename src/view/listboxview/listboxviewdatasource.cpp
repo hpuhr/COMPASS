@@ -235,6 +235,9 @@ void ListBoxViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
 bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
+    loginf << "ListBoxViewDataSource: addTemporaryVariable: dbcontent_name '" << dbcontent_name
+           << "' var_name '" << var_name << "'";
+
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
     
     assert (set_);
