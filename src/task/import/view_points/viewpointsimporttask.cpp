@@ -257,13 +257,14 @@ void ViewPointsImportTask::run()
 
                     float tod_offset = ds_it.at("time_offset");
 
-                    task.settings().filter_tod_active_ = true;
-                    task.settings().override_tod_offset_ = tod_offset;
+                    task.settings().override_tod_active_ = true;
+                    task.settings().override_tod_offset_ = -tod_offset;
                 }
                 else
                 {
                     loginf << "ViewPointsImportTask: import: override information not set";
-                    task.settings().override_tod_offset_ = false;
+                    task.settings().override_tod_active_ = false;
+                    task.settings().override_tod_offset_ = 0;
                 }
 
                 if (ds_it.contains("date"))

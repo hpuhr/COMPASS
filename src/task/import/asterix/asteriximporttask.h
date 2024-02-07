@@ -89,6 +89,7 @@ public:
     unsigned int num_packets_overload_ {60};
 
     float override_tod_offset_{0};
+
     float filter_tod_min_{0};
     float filter_tod_max_{0};
 

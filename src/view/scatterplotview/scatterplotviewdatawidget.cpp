@@ -1416,7 +1416,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
         //sort pointers to obtain correct render order (as it happens inside qtcharts)
         sort(series.begin(), series.end(),
-             [](SymbolLineSeries& a, SymbolLineSeries& b) {return a.scatter_series > b.scatter_series; });
+             [&](const SymbolLineSeries& a, const SymbolLineSeries& b) {return a.scatter_series > b.scatter_series; });
 
         //the biggest pointer is thus the one for the selection, so the selection will be rendered on top
         QScatterSeries* selected_symbol_series = series.back().scatter_series;

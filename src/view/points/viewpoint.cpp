@@ -72,54 +72,6 @@ ViewPoint::ViewPoint(unsigned int id, const nlohmann::json::object_t& data, View
     if (needs_save)
         save();
 
-//    "id":0,
-//    "type":"any string",
-//    "text":"any string",
-//    "position_latitude":49.5,
-//    "position_longitude":12.2,
-//    "position_window_latitude":0.05,
-//    "position_window_longitude":0.02,
-//    "time":666.0,
-//    "time_window":4.0,
-
-//    "dbo_data":
-//    [
-//    {
-//    "dbo":"Tracker",
-//    "ds_name":"ARTAS",
-//    "filters":
-//    [
-//    {
-//    "variable":"track_num",
-//    "values":[1234]
-//    },
-//    ...
-//    ]
-//    },
-//    {
-//    "dbo":"Tracker",
-//    "ds_name":"ARTAS2",
-//    "filters":
-//    [
-//    {
-//    "variable":"track_num",
-//    "values":[3234]
-//    },
-//    ...
-//    ]
-//    }
-//    ],
-//    "dbo_context_variables":
-//    [
-//    {
-//    "dbo":"Tracker",
-//    "variables":["rocd","barometric_altitude"]
-//    },
-//    ...
-//    ],
-//    "deviations":["DEV#1",...]
-
-
 }
 
 ViewPoint::ViewPoint(unsigned int id, const std::string& json_str, ViewManager& view_manager, bool needs_save)
