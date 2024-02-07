@@ -64,6 +64,7 @@ public:
     typedef Configuration::MissingKey        MissingKey;
     typedef Configuration::ReconfigureError  ReconfigureError;
     typedef Configuration::ReconfigureResult ReconfigureResult;
+    typedef Configuration::InstanceDescr     InstanceDescr;
     
     /// @brief Constructor
     Configurable(const std::string& class_id, 

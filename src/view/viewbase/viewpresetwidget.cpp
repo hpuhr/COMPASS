@@ -1093,21 +1093,25 @@ void ViewPresetWidget::presetApplied(ViewPresets::Key key)
     const auto& presets = COMPASS::instance().viewManager().viewPresets();
     const auto& preset  = presets.presets().at(key);
 
-    auto result = view_->applyPreset(preset, nullptr, nullptr);
+    std::string error_msg;
+
+    auto result = view_->applyPreset(preset, nullptr, nullptr, &error_msg);
 
     QApplication::restoreOverrideCursor();
 
     boost::optional<QString> error;
 
-    if (result.first == View::ReconfigureError::PreCheckFailed)
+    if (result == View::PresetError::IncompatibleVersion)
         error = "Checking preset failed: Preset not compatible with current software version.";
-    else if (result.first == View::ReconfigureError::ApplyFailed)
+    else if (result == View::PresetError::IncompatibleContent)
+        error = "Checking preset failed: Preset not compatible with current software version.";
+    else if (result == View::PresetError::ApplyFailed)
         error = "Applying preset failed: Preset not compatible with current software version.";
-    else if (result.first == View::ReconfigureError::GeneralError)
-        error = "Applying preset failed: " + QString::fromStdString(result.second);
-    else if (result.first == View::ReconfigureError::UnknownError)
+    else if (result == View::PresetError::GeneralError)
+        error = "Applying preset failed: " + (error_msg.empty() ? "Unknown error" : QString::fromStdString(error_msg));
+    else if (result == View::PresetError::UnknownError)
         error = "Applying preset failed: Unknown error";
-
+    
     //any errors?
     if (error.has_value())
         QMessageBox::critical(this, "Error", error.value());

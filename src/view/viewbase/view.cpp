@@ -26,6 +26,7 @@
 #include "compass.h"
 #include "dbcontentmanager.h"
 #include "viewdatawidget.h"
+#include "config.h"
 
 #include <QVBoxLayout>
 #include <QWidget>
@@ -589,27 +590,40 @@ void View::updateView(int flags)
 /**
  * Applies the given preset to the view.
  */
-View::ReconfigureResult View::applyPreset(const ViewPresets::Preset& preset,
-                                          std::vector<MissingKey>* missing_subconfig_keys,
-                                          std::vector<MissingKey>* missing_param_keys)
+View::PresetError View::applyPreset(const ViewPresets::Preset& preset,
+                                    std::vector<MissingKey>* missing_subconfig_keys,
+                                    std::vector<MissingKey>* missing_param_keys,
+                                    std::string* error_msg)
 {
-    
+    auto version = COMPASS::instance().config().getString("version");
+
+    if (!preset.app_version.empty() && preset.app_version != version)
+        return PresetError::IncompatibleVersion;
+
     bool assert_on_errors = !COMPASS::instance().isAppImage();
 
     auto result = reconfigure(preset.view_config, missing_subconfig_keys, missing_param_keys, assert_on_errors);
-    
-    //reconfigure succeeded?
-    if (result.first == ReconfigureError::NoError)
-    {
-        //store preset and revert changes
-        active_preset_  = preset;
-        preset_changed_ = false;
 
-        //notify about preset changes
-        emit presetChangedSignal();
-    }
-        
-    return result;
+    if (error_msg)
+        *error_msg = result.second;
+
+    if (result.first == View::ReconfigureError::PreCheckFailed)
+        return PresetError::IncompatibleContent;
+    else if (result.first == View::ReconfigureError::ApplyFailed)
+        return PresetError::ApplyFailed;
+    else if (result.first == View::ReconfigureError::GeneralError)
+        return PresetError::GeneralError;
+    else if (result.first == View::ReconfigureError::UnknownError)
+        return PresetError::UnknownError;
+
+    //store preset and revert changes
+    active_preset_  = preset;
+    preset_changed_ = false;
+
+    //notify about preset changes
+    emit presetChangedSignal();
+
+    return PresetError::NoError;
 }
 
 /**

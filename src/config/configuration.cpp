@@ -28,12 +28,21 @@ using namespace Utils;
 
 using namespace nlohmann;
 
+const std::string Configuration::ParameterName        = "name";
 const std::string Configuration::ParameterSection     = "parameters";
 const std::string Configuration::SubConfigSection     = "sub_configs";
 const std::string Configuration::SubConfigFileSection = "sub_config_files";
 const std::string Configuration::InstanceID           = "instance_id";
 const std::string Configuration::ClassID              = "class_id";
 const std::string Configuration::SubConfigFilePath    = "path";
+
+namespace
+{
+    std::string instanceIDFromUniqueName(const std::string& class_id, const std::string& unique_name)
+    {
+        return class_id + " " + unique_name;
+    }
+}
 
 /*
  *  Initializes members
@@ -110,6 +119,20 @@ Configuration::Ptr Configuration::create(const std::string& class_id,
 Configuration::Ptr Configuration::create(const std::string& class_id)
 {
     return std::unique_ptr<Configuration>(new Configuration(class_id));
+}
+
+/**
+ * Creates an empty configuration of the given a class and instance id, and a name parameter.
+ */
+Configuration::Ptr Configuration::create(const std::string& class_id, 
+                                         const std::string& instance_id,
+                                         const std::string& name)
+{
+    auto ptr = create(class_id, instance_id);
+    if (ptr)
+        ptr->addParameter<std::string>(ParameterName, name);
+
+    return ptr;
 }
 
 /**
@@ -704,6 +727,19 @@ Configuration& Configuration::addNewSubConfiguration(const std::string& class_id
 }
 
 /**
+ * Adds a new (empty) subconfiguration.
+ */
+Configuration& Configuration::addNewSubConfiguration(const std::string& class_id,
+                                                     const std::string& instance_id,
+                                                     const std::string& name)
+{
+    auto& c = addNewSubConfiguration(class_id, instance_id);
+    c.addParameter<std::string>(ParameterName, name);
+
+    return c;
+}
+
+/**
  * Adds a new (empty) subconfiguration and creates a suitable unique instance id.
  */
 Configuration& Configuration::addNewSubConfiguration(const std::string& class_id)
@@ -1010,8 +1046,16 @@ std::pair<bool,std::vector<std::string>> Configuration::reconfigure_internal(con
                     //parse sub config from json struct
                     sub_configurations_.at(key)->parseJSONConfig(config);
 
-                    //tell configurable to create missing subconfigurable
-                    configurable->generateSubConfigurable(key.first, key.second);
+                    try
+                    {
+                        //tell configurable to create missing subconfigurable
+                        configurable->generateSubConfigurable(key.first, key.second);
+                    }
+                    catch(...)
+                    {
+                        //creating configurable failed => erase previously added subconfig
+                        sub_configurations_.erase(key);
+                    }
                 }
             }
             else if (mode_subconfig == MissingKeyMode::SkipIfMissing)

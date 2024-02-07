@@ -65,6 +65,16 @@ public:
         VU_Reload           = 1 << 3  // reload view (will overrule all other updates)
     };
 
+    enum PresetError
+    {
+        NoError = 0,
+        IncompatibleVersion,
+        IncompatibleContent,
+        ApplyFailed,
+        GeneralError,
+        UnknownError
+    };
+
     View(const std::string& class_id, 
          const std::string& instance_id, 
          ViewContainer* container,
@@ -111,9 +121,10 @@ public:
 
     void updateView();
     
-    ReconfigureResult applyPreset(const ViewPresets::Preset& preset, 
-                                 std::vector<MissingKey>* missing_subconfig_keys = nullptr,
-                                 std::vector<MissingKey>* missing_param_keys = nullptr);
+    PresetError applyPreset(const ViewPresets::Preset& preset, 
+                            std::vector<MissingKey>* missing_subconfig_keys = nullptr,
+                            std::vector<MissingKey>* missing_param_keys = nullptr,
+                            std::string* error_msg = nullptr);
     const ViewPresets::Preset* activePreset() const;
     bool presetChanged() const;
 

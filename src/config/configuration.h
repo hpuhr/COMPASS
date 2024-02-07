@@ -93,6 +93,16 @@ public:
     typedef std::pair<ReconfigureError, std::string>  ReconfigureResult;
     typedef std::pair<Key, MissingKeyType>            MissingKey;
 
+    struct InstanceDescr
+    {
+        InstanceDescr() = default;
+        InstanceDescr(const std::string& instance_name, 
+                      const std::string& instance_id) : name(instance_name), id(instance_id) {}
+
+        std::string name;
+        std::string id;
+    };
+
     /// @brief Constructor
     Configuration(const std::string& class_id, 
                   const std::string& instance_id,
@@ -103,6 +113,9 @@ public:
 
     static Configuration::Ptr create(const std::string& class_id, 
                                      const std::string& instance_id);
+    static Configuration::Ptr create(const std::string& class_id, 
+                                     const std::string& instance_id,
+                                     const std::string& name);
     static Configuration::Ptr create(const std::string& class_id);
 
     template <typename T>
@@ -151,6 +164,10 @@ public:
     /// @brief Adds a new sub-configuration and returns reference
     Configuration& addNewSubConfiguration(const std::string& class_id,
                                           const std::string& instance_id);
+    /// @brief Adds a new sub-configuration and returns reference
+    Configuration& addNewSubConfiguration(const std::string& class_id,
+                                          const std::string& instance_id,
+                                          const std::string& name);
     /// @brief Adds a new sub-configuration and returns reference
     Configuration& addNewSubConfiguration(const std::string& class_id);
     /// @brief Returns a sub-configuration, creates new empty one if non-existing
@@ -206,6 +223,7 @@ public:
                              const std::vector<std::string>& class_ids);
     const std::set<std::string>* jsonExportFilters(JSONExportType export_type) const;
 
+    static const std::string ParameterName;
     static const std::string ParameterSection;
     static const std::string SubConfigSection;
     static const std::string SubConfigFileSection;
