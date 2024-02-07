@@ -394,6 +394,16 @@ bool ViewWidget::refreshView()
 
 /**
 */
+void ViewWidget::clearData()
+{
+    if (getViewDataWidget())
+        getViewDataWidget()->clearData();
+
+    updateComponents();
+}
+
+/**
+*/
 void ViewWidget::loadingStarted()
 {
     //propagate to subwidgets (note: order might be important)

@@ -265,8 +265,8 @@ void View::clearData()
 {
     logdbg << "View: clearData";
 
-    if (widget_ && widget_->getViewDataWidget())
-        widget_->getViewDataWidget()->clearData();
+    if (widget_)
+        widget_->clearData();
 }
 
 /**

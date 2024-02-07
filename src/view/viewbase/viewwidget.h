@@ -116,6 +116,7 @@ public:
     void updateComponents();
 
     bool refreshView();
+    void clearData();
 
     void loadingStarted();
     void loadingDone();
