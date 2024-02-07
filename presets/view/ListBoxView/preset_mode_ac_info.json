@@ -1,0 +1,88 @@
+{
+    "app_version": "0.7.5",
+    "category": "",
+    "description": "",
+    "name": "Mode AC Info",
+    "timestamp": "2024-02-07 15:35:27.008",
+    "view": "ListBoxView",
+    "view_config": {
+        "parameters": {
+            "show_only_selected": false,
+            "use_presentation": true
+        },
+        "sub_configs": {
+            "ListBoxViewDataSource": {
+                "ListBoxViewDataSource0": {
+                    "parameters": null,
+                    "sub_configs": {
+                        "VariableOrderedSet": {
+                            "Default": {
+                                "parameters": {
+                                    "variable_definitions": [
+                                        [
+                                            "Meta",
+                                            "Timestamp"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "DS ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Line ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Garbled"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Valid"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Smoothed"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Address"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Identification"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Number"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Garbled"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Valid"
+                                        ]
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ListBoxViewWidget": {
+                "ListBoxViewWidget0": {
+                    "parameters": null
+                }
+            }
+        }
+    }
+}

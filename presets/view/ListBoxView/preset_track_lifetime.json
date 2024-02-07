@@ -1,0 +1,84 @@
+{
+    "app_version": "0.7.5",
+    "category": "",
+    "description": "",
+    "name": "Track Lifetime",
+    "timestamp": "2024-02-07 15:37:06.223",
+    "view": "ListBoxView",
+    "view_config": {
+        "parameters": {
+            "show_only_selected": false,
+            "use_presentation": true
+        },
+        "sub_configs": {
+            "ListBoxViewDataSource": {
+                "ListBoxViewDataSource0": {
+                    "parameters": null,
+                    "sub_configs": {
+                        "VariableOrderedSet": {
+                            "Default": {
+                                "parameters": {
+                                    "variable_definitions": [
+                                        [
+                                            "Meta",
+                                            "Timestamp"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "DS ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Line ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Address"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Identification"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Number"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Begin"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Confirmed"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Coasting"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track End"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Code"
+                                        ]
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ListBoxViewWidget": {
+                "ListBoxViewWidget0": {
+                    "parameters": null
+                }
+            }
+        }
+    }
+}
