@@ -102,16 +102,17 @@ public:
         Key key() const { return Key(view, name); }
 
         //serialized
-        std::string    name;          // unique name of the preset
-        PresetMetadata metadata;      // preset metadata info
-        std::string    view;          // view the preset belongs to (= the view's configurable class id)
-        std::string    timestamp;     // timestamp the preset config was generated
-        std::string    app_version;   // version of the application the preset has been generated with
-        nlohmann::json view_config;   // view configuration as json blob
+        std::string    name;             // unique name of the preset
+        PresetMetadata metadata;         // preset metadata info
+        std::string    view;             // view the preset belongs to (= the view's configurable class id)
+        std::string    timestamp;        // timestamp the preset config was generated
+        std::string    app_version;      // version of the application the preset has been generated with
+        mutable bool   example = false;  // preset was deployed with compass
+        nlohmann::json view_config;      // view configuration as json blob
 
         //not serialized
-        std::string    filename;      // filename of the preset on disk
-        QImage         preview;       // a preview image generated from the view using the stored configuration
+        std::string    filename;         // filename of the preset on disk
+        QImage         preview;          // a preview image generated from the view using the stored configuration
     };
 
     typedef std::map<Key, Preset> Presets;
@@ -171,6 +172,7 @@ public:
     static const std::string TagView;
     static const std::string TagTimestamp;
     static const std::string TagVersion;
+    static const std::string TagExample;
     static const std::string TagConfig;
 
     static const std::string DirPresets;

@@ -631,6 +631,10 @@ void ViewPresetItemWidget::updateContents()
 
     preview_label_->setText(preset_->preview.isNull() ? "No preview available" : "");
     preview_label_->setPixmap(preset_->preview.isNull() ? QPixmap() : QPixmap::fromImage(preset_->preview));
+
+    //example presets cannot be modified
+    edit_button_->setEnabled(!preset_->example);
+    save_button_->setEnabled(!preset_->example);
 }
 
 /**
@@ -848,6 +852,17 @@ void ViewPresetItemListWidget::removePreset(ViewPresets::Key key)
 {
     auto& presets = COMPASS::instance().viewManager().viewPresets();
     assert(presets.hasPreset(key));
+
+    const auto& p = presets.presets().at(key);
+
+    //ask if an example is to be deleted
+    if (p.example)
+    {
+        QString msg = "Do you really want to permanently delete example preset '" + QString::fromStdString(p.name) + "'?";
+        auto ret = QMessageBox::question(this, "Delete Example Preset", msg, QMessageBox::Yes, QMessageBox::No);
+        if (ret == QMessageBox::No)
+            return;
+    }
 
     //remove preset
     presets.removePreset(key, view_);
