@@ -1,7 +1,8 @@
 {
     "app_version": "0.7.5",
-    "category": "",
+    "category": "Example",
     "description": "",
+    "example": true,
     "name": "ADS-B Quality",
     "timestamp": "2024-02-07 15:32:06.190",
     "view": "ListBoxView",

@@ -1,7 +1,8 @@
 {
     "app_version": "0.7.5",
-    "category": "",
+    "category": "Example",
     "description": "",
+    "example": true,
     "name": "Vertical Movement",
     "timestamp": "2024-02-07 15:33:56.724",
     "view": "ListBoxView",

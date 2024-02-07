@@ -1,7 +1,8 @@
 {
     "app_version": "0.7.5",
-    "category": "",
+    "category": "Example",
     "description": "",
+    "example": true,
     "name": "Track Lifetime",
     "timestamp": "2024-02-07 15:37:06.223",
     "view": "ListBoxView",
