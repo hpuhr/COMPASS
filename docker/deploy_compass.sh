@@ -35,6 +35,7 @@ fi
 mkdir -p appimage/appdir/compass/
 cp -r data appimage/appdir/compass/
 cp -r conf appimage/appdir/compass/
+cp -r presets appimage/appdir/compass/
 
 mkdir -p appimage/appdir/lib
 
