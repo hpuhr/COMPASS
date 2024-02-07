@@ -183,7 +183,7 @@ void ViewPresetEditDialog::configureUI()
         assert(preset_);
 
         //fill in current metadata (skip name as the name has to change anyway)
-        category_edit_->setText(QString::fromStdString(preset_->metadata.category));
+        category_edit_->setText(preset_->example ? "" : QString::fromStdString(preset_->metadata.category));
         description_edit_->setText(QString::fromStdString(preset_->metadata.description));
     }
     else if (mode_ == Mode::Create)
@@ -633,8 +633,8 @@ void ViewPresetItemWidget::updateContents()
     preview_label_->setPixmap(preset_->preview.isNull() ? QPixmap() : QPixmap::fromImage(preset_->preview));
 
     //example presets cannot be modified
-    edit_button_->setEnabled(!preset_->example);
-    save_button_->setEnabled(!preset_->example);
+    edit_button_->setVisible(!preset_->example);
+    save_button_->setVisible(!preset_->example);
 }
 
 /**
@@ -768,6 +768,13 @@ void ViewPresetItemListWidget::createUI()
     filter_edit_->setPlaceholderText("Filter for preset name...");
     header_layout->addWidget(filter_edit_);
 
+    header_layout->addSpacerItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Preferred));
+
+    show_examples_box_ = new QCheckBox("Show Examples");
+    show_examples_box_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    show_examples_box_->setChecked(true);
+    header_layout->addWidget(show_examples_box_);
+
     //layout->addSpacerItem(new QSpacerItem(1, 9, QSizePolicy::Fixed, QSizePolicy::Fixed));
 
     QWidget* widget = new QWidget;
@@ -810,6 +817,7 @@ void ViewPresetItemListWidget::createUI()
 
     connect(filter_edit_, &QLineEdit::textChanged, this, &ViewPresetItemListWidget::updateFilter);
     connect(add_button, &QToolButton::pressed, this, &ViewPresetItemListWidget::addPreset);
+    connect(show_examples_box_, &QCheckBox::toggled, this, &ViewPresetItemListWidget::updateFilter);
 }
 
 /**
@@ -982,10 +990,16 @@ namespace
 */
 void ViewPresetItemListWidget::updateFilter()
 {
-    auto filter = filter_edit_->text();
+    auto filter        = filter_edit_->text();
+    bool show_examples = show_examples_box_->isChecked();
 
     for (auto item : items_)
-        item->setVisible(inFilter(filter, item->getPreset()));
+    {
+        auto p       = item->getPreset();
+        bool visible = inFilter(filter, p) && (show_examples || !p->example);
+
+        item->setVisible(visible);
+    }
 }
 
 /**

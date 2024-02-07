@@ -37,6 +37,7 @@ class QTextEdit;
 class QFrame;
 class QMenu;
 class QDialog;
+class QCheckBox;
 
 /**
 */
@@ -178,8 +179,9 @@ private:
 
     View* view_ = nullptr;
 
-    QLineEdit*   filter_edit_ = nullptr;
-    QVBoxLayout* item_layout_ = nullptr;
+    QLineEdit*   filter_edit_       = nullptr;
+    QCheckBox*   show_examples_box_ = nullptr;
+    QVBoxLayout* item_layout_       = nullptr;
 
     std::vector<ViewPresetItemWidget*> items_;
 };
