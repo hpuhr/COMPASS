@@ -1,8 +1,8 @@
 {
     "app_version": "0.7.5",
-    "category": "Example",
+    "category": "Default",
     "description": "",
-    "example": true,
+    "deployed": true,
     "name": "Default",
     "timestamp": "2024-02-07 15:30:46.476",
     "view": "ListBoxView",
