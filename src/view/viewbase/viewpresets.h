@@ -101,13 +101,18 @@ public:
         //returns a unique key, being a combination of the view's class id and the preset name
         Key key() const { return Key(view, name); }
 
+        bool isDeployed() const { return deployed; }
+        bool isModified() const { return deployed && modified; }
+        bool isUnmodified() const { return !deployed || !modified; }
+
         //serialized
         std::string    name;             // unique name of the preset
         PresetMetadata metadata;         // preset metadata info
         std::string    view;             // view the preset belongs to (= the view's configurable class id)
         std::string    timestamp;        // timestamp the preset config was generated
         std::string    app_version;      // version of the application the preset has been generated with
-        mutable bool   deployed = false; // preset was deployed with compass
+        bool           deployed = false; // preset was deployed with compass
+        bool           modified = false; // preset has been modified from its original version (for deployed presets)
         nlohmann::json view_config;      // view configuration as json blob
 
         //not serialized
@@ -174,6 +179,7 @@ public:
     static const std::string TagVersion;
     static const std::string TagDeployed;
     static const std::string TagConfig;
+    static const std::string TagModified;
 
     static const std::string DirPresets;
     static const std::string DirPreviews;

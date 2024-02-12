@@ -33,6 +33,7 @@ const std::string ViewPresets::TagView        = "view";
 const std::string ViewPresets::TagTimestamp   = "timestamp";
 const std::string ViewPresets::TagVersion     = "app_version";
 const std::string ViewPresets::TagDeployed    = "deployed";
+const std::string ViewPresets::TagModified    = "modified";
 const std::string ViewPresets::TagConfig      = "view_config";
 
 const std::string ViewPresets::DirPresets     = "view";
@@ -262,6 +263,7 @@ bool ViewPresets::readPreset(Preset& p, const std::string& fn)
         return false;
 
     p.deployed = false;
+    p.modified = false;
 
     //optional tags
     if (data.contains(TagCategory))
@@ -274,6 +276,8 @@ bool ViewPresets::readPreset(Preset& p, const std::string& fn)
         p.app_version = data[ TagVersion ];
     if (data.contains(TagDeployed))
         p.deployed = data[ TagDeployed ];
+    if (data.contains(TagModified))
+        p.modified = data[ TagModified ];
 
     //remember filename the preset has been read from
     p.filename = Utils::Files::getFilenameFromPath(fn);
@@ -320,6 +324,7 @@ bool ViewPresets::writePreset(const Preset& preset) const
     obj[ TagDescription ] = preset.metadata.description;
     obj[ TagCategory    ] = preset.metadata.category;
     obj[ TagDeployed    ] = preset.deployed;
+    obj[ TagModified    ] = preset.modified;
     obj[ TagConfig      ] = preset.view_config;
     
     if (!preset.timestamp.empty())
@@ -406,8 +411,9 @@ bool ViewPresets::createPreset(const Preset& preset, const View* view, bool sign
 
     Preset p = preset;
 
-    //presets created in compass are never example presets
+    //presets created in compass are never deployed presets (and thus modified also makes no sense)
     p.deployed = false;
+    p.modified = false;
 
     //update view info?
     if (view)
@@ -642,8 +648,9 @@ bool ViewPresets::updatePreset(const Key& key,
         }
     }
 
-    //an updated preset is no example no more
-    preset_cur.deployed = false;
+    //if deployed now set to modified
+    if (preset_cur.deployed)
+        preset_cur.modified = true;
 
     //try to write
     if (!writePreset(preset_cur))

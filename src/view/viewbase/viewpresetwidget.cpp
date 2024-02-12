@@ -46,6 +46,26 @@
 #include <QPainter>
 #include <QPainterPath>
 
+namespace
+{
+    /**
+    */
+    bool checkOverwrite(const ViewPresets::Preset& preset, QWidget* parent)
+    {
+        //already modified?
+        if (preset.isModified())
+            return true;
+
+        QString msg = "Do you really want to overwrite default preset '" + QString::fromStdString(preset.name) + "'?";
+        auto ret = QMessageBox::question(parent, "Overwrite Default Preset", msg, QMessageBox::Yes, QMessageBox::No);
+        if (ret == QMessageBox::No)
+            return false;
+
+        return true;
+    }
+    
+}
+
 /********************************************************************************************
  * ViewPresetEditDialog
  ********************************************************************************************/
@@ -185,7 +205,7 @@ void ViewPresetEditDialog::configureUI()
         assert(preset_);
 
         //fill in current metadata (skip name as the name has to change anyway)
-        category_edit_->setText(preset_->deployed ? "" : QString::fromStdString(preset_->metadata.category));
+        category_edit_->setText(QString::fromStdString(preset_->metadata.category));
         description_edit_->setText(QString::fromStdString(preset_->metadata.description));
     }
     else if (mode_ == Mode::Create)
@@ -307,6 +327,10 @@ bool ViewPresetEditDialog::applyCreate()
 */
 bool ViewPresetEditDialog::applyEdit()
 {
+    //ask if overwrite is ok
+    if (!checkOverwrite(*preset_, this))
+        return false;
+
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
     //update metadata to form content
@@ -716,14 +740,9 @@ void ViewPresetItemWidget::saveButtonPressed()
 
     const auto& p = presets.presets().at(key_);
 
-    //ask if an example is to be deleted
-    if (p.deployed)
-    {
-        QString msg = "Do you really want to overwrite default preset '" + QString::fromStdString(p.name) + "'?";
-        auto ret = QMessageBox::question(this, "Overwrite Default Preset", msg, QMessageBox::Yes, QMessageBox::No);
-        if (ret == QMessageBox::No)
-            return;
-    }
+    //ask if overwrite is ok
+    if (!checkOverwrite(p, this))
+        return;
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
