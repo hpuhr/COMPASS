@@ -32,7 +32,7 @@ const std::string ViewPresets::TagDescription = "description";
 const std::string ViewPresets::TagView        = "view";
 const std::string ViewPresets::TagTimestamp   = "timestamp";
 const std::string ViewPresets::TagVersion     = "app_version";
-const std::string ViewPresets::TagExample     = "example";
+const std::string ViewPresets::TagDeployed    = "deployed";
 const std::string ViewPresets::TagConfig      = "view_config";
 
 const std::string ViewPresets::DirPresets     = "view";
@@ -62,7 +62,7 @@ std::string ViewPresets::uniqueBasename(const Preset& preset) const
     assert(!preset.name.empty());
 
     std::string view_preset_dir = viewPresetDir(preset);
-    std::string fn_base         = PrefixPreset + Utils::Files::normalizeFilename(preset.name);
+    std::string fn_base         = PrefixPreset + Utils::Files::normalizeFilename(preset.name, true);
 
     //no preset dir yet? => return initial filename
     if (!Utils::Files::directoryExists(view_preset_dir))
@@ -261,7 +261,7 @@ bool ViewPresets::readPreset(Preset& p, const std::string& fn)
     if (p.view.empty())
         return false;
 
-    p.example = false;
+    p.deployed = false;
 
     //optional tags
     if (data.contains(TagCategory))
@@ -272,8 +272,8 @@ bool ViewPresets::readPreset(Preset& p, const std::string& fn)
         p.timestamp = data[ TagTimestamp ];
     if (data.contains(TagVersion))
         p.app_version = data[ TagVersion ];
-    if (data.contains(TagExample))
-        p.example = data[ TagExample ];
+    if (data.contains(TagDeployed))
+        p.deployed = data[ TagDeployed ];
 
     //remember filename the preset has been read from
     p.filename = Utils::Files::getFilenameFromPath(fn);
@@ -319,7 +319,7 @@ bool ViewPresets::writePreset(const Preset& preset) const
     obj[ TagName        ] = preset.name;
     obj[ TagDescription ] = preset.metadata.description;
     obj[ TagCategory    ] = preset.metadata.category;
-    obj[ TagExample     ] = preset.example;
+    obj[ TagDeployed    ] = preset.deployed;
     obj[ TagConfig      ] = preset.view_config;
     
     if (!preset.timestamp.empty())
@@ -407,7 +407,7 @@ bool ViewPresets::createPreset(const Preset& preset, const View* view, bool sign
     Preset p = preset;
 
     //presets created in compass are never example presets
-    p.example = false;
+    p.deployed = false;
 
     //update view info?
     if (view)
@@ -643,7 +643,7 @@ bool ViewPresets::updatePreset(const Key& key,
     }
 
     //an updated preset is no example no more
-    preset_cur.example = false;
+    preset_cur.deployed = false;
 
     //try to write
     if (!writePreset(preset_cur))

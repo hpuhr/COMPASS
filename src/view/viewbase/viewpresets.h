@@ -107,7 +107,7 @@ public:
         std::string    view;             // view the preset belongs to (= the view's configurable class id)
         std::string    timestamp;        // timestamp the preset config was generated
         std::string    app_version;      // version of the application the preset has been generated with
-        mutable bool   example = false;  // preset was deployed with compass
+        mutable bool   deployed = false; // preset was deployed with compass
         nlohmann::json view_config;      // view configuration as json blob
 
         //not serialized
@@ -172,7 +172,7 @@ public:
     static const std::string TagView;
     static const std::string TagTimestamp;
     static const std::string TagVersion;
-    static const std::string TagExample;
+    static const std::string TagDeployed;
     static const std::string TagConfig;
 
     static const std::string DirPresets;

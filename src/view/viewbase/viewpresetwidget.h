@@ -104,6 +104,8 @@ public:
 
     void showSeparatorLine(bool show);
 
+    static const int IconHeight = 16;
+
 signals:
     void removePreset(ViewPresets::Key key);
     void editPreset(ViewPresets::Key key);
@@ -129,6 +131,7 @@ private:
 
     QLabel*      category_label_    = nullptr;
     QLabel*      name_label_        = nullptr;
+    QLabel*      deployed_label_    = nullptr;
     QLabel*      preview_label_     = nullptr;
     QLabel*      description_label_ = nullptr;
 
@@ -180,7 +183,7 @@ private:
     View* view_ = nullptr;
 
     QLineEdit*   filter_edit_       = nullptr;
-    QCheckBox*   show_examples_box_ = nullptr;
+    QCheckBox*   show_deployed_box_ = nullptr;
     QVBoxLayout* item_layout_       = nullptr;
 
     std::vector<ViewPresetItemWidget*> items_;
