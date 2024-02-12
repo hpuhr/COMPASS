@@ -41,7 +41,7 @@ public:
 
     bool hasAltitude() const;
     void altitude (double value);
-    double altitude () const;
+    double altitude () const; // ft
 
     void setFromJSON (const nlohmann::json& j);
 
