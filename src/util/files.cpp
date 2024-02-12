@@ -202,9 +202,9 @@ std::string normalizeFilename(const std::string& filename_without_ext, bool remo
                 fn_lower[ i ] = ' ';
     }
 
-    fn_lower.remove(QRegularExpression("^[/-.:\\s]+"));      //remove unwanted chars at begin
-    fn_lower.remove(QRegularExpression("[/-.:\\s]+$"));      //remove unwanted chars at end
-    fn_lower.replace(QRegularExpression("[/-.:\\s]+"), "_"); //replace sequences of unwanted chars with _
+    fn_lower.remove(QRegularExpression("^[/\\s]+"));      //remove unwanted chars at begin
+    fn_lower.remove(QRegularExpression("[/\\s]+$"));      //remove unwanted chars at end
+    fn_lower.replace(QRegularExpression("[/\\s]+"), "_"); //replace sequences of unwanted chars with _
     
     return fn_lower.toStdString();
 }
