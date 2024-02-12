@@ -3,6 +3,7 @@
     "category": "Default",
     "description": "",
     "deployed": true,
+    "modified": false,
     "name": "ADS-B Quality",
     "timestamp": "2024-02-07 15:32:06.190",
     "view": "ListBoxView",

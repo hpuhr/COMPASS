@@ -3,6 +3,7 @@
     "category": "Default",
     "description": "",
     "deployed": true,
+    "modified": false,
     "name": "Default",
     "timestamp": "2024-02-07 15:30:46.476",
     "view": "ListBoxView",

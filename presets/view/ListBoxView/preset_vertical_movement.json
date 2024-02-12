@@ -3,6 +3,7 @@
     "category": "Default",
     "description": "",
     "deployed": true,
+    "modified": false,
     "name": "Vertical Movement",
     "timestamp": "2024-02-07 15:33:56.724",
     "view": "ListBoxView",
