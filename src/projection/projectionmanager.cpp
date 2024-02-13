@@ -29,6 +29,7 @@
 
 #include <math.h>
 
+#include <boost/optional/optional_io.hpp>
 #include <cmath>
 
 using namespace std;
@@ -210,6 +211,9 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
         }
     }
 
+    double diff, diff_min {10e6}, diff_max{0}, diff_avg {0};
+    unsigned int diff_cnt {0};
+
     for (unsigned int cnt = 0; cnt < buffer_size; cnt++)
     {
         // load buffer data
@@ -289,6 +293,12 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
         {
             ++num_ffts_found;
 
+            double old_lat = lat;
+            double old_lon = lon;
+
+            logdbg << "ProjectionManager: calculateRadarPlotPositions: mode_c_code " << mode_c_code
+                   << " fft_altitude_ft " << fft_altitude_ft;
+
             ret = projection.polarToWGS84(ds_id, azimuth_rad, range_m, true,
                                           fft_altitude_ft, lat, lon);
 
@@ -297,6 +307,17 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
                 transformation_errors++;
                 continue;
             }
+
+            diff = 100 * sqrt(pow(lat-old_lat, 2) + pow(lon-old_lon, 2));
+
+            logdbg << "ProjectionManager: calculateRadarPlotPositions: lat/lon diff "
+                   << diff;
+
+            diff_avg += diff;
+            diff_min = min(diff_min, diff);
+            diff_max = max(diff_max, diff);
+
+            ++diff_cnt;
         }
 
         target_latitudes_vec.set(cnt, lat);
@@ -305,6 +326,12 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
 
     loginf << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name
            << " num_ffts_found " << num_ffts_found << " transformation_errors " << transformation_errors;
+
+    if (diff_cnt)
+    {
+        loginf << "ProjectionManager: calculateRadarPlotPositions: lat/lon avg diff "
+               << diff_avg / (float) diff_cnt << " min " << diff_min << " max " << diff_max << " cnt " << diff_cnt;
+    }
 
     return transformation_errors;
 }
