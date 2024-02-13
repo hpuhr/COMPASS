@@ -46,7 +46,7 @@ struct SetUIHint
  */
 inline QString normalizedObjectName(const QString& text)
 {
-    return QString::fromStdString(Utils::Files::normalizeFilename(text.toStdString()));
+    return QString::fromStdString(Utils::Files::normalizeFilename(text.toStdString(), true));
 }
 
 /**

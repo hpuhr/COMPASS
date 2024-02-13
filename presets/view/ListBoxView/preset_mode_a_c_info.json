@@ -1,9 +1,10 @@
 {
     "app_version": "0.7.5",
-    "category": "Example",
+    "category": "Default",
     "description": "",
-    "example": true,
-    "name": "Mode AC Info",
+    "deployed": true,
+    "modified": false,
+    "name": "Mode A/C Info",
     "timestamp": "2024-02-07 15:35:27.008",
     "view": "ListBoxView",
     "view_config": {

@@ -64,7 +64,7 @@ bool createMissingDirectories(const std::string& path); // true if successful
 
 std::string replaceExtension(const std::string& path, const std::string& new_ext_plus_point);
 
-std::string normalizeFilename(const std::string& filename_without_ext);
+std::string normalizeFilename(const std::string& filename_without_ext, bool remove_special_chars);
 
 }  // namespace Files
 }  // namespace Utils

@@ -14,6 +14,7 @@ namespace Utils
 {
 namespace String
 {
+
 bool isNumber(const std::string& number_str)
 {
     try
@@ -26,7 +27,6 @@ bool isNumber(const std::string& number_str)
     }
     return true;
 }
-
 
 std::string intToString(int number, int width, char c)
 {

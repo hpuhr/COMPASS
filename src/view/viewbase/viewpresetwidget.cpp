@@ -43,6 +43,28 @@
 #include <QResizeEvent>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QPainter>
+#include <QPainterPath>
+
+namespace
+{
+    /**
+    */
+    bool checkOverwrite(const ViewPresets::Preset& preset, QWidget* parent)
+    {
+        //already modified?
+        if (preset.isModified())
+            return true;
+
+        QString msg = "Do you really want to overwrite default preset '" + QString::fromStdString(preset.name) + "'?";
+        auto ret = QMessageBox::question(parent, "Overwrite Default Preset", msg, QMessageBox::Yes, QMessageBox::No);
+        if (ret == QMessageBox::No)
+            return false;
+
+        return true;
+    }
+    
+}
 
 /********************************************************************************************
  * ViewPresetEditDialog
@@ -183,7 +205,7 @@ void ViewPresetEditDialog::configureUI()
         assert(preset_);
 
         //fill in current metadata (skip name as the name has to change anyway)
-        category_edit_->setText(preset_->example ? "" : QString::fromStdString(preset_->metadata.category));
+        category_edit_->setText(QString::fromStdString(preset_->metadata.category));
         description_edit_->setText(QString::fromStdString(preset_->metadata.description));
     }
     else if (mode_ == Mode::Create)
@@ -305,6 +327,10 @@ bool ViewPresetEditDialog::applyCreate()
 */
 bool ViewPresetEditDialog::applyEdit()
 {
+    //ask if overwrite is ok
+    if (!checkOverwrite(*preset_, this))
+        return false;
+
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
     //update metadata to form content
@@ -493,15 +519,24 @@ void ViewPresetItemWidget::createUI()
 
         //header
         {
+            //deployed icon
+            deployed_label_ = new QLabel;
+            //deployed_label_->setAlignment(Qt::AlignBottom);
+            layout_header->addWidget(deployed_label_);
+
+            layout_header->addSpacerItem(new QSpacerItem(5, 1, QSizePolicy::Fixed, QSizePolicy::Preferred));
+
             //category
             category_label_ = new QLabel;
-            category_label_->setAlignment(Qt::AlignBottom);
+            //category_label_->setAlignment(Qt::AlignBottom);
 
             QFont f = category_label_->font();
             f.setBold(true);
             f.setItalic(true);
             f.setPointSize(f.pointSize() - 2);
             category_label_->setFont(f);
+
+            deployed_label_->setFont(f);
 
             layout_header->addWidget(category_label_);
 
@@ -618,6 +653,37 @@ void ViewPresetItemWidget::updateContents(const ViewPresets::Key& key)
     updateContents();
 }
 
+namespace
+{
+    QPixmap decorate(const QPixmap& pm, const QColor& col)
+    {
+        auto img = pm.toImage();
+
+        const int Radius = std::max(1, std::max(img.width(), img.height()) / 10);
+
+        int w = img.width()  + 2 * Radius;
+        int h = img.height() + 2 * Radius;
+        
+        QImage img_out(w, h, img.format());
+        img_out.fill(Qt::transparent);
+
+        QPainter painter(&img_out);
+
+        QPainterPath path;
+        path.addRoundedRect(QRectF(Radius, Radius, img.width(), img.height()), Radius, Radius);
+
+        QPen pen(col, Radius);
+
+        painter.setPen(pen);
+        painter.fillPath(path, col);
+        painter.drawPath(path);
+
+        painter.drawImage(Radius, Radius, img);
+        
+        return QPixmap::fromImage(img_out);
+    }
+}
+
 /**
 */
 void ViewPresetItemWidget::updateContents()
@@ -632,9 +698,16 @@ void ViewPresetItemWidget::updateContents()
     preview_label_->setText(preset_->preview.isNull() ? "No preview available" : "");
     preview_label_->setPixmap(preset_->preview.isNull() ? QPixmap() : QPixmap::fromImage(preset_->preview));
 
+    auto col = palette().color(QPalette::ColorRole::Background);
+    col = QColor(col.red() - 20, col.green() - 20, col.blue() - 20);
+
+    QPixmap pm = preset_->deployed ? decorate(QPixmap(Utils::Files::getImageFilepath("ats_transp.png").c_str()), col) : 
+                                     decorate(QPixmap(Utils::Files::getImageFilepath("user_wide.png").c_str() ), col);
+    
+    deployed_label_->setPixmap(pm.scaledToHeight(IconHeight, Qt::SmoothTransformation));
+
     //example presets cannot be modified
-    edit_button_->setVisible(!preset_->example);
-    save_button_->setVisible(!preset_->example);
+    edit_button_->setVisible(!preset_->deployed);
 }
 
 /**
@@ -664,6 +737,12 @@ void ViewPresetItemWidget::saveButtonPressed()
 {
     auto& presets = COMPASS::instance().viewManager().viewPresets();
     assert(presets.hasPreset(key_));
+
+    const auto& p = presets.presets().at(key_);
+
+    //ask if overwrite is ok
+    if (!checkOverwrite(p, this))
+        return;
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
@@ -768,14 +847,13 @@ void ViewPresetItemListWidget::createUI()
     filter_edit_->setPlaceholderText("Filter for preset name...");
     header_layout->addWidget(filter_edit_);
 
-    header_layout->addSpacerItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Preferred));
+    //header_layout->addSpacerItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Preferred));
 
-    show_examples_box_ = new QCheckBox("Show Examples");
-    show_examples_box_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    show_examples_box_->setChecked(true);
-    header_layout->addWidget(show_examples_box_);
-
-    //layout->addSpacerItem(new QSpacerItem(1, 9, QSizePolicy::Fixed, QSizePolicy::Fixed));
+    show_deployed_box_ = new QCheckBox("Show Default Presets");
+    show_deployed_box_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    show_deployed_box_->setChecked(true);
+    show_deployed_box_->setVisible(false);
+    header_layout->addWidget(show_deployed_box_);
 
     QWidget* widget = new QWidget;
     QVBoxLayout* widget_layout = new QVBoxLayout;
@@ -817,7 +895,7 @@ void ViewPresetItemListWidget::createUI()
 
     connect(filter_edit_, &QLineEdit::textChanged, this, &ViewPresetItemListWidget::updateFilter);
     connect(add_button, &QToolButton::pressed, this, &ViewPresetItemListWidget::addPreset);
-    connect(show_examples_box_, &QCheckBox::toggled, this, &ViewPresetItemListWidget::updateFilter);
+    connect(show_deployed_box_, &QCheckBox::toggled, this, &ViewPresetItemListWidget::updateFilter);
 }
 
 /**
@@ -864,10 +942,10 @@ void ViewPresetItemListWidget::removePreset(ViewPresets::Key key)
     const auto& p = presets.presets().at(key);
 
     //ask if an example is to be deleted
-    if (p.example)
+    if (p.deployed)
     {
-        QString msg = "Do you really want to permanently delete example preset '" + QString::fromStdString(p.name) + "'?";
-        auto ret = QMessageBox::question(this, "Delete Example Preset", msg, QMessageBox::Yes, QMessageBox::No);
+        QString msg = "Do you really want to permanently delete default preset '" + QString::fromStdString(p.name) + "'?";
+        auto ret = QMessageBox::question(this, "Delete Default Preset", msg, QMessageBox::Yes, QMessageBox::No);
         if (ret == QMessageBox::No)
             return;
     }
@@ -991,12 +1069,12 @@ namespace
 void ViewPresetItemListWidget::updateFilter()
 {
     auto filter        = filter_edit_->text();
-    bool show_examples = show_examples_box_->isChecked();
+    bool show_deployed = show_deployed_box_->isChecked();
 
     for (auto item : items_)
     {
         auto p       = item->getPreset();
-        bool visible = inFilter(filter, p) && (show_examples || !p->example);
+        bool visible = inFilter(filter, p) && (show_deployed || !p->deployed);
 
         item->setVisible(visible);
     }

@@ -190,15 +190,23 @@ std::string replaceExtension(const std::string& path,
     return p.replace_extension(new_ext_plus_point).string();
 }
 
-std::string normalizeFilename(const std::string& filename_without_ext)
+std::string normalizeFilename(const std::string& filename_without_ext, bool remove_special_chars)
 {
-    QString obj_name = QString::fromStdString(filename_without_ext).toLower();
+    QString fn_lower = QString::fromStdString(filename_without_ext).toLower();
 
-    obj_name.remove(QRegularExpression("^[-.:\\s]+"));
-    obj_name.remove(QRegularExpression("[-.:\\s]+$"));
-    obj_name.replace(QRegularExpression("[-.:\\s]+"), "_");
+    if (remove_special_chars)
+    {
+        //replace non-letter-non-number with spaces (to be removed in the next step)
+        for (int i = 0; i < fn_lower.count(); ++i)
+            if (!fn_lower[ i ].isLetterOrNumber())
+                fn_lower[ i ] = ' ';
+    }
 
-    return obj_name.toStdString();
+    fn_lower.remove(QRegularExpression("^[/\\s]+"));      //remove unwanted chars at begin
+    fn_lower.remove(QRegularExpression("[/\\s]+$"));      //remove unwanted chars at end
+    fn_lower.replace(QRegularExpression("[/\\s]+"), "_"); //replace sequences of unwanted chars with _
+    
+    return fn_lower.toStdString();
 }
 
 }  // namespace Files
