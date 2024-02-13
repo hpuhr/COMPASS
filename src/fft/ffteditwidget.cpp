@@ -325,7 +325,7 @@ void FFTEditWidget::updateContent()
         name_edit_->setDisabled(false);
 
         if (ds->hasModeSAddress())
-            mode_s_address_edit_->setText(String::octStringFromInt(ds->modeSAddress()).c_str());
+            mode_s_address_edit_->setText(String::hexStringFromInt(ds->modeSAddress()).c_str());
         else
             mode_s_address_edit_->clear();
 
