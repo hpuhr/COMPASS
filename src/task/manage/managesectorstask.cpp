@@ -273,7 +273,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
         layer = data_set->GetLayer(layer_cnt);
         assert (layer);
 
-        loginf << "ManageSectorsTask: parseCurrentFile: found sector name '" << layer->GetName() << "'";
+        logdbg << "ManageSectorsTask: parseCurrentFile: found sector name '" << layer->GetName() << "'";
         std::string sector_name = layer->GetName();
 
         OGRFeature* feature = nullptr;
@@ -290,7 +290,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
 
             assert (feature);
 
-            loginf << "ManageSectorsTask: parseCurrentFile: found feature '"
+            logdbg << "ManageSectorsTask: parseCurrentFile: found feature '"
                    << feature->GetDefnRef()->GetName() << "'";
 
             //std::string feature_name = feature->GetDefnRef()->GetName();
@@ -307,22 +307,22 @@ void ManageSectorsTask::parseCurrentFile (bool import)
                 switch(field_def->GetType())
                 {
                     case OFTInteger:
-                        loginf << "ManageSectorsTask: parseCurrentFile: int " << feature->GetFieldAsInteger(field_cnt);
+                        logdbg << "ManageSectorsTask: parseCurrentFile: int " << feature->GetFieldAsInteger(field_cnt);
                         break;
                     case OFTInteger64:
-                        loginf << "ManageSectorsTask: parseCurrentFile: int64 "
+                        logdbg << "ManageSectorsTask: parseCurrentFile: int64 "
                                << feature->GetFieldAsInteger64(field_cnt);
                         //printf( CPL_FRMT_GIB ",", oField.GetInteger64() );
                         break;
                     case OFTReal:
-                        loginf << "ManageSectorsTask: parseCurrentFile: double " << feature->GetFieldAsDouble(field_cnt);
+                        logdbg << "ManageSectorsTask: parseCurrentFile: double " << feature->GetFieldAsDouble(field_cnt);
                         break;
                     case OFTString:
-                        loginf << "ManageSectorsTask: parseCurrentFile: string '"
+                        logdbg << "ManageSectorsTask: parseCurrentFile: string '"
                                << feature->GetFieldAsString(field_cnt) << "'";
                         break;
                     default:
-                        loginf << "ManageSectorsTask: parseCurrentFile: default " << feature->GetFieldAsString(field_cnt);
+                        logdbg << "ManageSectorsTask: parseCurrentFile: default " << feature->GetFieldAsString(field_cnt);
                         break;
                 }
             }
@@ -365,12 +365,12 @@ void ManageSectorsTask::parseCurrentFile (bool import)
                             addPolygon(sector_name, *sub_polygon, import);
                         }
                         else
-                            loginf << "ManageSectorsTask: parseCurrentFile: no polygon in multipolygon found";
+                            logdbg << "ManageSectorsTask: parseCurrentFile: no polygon in multipolygon found";
                     }
                 }
                 else
                 {
-                    loginf << "ManageSectorsTask: parseCurrentFile: no geometry found";
+                    logdbg << "ManageSectorsTask: parseCurrentFile: no geometry found";
                 }
             }
         }
