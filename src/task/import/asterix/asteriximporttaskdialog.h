@@ -13,12 +13,10 @@ class ASTERIXImportTaskDialog : public QDialog
     Q_OBJECT
 
 signals:
-    void testTmportSignal();
     void importSignal();
     void cancelSignal();
 
 public slots:
-    void testImportClickedSlot();
     void importClickedSlot();
     void cancelClickedSlot();
 
@@ -37,7 +35,6 @@ protected:
 
     QPushButton* cancel_button_{nullptr};
     QPushButton* import_button_{nullptr};
-    QPushButton* test_button_{nullptr};
 };
 
 #endif // ASTERIXIMPORTTASKDIALOG_H

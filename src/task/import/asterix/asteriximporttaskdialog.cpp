@@ -37,12 +37,6 @@ ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
 
     button_layout->addStretch();
 
-    test_button_ = new QPushButton("Test Import");
-    connect(test_button_, &QPushButton::clicked, this, &ASTERIXImportTaskDialog::testImportClickedSlot);
-    button_layout->addWidget(test_button_);
-
-    button_layout->addStretch();
-
     import_button_ = new QPushButton("Import");
     connect(import_button_, &QPushButton::clicked, this, &ASTERIXImportTaskDialog::importClickedSlot);
     button_layout->addWidget(import_button_);
@@ -70,23 +64,8 @@ void ASTERIXImportTaskDialog::updateSourcesInfo()
 void ASTERIXImportTaskDialog::updateButtons()
 {
     assert (import_button_);
-    assert (test_button_);
 
-    if (task_.isImportNetwork()) // import from network
-    {
-        import_button_->setDisabled(!task_.canRun());
-        test_button_->setDisabled(true);
-    }
-    else // import file
-    {
-        import_button_->setDisabled(!task_.canRun());
-        test_button_->setDisabled(!task_.canRun());
-    }
-}
-
-void ASTERIXImportTaskDialog::testImportClickedSlot()
-{
-    emit testTmportSignal();
+    import_button_->setDisabled(!task_.canRun());
 }
 
 void ASTERIXImportTaskDialog::importClickedSlot()

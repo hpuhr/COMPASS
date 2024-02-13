@@ -329,20 +329,6 @@ void ASTERIXImportTaskWidget::debugChangedSlot()
     task_.settings().debug_jasterix_ = box->checkState() == Qt::Checked;
 }
 
-//void ASTERIXImportTaskWidget::runStarted()
-//{
-//    loginf << "ASTERIXImportTaskWidget: runStarted";
-
-//    test_button_->setDisabled(true);
-//}
-
-//void ASTERIXImportTaskWidget::runDone()
-//{
-//    loginf << "ASTERIXImportTaskWidget: runDone";
-
-//    test_button_->setDisabled(false);
-//}
-
 void ASTERIXImportTaskWidget::updateSourcesGrid()
 {
     QLayoutItem* child;
@@ -375,32 +361,10 @@ void ASTERIXImportTaskWidget::updateSourcesGrid()
     }
 }
 
-//void ASTERIXImportTaskWidget::updateSourceLabel()
-//{
-//    assert (source_label_);
-
-//    if (task_.isImportNetwork())
-//        source_label_->setText("Source: Network");
-//    else // file
-//        source_label_->setText(("Source: \n"+task_.importFilenamesStr()).c_str());
-//}
 
 ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
 {
     return override_widget_;
 }
 
-void ASTERIXImportTaskWidget::testImportSlot()
-{
-    loginf << "ASTERIXImportTaskWidget: testImportSlot";
 
-    if (!task_.canImportFiles())
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Test Import Failed",
-                              "Please select a file in the list.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
-
-    task_.run(true);
-}

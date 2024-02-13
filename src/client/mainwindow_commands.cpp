@@ -572,7 +572,7 @@ bool RTCommandImportASTERIXFile::run_impl()
 
     import_task.allowUserInteractions(false);
 
-    import_task.run(false); // no test
+    import_task.run();
 
     // handle errors
 
@@ -762,7 +762,7 @@ bool RTCommandImportASTERIXFiles::run_impl()
 
     import_task.allowUserInteractions(false);
 
-    import_task.run(false); // no test
+    import_task.run();
 
     // handle errors
 
@@ -885,7 +885,7 @@ bool RTCommandImportASTERIXNetworkStart::run_impl()
 
     import_task.allowUserInteractions(false);
 
-    import_task.run(false); // no test
+    import_task.run();
 
     // handle errors
 

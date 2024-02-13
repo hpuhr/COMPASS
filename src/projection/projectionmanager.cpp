@@ -99,7 +99,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
         std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
         NullableVector<double>& target_latitudes_vec, NullableVector<double>& target_longitudes_vec)
 {
-    loginf << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name;
+    logdbg << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name;
 
     bool ret;
 
@@ -196,8 +196,9 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     // set up projections
     assert(hasCurrentProjection());
     Projection& projection = currentProjection();
-    projection.clearCoordinateSystems(); // to rebuild from data sources
-    projection.addAllRadarCoordinateSystems();
+    assert (projection.radarCoordinateSystemsAdded()); // needs to have been prepared, otherwise multi-threading issue
+//    projection.clearCoordinateSystems(); // to rebuild from data sources
+//    projection.addAllRadarCoordinateSystems();
 
     for (auto ds_id_it : datasource_vec.distinctValues())
     {
@@ -324,7 +325,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
         target_longitudes_vec.set(cnt, lon);
     }
 
-    loginf << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name
+    logdbg << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name
            << " num_ffts_found " << num_ffts_found << " transformation_errors " << transformation_errors;
 
     if (diff_cnt)
@@ -388,7 +389,8 @@ unsigned int ProjectionManager::doRadarPlotPositionCalculations (
     {
         dbcontent_name = buf_it.first;
 
-        assert (dbcontent_name == "CAT001" || dbcontent_name == "CAT010" || dbcontent_name == "CAT048");
+        if (dbcontent_name != "CAT001" && dbcontent_name != "CAT010" && dbcontent_name != "CAT048")
+            continue;
 
         shared_ptr<Buffer> buffer = buf_it.second;
 

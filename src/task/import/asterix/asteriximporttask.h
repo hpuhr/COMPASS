@@ -108,8 +108,6 @@ public:
 
     unsigned int max_network_lines_ {4};
 
-    bool test_{false};
-
     bool override_tod_active_{false};
 
     bool ignore_time_jumps_{false};
@@ -139,7 +137,6 @@ signals:
 
 public slots:
     void dialogImportSlot();
-    void dialogTestImportSlot();
     void dialogCancelSlot();
 
     void decodeASTERIXDoneSlot();
@@ -175,7 +172,6 @@ public:
     virtual void run() override;
 
     virtual void stop() override;
-    void run(bool test);
     bool isRunning() const;
 
     std::vector<std::string> fileList();
