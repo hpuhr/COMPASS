@@ -252,7 +252,8 @@ FFTsConfigurationDialog* FFTManager::configurationDialog()
 
 std::pair<bool, float> FFTManager::isFromFFT(
         double prelim_latitute_deg, double prelim_longitude_deg,
-        boost::optional<unsigned int> mode_s_address, boost::optional<unsigned int> mode_a_code,
+        boost::optional<unsigned int> mode_s_address, bool ignore_mode_s,
+        boost::optional<unsigned int> mode_a_code,
         boost::optional<float> mode_c_code)
 {
 
@@ -262,7 +263,7 @@ std::pair<bool, float> FFTManager::isFromFFT(
     {
         check_passed = true;
 
-        if (fft_it->hasModeSAddress())
+        if (!ignore_mode_s && fft_it->hasModeSAddress())
         {
             if (!mode_s_address.has_value() || mode_s_address.value() != fft_it->modeSAddress())
                 check_passed = false;

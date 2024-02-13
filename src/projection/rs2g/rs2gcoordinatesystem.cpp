@@ -35,7 +35,7 @@ RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
 
 void RS2GCoordinateSystem::init()
 {
-    loginf << "RS2GCoordinateSystem: init: id " << id_ << " lat " << latitude_deg_ << " long "
+    logdbg << "RS2GCoordinateSystem: init: id " << id_ << " lat " << latitude_deg_ << " long "
            << longitude_deg_ << " altitude " << altitude_m_;
 
     double lat_rad = latitude_deg_ * DEG2RAD;

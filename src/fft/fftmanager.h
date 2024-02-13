@@ -64,7 +64,8 @@ public:
     FFTsConfigurationDialog* configurationDialog();
 
     std::pair<bool, float> isFromFFT(double prelim_latitute_deg, double prelim_longitude_deg,
-                                     boost::optional<unsigned int> mode_s_address, boost::optional<unsigned int> mode_a_code,
+                                     boost::optional<unsigned int> mode_s_address, bool ignore_mode_s,
+                                     boost::optional<unsigned int> mode_a_code,
                                      boost::optional<float> mode_c_code);
     // returns flag, altitude in ft if true
 

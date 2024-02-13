@@ -334,5 +334,15 @@ dbContent::VariableSet RadarPlotPositionCalculatorTask::getReadSetFor(const std:
     assert(dbcontent_man.canGetVariable(dbcontent_name, DBContent::var_radar_azimuth_));
     read_set.add(dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_));
 
+    assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+
+    // optionals
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
+
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
+
     return read_set;
 }
