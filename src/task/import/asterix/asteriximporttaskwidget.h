@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXIMPORTTASKWIDGET_H
-#define ASTERIXIMPORTTASKWIDGET_H
+#pragma once
 
 #include <jasterix/jasterix.h>
 
@@ -51,13 +50,11 @@ class ASTERIXImportTaskWidget : public QWidget
     void dateChangedSlot(QDate date);
 
     void debugChangedSlot();
-    void testImportSlot();
 
   public:
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImportTaskWidget();
 
-//    void updateSourceLabel();
     void updateSourcesGrid();
 
     ASTERIXOverrideWidget* overrideWidget() const;
@@ -68,8 +65,6 @@ protected:
     QHBoxLayout* main_layout_{nullptr};
 
     QTabWidget* tab_widget_{nullptr};
-
-    //QLabel* source_label_{nullptr};
 
     QGridLayout* sources_grid_{nullptr}; // network or files
 
@@ -93,4 +88,4 @@ protected:
     void updateParserBox();
 };
 
-#endif  // ASTERIXIMPORTTASKWIDGET_H
+

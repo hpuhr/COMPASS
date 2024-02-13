@@ -296,7 +296,7 @@ std::pair<bool, float> FFTManager::isFromFFT(
         }
     }
 
-    return {true, 0}; // no matches, not altitude info
+    return {false, 0}; // no matches, not altitude info
 }
 
 void FFTManager::loadDBFFTs()

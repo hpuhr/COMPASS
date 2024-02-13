@@ -29,6 +29,7 @@
 
 #include <math.h>
 
+#include <boost/optional/optional_io.hpp>
 #include <cmath>
 
 using namespace std;
@@ -98,7 +99,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
         std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
         NullableVector<double>& target_latitudes_vec, NullableVector<double>& target_longitudes_vec)
 {
-    loginf << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name;
+    logdbg << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name;
 
     bool ret;
 
@@ -195,8 +196,9 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     // set up projections
     assert(hasCurrentProjection());
     Projection& projection = currentProjection();
-    projection.clearCoordinateSystems(); // to rebuild from data sources
-    projection.addAllRadarCoordinateSystems();
+    assert (projection.radarCoordinateSystemsAdded()); // needs to have been prepared, otherwise multi-threading issue
+//    projection.clearCoordinateSystems(); // to rebuild from data sources
+//    projection.addAllRadarCoordinateSystems();
 
     for (auto ds_id_it : datasource_vec.distinctValues())
     {
@@ -209,6 +211,9 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
                    << ds_id_it << " not set up"; // should have been in ASTERIX import task
         }
     }
+
+    double diff, diff_min {10e6}, diff_max{0}, diff_avg {0};
+    unsigned int diff_cnt {0};
 
     for (unsigned int cnt = 0; cnt < buffer_size; cnt++)
     {
@@ -289,6 +294,12 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
         {
             ++num_ffts_found;
 
+            double old_lat = lat;
+            double old_lon = lon;
+
+            logdbg << "ProjectionManager: calculateRadarPlotPositions: mode_c_code " << mode_c_code
+                   << " fft_altitude_ft " << fft_altitude_ft;
+
             ret = projection.polarToWGS84(ds_id, azimuth_rad, range_m, true,
                                           fft_altitude_ft, lat, lon);
 
@@ -297,14 +308,31 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
                 transformation_errors++;
                 continue;
             }
+
+            diff = 100 * sqrt(pow(lat-old_lat, 2) + pow(lon-old_lon, 2));
+
+            logdbg << "ProjectionManager: calculateRadarPlotPositions: lat/lon diff "
+                   << diff;
+
+            diff_avg += diff;
+            diff_min = min(diff_min, diff);
+            diff_max = max(diff_max, diff);
+
+            ++diff_cnt;
         }
 
         target_latitudes_vec.set(cnt, lat);
         target_longitudes_vec.set(cnt, lon);
     }
 
-    loginf << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name
+    logdbg << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name
            << " num_ffts_found " << num_ffts_found << " transformation_errors " << transformation_errors;
+
+    if (diff_cnt)
+    {
+        loginf << "ProjectionManager: calculateRadarPlotPositions: lat/lon avg diff "
+               << diff_avg / (float) diff_cnt << " min " << diff_min << " max " << diff_max << " cnt " << diff_cnt;
+    }
 
     return transformation_errors;
 }
@@ -361,7 +389,8 @@ unsigned int ProjectionManager::doRadarPlotPositionCalculations (
     {
         dbcontent_name = buf_it.first;
 
-        assert (dbcontent_name == "CAT001" || dbcontent_name == "CAT010" || dbcontent_name == "CAT048");
+        if (dbcontent_name != "CAT001" && dbcontent_name != "CAT010" && dbcontent_name != "CAT048")
+            continue;
 
         shared_ptr<Buffer> buffer = buf_it.second;
 

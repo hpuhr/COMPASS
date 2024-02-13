@@ -81,7 +81,6 @@ ASTERIXImportTaskSettings::ASTERIXImportTaskSettings()
 ,   file_line_id_            (0)
 ,   date_                    ()
 ,   max_network_lines_       (4)
-,   test_                    (false)
 ,   override_tod_active_     (false)
 ,   ignore_time_jumps_       (false)
 ,   network_ignore_future_ts_(false)
@@ -306,9 +305,6 @@ ASTERIXImportTaskDialog* ASTERIXImportTask::dialog()
     if (!dialog_)
     {
         dialog_.reset(new ASTERIXImportTaskDialog(*this));
-
-        connect(dialog_.get(), &ASTERIXImportTaskDialog::testTmportSignal,
-                this, &ASTERIXImportTask::dialogTestImportSlot);
 
         connect(dialog_.get(), &ASTERIXImportTaskDialog::importSignal,
                 this, &ASTERIXImportTask::dialogImportSlot);
@@ -730,10 +726,12 @@ void ASTERIXImportTask::testFileDecoding()
                     //           }'
 
                     assert (file_info.analysis_info_.contains("num_errors"));
+                    assert (file_info.analysis_info_.contains("num_records"));
 
                     unsigned int num_errors = file_info.analysis_info_.at("num_errors");
+                    unsigned int num_records = file_info.analysis_info_.at("num_records");
 
-                    if (num_errors)
+                    if (num_errors || !num_records) // decoder errors or no data
                     {
                         file_info.errors_found_ = true;
                         file_decoding_errors_detected_ = true;
@@ -798,11 +796,6 @@ bool ASTERIXImportTask::canRun()
         return COMPASS::instance().dataSourceManager().getNetworkLines().size(); // there are network lines defined
 }
 
-void ASTERIXImportTask::run()
-{
-    run (false);
-}
-
 void ASTERIXImportTask::stop()
 {
     loginf << "ASTERIXImportTask: stop";
@@ -851,10 +844,8 @@ void ASTERIXImportTask::stop()
     loginf << "ASTERIXImportTask: stop done";
 }
 
-void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
+void ASTERIXImportTask::run() // , bool create_mapping_stubs
 {
-    settings_.test_ = test;
-
     assert (!running_);
 
     if (!settings_.import_files_)
@@ -875,7 +866,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     float free_ram = System::getFreeRAMinGB();
 
-    loginf << "ASTERIXImportTask: run: filenames " << importFilenamesStr() << " test " << settings_.test_
+    loginf << "ASTERIXImportTask: run: filenames " << importFilenamesStr()
            << " free RAM " << free_ram << " GB";
 
     assert(canRun());
@@ -952,19 +943,7 @@ void ASTERIXImportTask::dialogImportSlot()
     dialog_->hide();
 
     assert (canRun());
-    run (false);
-}
-
-void ASTERIXImportTask::dialogTestImportSlot()
-{
-    loginf << "ASTERIXImportTask: dialogTestImportSlot";
-
-    assert (dialog_);
-    dialog_->hide();
-
-    assert (canRun());
-
-    run (true);
+    run ();
 }
 
 void ASTERIXImportTask::dialogCancelSlot()
@@ -1139,37 +1118,30 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     if (settings_.network_ignore_future_ts_)
         check_future_ts = false;
 
-    if (!settings_.test_)
-    {
-        std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
-                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), settings_.date_,
-                                                   settings_.override_tod_active_, settings_.override_tod_offset_,
-                                                   settings_.ignore_time_jumps_, check_future_ts,
-                                                   settings_.filter_tod_active_,
-                                                   settings_.filter_tod_min_, settings_.filter_tod_max_,
-                                                   settings_.filter_position_active_,
-                                                   settings_.filter_latitude_min_, settings_.filter_latitude_max_,
-                                                   settings_.filter_longitude_min_, settings_.filter_longitude_max_,
-                                                   settings_.filter_modec_active_,
-                                                   settings_.filter_modec_min_, settings_.filter_modec_max_
-                                                   );
+    std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
+            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), settings_.date_,
+                                               settings_.override_tod_active_, settings_.override_tod_offset_,
+                                               settings_.ignore_time_jumps_, check_future_ts,
+                                               settings_.filter_tod_active_,
+                                               settings_.filter_tod_min_, settings_.filter_tod_max_,
+                                               settings_.filter_position_active_,
+                                               settings_.filter_latitude_min_, settings_.filter_latitude_max_,
+                                               settings_.filter_longitude_min_, settings_.filter_longitude_max_,
+                                               settings_.filter_modec_active_,
+                                               settings_.filter_modec_min_, settings_.filter_modec_max_
+                                               );
 
-        postprocess_jobs_.push_back(postprocess_job);
+    postprocess_jobs_.push_back(postprocess_job);
 
-        // check for future when net import
+    // check for future when net import
 
-        connect(postprocess_job.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
-                &ASTERIXImportTask::postprocessObsoleteSlot, Qt::QueuedConnection);
-        connect(postprocess_job.get(), &ASTERIXPostprocessJob::doneSignal, this,
-                &ASTERIXImportTask::postprocessDoneSlot, Qt::QueuedConnection);
+    connect(postprocess_job.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
+            &ASTERIXImportTask::postprocessObsoleteSlot, Qt::QueuedConnection);
+    connect(postprocess_job.get(), &ASTERIXPostprocessJob::doneSignal, this,
+            &ASTERIXImportTask::postprocessDoneSlot, Qt::QueuedConnection);
 
-        JobManager::instance().addNonBlockingJob(postprocess_job);
-    }
+    JobManager::instance().addNonBlockingJob(postprocess_job);
 
-    if (settings_.test_)
-    {
-        checkAllDone();
-    }
 
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot: done";
 }
@@ -1292,8 +1264,6 @@ void ASTERIXImportTask::insertData()
         return;
     }
 
-    assert (!settings_.test_);
-
     DBContentManager& dbcont_manager = COMPASS::instance().dbContentManager();
 
     assert(schema_);
@@ -1367,13 +1337,11 @@ void ASTERIXImportTask::insertDoneSlot()
         addDecodedASTERIXSlot(); // load next chunk
     }
 
-    bool test = settings_.test_; // test_ cleared by checkAllDone
-
     checkAllDone();
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: check done";
 
-    if (all_done_ && !test)
+    if (all_done_)
     {
         logdbg << "ASTERIXImportTask: insertDoneSlot: finalizing";
 
@@ -1450,8 +1418,7 @@ void ASTERIXImportTask::checkAllDone()
 
         logdbg << "ASTERIXImportTask: checkAllDone: dbo content";
 
-        if (!settings_.test_)
-            emit COMPASS::instance().interface().databaseContentChangedSignal();
+        emit COMPASS::instance().interface().databaseContentChangedSignal();
 
         logdbg << "ASTERIXImportTask: checkAllDone: status logging";
 
