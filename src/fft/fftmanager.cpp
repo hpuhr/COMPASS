@@ -9,6 +9,8 @@
 #include "files.h"
 #include "json.hpp"
 #include "logger.h"
+#include "dbcontentmanager.h"
+#include "dbcontent.h"
 
 using namespace std;
 
@@ -246,6 +248,55 @@ FFTsConfigurationDialog* FFTManager::configurationDialog()
     }
 
     return config_dialog_.get();
+}
+
+std::pair<bool, float> FFTManager::isFromFFT(
+        double prelim_latitute_deg, double prelim_longitude_deg,
+        boost::optional<unsigned int> mode_s_address, bool ignore_mode_s,
+        boost::optional<unsigned int> mode_a_code,
+        boost::optional<float> mode_c_code)
+{
+
+    bool check_passed;
+
+    for (const auto& fft_it : db_ffts_)
+    {
+        check_passed = true;
+
+        if (!ignore_mode_s && fft_it->hasModeSAddress())
+        {
+            if (!mode_s_address.has_value() || mode_s_address.value() != fft_it->modeSAddress())
+                check_passed = false;
+        }
+
+        if (check_passed && fft_it->hasMode3ACode())
+        {
+            if (!mode_a_code.has_value() || mode_a_code.value() != fft_it->mode3ACode())
+                check_passed = false;
+        }
+
+        if (check_passed && fft_it->hasModeCCode())
+        {
+            if (!mode_c_code.has_value() || mode_c_code.value() != fft_it->modeCCode())
+                check_passed = false;
+        }
+
+        if (check_passed && fft_it->hasPosition())
+        {
+            check_passed = sqrt(pow(prelim_latitute_deg - fft_it->latitude(), 2)
+                                + pow(prelim_longitude_deg - fft_it->longitude(), 2)) <= max_fft_plot_distance_deg_;
+        }
+
+        if (check_passed)
+        {
+            if (fft_it->hasAltitude())
+                return {true, fft_it->altitude()};
+            else
+                return {true, 0}; // no altitude info
+        }
+    }
+
+    return {true, 0}; // no matches, not altitude info
 }
 
 void FFTManager::loadDBFFTs()

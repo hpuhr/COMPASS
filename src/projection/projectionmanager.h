@@ -15,16 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PROJECTIONMANAGER_H_
-#define PROJECTIONMANAGER_H_
+#pragma once
 
 #include "configurable.h"
 #include "singleton.h"
+#include "buffer.h"
 
 class ProjectionManagerWidget;
 class Projection;
 class OGRProjection;
-class Buffer;
 
 /**
  * @brief Singleton for coordinate projection handling
@@ -86,6 +85,9 @@ protected:
     std::map<std::string, std::unique_ptr<Projection>> projections_;
 
     virtual void checkSubConfigurables();
+
+    unsigned int calculateRadarPlotPositions (std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
+                                              NullableVector<double>& target_latitudes_vec,
+                                              NullableVector<double>& target_longitudes_vec);
 };
 
-#endif /* PROJECTIONMANAGER_H_ */

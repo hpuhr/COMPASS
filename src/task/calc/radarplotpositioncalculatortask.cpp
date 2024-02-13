@@ -179,187 +179,47 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
     ProjectionManager& proj_man = ProjectionManager::instance();
 
-    assert(proj_man.hasCurrentProjection());
-    Projection& projection = proj_man.currentProjection();
-    projection.clearCoordinateSystems(); // to rebuild from data sources
-    projection.addAllRadarCoordinateSystems();
+    std::pair<unsigned int, std::map<std::string, std::shared_ptr<Buffer>>> result_buffers =
+            proj_man.doUpdateRadarPlotPositionCalculations (data_);
 
-    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method '"
-           << projection.name() << "'";
+    unsigned int transformation_errors = result_buffers.first;
+    std::map<std::string, std::shared_ptr<Buffer>> update_buffers = result_buffers.second;
 
-    string dbcontent_name;
-    set<unsigned int> ds_unknown;
+    unsigned int buffers_size = 0;
 
-    for (auto& buf_it : data_)
+    for (auto& buf_it : update_buffers)
+        buffers_size += buf_it.second->size();
+
+
+    assert(msg_box_);
+    delete msg_box_;
+
+    if (transformation_errors)
     {
-        dbcontent_name = buf_it.first;
-        assert (dbcontent_name == "CAT001" || dbcontent_name == "CAT010" || dbcontent_name == "CAT048");
+        QApplication::restoreOverrideCursor();
 
-        assert (msg_box_);
-        msg_box_->setText(("Processing "+dbcontent_name+" data").c_str());
+        QMessageBox::StandardButton reply;
 
-        std::shared_ptr<Buffer> read_buffer = buf_it.second;
-        unsigned int read_size = read_buffer->size();
-        assert(read_size);
+        std::string question =
+                "There were " + std::to_string(transformation_errors) +
+                " skipped coordinates with transformation errors, " +
+                std::to_string(buffers_size) +
+                " coordinates were projected correctly. Do you want to insert the data?";
 
-        loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: calculating " << dbcontent_name
-               << " read_size " << read_size;
+        reply = QMessageBox::question(nullptr, "Insert Data", question.c_str(),
+                                      QMessageBox::Yes | QMessageBox::No);
 
-        PropertyList update_buffer_list;
-
-        update_buffer_list.addProperty(
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name(),
-                    PropertyDataType::DOUBLE);
-        update_buffer_list.addProperty(
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name(),
-                    PropertyDataType::DOUBLE);
-        update_buffer_list.addProperty(
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name(),
-                    PropertyDataType::ULONGINT); // must be at last position for update
-
-        std::shared_ptr<Buffer> update_buffer =
-                std::make_shared<Buffer>(update_buffer_list, dbcontent_name);
-
-        unsigned long rec_num;
-        unsigned int ds_id;
-
-        double pos_azm_deg;
-        double pos_azm_rad;
-        double pos_range_nm;
-        double pos_range_m;
-        double altitude_ft;
-        bool has_altitude;
-
-        double lat, lon;
-        unsigned int update_cnt = 0;
-
-        assert(msg_box_);
-        std::string msg;
-
-        loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing update_buffer";
-        bool ret;
-
-        size_t transformation_errors = 0;
-
-        NullableVector<unsigned int>& read_ds_id_vec = read_buffer->get<unsigned int> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_).name());
-        NullableVector<unsigned long>& read_rec_num_vec = read_buffer->get<unsigned long> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
-        NullableVector<double>& read_range_vec = read_buffer->get<double> (
-                    dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_range_).name());
-        NullableVector<double>& read_azimuth_vec = read_buffer->get<double> (
-                    dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_).name());
-        NullableVector<float>& read_altitude_vec = read_buffer->get<float> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
-
-        NullableVector<double>& write_lat_vec = update_buffer->get<double> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name());
-        NullableVector<double>& write_lon_vec = update_buffer->get<double> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name());
-        NullableVector<unsigned long>& write_rec_num_vec = update_buffer->get<unsigned long> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
-
-        assert (read_ds_id_vec.isNeverNull());
-        assert (read_rec_num_vec.isNeverNull());
-
-        for (unsigned int cnt = 0; cnt < read_size; cnt++)
+        if (reply == QMessageBox::No)
         {
-            rec_num = read_rec_num_vec.get(cnt);
-
-            ds_id = read_ds_id_vec.get(cnt);
-
-            if (read_azimuth_vec.isNull(cnt) || read_range_vec.isNull(cnt))
-                continue;
-
-            pos_azm_deg = read_azimuth_vec.get(cnt);
-            pos_range_nm = read_range_vec.get(cnt);
-
-            has_altitude = !read_altitude_vec.isNull(cnt);
-
-            if (has_altitude)
-                altitude_ft = read_altitude_vec.get(cnt);
-            else
-                altitude_ft = 0.0;  // has to assumed in projection later on
-
-            pos_azm_rad = pos_azm_deg * DEG2RAD;
-
-            pos_range_m = 1852.0 * pos_range_nm;
-
-            if (!projection.hasCoordinateSystem(ds_id))
-            {
-                if (!ds_unknown.count(ds_id))
-                {
-                    logwrn << "RadarPlotPositionCalculatorTask: loadingDoneSlot: unknown data source " << ds_id
-                           << ", skipping";
-                    ds_unknown.insert(ds_id);
-                }
-                continue;
-            }
-
-            ret = projection.polarToWGS84(ds_id, pos_azm_rad, pos_range_m, has_altitude,
-                                          altitude_ft, lat, lon);
-
-            if (!ret)
-            {
-                transformation_errors++;
-                continue;
-            }
-
-            write_lat_vec.set(update_cnt, lat);
-            write_lon_vec.set(update_cnt, lon);
-            write_rec_num_vec.set(update_cnt, rec_num);
-
-            update_cnt++;
-
-            // loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long
-            // " << lon;
-        }
-
-        logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size "
-           << update_buffer->size() << ", " << transformation_errors << " transformation errors";
-
-        msg_box_->close();
-        delete msg_box_;
-        msg_box_ = nullptr;
-
-        if (!update_buffer->size())
-        {
-            std::string text =
-                    "There were " + std::to_string(transformation_errors) +
-                    " skipped coordinates with transformation errors, no data available for insertion.";
-
-            QMessageBox msgBox;
-            msgBox.setText(text.c_str());
-            msgBox.exec();
-
+            loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of "
+                      "transformation errors";
             return;
         }
+    }
 
-        if (transformation_errors)
-        {
-            QApplication::restoreOverrideCursor();
-
-            QMessageBox::StandardButton reply;
-
-            std::string question =
-                    "There were " + std::to_string(transformation_errors) +
-                    " skipped coordinates with transformation errors, " +
-                    std::to_string(update_buffer->size()) +
-                    " coordinates were projected correctly. Do you want to insert the data?";
-
-            reply = QMessageBox::question(nullptr, "Insert Data", question.c_str(),
-                                          QMessageBox::Yes | QMessageBox::No);
-
-            if (reply == QMessageBox::No)
-            {
-                loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of "
-                   "transformation errors";
-                return;
-            }
-
-            QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        }
-
+    if (buffers_size)
+    {
+        std::string msg;
         msg_box_ = new QMessageBox;
         assert(msg_box_);
         msg_box_->setWindowTitle("Calculating Radar Plot Positions");
@@ -368,16 +228,18 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
         msg_box_->setStandardButtons(QMessageBox::NoButton);
         msg_box_->show();
 
-        logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing " << dbcontent_name
-               << " size " << update_buffer->size()
-               << " key " << dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name();
+        logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing size " << buffers_size;
 
-        DBContent& dbcontent = dbcontent_man.dbContent(dbcontent_name);
+        for (auto& buf_it : update_buffers)
+        {
 
-        dbcontent.updateData(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_), update_buffer);
+            DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
 
-        connect(&dbcontent, &DBContent::updateDoneSignal,
-                this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
+            dbcontent.updateData(dbcontent_man.metaGetVariable(
+                                     buf_it.first, DBContent::meta_var_rec_num_), buf_it.second);
+
+            connect(&dbcontent, &DBContent::updateDoneSignal, this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
+        }
     }
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
@@ -471,6 +333,16 @@ dbContent::VariableSet RadarPlotPositionCalculatorTask::getReadSetFor(const std:
 
     assert(dbcontent_man.canGetVariable(dbcontent_name, DBContent::var_radar_azimuth_));
     read_set.add(dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_));
+
+    assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+
+    // optionals
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
+
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
 
     return read_set;
 }

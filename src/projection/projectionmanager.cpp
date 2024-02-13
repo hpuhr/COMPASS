@@ -24,6 +24,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "datasourcemanager.h"
+#include "fftmanager.h"
 #include "compass.h"
 
 #include <math.h>
@@ -93,6 +94,221 @@ void ProjectionManager::checkSubConfigurables()
     }
 }
 
+unsigned int ProjectionManager::calculateRadarPlotPositions (
+        std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
+        NullableVector<double>& target_latitudes_vec, NullableVector<double>& target_longitudes_vec)
+{
+    loginf << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name;
+
+    bool ret;
+
+    string datasource_var_name;
+    string range_var_name;
+    string azimuth_var_name;
+    string altitude_var_name;
+    string latitude_var_name;
+    string longitude_var_name;
+
+    string mode_s_address_var_name;
+    string mode_a_code_var_name;
+
+    // do radar position projection
+
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+    FFTManager& fft_man = COMPASS::instance().fftManager();
+
+    unsigned int ds_id;
+    double azimuth_deg;
+    double azimuth_rad;
+    double range_nm;
+    double range_m;
+    double altitude_ft;
+    bool has_altitude;
+    double lat, lon;
+
+    unsigned int transformation_errors {0};
+    unsigned int num_ffts_found {0};
+
+    bool is_from_fft;
+    float fft_altitude_ft;
+
+    boost::optional<unsigned int> mode_s_address;
+    boost::optional<unsigned int> mode_a_code;
+    boost::optional<float> mode_c_code;
+
+    assert (dbcontent_name == "CAT001" || dbcontent_name == "CAT010" || dbcontent_name == "CAT048");
+
+    unsigned int buffer_size = buffer->size();
+    assert(buffer_size);
+
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_range_));
+    assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_azimuth_));
+    assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_altitude_));
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
+
+    datasource_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_).name();
+    range_var_name = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_range_).name();
+    azimuth_var_name = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_).name();
+    altitude_var_name = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_altitude_).name();
+    latitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name();
+    longitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name();
+
+    assert (buffer->has<unsigned int>(datasource_var_name));
+    assert (buffer->has<double>(range_var_name));
+    assert (buffer->has<double>(azimuth_var_name));
+    assert (buffer->has<float>(altitude_var_name));
+
+    if (!buffer->has<double>(latitude_var_name))
+        buffer->addProperty(latitude_var_name, PropertyDataType::DOUBLE);
+
+    if (!buffer->has<double>(longitude_var_name))
+        buffer->addProperty(longitude_var_name, PropertyDataType::DOUBLE);
+
+    NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_var_name);
+    NullableVector<double>& range_vec = buffer->get<double>(range_var_name);
+    NullableVector<double>& azimuth_vec = buffer->get<double>(azimuth_var_name);
+    NullableVector<float>& altitude_vec = buffer->get<float>(altitude_var_name);
+
+    // optional data for fft check
+    NullableVector<unsigned int>* mode_s_address_vec {nullptr};
+
+    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
+    {
+        mode_s_address_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_).name();
+        assert (buffer->has<unsigned int>(mode_s_address_var_name));
+
+        mode_s_address_vec = &buffer->get<unsigned int>(mode_s_address_var_name);
+    }
+
+    NullableVector<unsigned int>* mode_a_code_vec {nullptr};
+    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
+    {
+        mode_a_code_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_).name();
+        assert (buffer->has<unsigned int>(mode_a_code_var_name));
+
+        mode_a_code_vec = &buffer->get<unsigned int>(mode_a_code_var_name);
+    }
+
+    // set up projections
+    assert(hasCurrentProjection());
+    Projection& projection = currentProjection();
+    projection.clearCoordinateSystems(); // to rebuild from data sources
+    projection.addAllRadarCoordinateSystems();
+
+    for (auto ds_id_it : datasource_vec.distinctValues())
+    {
+        if (!projection.hasCoordinateSystem(ds_id_it))
+        {
+            if (ds_man.hasConfigDataSource(ds_id_it) && ds_man.configDataSource(ds_id_it).dsType() != "Radar")
+                continue; // ok for non-radars
+
+            logwrn << "ProjectionManager: calculateRadarPlotPositions: data source id "
+                   << ds_id_it << " not set up"; // should have been in ASTERIX import task
+        }
+    }
+
+    for (unsigned int cnt = 0; cnt < buffer_size; cnt++)
+    {
+        // load buffer data
+
+        if (datasource_vec.isNull(cnt))
+        {
+            logerr << "ProjectionManager: calculateRadarPlotPositions: data source null";
+            continue;
+        }
+        ds_id = datasource_vec.get(cnt);
+
+        if (azimuth_vec.isNull(cnt) || range_vec.isNull(cnt))
+        {
+            logdbg << "ProjectionManager: calculateRadarPlotPositions: position null";
+            continue;
+        }
+
+        if (!target_latitudes_vec.isNull(cnt) && !target_longitudes_vec.isNull(cnt))
+        {
+            logdbg << "ProjectionManager: calculateRadarPlotPositions: position already set";
+            continue;
+        }
+
+        azimuth_deg = azimuth_vec.get(cnt);
+        range_nm = range_vec.get(cnt);
+
+        //loginf << "azimuth_deg " << azimuth_deg << " range_nm " << range_nm;
+
+        has_altitude = !altitude_vec.isNull(cnt);
+        if (has_altitude)
+            altitude_ft = altitude_vec.get(cnt);
+        else
+            altitude_ft = 0.0;  // has to assumed in projection later on
+
+        azimuth_rad = azimuth_deg * DEG2RAD;
+
+        range_m = 1852.0 * range_nm;
+
+        if (!projection.hasCoordinateSystem(ds_id))
+        {
+            transformation_errors++;
+            continue;
+        }
+
+        ret = projection.polarToWGS84(ds_id, azimuth_rad, range_m, has_altitude,
+                                      altitude_ft, lat, lon);
+
+        if (!ret)
+        {
+            transformation_errors++;
+            continue;
+        }
+
+        // check if fft
+
+        if (mode_s_address_vec && !mode_s_address_vec->isNull(cnt))
+            mode_s_address = mode_s_address_vec->get(cnt);
+        else
+            mode_s_address = boost::none;
+
+        if (mode_a_code_vec && !mode_a_code_vec->isNull(cnt))
+            mode_a_code = mode_a_code_vec->get(cnt);
+        else
+            mode_a_code =  boost::none;
+
+        if (has_altitude)
+            mode_c_code = altitude_ft;
+        else
+            mode_c_code =  boost::none;
+
+
+        std::tie(is_from_fft, fft_altitude_ft) = fft_man.isFromFFT(
+                    lat, lon, mode_s_address, dbcontent_name == "CAT001",
+                    mode_a_code, mode_c_code);
+
+        if (is_from_fft) // recalculate position
+        {
+            ++num_ffts_found;
+
+            ret = projection.polarToWGS84(ds_id, azimuth_rad, range_m, true,
+                                          fft_altitude_ft, lat, lon);
+
+            if (!ret)
+            {
+                transformation_errors++;
+                continue;
+            }
+        }
+
+        target_latitudes_vec.set(cnt, lat);
+        target_longitudes_vec.set(cnt, lon);
+    }
+
+    loginf << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name
+           << " num_ffts_found " << num_ffts_found << " transformation_errors " << transformation_errors;
+
+    return transformation_errors;
+}
+
 string ProjectionManager::currentProjectionName() const { return current_projection_name_; }
 
 void ProjectionManager::currentProjectionName(const string& name)
@@ -133,79 +349,27 @@ OGRProjection& ProjectionManager::ogrProjection()
 unsigned int ProjectionManager::doRadarPlotPositionCalculations (
         map<string, shared_ptr<Buffer>> buffers)
 {
-    bool ret;
+    unsigned int transformation_errors {0};
 
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     string dbcontent_name;
 
-    string datasource_var_name;
-    string range_var_name;
-    string azimuth_var_name;
-    string altitude_var_name;
     string latitude_var_name;
     string longitude_var_name;
-
-    // do radar position projection
-
-    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
-    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
-
-    assert(hasCurrentProjection());
-    Projection& projection = currentProjection();
-
-    unsigned int ds_id;
-    double azimuth_deg;
-    double azimuth_rad;
-    double range_nm;
-    double range_m;
-    double altitude_ft;
-    bool has_altitude;
-    double lat, lon;
-
-    unsigned int transformation_errors = 0;
 
     for (auto& buf_it : buffers)
     {
         dbcontent_name = buf_it.first;
 
-        if (dbcontent_name != "CAT001" && dbcontent_name != "CAT010" && dbcontent_name != "CAT048")
-            continue;
+        assert (dbcontent_name == "CAT001" || dbcontent_name == "CAT010" || dbcontent_name == "CAT048");
 
         shared_ptr<Buffer> buffer = buf_it.second;
-        unsigned int buffer_size = buffer->size();
-        assert(buffer_size);
 
-        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
-        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_range_));
-        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_azimuth_));
-        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_altitude_));
         assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
         assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
 
-        dbContent::Variable& datasource_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_);
-        dbContent::Variable& range_var = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_range_);
-        dbContent::Variable& azimuth_var = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_);
-        dbContent::Variable& altitude_var = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_altitude_);
-        dbContent::Variable& latitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
-        dbContent::Variable& longitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
-
-        datasource_var_name = datasource_var.name();
-        range_var_name = range_var.name();
-        azimuth_var_name = azimuth_var.name();
-        altitude_var_name = altitude_var.name();
-        latitude_var_name = latitude_var.name();
-        longitude_var_name = longitude_var.name();
-
-        assert (datasource_var.dataType() == PropertyDataType::UINT);
-        assert (range_var.dataType() == PropertyDataType::DOUBLE);
-        assert (azimuth_var.dataType() == PropertyDataType::DOUBLE);
-        assert (altitude_var.dataType() == PropertyDataType::FLOAT);
-        assert (latitude_var.dataType() == PropertyDataType::DOUBLE);
-        assert (longitude_var.dataType() == PropertyDataType::DOUBLE);
-
-        assert (buffer->has<unsigned int>(datasource_var_name));
-        assert (buffer->has<double>(range_var_name));
-        assert (buffer->has<double>(azimuth_var_name));
-        assert (buffer->has<float>(altitude_var_name));
+        latitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name();
+        longitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name();
 
         if (!buffer->has<double>(latitude_var_name))
             buffer->addProperty(latitude_var_name, PropertyDataType::DOUBLE);
@@ -213,83 +377,10 @@ unsigned int ProjectionManager::doRadarPlotPositionCalculations (
         if (!buffer->has<double>(longitude_var_name))
             buffer->addProperty(longitude_var_name, PropertyDataType::DOUBLE);
 
-        NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_var_name);
-        NullableVector<double>& range_vec = buffer->get<double>(range_var_name);
-        NullableVector<double>& azimuth_vec = buffer->get<double>(azimuth_var_name);
-        NullableVector<float>& altitude_vec = buffer->get<float>(altitude_var_name);
         NullableVector<double>& latitude_vec = buffer->get<double>(latitude_var_name);
         NullableVector<double>& longitude_vec = buffer->get<double>(longitude_var_name);
 
-        // set up projections
-
-        for (auto ds_id_it : datasource_vec.distinctValues())
-        {
-            if (!projection.hasCoordinateSystem(ds_id_it))
-            {
-                if (ds_man.hasConfigDataSource(ds_id_it) && ds_man.configDataSource(ds_id_it).dsType() != "Radar")
-                    continue; // ok for non-radars
-
-                logwrn << "ProjectionManager: doRadarPlotPositionCalculations: data source id "
-                       << ds_id_it << " not set up"; // should have been in ASTERIX import task
-            }
-        }
-
-        for (unsigned int cnt = 0; cnt < buffer_size; cnt++)
-        {
-            // load buffer data
-
-            if (datasource_vec.isNull(cnt))
-            {
-                logerr << "ProjectionManager: doRadarPlotPositionCalculations: data source null";
-                continue;
-            }
-            ds_id = datasource_vec.get(cnt);
-
-            if (azimuth_vec.isNull(cnt) || range_vec.isNull(cnt))
-            {
-                logdbg << "ProjectionManager: doRadarPlotPositionCalculations: position null";
-                continue;
-            }
-
-            if (!latitude_vec.isNull(cnt) && !longitude_vec.isNull(cnt))
-            {
-                logdbg << "ProjectionManager: doRadarPlotPositionCalculations: position already set";
-                continue;
-            }
-
-            azimuth_deg = azimuth_vec.get(cnt);
-            range_nm = range_vec.get(cnt);
-
-            //loginf << "azimuth_deg " << azimuth_deg << " range_nm " << range_nm;
-
-            has_altitude = !altitude_vec.isNull(cnt);
-            if (has_altitude)
-                altitude_ft = altitude_vec.get(cnt);
-            else
-                altitude_ft = 0.0;  // has to assumed in projection later on
-
-            azimuth_rad = azimuth_deg * DEG2RAD;
-
-            range_m = 1852.0 * range_nm;
-
-            if (!projection.hasCoordinateSystem(ds_id))
-            {
-                transformation_errors++;
-                continue;
-            }
-
-            ret = projection.polarToWGS84(ds_id, azimuth_rad, range_m, has_altitude,
-                                          altitude_ft, lat, lon);
-
-            if (!ret)
-            {
-                transformation_errors++;
-                continue;
-            }
-
-            latitude_vec.set(cnt, lat);
-            longitude_vec.set(cnt, lon);
-        }
+        transformation_errors += calculateRadarPlotPositions (dbcontent_name, buffer, latitude_vec, longitude_vec);
     }
 
     return transformation_errors;
@@ -298,134 +389,54 @@ unsigned int ProjectionManager::doRadarPlotPositionCalculations (
 std::pair<unsigned int, std::map<std::string, std::shared_ptr<Buffer>>>
 ProjectionManager::doUpdateRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers)
 {
-    assert(hasCurrentProjection());
-    Projection& projection = currentProjection();
-    projection.clearCoordinateSystems(); // to rebuild from data sources
-    projection.addAllRadarCoordinateSystems();
-
-    loginf << "ProjectionManager: doUpdateRadarPlotPositionCalculations: projection method '"
-           << projection.name() << "'";
-
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    string dbcontent_name;
-    set<unsigned int> ds_unknown; // to log only once
-
-    unsigned int transformation_errors = 0;
+    unsigned int transformation_errors {0};
     std::map<std::string, std::shared_ptr<Buffer>> update_buffers;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+    string dbcontent_name;
+
+    string latitude_var_name;
+    string longitude_var_name;
+    string rec_num_var_name;
 
     for (auto& buf_it : buffers)
     {
         dbcontent_name = buf_it.first;
-        auto& read_buffer = buf_it.second;
-        unsigned int read_size = read_buffer->size();
 
         assert (dbcontent_name == "CAT001" || dbcontent_name == "CAT010" || dbcontent_name == "CAT048");
 
+        shared_ptr<Buffer> read_buffer = buf_it.second;
+        unsigned int read_size = read_buffer->size();
+
+        latitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name();
+        longitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name();
+        rec_num_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name();
+
         PropertyList update_buffer_list;
 
-        update_buffer_list.addProperty(
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name(),
-                    PropertyDataType::DOUBLE);
-        update_buffer_list.addProperty(
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name(),
-                    PropertyDataType::DOUBLE);
-        update_buffer_list.addProperty(
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name(),
-                    PropertyDataType::ULONGINT); // must be at last position for update
+        update_buffer_list.addProperty(latitude_var_name, PropertyDataType::DOUBLE);
+        update_buffer_list.addProperty(longitude_var_name, PropertyDataType::DOUBLE);
+        // must be at last position for update
+        update_buffer_list.addProperty(rec_num_var_name, PropertyDataType::ULONGINT);
 
         std::shared_ptr<Buffer> update_buffer =
                 std::make_shared<Buffer>(update_buffer_list, dbcontent_name);
 
-        unsigned long rec_num;
-        unsigned int ds_id;
+        // copy record number
 
-        double pos_azm_deg;
-        double pos_azm_rad;
-        double pos_range_nm;
-        double pos_range_m;
-        double altitude_ft;
-        bool has_altitude;
+        NullableVector<unsigned long>& read_rec_num_vec = read_buffer->get<unsigned long> (rec_num_var_name);
 
-        double lat, lon;
-        unsigned int update_cnt = 0;
+        NullableVector<unsigned long>& update_rec_num_vec = update_buffer->get<unsigned long> (rec_num_var_name);
 
-        loginf << "ProjectionManager: doUpdateRadarPlotPositionCalculations: writing update_buffer";
-        bool ret;
-
-        NullableVector<unsigned int>& read_ds_id_vec = read_buffer->get<unsigned int> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_).name());
-        NullableVector<unsigned long>& read_rec_num_vec = read_buffer->get<unsigned long> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
-        NullableVector<double>& read_range_vec = read_buffer->get<double> (
-                    dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_range_).name());
-        NullableVector<double>& read_azimuth_vec = read_buffer->get<double> (
-                    dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_).name());
-        NullableVector<float>& read_altitude_vec = read_buffer->get<float> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
-
-        NullableVector<double>& write_lat_vec = update_buffer->get<double> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name());
-        NullableVector<double>& write_lon_vec = update_buffer->get<double> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name());
-        NullableVector<unsigned long>& write_rec_num_vec = update_buffer->get<unsigned long> (
-                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
-
-        assert (read_ds_id_vec.isNeverNull());
         assert (read_rec_num_vec.isNeverNull());
 
         for (unsigned int cnt = 0; cnt < read_size; cnt++)
-        {
-            rec_num = read_rec_num_vec.get(cnt);
+            update_rec_num_vec.set(cnt, read_rec_num_vec.get(cnt));
 
-            ds_id = read_ds_id_vec.get(cnt);
+        NullableVector<double>& latitude_vec = update_buffer->get<double>(latitude_var_name);
+        NullableVector<double>& longitude_vec = update_buffer->get<double>(longitude_var_name);
 
-            if (read_azimuth_vec.isNull(cnt) || read_range_vec.isNull(cnt))
-                continue;
-
-            pos_azm_deg = read_azimuth_vec.get(cnt);
-            pos_range_nm = read_range_vec.get(cnt);
-
-            has_altitude = !read_altitude_vec.isNull(cnt);
-
-            if (has_altitude)
-                altitude_ft = read_altitude_vec.get(cnt);
-            else
-                altitude_ft = 0.0;  // has to assumed in projection later on
-
-            pos_azm_rad = pos_azm_deg * DEG2RAD;
-
-            pos_range_m = 1852.0 * pos_range_nm;
-
-            if (!projection.hasCoordinateSystem(ds_id))
-            {
-                if (!ds_unknown.count(ds_id))
-                {
-                    logwrn << "ProjectionManager: doUpdateRadarPlotPositionCalculations: unknown data source " << ds_id
-                           << ", skipping";
-                    ds_unknown.insert(ds_id);
-                }
-                continue;
-            }
-
-            ret = projection.polarToWGS84(ds_id, pos_azm_rad, pos_range_m, has_altitude,
-                                          altitude_ft, lat, lon);
-
-            if (!ret)
-            {
-                transformation_errors++;
-                continue;
-            }
-
-            write_lat_vec.set(update_cnt, lat);
-            write_lon_vec.set(update_cnt, lon);
-            write_rec_num_vec.set(update_cnt, rec_num);
-
-            update_cnt++;
-
-            // loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long
-            // " << lon;
-        }
+        transformation_errors += calculateRadarPlotPositions (dbcontent_name, read_buffer, latitude_vec, longitude_vec);
 
         update_buffers[dbcontent_name] = std::move(update_buffer);
     }

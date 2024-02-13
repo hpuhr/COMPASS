@@ -7,14 +7,21 @@
 
 #include <QObject>
 
+#include <boost/optional.hpp>
+
 #include <set>
 #include <vector>
 #include <memory>
+
 
 class COMPASS;
 class ConfigurationFFT;
 class FFTsConfigurationDialog;
 class DBFFT;
+
+namespace dbContent {
+class VariableSet;
+}
 
 class FFTManager : public QObject, public Configurable
 {
@@ -56,6 +63,12 @@ public:
 
     FFTsConfigurationDialog* configurationDialog();
 
+    std::pair<bool, float> isFromFFT(double prelim_latitute_deg, double prelim_longitude_deg,
+                                     boost::optional<unsigned int> mode_s_address, bool ignore_mode_s,
+                                     boost::optional<unsigned int> mode_a_code,
+                                     boost::optional<float> mode_c_code);
+    // returns flag, altitude in ft if true
+
 protected:
     COMPASS& compass_;
 
@@ -65,6 +78,8 @@ protected:
     std::vector<std::string> fft_names_all_; // both from config and db, vector to have order
 
     std::unique_ptr<FFTsConfigurationDialog> config_dialog_;
+
+    const double max_fft_plot_distance_deg_ {0.1}; // lat/lon distance in degress
 
     virtual void checkSubConfigurables();
 
