@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXDECODEJOB_H
-#define ASTERIXDECODEJOB_H
+#pragma once
 
 #include "job.h"
 #include "asterixdecoderbase.h"
@@ -29,7 +28,9 @@ class ASTERIXImportTask;
 class ASTERIXImportTaskSettings;
 class ASTERIXPostProcess;
 
-// is a job, creates specifc reader/decoder, does post-processing
+/**
+ * is a job, creates specifc reader/decoder, does post-processing
+ */ 
 class ASTERIXDecodeJob : public Job
 {
     Q_OBJECT
@@ -38,7 +39,9 @@ signals:
     void decodedASTERIXSignal();
 
 public:
-    ASTERIXDecodeJob(ASTERIXImportTask& task, const ASTERIXImportTaskSettings& settings, ASTERIXPostProcess& post_process);
+    ASTERIXDecodeJob(ASTERIXImportTask& task, 
+                     const ASTERIXImportTaskSettings& settings, 
+                     ASTERIXPostProcess& post_process);
     virtual ~ASTERIXDecodeJob();
 
     virtual void run() override;
@@ -64,6 +67,22 @@ public:
     void forceBlockingDataProcessing();
 
 private:
+    void fileJasterixCallback(std::unique_ptr<nlohmann::json> data, 
+                              unsigned int line_id, 
+                              size_t num_frames,
+                              size_t num_records, 
+                              size_t numErrors);
+    void netJasterixCallback(std::unique_ptr<nlohmann::json> data, 
+                             unsigned int line_id, 
+                             size_t num_frames,
+                             size_t num_records, 
+                             size_t numErrors);
+
+    void countRecord(unsigned int category, nlohmann::json& record);
+
+    // checks that SAC/SIC are set in all records in same data block
+    void checkCAT001SacSics(nlohmann::json& data_block);
+
     friend class ASTERIXFileDecoder;
     friend class ASTERIXNetworkDecoder;
 
@@ -76,24 +95,13 @@ private:
 
     boost::posix_time::ptime start_time_;
 
-    size_t num_frames_{0};
+    size_t num_frames_ {0};
     size_t num_records_{0};
-    size_t num_errors_{0};
+    size_t num_errors_ {0};
 
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data_;
 
     std::map<unsigned int, size_t> category_counts_;
 
-    unsigned int signal_count_ {0};
-
-    void fileJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
-                              size_t num_records, size_t numErrors);
-    void netJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
-                             size_t num_records, size_t numErrors);
-
-    void countRecord(unsigned int category, nlohmann::json& record);
-    // checks that SAC/SIC are set in all records in same data block
-    void checkCAT001SacSics(nlohmann::json& data_block);
+    unsigned int signal_count_{0};
 };
-
-#endif  // ASTERIXDECODEJOB_H
