@@ -85,6 +85,8 @@ find_package(NemaTode REQUIRED CONFIG)
 
 find_package(Threads REQUIRED)
 
+find_package(PCAP REQUIRED)
+
 add_library(compass "")
 
 message("Install path: ${CMAKE_INSTALL_PREFIX}")
@@ -130,6 +132,7 @@ include_directories (
     ${EIGEN3_INCLUDE_DIR}
     ${JSONCPP_INCLUDE_DIR}
     ${jASTERIX_INCLUDE_DIR}
+    ${PCAP_INCLUDE_DIR}
     )
 
 link_directories(
@@ -150,6 +153,7 @@ target_link_libraries ( compass
     ${SQLITE3_LIBRARIES}
     ${LibArchive_LIBRARIES}
     ${JSONCPP_LIBRARY}
+    ${PCAP_LIBRARY}
     ${TBB_LIBRARIES}
     TBB::tbb
     ${OPENSSL_CRYPTO_LIBRARY}
