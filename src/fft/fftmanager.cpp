@@ -12,7 +12,13 @@
 #include "dbcontentmanager.h"
 #include "dbcontent.h"
 
+#include <QMessageBox>
+
+#include <fstream>
+
 using namespace std;
+using namespace Utils;
+using namespace nlohmann;
 
 FFTManager::FFTManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "ffts.json"), compass_(*compass)
@@ -107,9 +113,12 @@ const std::vector<std::unique_ptr<ConfigurationFFT>>& FFTManager::configFFTs() c
     return config_ffts_;
 }
 
-void FFTManager::deleteAllConfigFFTs()
+void FFTManager::deleteAllFFTs()
 {
     config_ffts_.clear();
+    db_ffts_.clear();
+
+    saveDBFFTs();
 
     updateFFTNamesAll();
 
@@ -179,6 +188,28 @@ void FFTManager::addNewFFT (const std::string& name)
     loginf << "FFTManager: addNewFFT: name " << name << " done";
 }
 
+void FFTManager::addNewFFT (const std::string& name, nlohmann::json info, bool emit_signal)
+{
+    loginf << "FFTManager: addNewFFT: name " << name << " with info";
+
+    assert (!hasConfigFFT(name));
+    assert (!hasDBFFT(name));
+
+    createConfigFFT(name);
+    ConfigurationFFT& cfg_fft = configFFT(name);
+    cfg_fft.info(info);
+
+    assert (hasConfigFFT(name));
+    assert (canAddNewFFTFromConfig(name));
+
+    db_ffts_.emplace_back(std::move(cfg_fft.getAsNewDBFFT()));
+
+    sortDBFFTs();
+
+    if (emit_signal)
+        emit fftsChangedSignal();
+}
+
 const std::vector<std::unique_ptr<DBFFT>>& FFTManager::dbFFTs() const
 {
     return db_ffts_;
@@ -235,6 +266,86 @@ void FFTManager::saveDBFFTs()
 
     assert(db_interface.dbOpen());
     db_interface.saveFFTs(db_ffts_);
+}
+
+void FFTManager::exportFFTs(const std::string& filename)
+{
+    loginf << "FFTManager: exportFFTs: filename '" << filename << "'";
+
+    json data;
+
+    data["content_type"] = "ffts";
+    data["content_version"] = "0.1";
+
+    data["ffts"] = json::array();
+    json& ffts = data.at("ffts");
+
+    unsigned int cnt = 0;
+
+    for (auto& ds_it : db_ffts_)
+    {
+        ffts[cnt] = ds_it->getAsJSON();
+        ++cnt;
+    }
+
+    std::ofstream file(filename);
+    file << data.dump(4);
+
+    QMessageBox m_info(QMessageBox::Information, "Export FFTs",
+                       "File export: '"+QString(filename.c_str())+"' done.\n"
+                       +QString::number(fft_names_all_.size())+" FFTs saved.", QMessageBox::Ok);
+    m_info.exec();
+}
+
+void FFTManager::importFFTs(const std::string& filename)
+{
+    loginf << "FFTManager: importFFTs: filename '" << filename << "'";
+
+    try
+    {
+        if (!Files::fileExists(filename))
+            throw std::runtime_error ("File '"+filename+"' not found.");
+
+        std::ifstream input_file(filename, std::ifstream::in);
+
+        json j = json::parse(input_file);
+
+        if (!j.contains("content_type")
+                || !j.at("content_type").is_string()
+                || j.at("content_type") != "ffts")
+            throw std::runtime_error("current data is not fft content");
+
+        if (!j.contains("content_version")
+                || !j.at("content_version").is_string()
+                || j.at("content_version") != "0.1")
+            throw std::runtime_error("current data content version is not supported");
+
+        if (!j.contains("ffts")
+                || !j.at("ffts").is_array())
+            throw std::runtime_error("current data contains no ffts");
+
+        for (auto& j_fft_it : j.at("ffts").get<json::array_t>())
+        {
+            assert(j_fft_it.contains("name"));
+            assert(j_fft_it.contains("info"));
+
+            string name = j_fft_it.at("name");
+
+            addNewFFT(name, j_fft_it.at("info"), false);
+        }
+    }
+    catch (json::exception& e)
+    {
+        logerr << "FFTManager: importFFTs: could not load file '"
+               << filename << "', exception '" << e.what() << "'";
+        throw e;
+    }
+
+    saveDBFFTs();
+
+    updateFFTNamesAll();
+
+    emit fftsChangedSignal();
 }
 
 FFTsConfigurationDialog* FFTManager::configurationDialog()

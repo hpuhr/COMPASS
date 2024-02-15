@@ -49,7 +49,6 @@ QVariant FFTTableModel::data(const QModelIndex& index, int role) const
         if (fft_man_.hasDBFFT(fft_name))
         {
             DBFFT& fft = fft_man_.dbFFT(fft_name);
-            assert (fft_man_.hasConfigFFT(fft_name));
 
             if (col_name == "Name")
                 return fft.name().c_str();

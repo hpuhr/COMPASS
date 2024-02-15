@@ -47,12 +47,13 @@ public:
     void createConfigFFT(const std::string& name);
     ConfigurationFFT& configFFT(const std::string& name);
     const std::vector<std::unique_ptr<ConfigurationFFT>>& configFFTs() const;
-    void deleteAllConfigFFTs();
+    void deleteAllFFTs();
 
     bool hasDBFFT(const std::string& name);
     DBFFT& dbFFT(const std::string& name);
     bool canAddNewFFTFromConfig (const std::string& name);
     void addNewFFT (const std::string& name); // be sure not to call from different thread
+    void addNewFFT (const std::string& name, nlohmann::json info, bool emit_signal);
     const std::vector<std::unique_ptr<DBFFT>>& dbFFTs() const;
 
     void deleteFFT(const std::string& name);
@@ -60,6 +61,9 @@ public:
     const std::vector<std::string>& getAllFFTNames(); // both config and db
 
     void saveDBFFTs();
+
+    void exportFFTs(const std::string& filename);
+    void importFFTs(const std::string& filename);
 
     FFTsConfigurationDialog* configurationDialog();
 

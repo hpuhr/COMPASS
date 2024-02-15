@@ -221,11 +221,12 @@ void FFTsConfigurationDialog::importClickedSlot()
     {
         table_model_->beginModelReset();
 
-//        ds_man_.importFFTs(filename);
+        fft_man_.importFFTs(filename);
 
         table_model_->endModelReset();
 
-//        edit_widget_->updateContent();
+        table_view_->resizeColumnsToContents();
+        edit_widget_->updateContent();
     }
 }
 
@@ -234,8 +235,7 @@ void FFTsConfigurationDialog::deleteAllClickedSlot()
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(
                 nullptr, "Delete All FFTs",
-                "This will delete all FFTs existing in the configuration,"
-                         " but not those (also) defined in the database. Do you want to continue?",
+                "This will delete all FFTs existing in the configuration and in the database. Do you want to continue?",
                 QMessageBox::Yes | QMessageBox::No);
 
     if (reply == QMessageBox::Yes)
@@ -244,7 +244,7 @@ void FFTsConfigurationDialog::deleteAllClickedSlot()
 
         table_model_->beginModelReset();
 
-        fft_man_.deleteAllConfigFFTs();
+        fft_man_.deleteAllFFTs();
         edit_widget_->clear();
 
         table_model_->endModelReset();
@@ -263,7 +263,7 @@ void FFTsConfigurationDialog::exportClickedSlot()
     {
         loginf << "FFTsConfigurationDialog: exportClickedSlot: file '" << filename << "'";
 
-//        ds_man_.exportFFTs(filename);
+        fft_man_.exportFFTs(filename);
     }
 }
 
