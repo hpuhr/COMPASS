@@ -19,7 +19,7 @@ ConfigurationFFT::~ConfigurationFFT()
 {
 }
 
-DBFFT* ConfigurationFFT::getAsNewDBDS()
+DBFFT* ConfigurationFFT::getAsNewDBFFT()
 {
     DBFFT* new_fft = new DBFFT();
     new_fft->name(name_);

@@ -152,9 +152,9 @@ void FFTManager::addNewFFT (const std::string& name)
     {
         loginf << "FFTManager: addNewFFT: name " << name << " from config";
 
-        ConfigurationFFT& cfg_ds = configFFT(name);
+        ConfigurationFFT& cfg_fft = configFFT(name);
 
-        db_ffts_.emplace_back(std::move(cfg_ds.getAsNewDBDS()));
+        db_ffts_.emplace_back(std::move(cfg_fft.getAsNewDBFFT()));
         sortDBFFTs();
     }
     else
@@ -163,10 +163,10 @@ void FFTManager::addNewFFT (const std::string& name)
 
         createConfigFFT(name);
 
-        DBFFT* new_ds = new DBFFT();
-        new_ds->name(name);
+        DBFFT* new_fft = new DBFFT();
+        new_fft->name(name);
 
-        db_ffts_.emplace_back(std::move(new_ds));
+        db_ffts_.emplace_back(std::move(new_fft));
 
         sortDBFFTs();
     }
@@ -318,6 +318,8 @@ void FFTManager::loadDBFFTs()
     {
         if (canAddNewFFTFromConfig(cfg_fft_it->name()))
         {
+            loginf << "FFTManager: loadDBFFTs: creating db fft '" << cfg_fft_it->name() << "'";
+
             addNewFFT(cfg_fft_it->name()); // creates from config if possible
             new_created = true;
         }
@@ -325,6 +327,20 @@ void FFTManager::loadDBFFTs()
 
     if (new_created)
         saveDBFFTs(); // save if new ones were created
+
+    // create db into config ones if missing
+    for (const auto& db_fft_it : db_ffts_)
+    {
+        string fft_name = db_fft_it->name();
+        if (!hasConfigFFT(fft_name)) // create
+        {
+            loginf << "FFTManager: loadDBFFTs: creating cfg fft '" << fft_name << "'";
+
+            createConfigFFT(fft_name);
+            assert (hasConfigFFT(fft_name));
+            configFFT(fft_name).info(db_fft_it->info());
+        }
+    }
 
     updateFFTNamesAll();
     sortDBFFTs();

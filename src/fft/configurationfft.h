@@ -14,7 +14,7 @@ public:
                             FFTManager& ds_manager);
     virtual ~ConfigurationFFT();
 
-    DBFFT* getAsNewDBDS();
+    DBFFT* getAsNewDBFFT();
 
 protected:
     virtual void checkSubConfigurables() {}
