@@ -382,7 +382,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
 
 void ManageSectorsTask::addPolygon (const std::string& sector_name, OGRPolygon& polygon, bool import)
 {
-    loginf << "ManageSectorsTask: addPolygon: sector_name '" << sector_name
+    logdbg << "ManageSectorsTask: addPolygon: sector_name '" << sector_name
            << "' polygon '" << polygon.getGeometryName() << "'";
 
     OGRLinearRing* ring = polygon.getExteriorRing();
@@ -414,7 +414,7 @@ void ManageSectorsTask::addPolygon (const std::string& sector_name, OGRPolygon& 
 
 void ManageSectorsTask::addLinearRing (const std::string& sector_name, OGRLinearRing& ring, bool import)
 {
-    loginf << "ManageSectorsTask: addLinearRing: layer '" << layer_name_ << "' sector_name '" << sector_name;
+    logdbg<< "ManageSectorsTask: addLinearRing: layer '" << layer_name_ << "' sector_name '" << sector_name;
 
     vector<pair<double,double>> points;
 

@@ -328,7 +328,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
 
     if (diff_cnt)
     {
-        loginf << "ProjectionManager: calculateRadarPlotPositions: lat/lon avg diff "
+        logdbg << "ProjectionManager: calculateRadarPlotPositions: lat/lon avg diff "
                << diff_avg / (float) diff_cnt << " min " << diff_min << " max " << diff_max << " cnt " << diff_cnt;
     }
 

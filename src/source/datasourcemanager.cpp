@@ -56,7 +56,7 @@ void DataSourceManager::generateSubConfigurable(const std::string& class_id,
     {
         unique_ptr<dbContent::ConfigurationDataSource> ds {
             new dbContent::ConfigurationDataSource(class_id, instance_id, *this)};
-        loginf << "DataSourceManager: generateSubConfigurable: adding config ds "
+        logdbg << "DataSourceManager: generateSubConfigurable: adding config ds "
                    << ds->name() << " sac/sic " <<  ds->sac() << "/" << ds->sic();
 
         assert (!hasConfigDataSource(Number::dsIdFrom(ds->sac(), ds->sic())));
