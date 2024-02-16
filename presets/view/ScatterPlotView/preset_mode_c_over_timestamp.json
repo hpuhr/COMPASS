@@ -1,0 +1,39 @@
+{
+    "app_version": "0.7.5",
+    "category": "",
+    "deployed": false,
+    "description": "",
+    "modified": false,
+    "name": "Mode C over Timestamp",
+    "timestamp": "2024-02-15 14:48:17.053",
+    "view": "ScatterPlotView",
+    "view_config": {
+        "parameters": {
+            "data_var_x_dbo": "Meta",
+            "data_var_x_name": "Timestamp",
+            "data_var_y_dbo": "Meta",
+            "data_var_y_name": "Mode C Code"
+        },
+        "sub_configs": {
+            "ScatterPlotViewDataSource": {
+                "ScatterPlotViewDataSource0": {
+                    "parameters": null,
+                    "sub_configs": {
+                        "VariableOrderedSet": {
+                            "VariableOrderedSet0": {
+                                "parameters": {
+                                    "variable_definitions": []
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ScatterPlotViewWidget": {
+                "ScatterPlotViewWidget0": {
+                    "parameters": null
+                }
+            }
+        }
+    }
+}
