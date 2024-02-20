@@ -55,6 +55,8 @@ ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidge
     addMappingsTab();
 
     setLayout(main_layout_);
+
+    connect(&task, &ASTERIXImportTask::decodingStateChanged, this, &ASTERIXImportTaskWidget::decodingStateChangedSlot);
 }
 
 void ASTERIXImportTaskWidget::addMainTab()
@@ -342,16 +344,18 @@ void ASTERIXImportTaskWidget::updateSourcesGrid()
     unsigned int row{0};
 
     if (task_.isImportNetwork())
+    {
         sources_grid_->addWidget(new QLabel("Source: Network"), row, 0);
+    }
     else // files
     {
-        for (auto& file_info : task_.filesInfo())
+        for (auto& file_info : task_.source().files())
         {
-            sources_grid_->addWidget(new QLabel(file_info.filename_.c_str()), row, 0);
+            sources_grid_->addWidget(new QLabel(file_info.filename.c_str()), row, 0);
 
-            if (!file_info.decoding_tried_)
+            if (!file_info.decodingTested())
                 sources_grid_->addWidget(new QLabel("?"), row, 1);
-            else if (file_info.errors_found_)
+            else if (!file_info.canDecode())
                 sources_grid_->addWidget(new QLabel("Decoding Errors"), row, 1);
             else
                 sources_grid_->addWidget(new QLabel("OK"), row, 1);
@@ -367,4 +371,7 @@ ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
     return override_widget_;
 }
 
-
+void ASTERIXImportTaskWidget::decodingStateChangedSlot()
+{
+    updateSourcesGrid();
+}

@@ -22,20 +22,22 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 /**
+ * PCAP file-based ASTERIX decoder.
 */
-class ASTERIXFileDecoder : public ASTERIXDecoderFile
+class ASTERIXPCAPDecoder : public ASTERIXDecoderFile
 {
 public:
-    ASTERIXFileDecoder(ASTERIXImportSource& source,
+    ASTERIXPCAPDecoder(ASTERIXImportSource& source,
                        ASTERIXImportTask& task, 
                        const ASTERIXImportTaskSettings& settings);
-    virtual ~ASTERIXFileDecoder();
+    virtual ~ASTERIXPCAPDecoder();
 
-    ASTERIXImportSource::SourceType fileSourceType() const override final { return ASTERIXImportSource::SourceType::FileASTERIX; }
+    ASTERIXImportSource::SourceType fileSourceType() const override final { return ASTERIXImportSource::SourceType::FilePCAP; }
 
 protected:
     void stop_impl() override final;
 
+    bool checkFile(ASTERIXImportFileInfo& file_info, std::string& error) const override final;
     bool checkDecoding(ASTERIXImportFileInfo& file_info, int section_idx, std::string& error) const override final;
     void processFile(ASTERIXImportFileInfo& file_info) override final;
 };

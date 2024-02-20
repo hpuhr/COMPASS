@@ -24,6 +24,7 @@
 #include "asterixjsonmappingjob.h"
 #include "asterixpostprocessjob.h"
 #include "asterixjsonparsingschema.h"
+#include "asteriximportsource.h"
 #include "task.h"
 #include "appmode.h"
 
@@ -38,7 +39,6 @@ class TaskManager;
 
 class ASTERIXCategoryConfig;
 class ASTERIXStatusDialog;
-class ASTERIXImportTaskDialog;
 
 class QProgressDialog;
 
@@ -67,19 +67,6 @@ class ASTERIXImportTaskSettings
 {
 public:
     ASTERIXImportTaskSettings();
-
-    bool importFile() const { return import_files_; }
-
-    std::vector<ASTERIXFileInfo>& filesInfo() { return files_info_; }
-    const std::vector<ASTERIXFileInfo>& filesInfo() const { return files_info_; }
-
-    void clearImportFilenames () { files_info_.clear(); }
-    void addImportFilename(const std::string& filename, unsigned int line_id)
-    {
-        files_info_.push_back(ASTERIXFileInfo());
-        files_info_.back().filename_ = filename;
-        //files_info_.back().line_id_ = line_id; // TODO
-    }
 
     // registered
     bool debug_jasterix_;
@@ -116,14 +103,6 @@ public:
     bool filter_tod_active_{false};
     bool filter_position_active_{false};
     bool filter_modec_active_{false};
-
-private:
-    friend class ASTERIXImportTask;
-
-    bool import_files_ {false}; // false = network, true file
-
-    //std::string current_filename_;
-    std::vector<ASTERIXFileInfo> files_info_;
 };
 
 /**
@@ -134,11 +113,9 @@ class ASTERIXImportTask : public Task, public Configurable
 
 signals:
     void configChanged();
+    void decodingStateChanged();
 
 public slots:
-    void dialogImportSlot();
-    void dialogCancelSlot();
-
     void decodeASTERIXDoneSlot();
     void decodeASTERIXObsoleteSlot();
     void addDecodedASTERIXSlot();
@@ -158,15 +135,11 @@ public:
                       TaskManager& task_manager);
     virtual ~ASTERIXImportTask();
 
-    ASTERIXImportTaskDialog* dialog();
-
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
     void asterixFileFraming(const std::string& asterix_framing);
     void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
-
-    bool canImportFiles();
 
     virtual bool canRun() override;
     virtual void run() override;
@@ -174,21 +147,25 @@ public:
     virtual void stop() override;
     bool isRunning() const;
 
+    void runDialog(QWidget* parent = nullptr);
+
     std::vector<std::string> fileList();
     void addFile(const std::string& filename);
     void clearFileList ();
 
-    void addImportFileNames(const std::vector<std::string>& filenames, unsigned int line_id=0);
-    std::vector<ASTERIXFileInfo>& filesInfo() { return settings_.filesInfo(); }
-    std::string importFilenamesStr() const;
-    void clearImportFilesInfo ();
+    const ASTERIXImportSource& source() const { return source_; }
+    ASTERIXImportSource& source() { return source_; }
 
-    void importNetwork();
-    bool isImportNetwork();
+    //void addImportFileNames(const std::vector<std::string>& filenames, unsigned int line_id=0);
+    //std::vector<ASTERIXFileInfo>& filesInfo();
+    //std::string importFilenamesStr() const;
+    //void clearImportFilesInfo ();
+    //void importNetwork();
 
-    std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { assert (jasterix_); return jasterix_; }
-    void refreshjASTERIX();
+    bool isImportNetwork() const;
 
+    std::shared_ptr<jASTERIX::jASTERIX> jASTERIX(bool refresh = false) const;
+    
     bool hasConfiguratonFor(unsigned int category);
     bool decodeCategory(unsigned int category);
     void decodeCategory(unsigned int category, bool decode);
@@ -205,6 +182,9 @@ public:
 
     ASTERIXImportTaskSettings& settings();
 
+    ASTERIXDecoderBase* decoder() { return decoder_.get(); }
+    const ASTERIXDecoderBase* decoder() const { return decoder_.get(); }
+
     void testFileDecoding();
 
 protected:
@@ -218,10 +198,15 @@ protected:
 
     void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
 
-    std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
+    void refreshjASTERIX() const;
+
+    void sourceChanged();
+
+    mutable std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
 
     ASTERIXImportTaskSettings settings_;
+    ASTERIXImportSource       source_;
 
     bool file_decoding_tested_ {false};
     bool file_decoding_errors_detected_ {false};
@@ -230,22 +215,19 @@ protected:
 
     unsigned int num_packets_in_processing_{0};
     unsigned int num_packets_total_{0};
-
     unsigned int num_records_ {0};
 
     boost::posix_time::ptime start_time_;
     std::unique_ptr<QProgressDialog> file_progress_dialog_;
 
-    std::unique_ptr<ASTERIXImportTaskDialog> dialog_;
-
     std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
 
     std::shared_ptr<ASTERIXJSONParsingSchema> schema_;
+    std::shared_ptr<ASTERIXDecodeJob>         decode_job_;
+    std::unique_ptr<ASTERIXDecoderBase>       decoder_;
 
-    std::shared_ptr<ASTERIXDecodeJob> decode_job_;
-
-    std::vector<std::shared_ptr<ASTERIXJSONMappingJob>> json_map_jobs_;
-    std::vector<std::shared_ptr<ASTERIXPostprocessJob>> postprocess_jobs_;
+    std::vector<std::shared_ptr<ASTERIXJSONMappingJob>>         json_map_jobs_;
+    std::vector<std::shared_ptr<ASTERIXPostprocessJob>>         postprocess_jobs_;
     std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_job_buffers_;
 
     boost::posix_time::ptime last_insert_time_;

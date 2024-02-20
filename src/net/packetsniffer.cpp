@@ -16,6 +16,8 @@
  */
 
 #include "packetsniffer.h"
+#include "logger.h"
+#include "files.h"
 
 #include <iostream>
 #include <cassert>
@@ -33,21 +35,36 @@
 #include <netinet/udp.h>
 #include <arpa/inet.h>
 
+#include <QString>
+#include <QStringList>
+
+const std::string PacketSniffer::SignatureStringSeparator = " => ";
+const std::string PacketSniffer::SignatureIPPortSeparator = ":";
+
 /**
 */
 PacketSniffer::PacketSniffer() = default;
 
 /**
 */
-PacketSniffer::~PacketSniffer() = default;
+PacketSniffer::~PacketSniffer()
+{
+    //close any opened pcap file
+    closePCAPFile();
+}
 
 /**
 */
 void PacketSniffer::clear()
 {
-    num_read_ = 0;
+    num_read_         = 0;
+    bytes_read_       = 0;
+    num_read_total_   = 0;
+    bytes_read_total_ = 0;
+    packet_idx_       = 0;
 
-    transactions_.clear();
+    data_per_signature_.clear();
+    data_ = {};
 
     unknown_link_types_.clear();
     unknown_eth_types_.clear();
@@ -77,19 +94,54 @@ std::pair<size_t, std::set<int>> PacketSniffer::unknownIPProtocols() const
 
 /**
 */
+bool PacketSniffer::hasUnknownPacketHeaders() const
+{
+    return (!unknown_link_types_.empty() ||
+            !unknown_eth_types_.empty()  ||
+            !unknown_ip_prot_.empty());
+}
+
+/**
+*/
+bool PacketSniffer::chunkEnded(const ReadConfig& read_config) const
+{
+    //check filters
+    if (packet_idx_ < read_config.start_index || packet_idx_ > read_config.end_index)
+        return true;
+    if (num_read_ >= read_config.max_packets)
+        return true;
+    if (bytes_read_ >= read_config.max_bytes)
+        return true;
+
+    return false;
+}
+
+/**
+*/
 void PacketSniffer::digestPCAPPacket(const struct pcap_pkthdr* pkthdr, 
                                      const u_char* packet,
-                                     int link_layer_type)
+                                     int link_layer_type,
+                                     const ReadConfig& read_config,
+                                     bool& chunk_ended)
 {
+    //chunk already ended?
+    if (chunk_ended)
+        return;
+
+    //skip packet?
+    chunk_ended = chunkEnded(read_config);
+    if (chunk_ended)
+        return;
+    
     if (link_layer_type == DLT_EN10MB)
     {
         const struct ether_header* eh = (struct ether_header*)packet;
-        digestPCAPEtherPacket(ntohs(eh->ether_type), pkthdr, packet + sizeof(struct ether_header), sizeof(struct ether_header));
+        digestPCAPEtherPacket(ntohs(eh->ether_type), pkthdr, packet + sizeof(struct ether_header), sizeof(struct ether_header), read_config);
     }
     else if(link_layer_type == DLT_LINUX_SLL)
     {
         const struct sll_header* sll = (struct sll_header*)packet;
-        digestPCAPEtherPacket(ntohs(sll->sll_protocol), pkthdr, packet + sizeof(struct sll_header), sizeof(struct sll_header));
+        digestPCAPEtherPacket(ntohs(sll->sll_protocol), pkthdr, packet + sizeof(struct sll_header), sizeof(struct sll_header), read_config);
     }
     else
     {
@@ -102,18 +154,19 @@ void PacketSniffer::digestPCAPPacket(const struct pcap_pkthdr* pkthdr,
 void PacketSniffer::digestPCAPEtherPacket(int ether_type, 
                                           const struct pcap_pkthdr* pkthdr, 
                                           const u_char* packet, 
-                                          unsigned long data_offs)
+                                          unsigned long data_offs,
+                                          const ReadConfig& read_config)
 {
-    const struct ip*           ipHeader;
-    const struct tcphdr*       tcpHeader;
-    const struct udphdr*       udpHeader;
+    const struct ip*      ipHeader;
+    const struct tcphdr* tcpHeader;
+    const struct udphdr* udpHeader;
 
     char  sourceIP[INET_ADDRSTRLEN];
     char  destIP  [INET_ADDRSTRLEN];
     u_int sourcePort, destPort;
 
-    u_char* data = nullptr;
-    size_t dataLength = 0;
+    u_char* data       = nullptr;
+    size_t  dataLength = 0;
 
     if (ether_type == ETHERTYPE_IP) 
     {
@@ -130,7 +183,7 @@ void PacketSniffer::digestPCAPEtherPacket(int ether_type,
             data       = (u_char*)(packet + sizeof(struct ip) + sizeof(struct tcphdr));
             dataLength = pkthdr->len - (data_offs + sizeof(struct ip) + sizeof(struct tcphdr));
 
-            std::cout << "TCP Packet " << sourceIP << ":" << sourcePort << " => " << destIP << ":" << destPort << " = " << dataLength << " byte(s)" << std::endl;
+            logdbg << "TCP Packet " << sourceIP << ":" << sourcePort << " => " << destIP << ":" << destPort << " = " << dataLength << " byte(s)";
         } 
         else if (ipHeader->ip_p == IPPROTO_UDP) 
         {
@@ -141,7 +194,7 @@ void PacketSniffer::digestPCAPEtherPacket(int ether_type,
             data       = (u_char*)(packet + sizeof(struct ip) + sizeof(struct udphdr));
             dataLength = pkthdr->len - (data_offs + sizeof(struct ip) + sizeof(struct udphdr));
 
-            std::cout << "UDP Packet " << sourceIP << ":" << sourcePort << " => " << destIP << ":" << destPort << " = " << dataLength << " byte(s)" << std::endl;
+            logdbg << "UDP Packet " << sourceIP << ":" << sourcePort << " => " << destIP << ":" << destPort << " = " << dataLength << " byte(s)";
         }
         else
         {
@@ -157,9 +210,7 @@ void PacketSniffer::digestPCAPEtherPacket(int ether_type,
     if (!data)
         return;
 
-    
-
-    addPacket(sourceIP, sourcePort, destIP, destPort, data, dataLength);
+    addPacket(sourceIP, sourcePort, destIP, destPort, data, dataLength, read_config);
 }
 
 /**
@@ -169,41 +220,64 @@ void PacketSniffer::addPacket(const std::string& src_ip,
                               const std::string& dst_ip,
                               unsigned int dst_port,
                               u_char* data,
-                              size_t data_len)
+                              size_t data_len,
+                              const ReadConfig& read_config)
 {
-    auto& tdata = transactions_[ Transaction(src_ip, src_port, dst_ip, dst_port) ];
+    Signature sig(src_ip, src_port, dst_ip, dst_port);
+
+    //check signature filter
+    if (!read_config.signatures_to_read.empty() && 
+         read_config.signatures_to_read.count(sig) == 0)
+         return;
+
+    //log encountered signature in any case
+    auto& sig_data = data_per_signature_[ sig ];
+
+    //collect data
+    auto& tdata = read_config.read_style == ReadStyle::PerSignature ? sig_data : data_;
 
     tdata.packets += 1;
     tdata.size    += data_len;
 
     tdata.data.insert(tdata.data.end(), data, data + data_len);
 
-    num_read_   += 1;
-    bytes_read_ += data_len;
+    num_read_         += 1;
+    bytes_read_       += data_len;
+    num_read_total_   += 1;
+    bytes_read_total_ += data_len;
 }
 
-namespace
+/**
+*/
+std::string PacketSniffer::signatureToString(const Signature& signature)
 {
-    struct SnifferConfig
+    return (std::get<0>(signature) + ":" + std::to_string(std::get<1>(signature)) + SignatureStringSeparator +
+            std::get<2>(signature) + ":" + std::to_string(std::get<3>(signature))); 
+}
+
+/**
+*/
+PacketSniffer::Signature PacketSniffer::signatureFromString(const std::string& str)
+{
+    auto parts = QString::fromStdString(str).split(QString::fromStdString(SignatureStringSeparator));
+    assert(parts.count() == 2&& !parts[ 0 ].isEmpty() && !parts[ 1 ].isEmpty());
+
+    auto splitIPPort = [ & ] (const QString& ip_port_str)
     {
-        PacketSniffer* sniffer         = nullptr;
-        int            link_layer_type = -1;
+        auto ip_port = ip_port_str.split(QString::fromStdString(SignatureIPPortSeparator));
+        assert(ip_port.count() == 2 && !ip_port[ 0 ].isEmpty() && !ip_port[ 1 ].isEmpty());
+
+        bool ok = false;
+        unsigned int port = ip_port[ 1 ].toUInt(&ok);
+        assert(ok);
+
+        return std::make_pair(ip_port[ 0 ].toStdString(), port);
     };
 
-    /**
-    */
-    void pcapPacketHandler(u_char *userData, 
-                           const struct pcap_pkthdr* pkthdr, 
-                           const u_char* packet)
-    {
-        //ugly cast ahead
-        SnifferConfig* config = (SnifferConfig*)userData;
+    auto ip_port0 = splitIPPort(parts[ 0 ]);
+    auto ip_port1 = splitIPPort(parts[ 1 ]);
 
-        assert(config->sniffer);
-
-        //digest packet
-        config->sniffer->digestPCAPPacket(pkthdr, packet, config->link_layer_type);
-    }
+    return Signature(ip_port0.first, ip_port0.second, ip_port1.first, ip_port1.second);
 }
 
 /**
@@ -211,19 +285,30 @@ namespace
 void PacketSniffer::print() const
 {
     std::cout << "=====================================================================" << std::endl;
-    std::cout << "num packets read: " << numRead() << std::endl;
-    std::cout << "num bytes read:   " << numBytesRead() << std::endl;
+    std::cout << "num packets read:       " << numPacketsRead() << std::endl;
+    std::cout << "num bytes read:         " << numBytesRead() << std::endl;
+    std::cout << "num packets read total: " << numPacketsReadTotal() << std::endl;
+    std::cout << "num bytes read total:   " << numBytesReadTotal() << std::endl;
     std::cout << std::endl;
-    std::cout << "encountered transactions:" << std::endl;
-
-    for (const auto& t : transactions())
+    
+    auto printData = [ & ] (const std::string& sig_str, const Data& data)
     {
-        std::cout << "    " << std::get<0>(t.first) << ":" << std::get<1>(t.first) << " => "
-                            << std::get<2>(t.first) << ":" << std::get<3>(t.first) << ": "
-                            << t.second.packets << " packet(s) "
-                            << t.second.size << " byte(s) [" << t.second.data.size() << "]"
+        std::cout << "    " << sig_str << ": "
+                            << data.packets << " packet(s) "
+                            << data.size << " byte(s) [" << data.data.size() << "]"
                             << std::endl;
-    }
+    };
+
+    std::cout << "encountered signatures:" << std::endl;
+
+    for (const auto& d : dataPerSignature())
+        printData(PacketSniffer::signatureToString(d.first), d.second);
+
+    std::cout << std::endl;
+    std::cout << "encountered data:" << std::endl;
+
+    printData("data", data_);
+
     std::cout << std::endl;
 
     auto printUnknown = [ & ] (const std::pair<size_t, std::set<int>>& unknown, const std::string& name)
@@ -239,35 +324,167 @@ void PacketSniffer::print() const
         std::cout << ss.str() << std::endl;
     };
 
-    printUnknown(unknownLinkTypes(), "link types");
+    printUnknown(unknownLinkTypes()    , "link types"    );
     printUnknown(unknownEthernetTypes(), "ethernet types");
-    printUnknown(unknownIPProtocols(), "ip protocols");
+    printUnknown(unknownIPProtocols()  , "ip protocols"  );
+}
+
+namespace
+{
+    /**
+    */
+    struct SnifferConfig
+    {
+        PacketSniffer*            sniffer         = nullptr;
+        int                       link_layer_type = -1;
+        PacketSniffer::ReadConfig read_config;
+        bool                      chunk_ended     = false;
+    };
+
+    /**
+    */
+    void pcapPacketHandler(u_char *userData, 
+                           const struct pcap_pkthdr* pkthdr, 
+                           const u_char* packet)
+    {
+        //ugly cast ahead
+        SnifferConfig* config = (SnifferConfig*)userData;
+
+        assert(config->sniffer);
+
+        //digest packet
+        config->sniffer->digestPCAPPacket(pkthdr, packet, config->link_layer_type, config->read_config, config->chunk_ended);
+    }
 }
 
 /**
 */
-PacketSniffer::Error PacketSniffer::readPCAP(const std::string& fn)
+void PacketSniffer::closePCAPFile()
 {
+    if (pcap_file_)
+    {
+        pcap_close(pcap_file_);
+        pcap_file_ = nullptr;
+
+        if (device_ == Device::File)
+            device_ = Device::NoDevice;
+    }
+}
+
+/**
+*/
+bool PacketSniffer::openPCAP(const std::string& fn)
+{
+    clear();
+    closePCAPFile();
+
     char errbuf[PCAP_ERRBUF_SIZE];
 
-    //open pcap file
-    pcap_t* fp = pcap_open_offline(fn.c_str(), errbuf);
-    if (fp == NULL) 
-        return Error::OpenFailed;
+    pcap_file_ = pcap_open_offline(fn.c_str(), errbuf);
+    if (pcap_file_ == NULL)
+    {
+        logerr << "PacketSniffer: openPCAP: open pcap file '" << Utils::Files::getFilenameFromPath(fn) << "' failed";
+        return false;
+    }
 
     //get link layer type
-    int link_layer_type = pcap_datalink(fp);
+    link_layer_type_ = pcap_datalink(pcap_file_);
 
-    std::cout << "link layer type: " << link_layer_type << std::endl;
+    device_ = Device::File;
+
+    loginf << "PacketSniffer: openPCAP: opened pcap file '" << Utils::Files::getFilenameFromPath(fn) << "'" << " with link layer type " << link_layer_type_;
+
+    return true;
+ }
+
+/**
+*/
+bool PacketSniffer::readFile(ReadStyle read_style,
+                             size_t max_packets,
+                             size_t max_bytes,
+                             size_t start_index,
+                             size_t end_index,
+                             const std::set<Signature>& signatures_to_read)
+{
+    clear();
+
+    if (device_ != Device::File || pcap_file_ == nullptr)
+    {
+        logerr << "PacketSniffer: read: no file device opened";
+        return false;
+    }
 
     //config to be passed to packet handler
     SnifferConfig config;
-    config.sniffer         = this;
-    config.link_layer_type = link_layer_type;
+
+    config.sniffer            = this;
+    config.link_layer_type    = link_layer_type_;
+
+    config.read_config.read_style         = read_style;
+    config.read_config.start_index        = start_index;
+    config.read_config.end_index          = end_index;
+    config.read_config.max_packets        = max_packets;
+    config.read_config.max_bytes          = max_bytes;
+    config.read_config.signatures_to_read = signatures_to_read;
 
     //loop packets
-    if (pcap_loop(fp, 0, pcapPacketHandler, (u_char*)&config) < 0) 
-        return Error::ParseFailed;
+    if (pcap_loop(pcap_file_, 0, pcapPacketHandler, (u_char*)&config) < 0) 
+        return false;
 
-    return Error::NoError;
+    return true;
+}
+
+/**
+*/
+boost::optional<PacketSniffer::Data> PacketSniffer::readFileNext(size_t max_packets, 
+                                                                 size_t max_bytes, 
+                                                                 const std::set<Signature>& signatures_to_read)
+{
+    if (device_ != Device::File || pcap_file_ == nullptr)
+    {
+        logerr << "PacketSniffer: readFileNext: no file device opened";
+        return {};
+    }
+
+    //config to be passed to packet handler
+    SnifferConfig config;
+
+    config.sniffer            = this;
+    config.link_layer_type    = link_layer_type_;
+
+    config.read_config.read_style         = ReadStyle::Accumulate;
+    config.read_config.max_packets        = max_packets;
+    config.read_config.max_bytes          = max_bytes;
+    config.read_config.signatures_to_read = signatures_to_read;
+
+    //reset counts
+    num_read_   = 0;
+    bytes_read_ = 0;
+    data_       = {};
+
+    pcap_pkthdr** pkthdr;
+    const uchar** packet;
+
+    bool error = false;
+
+    while (!config.chunk_ended)
+    {
+        int ret = pcap_next_ex(pcap_file_, pkthdr, packet);
+
+        //file ended?
+        if (ret == PCAP_ERROR_BREAK)
+            break;
+        
+        //read error?
+        if (ret != 1)
+        {
+            error = true;
+            break;
+        }
+    }
+
+    if (error)
+        return {};
+
+    return data_;
 }

@@ -21,6 +21,8 @@
 #include "logger.h"
 #include "asterixfiledecoder.h"
 #include "asterixnetworkdecoder.h"
+#include "asterixpcapdecoder.h"
+#include "asteriximportsource.h"
 
 #include <QThread>
 
@@ -34,20 +36,17 @@ using namespace std;
 
 /**
 */
-ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, 
-                                   const ASTERIXImportTaskSettings& settings,
+ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task,
                                    ASTERIXPostProcess& post_process)
 :   Job          ("ASTERIXDecodeJob"),
     task_        (task), 
-    settings_    (settings),
+    settings_    (task.settings()),
+    decoder_     (task.decoder()),
     post_process_(post_process)
 {
     logdbg << "ASTERIXDecodeJob: ctor";
 
-    if (settings_.importFile())
-        decoder_.reset(new ASTERIXFileDecoder(*this, task_, settings_));
-    else
-        decoder_.reset(new ASTERIXNetworkDecoder(*this, task_, settings_));
+    assert(decoder_);
 }
 
 /**
@@ -69,7 +68,7 @@ void ASTERIXDecodeJob::run()
     done_       = false;
 
     assert (decoder_);
-    decoder_->start();
+    decoder_->start(this);
 
     if (!obsolete_)
         assert(extracted_data_.size() == 0);

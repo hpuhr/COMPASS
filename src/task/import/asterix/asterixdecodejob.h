@@ -27,6 +27,7 @@
 class ASTERIXImportTask;
 class ASTERIXImportTaskSettings;
 class ASTERIXPostProcess;
+class ASTERIXImportSource;
 
 /**
  * is a job, creates specifc reader/decoder, does post-processing
@@ -40,7 +41,6 @@ signals:
 
 public:
     ASTERIXDecodeJob(ASTERIXImportTask& task, 
-                     const ASTERIXImportTaskSettings& settings, 
                      ASTERIXPostProcess& post_process);
     virtual ~ASTERIXDecodeJob();
 
@@ -85,11 +85,11 @@ private:
 
     friend class ASTERIXFileDecoder;
     friend class ASTERIXNetworkDecoder;
+    friend class ASTERIXPCAPDecoder; 
 
     ASTERIXImportTask& task_;
     const ASTERIXImportTaskSettings& settings_;
-
-    std::unique_ptr<ASTERIXDecoderBase> decoder_;
+    ASTERIXDecoderBase* decoder_ = nullptr;
 
     ASTERIXPostProcess& post_process_;
 

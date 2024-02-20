@@ -12,22 +12,20 @@ class ASTERIXImportTaskDialog : public QDialog
 {
     Q_OBJECT
 
-signals:
-    void importSignal();
-    void cancelSignal();
-
 public slots:
     void importClickedSlot();
     void cancelClickedSlot();
 
 public:
-    explicit ASTERIXImportTaskDialog(ASTERIXImportTask& task);
+    explicit ASTERIXImportTaskDialog(ASTERIXImportTask& task, QWidget* parent = nullptr);
 
     void updateSourcesInfo();
     void updateButtons();
+    void updateTitle();
 
 protected:
     void configChanged();
+    void decodingStateChangedSlot();
 
     ASTERIXImportTask& task_;
 

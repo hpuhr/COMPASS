@@ -24,6 +24,7 @@
 #include <QProgressBar>
 #include <QLabel>
 #include <QPushButton>
+#include <QApplication>
 
 /************************************************************************************
  * AsyncTask
@@ -121,6 +122,7 @@ bool AsyncTask::runAsyncDialog(AsyncTask* task,
         });
 
     dlg.exec();
+
     result.wait();
 
     return result.get();

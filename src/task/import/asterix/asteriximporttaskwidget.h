@@ -41,7 +41,7 @@ class ASTERIXImportTaskWidget : public QWidget
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void addParserSlot();
     void removeObjectParserSlot();
     void selectedObjectParserSlot(const QString& text);
@@ -50,6 +50,8 @@ class ASTERIXImportTaskWidget : public QWidget
     void dateChangedSlot(QDate date);
 
     void debugChangedSlot();
+
+    void decodingStateChangedSlot();
 
   public:
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);

@@ -749,7 +749,7 @@ void MainWindow::importAsterixRecordingSlot()
 
     ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    task.clearImportFilesInfo();
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FileASTERIX);
 
     if (dialog.exec())
     {
@@ -765,12 +765,13 @@ void MainWindow::importAsterixRecordingSlot()
             filenames_vec.push_back(filename.toStdString());
         }
 
-        task.addImportFileNames(filenames_vec);
+        task.source().addFiles(filenames_vec);//, file_line);
+
+        //task.addImportFileNames(filenames_vec);
 
         updateMenus();
 
-        task.dialog()->updateSourcesInfo();
-        task.dialog()->show();
+        task.runDialog(this);
     }
 
 //    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
@@ -797,12 +798,13 @@ void MainWindow::importRecentAsterixRecordingSlot()
 
     assert (filename.size());
 
-    COMPASS::instance().taskManager().asterixImporterTask().addImportFileNames({filename});
+    auto& task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FileASTERIX, {filename});
 
     updateMenus();
 
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSourcesInfo();
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+    task.runDialog(this);
 }
 
 void MainWindow::clearImportRecentAsterixRecordingsSlot()
@@ -818,10 +820,11 @@ void MainWindow::importAsterixFromNetworkSlot()
 {
     loginf << "MainWindow: importAsterixFromNetworkSlot";
 
-    COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
+    ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSourcesInfo();
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+    task.source().setSourceType(ASTERIXImportSource::SourceType::NetASTERIX);
+
+    task.runDialog(this);
 }
 
 void MainWindow::importJSONRecordingSlot()
