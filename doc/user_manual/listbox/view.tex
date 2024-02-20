@@ -15,7 +15,7 @@ A ListBox View displays DBContent data as text in tables to allow textual data i
 On the left side a number of tabs exist, one for each type of DBContent and an additional 'All' tab, each of which contains a table. \\
 
 On the right side resides the configuration area, which allows configuring what data is loaded and how it is displayed.
-The 'Reload' button on the bottom can be used to trigger a reload of the view's data.\\
+The \includegraphics[width=0.5cm,frame]{../../data/icons/refresh.png} 'Reload' button on the bottom can be used to trigger a reload of the view's data.\\
 
 Both areas can be resized and hidden if wanted.
 
@@ -34,15 +34,7 @@ If a value is undefined its cell remains empy. For each type of DBContent a dedi
 
 Please \textbf{note} that since a specific variable might only exist in certain DBContents, the number of columns in the various tables might differ.
 
-\section{Usage}
-
-\subsection{Selection}
-
-In the first column of each table checkboxes are shown, indicating whether that target report is currently selected. 
-Selection may be changed by selecting/de-selecting the respective checkboxes, or by altering the selection in other views (cross-selection). 
-If the selection is changed in one of the other views, this view is updated automatically.
-
-\subsection{Variable Lists}
+\section{View Presets}
 
 In the 'Variable Lists' section of the 'Config' tab, a variable list preset can be selected via a combo box. 
 Further, custom variable lists can be added, copied and removed by the user. \\
@@ -54,10 +46,19 @@ The following presets exist:
 \item Default: Common variables. Can not be renamed or removed.
 \item Mode A/C Info: Includes the Mode A/C valid/garbled/smoothed flags.
 \item Track Lifetime: Include the track begin/confirmed/coasted/end flags.
-\item ADS-B Position Quality: Includes the ADS-B MOPS version, NACp/NUCp/NIC/SIL information.
-\item Horizontal Movement: Includes hozizontal movement modes and derivatives.
+\item ADS-B Quality: Includes the ADS-B MOPS version, NACp/NUCp/NIC/SIL information.
+\item Horizontal Movement: Includes horizontal movement modes and derivatives.
+\item Vertical Movement: Includes vertical movement modes and derivatives.
 \end{itemize}
 \ \\
+
+\section{Usage}
+
+\subsection{Selection}
+
+In the first column of each table checkboxes are shown, indicating whether that target report is currently selected. 
+Selection may be changed by selecting/de-selecting the respective checkboxes, or by altering the selection in other views (cross-selection). 
+If the selection is changed in one of the other views, this view is updated automatically.
 
 \subsection{Variables}
 
