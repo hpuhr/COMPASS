@@ -11,6 +11,7 @@
 #include "logger.h"
 #include "dbcontentmanager.h"
 #include "dbcontent.h"
+#include "global.h"
 
 #include <QMessageBox>
 
@@ -401,7 +402,7 @@ std::pair<bool, float> FFTManager::isFromFFT(
         if (check_passed)
         {
             if (fft_it->hasAltitude())
-                return {true, fft_it->altitude()};
+                return {true, fft_it->altitude() / FT2M}; // meters to ft
             else
                 return {true, 0}; // no altitude info
         }

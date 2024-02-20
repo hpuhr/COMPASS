@@ -94,7 +94,7 @@ FFTEditWidget::FFTEditWidget(FFTManager& ds_man, FFTsConfigurationDialog& dialog
     properties_layout->addWidget(longitude_edit_, row, 1);
     row++;
 
-    properties_layout->addWidget(new QLabel("Altitude [ft]"), row, 0);
+    properties_layout->addWidget(new QLabel("Altitude [m]"), row, 0);
 
     altitude_edit_ = new QLineEdit();
     altitude_edit_->setValidator(new TextFieldDoubleValidator(-10000, 10000, 12));
