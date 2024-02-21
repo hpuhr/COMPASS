@@ -63,6 +63,8 @@ void PacketSniffer::clear()
     bytes_read_total_ = 0;
     packet_idx_       = 0;
 
+    reached_eof_ = false;
+
     data_per_signature_.clear();
     data_ = {};
 
@@ -106,14 +108,35 @@ bool PacketSniffer::hasUnknownPacketHeaders() const
 bool PacketSniffer::chunkEnded(const ReadConfig& read_config) const
 {
     //check filters
-    if (packet_idx_ < read_config.start_index || packet_idx_ > read_config.end_index)
+    if (packet_idx_ < read_config.chunk_start_index || packet_idx_ > read_config.chunk_end_index)
         return true;
-    if (num_read_ >= read_config.max_packets)
+    if (num_read_ >= read_config.chunk_max_packets)
         return true;
-    if (bytes_read_ >= read_config.max_bytes)
+    if (bytes_read_ >= read_config.chunk_max_bytes)
         return true;
 
     return false;
+}
+
+/**
+*/
+bool PacketSniffer::collectData(Data& data,
+                                const ReadConfig& read_config) const
+{
+    bool read_sig = (read_config.read_style == ReadStyle::PerSignature);
+
+    if (read_sig && data.packets >= read_config.data_max_packets_per_sig)
+        return false;
+    if (read_sig &&  data.data.size() >= read_config.data_max_bytes_per_sig)
+        return false;
+    if (packet_idx_ < read_config.data_start_index || packet_idx_ > read_config.data_end_index)
+        return false;
+    if (num_read_ >= read_config.data_max_packets)
+        return false;
+    if (bytes_read_ >= read_config.data_max_bytes)
+        return false;
+    
+    return true;
 }
 
 /**
@@ -147,6 +170,8 @@ void PacketSniffer::digestPCAPPacket(const struct pcap_pkthdr* pkthdr,
     {
         unknown_link_types_.push_back(link_layer_type);
     }
+
+    ++packet_idx_;
 }
 
 /**
@@ -213,6 +238,7 @@ void PacketSniffer::digestPCAPEtherPacket(int ether_type,
     addPacket(sourceIP, sourcePort, destIP, destPort, data, dataLength, read_config);
 }
 
+
 /**
 */
 void PacketSniffer::addPacket(const std::string& src_ip,
@@ -234,12 +260,13 @@ void PacketSniffer::addPacket(const std::string& src_ip,
     auto& sig_data = data_per_signature_[ sig ];
 
     //collect data
-    auto& tdata = read_config.read_style == ReadStyle::PerSignature ? sig_data : data_;
+    auto& tdata = (read_config.read_style == ReadStyle::PerSignature) ? sig_data : data_;
+
+    if (collectData(tdata, read_config))
+        tdata.data.insert(tdata.data.end(), data, data + data_len);
 
     tdata.packets += 1;
     tdata.size    += data_len;
-
-    tdata.data.insert(tdata.data.end(), data, data + data_len);
 
     num_read_         += 1;
     bytes_read_       += data_len;
@@ -402,6 +429,8 @@ bool PacketSniffer::openPCAP(const std::string& fn)
 bool PacketSniffer::readFile(ReadStyle read_style,
                              size_t max_packets,
                              size_t max_bytes,
+                             size_t max_packets_per_sig,
+                             size_t max_bytes_per_sig,
                              size_t start_index,
                              size_t end_index,
                              const std::set<Signature>& signatures_to_read)
@@ -417,14 +446,18 @@ bool PacketSniffer::readFile(ReadStyle read_style,
     //config to be passed to packet handler
     SnifferConfig config;
 
-    config.sniffer            = this;
-    config.link_layer_type    = link_layer_type_;
+    config.sniffer         = this;
+    config.link_layer_type = link_layer_type_;
 
-    config.read_config.read_style         = read_style;
-    config.read_config.start_index        = start_index;
-    config.read_config.end_index          = end_index;
-    config.read_config.max_packets        = max_packets;
-    config.read_config.max_bytes          = max_bytes;
+    config.read_config.read_style = read_style;
+
+    config.read_config.data_start_index         = start_index;
+    config.read_config.data_end_index           = end_index;
+    config.read_config.data_max_packets         = max_packets;
+    config.read_config.data_max_bytes           = max_bytes;
+    config.read_config.data_max_packets_per_sig = max_packets_per_sig;
+    config.read_config.data_max_bytes_per_sig   = max_bytes_per_sig;
+
     config.read_config.signatures_to_read = signatures_to_read;
 
     //loop packets
@@ -436,25 +469,36 @@ bool PacketSniffer::readFile(ReadStyle read_style,
 
 /**
 */
-boost::optional<PacketSniffer::Data> PacketSniffer::readFileNext(size_t max_packets, 
-                                                                 size_t max_bytes, 
-                                                                 const std::set<Signature>& signatures_to_read)
+boost::optional<PacketSniffer::Chunk> PacketSniffer::readFileNext(size_t max_packets, 
+                                                                  size_t max_bytes, 
+                                                                  const std::set<Signature>& signatures_to_read)
 {
+    //correct device opened?
     if (device_ != Device::File || pcap_file_ == nullptr)
     {
         logerr << "PacketSniffer: readFileNext: no file device opened";
         return {};
     }
 
+    //already reached eof?
+    if (reached_eof_)
+    {
+        Chunk c;
+        c.eof = true;
+        return c;
+    }
+
     //config to be passed to packet handler
     SnifferConfig config;
 
-    config.sniffer            = this;
-    config.link_layer_type    = link_layer_type_;
+    config.sniffer         = this;
+    config.link_layer_type = link_layer_type_;
 
-    config.read_config.read_style         = ReadStyle::Accumulate;
-    config.read_config.max_packets        = max_packets;
-    config.read_config.max_bytes          = max_bytes;
+    config.read_config.read_style = ReadStyle::Accumulate;
+
+    config.read_config.chunk_max_packets = max_packets;
+    config.read_config.chunk_max_bytes   = max_bytes;
+
     config.read_config.signatures_to_read = signatures_to_read;
 
     //reset counts
@@ -462,18 +506,23 @@ boost::optional<PacketSniffer::Data> PacketSniffer::readFileNext(size_t max_pack
     bytes_read_ = 0;
     data_       = {};
 
-    pcap_pkthdr** pkthdr;
-    const uchar** packet;
+    struct pcap_pkthdr *pkthdr;
+    const u_char *packet;
 
     bool error = false;
 
+    //read until chunk has ended
     while (!config.chunk_ended)
     {
-        int ret = pcap_next_ex(pcap_file_, pkthdr, packet);
+        int ret = pcap_next_ex(pcap_file_, &pkthdr, &packet);
 
         //file ended?
         if (ret == PCAP_ERROR_BREAK)
+        {
+            loginf << "PacketSniffer: readFileNext: pcap_next_ex reached end of data";
+            reached_eof_ = true;
             break;
+        }
         
         //read error?
         if (ret != 1)
@@ -481,10 +530,29 @@ boost::optional<PacketSniffer::Data> PacketSniffer::readFileNext(size_t max_pack
             error = true;
             break;
         }
+
+        pcapPacketHandler((u_char*)&config, pkthdr, packet);
     }
 
+    //pcap error?
     if (error)
+    {
+        logerr << "PacketSniffer: readFileNext: pcap_next_ex error";
         return {};
+    }
 
-    return data_;
+    //no data? => strange
+    if (data_.data.empty() && !reached_eof_)
+    {
+        logerr << "PacketSniffer: readFileNext: reached eof but no data retrieved";
+        return {};
+    }
+
+    loginf << "PacketSniffer: readFileNext: extracted " << data_.data.size() << " byte(s)";
+
+    Chunk c;
+    c.chunk_data = data_;
+    c.eof = false;
+
+    return c;
 }

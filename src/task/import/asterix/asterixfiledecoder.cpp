@@ -131,7 +131,7 @@ void ASTERIXFileDecoder::processFile(ASTERIXImportFileInfo& file_info)
                 assert(data_block.at("content").is_object());
                 assert(data_block.at("content").contains("index"));
 
-                bytesRead(data_block.at("content").at("index"), false);
+                setFileBytesRead(data_block.at("content").at("index"));
             }
         }
         else
@@ -148,12 +148,12 @@ void ASTERIXFileDecoder::processFile(ASTERIXImportFileInfo& file_info)
                     assert(frame.at("content").is_object());
                     assert (frame.at("content").contains("index"));
 
-                    bytesRead(frame.at("content").at("index"), false);
+                    setFileBytesRead(frame.at("content").at("index"));
                 }
             }
         }
 
-        recordsRead(num_records);
+        addRecordsRead(num_records);
 
         //invoke job callback
         job()->fileJasterixCallback(std::move(data), current_file_line, num_frames, num_records, numErrors);

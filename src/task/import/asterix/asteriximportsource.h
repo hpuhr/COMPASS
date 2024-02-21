@@ -91,7 +91,7 @@ struct ASTERIXImportFileInfo
     bool   hasSections() const;
     size_t numUsedSections() const;
 
-    size_t sizeInBytes() const;
+    size_t sizeInBytes(bool used_only = false) const;
 
     nlohmann::json toJSON() const;
 
@@ -142,12 +142,14 @@ public:
     const FileInfos& files() const;
     std::string filesAsString() const;
 
+    void setFileUsage(bool use, size_t file_idx, int section_idx = -1);
+
     SourceType sourceType() const;
     std::string sourceTypeAsString() const;
     bool isFileType() const;
     bool isNetworkType() const;
 
-    size_t totalFileSizeInBytes() const;
+    size_t totalFileSizeInBytes(bool used_only = false) const;
 
     nlohmann::json toJSON() const;
 
@@ -159,6 +161,7 @@ signals:
     void changed();
     void filesChanged();
     void sourceChanged();
+    void fileUsageChanged();
 
 private:
     friend class ASTERIXDecoderFile; //file based decoder can access the file infos directly

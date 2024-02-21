@@ -49,6 +49,12 @@ public:
         std::vector<u_char> data;
     };
 
+    struct Chunk
+    {
+        Data chunk_data;
+        bool eof = false;
+    };
+
     enum class Device
     {
         NoDevice = 0,
@@ -75,11 +81,19 @@ public:
     */
     struct ReadConfig
     {
-        ReadStyle           read_style      = PacketSniffer::ReadStyle::Accumulate;
-        size_t              start_index     = 0;
-        size_t              end_index       = std::numeric_limits<size_t>::max();
-        size_t              max_packets     = std::numeric_limits<size_t>::max();
-        size_t              max_bytes       = std::numeric_limits<size_t>::max();
+        ReadStyle read_style = PacketSniffer::ReadStyle::Accumulate;
+
+        size_t    chunk_start_index = 0;
+        size_t    chunk_end_index   = std::numeric_limits<size_t>::max();
+        size_t    chunk_max_packets = std::numeric_limits<size_t>::max();
+        size_t    chunk_max_bytes   = std::numeric_limits<size_t>::max();
+
+        size_t    data_start_index         = 0;
+        size_t    data_end_index           = std::numeric_limits<size_t>::max();
+        size_t    data_max_packets         = std::numeric_limits<size_t>::max();
+        size_t    data_max_bytes           = std::numeric_limits<size_t>::max();
+        size_t    data_max_packets_per_sig = std::numeric_limits<size_t>::max();
+        size_t    data_max_bytes_per_sig   = std::numeric_limits<size_t>::max();
 
         std::set<Signature> signatures_to_read;
     };
@@ -93,12 +107,14 @@ public:
     bool readFile(ReadStyle read_style = ReadStyle::Accumulate,
                   size_t max_packets = std::numeric_limits<size_t>::max(),
                   size_t max_bytes = std::numeric_limits<size_t>::max(),
+                  size_t max_packets_per_sig = std::numeric_limits<size_t>::max(),
+                  size_t max_bytes_per_sig = std::numeric_limits<size_t>::max(),
                   size_t start_index = 0,
                   size_t end_index = std::numeric_limits<size_t>::max(),
                   const std::set<Signature>& signatures_to_read = std::set<Signature>());
-    boost::optional<Data> readFileNext(size_t max_packets = 0, 
-                                       size_t max_bytes = 0,
-                                       const std::set<Signature>& signatures_to_read = std::set<Signature>());
+    boost::optional<Chunk> readFileNext(size_t max_packets = 0, 
+                                        size_t max_bytes = 0,
+                                        const std::set<Signature>& signatures_to_read = std::set<Signature>());
 
     void digestPCAPPacket(const struct pcap_pkthdr* pkthdr,
                           const u_char* packet,
@@ -144,12 +160,16 @@ private:
     void closePCAPFile();
 
     bool chunkEnded(const ReadConfig& read_config) const;
+    bool collectData(Data& data,
+                     const ReadConfig& read_config) const;
 
     size_t packet_idx_       = 0;
     size_t num_read_         = 0;
     size_t bytes_read_       = 0;
     size_t num_read_total_   = 0;
     size_t bytes_read_total_ = 0;
+
+    bool reached_eof_ = false;
 
     DataPerSignature data_per_signature_;
     Data             data_;

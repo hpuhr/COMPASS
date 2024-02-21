@@ -36,6 +36,7 @@ class QCheckBox;
 class QTabWidget;
 class QLabel;
 class QGridLayout;
+class QTreeWidgetItem;
 
 class ASTERIXImportTaskWidget : public QWidget
 {
@@ -62,6 +63,15 @@ public slots:
     ASTERIXOverrideWidget* overrideWidget() const;
 
 protected:
+    void addMainTab();
+    void addDecoderTab();
+    void addOverrideTab();
+    void addMappingsTab();
+
+    void updateParserBox();
+
+    void sourceClicked(QTreeWidgetItem* item, int column);
+
     ASTERIXImportTask& task_;
 
     QHBoxLayout* main_layout_{nullptr};
@@ -81,13 +91,6 @@ protected:
 
     QCheckBox* debug_check_{nullptr};
     QCheckBox* limit_ram_check_{nullptr};
-
-    void addMainTab();
-    void addDecoderTab();
-    void addOverrideTab();
-    void addMappingsTab();
-
-    void updateParserBox();
 };
 
 

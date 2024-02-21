@@ -53,6 +53,7 @@ ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task,
 
     connect(&task, &ASTERIXImportTask::configChanged, this, &ASTERIXImportTaskDialog::configChanged);
     connect(&task, &ASTERIXImportTask::decodingStateChanged, this, &ASTERIXImportTaskDialog::decodingStateChangedSlot);
+    connect(&task, &ASTERIXImportTask::sourceUsageChanged, this, &ASTERIXImportTaskDialog::updateButtons);
 }
 
 void ASTERIXImportTaskDialog::updateTitle()

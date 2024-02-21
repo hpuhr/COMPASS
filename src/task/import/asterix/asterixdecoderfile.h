@@ -49,6 +49,7 @@ public:
 
     unsigned int DecodeCheckRecordLimit = 10000;
     unsigned int DecodeCheckMaxBytes    = 10000000;
+    unsigned int FileChunkSize          = 500000000; //500 MB
 
 protected:
     virtual bool canRun_impl() const override;
@@ -61,8 +62,15 @@ protected:
     virtual bool checkDecoding(ASTERIXImportFileInfo& file_info, int section_idx, std::string& error) const = 0;
     virtual void processFile(ASTERIXImportFileInfo& file_info) = 0;
 
-    void bytesRead(size_t bytes, bool add = true);
-    void recordsRead(size_t num_records_read);
+    void addRecordsRead(size_t n);
+
+    void addChunkBytesRead(size_t n);
+    void setChunkBytesRead(size_t n);
+
+    void addFileBytesRead(size_t n);
+    void setFileBytesRead(size_t n);
+
+    void chunkFinished();
 
 private:
     bool nextFile();
@@ -73,15 +81,18 @@ private:
                        int section_idx, 
                        ASTERIXImportFileError& error) const;
 
+    size_t currentlyReadBytes() const;
     float getRecordsPerSecond() const;
     float getRemainingTime() const;
 
     int current_file_idx_ = -1;
 
-    size_t total_file_size_         = 0;
-    size_t done_file_size_          = 0;
-    size_t current_file_bytes_read_ = 0;
-    size_t total_records_read_      = 0;
+    size_t total_file_size_          = 0;
+    size_t done_file_size_           = 0;
+
+    size_t current_file_bytes_read_  = 0;
+    size_t current_chunk_bytes_read_ = 0;
+    size_t total_records_read_       = 0;
 
     ASTERIXImportSource::SourceType source_type_;
 };

@@ -68,6 +68,10 @@ Checks if the decoder can decode the currently set import source.
 */
 bool ASTERIXDecoderBase::canDecode(bool force_recompute) const
 {
+    //cannot run => cannot decode
+    if (!canRun())
+        return false;
+
     //refresh decoding info
     checkDecoding(force_recompute);
 

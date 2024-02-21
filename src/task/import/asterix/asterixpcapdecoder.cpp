@@ -65,7 +65,11 @@ bool ASTERIXPCAPDecoder::checkFile(ASTERIXImportFileInfo& file_info,
     }
 
     //read in some data
-    if (!sniffer.readFile(PacketSniffer::ReadStyle::PerSignature, std::numeric_limits<size_t>::max(), DecodeCheckMaxBytes))
+    if (!sniffer.readFile(PacketSniffer::ReadStyle::PerSignature,
+                          std::numeric_limits<size_t>::max(),
+                          std::numeric_limits<size_t>::max(),
+                          std::numeric_limits<size_t>::max(), 
+                          DecodeCheckMaxBytes))
     {
         error = "Could not parse PCAP file";
         return false;
@@ -102,6 +106,10 @@ bool ASTERIXPCAPDecoder::checkFile(ASTERIXImportFileInfo& file_info,
             memcpy(section.raw_data.data(), d.second.data.data(), n * sizeof(char));
         }
 
+        loginf << "ASTERIXPCAPDecoder: checkFile: Adding section '" << section.id << "': "
+               << "total size = " << section.total_size_bytes << " " 
+               << "read size = " << section.raw_data.size();
+
         file_info.sections.push_back(section);
     }
 
@@ -114,7 +122,7 @@ bool ASTERIXPCAPDecoder::checkDecoding(ASTERIXImportFileInfo& file_info,
                                        int section_idx, 
                                        std::string& error) const
 {
-    assert(section_idx >= 0 && section_idx < file_info.sections.size());
+    assert(section_idx >= 0 && section_idx < (int)file_info.sections.size());
 
     error = "";
 
@@ -131,9 +139,9 @@ bool ASTERIXPCAPDecoder::checkDecoding(ASTERIXImportFileInfo& file_info,
 
     section_error.analysis_info = *analysis_info;
 
-    loginf << "ASTERIXPCAPDecoder: checkDecoding: file '" << file_info.filename << "' "
-           << "section " << section.id << " "
-           << "json '" << section_error.analysis_info.dump(4) << "'";
+    //loginf << "ASTERIXPCAPDecoder: checkDecoding: file '" << file_info.filename << "' "
+    //       << "section " << section.id << " "
+    //       << "json '" << section_error.analysis_info.dump(4) << "'";
     //            json '{
     //               "data_items": {},
     //               "num_errors": 12,
@@ -173,6 +181,8 @@ void ASTERIXPCAPDecoder::processFile(ASTERIXImportFileInfo& file_info)
         {
             assert(!section.error.hasError());
             signatures.insert(PacketSniffer::signatureFromString(section.id));
+
+            loginf << "ASTERIXPCAPDecoder: processFile: importing section '" << section.id << "'";
         }
     }
 
@@ -202,7 +212,7 @@ void ASTERIXPCAPDecoder::processFile(ASTERIXImportFileInfo& file_info)
                 assert(data_block.at("content").is_object());
                 assert(data_block.at("content").contains("index"));
 
-                bytesRead(data_block.at("content").at("index"), true);
+                setChunkBytesRead(data_block.at("content").at("index"));
             }
         }
         else
@@ -219,21 +229,23 @@ void ASTERIXPCAPDecoder::processFile(ASTERIXImportFileInfo& file_info)
                     assert(frame.at("content").is_object());
                     assert (frame.at("content").contains("index"));
 
-                    bytesRead(frame.at("content").at("index"), true);
+                    setChunkBytesRead(frame.at("content").at("index"));
                 }
             }
         }
 
-        recordsRead(num_records);
+        addRecordsRead(num_records);
 
         job()->fileJasterixCallback(std::move(data), current_file_line, num_frames, num_records, numErrors);
     };
 
     size_t max_packets = std::numeric_limits<size_t>::max();
-    size_t max_bytes   = 500000000; //500 MB
+    size_t max_bytes   = FileChunkSize;
+
+    bool eof = false;
 
     //read chunks from PCAP until file is at end
-    while (1)
+    while (!eof)
     {
         //get next big chunk
         auto data = sniffer.readFileNext(max_packets, max_bytes, signatures);
@@ -241,11 +253,29 @@ void ASTERIXPCAPDecoder::processFile(ASTERIXImportFileInfo& file_info)
         //check for errors
         if (!data.has_value())
         {
+            logerr << "ASTERIXPCAPDecoder: processFile: Could not read data chunk from PCAP";
             logError("Could not read data chunk from PCAP");
             break;
         }
 
-        //decode chunk
-        task().jASTERIX(true)->decodeFile(current_filename, callback);
+        eof = data.value().eof;
+
+        //more data? => munch munch
+        if (!eof)
+        {
+            //decode chunk
+            const auto& chunk = data.value().chunk_data.data;
+            size_t num_bytes = chunk.size();
+
+            loginf << "ASTERIXPCAPDecoder: processFile: processing " << num_bytes << " byte(s)"; 
+            assert(num_bytes > 0);
+            
+            std::vector<char> vec(num_bytes);
+            memcpy(vec.data(), chunk.data(), num_bytes * sizeof(char));
+
+            task().jASTERIX(true)->decodeData(vec.data(), vec.size(), callback);
+
+            chunkFinished();
+        }
     }
 }

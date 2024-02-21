@@ -148,6 +148,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id,
     createSubConfigurables();
 
     connect(&source_, &ASTERIXImportSource::changed, this, &ASTERIXImportTask::sourceChanged);
+    connect(&source_, &ASTERIXImportSource::fileUsageChanged, this, &ASTERIXImportTask::sourceUsageChanged);
 
     logdbg << "ASTERIXImportTask: constructor: thread " << QThread::currentThreadId()
            << " main " << QApplication::instance()->thread()->currentThreadId();
@@ -650,14 +651,14 @@ void ASTERIXImportTask::testFileDecoding()
 {
     auto check_decoding = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
     {
+        //refresh decoder check
         assert(decoder_);
-        file_decoding_errors_detected_ = !decoder_->canRun() || !decoder_->canDecode(true);
+        decoder_->canDecode(true);
 
         return AsyncTaskResult(true, "");
     };
 
-    file_decoding_tested_          = false;
-    file_decoding_errors_detected_ = false;
+    file_decoding_tested_ = false;
 
     AsyncFuncTask task(check_decoding, "Testing decoding", "Please wait...", false);
     AsyncTask::runAsyncDialog(&task, true, nullptr);
@@ -682,7 +683,7 @@ bool ASTERIXImportTask::canRun()
     if (!decoder_)
         return false;
 
-    if (file_decoding_tested_ && file_decoding_errors_detected_)
+    if (file_decoding_tested_ && !decoder_->canDecode(false))
         return false;
 
     return true;

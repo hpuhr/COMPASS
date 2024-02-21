@@ -114,6 +114,7 @@ class ASTERIXImportTask : public Task, public Configurable
 signals:
     void configChanged();
     void decodingStateChanged();
+    void sourceUsageChanged();
 
 public slots:
     void decodeASTERIXDoneSlot();
@@ -201,7 +202,6 @@ protected:
     ASTERIXImportSource       source_;
 
     bool file_decoding_tested_ {false};
-    bool file_decoding_errors_detected_ {false};
 
     bool running_ {false};
 

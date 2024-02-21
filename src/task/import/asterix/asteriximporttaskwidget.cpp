@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "dbcontent/selectdialog.h"
 #include "util/timeconv.h"
+#include "util/files.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -35,6 +36,9 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QDateEdit>
+#include <QTreeWidgetItem>
+#include <QTreeWidget>
+#include <QHeaderView>
 
 using namespace Utils;
 using namespace std;
@@ -341,30 +345,90 @@ void ASTERIXImportTaskWidget::updateSourcesGrid()
         delete child;
     }
 
-    unsigned int row{0};
-
     if (task_.source().isNetworkType())
     {
-        sources_grid_->addWidget(new QLabel("Source: Network"), row, 0);
+        sources_grid_->addWidget(new QLabel("Source: Network"), 0, 0);
     }
     else // files
     {
-        for (auto& file_info : task_.source().files())
+        QStringList headers;
+        headers << "";
+        headers << "Name";
+        headers << "Decoding";
+        headers << "Error";
+
+        QTreeWidget* tree_widget = new QTreeWidget;
+        tree_widget->setColumnCount(headers.count());
+        tree_widget->setHeaderLabels(headers);
+
+        tree_widget->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
+        tree_widget->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::ResizeToContents);
+        tree_widget->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::ResizeToContents);
+        tree_widget->header()->setSectionResizeMode(3, QHeaderView::ResizeMode::Stretch);
+
+        unsigned int file_idx = 0;
+
+        for (const auto& file_info : task_.source().files())
         {
-            sources_grid_->addWidget(new QLabel(file_info.filename.c_str()), row, 0);
+            std::string name   = file_info.filename;
+            std::string status = file_info.decodingTested() ? (!file_info.canDecode() ? "Error" : "OK") : "?";
+            std::string descr  = file_info.error.errinfo;
 
-            if (!file_info.decodingTested())
-                sources_grid_->addWidget(new QLabel("?"), row, 1);
-            else if (!file_info.canDecode())
-                sources_grid_->addWidget(new QLabel("Decoding Errors"), row, 1);
-            else
-                sources_grid_->addWidget(new QLabel("OK"), row, 1);
+            auto item = new QTreeWidgetItem;
+            item->setCheckState(0, file_info.used ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+            item->setText(1, QString::fromStdString(name  ));
+            item->setText(2, QString::fromStdString(status));
+            item->setText(3, QString::fromStdString(descr ));
 
-            ++row;
+            item->setData(0, Qt::UserRole, QVariant(QPoint(file_idx, -1)));
+
+            bool has_error = file_info.decodingTested() && !file_info.canDecode();
+
+            if (has_error)
+                item->setFlags(Qt::ItemIsSelectable);
+
+            //file itself has no error? => add sections
+            if (!has_error)
+            {
+                unsigned int section_idx = 0;
+
+                for (const auto& section : file_info.sections)
+                {
+                    std::string name   = section.description;
+                    std::string status = file_info.decodingTested() ? (section.error.hasError() ? "Error" : "OK") : "?";
+                    std::string descr  = section.error.errinfo;
+
+                    auto sec_item = new QTreeWidgetItem;
+                    sec_item->setCheckState(0, section.used ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+                    sec_item->setText(1, QString::fromStdString(name  ));
+                    sec_item->setText(2, QString::fromStdString(status));
+                    sec_item->setText(3, QString::fromStdString(descr ));
+
+                    sec_item->setData(0, Qt::UserRole, QVariant(QPoint(file_idx, section_idx)));
+
+                    bool has_error = file_info.decodingTested() && section.error.hasError();
+
+                    if (has_error)
+                        sec_item->setFlags(Qt::ItemIsSelectable);
+
+                    item->addChild(sec_item);
+
+                    ++section_idx;
+                }
+            }
+
+            tree_widget->addTopLevelItem(item);
+
+            ++file_idx;
         }
+
+        tree_widget->expandAll();
+
+        connect(tree_widget, &QTreeWidget::itemClicked, this, &ASTERIXImportTaskWidget::sourceClicked);
+
+        sources_grid_->addWidget(tree_widget, 0, 0);
     }
 }
-
 
 ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
 {
@@ -374,4 +438,15 @@ ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
 void ASTERIXImportTaskWidget::decodingStateChangedSlot()
 {
     updateSourcesGrid();
+}
+
+void ASTERIXImportTaskWidget::sourceClicked(QTreeWidgetItem* item, int column)
+{
+    if (item && column == 0)
+    {
+        bool selected = item->checkState(0) == Qt::CheckState::Checked;
+
+        QPoint index = item->data(0, Qt::UserRole).toPoint();
+        task_.source().setFileUsage(selected, (size_t)index.x(), index.y());
+    }
 }

@@ -42,13 +42,14 @@ ASTERIXDecoderFile::~ASTERIXDecoderFile() = default;
 */
 void ASTERIXDecoderFile::start_impl()
 {
-    total_file_size_         = source_.totalFileSizeInBytes();
-    total_records_read_      = 0;
-    current_file_bytes_read_ = 0;
-    done_file_size_          = 0;
+    total_file_size_          = source_.totalFileSizeInBytes(true);
+    total_records_read_       = 0;
+    current_file_bytes_read_  = 0;
+    current_chunk_bytes_read_ = 0;
+    done_file_size_           = 0;
     
-    current_file_idx_        = 0;
-    
+    current_file_idx_         = -1;
+
     while (isRunning() && nextFile())
         processCurrentFile();
 }
@@ -79,13 +80,19 @@ void ASTERIXDecoderFile::processCurrentFile()
     assert(!atEnd());
 
     auto& current_file = source_.file_infos_.at(current_file_idx_);
+
+    //skip unused
+    if (!current_file.used)
+        return;
+
     try
     {
         processFile(current_file);
 
         //another file done
-        done_file_size_          += current_file.sizeInBytes();
+        done_file_size_          += current_file.sizeInBytes(true);
         current_file_bytes_read_  = 0;
+        current_chunk_bytes_read_ = 0;
     }
     catch(const std::exception& e)
     {
@@ -103,7 +110,7 @@ void ASTERIXDecoderFile::processCurrentFile()
 */
 bool ASTERIXDecoderFile::canRun_impl() const
 {
-    //no files to decode
+    //no files to decode?
     if (source_.files().empty())
         return false;
 
@@ -115,9 +122,20 @@ bool ASTERIXDecoderFile::canRun_impl() const
 bool ASTERIXDecoderFile::canDecode_impl() const
 {
     //check on all files
+    size_t num_used = 0;
     for (const auto& fi : source_.file_infos_)
-        if (!fi.canDecode())
+    {
+        //used and cannot decode? => fail
+        if (fi.used && !fi.canDecode())
             return false;
+
+        if (fi.used)
+            ++num_used;
+    }
+
+    //no used file no decoding
+    if (num_used == 0)
+        return false;
 
     return true;
 }
@@ -156,7 +174,7 @@ void ASTERIXDecoderFile::checkDecoding(ASTERIXImportFileInfo& file_info,
     std::string error;
     bool file_ok = false;
 
-    //check file (initially parse file, collect file sections, etc)
+    //check file (open file, initially parse file, collect file sections, etc)
     try
     {
         file_ok = checkFile(file_info, error);
@@ -179,7 +197,7 @@ void ASTERIXDecoderFile::checkDecoding(ASTERIXImportFileInfo& file_info,
         return;
     }
 
-    //if file has subsections check these
+    //if file has subsections check decoding for each of them...
     if (file_info.hasSections())
     {
         for (size_t i = 0; i < file_info.sections.size(); ++i)
@@ -193,8 +211,12 @@ void ASTERIXDecoderFile::checkDecoding(ASTERIXImportFileInfo& file_info,
         return;
     }
 
-    //check decoding on complete file
-    checkDecoding(file_info, -1, file_info.error);
+    //... otherwise check decoding on complete file
+    bool file_dec_ok = checkDecoding(file_info, -1, file_info.error);
+
+    //set file to unused?
+    if (!file_dec_ok)
+        file_info.used = false;
 }
 
 /**
@@ -244,23 +266,6 @@ std::string ASTERIXDecoderFile::getCurrentFilename() const
 
 /**
 */
-void ASTERIXDecoderFile::bytesRead(size_t bytes, bool add)
-{
-    if (add)
-        current_file_bytes_read_ += bytes;
-    else
-        current_file_bytes_read_ = bytes;
-}
-
-/**
-*/
-void ASTERIXDecoderFile::recordsRead(size_t num_records_read)
-{
-    total_records_read_ += num_records_read;
-}
-
-/**
-*/
 std::string ASTERIXDecoderFile::statusInfoString() const
 {
     std::string text;
@@ -269,6 +274,10 @@ std::string ASTERIXDecoderFile::statusInfoString() const
 
     for (const auto& file_info : file_infos)
     {
+        //skip unused
+        if (!file_info.used)
+            continue;
+
         if (file_info.filename == getCurrentFilename())
             text += "<p align=\"left\"><b>" + file_info.filename + "</b>";
         else
@@ -278,14 +287,21 @@ std::string ASTERIXDecoderFile::statusInfoString() const
     text += "<br><p align=\"left\">Records/s: " + std::to_string((unsigned int) getRecordsPerSecond());
     text += "<p align=\"right\">Remaining: "+ Utils::String::timeStringFromDouble(getRemainingTime() + 1.0, false);
 
-    return text ;
+    return text;
+}
+
+/**
+*/
+size_t ASTERIXDecoderFile::currentlyReadBytes() const
+{
+    return (done_file_size_ + current_file_bytes_read_ + current_chunk_bytes_read_);
 }
 
 /**
 */
 float ASTERIXDecoderFile::statusInfoProgress() const
 {
-    return 100.0 * (float)(done_file_size_ + current_file_bytes_read_) / (float)total_file_size_;
+    return 100.0 * (float)currentlyReadBytes() / (float)total_file_size_;
 }
 
 /**
@@ -299,8 +315,52 @@ float ASTERIXDecoderFile::getRecordsPerSecond() const
 */
 float ASTERIXDecoderFile::getRemainingTime() const
 {
-    size_t remaining_bytes = total_file_size_ - done_file_size_ - current_file_bytes_read_;
-    float  bytes_per_s     = (float) (done_file_size_ + current_file_bytes_read_) / elapsedSeconds();
+    float  elapsed_secs    = elapsedSeconds();
+    size_t remaining_bytes = total_file_size_ - currentlyReadBytes();
+    float  bytes_per_s     = (float)currentlyReadBytes() / elapsed_secs;
 
     return (float)remaining_bytes / bytes_per_s;
+}
+
+/**
+*/
+void ASTERIXDecoderFile::addRecordsRead(size_t n)
+{
+    total_records_read_ += n;
+}
+
+/**
+*/
+void ASTERIXDecoderFile::addChunkBytesRead(size_t n)
+{
+    current_chunk_bytes_read_ += n;
+}
+
+/**
+*/
+void ASTERIXDecoderFile::setChunkBytesRead(size_t n)
+{
+    current_chunk_bytes_read_ = n;
+}
+
+/**
+*/
+void ASTERIXDecoderFile::addFileBytesRead(size_t n)
+{
+    current_file_bytes_read_ += n;
+}
+
+/**
+*/
+void ASTERIXDecoderFile::setFileBytesRead(size_t n)
+{
+    current_file_bytes_read_ = n;
+}
+
+/**
+*/
+void ASTERIXDecoderFile::chunkFinished()
+{
+    current_file_bytes_read_ += current_chunk_bytes_read_;
+    current_chunk_bytes_read_ = 0;
 }

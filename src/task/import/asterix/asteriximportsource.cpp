@@ -62,6 +62,7 @@ void ASTERIXImportFileInfo::reset()
     sections.clear();
 
     decoding_tested = false;
+    used            = true;
 }
 
 /**
@@ -117,14 +118,14 @@ size_t ASTERIXImportFileInfo::numUsedSections() const
 
 /**
 */
-size_t ASTERIXImportFileInfo::sizeInBytes() const
+size_t ASTERIXImportFileInfo::sizeInBytes(bool used_only) const
 {
     //obtain import size from used sections?
     if (hasSections())
     {
         size_t size = 0;
         for (const auto& s : sections)
-            if (s.used)
+            if (!used_only || s.used)
                 size += s.total_size_bytes;
 
         return size;
@@ -346,12 +347,13 @@ bool ASTERIXImportSource::isNetworkType() const
 
 /**
 */
-size_t ASTERIXImportSource::totalFileSizeInBytes() const
+size_t ASTERIXImportSource::totalFileSizeInBytes(bool used_only) const
 {
     size_t size = 0;
 
     for (const auto& fi : file_infos_)
-        size += fi.sizeInBytes();
+        if (!used_only || fi.used)
+            size += fi.sizeInBytes(used_only);
 
     return size;
 }
@@ -371,4 +373,21 @@ nlohmann::json ASTERIXImportSource::toJSON() const
     info[ "file_infos"  ] = fi_infos;
 
     return info;
+}
+
+/**
+*/
+void ASTERIXImportSource::setFileUsage(bool use, 
+                                       size_t file_idx, 
+                                       int section_idx)
+{
+    auto& fi = file_infos_.at(file_idx);
+
+    auto& usage = section_idx >= 0 ? fi.sections.at(section_idx).used : fi.used;
+
+    if (usage != use)
+    {
+        usage = use;
+        emit fileUsageChanged();
+    }
 }
