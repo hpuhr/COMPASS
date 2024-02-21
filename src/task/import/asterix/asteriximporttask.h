@@ -156,14 +156,6 @@ public:
     const ASTERIXImportSource& source() const { return source_; }
     ASTERIXImportSource& source() { return source_; }
 
-    //void addImportFileNames(const std::vector<std::string>& filenames, unsigned int line_id=0);
-    //std::vector<ASTERIXFileInfo>& filesInfo();
-    //std::string importFilenamesStr() const;
-    //void clearImportFilesInfo ();
-    //void importNetwork();
-
-    bool isImportNetwork() const;
-
     std::shared_ptr<jASTERIX::jASTERIX> jASTERIX(bool refresh = false) const;
     
     bool hasConfiguratonFor(unsigned int category);

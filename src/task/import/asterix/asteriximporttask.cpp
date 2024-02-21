@@ -453,13 +453,6 @@ void ASTERIXImportTask::clearFileList ()
 
 /**
 */
-bool ASTERIXImportTask::isImportNetwork() const
-{
-    return (source_.sourceType() == ASTERIXImportSource::SourceType::NetASTERIX);
-}
-
-/**
-*/
 bool ASTERIXImportTask::hasConfiguratonFor(unsigned int category)
 {
     return category_configs_.count(category) > 0;
@@ -751,7 +744,7 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
 {
     assert (!running_);
 
-    if (isImportNetwork())
+    if (source_.isNetworkType())
         COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
 
     running_ = true;
@@ -773,7 +766,7 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
 
     assert(canRun());
 
-    if (!isImportNetwork())
+    if (source_.isFileType())
     {
         last_file_progress_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -821,7 +814,7 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
     assert(decode_job_ == nullptr);
     assert(decoder_);
 
-    if (isImportNetwork())
+    if (source_.isNetworkType())
         COMPASS::instance().dataSourceManager().createNetworkDBDataSources();
 
     decode_job_ = make_shared<ASTERIXDecodeJob>(*this, post_process_);
@@ -892,7 +885,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: errors " << decode_job_->numErrors()
            << " num records " << jasterix_->numRecords();
 
-    if (!isImportNetwork())
+    if (source_.isFileType())
     {
         if (file_progress_dialog_->wasCanceled())
         {
@@ -950,7 +943,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     std::vector<std::string> keys;
 
-    if (settings_.current_file_framing_ == "" || isImportNetwork()) // force netto when doing network import
+    if (settings_.current_file_framing_ == "" || source_.isNetworkType()) // force netto when doing network import
         keys = {"data_blocks", "content", "records"};
     else
         keys = {"frames", "content", "data_blocks", "content", "records"};
@@ -1006,7 +999,7 @@ void ASTERIXImportTask::mapJSONDoneSlot()
         return;
     }
 
-    bool check_future_ts = isImportNetwork();
+    bool check_future_ts = source_.isNetworkType();
 
     if (settings_.network_ignore_future_ts_)
         check_future_ts = false;
@@ -1060,7 +1053,7 @@ void ASTERIXImportTask::mapJSONObsoleteSlot()
 */
 void ASTERIXImportTask::postprocessDoneSlot()
 {
-    logdbg << "ASTERIXImportTask: postprocessDoneSlot: import_file " << !isImportNetwork();
+    logdbg << "ASTERIXImportTask: postprocessDoneSlot: import_file " << source_.isFileType();
 
     if (stopped_)
     {
@@ -1202,7 +1195,7 @@ void ASTERIXImportTask::insertDoneSlot()
 {
     logdbg << "ASTERIXImportTask: insertDoneSlot";
 
-    if (!isImportNetwork())
+    if (source_.isFileType())
     {
         logdbg << "ASTERIXImportTask: insertDoneSlot: num_packets_in_processing " << num_packets_in_processing_;
 
@@ -1301,7 +1294,7 @@ void ASTERIXImportTask::checkAllDone()
     {
         logdbg << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
 
-        if (!isImportNetwork() && file_progress_dialog_)
+        if (source_.isFileType() && file_progress_dialog_)
         {
             file_progress_dialog_ = nullptr;
         }
@@ -1357,7 +1350,7 @@ void ASTERIXImportTask::updateFileProgressDialog(bool force)
     if (stopped_)
         return;
 
-    assert (!isImportNetwork());
+    assert (source_.isFileType());
 
     if (!file_progress_dialog_)
     {

@@ -30,12 +30,13 @@ class ASTERIXImportTaskSettings;
 class ASTERIXDecoderFile : public ASTERIXDecoderBase
 {
 public:
-    ASTERIXDecoderFile(ASTERIXImportSource& source,
+    ASTERIXDecoderFile(ASTERIXImportSource::SourceType source_type,
+                       ASTERIXImportSource& source,
                        ASTERIXImportTask& task, 
                        const ASTERIXImportTaskSettings& settings);
     virtual ~ASTERIXDecoderFile();
 
-    virtual ASTERIXImportSource::SourceType fileSourceType() const = 0;
+    ASTERIXImportSource::SourceType fileSourceType() const { return source_type_; }
 
     virtual bool hasStatusInfo() const override { return true; };
     virtual std::string statusInfoString() const override;
@@ -81,4 +82,6 @@ private:
     size_t done_file_size_          = 0;
     size_t current_file_bytes_read_ = 0;
     size_t total_records_read_      = 0;
+
+    ASTERIXImportSource::SourceType source_type_;
 };

@@ -31,8 +31,6 @@ public:
                        const ASTERIXImportTaskSettings& settings);
     virtual ~ASTERIXFileDecoder();
 
-    ASTERIXImportSource::SourceType fileSourceType() const override final { return ASTERIXImportSource::SourceType::FileASTERIX; }
-
 protected:
     void stop_impl() override final;
 

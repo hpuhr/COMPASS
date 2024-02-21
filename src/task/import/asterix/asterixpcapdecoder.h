@@ -32,8 +32,6 @@ public:
                        const ASTERIXImportTaskSettings& settings);
     virtual ~ASTERIXPCAPDecoder();
 
-    ASTERIXImportSource::SourceType fileSourceType() const override final { return ASTERIXImportSource::SourceType::FilePCAP; }
-
 protected:
     void stop_impl() override final;
 

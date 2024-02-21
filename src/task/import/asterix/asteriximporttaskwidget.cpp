@@ -79,7 +79,7 @@ void ASTERIXImportTaskWidget::addMainTab()
 
         main_tab_layout->addStretch();
 
-        if (task_.isImportNetwork())
+        if (task_.source().isNetworkType())
         {
             loginf << "ASTERIXImportTaskWidget: addMainTab: is network import";
         }
@@ -343,7 +343,7 @@ void ASTERIXImportTaskWidget::updateSourcesGrid()
 
     unsigned int row{0};
 
-    if (task_.isImportNetwork())
+    if (task_.source().isNetworkType())
     {
         sources_grid_->addWidget(new QLabel("Source: Network"), row, 0);
     }

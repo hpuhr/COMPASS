@@ -40,6 +40,8 @@ ASTERIXNetworkDecoder::ASTERIXNetworkDecoder(ASTERIXImportSource& source,
 :   ASTERIXDecoderBase(source, task, settings)
 ,   receive_semaphore_((unsigned int)0)
 {
+    assert(source.isNetworkType());
+
     ds_lines_ = COMPASS::instance().dataSourceManager().getNetworkLines();
 
     for (auto& ds_it : ds_lines_)

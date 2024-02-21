@@ -31,7 +31,7 @@ using namespace nlohmann;
 ASTERIXFileDecoder::ASTERIXFileDecoder(ASTERIXImportSource& source,
                                        ASTERIXImportTask& task, 
                                        const ASTERIXImportTaskSettings& settings)
-:   ASTERIXDecoderFile(source, task, settings)
+:   ASTERIXDecoderFile(ASTERIXImportSource::SourceType::FileASTERIX, source, task, settings)
 {
 }
 

@@ -940,7 +940,7 @@ bool RTCommandImportASTERIXNetworkStop::run_impl()
 
     ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    if (!import_task.isRunning() || !import_task.isImportNetwork())
+    if (!import_task.isRunning() || !import_task.source().isNetworkType())
     {
         setResultMessage("No ASTERIX network import running");
         return false;

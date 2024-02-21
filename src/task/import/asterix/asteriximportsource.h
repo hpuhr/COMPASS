@@ -145,6 +145,7 @@ public:
     SourceType sourceType() const;
     std::string sourceTypeAsString() const;
     bool isFileType() const;
+    bool isNetworkType() const;
 
     size_t totalFileSizeInBytes() const;
 

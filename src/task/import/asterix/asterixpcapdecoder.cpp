@@ -26,7 +26,7 @@
 ASTERIXPCAPDecoder::ASTERIXPCAPDecoder(ASTERIXImportSource& source,
                                        ASTERIXImportTask& task, 
                                        const ASTERIXImportTaskSettings& settings)
-:   ASTERIXDecoderFile(source, task, settings)
+:   ASTERIXDecoderFile(ASTERIXImportSource::SourceType::FilePCAP, source, task, settings)
 {
 }
 

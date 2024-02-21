@@ -24,12 +24,14 @@
 
 /**
 */
-ASTERIXDecoderFile::ASTERIXDecoderFile(ASTERIXImportSource& source,
+ASTERIXDecoderFile::ASTERIXDecoderFile(ASTERIXImportSource::SourceType source_type,
+                                       ASTERIXImportSource& source,
                                        ASTERIXImportTask& task, 
                                        const ASTERIXImportTaskSettings& settings)
 :   ASTERIXDecoderBase(source, task, settings)
+,   source_type_      (source_type)
 {
-    assert(source_.isFileType());
+    assert(source_.isFileType() && source_.sourceType() == fileSourceType());
 }
 
 /**
@@ -101,8 +103,6 @@ void ASTERIXDecoderFile::processCurrentFile()
 */
 bool ASTERIXDecoderFile::canRun_impl() const
 {
-    assert(source_.sourceType() == fileSourceType());
-
     //no files to decode
     if (source_.files().empty())
         return false;
@@ -114,8 +114,6 @@ bool ASTERIXDecoderFile::canRun_impl() const
  */
 bool ASTERIXDecoderFile::canDecode_impl() const
 {
-    assert(source_.sourceType() == fileSourceType());
-
     //check on all files
     for (const auto& fi : source_.file_infos_)
         if (!fi.canDecode())
@@ -128,8 +126,6 @@ bool ASTERIXDecoderFile::canDecode_impl() const
  */
 void ASTERIXDecoderFile::checkDecoding_impl(bool force_recompute) const
 {
-    assert(source_.sourceType() == fileSourceType());
-
     //run decode check on all files
     for (auto& fi : source_.file_infos_)
         checkDecoding(fi, force_recompute);
