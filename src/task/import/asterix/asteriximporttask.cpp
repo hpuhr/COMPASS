@@ -320,7 +320,7 @@ void ASTERIXImportTask::checkSubConfigurables()
 void ASTERIXImportTask::sourceChanged()
 {
     //update to suitable decoder
-    decoder_ = ASTERIXDecoderBase::createDecoder(source_, *this, settings_);
+    decoder_ = ASTERIXDecoderBase::createDecoder(source_);
     assert(decoder_);
 
     //test decoding

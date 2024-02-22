@@ -32,8 +32,7 @@ class ASTERIXDecoderFile : public ASTERIXDecoderBase
 public:
     ASTERIXDecoderFile(ASTERIXImportSource::SourceType source_type,
                        ASTERIXImportSource& source,
-                       ASTERIXImportTask& task, 
-                       const ASTERIXImportTaskSettings& settings);
+                       const ASTERIXImportTaskSettings* settings = nullptr);
     virtual ~ASTERIXDecoderFile();
 
     ASTERIXImportSource::SourceType fileSourceType() const { return source_type_; }

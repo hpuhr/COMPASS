@@ -35,9 +35,8 @@
 class ASTERIXNetworkDecoder : public ASTERIXDecoderBase
 {
 public:
-    ASTERIXNetworkDecoder(ASTERIXImportSource& source,
-                          ASTERIXImportTask& task, 
-                          const ASTERIXImportTaskSettings& settings);
+    ASTERIXNetworkDecoder(ASTERIXImportSource& source, 
+                          const ASTERIXImportTaskSettings* settings = nullptr);
     virtual ~ASTERIXNetworkDecoder();
 
     static const unsigned int MAX_UDP_READ_SIZE    = 1024*1024;

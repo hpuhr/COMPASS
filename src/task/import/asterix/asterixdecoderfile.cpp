@@ -23,12 +23,14 @@
 #include "stringconv.h"
 
 /**
+ * @param source_type File source the decoder is able to decode.
+ * @param source Import source to retrieve data from.
+ * @param settings If set, external settings will be applied, otherwise settings will be retrieved from the import task.
 */
 ASTERIXDecoderFile::ASTERIXDecoderFile(ASTERIXImportSource::SourceType source_type,
                                        ASTERIXImportSource& source,
-                                       ASTERIXImportTask& task, 
-                                       const ASTERIXImportTaskSettings& settings)
-:   ASTERIXDecoderBase(source, task, settings)
+                                       const ASTERIXImportTaskSettings* settings)
+:   ASTERIXDecoderBase(source, settings)
 ,   source_type_      (source_type)
 {
     assert(source_.isFileType() && source_.sourceType() == fileSourceType());

@@ -22,11 +22,12 @@
 #include <jasterix/jasterix.h>
 
 /**
+ * @param source Import source to retrieve data from.
+ * @param settings If set, external settings will be applied, otherwise settings will be retrieved from the import task.
 */
 ASTERIXPCAPDecoder::ASTERIXPCAPDecoder(ASTERIXImportSource& source,
-                                       ASTERIXImportTask& task, 
-                                       const ASTERIXImportTaskSettings& settings)
-:   ASTERIXDecoderFile(ASTERIXImportSource::SourceType::FilePCAP, source, task, settings)
+                                       const ASTERIXImportTaskSettings* settings)
+:   ASTERIXDecoderFile(ASTERIXImportSource::SourceType::FilePCAP, source, settings)
 {
 }
 
@@ -167,7 +168,7 @@ bool ASTERIXPCAPDecoder::checkDecoding(ASTERIXImportFileInfo& file_info,
 void ASTERIXPCAPDecoder::processFile(ASTERIXImportFileInfo& file_info)
 {
     std::string  current_filename  = file_info.filename;
-    unsigned int current_file_line = settings_.file_line_id_; //files_info_.at(current_file_count_).line_id_;
+    unsigned int current_file_line = settings().file_line_id_; //files_info_.at(current_file_count_).line_id_;
 
     loginf << "ASTERIXPCAPDecoder: processFile: file '" << current_filename << "'";
 
@@ -197,7 +198,7 @@ void ASTERIXPCAPDecoder::processFile(ASTERIXImportFileInfo& file_info)
     {
         // get last index
 
-        if (settings_.current_file_framing_ == "")
+        if (settings().current_file_framing_ == "")
         {
             assert(data->contains("data_blocks"));
             assert(data->at("data_blocks").is_array());

@@ -20,16 +20,24 @@
 #include "asterixfiledecoder.h"
 #include "asterixpcapdecoder.h"
 #include "asterixnetworkdecoder.h"
+#include "asteriximporttask.h"
+
+#include "compass.h"
+#include "taskmanager.h"
 
 /**
+ * @param source Import source to retrieve data from.
+ * @param settings If set, external settings will be applied, otherwise settings will be retrieved from the import task.
 */
 ASTERIXDecoderBase::ASTERIXDecoderBase(ASTERIXImportSource& source,
-                                       ASTERIXImportTask& task, 
-                                       const ASTERIXImportTaskSettings& settings)
-:   source_  (source)
-,   settings_(settings)
-,   task_    (task)
+                                       const ASTERIXImportTaskSettings* settings)
+:   source_(source)
 {
+    task_ = &COMPASS::instance().taskManager().asterixImporterTask();
+    assert(task_);
+
+    settings_ = settings ? settings : &task_->settings();
+    assert(settings_);
 }
 
 /**
@@ -40,15 +48,14 @@ ASTERIXDecoderBase::~ASTERIXDecoderBase() = default;
  * Create a specific decoder for the given source type.
  */
 std::unique_ptr<ASTERIXDecoderBase> ASTERIXDecoderBase::createDecoder(ASTERIXImportSource& source,
-                                                                      ASTERIXImportTask& task, 
-                                                                      const ASTERIXImportTaskSettings& settings)
+                                                                      const ASTERIXImportTaskSettings* settings)
 {
     if (source.sourceType() == ASTERIXImportSource::SourceType::FileASTERIX)
-        return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXFileDecoder(source, task, settings));
+        return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXFileDecoder(source, settings));
     else if (source.sourceType() == ASTERIXImportSource::SourceType::FilePCAP)
-        return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXPCAPDecoder(source, task, settings));
+        return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXPCAPDecoder(source, settings));
     else if (source.sourceType() == ASTERIXImportSource::SourceType::NetASTERIX)
-        return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXNetworkDecoder(source, task, settings));
+        return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXNetworkDecoder(source, settings));
 
     return {};
 }

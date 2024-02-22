@@ -35,8 +35,7 @@ class ASTERIXDecoderBase
 {
 public:
     ASTERIXDecoderBase(ASTERIXImportSource& source,
-                       ASTERIXImportTask& task, 
-                       const ASTERIXImportTaskSettings& settings);
+                       const ASTERIXImportTaskSettings* settings = nullptr);
     virtual ~ASTERIXDecoderBase();
 
     bool canRun() const;
@@ -57,13 +56,13 @@ public:
     nlohmann::json stateAsJSON() const;
 
     static std::unique_ptr<ASTERIXDecoderBase> createDecoder(ASTERIXImportSource& source,
-                                                             ASTERIXImportTask& task, 
-                                                             const ASTERIXImportTaskSettings& settings);
+                                                             const ASTERIXImportTaskSettings* settings = nullptr);
 protected:
     ASTERIXDecodeJob* job() { return job_; }
     const ASTERIXDecodeJob* job() const { return job_; }
-    ASTERIXImportTask& task() { return task_; }
-    const ASTERIXImportTask& task() const { return task_; }
+    ASTERIXImportTask& task() { return *task_; }
+    const ASTERIXImportTask& task() const { return *task_; }
+    const ASTERIXImportTaskSettings& settings() const { return *settings_; }
 
     bool isRunning() const { return running_; }
 
@@ -79,14 +78,14 @@ protected:
     virtual void start_impl() = 0;
     virtual void stop_impl() = 0;
 
-    ASTERIXImportSource&             source_;
-    const ASTERIXImportTaskSettings& settings_;
-
+    ASTERIXImportSource& source_;
+    
 private:
     void checkDecoding(bool force_recompute) const;
 
-    ASTERIXDecodeJob*  job_ = nullptr;
-    ASTERIXImportTask& task_;
+    ASTERIXDecodeJob*                job_      = nullptr;
+    ASTERIXImportTask*               task_     = nullptr;
+    const ASTERIXImportTaskSettings* settings_ = nullptr;
 
     bool running_ = false;
 

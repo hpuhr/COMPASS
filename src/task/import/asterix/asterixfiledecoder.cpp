@@ -26,12 +26,14 @@ using namespace Utils;
 using namespace std;
 using namespace nlohmann;
 
+
 /**
+ * @param source Import source to retrieve data from.
+ * @param settings If set, external settings will be applied, otherwise settings will be retrieved from the import task.
 */
 ASTERIXFileDecoder::ASTERIXFileDecoder(ASTERIXImportSource& source,
-                                       ASTERIXImportTask& task, 
-                                       const ASTERIXImportTaskSettings& settings)
-:   ASTERIXDecoderFile(ASTERIXImportSource::SourceType::FileASTERIX, source, task, settings)
+                                       const ASTERIXImportTaskSettings* settings)
+:   ASTERIXDecoderFile(ASTERIXImportSource::SourceType::FileASTERIX, source, settings)
 {
 }
 
@@ -54,13 +56,13 @@ bool ASTERIXFileDecoder::checkDecoding(ASTERIXImportFileInfo& file_info, int sec
     //get a fresh jasterix instance
     auto jasterix = task().jASTERIX(true);
 
-    bool has_framing = settings_.current_file_framing_.size() > 0;
+    bool has_framing = settings().current_file_framing_.size() > 0;
 
     loginf << "ASTERIXFileDecoder: checkDecoding: file '" << file_info.filename << "' decoding now...";
 
     //analyze asterix file
     std::unique_ptr<nlohmann::json> analysis_info;
-    analysis_info = has_framing ? jasterix->analyzeFile(file_info.filename, settings_.current_file_framing_, DecodeCheckRecordLimit) :
+    analysis_info = has_framing ? jasterix->analyzeFile(file_info.filename, settings().current_file_framing_, DecodeCheckRecordLimit) :
                                   jasterix->analyzeFile(file_info.filename, DecodeCheckRecordLimit);
     assert(analysis_info);
 
@@ -106,9 +108,9 @@ void ASTERIXFileDecoder::processFile(ASTERIXImportFileInfo& file_info)
     task().jASTERIX(true);
 
     string       current_filename  = file_info.filename;
-    unsigned int current_file_line = settings_.file_line_id_; //files_info_.at(current_file_count_).line_id_;
+    unsigned int current_file_line = settings().file_line_id_; //files_info_.at(current_file_count_).line_id_;
 
-    loginf << "ASTERIXFileDecoder: processFile: file '" << current_filename << "' framing '" << settings_.current_file_framing_ << "'";
+    loginf << "ASTERIXFileDecoder: processFile: file '" << current_filename << "' framing '" << settings().current_file_framing_ << "'";
 
     //jasterix callback
     auto callback = [this, current_file_line] (std::unique_ptr<nlohmann::json> data, 
@@ -118,7 +120,7 @@ void ASTERIXFileDecoder::processFile(ASTERIXImportFileInfo& file_info)
     {
         // get last index
 
-        if (settings_.current_file_framing_ == "")
+        if (settings().current_file_framing_ == "")
         {
             assert(data->contains("data_blocks"));
             assert(data->at("data_blocks").is_array());
@@ -160,8 +162,8 @@ void ASTERIXFileDecoder::processFile(ASTERIXImportFileInfo& file_info)
     };
 
     //start decoding
-    if (settings_.current_file_framing_ == "")
+    if (settings().current_file_framing_ == "")
         task().jASTERIX()->decodeFile(current_filename, callback);
     else
-        task().jASTERIX()->decodeFile(current_filename, settings_.current_file_framing_, callback);
+        task().jASTERIX()->decodeFile(current_filename, settings().current_file_framing_, callback);
 }

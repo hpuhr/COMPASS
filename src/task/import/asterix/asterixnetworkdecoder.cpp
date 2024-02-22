@@ -33,11 +33,12 @@ using namespace Utils;
 using namespace std;
 
 /**
+ * @param source Import source to retrieve data from.
+ * @param settings If set, external settings will be applied, otherwise settings will be retrieved from the import task.
 */
-ASTERIXNetworkDecoder::ASTERIXNetworkDecoder(ASTERIXImportSource& source,
-                                             ASTERIXImportTask& task, 
-                                             const ASTERIXImportTaskSettings& settings)
-:   ASTERIXDecoderBase(source, task, settings)
+ASTERIXNetworkDecoder::ASTERIXNetworkDecoder(ASTERIXImportSource& source, 
+                                             const ASTERIXImportTaskSettings* settings)
+:   ASTERIXDecoderBase(source, settings)
 ,   receive_semaphore_((unsigned int)0)
 {
     assert(source.isNetworkType());
@@ -82,7 +83,7 @@ void ASTERIXNetworkDecoder::start_impl()
 
     vector<unique_ptr<UDPReceiver>> udp_receivers;
 
-    int max_lines = settings_.max_network_lines_;
+    int max_lines = settings().max_network_lines_;
 
     loginf << "ASTERIXNetworkDecoder: start: max lines " << max_lines;
 
