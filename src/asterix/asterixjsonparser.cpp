@@ -162,14 +162,11 @@ void ASTERIXJSONParser::selectMapping (unsigned int index)
 {
     loginf << "ASTERIXJSONParser: selectMapping: index " << index;
 
-    assert (widget_);
-    widget_->selectModelRow(index);
+    emit modelRowChanged(index);
 }
 
 void ASTERIXJSONParser::selectUnmappedDBContentVariable (const std::string& name)
 {
-    assert (widget_);
-
     auto iter = find(not_added_dbo_variables_.begin(), not_added_dbo_variables_.end(), name);
     assert (iter != not_added_dbo_variables_.end());
 
@@ -177,7 +174,9 @@ void ASTERIXJSONParser::selectUnmappedDBContentVariable (const std::string& name
 
     assert (pos < not_added_dbo_variables_.size());
 
-    widget_->selectModelRow(data_mappings_.size() + not_added_json_keys_.size() + pos);
+    unsigned int index = data_mappings_.size() + not_added_json_keys_.size() + pos;
+
+    emit modelRowChanged(index);
 }
 
 //void ASTERIXJSONParser::updateToChangedIndex (unsigned int row_index)
@@ -616,18 +615,12 @@ void ASTERIXJSONParser::removeMapping(unsigned int index)
 
 const dbContent::VariableSet& ASTERIXJSONParser::variableList() const { return var_list_; }
 
-ASTERIXJSONParserWidget* ASTERIXJSONParser::widget()
+ASTERIXJSONParserWidget* ASTERIXJSONParser::createWidget()
 {
     if (mapping_checks_dirty_)
         doMappingChecks();
 
-    if (!widget_)
-    {
-        widget_.reset(new ASTERIXJSONParserWidget(*this));
-        assert(widget_);
-    }
-
-    return widget_.get();  // needed for qt integration, not pretty
+    return new ASTERIXJSONParserWidget(*this);
 }
 
 std::string ASTERIXJSONParser::dbContentName() const { return db_content_name_; }

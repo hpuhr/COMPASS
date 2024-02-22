@@ -85,6 +85,7 @@ protected:
     QPushButton* delete_object_parser_button_{nullptr};
 
     QStackedWidget* object_parser_widget_{nullptr};
+    std::map<std::string, QWidget*> object_parser_widgets_;
 
     ASTERIXConfigWidget* config_widget_{nullptr};
     ASTERIXOverrideWidget* override_widget_{nullptr};

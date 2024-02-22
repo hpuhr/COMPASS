@@ -68,6 +68,8 @@ ASTERIXJSONParserWidget::ASTERIXJSONParserWidget(ASTERIXJSONParser& parser, QWid
     main_layout->addWidget(splitter_);
 
     setLayout(main_layout);
+
+    connect(&parser, &ASTERIXJSONParser::modelRowChanged, this, &ASTERIXJSONParserWidget::selectModelRow);
 }
 
 ASTERIXJSONParserWidget::~ASTERIXJSONParserWidget()

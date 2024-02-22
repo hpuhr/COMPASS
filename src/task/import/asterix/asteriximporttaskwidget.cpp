@@ -268,7 +268,12 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
     if (!text.size())
     {
         while (object_parser_widget_->count() > 0)  // remove all widgets
-            object_parser_widget_->removeWidget(object_parser_widget_->widget(0));
+        {
+            auto w = object_parser_widget_->widget(0);
+            object_parser_widget_->removeWidget(w);
+            w->deleteLater();
+        }
+        object_parser_widgets_.clear();
         return;
     }
 
@@ -280,12 +285,19 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
     assert(task_.schema() != nullptr);
     assert(task_.schema()->hasObjectParser(cat));
 
-    if (object_parser_widget_->indexOf(task_.schema()->parser(cat).widget()) < 0)
-        object_parser_widget_->addWidget(task_.schema()->parser(cat).widget());
+    auto id = text.toStdString();
 
-    object_parser_widget_->setCurrentWidget(task_.schema()->parser(cat).widget());
+    if (object_parser_widgets_.count(id) == 0)
+    {
+        auto w = task_.schema()->parser(cat).createWidget();
+        object_parser_widget_->addWidget(w);
+        object_parser_widgets_[ id ] = w;
+    }
+
+    auto w = object_parser_widgets_.at(id);
+
+    object_parser_widget_->setCurrentWidget(w);
 }
-
 
 void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 {
