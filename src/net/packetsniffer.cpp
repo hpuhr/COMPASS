@@ -105,14 +105,11 @@ bool PacketSniffer::hasUnknownPacketHeaders() const
 
 /**
 */
-bool PacketSniffer::chunkEnded(const ReadConfig& read_config) const
+bool PacketSniffer::chunkEnded(const BasicFilter& filter) const
 {
-    //check filters
-    if (packet_idx_ < read_config.chunk_start_index || packet_idx_ > read_config.chunk_end_index)
+    if (num_read_ >= filter.max_packets)
         return true;
-    if (num_read_ >= read_config.chunk_max_packets)
-        return true;
-    if (bytes_read_ >= read_config.chunk_max_bytes)
+    if (bytes_read_ >= filter.max_bytes)
         return true;
 
     return false;
@@ -120,20 +117,37 @@ bool PacketSniffer::chunkEnded(const ReadConfig& read_config) const
 
 /**
 */
-bool PacketSniffer::collectData(Data& data,
-                                const ReadConfig& read_config) const
+bool PacketSniffer::checkGeneralFilters(const BasicFilter& filter) const
 {
-    bool read_sig = (read_config.read_style == ReadStyle::PerSignature);
+    if (packet_idx_ < filter.start_packet_index || packet_idx_ > filter.end_packet_index)
+        return false;
+    if (num_read_ >= filter.max_packets)
+        return false;
+    if (bytes_read_ >= filter.max_bytes)
+        return false;
 
-    if (read_sig && data.packets >= read_config.data_max_packets_per_sig)
+    return true;
+}
+
+/**
+*/
+bool PacketSniffer::checkPerSignatureFilters(const Data& data,
+                                             const DataFilter& filter) const
+{
+    if (data.packets >= filter.max_packets_per_sig)
         return false;
-    if (read_sig &&  data.data.size() >= read_config.data_max_bytes_per_sig)
+    if (data.data.size() >= filter.max_bytes_per_sig)
         return false;
-    if (packet_idx_ < read_config.data_start_index || packet_idx_ > read_config.data_end_index)
-        return false;
-    if (num_read_ >= read_config.data_max_packets)
-        return false;
-    if (bytes_read_ >= read_config.data_max_bytes)
+
+    return true;
+}
+
+/**
+*/
+bool PacketSniffer::checkSignatureFilter(const Signature& signature,
+                                         const BasicFilter& filter) const
+{
+    if (!filter.signatures.empty() && filter.signatures.count(signature) == 0)
         return false;
     
     return true;
@@ -151,9 +165,13 @@ void PacketSniffer::digestPCAPPacket(const struct pcap_pkthdr* pkthdr,
     if (chunk_ended)
         return;
 
-    //skip packet?
-    chunk_ended = chunkEnded(read_config);
+    //read chunk ended? (for incremental reading)
+    chunk_ended = chunkEnded(read_config.chunk_filter);
     if (chunk_ended)
+        return;
+
+    //skip packet immediately?
+    if (!checkGeneralFilters(read_config.packet_filter))
         return;
     
     if (link_layer_type == DLT_EN10MB)
@@ -251,18 +269,24 @@ void PacketSniffer::addPacket(const std::string& src_ip,
 {
     Signature sig(src_ip, src_port, dst_ip, dst_port);
 
-    //check signature filter
-    if (!read_config.signatures_to_read.empty() && 
-         read_config.signatures_to_read.count(sig) == 0)
-         return;
-
+    //immediately check signatures of packet filter
+    if (!checkSignatureFilter(sig, read_config.packet_filter))
+        return;
+    
     //log encountered signature in any case
     auto& sig_data = data_per_signature_[ sig ];
 
-    //collect data
-    auto& tdata = (read_config.read_style == ReadStyle::PerSignature) ? sig_data : data_;
+    bool read_per_sig = (read_config.read_style == ReadStyle::PerSignature);
 
-    if (collectData(tdata, read_config))
+    //collect data
+    auto& tdata = read_per_sig ? sig_data : data_;
+
+    //check data filters
+    bool collect_data = checkGeneralFilters(read_config.data_filter) &&
+                        checkSignatureFilter(sig, read_config.data_filter) &&
+                        (!read_per_sig || checkPerSignatureFilters(tdata, read_config.data_filter));
+    //collect data?
+    if (collect_data)
         tdata.data.insert(tdata.data.end(), data, data + data_len);
 
     tdata.packets += 1;
@@ -427,13 +451,8 @@ bool PacketSniffer::openPCAP(const std::string& fn)
 /**
 */
 bool PacketSniffer::readFile(ReadStyle read_style,
-                             size_t max_packets,
-                             size_t max_bytes,
-                             size_t max_packets_per_sig,
-                             size_t max_bytes_per_sig,
-                             size_t start_index,
-                             size_t end_index,
-                             const std::set<Signature>& signatures_to_read)
+                             const PacketFilter& packet_filter,
+                             const DataFilter& data_filter)
 {
     clear();
 
@@ -451,14 +470,8 @@ bool PacketSniffer::readFile(ReadStyle read_style,
 
     config.read_config.read_style = read_style;
 
-    config.read_config.data_start_index         = start_index;
-    config.read_config.data_end_index           = end_index;
-    config.read_config.data_max_packets         = max_packets;
-    config.read_config.data_max_bytes           = max_bytes;
-    config.read_config.data_max_packets_per_sig = max_packets_per_sig;
-    config.read_config.data_max_bytes_per_sig   = max_bytes_per_sig;
-
-    config.read_config.signatures_to_read = signatures_to_read;
+    config.read_config.packet_filter = packet_filter;
+    config.read_config.data_filter   = data_filter;
 
     //loop packets
     if (pcap_loop(pcap_file_, 0, pcapPacketHandler, (u_char*)&config) < 0) 
@@ -496,10 +509,10 @@ boost::optional<PacketSniffer::Chunk> PacketSniffer::readFileNext(size_t max_pac
 
     config.read_config.read_style = ReadStyle::Accumulate;
 
-    config.read_config.chunk_max_packets = max_packets;
-    config.read_config.chunk_max_bytes   = max_bytes;
+    config.read_config.chunk_filter.max_packets = max_packets;
+    config.read_config.chunk_filter.max_bytes   = max_bytes;
 
-    config.read_config.signatures_to_read = signatures_to_read;
+    config.read_config.packet_filter.signatures = signatures_to_read;
 
     //reset counts
     num_read_   = 0;

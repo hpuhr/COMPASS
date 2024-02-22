@@ -64,12 +64,10 @@ bool ASTERIXPCAPDecoder::checkFile(ASTERIXImportFileInfo& file_info,
         return false;
     }
 
-    //read in some data
+    //parse file and accumulate a little portion of data per detected signature
     if (!sniffer.readFile(PacketSniffer::ReadStyle::PerSignature,
-                          std::numeric_limits<size_t>::max(),
-                          std::numeric_limits<size_t>::max(),
-                          std::numeric_limits<size_t>::max(), 
-                          DecodeCheckMaxBytes))
+                          {}, //we want complete packet stats, so no packet filter
+                          PacketSniffer::DataFilter().maxBytesPerSignature(DecodeCheckMaxBytes)))
     {
         error = "Could not parse PCAP file";
         return false;
