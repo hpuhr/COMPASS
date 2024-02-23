@@ -52,12 +52,16 @@ namespace
     */
     bool checkOverwrite(const ViewPresets::Preset& preset, QWidget* parent)
     {
+        //user presets can always be modified
+        if (!preset.isDeployed())
+            return true;
+
         //already modified?
         if (preset.isModified())
             return true;
 
-        QString msg = "Do you really want to overwrite default preset '" + QString::fromStdString(preset.name) + "'?";
-        auto ret = QMessageBox::question(parent, "Overwrite Default Preset", msg, QMessageBox::Yes, QMessageBox::No);
+        QString msg = "Do you really want to modify default preset '" + QString::fromStdString(preset.name) + "'?";
+        auto ret = QMessageBox::question(parent, "Modify Default Preset", msg, QMessageBox::Yes, QMessageBox::No);
         if (ret == QMessageBox::No)
             return false;
 
@@ -327,10 +331,6 @@ bool ViewPresetEditDialog::applyCreate()
 */
 bool ViewPresetEditDialog::applyEdit()
 {
-    //ask if overwrite is ok
-    if (!checkOverwrite(*preset_, this))
-        return false;
-
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
     //update metadata to form content
@@ -707,7 +707,7 @@ void ViewPresetItemWidget::updateContents()
     deployed_label_->setPixmap(pm.scaledToHeight(IconHeight, Qt::SmoothTransformation));
 
     //example presets cannot be modified
-    edit_button_->setVisible(!preset_->deployed);
+    //edit_button_->setVisible(!preset_->deployed);
 }
 
 /**
@@ -926,8 +926,14 @@ void ViewPresetItemListWidget::editPreset(ViewPresets::Key key)
     auto& presets = COMPASS::instance().viewManager().viewPresets();
     assert(presets.hasPreset(key));
 
+    auto& p = presets.presets().at(key);
+
+    //ask if overwrite is ok
+    if (!checkOverwrite(p, this))
+        return;
+
     //edit preset
-    ViewPresetEditDialog dlg(view_, &presets.presets().at(key), ViewPresetEditDialog::Mode::Edit, this);
+    ViewPresetEditDialog dlg(view_, &p, ViewPresetEditDialog::Mode::Edit, this);
     if (dlg.exec() != QDialog::Accepted)
         return;
 }
@@ -942,7 +948,7 @@ void ViewPresetItemListWidget::removePreset(ViewPresets::Key key)
     const auto& p = presets.presets().at(key);
 
     //ask if an example is to be deleted
-    if (p.deployed)
+    if (p.isDeployed())
     {
         QString msg = "Do you really want to permanently delete default preset '" + QString::fromStdString(p.name) + "'?";
         auto ret = QMessageBox::question(this, "Delete Default Preset", msg, QMessageBox::Yes, QMessageBox::No);
