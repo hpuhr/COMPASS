@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "asterixnetworkdecoder.h"
 #include "asteriximporttask.h"
 #include "stringconv.h"
@@ -15,10 +32,17 @@ using namespace nlohmann;
 using namespace Utils;
 using namespace std;
 
-ASTERIXNetworkDecoder::ASTERIXNetworkDecoder(
-        ASTERIXDecodeJob& job, ASTERIXImportTask& task, const ASTERIXImportTaskSettings& settings)
-    : ASTERIXDecoderBase(job, task, settings), receive_semaphore_((unsigned int) 0)
+/**
+ * @param source Import source to retrieve data from.
+ * @param settings If set, external settings will be applied, otherwise settings will be retrieved from the import task.
+*/
+ASTERIXNetworkDecoder::ASTERIXNetworkDecoder(ASTERIXImportSource& source, 
+                                             const ASTERIXImportTaskSettings* settings)
+:   ASTERIXDecoderBase(source, settings)
+,   receive_semaphore_((unsigned int)0)
 {
+    assert(source.isNetworkType());
+
     ds_lines_ = COMPASS::instance().dataSourceManager().getNetworkLines();
 
     for (auto& ds_it : ds_lines_)
@@ -30,24 +54,36 @@ ASTERIXNetworkDecoder::ASTERIXNetworkDecoder(
     }
 }
 
-ASTERIXNetworkDecoder::~ASTERIXNetworkDecoder()
-{
+/**
+*/
+ASTERIXNetworkDecoder::~ASTERIXNetworkDecoder() = default;
 
+/**
+*/
+bool ASTERIXNetworkDecoder::canDecode_impl() const
+{
+    //@TODO: try to retrieve some data from network lines?
+    return true;
 }
 
-void ASTERIXNetworkDecoder::start()
+/**
+*/
+bool ASTERIXNetworkDecoder::canRun_impl() const
 {
-    assert (!running_);
+    return COMPASS::instance().dataSourceManager().getNetworkLines().size(); // there are network lines defined
+}
 
-    running_ = true;
-
+/**
+*/
+void ASTERIXNetworkDecoder::start_impl()
+{
     boost::asio::io_context io_context;
 
     unsigned int line;
 
     vector<unique_ptr<UDPReceiver>> udp_receivers;
 
-    int max_lines = settings_.max_network_lines_;
+    int max_lines = settings().max_network_lines_;
 
     loginf << "ASTERIXNetworkDecoder: start: max lines " << max_lines;
 
@@ -88,11 +124,11 @@ void ASTERIXNetworkDecoder::start()
 
     unsigned int line_id = 0;
 
-    while (running_)
+    while (isRunning())
     {
         receive_semaphore_.wait();
 
-        if (!running_)
+        if (!isRunning())
             break;
 
         {
@@ -138,18 +174,18 @@ void ASTERIXNetworkDecoder::start()
 
                     auto callback = [this, line_id](std::unique_ptr<nlohmann::json> data, size_t num_frames,
                             size_t num_records, size_t numErrors) {
-                        job_.netJasterixCallback(std::move(data), line_id, num_frames, num_records, numErrors);
+                        job()->netJasterixCallback(std::move(data), line_id, num_frames, num_records, numErrors);
                     };
 
-                    task_.jASTERIX()->decodeData((char*) receive_buffers_copy_.at(line_id)->data(),
-                                                 size_it.second, callback);
+                    task().jASTERIX()->decodeData((char*) receive_buffers_copy_.at(line_id)->data(),
+                                                   size_it.second, callback);
                 }
 
                 logdbg << "ASTERIXNetworkDecoder: start: done";
 
                 receive_copy_buffer_sizes_.clear();
 
-                job_.forceBlockingDataProcessing();
+                job()->forceBlockingDataProcessing();
             }
         }
     }
@@ -166,20 +202,21 @@ void ASTERIXNetworkDecoder::start()
     loginf << "ASTERIXNetworkDecoder: start: done";
 }
 
-void ASTERIXNetworkDecoder::stop()
+/**
+*/
+void ASTERIXNetworkDecoder::stop_impl()
 {
-    if (running_)
-    {
-        running_ = false;
-
-        // stop decoding
-        receive_semaphore_.post(); // wake up loop
-    }
+    // stop decoding
+    receive_semaphore_.post(); // wake up loop
 }
 
-void ASTERIXNetworkDecoder::storeReceivedData (unsigned int line, const char* data, unsigned int length) // const std::string& sender_id,
+/**
+*/
+void ASTERIXNetworkDecoder::storeReceivedData(unsigned int line, 
+                                              const char* data, 
+                                              unsigned int length)
 {
-    if (!running_)
+    if (!isRunning())
         return;
 
     //loginf << "ASTERIXDecoderBase: storeReceivedData: sender " << sender_id;

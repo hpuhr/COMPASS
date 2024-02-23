@@ -36,12 +36,13 @@ class QCheckBox;
 class QTabWidget;
 class QLabel;
 class QGridLayout;
+class QTreeWidgetItem;
 
 class ASTERIXImportTaskWidget : public QWidget
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void addParserSlot();
     void removeObjectParserSlot();
     void selectedObjectParserSlot(const QString& text);
@@ -50,6 +51,8 @@ class ASTERIXImportTaskWidget : public QWidget
     void dateChangedSlot(QDate date);
 
     void debugChangedSlot();
+
+    void decodingStateChangedSlot();
 
   public:
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
@@ -60,6 +63,15 @@ class ASTERIXImportTaskWidget : public QWidget
     ASTERIXOverrideWidget* overrideWidget() const;
 
 protected:
+    void addMainTab();
+    void addDecoderTab();
+    void addOverrideTab();
+    void addMappingsTab();
+
+    void updateParserBox();
+
+    void sourceClicked(QTreeWidgetItem* item, int column);
+
     ASTERIXImportTask& task_;
 
     QHBoxLayout* main_layout_{nullptr};
@@ -73,19 +85,13 @@ protected:
     QPushButton* delete_object_parser_button_{nullptr};
 
     QStackedWidget* object_parser_widget_{nullptr};
+    std::map<std::string, QWidget*> object_parser_widgets_;
 
     ASTERIXConfigWidget* config_widget_{nullptr};
     ASTERIXOverrideWidget* override_widget_{nullptr};
 
     QCheckBox* debug_check_{nullptr};
     QCheckBox* limit_ram_check_{nullptr};
-
-    void addMainTab();
-    void addDecoderTab();
-    void addOverrideTab();
-    void addMappingsTab();
-
-    void updateParserBox();
 };
 
 

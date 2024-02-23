@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "asterixfiledecoder.h"
 #include "asterixdecoderbase.h"
 #include "asteriximporttask.h"
@@ -9,118 +26,101 @@ using namespace Utils;
 using namespace std;
 using namespace nlohmann;
 
-ASTERIXFileDecoder::ASTERIXFileDecoder (
-        ASTERIXDecodeJob& job, ASTERIXImportTask& task, const ASTERIXImportTaskSettings& settings)
-    : ASTERIXDecoderBase(job, task, settings)
+
+/**
+ * @param source Import source to retrieve data from.
+ * @param settings If set, external settings will be applied, otherwise settings will be retrieved from the import task.
+*/
+ASTERIXFileDecoder::ASTERIXFileDecoder(ASTERIXImportSource& source,
+                                       const ASTERIXImportTaskSettings* settings)
+:   ASTERIXDecoderFile(ASTERIXImportSource::SourceType::FileASTERIX, source, settings)
 {
-    total_file_size_ = 0;
+}
 
-    files_info_ = settings_.filesInfo();
-    assert (files_info_.size());
+/**
+*/
+ASTERIXFileDecoder::~ASTERIXFileDecoder() = default;
 
-    for (const auto& file_info : files_info_)
+/**
+*/
+void ASTERIXFileDecoder::stop_impl()
+{
+    // stop decoding
+    task().jASTERIX()->stopFileDecoding();
+}
+
+/**
+*/
+bool ASTERIXFileDecoder::checkDecoding(ASTERIXImportFileInfo& file_info, int section_idx, std::string& error) const
+{
+    //get a fresh jasterix instance
+    auto jasterix = task().jASTERIX(true);
+
+    bool has_framing = settings().current_file_framing_.size() > 0;
+
+    loginf << "ASTERIXFileDecoder: checkDecoding: file '" << file_info.filename << "' decoding now...";
+
+    //analyze asterix file
+    std::unique_ptr<nlohmann::json> analysis_info;
+    analysis_info = has_framing ? jasterix->analyzeFile(file_info.filename, settings().current_file_framing_, DecodeCheckRecordLimit) :
+                                  jasterix->analyzeFile(file_info.filename, DecodeCheckRecordLimit);
+    assert(analysis_info);
+
+    auto& file_error = file_info.error;
+
+    //store analysis info for later usage
+    file_error.analysis_info = *analysis_info;
+
+    loginf << "ASTERIXFileDecoder: checkDecoding: file '" << file_info.filename << "' json '" << file_error.analysis_info.dump(4) << "'";
+    //            json '{
+    //               "data_items": {},
+    //               "num_errors": 12,
+    //               "num_records": 919,
+    //               "sensor_counts": {}
+    //           }'
+
+    //no error info? => strange
+    if (!file_error.analysis_info.contains("num_errors") ||
+        !file_error.analysis_info.contains("num_records"))
     {
-        assert (Files::fileExists(file_info.filename_));
-        total_file_size_ += Files::fileSize(file_info.filename_);
+        error = "Decoding failed";
+        return false;
     }
-}
 
+    //decoding succeeded?
+    unsigned int num_errors  = file_error.analysis_info.at("num_errors");
+    unsigned int num_records = file_error.analysis_info.at("num_records");
 
-ASTERIXFileDecoder::~ASTERIXFileDecoder()
-{
-
-}
-
-void ASTERIXFileDecoder::start()
-{
-    assert (!running_);
-
-    start_time_ = boost::posix_time::microsec_clock::local_time();
-
-    running_ = true;
-
-    while (running_ && hasCurrentFileToDo())
-        doCurrentFile();
-
-}
-
-void ASTERIXFileDecoder::stop()
-{
-    if (running_)
+    if (num_errors || !num_records) // decoder errors or no data
     {
-        running_ = false;
-
-        // stop decoding
-        task_.jASTERIX()->stopFileDecoding();
+        error = "Decoding failed";
+        return false;
     }
+
+    return true;
 }
 
-std::string ASTERIXFileDecoder::statusInfoString()
+/**
+*/
+void ASTERIXFileDecoder::processFile(ASTERIXImportFileInfo& file_info)
 {
-    string text;
+    //get a fresh jasterix instance
+    task().jASTERIX(true);
 
-    for (const auto& file_info : files_info_)
+    string       current_filename  = file_info.filename;
+    unsigned int current_file_line = settings().file_line_id_; //files_info_.at(current_file_count_).line_id_;
+
+    loginf << "ASTERIXFileDecoder: processFile: file '" << current_filename << "' framing '" << settings().current_file_framing_ << "'";
+
+    //jasterix callback
+    auto callback = [this, current_file_line] (std::unique_ptr<nlohmann::json> data, 
+                                               size_t num_frames,
+                                               size_t num_records, 
+                                               size_t numErrors) 
     {
-        if (file_info.filename_ == getCurrentFilename())
-            text += "<p align=\"left\"><b>" + file_info.filename_ + "</b>";
-        else
-            text += "<p align=\"left\">"+file_info.filename_ + "";
-    }
-
-    text += "<br><p align=\"left\">Records/s: "+to_string((unsigned int) getRecordsPerSecond());
-    text += "<p align=\"right\">Remaining: "+String::timeStringFromDouble(getRemainingTime() + 1.0, false);
-
-    return text ;
-}
-
-float ASTERIXFileDecoder::statusInfoProgress() // percent
-{
-    return 100.0 * (float) (done_files_total_size_ + current_file_max_index_)/(float) total_file_size_;
-}
-
-float ASTERIXFileDecoder::getRecordsPerSecond() const
-{
-    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
-                               - start_time_).total_milliseconds()/1000.0;
-
-    return (float) num_records_total_ / elapsed_s;
-}
-
-float ASTERIXFileDecoder::getRemainingTime() const
-{
-    size_t remaining_rec = total_file_size_ - done_files_total_size_ - current_file_max_index_;
-
-    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
-                               - start_time_).total_milliseconds()/1000.0;
-
-    float index_per_s = (float) (done_files_total_size_ + current_file_max_index_) / elapsed_s;
-
-    return (float) remaining_rec / index_per_s;
-}
-
-bool ASTERIXFileDecoder::hasCurrentFileToDo() // still something to decode
-{
-    return current_file_count_ < files_info_.size();
-}
-
-void ASTERIXFileDecoder::doCurrentFile()
-{
-    assert (hasCurrentFileToDo());
-
-    task_.refreshjASTERIX();
-
-    string current_filename = files_info_.at(current_file_count_).filename_;
-    unsigned int current_file_line = settings_.file_line_id_; //files_info_.at(current_file_count_).line_id_;
-
-    loginf << "ASTERIXFileDecoder: doCurrentFile: file '" << current_filename
-           << "' framing '" << settings_.current_file_framing_ << "'";
-
-    auto callback = [this, current_file_line](std::unique_ptr<nlohmann::json> data, size_t num_frames,
-            size_t num_records, size_t numErrors) {
-
         // get last index
 
-        if (settings_.current_file_framing_ == "")
+        if (settings().current_file_framing_ == "")
         {
             assert(data->contains("data_blocks"));
             assert(data->at("data_blocks").is_array());
@@ -129,12 +129,12 @@ void ASTERIXFileDecoder::doCurrentFile()
             {
                 json& data_block = data->at("data_blocks").back();
 
-                assert (data_block.contains("content"));
+                assert(data_block.contains("content"));
                 assert(data_block.at("content").is_object());
-                assert (data_block.at("content").contains("index"));
-                current_file_max_index_ = data_block.at("content").at("index");
-            }
+                assert(data_block.at("content").contains("index"));
 
+                setFileBytesRead(data_block.at("content").at("index"));
+            }
         }
         else
         {
@@ -149,37 +149,21 @@ void ASTERIXFileDecoder::doCurrentFile()
                 {
                     assert(frame.at("content").is_object());
                     assert (frame.at("content").contains("index"));
-                    current_file_max_index_ = frame.at("content").at("index");
+
+                    setFileBytesRead(frame.at("content").at("index"));
                 }
             }
         }
 
-        num_records_total_ += num_records;
+        addRecordsRead(num_records);
 
-        job_.fileJasterixCallback(std::move(data), current_file_line, num_frames, num_records, numErrors);
+        //invoke job callback
+        job()->fileJasterixCallback(std::move(data), current_file_line, num_frames, num_records, numErrors);
     };
 
-    try
-    {
-        if (settings_.current_file_framing_ == "")
-            task_.jASTERIX()->decodeFile(current_filename, callback);
-        else
-            task_.jASTERIX()->decodeFile(current_filename, settings_.current_file_framing_, callback);
-    }
-    catch (std::exception& e)
-    {
-        logerr << "ASTERIXFileDecoder: doCurrentFile: decoding error '" << e.what() << "'";
-        error_ = true;
-        error_message_ = e.what();
-    }
-
-    done_files_total_size_ += Files::fileSize(files_info_.at(current_file_count_).filename_);
-    current_file_max_index_ = 0;
-    ++current_file_count_;
-}
-
-std::string ASTERIXFileDecoder::getCurrentFilename()
-{
-    assert (current_file_count_ < files_info_.size());
-    return files_info_.at(current_file_count_).filename_;
+    //start decoding
+    if (settings().current_file_framing_ == "")
+        task().jASTERIX()->decodeFile(current_filename, callback);
+    else
+        task().jASTERIX()->decodeFile(current_filename, settings().current_file_framing_, callback);
 }

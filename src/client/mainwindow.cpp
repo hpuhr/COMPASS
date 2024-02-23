@@ -323,6 +323,12 @@ void MainWindow::createMenus ()
     import_recent_asterix_menu_ = import_menu_->addMenu("Recent ASTERIX Recording");
     import_recent_asterix_menu_->setToolTip("Import a recent ASTERIX Recording File");
 
+    QAction* import_pcap_file_action = new QAction("&PCAP Network Recording");
+    import_pcap_file_action->setShortcut(tr("Ctrl+P"));
+    import_pcap_file_action->setToolTip("Import ASTERIX data from PCAP network recording");
+    connect(import_pcap_file_action, &QAction::triggered, this, &MainWindow::importAsterixFromPCAPSlot);
+    import_menu_->addAction(import_pcap_file_action);
+
     QAction* import_ast_net_action = new QAction("ASTERIX From Network");
     import_ast_net_action->setToolTip("Import ASTERIX From Network");
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
@@ -749,7 +755,7 @@ void MainWindow::importAsterixRecordingSlot()
 
     ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    task.clearImportFilesInfo();
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FileASTERIX);
 
     if (dialog.exec())
     {
@@ -765,12 +771,13 @@ void MainWindow::importAsterixRecordingSlot()
             filenames_vec.push_back(filename.toStdString());
         }
 
-        task.addImportFileNames(filenames_vec);
+        task.source().addFiles(filenames_vec);//, file_line);
+
+        //task.addImportFileNames(filenames_vec);
 
         updateMenus();
 
-        task.dialog()->updateSourcesInfo();
-        task.dialog()->show();
+        task.runDialog(this);
     }
 
 //    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
@@ -797,12 +804,13 @@ void MainWindow::importRecentAsterixRecordingSlot()
 
     assert (filename.size());
 
-    COMPASS::instance().taskManager().asterixImporterTask().addImportFileNames({filename});
+    auto& task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FileASTERIX, {filename});
 
     updateMenus();
 
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSourcesInfo();
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+    task.runDialog(this);
 }
 
 void MainWindow::clearImportRecentAsterixRecordingsSlot()
@@ -814,14 +822,34 @@ void MainWindow::clearImportRecentAsterixRecordingsSlot()
     updateMenus();
 }
 
+void MainWindow::importAsterixFromPCAPSlot()
+{
+    loginf << "MainWindow: importAsterixFromPCAPSlot";
+
+    auto fn = QFileDialog::getOpenFileName(this, 
+                                           "Import PCAP File", 
+                                           COMPASS::instance().lastUsedPath().c_str());
+    if (fn.isEmpty())
+        return;
+
+    ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FilePCAP, { fn.toStdString() });
+
+    updateMenus();
+
+    task.runDialog(this);
+}
+
 void MainWindow::importAsterixFromNetworkSlot()
 {
     loginf << "MainWindow: importAsterixFromNetworkSlot";
 
-    COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
+    ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSourcesInfo();
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+    task.source().setSourceType(ASTERIXImportSource::SourceType::NetASTERIX);
+
+    task.runDialog(this);
 }
 
 void MainWindow::importJSONRecordingSlot()

@@ -8,8 +8,10 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
-: QDialog(), task_(task)
+ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task, 
+                                                 QWidget* parent)
+:   QDialog(parent)
+,   task_  (task  )
 {
     setWindowTitle("Import ASTERIX Recording");
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
@@ -46,16 +48,22 @@ ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
     setLayout(main_layout);
 
     update();
+    updateTitle();
+    updateButtons();
 
     connect(&task, &ASTERIXImportTask::configChanged, this, &ASTERIXImportTaskDialog::configChanged);
+    connect(&task, &ASTERIXImportTask::decodingStateChanged, this, &ASTERIXImportTaskDialog::decodingStateChangedSlot);
+    connect(&task, &ASTERIXImportTask::sourceUsageChanged, this, &ASTERIXImportTaskDialog::updateButtons);
+}
+
+void ASTERIXImportTaskDialog::updateTitle()
+{
+    setWindowTitle("Import ASTERIX From " + QString::fromStdString(task_.source().sourceTypeAsString()));
 }
 
 void ASTERIXImportTaskDialog::updateSourcesInfo()
 {
-    if (task_.isImportNetwork())
-        setWindowTitle("Import ASTERIX From Network");
-    else // file
-        setWindowTitle("Import ASTERIX From File");
+    updateTitle();
 
     assert (task_widget_);
     task_widget_->updateSourcesGrid();
@@ -70,15 +78,21 @@ void ASTERIXImportTaskDialog::updateButtons()
 
 void ASTERIXImportTaskDialog::importClickedSlot()
 {
-    emit importSignal();
+    accept();
 }
 
 void ASTERIXImportTaskDialog::cancelClickedSlot()
 {
-    emit cancelSignal();
+    reject();
 }
 
 void ASTERIXImportTaskDialog::configChanged()
 {
     //@TODO
+}
+
+void ASTERIXImportTaskDialog::decodingStateChangedSlot()
+{
+    updateTitle();
+    updateButtons();
 }

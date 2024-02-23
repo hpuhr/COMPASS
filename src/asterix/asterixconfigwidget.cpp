@@ -121,7 +121,7 @@ void ASTERIXConfigWidget::refreshjASTERIXSlot()
 {
     loginf << "ASTERIXConfigWidget: refreshjASTERIXSlot";
 
-    task_.refreshjASTERIX();
+    task_.jASTERIX(true);
     task_.testFileDecoding(); // in case anything was changed
 
     updateSlot();

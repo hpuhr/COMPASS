@@ -14,6 +14,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/taskmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/task.h"
         "${CMAKE_CURRENT_LIST_DIR}/taskwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/asynctask.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/taskmanager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/asynctask.cpp"
 )
