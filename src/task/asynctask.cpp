@@ -17,14 +17,15 @@
 
 #include "asynctask.h"
 
-#include <future>
-
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QProgressBar>
 #include <QLabel>
 #include <QPushButton>
 #include <QApplication>
+
+#include <future>
+#include <cassert>
 
 /************************************************************************************
  * AsyncTask

@@ -9,8 +9,8 @@ RUN sed -i -e 's/deb.debian.org/archive.debian.org/g' \
 RUN apt-get update
 RUN apt-get install -y openssl 
 
-RUN groupadd -r someusers --gid=1001 
-RUN useradd -r -p "$(openssl passwd -1 mcphatty)" -g someusers -G sudo --uid=1001 --create-home --shell /bin/bash mcphatty 
+RUN groupadd -r someusers --gid=1000 
+RUN useradd -r -p "$(openssl passwd -1 sk)" -g someusers -G sudo --uid=1000 --create-home --shell /bin/bash sk 
 
 # Update and allow for apt over HTTPS
 RUN apt-get install -y apt-utils
@@ -170,6 +170,8 @@ RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/m
 RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
 RUN cd jasper && dpkg -i *.deb
 
+RUN apt-get install libpcap-dev -y
+
 RUN ldconfig -v /usr/lib64/ /usr/local/
 RUN updatedb
 
@@ -177,8 +179,8 @@ RUN locate libboost
 
 RUN apt install sudo
 
-RUN echo 'mcphatty ALL=(ALL)  ALL' >> /etc/sudoers
+RUN echo 'sk ALL=(ALL)  ALL' >> /etc/sudoers
 RUN more /etc/sudoers
 
-USER mcphatty
+USER sk
 WORKDIR /app/workspace/compass/docker
