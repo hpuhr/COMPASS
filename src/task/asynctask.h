@@ -20,6 +20,9 @@
 #include <QObject>
 #include <QDialog>
 
+#include <cassert>
+#include <functional>
+
 class QProgressBar;
 class QLabel;
 class QPushButton;
