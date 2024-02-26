@@ -44,8 +44,8 @@
 #include "ViewerWidget.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
-#include "osgview.h"
-#include "osgviewdatawidget.h"
+#include "geographicview.h"
+#include "geographicviewdatawidget.h"
 #endif
 
 #include <QCoreApplication>
@@ -418,10 +418,10 @@ void LatexVisitor::visit(HistogramView* e)
 }
 
 #if USE_EXPERIMENTAL_SOURCE == true
-void LatexVisitor::visit(OSGView* e)
+void LatexVisitor::visit(GeographicView* e)
 {
     assert (e);
-    loginf << "LatexVisitor: visit: OSGView " << e->instanceId();
+    loginf << "LatexVisitor: visit: GeographicView " << e->instanceId();
 
     std::string screenshot_path = report_.path()+"/screenshots";
 
@@ -432,7 +432,7 @@ void LatexVisitor::visit(OSGView* e)
         bool ret = Files::createMissingDirectories(screenshot_path);
 
         if (!ret)
-            throw runtime_error("LatexVisitor: visit: OSGView: unable to create directories for '"
+            throw runtime_error("LatexVisitor: visit: GeographicView: unable to create directories for '"
                                 +screenshot_path+"'");
 
         screenshot_folder_created_ = true;
@@ -440,7 +440,7 @@ void LatexVisitor::visit(OSGView* e)
 
     e->showInTabWidget();
 
-    OSGViewDataWidget* data_widget = e->getDataWidget();
+    GeographicViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
 
     if (wait_on_map_loading_)
@@ -459,7 +459,7 @@ void LatexVisitor::visit(OSGView* e)
     bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
 
     if (!ret)
-        throw runtime_error("LatexVisitor: visit: OSGView: unable to create directories for '"
+        throw runtime_error("LatexVisitor: visit: GeographicView: unable to create directories for '"
                             +image_path+"'");
 
     ret = screenshot.save(image_path.c_str(), "JPG"); // , 50

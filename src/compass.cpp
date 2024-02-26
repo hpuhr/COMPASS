@@ -80,7 +80,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     registerParameter("disable_live_to_offline_switch", &disable_live_to_offline_switch_, false);
     registerParameter("disable_menu_config_save", &disable_menu_config_save_, false);
 
-    registerParameter("disable_osgview_rotate", &disable_osgview_rotate_, false);
+    registerParameter("disable_geographicview_rotate", &disable_geographicview_rotate_, false);
 
     registerParameter("disable_add_remove_views", &disable_add_remove_views_, false);
 
@@ -592,9 +592,9 @@ bool COMPASS::disableAddRemoveViews() const
     return disable_add_remove_views_;
 }
 
-bool COMPASS::disableOSGViewRotate() const
+bool COMPASS::disableGeographicViewRotate() const
 {
-    return disable_osgview_rotate_;
+    return disable_geographicview_rotate_;
 }
 
 bool COMPASS::disableMenuConfigSave() const

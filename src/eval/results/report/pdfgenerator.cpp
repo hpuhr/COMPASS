@@ -34,7 +34,7 @@
 #include "eval/results/evaluationresultsgenerator.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
-#include "osgview.h"
+#include "geographicview.h"
 #endif
 
 #include <QCoreApplication>
@@ -146,7 +146,7 @@ void PDFGenerator::run ()
         double ms_per_sec;
 
 #if USE_EXPERIMENTAL_SOURCE == true
-        OSGView::instant_display_ = true;
+        GeographicView::instant_display_ = true;
 #endif
 
         for (auto& sec_it : sections)

@@ -35,7 +35,7 @@
 #include "viewwidget.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
-#include "osgview.h"
+#include "geographicview.h"
 #endif
 
 #include <QHBoxLayout>
@@ -153,7 +153,7 @@ void ViewContainer::addView(View* view)
     int index = tab_widget_->addTab(w, view_name);
 
     QPushButton* manage_button = new QPushButton();
-    UI_TEST_OBJ_NAME(manage_button, view_name + " Manager"); //manage buttons can be reached via e.g. window1.osgview2_manager
+    UI_TEST_OBJ_NAME(manage_button, view_name + " Manager"); //manage buttons can be reached via e.g. window1.geographicview2_manager
 
     manage_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
     manage_button->setFixedSize(UI_ICON_SIZE);
@@ -249,16 +249,16 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
     }
-    else if (class_id == "OSGView")
+    else if (class_id == "GeographicView")
     {
 #if USE_EXPERIMENTAL_SOURCE == true
 
-        views_.emplace_back(new OSGView(class_id, instance_id, this, view_manager_));
+        views_.emplace_back(new GeographicView(class_id, instance_id, this, view_manager_));
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
 #else
-        loginf << "ViewContainer: generateSubConfigurable: OSGView ignored since compiled w/o experimental source";
+        loginf << "ViewContainer: generateSubConfigurable: GeographicView ignored since compiled w/o experimental source";
 #endif
 
     }

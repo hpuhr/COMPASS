@@ -41,7 +41,7 @@ boost::optional<std::pair<std::string, std::string>> signalFromObjectPath(const 
 
 QMainWindow* mainWindow();
 QDialog* activeDialog();
-std::pair<FindObjectErrCode, QObject*> getCommandReceiver(const std::string& object_path); // mainwindow.osgview1, dialog.obj2, compass.child1
+std::pair<FindObjectErrCode, QObject*> getCommandReceiver(const std::string& object_path); // mainwindow.geographicview1, dialog.obj2, compass.child1
 
 std::vector<std::string> parameterToStrings(const std::string& string_param);
 std::string parameterFromStrings(const std::vector<std::string>& strings);

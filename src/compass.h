@@ -97,7 +97,7 @@ protected:
     bool hide_viewpoints_ {false};
     bool disable_live_to_offline_switch_ {false};
     bool disable_menu_config_save_ {false};
-    bool disable_osgview_rotate_ {false};
+    bool disable_geographicview_rotate_ {false};
     bool disable_add_remove_views_ {false};
     bool disable_confirm_reset_views_ {false};
 
@@ -173,7 +173,7 @@ public:
 
     bool disableLiveToOfflineSwitch() const;
     bool disableMenuConfigSave() const;
-    bool disableOSGViewRotate() const;
+    bool disableGeographicViewRotate() const;
     bool disableAddRemoveViews() const;
     bool dbExportInProgress() const;
 

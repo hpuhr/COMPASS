@@ -26,7 +26,7 @@ class ViewPoint;
 class TableView;
 class HistogramView;
 #if USE_EXPERIMENTAL_SOURCE == true
-class OSGView;
+class GeographicView;
 #endif
 class ScatterPlotView;
 class LatexDocument;
@@ -50,7 +50,7 @@ public:
     virtual void visit(TableView* e);
     virtual void visit(HistogramView* e);
 #if USE_EXPERIMENTAL_SOURCE == true
-    virtual void visit(OSGView* e);
+    virtual void visit(GeographicView* e);
 #endif
     virtual void visit(ScatterPlotView* e);
 

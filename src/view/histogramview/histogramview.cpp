@@ -501,7 +501,7 @@ void HistogramView::loadingDone()
 
         //if (data.at("evaluation_results").contains("highlight_details"))
         //{
-        //    loginf << "OSGView: loadingDoneSlot: highlight_details "
+        //    loginf << "GeographicView: loadingDoneSlot: highlight_details "
         //           << data.at("evaluation_results").at("highlight_details").dump();
 
         //    vector<unsigned int> highlight_details = data.at("evaluation_results").at("highlight_details");

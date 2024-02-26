@@ -101,7 +101,7 @@ void ViewManager::init(QTabWidget* tab_widget)
     view_class_list_.append("TableView");
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    view_class_list_.append("OSGView");
+    view_class_list_.append("GeographicView");
 #endif
 
     view_class_list_.append("ScatterPlotView");
@@ -840,7 +840,7 @@ void ViewManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode
         view_it.second->appModeSwitch(app_mode_previous, app_mode_current);
 
         if (app_mode_current == AppMode::LiveRunning)
-            view_it.second->enableInTabWidget(view_it.second->classId() == "OSGView");
+            view_it.second->enableInTabWidget(view_it.second->classId() == "GeographicView");
         else
             view_it.second->enableInTabWidget(true);
     }

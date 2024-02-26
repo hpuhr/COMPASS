@@ -127,7 +127,7 @@ namespace rtcommand
     /**
      * Configures the wait condition as 'signal' type using a signal path and a timeout.
      * 
-     * Path is e.g. "mainwindow.osgview1.dataLoaded"
+     * Path is e.g. "mainwindow.geographicview1.dataLoaded"
      */
     bool RTCommandWaitCondition::setSignal(const QString& signal_path, int timeout_in_ms)
     {

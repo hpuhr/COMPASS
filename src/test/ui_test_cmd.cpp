@@ -46,7 +46,7 @@ void RTCommandUIObject::collectOptions_impl(OptionsDescription& options,
 {
     //add basic command options here
     ADD_RTCOMMAND_OPTIONS(options)
-        ("object,o", po::value<std::string>()->default_value(""), "name of an ui element, object names separated by '.', e.g. 'mainwindow.window1.osgview1.toolbar'");
+        ("object,o", po::value<std::string>()->default_value(""), "name of an ui element, object names separated by '.', e.g. 'mainwindow.window1.geographicview1.toolbar'");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "object", 1)
 }

@@ -6,7 +6,7 @@
     "modified": false,
     "name": "Overview Minimal",
     "timestamp": "2024-02-15 15:02:37.756",
-    "view": "OSGView",
+    "view": "GeographicView",
     "view_config": {
         "parameters": {
             "auto_label": false,
@@ -170,8 +170,8 @@
                     }
                 }
             },
-            "OSGViewDataSource": {
-                "OSGViewDataSource0": {
+            "GeographicViewDataSource": {
+                "GeographicViewDataSource0": {
                     "parameters": null,
                     "sub_configs": {
                         "VariableOrderedSet": {
@@ -237,8 +237,8 @@
                     }
                 }
             },
-            "OSGViewWidget": {
-                "OSGViewWidget0": {
+            "GeographicViewWidget": {
+                "GeographicViewWidget0": {
                     "parameters": null
                 }
             }

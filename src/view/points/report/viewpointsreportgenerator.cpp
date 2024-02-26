@@ -35,7 +35,7 @@
 #include "system.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
-#include "osgview.h"
+#include "geographicview.h"
 #endif
 
 #include <QCoreApplication>
@@ -174,7 +174,7 @@ void ViewPointsReportGenerator::run ()
         double ms_per_vp;
 
 #if USE_EXPERIMENTAL_SOURCE == true
-        OSGView::instant_display_ = true;
+        GeographicView::instant_display_ = true;
 #endif
 
         for (auto vp_id : vp_ids)
@@ -343,7 +343,7 @@ void ViewPointsReportGenerator::run ()
         QApplication::restoreOverrideCursor();
 
 #if USE_EXPERIMENTAL_SOURCE == true
-        OSGView::instant_display_ = false;
+        GeographicView::instant_display_ = false;
 #endif
 
         if (show_done_)

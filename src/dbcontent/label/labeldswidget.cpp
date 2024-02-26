@@ -144,7 +144,7 @@ void LabelDSWidget::sourceClickedSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "OSGViewConfigLabelDSWidget: sourceClickedSlot: ds_id " << ds_id;
+    loginf << "LabelDSWidget: sourceClickedSlot: ds_id " << ds_id;
 
     if (label_generator_.labelWanted(ds_id))
         label_generator_.removeLabelDSID(ds_id);
@@ -160,7 +160,7 @@ void LabelDSWidget::changeLineSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "OSGViewConfigLabelDSWidget: changeLineSlot: ds_id " << ds_id;
+    loginf << "LabelDSWidget: changeLineSlot: ds_id " << ds_id;
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
     assert (ds_man.hasDBDataSource(ds_id));
@@ -191,7 +191,7 @@ void LabelDSWidget::changeDirectionSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "OSGViewConfigLabelDSWidget: changeDirectionSlot: ds_id " << ds_id;
+    loginf << "LabelDSWidget: changeDirectionSlot: ds_id " << ds_id;
 
     QMenu menu;
 

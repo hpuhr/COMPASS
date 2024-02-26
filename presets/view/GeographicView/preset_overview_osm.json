@@ -6,7 +6,7 @@
     "modified": false,
     "name": "Overview OSM",
     "timestamp": "2024-02-15 15:02:09.533",
-    "view": "OSGView",
+    "view": "GeographicView",
     "view_config": {
         "parameters": {
             "auto_label": false,
@@ -159,8 +159,8 @@
         },
         "sub_configs": {
             "GeometryStyleFactory": {},
-            "OSGViewDataSource": {
-                "OSGViewDataSource0": {
+            "GeographicViewDataSource": {
+                "GeographicViewDataSource0": {
                     "parameters": null,
                     "sub_configs": {
                         "VariableOrderedSet": {
@@ -226,8 +226,8 @@
                     }
                 }
             },
-            "OSGViewWidget": {
-                "OSGViewWidget0": {
+            "GeographicViewWidget": {
+                "GeographicViewWidget0": {
                     "parameters": null
                 }
             }
