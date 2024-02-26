@@ -20,44 +20,125 @@ Currently, the following Views exist:
 
 \subsection{View Presets}
 
-\hl{Each view can be configured to the users needs, to suit various use-cases. For each type of view, a number of pre-defined (default) presets are delivered, which can be used to conveniently set a number of configuration options for specific display purposes. Existing presets can be changed and overridden, also new ones can be created.} \\
+A view can typically be configured via the configuration tab on its right side.
+A view preset represents the state of this configuration for a certain kind of view,
+which can be saved back and restored at a later point for a specific display purpose. 
+Such a 'purpose' could for instance be a certain kind of assessment carried out by the user
+on a regular basis. By making use of view presets, users can restore often used view configurations conveniently. \\
 
-In the toolbar of each view, a preset selection dropdown-menu is shown. If clicked, a menu is shown:
+Please \textbf{note} that view presets are created for a certain type of view (OSGView, HistogramView, etc.),
+and are always shared amongst these views. For each type of view, a number of pre-defined \textit{default presets} are deployed with a new COMPASS release. \\
+
+In the toolbar of each view, the view preset selection is shown on the left side. 
 
 \begin{figure}[H]
-    \includegraphics[width=12cm,frame]{figures/view_presets.png}
+    \center
+    \includegraphics[width=5cm,frame]{figures/view_preset_selection.png}
   \caption{View Preset Selection}
 \end{figure}
 
-All existing view presets are listed, and can be selected with a single left click. A preset contains the following information:
-
-\begin{itemize}
- \item Screenshot: A saved screenshot 
- \item Category: Default (delivered with the application) or created by user
- \item Name: A (unique) descriptive name
- \item Description
-\end{itemize} \ \\
-
-Additionally, a number of actions exist per preset:
-
-\begin{itemize}
- \item \includegraphics[width=0.5cm,frame]{../../data/icons/edit_old.png}: Edit the preset (name, category, description)
- \item \includegraphics[width=0.5cm,frame]{../../data/icons/copy.png}: Copy the preset into a new one
- \item \includegraphics[width=0.5cm,frame]{../../data/icons/save.png}: Save the current changes into the preset
- \item \includegraphics[width=0.5cm,frame]{../../data/icons/delete.png}: Delete the preset
-\end{itemize} \ \\
-
-Editing a preset shows the following dialog:
+It displays the name of the last applied preset, if no preset has been applied it shows \textit{No active preset}.
+If the view configuration has been modified since a preset has been applied, a change indicator (*) is displayed after the preset name.
 
 \begin{figure}[H]
+    \center
+    \includegraphics[width=5cm,frame]{figures/view_preset_selection_modified.png}
+  \caption{View Preset Selection - Modified Preset}
+\end{figure}
+
+When clicked, the view preset list opens:
+
+\begin{figure}[H]
+    \center
+    \includegraphics[width=10cm,frame]{figures/view_presets.png}
+  \caption{View Preset Selection - Preset List}
+\end{figure}
+
+All view presets existing for the current type of view are listed, and can be applied with a single left click on a preset item. 
+Applying the preset will reconfigure the view and refresh it accordingly. \\
+
+Please \textbf{note} that if a view preset is selected, the configuration is applied immediately, often triggering a reload of the surveillance data. \\
+
+A preset item contains the following information:
+
+\begin{itemize}
+ \item \textbf{Screenshot}: A screenshot of the view, taken when the preset is created/saved, serving as a preview image for the preset
+ \item \textbf{Preset Origin}: Icon, showing where the preset originates from, either \includegraphics[width=0.5cm,frame]{figures/view_presets_origin_openats.png} (delivered with the application) 
+ or \includegraphics[width=0.5cm,frame]{figures/view_presets_origin_user.png} (created by user)
+ \item \textbf{Category}: Optional preset category
+ \item \textbf{Name}: A (unique) descriptive name
+ \item \textbf{Description}: An optional description of the preset
+\end{itemize} \ \\
+
+Additionally, a number of actions exist for each preset:
+
+\begin{itemize}
+ \item \includegraphics[width=0.5cm,frame]{../../data/icons/edit_old.png}: \textit{Edit} the preset's meta-information (category, description)
+ \item \includegraphics[width=0.5cm,frame]{../../data/icons/copy.png}: \textit{Copy} the preset into a new one
+ \item \includegraphics[width=0.5cm,frame]{../../data/icons/save.png}: \textit{Save} the current view configuration into the preset
+ \item \includegraphics[width=0.5cm,frame]{../../data/icons/delete.png}: \textit{Delete} the preset
+\end{itemize} \ \\
+
+Please \textbf{note} that since presets are shared amongst a certain type of view (e.g. OSGView), applying these actions to a preset 
+will alter the preset for all views of the same type. \\
+
+\textit{Example}: Deleting a preset in OSGView will remove the preset for all currently existing and future OSGViews. \\
+
+Each type of action will be described in more detail below:
+
+\paragraph*{Edit} The category and description of a preset can be edited by clicking the \textit{edit} action, which opens the following dialog:
+
+\begin{figure}[H]
+    \center
     \includegraphics[width=10cm]{figures/view_preset_edit.png}
   \caption{View Preset Editing}
 \end{figure}
 
-At the very bottom, a button exists for adding new presets, as for creating a new preset from the current configuration. \\
+\paragraph*{Copy} A preset can be copied to a new preset by clicking the \textit{copy} action, which opens the following dialog:
 
-Please \textbf{note} that if a view preset is selected, the configuration is applied automatically, often triggering a reload of the surveillance data. \\
-Also, if changes are made in the configuration tab, these changes are not saved to the preset by default. Such an action as to be performed manually by the user. \\
+\begin{figure}[H]
+    \center
+    \includegraphics[width=10cm]{figures/view_preset_copy.png}
+  \caption{View Preset Copying}
+\end{figure}
 
-Please also \textbf{note} that user-created view presets are created per COMPASS version, and have to be created each time a COMPASS version upgrade is performed. If this is cumbersome, or if a view preset was created which should added as a default one, please contact \href{mailto:compass@openats.at}{compass@openats.at} for support.
+Then a new (unique) name can be specified for the copied preset, and the category and description can be edited.
+The view configuration stored in the copied preset will be transferred to the new preset.
 
+\paragraph*{Save} The current view configuration can be saved to an existing preset by clicking the \textit{save} action. \\
+
+Please \textbf{note} that if changes are made in the configuration tab of a view, these changes are not saved to a preset automatically. 
+Such an action has to be performed manually by the user using this functionality.
+
+\paragraph*{Delete} A preset can be deleted by clicking the \textit{delete} action.
+In the case of a default preset (a preset delivered with the application), the user will be prompted if the preset should really
+be deleted. \\
+
+Please \textbf{note} that presets will be deleted \textbf{permanently}, so once removed, default presets cannot be recovered easily.
+
+\paragraph*{Creating New Presets} The \textit{Add preset} button resides at the bottom of the preset list, 
+and can be used to create a new preset from the current view configuration. Clicking the button will open the following dialog:
+
+\begin{figure}[H]
+    \center
+    \includegraphics[width=10cm]{figures/view_preset_add.png}
+  \caption{Creating a New Preset}
+\end{figure}
+
+A unique name has to be be specified. Optionally, a category and description for the new preset can be entered.
+
+\paragraph*{Filtering Presets} At the top of the preset list, a filter text field resides, which can be used to filter presets by name.
+
+\begin{figure}[H]
+    \center
+    \includegraphics[width=10cm]{figures/view_preset_filter.png}
+  \caption{Filtering Presets by Name}
+\end{figure}
+
+\paragraph*{Presets and COMPASS Version}
+
+Please \textbf{note} that user-created view presets are always created for the currently running COMPASS version, 
+and have to be recreated manually each time a COMPASS version upgrade is performed. \\
+
+If this is cumbersome, or if a specific view preset should added to the list of default presets officially deployed with compass, 
+please contact \href{mailto:compass@openats.at}{compass@openats.at} for support.
