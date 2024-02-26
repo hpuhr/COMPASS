@@ -15,23 +15,24 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BUFFERTABLEMODEL_H
-#define BUFFERTABLEMODEL_H
+#ifndef ALLBUFFERTABLEMODEL_H
+#define ALLBUFFERTABLEMODEL_H
 
-#include "dbcontent/variable/variableset.h"
+//#include "dbcontent/variable/variableset.h"
 
 #include <QAbstractTableModel>
 
-#include <memory>
+#include "boost/date_time/posix_time/ptime.hpp"
 
+#include <memory>
 
 class Buffer;
 class DBContent;
-class BufferCSVExportJob;
-class ListBoxViewDataSource;
-class BufferTableWidget;
+class AllBufferCSVExportJob;
+class TableViewDataSource;
+class AllBufferTableWidget;
 
-class BufferTableModel : public QAbstractTableModel
+class AllBufferTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
@@ -44,9 +45,8 @@ class BufferTableModel : public QAbstractTableModel
     void exportJobDoneSlot();
 
   public:
-    BufferTableModel(BufferTableWidget* table_widget, DBContent& object,
-                     ListBoxViewDataSource& data_source);
-    virtual ~BufferTableModel();
+    AllBufferTableModel(AllBufferTableWidget* table_widget, TableViewDataSource& data_source);
+    virtual ~AllBufferTableModel();
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
@@ -57,7 +57,7 @@ class BufferTableModel : public QAbstractTableModel
                                 int role = Qt::DisplayRole) const;
 
     void clearData();
-    void setData(std::shared_ptr<Buffer> buffer);
+    void setData(std::map<std::string, std::shared_ptr<Buffer>> buffers);
 
     void saveAsCSV(const std::string& file_name);
 
@@ -67,26 +67,33 @@ class BufferTableModel : public QAbstractTableModel
 
     void updateToSelection();
 
+    std::pair<int,int> getSelectedRows(); // min, max, selected row
+
     bool showOnlySelected() const { return show_only_selected_; }
     bool usePresentation() const { return use_presentation_; }
 
   protected:
-    BufferTableWidget* table_widget_{nullptr};
-    DBContent& object_;
-    ListBoxViewDataSource& data_source_;
+    AllBufferTableWidget* table_widget_{nullptr};
+    TableViewDataSource& data_source_;
 
-    std::shared_ptr<Buffer> buffer_;
-    dbContent::VariableSet read_set_;
+    std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 
-    std::shared_ptr<BufferCSVExportJob> export_job_;
+    std::shared_ptr<AllBufferCSVExportJob> export_job_;
 
-    unsigned int last_processed_index_{0};
-    std::vector<unsigned int> row_indexes_;
+    std::map<unsigned int, std::string> number_to_dbo_;
+    std::map<std::string, unsigned int> dbo_to_number_;
+
+    std::map<std::string, unsigned int> dbo_last_processed_index_;
+
+    std::multimap<boost::posix_time::ptime, std::pair<unsigned int, unsigned int>> time_to_indexes_;
+    // timestamp -> [dbo num,index]
+    std::vector<std::pair<unsigned int, unsigned int>> row_indexes_;  // row index -> dbo num,index
 
     bool show_only_selected_{true};
     bool use_presentation_{true};
 
-    void updateRows();
+    void updateTimeIndexes();
+    void rebuildRowIndexes();
 };
 
-#endif  // BUFFERTABLEMODEL_H
+#endif  // ALLBUFFERTABLEMODEL_H

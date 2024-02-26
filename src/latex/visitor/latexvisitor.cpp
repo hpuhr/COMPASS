@@ -21,8 +21,8 @@
 #include "latextable.h"
 //#include "lateximage.h"
 #include "viewpoint.h"
-#include "listboxview.h"
-#include "listboxviewdatawidget.h"
+#include "tableview.h"
+#include "tableviewdatawidget.h"
 #include "allbuffertablewidget.h"
 #include "histogramview.h"
 #include "histogramviewdatawidget.h"
@@ -292,7 +292,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 
 #if USE_EXPERIMENTAL_SOURCE == true
 
-    ignore_listbox_views_ = true;
+    ignore_table_views_ = true;
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
@@ -313,17 +313,17 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
     for (auto& view_it : view_man.getViews())
         view_it.second->accept(*this);
 
-    ignore_listbox_views_ = false;
+    ignore_table_views_ = false;
 #endif
 }
 
-void LatexVisitor::visit(ListBoxView* e)
+void LatexVisitor::visit(TableView* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: ListBoxView " << e->instanceId();
+    loginf << "LatexVisitor: visit: TableView " << e->instanceId();
 
-    if (ignore_listbox_views_)
+    if (ignore_table_views_)
         return;
 
     AllBufferTableWidget* allbuf = e->getDataWidget()->getAllBufferTableWidget();

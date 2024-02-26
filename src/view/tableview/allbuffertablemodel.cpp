@@ -29,18 +29,18 @@
 //#include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
-#include "listboxview.h"
-#include "listboxviewdatasource.h"
+#include "tableview.h"
+#include "tableviewdatasource.h"
 #include "dbcontent/variable/metavariable.h"
 
 AllBufferTableModel::AllBufferTableModel(AllBufferTableWidget* table_widget,
-                                         ListBoxViewDataSource& data_source)
+                                         TableViewDataSource& data_source)
     : QAbstractTableModel(table_widget), table_widget_(table_widget), data_source_(data_source)
 {
 //    connect(data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
 //            &AllBufferTableModel::setChangedSlot);
 
-    connect(&data_source_, &ListBoxViewDataSource::setChangedSignal, this, &AllBufferTableModel::setChangedSlot);
+    connect(&data_source_, &TableViewDataSource::setChangedSignal, this, &AllBufferTableModel::setChangedSlot);
 }
 
 AllBufferTableModel::~AllBufferTableModel() {}

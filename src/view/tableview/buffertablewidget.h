@@ -31,8 +31,8 @@ class QStringList;
 class Buffer;
 class VariableSet;
 class DBContent;
-class ListBoxView;
-class ListBoxViewDataSource;
+class TableView;
+class TableViewDataSource;
 
 /**
  * @brief Widget with table representation of a Buffer's data contents
@@ -61,7 +61,7 @@ class BufferTableWidget : public QWidget
 
   public:
     /// @brief Constructor
-    BufferTableWidget(DBContent& object, ListBoxView& view, ListBoxViewDataSource& data_source,
+    BufferTableWidget(DBContent& object, TableView& view, TableViewDataSource& data_source,
                       QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~BufferTableWidget();
@@ -73,7 +73,7 @@ class BufferTableWidget : public QWidget
     void resetModel();
     void updateToSelection();
 
-    ListBoxView& view() const;
+    TableView& view() const;
     void resizeColumns();
 
     bool showOnlySelected() const;
@@ -83,8 +83,8 @@ class BufferTableWidget : public QWidget
 
   protected:
     DBContent& object_;
-    ListBoxView& view_;
-    ListBoxViewDataSource& data_source_;
+    TableView& view_;
+    TableViewDataSource& data_source_;
     /// Table with items
     QTableView* table_{nullptr};
     BufferTableModel* model_{nullptr};

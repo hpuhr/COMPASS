@@ -4,15 +4,15 @@
     "description": "",
     "deployed": true,
     "modified": false,
-    "name": "ADS-B Quality",
-    "timestamp": "2024-02-07 15:32:06.190",
-    "view": "ListBoxView",
+    "name": "Horizontal Movement",
+    "timestamp": "2024-02-07 15:33:22.816",
+    "view": "TableView",
     "view_config": {
         "parameters": {
         },
         "sub_configs": {
-            "ListBoxViewDataSource": {
-                "ListBoxViewDataSource0": {
+            "TableViewDataSource": {
+                "TableViewDataSource0": {
                     "parameters": null,
                     "sub_configs": {
                         "VariableOrderedSet": {
@@ -52,20 +52,12 @@
                                             "Mode C Code"
                                         ],
                                         [
-                                            "CAT021",
-                                            "MOPS Version"
+                                            "Meta",
+                                            "Track Angle"
                                         ],
                                         [
-                                            "CAT021",
-                                            "NACp"
-                                        ],
-                                        [
-                                            "CAT021",
-                                            "NUCp or NIC"
-                                        ],
-                                        [
-                                            "CAT021",
-                                            "SIL"
+                                            "Meta",
+                                            "Track Groundspeed"
                                         ]
                                     ]
                                 }
@@ -74,8 +66,8 @@
                     }
                 }
             },
-            "ListBoxViewWidget": {
-                "ListBoxViewWidget0": {
+            "TableViewWidget": {
+                "TableViewWidget0": {
                     "parameters": null
                 }
             }

@@ -98,7 +98,7 @@ void ViewManager::init(QTabWidget* tab_widget)
     connect (this, &ViewManager::unshowViewPointSignal, &filter_man, &FilterManager::unshowViewPointSlot);
 
     view_class_list_.append("HistogramView");
-    view_class_list_.append("ListBoxView");
+    view_class_list_.append("TableView");
 
 #if USE_EXPERIMENTAL_SOURCE == true
     view_class_list_.append("OSGView");

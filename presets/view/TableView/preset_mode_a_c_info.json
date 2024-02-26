@@ -4,15 +4,15 @@
     "description": "",
     "deployed": true,
     "modified": false,
-    "name": "Default",
-    "timestamp": "2024-02-07 15:30:46.476",
-    "view": "ListBoxView",
+    "name": "Mode A/C Info",
+    "timestamp": "2024-02-07 15:35:27.008",
+    "view": "TableView",
     "view_config": {
         "parameters": {
         },
         "sub_configs": {
-            "ListBoxViewDataSource": {
-                "ListBoxViewDataSource0": {
+            "TableViewDataSource": {
+                "TableViewDataSource0": {
                     "parameters": null,
                     "sub_configs": {
                         "VariableOrderedSet": {
@@ -37,6 +37,18 @@
                                         ],
                                         [
                                             "Meta",
+                                            "Mode 3/A Garbled"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Valid"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Smoothed"
+                                        ],
+                                        [
+                                            "Meta",
                                             "Aircraft Address"
                                         ],
                                         [
@@ -50,6 +62,14 @@
                                         [
                                             "Meta",
                                             "Mode C Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Garbled"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Valid"
                                         ]
                                     ]
                                 }
@@ -58,8 +78,8 @@
                     }
                 }
             },
-            "ListBoxViewWidget": {
-                "ListBoxViewWidget0": {
+            "TableViewWidget": {
+                "TableViewWidget0": {
                     "parameters": null
                 }
             }

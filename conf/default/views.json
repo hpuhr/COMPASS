@@ -5,18 +5,18 @@
             "ViewContainer0": {
                 "parameters": null,
                 "sub_configs": {
-                    "ListBoxView": {
-                        "ListBoxView0": {
+                    "TableView": {
+                        "TableView0": {
                             "parameters": {
                                 "show_only_selected": false,
                                 "use_presentation": true
                             },
                             "sub_configs": {
-                                "ListBoxViewDataSource": {
-                                    "ListBoxViewDataSource0": {}
+                                "TableViewDataSource": {
+                                    "TableViewDataSource0": {}
                                 },
-                                "ListBoxViewWidget": {
-                                    "ListBoxViewWidget0": {
+                                "TableViewWidget": {
+                                    "TableViewWidget0": {
                                         "parameters": null
                                     }
                                 }

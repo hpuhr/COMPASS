@@ -4,15 +4,15 @@
     "description": "",
     "deployed": true,
     "modified": false,
-    "name": "Vertical Movement",
-    "timestamp": "2024-02-07 15:33:56.724",
-    "view": "ListBoxView",
+    "name": "Default",
+    "timestamp": "2024-02-07 15:30:46.476",
+    "view": "TableView",
     "view_config": {
         "parameters": {
         },
         "sub_configs": {
-            "ListBoxViewDataSource": {
-                "ListBoxViewDataSource0": {
+            "TableViewDataSource": {
+                "TableViewDataSource0": {
                     "parameters": null,
                     "sub_configs": {
                         "VariableOrderedSet": {
@@ -50,10 +50,6 @@
                                         [
                                             "Meta",
                                             "Mode C Code"
-                                        ],
-                                        [
-                                            "Meta",
-                                            "Ground Bit"
                                         ]
                                     ]
                                 }
@@ -62,8 +58,8 @@
                     }
                 }
             },
-            "ListBoxViewWidget": {
-                "ListBoxViewWidget0": {
+            "TableViewWidget": {
+                "TableViewWidget0": {
                     "parameters": null
                 }
             }

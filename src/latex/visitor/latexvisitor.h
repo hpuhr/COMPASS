@@ -23,7 +23,7 @@
 #include <string>
 
 class ViewPoint;
-class ListBoxView;
+class TableView;
 class HistogramView;
 #if USE_EXPERIMENTAL_SOURCE == true
 class OSGView;
@@ -47,7 +47,7 @@ public:
                  bool wait_on_map_loading);
 
     virtual void visit(const ViewPoint* e);
-    virtual void visit(ListBoxView* e);
+    virtual void visit(TableView* e);
     virtual void visit(HistogramView* e);
 #if USE_EXPERIMENTAL_SOURCE == true
     virtual void visit(OSGView* e);
@@ -72,7 +72,7 @@ protected:
     unsigned int max_table_col_width_ {24};
     bool wait_on_map_loading_ {true};
 
-    bool ignore_listbox_views_ {false};
+    bool ignore_table_views_ {false};
     bool screenshot_folder_created_ {false};
 
     std::string current_section_name_;

@@ -20,7 +20,7 @@
 //#include "config.h"
 #include "files.h"
 #include "global.h"
-#include "listboxview.h"
+#include "tableview.h"
 #include "histogramview.h"
 #include "scatterplotview.h"
 #include "logger.h"
@@ -228,9 +228,9 @@ const std::vector<std::unique_ptr<View>>& ViewContainer::getViews() const { retu
 void ViewContainer::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {
-    if (class_id == "ListBoxView")
+    if (class_id == "TableView")
     {
-        views_.emplace_back(new ListBoxView(class_id, instance_id, this, view_manager_));
+        views_.emplace_back(new TableView(class_id, instance_id, this, view_manager_));
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());

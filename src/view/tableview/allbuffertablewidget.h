@@ -30,8 +30,8 @@ class QStringList;
 class Buffer;
 class VariableSet;
 class DBContent;
-class ListBoxView;
-class ListBoxViewDataSource;
+class TableView;
+class TableViewDataSource;
 
 class AllBufferTableWidget : public QWidget
 {
@@ -48,7 +48,7 @@ class AllBufferTableWidget : public QWidget
     void usePresentationSlot(bool use_presentation);
 
   public:
-    AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSource& data_source, QWidget* parent = 0,
+    AllBufferTableWidget(TableView& view, TableViewDataSource& data_source, QWidget* parent = 0,
                          Qt::WindowFlags f = 0);
     virtual ~AllBufferTableWidget();
 
@@ -58,7 +58,7 @@ class AllBufferTableWidget : public QWidget
     void resetModel();
     void updateToSelection();
 
-    ListBoxView& view() const;
+    TableView& view() const;
     void resizeColumns();
 
     void selectSelectedRows();
@@ -74,8 +74,8 @@ class AllBufferTableWidget : public QWidget
     const QTableView* table() const { return table_; }
 
   protected:
-    ListBoxView& view_;
-    ListBoxViewDataSource& data_source_;
+    TableView& view_;
+    TableViewDataSource& data_source_;
     /// Table with items
     QTableView* table_{nullptr};
     AllBufferTableModel* model_{nullptr};

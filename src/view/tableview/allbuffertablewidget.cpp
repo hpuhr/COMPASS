@@ -24,7 +24,7 @@
 //#include "dbcontent/dbcontentmanager.h"
 //#include "dbcontent/variable/variable.h"
 //#include "dbcontent/variable/variableset.h"
-#include "listboxviewdatasource.h"
+#include "tableviewdatasource.h"
 #include "logger.h"
 #include "compass.h"
 
@@ -41,7 +41,7 @@
 
 // using namespace Utils;
 
-AllBufferTableWidget::AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSource& data_source,
+AllBufferTableWidget::AllBufferTableWidget(TableView& view, TableViewDataSource& data_source,
                                            QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), view_(view), data_source_(data_source)
 {
@@ -205,7 +205,7 @@ void AllBufferTableWidget::selectSelectedRows()
         loginf << "AllBufferTableWidget: selectSelectedRows: nothing selected";
 }
 
-ListBoxView& AllBufferTableWidget::view() const { return view_; }
+TableView& AllBufferTableWidget::view() const { return view_; }
 
 void AllBufferTableWidget::keyPressEvent(QKeyEvent* event)
 {

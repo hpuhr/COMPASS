@@ -25,7 +25,7 @@
 //#include "dbcontent/dbcontentmanager.h"
 //#include "dbcontent/variable/variable.h"
 //#include "dbcontent/variable/variableset.h"
-#include "listboxviewdatasource.h"
+#include "tableviewdatasource.h"
 #include "logger.h"
 #include "compass.h"
 
@@ -41,8 +41,8 @@
 
 // using namespace Utils;
 
-BufferTableWidget::BufferTableWidget(DBContent& object, ListBoxView& view,
-                                     ListBoxViewDataSource& data_source, QWidget* parent,
+BufferTableWidget::BufferTableWidget(DBContent& object, TableView& view,
+                                     TableViewDataSource& data_source, QWidget* parent,
                                      Qt::WindowFlags f)
     : QWidget(parent, f), object_(object), view_(view), data_source_(data_source)
 {
@@ -170,7 +170,7 @@ void BufferTableWidget::updateToSelection()
     table_->resizeColumnsToContents();
 }
 
-ListBoxView& BufferTableWidget::view() const { return view_; }
+TableView& BufferTableWidget::view() const { return view_; }
 
 void BufferTableWidget::resizeColumns()
 {

@@ -26,14 +26,14 @@
 #include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
-#include "listboxview.h"
-#include "listboxviewdatasource.h"
+#include "tableview.h"
+#include "tableviewdatasource.h"
 
 #include <QApplication>
 
 BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, 
                                    DBContent& object,
-                                   ListBoxViewDataSource& data_source)
+                                   TableViewDataSource& data_source)
     : QAbstractTableModel(table_widget),
       table_widget_(table_widget),
       object_(object),
@@ -44,7 +44,7 @@ BufferTableModel::BufferTableModel(BufferTableWidget* table_widget,
 //    connect(data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
 //            &BufferTableModel::setChangedSlot);
 
-    connect(&data_source_, &ListBoxViewDataSource::setChangedSignal, this, &BufferTableModel::setChangedSlot);
+    connect(&data_source_, &TableViewDataSource::setChangedSignal, this, &BufferTableModel::setChangedSlot);
 }
 
 BufferTableModel::~BufferTableModel() 

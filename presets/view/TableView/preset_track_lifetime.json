@@ -6,13 +6,13 @@
     "modified": false,
     "name": "Track Lifetime",
     "timestamp": "2024-02-07 15:37:06.223",
-    "view": "ListBoxView",
+    "view": "TableView",
     "view_config": {
         "parameters": {
         },
         "sub_configs": {
-            "ListBoxViewDataSource": {
-                "ListBoxViewDataSource0": {
+            "TableViewDataSource": {
+                "TableViewDataSource0": {
                     "parameters": null,
                     "sub_configs": {
                         "VariableOrderedSet": {
@@ -74,8 +74,8 @@
                     }
                 }
             },
-            "ListBoxViewWidget": {
-                "ListBoxViewWidget0": {
+            "TableViewWidget": {
+                "TableViewWidget0": {
                     "parameters": null
                 }
             }

@@ -4,15 +4,15 @@
     "description": "",
     "deployed": true,
     "modified": false,
-    "name": "Horizontal Movement",
-    "timestamp": "2024-02-07 15:33:22.816",
-    "view": "ListBoxView",
+    "name": "Vertical Movement",
+    "timestamp": "2024-02-07 15:33:56.724",
+    "view": "TableView",
     "view_config": {
         "parameters": {
         },
         "sub_configs": {
-            "ListBoxViewDataSource": {
-                "ListBoxViewDataSource0": {
+            "TableViewDataSource": {
+                "TableViewDataSource0": {
                     "parameters": null,
                     "sub_configs": {
                         "VariableOrderedSet": {
@@ -53,11 +53,7 @@
                                         ],
                                         [
                                             "Meta",
-                                            "Track Angle"
-                                        ],
-                                        [
-                                            "Meta",
-                                            "Track Groundspeed"
+                                            "Ground Bit"
                                         ]
                                     ]
                                 }
@@ -66,8 +62,8 @@
                     }
                 }
             },
-            "ListBoxViewWidget": {
-                "ListBoxViewWidget0": {
+            "TableViewWidget": {
+                "TableViewWidget0": {
                     "parameters": null
                 }
             }

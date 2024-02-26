@@ -4,15 +4,15 @@
     "description": "",
     "deployed": true,
     "modified": false,
-    "name": "Mode A/C Info",
-    "timestamp": "2024-02-07 15:35:27.008",
-    "view": "ListBoxView",
+    "name": "ADS-B Quality",
+    "timestamp": "2024-02-07 15:32:06.190",
+    "view": "TableView",
     "view_config": {
         "parameters": {
         },
         "sub_configs": {
-            "ListBoxViewDataSource": {
-                "ListBoxViewDataSource0": {
+            "TableViewDataSource": {
+                "TableViewDataSource0": {
                     "parameters": null,
                     "sub_configs": {
                         "VariableOrderedSet": {
@@ -37,18 +37,6 @@
                                         ],
                                         [
                                             "Meta",
-                                            "Mode 3/A Garbled"
-                                        ],
-                                        [
-                                            "Meta",
-                                            "Mode 3/A Valid"
-                                        ],
-                                        [
-                                            "Meta",
-                                            "Mode 3/A Smoothed"
-                                        ],
-                                        [
-                                            "Meta",
                                             "Aircraft Address"
                                         ],
                                         [
@@ -64,12 +52,20 @@
                                             "Mode C Code"
                                         ],
                                         [
-                                            "Meta",
-                                            "Mode C Garbled"
+                                            "CAT021",
+                                            "MOPS Version"
                                         ],
                                         [
-                                            "Meta",
-                                            "Mode C Valid"
+                                            "CAT021",
+                                            "NACp"
+                                        ],
+                                        [
+                                            "CAT021",
+                                            "NUCp or NIC"
+                                        ],
+                                        [
+                                            "CAT021",
+                                            "SIL"
                                         ]
                                     ]
                                 }
@@ -78,8 +74,8 @@
                     }
                 }
             },
-            "ListBoxViewWidget": {
-                "ListBoxViewWidget0": {
+            "TableViewWidget": {
+                "TableViewWidget0": {
                     "parameters": null
                 }
             }
