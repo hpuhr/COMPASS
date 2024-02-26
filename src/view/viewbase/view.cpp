@@ -19,9 +19,7 @@
 #include "logger.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
-//#include "viewmodel.h"
 #include "viewwidget.h"
-//#include "viewpoint.h"
 #include "viewabledataconfig.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
@@ -51,11 +49,14 @@ View::View(const std::string& class_id,
            ViewManager& view_manager)
     : Configurable(class_id, instance_id, container),
       view_manager_(view_manager),
-//      model_(nullptr),
       widget_(nullptr),
       container_(container)
 {
     logdbg << "View: constructor";
+
+    registerParameter("name", &name_, std::string());
+    loginf << "View: constructor: name '" << name_ << "'";
+    assert (name_.size());
 
     creation_time_ = boost::posix_time::to_time_t(boost::posix_time::microsec_clock::local_time());
 
@@ -135,7 +136,7 @@ void View::databaseClosed()
 @brief Returns the views name.
 @return The views name.
  */
-const std::string& View::getName() const { return instanceId(); }
+const std::string& View::getName() const { return name_; }
 
 /**
 */

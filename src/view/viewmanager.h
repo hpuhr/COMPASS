@@ -117,7 +117,6 @@ class ViewManager : public QObject, public Configurable
         return it->second;
     }
 
-    //ViewManagerWidget* widget();
 
     ViewPointsWidget* viewPointsWidget() const;
     ViewPointsReportGenerator& viewPointsGenerator();
@@ -133,9 +132,11 @@ class ViewManager : public QObject, public Configurable
 
     void showMainViewContainerAddView();
 
-    QStringList viewClassList() const;
+    std::map<std::string, std::string> viewClassList() const;
 
-    unsigned int newViewNumber();
+    unsigned int newViewNumber(const std::string& class_id);
+    std::string newViewInstanceId(const std::string& class_id);
+    std::string newViewName(const std::string& class_id);
 
     void disableDataDistribution(bool value);
     // disables propagation of data to the views. used when loading is performed for processing purposes
@@ -165,7 +166,6 @@ protected:
 
     COMPASS& compass_;
 
-    //ViewManagerWidget* widget_{nullptr};
     ViewPointsWidget* view_points_widget_{nullptr};
 
     Config config_;
@@ -187,7 +187,7 @@ protected:
 
     unsigned int container_count_{0};
 
-    QStringList view_class_list_;
+    std::map<std::string, std::string> view_class_list_; // class name -> name (without appended number)
 
     bool disable_data_distribution_ {false};
 

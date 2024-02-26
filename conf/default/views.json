@@ -8,6 +8,7 @@
                     "TableView": {
                         "TableView0": {
                             "parameters": {
+                                "name" : "Table View 0",
                                 "show_only_selected": false,
                                 "use_presentation": true
                             },

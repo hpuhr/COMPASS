@@ -23,17 +23,13 @@
 #include "view.h"
 #include "viewcontainer.h"
 #include "viewcontainerwidget.h"
-//#include "viewmanagerwidget.h"
 #include "viewpoint.h"
 #include "dbinterface.h"
 #include "viewpointswidget.h"
-//#include "files.h"
 #include "filtermanager.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-//#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
-//#include "viewpointstablemodel.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
 #include "util/timeconv.h"
@@ -54,6 +50,7 @@
 
 using namespace Utils;
 using namespace nlohmann;
+using namespace std;
 
 ViewManager::ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "views.json"), compass_(*compass)
@@ -97,14 +94,14 @@ void ViewManager::init(QTabWidget* tab_widget)
     connect (this, &ViewManager::showViewPointSignal, &filter_man, &FilterManager::showViewPointSlot);
     connect (this, &ViewManager::unshowViewPointSignal, &filter_man, &FilterManager::unshowViewPointSlot);
 
-    view_class_list_.append("HistogramView");
-    view_class_list_.append("TableView");
+    view_class_list_.insert({"HistogramView", "Histogram View"});
+    view_class_list_.insert({"TableView", "Table View"});
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    view_class_list_.append("GeographicView");
+    view_class_list_.insert({"GeographicView", "Geographic View"});
 #endif
 
-    view_class_list_.append("ScatterPlotView");
+    view_class_list_.insert({"ScatterPlotView", "Scatterplot View"});
 
 #ifdef SCAN_PRESETS
     //scan view presets
@@ -560,18 +557,21 @@ void ViewManager::showMainViewContainerAddView()
     containers_.at("ViewContainer0")->showAddViewMenuSlot();
 }
 
-QStringList ViewManager::viewClassList() const
+std::map<std::string, std::string> ViewManager::viewClassList() const
 {
     return view_class_list_;
 }
 
-unsigned int ViewManager::newViewNumber()
+unsigned int ViewManager::newViewNumber(const std::string& class_id)
 {
-    unsigned int max_number = 0;
-    unsigned int tmp;
+    int max_number = -1;
+    int tmp;
 
     for (auto& view_it : views_)
     {
+        if (view_it.second->classId() != class_id)
+            continue;
+
         tmp = String::getAppendedInt(view_it.second->instanceId());
 
         if (tmp > max_number)
@@ -579,6 +579,17 @@ unsigned int ViewManager::newViewNumber()
     }
 
     return max_number + 1;
+}
+
+std::string ViewManager::newViewInstanceId(const std::string& class_id)
+{
+    return class_id + to_string(newViewNumber(class_id));
+}
+
+std::string ViewManager::newViewName(const std::string& class_id)
+{
+    assert (view_class_list_.count(class_id));
+    return view_class_list_.at(class_id) + " " + to_string(newViewNumber(class_id));
 }
 
 void ViewManager::disableDataDistribution(bool value)

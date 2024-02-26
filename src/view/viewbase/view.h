@@ -76,7 +76,7 @@ public:
     };
 
     View(const std::string& class_id, 
-         const std::string& instance_id, 
+         const std::string& instance_id,
          ViewContainer* container,
          ViewManager& view_manager);
     virtual ~View();
@@ -184,6 +184,7 @@ protected:
     QWidget* central_widget_ {nullptr};
 
 private:
+    std::string name_;
     unsigned int getInstanceKey();
 
     void runAutomaticUpdates();

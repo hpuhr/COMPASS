@@ -103,10 +103,14 @@ ViewContainer::~ViewContainer()
     logdbg << "ViewContainer: dtor: done";
 }
 
-void ViewContainer::addView(const std::string& class_name)
+void ViewContainer::addView(const std::string& class_id)
 {
     assert (!disable_add_remove_views_);
-    generateSubConfigurable(class_name, class_name + std::to_string(view_manager_.newViewNumber()));
+
+    auto config = Configuration::create(class_id, view_manager_.newViewInstanceId(class_id),
+                          view_manager_.newViewName(class_id));
+
+    generateSubConfigurableFromConfig(std::move(config));
 }
 
 void ViewContainer::enableViewTab(QWidget* widget, bool value)
@@ -298,20 +302,20 @@ void ViewContainer::showAddViewMenuSlot()
     QMenu menu;
 
     QMenu* here_menu = menu.addMenu("Add Here");
-    for (QString view_class : view_manager_.viewClassList())
+    for (auto& class_it : view_manager_.viewClassList()) // class name, name
     {
-        QAction* action = here_menu->addAction(view_class);
+        QAction* action = here_menu->addAction(class_it.second.c_str());
         action->setProperty("location", "here");
-        action->setProperty("class_id", view_class);
+        action->setProperty("class_id", class_it.first.c_str());
         connect (action, &QAction::triggered, this, &ViewContainer::addNewViewSlot);
     }
 
     QMenu* new_menu = menu.addMenu("Add In New Window");
-    for (QString view_class : view_manager_.viewClassList())
+    for (auto& class_it : view_manager_.viewClassList())
     {
-        QAction* action = new_menu->addAction(view_class);
+        QAction* action = new_menu->addAction(class_it.second.c_str());
         action->setProperty("location", "new");
-        action->setProperty("class_id", view_class);
+        action->setProperty("class_id", class_it.first.c_str());
         connect (action, &QAction::triggered, this, &ViewContainer::addNewViewSlot);
     }
 
