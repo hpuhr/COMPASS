@@ -9,8 +9,6 @@
     "view": "ListBoxView",
     "view_config": {
         "parameters": {
-            "show_only_selected": false,
-            "use_presentation": true
         },
         "sub_configs": {
             "ListBoxViewDataSource": {

@@ -1,7 +1,7 @@
 {
     "app_version": "0.7.5",
-    "category": "",
-    "deployed": false,
+    "category": "Default",
+    "deployed": true,
     "description": "",
     "modified": false,
     "name": "Mode C over Groundspeed",
