@@ -291,14 +291,34 @@ void Configurable::createSubConfigurables()
 
     const auto& sub_configs = configuration_->subConfigurations();
 
+    //create from provided custom creation order first
+    auto custom_order = subConfigurableCreationOrder();
+    for (const auto& key : custom_order)
+    {
+        //must be part of sub configurations
+        if (sub_configs.count(key) != 0)
+        {
+            logdbg << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '" << key.first << "' instance_id '" << key.second << "' (custom order)";
+
+            assert(!hasSubConfigurable(key.first, key.second));
+            generateSubConfigurable(key.first, key.second);
+        }
+    }
+    
     // TODO what if map changed (deleting of config) during iteration
     for (auto it = sub_configs.begin(); it != sub_configs.end(); it++)
     {
-        logdbg << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '" << it->first.first << "' instance_id '" << it->first.second << "'";
+        //not yet created from manual order?
+        if (custom_order.empty() || std::find(custom_order.begin(), custom_order.end(), it->first) == custom_order.end())
+        {
+            logdbg << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '" << it->first.first << "' instance_id '" << it->first.second << "'";
 
-        generateSubConfigurable(it->first.first, it->first.second);
+            assert(!hasSubConfigurable(it->first.first, it->first.second));
+            generateSubConfigurable(it->first.first, it->first.second);
+        }
     }
 
+    //check if every needed subconfigurable has been created yet
     checkSubConfigurables();
 
     logdbg << "Configurable: createSubConfigurables: instance " << instance_id_ << " end";

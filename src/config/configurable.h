@@ -140,6 +140,9 @@ protected:
     /// @brief Creates sub-configurables according to configuration
     void createSubConfigurables();
 
+    /// @brief Override to enforce a custom sub-configurable creation order inside createSubConfigurables()
+    virtual std::vector<Configuration::Key> subConfigurableCreationOrder() const { return {}; }
+
     /// @brief Registers a parameter of given type
     template <typename T>
     void registerParameter(const std::string& parameter_id, T* pointer, const T& default_value);
