@@ -96,6 +96,8 @@ public:
 
     nlohmann::json getConfigDataSourcesAsJSON();
     nlohmann::json getDBDataSourcesAsJSON();
+    nlohmann::json getSortedConfigDataSourcesAsJSON();
+    nlohmann::json getSortedDBDataSourcesAsJSON();
 
     void setLoadedCounts(std::map<unsigned int, std::map<std::string,
                          std::map<unsigned int, unsigned int>>> loaded_counts); // ds id->dbcont->line->cnt

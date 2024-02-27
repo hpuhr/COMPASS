@@ -288,6 +288,42 @@ nlohmann::json DataSourceManager::getDBDataSourcesAsJSON()
     return data;
 }
 
+namespace
+{
+    void sortJSONDataSource(nlohmann::json& ds)
+    {
+        assert(ds.contains("data_sources"));
+
+        json& ds_array = ds.at("data_sources");
+
+        std::sort(ds_array.begin(), ds_array.end(), 
+            [ & ] (const nlohmann::json& j0, const nlohmann::json& j1) 
+            { 
+                assert(j0.contains("name"));
+                assert(j1.contains("name"));
+
+                std::string n0 = j0[ "name" ];
+                std::string n1 = j1[ "name" ];
+
+                return n0 < n1;
+            });
+    }
+}
+
+nlohmann::json DataSourceManager::getSortedConfigDataSourcesAsJSON()
+{
+    auto ds_json = getConfigDataSourcesAsJSON();
+    sortJSONDataSource(ds_json);
+    return ds_json;
+}
+
+nlohmann::json DataSourceManager::getSortedDBDataSourcesAsJSON()
+{
+    auto ds_json = getDBDataSourcesAsJSON();
+    sortJSONDataSource(ds_json);
+    return ds_json;
+}
+
 // ds id->dbcont->line->cnt
 void DataSourceManager::setLoadedCounts(std::map<unsigned int, std::map<std::string,
                                         std::map<unsigned int, unsigned int>>> loaded_counts)
