@@ -142,3 +142,26 @@ and have to be recreated manually each time a COMPASS version upgrade is perform
 
 If this is cumbersome, or if a specific view preset should added to the list of default presets officially deployed with compass, 
 please contact \href{mailto:compass@openats.at}{compass@openats.at} for support.
+
+\subsection{View Cross Selection}
+
+A very convenient feature which is supported by all views is cross selection of data. Data items selected in one view will also be highlighted in all other views, 
+allowing for closer inspection of data portions across multiple views. This selection also persists if a reload is triggered either in the main window or in a view. \\
+
+Selected data items will be highlighted in a special way, typically in yellow color. In Table View a checkbox will be set for selected data items.
+
+\paragraph*{Example} In the image below a certain slice of time is selected in Histogram View.
+
+\begin{figure}[H]
+    \center
+    \includegraphics[width=10cm]{figures/cross_sel_histogram.png}
+  \caption{Selection of data in Histogram View}
+\end{figure}
+
+The target reports belonging to this time frame will also be selected in Geographic View.
+
+\begin{figure}[H]
+    \center
+    \includegraphics[width=10cm]{figures/cross_sel_geographic.png}
+  \caption{Selected data highlighted in Geographic View via cross selection}
+\end{figure}
