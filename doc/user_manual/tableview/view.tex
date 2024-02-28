@@ -1,13 +1,13 @@
-\chapter{ListBox View}
-\label{sec:listbox_view}
+\chapter{Table View}
+\label{sec:table_view}
 
-A ListBox View displays DBContent data as text in tables to allow textual data inspection. When started, it presents itself in the following manner.
+A Table View displays DBContent data as text in tables to allow textual data inspection. When started, it presents itself in the following manner.
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/listbox_start.png}
-  \caption{Listbox View startup}
-  \label{fig:listbox_start}
+    \includegraphics[width=18cm,frame]{figures/table_start.png}
+  \caption{Table View startup}
+  \label{fig:table_start}
 \end{figure}
 
 \section{Layout}
@@ -25,8 +25,8 @@ To load the data the 'Reload' button or the mechanism described in Section \name
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/listbox_loaded.png}
-  \caption{Listbox View after loading}
+    \includegraphics[width=18cm,frame]{figures/table_loaded.png}
+  \caption{Table View after loading}
 \end{figure}
 
 Once updated, the tables are filled with text representing the values of the chosen DBContent variables. 
@@ -71,8 +71,8 @@ When pressing the 'Remove' button, a selected variable is removed. Pressing the 
 If Meta variables are used, they are displayed for all DBContents they exist in. If a DBContent variable is used, it is only displayed in its native content.
 
 \begin{figure}[H]
-    \includegraphics[width=16cm,frame]{figures/listbox_add.png}
-  \caption{Listbox View adding of variables}
+    \includegraphics[width=16cm,frame]{figures/table_add.png}
+  \caption{Table View adding of variables}
 \end{figure}
 
 After a adding a variable the dataset has to be reloaded to include the additional data, therefore the 'Reload' button becomes active.
@@ -108,8 +108,8 @@ To export the complete loaded dataset, click the 'Export' button, so that a dial
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/listbox_export.png}
-  \caption{Listbox View export}
+    \includegraphics[width=18cm,frame]{figures/table_export.png}
+  \caption{Table View export}
 \end{figure}
 
 Choose a filename, and press 'Save' to save the data. If the 'Overwrite Exported File' checkbox was checked, an existing file is automatically overwritten. Please \textbf{note} that exporting might take some time for larger datasets, and currently no status indication is given.\\
@@ -120,8 +120,8 @@ The exported file can be opened in any editor, or for example imported into Libr
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/listbox_exported_calc.png}
-  \caption{Listbox View export in LibreOffice Calc}
+    \includegraphics[width=19cm]{figures/table_exported_calc.png}
+  \caption{Table View export in LibreOffice Calc}
 \end{figure}
  
 \subsection{Reload}
