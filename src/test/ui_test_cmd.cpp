@@ -29,6 +29,7 @@
 
 REGISTER_RTCOMMAND(ui_test::RTCommandUISet)
 REGISTER_RTCOMMAND(ui_test::RTCommandUIGet)
+REGISTER_RTCOMMAND(ui_test::RTCommandUIGetJSON)
 REGISTER_RTCOMMAND(ui_test::RTCommandUIInject)
 REGISTER_RTCOMMAND(ui_test::RTCommandUIRefresh)
 
@@ -224,6 +225,81 @@ void RTCommandUIGet::assignVariables_impl(const VariablesMap& variables)
 
     RTCOMMAND_GET_QSTRING_OR_THROW(variables, "what", what)
     RTCOMMAND_CHECK_VAR(variables, "json", as_json)
+    RTCOMMAND_CHECK_VAR(variables, "visible", visible)
+}
+
+/*************************************************************************
+ * RTCommandUIGetJSON
+ *************************************************************************/
+
+/**
+ */
+bool RTCommandUIGetJSON::run_impl()
+{
+    auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
+    if (receiver.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        setResultMessage("Object '" + obj.toStdString() + "' not found");
+        return false;
+    }
+
+    boost::optional<nlohmann::json> result;
+    std::string result_string;
+
+    if (visible)
+    {
+        //retrieve ui element visibility
+        nlohmann::json v;
+        v[ "visible" ] = receiver.second->isVisible();
+
+        result        = v;
+        result_string = receiver.second->isVisible() ? "true" : "false";
+    }
+    else
+    {
+        //retrieve ui element value as json
+        auto res = getUIElementJSON(receiver.second, "", what);
+        if (!res.is_null())
+        {
+            result = res;
+            result_string = res.dump(4);
+        }
+    }
+
+    if (!result.has_value())
+    {
+        setResultMessage("Value could not be retrieved from object '" + obj.toStdString() + "'");
+        return false;
+    }
+    
+    setJSONReply(result.value(), result_string);
+
+    return true;
+}
+
+/**
+ */
+void RTCommandUIGetJSON::collectOptions_impl(OptionsDescription& options,
+                                             PosOptionsDescription& positional)
+{
+    //call base
+    RTCommandUIObject::collectOptions_impl(options, positional);
+
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("what,w", po::value<std::string>()->default_value(""), "which value to retrieve from the ui element (empty = default behavior)")
+        ("visible", "if present, the visibility of the ui element will be returned");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "what", 2)
+}
+
+/**
+ */
+void RTCommandUIGetJSON::assignVariables_impl(const VariablesMap& variables)
+{
+    //call base
+    RTCommandUIObject::assignVariables_impl(variables);
+
+    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "what", what)
     RTCOMMAND_CHECK_VAR(variables, "visible", visible)
 }
 

@@ -158,7 +158,7 @@ void ViewWidget::createStandardLayout()
 
     //create data widget container in left widget
     {
-        QSizePolicy size_policy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         size_policy.setHorizontalStretch(DataWidgetStretch);
 
         data_widget_container_ = new QWidget;
@@ -170,7 +170,7 @@ void ViewWidget::createStandardLayout()
 
     //create config widget container in right widget
     {
-        QSizePolicy size_policy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         size_policy.setHorizontalStretch(ConfigWidgetStretch);
 
         config_widget_container_ = new QWidget;
@@ -229,8 +229,10 @@ void ViewWidget::init()
     }
     else
     {
-        main_splitter_->setStretchFactor(0, DataWidgetStretch);
-        main_splitter_->setStretchFactor(1, ConfigWidgetStretch);
+        //wtf qt...
+        //https://stackoverflow.com/questions/43831474/how-to-equally-distribute-the-width-of-qsplitter
+        int wmax = std::max(data_widget_container_->minimumSizeHint().width(), config_widget_container_->minimumSizeHint().width());
+        main_splitter_->setSizes({ wmax * DataWidgetStretch, wmax * ConfigWidgetStretch });
     }
 
     init_ = true;
