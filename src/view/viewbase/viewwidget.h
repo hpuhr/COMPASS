@@ -149,6 +149,9 @@ public:
 
     static QIcon getIcon(const std::string& fn);
 
+    static const int DataWidgetStretch;
+    static const int ConfigWidgetStretch;
+
 protected:
     ViewToolWidget* getViewToolWidget() { assert(tool_widget_); return tool_widget_; }
     const ViewToolWidget* getViewToolWidget() const { assert(tool_widget_); return tool_widget_; }

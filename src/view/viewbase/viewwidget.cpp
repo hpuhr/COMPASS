@@ -35,6 +35,9 @@
 #include <QSettings>
 #include <QPainter>
 
+const int ViewWidget::DataWidgetStretch   = 3;
+const int ViewWidget::ConfigWidgetStretch = 1;
+
 /**
 @brief Constructor.
 @param class_id Configurable class id.
@@ -53,7 +56,7 @@ ViewWidget::ViewWidget(const std::string& class_id,
       view_       (view)
 {
     //generate and set a nice object name which can be used to identify the view widget in the object hierarchy
-    UI_TEST_OBJ_NAME(this, QString::fromStdString(view->getName()))
+    UI_TEST_OBJ_NAME(this, QString::fromStdString(view->classId()))
 
     setContentsMargins(0, 0, 0, 0);
 
@@ -132,11 +135,6 @@ void ViewWidget::createStandardLayout()
     main_splitter_->setOrientation(Qt::Horizontal);
     main_splitter_->setContentsMargins(0, 0, 0, 0);
 
-    QSettings settings("COMPASS", instanceId().c_str());
-
-    const int DataWidgetStretch   = 5;
-    const int ConfigWidgetStretch = 1;
-
     QWidget* left_widget = new QWidget;
     left_widget->setContentsMargins(0, 0, 0, 0);
 
@@ -160,7 +158,7 @@ void ViewWidget::createStandardLayout()
 
     //create data widget container in left widget
     {
-        QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        QSizePolicy size_policy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         size_policy.setHorizontalStretch(DataWidgetStretch);
 
         data_widget_container_ = new QWidget;
@@ -172,11 +170,10 @@ void ViewWidget::createStandardLayout()
 
     //create config widget container in right widget
     {
-        config_widget_container_ = new QWidget;
-
-        QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        QSizePolicy size_policy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         size_policy.setHorizontalStretch(ConfigWidgetStretch);
 
+        config_widget_container_ = new QWidget;
         config_widget_container_->setSizePolicy(size_policy);
         config_widget_container_->setContentsMargins(0, 0, 0, 0);
 
@@ -190,8 +187,6 @@ void ViewWidget::createStandardLayout()
         right_layout->addWidget(state_widget_);
     }
 
-    //add main splitter to central layout and restore state from config
-    main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
     central_layout->addWidget(main_splitter_);
 
     setFocusPolicy(Qt::StrongFocus);
@@ -225,6 +220,18 @@ void ViewWidget::init()
 
     //call derived
     init_impl();
+
+    //add main splitter to central layout and restore state from config
+    QSettings settings("COMPASS", instanceId().c_str());
+    if (settings.value("mainSplitterSizes").isValid())
+    {
+        main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
+    }
+    else
+    {
+        main_splitter_->setStretchFactor(0, DataWidgetStretch);
+        main_splitter_->setStretchFactor(1, ConfigWidgetStretch);
+    }
 
     init_ = true;
 
