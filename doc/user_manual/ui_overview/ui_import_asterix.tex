@@ -1,7 +1,7 @@
 \subsection{Import ASTERIX Recording}
 \label{sec:ui_import_asterix}
 
-\hl{TODO: update - This task allows importing of ASTERIX data recording files into the opened database.} \\
+This task allows importing of ASTERIX data recording files into the opened database. \\
 
 \begin{figure}[H]
   \center
@@ -20,7 +20,7 @@ There exist four tabs:
 \end{itemize}
 \ \\
 
-Please note that one or several files can be selected. Since all of the settings are general configuration, please only import several files if they can be imported with the same settings, and do several imports for non-matching files. \\
+Please \textbf{note} that one or several files can be selected. Since all of the settings are general configuration, please only import several files if they can be imported with the same settings, and do several imports for non-matching files. \\
 
 The following framings are currently supported:
 
@@ -32,7 +32,7 @@ The following framings are currently supported:
 \end{itemize}
 \ \\
 
-Please note that the following ASTERIX categories, editions, reserved expansion fields and special purpose fields are currently supported: \\
+Please \textbf{note} that the following ASTERIX categories, editions, reserved expansion fields and special purpose fields are currently supported: \\
 
 \begin{tabular}{ | l | r | r | r |}
 \hline
@@ -55,7 +55,7 @@ Please note that the following ASTERIX categories, editions, reserved expansion 
 \end{tabular} \\
 \  \\
 
-Please note that sensor status messages can be decoded, but are not inserted into the database. 
+Please \textbf{note} that sensor status messages can be decoded, but are not inserted into the database. 
 Decoding of ASTERIX CAT002 is recommended if CAT001 data is imported, since the timestamps are derived from it (if not available in CAT001).
 
 \subsubsection{Main Tab}
@@ -77,7 +77,8 @@ Below, the following items exist:
 
 \subsubsection{Decoder}
 
-In this tab, all decoder settings can be configured. Please note that changing the settings will trigger a re-evaluation of the recordings can be imported correctly, therefore changing the information displayed in the main tab.
+In this tab, all decoder settings can be configured. Please \textbf{note} that changing the settings will trigger a re-evaluation if the recordings can be imported correctly, 
+therefore changing the information displayed in the main tab.
 
 \begin{figure}[H]
   \center
@@ -112,7 +113,6 @@ Using the 'Edit Categories' button, the ASTERIX definitions file is opened in a 
 
 Using the 'Refresh' button, all of the jASTERIX definitions are re-loaded from harddisk (e.g. to update after file changes were made). \\
 
-
 \subsubsection{Override / Filter Tab}
 \label{sec:task_import_asterix_override}
 
@@ -141,7 +141,7 @@ These features should only be used in very specific circumstances.
 \end{itemize}
 \ \\
 
-Please note that the filtering is applied after the (optional) 'Time of Day' correction is performed. Also, if any filters are active, the import status dialog may not be updated for some time and show wrong time estimates.
+Please \textbf{note} that the filtering is applied after the (optional) 'Time of Day' correction is performed. Also, if any filters are active, the import status dialog may not be updated for some time and show wrong time estimates.
 
 \subsubsection{Mappings Tab}
 
@@ -199,7 +199,6 @@ Using the 'Import' button the import task can be performed. During import a stat
 
 If a decoding error occurs, a brief message box is shown, after which the application has to be closed. 
 Please make sure that the correct framing and edition versions are selected, or contact the author for support if this does not resolve the issue. \\
-
 
 \paragraph{Comments}
 The time needed for the import strongly depends on the available CPU performance (multi-threading being very beneficial), but an import of 5 million target reports takes about 3:30 minutes on the author's hardware. \\
