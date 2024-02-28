@@ -49,7 +49,8 @@ class ASTERIXFramingComboBox : public QComboBox
 
         for (std::string frame_it : task_.jASTERIX()->framings())
         {
-            addItem(frame_it.c_str());
+            auto name = frame_it.empty() ? std::string("raw/netto") : frame_it;
+            addItem(name.c_str());
         }
 
         setCurrentIndex(0);
