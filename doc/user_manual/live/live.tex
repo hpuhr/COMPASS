@@ -36,16 +36,16 @@ For each data source, the defined lines are shown (as L1 ... L4 buttons). If no 
 
 The line button can also be toggled - if a bold border is shown the data from the respective line stored not only in the database but \textbf{also} in main memory (RAM). The most recent 5 minutes of data are kept in main memory (RAM), and can be visualized in the existing Views. \\
 
-Please \textbf{note} that currently only the OSG View displays data in live mode, for performance reasons the other Views are inactive.
+Please \textbf{note} that currently only the Geographic View displays data in live mode, for performance reasons the other Views are inactive.
 
-\section{OSG View}
+\section{Geographic View}
 
-In Live mode, the OSG View automatically shows the same elements as with the time filter, and the main components are the same as in Offline mode (although some are deactivated).
+In Live mode, the Geographic View automatically shows the same elements as with the time filter, and the main components are the same as in Offline mode (although some are deactivated).
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osg_live_mode.png}
-  \caption{OSG View in Live Mode}
+    \includegraphics[width=19cm,frame]{figures/geo_live_mode.png}
+  \caption{Geographic View in Live Mode}
 \end{figure} 
 
 In the time filter elements, at maximum 5 minutes of past data is available. In a 1 second update newly received network data is shown, and the labels updated (if automatic labeling is enabled). \\
@@ -56,12 +56,12 @@ When clicking the \includegraphics[width=0.5cm,frame]{../../data/icons/right.png
 
 \subsection{Online/Offline Display}
 
-To indicite if the displayed data is the currently most recent or from a previous point in time, the OSGView can display colored text (by default "Online" or "Offline"). After creation of the OSView and closing the application, this feature can be enabled using the configuration options listed in \nameref{sec:live_online_offline}.
+To indicite if the displayed data is the currently most recent or from a previous point in time, the Geographic View can display colored text (by default "Online" or "Offline"). After creation of the OSView and closing the application, this feature can be enabled using the configuration options listed in \nameref{sec:live_online_offline}.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_offline_status.png}
-  \caption{OSG View Overload Message}
+    \includegraphics[width=19cm,frame]{figures/geoview_offline_status.png}
+  \caption{Geographic View Overload Message}
 \end{figure} 
 
 The online state text is shown if the application is in Live:Running mode and the most recent data is displayed. In all other states (other application mode or previous time window displayed) the offline state text is displayed.
@@ -69,14 +69,14 @@ The online state text is shown if the application is in Live:Running mode and th
 
 \section{Overload Detection}
 
-The ASTERIX Import task as well as the OSGView can detect and handle overload situations. If the real-time processing is not possible with the used workstation, display latency builds up - resulting in ASTERIX data queuing up. \\
+The ASTERIX Import task as well as the Geographic View can detect and handle overload situations. If the real-time processing is not possible with the used workstation, display latency builds up - resulting in ASTERIX data queuing up. \\
 
-If such a latency is larger than 3 seconds,  existing OSGViews skip drawing until re-synchronization is possible (display latency $<$ 3s). During such an overload, the OSGViews show a red overload message on the bottom right, with the display latency in seconds. After such an overload, no loss of data occured and all data is displayed. \\
+If such a latency is larger than 3 seconds,  existing Geographic Views skip drawing until re-synchronization is possible (display latency $<$ 3s). During such an overload, the Geographic Views show a red overload message on the bottom right, with the display latency in seconds. After such an overload, no loss of data occured and all data is displayed. \\
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_overload.png}
-  \caption{OSG View Overload Message}
+    \includegraphics[width=19cm,frame]{figures/geoview_overload.png}
+  \caption{Geographic View Overload Message}
 \end{figure} 
 
 If the latency exceeds 60 seconds, ASTERIX data is skipped - therefore not decoded, added to the database, or displayed.
@@ -147,10 +147,10 @@ Per default, the RAM cache is limited to 5 minutes, while the database content i
 ...        
 \end{lstlisting}
 
-\subsection{OSGView Online/Offline Display}
+\subsection{Geographic View Online/Offline Display}
 \label{sec:live_online_offline}
 
-In the 'views.json' configuration file, in the respective OSGView section, the following parameters can be set:
+In the 'views.json' configuration file, in the respective Geographic View section, the following parameters can be set:
 
 \begin{lstlisting}
 ...
@@ -165,13 +165,13 @@ In the 'views.json' configuration file, in the respective OSGView section, the f
 
 The display of the text can be enabled using the 'use\_online\_messages' flag, the other parameters configure text size, text captions and text coloring.
 
-\subsection{OSGView Disable Rotate}
+\subsection{Geographic View Disable Rotate}
 
 In the file 'compass.json' the following parameters can be set:
 
 \begin{lstlisting}
 ...
-        "disable_osgview_rotate": false,
+        "disable_geographicview_rotate": false,
 ...        
 \end{lstlisting}
 
