@@ -189,12 +189,12 @@ When the loading process is finished, data is automatically selected using the '
 In the ListBox View, the variables set in the 'context\_variables' attribute are added temporarily to the list of variables. Loaded data is presented as always. When the loading process is finished, selected data is highlighed.
 
 
-\subsection{OSGView}
+\subsection{Geographic View}
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/view_points_osgview_selected.png}
-  \caption{View Points OSGView: Selected View Point}
+    \includegraphics[width=18cm,frame]{figures/view_points_geoview_selected.png}
+  \caption{View Points Geographic View: Selected View Point}
 \end{figure}
 
 Loaded data is presented as always and can be adapted to a users needs. After loading, the presented data is centered/zoomed according to the 'position\_latitude', 'position\_longitude', 'position\_window\_latitude', 'position\_window\_longitude' attributes. If these are not set, the center/zoom is adapted to encompass all of the loaded data. \\
@@ -204,7 +204,7 @@ Please \textbf{note} that using view points in 3D maps is currently not recommen
 
 \subsection{After Selection}
 
-After data loading, the application can be used as in any other situation, therefore changing filters, adapting the OSGView style or re-loading the dataset is possible.
+After data loading, the application can be used as in any other situation, therefore changing filters, adapting the Geographic View style or re-loading the dataset is possible.
 
 \subsection{Assessment}
 
@@ -226,7 +226,7 @@ Please note that:
 \item All active views are included, so they should be configured in a suitable manner
 \begin{itemize}  
 \item A ListBoxView is reported as the selected data, or the first 30 rows (if no data is selected), in a table.
-\item An OSGView is reported as a screenshot figure.
+\item An Geographic View is reported as a screenshot figure.
 \end{itemize}
 \end{itemize}
 \ \\
@@ -248,8 +248,8 @@ At the top, the following configuration options exist:
 \item Export All (Sorted by id): Export all view points, sorted by id, ignoring the filtering and ordering in the View Point tab.
 \item Group by Type: Creates sub-section for each type of View Point.
 \item Add Overview Table: Creates table with an overview of all View Points in the beginning of the document. 
-\item Wait on Map Loading: When OSGView screenshots are created, some maps require downloading terrain from the Internet.  This option enables to wait on completion of such activities, to generate high-quality screenshots. Disable only when operating on cached maps without an Internet connection.
-\item Add Overview Screenshot: Adds a preceding screenshot per OSGView with an larger map overview and a data marker.
+\item Wait on Map Loading: When Geographic View screenshots are created, some maps require downloading terrain from the Internet.  This option enables to wait on completion of such activities, to generate high-quality screenshots. Disable only when operating on cached maps without an Internet connection.
+\item Add Overview Screenshot: Adds a preceding screenshot per Geographic View with an larger map overview and a data marker.
 \item Run PDFLatex: Automatically runs the pdflatex compile process, immediately creating a PDF after finished export. Is disabled if command could not be found.
 \item Open Created PDF: Automatically opens the created PDF. Is disabled if pdflatex command could not be found.
 \end{itemize}

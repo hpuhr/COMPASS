@@ -1,5 +1,5 @@
 \section{Data Widget}
-\label{sec:osgview_data}
+\label{sec:geoview_data}
 
 \subsection{Mouse/Keyboard Operations}
 In the data widget, several mouse and key operations are supported. The following terms are used:
@@ -59,8 +59,8 @@ Labels can be shown for target reports. Simply do a LMB click on a target report
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_labels.png}
-  \caption{OSG View Labels}
+    \includegraphics[width=19cm,frame]{figures/geoview_labels.png}
+  \caption{Geographic View Labels}
 \end{figure}
 
 Please note that if automatic labeling is active, manually created labels are cleared every 1 second. This will be improved in a future version.
@@ -71,8 +71,8 @@ Existing labels can be maximized to show all (currently available) information a
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_max_label.png}
-  \caption{OSG View maximized label}
+    \includegraphics[width=19cm,frame]{figures/geoview_max_label.png}
+  \caption{Geographic View maximized label}
 \end{figure}
 
 The maximized label information is shown until the LMB is released.
@@ -83,8 +83,8 @@ Several data-related operations can be performed in the data widget by a RMB cli
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_data_operations.png}
-  \caption{OSG View geometry operations}
+    \includegraphics[width=19cm,frame]{figures/geoview_data_operations.png}
+  \caption{Geographic View geometry operations}
 \end{figure}
 
 The data context menu allows the following operations:
@@ -104,8 +104,8 @@ Several operations can be performed by a RMB click on the background map (no geo
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_quick_operations.png}
-  \caption{OSG View quick menu}
+    \includegraphics[width=19cm,frame]{figures/geoview_quick_operations.png}
+  \caption{Geographic View quick menu}
 \end{figure}
 
 \begin{itemize}
@@ -120,20 +120,20 @@ Several operations can be performed by a RMB click on the background map (no geo
 % 
 % \begin{figure}[H]
 %     \hspace*{-2.5cm}
-%     \includegraphics[width=19cm]{figures/osgview_assoc.png}
-%   \caption{OSG View show ARTAS association information}
+%     \includegraphics[width=19cm]{figures/geoview_assoc.png}
+%   \caption{Geographic View show ARTAS association information}
 % \end{figure}
 % 
 % These associations are gradient-coloured from the color of the system track update to color of the associated target report. Additionally, the time window filter can be used to show the timing of the data.
 % 
 % \begin{figure}[H]
 %     \hspace*{-2.5cm}
-%     \includegraphics[width=19cm]{figures/osgview_assoc_time_window.png}
-%   \caption{OSG View show ARTAS association information in time window}
+%     \includegraphics[width=19cm]{figures/geoview_assoc_time_window.png}
+%   \caption{Geographic View show ARTAS association information in time window}
 % \end{figure}
 
 \subsubsection{Selection}
-\label{sec:osgview_selection}
+\label{sec:geoview_selection}
 
 Target reports can be selected when the Select mode \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} is active. If 'Use height' is not checked, select is done as follows:
 
@@ -143,32 +143,32 @@ Pressing the Escape button during the selection cancels the operations.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_select1.png}
-  \caption{OSG View selection}
+    \includegraphics[width=19cm,frame]{figures/geoview_select1.png}
+  \caption{Geographic View selection}
 \end{figure}
 
 When the selection has been done and all target reports in the created latitude/longitude rectangle are selection. This is shown by a different color (yellow by default), and the 'Selected' counter in the lower-left corner shows the current selection size.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_select2.png}
-  \caption{OSG View selection done}
+    \includegraphics[width=19cm,frame]{figures/geoview_select2.png}
+  \caption{Geographic View selection done}
 \end{figure}
 
 If another selection is done, the previous one is cleared by default. If another selection should be \textit{added} to the current one, hold down the \textbf{Control} key when doing the LMB release.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_select_add1.png}
-  \caption{OSG View selection with adding}
+    \includegraphics[width=19cm,frame]{figures/geoview_select_add1.png}
+  \caption{Geographic View selection with adding}
 \end{figure}
 
 This adds the target reports within the new red rectangle to the current selecion.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_select_add2.png}
-  \caption{OSG View selection with adding done}
+    \includegraphics[width=19cm,frame]{figures/geoview_select_add2.png}
+  \caption{Geographic View selection with adding done}
 \end{figure}
 
 If 'Use height' is checked, selection can be done with height information, which is shown as a box. Simply do a LMB click on the map for a target report, and move the cursor to another target report or map location.  \\
@@ -177,15 +177,15 @@ If both locations have zero height (map location or no height information in tar
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_select3d.png}
-  \caption{OSG View selection with height}
+    \includegraphics[width=19cm,frame]{figures/geoview_select3d.png}
+  \caption{Geographic View selection with height}
 \end{figure}
 
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_select3d_2.png}
-  \caption{OSG View selection with height done}
+    \includegraphics[width=19cm,frame]{figures/geoview_select3d_2.png}
+  \caption{Geographic View selection with height done}
 \end{figure}
 
 
@@ -200,8 +200,8 @@ Pressing the Escape button during the measurement cancels the operations.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_measure1.png}
-  \caption{OSG View measurement}
+    \includegraphics[width=19cm,frame]{figures/geoview_measure1.png}
+  \caption{Geographic View measurement}
 \end{figure}
 
 During measurement, the following information is shown in the top-left corner.
@@ -214,8 +214,8 @@ During measurement, the following information is shown in the top-left corner.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_measure2.png}
-  \caption{OSG View measurement done}
+    \includegraphics[width=19cm,frame]{figures/geoview_measure2.png}
+  \caption{Geographic View measurement done}
 \end{figure}
 
 If 'Use height' (section \nameref{sec:others_height}) is checked, measurements are calculated in the same way as previously (ground distance), but for each target report with height a connecting line to the respective ground position is displayed. \\
@@ -224,13 +224,13 @@ For a measurement between two target reports with height information, the measur
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_measure3d.png}
-  \caption{OSG View measurement with height information}
+    \includegraphics[width=19cm,frame]{figures/geoview_measure3d.png}
+  \caption{Geographic View measurement with height information}
 \end{figure}
 
 %The measurements is shown in the Layers tab, and is identified using a number.
 
-For details about the measurement layer operations please refer to \nameref{sec:osg_measure_ops}. \\
+For details about the measurement layer operations please refer to \nameref{sec:geo_measure_ops}. \\
 
 %Please note the the measurement number background color can be set as with the label background color.
 
@@ -244,9 +244,9 @@ Once activated using the symbol \includegraphics[width=0.5cm,frame]{../../data/i
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/osgview_time_filter.png}
-  \caption{OSG View time filter}
-  \label{fig:osgview_time_filter}
+    \includegraphics[width=19cm,frame]{figures/geoview_time_filter.png}
+  \caption{Geographic View time filter}
+  \label{fig:geoview_time_filter}
 \end{figure}
 
 The following items exist:
@@ -273,8 +273,8 @@ Once activated using the symbol \includegraphics[width=0.5cm,frame]{../../data/i
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/osgview_depth_check.png}
-  \caption{OSG View depth check}
+    \includegraphics[width=18cm,frame]{figures/geoview_depth_check.png}
+  \caption{Geographic View depth check}
 \end{figure}
 
 Please note that if the display check is activated for geometry without height display, bad rendering can occur. For this reason, this mode is only recommended for geometry display with height and is disabled in 2D display mode.
