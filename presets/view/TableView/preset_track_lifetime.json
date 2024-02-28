@@ -1,7 +1,7 @@
 {
     "app_version": "0.7.5",
     "category": "Default",
-    "description": "",
+    "description": "Contains main variables to be displayed by default, as well as Track lifetime information (Begin,Confirmed,Coasting,End).",
     "deployed": true,
     "modified": false,
     "name": "Track Lifetime",

@@ -1,7 +1,7 @@
 {
     "app_version": "0.7.5",
     "category": "Default",
-    "description": "",
+    "description": "Contains main variables to be displayed by default, as well as vertical movement information: Climbing/Descending indicator and Ground bit.",
     "deployed": true,
     "modified": false,
     "name": "Vertical Movement",
@@ -51,6 +51,10 @@
                                             "Meta",
                                             "Mode C Code"
                                         ],
+                                        [
+                                            "Meta",
+                                            "Track Climbing/Descending"
+                                        ],                                        
                                         [
                                             "Meta",
                                             "Ground Bit"
