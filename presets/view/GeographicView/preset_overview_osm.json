@@ -2,7 +2,7 @@
     "app_version": "0.7.5",
     "category": "Default",
     "deployed": true,
-    "description": "",
+    "description": "Gives an overview of the data, color by DBContent over the OpenStreetMap map.",
     "modified": false,
     "name": "Overview OSM",
     "timestamp": "2024-02-15 15:02:09.533",
