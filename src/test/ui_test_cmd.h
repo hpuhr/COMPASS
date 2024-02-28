@@ -77,6 +77,19 @@ protected:
 
 /**
  */
+struct RTCommandUIGetJSON : public RTCommandUIObject
+{
+    QString what;
+    bool    visible = false;
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(uiget_json, "retrieves the value of the given ui element as json")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+/**
+ */
 struct RTCommandUIInject : public RTCommandUIInjection
 {
     QString event;
@@ -103,6 +116,7 @@ inline void initUITestCommands()
 {
     RTCommandUISet::init();
     RTCommandUIGet::init();
+    RTCommandUIGetJSON::init();
     RTCommandUIInject::init();
     RTCommandUIRefresh::init();
 }
