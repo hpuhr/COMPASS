@@ -15,11 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PROJECTIONMANAGER_H_
-#define PROJECTIONMANAGER_H_
+#pragma once
 
 #include "configurable.h"
 #include "singleton.h"
+#include "buffer.h"
 
 class ProjectionManagerWidget;
 class Projection;
@@ -67,13 +67,16 @@ public:
 
     OGRProjection& ogrProjection();
 
+    // in place calculation, returns transformation errors count
+    unsigned int doRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
+    // returns transformation errors count, update buffers
+    std::pair<unsigned int, std::map<std::string, std::shared_ptr<Buffer>>>
+      doUpdateRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
+
     static const std::string RS2G_NAME;
     static const std::string OGR_NAME;
 
 protected:
-    //    float sdl_system_latitude_;
-    //    float sdl_system_longitude_;
-    //    t_Mapping_Info sdl_mapping_info_;
 
     std::string current_projection_name_;
 
@@ -82,6 +85,9 @@ protected:
     std::map<std::string, std::unique_ptr<Projection>> projections_;
 
     virtual void checkSubConfigurables();
+
+    unsigned int calculateRadarPlotPositions (std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
+                                              NullableVector<double>& target_latitudes_vec,
+                                              NullableVector<double>& target_longitudes_vec);
 };
 
-#endif /* PROJECTIONMANAGER_H_ */

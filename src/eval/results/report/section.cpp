@@ -359,7 +359,4 @@ namespace EvaluationResultsReport
 
         content_widget_->setLayout(layout);
     }
-
-
-
 }

@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "viewcomponent.h"
 #include "appmode.h"
 #include "json.h"
 
@@ -29,12 +30,17 @@ class ViewWidget;
 class ViewToolSwitcher;
 class Buffer;
 
+namespace dbContent
+{
+    class Variable;
+}
+
 /**
  * Base class for view data widgets, which are held in the data area of the ViewWidget.
  * Used to display data in a view specific way, e.g. as a graph.
  * Derive and reimplement as needed.
  */
-class ViewDataWidget : public QWidget 
+class ViewDataWidget : public QWidget, public ViewComponent 
 {
     Q_OBJECT
 public:
@@ -53,11 +59,17 @@ public:
     void liveReload();
 
     bool hasData() const;
+    unsigned int loadedDataCount();
     bool showsData() const;
 
-    virtual void appModeSwitch(AppMode app_mode) {} //reacts on switching the application mode
+    bool isVariableSetLoaded() const;
 
-    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
+    virtual void appModeSwitch(AppMode app_mode) {} //reacts on switching the application mode
+    virtual void configChanged() {}                 //reacts on configuration changes
+
+    nlohmann::json viewInfoJSON() const override final;
+
+    virtual QImage renderData();
 
 signals:
     void displayChanged();
@@ -76,6 +88,8 @@ protected:
     virtual void clearData_impl() = 0;                     //implements clearing all view data
     virtual bool redrawData_impl(bool recompute) = 0;      //implements redrawing the display (and possibly needed computations), and returns if the redraw succeeded
     virtual void liveReload_impl() = 0;                    //implements data reload during live running mode
+
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
     void endTool();
 

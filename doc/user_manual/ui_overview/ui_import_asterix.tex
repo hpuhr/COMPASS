@@ -10,26 +10,29 @@ This task allows importing of ASTERIX data recording files into the opened datab
   \caption{Import ASTERIX data}
 \end{figure}
 
-There exist three tabs:
+There exist four tabs:
 
 \begin{itemize}
-\item Main: File label, input line, jASTERIX decoder settings
+\item Main: File label(s) and status, input line
+\item Decoder: jASTERIX decoder settings
 \item Override / Filter: Data override settings
 \item Mappings: Definition of created database content based on decoded data
 \end{itemize}
 \ \\
 
-Please note that the following framings are currently supported:
+Please \textbf{note} that one or several files can be selected. Since all of the settings are general configuration, please only import several files if they can be imported with the same settings, and do several imports for non-matching files. \\
+
+The following framings are currently supported:
 
 \begin{itemize}
-\item None: Raw, netto, unframed ASTERIX data blocks
+\item Raw/Netto: Unframed ASTERIX data blocks
 \item IOSS: IOSS Final Format
 \item IOSS\_SEQ: IOSS Final Format with sequence numbers
 \item RFF: Comsoft RFF format
 \end{itemize}
 \ \\
 
-Please note that the following ASTERIX categories, editions, reserved expansion fields and special purpose fields are currently supported: \\
+Please \textbf{note} that the following ASTERIX categories, editions, reserved expansion fields and special purpose fields are currently supported: \\
 
 \begin{tabular}{ | l | r | r | r |}
 \hline
@@ -52,12 +55,37 @@ Please note that the following ASTERIX categories, editions, reserved expansion 
 \end{tabular} \\
 \  \\
 
-Please note that sensor status messages can be decoded, but are not inserted into the database. 
+Please \textbf{note} that sensor status messages can be decoded, but are not inserted into the database. 
 Decoding of ASTERIX CAT002 is recommended if CAT001 data is imported, since the timestamps are derived from it (if not available in CAT001).
 
 \subsubsection{Main Tab}
 
-At the top, the recording file to be imported is shown. Below, there exists a combobox defining in which line the data should be written. \\
+At the top, the recording files to be imported are shown, with the following items existing for each:
+\begin{itemize}
+\item Checkbox: Checkbox to indicate if the file should be imported
+\item Name: Path and filename
+\item Decoding and Error: Indicating possible decoder issues
+\end{itemize}
+\ \\
+
+Below, the following items exist:
+\begin{itemize}
+\item Line ID: Line into which all data should be written
+\item UTC Day: Date of the recording (for all data)
+\item Debug in Console: Additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation \\
+\end{itemize}
+
+\subsubsection{Decoder}
+
+In this tab, all decoder settings can be configured. Please \textbf{note} that changing the settings will trigger a re-evaluation if the recordings can be imported correctly, 
+therefore changing the information displayed in the main tab.
+
+\begin{figure}[H]
+  \center
+    \hspace*{-0.5cm}
+    \includegraphics[width=17cm]{figures/asterix_import_data_decoder.png}
+  \caption{Import ASTERIX data Decoder}
+\end{figure}
 
 \paragraph{Framing}
 Using the 'Framing' drop-down menu, the current framing can be selected. Using the 'Edit' button, the current framing definition is opened in a text editor.
@@ -84,14 +112,6 @@ Using the 'Edit Data Block' button, the ASTERIX data block definition is opened 
 Using the 'Edit Categories' button, the ASTERIX definitions file is opened in a text editor. \\
 
 Using the 'Refresh' button, all of the jASTERIX definitions are re-loaded from harddisk (e.g. to update after file changes were made). \\
-
-
-
-\paragraph{Running}
-Using the 'Debug in Console' checkbox, additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation. \\
-
-The 'Cancel' button aborts the import. Using the 'Test Import' button the import process can be tested without inserting the data into the database. 
-The 'Import' button triggers the import of the selected file into into the database with the given options. This function can be run multiple times. \\
 
 \subsubsection{Override / Filter Tab}
 \label{sec:task_import_asterix_override}
@@ -121,7 +141,7 @@ These features should only be used in very specific circumstances.
 \end{itemize}
 \ \\
 
-Please note that the filtering is applied after the (optional) 'Time of Day' correction is performed. Also, if any filters are active, the import status dialog may not be updated for some time and show wrong time estimates.
+Please \textbf{note} that the filtering is applied after the (optional) 'Time of Day' correction is performed. Also, if any filters are active, the import status dialog may not be updated for some time and show wrong time estimates.
 
 \subsubsection{Mappings Tab}
 
@@ -167,6 +187,8 @@ Using the 'Show DBContent Variable' button the variable can be inspected in deta
 
 \subsubsection{Running}
 
+The 'Cancel' button aborts the import.  The 'Import' button triggers the import of the selected files into into the database with the given options, but is only available if all selected files can be decoded correctly. \\
+
 Using the 'Import' button the import task can be performed. During import a status indication will be shown. \\
 
 \begin{figure}[H]
@@ -177,7 +199,6 @@ Using the 'Import' button the import task can be performed. During import a stat
 
 If a decoding error occurs, a brief message box is shown, after which the application has to be closed. 
 Please make sure that the correct framing and edition versions are selected, or contact the author for support if this does not resolve the issue. \\
-
 
 \paragraph{Comments}
 The time needed for the import strongly depends on the available CPU performance (multi-threading being very beneficial), but an import of 5 million target reports takes about 3:30 minutes on the author's hardware. \\

@@ -5,6 +5,7 @@
 #include "logger.h"
 
 #include <vector>
+#include <cmath>
 
 #include <boost/optional.hpp>
 

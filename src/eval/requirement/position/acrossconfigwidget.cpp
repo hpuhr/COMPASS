@@ -17,12 +17,13 @@
 
 #include "eval/requirement/position/acrossconfigwidget.h"
 #include "eval/requirement/position/acrossconfig.h"
-#include "textfielddoublevalidator.h"
+//#include "textfielddoublevalidator.h"
 #include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QDoubleValidator>
 
 namespace EvaluationRequirement
 {

@@ -18,7 +18,10 @@
 #ifndef DBCONTENT_VARIABLESET_H_
 #define DBCONTENT_VARIABLESET_H_
 
-#include "propertylist.h"
+//#include "propertylist.h"
+
+#include <vector>
+#include <string>
 
 namespace dbContent
 {

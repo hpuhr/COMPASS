@@ -17,10 +17,10 @@ Directory structure:
 \begin{itemize}
 \item conf/: Configuration as described in \nameref{sec:appendix_config_config_folder}
 \item data/: Data as described in \nameref{sec:appendix_config_data_folder}
+\item presets/: Configuration presets as described in \nameref{sec:appendix_config_preset_folder}
 \end{itemize}
 \item osgearth\_cache: OSGEarth cache folder (for downloaded map information)
 \end{itemize}
-
 
 \subsection{Pre-v0.6.0 and older}
 
@@ -84,7 +84,6 @@ All application configuration is stored as JSON files, which are read during sta
 % \end{itemize}
 \end{itemize}
 
-
 \subsection{Data Folder}
 \label{sec:appendix_config_data_folder}
 
@@ -95,6 +94,17 @@ The data folder contains e.g. used images, 3rd party (static) configuration etc.
 \item gdal: GDAL libary data \& configuration
 \item icons: Application icons
 \item jasterix\_definitions: jASTERIX libary definitions
-\item maps: OSGView map files
-\item textures: OSGView symbol textures
+\item maps: Geographic View map files
+\item textures: Geographic View symbol textures
 \end{itemize}
+
+\subsection{Preset Folder}
+\label{sec:appendix_config_preset_folder}
+
+The preset folder contains configuration presets.
+
+\begin{itemize}
+    \item view: View Presets. Contains a subfolder for each kind of view, where the view-specific presets are stored.
+\end{itemize} \ \\
+
+Presets are stored as JSON files.

@@ -53,7 +53,8 @@ bool OGRProjection::hasCoordinateSystem(unsigned int id) { return coordinate_sys
 void OGRProjection::addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                                         double altitude_m)
 {
-    assert(!hasCoordinateSystem(id));
+    if (hasCoordinateSystem(id))
+        return;
 
     coordinate_systems_[id].reset(
         new OGRCoordinateSystem(id, latitude_deg, longitude_deg, altitude_m));

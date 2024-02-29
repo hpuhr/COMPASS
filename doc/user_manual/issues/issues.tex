@@ -43,10 +43,10 @@ Unfortunately this means that for e.g. CentOS 6.* (or older) an AppImage produce
 If this is the case for you please comment on \url{https://github.com/hpuhr/COMPASS/issues/35}.
 
 
-\subsection{White OSGView \& Shader Errors in Console Log}
+\subsection{White Geographic View \& Shader Errors in Console Log}
 \label{ref:issue_shaders}
 
-When the OSGView is started on older, unsupported Intel graphics cards the OSGView only show a white window and the following error messages are logged in the console:
+When the Geographic View is started on older, unsupported Intel graphics cards the Geographic View only show a white window and the following error messages are logged in the console:
 
 \begin{lstlisting}
 ...
@@ -96,7 +96,7 @@ Only if this is the case, please collect the output of \textit{glxinfo} and crea
 
 \subsection{ADS-B Target Reports Not Shown}
 
-If imported ADS-B target reports are not displayed in the OSGView, one cause can be that the latitude/longitude position information is only given in it's high precision data item in ASTERIX. So e.g. instead of the 'Latitude' variable, the 'Latitude HP' variable holds the respective information in COMPASS. This could be inspected e.g. using the Histogram or the Scatterplot views. \\
+If imported ADS-B target reports are not displayed in the Geographic View, one cause can be that the latitude/longitude position information is only given in it's high precision data item in ASTERIX. So e.g. instead of the 'Latitude' variable, the 'Latitude HP' variable holds the respective information in COMPASS. This could be inspected e.g. using the Histogram or the Scatterplot views. \\
 
 To change the usage of the position information, (once) start the COMPASS application using the '--expert\_mode' command line option, (after opening any database) and step into the Configuration $\rightarrow$ Configure Meta Variables dialog. \\
 

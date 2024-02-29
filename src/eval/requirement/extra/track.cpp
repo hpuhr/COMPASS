@@ -17,10 +17,10 @@
 
 #include "eval/requirement/extra/track.h"
 #include "eval/results/extra/tracksingle.h"
-#include "evaluationdata.h"
+//#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "sectorlayer.h"
 #include "timeperiod.h"
 

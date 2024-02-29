@@ -17,8 +17,8 @@
 
 #include "eval/requirement/mode_c/modecpresentconfigwidget.h"
 #include "eval/requirement/mode_c/presentconfig.h"
-#include "textfielddoublevalidator.h"
-#include "logger.h"
+//#include "textfielddoublevalidator.h"
+//#include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>

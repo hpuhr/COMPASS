@@ -31,6 +31,8 @@
 
 #include "logger.h"
 #include "stringconv.h"
+#include "viewpoint.h"
+#include "sectorlayer.h"
 
 #include <cassert>
 
@@ -429,11 +431,11 @@ std::unique_ptr<nlohmann::json::object_t> SingleIntervalBase::getTargetErrorsVie
 
     if (has_pos)
     {
-        (*viewable_ptr)[VP_POS_LAT_KEY] = (lat_max + lat_min) / 2.0;
-        (*viewable_ptr)[VP_POS_LON_KEY] = (lon_max + lon_min) / 2.0;
+        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max + lat_min) / 2.0;
+        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max + lon_min) / 2.0;
 
-        double lat_w = 1.1 * (lat_max - lat_min) / 2.0;
-        double lon_w = 1.1 * (lon_max - lon_min) / 2.0;
+        double lat_w = OSGVIEW_POS_WINDOW_SCALE * (lat_max - lat_min) / 2.0;
+        double lon_w = OSGVIEW_POS_WINDOW_SCALE * (lon_max - lon_min) / 2.0;
 
         if (lat_w < eval_man_.settings().result_detail_zoom_)
             lat_w = eval_man_.settings().result_detail_zoom_;
@@ -441,8 +443,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleIntervalBase::getTargetErrorsVie
         if (lon_w < eval_man_.settings().result_detail_zoom_)
             lon_w = eval_man_.settings().result_detail_zoom_;
 
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
     }
 
     //add track annotations
@@ -450,7 +452,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleIntervalBase::getTargetErrorsVie
 
     if (detail)
     {
-        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail->timestamp());
+        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(detail->timestamp());
 
         //highlight detail
         addAnnotations(*viewable_ptr, *detail);
@@ -784,11 +786,11 @@ std::unique_ptr<nlohmann::json::object_t> JoinedIntervalBase::getErrorsViewable 
     tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
     tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
 
-    (*viewable_ptr)[VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    (*viewable_ptr)[VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
+    (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
+    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
 
-    double lat_w = 1.1*(lat_max-lat_min)/2.0;
-    double lon_w = 1.1*(lon_max-lon_min)/2.0;
+    double lat_w = lat_max-lat_min;
+    double lon_w = lon_max-lon_min;
 
     if (lat_w < eval_man_.settings().result_detail_zoom_)
         lat_w = eval_man_.settings().result_detail_zoom_;
@@ -796,8 +798,8 @@ std::unique_ptr<nlohmann::json::object_t> JoinedIntervalBase::getErrorsViewable 
     if (lon_w < eval_man_.settings().result_detail_zoom_)
         lon_w = eval_man_.settings().result_detail_zoom_;
 
-    (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
-    (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
+    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
 
     addAnnotationsFromSingles(*viewable_ptr);
 

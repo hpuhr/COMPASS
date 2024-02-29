@@ -18,15 +18,16 @@
 #include "histogramviewconfigwidget.h"
 #include "histogramviewwidget.h"
 #include "histogramviewdatawidget.h"
-#include "compass.h"
+//#include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableselectionwidget.h"
 #include "histogramview.h"
-#include "histogramviewdatasource.h"
+//#include "histogramviewdatasource.h"
 #include "logger.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "groupbox.h"
 #include "ui_test_common.h"
+#include "metavariable.h"
 
 #include <QCheckBox>
 #include <QLabel>
@@ -43,21 +44,13 @@ using namespace Utils;
 /**
  */
 HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_widget, QWidget* parent)
-:   ViewConfigWidget(view_widget, parent)
+:   TabStyleViewConfigWidget(view_widget, parent)
 {
     view_ = view_widget->getView();
     assert(view_);
 
-    setMinimumWidth(400);
-
     QFont font_bold;
     font_bold.setBold(true);
-
-    QVBoxLayout* vlayout = new QVBoxLayout(this);
-    vlayout->setContentsMargins(0, 0, 0, 0);
-
-    QTabWidget* tab_widget = new QTabWidget(this);
-    tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
 
     bool show_result = view_->showResults() && view_->hasResultID();
 
@@ -71,6 +64,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
             selected_var_widget_ = new QWidget;
             selected_var_check_  = new QRadioButton("Show Variable Data");
             selected_var_check_->setChecked(!show_result);
+            UI_TEST_OBJ_NAME(selected_var_check_, selected_var_check_->text())
 
             connect(selected_var_check_, &QRadioButton::toggled, this,
                     &HistogramViewConfigWidget::dataSourceToggled);
@@ -91,13 +85,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
                                             PropertyDataType::ULONGINT,
                                             PropertyDataType::FLOAT,
                                             PropertyDataType::DOUBLE});
-            if (view_->hasDataVar())
-            {
-                if (view_->isDataVarMeta())
-                    select_var_->selectedMetaVariable(view_->metaDataVar());
-                else
-                    select_var_->selectedVariable(view_->dataVar());
-            }
+            updateSelectedVar();
 
             connect(select_var_, &dbContent::VariableSelectionWidget::selectionChanged, this,
                     &HistogramViewConfigWidget::selectedVariableChangedSlot);
@@ -113,6 +101,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
             eval_results_widget_ = new QWidget;
             eval_results_check_  = new QRadioButton("Show Evaluation Result Data");
             eval_results_check_->setChecked(show_result);
+            UI_TEST_OBJ_NAME(eval_results_check_, eval_results_check_->text())
 
             connect(eval_results_check_, &QRadioButton::toggled, this,
                     &HistogramViewConfigWidget::dataSourceToggled);
@@ -143,8 +132,9 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
         //general
         {
             log_check_ = new QCheckBox("Logarithmic Y Scale");
-            log_check_->setChecked(view_->useLogScale());
             UI_TEST_OBJ_NAME(log_check_, log_check_->text())
+
+            updateLogScale();
 
             connect(log_check_, &QCheckBox::clicked, this,
                     &HistogramViewConfigWidget::toggleLogScale);
@@ -158,10 +148,8 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
         
         cfg_widget->setLayout(cfg_layout);
 
-        tab_widget->addTab(cfg_widget, "Config");
+        getTabWidget()->addTab(cfg_widget, "Config");
     }
-
-    vlayout->addWidget(tab_widget);
 
     //info widget
     {
@@ -196,13 +184,11 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramViewWidget* view_w
         layout->addWidget(info_oor_label_      , 2, 1);
         layout->addWidget(info_zoom_label      , 3, 1);
 
-        vlayout->addWidget(info_widget_);
-        vlayout->addSpacerItem(new QSpacerItem(5, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
+        getMainLayout()->addWidget(info_widget_);
+        getMainLayout()->addSpacerItem(new QSpacerItem(5, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
 
         updateInfo();
     }
-
-    setLayout(vlayout);
 }
 
 /**
@@ -216,9 +202,9 @@ void HistogramViewConfigWidget::selectedVariableChangedSlot()
     loginf << "HistogramViewConfigWidget: selectedVariableChangedSlot";
 
     if (select_var_->hasVariable())
-        view_->dataVar(select_var_->selectedVariable());
+        view_->dataVar(select_var_->selectedVariable(), true);
     else if (select_var_->hasMetaVariable())
-        view_->metaDataVar(select_var_->selectedMetaVariable());
+        view_->metaDataVar(select_var_->selectedMetaVariable(), true);
 }
 
 /**
@@ -256,7 +242,7 @@ void HistogramViewConfigWidget::toggleLogScale()
     assert(log_check_);
     bool checked = log_check_->checkState() == Qt::Checked;
     logdbg << "HistogramViewConfigWidget: toggleLogScale: setting overwrite to " << checked;
-    view_->useLogScale(checked);
+    view_->useLogScale(checked, true);
 }
 
 /**
@@ -359,4 +345,52 @@ void HistogramViewConfigWidget::updateInfo()
 
         info_zoom_label->setVisible(info.zoom_active);
     }
+}
+
+/**
+ */
+void HistogramViewConfigWidget::configChanged()
+{
+    updateSelectedVar();
+    updateLogScale();
+}
+
+/**
+ */
+void HistogramViewConfigWidget::updateSelectedVar()
+{
+    if (view_->hasDataVar())
+    {
+        if (view_->isDataVarMeta())
+            select_var_->selectedMetaVariable(view_->metaDataVar());
+        else
+            select_var_->selectedVariable(view_->dataVar());
+    }
+}
+
+/**
+ */
+void HistogramViewConfigWidget::updateLogScale()
+{
+    log_check_->setChecked(view_->useLogScale());
+}
+
+/**
+ */
+void HistogramViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    if (select_var_->hasMetaVariable())
+        info[ "selected_var" ] = "Meta - " + select_var_->selectedMetaVariable().name();
+    else
+        info[ "selected_var" ] = select_var_->selectedVariable().dbContentName() + " - " + select_var_->selectedVariable().name();
+
+    info[ "log_enabled" ] = log_check_->isChecked();
+
+    info[ "info_zoom_active" ] = info_zoom_label->isVisible();
+    info[ "info_range_min"   ] = info_range_min_label_->text().toStdString();
+    info[ "info_range_max"   ] = info_range_max_label_->text().toStdString();
+    info[ "info_oor_count"   ] = info_oor_label_->text().toStdString();
+
+    info[ "result_active" ] = eval_results_check_->isChecked();
+    info[ "result_id"     ] = eval_results_grpreq_label_->text().toStdString() + " - " + eval_results_id_label_->text().toStdString();
 }

@@ -17,23 +17,25 @@
 
 #include "viewcontainer.h"
 
-#include "config.h"
+//#include "config.h"
 #include "files.h"
 #include "global.h"
-#include "listboxview.h"
+#include "tableview.h"
 #include "histogramview.h"
 #include "scatterplotview.h"
 #include "logger.h"
 //#include "mainloadwidget.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "view.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
 #include "ui_test_common.h"
 #include "compass.h"
+#include "rtcommand_helpers.h"
+#include "viewwidget.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
-#include "osgview.h"
+#include "geographicview.h"
 #endif
 
 #include <QHBoxLayout>
@@ -48,9 +50,12 @@
 using namespace Utils;
 using namespace std;
 
-ViewContainer::ViewContainer(const std::string& class_id, const std::string& instance_id,
-                             Configurable* parent, ViewManager* view_manager,
-                             QTabWidget* tab_widget, int window_cnt)
+ViewContainer::ViewContainer(const std::string& class_id, 
+                             const std::string& instance_id,
+                             Configurable* parent, 
+                             ViewManager* view_manager,
+                             QTabWidget* tab_widget, 
+                             int window_cnt)
     : QObject(),
       Configurable(class_id, instance_id, parent),
       view_manager_(*view_manager),
@@ -98,10 +103,14 @@ ViewContainer::~ViewContainer()
     logdbg << "ViewContainer: dtor: done";
 }
 
-void ViewContainer::addView(const std::string& class_name)
+void ViewContainer::addView(const std::string& class_id)
 {
     assert (!disable_add_remove_views_);
-    generateSubConfigurable(class_name, class_name + std::to_string(view_manager_.newViewNumber()));
+
+    auto config = Configuration::create(class_id, view_manager_.newViewInstanceId(class_id),
+                          view_manager_.newViewName(class_id));
+
+    generateSubConfigurableFromConfig(std::move(config));
 }
 
 void ViewContainer::enableViewTab(QWidget* widget, bool value)
@@ -148,7 +157,7 @@ void ViewContainer::addView(View* view)
     int index = tab_widget_->addTab(w, view_name);
 
     QPushButton* manage_button = new QPushButton();
-    UI_TEST_OBJ_NAME(manage_button, view_name + " Manager"); //manage buttons can be reached via e.g. window1.osgview2_manager
+    UI_TEST_OBJ_NAME(manage_button, view_name + " Manager"); //manage buttons can be reached via e.g. window1.geographicview2_manager
 
     manage_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
     manage_button->setFixedSize(UI_ICON_SIZE);
@@ -158,6 +167,13 @@ void ViewContainer::addView(View* view)
     manage_button->setDisabled(disable_add_remove_views_);
     connect(manage_button, SIGNAL(clicked()), this, SLOT(showViewMenuSlot()));
     tab_widget_->tabBar()->setTabButton(index, QTabBar::RightSide, manage_button);
+
+    //in localbuild we show some info about how the view is reachable via rtcommands
+    if (!COMPASS::instance().isAppImage())
+    {
+        QString tt = rtcommand::getTooltip(view->getViewWidget(), view);
+        tab_widget_->setTabToolTip(index, tt);
+    }
 }
 
 void ViewContainer::deleteViewSlot()
@@ -216,9 +232,9 @@ const std::vector<std::unique_ptr<View>>& ViewContainer::getViews() const { retu
 void ViewContainer::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {
-    if (class_id == "ListBoxView")
+    if (class_id == "TableView")
     {
-        views_.emplace_back(new ListBoxView(class_id, instance_id, this, view_manager_));
+        views_.emplace_back(new TableView(class_id, instance_id, this, view_manager_));
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
@@ -237,16 +253,16 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
     }
-    else if (class_id == "OSGView")
+    else if (class_id == "GeographicView")
     {
 #if USE_EXPERIMENTAL_SOURCE == true
 
-        views_.emplace_back(new OSGView(class_id, instance_id, this, view_manager_));
+        views_.emplace_back(new GeographicView(class_id, instance_id, this, view_manager_));
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
 #else
-        loginf << "ViewContainer: generateSubConfigurable: OSGView ignored since compiled w/o experimental source";
+        loginf << "ViewContainer: generateSubConfigurable: GeographicView ignored since compiled w/o experimental source";
 #endif
 
     }
@@ -286,20 +302,20 @@ void ViewContainer::showAddViewMenuSlot()
     QMenu menu;
 
     QMenu* here_menu = menu.addMenu("Add Here");
-    for (QString view_class : view_manager_.viewClassList())
+    for (auto& class_it : view_manager_.viewClassList()) // class name, name
     {
-        QAction* action = here_menu->addAction(view_class);
+        QAction* action = here_menu->addAction(class_it.second.c_str());
         action->setProperty("location", "here");
-        action->setProperty("class_id", view_class);
+        action->setProperty("class_id", class_it.first.c_str());
         connect (action, &QAction::triggered, this, &ViewContainer::addNewViewSlot);
     }
 
     QMenu* new_menu = menu.addMenu("Add In New Window");
-    for (QString view_class : view_manager_.viewClassList())
+    for (auto& class_it : view_manager_.viewClassList())
     {
-        QAction* action = new_menu->addAction(view_class);
+        QAction* action = new_menu->addAction(class_it.second.c_str());
         action->setProperty("location", "new");
-        action->setProperty("class_id", view_class);
+        action->setProperty("class_id", class_it.first.c_str());
         connect (action, &QAction::triggered, this, &ViewContainer::addNewViewSlot);
     }
 

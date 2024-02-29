@@ -25,6 +25,7 @@
 #include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgenerator.h"
 #include "datasourcecompoundcoverage.h"
+#include "sector.h"
 
 #include <QObject>
 
@@ -47,6 +48,8 @@ class QTabWidget;
 
 struct EvaluationManagerSettings
 {
+    EvaluationManagerSettings();
+
     unsigned int line_id_ref_;
     nlohmann::json active_sources_ref_; // config var for data_sources_ref_
 
@@ -54,14 +57,12 @@ struct EvaluationManagerSettings
     nlohmann::json active_sources_tst_; // config var for active_sources_tst_
 
     std::string current_standard_;
-    std::string current_config_name_;
+    //std::string current_config_name_;
 
     nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
 
     float max_ref_time_diff_ {0};
-
-    bool load_only_sector_data_ {true};
 
     // load filter
     bool use_load_filter_ {false};
@@ -139,6 +140,9 @@ struct EvaluationManagerSettings
     bool report_open_created_pdf_ {false};
 
     bool warning_shown_ {false};
+
+    //not written to config
+    bool load_only_sector_data_ {true};
 
 private:
     friend class EvaluationManager;
@@ -315,6 +319,24 @@ public:
     const dbContent::DataSourceCompoundCoverage& tstSrcsCoverage() const;
 
 protected:
+    virtual void checkSubConfigurables() override;
+
+    void loadSectors();
+
+    void checkReferenceDataSources();
+    void checkTestDataSources();
+
+    void updateMaxSectorID();
+
+    void checkMinHeightFilterValid();
+
+    nlohmann::json::object_t getBaseViewableDataConfig ();
+    nlohmann::json::object_t getBaseViewableNoDataConfig ();
+
+    void updateCompoundCoverage(std::set<unsigned int> tst_sources);
+
+    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
+
     COMPASS& compass_;
 
     EvaluationManagerSettings settings_;
@@ -361,22 +383,6 @@ protected:
     bool use_fast_sector_inside_check_ = true;
 
     dbContent::DataSourceCompoundCoverage tst_srcs_coverage_;
-
-    virtual void checkSubConfigurables() override;
-
-    void loadSectors();
-
-    void checkReferenceDataSources();
-    void checkTestDataSources();
-
-    void updateMaxSectorID();
-
-    void checkMinHeightFilterValid();
-
-    nlohmann::json::object_t getBaseViewableDataConfig ();
-    nlohmann::json::object_t getBaseViewableNoDataConfig ();
-
-    void updateCompoundCoverage(std::set<unsigned int> tst_sources);
 };
 
 #endif // EVALUATIONMANAGER_H

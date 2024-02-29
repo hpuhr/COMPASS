@@ -24,6 +24,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/unit/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/eval/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/rtcommand/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/reconstruction/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/fft/CMakeLists.txt")
 
 include("${CMAKE_CURRENT_LIST_DIR}/test/CMakeLists.txt")
 

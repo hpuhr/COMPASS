@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTMODECCORRECTCONFIG_H
 #define EVALUATIONREQUIREMENTMODECCORRECTCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/mode_c/correct.h"
-#include "eval/requirement/mode_c/modeccorrectconfigwidget.h"
+//#include "eval/requirement/mode_c/correct.h"
+//#include "eval/requirement/mode_c/modeccorrectconfigwidget.h"
 
 #include <memory>
 

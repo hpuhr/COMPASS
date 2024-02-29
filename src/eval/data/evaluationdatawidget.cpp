@@ -186,20 +186,24 @@ void EvaluationDataWidget::showSurroundingDataSlot ()
 
 void EvaluationDataWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-    if (!current.isValid())
+    itemClicked(current);
+}
+
+void EvaluationDataWidget::itemClicked(const QModelIndex& index)
+{
+    if (!index.isValid())
     {
-        loginf << "EvaluationDataWidget: currentRowChanged: invalid index";
+        loginf << "EvaluationDataWidget: itemClicked: invalid index";
         return;
     }
 
-    auto const source_index = proxy_model_->mapToSource(current);
+    auto const source_index = proxy_model_->mapToSource(index);
     assert (source_index.isValid());
 
     const EvaluationTargetData& target = eval_data_.getTargetOf(source_index);
 
-    loginf << "EvaluationDataWidget: currentRowChanged: current target " << target.utn_;
+    loginf << "EvaluationDataWidget: itemClicked: current target " << target.utn_;
     //restore_focus_ = true;
 
     eval_man_.showUTN(target.utn_);
 }
-

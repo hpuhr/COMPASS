@@ -34,10 +34,6 @@ class JSONParsingSchema : public Configurable
     JSONParsingSchema(const std::string& class_id, const std::string& instance_id,
                       Configurable* parent);
     JSONParsingSchema() = default;
-    JSONParsingSchema(JSONParsingSchema&& other) { *this = std::move(other); }
-
-    /// @brief Move constructor
-    JSONParsingSchema& operator=(JSONParsingSchema&& other);
 
     JSONObjectParserIterator begin() { return parsers_.begin(); }
     JSONObjectParserIterator end() { return parsers_.end(); }

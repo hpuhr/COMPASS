@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTEXTRADATACONFIG_H
 #define EVALUATIONREQUIREMENTEXTRADATACONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/extra/dataconfigwidget.h"
-#include "eval/requirement/extra/data.h"
+//#include "eval/requirement/extra/dataconfigwidget.h"
+//#include "eval/requirement/extra/data.h"
 
 #include <memory>
 
@@ -51,7 +51,7 @@ namespace EvaluationRequirement
         bool ignorePrimaryOnly() const;
         void ignorePrimaryOnly(bool value);
 
-        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     protected:
         float min_duration_{0};

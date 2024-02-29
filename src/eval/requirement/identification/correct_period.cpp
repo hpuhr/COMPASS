@@ -19,11 +19,11 @@
 #include "eval/results/identification/correct_period.h"
 #include "eval/requirement/group.h"
 
-#include "evaluationdata.h"
+//#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "util/stringconv.h"
-#include "util/timeconv.h"
+//#include "util/stringconv.h"
+//#include "util/timeconv.h"
 #include "sectorlayer.h"
 
 #include <QLineEdit>

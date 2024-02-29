@@ -33,7 +33,7 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
                      Configurable* parent)
     : DBFilter(class_id, instance_id, parent, false)
 {
-    registerParameter("utns_str", &utns_str_, "");
+    registerParameter("utns_str", &utns_str_, std::string());
     updateUTNSFromStr(utns_str_);
 
     name_ = "UTNs";

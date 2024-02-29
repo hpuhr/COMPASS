@@ -17,13 +17,14 @@
 
 #include "eval/requirement/position/radarrangeconfigwidget.h"
 #include "eval/requirement/position/radarrangeconfig.h"
-#include "textfielddoublevalidator.h"
-#include "eval/requirement/base/comparisontypecombobox.h"
+//#include "textfielddoublevalidator.h"
+//#include "eval/requirement/base/comparisontypecombobox.h"
 #include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QDoubleValidator>
 
 namespace EvaluationRequirement
 {

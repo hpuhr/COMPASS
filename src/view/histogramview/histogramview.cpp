@@ -33,16 +33,28 @@
 
 using namespace dbContent;
 
+const std::string HistogramView::ParamDataVarDBO  = "data_var_dbo";
+const std::string HistogramView::ParamDataVarName = "data_var_name";
+const std::string HistogramView::ParamUseLogScale = "use_log_scale";
+
+/**
+ */
+HistogramView::Settings::Settings()
+:   data_var_dbo (META_OBJECT_NAME)
+,   data_var_name(DBContent::meta_var_timestamp_.name())
+,   use_log_scale(false)
+{
+}
+
 /**
  */
 HistogramView::HistogramView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)
     : View(class_id, instance_id, w, view_manager)
 {
-    registerParameter("data_var_dbo", &data_var_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_name", &data_var_name_, DBContent::meta_var_timestamp_.name());
-
-    registerParameter("use_log_scale", &use_log_scale_, true);
+    registerParameter(ParamDataVarDBO, &settings_.data_var_dbo, Settings().data_var_dbo);
+    registerParameter(ParamDataVarName, &settings_.data_var_name, Settings().data_var_name);
+    registerParameter(ParamUseLogScale, &settings_.use_log_scale, Settings().use_log_scale);
 
     // create sub done in init
 }
@@ -154,7 +166,7 @@ VariableSet HistogramView::getSet(const std::string& dbcontent_name)
 {
     assert(data_source_);
 
-    VariableSet set = data_source_->getSet()->getExistingInDBFor(dbcontent_name);
+    VariableSet set = data_source_->getSet()->getFor(dbcontent_name);
 
     if (hasDataVar())
     {
@@ -186,39 +198,42 @@ void HistogramView::accept(LatexVisitor& v)
  */
 bool HistogramView::useLogScale() const
 {
-    return use_log_scale_;
+    return settings_.use_log_scale;
 }
 
 /**
  */
-void HistogramView::useLogScale(bool use_log_scale)
+void HistogramView::useLogScale(bool use_log_scale, bool notify_changes)
 {
-    use_log_scale_ = use_log_scale;
+    setParameter(settings_.use_log_scale, use_log_scale);
 
     HistogramViewDataWidget* data_widget = dynamic_cast<HistogramViewDataWidget*>(getDataWidget());
     assert (data_widget);
 
-    data_widget->redrawData(false);
+    if (notify_changes)
+    {
+        updateView(VU_Redraw);
+    }
 }
 
 /**
  */
 bool HistogramView::hasDataVar ()
 {
-    if (!data_var_dbo_.size() || !data_var_name_.size())
+    if (settings_.data_var_dbo.empty() || settings_.data_var_name.empty())
         return false;
 
-    if (data_var_dbo_ == META_OBJECT_NAME)
-        return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_name_);
+    if (settings_.data_var_dbo == META_OBJECT_NAME)
+        return COMPASS::instance().dbContentManager().existsMetaVariable(settings_.data_var_name);
     else
-        return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).hasVariable(data_var_name_);
+        return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).hasVariable(settings_.data_var_name);
 }
 
 /**
  */
 bool HistogramView::isDataVarMeta ()
 {
-    return data_var_dbo_ == META_OBJECT_NAME;
+    return (settings_.data_var_dbo == META_OBJECT_NAME);
 }
 
 /**
@@ -227,25 +242,31 @@ Variable& HistogramView::dataVar()
 {
     assert (hasDataVar());
     assert (!isDataVarMeta());
-    assert (COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).hasVariable(data_var_name_));
+    assert (COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).hasVariable(settings_.data_var_name));
 
-    return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).variable(data_var_name_);
+    return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).variable(settings_.data_var_name);
 }
 
 /**
  */
-void HistogramView::dataVar (Variable& var)
+void HistogramView::dataVar (Variable& var, bool notify_changes)
 {
+    if (settings_.data_var_dbo == var.dbContentName() && 
+        settings_.data_var_name == var.name())
+        return;
+
     loginf << "HistogramView: dataVar: dbo " << var.dbContentName() << " name " << var.name();
 
-    data_var_dbo_ = var.dbContentName();
-    data_var_name_ = var.name();
+    setParameter(settings_.data_var_dbo, var.dbContentName());
+    setParameter(settings_.data_var_name, var.name());
+
     assert (hasDataVar());
     assert (!isDataVarMeta());
 
-    assert (widget_);
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
+    if (notify_changes)
+    {
+        notifyRefreshNeeded();
+    }
 }
 
 /**
@@ -255,37 +276,43 @@ MetaVariable& HistogramView::metaDataVar()
     assert (hasDataVar());
     assert (isDataVarMeta());
 
-    return COMPASS::instance().dbContentManager().metaVariable(data_var_name_);
+    return COMPASS::instance().dbContentManager().metaVariable(settings_.data_var_name);
 }
 
 /**
  */
-void HistogramView::metaDataVar (MetaVariable& var)
+void HistogramView::metaDataVar (MetaVariable& var, bool notify_changes)
 {
+    if (settings_.data_var_dbo == META_OBJECT_NAME && 
+        settings_.data_var_name == var.name())
+        return;
+    
     loginf << "HistogramView: metaDataVar: name " << var.name();
 
-    data_var_dbo_ = META_OBJECT_NAME;
-    data_var_name_ = var.name();
+    setParameter(settings_.data_var_dbo, META_OBJECT_NAME);
+    setParameter(settings_.data_var_name, var.name());
+
     assert (hasDataVar());
     assert (isDataVarMeta());
 
-    assert (widget_);
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
+    if (notify_changes)
+    {
+        notifyRefreshNeeded();
+    }
 }
 
 /**
  */
 std::string HistogramView::dataVarDBO() const
 {
-    return data_var_dbo_;
+    return settings_.data_var_dbo;
 }
 
 /**
  */
 std::string HistogramView::dataVarName() const
 {
-    return data_var_name_;
+    return settings_.data_var_name;
 }
 
 /**
@@ -474,7 +501,7 @@ void HistogramView::loadingDone()
 
         //if (data.at("evaluation_results").contains("highlight_details"))
         //{
-        //    loginf << "OSGView: loadingDoneSlot: highlight_details "
+        //    loginf << "GeographicView: loadingDoneSlot: highlight_details "
         //           << data.at("evaluation_results").at("highlight_details").dump();
 
         //    vector<unsigned int> highlight_details = data.at("evaluation_results").at("highlight_details");
@@ -488,4 +515,16 @@ void HistogramView::loadingDone()
         //do not show results
         showResults(false);
     }
+}
+
+/**
+ */
+void HistogramView::viewInfoJSON_impl(nlohmann::json& info) const
+{
+    info[ "use_log_scale"       ] = settings_.use_log_scale;
+    info[ "data_var_dbo"        ] = settings_.data_var_dbo;
+    info[ "data_var_name"       ] = settings_.data_var_name;
+    info[ "show_results"        ] = show_results_;
+    info[ "eval_results_grpreq" ] = eval_results_grpreq_;
+    info[ "eval_results_id_"    ] = eval_results_id_;
 }

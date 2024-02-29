@@ -15,12 +15,14 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_force.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_spring.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_helpers.h"
+        "${CMAKE_CURRENT_LIST_DIR}/labelgeneratorconfig.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/labelgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/labelgeneratorwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/labeldswidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/labelcontentdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/labelgeneratorconfig.cpp"
 )
 
 

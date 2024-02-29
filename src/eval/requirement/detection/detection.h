@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTDETECTION_H
 
 #include "eval/requirement/base/probabilitybase.h"
-#include "dbcontent/target/targetposition.h"
+//#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
 

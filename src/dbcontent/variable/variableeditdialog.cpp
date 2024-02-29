@@ -3,7 +3,7 @@
 #include "dbcontent/variable/variabledatatypecombobox.h"
 #include "stringrepresentationcombobox.h"
 #include "unitselectionwidget.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "dbcontent/dbcontent.h"
 #include "compass.h"
 #include "logger.h"

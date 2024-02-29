@@ -19,8 +19,8 @@
 #define SCATTERPLOTVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-#include "dbcontent/variable/variable.h"
-#include "appmode.h"
+//#include "dbcontent/variable/variable.h"
+//#include "appmode.h"
 
 namespace dbContent
 {
@@ -38,7 +38,7 @@ class QLineEdit;
  * @brief Widget with configuration elements for a ScatterPlotView
  *
  */
-class ScatterPlotViewConfigWidget : public ViewConfigWidget
+class ScatterPlotViewConfigWidget : public TabStyleViewConfigWidget
 {
     Q_OBJECT
 
@@ -46,15 +46,28 @@ public slots:
     void selectedVariableXChangedSlot();
     void selectedVariableYChangedSlot();
 
+    void useConnectionLinesSlot();
+
 public:
     ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
 
+    virtual void configChanged() override;
+
 protected:
+    void updateSelectedVarX();
+    void updateSelectedVarY();
+
+    void viewInfoJSON_impl(nlohmann::json& info) const override;
+
     ScatterPlotView* view_ = nullptr;
 
     dbContent::VariableSelectionWidget* select_var_x_ {nullptr};
     dbContent::VariableSelectionWidget* select_var_y_ {nullptr};
+
+    QCheckBox* use_connection_lines_ {nullptr};
+
+    virtual void onDisplayChange_impl() override;
 };
 
 #endif /* SCATTERPLOTVIEWCONFIGWIDGET_H_ */

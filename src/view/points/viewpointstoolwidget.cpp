@@ -18,6 +18,9 @@
 #include "viewpointstoolwidget.h"
 #include "viewpointswidget.h"
 
+#include "files.h"
+#include "logger.h"
+
 #include <QApplication>
 #include <QColorDialog>
 #include <QHBoxLayout>
@@ -25,8 +28,6 @@
 #include <QToolBar>
 #include <QToolButton>
 
-#include "files.h"
-#include "logger.h"
 
 using namespace Utils;
 

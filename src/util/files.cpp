@@ -20,6 +20,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QString>
+#include <QRegularExpression>
+
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -123,6 +125,15 @@ QStringList getFilesInDirectory(const std::string& path)
     return list;
 }
 
+QStringList getSubdirectories(const std::string& path)
+{
+    assert(directoryExists(path));
+    QDir directory(path.c_str());
+    QStringList list =
+        directory.entryList(QStringList({"*"}), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    return list;
+}
+
 std::string getIconFilepath(const std::string& filename)
 {
     std::string filepath = HOME_DATA_DIRECTORY + "icons/" + filename;
@@ -149,7 +160,7 @@ void deleteFolder(const std::string& path)
     dir.removeRecursively();
 }
 
-std::string getDirectoryFromPath (const std::string& path)
+std::string getDirectoryFromPath(const std::string& path)
 {
     boost::filesystem::path p(path);
     boost::filesystem::path dir = p.parent_path();
@@ -157,7 +168,7 @@ std::string getDirectoryFromPath (const std::string& path)
     return dir.string();
 }
 
-std::string getFilenameFromPath (const std::string& path)
+std::string getFilenameFromPath(const std::string& path)
 {
     boost::filesystem::path p(path);
     boost::filesystem::path file = p.filename();
@@ -170,6 +181,32 @@ bool createMissingDirectories(const std::string& path)
     QDir dir = QDir::root();
     bool ret = dir.mkpath(path.c_str());
     return ret;
+}
+
+std::string replaceExtension(const std::string& path, 
+                             const std::string& new_ext_plus_point)
+{
+    boost::filesystem::path p(path);
+    return p.replace_extension(new_ext_plus_point).string();
+}
+
+std::string normalizeFilename(const std::string& filename_without_ext, bool remove_special_chars)
+{
+    QString fn_lower = QString::fromStdString(filename_without_ext).toLower();
+
+    if (remove_special_chars)
+    {
+        //replace non-letter-non-number with spaces (to be removed in the next step)
+        for (int i = 0; i < fn_lower.count(); ++i)
+            if (!fn_lower[ i ].isLetterOrNumber())
+                fn_lower[ i ] = ' ';
+    }
+
+    fn_lower.remove(QRegularExpression("^[/\\s]+"));      //remove unwanted chars at begin
+    fn_lower.remove(QRegularExpression("[/\\s]+$"));      //remove unwanted chars at end
+    fn_lower.replace(QRegularExpression("[/\\s]+"), "_"); //replace sequences of unwanted chars with _
+    
+    return fn_lower.toStdString();
 }
 
 }  // namespace Files

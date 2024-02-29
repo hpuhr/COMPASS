@@ -170,8 +170,9 @@ private:
         auto& data = intermediate_data_[ db_content ];
         data.bin_data.resize(histogram.numBins());
 
-        data.not_inserted_count = histogram.unassignedCount(); // ACQUI
-        data.bins_are_sorted    = histogram.configuration().sorted_bins;
+        data.not_inserted_count  = histogram.unassignedCount(); // ACQUI
+        data.bins_are_sorted     = histogram.configuration().sorted_bins;
+        data.bins_are_categories = histogram.configuration().type == HistogramConfig::Type::Category;
 
         for (size_t i = 0; i < histogram.numBins(); ++i)
         {

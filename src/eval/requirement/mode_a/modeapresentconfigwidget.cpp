@@ -17,8 +17,8 @@
 
 #include "eval/requirement/mode_a/modeapresentconfigwidget.h"
 #include "eval/requirement/mode_a/presentconfig.h"
-#include "textfielddoublevalidator.h"
-#include "logger.h"
+//#include "textfielddoublevalidator.h"
+//#include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>

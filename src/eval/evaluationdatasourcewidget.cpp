@@ -58,7 +58,6 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
 
     dbo_lay->addWidget(dbcont_combo_, 0, 1);
 
-
     main_layout->addLayout(dbo_lay);
 
     // data sources

@@ -24,30 +24,43 @@ class QListWidget;
 #include <QWidget>
 
 #include "dbcontent/variable/variableorderedset.h"
-#include "dbcontent/variable/variableselectionwidget.h"
+//#include "dbcontent/variable/variableselectionwidget.h"
+
+#include "test/ui_test_testable.h"
 
 namespace dbContent
 {
 
-class VariableOrderedSetWidget : public QWidget
+class VariableOrderedSetWidget : public QWidget, public ui_test::UITestable
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void updateVariableListSlot();
     void removeSlot();
     void moveUpSlot();
     void moveDownSlot();
 
-  protected slots:
+protected slots:
     void triggerSlot(QAction* action);
     void showMenuSlot();
 
-  public:
+public:
     VariableOrderedSetWidget(VariableOrderedSet& set, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~VariableOrderedSetWidget();
 
-  protected:
+    const QListWidget* listWidget() const { return list_widget_; }
+    const VariableOrderedSet& variableSet() const { return set_; }
+
+    void setVariables(const std::vector<std::pair<std::string,std::string>>& vars);
+
+    boost::optional<QString> uiGet(const QString& what = QString()) const override;
+    nlohmann::json uiGetJSON(const QString& what = QString()) const override;
+    bool uiSet(const QString& str) override;
+
+    static const std::string VariableSeparator;
+
+protected:
     VariableOrderedSet& set_;
     QMenu menu_;
 

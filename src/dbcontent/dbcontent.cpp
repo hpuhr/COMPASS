@@ -24,7 +24,7 @@
 #include "datasourcemanager.h"
 #include "dbcontentreaddbjob.h"
 #include "dbcontent/variable/variable.h"
-#include "dbtableinfo.h"
+//#include "dbtableinfo.h"
 #include "filtermanager.h"
 #include "insertbufferdbjob.h"
 #include "jobmanager.h"
@@ -127,10 +127,10 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
       compass_(compass),
       dbcont_manager_(*manager)
 {
-    registerParameter("name", &name_, "Undefined");
-    registerParameter("id", &id_, 0);
-    registerParameter("info", &info_, "");
-    registerParameter("db_table_name", &db_table_name_, "");
+    registerParameter("name", &name_, std::string("Undefined"));
+    registerParameter("id", &id_, 0u);
+    registerParameter("info", &info_, std::string());
+    registerParameter("db_table_name", &db_table_name_, std::string());
 
     assert (db_table_name_.size());
 

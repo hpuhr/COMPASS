@@ -127,7 +127,7 @@ namespace rtcommand
     /**
      * Configures the wait condition as 'signal' type using a signal path and a timeout.
      * 
-     * Path is e.g. "mainwindow.osgview1.dataLoaded"
+     * Path is e.g. "mainwindow.geographicview1.dataLoaded"
      */
     bool RTCommandWaitCondition::setSignal(const QString& signal_path, int timeout_in_ms)
     {
@@ -499,8 +499,7 @@ namespace rtcommand
 
         // parse command using collected options description
         po::variables_map vm;
-        QString parse_err;
-        if (!cmd.parse(vm, od, pod, true, &parse_err))
+        if (!cmd.parse(vm, od, pod, true, &err_msg))
         {
             // std::cout << "RTCommand::configure: Could not parse command" << std::endl;
             setError(CmdErrorCode::Config_ParseOptionsFailed, err_msg.toStdString());

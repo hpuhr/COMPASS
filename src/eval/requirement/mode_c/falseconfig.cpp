@@ -16,15 +16,16 @@
  */
 
 #include "eval/requirement/mode_c/falseconfig.h"
+#include "eval/requirement/mode_c/false.h"
 #include "eval/requirement/mode_c/modecfalseconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
-using namespace Utils;
+//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -35,9 +36,9 @@ ModeCFalseConfig::ModeCFalseConfig(const std::string& class_id, const std::strin
                                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
+    registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01f);
 
-    registerParameter("max_difference", &max_difference_, 100);
+    registerParameter("max_difference", &max_difference_, 100.0f);
 }
 
 std::shared_ptr<Base> ModeCFalseConfig::createRequirement()

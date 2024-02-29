@@ -16,6 +16,17 @@
  */
 
 #include "radarplotpositioncalculatortaskwidget.h"
+//#include "compass.h"
+//#include "dbcontent/dbcontentcombobox.h"
+//#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variableselectionwidget.h"
+#include "logger.h"
+#include "projectionmanager.h"
+#include "projectionmanagerwidget.h"
+#include "radarplotpositioncalculatortask.h"
+//#include "stringconv.h"
+//#include "taskmanager.h"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -23,19 +34,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "compass.h"
-#include "dbcontent/dbcontentcombobox.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableselectionwidget.h"
-#include "logger.h"
-#include "projectionmanager.h"
-#include "projectionmanagerwidget.h"
-#include "radarplotpositioncalculatortask.h"
-#include "stringconv.h"
-#include "taskmanager.h"
-
-using namespace Utils::String;
+//using namespace Utils::String;
 using namespace dbContent;
 
 RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(

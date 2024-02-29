@@ -16,13 +16,14 @@
  */
 
 #include "insertbufferdbjob.h"
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "stringconv.h"
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 
 using namespace Utils::String;
 

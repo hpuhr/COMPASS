@@ -55,7 +55,7 @@ FilterManager::FilterManager(const std::string& class_id, const std::string& ins
     logdbg << "FilterManager: constructor";
 
     registerParameter("use_filters", &use_filters_, false);
-    registerParameter("db_id", &db_id_, "");
+    registerParameter("db_id", &db_id_, std::string());
 
     createSubConfigurables();
 }
@@ -104,9 +104,7 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "DBOSpecificValuesDBFilter")
     {
-        std::string dbcontent_name = configuration()
-                .getSubConfiguration(class_id, instance_id)
-                .getParameterConfigValueString("dbcontent_name");
+        std::string dbcontent_name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<std::string>("dbcontent_name");
 
         if (!checkDBContent(dbcontent_name))
         {
@@ -163,8 +161,8 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "UTNFilter")
     {
-        try
-        {
+        //try
+        //{
             if (hasSubConfigurable(class_id, instance_id))
             {
                 logerr << "FilterManager: generateSubConfigurable: utn filter "
@@ -175,18 +173,17 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             UTNFilter* filter = new UTNFilter(class_id, instance_id, this);
 
             filters_.emplace_back(filter);
-        }
-        catch (const std::exception& e)
-        {
-            loginf << "FilterManager: generateSubConfigurable: utn filter exception '"
-                   << e.what() << "', deleting";
-            configuration().removeSubConfiguration(class_id, instance_id);
-        }
+        //}
+        //catch (const std::exception& e)
+        //{
+        //    loginf << "FilterManager: generateSubConfigurable: utn filter exception '" << e.what() << "', deleting";
+        //    configuration().removeSubConfiguration(class_id, instance_id);
+        //}
     }
     else if (class_id == "ADSBQualityFilter")
     {
-        try
-        {
+        //try
+        //{
             if (hasSubConfigurable(class_id, instance_id))
             {
                 logerr << "FilterManager: generateSubConfigurable: adsb quality filter "
@@ -197,13 +194,12 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             ADSBQualityFilter* filter = new ADSBQualityFilter(class_id, instance_id, this);
 
             filters_.emplace_back(filter);
-        }
-        catch (const std::exception& e)
-        {
-            loginf << "FilterManager: generateSubConfigurable: data source filter exception '"
-                   << e.what() << "', deleting";
-            configuration().removeSubConfiguration(class_id, instance_id);
-        }
+        //}
+        //catch (const std::exception& e)
+        //{
+        //    loginf << "FilterManager: generateSubConfigurable: data source filter exception '" << e.what() << "', deleting";
+        //    configuration().removeSubConfiguration(class_id, instance_id);
+        //}
     }
     else if (class_id == "PrimaryOnlyFilter")
     {
@@ -253,8 +249,7 @@ void FilterManager::checkSubConfigurables()
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     { // no UTN filter
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
     classid = "TimestampFilter";
@@ -262,8 +257,7 @@ void FilterManager::checkSubConfigurables()
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     {
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
     classid = "TrackerTrackNumberFilter";
@@ -271,16 +265,14 @@ void FilterManager::checkSubConfigurables()
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     {
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
     classid = "RefTrajAccuracyFilter";
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     {
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
     classid = "MLATRUFilter";
@@ -288,8 +280,7 @@ void FilterManager::checkSubConfigurables()
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
     {
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
 //    classid = "ADSBQualityFilter";
@@ -392,9 +383,9 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     // add all data source types that need loading
-    if (data.contains(VP_DS_TYPES_KEY)) // the listed ones should be loaded
+    if (data.contains(ViewPoint::VP_DS_TYPES_KEY)) // the listed ones should be loaded
     {
-        const json& data_source_types  = data.at(VP_DS_TYPES_KEY);
+        const json& data_source_types  = data.at(ViewPoint::VP_DS_TYPES_KEY);
 
         std::set<std::string> ds_types = data_source_types.get<std::set<std::string>>();
 
@@ -410,9 +401,9 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     }
 
     // add all data sources that need loading
-    if (data.contains(VP_DS_KEY)) // the listed ones should be loaded
+    if (data.contains(ViewPoint::VP_DS_KEY)) // the listed ones should be loaded
     {
-        const json& data_sources  = data.at(VP_DS_KEY);
+        const json& data_sources  = data.at(ViewPoint::VP_DS_KEY);
 
         std::map<unsigned int, std::set<unsigned int>> ds_ids
                 = data_sources.get<std::map<unsigned int, std::set<unsigned int>>>(); // ds_id + line strs
@@ -430,13 +421,13 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     }
 
     // add filters
-    use_filters_ = data.contains(VP_FILTERS_KEY);
+    use_filters_ = data.contains(ViewPoint::VP_FILTERS_KEY);
 
     disableAllFilters();
 
-    if (data.contains(VP_FILTERS_KEY))
+    if (data.contains(ViewPoint::VP_FILTERS_KEY))
     {
-        const json& filters = data.at(VP_FILTERS_KEY);
+        const json& filters = data.at(ViewPoint::VP_FILTERS_KEY);
 
         logdbg << "FilterManager: showViewPointSlot: filter data '" << filters.dump(4) << "'";
 
@@ -471,16 +462,16 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     if (ds_man.dsTypeFiltered()) // ds types filters active
-        data[VP_DS_TYPES_KEY] = ds_man.wantedDSTypes(); // add all data sources that need loading
+        data[ViewPoint::VP_DS_TYPES_KEY] = ds_man.wantedDSTypes(); // add all data sources that need loading
 
     if (ds_man.loadDataSourcesFiltered()) // ds filters active
-        data[VP_DS_KEY] = ds_man.getLoadDataSources(); // add all data sources that need loading
+        data[ViewPoint::VP_DS_KEY] = ds_man.getLoadDataSources(); // add all data sources that need loading
 
     // add filters
     if (use_filters_)
     {
-        data[VP_FILTERS_KEY] = json::object();
-        json& filters = data.at(VP_FILTERS_KEY);
+        data[ViewPoint::VP_FILTERS_KEY] = json::object();
+        json& filters = data.at(ViewPoint::VP_FILTERS_KEY);
 
         for (auto& fil_it : filters_)
         {

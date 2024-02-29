@@ -1,5 +1,5 @@
 #include "modecfilterwidget.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
 #include "rangeedit.h"
@@ -10,7 +10,7 @@
 #include <QCheckBox>
 
 using namespace std;
-using namespace Utils;
+//using namespace Utils;
 
 ModeCFilterWidget::ModeCFilterWidget(ModeCFilter& filter)
     : DBFilterWidget(filter), filter_(filter)

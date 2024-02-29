@@ -18,10 +18,8 @@
 #ifndef EVALUATIONREQUIREMENTSPEEDCONFIG_H
 #define EVALUATIONREQUIREMENTSPEEDCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/speed/speedconfigwidget.h"
-#include "eval/requirement/speed/speed.h"
 
 class Group;
 class EvaluationStandard;

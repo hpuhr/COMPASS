@@ -19,7 +19,6 @@
 #ifndef DATASOURCE_COMMANDS_H
 #define DATASOURCE_COMMANDS_H
 
-
 #include "rtcommand/rtcommand.h"
 
 namespace dbContent

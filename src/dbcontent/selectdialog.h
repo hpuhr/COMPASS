@@ -18,15 +18,15 @@
 #ifndef DBCONTENT_SELECTDIALOG_H
 #define DBCONTENT_SELECTDIALOG_H
 
+#include "dbcontent/dbcontentcombobox.h"
+//#include "textfielddoublevalidator.h"
+
 #include <QComboBox>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
-
-#include "dbcontent/dbcontentcombobox.h"
-#include "textfielddoublevalidator.h"
 
 namespace dbContent
 {

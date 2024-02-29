@@ -17,13 +17,13 @@
 
 #include "managesectorstask.h"
 #include "compass.h"
-#include "dbinterface.h"
+//#include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "managesectorstaskdialog.h"
 #include "taskmanager.h"
 #include "savedfile.h"
 #include "files.h"
-#include "sector.h"
+//#include "sector.h"
 
 #include "gdal.h"
 #include "gdal_priv.h"
@@ -42,7 +42,7 @@ ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::str
     : Task("ManageSectorsTask", "Manage Sectors", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_sectors.json")
 {
-    registerParameter("current_filename", &current_filename_, "");
+    registerParameter("current_filename", &current_filename_, std::string());
 
     createSubConfigurables();
 
@@ -110,9 +110,9 @@ void ManageSectorsTask::addFile(const std::string& filename)
     instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
                        instancename.end());
 
-    Configuration& config = addNewSubConfiguration("SectorsFile", "SectorsFile" + instancename);
-    config.addParameterString("name", filename);
-    generateSubConfigurable("SectorsFile", "SectorsFile" + instancename);
+    auto config = Configuration::create("SectorsFile", "SectorsFile" + instancename);
+    config->addParameter<std::string>("name", filename);
+    generateSubConfigurableFromConfig(std::move(config));
 
     current_filename_ = filename;
     parseCurrentFile(false);
@@ -273,7 +273,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
         layer = data_set->GetLayer(layer_cnt);
         assert (layer);
 
-        loginf << "ManageSectorsTask: parseCurrentFile: found sector name '" << layer->GetName() << "'";
+        logdbg << "ManageSectorsTask: parseCurrentFile: found sector name '" << layer->GetName() << "'";
         std::string sector_name = layer->GetName();
 
         OGRFeature* feature = nullptr;
@@ -290,7 +290,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
 
             assert (feature);
 
-            loginf << "ManageSectorsTask: parseCurrentFile: found feature '"
+            logdbg << "ManageSectorsTask: parseCurrentFile: found feature '"
                    << feature->GetDefnRef()->GetName() << "'";
 
             //std::string feature_name = feature->GetDefnRef()->GetName();
@@ -307,22 +307,22 @@ void ManageSectorsTask::parseCurrentFile (bool import)
                 switch(field_def->GetType())
                 {
                     case OFTInteger:
-                        loginf << "ManageSectorsTask: parseCurrentFile: int " << feature->GetFieldAsInteger(field_cnt);
+                        logdbg << "ManageSectorsTask: parseCurrentFile: int " << feature->GetFieldAsInteger(field_cnt);
                         break;
                     case OFTInteger64:
-                        loginf << "ManageSectorsTask: parseCurrentFile: int64 "
+                        logdbg << "ManageSectorsTask: parseCurrentFile: int64 "
                                << feature->GetFieldAsInteger64(field_cnt);
                         //printf( CPL_FRMT_GIB ",", oField.GetInteger64() );
                         break;
                     case OFTReal:
-                        loginf << "ManageSectorsTask: parseCurrentFile: double " << feature->GetFieldAsDouble(field_cnt);
+                        logdbg << "ManageSectorsTask: parseCurrentFile: double " << feature->GetFieldAsDouble(field_cnt);
                         break;
                     case OFTString:
-                        loginf << "ManageSectorsTask: parseCurrentFile: string '"
+                        logdbg << "ManageSectorsTask: parseCurrentFile: string '"
                                << feature->GetFieldAsString(field_cnt) << "'";
                         break;
                     default:
-                        loginf << "ManageSectorsTask: parseCurrentFile: default " << feature->GetFieldAsString(field_cnt);
+                        logdbg << "ManageSectorsTask: parseCurrentFile: default " << feature->GetFieldAsString(field_cnt);
                         break;
                 }
             }
@@ -365,12 +365,12 @@ void ManageSectorsTask::parseCurrentFile (bool import)
                             addPolygon(sector_name, *sub_polygon, import);
                         }
                         else
-                            loginf << "ManageSectorsTask: parseCurrentFile: no polygon in multipolygon found";
+                            logdbg << "ManageSectorsTask: parseCurrentFile: no polygon in multipolygon found";
                     }
                 }
                 else
                 {
-                    loginf << "ManageSectorsTask: parseCurrentFile: no geometry found";
+                    logdbg << "ManageSectorsTask: parseCurrentFile: no geometry found";
                 }
             }
         }
@@ -382,7 +382,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
 
 void ManageSectorsTask::addPolygon (const std::string& sector_name, OGRPolygon& polygon, bool import)
 {
-    loginf << "ManageSectorsTask: addPolygon: sector_name '" << sector_name
+    logdbg << "ManageSectorsTask: addPolygon: sector_name '" << sector_name
            << "' polygon '" << polygon.getGeometryName() << "'";
 
     OGRLinearRing* ring = polygon.getExteriorRing();
@@ -414,7 +414,7 @@ void ManageSectorsTask::addPolygon (const std::string& sector_name, OGRPolygon& 
 
 void ManageSectorsTask::addLinearRing (const std::string& sector_name, OGRLinearRing& ring, bool import)
 {
-    loginf << "ManageSectorsTask: addLinearRing: layer '" << layer_name_ << "' sector_name '" << sector_name;
+    logdbg<< "ManageSectorsTask: addLinearRing: layer '" << layer_name_ << "' sector_name '" << sector_name;
 
     vector<pair<double,double>> points;
 

@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "viewcomponent.h"
 #include "appmode.h"
 #include "json.h"
 
@@ -33,7 +34,7 @@ class QPushButton;
 /**
  * Widget keeping/displaying the current data state and handling manual updates like reloading and redrawing.
 */
-class ViewLoadStateWidget : public QWidget
+class ViewLoadStateWidget : public QWidget, public ViewComponent
 {
 public:
     enum class State
@@ -45,6 +46,13 @@ public:
         Loaded,
         ReloadRequired,
         RedrawRequired
+    };
+
+    enum class InactivityMode
+    {
+        Show = 0,
+        Hide,
+        Disable
     };
 
     ViewLoadStateWidget(ViewWidget* view_widget, QWidget* parent = nullptr);
@@ -60,19 +68,31 @@ public:
 
     void appModeSwitch(AppMode app_mode);
 
-    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
+    bool viewUpdateRequired() const;
+    bool viewReloadRequired() const;
+    bool viewBusy() const;
+
+    nlohmann::json viewInfoJSON() const override final;
+
+    static const int DefaultMargin = 4;
+
+protected:
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
 private:
     static std::string messageFromState(State state);
+    static std::string stringFromState(State state);
     static QColor colorFromState(State state);
     static std::string buttonTextFromState(State state);
 
     void updateData();
 
-    State        state_         = State::None;
+    State           state_          = State::None;
+    InactivityMode  inactive_mode_  = InactivityMode::Hide;
 
-    QLabel*      status_label_  = nullptr;
-    QPushButton* reload_button_ = nullptr;
+    QWidget*        content_widget_ = nullptr;
+    QLabel*         status_label_   = nullptr;
+    QPushButton*    refresh_button_ = nullptr;
 
-    ViewWidget*  view_widget_   = nullptr;
+    ViewWidget*     view_widget_    = nullptr;
 };

@@ -28,7 +28,7 @@
 
 #include <QDateTime>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+//#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <array>
 #include <bitset>
@@ -65,7 +65,7 @@ public:
     void clearData(); // removes all data
 
     /// @brief Returns const reference to a specific value
-    const T get(unsigned int index);
+    const T get(unsigned int index) const;
 
     // exists only for non-integral types
     template<typename T_ = T, typename std::enable_if<!std::is_integral<T_>::value>::type* = nullptr>
@@ -89,7 +89,7 @@ public:
     }
 
     /// @brief Returns string of a specific value
-    const std::string getAsString(unsigned int index);
+    const std::string getAsString(unsigned int index) const;
 
     /// @brief Sets specific value
     void set(unsigned int index, T value);
@@ -116,6 +116,7 @@ public:
                                                                      unsigned int to_index);
     std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(
             const std::vector<unsigned int>& indexes);
+    std::map<T, unsigned int> uniqueValuesWithIndexes();
     std::vector<unsigned int> nullValueIndexes(unsigned int from_index, unsigned int to_index);
     std::vector<unsigned int> nullValueIndexes(const std::vector<unsigned int>& indexes);
 
@@ -124,9 +125,9 @@ public:
     unsigned int size();
 
     /// @brief Checks if specific element is Null
-    bool isNull(unsigned int index);
-
-    bool isNeverNull();
+    bool isNull(unsigned int index) const;
+    bool isAlwaysNull() const;
+    bool isNeverNull() const;
 
     void swapData (unsigned int index1, unsigned int index2);
 
@@ -190,7 +191,7 @@ void NullableVector<T>::clearData() // removes all data
 }
 
 template <class T>
-const T NullableVector<T>::get(unsigned int index)
+const T NullableVector<T>::get(unsigned int index) const
 {
     logdbg << "NullableVector " << property_.name() << ": get: index " << index;
     if (BUFFER_PEDANTIC_CHECKING)
@@ -210,7 +211,7 @@ const T NullableVector<T>::get(unsigned int index)
 }
 
 template <class T>
-const std::string NullableVector<T>::getAsString(unsigned int index)
+const std::string NullableVector<T>::getAsString(unsigned int index) const
 {
     logdbg << "NullableVector " << property_.name() << ": getAsString";
     return Utils::String::getValueString(get(index));
@@ -408,7 +409,7 @@ void NullableVector<T>::setAllNull()
 
 /// @brief Checks if specific element is Null
 template <class T>
-bool NullableVector<T>::isNull(unsigned int index)
+bool NullableVector<T>::isNull(unsigned int index) const
 {
     logdbg << "NullableVector " << property_.name() << ": isNull: index " << index;
 
@@ -789,6 +790,36 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
 }
 
 template <class T>
+std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes()
+{
+    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
+
+    std::map<T, unsigned int> values;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert(data_.size() <= buffer_.data_size_);
+        assert(null_flags_.size() <= buffer_.data_size_);
+    }
+
+    for (unsigned int index = 0; index < data_.size(); ++index)
+    {
+        if (!isNull(index))  // not for null
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert(index < data_.size());
+
+            assert (!values.count(data_.at(index)));
+            values[data_.at(index)] = index;
+        }
+    }
+
+    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
+           << values.size();
+    return values;
+}
+
+template <class T>
 std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_index,
                                                               unsigned int to_index)
 {
@@ -1064,13 +1095,31 @@ void NullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_remo
 }
 
 template <class T>
-bool NullableVector<T>::isNeverNull()
+bool NullableVector<T>::isAlwaysNull() const
+{
+    logdbg << "NullableVector " << property_.name() << ": isAlwaysNull";
+
+    if (data_.size() == 0)
+        return true;
+
+
+    for (unsigned int cnt = 0; cnt < buffer_.data_size_; cnt++)
+    {
+        if (!isNull(cnt))
+            return false;
+    }
+
+    return true;
+}
+
+template <class T>
+bool NullableVector<T>::isNeverNull() const
 {
     logdbg << "NullableVector " << property_.name() << ": isNeverNull";
 
-    for (unsigned int cnt = 0; cnt < null_flags_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < buffer_.data_size_; cnt++)
     {
-        if (null_flags_.at(cnt))
+        if (isNull(cnt))
             return false;
     }
 

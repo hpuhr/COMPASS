@@ -1,8 +1,10 @@
 #include "stringconv.h"
-#include "global.h"
+//#include "global.h"
 #include "logger.h"
-#include "property.h"
+//#include "property.h"
 #include "util/timeconv.h"
+
+#include <openssl/sha.h>
 
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -12,6 +14,7 @@ namespace Utils
 {
 namespace String
 {
+
 bool isNumber(const std::string& number_str)
 {
     try
@@ -24,7 +27,6 @@ bool isNumber(const std::string& number_str)
     }
     return true;
 }
-
 
 std::string intToString(int number, int width, char c)
 {
@@ -267,6 +269,25 @@ double doubleFromLongitudeString(std::string& longitude_str)
         x *= -1.0;
 
     return x;
+}
+
+unsigned int hash(const std::string& str)
+{
+    unsigned char hash[SHA_DIGEST_LENGTH];  // == 20
+
+    unsigned char str_data[str.size() + 1];  // needs copy, reinterpret cast failed in ub14
+    std::copy(str.begin(), str.end(), str_data);
+
+    SHA1(str_data, sizeof(str_data), hash);
+
+    unsigned int tmp = 0;
+    for (unsigned int cnt = 0; cnt < 4; ++cnt)
+    {
+        tmp <<= 8;
+        tmp += (unsigned int)hash[SHA_DIGEST_LENGTH - 1 - cnt];
+    }
+
+    return tmp;
 }
 
 std::string getValueString(const std::string& value)

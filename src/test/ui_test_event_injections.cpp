@@ -43,6 +43,7 @@
 #include <QTest>
 #include <QTimer>
 #include <QDialog>
+#include <QAbstractScrollArea>
 
 namespace ui_test
 {
@@ -262,8 +263,15 @@ bool injectClickEvent(QWidget* root,
  
     if (obj.second->isWidgetType())
     {
+        auto w = dynamic_cast<QWidget*>(obj.second);
+
+        //!for scroll areas we have to send the events to its viewport!
+        auto scroll_area = dynamic_cast<QAbstractScrollArea*>(w);
+        if (scroll_area)
+            w = scroll_area->viewport();
+        
         injectionMsg("widget");
-        QTest::mouseClick(dynamic_cast<QWidget*>(obj.second), button, 0, pos, delay);
+        QTest::mouseClick(w, button, 0, pos, delay);
     }
     else //window
     {
@@ -308,10 +316,17 @@ bool injectRectEvent(QWidget* root,
 
     if (obj.second->isWidgetType())
     {
+        auto w = dynamic_cast<QWidget*>(obj.second);
+
+        //!for scroll areas we have to send the events to its viewport!
+        auto scroll_area = dynamic_cast<QAbstractScrollArea*>(w);
+        if (scroll_area)
+            w = scroll_area->viewport();
+
         injectionMsg("widget");
-        QTest::mousePress(dynamic_cast<QWidget*>(obj.second), button, 0, pos0, 0);
-        QTest::mouseMove(dynamic_cast<QWidget*>(obj.second), pos1, 0);
-        QTest::mouseRelease(dynamic_cast<QWidget*>(obj.second), button, 0, pos1, 0);
+        QTest::mousePress(w, button, 0, pos0, 0);
+        QTest::mouseMove(w, pos1, 0);
+        QTest::mouseRelease(w, button, 0, pos1, 0);
     }
     else //window
     {

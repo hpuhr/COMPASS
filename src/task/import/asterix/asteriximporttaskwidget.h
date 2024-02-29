@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXIMPORTTASKWIDGET_H
-#define ASTERIXIMPORTTASKWIDGET_H
+#pragma once
 
 #include <jasterix/jasterix.h>
 
@@ -36,12 +35,14 @@ class QStackedWidget;
 class QCheckBox;
 class QTabWidget;
 class QLabel;
+class QGridLayout;
+class QTreeWidgetItem;
 
 class ASTERIXImportTaskWidget : public QWidget
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void addParserSlot();
     void removeObjectParserSlot();
     void selectedObjectParserSlot(const QString& text);
@@ -50,42 +51,47 @@ class ASTERIXImportTaskWidget : public QWidget
     void dateChangedSlot(QDate date);
 
     void debugChangedSlot();
-    void testImportSlot();
+
+    void decodingStateChangedSlot();
 
   public:
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImportTaskWidget();
 
-    void updateSourceLabel();
+    void updateSourcesGrid();
 
     ASTERIXOverrideWidget* overrideWidget() const;
 
 protected:
+    void addMainTab();
+    void addDecoderTab();
+    void addOverrideTab();
+    void addMappingsTab();
+
+    void updateParserBox();
+
+    void sourceClicked(QTreeWidgetItem* item, int column);
+
     ASTERIXImportTask& task_;
 
     QHBoxLayout* main_layout_{nullptr};
 
     QTabWidget* tab_widget_{nullptr};
 
-    QLabel* source_label_{nullptr};
+    QGridLayout* sources_grid_{nullptr}; // network or files
 
     QComboBox* object_parser_box_{nullptr};
     QPushButton* add_object_parser_button_{nullptr};
     QPushButton* delete_object_parser_button_{nullptr};
 
     QStackedWidget* object_parser_widget_{nullptr};
+    std::map<std::string, QWidget*> object_parser_widgets_;
 
     ASTERIXConfigWidget* config_widget_{nullptr};
     ASTERIXOverrideWidget* override_widget_{nullptr};
 
     QCheckBox* debug_check_{nullptr};
     QCheckBox* limit_ram_check_{nullptr};
-
-    void addMainTab();
-    void addOverrideTab();
-    void addMappingsTab();
-
-    void updateParserBox();
 };
 
-#endif  // ASTERIXIMPORTTASKWIDGET_H
+

@@ -18,10 +18,10 @@
 #ifndef DUBIOUSTARGETCONFIG_H
 #define DUBIOUSTARGETCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/dubious/dubioustargetconfigwidget.h"
-#include "eval/requirement/dubious/dubioustarget.h"
+//#include "eval/requirement/dubious/dubioustargetconfigwidget.h"
+//#include "eval/requirement/dubious/dubioustarget.h"
 
 class Group;
 class EvaluationStandard;

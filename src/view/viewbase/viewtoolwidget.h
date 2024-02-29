@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "viewcomponent.h"
 #include "appmode.h"
 #include "json.h"
 
@@ -40,7 +41,7 @@ class QAction;
  * Toolbar for views. Implements adding of tools and actions to the view's toolbar, switching of tools, etc.
  * Keeps the toolbar generic for all views by giving the possibility to pass callbacks.
  */
-class ViewToolWidget : public QToolBar
+class ViewToolWidget : public QToolBar, public ViewComponent
 {
 public:
     typedef std::function<void()>         Callback;       //callback triggered if an action is clicked
@@ -76,7 +77,9 @@ public:
                            const QKeySequence& key_combination = QKeySequence(),
                            bool checked = false);
     void addSpacer();
+    void addSpacer(int width);
     void addSeparatorIfValid();
+    void addScreenshotButton();
     void addConfigWidgetToggle();
 
     void enableAction(int id, bool enable);
@@ -87,10 +90,13 @@ public:
     void loadingDone();
     void redrawStarted();
     void redrawDone();
-
     void appModeSwitch(AppMode app_mode);
+    void configChanged();
 
-    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
+    nlohmann::json viewInfoJSON() const override final;
+
+protected:
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
 private:
     struct Action
@@ -124,6 +130,4 @@ private:
     std::map<int, Action> actions_;
     std::set<QAction*>    spacers_;
     std::vector<Callback> update_callbacks_;
-
-    
 };

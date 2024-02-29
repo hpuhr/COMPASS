@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONALONGCONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONALONGCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/position/alongconfigwidget.h"
-#include "eval/requirement/position/along.h"
+//#include "eval/requirement/position/alongconfigwidget.h"
+//#include "eval/requirement/position/along.h"
 
 class Group;
 class EvaluationStandard;

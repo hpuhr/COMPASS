@@ -2,13 +2,13 @@
 #define ASTERIXJSONPARSER_H
 
 #include "configurable.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-#include "format.h"
+//#include "format.h"
 #include "jsondatamapping.h"
 #include "asterixjsonparserwidget.h"
 #include "propertylist.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
 #include <jasterix/iteminfo.h>
 
@@ -27,7 +27,8 @@ class ASTERIXJSONParser : public QAbstractItemModel, public Configurable
     Q_OBJECT
 
 signals:
-    void rowContentChangedSignal (unsigned int row_index); // emitted when something in the index was changed
+    void rowContentChangedSignal(unsigned int row_index); // emitted when something in the index was changed
+    void modelRowChanged(unsigned int row_index);
 
 private:
     using MappingIterator = std::vector<std::unique_ptr<JSONDataMapping>>::iterator;
@@ -36,7 +37,6 @@ public:
     enum EntryType {
         ExistingMapping=0, UnmappedJSONKey, UnmappedDBContentVariable
     };
-
 
     ASTERIXJSONParser(const std::string& class_id, const std::string& instance_id,
                       Configurable* parent, ASTERIXImportTask& task);
@@ -63,7 +63,7 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
-    ASTERIXJSONParserWidget* widget();
+    ASTERIXJSONParserWidget* createWidget();
 
     std::string dbContentName() const;
 
@@ -133,14 +133,11 @@ private:
 
     PropertyList list_;
 
-    std::unique_ptr<ASTERIXJSONParserWidget> widget_;
-
     std::vector<std::unique_ptr<JSONDataMapping>> data_mappings_;
     bool mapping_checks_dirty_ {true};
     std::set<std::string> not_existing_json_keys_; // mapped keys not existing in cat info
     std::vector<std::string> not_added_json_keys_; // keys existing in cat info not in mappings
     std::vector<std::string> not_added_dbo_variables_; // existing dbovars not in mappings
-
 
     QStringList table_columns_ {"Active", "JSON Key", "DBContent Variable"};
 

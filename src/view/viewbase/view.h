@@ -15,14 +15,14 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEW_H
-#define VIEW_H
+#pragma once
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
 #include "viewcontainerwidget.h"
 #include "buffer.h"
 #include "appmode.h"
+#include "viewpresets.h"
 
 #include <QObject>
 
@@ -30,6 +30,7 @@
 #include <map>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/optional/optional.hpp>
 
 class ViewContainer;
 class ViewWidget;
@@ -56,8 +57,26 @@ class View : public QObject, public Configurable
 {
     Q_OBJECT
 public:
+    enum ViewUpdateFlags
+    {
+        VU_UpdateComponents = 1 << 0, // update view components (load state, toolbar activity, etc)
+        VU_Redraw           = 1 << 1, // redraw view
+        VU_Recompute        = 1 << 2, // recompute intermediate view data from buffers
+        VU_Reload           = 1 << 3  // reload view (will overrule all other updates)
+    };
+
+    enum PresetError
+    {
+        NoError = 0,
+        IncompatibleVersion,
+        IncompatibleContent,
+        ApplyFailed,
+        GeneralError,
+        UnknownError
+    };
+
     View(const std::string& class_id, 
-         const std::string& instance_id, 
+         const std::string& instance_id,
          ViewContainer* container,
          ViewManager& view_manager);
     virtual ~View();
@@ -73,7 +92,6 @@ public:
     virtual void clearData();
     virtual void appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current);
 
-    unsigned int getKey();
     const std::string& getName() const;
 
     /// @brief Returns the view's central widget
@@ -88,13 +106,38 @@ public:
     void emitSelectionChange();
 
     AppMode appMode() const { return app_mode_; }
-    
     time_t created() const { return creation_time_; }
+
+    const ViewWidget* getViewWidget() const { assert (widget_); return widget_; }
 
     virtual void accept(LatexVisitor& v) = 0;
 
+    QImage renderData() const;
+    QImage renderView() const;
+
+    bool reloadNeeded() const;
+    bool redrawNeeded() const;
+    bool updateNeeded() const;
+
+    void updateView();
+    
+    PresetError applyPreset(const ViewPresets::Preset& preset, 
+                            std::vector<MissingKey>* missing_subconfig_keys = nullptr,
+                            std::vector<MissingKey>* missing_param_keys = nullptr,
+                            std::string* error_msg = nullptr);
+    const ViewPresets::Preset* activePreset() const;
+    bool presetChanged() const;
+
+    nlohmann::json viewInfoJSON() const;
+
+    //shortcut update flags
+    static const int VU_PureRedraw       = VU_Redraw;                                      // just redraw
+    static const int VU_RecomputedRedraw = VU_Redraw | VU_Recompute;                       // recompute + redraw
+    static const int VU_Complete         = VU_Redraw | VU_Recompute | VU_UpdateComponents; // complete view update (no reload though)
+
 signals:
     void selectionChangedSignal();  // do not emit manually, call emitSelectionChange()
+    void presetChangedSignal();
 
 public slots:
     void selectionChangedSlot();
@@ -105,32 +148,57 @@ protected:
     virtual void updateSelection() = 0;
     virtual bool init_impl() { return true; }
 
+    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override final;
+    virtual void onConfigurationChanged_impl(const std::vector<std::string>& changed_params) {};
+
+    virtual void onModified() override final;
+
+    virtual void viewManagerReloadStateChanged();
+    virtual void viewManagerAutoUpdatesChanged();
+
+    virtual bool refreshScreenOnNeededReload() const { return false; }
+
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
+
     void constructWidget();
-    //void setModel(ViewModel* model);
     void setWidget(ViewWidget* widget);
+
+    //can be used by derived views to signal certain changes in the view
+    void notifyViewUpdateNeeded(int flags, bool add = true);
+    void notifyRedrawNeeded(bool add = true);
+    void notifyReloadNeeded(bool add = true);
+    void notifyRefreshNeeded();
+
+    void updateView(int flags);
 
     /// @brief Returns the view's widget, override this method in derived classes.
     ViewWidget* getWidget() { assert (widget_); return widget_; }
 
     ViewManager& view_manager_;
 
-    /// The view's model
-    //ViewModel* model_;
     /// The view's widget
     ViewWidget* widget_ {nullptr};
     /// The ViewContainerWidget the view is currently embedded in
     ViewContainer* container_ {nullptr};
     /// The widget containing the view's widget
-    QWidget* central_widget_;
+    QWidget* central_widget_ {nullptr};
 
 private:
+    std::string name_;
     unsigned int getInstanceKey();
+
+    void runAutomaticUpdates();
+
+    void presetEdited(ViewPresets::EditAction ea);
 
     AppMode app_mode_;
     time_t  creation_time_;
 
+    boost::optional<int> issued_update_;
+
+    bool preset_changed_ = false;
+    boost::optional<ViewPresets::Preset> active_preset_;
+
     /// Static member counter
     static unsigned int cnt_;
 };
-
-#endif  // VIEW_H

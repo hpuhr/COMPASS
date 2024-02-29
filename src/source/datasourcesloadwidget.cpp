@@ -22,9 +22,9 @@
 #include "datasourcemanager.h"
 #include "global.h"
 #include "stringconv.h"
-#include "viewmanager.h"
 #include "number.h"
 #include "files.h"
+#include "timeconv.h"
 
 #include <QCheckBox>
 #include <QGridLayout>
@@ -100,10 +100,27 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     QHBoxLayout* assoc_layout = new QHBoxLayout();
 
+    // time
+    QLabel* ts_label = new QLabel("Timestamps");
+    ts_label->setFont(font_bold);
+    assoc_layout->addWidget(ts_label);
+
+    assoc_layout->addWidget(new QLabel("Min"));
+
+    ts_min_label_ = new QLabel("None");
+    assoc_layout->addWidget(ts_min_label_);
+
+    assoc_layout->addWidget(new QLabel("Max"));
+
+    ts_max_label_ = new QLabel("None");
+    assoc_layout->addWidget(ts_max_label_);
+
+    assoc_layout->addStretch();
+
+    // assoc
     QLabel* assoc_label = new QLabel("Associations");
     assoc_label->setFont(font_bold);
     assoc_layout->addWidget(assoc_label);
-
 
     associations_label_ = new QLabel("None");
     //associations_label_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -369,12 +386,26 @@ void DataSourcesLoadWidget::updateContent()
     }
 
     // TODO move this
-    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    assert (ts_min_label_);
+    assert (ts_max_label_);
+
+    if (dbcont_man.hasMinMaxTimestamp())
+    {
+        ts_min_label_->setText(Time::toString(get<0>(dbcont_man.minMaxTimestamp()), 0).c_str());
+        ts_max_label_->setText(Time::toString(get<1>(dbcont_man.minMaxTimestamp()), 0).c_str());
+    }
+    else
+    {
+        ts_min_label_->setText("None");
+        ts_max_label_->setText("None");
+    }
 
     assert(associations_label_);
-    if (dbo_man.hasAssociations())
+    if (dbcont_man.hasAssociations())
     {
-        std::string tmp = "From " + dbo_man.associationsID();
+        std::string tmp = "From " + dbcont_man.associationsID();
         associations_label_->setText(tmp.c_str());
     }
     else

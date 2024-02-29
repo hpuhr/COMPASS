@@ -3,7 +3,7 @@
 
 #include "configurable.h"
 #include "singleton.h"
-#include "logger.h"
+//#include "logger.h"
 #include "rtcommand_defs.h"
 #include "json.h"
 

@@ -1,10 +1,9 @@
 #include "asterixjsonmappingjob.h"
 #include "asterixjsonparser.h"
-
 #include "buffer.h"
-#include "dbcontent/dbcontent.h"
+//#include "dbcontent/dbcontent.h"
 #include "json.h"
-#include "jsonobjectparser.h"
+//#include "jsonobjectparser.h"
 #include "logger.h"
 
 #include <exception>

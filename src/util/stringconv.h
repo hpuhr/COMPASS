@@ -63,6 +63,8 @@ extern int getLeadingInt(std::string text);
 extern double doubleFromLatitudeString(std::string& latitude_str);
 extern double doubleFromLongitudeString(std::string& longitude_str);
 
+extern unsigned int hash(const std::string& str);
+
 extern std::string getValueString(const std::string& value);
 extern std::string getValueString(const float& value);
 extern std::string getValueString(const double& value);

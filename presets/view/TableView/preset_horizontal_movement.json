@@ -1,0 +1,80 @@
+{
+    "app_version": "0.7.5",
+    "category": "Default",
+    "description": "Contains main variables to be displayed by default, as well as horizontal movement information: Manoeuvre indicator,Track Angle, Groundspeed.",
+    "deployed": true,
+    "modified": false,
+    "name": "Horizontal Movement",
+    "timestamp": "2024-02-07 15:33:22.816",
+    "view": "TableView",
+    "view_config": {
+        "parameters": {
+        },
+        "sub_configs": {
+            "TableViewDataSource": {
+                "TableViewDataSource0": {
+                    "parameters": null,
+                    "sub_configs": {
+                        "VariableOrderedSet": {
+                            "Default": {
+                                "parameters": {
+                                    "variable_definitions": [
+                                        [
+                                            "Meta",
+                                            "Timestamp"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "DS ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Line ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Address"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Identification"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Number"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Horizontal Manoeuvre"
+                                        ],                                        
+                                        [
+                                            "Meta",
+                                            "Track Angle"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Groundspeed"
+                                        ]
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "TableViewWidget": {
+                "TableViewWidget0": {
+                    "parameters": null
+                }
+            }
+        }
+    }
+}

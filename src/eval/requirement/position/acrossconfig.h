@@ -18,10 +18,8 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONACROSSCONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONACROSSCONFIG_H
 
-#include "configurable.h"
+//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/position/acrossconfigwidget.h"
-#include "eval/requirement/position/across.h"
 
 class Group;
 class EvaluationStandard;

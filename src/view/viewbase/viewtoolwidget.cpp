@@ -1,13 +1,34 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "viewtoolwidget.h"
 #include "viewtoolswitcher.h"
 #include "viewwidget.h"
+#include "view.h"
+#include "viewscreenshotdialog.h"
+#include "compass.h"
+#include "timeconv.h"
 
 #include "ui_test_common.h"
 
 #include <QShortcut>
 #include <QToolButton>
 #include <QApplication>
+#include <QFileDialog>
 
 #include <cassert>
 
@@ -217,6 +238,17 @@ void ViewToolWidget::addSpacer()
 }
 
 /**
+ * Adds a spacer item of a fixed size to the toolbar.
+ */
+void ViewToolWidget::addSpacer(int width)
+{
+    QWidget* w = new QWidget;
+    w->setFixedSize(width, 1);
+
+    addWidget(w);
+}   
+
+/**
  * Adds a checkable action with callback to the toolbar.
  * This version stores the action under an id which can be used to retrieve the action later on.
  */
@@ -245,6 +277,28 @@ void ViewToolWidget::addSeparatorIfValid()
         return;
 
     addSeparator();
+}
+
+/**
+ * Adds a button for toggling the config widget, that is part of the ViewWidget.
+*/
+void ViewToolWidget::addScreenshotButton()
+{
+    //add spacer if no spacer yet
+    if (spacers_.empty())
+        addSpacer();
+
+    //add separator if needed
+    addSeparatorIfValid();
+
+    auto screener_cb = [ = ] ()
+    {
+        ViewScreenshotDialog dlg(view_widget_->getView(), this);
+        dlg.exec();
+    };
+
+    //add callback
+    addActionCallback("Save Screenshot", screener_cb, {}, ViewWidget::getIcon("camera.png"), QKeySequence());
 }
 
 /**
@@ -374,4 +428,44 @@ void ViewToolWidget::appModeSwitch(AppMode app_mode)
 {
     //update items as their state might depend on app mode
     updateItems();
+}
+
+/**
+ * React on config changes.
+*/
+void ViewToolWidget::configChanged()
+{
+    //update items as their state might depend on config
+    updateItems();
+}
+
+/**
+ * Generates json view information.
+ */
+nlohmann::json ViewToolWidget::viewInfoJSON() const
+{
+    nlohmann::json info;
+
+    //add general information
+    nlohmann::json action_infos = nlohmann::json::array();
+
+    for (auto a : actions())
+    {
+        if (a->isSeparator())
+            continue;
+
+        nlohmann::json action_info;
+        action_info[ "name"      ] = a->text().toStdString();
+        action_info[ "checkable "] = a->isCheckable();
+        action_info[ "checked"   ] = a->isChecked();
+
+        action_infos.push_back(action_info);
+    }
+
+    info[ "actions" ] = action_infos;
+
+    //add view-specific information
+    viewInfoJSON_impl(info);
+
+    return info;
 }

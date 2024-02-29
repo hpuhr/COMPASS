@@ -274,7 +274,8 @@ private:
             auto& d = intermediate_data_[ elem.first ];
             d.init(elem.second.numBins());
 
-            d.bins_are_sorted = elem.second.configuration().sorted_bins;
+            d.bins_are_sorted     = elem.second.configuration().sorted_bins;
+            d.bins_are_categories = elem.second.configuration().type == HistogramConfig::Type::Category;
 
             //generate labels
             for (size_t i = 0; i < elem.second.numBins(); ++i)
@@ -365,7 +366,7 @@ private:
         assert (buffer.has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buffer.get<bool>(DBContent::selected_var.name());
 
-        auto& histogram   = histograms_[ db_content ];
+        auto& histogram = histograms_[ db_content ];
 
         //histogram badly configured?
         if (histogram.numBins() < 1)

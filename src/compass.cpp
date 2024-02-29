@@ -18,15 +18,11 @@
 #include "compass.h"
 #include "config.h"
 #include "dbinterface.h"
-#include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "datasourcemanager.h"
-#include "dbtableinfo.h"
 #include "filtermanager.h"
-#include "global.h"
 #include "jobmanager.h"
 #include "logger.h"
-#include "projectionmanager.h"
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "evaluationmanager.h"
@@ -37,6 +33,7 @@
 #include "rtcommand_manager.h"
 #include "rtcommand.h"
 #include "util/timeconv.h"
+#include "fftmanager.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -59,8 +56,23 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     simple_config_.reset(new SimpleConfig("config.json"));
 
-    registerParameter("last_db_filename", &last_db_filename_, "");
+    registerParameter("last_db_filename", &last_db_filename_, std::string());
     registerParameter("db_file_list", &db_file_list_, json::array());
+
+    vector<string> cleaned_file_list;
+    // clean missing files
+
+    for (auto& filename : db_file_list_.get<std::vector<string>>())
+    {
+        if (Files::fileExists(filename))
+            cleaned_file_list.push_back(filename);
+    }
+    db_file_list_ = cleaned_file_list;
+
+    registerParameter("last_path", &last_path_, {});
+
+    if (!Files::directoryExists(last_path_))
+        last_path_ = QDir::homePath().toStdString();
 
     registerParameter("hide_evaluation", &hide_evaluation_, false);
     registerParameter("hide_viewpoints", &hide_viewpoints_, false);
@@ -68,12 +80,12 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     registerParameter("disable_live_to_offline_switch", &disable_live_to_offline_switch_, false);
     registerParameter("disable_menu_config_save", &disable_menu_config_save_, false);
 
-    registerParameter("disable_osgview_rotate", &disable_osgview_rotate_, false);
+    registerParameter("disable_geographicview_rotate", &disable_geographicview_rotate_, false);
 
     registerParameter("disable_add_remove_views", &disable_add_remove_views_, false);
 
-    registerParameter("auto_live_running_resume_ask_time", &auto_live_running_resume_ask_time_, 60);
-    registerParameter("auto_live_running_resume_ask_wait_time", &auto_live_running_resume_ask_wait_time_, 1);
+    registerParameter("auto_live_running_resume_ask_time", &auto_live_running_resume_ask_time_, 60u);
+    registerParameter("auto_live_running_resume_ask_wait_time", &auto_live_running_resume_ask_wait_time_, 1u);
 
     registerParameter("disable_confirm_reset_views", &disable_confirm_reset_views_, false);
 
@@ -93,6 +105,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     assert(task_manager_);
     assert(view_manager_);
     assert(eval_manager_);
+    assert (fft_manager_);
 
     rt_cmd_runner_.reset(new rtcommand::RTCommandRunner);
 
@@ -125,6 +138,11 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
                      eval_manager_.get(), &EvaluationManager::databaseOpenedSlot);
     QObject::connect(this, &COMPASS::databaseClosedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
+
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
+                     fft_manager_.get(), &FFTManager::databaseOpenedSlot);
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
+                     fft_manager_.get(), &FFTManager::databaseClosedSlot);
 
     // data sources changed
     QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
@@ -167,6 +185,7 @@ COMPASS::~COMPASS()
     assert(!task_manager_);
     assert(!view_manager_);
     assert (!eval_manager_);
+    assert (!fft_manager_);
 
     logdbg << "COMPASS: destructor: end";
 }
@@ -176,6 +195,11 @@ void COMPASS::setAppState(AppState state)
     app_state_ = state;
 
     //notify someone about changed app state?
+}
+
+std::string COMPASS::getPath() const
+{
+    return "";
 }
 
 void COMPASS::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
@@ -224,6 +248,12 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         eval_manager_.reset(new EvaluationManager(class_id, instance_id, this));
         assert(eval_manager_);
     }
+    else if (class_id == "FFTManager")
+    {
+        assert(!fft_manager_);
+        fft_manager_.reset(new FFTManager(class_id, instance_id, this));
+        assert(fft_manager_);
+    }
     else
         throw std::runtime_error("COMPASS: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -232,45 +262,43 @@ void COMPASS::checkSubConfigurables()
 {
     if (!db_interface_)
     {
-        addNewSubConfiguration("DBInterface", "DBInterface0");
-        generateSubConfigurable("DBInterface", "DBInterface0");
+        generateSubConfigurableFromConfig("DBInterface", "DBInterface0");
         assert(db_interface_);
     }
     if (!dbcontent_manager_)
     {
-        addNewSubConfiguration("DBContentManager", "DBContentManager0");
-        generateSubConfigurable("DBContentManager", "DBContentManager0");
+        generateSubConfigurableFromConfig("DBContentManager", "DBContentManager0");
         assert(dbcontent_manager_);
     }
     if (!ds_manager_)
     {
-        addNewSubConfiguration("DataSourceManager", "DataSourceManager0");
-        generateSubConfigurable("DataSourceManager", "DataSourceManager0");
+        generateSubConfigurableFromConfig("DataSourceManager", "DataSourceManager0");
         assert(dbcontent_manager_);
     }
     if (!filter_manager_)
     {
-        addNewSubConfiguration("FilterManager", "FilterManager0");
-        generateSubConfigurable("FilterManager", "FilterManager0");
+        generateSubConfigurableFromConfig("FilterManager", "FilterManager0");
         assert(filter_manager_);
     }
     if (!task_manager_)
     {
-        addNewSubConfiguration("TaskManager", "TaskManager0");
-        generateSubConfigurable("TaskManager", "TaskManager0");
+        generateSubConfigurableFromConfig("TaskManager", "TaskManager0");
         assert(task_manager_);
     }
     if (!view_manager_)
     {
-        addNewSubConfiguration("ViewManager", "ViewManager0");
-        generateSubConfigurable("ViewManager", "ViewManager0");
+        generateSubConfigurableFromConfig("ViewManager", "ViewManager0");
         assert(view_manager_);
     }
     if (!eval_manager_)
     {
-        addNewSubConfiguration("EvaluationManager", "EvaluationManager0");
-        generateSubConfigurable("EvaluationManager", "EvaluationManager0");
+        generateSubConfigurableFromConfig("EvaluationManager", "EvaluationManager0");
         assert(eval_manager_);
+    }
+    if (!fft_manager_)
+    {
+        generateSubConfigurableFromConfig("FFTManager", "FFTManager0");
+        assert(fft_manager_);
     }
 }
 
@@ -291,6 +319,7 @@ void COMPASS::openDBFile(const std::string& filename)
         assert (db_interface_->dbOpen());
 
         addDBFileToList(filename);
+        lastUsedPath(Files::getDirectoryFromPath(filename));
 
         db_opened_ = true;
 
@@ -329,6 +358,7 @@ void COMPASS::createNewDBFile(const std::string& filename)
     assert (db_interface_->dbOpen());
 
     addDBFileToList(filename);
+    lastUsedPath(Files::getDirectoryFromPath(filename));
 
     db_opened_ = true;
 
@@ -362,6 +392,8 @@ void COMPASS::exportDBFile(const std::string& filename)
     }
 
     db_interface_->exportDBFile(filename);
+    lastUsedPath(Files::getDirectoryFromPath(filename));
+
 
     msg_box->close();
     delete msg_box;
@@ -435,6 +467,12 @@ EvaluationManager& COMPASS::evaluationManager()
     return *eval_manager_;
 }
 
+FFTManager& COMPASS::fftManager()
+{
+    assert(fft_manager_);
+    return *fft_manager_;
+}
+
 rtcommand::RTCommandRunner& COMPASS::rtCmdRunner()
 {
     assert(rt_cmd_runner_);
@@ -468,6 +506,11 @@ void COMPASS::shutdown()
     if (db_interface_->dbOpen())
         ds_manager_->saveDBDataSources();
     ds_manager_ = nullptr;
+
+    assert(fft_manager_);
+    if (db_interface_->dbOpen())
+        fft_manager_->saveDBFFTs();
+    fft_manager_ = nullptr;
 
     assert(dbcontent_manager_);
     if (db_interface_->dbOpen())
@@ -511,6 +554,19 @@ MainWindow& COMPASS::mainWindow()
     return *main_window_;
 }
 
+std::string COMPASS::lastUsedPath()
+{
+    loginf << "COMPASS: lastUsedPath: return '" << last_path_ << "'";
+    return last_path_;
+}
+
+void COMPASS::lastUsedPath(const std::string& last_path)
+{
+    loginf << "COMPASS: lastUsedPath: set '" << last_path << "'";
+    last_path_ = last_path;
+}
+
+
 bool COMPASS::disableConfirmResetViews() const
 {
     return disable_confirm_reset_views_;
@@ -536,9 +592,9 @@ bool COMPASS::disableAddRemoveViews() const
     return disable_add_remove_views_;
 }
 
-bool COMPASS::disableOSGViewRotate() const
+bool COMPASS::disableGeographicViewRotate() const
 {
-    return disable_osgview_rotate_;
+    return disable_geographicview_rotate_;
 }
 
 bool COMPASS::disableMenuConfigSave() const

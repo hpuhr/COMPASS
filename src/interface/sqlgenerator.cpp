@@ -19,17 +19,14 @@
 #include "compass.h"
 #include "buffer.h"
 #include "dbcommand.h"
-#include "dbcommandlist.h"
-#include "sqliteconnection.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
-#include "filtermanager.h"
 #include "logger.h"
 #include "propertylist.h"
-#include "stringconv.h"
 #include "source/dbdatasource.h"
+#include "fft/dbfft.h"
 #include "util/timeconv.h"
 
 #include <algorithm>
@@ -58,6 +55,7 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
     table_properties_create_statement_ = ss.str();
     ss.str(string());
 
+    // data sources
     ss << "CREATE TABLE " << DBDataSource::table_name_ << "("
         << DBDataSource::id_column_.name() << " "  << DBDataSource::id_column_.dbDataTypeString() << ", "
         << DBDataSource::ds_type_column_.name() << " "  << DBDataSource::ds_type_column_.dbDataTypeString() << ", "
@@ -70,6 +68,15 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
         << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
         << ");";
     table_data_sources_create_statement_ = ss.str();
+    ss.str(string());
+
+    // ffts
+    ss << "CREATE TABLE " << DBFFT::table_name_ << "("
+        << DBFFT::name_column_.name() << " "  << DBFFT::name_column_.dbDataTypeString() << ", "
+        << DBFFT::info_column_.name() << " "  << DBFFT::info_column_.dbDataTypeString() << ", "
+        << "PRIMARY KEY (" << DBFFT::name_column_.name() << ")"
+        << ");";
+    table_ffts_create_statement_ = ss.str();
     ss.str(string());
 
     ss << "CREATE TABLE " << TABLE_NAME_SECTORS
@@ -206,6 +213,45 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 
     return command;
 }
+
+shared_ptr<DBCommand> SQLGenerator::getFFTSelectCommand()
+{
+    using namespace dbContent;
+
+    PropertyList list;
+    list.addProperty(DBDataSource::name_column_);
+    list.addProperty(DBDataSource::info_column_);
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+
+    stringstream ss;
+
+    ss << "SELECT ";
+
+    bool first = true;
+
+    for (const auto& prop_it : list.properties())
+    {
+        if (!first)
+            ss << ",";
+
+        ss << " " << prop_it.name();
+
+        first = false;
+    }
+
+    ss << " FROM ";
+
+    ss << DBFFT::table_name_;
+
+    ss << ";";
+
+    command->set(ss.str());
+    command->list(list);
+
+    return command;
+}
+
 
 std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
         const DBContent& dbcontent, boost::posix_time::ptime before_timestamp)
@@ -585,6 +631,11 @@ string SQLGenerator::getTablePropertiesCreateStatement()
 std::string SQLGenerator::getTableDataSourcesCreateStatement()
 {
     return table_data_sources_create_statement_;
+}
+
+std::string SQLGenerator::getTableFFTsCreateStatement()
+{
+    return table_ffts_create_statement_;
 }
 
 string SQLGenerator::getTableSectorsCreateStatement()

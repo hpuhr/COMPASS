@@ -22,10 +22,10 @@
 #include "logger.h"
 #include "dbcontent/selectdialog.h"
 #include "util/timeconv.h"
+#include "util/files.h"
 
 #include <QCheckBox>
 #include <QComboBox>
-#include <QFileDialog>
 #include <QFormLayout>
 #include <QFrame>
 #include <QInputDialog>
@@ -36,6 +36,9 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QDateEdit>
+#include <QTreeWidgetItem>
+#include <QTreeWidget>
+#include <QHeaderView>
 
 using namespace Utils;
 using namespace std;
@@ -51,10 +54,13 @@ ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidge
     main_layout_->addWidget(tab_widget_);
 
     addMainTab();
+    addDecoderTab();
     addOverrideTab();
     addMappingsTab();
 
     setLayout(main_layout_);
+
+    connect(&task, &ASTERIXImportTask::decodingStateChanged, this, &ASTERIXImportTaskWidget::decodingStateChangedSlot);
 }
 
 void ASTERIXImportTaskWidget::addMainTab()
@@ -70,10 +76,14 @@ void ASTERIXImportTaskWidget::addMainTab()
     {
         QFormLayout* source_layout = new QFormLayout();
 
-        source_label_ = new QLabel();
-        source_layout->addWidget(source_label_);
+        sources_grid_ = new QGridLayout();
+        updateSourcesGrid();
 
-        if (task_.isImportNetwork())
+        main_tab_layout->addLayout(sources_grid_);
+
+        main_tab_layout->addStretch();
+
+        if (task_.source().isNetworkType())
         {
             loginf << "ASTERIXImportTaskWidget: addMainTab: is network import";
         }
@@ -95,7 +105,7 @@ void ASTERIXImportTaskWidget::addMainTab()
 
             //loginf << "UGA " << Time::toDateString(task_.date());
 
-            QDate date = QDate::fromString(Time::toDateString(task_.date()).c_str(), "yyyy-MM-dd");
+            QDate date = QDate::fromString(Time::toDateString(task_.settings().date_).c_str(), "yyyy-MM-dd");
             //loginf << "UGA2 " << date.toString().toStdString();
 
             date_edit->setDate(date);
@@ -105,20 +115,15 @@ void ASTERIXImportTaskWidget::addMainTab()
             source_layout->addRow("UTC Day", date_edit);
         }
 
-        updateSourceLabel();
-
         main_tab_layout->addLayout(source_layout);
     }
-
-    config_widget_ = new ASTERIXConfigWidget(task_, this);
-    main_tab_layout->addWidget(config_widget_);
 
     main_tab_layout->addStretch();
 
     // final stuff
     {
         debug_check_ = new QCheckBox("Debug in Console");
-        debug_check_->setChecked(task_.debug());
+        debug_check_->setChecked(task_.settings().debug_jasterix_);
         connect(debug_check_, &QCheckBox::clicked, this,
                 &ASTERIXImportTaskWidget::debugChangedSlot);
         main_tab_layout->addWidget(debug_check_);
@@ -129,6 +134,14 @@ void ASTERIXImportTaskWidget::addMainTab()
     main_tab_widget->setContentsMargins(0, 0, 0, 0);
     main_tab_widget->setLayout(main_tab_layout);
     tab_widget_->addTab(main_tab_widget, "Main");
+}
+
+void ASTERIXImportTaskWidget::addDecoderTab()
+{
+    assert(tab_widget_);
+
+    config_widget_ = new ASTERIXConfigWidget(task_, this);
+    tab_widget_->addTab(config_widget_, "Decoder");
 }
 
 void ASTERIXImportTaskWidget::addOverrideTab()
@@ -181,89 +194,6 @@ void ASTERIXImportTaskWidget::addMappingsTab()
 
 ASTERIXImportTaskWidget::~ASTERIXImportTaskWidget() { config_widget_ = nullptr; }
 
-//void ASTERIXImportTaskWidget::addFileSlot()
-//{
-//    QFileDialog dialog(this);
-//    dialog.setWindowTitle("Add ASTERIX File(s)");
-//    // dialog.setDirectory(QDir::homePath());
-//    dialog.setFileMode(QFileDialog::ExistingFiles);
-//    // dialog.setNameFilter(trUtf8("Splits (*.000 *.001)"));
-//    QStringList fileNames;
-//    if (dialog.exec())
-//    {
-//        for (auto& filename : dialog.selectedFiles())
-//            addFile(filename.toStdString());
-//    }
-//}
-
-//void ASTERIXImportTaskWidget::addFile(const std::string& filename)
-//{
-//    if (!task_.hasFile(filename))
-//        task_.addFile(filename);
-//}
-
-//void ASTERIXImportTaskWidget::selectFile(const std::string& filename)
-//{
-//    assert(task_.hasFile(filename));
-//    task_.importFilename(filename);
-
-//    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
-//    assert (items.size() > 0);
-
-//    for (auto item_it : items)
-//    {
-//        assert (item_it);
-//        file_list_->setCurrentItem(item_it);
-//    }
-//}
-
-//void ASTERIXImportTaskWidget::deleteFileSlot()
-//{
-//    loginf << "ASTERIXImportTaskWidget: deleteFileSlot";
-
-//    if (!file_list_->currentItem() || !task_.importFilename().size())
-//    {
-//        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Deletion Failed",
-//                              "Please select a file in the list.", QMessageBox::Ok);
-//        m_warning.exec();
-//        return;
-//    }
-
-//    assert(task_.importFilename().size());
-//    assert(task_.hasFile(task_.importFilename()));
-//    task_.removeCurrentFilename();
-//}
-
-//void ASTERIXImportTaskWidget::deleteAllFiles()
-//{
-//    loginf << "ASTERIXImportTaskWidget: deleteAllFiles";
-//    task_.removeAllFiles();
-//}
-
-//void ASTERIXImportTaskWidget::selectedFileSlot()
-//{
-//    loginf << "ASTERIXImportTaskWidget: selectedFileSlot";
-//    assert(file_list_->currentItem());
-
-//    QString filename = file_list_->currentItem()->text();
-//    assert(task_.hasFile(filename.toStdString()));
-//    task_.importFilename(filename.toStdString());
-//}
-
-//void ASTERIXImportTaskWidget::updateFileListSlot()
-//{
-//    assert(file_list_);
-
-//    file_list_->clear();
-
-//    for (auto it : task_.fileList())
-//    {
-//        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
-//        if (it.first == task_.importFilename())
-//            file_list_->setCurrentItem(item);
-//    }
-//}
-
 void ASTERIXImportTaskWidget::addParserSlot()
 {
     if (task_.schema() == nullptr)
@@ -299,11 +229,11 @@ void ASTERIXImportTaskWidget::addParserSlot()
 
         std::string instance = "ASTERIXJSONParserCAT" + to_string(cat) + "0";
 
-        Configuration& config = current->addNewSubConfiguration("ASTERIXJSONParser", instance);
-        config.addParameterUnsignedInt("category", cat);
-        config.addParameterString("dbcontent_name", dbcontent_name);
+        auto config = Configuration::create("ASTERIXJSONParser", instance);
+        config->addParameter<unsigned int>("category", cat);
+        config->addParameter<std::string>("dbcontent_name", dbcontent_name);
 
-        current->generateSubConfigurable("JSONObjectParser", instance);
+        current->generateSubConfigurableFromConfig(std::move(config));
         updateParserBox();
     }
 }
@@ -338,7 +268,12 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
     if (!text.size())
     {
         while (object_parser_widget_->count() > 0)  // remove all widgets
-            object_parser_widget_->removeWidget(object_parser_widget_->widget(0));
+        {
+            auto w = object_parser_widget_->widget(0);
+            object_parser_widget_->removeWidget(w);
+            w->deleteLater();
+        }
+        object_parser_widgets_.clear();
         return;
     }
 
@@ -350,12 +285,19 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
     assert(task_.schema() != nullptr);
     assert(task_.schema()->hasObjectParser(cat));
 
-    if (object_parser_widget_->indexOf(task_.schema()->parser(cat).widget()) < 0)
-        object_parser_widget_->addWidget(task_.schema()->parser(cat).widget());
+    auto id = text.toStdString();
 
-    object_parser_widget_->setCurrentWidget(task_.schema()->parser(cat).widget());
+    if (object_parser_widgets_.count(id) == 0)
+    {
+        auto w = task_.schema()->parser(cat).createWidget();
+        object_parser_widget_->addWidget(w);
+        object_parser_widgets_[ id ] = w;
+    }
+
+    auto w = object_parser_widgets_.at(id);
+
+    object_parser_widget_->setCurrentWidget(w);
 }
-
 
 void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 {
@@ -369,7 +311,7 @@ void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 
     assert (line_id > 0 && line_id <= 4);
 
-    task_.fileLineID(line_id-1);
+    task_.settings().file_line_id_ = line_id-1;
 }
 
 void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)
@@ -378,7 +320,7 @@ void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)
 
     loginf << "ASTERIXImportTaskWidget: dateChangedSlot: " << tmp;
 
-    task_.date(Time::fromDateString(tmp));
+    task_.settings().date_ = Time::fromDateString(tmp);
 }
 
 void ASTERIXImportTaskWidget::updateParserBox()
@@ -402,31 +344,102 @@ void ASTERIXImportTaskWidget::debugChangedSlot()
     QCheckBox* box = dynamic_cast<QCheckBox*>(sender());
     assert(box);
 
-    task_.debug(box->checkState() == Qt::Checked);
+    task_.settings().debug_jasterix_ = box->checkState() == Qt::Checked;
 }
 
-//void ASTERIXImportTaskWidget::runStarted()
-//{
-//    loginf << "ASTERIXImportTaskWidget: runStarted";
-
-//    test_button_->setDisabled(true);
-//}
-
-//void ASTERIXImportTaskWidget::runDone()
-//{
-//    loginf << "ASTERIXImportTaskWidget: runDone";
-
-//    test_button_->setDisabled(false);
-//}
-
-void ASTERIXImportTaskWidget::updateSourceLabel()
+void ASTERIXImportTaskWidget::updateSourcesGrid()
 {
-    assert (source_label_);
+    QLayoutItem* child;
+    while ((child = sources_grid_->takeAt(0)) != nullptr)
+    {
+        if (child->widget())
+            delete child->widget();
+        delete child;
+    }
 
-    if (task_.isImportNetwork())
-        source_label_->setText("Source: Network");
-    else // file
-        source_label_->setText(("Source: "+task_.importFilename()).c_str());
+    if (task_.source().isNetworkType())
+    {
+        sources_grid_->addWidget(new QLabel("Source: Network"), 0, 0);
+    }
+    else // files
+    {
+        QStringList headers;
+        headers << "";
+        headers << "Name";
+        headers << "Decoding";
+        headers << "Error";
+
+        QTreeWidget* tree_widget = new QTreeWidget;
+        tree_widget->setColumnCount(headers.count());
+        tree_widget->setHeaderLabels(headers);
+
+        tree_widget->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
+        tree_widget->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::ResizeToContents);
+        tree_widget->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::ResizeToContents);
+        tree_widget->header()->setSectionResizeMode(3, QHeaderView::ResizeMode::Stretch);
+
+        unsigned int file_idx = 0;
+
+        for (const auto& file_info : task_.source().files())
+        {
+            std::string name   = file_info.filename;
+            std::string status = file_info.decodingTested() ? (!file_info.canDecode() ? "Error" : "OK") : "?";
+            std::string descr  = file_info.error.errinfo;
+
+            auto item = new QTreeWidgetItem;
+            item->setCheckState(0, file_info.used ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+            item->setText(1, QString::fromStdString(name  ));
+            item->setText(2, QString::fromStdString(status));
+            item->setText(3, QString::fromStdString(descr ));
+
+            item->setData(0, Qt::UserRole, QVariant(QPoint(file_idx, -1)));
+
+            bool has_error = file_info.decodingTested() && !file_info.canDecode();
+
+            if (has_error)
+                item->setFlags(Qt::ItemIsSelectable);
+
+            //file itself has no error? => add sections
+            if (!has_error)
+            {
+                unsigned int section_idx = 0;
+
+                for (const auto& section : file_info.sections)
+                {
+                    std::string name   = section.description;
+                    std::string status = file_info.decodingTested() ? (section.error.hasError() ? "Error" : "OK") : "?";
+                    std::string descr  = section.error.errinfo;
+
+                    auto sec_item = new QTreeWidgetItem;
+                    sec_item->setCheckState(0, section.used ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+                    sec_item->setText(1, QString::fromStdString(name  ));
+                    sec_item->setText(2, QString::fromStdString(status));
+                    sec_item->setText(3, QString::fromStdString(descr ));
+
+                    sec_item->setData(0, Qt::UserRole, QVariant(QPoint(file_idx, section_idx)));
+
+                    bool has_error = file_info.decodingTested() && section.error.hasError();
+
+                    if (has_error)
+                        sec_item->setFlags(Qt::ItemIsSelectable);
+
+                    item->addChild(sec_item);
+
+                    ++section_idx;
+                }
+            }
+
+            tree_widget->addTopLevelItem(item);
+
+            ++file_idx;
+        }
+
+        tree_widget->expandAll();
+
+        connect(tree_widget, &QTreeWidget::itemClicked, this, &ASTERIXImportTaskWidget::sourceClicked);
+
+        sources_grid_->addWidget(tree_widget, 0, 0);
+    }
 }
 
 ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
@@ -434,17 +447,18 @@ ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
     return override_widget_;
 }
 
-void ASTERIXImportTaskWidget::testImportSlot()
+void ASTERIXImportTaskWidget::decodingStateChangedSlot()
 {
-    loginf << "ASTERIXImportTaskWidget: testImportSlot";
+    updateSourcesGrid();
+}
 
-    if (!task_.canImportFile())
+void ASTERIXImportTaskWidget::sourceClicked(QTreeWidgetItem* item, int column)
+{
+    if (item && column == 0)
     {
-        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Test Import Failed",
-                              "Please select a file in the list.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
+        bool selected = item->checkState(0) == Qt::CheckState::Checked;
 
-    task_.run(true);
+        QPoint index = item->data(0, Qt::UserRole).toPoint();
+        task_.source().setFileUsage(selected, (size_t)index.x(), index.y());
+    }
 }

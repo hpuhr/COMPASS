@@ -19,13 +19,13 @@
 #define JSONOBJECTPARSER_H
 
 #include "configurable.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-#include "format.h"
+//#include "format.h"
 #include "jsondatamapping.h"
 #include "jsonobjectparserwidget.h"
 #include "propertylist.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
 #include <memory>
 #include <string>
@@ -48,10 +48,6 @@ class JSONObjectParser : public Configurable
     JSONObjectParser(const std::string& class_id, const std::string& instance_id,
                      Configurable* parent);
     JSONObjectParser() = default;
-    JSONObjectParser(JSONObjectParser&& other) { *this = std::move(other); }
-
-    /// @brief Move constructor
-    JSONObjectParser& operator=(JSONObjectParser&& other);
 
     DBContent& dbContent() const;
 

@@ -38,7 +38,7 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    std::vector<unsigned int> getAllDsIDs(); // both config and db
+    const std::vector<unsigned int>& getAllDsIDs(); // both config and db
 
     bool hasConfigDataSource(unsigned int ds_id);
     void createConfigDataSource(unsigned int ds_id);
@@ -96,6 +96,8 @@ public:
 
     nlohmann::json getConfigDataSourcesAsJSON();
     nlohmann::json getDBDataSourcesAsJSON();
+    nlohmann::json getSortedConfigDataSourcesAsJSON();
+    nlohmann::json getSortedDBDataSourcesAsJSON();
 
     void setLoadedCounts(std::map<unsigned int, std::map<std::string,
                          std::map<unsigned int, unsigned int>>> loaded_counts); // ds id->dbcont->line->cnt

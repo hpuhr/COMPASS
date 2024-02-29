@@ -42,6 +42,18 @@ signals:
     void showAssociationsSignal(bool value);
 
 public:
+    struct Settings
+    {
+        Settings();
+
+        std::string data_var_x_dbo;
+        std::string data_var_x_name;
+        std::string data_var_y_dbo;
+        std::string data_var_y_name;
+
+        bool use_connection_lines {false};
+    };
+
     /// @brief Constructor
     ScatterPlotView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
@@ -65,10 +77,10 @@ public:
     bool hasDataVarX ();
     bool isDataVarXMeta ();
     dbContent::Variable& dataVarX();
-    void dataVarX (dbContent::Variable& var);
+    void dataVarX (dbContent::Variable& var, bool notify_changes);
 
     dbContent::MetaVariable& metaDataVarX();
-    void metaDataVarX (dbContent::MetaVariable& var);
+    void metaDataVarX (dbContent::MetaVariable& var, bool notify_changes);
 
     std::string dataVarXDBO() const;
     std::string dataVarXName() const;
@@ -76,13 +88,22 @@ public:
     bool hasDataVarY ();
     bool isDataVarYMeta ();
     dbContent::Variable& dataVarY();
-    void dataVarY (dbContent::Variable& var);
+    void dataVarY (dbContent::Variable& var, bool notify_changes);
 
     dbContent::MetaVariable& metaDataVarY();
-    void metaDataVarY (dbContent::MetaVariable& var);
+    void metaDataVarY (dbContent::MetaVariable& var, bool notify_changes);
 
     std::string dataVarYDBO() const;
     std::string dataVarYName() const;
+
+    bool useConnectionLines();
+    void useConnectionLines(bool value);
+
+    static const std::string ParamDataVarXDBO;
+    static const std::string ParamDataVarXName;
+    static const std::string ParamDataVarYDBO;
+    static const std::string ParamDataVarYName;
+    static const std::string ParamUseConnectionLines;
 
 protected:
     friend class LatexVisitor;
@@ -92,6 +113,10 @@ protected:
 
     virtual bool init_impl() override;
 
+    virtual bool refreshScreenOnNeededReload() const override { return true; }
+
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
+
     ScatterPlotViewDataWidget* getDataWidget();
 
     /// For data display
@@ -99,11 +124,7 @@ protected:
     /// For data loading
     ScatterPlotViewDataSource* data_source_{nullptr};
 
-    std::string data_var_x_dbo_;
-    std::string data_var_x_name_;
-
-    std::string data_var_y_dbo_;
-    std::string data_var_y_name_;
+    Settings settings_;
 };
 
 #endif /* SCATTERPLOTVIEW_H_ */

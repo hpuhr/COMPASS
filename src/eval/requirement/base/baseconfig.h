@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "evaluationstandardtreeitem.h"
 #include "eval/requirement/base/baseconfigwidget.h"
-#include "eval/requirement/base/comparisontype.h"
+//#include "eval/requirement/base/comparisontype.h"
 #include "eval/results/report/rootitem.h"
 
 #include <QObject>

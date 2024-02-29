@@ -21,7 +21,7 @@
 #include <QValidator>
 #include <QLineEdit>
 
-#include "logger.h"
+//#include "logger.h"
 
 class TextFieldOctValidator : public QValidator
 {

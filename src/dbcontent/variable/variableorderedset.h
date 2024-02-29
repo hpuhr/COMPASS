@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variabledefinition.h"
-#include "propertylist.h"
+//#include "propertylist.h"
 
 namespace dbContent
 {
@@ -31,31 +31,6 @@ class VariableSet;
 class VariableOrderedSet;
 class VariableOrderedSetWidget;
 
-/**
- * @brief Extends DBOVariableDefinition with an ordering index
- */
-class VariableOrderDefinition : public VariableDefinition
-{
-  public:
-    VariableOrderDefinition(std::string class_id, std::string instance_id, Configurable* parent)
-        : VariableDefinition(class_id, instance_id, parent)
-    {
-        registerParameter("index", &index_, 0);
-    }
-    virtual ~VariableOrderDefinition() {}
-
-    unsigned int getIndex() { return index_; }
-    void setIndex(unsigned index) { index_ = index; }
-
-  protected:
-    unsigned int index_;
-};
-
-/**
- * @brief Ordered set of DBOVariables
- *
- * Set with DBOVariables, which can only be added once (set), and have a specific order.
- */
 class VariableOrderedSet : public QObject, public Configurable
 {
     Q_OBJECT
@@ -65,32 +40,27 @@ class VariableOrderedSet : public QObject, public Configurable
     void variableAddedChangedSignal();
 
   public:
-    /// @brief Constructor
-    VariableOrderedSet(const std::string& class_id, const std::string& instance_id,
-                          Configurable* parent);
-    /// @brief Destructor
+    VariableOrderedSet(const std::string& class_id, 
+                       const std::string& instance_id,
+                       Configurable* parent);
     virtual ~VariableOrderedSet();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    /// @brief Adds a variable to the set at last index
     void add(Variable& var);
     void add(MetaVariable& var);
-    void add (const std::string& dbcontent_name, const std::string var_name);
+    void add(const std::string& dbcontent_name, const std::string var_name);
 
-    /// @brief Adds a variable set
-    // void add (const DBOVariableOrderedSet &set);
-    /// @brief Adds a variable set for a given DBO type (DBOVariable::getFor)
-    // void addOnly (DBOVariableOrderedSet &set, const std::string &dbo_type);
-    /// @brief Removes a variable at a given index
+    void set(const std::vector<std::pair<std::string,std::string>>& vars);
+
     void removeVariableAt(unsigned int index);
     void removeVariable(const Variable& variable);
     void removeMetaVariable(const MetaVariable& variable);
 
-    /// @brief Decreases index of a variable at a given index
+    /// @brief Decreases position of a variable at a given index
     void moveVariableUp(unsigned int index);
-    /// @brief Increases index of a variable at a given index
+    /// @brief Increases positions of a variable at a given index
     void moveVariableDown(unsigned int index);
 
     /// @brief Returns if variable is in set
@@ -98,38 +68,22 @@ class VariableOrderedSet : public QObject, public Configurable
     bool hasMetaVariable(const MetaVariable& variable) const;
     /// @brief Returns if variable is in set
     bool hasVariable(const std::string& dbo_type, const std::string& name) const;
+    unsigned int getIndexFor(const std::string& dbcontent_name, const std::string var_name);
 
-    /// @brief Returns a copied new variable set, with all variables for a given DBO type
     VariableSet getFor(const std::string& dbcontent_name);
-    VariableSet getExistingInDBFor(const std::string& dbcontent_name);
-    // DBOVariableSet getUnorderedSet () const;
+    //VariableSet getExistingInDBFor(const std::string& dbcontent_name);
 
-    /// @brief Returns a variable at a given index
-    VariableOrderDefinition& variableDefinition(unsigned int index) const;
-    const std::map<unsigned int, VariableOrderDefinition*>& definitions()
-    {
-        return variable_definitions_;
-    }
+    std::vector<std::pair<std::string,std::string>> definitions() const;
+    std::pair<std::string,std::string> variableDefinition(unsigned int index) const;
+    unsigned int getSize() const;
 
-    /// @brief Returns set as properties for given DBO type
-    // PropertyList getPropertyList (const std::string &dbo_type);
-
-    /// @brief Prints information for debugging
-    // void print () const;
-    /// @brief Returns number of variables in set
-    unsigned int getSize() const { return variable_definitions_.size(); }
-
-    VariableOrderedSetWidget* widget();
+    VariableOrderedSetWidget* createWidget();
 
   protected:
-    /// Container with ordered variable definitions (index -> definition pointer)
-    std::map<unsigned int, VariableOrderDefinition*> variable_definitions_;
+    nlohmann::json variable_definitions_; // json list of std::string pairs
 
-    VariableOrderedSetWidget* widget_;
-
-    virtual void checkSubConfigurables();
-
-    void reorderVariables ();
+    virtual void checkSubConfigurables() override;
+    virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
 };
 
 }

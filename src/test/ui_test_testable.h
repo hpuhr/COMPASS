@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "json.h"
+
 #include <boost/optional.hpp>
 
 #include <QString>
@@ -40,6 +42,7 @@ namespace ui_test
          * Override to make available for testing.
         */
         virtual boost::optional<QString> uiGet(const QString& what = QString()) const { return {}; }
+        virtual nlohmann::json uiGetJSON(const QString& what = QString()) const { return {}; }
 
         /**
          * Set the widgets contents from the given string using injected ui events.
@@ -55,5 +58,10 @@ namespace ui_test
          * Override to make available for testing.
         */
         virtual QWidget* uiRerouteToNative() const { return nullptr; }
+
+        /**
+         * "Refreshes" the ui element, the meaning of it being specific to the implementation. 
+        */
+        virtual void uiRefresh() {}
     };
 }

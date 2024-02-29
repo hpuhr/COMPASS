@@ -8,8 +8,10 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
-: QDialog(), task_(task)
+ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task, 
+                                                 QWidget* parent)
+:   QDialog(parent)
+,   task_  (task  )
 {
     setWindowTitle("Import ASTERIX Recording");
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
@@ -37,12 +39,6 @@ ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
 
     button_layout->addStretch();
 
-    test_button_ = new QPushButton("Test Import");
-    connect(test_button_, &QPushButton::clicked, this, &ASTERIXImportTaskDialog::testImportClickedSlot);
-    button_layout->addWidget(test_button_);
-
-    button_layout->addStretch();
-
     import_button_ = new QPushButton("Import");
     connect(import_button_, &QPushButton::clicked, this, &ASTERIXImportTaskDialog::importClickedSlot);
     button_layout->addWidget(import_button_);
@@ -52,48 +48,51 @@ ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
     setLayout(main_layout);
 
     update();
+    updateTitle();
+    updateButtons();
+
+    connect(&task, &ASTERIXImportTask::configChanged, this, &ASTERIXImportTaskDialog::configChanged);
+    connect(&task, &ASTERIXImportTask::decodingStateChanged, this, &ASTERIXImportTaskDialog::decodingStateChangedSlot);
+    connect(&task, &ASTERIXImportTask::sourceUsageChanged, this, &ASTERIXImportTaskDialog::updateButtons);
 }
 
-void ASTERIXImportTaskDialog::updateSource()
+void ASTERIXImportTaskDialog::updateTitle()
 {
-    if (task_.isImportNetwork())
-        setWindowTitle("Import ASTERIX From Network");
-    else // file
-        setWindowTitle("Import ASTERIX From File");
+    setWindowTitle("Import ASTERIX From " + QString::fromStdString(task_.source().sourceTypeAsString()));
+}
+
+void ASTERIXImportTaskDialog::updateSourcesInfo()
+{
+    updateTitle();
 
     assert (task_widget_);
-    task_widget_->updateSourceLabel();
+    task_widget_->updateSourcesGrid();
 }
 
 void ASTERIXImportTaskDialog::updateButtons()
 {
     assert (import_button_);
-    assert (test_button_);
 
-    if (task_.isImportNetwork()) // import from network
-    {
-        import_button_->setDisabled(!task_.canRun());
-        test_button_->setDisabled(true);
-    }
-    else // import file
-    {
-        import_button_->setDisabled(!task_.canRun());
-        test_button_->setDisabled(!task_.canRun());
-    }
+    import_button_->setDisabled(!task_.canRun());
 }
-
-void ASTERIXImportTaskDialog::testImportClickedSlot()
-{
-    emit testTmportSignal();
-}
-
 
 void ASTERIXImportTaskDialog::importClickedSlot()
 {
-    emit importSignal();
+    accept();
 }
 
 void ASTERIXImportTaskDialog::cancelClickedSlot()
 {
-    emit cancelSignal();
+    reject();
+}
+
+void ASTERIXImportTaskDialog::configChanged()
+{
+    //@TODO
+}
+
+void ASTERIXImportTaskDialog::decodingStateChangedSlot()
+{
+    updateTitle();
+    updateButtons();
 }

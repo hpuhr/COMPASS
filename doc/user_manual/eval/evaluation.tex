@@ -359,7 +359,7 @@ The following settings can be used to configure the content of the generated res
 \item Split Results by Mode A/C Only and Mode S: Split sector aggregations also by Mode A/C Only and Mode S results
 \item Show ADS-B Info: Show ADS-B MOPS Version in results target lists
 \item Show OK data in Sector Results: Show also OK markings in sector aggregations (not only errors)
-\item Results Detail WGS84 Zoom Factor: Zoom factor in OSGView for target report details
+\item Results Detail WGS84 Zoom Factor: Zoom factor in Geographic View for target report details
 \end{itemize}
 \ \\
 
@@ -462,8 +462,8 @@ When single-clicking a row, the respective result error are shown in the existin
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/eval_results_osgview.png}
-  \caption{Evaluation results: Sector errors in OSGView}
+    \includegraphics[width=19cm,frame]{figures/eval_results_geoview.png}
+  \caption{Evaluation results: Sector errors in Geographic View}
 \end{figure}
 
 When double-clicking a row, a step into the respective sector sum details is performed.
@@ -480,12 +480,12 @@ On the left side, the current position in the results sections is shown. On the 
 
 At the bottom, further result details are listed per-target, sorted in this example by the Probability of Detection (PD). \\
 
-When single-clicking a row, the respective target data and result errors are shown in the existing OSGViews.
+When single-clicking a row, the respective target data and result errors are shown in the existing Geographic Views.
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_single_osgview.png}
-  \caption{Evaluation results: Target Errors in OSGView}
+    \includegraphics[width=18cm,frame]{figures/eval_results_single_geoview.png}
+  \caption{Evaluation results: Target Errors in Geographic View}
 \end{figure}
 
 When double-clicking a row, a step into the respective target details is performed.
@@ -502,12 +502,12 @@ On the left side, the current position in the results sections is shown. On the 
 
 At the bottom, further result details are listed per-target-report, sorted in this example by time. \\
 
-When single-clicking a row, the respective target data and the respective single result error are shown in the existing OSGViews.
+When single-clicking a row, the respective target data and the respective single result error are shown in the existing Geographic Views.
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/eval_results_pd_single_tr_osgview.png}
-  \caption{Evaluation results: Target Single PD Error in OSGView}
+    \includegraphics[width=19cm]{figures/eval_results_pd_single_tr_geoview.png}
+  \caption{Evaluation results: Target Single PD Error in Geographic View}
 \end{figure}
 
 
@@ -531,7 +531,7 @@ At the top, the following configuration options exist:
 \item Abstract: Abstract string, is added to the first page of the report.
 \item Include Per-Target Details: Whether to include the per-target details.
 \item Include Per-Target Target Report Details: Whether to include the per-target target report details.
-\item Wait on Map Loading: When OSGView screenshots are created, some maps require downloading terrain from the Internet.  This option enables to wait on completion of such activities, to generate high-quality screenshots. Disable only when operating on cached maps without an Internet connection.
+\item Wait on Map Loading: When Geographic View screenshots are created, some maps require downloading terrain from the Internet.  This option enables to wait on completion of such activities, to generate high-quality screenshots. Disable only when operating on cached maps without an Internet connection.
 \item Run PDFLatex: Automatically runs the pdflatex compile process, immediately creating a PDF after finished export. Is disabled if command could not be found.
 \item Open Created PDF: Automatically opens the created PDF. Is disabled if pdflatex command could not be found.
 \end{itemize}

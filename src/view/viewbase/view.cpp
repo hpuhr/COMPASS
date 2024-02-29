@@ -19,16 +19,19 @@
 #include "logger.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
-//#include "viewmodel.h"
 #include "viewwidget.h"
-#include "viewpoint.h"
+#include "viewabledataconfig.h"
 #include "compass.h"
+#include "dbcontentmanager.h"
 #include "viewdatawidget.h"
+#include "config.h"
 
 #include <QVBoxLayout>
 #include <QWidget>
 
 #include <cassert>
+
+#include <fstream>
 
 #include <boost/date_time/posix_time/conversion.hpp>
 
@@ -46,11 +49,14 @@ View::View(const std::string& class_id,
            ViewManager& view_manager)
     : Configurable(class_id, instance_id, container),
       view_manager_(view_manager),
-//      model_(nullptr),
       widget_(nullptr),
       container_(container)
 {
     logdbg << "View: constructor";
+
+    registerParameter("name", &name_, std::string());
+    loginf << "View: constructor: name '" << name_ << "'";
+    assert (name_.size());
 
     creation_time_ = boost::posix_time::to_time_t(boost::posix_time::microsec_clock::local_time());
 
@@ -60,9 +66,11 @@ View::View(const std::string& class_id,
     connect(this, &View::selectionChangedSignal, &view_manager_, &ViewManager::selectionChangedSlot);
 
     connect(&view_manager_, &ViewManager::selectionChangedSignal, this, &View::selectionChangedSlot);
-
     connect(&view_manager_, &ViewManager::unshowViewPointSignal, this, &View::unshowViewPointSlot);
     connect(&view_manager_, &ViewManager::showViewPointSignal, this, &View::showViewPointSlot);
+    connect(&view_manager_, &ViewManager::reloadStateChanged, this, &View::viewManagerReloadStateChanged);
+    connect(&view_manager_, &ViewManager::automaticUpdatesChanged, this, &View::viewManagerAutoUpdatesChanged);
+    connect(&view_manager_, &ViewManager::presetEdited, this, &View::presetEdited);
 }
 
 /**
@@ -72,10 +80,6 @@ Just deleting a view is totally feasible and will remove the view from its ViewC
  */
 View::~View()
 {
-    // delete model
-//    if (model_)
-//        delete model_;
-
     // unregister from manager
     if (view_manager_.isRegistered(this))
         view_manager_.unregisterView(this);
@@ -116,10 +120,14 @@ bool View::init()
     return true;
 }
 
+/**
+*/
 void View::databaseOpened()
 {
 }
 
+/**
+*/
 void View::databaseClosed()
 {
 }
@@ -128,14 +136,18 @@ void View::databaseClosed()
 @brief Returns the views name.
 @return The views name.
  */
-const std::string& View::getName() const { return instanceId(); }
+const std::string& View::getName() const { return name_; }
 
+/**
+*/
 void View::enableInTabWidget(bool value)
 {
     assert (container_);
     container_->enableViewTab(getCentralWidget(), value);
 }
 
+/**
+*/
 void View::showInTabWidget()
 {
     assert (container_);
@@ -153,19 +165,6 @@ unsigned int View::getInstanceKey()
 }
 
 /**
-@brief Sets the view's model.
-
-Should only be called once to set the model.
-@param model The view's model.
- */
-//void View::setModel(ViewModel* model)
-//{
-//    if (model_)
-//        throw std::runtime_error("View: setModel: Model already set.");
-//    model_ = model;
-//}
-
-/**
 @brief Sets the view's widget.
 
 Should only be called once to set the widget.
@@ -174,7 +173,7 @@ Should only be called once to set the widget.
 void View::setWidget(ViewWidget* widget)
 {
     if (widget_)
-        throw std::runtime_error("View: setWidget: Widget already set.");
+        throw std::runtime_error("View: setWidget: widget already set");
 
     widget_ = widget;
     if (widget_)
@@ -190,9 +189,14 @@ void View::constructWidget()
     assert(central_widget_);
 
     QVBoxLayout* central_vlayout = new QVBoxLayout();
+    central_vlayout->setMargin(0);
+
     QHBoxLayout* central_hlayout = new QHBoxLayout();
+    central_hlayout->setMargin(0);
+
     central_widget_->setLayout(central_vlayout);
     widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     central_hlayout->addWidget(widget_);
     central_vlayout->addLayout(central_hlayout);
 }
@@ -203,6 +207,8 @@ void View::constructWidget()
  */
 void View::viewShutdown(const std::string& err) { view_manager_.viewShutdown(this, err); }
 
+/**
+*/
 void View::emitSelectionChange()
 {
     //    assert (!selection_change_emitted_);
@@ -211,6 +217,8 @@ void View::emitSelectionChange()
     emit selectionChangedSignal();
 }
 
+/**
+*/
 void View::selectionChangedSlot()
 {
     //    if (selection_change_emitted_)
@@ -219,45 +227,512 @@ void View::selectionChangedSlot()
     updateSelection();
 }
 
+/**
+*/
 void View::loadingStarted()
 {
-    loginf << "View: loadingStarted";
+    logdbg << "View: loadingStarted";
+
+    //reload reverts any pending view updates
+    issued_update_.reset();
 
     if (widget_)
         widget_->loadingStarted();
 }
 
+/**
+*/
 void View::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-    loginf << "View: loadedData";
+    logdbg << "View: loadedData";
 
     if (widget_ && widget_->getViewDataWidget())
         widget_->getViewDataWidget()->updateData(data, requires_reset);
 }
 
+/**
+*/
 void View::loadingDone()
 {
-    loginf << "View: loadingDone";
+    logdbg << "View: loadingDone";
 
     if (widget_)
         widget_->loadingDone();
 }
 
+/**
+*/
 void View::clearData()
 {
-    loginf << "View: clearData";
+    logdbg << "View: clearData";
 
-    if (widget_ && widget_->getViewDataWidget())
-        widget_->getViewDataWidget()->clearData();
+    if (widget_)
+        widget_->clearData();
 }
 
+/**
+*/
 void View::appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current)
 {
-    loginf << "View: appModeSwitch: app_mode " << toString(app_mode_current)
+    logdbg << "View: appModeSwitch: app_mode " << toString(app_mode_current)
            << " prev " << toString(app_mode_previous);
 
     app_mode_ = app_mode_current;
 
     if (widget_)
         widget_->appModeSwitch(app_mode_current);
+}
+
+/**
+ * Reacts on configuration changes in the view triggered by at runtime reconfiguration of the configurable.
+ */
+void View::onConfigurationChanged(const std::vector<std::string>& changed_params)
+{
+    logdbg << "View: onConfigurationChanged";
+
+    //invoke derived for view-specific updates
+    onConfigurationChanged_impl(changed_params);
+
+    //inform the view widget
+    assert (widget_);
+    widget_->configChanged();
+
+    //signal view + config changes
+    notifyRefreshNeeded();
+
+    //every external configuration change potentially modifies the configuration
+    notifyModifications();
+}
+
+/**
+ * React on modifications in the configurable hierarchy.
+ */
+void View::onModified()
+{
+    //no preset? => no need to do anything
+    if (!active_preset_.has_value())
+        return;
+
+#if 1
+    //preset change already registered
+    if (preset_changed_)
+        return;
+
+    preset_changed_ = true;
+#else
+    //get current config
+    nlohmann::json cfg;
+    generateJSON(cfg, Configurable::JSONExportType::Preset);
+
+    //check if preset config has changed
+    preset_changed_ = (cfg != active_preset_->view_config);
+
+    if (preset_changed_)
+    {
+        auto d = nlohmann::json::diff(active_preset_->view_config, cfg);
+        std::cout << d.dump(4) << std::endl;
+
+        std::ofstream out("/home/mcphatty/test.json");
+        out << cfg.dump(4);
+    }
+#endif
+
+    //notify preset change
+    emit presetChangedSignal();
+}
+
+/**
+ * Renders the data widget into an image.
+ */
+QImage View::renderData() const
+{
+    assert (widget_ && widget_->getViewDataWidget());  
+    return widget_->getViewDataWidget()->renderData();
+}
+
+/**
+ * Renders the complete view widget into an image.
+ */
+QImage View::renderView() const
+{
+    assert (widget_);  
+    return widget_->renderContents();
+}
+
+/**
+ * Reacts on a changed global load state in the view manager.
+ */
+void View::viewManagerReloadStateChanged()
+{
+    assert (widget_);
+
+    //inform dependent components of changed reload state
+    widget_->updateComponents();
+}
+
+/**
+ * Reacts on changed auto-update flags in the view manager.
+ */
+void View::viewManagerAutoUpdatesChanged()
+{
+    assert (widget_);
+
+    //run any needed automatic updates
+    //runAutomaticUpdates();
+
+    //inform dependent components of changed reload state
+    widget_->updateComponents();
+}
+
+/**
+ * Checks if THIS view needs a reload (this is different from the global reload flag in the view manager).
+*/
+bool View::reloadNeeded() const
+{
+    return updateNeeded() && (issued_update_.value() & VU_Reload);
+}
+
+/**
+ * Check if this view needs a redraw.
+ */
+bool View::redrawNeeded() const
+{
+    return updateNeeded() && (issued_update_.value() & VU_Redraw);
+}
+
+/**
+ * Check if this view needs an update (redraw, reload, etc).
+ */
+bool View::updateNeeded() const
+{
+    return issued_update_.has_value();
+}
+
+/**
+ * Run any needed automatic updates.
+ */
+void View::runAutomaticUpdates()
+{
+    if (!issued_update_.has_value())
+        return;
+
+    if (issued_update_.value() & VU_Reload)
+    {
+        //reload issued => run automatic reload?
+        if (view_manager_.automaticReloadEnabled())
+            updateView();
+        else if (refreshScreenOnNeededReload()) //view might want to redraw after an issued reload (e.g. to clear itself)
+            updateView(VU_RecomputedRedraw);
+    }
+    else if (issued_update_.value() != 0)
+    {
+        //redraw issued => run automatic redraw?
+        if (view_manager_.automaticRedrawEnabled())
+            updateView();
+    }
+}
+
+/**
+ * Informs the view that the given view update is needed.
+ * (Note: the update is cached until the next call to updateView())
+ * @param add If true the update is added incrementally to any existing update, if false it will overwrite any existing update.
+ */
+void View::notifyViewUpdateNeeded(int flags, bool add)
+{
+    assert (widget_);
+
+    //live mode updates are handled immediately in their own way
+    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
+    {
+        if (flags & VU_Reload)
+        {
+            //in live mode a view handles its reload internally in its data widget
+            widget_->getViewDataWidget()->liveReload();
+        }
+        else if (flags & VU_Redraw)
+        {
+            //just redraw
+            updateView(VU_PureRedraw);
+        }
+        return;
+    }
+
+    //check if this is the first update issued
+    bool update_components  = !updateNeeded();
+
+    //add update to issued updates
+    if (add && issued_update_.has_value())
+        issued_update_.value() |= flags; //add incrementally to existing update
+    else
+        issued_update_ = flags;
+
+    //check reload state after adding update
+    bool reload_view_needed = reloadNeeded();
+
+    //notify view if reload state has changed
+    if (view_manager_.reloadNeeded() != reload_view_needed)
+        view_manager_.notifyReloadStateChanged();
+
+    //run any needed automatic updates
+    runAutomaticUpdates();
+
+    //inform dependent components if this is the first view update added
+    if (update_components)
+        widget_->updateComponents();
+}
+
+/**
+ * Notifies the view that a view redraw is needed.
+ * @param add If true the update is added incrementally to any existing update, if false it will overwrite any existing update.
+ */
+void View::notifyRedrawNeeded(bool add)
+{
+    notifyViewUpdateNeeded(VU_RecomputedRedraw, add);
+}
+
+/**
+ * Notifies the view that a view reload is needed.
+ * @param add If true the update is added incrementally to any existing update, if false it will overwrite any existing update.
+ */
+void View::notifyReloadNeeded(bool add)
+{
+    notifyViewUpdateNeeded(VU_Reload, add);
+}
+
+/**
+ * Notifies the view that a "refresh" is needed and determines what kind of update is needed.
+ * It is suggested to use this method in derived classes in order to notify the view about needed updates,
+ * since it can automatically determine what is needed.
+ * 
+ * (Note: this function will always reset any pending updates, as it determines the new needed update state on-the-fly)
+ */
+void View::notifyRefreshNeeded()
+{
+    assert(widget_);
+
+    //reset already issued updates, since we can determine which updates are needed on-the-fly (either redraw or reload),
+    //no matter what the last config state has looked like
+    issued_update_.reset();
+
+    //run a check if all needed variables are already loaded
+    bool has_varset = widget_->isVariableSetLoaded();
+
+    //std::cout << "has varset: " << has_varset << std::endl;
+
+    //update depending on that information
+    bool reload_needed = !has_varset;
+
+    if (reload_needed)
+        notifyReloadNeeded(false);
+    else
+        notifyRedrawNeeded(false);
+}
+
+/**
+ * Updates the view by applying all needed updates.
+ * This method can be used to keep the view up-to-date from the outside.
+ */
+void View::updateView()
+{
+    assert (widget_);
+
+    int update_flags = 0;
+
+    //add my own issued updates
+    if (issued_update_.has_value())
+    {
+        update_flags  |= issued_update_.value();
+        issued_update_.reset();
+    }
+
+    //add view manager's needed updates
+    if (view_manager_.reloadNeeded())
+    {
+        //viewmanager desires global reload
+        update_flags |= VU_Reload;
+    }
+
+    //nothing to do?
+    if (update_flags == 0)
+        return; 
+
+    bool components_updated = update_flags & VU_UpdateComponents;
+    bool view_reloaded      = update_flags & VU_Reload;
+
+    //update view
+    updateView(update_flags);
+
+    //inform dependent components now if not previously done by view update
+    if (!components_updated && !view_reloaded)
+        widget_->updateComponents();
+}
+
+/**
+ * Updates the view according to the given update flags.
+*/
+void View::updateView(int flags)
+{
+    assert (widget_);
+
+    if (flags & VU_Reload) //reload = complete update
+    {
+        //start reload (will reset all cached updates)
+        COMPASS::instance().dbContentManager().load();
+    }
+    else //handle all other updates
+    {
+        if (flags & VU_Redraw)
+            widget_->getViewDataWidget()->redrawData(flags & VU_Recompute, true);
+        if (flags & VU_UpdateComponents)
+            widget_->updateComponents();
+    }
+}
+
+/**
+ * Applies the given preset to the view.
+ */
+View::PresetError View::applyPreset(const ViewPresets::Preset& preset,
+                                    std::vector<MissingKey>* missing_subconfig_keys,
+                                    std::vector<MissingKey>* missing_param_keys,
+                                    std::string* error_msg)
+{
+    auto version = COMPASS::instance().config().getString("version");
+
+    if (!preset.app_version.empty() && preset.app_version != version)
+        return PresetError::IncompatibleVersion;
+
+    bool assert_on_errors = !COMPASS::instance().isAppImage();
+
+    auto result = reconfigure(preset.view_config, missing_subconfig_keys, missing_param_keys, assert_on_errors);
+
+    if (error_msg)
+        *error_msg = result.second;
+
+    if (result.first == View::ReconfigureError::PreCheckFailed)
+        return PresetError::IncompatibleContent;
+    else if (result.first == View::ReconfigureError::ApplyFailed)
+        return PresetError::ApplyFailed;
+    else if (result.first == View::ReconfigureError::GeneralError)
+        return PresetError::GeneralError;
+    else if (result.first == View::ReconfigureError::UnknownError)
+        return PresetError::UnknownError;
+
+    //store preset and revert changes
+    active_preset_  = preset;
+    preset_changed_ = false;
+
+    //notify about preset changes
+    emit presetChangedSignal();
+
+    return PresetError::NoError;
+}
+
+/**
+ * Reacts on edited presets. Depending on the type of edit this might concern a view or not.
+ */
+void View::presetEdited(ViewPresets::EditAction ea)
+{
+    assert(ea.valid());
+
+    const auto& presets = view_manager_.viewPresets().presets();
+
+    if (ea.mode == ViewPresets::EditMode::Add)
+    {
+        //if my view has added the preset => set active preset to new one
+        if (ea.view == this)
+        {
+            const auto& preset = presets.at(ea.key);
+
+            active_preset_  = preset;
+            preset_changed_ = false;
+        }
+    }
+    else if (ea.mode == ViewPresets::EditMode::Remove)
+    {
+        if (!active_preset_.has_value())
+            return;
+
+        //if my active preset has been removed => reset active preset
+        if (active_preset_->key() == ea.key)
+        {
+            active_preset_.reset();
+            preset_changed_ = false;
+        }
+    }
+    else if (ea.mode == ViewPresets::EditMode::Update)
+    {
+        if (!active_preset_.has_value())
+            return;
+        
+        //if my active preset is the updated preset => update local preset
+        if (active_preset_->key() == ea.key)
+        {
+            const auto& preset = presets.at(ea.key);
+
+            active_preset_  = preset;
+
+            //if the config has been updated the preset is synced to the current view config => reset changes
+            if (ea.config_changed)
+                preset_changed_ = false;
+        }
+    }
+    else if (ea.mode == ViewPresets::EditMode::Copy)
+    {
+        if (!active_preset_.has_value())
+            return;
+
+        //@TODO: actions needed?
+    }
+    else if (ea.mode == ViewPresets::EditMode::Rename)
+    {
+        if (!active_preset_.has_value())
+            return;
+
+        //@TODO: actions needed?
+    }
+
+    //notify about preset changes
+    emit presetChangedSignal();
+}
+
+/**
+ * Return the active preset.
+ */
+const ViewPresets::Preset* View::activePreset() const
+{
+    if (!active_preset_.has_value())
+        return nullptr;
+
+    return &active_preset_.value();
+}
+
+/**
+ * Check if the currently stored preset has any modifications.
+ */
+bool View::presetChanged() const
+{
+    return (active_preset_.has_value() && preset_changed_);
+}
+
+/**
+ * Returns view-specific json information.
+ */
+nlohmann::json View::viewInfoJSON() const
+{
+    assert(widget_);
+
+    nlohmann::json info;
+
+    //add basic information
+    info[ "name" ] = getName();
+
+    //add widget information
+    info[ "ui"   ] = widget_->viewInfoJSON();
+
+    //add derived view information
+    nlohmann::json view_info;
+    viewInfoJSON_impl(view_info);
+    info[ "view" ] = view_info;
+
+    return info;
 }

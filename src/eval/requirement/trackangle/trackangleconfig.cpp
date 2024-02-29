@@ -17,14 +17,15 @@
 
 #include "eval/requirement/trackangle/trackangleconfig.h"
 #include "eval/requirement/trackangle/trackangleconfigwidget.h"
+#include "eval/requirement/trackangle/trackangle.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
-#include "stringconv.h"
+//#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttable.h"
+//#include "stringconv.h"
 
-using namespace Utils;
+//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -36,10 +37,10 @@ TrackAngleConfig::TrackAngleConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold", &threshold_, 15.0);
+    registerParameter("threshold", &threshold_, 15.0f);
 
     registerParameter("use_minimum_speed", &use_minimum_speed_, true);
-    registerParameter("minimum_speed", &minimum_speed_, 3.0);
+    registerParameter("minimum_speed", &minimum_speed_, 3.0f);
 
     registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,
                       (unsigned int) COMPARISON_TYPE::LESS_THAN_OR_EQUAL);

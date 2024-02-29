@@ -19,8 +19,8 @@
 #define HISTOGRAMVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-#include "dbcontent/variable/variable.h"
-#include "appmode.h"
+//#include "dbcontent/variable/variable.h"
+//#include "appmode.h"
 
 class HistogramView;
 class HistogramViewWidget;
@@ -41,7 +41,7 @@ class GroupBox;
  * @brief Widget with configuration elements for a HistogramView
  *
  */
-class HistogramViewConfigWidget : public ViewConfigWidget
+class HistogramViewConfigWidget : public TabStyleViewConfigWidget
 {
     Q_OBJECT
 
@@ -60,11 +60,16 @@ public:
 
     void updateConfig();
 
+    virtual void configChanged() override;
+
 protected:
     void updateEvalConfig();
     void updateInfo();
+    void updateSelectedVar();
+    void updateLogScale();
 
     virtual void onDisplayChange_impl() override;
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     HistogramView* view_ = nullptr;
 

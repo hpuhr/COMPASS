@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "viewcomponent.h"
 #include "appmode.h"
 #include "json.h"
 
@@ -25,11 +26,14 @@
 class ViewWidget;
 class View;
 
+class QTabWidget;
+class QVBoxLayout;
+
 /**
  * Base class for view configuration widgets, which are held in the configuration area of the ViewWidget.
  * Derive and reimplement as needed.
-*/
-class ViewConfigWidget : public QWidget
+ */
+class ViewConfigWidget : public QWidget, public ViewComponent
 {
 public:
     ViewConfigWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
@@ -42,14 +46,39 @@ public:
     virtual void redrawStarted();
     virtual void redrawDone();
     virtual void appModeSwitch(AppMode app_mode);
+    virtual void configChanged();
 
-    virtual nlohmann::json viewInfo(const std::string& what) const { return {}; }
+    nlohmann::json viewInfoJSON() const override final;
 
+    static const int MinWidth  = 400;
+    
 protected:
     virtual void onDisplayChange_impl() {} 
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
     ViewWidget* getWidget() { return view_widget_; }
 
 private:
     ViewWidget* view_widget_ = nullptr;
+};
+
+/**
+ * This config widget already contains a tab widget arranged in a vertical layout,
+ * which can be retrieved and reused in derived classes.
+ */
+class TabStyleViewConfigWidget : public ViewConfigWidget
+{
+public:
+    TabStyleViewConfigWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    virtual ~TabStyleViewConfigWidget() = default;
+
+    static const int TabHeight = 42;
+
+protected:
+    QTabWidget* getTabWidget() { return tab_widget_; }
+    QVBoxLayout* getMainLayout() { return main_layout_; }
+
+private:
+    QTabWidget*  tab_widget_  = nullptr;
+    QVBoxLayout* main_layout_ = nullptr;
 };

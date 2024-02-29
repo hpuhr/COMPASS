@@ -46,7 +46,7 @@ Depending on the DSType, additional information can be set in a source. For a no
 \begin{itemize}
     \item 4 different lines are possible, each with 
     \begin{itemize}
-      \item Listen IP (optional, defines used network interface and IGMP requests)
+      \item Listen IP (defines used network interface and IGMP requests, optional when not using multicast)
       \item Multicast IP
       \item Multicast port
       \item Sender IP (optional, for filtering purposes)
@@ -55,7 +55,9 @@ Depending on the DSType, additional information can be set in a source. For a no
 \end{itemize}
 \ \\
 
-Please note that if e.g. only Multicast IP and port are set, and the Multicast IP is set to a non-multicast one (outside of 224.0.0.0 to 239.255.255.255), a local replay is possible (without multi-casting). \\
+Please note that for using real multicast addressess (inside of 224.0.0.0 to 239.255.255.255), it is recommended to also define the Listen IP to the local address of the network interface to be used. Otherwise the multicast data might not be received, or the wrong network interface might be used, causing COMPASS to receive no data. \\
+
+Please note that if e.g. only Multicast IP and port are set, and the Multicast IP is set to a non-multicast one (outside of 224.0.0.0 to 239.255.255.255), a local replay is possible (without real multi-casting). \\
 
 For sources of DSType 'Radar', the follwing additional information should be provided:
 

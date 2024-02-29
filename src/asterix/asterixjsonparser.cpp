@@ -5,10 +5,10 @@
 #include "configuration.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "stringconv.h"
-#include "unit.h"
-#include "unitmanager.h"
-#include "util/json.h"
+//#include "stringconv.h"
+//#include "unit.h"
+//#include "unitmanager.h"
+//#include "util/json.h"
 #include "asteriximporttask.h"
 #include "files.h"
 
@@ -32,10 +32,9 @@ ASTERIXJSONParser::ASTERIXJSONParser(const std::string& class_id, const std::str
                    "task_import_asterix_" + boost::algorithm::to_lower_copy(instance_id) + ".json"),
       task_(task)
 {
-    registerParameter("name", &name_, "");
-    registerParameter("category", &category_, 0);
-
-    registerParameter("db_content_name", &db_content_name_, "");
+    registerParameter("name", &name_, std::string());
+    registerParameter("category", &category_, 0u);
+    registerParameter("db_content_name", &db_content_name_, std::string());
 
     assert(db_content_name_.size());
 
@@ -163,14 +162,11 @@ void ASTERIXJSONParser::selectMapping (unsigned int index)
 {
     loginf << "ASTERIXJSONParser: selectMapping: index " << index;
 
-    assert (widget_);
-    widget_->selectModelRow(index);
+    emit modelRowChanged(index);
 }
 
 void ASTERIXJSONParser::selectUnmappedDBContentVariable (const std::string& name)
 {
-    assert (widget_);
-
     auto iter = find(not_added_dbo_variables_.begin(), not_added_dbo_variables_.end(), name);
     assert (iter != not_added_dbo_variables_.end());
 
@@ -178,7 +174,9 @@ void ASTERIXJSONParser::selectUnmappedDBContentVariable (const std::string& name
 
     assert (pos < not_added_dbo_variables_.size());
 
-    widget_->selectModelRow(data_mappings_.size() + not_added_json_keys_.size() + pos);
+    unsigned int index = data_mappings_.size() + not_added_json_keys_.size() + pos;
+
+    emit modelRowChanged(index);
 }
 
 //void ASTERIXJSONParser::updateToChangedIndex (unsigned int row_index)
@@ -570,18 +568,18 @@ void ASTERIXJSONParser::checkIfKeysExistsInMappings(const std::string& location,
                  << db_content_name_ << "'" << location << "' type " << j.type_name() << " value "
                  << j.dump() << " in array " << is_in_array;
 
-        Configuration& new_cfg = configuration().addNewSubConfiguration("JSONDataMapping");
-        new_cfg.addParameterString("json_key", location);
-        new_cfg.addParameterString("dbcontent_name", db_content_name_);
+        auto new_cfg = Configuration::create("JSONDataMapping");
+        new_cfg->addParameter<std::string>("json_key", location);
+        new_cfg->addParameter<std::string>("dbcontent_name", db_content_name_);
 
         if (is_in_array)
-            new_cfg.addParameterBool("in_array", true);
+            new_cfg->addParameter<bool>("in_array", true);
 
         std::stringstream ss;
         ss << "Type " << j.type_name() << ", value " << j.dump();
-        new_cfg.addParameterString("comment", ss.str());
+        new_cfg->addParameter<std::string>("comment", ss.str());
 
-        generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+        Configurable::generateSubConfigurableFromConfig(std::move(new_cfg));
     }
 }
 
@@ -617,18 +615,12 @@ void ASTERIXJSONParser::removeMapping(unsigned int index)
 
 const dbContent::VariableSet& ASTERIXJSONParser::variableList() const { return var_list_; }
 
-ASTERIXJSONParserWidget* ASTERIXJSONParser::widget()
+ASTERIXJSONParserWidget* ASTERIXJSONParser::createWidget()
 {
     if (mapping_checks_dirty_)
         doMappingChecks();
 
-    if (!widget_)
-    {
-        widget_.reset(new ASTERIXJSONParserWidget(*this));
-        assert(widget_);
-    }
-
-    return widget_.get();  // needed for qt integration, not pretty
+    return new ASTERIXJSONParserWidget(*this);
 }
 
 std::string ASTERIXJSONParser::dbContentName() const { return db_content_name_; }

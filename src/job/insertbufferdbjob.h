@@ -62,8 +62,6 @@ class InsertBufferDBJob : public Job
     DBContent& dbobject_;
     std::shared_ptr<Buffer> buffer_;
     bool emit_change_{true};
-
-    void partialInsertBuffer(DBTable& table);
 };
 
 #endif /* INSERTBUFFERDBJOB_H_ */

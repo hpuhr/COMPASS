@@ -1,0 +1,88 @@
+{
+    "app_version": "0.7.5",
+    "category": "Default",
+    "description": "Contains main variables to be displayed by default, as well as Mode 3/A and Mode C garbled/valid/smoothed information.",
+    "deployed": true,
+    "modified": false,
+    "name": "Mode A/C Info",
+    "timestamp": "2024-02-07 15:35:27.008",
+    "view": "TableView",
+    "view_config": {
+        "parameters": {
+        },
+        "sub_configs": {
+            "TableViewDataSource": {
+                "TableViewDataSource0": {
+                    "parameters": null,
+                    "sub_configs": {
+                        "VariableOrderedSet": {
+                            "Default": {
+                                "parameters": {
+                                    "variable_definitions": [
+                                        [
+                                            "Meta",
+                                            "Timestamp"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "DS ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Line ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Garbled"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Valid"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Smoothed"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Address"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Identification"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Number"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Garbled"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Valid"
+                                        ]
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "TableViewWidget": {
+                "TableViewWidget0": {
+                    "parameters": null
+                }
+            }
+        }
+    }
+}

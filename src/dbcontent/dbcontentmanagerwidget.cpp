@@ -17,9 +17,9 @@
 
 #include "dbcontent/dbcontentmanagerwidget.h"
 
-#include "compass.h"
+//#include "compass.h"
 #include "configuration.h"
-#include "configurationmanager.h"
+//#include "configurationmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentwidget.h"
@@ -28,7 +28,7 @@
 #include "global.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/metavariablewidget.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
 #include <QComboBox>
 #include <QGridLayout>
@@ -175,15 +175,15 @@ void DBContentManagerWidget::addDBOSlot()
             return;
         }
 
-            std::string instance = "DBContent" + name + "0";
+        std::string instance = "DBContent" + name + "0";
 
-            Configuration& config = object_manager_.addNewSubConfiguration("DBContent", instance);
-            config.addParameterString("name", name);
-             //config.addParameterString ("meta_table", meta_table_name); // TODO add db_table_name
+        auto config = Configuration::create("DBContent", instance);
+        config->addParameter<std::string>("name", name);
+        //config->addParameter<std::string> ("meta_table", meta_table_name); // TODO add db_table_name
 
-            object_manager_.generateSubConfigurable("DBContent", instance);
+        object_manager_.generateSubConfigurableFromConfig(std::move(config));
 
-            updateDBContentsSlot();
+        updateDBContentsSlot();
     }
 }
 
@@ -353,11 +353,10 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
 
                     std::string instance = "MetaVariable" + var_it.first + "0";
 
-                    Configuration& config =
-                        object_manager_.addNewSubConfiguration("MetaVariable", instance);
-                    config.addParameterString("name", var_it.first);
+                    auto config = Configuration::create("MetaVariable", instance);
+                    config->addParameter<std::string>("name", var_it.first);
 
-                    object_manager_.generateSubConfigurable("MetaVariable", instance);
+                    object_manager_.generateSubConfigurableFromConfig(std::move(config));
                 }
 
                 assert(object_manager_.existsMetaVariable(var_it.first));

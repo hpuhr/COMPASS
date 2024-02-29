@@ -18,7 +18,7 @@
 #include "histogramviewwidget.h"
 #include "histogramviewconfigwidget.h"
 #include "histogramviewdatawidget.h"
-#include "files.h"
+//#include "files.h"
 #include "viewtoolswitcher.h"
 #include "viewtoolwidget.h"
 
@@ -115,11 +115,4 @@ HistogramView* HistogramViewWidget::getView()
     auto view = dynamic_cast<HistogramView*>(ViewWidget::getView()); 
     assert(view);
     return view;
-}
-
-/**
-*/
-bool HistogramViewWidget::reloadNeeded_impl() const
-{
-    return getViewDataWidget()->dataNotInBuffer();
 }

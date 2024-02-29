@@ -20,6 +20,7 @@
 #include "rtcommand_registry.h"
 #include "datasourcemanager.h"
 #include "compass.h"
+#include "logger.h"
 
 #include <boost/program_options.hpp>
 
@@ -56,7 +57,7 @@ bool RTCommandGetConfigDataSources::checkResult_impl()
 {
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    setJSONReply(ds_man.getConfigDataSourcesAsJSON());
+    setJSONReply(ds_man.getSortedConfigDataSourcesAsJSON());
 
     return true;
 }
@@ -78,7 +79,7 @@ bool RTCommandGetDBDataSources::checkResult_impl()
 {
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    setJSONReply(ds_man.getDBDataSourcesAsJSON());
+    setJSONReply(ds_man.getSortedDBDataSourcesAsJSON());
 
     return true;
 }

@@ -18,9 +18,9 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
                                                  DataSourceManager& ds_manager)
     : Configurable(class_id, instance_id, &ds_manager)
 {
-    registerParameter("ds_type", &ds_type_, "");
-    registerParameter("sac", &sac_, 0);
-    registerParameter("sic", &sic_, 0);
+    registerParameter("ds_type", &ds_type_, std::string());
+    registerParameter("sac", &sac_, 0u);
+    registerParameter("sic", &sic_, 0u);
 
     assert (ds_type_.size());
 
@@ -36,9 +36,9 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
                  DataSourceManager::data_source_types_.end(), ds_type_)
             != DataSourceManager::data_source_types_.end());
 
-    registerParameter("name", &name_, "");
+    registerParameter("name", &name_, std::string());
     registerParameter("has_short_name", &has_short_name_, false);
-    registerParameter("short_name", &short_name_, "");
+    registerParameter("short_name", &short_name_, std::string());
 
     registerParameter("info", &info_, {});
 

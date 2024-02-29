@@ -20,9 +20,9 @@
 
 #include <QObject>
 
-#include "buffer.h"
+//#include "buffer.h"
 #include "configurable.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableorderedset.h"
 
 class Job;

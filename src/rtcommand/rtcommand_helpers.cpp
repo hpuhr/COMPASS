@@ -219,4 +219,46 @@ QString parameterFromStrings(const QStringList& strings)
     return strings.join(RTCommand::ParameterListSeparator);
 }
 
+/**
+ * Returns a minimum object path for the given qobject.
+ */
+QString getObjectPath(const QObject* obj)
+{
+    if (!obj || obj->objectName().isEmpty())
+        return "";
+
+    QString name = obj->objectName();
+
+    const QObject* cur_obj = obj->parent();
+    while (cur_obj)
+    {
+        if (!cur_obj->objectName().isEmpty())
+            name = cur_obj->objectName() + "." + name;
+
+        cur_obj = cur_obj->parent();
+    }
+
+    return name;
+}
+
+/**
+ * Sets a tooltip to the given display widget showing information about the given command receivers.
+ */
+QString getTooltip(const QObject* rtcmd_object,
+                   const Configurable* rtcmd_configurable)
+{
+    QString tt_txt;
+
+    if (rtcmd_object)
+        tt_txt += "Object Path: " + getObjectPath(rtcmd_object);
+
+    if (rtcmd_object && rtcmd_configurable)
+        tt_txt += "\n";
+
+    if (rtcmd_configurable)
+        tt_txt += "Configurable Path: " + QString::fromStdString(rtcmd_configurable->getPath());
+    
+    return tt_txt;
+}
+
 } // rtcommand

@@ -18,10 +18,10 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONRADARRANGECONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONRADARRANGECONFIG_H
 
-#include "configurable.h"
-#include "eval/requirement/base/probabilitybaseconfig.h"
-#include "eval/requirement/position/radarrangeconfigwidget.h"
-#include "eval/requirement/position/radarrange.h"
+//#include "configurable.h"
+#include "eval/requirement/base/baseconfig.h"
+//#include "eval/requirement/position/radarrangeconfigwidget.h"
+//#include "eval/requirement/position/radarrange.h"
 
 class Group;
 class EvaluationStandard;

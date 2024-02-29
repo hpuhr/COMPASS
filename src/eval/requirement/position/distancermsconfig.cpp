@@ -17,14 +17,15 @@
 
 #include "eval/requirement/position/distancermsconfig.h"
 #include "eval/requirement/position/distancermsconfigwidget.h"
+#include "eval/requirement/position/distancerms.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
-using namespace Utils;
+//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -36,12 +37,11 @@ PositionDistanceRMSConfig::PositionDistanceRMSConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0);
+    registerParameter("threshold_value", &threshold_value_, 50.0f);
 }
 
 PositionDistanceRMSConfig::~PositionDistanceRMSConfig()
 {
-
 }
 
 std::shared_ptr<Base> PositionDistanceRMSConfig::createRequirement()

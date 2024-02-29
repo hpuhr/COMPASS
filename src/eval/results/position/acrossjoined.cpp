@@ -15,18 +15,21 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/position/acrosssingle.h"
+//#include "eval/results/position/acrosssingle.h"
 #include "eval/results/position/acrossjoined.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/position/across.h"
-#include "evaluationtargetdata.h"
+//#include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "compass.h"
+#include "viewpoint.h"
+#include "sectorlayer.h"
 
 #include <QFileDialog>
 
@@ -247,11 +250,11 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::getErrorsViewabl
     tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
     tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
 
-    (*viewable_ptr)[VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    (*viewable_ptr)[VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
+    (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
+    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
 
-    double lat_w = 1.1*(lat_max-lat_min)/2.0;
-    double lon_w = 1.1*(lon_max-lon_min)/2.0;
+    double lat_w = lat_max-lat_min;
+    double lon_w = lon_max-lon_min;
 
     if (lat_w < eval_man_.settings().result_detail_zoom_)
         lat_w = eval_man_.settings().result_detail_zoom_;
@@ -259,8 +262,8 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::getErrorsViewabl
     if (lon_w < eval_man_.settings().result_detail_zoom_)
         lon_w = eval_man_.settings().result_detail_zoom_;
 
-    (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
-    (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
+    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
 
     addAnnotationsFromSingles(*viewable_ptr);
 
@@ -310,6 +313,7 @@ void JoinedPositionAcross::exportAsCSV()
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
     dialog.setNameFilter("CSV Files (*.csv)");
     dialog.setDefaultSuffix("csv");
     dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);

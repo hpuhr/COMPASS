@@ -109,6 +109,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "imports view points JSON file with given filename, e.g. '/data/file1.json'")
             ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
+            ("import_asterix_files", po::value<std::string>(&import_asterix_filenames_),
+             "imports multiple ASTERIX files with given filenames, e.g. '/data/file1.ff;/data/file2.ff'")
             ("import_asterix_file_line", po::value<std::string>(&import_asterix_file_line_),
              "imports ASTERIX file with given line, e.g. 'L2'")
             ("import_asterix_date", po::value<std::string>(&import_asterix_date_),
@@ -155,7 +157,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
              "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
-            ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in OSGView'")
+            ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in GeographicView'")
             ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
             ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
             ("enable_event_log", po::bool_switch(&enable_event_log_), "collect warnings and errors in the event log")
@@ -291,8 +293,6 @@ void Client::run ()
 
     if (import_asterix_filename_.size())
     {
-        //main_window.importASTERIXFile(import_asterix_filename_);
-
         string cmd = "import_asterix_file "+import_asterix_filename_;
 
         if (asterix_framing.size() && asterix_framing != "none")
@@ -316,6 +316,33 @@ void Client::run ()
 
         rt_man.addCommand(cmd);
     }
+
+    if (import_asterix_filenames_.size())
+    {
+        string cmd = "import_asterix_files '"+import_asterix_filenames_+"'";
+
+        if (asterix_framing.size() && asterix_framing != "none")
+            cmd += " --framing "+asterix_framing;
+        else
+            cmd += " --framing none";
+
+        if (import_asterix_file_line_.size())
+            cmd += " --line "+import_asterix_file_line_;
+        else
+            cmd += " --line L1";
+
+        if (import_asterix_date_.size())
+            cmd += " --date "+import_asterix_date_;
+
+        if (import_asterix_file_time_offset_.size())
+            cmd += " --time_offset "+import_asterix_file_time_offset_;
+
+        if (import_asterix_ignore_time_jumps_)
+            cmd += " --ignore_time_jumps";
+
+        rt_man.addCommand(cmd);
+    }
+
     else if (import_asterix_network_)
     {
         string cmd = "import_asterix_network";
@@ -499,11 +526,11 @@ void Client::checkAndSetupConfig()
                             "COMPASS", "COMPASS0");
 
                 assert (compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
-                Configuration& task_man_config = compass_config.getSubConfiguration(
+                Configuration& task_man_config = compass_config.assertSubConfiguration(
                             "TaskManager", "TaskManager0");
 
                 assert (task_man_config.hasSubConfiguration("GPSTrailImportTask", "GPSTrailImportTask0"));
-                Configuration& gps_task_config = task_man_config.getSubConfiguration(
+                Configuration& gps_task_config = task_man_config.assertSubConfiguration(
                             "GPSTrailImportTask", "GPSTrailImportTask0");
 
                 gps_task_config.overrideJSONParameters(gps_config);
@@ -529,7 +556,7 @@ void Client::checkAndSetupConfig()
                             "COMPASS", "COMPASS0");
 
                 assert (compass_config.hasSubConfiguration("EvaluationManager", "EvaluationManager0"));
-                Configuration& eval_man_config = compass_config.getSubConfiguration(
+                Configuration& eval_man_config = compass_config.assertSubConfiguration(
                             "EvaluationManager", "EvaluationManager0");
 
                 eval_man_config.overrideJSONParameters(eval_config);

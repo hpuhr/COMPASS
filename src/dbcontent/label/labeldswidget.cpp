@@ -23,8 +23,7 @@ namespace dbContent
 {
 
 
-LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
-                                                       Qt::WindowFlags f)
+LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), label_generator_(label_generator)
 {
     arrow_lu_ = QIcon(Files::getIconFilepath("arrow_lu.png").c_str());
@@ -45,13 +44,11 @@ LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
     connect(&COMPASS::instance().dataSourceManager(), &DataSourceManager::dataSourcesChangedSignal,
             this, &LabelDSWidget::updateListSlot); // update if data sources changed
 
-    connect(&COMPASS::instance().dbContentManager().labelGenerator(), &LabelGenerator::labelLinesChangedSignal,
+    connect(&label_generator, &LabelGenerator::labelLinesChangedSignal,
             this, &LabelDSWidget::updateListSlot); // update if lines changed
 }
 
-LabelDSWidget::~LabelDSWidget()
-{
-}
+LabelDSWidget::~LabelDSWidget() = default;
 
 void LabelDSWidget::forceUpdateList()
 {
@@ -102,7 +99,7 @@ void LabelDSWidget::updateListSlot()
 
     QLabel* dir_label = new QLabel("Direction");
     dir_label->setFont(font_bold);
-    ds_grid_->addWidget(dir_label, row, 2);;
+    ds_grid_->addWidget(dir_label, row, 2);
 
     for (const auto& ds_it : ds_man.dbDataSources())
     {
@@ -147,7 +144,7 @@ void LabelDSWidget::sourceClickedSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "OSGViewConfigLabelDSWidget: sourceClickedSlot: ds_id " << ds_id;
+    loginf << "LabelDSWidget: sourceClickedSlot: ds_id " << ds_id;
 
     if (label_generator_.labelWanted(ds_id))
         label_generator_.removeLabelDSID(ds_id);
@@ -163,7 +160,7 @@ void LabelDSWidget::changeLineSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "OSGViewConfigLabelDSWidget: changeLineSlot: ds_id " << ds_id;
+    loginf << "LabelDSWidget: changeLineSlot: ds_id " << ds_id;
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
     assert (ds_man.hasDBDataSource(ds_id));
@@ -194,7 +191,7 @@ void LabelDSWidget::changeDirectionSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "OSGViewConfigLabelDSWidget: changeDirectionSlot: ds_id " << ds_id;
+    loginf << "LabelDSWidget: changeDirectionSlot: ds_id " << ds_id;
 
     QMenu menu;
 

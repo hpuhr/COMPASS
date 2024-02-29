@@ -17,14 +17,15 @@
 
 #include "eval/requirement/position/latencyconfig.h"
 #include "eval/requirement/position/latencyconfigwidget.h"
+#include "eval/requirement/position/latency.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
-using namespace Utils;
+//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -36,12 +37,11 @@ PositionLatencyConfig::PositionLatencyConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("max_abs_value", &max_abs_value_, 0.050);
+    registerParameter("max_abs_value", &max_abs_value_, 0.050f);
 }
 
 PositionLatencyConfig::~PositionLatencyConfig()
 {
-
 }
 
 std::shared_ptr<Base> PositionLatencyConfig::createRequirement()

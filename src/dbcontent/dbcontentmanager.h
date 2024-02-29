@@ -19,11 +19,11 @@
 #define DBCONTENT_DBCONTENTMANAGER_H_
 
 #include "configurable.h"
-#include "global.h"
-#include "singleton.h"
+//#include "global.h"
+//#include "singleton.h"
 #include "buffer.h"
 #include "targetmodel.h"
-#include "dbcontent/dbcontentcache.h"
+//#include "dbcontent/dbcontentcache.h"
 #include "viewabledataconfig.h"
 
 #include <boost/optional.hpp>
@@ -39,17 +39,16 @@ class DBContentManagerWidget;
 class DBSchemaManager;
 class DBContentDeleteDBJob;
 
-namespace dbContent {
-
-class MetaVariableConfigurationDialog;
-class Variable;
-class MetaVariable;
-class VariableSet;
-class Target;
-class TargetListWidget;
-class LabelGenerator;
-class VariableSet;
-
+namespace dbContent 
+{
+    class MetaVariableConfigurationDialog;
+    class Variable;
+    class MetaVariable;
+    class VariableSet;
+    class Target;
+    class TargetListWidget;
+//    class LabelGenerator;
+    class VariableSet;
 }
 
 class DBContentManager : public QObject, public Configurable
@@ -84,8 +83,6 @@ public:
     virtual ~DBContentManager();
 
     virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override;
-
-    dbContent::LabelGenerator& labelGenerator();
 
     bool existsDBContent(const std::string& dbcontent_name);
     DBContent& dbContent(const std::string& dbcontent_name);
@@ -131,9 +128,9 @@ public:
     void setAssociationsIdentifier(const std::string& assoc_id);
     std::string associationsID() const;
 
-    bool hasMaxRecordNumber() const { return has_max_rec_num_; }
-    unsigned long maxRecordNumber() const;
-    void maxRecordNumber(unsigned long value);
+    bool hasMaxRecordNumberWODBContentID() const { return has_max_rec_num_wo_dbcontid_; }
+    unsigned long maxRecordNumberWODBContentID() const;
+    void maxRecordNumberWODBContentID(unsigned long value);
 
     bool hasMaxRefTrajTrackNum() const { return has_max_reftraj_track_num_; }
     unsigned int maxRefTrajTrackNum() const;
@@ -187,19 +184,19 @@ public:
 
     void autoFilterUTNS();
     void showUTN (unsigned int utn);
+    void showUTNs (std::vector<unsigned int> utns);
 
 protected:
     COMPASS& compass_;
 
-    std::unique_ptr<dbContent::LabelGenerator> label_generator_;
     std::unique_ptr<dbContent::TargetModel> target_model_;
     std::unique_ptr<dbContent::TargetListWidget> target_list_widget_;
 
     bool has_associations_{false};
     std::string associations_id_;
 
-    bool has_max_rec_num_ {false};
-    unsigned long max_rec_num_ {0};
+    bool has_max_rec_num_wo_dbcontid_ {false};
+    unsigned long max_rec_num_wo_dbcontid_ {0};
 
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
@@ -215,6 +212,7 @@ protected:
     boost::optional<double> longitude_max_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
+    std::map<std::string, std::vector<unsigned long>> tmp_selected_rec_nums_; // for storage between loads
 
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
 
@@ -225,8 +223,6 @@ protected:
     std::map<std::string, DBContent*> dbcontent_;
     std::map<unsigned int, DBContent*> dbcontent_ids_;
     std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
-
-    //std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
 
     std::unique_ptr<DBContentManagerWidget> widget_;
 
@@ -246,12 +242,15 @@ protected:
 
     void updateNumLoadedCounts(); // from data_
 
-    void loadMaxRecordNumber();
+    void loadMaxRecordNumberWODBContentID();
     void loadMaxRefTrajTrackNum();
 
     void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
 
     void setViewableDataConfig (const nlohmann::json::object_t& data);
+
+    void saveSelectedRecNums();
+    void restoreSelectedRecNums();
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

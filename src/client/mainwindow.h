@@ -18,7 +18,7 @@
 #ifndef MAINWINDOW_H_
 #define MAINWINDOW_H_
 
-#include "global.h"
+//#include "global.h"
 #include "appmode.h"
 #include "autoresumedialog.h"
 
@@ -66,6 +66,7 @@ public slots:
     void liveStopSlot();
 
     void configureDataSourcesSlot();
+    void configureFFTsSlot();
     void configureMetaVariablesSlot();
     void configureSectorsSlot();
 
@@ -73,7 +74,7 @@ public slots:
     void importRecentAsterixRecordingSlot();
     void clearImportRecentAsterixRecordingsSlot();
     void importAsterixFromNetworkSlot();
-
+    void importAsterixFromPCAPSlot();
     void importJSONRecordingSlot();
 
     void importGPSTrailSlot();
@@ -112,6 +113,14 @@ public:
     void updateBottomWidget();
 
 protected:
+    void createMenus ();
+    void createDebugMenu();
+
+    /// @brief Called when application closes
+    void closeEvent(QCloseEvent* event);
+
+    void shutdown();
+
     QTabWidget* tab_widget_{nullptr};
 
     QPushButton* add_view_button_{nullptr};
@@ -157,14 +166,6 @@ protected:
 
     std::unique_ptr<AutoResumeDialog> auto_resume_dialog_;
     QTimer* auto_resume_timer_ {nullptr};
-
-    void createMenus ();
-    void createDebugMenu();
-
-    /// @brief Called when application closes
-    void closeEvent(QCloseEvent* event);
-
-    void shutdown();
 
 private:
     void showCommandShell();

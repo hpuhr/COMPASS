@@ -1,6 +1,7 @@
 #include "radarplotpositioncalculatortaskdialog.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
+#include "logger.h"
 
 #include <QHBoxLayout>
 #include <QLabel>

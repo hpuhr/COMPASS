@@ -17,14 +17,13 @@
 
 #include "createartasassociationsjob.h"
 #include "compass.h"
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "createartasassociationstask.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 #include "util/timeconv.h"
 #include "util/number.h"
@@ -33,6 +32,8 @@
 
 #include <QThread>
 #include <QCoreApplication>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <cmath>
 #include <algorithm>

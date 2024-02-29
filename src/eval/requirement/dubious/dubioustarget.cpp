@@ -19,7 +19,7 @@
 #include "eval/requirement/dubious/dubioustarget.h"
 #include "eval/results/dubious/dubioustargetsingle.h"
 #include "evaluationmanager.h"
-#include "evaluationdata.h"
+//#include "evaluationdata.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "util/number.h"

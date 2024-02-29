@@ -66,10 +66,25 @@ protected:
 struct RTCommandUIGet : public RTCommandUIObject
 {
     QString what;
+    bool    as_json = false;
+    bool    visible = false;
 protected:
     virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(uiget, "retrieves the value of the given ui element")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+/**
+ */
+struct RTCommandUIGetJSON : public RTCommandUIObject
+{
+    QString what;
+    bool    visible = false;
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(uiget_json, "retrieves the value of the given ui element as json")
     DECLARE_RTCOMMAND_OPTIONS
 };
 
@@ -86,12 +101,24 @@ protected:
 };
 
 /**
+ */
+struct RTCommandUIRefresh : public RTCommandUIObject
+{
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(uirefresh, "refreshes the given ui element")
+};
+
+/**
 */
 inline void initUITestCommands()
 {
     RTCommandUISet::init();
     RTCommandUIGet::init();
+    RTCommandUIGetJSON::init();
     RTCommandUIInject::init();
+    RTCommandUIRefresh::init();
 }
 
 } // namespace ui_test

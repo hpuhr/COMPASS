@@ -17,10 +17,11 @@
 
 #include "eval/requirement/position/distanceconfig.h"
 #include "eval/requirement/position/distanceconfigwidget.h"
+#include "eval/requirement/position/distance.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/probabilitybase.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "stringconv.h"
 
@@ -36,7 +37,7 @@ PositionDistanceConfig::PositionDistanceConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0);
+    registerParameter("threshold_value", &threshold_value_, 50.0f);
     registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,
                       (unsigned int) COMPARISON_TYPE::LESS_THAN_OR_EQUAL);
     registerParameter("failed_values_of_interest", &failed_values_of_interest_, true);
@@ -44,7 +45,6 @@ PositionDistanceConfig::PositionDistanceConfig(
 
 PositionDistanceConfig::~PositionDistanceConfig()
 {
-
 }
 
 std::shared_ptr<Base> PositionDistanceConfig::createRequirement()

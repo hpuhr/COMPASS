@@ -17,16 +17,16 @@
 
 #include "buffer.h"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+//#include "boost/date_time/posix_time/posix_time.hpp"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
 #include "logger.h"
 #include "nullablevector.h"
-#include "string.h"
-#include "stringconv.h"
-#include "unit.h"
-#include "unitmanager.h"
-#include "util/timeconv.h"
+//#include "string.h"
+//#include "stringconv.h"
+//#include "unit.h"
+//#include "unitmanager.h"
+//#include "util/timeconv.h"
 
 using namespace nlohmann;
 using namespace std;
@@ -155,11 +155,11 @@ void Buffer::addProperty(string id, PropertyDataType type)
             getArrayListMap<json>()[id] = shared_ptr<NullableVector<json>>(
                 new NullableVector<json>(property, *this));
             break;
-    case PropertyDataType::TIMESTAMP:
-        assert(getArrayListMap<boost::posix_time::ptime>().count(id) == 0);
-        getArrayListMap<boost::posix_time::ptime>()[id] = shared_ptr<NullableVector<boost::posix_time::ptime>>(
-            new NullableVector<boost::posix_time::ptime>(property, *this));
-        break;
+        case PropertyDataType::TIMESTAMP:
+            assert(getArrayListMap<boost::posix_time::ptime>().count(id) == 0);
+            getArrayListMap<boost::posix_time::ptime>()[id] = shared_ptr<NullableVector<boost::posix_time::ptime>>(
+                new NullableVector<boost::posix_time::ptime>(property, *this));
+            break;
         default:
             logerr << "Buffer: addProperty: unknown property type " << Property::asString(type);
             throw runtime_error("Buffer: addProperty: unknown property type " +
@@ -689,11 +689,153 @@ bool Buffer::isNull(const Property& property, unsigned int index)
             assert(getArrayListMap<boost::posix_time::ptime>().count(property.name()));
             return getArrayListMap<boost::posix_time::ptime>().at(property.name())->isNull(index);
         default:
-            logerr << "Buffer: isNone: unknown property type "
+            logerr << "Buffer: isNull: unknown property type "
                    << Property::asString(property.dataType());
-            throw runtime_error("Buffer: isNone: unknown property type " +
+            throw runtime_error("Buffer: isNull: unknown property type " +
                                      Property::asString(property.dataType()));
     }
+}
+
+void Buffer::deleteEmptyProperties()
+{
+    std::vector<Property> properties_to_delete;
+
+    for (auto& property : properties_.properties())
+    {
+        switch (property.dataType())
+        {
+            case PropertyDataType::BOOL:
+                assert(getArrayListMap<bool>().count(property.name()));
+                if (getArrayListMap<bool>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::CHAR:
+                assert(getArrayListMap<char>().count(property.name()));
+                if (getArrayListMap<char>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::UCHAR:
+                assert(getArrayListMap<unsigned char>().count(property.name()));
+                if (getArrayListMap<unsigned char>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::INT:
+                assert(getArrayListMap<int>().count(property.name()));
+                if (getArrayListMap<int>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::UINT:
+                assert(getArrayListMap<unsigned int>().count(property.name()));
+                if (getArrayListMap<unsigned int>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::LONGINT:
+                assert(getArrayListMap<long int>().count(property.name()));
+                if (getArrayListMap<long int>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::ULONGINT:
+                assert(getArrayListMap<unsigned long int>().count(property.name()));
+                if (getArrayListMap<unsigned long int>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::FLOAT:
+                assert(getArrayListMap<float>().count(property.name()));
+                if (getArrayListMap<float>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::DOUBLE:
+                assert(getArrayListMap<double>().count(property.name()));
+                if (getArrayListMap<double>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::STRING:
+                assert(getArrayListMap<string>().count(property.name()));
+                if (getArrayListMap<string>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::JSON:
+                assert(getArrayListMap<json>().count(property.name()));
+                if (getArrayListMap<json>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            case PropertyDataType::TIMESTAMP:
+                assert(getArrayListMap<boost::posix_time::ptime>().count(property.name()));
+                if (getArrayListMap<boost::posix_time::ptime>().at(property.name())->isAlwaysNull())
+                    properties_to_delete.push_back(property);
+                break;
+            default:
+                logerr << "Buffer: deleteEmptyProperties: unknown property type "
+                       << Property::asString(property.dataType());
+                throw runtime_error("Buffer: deleteEmptyProperties: unknown property type " +
+                                         Property::asString(property.dataType()));
+        }
+    }
+
+    logdbg << "Buffer: deleteEmptyProperties: " << dbcontent_name_
+           << " properties_to_delete " << properties_to_delete.size();
+
+    for (auto& property : properties_to_delete)
+    {
+        switch (property.dataType())
+        {
+            case PropertyDataType::BOOL:
+                assert(getArrayListMap<bool>().count(property.name()));
+                remove<bool>(property.name());
+                break;
+            case PropertyDataType::CHAR:
+                assert(getArrayListMap<char>().count(property.name()));
+                remove<char>(property.name());
+                break;
+            case PropertyDataType::UCHAR:
+                assert(getArrayListMap<unsigned char>().count(property.name()));
+                remove<unsigned char>(property.name());
+                break;
+            case PropertyDataType::INT:
+                assert(getArrayListMap<int>().count(property.name()));
+                remove<int>(property.name());
+                break;
+            case PropertyDataType::UINT:
+                assert(getArrayListMap<unsigned int>().count(property.name()));
+                remove<unsigned int>(property.name());
+                break;
+            case PropertyDataType::LONGINT:
+                assert(getArrayListMap<long int>().count(property.name()));
+                remove<long int>(property.name());
+                break;
+            case PropertyDataType::ULONGINT:
+                assert(getArrayListMap<unsigned long int>().count(property.name()));
+                remove<unsigned long int>(property.name());
+                break;
+            case PropertyDataType::FLOAT:
+                assert(getArrayListMap<float>().count(property.name()));
+                remove<float>(property.name());
+                break;
+            case PropertyDataType::DOUBLE:
+                assert(getArrayListMap<double>().count(property.name()));
+                remove<double>(property.name());
+                break;
+            case PropertyDataType::STRING:
+                assert(getArrayListMap<string>().count(property.name()));
+                remove<string>(property.name());
+                break;
+            case PropertyDataType::JSON:
+                assert(getArrayListMap<json>().count(property.name()));
+                remove<json>(property.name());
+                break;
+            case PropertyDataType::TIMESTAMP:
+                assert(getArrayListMap<boost::posix_time::ptime>().count(property.name()));
+                remove<boost::posix_time::ptime>(property.name());
+                break;
+            default:
+                logerr << "Buffer: deleteEmptyProperties: unknown property type "
+                       << Property::asString(property.dataType());
+                throw runtime_error("Buffer: deleteEmptyProperties: unknown property type " +
+                                         Property::asString(property.dataType()));
+        }
+    }
+
+
 }
 
 void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
@@ -720,7 +862,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
         {
             if (!properties_.hasProperty(db_column_name))
             {
-                logerr << "Buffer: transformVariables: property '" << db_column_name << "' not found";
+                //logerr << "Buffer: transformVariables: property '" << db_column_name << "' not found";
                 continue;
             }
 

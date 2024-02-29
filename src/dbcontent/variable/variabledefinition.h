@@ -15,8 +15,8 @@ class VariableDefinition : public Configurable
                           Configurable* parent)
         : Configurable(class_id, instance_id, parent)
     {
-        registerParameter("dbcontent_name", &dbcontent_name_, "");
-        registerParameter("variable_name", &variable_name_, "");
+        registerParameter("dbcontent_name", &dbcontent_name_, std::string());
+        registerParameter("variable_name", &variable_name_, std::string());
 
         // DBOVAR LOWERCASE HACK
         // boost::algorithm::to_lower(dbo_variable_name_);

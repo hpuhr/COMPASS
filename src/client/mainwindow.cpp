@@ -22,7 +22,6 @@
 #include "configurationmanager.h"
 #include "datasourcemanager.h"
 #include "datasourcesconfigurationdialog.h"
-#include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/target/targetlistwidget.h"
 #include "datasourcesloadwidget.h"
@@ -32,13 +31,10 @@
 #include "filtermanagerwidget.h"
 #include "global.h"
 #include "logger.h"
-#include "stringconv.h"
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskdialog.h"
-#include "viewpointsreportgenerator.h"
-#include "viewpointsreportgeneratordialog.h"
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskdialog.h"
 #include "gpsimportcsvtask.h"
@@ -49,7 +45,8 @@
 #include "calculatereferencestaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
-#include "viewwidget.h"
+#include "fftmanager.h"
+#include "fftsconfigurationdialog.h"
 #include "view.h"
 #include "ui_test_common.h"
 #include "ui_test_cmd.h"
@@ -203,6 +200,8 @@ MainWindow::MainWindow()
     connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
     bottom_layout->addWidget(load_button_);
 
+    load_button_->setObjectName("reload");
+
     bottom_widget->setLayout(bottom_layout);
 
     updateBottomWidget();
@@ -324,6 +323,12 @@ void MainWindow::createMenus ()
     import_recent_asterix_menu_ = import_menu_->addMenu("Recent ASTERIX Recording");
     import_recent_asterix_menu_->setToolTip("Import a recent ASTERIX Recording File");
 
+    QAction* import_pcap_file_action = new QAction("&PCAP Network Recording");
+    import_pcap_file_action->setShortcut(tr("Ctrl+P"));
+    import_pcap_file_action->setToolTip("Import ASTERIX data from PCAP network recording");
+    connect(import_pcap_file_action, &QAction::triggered, this, &MainWindow::importAsterixFromPCAPSlot);
+    import_menu_->addAction(import_pcap_file_action);
+
     QAction* import_ast_net_action = new QAction("ASTERIX From Network");
     import_ast_net_action->setToolTip("Import ASTERIX From Network");
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
@@ -366,6 +371,11 @@ void MainWindow::createMenus ()
     connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
     config_menu_->addAction(ds_action);
 
+    QAction* ffts_action = new QAction("FFTs");
+    ffts_action->setToolTip("Configure FFTs");
+    connect(ffts_action, &QAction::triggered, this, &MainWindow::configureFFTsSlot);
+    config_menu_->addAction(ffts_action);
+
     QAction* meta_action = new QAction("Meta Variables");
 
     if (expert_mode)
@@ -381,6 +391,16 @@ void MainWindow::createMenus ()
     connect(sectors_action_, &QAction::triggered, this, &MainWindow::configureSectorsSlot);
     sectors_action_->setDisabled(true);
     config_menu_->addAction(sectors_action_);
+
+    config_menu_->addSeparator();
+
+    ViewManager& view_manager = COMPASS::instance().viewManager();
+
+    auto auto_refresh_views_action = new QAction("Refresh Views Automatically");
+    auto_refresh_views_action->setCheckable(true);
+    auto_refresh_views_action->setChecked(view_manager.automaticReloadEnabled());
+    connect(auto_refresh_views_action, &QAction::toggled, &view_manager, &ViewManager::enableAutomaticReload);
+    config_menu_->addAction(auto_refresh_views_action);
 
     // process menu
     process_menu_ = menuBar()->addMenu("&Process");
@@ -631,7 +651,8 @@ void MainWindow::newDBSlot()
 {
     loginf << "MainWindow: newDBSlot";
 
-    string filename = QFileDialog::getSaveFileName(this, "New SQLite3 File").toStdString();
+    string filename = QFileDialog::getSaveFileName(
+                this, "New SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         createDB(filename);
@@ -641,7 +662,8 @@ void MainWindow::openExistingDBSlot()
 {
     loginf << "MainWindow: openExistingDBSlot";
 
-    string filename = QFileDialog::getOpenFileName(this, "Open SQLite3 File").toStdString();
+    string filename = QFileDialog::getOpenFileName(
+                this, "Open SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         openExistingDB(filename);
@@ -665,7 +687,8 @@ void MainWindow::exportDBSlot()
 {
     loginf << "MainWindow: exportDBSlot";
 
-    string filename = QFileDialog::getSaveFileName(this, "Export DB SQLite3 File").toStdString();
+    string filename = QFileDialog::getSaveFileName(
+                this, "Export DB SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
     {
@@ -725,17 +748,49 @@ void MainWindow::importAsterixRecordingSlot()
 {
     loginf << "MainWindow: importAsterixRecordingSlot";
 
-    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
+    QFileDialog dialog(this, "Import ASTERIX File(s)");
+    dialog.setViewMode(QFileDialog::Detail);
+    dialog.setFileMode(QFileDialog::ExistingFiles);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
 
-    if (filename.size() > 0)
+    ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FileASTERIX);
+
+    if (dialog.exec())
     {
-        COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
+        QStringList filenames = dialog.selectedFiles();
+
+        vector<string> filenames_vec;
+
+        for (auto& filename : filenames)
+        {
+            assert (Files::fileExists(filename.toStdString()));
+            COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename.toStdString()));
+
+            filenames_vec.push_back(filename.toStdString());
+        }
+
+        task.source().addFiles(filenames_vec);//, file_line);
+
+        //task.addImportFileNames(filenames_vec);
 
         updateMenus();
 
-        COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
-        COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+        task.runDialog(this);
     }
+
+//    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
+
+//    if (filename.size() > 0)
+//    {
+//        //COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
+
+//        updateMenus();
+
+//        COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
+//        COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+//    }
 }
 
 void MainWindow::importRecentAsterixRecordingSlot()
@@ -749,12 +804,13 @@ void MainWindow::importRecentAsterixRecordingSlot()
 
     assert (filename.size());
 
-    COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename);
+    auto& task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FileASTERIX, {filename});
 
     updateMenus();
 
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+    task.runDialog(this);
 }
 
 void MainWindow::clearImportRecentAsterixRecordingsSlot()
@@ -766,40 +822,64 @@ void MainWindow::clearImportRecentAsterixRecordingsSlot()
     updateMenus();
 }
 
+void MainWindow::importAsterixFromPCAPSlot()
+{
+    loginf << "MainWindow: importAsterixFromPCAPSlot";
+
+    auto fn = QFileDialog::getOpenFileName(this, 
+                                           "Import PCAP File", 
+                                           COMPASS::instance().lastUsedPath().c_str());
+    if (fn.isEmpty())
+        return;
+
+    ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FilePCAP, { fn.toStdString() });
+
+    updateMenus();
+
+    task.runDialog(this);
+}
+
 void MainWindow::importAsterixFromNetworkSlot()
 {
     loginf << "MainWindow: importAsterixFromNetworkSlot";
 
-    COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
+    ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
-    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+    task.source().setSourceType(ASTERIXImportSource::SourceType::NetASTERIX);
+
+    task.runDialog(this);
 }
 
 void MainWindow::importJSONRecordingSlot()
 {
-    string filename = QFileDialog::getOpenFileName(this, "Import JSON File", "", "JSON Files (*.json *.zip)").toStdString();
+    string filename = QFileDialog::getOpenFileName(
+                this, "Import JSON File", COMPASS::instance().lastUsedPath().c_str(),
+                "JSON Files (*.json *.zip)").toStdString();
 
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().jsonImporterTask().importFilename(filename); // also adds
+        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
         updateMenus();
 
         COMPASS::instance().taskManager().jsonImporterTask().dialog()->updateSource();
         COMPASS::instance().taskManager().jsonImporterTask().dialog()->show();
     }
-
 }
 
 void MainWindow::importGPSTrailSlot()
 {
-    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail", "",
+    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail",
+                                                   COMPASS::instance().lastUsedPath().c_str(),
                                                    "Text Files (*.nmea *.txt)").toStdString();
 
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().gpsTrailImportTask().importFilename(filename);
+        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
         updateMenus();
 
@@ -809,12 +889,14 @@ void MainWindow::importGPSTrailSlot()
 
 void MainWindow::importGPSCSVSlot()
 {
-    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV", "",
+    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV",
+                                                   COMPASS::instance().lastUsedPath().c_str(),
                                                    "Text Files (*.csv *.txt)").toStdString();
 
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().gpsImportCSVTask().importFilename(filename);
+        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
         updateMenus();
 
@@ -824,11 +906,13 @@ void MainWindow::importGPSCSVSlot()
 
 void MainWindow::importViewPointsSlot()
 {
-    string filename = QFileDialog::getOpenFileName(this, "Import View Points", "", "*.json").toStdString();
+    string filename = QFileDialog::getOpenFileName(this, "Import View Points",
+                                                   COMPASS::instance().lastUsedPath().c_str(), "*.json").toStdString();
 
     if (filename.size() > 0)
     {
         COMPASS::instance().taskManager().viewPointsImportTask().importFilename(filename);
+        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
         updateMenus();
 
@@ -870,6 +954,14 @@ void MainWindow::configureDataSourcesSlot()
 
     COMPASS::instance().dataSourceManager().configurationDialog()->show();
 }
+
+void MainWindow::configureFFTsSlot()
+{
+    loginf << "MainWindow: configureFFTsSlot";
+
+    COMPASS::instance().fftManager().configurationDialog()->show();
+}
+
 
 void MainWindow::configureMetaVariablesSlot()
 {

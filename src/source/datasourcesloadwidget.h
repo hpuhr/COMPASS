@@ -73,6 +73,8 @@ private:
 
     QGridLayout* type_layout_{nullptr};
 
+    QLabel* ts_min_label_{nullptr};
+    QLabel* ts_max_label_{nullptr};
     QLabel* associations_label_{nullptr};
 
     std::map<std::string, QCheckBox*> ds_type_boxes_;

@@ -8,7 +8,7 @@ set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 project( COMPASS )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "7")
-SET(CPACK_PACKAGE_VERSION_PATCH "4")
+SET(CPACK_PACKAGE_VERSION_PATCH "5")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -85,6 +85,8 @@ find_package(NemaTode REQUIRED CONFIG)
 
 find_package(Threads REQUIRED)
 
+find_package(PCAP REQUIRED)
+
 add_library(compass "")
 
 message("Install path: ${CMAKE_INSTALL_PREFIX}")
@@ -130,6 +132,7 @@ include_directories (
     ${EIGEN3_INCLUDE_DIR}
     ${JSONCPP_INCLUDE_DIR}
     ${jASTERIX_INCLUDE_DIR}
+    ${PCAP_INCLUDE_DIR}
     )
 
 link_directories(
@@ -150,6 +153,7 @@ target_link_libraries ( compass
     ${SQLITE3_LIBRARIES}
     ${LibArchive_LIBRARIES}
     ${JSONCPP_LIBRARY}
+    ${PCAP_LIBRARY}
     ${TBB_LIBRARIES}
     TBB::tbb
     ${OPENSSL_CRYPTO_LIBRARY}

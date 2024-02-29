@@ -20,6 +20,8 @@
 #include "ui_test_common.h"
 #include "ui_test_conversions.h"
 
+#include "json.h"
+
 #include <QMenu>
 #include <QMenuBar>
 #include <QComboBox>
@@ -47,6 +49,10 @@
 
 namespace ui_test
 {
+
+    /****************************************************************************************
+     * string getters
+     ****************************************************************************************/
 
     /**
      */
@@ -183,6 +189,138 @@ namespace ui_test
     inline boost::optional<QString> getUIElementValue(QCheckBox* widget, const QString& what)
     {
         return getUIElementValue<QAbstractButton>(widget, what);
+    }
+
+    /****************************************************************************************
+     * json getters
+     ****************************************************************************************/
+
+    template <class T>
+    inline nlohmann::json value2JSON(const T& v)
+    {
+        nlohmann::json json_val;
+        json_val[ "value" ] = v;
+        return json_val;
+    }
+
+    /**
+     */
+    template <class T>
+    inline nlohmann::json getUIElementValueJSON(T* widget, const QString& what = "")
+    {
+        return {};
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QLabel* widget, const QString& what)
+    {
+        return value2JSON(widget->text().toStdString());
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QMenuBar* widget, const QString& what)
+    {
+        if (what.isEmpty())
+            return {};
+
+        auto path = conversions::valueFromString<QStringList>(what);
+        if (!path.has_value() || path.value().empty())
+            return {};
+
+        int n = path.value().count();
+
+        QWidget* last_menu   = widget;
+        QAction* last_action = nullptr;
+        for (int i = 0; i < n; ++i)
+        {
+            last_action = findAction(last_menu, path.value()[ i ], i < n - 1);
+            if (!last_action)
+                return {};
+
+            if (last_action->menu())
+                last_menu = last_action->menu();
+        }
+
+        if (!last_action)
+            return {};
+
+        return value2JSON(last_action->isChecked());
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QComboBox* widget, const QString& what)
+    {
+        return value2JSON(widget->currentText().toStdString());
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QTabWidget* widget, const QString& what)
+    {
+        return value2JSON(widget->tabBar()->tabText(widget->currentIndex()).toStdString());
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QToolBar* widget, const QString& what)
+    {
+        if (what.isEmpty())
+            return {};
+
+        for (auto a : widget->actions())
+            if (!a->isSeparator() && what == normalizedToolName(a->text()))
+                return value2JSON(a->isChecked());
+
+        return {};
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QLineEdit* widget, const QString& what)
+    {
+        return value2JSON(widget->text().toStdString());
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QTextEdit* widget, const QString& what)
+    {
+        return value2JSON(widget->toPlainText().toStdString());
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QSpinBox* widget, const QString& what)
+    {
+        return value2JSON(widget->value());
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QDoubleSpinBox* widget, const QString& what)
+    {
+        //@TODO: decimals?
+        return value2JSON(widget->value());
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QAbstractSlider* widget, const QString& what)
+    {
+        const double t = (double)(widget->value() - widget->minimum()) / (double)(widget->maximum() - widget->minimum());
+        const double p = t * 100.0;
+
+        //@TODO: decimals?
+        return value2JSON(p);
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QAbstractButton* widget, const QString& what)
+    {
+        //standard behaviour for buttons: return check state
+        return value2JSON(widget->isChecked());
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QPushButton* widget, const QString& what)
+    {
+        return getUIElementValueJSON<QAbstractButton>(widget, what);
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QToolButton* widget, const QString& what)
+    {
+        return getUIElementValueJSON<QAbstractButton>(widget, what);
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QRadioButton* widget, const QString& what)
+    {
+        return getUIElementValueJSON<QAbstractButton>(widget, what); 
+    }
+    template<>
+    inline nlohmann::json getUIElementValueJSON(QCheckBox* widget, const QString& what)
+    {
+        return getUIElementValueJSON<QAbstractButton>(widget, what);
     }
     
 } // namespace ui_test

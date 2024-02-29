@@ -35,7 +35,7 @@
 #include "system.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
-#include "osgview.h"
+#include "geographicview.h"
 #endif
 
 #include <QCoreApplication>
@@ -53,14 +53,14 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
                                                      ViewManager& view_manager)
     : Configurable(class_id, instance_id, &view_manager), view_manager_(view_manager)
 {
-    registerParameter("author", &author_, "");
+    registerParameter("author", &author_, std::string());
 
     if (!author_.size())
         author_ = System::getUserName();
     if (!author_.size())
         author_ = "User";
 
-    registerParameter("abstract", &abstract_, "");
+    registerParameter("abstract", &abstract_, std::string());
 
     SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
     assert (sql_con);
@@ -174,7 +174,7 @@ void ViewPointsReportGenerator::run ()
         double ms_per_vp;
 
 #if USE_EXPERIMENTAL_SOURCE == true
-        OSGView::instant_display_ = true;
+        GeographicView::instant_display_ = true;
 #endif
 
         for (auto vp_id : vp_ids)
@@ -343,7 +343,7 @@ void ViewPointsReportGenerator::run ()
         QApplication::restoreOverrideCursor();
 
 #if USE_EXPERIMENTAL_SOURCE == true
-        OSGView::instant_display_ = false;
+        GeographicView::instant_display_ = false;
 #endif
 
         if (show_done_)

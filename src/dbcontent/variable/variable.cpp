@@ -16,19 +16,20 @@
  */
 
 #include "dbcontent/variable/variable.h"
-
-#include <algorithm>
-
 #include "compass.h"
-#include "configuration.h"
-#include "configurationmanager.h"
-#include "dbinterface.h"
+//#include "configuration.h"
+//#include "configurationmanager.h"
+//#include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "datasourcemanager.h"
 #include "dbcontent/variable/variablewidget.h"
 #include "stringconv.h"
-#include "unit.h"
-#include "unitmanager.h"
+//#include "unit.h"
+//#include "unitmanager.h"
+#include "global.h"
+
+#include <algorithm>
+
 
 using namespace Utils;
 using namespace std;
@@ -83,15 +84,15 @@ Variable::Variable(const std::string& class_id, const std::string& instance_id,
                          DBContent* parent)
     : Property(), Configurable(class_id, instance_id, parent), dbcontent_(parent)
 {
-    registerParameter("name", &name_, "");
-    registerParameter("short_name", &short_name_, "");
-    registerParameter("description", &description_, "");
-    registerParameter("db_column_name", &db_column_name_, "");
-    registerParameter("data_type_str", &data_type_str_, "");
+    registerParameter("name", &name_, std::string());
+    registerParameter("short_name", &short_name_, std::string());
+    registerParameter("description", &description_, std::string());
+    registerParameter("db_column_name", &db_column_name_, std::string());
+    registerParameter("data_type_str", &data_type_str_, std::string());
     registerParameter("is_key", &is_key_, false);
-    registerParameter("representation_str", &representation_str_, "");
-    registerParameter("dimension", &dimension_, "");
-    registerParameter("unit", &unit_, "");
+    registerParameter("representation_str", &representation_str_, std::string());
+    registerParameter("dimension", &dimension_, std::string());
+    registerParameter("unit", &unit_, std::string());
 
     if (name_.size() == 0)
         logerr << "Variable: constructor: instance " << instance_id << " has no name";
@@ -197,7 +198,7 @@ void Variable::generateSubConfigurable(const std::string& class_id,
 //    {
 //        std::string var_id = configuration()
 //                                   .getSubConfiguration(class_id, instance_id)
-//                                   .getParameterConfigValueString("variable_identifier");
+//                                   .getParameterConfigValue<std::string>("variable_identifier");
 //        if (var_id.size())
 //            variable_identifier_ = var_id;
 
@@ -220,13 +221,11 @@ bool Variable::operator==(const Variable& var)
     return true;
 }
 
-void Variable::print()
+void Variable::print() const
 {
-    loginf << "Variable: print: dbo " << Configurable::parent().instanceId() << " id " << name_
+    loginf << "Variable: print: dbo " << Configurable::getParent().instanceId() << " id " << name_
            << " data type " << data_type_str_;
 }
-
-
 
 void Variable::checkSubConfigurables()
 {

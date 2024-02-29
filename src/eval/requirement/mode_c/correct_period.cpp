@@ -20,11 +20,11 @@
 #include "eval/requirement/group.h"
 #include "eval/results/report/sectioncontenttable.h"
 
-#include "evaluationdata.h"
+//#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "util/stringconv.h"
-#include "util/timeconv.h"
+//#include "util/stringconv.h"
+//#include "util/timeconv.h"
 #include "sectorlayer.h"
 
 #include <QLineEdit>
@@ -144,7 +144,7 @@ ModeCCorrectPeriodConfig::ModeCCorrectPeriodConfig(const std::string& class_id,
 {
     configure(UseMissTol);
 
-    registerParameter("max_distance_ft", &max_distance_ft_, 300);
+    registerParameter("max_distance_ft", &max_distance_ft_, 300.0f);
 }
 
 /**

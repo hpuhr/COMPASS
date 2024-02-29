@@ -22,7 +22,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variabledefinition.h"
-#include "stringconv.h"
+//#include "stringconv.h"
 
 namespace dbContent
 {

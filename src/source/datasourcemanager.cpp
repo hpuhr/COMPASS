@@ -8,6 +8,7 @@
 #include "files.h"
 #include "json.hpp"
 #include "datasource_commands.h"
+#include "logger.h"
 
 #include <QMessageBox>
 
@@ -28,7 +29,7 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
     registerParameter("load_widget_show_counts", &load_widget_show_counts_, true);
     registerParameter("load_widget_show_lines", &load_widget_show_lines_, true);
 
-    registerParameter("ds_font_size", &ds_font_size_, 10);
+    registerParameter("ds_font_size", &ds_font_size_, 10u);
 
     createSubConfigurables();
 
@@ -55,7 +56,7 @@ void DataSourceManager::generateSubConfigurable(const std::string& class_id,
     {
         unique_ptr<dbContent::ConfigurationDataSource> ds {
             new dbContent::ConfigurationDataSource(class_id, instance_id, *this)};
-        loginf << "DataSourceManager: generateSubConfigurable: adding config ds "
+        logdbg << "DataSourceManager: generateSubConfigurable: adding config ds "
                    << ds->name() << " sac/sic " <<  ds->sac() << "/" << ds->sic();
 
         assert (!hasConfigDataSource(Number::dsIdFrom(ds->sac(), ds->sic())));
@@ -66,7 +67,7 @@ void DataSourceManager::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
-std::vector<unsigned int> DataSourceManager::getAllDsIDs()
+const std::vector<unsigned int>& DataSourceManager::getAllDsIDs()
 {
     return ds_ids_all_;
 }
@@ -173,7 +174,7 @@ void DataSourceManager::importDataSourcesJSON(const nlohmann::json& j)
     if (!j.contains("content_type")
             || !j.at("content_type").is_string()
             || j.at("content_type") != "data_sources")
-        throw std::runtime_error("current data is not view point content");
+        throw std::runtime_error("current data is not data sources content");
 
     if (!j.contains("content_version")
             || !j.at("content_version").is_string()
@@ -285,6 +286,42 @@ nlohmann::json DataSourceManager::getDBDataSourcesAsJSON()
     }
 
     return data;
+}
+
+namespace
+{
+    void sortJSONDataSource(nlohmann::json& ds)
+    {
+        assert(ds.contains("data_sources"));
+
+        json& ds_array = ds.at("data_sources");
+
+        std::sort(ds_array.begin(), ds_array.end(), 
+            [ & ] (const nlohmann::json& j0, const nlohmann::json& j1) 
+            { 
+                assert(j0.contains("name"));
+                assert(j1.contains("name"));
+
+                std::string n0 = j0[ "name" ];
+                std::string n1 = j1[ "name" ];
+
+                return n0 < n1;
+            });
+    }
+}
+
+nlohmann::json DataSourceManager::getSortedConfigDataSourcesAsJSON()
+{
+    auto ds_json = getConfigDataSourcesAsJSON();
+    sortJSONDataSource(ds_json);
+    return ds_json;
+}
+
+nlohmann::json DataSourceManager::getSortedDBDataSourcesAsJSON()
+{
+    auto ds_json = getDBDataSourcesAsJSON();
+    sortJSONDataSource(ds_json);
+    return ds_json;
 }
 
 // ds id->dbcont->line->cnt
@@ -601,6 +638,8 @@ void DataSourceManager::configurationDialogDoneSlot()
     config_dialog_->hide();
     config_dialog_ = nullptr;
 
+    saveDBDataSources();
+
     emit dataSourcesChangedSignal();
 }
 
@@ -615,14 +654,14 @@ void DataSourceManager::createConfigDataSource(unsigned int ds_id)
 {
     assert (!hasConfigDataSource(ds_id));
 
-    Configuration& new_cfg = configuration().addNewSubConfiguration("ConfigurationDataSource");
-    new_cfg.addParameterString("ds_type", "Other");
-    new_cfg.addParameterUnsignedInt("sac", Number::sacFromDsId(ds_id));
-    new_cfg.addParameterUnsignedInt("sic", Number::sicFromDsId(ds_id));
-    new_cfg.addParameterString("name", "Unknown ("+to_string(Number::sacFromDsId(ds_id))+"/"
-                                                  +to_string(Number::sicFromDsId(ds_id))+")");
+    auto new_cfg = Configuration::create("ConfigurationDataSource");
 
-    generateSubConfigurable("ConfigurationDataSource", new_cfg.getInstanceId());
+    new_cfg->addParameter<std::string>("ds_type", "Other");
+    new_cfg->addParameter<unsigned int>("sac", Number::sacFromDsId(ds_id));
+    new_cfg->addParameter<unsigned int>("sic", Number::sicFromDsId(ds_id));
+    new_cfg->addParameter<std::string>("name", "Unknown ("+to_string(Number::sacFromDsId(ds_id))+"/"+to_string(Number::sicFromDsId(ds_id))+")");
+
+    generateSubConfigurableFromConfig(std::move(new_cfg));
 
     updateDSIdsAll();
 }

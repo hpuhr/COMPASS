@@ -19,10 +19,10 @@
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
+//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "sectorlayer.h"
-#include "logger.h"
+//#include "logger.h"
 #include "evaluationmanager.h"
 
 #include <sstream>

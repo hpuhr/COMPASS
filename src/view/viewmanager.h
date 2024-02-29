@@ -15,12 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWMANAGER_H_
-#define VIEWMANAGER_H_
+#pragma once
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
 #include "appmode.h"
+#include "viewpresets.h"
 
 #include <QObject>
 
@@ -39,6 +39,8 @@ class ViewPointsReportGenerator;
 class QWidget;
 class QTabWidget;
 
+/**
+*/
 class ViewManager : public QObject, public Configurable
 {
     Q_OBJECT
@@ -47,6 +49,9 @@ class ViewManager : public QObject, public Configurable
     void selectionChangedSignal();
     void unshowViewPointSignal (const ViewableDataConfig* vp);
     void showViewPointSignal (const ViewableDataConfig* vp);
+    void reloadStateChanged();
+    void automaticUpdatesChanged();
+    void presetEdited(ViewPresets::EditAction ea);
 
   public slots:
     void selectionChangedSlot();
@@ -63,6 +68,12 @@ class ViewManager : public QObject, public Configurable
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
   public:
+    struct Config
+    {
+        bool automatic_reload = true;
+        bool automatic_redraw = true;
+    };
+
     ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~ViewManager();
 
@@ -106,7 +117,6 @@ class ViewManager : public QObject, public Configurable
         return it->second;
     }
 
-    //ViewManagerWidget* widget();
 
     ViewPointsWidget* viewPointsWidget() const;
     ViewPointsReportGenerator& viewPointsGenerator();
@@ -122,9 +132,11 @@ class ViewManager : public QObject, public Configurable
 
     void showMainViewContainerAddView();
 
-    QStringList viewClassList() const;
+    std::map<std::string, std::string> viewClassList() const;
 
-    unsigned int newViewNumber();
+    unsigned int newViewNumber(const std::string& class_id);
+    std::string newViewInstanceId(const std::string& class_id);
+    std::string newViewName(const std::string& class_id);
 
     void disableDataDistribution(bool value);
     // disables propagation of data to the views. used when loading is performed for processing purposes
@@ -135,14 +147,32 @@ class ViewManager : public QObject, public Configurable
 
     bool isInitialized() const;
 
+    bool viewPresetsEnabled() const;
+    ViewPresets& viewPresets() { return presets_; }
+    const ViewPresets& viewPresets() const { return presets_; }
+
+    void notifyReloadStateChanged();
+    bool reloadNeeded() const;
+    void enableAutomaticReload(bool enable);
+    void enableAutomaticRedraw(bool enable);
+    bool automaticReloadEnabled() const;
+    bool automaticRedrawEnabled() const;
+
 protected:
+    virtual void checkSubConfigurables();
+
+    void enableStoredReadSets();
+    void disableStoredReadSets();
+
     COMPASS& compass_;
 
-    //ViewManagerWidget* widget_{nullptr};
     ViewPointsWidget* view_points_widget_{nullptr};
 
-    bool initialized_{false};
-    bool processing_data_ {false};
+    Config config_;
+
+    bool initialized_     = false;
+    bool processing_data_ = false;
+    bool reload_needed_   = false;
 
     QTabWidget* main_tab_widget_{nullptr};
 
@@ -157,17 +187,12 @@ protected:
 
     unsigned int container_count_{0};
 
-    QStringList view_class_list_;
+    std::map<std::string, std::string> view_class_list_; // class name -> name (without appended number)
 
     bool disable_data_distribution_ {false};
 
     bool use_tmp_stored_readset_ {false};
     std::map<std::string, dbContent::VariableSet> tmp_stored_readset_;
 
-    virtual void checkSubConfigurables();
-
-    void enableStoredReadSets();
-    void disableStoredReadSets();
+    ViewPresets presets_;
 };
-
-#endif /* VIEWMANAGER_H_ */

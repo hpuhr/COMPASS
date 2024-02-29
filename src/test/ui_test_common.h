@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <files.h>
+
 #include <QString>
 #include <QRegularExpression>
 
@@ -44,12 +46,7 @@ struct SetUIHint
  */
 inline QString normalizedObjectName(const QString& text)
 {
-    QString obj_name = text.toLower();
-    obj_name.remove(QRegularExpression("^[-.:\\s]+"));
-    obj_name.remove(QRegularExpression("[-.:\\s]+$"));
-    obj_name.replace(QRegularExpression("[-.:\\s]+"), "_");
-
-    return obj_name;
+    return QString::fromStdString(Utils::Files::normalizeFilename(text.toStdString(), true));
 }
 
 /**

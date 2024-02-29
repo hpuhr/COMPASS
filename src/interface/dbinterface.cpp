@@ -20,28 +20,23 @@
 #include "buffer.h"
 #include "config.h"
 #include "dbcommand.h"
-#include "dbcommandlist.h"
 #include "sqliteconnection.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "dbresult.h"
 #include "dbtableinfo.h"
-#include "dimension.h"
-#include "jobmanager.h"
 #include "sqliteconnection.h"
-#include "stringconv.h"
-#include "unit.h"
-#include "unitmanager.h"
 #include "files.h"
 #include "util/timeconv.h"
 #include "util/number.h"
 #include "sector.h"
 #include "sectorlayer.h"
-#include "evaluationmanager.h"
 #include "source/dbdatasource.h"
+#include "fft/dbfft.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/target/target.h"
+#include "viewpoint.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -68,7 +63,7 @@ DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
 {
     boost::mutex::scoped_lock locker(connection_mutex_);
 
-    registerParameter("read_chunk_size", &read_chunk_size_, 50000);
+    registerParameter("read_chunk_size", &read_chunk_size_, 50000u);
 
     createSubConfigurables();
 }
@@ -249,8 +244,7 @@ void DBInterface::checkSubConfigurables()
 {
     if (!db_connection_)
     {
-        addNewSubConfiguration("SQLiteConnection", "SQLite Connection");
-        generateSubConfigurable("SQLiteConnection", "SQLite Connection");
+        generateSubConfigurableFromConfig(Configuration::create("SQLiteConnection", "SQLite Connection"));
     }
 }
 
@@ -564,6 +558,97 @@ void DBInterface::saveDataSources(const std::vector<std::unique_ptr<dbContent::D
     loginf << "DBInterface: saveDataSources: done";
 }
 
+bool DBInterface::existsFFTsTable()
+{
+    return existsTable(DBFFT::table_name_);
+}
+void DBInterface::createFFTsTable()
+{
+    assert(!existsFFTsTable());
+    connection_mutex_.lock();
+    db_connection_->executeSQL(sql_generator_.getTableFFTsCreateStatement());
+    connection_mutex_.unlock();
+
+    updateTableInfo();
+}
+std::vector<std::unique_ptr<DBFFT>> DBInterface::getFFTs()
+{
+    logdbg << "DBInterface: getFFTs: start";
+
+    using namespace dbContent;
+
+    boost::mutex::scoped_lock locker(connection_mutex_);
+
+    shared_ptr<DBCommand> command = sql_generator_.getFFTSelectCommand();
+
+    loginf << "DBInterface: getFFTs: sql '" << command->get() << "'";
+
+    shared_ptr<DBResult> result = db_connection_->execute(*command);
+    assert(result->containsData());
+    shared_ptr<Buffer> buffer = result->buffer();
+
+    logdbg << "DBInterface: getFFTs: json '" << buffer->asJSON().dump(4) << "'";
+
+    assert(buffer->properties().hasProperty(DBFFT::name_column_));
+    assert(buffer->properties().hasProperty(DBFFT::info_column_));
+
+    std::vector<std::unique_ptr<DBFFT>> sources;
+
+    for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
+    {
+        if (buffer->get<string>(DBFFT::name_column_.name()).isNull(cnt))
+        {
+            logerr << "DBInterface: getFFTs: data source cnt " << cnt
+                   << " has NULL name, will be omitted";
+            continue;
+        }
+
+        std::unique_ptr<DBFFT> src {new DBFFT()};
+
+        src->name(buffer->get<string>(DBFFT::name_column_.name()).get(cnt));
+
+        if (!buffer->get<string>(DBFFT::info_column_.name()).isNull(cnt))
+            src->info(nlohmann::json::parse(buffer->get<string>(DBFFT::info_column_.name()).get(cnt)));
+
+        sources.emplace_back(std::move(src));
+    }
+
+    return sources;
+}
+void DBInterface::saveFFTs(const std::vector<std::unique_ptr<DBFFT>>& ffts)
+{
+    loginf << "DBInterface: saveFFTs: num " << ffts.size();
+
+    using namespace dbContent;
+
+    assert (dbOpen());
+
+    if (existsFFTsTable())
+        clearTableContent(DBFFT::table_name_);
+    else
+        createFFTsTable();
+
+    PropertyList list;
+    list.addProperty(DBFFT::name_column_);
+    list.addProperty(DBFFT::info_column_);
+
+    shared_ptr<Buffer> buffer = make_shared<Buffer>(list);
+
+    unsigned int cnt = 0;
+    for (auto& ds_it : ffts)
+    {
+        buffer->get<string>(DBFFT::name_column_.name()).set(cnt, ds_it->name());
+        buffer->get<string>(DBFFT::info_column_.name()).set(cnt, ds_it->infoStr());
+
+        ++cnt;
+    }
+
+    loginf << "DBInterface: saveFFTs: buffer size " << buffer->size();
+
+    insertBuffer(DBFFT::table_name_, buffer);
+
+    loginf << "DBInterface: saveFFTs: done";
+}
 
 
 size_t DBInterface::count(const string& table)
@@ -801,7 +886,7 @@ void DBInterface::createViewPointsTable()
 {
     assert(!existsViewPointsTable());
 
-    setProperty("view_points_version", VP_COLLECTION_CONTENT_VERSION);
+    setProperty("view_points_version", ViewPoint::VP_COLLECTION_CONTENT_VERSION);
 
     connection_mutex_.lock();
     db_connection_->executeSQL(sql_generator_.getTableViewPointsCreateStatement());
@@ -1087,8 +1172,8 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
 
         buffer->addProperty(rec_num_col_str, PropertyDataType::ULONGINT);
 
-        assert (COMPASS::instance().dbContentManager().hasMaxRecordNumber());
-        unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumber();
+        assert (COMPASS::instance().dbContentManager().hasMaxRecordNumberWODBContentID());
+        unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID();
 
         NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(rec_num_col_str);
 
@@ -1102,8 +1187,11 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
             rec_num_vec.set(cnt, Number::recNumAddDBContId(max_rec_num, dbcont_id));
         }
 
-        COMPASS::instance().dbContentManager().maxRecordNumber(max_rec_num);
+        COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID(max_rec_num);
     }
+
+    if (COMPASS::instance().appMode() != AppMode::LiveRunning) // is cleaned special there
+        buffer->deleteEmptyProperties();
 
     insertBuffer(dbcontent.dbTableName(), buffer);
 }

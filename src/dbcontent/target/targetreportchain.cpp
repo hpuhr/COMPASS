@@ -1,13 +1,14 @@
 #include "targetreportchain.h"
 #include "targetposition.h"
 #include "targetvelocity.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/metavariable.h"
-#include "dbcontent/dbcontentmanager.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/metavariable.h"
+//#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent.h"
 #include "dbcontentcache.h"
 #include "util/number.h"
 #include "util/timeconv.h"
+#include "global.h"
 
 #include <boost/algorithm/string.hpp>
 

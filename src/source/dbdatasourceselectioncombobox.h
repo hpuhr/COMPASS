@@ -1,12 +1,11 @@
 #ifndef DBDATASOURCESELECTIONCOMBOBOX_H
 #define DBDATASOURCESELECTIONCOMBOBOX_H
 
-
-#include <QComboBox>
-
 #include "compass.h"
 #include "datasourcemanager.h"
 #include "source/dbdatasource.h"
+
+#include <QComboBox>
 
 namespace dbContent
 {

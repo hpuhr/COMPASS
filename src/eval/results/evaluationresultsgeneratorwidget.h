@@ -44,6 +44,8 @@ public:
                                      EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
     virtual ~EvaluationResultsGeneratorWidget();
 
+    void updateFromSettings();
+
 protected:
     EvaluationResultsGenerator& results_gen_;
     EvaluationManager& eval_man_;

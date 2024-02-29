@@ -2,7 +2,7 @@
 #define DSTYPESELECTIONCOMBOBOX_H
 
 #include "datasourcemanager.h"
-#include "global.h"
+//#include "global.h"
 #include "logger.h"
 
 #include <QComboBox>

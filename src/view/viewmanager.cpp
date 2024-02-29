@@ -23,21 +23,18 @@
 #include "view.h"
 #include "viewcontainer.h"
 #include "viewcontainerwidget.h"
-#include "viewmanagerwidget.h"
 #include "viewpoint.h"
 #include "dbinterface.h"
 #include "viewpointswidget.h"
-#include "files.h"
 #include "filtermanager.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
-#include "viewpointstablemodel.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
 #include "util/timeconv.h"
 #include "viewpoint_commands.h"
+#include "global.h"
 
 #include "json.hpp"
 
@@ -49,8 +46,11 @@
 
 #include <cassert>
 
+#define SCAN_PRESETS
+
 using namespace Utils;
 using namespace nlohmann;
+using namespace std;
 
 ViewManager::ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "views.json"), compass_(*compass)
@@ -60,6 +60,9 @@ ViewManager::ViewManager(const std::string& class_id, const std::string& instanc
     qRegisterMetaType<ViewPoint*>("ViewPoint*");
 
     init_view_point_commands();
+
+    registerParameter("automatic_reload", &config_.automatic_reload, Config().automatic_reload);
+    registerParameter("automatic_redraw", &config_.automatic_redraw, Config().automatic_redraw);
 }
 
 void ViewManager::init(QTabWidget* tab_widget)
@@ -71,8 +74,7 @@ void ViewManager::init(QTabWidget* tab_widget)
 
     main_tab_widget_ = tab_widget;
 
-    connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
-             this, &ViewManager::appModeSwitchSlot);
+    connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal, this, &ViewManager::appModeSwitchSlot);
 
     // view point stuff
 
@@ -92,20 +94,27 @@ void ViewManager::init(QTabWidget* tab_widget)
     connect (this, &ViewManager::showViewPointSignal, &filter_man, &FilterManager::showViewPointSlot);
     connect (this, &ViewManager::unshowViewPointSignal, &filter_man, &FilterManager::unshowViewPointSlot);
 
-    view_class_list_.append("HistogramView");
-    view_class_list_.append("ListBoxView");
+    view_class_list_.insert({"HistogramView", "Histogram View"});
+    view_class_list_.insert({"TableView", "Table View"});
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    view_class_list_.append("OSGView");
+    view_class_list_.insert({"GeographicView", "Geographic View"});
 #endif
 
-    view_class_list_.append("ScatterPlotView");
+    view_class_list_.insert({"ScatterPlotView", "Scatterplot View"});
+
+#ifdef SCAN_PRESETS
+    //scan view presets
+    if (!presets_.scanForPresets())
+        logwrn << "ViewManager: init: view presets could not be loaded";
+#endif
+
+    connect(&presets_, &ViewPresets::presetEdited, this, &ViewManager::presetEdited);
 
     initialized_ = true;
 
     createSubConfigurables();
 }
-
 
 void ViewManager::loadViewPoints()
 {
@@ -209,14 +218,12 @@ void ViewManager::checkSubConfigurables()
 {
     if (containers_.size() == 0)
     {
-        addNewSubConfiguration("ViewContainer", "ViewContainer0");
-        generateSubConfigurable("ViewContainer", "ViewContainer0");
+        generateSubConfigurableFromConfig("ViewContainer", "ViewContainer0");
     }
 
     if (!view_points_report_gen_)
     {
-        addNewSubConfiguration("ViewPointsReportGenerator", "ViewPointsReportGenerator0");
-        generateSubConfigurable("ViewPointsReportGenerator", "ViewPointsReportGenerator0");
+        generateSubConfigurableFromConfig("ViewPointsReportGenerator", "ViewPointsReportGenerator0");
     }
 }
 
@@ -287,21 +294,21 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
         if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
             db_interface.deleteAllViewPoints();
 
-        assert (json_obj.contains(VP_COLLECTION_ARRAY_KEY));
+        assert (json_obj.contains(ViewPoint::VP_COLLECTION_ARRAY_KEY));
         
         //add new ones
-        json& view_points = json_obj.at(VP_COLLECTION_ARRAY_KEY);
+        json& view_points = json_obj.at(ViewPoint::VP_COLLECTION_ARRAY_KEY);
         assert (view_points.size());
 
         unsigned int id;
         for (auto& vp_it : view_points.get<json::array_t>())
         {
-            assert (vp_it.contains(VP_ID_KEY));
+            assert (vp_it.contains(ViewPoint::VP_ID_KEY));
 
-            id = vp_it.at(VP_ID_KEY);
+            id = vp_it.at(ViewPoint::VP_ID_KEY);
 
-            if (!vp_it.contains(VP_STATUS_KEY))
-                vp_it[VP_STATUS_KEY] = "open";
+            if (!vp_it.contains(ViewPoint::VP_STATUS_KEY))
+                vp_it[ViewPoint::VP_STATUS_KEY] = "open";
 
             db_interface.setViewPoint(id, vp_it.dump());
         }
@@ -375,9 +382,9 @@ void ViewManager::doViewPointAfterLoad ()
 
     logdbg << "ViewManager: doViewPointAfterLoad: data '" << data.dump(4) << "'";
 
-    bool vp_contains_timestamp = data.contains(VP_TIMESTAMP_KEY);
+    bool vp_contains_timestamp = data.contains(ViewPoint::VP_TIMESTAMP_KEY);
     boost::posix_time::ptime vp_timestamp;
-    bool vp_contains_time_window = data.contains(VP_TIME_WIN_KEY);
+    bool vp_contains_time_window = data.contains(ViewPoint::VP_TIME_WIN_KEY);
     float vp_time_window;
     boost::posix_time::ptime vp_ts_min, vp_ts_max;
 
@@ -388,16 +395,16 @@ void ViewManager::doViewPointAfterLoad ()
     }
     else
     {
-        assert (data.at(VP_TIMESTAMP_KEY).is_string());
-        vp_timestamp = Time::fromString(data.at(VP_TIMESTAMP_KEY));
+        assert (data.at(ViewPoint::VP_TIMESTAMP_KEY).is_string());
+        vp_timestamp = Time::fromString(data.at(ViewPoint::VP_TIMESTAMP_KEY));
 
         loginf << "ViewManager: doViewPointAfterLoad: time " << Time::toString(vp_timestamp);
     }
 
     if (vp_contains_time_window)
     {
-        assert (data.at(VP_TIME_WIN_KEY).is_number());
-        vp_time_window = data.at(VP_TIME_WIN_KEY);
+        assert (data.at(ViewPoint::VP_TIME_WIN_KEY).is_number());
+        vp_time_window = data.at(ViewPoint::VP_TIME_WIN_KEY);
         vp_ts_min = vp_timestamp - Time::partialSeconds(vp_time_window / 2.0);
         vp_ts_max = vp_timestamp + Time::partialSeconds(vp_time_window / 2.0);
 
@@ -550,18 +557,21 @@ void ViewManager::showMainViewContainerAddView()
     containers_.at("ViewContainer0")->showAddViewMenuSlot();
 }
 
-QStringList ViewManager::viewClassList() const
+std::map<std::string, std::string> ViewManager::viewClassList() const
 {
     return view_class_list_;
 }
 
-unsigned int ViewManager::newViewNumber()
+unsigned int ViewManager::newViewNumber(const std::string& class_id)
 {
-    unsigned int max_number = 0;
-    unsigned int tmp;
+    int max_number = -1;
+    int tmp;
 
     for (auto& view_it : views_)
     {
+        if (view_it.second->classId() != class_id)
+            continue;
+
         tmp = String::getAppendedInt(view_it.second->instanceId());
 
         if (tmp > max_number)
@@ -569,6 +579,17 @@ unsigned int ViewManager::newViewNumber()
     }
 
     return max_number + 1;
+}
+
+std::string ViewManager::newViewInstanceId(const std::string& class_id)
+{
+    return class_id + to_string(newViewNumber(class_id));
+}
+
+std::string ViewManager::newViewName(const std::string& class_id)
+{
+    assert (view_class_list_.count(class_id));
+    return view_class_list_.at(class_id) + " " + to_string(newViewNumber(class_id));
 }
 
 void ViewManager::disableDataDistribution(bool value)
@@ -633,8 +654,7 @@ ViewContainerWidget* ViewManager::addNewContainerWidget()
     container_count_++;
     std::string container_widget_name = "ViewWindow" + std::to_string(container_count_);
 
-    addNewSubConfiguration("ViewContainerWidget", container_widget_name);
-    generateSubConfigurable("ViewContainerWidget", container_widget_name);
+    generateSubConfigurableFromConfig("ViewContainerWidget", container_widget_name);
 
     assert(container_widgets_.count(container_widget_name) == 1);
 
@@ -774,6 +794,9 @@ void ViewManager::loadingStartedSlot()
     if (disable_data_distribution_)
         return;
 
+    //reset reload flag
+    reload_needed_ = false;
+
     loginf << "ViewManager: loadingStartedSlot";
 
     for (auto& view_it : views_)
@@ -828,7 +851,7 @@ void ViewManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode
         view_it.second->appModeSwitch(app_mode_previous, app_mode_current);
 
         if (app_mode_current == AppMode::LiveRunning)
-            view_it.second->enableInTabWidget(view_it.second->classId() == "OSGView");
+            view_it.second->enableInTabWidget(view_it.second->classId() == "GeographicView");
         else
             view_it.second->enableInTabWidget(true);
     }
@@ -866,6 +889,99 @@ ViewContainerWidget* ViewManager::latestViewContainer()
     }
 
     return latest_container;
+}
+
+bool ViewManager::viewPresetsEnabled() const
+{
+#ifdef SCAN_PRESETS
+    return true;
+#else
+    return false;
+#endif
+}
+
+/**
+ * Notifies the view manager that the reload state in a view has changed, 
+ * determines the new global reload state, and informs all views about it.
+ */
+void ViewManager::notifyReloadStateChanged()
+{
+    //query views if one of them needs to reload
+    bool reload_needed = false;
+    for (const auto& elem : views_)
+    {
+        if (!elem.second->reloadNeeded())
+            continue;
+
+        logdbg << "ViewManager::notifyReloadStateChanged: view '" << elem.first << "' needs to reload";
+
+        reload_needed = true;
+        break;
+    }
+
+    logdbg << "ViewManager::notifyReloadStateChanged: reload needed before: " << reload_needed_ << ", now: " << reload_needed;
+
+    //reload state has not changed? => just return
+    if (reload_needed_ == reload_needed)
+        return;
+
+    //update global reload flag
+    reload_needed_ = reload_needed;
+
+    logdbg << "ViewManager::notifyReloadStateChanged: emitting new reload state " << reload_needed_;
+
+    //inform views about changed reload state
+    emit reloadStateChanged();
+}
+
+/**
+ * Checks if a reload is needed (has been notified by a view).
+ */
+bool ViewManager::reloadNeeded() const
+{
+    return reload_needed_;
+}
+
+/**
+ * Enables/disables automatic reloading in the view manager and informs all views about it.
+ */
+void ViewManager::enableAutomaticReload(bool enable)
+{
+    if (config_.automatic_reload == enable)
+        return;
+
+    config_.automatic_reload = enable;
+
+    //inform views about changed auto-update state
+    emit automaticUpdatesChanged();
+}
+
+/**
+ * Enables/disables automatic redrawing in the view manager and informs all views about it.
+ */
+void ViewManager::enableAutomaticRedraw(bool enable)
+{
+    if (config_.automatic_redraw == enable)
+        return;
+
+    config_.automatic_redraw = enable;
+
+    //inform about changed auto-update state
+    emit automaticUpdatesChanged();
+}
+
+/**
+ */
+bool ViewManager::automaticReloadEnabled() const
+{
+    return config_.automatic_reload;
+}
+
+/**
+ */
+bool ViewManager::automaticRedrawEnabled() const
+{
+    return config_.automatic_redraw;
 }
 
 // void ViewManager::saveViewAsTemplate (View *view, std::string template_name)

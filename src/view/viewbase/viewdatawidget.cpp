@@ -1,9 +1,31 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "viewdatawidget.h"
+#include "viewwidget.h"
+#include "view.h"
 #include "viewtoolswitcher.h"
+#include "logger.h"
 #include "buffer.h"
+#include "variable.h"
+#include "property.h"
 
 #include <QApplication>
+#include <QPainter>
 
 #include <iostream>
 
@@ -24,6 +46,16 @@ ViewDataWidget::ViewDataWidget(ViewWidget* view_widget, QWidget* parent, Qt::Win
 bool ViewDataWidget::hasData() const
 {
     return !data_.empty();
+}
+
+unsigned int ViewDataWidget::loadedDataCount()
+{
+    unsigned int count = 0;
+
+    for (auto& buf_it : data_)
+        count += (*buf_it.second).size();
+
+    return count;
 }
 
 /**
@@ -195,4 +227,82 @@ void ViewDataWidget::liveReload()
 
     //signal that live data has been loaded
     emit liveDataLoaded();
+}
+
+/**
+ * Checks if the required read set of the view is available in the loaded data.
+ */
+bool ViewDataWidget::isVariableSetLoaded() const
+{
+    const auto& view_data = viewData();
+    if (view_data.empty())
+        return false;
+
+    for (const auto& dbcontent_data : view_data)
+    {
+        auto var_set = view_widget_->getView()->getSet(dbcontent_data.first);
+        for (auto var : var_set.getSet())
+        {
+            if (!dbcontent_data.second->hasAnyPropertyNamed(var->name()))
+                return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Renders the data widget's contents.
+ */
+QImage ViewDataWidget::renderData()
+{
+    //per default just render the data widget's content
+    //note: does not work with opengl widgets such as osg view => derive as needed
+    QImage img(this->size(), QImage::Format_ARGB32);
+    QPainter painter(&img);
+
+    this->render(&painter);
+
+    return img;
+}
+
+/**
+ * Generates json view information.
+ */
+nlohmann::json ViewDataWidget::viewInfoJSON() const
+{
+    nlohmann::json info;
+
+    //add general information
+    info[ "has_data"    ] = hasData();
+    info[ "num_buffers" ] = data_.size();
+
+    nlohmann::json buffer_infos = nlohmann::json::array();
+    for (const auto& dbc_data : data_)
+    {
+        nlohmann::json buffer_info;
+        buffer_info[ "dbcontent" ] = dbc_data.first;
+        buffer_info[ "size"      ] = dbc_data.second->size();
+
+        // nlohmann::json props = nlohmann::json::array();
+        // for (const auto& p : dbc_data.second->properties().properties())
+        // {
+        //     nlohmann::json pinfo;
+        //     pinfo[ "name"      ] = p.name();
+        //     pinfo[ "data_type" ] = p.dataTypeString();
+
+        //     props.push_back(pinfo);
+        // }
+
+        // buffer_info[ "properties" ] = props;
+
+        buffer_infos.push_back(buffer_info);
+    }
+
+    info[ "buffers" ] = buffer_infos;
+
+    //add view-specific information
+    viewInfoJSON_impl(info);
+
+    return info;
 }

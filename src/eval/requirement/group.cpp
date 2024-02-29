@@ -82,7 +82,7 @@ Group::Group(const std::string& class_id, const std::string& instance_id,
     : Configurable(class_id, instance_id, &standard), EvaluationStandardTreeItem(&standard), standard_(standard),
       eval_man_(eval_man)
 {
-    registerParameter("name", &name_, "");
+    registerParameter("name", &name_, std::string());
 
     assert (name_.size());
 
@@ -357,11 +357,11 @@ void Group::addRequirementConfig (const std::string& class_id, const std::string
 
     std::string instance = class_id + name + "0";
 
-    Configuration& config = addNewSubConfiguration(class_id, instance);
-    config.addParameterString("name", name);
-    config.addParameterString("short_name", short_name);
+    auto config = Configuration::create(class_id, instance);
+    config->addParameter<std::string>("name", name);
+    config->addParameter<std::string>("short_name", short_name);
 
-    generateSubConfigurable(class_id, instance);
+    generateSubConfigurableFromConfig(std::move(config));
 
     sortConfigs();
 

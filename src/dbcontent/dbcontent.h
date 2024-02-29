@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-#include "global.h"
+//#include "global.h"
 
 #include <QObject>
 

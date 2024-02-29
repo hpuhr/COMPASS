@@ -85,4 +85,27 @@ boost::optional<QString> getUIElement(QWidget* parent,
     return w_test->uiGet(what);
 }
 
+/**
+ * Widget type agnostic json value getter.
+ * Includes checks on complex (non-qt-native) widgets.
+ */
+nlohmann::json getUIElementJSON(QWidget* parent, 
+                                    const QString& obj_name,
+                                    const QString& what)
+{
+    auto w = findObjectAs<QWidget>(parent, obj_name);
+    if (w.first != rtcommand::FindObjectErrCode::NoError)
+        return {};
+
+    UITestable* w_test = dynamic_cast<UITestable*>(w.second);
+
+    //not ui testable? try native Qt types
+    if (!w_test)
+    {
+        return getUIElementNativeJSON(parent, obj_name, what);
+    }
+
+    return w_test->uiGetJSON(what);
+}
+
 } // namespace ui_test

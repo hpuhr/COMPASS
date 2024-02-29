@@ -19,13 +19,12 @@
 #include "gpstrailimporttask.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "timeconv.h"
+//#include "timeconv.h"
 
 #include "textfielddoublevalidator.h"
 #include "textfieldhexvalidator.h"
 #include "textfieldoctvalidator.h"
 
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -59,6 +58,9 @@ GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWi
     updateConfig();
 
     setLayout(main_layout_);
+
+    connect(&task_, &GPSTrailImportTask::configChanged, this, &GPSTrailImportTaskWidget::updateConfig);
+    connect(&task_, &GPSTrailImportTask::fileChanged, this, &GPSTrailImportTaskWidget::updateText);
 }
 
 void GPSTrailImportTaskWidget::addMainTab()
@@ -73,7 +75,6 @@ void GPSTrailImportTaskWidget::addMainTab()
     // file stuff
     file_label_ = new QLabel(task_.importFilename().c_str());
     tab_layout->addWidget(file_label_);
-
 
     text_edit_ = new QTextEdit ();
     text_edit_->setReadOnly(true);
@@ -422,6 +423,8 @@ void GPSTrailImportTaskWidget::updateText ()
         ss << task_.currentText();
 
     text_edit_->setText(ss.str().c_str());
+
+    file_label_->setText(task_.importFilename().c_str());
 
     //    if (task_.currentError().size())
     //    {

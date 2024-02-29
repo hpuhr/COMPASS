@@ -17,17 +17,17 @@
 
 #include "reconstructor_interp.h"
 #include "viewpointgenerator.h"
-#include "util/number.h"
+//#include "util/number.h"
 
-#include "util/timeconv.h"
+//#include "util/timeconv.h"
 
-#include "spline.h"
+//#include "spline.h"
 
 namespace reconstruction
 {
 
 const QColor ReconstructorInterp::ColorOk    = QColor(255, 125, 0);
-const QColor ReconstructorInterp::ColorFishy = QColor(255, 255, 0);
+const QColor ReconstructorInterp::ColorFishy = QColor(255, 255, 0); 
 
 /**
 */
@@ -43,7 +43,7 @@ boost::optional<std::vector<Reference>> ReconstructorInterp::reconstruct_impl(st
     interp.config()                  = config().interp_config;
     interp.config().interpolate_cart = false;
 
-    auto mms_interp = interp.interpolate(measurements);
+    auto mms_interp = interp.interpolate(measurements); 
 
     if (mms_interp.empty())
         return {};

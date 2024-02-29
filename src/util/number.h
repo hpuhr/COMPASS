@@ -20,7 +20,7 @@
 
 #include <string>
 
-#include "nullablevector.h"
+//#include "nullablevector.h"
 
 namespace Utils
 {
@@ -61,6 +61,7 @@ extern unsigned int sacFromDsId (unsigned int ds_id);
 extern unsigned int sicFromDsId (unsigned int ds_id);
 
 extern unsigned long recNumAddDBContId (unsigned long rec_num_wo_dbcont_id, unsigned int dbcont_id);
+extern unsigned long recNumGetWithoutDBContId (unsigned long rec_num);
 extern unsigned int recNumGetDBContId (unsigned long rec_num);
 
 }  // namespace Number

@@ -44,12 +44,12 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
 {
     logdbg << "ViewContainerWidget: constructor: instance " << instanceId();
 
-    registerParameter("pos_x", &pos_x_, 0);
-    registerParameter("pos_y", &pos_y_, 0);
-    registerParameter("width", &width_, 1200);
-    registerParameter("height", &height_, 900);
-    registerParameter("min_width", &min_width_, 1200);
-    registerParameter("min_height", &min_height_, 900);
+    registerParameter("pos_x", &pos_x_, 0u);
+    registerParameter("pos_y", &pos_y_, 0u);
+    registerParameter("width", &width_, 1200u);
+    registerParameter("height", &height_, 900u);
+    registerParameter("min_width", &min_width_, 1200u);
+    registerParameter("min_height", &min_height_, 900u);
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
 

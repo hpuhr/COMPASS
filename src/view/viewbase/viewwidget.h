@@ -27,6 +27,8 @@
 #include "ui_test_testable.h"
 #include "json.h"
 
+#include <boost/optional.hpp>
+
 //class EventProcessor;
 class View;
 class ViewToolWidget;
@@ -34,7 +36,7 @@ class ViewDataWidget;
 class ViewConfigWidget;
 class ViewToolSwitcher;
 class ViewLoadStateWidget;
-class ViewLowerWidget;
+class ViewPresetWidget;
 
 class QSplitter;
 class QLayout;
@@ -49,9 +51,9 @@ A ViewWidget consists of a standard layout with a set of typical components loca
 Some of them need to be derived and set manually in the derived ViewWidget's constructor, some are pregenerated and can
 be used directly.
 _____________________________________________________________________________
-|_ViewToolWidget_______________________________||ViewConfigWidget            |
+|_ViewPresetWidget____|________ViewToolWidget________________________________|           
 |                                              ||                            |
-| ViewDataWidget                               ||                            |
+| ViewDataWidget                               || ViewConfigWidget           |
 |                                              ||                            |
 |                                              ||                            |
 |                                              ||                            |
@@ -77,6 +79,8 @@ Needs to be derived and then set via setDataWidget() in the constructor of the d
 ViewConfigWidget [derive]: Implements a configuration area for the view located on the right side of the widget.
 Needs to be derived and then set via setConfigWidget() in the constructor of the derived class.
 
+ViewPresetWidget: Widget for selecting and editing view presets. No need to derive.
+
 ViewToolWidget: A toolbar located above the ViewDataWidget, holding the view's needed tool buttons and actions.
 This is a generic class which doesn't need to be derived, but is rather filled in the derived ViewWidget's constructor and
 provided with all needed callbacks. Interacts with the ViewDataWidget to switch the view's active tool and handles tool
@@ -96,6 +100,10 @@ It also serves as the View's main interface to all ui and display functionality.
 class ViewWidget : public QWidget, public Configurable, public ui_test::UITestable
 {
     Q_OBJECT
+
+signals:
+    void viewRefreshed();
+
 public:
     ViewWidget(const std::string& class_id, const std::string& instance_id,
                Configurable* config_parent, View* view, QWidget* parent = nullptr);
@@ -107,14 +115,15 @@ public:
     void updateLoadState();
     void updateComponents();
 
+    bool refreshView();
+    void clearData();
+
     void loadingStarted();
     void loadingDone();
     void redrawStarted();
     void redrawDone();
     void appModeSwitch(AppMode app_mode);
-
-    void notifyReloadNeeded();
-    void notifyRedrawNeeded();
+    void configChanged();
 
     ViewDataWidget* getViewDataWidget() { assert(data_widget_); return data_widget_; }
     const ViewDataWidget* getViewDataWidget() const { assert(data_widget_); return data_widget_; }
@@ -123,19 +132,26 @@ public:
 
     std::string loadedMessage() const;
 
-    bool reloadNeeded() const;
-    bool redrawNeeded() const;
-
     void init();
     bool isInit() const { return init_; }
 
+    bool isVariableSetLoaded() const;
+
     View* getView() { return view_; }
 
-    nlohmann::json viewInfo(const std::string& what) const;
+    nlohmann::json viewInfoJSON() const;
 
     boost::optional<QString> uiGet(const QString& what = QString()) const override final;
+    nlohmann::json uiGetJSON(const QString& what = QString()) const override final;
+    void uiRefresh() override final;
+
+    QImage renderContents();
 
     static QIcon getIcon(const std::string& fn);
+
+    static const int DataWidgetStretch;
+    static const int ConfigWidgetStretch;
+
 protected:
     ViewToolWidget* getViewToolWidget() { assert(tool_widget_); return tool_widget_; }
     const ViewToolWidget* getViewToolWidget() const { assert(tool_widget_); return tool_widget_; }
@@ -143,19 +159,13 @@ protected:
     const ViewToolSwitcher* getViewToolSwitcher() const { assert(tool_switcher_); return tool_switcher_.get(); }
     ViewLoadStateWidget* getViewLoadStateWidget() { assert(state_widget_); return state_widget_; }
     const ViewLoadStateWidget* getViewLoadStateWidget() const { assert(state_widget_); return state_widget_; }
+    ViewPresetWidget* getViewPresetWidget() { return preset_widget_; }
+    const ViewPresetWidget* getViewPresetWidget() const { return preset_widget_; }
 
     /**
      * Reimplement to provide the ViewLoadStateWidget with view specific load information.
-    */
-    virtual std::string loadedMessage_impl() const { return ""; }
-
-    /**
-     * Reimplement to dynamically provide the ViewLoadStateWidget with reload and redraw information.
-     * Note that redraws and reloads can also manually be issued via notifyReloadNeeded() and notifyRedrawNeeded(),
-     * so this is rather optional.
      */
-    virtual bool reloadNeeded_impl() const { return false; };
-    virtual bool redrawNeeded_impl() const { return false; };
+    virtual std::string loadedMessage_impl() const { return ""; }
 
     /**
      * Reimplement for specific initialization behavior.
@@ -165,7 +175,7 @@ protected:
     /**
      * Reimplement to add additional information to the view's view info.
      */
-    virtual nlohmann::json viewInfo_impl(const std::string& what) const { return {}; }
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
@@ -174,6 +184,9 @@ protected:
 private:
     void createStandardLayout();
     void connectWidgets();
+
+    static const int PresetSelectionWidth  = 200;
+    static const int PresetSelectionSpacer = 20;
 
     /// The view the widget is part of
     View* view_ = nullptr;
@@ -190,14 +203,13 @@ private:
     ViewDataWidget*      data_widget_   = nullptr;
     ViewConfigWidget*    config_widget_ = nullptr;
     ViewLoadStateWidget* state_widget_  = nullptr;
+    ViewPresetWidget*    preset_widget_ = nullptr;
+    
     QWidget*             lower_widget_  = nullptr;
 
     std::unique_ptr<ViewToolSwitcher> tool_switcher_;
 
     bool init_ = false;
-
-    bool redraw_needed_ = false;
-    bool reload_needed_ = false;
 };
 
 #endif  // VIEWWIDGET_H

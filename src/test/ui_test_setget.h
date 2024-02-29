@@ -18,6 +18,7 @@
 #pragma once
 
 #include "ui_test_common.h"
+#include "json.h"
 
 #include <boost/optional.hpp>
 
@@ -35,5 +36,8 @@ namespace ui_test
     boost::optional<QString> getUIElement(QWidget* parent, 
                                           const QString& obj_name,
                                           const QString& what);
+    nlohmann::json getUIElementJSON(QWidget* parent, 
+                                    const QString& obj_name,
+                                    const QString& what);
 
 } // namespace ui_test

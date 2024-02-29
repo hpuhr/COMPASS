@@ -746,7 +746,7 @@ void ViewPointGenerator::toJSON(nlohmann::json& j,
     nlohmann::json vp_content;
 
     vp_content[ViewPointsFieldContentType] = "view_points";
-    vp_content[ViewPointsFieldVersion    ] = VP_COLLECTION_CONTENT_VERSION;
+    vp_content[ViewPointsFieldVersion    ] = ViewPoint::VP_COLLECTION_CONTENT_VERSION;
 
     nlohmann::json viewpoints = nlohmann::json::array();
 

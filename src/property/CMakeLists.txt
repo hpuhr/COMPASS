@@ -9,6 +9,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/propertylist.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/property.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/propertylist.cpp"
     )
 
 

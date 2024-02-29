@@ -16,11 +16,11 @@
  */
 
 #include "unitmanager.h"
+#include "dimension.h"
+#include "logger.h"
 
 #include <math.h>
 
-#include "dimension.h"
-#include "logger.h"
 
 UnitManager::UnitManager() : Configurable("UnitManager", "UnitManager0", 0, "units.json")
 {
@@ -52,8 +52,7 @@ void UnitManager::checkSubConfigurables()
 {
     if (dimensions_.count("Angle") == 0)
     {
-        addNewSubConfiguration("Dimension", "Angle");
-        generateSubConfigurable("Dimension", "Angle");
+        generateSubConfigurableFromConfig("Dimension", "Angle");
 
         dimensions_.at("Angle")->addUnit("Degree", 1.0, "");
         dimensions_.at("Angle")->addUnit("Radian", M_PI / 180.0, "");
@@ -61,8 +60,7 @@ void UnitManager::checkSubConfigurables()
 
     if (dimensions_.count("Length") == 0)
     {
-        addNewSubConfiguration("Dimension", "Length");
-        generateSubConfigurable("Dimension", "Length");
+        generateSubConfigurableFromConfig("Dimension", "Length");
 
         dimensions_.at("Length")->addUnit("Meter", 1.0, "");
         dimensions_.at("Length")->addUnit("Kilometer", 1.0 / 1000.0, "");
@@ -72,8 +70,7 @@ void UnitManager::checkSubConfigurables()
 
     if (dimensions_.count("Height") == 0)
     {
-        addNewSubConfiguration("Dimension", "Height");
-        generateSubConfigurable("Dimension", "Height");
+        generateSubConfigurableFromConfig("Dimension", "Height");
 
         dimensions_.at("Height")->addUnit("Feet", 1.0, "");
         dimensions_.at("Height")->addUnit("Flight Level", 1.0 / 100.0, "");
@@ -82,8 +79,7 @@ void UnitManager::checkSubConfigurables()
 
     if (dimensions_.count("Time") == 0)
     {
-        addNewSubConfiguration("Dimension", "Time");
-        generateSubConfigurable("Dimension", "Time");
+        generateSubConfigurableFromConfig("Dimension", "Time");
 
         dimensions_.at("Time")->addUnit("Second", 1.0, "");
         dimensions_.at("Time")->addUnit("Minute", 1.0 / 60.0, "");
@@ -95,8 +91,7 @@ void UnitManager::checkSubConfigurables()
 
     if (dimensions_.count("Speed") == 0)
     {
-        addNewSubConfiguration("Dimension", "Speed");
-        generateSubConfigurable("Dimension", "Speed");
+        generateSubConfigurableFromConfig("Dimension", "Speed");
 
         dimensions_.at("Speed")->addUnit("Knots", 1.0, "");
         dimensions_.at("Speed")->addUnit("Meter/Second", 0.514444, "");

@@ -21,8 +21,8 @@
 #include <QObject>
 
 #include "configurable.h"
-#include "global.h"
-#include "singleton.h"
+//#include "global.h"
+//#include "singleton.h"
 #include "task.h"
 
 class COMPASS;

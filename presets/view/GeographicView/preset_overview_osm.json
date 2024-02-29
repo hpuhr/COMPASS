@@ -1,0 +1,236 @@
+{
+    "app_version": "0.7.5",
+    "category": "Default",
+    "deployed": true,
+    "description": "Gives an overview of the data, color by DBContent over the OpenStreetMap map.",
+    "modified": false,
+    "name": "Overview OSM",
+    "timestamp": "2024-02-15 15:02:09.533",
+    "view": "GeographicView",
+    "view_config": {
+        "parameters": {
+            "auto_label": false,
+            "auto_lod": true,
+            "blend_mode_name": "contour",
+            "connect_height_none": true,
+            "connect_last_layer": true,
+            "current_lod": 2.9994983673095703,
+            "declutter_labels": true,
+            "filter_mode3a_active": false,
+            "filter_mode3a_values": "7000,7777",
+            "filter_modec_max_active": false,
+            "filter_modec_max_value": 400.0,
+            "filter_modec_min_active": false,
+            "filter_modec_min_value": 10.0,
+            "filter_modec_null_wanted": false,
+            "filter_primary_only_activ": false,
+            "filter_ta_active": false,
+            "filter_ta_values": "AADDCC",
+            "filter_ti_active": false,
+            "filter_ti_values": "OE",
+            "groundspeed_period": 2,
+            "height_offset_factor": 0.0,
+            "height_scale_factor": 2.0,
+            "label_bg_color": "#000000",
+            "label_config": {
+                "CAT001": {
+                    "0": "Best available Identification",
+                    "3": "Mode 3/A Code",
+                    "4": "Mode C Code",
+                    "5": "DS ID",
+                    "6": "Track Groundspeed",
+                    "8": "Timestamp"
+                },
+                "CAT010": {
+                    "0": "Best available Identification",
+                    "1": "Aircraft Identification",
+                    "2": "Aircraft Address",
+                    "3": "Mode 3/A Code",
+                    "4": "Mode C Code",
+                    "5": "DS ID",
+                    "6": "Ground Speed",
+                    "7": "Track Number",
+                    "8": "Timestamp"
+                },
+                "CAT020": {
+                    "0": "Best available Identification",
+                    "1": "Aircraft Identification",
+                    "2": "Aircraft Address",
+                    "3": "Mode 3/A Code",
+                    "4": "Mode C Code",
+                    "5": "DS ID",
+                    "6": "Ground Speed",
+                    "8": "Timestamp"
+                },
+                "CAT021": {
+                    "0": "Best available Identification",
+                    "1": "Aircraft Identification",
+                    "2": "Aircraft Address",
+                    "3": "Mode 3/A Code",
+                    "4": "Mode C Code",
+                    "5": "DS ID",
+                    "6": "Ground Speed",
+                    "8": "Timestamp"
+                },
+                "CAT048": {
+                    "0": "Best available Identification",
+                    "1": "Aircraft Identification",
+                    "2": "Aircraft Address",
+                    "3": "Mode 3/A Code",
+                    "4": "Mode C Code",
+                    "5": "DS ID",
+                    "6": "Track Groundspeed",
+                    "8": "Timestamp"
+                },
+                "CAT062": {
+                    "0": "Best available Identification",
+                    "1": "Aircraft Identification",
+                    "2": "Aircraft Address",
+                    "3": "Mode 3/A Code",
+                    "4": "Mode C Code LM",
+                    "5": "DS ID",
+                    "6": "Ground Speed",
+                    "7": "Track Number",
+                    "8": "Timestamp"
+                },
+                "RefTraj": {
+                    "0": "Best available Identification",
+                    "1": "Aircraft Identification",
+                    "2": "Aircraft Address",
+                    "3": "Mode 3/A Code",
+                    "4": "Mode C Code",
+                    "5": "DS ID",
+                    "6": "Ground Speed",
+                    "8": "Timestamp"
+                }
+            },
+            "label_directions": {},
+            "label_ds_ids": {},
+            "label_lines": {},
+            "label_opacity": 0.8999999761581421,
+            "label_placement_forcedir": 2,
+            "label_placement_method": 1,
+            "layer_mode": "DBContent:DS ID:Line ID:Aircraft Address",
+            "map_name": "openstreetmap_2d.earth",
+            "map_opacity": 0.4000000059604645,
+            "max_declutter_labels": 200,
+            "mode_s_azimuth_stddev": 0.06,
+            "mode_s_range_stddev": 50.0,
+            "null_height_offset": 0.0,
+            "num_accuracy_ellipse_points_factor": 4.0,
+            "num_accuracy_ellipse_points_max": 32.0,
+            "offline_text": "Offline",
+            "offline_text_color_str": "#FF0000",
+            "online_text": "Online",
+            "online_text_color_str": "#00FF00",
+            "overlay_text_color_invert": false,
+            "overload_text_color_str": "#FF0000",
+            "position_accuracy_vars_scale": 2.0,
+            "primary_azimuth_stddev": 0.15,
+            "primary_range_stddev": 120.0,
+            "radar_layer_config": {
+                "show_fft": {},
+                "show_labels": true,
+                "show_layer": true,
+                "show_radars": {},
+                "show_range_ring": true,
+                "show_range_rings": true
+            },
+            "secondary_azimuth_stddev": 0.08,
+            "secondary_range_stddev": 70.0,
+            "sector_layer_config": {
+                "show_layer": false,
+                "show_layers": {}
+            },
+            "selection_color": "#FFFF00",
+            "status_message_font_size": 24,
+            "text_background_color_str": "rgba(0,0,0,150)",
+            "time_filter_auto_play_step_interval": 10,
+            "time_filter_auto_play_update_interval": 1000.0,
+            "time_filter_max_opacity_tdiff": 4.0,
+            "time_filter_opacity_min": 0.44999998807907104,
+            "time_filter_time_window": 60,
+            "time_filter_use_opacity": false,
+            "use_depth_check": false,
+            "use_height": false,
+            "use_online_messages": false,
+            "use_radar_min_stddev": false,
+            "use_utn_as_id": false
+        },
+        "sub_configs": {
+            "GeometryStyleFactory": {},
+            "GeographicViewDataSource": {
+                "GeographicViewDataSource0": {
+                    "parameters": null,
+                    "sub_configs": {
+                        "VariableOrderedSet": {
+                            "VariableOrderedSet0": {
+                                "parameters": {
+                                    "variable_definitions": [
+                                        [
+                                            "Meta",
+                                            "Record Number"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "DS ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Line ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Timestamp"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Address"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Aircraft Identification"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Track Number"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode 3/A Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Mode C Code"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Latitude"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Longitude"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "Type"
+                                        ],
+                                        [
+                                            "CAT062",
+                                            "TRI Record Numbers"
+                                        ]
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "GeographicViewWidget": {
+                "GeographicViewWidget0": {
+                    "parameters": null
+                }
+            }
+        }
+    }
+}
