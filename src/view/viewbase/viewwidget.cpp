@@ -180,6 +180,25 @@ void ViewWidget::createStandardLayout()
         right_layout->addWidget(config_widget_container_);
     }
 
+    //add main splitter to central layout and restore state from config
+    QSettings settings("COMPASS", instanceId().c_str());
+
+#if 0
+    main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
+#else
+    if (settings.value("mainSplitterSizes").isValid())
+    {
+        main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
+    }
+    else
+    {
+        //wtf qt...
+        //https://stackoverflow.com/questions/43831474/how-to-equally-distribute-the-width-of-qsplitter
+        int wmax = std::max(data_widget_container_->minimumSizeHint().width(), config_widget_container_->minimumSizeHint().width());
+        main_splitter_->setSizes({ wmax * DataWidgetStretch, wmax * ConfigWidgetStretch });
+    }
+#endif
+
     //create load state widget in right widget
     {
         state_widget_ = new ViewLoadStateWidget(this, right_widget_);
@@ -220,20 +239,6 @@ void ViewWidget::init()
 
     //call derived
     init_impl();
-
-    //add main splitter to central layout and restore state from config
-    QSettings settings("COMPASS", instanceId().c_str());
-    if (settings.value("mainSplitterSizes").isValid())
-    {
-        main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
-    }
-    else
-    {
-        //wtf qt...
-        //https://stackoverflow.com/questions/43831474/how-to-equally-distribute-the-width-of-qsplitter
-        int wmax = std::max(data_widget_container_->minimumSizeHint().width(), config_widget_container_->minimumSizeHint().width());
-        main_splitter_->setSizes({ wmax * DataWidgetStretch, wmax * ConfigWidgetStretch });
-    }
 
     init_ = true;
 
