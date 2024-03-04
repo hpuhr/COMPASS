@@ -72,7 +72,9 @@ ViewWidget::~ViewWidget()
 {
     if (main_splitter_)
     {
-        QSettings settings("COMPASS", instanceId().c_str());
+        assert(view_);
+
+        QSettings settings("COMPASS", view_->instanceId().c_str());
         settings.setValue("mainSplitterSizes", main_splitter_->saveState());
     }
 }
@@ -82,6 +84,8 @@ ViewWidget::~ViewWidget()
  */
 void ViewWidget::createStandardLayout()
 {
+    assert(view_);
+
     //create main layout
     QVBoxLayout* main_layout = new QVBoxLayout;
     main_layout->setContentsMargins(0, 0, 0, 0);
@@ -159,7 +163,7 @@ void ViewWidget::createStandardLayout()
     //create data widget container in left widget
     {
         QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-        size_policy.setHorizontalStretch(DataWidgetStretch);
+        //size_policy.setHorizontalStretch(DataWidgetStretch);
 
         data_widget_container_ = new QWidget;
         data_widget_container_->setSizePolicy(size_policy);
@@ -171,7 +175,7 @@ void ViewWidget::createStandardLayout()
     //create config widget container in right widget
     {
         QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-        size_policy.setHorizontalStretch(ConfigWidgetStretch);
+        //size_policy.setHorizontalStretch(ConfigWidgetStretch);
 
         config_widget_container_ = new QWidget;
         config_widget_container_->setSizePolicy(size_policy);
@@ -181,7 +185,7 @@ void ViewWidget::createStandardLayout()
     }
 
     //add main splitter to central layout and restore state from config
-    QSettings settings("COMPASS", instanceId().c_str());
+    QSettings settings("COMPASS", view_->instanceId().c_str());
 
 #if 0
     main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
@@ -194,8 +198,7 @@ void ViewWidget::createStandardLayout()
     {
         //wtf qt...
         //https://stackoverflow.com/questions/43831474/how-to-equally-distribute-the-width-of-qsplitter
-        int wmax = std::max(data_widget_container_->minimumSizeHint().width(), config_widget_container_->minimumSizeHint().width());
-        main_splitter_->setSizes({ wmax * DataWidgetStretch, wmax * ConfigWidgetStretch });
+        main_splitter_->setSizes({ 100000 * DataWidgetStretch, 100000 * ConfigWidgetStretch });
     }
 #endif
 
