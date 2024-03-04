@@ -70,7 +70,6 @@ public:
 
     // registered
     bool debug_jasterix_;
-    nlohmann::json file_list_;
     std::string current_file_framing_;
 
     unsigned int num_packets_overload_ {60};
@@ -149,10 +148,6 @@ public:
     bool isRunning() const;
 
     void runDialog(QWidget* parent = nullptr);
-
-    std::vector<std::string> fileList();
-    void addFile(const std::string& filename);
-    void clearFileList ();
 
     const ASTERIXImportSource& source() const { return source_; }
     ASTERIXImportSource& source() { return source_; }

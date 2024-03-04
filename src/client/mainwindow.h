@@ -18,7 +18,6 @@
 #ifndef MAINWINDOW_H_
 #define MAINWINDOW_H_
 
-//#include "global.h"
 #include "appmode.h"
 #include "autoresumedialog.h"
 
@@ -72,7 +71,6 @@ public slots:
 
     void importAsterixRecordingSlot();
     void importRecentAsterixRecordingSlot();
-    void clearImportRecentAsterixRecordingsSlot();
     void importAsterixFromNetworkSlot();
     void importAsterixFromPCAPSlot();
     void importJSONRecordingSlot();
@@ -142,8 +140,6 @@ protected:
 
     // import menu
     QMenu* import_menu_ {nullptr};
-
-    QMenu* import_recent_asterix_menu_ {nullptr};
 
     // configuration menu
     QMenu* config_menu_ {nullptr};

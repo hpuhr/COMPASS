@@ -18,7 +18,6 @@
 #ifndef ARRAYLIST_H_
 #define ARRAYLIST_H_
 
-
 #include "buffer.h"
 #include "property.h"
 #include "stringconv.h"
