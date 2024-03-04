@@ -320,9 +320,6 @@ void MainWindow::createMenus ()
     connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
     import_menu_->addAction(import_ast_file_action);
 
-    import_recent_asterix_menu_ = import_menu_->addMenu("Recent ASTERIX Recording");
-    import_recent_asterix_menu_->setToolTip("Import a recent ASTERIX Recording File");
-
     QAction* import_pcap_file_action = new QAction("&PCAP Network Recording");
     import_pcap_file_action->setShortcut(tr("Ctrl+P"));
     import_pcap_file_action->setToolTip("Import ASTERIX data from PCAP network recording");
@@ -499,30 +496,6 @@ void MainWindow::updateMenus()
                               || in_live);
     process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
                                || in_live);
-
-    assert (import_recent_asterix_menu_);
-
-    import_recent_asterix_menu_->clear();
-
-    vector<string> recent_ast_list =  COMPASS::instance().taskManager().asterixImporterTask().fileList();
-
-    for (auto& fn_it : recent_ast_list)
-    {
-        QAction* file_act = new QAction(fn_it.c_str());
-        file_act->setData(fn_it.c_str());
-        connect(file_act, &QAction::triggered, this, &MainWindow::importRecentAsterixRecordingSlot);
-        import_recent_asterix_menu_->addAction(file_act);
-    }
-    if (recent_ast_list.size() == 0)
-        import_recent_asterix_menu_->setDisabled(true);
-    else
-    {
-        import_recent_asterix_menu_->addSeparator();
-
-        QAction* clear_file_act = new QAction("Clear");
-        connect(clear_file_act, &QAction::triggered, this, &MainWindow::clearImportRecentAsterixRecordingsSlot);
-        import_recent_asterix_menu_->addAction(clear_file_act);
-    }
 
     assert (calculate_references_action_);
     calculate_references_action_->setEnabled(COMPASS::instance().dbContentManager().hasAssociations());
@@ -811,15 +784,6 @@ void MainWindow::importRecentAsterixRecordingSlot()
     updateMenus();
 
     task.runDialog(this);
-}
-
-void MainWindow::clearImportRecentAsterixRecordingsSlot()
-{
-    loginf << "MainWindow: clearImportRecentAsterixRecordingsSlot";
-
-    COMPASS::instance().taskManager().asterixImporterTask().clearFileList();
-
-    updateMenus();
 }
 
 void MainWindow::importAsterixFromPCAPSlot()

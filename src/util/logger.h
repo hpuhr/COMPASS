@@ -15,12 +15,14 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LOGGER_H_
-#define LOGGER_H_
+#pragma once
+
+#include "singleton.h"
 
 #include "log4cpp/Appender.hh"
 #include "log4cpp/Category.hh"
-#include "singleton.h"
+
+#include <cstdint>
 
 #define logerr log4cpp::Category::getRoot().errorStream()
 #define logwrn log4cpp::Category::getRoot().warnStream()
@@ -84,4 +86,3 @@ class Logger : public Singleton
     virtual ~Logger();
 };
 
-#endif /* LOGGER_H_ */

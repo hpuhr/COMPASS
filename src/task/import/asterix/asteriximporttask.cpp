@@ -67,7 +67,6 @@ const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 */
 ASTERIXImportTaskSettings::ASTERIXImportTaskSettings()
 :   debug_jasterix_          (false)
-,   file_list_               (json::array())
 ,   current_file_framing_    ("")
 ,   num_packets_overload_    (60)
 ,   override_tod_offset_     (0.0f)
@@ -102,18 +101,6 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id,
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
 
     registerParameter("debug_jasterix", &settings_.debug_jasterix_, ASTERIXImportTaskSettings().debug_jasterix_);
-
-    registerParameter("file_list", &settings_.file_list_, ASTERIXImportTaskSettings().file_list_);
-
-    vector<string> cleaned_file_list;
-    // clean missing files
-
-    for (auto& filename : settings_.file_list_.get<std::vector<string>>())
-    {
-        if (Files::fileExists(filename))
-            cleaned_file_list.push_back(filename);
-    }
-    settings_.file_list_ = cleaned_file_list;
 
     registerParameter("current_file_framing", &settings_.current_file_framing_, ASTERIXImportTaskSettings().current_file_framing_);
 
@@ -412,44 +399,6 @@ void ASTERIXImportTask::refreshjASTERIX() const
         jasterix_->category(cat_it.first)->setCurrentREFEdition(cat_it.second.ref());
         jasterix_->category(cat_it.first)->setCurrentSPFEdition(cat_it.second.spf());
     }
-}
-
-/**
-*/
-std::vector<std::string> ASTERIXImportTask::fileList()
-{
-    return settings_.file_list_.get<std::vector<string>>();
-}
-
-/**
-*/
-void ASTERIXImportTask::addFile(const std::string& filename)
-{
-    loginf << "ASTERIXImportTask: addFile: filename '" << filename << "'";
-
-    vector<string> tmp_list = settings_.file_list_.get<std::vector<string>>();
-
-    if (find(tmp_list.begin(), tmp_list.end(), filename) == tmp_list.end())
-    {
-        loginf << "ASTERIXImportTask: addFile: adding filename '" << filename << "'";
-
-        tmp_list.push_back(filename);
-
-        sort(tmp_list.begin(), tmp_list.end());
-
-        settings_.file_list_ = tmp_list;
-    }
-
-    emit statusChangedSignal(name_);
-}
-
-/**
-*/
-void ASTERIXImportTask::clearFileList ()
-{
-    loginf << "ASTERIXImportTask: removeAllFiles";
-
-    settings_.file_list_.clear();
 }
 
 /**
