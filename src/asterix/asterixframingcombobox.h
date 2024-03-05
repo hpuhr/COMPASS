@@ -48,18 +48,18 @@ class ASTERIXFramingComboBox : public QComboBox
         clear();
 
         for (std::string frame_it : task_.jASTERIX()->framings())
-            addItem(displayNameForFraming(frame_it).c_str());
+            addItem(displayNameForFraming(frame_it).c_str(), QVariant(QString::fromStdString(frame_it)));
 
         setCurrentIndex(0);
     }
 
     /// @brief Returns the currently selected framing
-    std::string getFraming() { return framingForDisplayName(currentText().toStdString()); }
+    std::string getFraming() { return currentData().toString().toStdString(); }
 
     /// @brief Sets the currently selected data type
     void setFraming(const std::string& framing)
     {
-        int index = findText(QString(displayNameForFraming(framing).c_str()));
+        int index = findData(QVariant(QString::fromStdString(framing)));
         assert(index >= 0);
         setCurrentIndex(index);
     }
@@ -68,12 +68,6 @@ protected:
     std::string displayNameForFraming(const std::string& framing) const
     {
         return (framing.empty() ? std::string("raw/netto") : framing);
-    }
-    std::string framingForDisplayName(const std::string& display_name) const
-    {
-        if (display_name == "raw/netto")
-            return "";
-        return display_name;
     }
 
     ASTERIXImportTask& task_;
