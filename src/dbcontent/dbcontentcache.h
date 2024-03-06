@@ -75,9 +75,9 @@ inline NullableVector<T>& Cache::getMetaVar(const std::string& dbcontent_name, c
 {
     if (!hasMetaVar<T>(dbcontent_name, metavar_property))
     {
-        assert (hasMetaVar<T>(dbcontent_name, metavar_property));
         logerr << "Cache: getMetaVar: dbcontent " << dbcontent_name
                << " property " << metavar_property.name() << " not present";
+        assert (hasMetaVar<T>(dbcontent_name, metavar_property));
     }
 
     assert (buffers_.at(dbcontent_name)->has<T>(meta_var_lookup_.at(dbcontent_name).at(metavar_property.name())));
