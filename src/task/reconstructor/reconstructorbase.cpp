@@ -29,7 +29,9 @@ ReconstructorBase::~ReconstructorBase() = default;
 
 /**
 */
-bool ReconstructorBase::processSlice(Buffers& buffers)
+bool ReconstructorBase::processSlice(Buffers&& buffers)
 {
-    return processSlice_impl(buffers);
+    buffers_ = buffers;
+
+    return processSlice_impl();
 }

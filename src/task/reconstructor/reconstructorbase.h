@@ -33,18 +33,19 @@ class Buffer;
 class ReconstructorBase
 {
 public:
-    typedef std::map<std::string, dbContent::VariableSet>  ReadSet;
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
 
     ReconstructorBase();
     virtual ~ReconstructorBase();
 
-    bool processSlice(Buffers& buffers);
+    bool processSlice(Buffers&& buffers);
 
-    virtual ReadSet getReadSet() const = 0;
+    virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 
 protected:
-    virtual bool processSlice_impl(Buffers& buffers) = 0;
+    Buffers buffers_;
+
+    virtual bool processSlice_impl() = 0;
 
 private:
 };

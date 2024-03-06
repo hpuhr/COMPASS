@@ -10,6 +10,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskjob.h"
         #"${CMAKE_CURRENT_LIST_DIR}/calculatereferencestarget.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructorbase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/simplereconstructor.h"
 
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortask.cpp"
@@ -18,4 +19,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskjob.cpp"
         #"${CMAKE_CURRENT_LIST_DIR}/calculatereferencestarget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructorbase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/simplereconstructor.cpp"
 )

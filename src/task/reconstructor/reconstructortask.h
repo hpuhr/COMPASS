@@ -59,5 +59,6 @@ class ReconstructorTask : public Task, public Configurable
 
     std::shared_ptr<ReconstructorTaskJob> job_;
     bool job_done_{false};
+
 };
 
