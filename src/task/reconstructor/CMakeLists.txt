@@ -1,0 +1,19 @@
+include_directories (
+    "${CMAKE_CURRENT_LIST_DIR}"
+    )
+
+target_sources(compass
+    PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructortask.h"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskdialog.h"
+        #"${CMAKE_CURRENT_LIST_DIR}/calculatereferencesstatusdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskjob.h"
+        #"${CMAKE_CURRENT_LIST_DIR}/calculatereferencestarget.h"
+    PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructortask.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskdialog.cpp"
+        #"${CMAKE_CURRENT_LIST_DIR}/calculatereferencesstatusdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskjob.cpp"
+        #"${CMAKE_CURRENT_LIST_DIR}/calculatereferencestarget.cpp"
+  
+)

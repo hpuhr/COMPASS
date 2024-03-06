@@ -103,7 +103,6 @@ CreateAssociationsTaskDialog* CreateAssociationsTask::dialog()
 
     assert(dialog_);
     return dialog_.get();
-
 }
 
 bool CreateAssociationsTask::canRun()

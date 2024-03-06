@@ -1,5 +1,4 @@
-#ifndef RECONSTRUCTORTASKJOB_H
-#define RECONSTRUCTORTASKJOB_H
+#pragma once
 
 
 class ReconstructorTaskJob
@@ -8,4 +7,3 @@ class ReconstructorTaskJob
     ReconstructorTaskJob();
 };
 
-#endif // RECONSTRUCTORTASKJOB_H
