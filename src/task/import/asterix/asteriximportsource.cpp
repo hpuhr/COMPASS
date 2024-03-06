@@ -131,7 +131,11 @@ size_t ASTERIXImportFileInfo::sizeInBytes(bool used_only) const
         return size;
     }
 
-    //accumulate import size from file size
+    //check custom size value first
+    if (total_size_bytes.has_value())
+        return total_size_bytes.value();
+
+    //determine import size from file size
     if (filename.empty() || !Utils::Files::fileExists(filename))
         return 0;
 
