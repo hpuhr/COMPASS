@@ -48,7 +48,7 @@ const std::string RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME =
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::string& class_id,
                                                                  const std::string& instance_id,
                                                                  TaskManager& task_manager)
-    : Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_radar_pos.json")
 {
     tooltip_ =
@@ -291,7 +291,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
         delete msg_box_;
         msg_box_ = nullptr;
 
-        emit doneSignal(name_);
+        emit doneSignal();
     }
     else
         loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot: not yet done";

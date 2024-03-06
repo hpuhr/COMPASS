@@ -27,22 +27,14 @@ class Task : public QObject
     Q_OBJECT
 
   signals:
-    void statusChangedSignal(std::string task_name);  // emitted when settings where changes which
-                                                      // influence the prerequisites
-    void doneSignal(std::string task_name);           // emitted when task is done
+    void doneSignal();           // emitted when task is done
 
   public:
-    Task(const std::string& name, const std::string& gui_name, TaskManager& task_manager)
-        : name_(name),
-          gui_name_(gui_name),
-          task_manager_(task_manager)
+    Task(TaskManager& task_manager)
+        : task_manager_(task_manager)
     {
     }
     virtual ~Task() {}
-
-//    std::string name() const { return name_; }
-
-//    std::string guiName() const { return gui_name_; }
 
     bool done() const { return done_; }
 
@@ -59,8 +51,6 @@ class Task : public QObject
     void allowUserInteractions(bool value) { allow_user_interactions_ = value; }
 
   protected:
-    std::string name_;
-    std::string gui_name_;
     bool stopped_ {false};
     bool done_{false};
     bool allow_user_interactions_{true};

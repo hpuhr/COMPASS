@@ -48,7 +48,7 @@ const std::string CreateAssociationsTask::DONE_PROPERTY_NAME = "associations_cre
 CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
                                                const std::string& instance_id,
                                                TaskManager& task_manager)
-    : Task("CreateAssociationsTask", "Calculate Unique Targets", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_assoc.json")
 {
     tooltip_ = "Create Unique Targets based on all DB Content.";
@@ -533,7 +533,7 @@ void CreateAssociationsTask::createDoneSlot()
 
     QApplication::restoreOverrideCursor();
 
-    emit doneSignal(name_);
+    emit doneSignal();
 }
 
 void CreateAssociationsTask::createObsoleteSlot()

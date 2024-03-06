@@ -18,7 +18,7 @@
 
 ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
-    : Task("ReconstructorTask", "Reconstruct Reference Trajectories", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_reconstructor.json")
 {
     tooltip_ = "Associate target reports and calculate reference trajectories based on all DB Content.";

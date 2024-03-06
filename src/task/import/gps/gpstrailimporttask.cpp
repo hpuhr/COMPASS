@@ -83,7 +83,7 @@ GPSTrailImportTask::Settings::Settings()
 GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, 
                                        const std::string& instance_id,
                                        TaskManager& task_manager)
-:   Task        ("GPSTrailImportTask", "Import GPS Trail", task_manager)
+:   Task        (task_manager)
 ,   Configurable(class_id, instance_id, &task_manager, "task_import_gps.json")
 {
     tooltip_ = "Allows importing of GPS trails as NMEA into the opened database.";
@@ -153,7 +153,6 @@ void GPSTrailImportTask::importFilename(const std::string& filename)
     parseCurrentFile();
 
     emit fileChanged();
-    emit statusChangedSignal(name_);
 }
 
 /**
@@ -946,7 +945,7 @@ void GPSTrailImportTask::insertDoneSlot()
     if (allow_user_interactions_)
         msg_box.exec();
 
-    emit doneSignal(name_);
+    emit doneSignal();
 }
 
 /**

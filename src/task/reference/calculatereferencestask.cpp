@@ -34,7 +34,7 @@ const double CalculateReferencesTaskSettings::HighValueDefault            = 1000
 CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
                                                  const std::string& instance_id,
                                                  TaskManager& task_manager)
-    : Task("CalculateReferencesTask", "Associate Target Reports", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_references.json")
 {
     tooltip_ =
@@ -494,7 +494,7 @@ void CalculateReferencesTask::createDoneSlot()
 
     QApplication::restoreOverrideCursor();
 
-    emit doneSignal(name_);
+    emit doneSignal();
 }
 void CalculateReferencesTask::createObsoleteSlot()
 {

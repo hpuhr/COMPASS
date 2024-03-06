@@ -53,7 +53,7 @@ using namespace nmea;
 
 GPSImportCSVTask::GPSImportCSVTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
-    : Task("GPSImportCSVTask", "Import GPS Trail", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_gps_csv.json")
 {
     tooltip_ = "Allows importing of GPS trails as CSV into the opened database.";
@@ -121,8 +121,6 @@ void GPSImportCSVTask::importFilename(const std::string& filename)
     current_filename_ = filename;
 
     parseCurrentFile();
-
-    emit statusChangedSignal(name_);
 }
 
 bool GPSImportCSVTask::checkPrerequisites()
@@ -669,7 +667,7 @@ void GPSImportCSVTask::insertDoneSlot()
     if (allow_user_interactions_)
         msg_box.exec();
 
-    emit doneSignal(name_);
+    emit doneSignal();
 }
 
 void GPSImportCSVTask::dialogImportSlot()
