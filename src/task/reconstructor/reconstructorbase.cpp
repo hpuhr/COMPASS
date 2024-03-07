@@ -16,6 +16,13 @@
  */
 
 #include "reconstructorbase.h"
+#include "compass.h"
+#include "dbcontentmanager.h"
+#include "logger.h"
+#include "timeconv.h"
+
+using namespace std;
+using namespace Utils;
 
 /**
 */
@@ -27,6 +34,43 @@ ReconstructorBase::ReconstructorBase()
 */
 ReconstructorBase::~ReconstructorBase() = default;
 
+bool ReconstructorBase::hasNextTimeSlice()
+{
+    if (current_slice_begin_.is_not_a_date_time())
+    {
+        assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
+        std::tie(current_slice_begin_, timestamp_max_) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+
+        loginf << "ReconstructorBase: hasNextTimeSlice: new min " << Time::toString(current_slice_begin_)
+               << " max " << Time::toString(timestamp_max_);
+    }
+
+    assert (!current_slice_begin_.is_not_a_date_time());
+    assert (!timestamp_max_.is_not_a_date_time());
+
+    return current_slice_begin_ + slice_duration_ < timestamp_max_;
+}
+
+TimeWindow ReconstructorBase::getNextTimeSlice()
+{
+    assert (hasNextTimeSlice());
+
+    assert (!current_slice_begin_.is_not_a_date_time());
+    assert (!timestamp_max_.is_not_a_date_time());
+
+    assert (current_slice_begin_ <= timestamp_max_);
+
+    boost::posix_time::ptime current_slice_end = current_slice_begin_ + slice_duration_;
+
+    TimeWindow window {current_slice_begin_, current_slice_end};
+
+    current_slice_begin_ = current_slice_end;
+
+    assert (current_slice_begin_ <= timestamp_max_);
+
+    return window;
+}
+
 /**
 */
 bool ReconstructorBase::processSlice(Buffers&& buffers)
@@ -34,4 +78,13 @@ bool ReconstructorBase::processSlice(Buffers&& buffers)
     buffers_ = buffers;
 
     return processSlice_impl();
+}
+
+
+void ReconstructorBase::clear()
+{
+    buffers_.clear();
+
+    current_slice_begin_ = {};
+    timestamp_max_ = {};
 }

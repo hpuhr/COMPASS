@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include <map>
 #include <string>
 #include <memory>
@@ -28,24 +30,34 @@ class VariableSet;
 
 class Buffer;
 
+typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow; // min, max
+
 /**
-*/
+ */
 class ReconstructorBase
 {
-public:
+  public:
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
 
     ReconstructorBase();
     virtual ~ReconstructorBase();
 
+    bool hasNextTimeSlice();
+    TimeWindow getNextTimeSlice();
     bool processSlice(Buffers&& buffers);
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 
-protected:
+    void clear();
+
+  protected:
     Buffers buffers_;
+
+    boost::posix_time::ptime current_slice_begin_;
+    boost::posix_time::ptime timestamp_max_;
+    const boost::posix_time::time_duration slice_duration_ {1, 0, 0}; // 1 hour
 
     virtual bool processSlice_impl() = 0;
 
-private:
+  private:
 };
