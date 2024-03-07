@@ -20,7 +20,7 @@
 
 #include "evaluationtargetdata.h"
 #include "evaluationdatawidget.h"
-#include "dbcontentcache.h"
+#include "dbcontentaccessor.h"
 
 #include <QAbstractItemModel>
 
@@ -107,7 +107,7 @@ protected:
     QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
                                 "M3/A", "MC Min", "MC Max"};
 
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     TargetCache target_data_;
     bool finalized_ {false};

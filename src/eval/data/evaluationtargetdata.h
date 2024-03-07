@@ -45,7 +45,7 @@ public:
 
     EvaluationTargetData(unsigned int utn, 
                          EvaluationData& eval_data,
-                         std::shared_ptr<dbContent::Cache> cache,
+                         std::shared_ptr<dbContent::DBContentAccessor> accessor,
                          EvaluationManager& eval_man, 
                          DBContentManager& dbcont_man);
     virtual ~EvaluationTargetData();
@@ -187,7 +187,7 @@ protected:
                      const dbContent::TargetReport::Index& index) const;
     
     EvaluationData&    eval_data_;
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
     EvaluationManager& eval_man_;
     DBContentManager&  dbcont_man_;
 

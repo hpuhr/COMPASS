@@ -322,8 +322,8 @@ dbContent::VariableSet RadarPlotPositionCalculatorTask::getReadSetFor(const std:
     assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
 
-    assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
-    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
 
     assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
@@ -338,8 +338,8 @@ dbContent::VariableSet RadarPlotPositionCalculatorTask::getReadSetFor(const std:
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
 
     // optionals
-    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
-        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_));
 
     if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
         read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));

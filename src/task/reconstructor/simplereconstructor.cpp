@@ -18,8 +18,8 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
             // ds id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
 
             // line id
     assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
@@ -30,12 +30,12 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
 
             // aircraft address
-    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
-        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
+    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_));
 
             // aircraft id
-    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
-        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_));
+    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_));
 
             // track num
     if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_num_))

@@ -48,7 +48,7 @@ using namespace boost::posix_time;
 EvaluationData::EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man)
     : eval_man_(eval_man), dbcont_man_(dbcont_man)
 {
-    cache_ = make_shared<dbContent::Cache>(dbcont_man_);
+    accessor_ = make_shared<dbContent::DBContentAccessor>(dbcont_man_);
 
     connect(&dbcont_man, &DBContentManager::targetChangedSignal, this, &EvaluationData::targetChangedSlot);
     connect(&dbcont_man, &DBContentManager::allTargetsChangedSignal, this, &EvaluationData::allTargetsChangedSlot);
@@ -58,8 +58,8 @@ void EvaluationData::setBuffers(std::map<std::string, std::shared_ptr<Buffer>> b
 {
     loginf << "EvaluationData: setBuffers";
 
-    cache_->clear();
-    cache_->add(buffers);
+    accessor_->clear();
+    accessor_->add(buffers);
 }
 
 void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_id)
@@ -80,22 +80,22 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
-    assert (cache_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
-    NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(
+    assert (accessor_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
+    NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(
                 dbcontent_name, DBContent::meta_var_timestamp_);
 
     unsigned int buffer_size = ts_vec.size();
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_datasource_id_));
-    NullableVector<unsigned int>& ds_ids = cache_->getMetaVar<unsigned int>(
-                dbcontent_name, DBContent::meta_var_datasource_id_);
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ds_id_));
+    NullableVector<unsigned int>& ds_ids = accessor_->getMetaVar<unsigned int>(
+                dbcontent_name, DBContent::meta_var_ds_id_);
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
-    NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
+    NullableVector<unsigned int>& line_ids = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_line_id_);
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
-    NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+    NullableVector<unsigned int>& utn_vec = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_utn_);
 
     ptime timestamp;
@@ -145,7 +145,7 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
         utn = utn_vec.get(cnt);
 
         if (!hasTargetData(utn))
-            target_data_.emplace_back(utn, *this, cache_, eval_man_, dbcont_man_);
+            target_data_.emplace_back(utn, *this, accessor_, eval_man_, dbcont_man_);
 
         assert (hasTargetData(utn));
 
@@ -179,22 +179,22 @@ void EvaluationData::addTestData (string dbcontent_name, unsigned int line_id)
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
-    assert (cache_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
-    NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(
+    assert (accessor_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
+    NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(
                 dbcontent_name, DBContent::meta_var_timestamp_);
 
     unsigned int buffer_size = ts_vec.size();
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_datasource_id_));
-    NullableVector<unsigned int>& ds_ids = cache_->getMetaVar<unsigned int>(
-                dbcontent_name, DBContent::meta_var_datasource_id_);
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ds_id_));
+    NullableVector<unsigned int>& ds_ids = accessor_->getMetaVar<unsigned int>(
+                dbcontent_name, DBContent::meta_var_ds_id_);
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
-    NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
+    NullableVector<unsigned int>& line_ids = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_line_id_);
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
-    NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+    NullableVector<unsigned int>& utn_vec = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_utn_);
 
     boost::posix_time::ptime timestamp;
@@ -243,7 +243,7 @@ void EvaluationData::addTestData (string dbcontent_name, unsigned int line_id)
         utn = utn_vec.get(cnt);
 
         if (!hasTargetData(utn))
-            target_data_.emplace_back(utn, *this, cache_, eval_man_, dbcont_man_);
+            target_data_.emplace_back(utn, *this, accessor_, eval_man_, dbcont_man_);
 
         assert (hasTargetData(utn));
 
@@ -314,7 +314,7 @@ void EvaluationData::clear()
 {
     beginResetModel();
 
-    cache_->clear();
+    accessor_->clear();
 
     target_data_.clear();
     finalized_ = false;

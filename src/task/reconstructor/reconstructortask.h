@@ -2,7 +2,7 @@
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
-#include "dbcontent/dbcontentcache.h"
+#include "dbcontent/dbcontentaccessor.h"
 #include "task.h"
 #include "global.h"
 
@@ -53,7 +53,7 @@ class ReconstructorTask : public Task, public Configurable
 
     //std::unique_ptr<CreateAssociationsStatusDialog> status_dialog_;
 
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 

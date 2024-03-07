@@ -169,8 +169,8 @@ dbContent::VariableSet RTCommandGetData::getReadSetFor() const
     DBContent& db_content = dbcont_man.dbContent(dbcontent_name_);
 
     // ds id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name_, DBContent::meta_var_datasource_id_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name_, DBContent::meta_var_datasource_id_));
+    assert(dbcont_man.metaCanGetVariable(dbcontent_name_, DBContent::meta_var_ds_id_));
+    read_set.add(dbcont_man.metaGetVariable(dbcontent_name_, DBContent::meta_var_ds_id_));
 
     // line id
     assert(dbcont_man.metaCanGetVariable(dbcontent_name_, DBContent::meta_var_line_id_));

@@ -3,7 +3,7 @@
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
-#include "dbcontent/dbcontentcache.h"
+#include "dbcontent/dbcontentaccessor.h"
 #include "task.h"
 #include "reconstruction/reconstructor_defs.h"
 
@@ -172,7 +172,7 @@ protected:
 
     // calculate only utns list
 
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 

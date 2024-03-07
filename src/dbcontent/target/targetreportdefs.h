@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <map>
+
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/optional.hpp>
 
@@ -25,6 +27,17 @@ namespace dbContent
 namespace TargetReport 
 {
 
+/**
+*/
+struct AccuracyTables
+{
+    static const std::map<int, float> adsb_nucr_nacv_accuracies;
+    static const std::map<int, float> adsb_v0_accuracies;
+    static const std::map<int, float> adsb_v12_accuracies;
+};
+
+/**
+*/
 struct Index
 {
     Index() = default;
@@ -35,6 +48,8 @@ struct Index
     unsigned int idx_internal; //internal index (index into internal data structures)
 };
 
+/**
+*/
 class DataID
 {
 public:
@@ -67,6 +82,83 @@ private:
     boost::posix_time::ptime timestamp_;
     boost::optional<Index>   index_;
     bool                     valid_ = false;
+};
+
+/**
+*/
+struct TargetReportPos
+{
+    TargetReportPos() {}
+    TargetReportPos(double lat, double lon) : latitude_(lat), longitude_(lon) {}
+
+    double latitude_  {0}; // deg
+    double longitude_ {0}; // deg
+};
+
+/**
+*/
+struct TargetReportAlt
+{
+    enum class Source
+    {
+        Barometric_ModeC = 0,
+        Barometric_CAT062_Trusted,
+        Barometric_CAT062_Secondary
+    };
+
+    TargetReportAlt() {}
+    TargetReportAlt(Source source, 
+                    float alt, 
+                    const boost::optional<bool>& v,
+                    const boost::optional<bool>& g)
+    :   source_  (source)
+    ,   altitude_(alt   )
+    ,   valid_   (v     )
+    ,   garbled_ (g     ) {}
+
+    Source                source_   = Source::Barometric_ModeC;
+    float                 altitude_ = 0.0f;
+    boost::optional<bool> valid_;
+    boost::optional<bool> garbled_;   
+};
+
+/**
+*/
+struct TargetReportPosAcc
+{
+    TargetReportPosAcc() = default;
+    TargetReportPosAcc(double x_stddev, 
+                       double y_stddev, 
+                       double xy_cov)
+    :   x_stddev_(x_stddev), 
+        y_stddev_(y_stddev), 
+        xy_cov_  (xy_cov  ) {}
+
+    double x_stddev_ {0}; // m
+    double y_stddev_ {0}; // m
+    double xy_cov_   {0}; // m^2
+};
+
+/**
+*/
+struct TargetReportVel
+{
+    TargetReportVel() {}
+    TargetReportVel(double track_angle, double speed) : track_angle_(track_angle), speed_(speed) {}
+
+    double track_angle_ {0}; // true north, deg
+    double speed_       {0}; // m/s
+};
+
+/**
+*/
+struct TargetReportVelAcc
+{
+    TargetReportVelAcc() = default;
+    TargetReportVelAcc(double vx_stddev, double vy_stddev) : vx_stddev_(vx_stddev), vy_stddev_(vy_stddev) {}
+
+    double vx_stddev_ {0}; // m/s
+    double vy_stddev_ {0}; // m/s
 };
 
 } // namespace TargetReport

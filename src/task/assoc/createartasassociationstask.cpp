@@ -165,14 +165,14 @@ bool CreateARTASAssociationsTask::canRun()
     // meta var stuff
     loginf << "CreateARTASAssociationsTask: canRun: meta vars "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_.name()) << " "
-        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()) << " "
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_ds_id_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_timestamp_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_utn_.name());
 
     if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_.name()) ||
-            !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()) ||
+            !dbcontent_man.existsMetaVariable(DBContent::meta_var_ds_id_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_timestamp_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) ||
@@ -204,12 +204,12 @@ bool CreateARTASAssociationsTask::canRun()
 
         loginf << "CreateARTASAssociationsTask: canRun: metas in object " << dbo_it.first << " "
             << !dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first) << " "
-            << !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first) << " "
+            << !dbcontent_man.metaVariable(DBContent::meta_var_ds_id_.name()).existsIn(dbo_it.first) << " "
             << !dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(dbo_it.first) << " "
             << !dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbo_it.first);
 
         if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_ds_id_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbo_it.first))
             return false;
@@ -283,7 +283,7 @@ void CreateARTASAssociationsTask::run()
 
             assert(ds_found);
             std::string custom_filter_clause {
-                dbcontent_man.metaGetVariable(dbo_it.first, DBContent::meta_var_datasource_id_).dbColumnName()
+                dbcontent_man.metaGetVariable(dbo_it.first, DBContent::meta_var_ds_id_).dbColumnName()
                         + " in (" + std::to_string(current_ds_id) + ")"};
 
             //        void DBContent::load (DBOVariableSet& read_set,  std::string

@@ -17,7 +17,7 @@ public:
     typedef std::tuple<std::string, unsigned int, unsigned int> TargetKey; // dbcontent_name, ds_id, line_id
 
     Target(unsigned int utn, 
-           std::shared_ptr<dbContent::Cache> cache);
+           std::shared_ptr<dbContent::DBContentAccessor> accessor);
 
     void addTargetReport(const std::string& dbcontent_name, 
                          unsigned int ds_id, 
@@ -34,8 +34,8 @@ public:
     std::map<TargetKey, std::unique_ptr<dbContent::TargetReport::Chain>>& chains () { return chains_; }
 
 protected:
-    unsigned int                      utn_;
-    std::shared_ptr<dbContent::Cache> cache_;
+    unsigned int utn_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     std::map<TargetKey, std::unique_ptr<dbContent::TargetReport::Chain>> chains_;
 };

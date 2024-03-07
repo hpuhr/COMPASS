@@ -46,7 +46,7 @@ using namespace Utils;
 using namespace dbContent;
 
 const Property DBContent::meta_var_rec_num_ {"Record Number", PropertyDataType::ULONGINT};
-const Property DBContent::meta_var_datasource_id_ {"DS ID", PropertyDataType::UINT};
+const Property DBContent::meta_var_ds_id_ {"DS ID", PropertyDataType::UINT};
 const Property DBContent::meta_var_sac_id_ {"SAC", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_sic_id_ {"SIC", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_line_id_ {"Line ID", PropertyDataType::UINT};
@@ -56,8 +56,8 @@ const Property DBContent::meta_var_m3a_ {"Mode 3/A Code", PropertyDataType::UINT
 const Property DBContent::meta_var_m3a_g_ {"Mode 3/A Garbled", PropertyDataType::BOOL};
 const Property DBContent::meta_var_m3a_v_ {"Mode 3/A Valid", PropertyDataType::BOOL};
 const Property DBContent::meta_var_m3a_smoothed_ {"Mode 3/A Smoothed", PropertyDataType::BOOL};
-const Property DBContent::meta_var_ta_ {"Aircraft Address", PropertyDataType::UINT};
-const Property DBContent::meta_var_ti_ {"Aircraft Identification", PropertyDataType::STRING};
+const Property DBContent::meta_var_acad_ {"Aircraft Address", PropertyDataType::UINT};
+const Property DBContent::meta_var_acid_ {"Aircraft Identification", PropertyDataType::STRING};
 const Property DBContent::meta_var_mc_ {"Mode C Code", PropertyDataType::FLOAT};
 const Property DBContent::meta_var_mc_g_ {"Mode C Garbled", PropertyDataType::BOOL};
 const Property DBContent::meta_var_mc_v_ {"Mode C Valid", PropertyDataType::BOOL};
@@ -139,7 +139,7 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
     logdbg << "DBContent: constructor: created with instance_id " << instanceId() << " name "
            << name_;
 
-    checkStaticVariable(DBContent::meta_var_datasource_id_);
+    checkStaticVariable(DBContent::meta_var_ds_id_);
     checkStaticVariable(DBContent::meta_var_latitude_);
     checkStaticVariable(DBContent::meta_var_longitude_);
 
@@ -313,9 +313,9 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
         vector<unsigned int> ds_ids_to_load = ds_man.unfilteredDS(name_);
         assert (ds_ids_to_load.size());
 
-        assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
+        assert (hasVariable(DBContent::meta_var_ds_id_.name()));
 
-        Variable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
+        Variable& datasource_var = variable(DBContent::meta_var_ds_id_.name());
         assert (datasource_var.dataType() == PropertyDataType::UINT);
 
         if (ds_man.lineSpecificLoadingRequired(name_)) // ds specific line loading
@@ -430,8 +430,8 @@ void DBContent::loadFiltered(dbContent::VariableSet& read_set, std::string custo
     assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_rec_num_));
     read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_rec_num_));
 
-    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_datasource_id_));
-    read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_datasource_id_));
+    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_ds_id_));
+    read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_ds_id_));
 
     assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_line_id_));
     read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_line_id_));
@@ -493,10 +493,10 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 {
     logdbg << "DBContent " << name_ << ": doDataSourcesBeforeInsert";
 
-    assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
+    assert (hasVariable(DBContent::meta_var_ds_id_.name()));
 
     // ds
-    Variable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
+    Variable& datasource_var = variable(DBContent::meta_var_ds_id_.name());
     assert (datasource_var.dataType() == PropertyDataType::UINT);
 
     string datasource_col_str = datasource_var.dbColumnName();

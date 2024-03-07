@@ -37,8 +37,8 @@ string adsb_only_high_sil_reason {"I021/090 SIL: Too low or unknown"};
 
 CalculateReferencesJob::CalculateReferencesJob(CalculateReferencesTask& task, 
                                                CalculateReferencesStatusDialog& status_dialog,
-                                               std::shared_ptr<dbContent::Cache> cache)
-    : Job("CalculateReferencesJob"), task_(task), status_dialog_(status_dialog), cache_(cache)
+                                               std::shared_ptr<dbContent::DBContentAccessor> accessor)
+    : Job("CalculateReferencesJob"), task_(task), status_dialog_(status_dialog), accessor_(accessor)
 {
 }
 
@@ -124,7 +124,7 @@ size_t CalculateReferencesJob::createTargets()
 {
     loginf << "CalculateReferencesJob: createTargets";
 
-    assert (cache_);
+    assert (accessor_);
 
     unsigned int num_skipped {0};
     unsigned int num_unassoc {0};
@@ -136,26 +136,26 @@ size_t CalculateReferencesJob::createTargets()
     // create map for utn lookup
     map<unsigned int, std::unique_ptr<CalculateReferences::Target>> target_map;
 
-    for (auto& buf_it : *cache_)
+    for (auto& buf_it : *accessor_)
     {
         string dbcontent_name = buf_it.first;
 
-        assert (cache_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
-        NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(
+        assert (accessor_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
+        NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(
                     dbcontent_name, DBContent::meta_var_timestamp_);
 
         unsigned int buffer_size = ts_vec.size();
 
-        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_datasource_id_));
-        NullableVector<unsigned int>& ds_ids = cache_->getMetaVar<unsigned int>(
-                    dbcontent_name, DBContent::meta_var_datasource_id_);
+        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ds_id_));
+        NullableVector<unsigned int>& ds_ids = accessor_->getMetaVar<unsigned int>(
+                    dbcontent_name, DBContent::meta_var_ds_id_);
 
-        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
-        NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
+        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
+        NullableVector<unsigned int>& line_ids = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name, DBContent::meta_var_line_id_);
 
-        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
-        NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(
+        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+        NullableVector<unsigned int>& utn_vec = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name, DBContent::meta_var_utn_);
 
         for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
@@ -180,7 +180,7 @@ size_t CalculateReferencesJob::createTargets()
             utn = utn_vec.get(cnt);
 
             if (!target_map.count(utn))
-                target_map[utn].reset(new CalculateReferences::Target(utn, cache_));
+                target_map[utn].reset(new CalculateReferences::Target(utn, accessor_));
 
             target_map.at(utn)->addTargetReport(dbcontent_name, ds_ids.get(cnt), line_ids.get(cnt), timestamp, cnt);
 
@@ -239,35 +239,35 @@ void CalculateReferencesJob::filterPositionUsage(
     //        Mono/Multi track, CNF (confirmed/tentative), Primary-tracks
     //    I062/500 Estimated Accuracies (APC, ATV)
 
-    if (cache_->has(dbcontent_name))
+    if (accessor_->has(dbcontent_name))
     {
         vector<bool> ignore_positions;
         bool ignore_current_position;
 
-        unsigned int buffer_size = cache_->get(dbcontent_name)->size();
+        unsigned int buffer_size = accessor_->get(dbcontent_name)->size();
 
-        assert (cache_->hasMetaVar<bool>(dbcontent_name, DBContent::meta_var_track_confirmed_));
-        NullableVector<bool>& confirmed_vec = cache_->getMetaVar<bool>(
+        assert (accessor_->hasMetaVar<bool>(dbcontent_name, DBContent::meta_var_track_confirmed_));
+        NullableVector<bool>& confirmed_vec = accessor_->getMetaVar<bool>(
                     dbcontent_name, DBContent::meta_var_track_confirmed_);
 
-        assert (cache_->hasMetaVar<unsigned char>(dbcontent_name, DBContent::meta_var_track_coasting_));
-        NullableVector<unsigned char>& coasting_vec = cache_->getMetaVar<unsigned char>(
+        assert (accessor_->hasMetaVar<unsigned char>(dbcontent_name, DBContent::meta_var_track_coasting_));
+        NullableVector<unsigned char>& coasting_vec = accessor_->getMetaVar<unsigned char>(
                     dbcontent_name, DBContent::meta_var_track_coasting_);
 
-        assert (cache_->hasVar<bool>(dbcontent_name, DBContent::var_cat062_mono_sensor_));
-        NullableVector<bool>& mono_vec = cache_->getVar<bool>(
+        assert (accessor_->hasVar<bool>(dbcontent_name, DBContent::var_cat062_mono_sensor_));
+        NullableVector<bool>& mono_vec = accessor_->getVar<bool>(
                     dbcontent_name, DBContent::var_cat062_mono_sensor_);
 
-        assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat062_type_lm_));
-        NullableVector<unsigned char>& type_lm_vec = cache_->getVar<unsigned char>(
+        assert (accessor_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat062_type_lm_));
+        NullableVector<unsigned char>& type_lm_vec = accessor_->getVar<unsigned char>(
                     dbcontent_name, DBContent::var_cat062_type_lm_);
 
-        assert (cache_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_x_stddev_));
-        NullableVector<double>& x_stddev_vec = cache_->getMetaVar<double>(
+        assert (accessor_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_x_stddev_));
+        NullableVector<double>& x_stddev_vec = accessor_->getMetaVar<double>(
                     dbcontent_name, DBContent::meta_var_x_stddev_);
 
-        assert (cache_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_y_stddev_));
-        NullableVector<double>& y_stddev_vec = cache_->getMetaVar<double>(
+        assert (accessor_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_y_stddev_));
+        NullableVector<double>& y_stddev_vec = accessor_->getMetaVar<double>(
                     dbcontent_name, DBContent::meta_var_y_stddev_);
 
         unsigned int index;
@@ -366,27 +366,27 @@ void CalculateReferencesJob::filterPositionUsage(
 
     // MOPS version, NACp, NIC, PIC, SIL
 
-    if (cache_->has(dbcontent_name))
+    if (accessor_->has(dbcontent_name))
     {
         vector<bool> ignore_positions;
         bool ignore_current_position;
 
-        unsigned int buffer_size = cache_->get(dbcontent_name)->size();
+        unsigned int buffer_size = accessor_->get(dbcontent_name)->size();
 
-        assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_mops_version_));
-        NullableVector<unsigned char>& mops_vec = cache_->getVar<unsigned char>(
+        assert (accessor_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_mops_version_));
+        NullableVector<unsigned char>& mops_vec = accessor_->getVar<unsigned char>(
                     dbcontent_name, DBContent::var_cat021_mops_version_);
 
-        assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nacp_));
-        NullableVector<unsigned char>& nacp_vec = cache_->getVar<unsigned char>(
+        assert (accessor_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nacp_));
+        NullableVector<unsigned char>& nacp_vec = accessor_->getVar<unsigned char>(
                     dbcontent_name, DBContent::var_cat021_nacp_);
 
-        assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nucp_nic_));
-        NullableVector<unsigned char>& nucp_nic_vec = cache_->getVar<unsigned char>(
+        assert (accessor_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nucp_nic_));
+        NullableVector<unsigned char>& nucp_nic_vec = accessor_->getVar<unsigned char>(
                     dbcontent_name, DBContent::var_cat021_nucp_nic_);
 
-        assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_sil_));
-        NullableVector<unsigned char>& sil_vec = cache_->getVar<unsigned char>(
+        assert (accessor_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_sil_));
+        NullableVector<unsigned char>& sil_vec = accessor_->getVar<unsigned char>(
                     dbcontent_name, DBContent::var_cat021_sil_);
 
         unsigned int index;

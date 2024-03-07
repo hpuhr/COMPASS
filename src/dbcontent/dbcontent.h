@@ -71,7 +71,7 @@ public slots:
 
 public:
     static const Property meta_var_rec_num_;
-    static const Property meta_var_datasource_id_;
+    static const Property meta_var_ds_id_;
     static const Property meta_var_sac_id_;
     static const Property meta_var_sic_id_;
     static const Property meta_var_line_id_;
@@ -81,8 +81,8 @@ public:
     static const Property meta_var_m3a_g_;
     static const Property meta_var_m3a_v_;
     static const Property meta_var_m3a_smoothed_;
-    static const Property meta_var_ta_;
-    static const Property meta_var_ti_;
+    static const Property meta_var_acad_;
+    static const Property meta_var_acid_;
     static const Property meta_var_mc_;
     static const Property meta_var_mc_g_;
     static const Property meta_var_mc_v_;

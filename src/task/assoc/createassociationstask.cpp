@@ -111,10 +111,10 @@ bool CreateAssociationsTask::canRun()
 
     loginf << "CreateAssociationsTask: canRun: metas ";
     if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_.name())
-            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ds_id_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_timestamp_.name())
-            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ta_.name())
-            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ti_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_acad_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_acid_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_end_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_m3a_.name())
@@ -129,7 +129,7 @@ bool CreateAssociationsTask::canRun()
         loginf << "CreateAssociationsTask: canRun: metas in dbcontent " << dbo_it.first;
 
         if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_ds_id_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_it.first)
@@ -141,8 +141,8 @@ bool CreateAssociationsTask::canRun()
 
         if (dbo_it.first != "CAT001")  // check metas specific track vars
         {
-            if (!dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_it.first)
-                    || !dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_it.first)
+            if (!dbcontent_man.metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbo_it.first)
+                    || !dbcontent_man.metaVariable(DBContent::meta_var_acid_.name()).existsIn(dbo_it.first)
                     )
                 return false;
         }
@@ -442,10 +442,10 @@ void CreateAssociationsTask::loadingDoneSlot()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    if (!cache_)
-        cache_ = std::make_shared<dbContent::Cache> (dbcontent_man);
+    if (!accessor_)
+        accessor_ = std::make_shared<dbContent::DBContentAccessor> (dbcontent_man);
 
-    cache_->add(data_);
+    accessor_->add(data_);
 
     disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
                this, &CreateAssociationsTask::loadedDataSlot);
@@ -464,7 +464,7 @@ void CreateAssociationsTask::loadingDoneSlot()
     //assert(!create_job_);
 
     create_job_ = std::make_shared<CreateAssociationsJob>(
-                *this, COMPASS::instance().interface(), cache_);
+                *this, COMPASS::instance().interface(), accessor_);
 
     connect(create_job_.get(), &CreateAssociationsJob::doneSignal, this,
             &CreateAssociationsTask::createDoneSlot, Qt::QueuedConnection);
@@ -526,7 +526,7 @@ void CreateAssociationsTask::createDoneSlot()
 
     COMPASS::instance().interface().saveProperties();
 
-    cache_ = nullptr;
+    accessor_ = nullptr;
     data_.clear();
 
     done_ = true;
@@ -561,8 +561,8 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbcontent_n
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     // ds id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
 
     // line id
     assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
@@ -573,12 +573,12 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbcontent_n
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
 
     // aircraft address
-    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
-        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
+    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_));
 
     // aircraft id
-    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
-        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_));
+    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_));
 
     // track num
     if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_num_))

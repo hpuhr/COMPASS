@@ -20,7 +20,7 @@
 
 namespace dbContent {
 
-class Cache;
+class DBContentAccessor;
 
 namespace TargetReport {
 
@@ -63,7 +63,7 @@ public:
     typedef TargetReport::DataID                                  DataID;
     typedef std::multimap<boost::posix_time::ptime, Index>      IndexMap;
 
-    Chain(std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name);
+    Chain(std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name);
     virtual ~Chain();
 
     void addIndex (boost::posix_time::ptime timestamp, unsigned int index);
@@ -151,7 +151,7 @@ public:
     bool ignorePosition(const DataID& id) const;
 
 protected:
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
     std::string dbcontent_name_;
 
     std::multimap<boost::posix_time::ptime, Index> timestamp_index_lookup_; // timestamp -> index

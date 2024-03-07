@@ -102,7 +102,7 @@ public:
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
     void renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name);
     void deleteMetaVariable(const std::string& var_name);
-    const std::map<std::string, std::unique_ptr<dbContent::MetaVariable>>& metaVariables() { return meta_variables_; }
+    const std::map<std::string, std::unique_ptr<dbContent::MetaVariable>>& metaVariables() const { return meta_variables_; }
 
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();

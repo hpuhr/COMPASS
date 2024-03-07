@@ -27,8 +27,8 @@ using namespace boost::posix_time;
 namespace CalculateReferences {
 
 Target::Target(unsigned int utn, 
-               std::shared_ptr<dbContent::Cache> cache)
-    : utn_(utn), cache_(cache)
+               std::shared_ptr<dbContent::DBContentAccessor> accessor)
+    : utn_(utn), accessor_(accessor)
 {
 }
 
@@ -41,7 +41,7 @@ void Target::addTargetReport(const std::string& dbcontent_name,
     TargetKey key = TargetKey{dbcontent_name, ds_id, line_id};
 
     if (!chains_.count(key))
-        chains_[key].reset(new Chain(cache_, dbcontent_name));
+        chains_[key].reset(new Chain(accessor_, dbcontent_name));
 
     chains_.at(key)->addIndex(timestamp, index);
 }
@@ -103,7 +103,7 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
     PropertyList buffer_list;
 
     // basics
-    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sac_id_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
@@ -131,15 +131,15 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
 
     // secondary
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
-    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
-    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_));
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
 
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
 
     NullableVector<unsigned int>& ds_id_vec = buffer->get<unsigned int> (
-                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_).name());
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_).name());
     NullableVector<unsigned char>& sac_vec = buffer->get<unsigned char> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sac_id_).name());
     NullableVector<unsigned char>& sic_vec = buffer->get<unsigned char> (
@@ -185,9 +185,9 @@ std::shared_ptr<Buffer> Target::calculateReference(const CalculateReferencesTask
     NullableVector<unsigned int>& m3a_vec = buffer->get<unsigned int> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_).name());
     NullableVector<unsigned int>& acad_vec = buffer->get<unsigned int> (
-                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_).name());
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_).name());
     NullableVector<string>& acid_vec = buffer->get<string> (
-                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_).name());
+                dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_).name());
 
     NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int> (
                 dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).name());

@@ -153,7 +153,7 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
 
     ss << "\nCREATE INDEX DS_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
     ss << COMPASS::instance().dbContentManager().metaGetVariable(
-              object.name(), DBContent::meta_var_datasource_id_).dbColumnName()
+              object.name(), DBContent::meta_var_ds_id_).dbColumnName()
        << ");";
 
     ss << "\nCREATE INDEX LINE_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";

@@ -47,16 +47,16 @@ using namespace dbContent::TargetReport;
 
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, 
                                            EvaluationData& eval_data,
-                                           std::shared_ptr<dbContent::Cache> cache,
+                                           std::shared_ptr<dbContent::DBContentAccessor> accessor,
                                            EvaluationManager& eval_man,
                                            DBContentManager& dbcont_man)
     :   utn_       (utn)
     ,   eval_data_ (eval_data)
-    ,   cache_(cache)
+    ,   accessor_  (accessor)
     ,   eval_man_  (eval_man)
     ,   dbcont_man_(dbcont_man)
-    ,   ref_chain_(cache_, eval_man_.dbContentNameRef())
-    ,   tst_chain_(cache_, eval_man_.dbContentNameTst())
+    ,   ref_chain_ (accessor_, eval_man_.dbContentNameRef())
+    ,   tst_chain_ (accessor_, eval_man_.dbContentNameTst())
 {
 }
 

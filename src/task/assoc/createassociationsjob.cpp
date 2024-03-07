@@ -45,8 +45,8 @@ using namespace boost::posix_time;
 //bool CreateAssociationsJob::in_appimage_ = COMPASS::isAppImage();
 
 CreateAssociationsJob::CreateAssociationsJob(CreateAssociationsTask& task, DBInterface& db_interface,
-                                             std::shared_ptr<dbContent::Cache> cache)
-    : Job("CreateAssociationsJob"), task_(task), db_interface_(db_interface), cache_(cache)
+                                             std::shared_ptr<dbContent::DBContentAccessor> accessor)
+    : Job("CreateAssociationsJob"), task_(task), db_interface_(db_interface), accessor_(accessor)
 {
 }
 
@@ -160,10 +160,10 @@ void CreateAssociationsJob::removePreviousAssociations()
 {
     loginf << "CreateAssociationsJob: removePreviousAssociations";
 
-    for (auto& buf_it : *cache_)
+    for (auto& buf_it : *accessor_)
     {
-        assert(cache_->hasMetaVar<unsigned int>(buf_it.first, DBContent::meta_var_utn_));
-        NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(buf_it.first, DBContent::meta_var_utn_);
+        assert(accessor_->hasMetaVar<unsigned int>(buf_it.first, DBContent::meta_var_utn_));
+        NullableVector<unsigned int>& utn_vec = accessor_->getMetaVar<unsigned int>(buf_it.first, DBContent::meta_var_utn_);
 
         utn_vec.setAllNull();
     }
@@ -177,75 +177,75 @@ void CreateAssociationsJob::createTargetReports()
 
     Association::TargetReport tr;
 
-    for (auto& buf_it : *cache_) // dbo name, buffer
+    for (auto& buf_it : *accessor_) // dbo name, buffer
     {
         string dbcontent_name = buf_it.first;
 
         shared_ptr<Buffer> buffer = buf_it.second;
         size_t buffer_size = buffer->size();
 
-        assert (cache_->hasMetaVar<unsigned long>(dbcontent_name, DBContent::meta_var_rec_num_));
-        NullableVector<unsigned long>& rec_nums = cache_->getMetaVar<unsigned long>(
+        assert (accessor_->hasMetaVar<unsigned long>(dbcontent_name, DBContent::meta_var_rec_num_));
+        NullableVector<unsigned long>& rec_nums = accessor_->getMetaVar<unsigned long>(
                     dbcontent_name, DBContent::meta_var_rec_num_);
 
-        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_datasource_id_));
-        NullableVector<unsigned int>& ds_ids = cache_->getMetaVar<unsigned int>(
-                    dbcontent_name, DBContent::meta_var_datasource_id_);
+        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ds_id_));
+        NullableVector<unsigned int>& ds_ids = accessor_->getMetaVar<unsigned int>(
+                    dbcontent_name, DBContent::meta_var_ds_id_);
 
-        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
-        NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
+        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
+        NullableVector<unsigned int>& line_ids = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name, DBContent::meta_var_line_id_);
 
-        assert (cache_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
-        NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(
+        assert (accessor_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
+        NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(
                     dbcontent_name, DBContent::meta_var_timestamp_);
 
         NullableVector<unsigned int>* tas {nullptr};
-        if (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ta_))
-            tas = &cache_->getMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ta_);
+        if (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_acad_))
+            tas = &accessor_->getMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_acad_);
 
         NullableVector<string>* tis {nullptr};
-        if (cache_->hasMetaVar<string>(dbcontent_name, DBContent::meta_var_ti_))
-            tis = &cache_->getMetaVar<string>(dbcontent_name, DBContent::meta_var_ti_);
+        if (accessor_->hasMetaVar<string>(dbcontent_name, DBContent::meta_var_acid_))
+            tis = &accessor_->getMetaVar<string>(dbcontent_name, DBContent::meta_var_acid_);
 
         NullableVector<unsigned int>* tns {nullptr};
-        if (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_track_num_))
-            tns = &cache_->getMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_track_num_);
+        if (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_track_num_))
+            tns = &accessor_->getMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_track_num_);
 
         NullableVector<bool>* tr_ends {nullptr};
-        if (cache_->hasMetaVar<bool>(dbcontent_name, DBContent::meta_var_track_end_))
-            tr_ends = &cache_->getMetaVar<bool>(dbcontent_name, DBContent::meta_var_track_end_);
+        if (accessor_->hasMetaVar<bool>(dbcontent_name, DBContent::meta_var_track_end_))
+            tr_ends = &accessor_->getMetaVar<bool>(dbcontent_name, DBContent::meta_var_track_end_);
 
-        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_m3a_));
-        NullableVector<unsigned int>& m3as = cache_->getMetaVar<unsigned int>(
+        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_m3a_));
+        NullableVector<unsigned int>& m3as = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name, DBContent::meta_var_m3a_);
 
-        assert (cache_->hasMetaVar<float>(dbcontent_name, DBContent::meta_var_mc_));
-        NullableVector<float>& mcs = cache_->getMetaVar<float>(
+        assert (accessor_->hasMetaVar<float>(dbcontent_name, DBContent::meta_var_mc_));
+        NullableVector<float>& mcs = accessor_->getMetaVar<float>(
                     dbcontent_name, DBContent::meta_var_mc_);
 
         NullableVector<float>* mcs_valid {nullptr};
 
         if (dbcontent_name == "CAT062")
         {
-            assert (cache_->hasVar<float>(dbcontent_name, DBContent::var_cat062_fl_measured_));
-            mcs_valid = &cache_->getVar<float>(
+            assert (accessor_->hasVar<float>(dbcontent_name, DBContent::var_cat062_fl_measured_));
+            mcs_valid = &accessor_->getVar<float>(
                         dbcontent_name, DBContent::var_cat062_fl_measured_);
         }
 
-        assert (cache_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_latitude_));
-        NullableVector<double>& lats = cache_->getMetaVar<double>(
+        assert (accessor_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_latitude_));
+        NullableVector<double>& lats = accessor_->getMetaVar<double>(
                     dbcontent_name, DBContent::meta_var_latitude_);
 
-        assert (cache_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_longitude_));
-        NullableVector<double>& longs = cache_->getMetaVar<double>(
+        assert (accessor_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_longitude_));
+        NullableVector<double>& longs = accessor_->getMetaVar<double>(
                     dbcontent_name, DBContent::meta_var_longitude_);
 
         NullableVector<unsigned char>* adsb_mops {nullptr};
         if (dbcontent_name == "CAT021")
         {
-            assert (cache_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_mops_version_));
-            adsb_mops = &cache_->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_mops_version_);
+            assert (accessor_->hasVar<unsigned char>(dbcontent_name, DBContent::var_cat021_mops_version_));
+            adsb_mops = &accessor_->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_mops_version_);
         }
 
         for (size_t cnt = 0; cnt < buffer_size; ++cnt)
@@ -790,16 +790,16 @@ void CreateAssociationsJob::saveAssociations()
 
         loginf << "CreateAssociationsJob: saveAssociations: db content " << dbcontent_name;
 
-        assert (cache_->hasMetaVar<unsigned long>(dbcontent_name, DBContent::meta_var_rec_num_));
-        NullableVector<unsigned long>& rec_num_vec = cache_->getMetaVar<unsigned long>(
+        assert (accessor_->hasMetaVar<unsigned long>(dbcontent_name, DBContent::meta_var_rec_num_));
+        NullableVector<unsigned long>& rec_num_vec = accessor_->getMetaVar<unsigned long>(
                     dbcontent_name, DBContent::meta_var_rec_num_);
 
-        assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
-        NullableVector<unsigned int>& assoc_vec = cache_->getMetaVar<unsigned int>(
+        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+        NullableVector<unsigned int>& assoc_vec = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name, DBContent::meta_var_utn_);
 
-        assert (cache_->has(dbcontent_name));
-        unsigned int buffer_size = cache_->get(dbcontent_name)->size();
+        assert (accessor_->has(dbcontent_name));
+        unsigned int buffer_size = accessor_->get(dbcontent_name)->size();
 
         for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
         {
@@ -827,7 +827,7 @@ void CreateAssociationsJob::saveAssociations()
     }
 
     // delete all data from buffer except rec_nums and associations, rename to db column names
-    for (auto& buf_it : *cache_)
+    for (auto& buf_it : *accessor_)
     {
         string dbcontent_name = buf_it.first;
 
@@ -855,7 +855,7 @@ void CreateAssociationsJob::saveAssociations()
     }
 
     // actually save data, ok since DB job
-    for (auto& buf_it : *cache_)
+    for (auto& buf_it : *accessor_)
     {
         string dbcontent_name = buf_it.first;
 
