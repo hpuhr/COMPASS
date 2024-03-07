@@ -79,6 +79,55 @@ void ReconstructorTask::dialogCancelSlot()
     dialog_->hide();
 }
 
+void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    data_ = data;
+
+//    assert (status_dialog_);
+//    status_dialog_->updateTime();
+}
+
+void ReconstructorTask::loadingDoneSlot()
+{
+    loginf << "ReconstructorTask: loadingDoneSlot";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+//    if (!cache_)
+//        cache_ = std::make_shared<dbContent::Cache> (dbcontent_man);
+
+//    cache_->add(data_);
+
+    disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+               this, &ReconstructorTask::loadedDataSlot);
+    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+               this, &ReconstructorTask::loadingDoneSlot);
+
+//    assert(status_dialog_);
+//    status_dialog_->setStatus("Loading done, starting association");
+
+    dbcontent_man.clearData();
+
+    COMPASS::instance().viewManager().disableDataDistribution(false);
+
+    loginf << "ReconstructorTask: loadingDoneSlot: data loading done";
+
+            //assert(!create_job_);
+
+//    job_ = std::make_shared<ReconstructorTaskJob>(
+//        *this, COMPASS::instance().interface(), cache_);
+
+//    connect(job_.get(), &ReconstructorTaskJob::doneSignal, this,
+//            &ReconstructorTask::createDoneSlot, Qt::QueuedConnection);
+//    connect(job_.get(), &ReconstructorTaskJob::obsoleteSignal, this,
+//            &ReconstructorTask::createObsoleteSlot, Qt::QueuedConnection);
+//    connect(job_.get(), &ReconstructorTaskJob::statusSignal, this,
+//            &ReconstructorTask::associationStatusSlot, Qt::QueuedConnection);
+
+//    JobManager::instance().addDBJob(create_job_);
+
+}
+
 void ReconstructorTask::closeStatusDialogSlot()
 {
 //    assert(status_dialog_);
