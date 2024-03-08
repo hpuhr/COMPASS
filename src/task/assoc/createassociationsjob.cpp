@@ -42,8 +42,6 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-//bool CreateAssociationsJob::in_appimage_ = COMPASS::isAppImage();
-
 CreateAssociationsJob::CreateAssociationsJob(CreateAssociationsTask& task, DBInterface& db_interface,
                                              std::shared_ptr<dbContent::DBContentAccessor> accessor)
     : Job("CreateAssociationsJob"), task_(task), db_interface_(db_interface), accessor_(accessor)

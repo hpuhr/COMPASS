@@ -34,6 +34,9 @@ class ReconstructorTask : public Task, public Configurable
     void dialogRunSlot();
     void dialogCancelSlot();
 
+    void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSlot();
+
     void closeStatusDialogSlot();
 
   public:
