@@ -68,7 +68,6 @@ protected:
                           std::vector<kalman::Matrix>& P_smooth,
                           const KalmanChain& chain,
                           const kalman::XTransferFunc& x_tr) const override final;
-    
 private:
     Config config_;
     bool   track_velocities_ = false;

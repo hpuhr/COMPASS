@@ -167,7 +167,7 @@ struct Measurement
     uint32_t                 source_id;            // source of the measurement
     boost::posix_time::ptime t;                    // timestamp
 
-    bool                     mm_interp = false;    //measurement has been interpolated (e.g. by spline interpolator)
+    bool                     mm_interp = false;    // measurement has been interpolated (e.g. by spline interpolator)
 
     double                   lat;                  // wgs84 latitude
     double                   lon;                  // wgs84 longitude
