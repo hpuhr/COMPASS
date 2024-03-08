@@ -99,11 +99,11 @@ private:
     bool is_tracker_ = false;
 
     //general
-    const NullableVector<boost::posix_time::ptime>* meta_timestamp_vec_    = nullptr;
-    const NullableVector<unsigned long>*            meta_rec_num_vec_      = nullptr;
-    const NullableVector<unsigned int>*             meta_ds_id_vec_        = nullptr;   
-    const NullableVector<unsigned int>*             meta_acad_vec_         = nullptr;
-    const NullableVector<std::string>*              meta_acid_vec_         = nullptr;
+    const NullableVector<boost::posix_time::ptime>* meta_timestamp_vec_ = nullptr;
+    const NullableVector<unsigned long>*            meta_rec_num_vec_   = nullptr;
+    const NullableVector<unsigned int>*             meta_ds_id_vec_     = nullptr;   
+    const NullableVector<unsigned int>*             meta_acad_vec_      = nullptr;
+    const NullableVector<std::string>*              meta_acid_vec_      = nullptr;
 
     //position
     const NullableVector<double>* meta_latitude_vec_      = nullptr;

@@ -49,6 +49,8 @@ public:
 
     void update(const DBContentManager& dbcontent_manager);
 
+    void print() const;
+
 private:
     std::string                        dbcontent_name_;
     std::shared_ptr<Buffer>            buffer_;
