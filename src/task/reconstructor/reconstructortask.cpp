@@ -15,6 +15,14 @@
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "buffer.h"
+#include "simplereconstructor.h"
+
+#include <QApplication>
+#include <QMessageBox>
+
+using namespace std;
+using namespace Utils;
+using namespace dbContent;
 
 ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
@@ -57,6 +65,17 @@ void ReconstructorTask::run()
     assert(canRun());
 
     loginf << "ReconstructorTask: run: started";
+
+    deleteCalculatedReferences();
+
+    COMPASS::instance().viewManager().disableDataDistribution(true);
+
+    reconstructor_.reset(new SimpleReconstructor());
+
+    QMessageBox box;
+    box.setText("Running Reconstruction...");
+    box.show();
+
 }
 
 
@@ -133,4 +152,36 @@ void ReconstructorTask::closeStatusDialogSlot()
 //    assert(status_dialog_);
 //    status_dialog_->close();
 //    status_dialog_ = nullptr;
+}
+
+
+void ReconstructorTask::deleteCalculatedReferences()
+{
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    dbcontent_man.clearData();
+
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    for (auto& ds_it : ds_man.dbDataSources())
+    {
+        if (ds_it->isCalculatedReferenceSource())
+        {
+            //status_dialog_->setStatus("Deleting From Data Source " + ds_it->name());
+
+            dbcontent_man.dbContent("RefTraj").deleteDBContentData(ds_it->sac(), ds_it->sic());
+
+            while (dbcontent_man.dbContent("RefTraj").isDeleting())
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(10);
+            }
+
+            ds_it->clearNumInserted("RefTraj");
+        }
+    }
+}
+
+void ReconstructorTask::loadDataSlice()
+{
+
 }

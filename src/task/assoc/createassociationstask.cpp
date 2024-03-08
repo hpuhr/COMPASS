@@ -35,7 +35,6 @@
 //#include "sqliteconnection.h"
 
 #include <QApplication>
-#include <QMessageBox>
 
 #include <sstream>
 
