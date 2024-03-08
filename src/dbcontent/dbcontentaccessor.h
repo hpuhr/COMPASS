@@ -59,6 +59,8 @@ public:
     BufferAccessor bufferAccessor(const std::string& dbcontent_name) const;
     TargetReportAccessor targetReportAccessor(const std::string& dbcontent_name) const;
 
+    void print() const;
+
 protected:
     void updateDBContentLookup();
 

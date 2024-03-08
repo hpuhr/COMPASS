@@ -146,11 +146,11 @@ boost::optional<std::string> TargetReportAccessor::acid(unsigned int index) cons
 */
 boost::optional<TargetReport::TargetReportPos> TargetReportAccessor::position(unsigned int index) const
 {
-    if (!meta_latitude_vec_ || !meta_longitude_vec_)
+    if (!meta_latitude_vec_ || 
+        !meta_longitude_vec_ ||
+         meta_latitude_vec_->isNull(index) ||
+         meta_longitude_vec_->isNull(index))
         return {};
-
-    assert(!meta_latitude_vec_->isNull(index));
-    assert(!meta_longitude_vec_->isNull(index));
 
     return TargetReport::TargetReportPos(meta_latitude_vec_->get(index),
                                          meta_longitude_vec_->get(index));

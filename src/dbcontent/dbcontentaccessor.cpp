@@ -122,4 +122,15 @@ TargetReportAccessor DBContentAccessor::targetReportAccessor(const std::string& 
     return TargetReportAccessor(dbcontent_lookup_.at(dbcontent_name));
 }
 
+/**
+*/
+void DBContentAccessor::print() const 
+{
+    for (const auto& elem : dbcontent_lookup_)
+    {
+        elem.second->print();
+        std::cout << std::endl;
+    }
+}
+
 } // namespace dbContent

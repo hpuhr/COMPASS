@@ -38,6 +38,10 @@ public:
                  size_t dim_u);
     virtual ~KalmanFilter();
 
+    size_t dimX() const { return dim_x_; }
+    size_t dimZ() const { return dim_z_; }
+    size_t dimU() const { return dim_u_; }
+
     void predict(const OMatrix& F = OMatrix(),
                  const OMatrix& Q = OMatrix(),
                  const OMatrix& B = OMatrix(),
@@ -48,6 +52,8 @@ public:
                 const OMatrix& H = OMatrix());
 
     static Matrix continuousWhiteNoise(size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
+    static void continuousWhiteNoise(Matrix& Q_noise, size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
+
     static bool rtsSmoother(std::vector<kalman::Vector>& x_smooth,
                             std::vector<kalman::Matrix>& P_smooth,
                             const std::vector<KalmanState>& states,
@@ -74,12 +80,19 @@ public:
     void setProcessMMCrossCorrMat(const Matrix& M) { setM(M); }
 
     const Vector& getX() const { return x_; }
+    Vector& getX() { return x_; }
     const Matrix& getP() const { return P_; }
+    Matrix& getP() { return P_; }
     const Matrix& getQ() const { return Q_; }
+    Matrix& getQ() { return Q_; }
     const Matrix& getF() const { return F_; }
+    Matrix& getF() { return F_; }
     const Matrix& getH() const { return H_; }
+    Matrix& getH() { return H_; }
     const Matrix& getR() const { return R_; }
+    Matrix& getR() { return R_; }
     const Matrix& getM() const { return M_; }
+    Matrix& getM() { return M_; }
 
 private:
     size_t dim_x_;

@@ -55,4 +55,14 @@ void DBContentVariableLookup::update(const DBContentManager& dbcontent_manager)
     }
 }
 
+/**
+*/
+void DBContentVariableLookup::print() const
+{
+    std::cout << "dbcontent = " << dbcontent_name_ << std::endl;
+
+    for (const auto& elem : meta_var_lookup_)
+        std::cout << "    " << elem.first << " => " << elem.second << std::endl;
+}
+
 } // namespace dbContent
