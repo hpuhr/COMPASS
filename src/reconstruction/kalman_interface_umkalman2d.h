@@ -38,6 +38,10 @@ public:
     KalmanInterfaceUMKalman2D(bool track_velocities);
     virtual ~KalmanInterfaceUMKalman2D() = default;
 
+    size_t dimX() const override final; 
+    size_t dimZ() const override final;
+    size_t dimU() const override final;
+
     void stateVecX(kalman::Vector& x, const Measurement& mm) const override final;
     void measurementVecZ(kalman::Vector& z, const Measurement& mm) const override final;
     void covarianceMatP(kalman::Matrix& P, const Measurement& mm, const reconstruction::Uncertainty& default_uncert) const override final;
