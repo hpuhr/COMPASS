@@ -51,13 +51,13 @@ class ReconstructorBase
     void clear();
 
   protected:
-    Buffers buffers_;
+    //Buffers buffers_;
 
     boost::posix_time::ptime current_slice_begin_;
     boost::posix_time::ptime timestamp_max_;
     const boost::posix_time::time_duration slice_duration_ {1, 0, 0}; // 1 hour
 
-    virtual bool processSlice_impl() = 0;
+    virtual bool processSlice_impl(Buffers&& buffers) = 0;
 
   private:
 };

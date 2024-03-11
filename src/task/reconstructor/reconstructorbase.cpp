@@ -48,7 +48,7 @@ bool ReconstructorBase::hasNextTimeSlice()
     assert (!current_slice_begin_.is_not_a_date_time());
     assert (!timestamp_max_.is_not_a_date_time());
 
-    return current_slice_begin_ + slice_duration_ < timestamp_max_;
+    return current_slice_begin_ < timestamp_max_;
 }
 
 TimeWindow ReconstructorBase::getNextTimeSlice()
@@ -66,7 +66,7 @@ TimeWindow ReconstructorBase::getNextTimeSlice()
 
     current_slice_begin_ = current_slice_end;
 
-    assert (current_slice_begin_ <= timestamp_max_);
+    //assert (current_slice_begin_ <= timestamp_max_); can be bigger
 
     return window;
 }
@@ -75,16 +75,12 @@ TimeWindow ReconstructorBase::getNextTimeSlice()
 */
 bool ReconstructorBase::processSlice(Buffers&& buffers)
 {
-    buffers_ = buffers;
-
-    return processSlice_impl();
+    return processSlice_impl(std::move(buffers));
 }
 
 
 void ReconstructorBase::clear()
 {
-    buffers_.clear();
-
     current_slice_begin_ = {};
     timestamp_max_ = {};
 }

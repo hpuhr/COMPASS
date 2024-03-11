@@ -63,6 +63,8 @@
 #include "createartasassociationstaskdialog.h"
 #include "createassociationstask.h"
 #include "createassociationstaskdialog.h"
+#include "reconstructortask.h"
+#include "reconstructortaskdialog.h"
 
 #ifdef USE_EXPERIMENTAL_SOURCE
 #include "geometrytreeitem.h"
@@ -409,9 +411,9 @@ void MainWindow::createMenus ()
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
-    QAction* assoc_action = new QAction("Calculate Unique Targets");
+    QAction* assoc_action = new QAction("Calculate Unique Targets (Old)");
     assoc_action->setToolTip("Create Unique Targets based on all DB Content");
-    connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsSlot);
+    connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsOldSlot);
     process_menu_->addAction(assoc_action);
 
     QAction* assoc_artas_action = new QAction("Calculate ARTAS Target Report Usage");
@@ -419,10 +421,15 @@ void MainWindow::createMenus ()
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
 
-    calculate_references_action_ = new QAction("Calculate References");
+    calculate_references_action_ = new QAction("Calculate References (Old)");
     calculate_references_action_->setToolTip("Calculate References from System Tracker and ADS-B data");
-    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesSlot);
+    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesOldSlot);
     process_menu_->addAction(calculate_references_action_);
+
+    QAction* reconstruct_action = new QAction("Reconstruct References");
+    reconstruct_action->setToolTip("Associate Unique Targets andd reconstruct Reference Trajectories");
+    connect(reconstruct_action, &QAction::triggered, this, &MainWindow::reconstructReferencesSlot);
+    process_menu_->addAction(reconstruct_action);
 
     // ui menu
     ui_menu_ = menuBar()->addMenu("&UI");
@@ -898,16 +905,23 @@ void MainWindow::calculateAssociationsARTASSlot()
     COMPASS::instance().taskManager().createArtasAssociationsTask().dialog()->show();
 }
 
-void MainWindow::calculateAssociationsSlot()
+void MainWindow::calculateAssociationsOldSlot()
 {
     loginf << "MainWindow: calculateAssociationsSlot";
 
     COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
 }
 
-void  MainWindow::calculateReferencesSlot()
+void MainWindow::reconstructReferencesSlot()
 {
-    loginf << "MainWindow: calculateReferencesSlot";
+    loginf << "MainWindow: reconstructReferencesSlot";
+
+    COMPASS::instance().taskManager().reconstructReferencesTask().dialog()->show();
+}
+
+void MainWindow::calculateReferencesOldSlot()
+{
+    loginf << "MainWindow: calculateReferencesOldSlot";
 
     COMPASS::instance().taskManager().calculateReferencesTask().dialog()->show();
 }

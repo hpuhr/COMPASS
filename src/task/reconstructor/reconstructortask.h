@@ -17,7 +17,6 @@ class TaskManager;
 class ReconstructorTaskDialog;
 class DBContent;
 class Buffer;
-class ReconstructorTaskJob;
 class ReconstructorBase;
 
 namespace dbContent
@@ -61,9 +60,8 @@ class ReconstructorTask : public Task, public Configurable
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
-    std::unique_ptr<ReconstructorBase> reconstructor_;
+    std::unique_ptr<ReconstructorBase> reconstructor_; // has to be reset after each calculation
 
-    std::shared_ptr<ReconstructorTaskJob> job_;
     bool job_done_{false};
 
     void deleteCalculatedReferences();

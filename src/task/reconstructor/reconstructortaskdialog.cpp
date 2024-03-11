@@ -44,7 +44,7 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     setLayout(main_layout);
 
-    update();
+    updateButtons();
 }
 
 void ReconstructorTaskDialog::updateButtons()
@@ -52,7 +52,6 @@ void ReconstructorTaskDialog::updateButtons()
     assert (run_button_);
 
     run_button_->setDisabled(!task_.canRun());
-
 }
 
 void ReconstructorTaskDialog::runClickedSlot()

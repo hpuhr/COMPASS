@@ -2,7 +2,6 @@
 
 #include "compass.h"
 #include "reconstructortaskdialog.h"
-#include "reconstructortaskjob.h"
 #include "datasourcemanager.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
@@ -16,6 +15,7 @@
 #include "viewmanager.h"
 #include "buffer.h"
 #include "simplereconstructor.h"
+#include "timeconv.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -30,6 +30,8 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
       Configurable(class_id, instance_id, &task_manager, "task_reconstructor.json")
 {
     tooltip_ = "Associate target reports and calculate reference trajectories based on all DB Content.";
+
+    reconstructor_.reset(new SimpleReconstructor());
 }
 
 ReconstructorTask::~ReconstructorTask()
@@ -57,7 +59,9 @@ ReconstructorTaskDialog* ReconstructorTask::dialog()
 
 bool ReconstructorTask::canRun()
 {
-    return true;
+    assert (reconstructor_);
+
+    return COMPASS::instance().dbContentManager().hasData() && reconstructor_->hasNextTimeSlice();
 }
 
 void ReconstructorTask::run()
@@ -75,6 +79,15 @@ void ReconstructorTask::run()
     QMessageBox box;
     box.setText("Running Reconstruction...");
     box.show();
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+            this, &ReconstructorTask::loadedDataSlot);
+    connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+            this, &ReconstructorTask::loadingDoneSlot);
+
+    loadDataSlice();
 
 }
 
@@ -110,26 +123,46 @@ void ReconstructorTask::loadingDoneSlot()
 {
     loginf << "ReconstructorTask: loadingDoneSlot";
 
+    assert (reconstructor_);
+
+    bool last_slice = !reconstructor_->hasNextTimeSlice();
+
+    std::map<std::string, std::shared_ptr<Buffer>> data = std::move(data_); // move out of there
+
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    dbcontent_man.clearData(); // clear previous
+
+    if (last_slice) // disconnect everything
+    {
+        disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+                   this, &ReconstructorTask::loadedDataSlot);
+        disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+                   this, &ReconstructorTask::loadingDoneSlot);
+
+        COMPASS::instance().viewManager().disableDataDistribution(false);
+
+        loginf << "ReconstructorTask: loadingDoneSlot: data loading done";
+
+    }
+    else // do next load
+    {
+        loadDataSlice();
+    }
+
+    // check if not already processing
+    assert (reconstructor_->processSlice(std::move(data)));
 
 //    if (!cache_)
 //        cache_ = std::make_shared<dbContent::Cache> (dbcontent_man);
 
 //    cache_->add(data_);
 
-    disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
-               this, &ReconstructorTask::loadedDataSlot);
-    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
-               this, &ReconstructorTask::loadingDoneSlot);
 
 //    assert(status_dialog_);
 //    status_dialog_->setStatus("Loading done, starting association");
 
-    dbcontent_man.clearData();
 
-    COMPASS::instance().viewManager().disableDataDistribution(false);
-
-    loginf << "ReconstructorTask: loadingDoneSlot: data loading done";
 
             //assert(!create_job_);
 
@@ -183,5 +216,37 @@ void ReconstructorTask::deleteCalculatedReferences()
 
 void ReconstructorTask::loadDataSlice()
 {
+    assert (reconstructor_);
+    assert (reconstructor_->hasNextTimeSlice());
 
+    boost::posix_time::ptime min_ts, max_ts;
+
+    std::tie(min_ts, max_ts) = reconstructor_->getNextTimeSlice();
+    assert (min_ts <= max_ts);
+
+    bool last_slice = !reconstructor_->hasNextTimeSlice();
+
+    loginf << "ReconstructorTask: loadDataSlice: min " << Time::toString(min_ts)
+           << " max " << Time::toString(max_ts) << " last " << last_slice;
+
+    string timestamp_filter;
+
+    timestamp_filter = "timestamp >= " + to_string(Time::toLong(min_ts));
+
+    if (last_slice)
+        timestamp_filter += " AND timestamp <= " + to_string(Time::toLong(max_ts));
+    else
+        timestamp_filter += " AND timestamp < " + to_string(Time::toLong(max_ts));
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    for (auto& dbo_it : dbcontent_man)
+    {
+        if (!dbo_it.second->hasData())
+            continue;
+
+        VariableSet read_set = reconstructor_->getReadSetFor(dbo_it.first);
+
+        dbo_it.second->load(read_set, false, false, timestamp_filter);
+    }
 }
