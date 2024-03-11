@@ -42,15 +42,16 @@ public:
     KalmanInterfaceLinear();
     virtual ~KalmanInterfaceLinear();
 
-    virtual size_t dimX() = 0; 
-    virtual size_t dimZ() = 0;
-    virtual size_t dimU() = 0;
+    virtual size_t dimX() const = 0; 
+    virtual size_t dimZ() const = 0;
+    virtual size_t dimU() const = 0;
 
     virtual bool init() override;
 
     bool kalmanInit(kalman::KalmanState& init_state,
                     const Measurement& mm, 
-                    const reconstruction::Uncertainty& default_uncert) override final;
+                    const reconstruction::Uncertainty& default_uncert,
+                    double Q_var) override final;
     bool kalmanStep(kalman::KalmanState& new_state,
                     double dt, 
                     const Measurement& mm, 
@@ -58,7 +59,6 @@ public:
                     double Q_var) override final;
 protected:
     std::unique_ptr<kalman::KalmanFilter> kalman_filter_;
-    kalman::Vector z_;
 };
 
 } // reconstruction

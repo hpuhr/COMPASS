@@ -32,6 +32,27 @@ KalmanInterfaceUMKalman2D::KalmanInterfaceUMKalman2D(bool track_velocities)
 
 /**
 */
+size_t KalmanInterfaceUMKalman2D::dimX() const
+{
+    return 4;
+}
+
+/**
+*/
+size_t KalmanInterfaceUMKalman2D::dimZ() const
+{
+    return (track_velocities_ ? 4 : 2);
+}
+
+/**
+*/
+size_t KalmanInterfaceUMKalman2D::dimU() const
+{
+    return 0;
+}
+
+/**
+*/
 void KalmanInterfaceUMKalman2D::stateVecX(kalman::Vector& x, const Measurement& mm) const
 {
     x.setZero(4);

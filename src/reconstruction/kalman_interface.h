@@ -41,7 +41,8 @@ public:
 
     virtual bool kalmanInit(kalman::KalmanState& init_state,
                             const Measurement& mm,
-                            const reconstruction::Uncertainty& default_uncert) = 0;
+                            const reconstruction::Uncertainty& default_uncert,
+                            double Q_var) = 0;
     virtual bool kalmanStep(kalman::KalmanState& new_state,
                             double dt, 
                             const Measurement& mm, 
@@ -69,6 +70,14 @@ public:
     virtual double xVar(const kalman::Matrix& P) const = 0;
     virtual double yVar(const kalman::Matrix& P) const = 0;
     virtual void stateVecXInv(kalman::Vector& x_inv, const kalman::Vector& x) const = 0;
+
+    void setVerbosity(int v) { verbosity_ = v; }
+
+protected:
+    int verbosity() const { return verbosity_; }
+
+private:
+    int verbosity_ = 0;
 };
 
 } // reconstruction
