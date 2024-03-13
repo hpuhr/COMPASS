@@ -27,13 +27,13 @@ class DBContentManager;
 namespace dbContent 
 {
 
-namespace TargetReport 
+namespace targetReport
 {
-    class TargetReportPos;
-    class TargetReportPosAcc;
-    class TargetReportAlt;
-    class TargetReportVel;
-    class TargetReportVelAcc;
+    class Position;
+    class PositionAccuracy;
+    class BarometricAltitude;
+    class Velocity;
+    class VelocityAccuracy;
 }
 
 /**
@@ -47,21 +47,25 @@ public:
     TargetReportAccessor(const std::shared_ptr<DBContentVariableLookup>& lookup);
     virtual ~TargetReportAccessor() = default;
 
+    // HP: have to be always present, not optional
     boost::optional<boost::posix_time::ptime> timestamp(unsigned int index) const;
     boost::optional<unsigned long> recordNumber(unsigned int index) const;
     boost::optional<unsigned int> dsID(unsigned int index) const;
+    // HP: missing lineID
+
     boost::optional<unsigned char> mopsVersion(unsigned int index) const;
     boost::optional<unsigned int> acad(unsigned int index) const;
     boost::optional<std::string> acid(unsigned int index) const;
 
-    boost::optional<TargetReport::TargetReportPos> position(unsigned int index) const;
-    boost::optional<TargetReport::TargetReportPosAcc> positionAccuracy(unsigned int index) const;
-    boost::optional<TargetReport::TargetReportAlt> barometricAltitude(unsigned int index) const;
-    boost::optional<TargetReport::TargetReportVel> velocity(unsigned int index) const;
-    boost::optional<TargetReport::TargetReportVelAcc> velocityAccuracy(unsigned int index) const;
+    boost::optional<targetReport::Position> position(unsigned int index) const;
+    boost::optional<targetReport::PositionAccuracy> positionAccuracy(unsigned int index) const;
+    boost::optional<targetReport::BarometricAltitude> barometricAltitude(unsigned int index) const;
+    boost::optional<targetReport::Velocity> velocity(unsigned int index) const;
+    boost::optional<targetReport::VelocityAccuracy> velocityAccuracy(unsigned int index) const;
     boost::optional<double> trackAngle(unsigned int index) const;
     boost::optional<bool> groundBit(unsigned int index) const;
     
+    // HP: do as struct
     boost::optional<unsigned int> modeA(unsigned int index) const;
     boost::optional<bool> modeAValid(unsigned int index) const;
     boost::optional<bool> modeAGarbled(unsigned int index) const;

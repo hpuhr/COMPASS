@@ -19,7 +19,7 @@
 
 namespace dbContent 
 {
-namespace TargetReport 
+namespace TargetReport
 {
 
 // NUCr

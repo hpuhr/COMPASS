@@ -17,27 +17,22 @@
 
 #pragma once
 
-#include <map>
-
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/optional.hpp>
 
+#include <map>
+#include <memory>
+
+
 namespace dbContent 
 {
-namespace TargetReport 
-{
 
-/**
-*/
-struct AccuracyTables
-{
-    static const std::map<int, float> adsb_nucr_nacv_accuracies;
-    static const std::map<int, float> adsb_v0_accuracies;
-    static const std::map<int, float> adsb_v12_accuracies;
-};
+class DBContentAccessor;
 
+namespace TargetReport
+{
 /**
-*/
+ */
 struct Index
 {
     Index() = default;
@@ -49,10 +44,10 @@ struct Index
 };
 
 /**
-*/
+ */
 class DataID
 {
-public:
+  public:
     typedef std::pair<const boost::posix_time::ptime, Index> IndexPair;
 
     DataID() = default;
@@ -78,18 +73,65 @@ public:
         return index_.value();
     }
 
-private:
+  private:
     boost::posix_time::ptime timestamp_;
     boost::optional<Index>   index_;
     bool                     valid_ = false;
 };
 
+
+/**
+ */
+struct AccuracyTables
+{
+    static const std::map<int, float> adsb_nucr_nacv_accuracies;
+    static const std::map<int, float> adsb_v0_accuracies;
+    static const std::map<int, float> adsb_v12_accuracies;
+};
+
+}
+
+
+namespace targetReport
+{
+
+struct ID
+{
+    ID(unsigned long record_num) : record_num_(record_num) {}
+
+    unsigned long record_num_ {0};
+    unsigned int ds_id_ {0};
+    unsigned int line_id_ {0};
+    boost::posix_time::ptime timestamp_;
+};
+
+
+//class PerDSChain
+//{
+//public:
+//    PerDSChain(std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name,
+//             unsigned int ds_id);
+//    virtual ~PerDSChain();
+
+//    void addIndex (boost::posix_time::ptime timestamp, unsigned int index);
+
+//    bool hasData() const;
+//    unsigned int size () const;
+//};
+
+//class FullChain
+//{
+
+//};
+
+
+
 /**
 */
-struct TargetReportPos
+struct Position
 {
-    TargetReportPos() {}
-    TargetReportPos(double lat, double lon) : latitude_(lat), longitude_(lon) {}
+    Position() {}
+    Position(double lat, double lon) : latitude_(lat), longitude_(lon) {}
 
     double latitude_  {0}; // deg
     double longitude_ {0}; // deg
@@ -97,7 +139,7 @@ struct TargetReportPos
 
 /**
 */
-struct TargetReportAlt
+struct BarometricAltitude
 {
     enum class Source
     {
@@ -106,8 +148,8 @@ struct TargetReportAlt
         Barometric_CAT062_Secondary
     };
 
-    TargetReportAlt() {}
-    TargetReportAlt(Source source, 
+    BarometricAltitude() {}
+    BarometricAltitude(Source source,
                     float alt, 
                     const boost::optional<bool>& v,
                     const boost::optional<bool>& g)
@@ -124,10 +166,10 @@ struct TargetReportAlt
 
 /**
 */
-struct TargetReportPosAcc
+struct PositionAccuracy
 {
-    TargetReportPosAcc() = default;
-    TargetReportPosAcc(double x_stddev, 
+    PositionAccuracy() = default;
+    PositionAccuracy(double x_stddev,
                        double y_stddev, 
                        double xy_cov)
     :   x_stddev_(x_stddev), 
@@ -141,10 +183,10 @@ struct TargetReportPosAcc
 
 /**
 */
-struct TargetReportVel
+struct Velocity
 {
-    TargetReportVel() {}
-    TargetReportVel(double track_angle, double speed) : track_angle_(track_angle), speed_(speed) {}
+    Velocity() {}
+    Velocity(double track_angle, double speed) : track_angle_(track_angle), speed_(speed) {}
 
     double track_angle_ {0}; // true north, deg
     double speed_       {0}; // m/s
@@ -152,15 +194,15 @@ struct TargetReportVel
 
 /**
 */
-struct TargetReportVelAcc
+struct VelocityAccuracy
 {
-    TargetReportVelAcc() = default;
-    TargetReportVelAcc(double vx_stddev, double vy_stddev) : vx_stddev_(vx_stddev), vy_stddev_(vy_stddev) {}
+    VelocityAccuracy() = default;
+    VelocityAccuracy(double vx_stddev, double vy_stddev) : vx_stddev_(vx_stddev), vy_stddev_(vy_stddev) {}
 
     double vx_stddev_ {0}; // m/s
     double vy_stddev_ {0}; // m/s
 };
 
-} // namespace TargetReport
+} // namespace targetReport
 
 } // namespace dbContent

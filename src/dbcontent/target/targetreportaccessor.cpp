@@ -144,7 +144,7 @@ boost::optional<std::string> TargetReportAccessor::acid(unsigned int index) cons
 
 /**
 */
-boost::optional<TargetReport::TargetReportPos> TargetReportAccessor::position(unsigned int index) const
+boost::optional<targetReport::Position> TargetReportAccessor::position(unsigned int index) const
 {
     if (!meta_latitude_vec_ || 
         !meta_longitude_vec_ ||
@@ -152,13 +152,13 @@ boost::optional<TargetReport::TargetReportPos> TargetReportAccessor::position(un
          meta_longitude_vec_->isNull(index))
         return {};
 
-    return TargetReport::TargetReportPos(meta_latitude_vec_->get(index),
+    return targetReport::Position(meta_latitude_vec_->get(index),
                                          meta_longitude_vec_->get(index));
 }
 
 /**
 */
-boost::optional<TargetReport::TargetReportPosAcc> TargetReportAccessor::positionAccuracy(unsigned int index) const
+boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAccuracy(unsigned int index) const
 {
     if (is_adsb_)
     {
@@ -200,7 +200,7 @@ boost::optional<TargetReport::TargetReportPosAcc> TargetReportAccessor::position
             return {}; // unknown mops version
         }
 
-        return TargetReport::TargetReportPosAcc(x_stddev,
+        return targetReport::PositionAccuracy(x_stddev,
                                                 y_stddev,
                                                 0.0);
     }
@@ -227,7 +227,7 @@ boost::optional<TargetReport::TargetReportPosAcc> TargetReportAccessor::position
                 xy_cov =  std::pow(xy_cov, 2);
         }
 
-        return TargetReport::TargetReportPosAcc(meta_pos_std_dev_x_m_vec_->get(index),
+        return targetReport::PositionAccuracy(meta_pos_std_dev_x_m_vec_->get(index),
                                                 meta_pos_std_dev_y_m_vec_->get(index),
                                                 xy_cov);
     }
@@ -238,25 +238,25 @@ boost::optional<TargetReport::TargetReportPosAcc> TargetReportAccessor::position
 
 /**
 */
-boost::optional<TargetReport::TargetReportAlt> TargetReportAccessor::barometricAltitude(unsigned int index) const
+boost::optional<targetReport::BarometricAltitude> TargetReportAccessor::barometricAltitude(unsigned int index) const
 {
     if (is_tracker_ && cat062_alt_trusted_vec_ && !cat062_alt_trusted_vec_->isNull(index))
     {
-        return TargetReport::TargetReportAlt(TargetReport::TargetReportAlt::Source::Barometric_CAT062_Trusted,
+        return targetReport::BarometricAltitude(targetReport::BarometricAltitude::Source::Barometric_CAT062_Trusted,
                                              cat062_alt_trusted_vec_->get(index),
                                              meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
                                              meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
     }
     else if (meta_mode_c_vec_ && !meta_mode_c_vec_->isNull(index))
     {
-        return TargetReport::TargetReportAlt(TargetReport::TargetReportAlt::Source::Barometric_ModeC,
+        return targetReport::BarometricAltitude(targetReport::BarometricAltitude::Source::Barometric_ModeC,
                                              meta_mode_c_vec_->get(index),
                                              meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
                                              meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
     }
     else if (is_tracker_ && cat062_alt_sec_vec_ && !cat062_alt_sec_vec_->isNull(index))
     {
-        return TargetReport::TargetReportAlt(TargetReport::TargetReportAlt::Source::Barometric_CAT062_Secondary,
+        return targetReport::BarometricAltitude(targetReport::BarometricAltitude::Source::Barometric_CAT062_Secondary,
                                              cat062_alt_sec_vec_->get(index),
                                              meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
                                              meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
@@ -268,7 +268,7 @@ boost::optional<TargetReport::TargetReportAlt> TargetReportAccessor::barometricA
 
 /**
 */
-boost::optional<TargetReport::TargetReportVel> TargetReportAccessor::velocity(unsigned int index) const
+boost::optional<targetReport::Velocity> TargetReportAccessor::velocity(unsigned int index) const
 {
     if (!meta_speed_vec_ || 
         !meta_track_angle_vec_ ||
@@ -276,12 +276,12 @@ boost::optional<TargetReport::TargetReportVel> TargetReportAccessor::velocity(un
          meta_track_angle_vec_->isNull(index))
         return {};
 
-    return TargetReport::TargetReportVel(meta_track_angle_vec_->get(index), meta_speed_vec_->get(index));
+    return targetReport::Velocity(meta_track_angle_vec_->get(index), meta_speed_vec_->get(index));
 }
 
 /**
 */
-boost::optional<TargetReport::TargetReportVelAcc> TargetReportAccessor::velocityAccuracy(unsigned int index) const
+boost::optional<targetReport::VelocityAccuracy> TargetReportAccessor::velocityAccuracy(unsigned int index) const
 {
     if (is_adsb_)
     {
@@ -296,7 +296,7 @@ boost::optional<TargetReport::TargetReportVelAcc> TargetReportAccessor::velocity
         double vx_stddev = TargetReport::AccuracyTables::adsb_nucr_nacv_accuracies.at(nuc_r);
         double vy_stddev = vx_stddev;
 
-        return TargetReport::TargetReportVelAcc(vx_stddev, vy_stddev);
+        return targetReport::VelocityAccuracy(vx_stddev, vy_stddev);
     }
     else if (is_tracker_)
     {
@@ -306,7 +306,7 @@ boost::optional<TargetReport::TargetReportVelAcc> TargetReportAccessor::velocity
              cat062_vy_stddev_vec_->isNull(index))
             return {};
 
-        return TargetReport::TargetReportVelAcc(cat062_vx_stddev_vec_->get(index), 
+        return targetReport::VelocityAccuracy(cat062_vx_stddev_vec_->get(index),
                                                 cat062_vy_stddev_vec_->get(index));
     }
 
