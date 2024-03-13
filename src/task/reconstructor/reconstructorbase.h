@@ -18,6 +18,7 @@
 #pragma once
 
 #include "dbcontentaccessor.h"
+#include "configurable.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -31,17 +32,19 @@ class VariableSet;
 }
 
 class Buffer;
+class ReconstructorTask;
 
 typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow; // min, max
 
 /**
  */
-class ReconstructorBase
+class ReconstructorBase : public Configurable
 {
   public:
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
 
-    ReconstructorBase();
+    ReconstructorBase(const std::string& class_id, const std::string& instance_id,
+                      ReconstructorTask& task);
     virtual ~ReconstructorBase();
 
     bool hasNextTimeSlice();
@@ -51,7 +54,7 @@ class ReconstructorBase
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 
-    void clear();
+    virtual void reset();
 
   protected:
 

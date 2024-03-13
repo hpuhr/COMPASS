@@ -16,6 +16,7 @@
  */
 
 #include "reconstructorbase.h"
+#include "reconstructortask.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
@@ -29,7 +30,9 @@ using namespace Utils;
 
 /**
  */
-ReconstructorBase::ReconstructorBase()
+ReconstructorBase::ReconstructorBase(const std::string& class_id, const std::string& instance_id,
+                                     ReconstructorTask& task)
+    : Configurable (class_id, instance_id, &task)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 }
@@ -104,7 +107,7 @@ bool ReconstructorBase::processSlice(Buffers&& buffers)
 }
 
 
-void ReconstructorBase::clear()
+void ReconstructorBase::reset()
 {
     current_slice_begin_ = {};
     next_slice_begin_ = {};

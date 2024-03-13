@@ -56,8 +56,7 @@ class TaskManager : public QObject, public Configurable
 
     virtual ~TaskManager();
 
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override;
 
     void shutdown();
 
@@ -91,7 +90,7 @@ protected:
     std::unique_ptr<CalculateReferencesTask> calculate_references_task_;
     std::unique_ptr<ReconstructorTask> reconstruct_references_task_;
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
 
     std::map<std::string, Task*> tasks_;
 

@@ -31,7 +31,9 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 {
     tooltip_ = "Associate target reports and calculate reference trajectories based on all DB Content.";
 
-    reconstructor_.reset(new SimpleReconstructor());
+    //reconstructor_.reset(new SimpleReconstructor());
+
+    createSubConfigurables();
 }
 
 ReconstructorTask::~ReconstructorTask()
@@ -39,6 +41,18 @@ ReconstructorTask::~ReconstructorTask()
 
 }
 
+void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
+                                                const std::string& instance_id)
+{
+    if (class_id == "SimpleReconstructor")
+    {
+        assert(!simple_reconstructor_);
+        simple_reconstructor_.reset(new SimpleReconstructor(class_id, instance_id, *this));
+        assert(simple_reconstructor_);
+    }
+    else
+        throw std::runtime_error("ReconstructorTask: generateSubConfigurable: unknown class_id " + class_id);
+}
 
 ReconstructorTaskDialog* ReconstructorTask::dialog()
 {
@@ -59,9 +73,9 @@ ReconstructorTaskDialog* ReconstructorTask::dialog()
 
 bool ReconstructorTask::canRun()
 {
-    assert (reconstructor_);
+    assert (simple_reconstructor_);
 
-    return COMPASS::instance().dbContentManager().hasData() && reconstructor_->hasNextTimeSlice();
+    return COMPASS::instance().dbContentManager().hasData() && simple_reconstructor_->hasNextTimeSlice();
 }
 
 void ReconstructorTask::run()
@@ -74,7 +88,7 @@ void ReconstructorTask::run()
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
-    reconstructor_.reset(new SimpleReconstructor());
+    simple_reconstructor_.reset();
 
     QMessageBox box;
     box.setText("Running Reconstruction...");
@@ -121,9 +135,9 @@ void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_p
 
 void ReconstructorTask::loadingDoneSlot()
 {
-    assert (reconstructor_);
+    assert (simple_reconstructor_);
 
-    bool last_slice = !reconstructor_->hasNextTimeSlice();
+    bool last_slice = !simple_reconstructor_->hasNextTimeSlice();
 
     loginf << "ReconstructorTask: loadingDoneSlot: last_slice " << last_slice;
 
@@ -152,7 +166,7 @@ void ReconstructorTask::loadingDoneSlot()
     }
 
     // check if not already processing
-    assert (reconstructor_->processSlice(std::move(data)));
+    assert (simple_reconstructor_->processSlice(std::move(data)));
 
 //    if (!cache_)
 //        cache_ = std::make_shared<dbContent::Cache> (dbcontent_man);
@@ -189,6 +203,15 @@ void ReconstructorTask::closeStatusDialogSlot()
 }
 
 
+void ReconstructorTask::checkSubConfigurables()
+{
+    if (!simple_reconstructor_)
+    {
+        generateSubConfigurable("SimpleReconstructor", "SimpleReconstructor0");
+        assert (simple_reconstructor_);
+    }
+}
+
 void ReconstructorTask::deleteCalculatedReferences()
 {
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
@@ -217,15 +240,15 @@ void ReconstructorTask::deleteCalculatedReferences()
 
 void ReconstructorTask::loadDataSlice()
 {
-    assert (reconstructor_);
-    assert (reconstructor_->hasNextTimeSlice());
+    assert (simple_reconstructor_);
+    assert (simple_reconstructor_->hasNextTimeSlice());
 
     boost::posix_time::ptime min_ts, max_ts;
 
-    std::tie(min_ts, max_ts) = reconstructor_->getNextTimeSlice();
+    std::tie(min_ts, max_ts) = simple_reconstructor_->getNextTimeSlice();
     assert (min_ts <= max_ts);
 
-    bool last_slice = !reconstructor_->hasNextTimeSlice();
+    bool last_slice = !simple_reconstructor_->hasNextTimeSlice();
 
     loginf << "ReconstructorTask: loadDataSlice: min " << Time::toString(min_ts)
            << " max " << Time::toString(max_ts) << " last " << last_slice;
@@ -246,7 +269,7 @@ void ReconstructorTask::loadDataSlice()
         if (!dbo_it.second->hasData())
             continue;
 
-        VariableSet read_set = reconstructor_->getReadSetFor(dbo_it.first);
+        VariableSet read_set = simple_reconstructor_->getReadSetFor(dbo_it.first);
 
         dbo_it.second->load(read_set, false, false, timestamp_filter);
     }
