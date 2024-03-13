@@ -46,6 +46,7 @@ bool ReconstructorBase::hasNextTimeSlice()
         std::tie(timestamp_min_, timestamp_max_) = COMPASS::instance().dbContentManager().minMaxTimestamp();
 
         current_slice_begin_ = timestamp_min_;
+        next_slice_begin_ = timestamp_min_; // first slice
 
         loginf << "ReconstructorBase: hasNextTimeSlice: new min " << Time::toString(current_slice_begin_)
                << " max " << Time::toString(timestamp_max_) << " first_slice " << first_slice_;
@@ -56,12 +57,14 @@ bool ReconstructorBase::hasNextTimeSlice()
 
     first_slice_ = current_slice_begin_ == timestamp_min_;
 
-    return current_slice_begin_ < timestamp_max_;
+    return next_slice_begin_ < timestamp_max_;
 }
 
 TimeWindow ReconstructorBase::getNextTimeSlice()
 {
     assert (hasNextTimeSlice());
+
+    current_slice_begin_ = next_slice_begin_;
 
     assert (!current_slice_begin_.is_not_a_date_time());
     assert (!timestamp_max_.is_not_a_date_time());
@@ -74,15 +77,11 @@ TimeWindow ReconstructorBase::getNextTimeSlice()
 
     first_slice_ = current_slice_begin_ == timestamp_min_;
 
-    if (first_slice_)
-        remove_before_time_ = current_slice_begin_;
-    else
-        current_slice_begin_ = current_slice_begin_ - outdated_duration_;
+    remove_before_time_ = current_slice_begin_ - outdated_duration_;
 
-    current_slice_begin_ = current_slice_end; // for next iteration
+    next_slice_begin_ = current_slice_end; // for next iteration
 
-
-            //assert (current_slice_begin_ <= timestamp_max_); can be bigger
+    //assert (current_slice_begin_ <= timestamp_max_); can be bigger
 
     return window;
 }
@@ -108,6 +107,8 @@ bool ReconstructorBase::processSlice(Buffers&& buffers)
 void ReconstructorBase::clear()
 {
     current_slice_begin_ = {};
+    next_slice_begin_ = {};
+    timestamp_min_ = {};
     timestamp_max_ = {};
 }
 
@@ -117,7 +118,8 @@ void ReconstructorBase::removeOldBufferData()
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    loginf << "ReconstructorBase: clearOldBufferData: remove_before_time " << Time::toString(remove_before_time_);
+    loginf << "ReconstructorBase: clearOldBufferData: current_slice_begin " << Time::toString(current_slice_begin_)
+        << " remove_before_time " << Time::toString(remove_before_time_);
 
     for (auto& buf_it : buffers_)
     {

@@ -59,6 +59,7 @@ class ReconstructorBase
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     boost::posix_time::ptime current_slice_begin_;
+    boost::posix_time::ptime next_slice_begin_;
     boost::posix_time::ptime timestamp_min_, timestamp_max_;
     bool first_slice_ {false};
 

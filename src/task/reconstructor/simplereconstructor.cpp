@@ -6,6 +6,11 @@
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
 
+#include "timeconv.h"
+
+using namespace std;
+using namespace Utils;
+
 SimpleReconstructor::SimpleReconstructor()
 {
 
@@ -87,7 +92,9 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
 
 bool SimpleReconstructor::processSlice_impl()
 {
-    loginf << "SimpleReconstructor: processSlice_impl";
+    loginf << "SimpleReconstructor: processSlice_impl: current_slice_begin " << Time::toString(current_slice_begin_)
+           << " end " << Time::toString(current_slice_begin_ + slice_duration_)
+           << " has next " << hasNextTimeSlice();
 
     return true;
 }
