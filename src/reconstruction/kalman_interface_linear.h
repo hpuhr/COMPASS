@@ -48,16 +48,29 @@ public:
 
     virtual bool init() override;
 
-    bool kalmanInit(kalman::KalmanState& init_state,
-                    const Measurement& mm, 
-                    const reconstruction::Uncertainty& default_uncert,
-                    double Q_var) override final;
-    bool kalmanStep(kalman::KalmanState& new_state,
-                    double dt, 
-                    const Measurement& mm, 
-                    const reconstruction::Uncertainty& default_uncert, 
-                    double Q_var) override final;
+    void stateVecX(const kalman::Vector& x) override final;
+
+    boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
+                                                    const kalman::KalmanState& state1,
+                                                    double dt,
+                                                    double Q_var) const override final;
+
 protected:
+    void kalmanInit_impl(kalman::KalmanState& init_state,
+                         const Measurement& mm, 
+                         const reconstruction::Uncertainty& default_uncert,
+                         double Q_var) override final;
+    void kalmanInit_impl(const kalman::KalmanState& init_state) override final;
+    bool kalmanStep_impl(kalman::KalmanState& new_state,
+                         double dt, 
+                         const Measurement& mm, 
+                         const reconstruction::Uncertainty& default_uncert, 
+                         double Q_var) override final;
+    bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
+                            std::vector<kalman::Matrix>& P_smooth,
+                            const std::vector<kalman::KalmanState>& states,
+                            const kalman::XTransferFunc& x_tr) const override final;
+
     std::unique_ptr<kalman::KalmanFilter> kalman_filter_;
 };
 

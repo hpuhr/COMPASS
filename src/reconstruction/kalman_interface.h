@@ -20,12 +20,16 @@
 #include "kalman_defs.h"
 
 #include <boost/optional.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace reconstruction
 {
 
 struct Measurement;
 struct Uncertainty;
+struct KalmanUpdate;
+
+class KalmanProjectionHandler;
 
 /**
  * Provides needed data structures for kalman and means to retrieve data from kalman state. 
@@ -39,17 +43,28 @@ public:
 
     virtual bool init() = 0;
 
-    virtual bool kalmanInit(kalman::KalmanState& init_state,
-                            const Measurement& mm,
-                            const reconstruction::Uncertainty& default_uncert,
-                            double Q_var) = 0;
-    virtual bool kalmanStep(kalman::KalmanState& new_state,
-                            double dt, 
-                            const Measurement& mm, 
-                            const reconstruction::Uncertainty& default_uncert, 
-                            double Q_var) = 0;
+    void kalmanInit(kalman::KalmanState& init_state,
+                    const Measurement& mm,
+                    const reconstruction::Uncertainty& default_uncert,
+                    double Q_var);
+    void kalmanInit(const kalman::KalmanState& init_state,
+                    const boost::posix_time::ptime& ts);
+    bool kalmanStep(kalman::KalmanState& new_state,
+                    const Measurement& mm, 
+                    const reconstruction::Uncertainty& default_uncert, 
+                    double Q_var);
+
+    bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
+                       size_t idx0,
+                       size_t idx1,
+                       KalmanProjectionHandler& proj_handler) const;
+
+    double timestep(const Measurement& mm) const;
+    double distanceSqr(const Measurement& mm) const;
+    
     //needed for feeding kalman
     virtual void stateVecX(kalman::Vector& x, const Measurement& mm) const = 0;
+    virtual void stateVecX(const kalman::Vector& x) = 0;
     virtual void measurementVecZ(kalman::Vector& z, const Measurement& mm) const = 0;
     virtual void covarianceMatP(kalman::Matrix& P,
                                 const Measurement& mm, 
@@ -66,17 +81,42 @@ public:
     
     //helpers
     virtual void xPos(double& x, double& y, const kalman::Vector& x_vec) const = 0;
+    virtual void xPos(double& x, double& y) const = 0;
     virtual void xPos(kalman::Vector& x_vec, double x, double y) const = 0;
     virtual double xVar(const kalman::Matrix& P) const = 0;
     virtual double yVar(const kalman::Matrix& P) const = 0;
     virtual void stateVecXInv(kalman::Vector& x_inv, const kalman::Vector& x) const = 0;
 
+    kalman::Vector stateVecXInv(const kalman::Vector& x) const;
+
+    //interpolation of kalman states
+    virtual boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
+                                                            const kalman::KalmanState& state1,
+                                                            double dt,
+                                                            double Q_var) const = 0;
     void setVerbosity(int v) { verbosity_ = v; }
 
 protected:
+    virtual void kalmanInit_impl(kalman::KalmanState& init_state,
+                                 const Measurement& mm,
+                                 const reconstruction::Uncertainty& default_uncert,
+                                 double Q_var) = 0;
+    virtual void kalmanInit_impl(const kalman::KalmanState& init_state) = 0;
+    virtual bool kalmanStep_impl(kalman::KalmanState& new_state,
+                                 double dt,
+                                 const Measurement& mm,
+                                 const reconstruction::Uncertainty& default_uncert, 
+                                 double Q_var) = 0;
+    virtual bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
+                                    std::vector<kalman::Matrix>& P_smooth,
+                                    const std::vector<kalman::KalmanState>& states,
+                                    const kalman::XTransferFunc& x_tr) const = 0;
+
     int verbosity() const { return verbosity_; }
 
 private:
+    boost::posix_time::ptime ts_;
+
     int verbosity_ = 0;
 };
 

@@ -261,6 +261,13 @@ void KalmanInterfaceUMKalman2D::xPos(double& x, double& y, const kalman::Vector&
 
 /**
 */
+void KalmanInterfaceUMKalman2D::xPos(double& x, double& y) const
+{
+    return xPos(x, y, kalman_filter_->getX());
+}
+
+/**
+*/
 void KalmanInterfaceUMKalman2D::xPos(kalman::Vector& x_vec, double x, double y) const
 {
     x_vec[ 0 ] = x;

@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "kalman_defs.h"
+
 #include <ostream>
 
 #include <boost/optional.hpp>
@@ -205,9 +207,10 @@ struct Reference : public Measurement
     bool nostddev_pos   = false; // did this position not obtain stddev information
     bool projchange_pos = false; // position where a change of map projection happened 
 
-    bool ref_interp   = false; // reference has been interpolated (e.g. from kalman samples)
+    bool ref_interp     = false; // reference has been interpolated (e.g. from kalman samples)
 
-    Eigen::MatrixXd cov; //covariance matrix
+    Eigen::MatrixXd cov; // covariance matrix
+    double          dt;  // last timestep (only set for non-interpolated)
 };
 
 /**

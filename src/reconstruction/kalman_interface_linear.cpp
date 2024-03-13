@@ -41,15 +41,15 @@ bool KalmanInterfaceLinear::init()
 
 /**
 */
-bool KalmanInterfaceLinear::kalmanInit(kalman::KalmanState& init_state,
-                                       const Measurement& mm,
-                                       const reconstruction::Uncertainty& default_uncert,
-                                       double Q_var)
+void KalmanInterfaceLinear::kalmanInit_impl(kalman::KalmanState& init_state,
+                                            const Measurement& mm,
+                                            const reconstruction::Uncertainty& default_uncert,
+                                            double Q_var)
 {
     const double dt_start = 1.0;
 
     //init kalman
-    stateVecX(kalman_filter_->getX(), mm);
+    KalmanInterface::stateVecX(kalman_filter_->getX(), mm);
     covarianceMatP(kalman_filter_->getP(), mm, default_uncert);
     stateTransitionMatF(kalman_filter_->getF(), dt_start);
     processUncertMatQ(kalman_filter_->getQ(), dt_start, Q_var);
@@ -72,17 +72,25 @@ bool KalmanInterfaceLinear::kalmanInit(kalman::KalmanState& init_state,
     init_state.F  = kalman_filter_->getF();
     init_state.Q  = kalman_filter_->getQ();
     init_state.dt = dt_start;
-
-    return true;
 }
 
 /**
 */
-bool KalmanInterfaceLinear::kalmanStep(kalman::KalmanState& new_state,
-                                       double dt, 
-                                       const Measurement& mm, 
-                                       const reconstruction::Uncertainty& default_uncert, 
-                                       double Q_var)
+void KalmanInterfaceLinear::kalmanInit_impl(const kalman::KalmanState& init_state)
+{
+    kalman_filter_->setX(init_state.x);
+    kalman_filter_->setP(init_state.P);
+    kalman_filter_->setQ(init_state.Q);
+    kalman_filter_->setF(init_state.F);
+}
+
+/**
+*/
+bool KalmanInterfaceLinear::kalmanStep_impl(kalman::KalmanState& new_state,
+                                            double dt, 
+                                            const Measurement& mm, 
+                                            const reconstruction::Uncertainty& default_uncert, 
+                                            double Q_var)
 {
     assert(kalman_filter_);
 
@@ -116,6 +124,79 @@ bool KalmanInterfaceLinear::kalmanStep(kalman::KalmanState& new_state,
     new_state.dt = dt;
 
     return true;
+}
+
+/**
+*/
+void KalmanInterfaceLinear::stateVecX(const kalman::Vector& x)
+{
+    kalman_filter_->setX(x);
+}
+
+/**
+*/
+bool KalmanInterfaceLinear::smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
+                                               std::vector<kalman::Matrix>& P_smooth,
+                                               const std::vector<kalman::KalmanState>& states,
+                                               const kalman::XTransferFunc& x_tr) const
+{
+    return kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, states, x_tr);
+}
+
+/**
+*/
+boost::optional<kalman::KalmanState> KalmanInterfaceLinear::interpStep(const kalman::KalmanState& state0,
+                                                                       const kalman::KalmanState& state1,
+                                                                       double dt,
+                                                                       double Q_var) const
+{
+#if 0
+    kalman_filter_->setX(state0.x);
+    kalman_filter_->setP(state0.P);
+
+    stateTransitionMatF(kalman_filter_->getF(), dt);
+    processUncertMatQ(kalman_filter_->getQ(), dt, Q_var);
+
+    kalman_filter_->predict({}, {});
+
+    kalman::KalmanState new_state;
+    new_state.x = kalman_filter_->getX();
+    new_state.P = kalman_filter_->getP();
+    new_state.F = F;
+    new_state.Q = Q;
+
+    return new_state;
+#else
+    bool forward = dt >= 0.0;
+
+    if (!forward)
+        dt = std::fabs(dt);
+
+    if (forward)
+        kalman_filter_->setX(state0.x);
+    else
+        stateVecXInv(kalman_filter_->getX(), state0.x);
+
+    kalman_filter_->setP(state0.P);
+
+    stateTransitionMatF(kalman_filter_->getF(), dt);
+    processUncertMatQ(kalman_filter_->getQ(), dt, Q_var);
+
+    kalman_filter_->predict({}, {});
+
+    kalman::KalmanState new_state;
+
+    if (forward)
+        new_state.x = kalman_filter_->getX();
+    else
+        stateVecXInv(new_state.x, kalman_filter_->getX());
+
+    new_state.P = kalman_filter_->getP();
+    new_state.F = kalman_filter_->getF();
+    new_state.Q = kalman_filter_->getQ();
+
+    return new_state;
+#endif
 }
 
 } // reconstruction
