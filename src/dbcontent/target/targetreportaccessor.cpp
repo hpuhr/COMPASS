@@ -176,10 +176,10 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
 
             auto nuc_p = cat021_nucp_nic_vec_->get(index);
 
-            if (!TargetReport::AccuracyTables::adsb_v0_accuracies.count(nuc_p)) // value unknown, also for 0 (undefined)
+            if (!targetReport::AccuracyTables::adsb_v0_accuracies.count(nuc_p)) // value unknown, also for 0 (undefined)
                 return {};
 
-            x_stddev = TargetReport::AccuracyTables::adsb_v0_accuracies.at(nuc_p);
+            x_stddev = targetReport::AccuracyTables::adsb_v0_accuracies.at(nuc_p);
             y_stddev = x_stddev;
         }
         else if (mops_version == 1 || mops_version == 2)
@@ -189,10 +189,10 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
 
             auto nac_p = cat021_nac_p_vec_->get(index);
 
-            if (!TargetReport::AccuracyTables::adsb_v12_accuracies.count(nac_p))
+            if (!targetReport::AccuracyTables::adsb_v12_accuracies.count(nac_p))
                 return {}; // value unknown, also for 0 (undefined)
 
-            x_stddev = TargetReport::AccuracyTables::adsb_v12_accuracies.at(nac_p);
+            x_stddev = targetReport::AccuracyTables::adsb_v12_accuracies.at(nac_p);
             y_stddev = x_stddev;
         }
         else
@@ -290,10 +290,10 @@ boost::optional<targetReport::VelocityAccuracy> TargetReportAccessor::velocityAc
 
         auto nuc_r = cat021_nucv_nacv_vec_->get(index);
 
-        if (!TargetReport::AccuracyTables::adsb_nucr_nacv_accuracies.count(nuc_r))
+        if (!targetReport::AccuracyTables::adsb_nucr_nacv_accuracies.count(nuc_r))
             return {}; // no info
 
-        double vx_stddev = TargetReport::AccuracyTables::adsb_nucr_nacv_accuracies.at(nuc_r);
+        double vx_stddev = targetReport::AccuracyTables::adsb_nucr_nacv_accuracies.at(nuc_r);
         double vy_stddev = vx_stddev;
 
         return targetReport::VelocityAccuracy(vx_stddev, vy_stddev);

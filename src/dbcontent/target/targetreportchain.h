@@ -24,6 +24,55 @@ class DBContentAccessor;
 
 namespace TargetReport {
 
+/**
+ */
+struct Index
+{
+    Index() = default;
+    Index(unsigned int idx_ext,
+          unsigned int idx_int) : idx_external(idx_ext), idx_internal(idx_int) {}
+
+    unsigned int idx_external; //external index (usually index into buffer)
+    unsigned int idx_internal; //internal index (index into internal data structures)
+};
+
+/**
+ */
+class DataID
+{
+  public:
+    typedef std::pair<const boost::posix_time::ptime, Index> IndexPair;
+
+    DataID() = default;
+    DataID(const boost::posix_time::ptime& timestamp) : timestamp_(timestamp), valid_(true) {}
+    DataID(const boost::posix_time::ptime& timestamp, const Index& index) : timestamp_(timestamp), index_(index), valid_(true) {}
+    DataID(const IndexPair& ipair) : timestamp_(ipair.first), index_(ipair.second), valid_(true) {}
+    virtual ~DataID() = default;
+
+    bool valid() const { return valid_; }
+    const boost::posix_time::ptime& timestamp() const { return timestamp_; }
+    bool hasIndex() const { return index_.has_value(); }
+
+    DataID& addIndex(const Index& index)
+    {
+        index_ = index;
+        return *this;
+    }
+
+    const Index& index() const
+    {
+        if (!hasIndex())
+            throw std::runtime_error("DataID: index: No index stored");
+        return index_.value();
+    }
+
+  private:
+    boost::posix_time::ptime timestamp_;
+    boost::optional<Index>   index_;
+    bool                     valid_ = false;
+};
+
+
 struct DataMappingTimes // mapping to respective tst data
 {
     boost::posix_time::ptime timestamp_; // tod of test
