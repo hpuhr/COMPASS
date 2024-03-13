@@ -11,6 +11,6 @@ class SimpleReconstructor : public ReconstructorBase
 
   protected:
 
-    virtual bool processSlice_impl(Buffers&& buffers) override;
+    virtual bool processSlice_impl() override;
 };
 

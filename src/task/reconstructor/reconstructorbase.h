@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "dbcontentaccessor.h"
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <map>
@@ -44,6 +46,7 @@ class ReconstructorBase
 
     bool hasNextTimeSlice();
     TimeWindow getNextTimeSlice();
+
     bool processSlice(Buffers&& buffers);
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
@@ -51,13 +54,21 @@ class ReconstructorBase
     void clear();
 
   protected:
-    //Buffers buffers_;
+
+    Buffers buffers_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     boost::posix_time::ptime current_slice_begin_;
-    boost::posix_time::ptime timestamp_max_;
-    const boost::posix_time::time_duration slice_duration_ {1, 0, 0}; // 1 hour
+    boost::posix_time::ptime timestamp_min_, timestamp_max_;
+    bool first_slice_ {false};
 
-    virtual bool processSlice_impl(Buffers&& buffers) = 0;
+    boost::posix_time::ptime remove_before_time_;
+
+    const boost::posix_time::time_duration slice_duration_ {0, 10, 0}; // 1 hour
+    const boost::posix_time::time_duration outdated_duration_ {0, 1, 0}; // 5 minutes
+
+    void removeOldBufferData(); // remove all data before current_slice_begin_
+    virtual bool processSlice_impl() = 0;
 
   private:
 };

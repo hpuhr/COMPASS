@@ -121,11 +121,11 @@ void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_p
 
 void ReconstructorTask::loadingDoneSlot()
 {
-    loginf << "ReconstructorTask: loadingDoneSlot";
-
     assert (reconstructor_);
 
     bool last_slice = !reconstructor_->hasNextTimeSlice();
+
+    loginf << "ReconstructorTask: loadingDoneSlot: last_slice " << last_slice;
 
     std::map<std::string, std::shared_ptr<Buffer>> data = std::move(data_); // move out of there
 
@@ -147,6 +147,7 @@ void ReconstructorTask::loadingDoneSlot()
     }
     else // do next load
     {
+        loginf << "ReconstructorTask: loadingDoneSlot: next slice";
         loadDataSlice();
     }
 

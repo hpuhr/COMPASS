@@ -442,7 +442,7 @@ void CreateAssociationsTask::loadingDoneSlot()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     if (!accessor_)
-        accessor_ = std::make_shared<dbContent::DBContentAccessor> (dbcontent_man);
+        accessor_ = std::make_shared<dbContent::DBContentAccessor>();
 
     accessor_->add(data_);
 

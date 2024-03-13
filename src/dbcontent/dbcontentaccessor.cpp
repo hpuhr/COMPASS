@@ -16,6 +16,7 @@
  */
 
 #include "dbcontentaccessor.h"
+#include "compass.h"
 #include "dbcontentmanager.h"
 #include "dbcontent/variable/metavariable.h"
 #include "bufferaccessor.h"
@@ -26,8 +27,7 @@ namespace dbContent
 
 /**
 */
-DBContentAccessor::DBContentAccessor(const DBContentManager& dbcont_man)
-    : dbcont_man_(dbcont_man)
+DBContentAccessor::DBContentAccessor()
 {
 }
 
@@ -54,7 +54,7 @@ bool DBContentAccessor::add(std::map<std::string, std::shared_ptr<Buffer>> buffe
         }
         else
         {
-            buffers_[buf_it.first] = move(buf_it.second);
+            buffers_[buf_it.first] = std::move(buf_it.second);
 
             loginf << "DBContentAccessor: add: created buffer dbo " << buf_it.first
                    << " size " << buffers_.at(buf_it.first)->size();
@@ -66,6 +66,24 @@ bool DBContentAccessor::add(std::map<std::string, std::shared_ptr<Buffer>> buffe
         updateDBContentLookup();
 
     return something_changed;
+}
+
+void DBContentAccessor::removeEmptyBuffers()
+{
+    bool something_changed = false;
+
+    // remove empty buffers
+    std::map<std::string, std::shared_ptr<Buffer>> tmp_data = buffers_;
+
+    for (auto& buf_it : tmp_data)
+        if (!buf_it.second->size())
+        {
+            buffers_.erase(buf_it.first);
+            something_changed = true;
+        }
+
+    if (something_changed)
+        updateDBContentLookup();
 }
 
 /**
@@ -102,7 +120,7 @@ void DBContentAccessor::updateDBContentLookup()
         //generate lookup for buffer's dbcontent
         auto& lookup = dbcontent_lookup_[buf_it.first];
         lookup = std::shared_ptr<DBContentVariableLookup>(new DBContentVariableLookup(buf_it.first, buf_it.second));
-        lookup->update(dbcont_man_);
+        lookup->update(COMPASS::instance().dbContentManager());
     }
 }
 

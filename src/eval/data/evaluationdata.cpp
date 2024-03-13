@@ -48,7 +48,7 @@ using namespace boost::posix_time;
 EvaluationData::EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man)
     : eval_man_(eval_man), dbcont_man_(dbcont_man)
 {
-    accessor_ = make_shared<dbContent::DBContentAccessor>(dbcont_man_);
+    accessor_ = make_shared<dbContent::DBContentAccessor>();
 
     connect(&dbcont_man, &DBContentManager::targetChangedSignal, this, &EvaluationData::targetChangedSlot);
     connect(&dbcont_man, &DBContentManager::allTargetsChangedSignal, this, &EvaluationData::allTargetsChangedSlot);

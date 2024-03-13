@@ -85,7 +85,7 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
     return read_set;
 }
 
-bool SimpleReconstructor::processSlice_impl(Buffers&& buffers)
+bool SimpleReconstructor::processSlice_impl()
 {
     loginf << "SimpleReconstructor: processSlice_impl";
 
