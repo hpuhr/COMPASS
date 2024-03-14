@@ -152,6 +152,8 @@ public:
     const ASTERIXImportSource& source() const { return source_; }
     ASTERIXImportSource& source() { return source_; }
 
+    bool requiresFixedFraming() const;
+
     std::shared_ptr<jASTERIX::jASTERIX> jASTERIX(bool refresh = false) const;
     
     bool hasConfiguratonFor(unsigned int category);

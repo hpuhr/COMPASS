@@ -31,6 +31,8 @@ public:
                        const ASTERIXImportTaskSettings* settings = nullptr);
     virtual ~ASTERIXPCAPDecoder();
 
+    boost::optional<std::string> requiredASTERIXFraming() const override { return std::string(""); }
+
 protected:
     void stop_impl() override final;
 
