@@ -51,4 +51,11 @@ void BufferAccessor::updateLookup(const DBContentManager& dbcontent_manager)
     lookup_->update(dbcontent_manager);
 }
 
+unsigned int BufferAccessor::size() const
+{
+    assert (lookup_);
+    return lookup_->size();
+}
+
+
 } // namespace dbContent

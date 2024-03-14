@@ -46,6 +46,8 @@ public:
     template <typename T>
     NullableVector<T>& getMetaVar(const Property& metavar_property);
 
+    unsigned int size() const;
+
 protected:
     std::shared_ptr<DBContentVariableLookup> lookup_;
 
@@ -84,5 +86,6 @@ NullableVector<T>& BufferAccessor::getMetaVar(const Property& metavar_property)
 {
     return lookup_->getMetaVar<T>(metavar_property);
 }
+
 
 } // namespace dbContent

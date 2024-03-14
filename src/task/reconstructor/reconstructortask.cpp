@@ -88,7 +88,7 @@ void ReconstructorTask::run()
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
-    simple_reconstructor_.reset();
+    simple_reconstructor_->reset();
 
     QMessageBox box;
     box.setText("Running Reconstruction...");
@@ -156,8 +156,6 @@ void ReconstructorTask::loadingDoneSlot()
 
         COMPASS::instance().viewManager().disableDataDistribution(false);
 
-        loginf << "ReconstructorTask: loadingDoneSlot: data loading done";
-
     }
     else // do next load
     {
@@ -165,33 +163,17 @@ void ReconstructorTask::loadingDoneSlot()
         loadDataSlice();
     }
 
-    // check if not already processing
+    // TODO: do async, check if not already processing
     assert (simple_reconstructor_->processSlice(std::move(data)));
 
-//    if (!cache_)
-//        cache_ = std::make_shared<dbContent::Cache> (dbcontent_man);
-
-//    cache_->add(data_);
-
+    if (last_slice)
+    {
+        loginf << "ReconstructorTask: loadingDoneSlot: data loading done";
+        simple_reconstructor_->reset();
+    }
 
 //    assert(status_dialog_);
 //    status_dialog_->setStatus("Loading done, starting association");
-
-
-
-            //assert(!create_job_);
-
-//    job_ = std::make_shared<ReconstructorTaskJob>(
-//        *this, COMPASS::instance().interface(), cache_);
-
-//    connect(job_.get(), &ReconstructorTaskJob::doneSignal, this,
-//            &ReconstructorTask::createDoneSlot, Qt::QueuedConnection);
-//    connect(job_.get(), &ReconstructorTaskJob::obsoleteSignal, this,
-//            &ReconstructorTask::createObsoleteSlot, Qt::QueuedConnection);
-//    connect(job_.get(), &ReconstructorTaskJob::statusSignal, this,
-//            &ReconstructorTask::associationStatusSlot, Qt::QueuedConnection);
-
-//    JobManager::instance().addDBJob(create_job_);
 
 }
 

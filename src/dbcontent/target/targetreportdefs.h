@@ -34,8 +34,7 @@ namespace targetReport
 
 struct ID
 {
-    ID(unsigned int buffer_index, unsigned long record_num)
-        : buffer_index_(buffer_index), record_num_(record_num) {}
+    ID() {}
 
     unsigned int buffer_index_ {0};
     unsigned long record_num_ {0};
