@@ -320,9 +320,9 @@ void MainWindow::createMenus ()
     connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
     import_menu_->addAction(import_ast_file_action);
 
-    QAction* import_pcap_file_action = new QAction("&PCAP Network Recording");
+    QAction* import_pcap_file_action = new QAction("&PCAP ASTERIX Recording");
     import_pcap_file_action->setShortcut(tr("Ctrl+P"));
-    import_pcap_file_action->setToolTip("Import ASTERIX data from PCAP network recording");
+    import_pcap_file_action->setToolTip("Import PCAP Recording File");
     connect(import_pcap_file_action, &QAction::triggered, this, &MainWindow::importAsterixFromPCAPSlot);
     import_menu_->addAction(import_pcap_file_action);
 
