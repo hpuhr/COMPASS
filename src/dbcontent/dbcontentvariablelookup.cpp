@@ -65,4 +65,12 @@ void DBContentVariableLookup::print() const
         std::cout << "    " << elem.first << " => " << elem.second << std::endl;
 }
 
+unsigned int DBContentVariableLookup::size() const
+{
+    if (buffer_)
+        return buffer_->size();
+    else
+        return 0;
+}
+
 } // namespace dbContent

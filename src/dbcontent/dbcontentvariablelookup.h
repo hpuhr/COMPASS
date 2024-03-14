@@ -51,6 +51,9 @@ public:
 
     void print() const;
 
+    unsigned int size() const;
+
+
 private:
     std::string                        dbcontent_name_;
     std::shared_ptr<Buffer>            buffer_;

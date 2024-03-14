@@ -47,11 +47,11 @@ public:
     TargetReportAccessor(const std::shared_ptr<DBContentVariableLookup>& lookup);
     virtual ~TargetReportAccessor() = default;
 
-    // HP: have to be always present, not optional
-    boost::optional<boost::posix_time::ptime> timestamp(unsigned int index) const;
-    boost::optional<unsigned long> recordNumber(unsigned int index) const;
-    boost::optional<unsigned int> dsID(unsigned int index) const;
-    // HP: missing lineID
+    // have to be always present, not optional
+    boost::posix_time::ptime timestamp(unsigned int index) const;
+    unsigned long recordNumber(unsigned int index) const;
+    unsigned int dsID(unsigned int index) const;
+    unsigned int lineID(unsigned int index) const;
 
     boost::optional<unsigned char> mopsVersion(unsigned int index) const;
     boost::optional<unsigned int> acad(unsigned int index) const;
@@ -95,7 +95,18 @@ private:
     template <typename T>
     boost::optional<T> getOptional(const NullableVector<T>* vec, unsigned int index) const
     {
-        return vec ? vec->get(index) : boost::optional<T>();
+        if (!vec || vec->isNull(index))
+            return boost::optional<T>();
+        else
+            return vec->get(index);
+    }
+
+    template <typename T>
+    T getNotOptional(const NullableVector<T>* vec, unsigned int index) const
+    {
+        assert (vec);
+        assert (!vec->isNull(index));
+        return vec->get(index);
     }
 
     bool is_radar_   = false;
@@ -105,7 +116,8 @@ private:
     //general
     const NullableVector<boost::posix_time::ptime>* meta_timestamp_vec_ = nullptr;
     const NullableVector<unsigned long>*            meta_rec_num_vec_   = nullptr;
-    const NullableVector<unsigned int>*             meta_ds_id_vec_     = nullptr;   
+    const NullableVector<unsigned int>*             meta_ds_id_vec_     = nullptr;
+    const NullableVector<unsigned int>*             meta_line_id_vec_   = nullptr;
     const NullableVector<unsigned int>*             meta_acad_vec_      = nullptr;
     const NullableVector<std::string>*              meta_acid_vec_      = nullptr;
 

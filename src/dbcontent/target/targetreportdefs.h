@@ -29,21 +29,14 @@ namespace dbContent
 
 class DBContentAccessor;
 
-namespace TargetReport
-{
-
-
-
-}
-
-
 namespace targetReport
 {
 
 struct ID
 {
-    ID(unsigned long record_num) : record_num_(record_num) {}
+    ID() {}
 
+    unsigned int buffer_index_ {0};
     unsigned long record_num_ {0};
     unsigned int ds_id_ {0};
     unsigned int line_id_ {0};

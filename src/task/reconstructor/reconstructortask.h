@@ -17,7 +17,7 @@ class TaskManager;
 class ReconstructorTaskDialog;
 class DBContent;
 class Buffer;
-class ReconstructorBase;
+class SimpleReconstructor;
 
 namespace dbContent
 {
@@ -44,6 +44,8 @@ class ReconstructorTask : public Task, public Configurable
                       TaskManager& task_manager);
     virtual ~ReconstructorTask();
 
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id) override;
 
     ReconstructorTaskDialog* dialog();
 
@@ -60,10 +62,13 @@ class ReconstructorTask : public Task, public Configurable
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
-    std::unique_ptr<ReconstructorBase> reconstructor_; // has to be reset after each calculation
+    //std::unique_ptr<ReconstructorBase> reconstructor_;
+    std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
+
 
     bool job_done_{false};
 
+    virtual void checkSubConfigurables() override;
     void deleteCalculatedReferences();
 
     void loadDataSlice();

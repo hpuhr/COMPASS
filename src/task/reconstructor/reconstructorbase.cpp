@@ -16,8 +16,12 @@
  */
 
 #include "reconstructorbase.h"
+#include "reconstructortask.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "logger.h"
 #include "timeconv.h"
 
@@ -25,13 +29,16 @@ using namespace std;
 using namespace Utils;
 
 /**
-*/
-ReconstructorBase::ReconstructorBase()
+ */
+ReconstructorBase::ReconstructorBase(const std::string& class_id, const std::string& instance_id,
+                                     ReconstructorTask& task)
+    : Configurable (class_id, instance_id, &task)
 {
+    accessor_ = make_shared<dbContent::DBContentAccessor>();
 }
 
 /**
-*/
+ */
 ReconstructorBase::~ReconstructorBase() = default;
 
 bool ReconstructorBase::hasNextTimeSlice()
@@ -39,21 +46,28 @@ bool ReconstructorBase::hasNextTimeSlice()
     if (current_slice_begin_.is_not_a_date_time())
     {
         assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
-        std::tie(current_slice_begin_, timestamp_max_) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+        std::tie(timestamp_min_, timestamp_max_) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+
+        current_slice_begin_ = timestamp_min_;
+        next_slice_begin_ = timestamp_min_; // first slice
 
         loginf << "ReconstructorBase: hasNextTimeSlice: new min " << Time::toString(current_slice_begin_)
-               << " max " << Time::toString(timestamp_max_);
+               << " max " << Time::toString(timestamp_max_) << " first_slice " << first_slice_;
     }
 
     assert (!current_slice_begin_.is_not_a_date_time());
     assert (!timestamp_max_.is_not_a_date_time());
 
-    return current_slice_begin_ < timestamp_max_;
+    first_slice_ = current_slice_begin_ == timestamp_min_;
+
+    return next_slice_begin_ < timestamp_max_;
 }
 
 TimeWindow ReconstructorBase::getNextTimeSlice()
 {
     assert (hasNextTimeSlice());
+
+    current_slice_begin_ = next_slice_begin_;
 
     assert (!current_slice_begin_.is_not_a_date_time());
     assert (!timestamp_max_.is_not_a_date_time());
@@ -64,7 +78,11 @@ TimeWindow ReconstructorBase::getNextTimeSlice()
 
     TimeWindow window {current_slice_begin_, current_slice_end};
 
-    current_slice_begin_ = current_slice_end;
+    first_slice_ = current_slice_begin_ == timestamp_min_;
+
+    remove_before_time_ = current_slice_begin_ - outdated_duration_;
+
+    next_slice_begin_ = current_slice_end; // for next iteration
 
     //assert (current_slice_begin_ <= timestamp_max_); can be bigger
 
@@ -72,15 +90,80 @@ TimeWindow ReconstructorBase::getNextTimeSlice()
 }
 
 /**
-*/
+ */
 bool ReconstructorBase::processSlice(Buffers&& buffers)
 {
-    return processSlice_impl(std::move(buffers));
+    loginf << "ReconstructorBase: processSlice: first_slice " << first_slice_;
+
+    if (!first_slice_)
+    {
+        removeOldBufferData();
+        accessor_->removeEmptyBuffers();
+    }
+
+    accessor_->add(buffers);
+
+    return processSlice_impl();
 }
 
 
-void ReconstructorBase::clear()
+void ReconstructorBase::reset()
 {
     current_slice_begin_ = {};
+    next_slice_begin_ = {};
+    timestamp_min_ = {};
     timestamp_max_ = {};
+}
+
+void ReconstructorBase::removeOldBufferData()
+{
+    unsigned int buffer_size;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    loginf << "ReconstructorBase: clearOldBufferData: current_slice_begin " << Time::toString(current_slice_begin_)
+        << " remove_before_time " << Time::toString(remove_before_time_);
+
+    for (auto& buf_it : buffers_)
+    {
+        buffer_size = buf_it.second->size();
+
+        assert (dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
+
+        dbContent::Variable& ts_var = dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
+
+        Property ts_prop {ts_var.name(), ts_var.dataType()};
+
+        if (buf_it.second->hasProperty(ts_prop))
+        {
+            NullableVector<boost::posix_time::ptime>& ts_vec = buf_it.second->get<boost::posix_time::ptime>(
+                ts_var.name());
+
+            unsigned int index=0;
+
+            for (; index < buffer_size; ++index)
+            {
+                if (!ts_vec.isNull(index) && ts_vec.get(index) > remove_before_time_)
+                {
+                    logdbg << "ReconstructorBase: clearOldBufferData: found " << buf_it.first
+                           << " cutoff tod index " << index
+                           << " ts " << Time::toString(ts_vec.get(index));
+                    break;
+                }
+            }
+            // index == buffer_size if none bigger than min_ts
+
+            if (index) // index found
+            {
+                index--; // cut at previous
+
+                logdbg << "ReconstructorBase: clearOldBufferData: cutting " << buf_it.first
+                       << " up to index " << index
+                       << " total size " << buffer_size
+                       << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
+                assert (index < buffer_size);
+                buf_it.second->cutUpToIndex(index);
+            }
+        }
+    }
 }

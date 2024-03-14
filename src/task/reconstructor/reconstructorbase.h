@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include "dbcontentaccessor.h"
+#include "configurable.h"
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <map>
@@ -29,35 +32,47 @@ class VariableSet;
 }
 
 class Buffer;
+class ReconstructorTask;
 
 typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow; // min, max
 
 /**
  */
-class ReconstructorBase
+class ReconstructorBase : public Configurable
 {
   public:
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
 
-    ReconstructorBase();
+    ReconstructorBase(const std::string& class_id, const std::string& instance_id,
+                      ReconstructorTask& task);
     virtual ~ReconstructorBase();
 
     bool hasNextTimeSlice();
     TimeWindow getNextTimeSlice();
+
     bool processSlice(Buffers&& buffers);
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 
-    void clear();
+    virtual void reset();
 
   protected:
-    //Buffers buffers_;
+
+    Buffers buffers_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     boost::posix_time::ptime current_slice_begin_;
-    boost::posix_time::ptime timestamp_max_;
-    const boost::posix_time::time_duration slice_duration_ {1, 0, 0}; // 1 hour
+    boost::posix_time::ptime next_slice_begin_;
+    boost::posix_time::ptime timestamp_min_, timestamp_max_;
+    bool first_slice_ {false};
 
-    virtual bool processSlice_impl(Buffers&& buffers) = 0;
+    boost::posix_time::ptime remove_before_time_;
+
+    const boost::posix_time::time_duration slice_duration_ {0, 10, 0}; // 1 hour
+    const boost::posix_time::time_duration outdated_duration_ {0, 1, 0}; // 5 minutes
+
+    void removeOldBufferData(); // remove all data before current_slice_begin_
+    virtual bool processSlice_impl() = 0;
 
   private:
 };

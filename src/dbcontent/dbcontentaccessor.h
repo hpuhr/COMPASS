@@ -33,10 +33,11 @@ class TargetReportAccessor;
 class DBContentAccessor
 {
 public:
-    DBContentAccessor(const DBContentManager& dbcont_man);
+    DBContentAccessor();
     virtual ~DBContentAccessor() = default;
 
     bool add(std::map<std::string, std::shared_ptr<Buffer>> buffers); // something changed flag
+    void removeEmptyBuffers();
     void clear();
 
     bool has(const std::string& dbcontent_name) const;
@@ -63,8 +64,6 @@ public:
 
 protected:
     void updateDBContentLookup();
-
-    const DBContentManager& dbcont_man_;
 
     std::map<std::string, std::shared_ptr<Buffer>>                  buffers_;          // dbcont name -> buffer
     std::map<std::string, std::shared_ptr<DBContentVariableLookup>> dbcontent_lookup_; // dbcont name -> var lookup

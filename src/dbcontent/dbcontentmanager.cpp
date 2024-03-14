@@ -16,7 +16,6 @@
  */
 
 #include "dbcontent/dbcontentmanager.h"
-//#include "dbcontent/label/labelgenerator.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
