@@ -175,13 +175,17 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
 
 /**
 */
-bool KalmanEstimator::kalmanStep(kalman::KalmanUpdate& update,
-                                 Measurement& mm)
+KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& update,
+                                                        Measurement& mm)
 {
     assert(kalman_interface_);
 
     //init measurement
     initMeasurement(update, mm);
+
+    //check if timestep is too small
+    if (kalman_interface_->timestep(mm) < settings_.min_dt)
+        return KalmanEstimator::StepResult::FailStepTooSmall;
 
     //check if reinit is needed
     if (needsReinit(mm) != ReinitState::ReinitNotNeeded)
@@ -193,7 +197,7 @@ bool KalmanEstimator::kalmanStep(kalman::KalmanUpdate& update,
     {
         //normal step
         if (!step(update, mm))
-            return false;
+            return KalmanEstimator::StepResult::FailKalmanError;
     }
 
     //update projection if needed
@@ -201,7 +205,7 @@ bool KalmanEstimator::kalmanStep(kalman::KalmanUpdate& update,
 
     update.valid = true;
 
-    return true;
+    return KalmanEstimator::StepResult::Success;
 }
 
 /**

@@ -70,6 +70,13 @@ public:
         ReinitTime
     };
 
+    enum class StepResult
+    {
+        Success = 0,
+        FailStepTooSmall,
+        FailKalmanError
+    };
+
     typedef std::vector<kalman::KalmanUpdate> Updates;
     typedef std::function<void(Updates&, size_t, size_t)> ChainFunc;
 
@@ -81,8 +88,8 @@ public:
     void kalmanInit(kalman::KalmanUpdate& update,
                     Measurement& mm);
     void kalmanInit(const kalman::KalmanUpdate& update);
-    bool kalmanStep(kalman::KalmanUpdate& update,
-                    Measurement& mm);
+    StepResult kalmanStep(kalman::KalmanUpdate& update,
+                          Measurement& mm);
 
     void smoothUpdates(std::vector<kalman::KalmanUpdate>& updates);
     void interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
