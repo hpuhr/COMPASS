@@ -164,6 +164,7 @@ void ASTERIXConfigWidget::updateFraming()
 
     framing_combo_->loadFramings();
     framing_combo_->setFraming(task_.settings().current_file_framing_);
+    framing_combo_->setEnabled(!task_.requiresFixedFraming());
 
     if (task_.settings().current_file_framing_ == "")
         framing_edit_->setDisabled(true);
