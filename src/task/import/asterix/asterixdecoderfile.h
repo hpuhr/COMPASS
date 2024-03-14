@@ -46,9 +46,14 @@ public:
 
     std::string getCurrentFilename() const;
 
-    unsigned int DecodeCheckRecordLimit = 10000;
-    unsigned int DecodeCheckMaxBytes    = 10000000;
-    unsigned int FileChunkSize          = 500000000; //500 MB
+    static bool isSupportedArchive(const ASTERIXImportFileInfo& file_info);
+
+    static const unsigned int DecodeCheckRecordLimit = 10000;
+    static const unsigned int DecodeCheckMaxBytes    = 10000000;
+    static const unsigned int FileChunkSize          = 500000000; //500 MB
+    static const unsigned int MaxJSONObjects         = 1000; //@TODO
+
+    static const std::vector<std::string> SupportedArchives;
 
 protected:
     virtual bool canRun_impl() const override;

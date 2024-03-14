@@ -310,8 +310,20 @@ void ASTERIXImportTask::sourceChanged()
     decoder_ = ASTERIXDecoderBase::createDecoder(source_);
     assert(decoder_);
 
+    //switch to framing required by the decoder?
+    auto required_framing = decoder_->requiredASTERIXFraming();
+    if (required_framing.has_value())
+        settings_.current_file_framing_ = required_framing.value();
+
     //test decoding
     testFileDecoding();
+}
+
+/**
+*/
+bool ASTERIXImportTask::requiresFixedFraming() const
+{
+    return (decoder_ && decoder_->requiredASTERIXFraming().has_value());
 }
 
 /**
@@ -598,6 +610,10 @@ ASTERIXImportTaskSettings& ASTERIXImportTask::settings()
 */
 void ASTERIXImportTask::testFileDecoding()
 {
+    //no decoder yet?
+    if (!decoder_)
+        return;
+
     auto check_decoding = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
     {
         //refresh decoder check

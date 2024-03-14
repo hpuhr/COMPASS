@@ -57,11 +57,13 @@ PacketSniffer::~PacketSniffer()
 */
 void PacketSniffer::clear()
 {
-    num_read_         = 0;
-    bytes_read_       = 0;
-    num_read_total_   = 0;
-    bytes_read_total_ = 0;
-    packet_idx_       = 0;
+    num_read_          = 0;
+    num_dropped_       = 0;
+    bytes_read_        = 0;
+    num_read_total_    = 0;
+    num_dropped_total_ = 0;
+    bytes_read_total_  = 0;
+    packet_idx_        = 0;
 
     reached_eof_ = false;
 
@@ -208,8 +210,9 @@ void PacketSniffer::digestPCAPEtherPacket(int ether_type,
     char  destIP  [INET_ADDRSTRLEN];
     u_int sourcePort, destPort;
 
-    u_char* data       = nullptr;
-    size_t  dataLength = 0;
+    u_char* data          = nullptr;
+    size_t  dataLength    = 0;
+    size_t  payloadLength = 0; 
 
     if (ether_type == ETHERTYPE_IP) 
     {
@@ -226,7 +229,8 @@ void PacketSniffer::digestPCAPEtherPacket(int ether_type,
             data       = (u_char*)(packet + sizeof(struct ip) + sizeof(struct tcphdr));
             dataLength = pkthdr->len - (data_offs + sizeof(struct ip) + sizeof(struct tcphdr));
 
-            logdbg << "TCP Packet " << sourceIP << ":" << sourcePort << " => " << destIP << ":" << destPort << " = " << dataLength << " byte(s)";
+            logdbg << "TCP Packet " << sourceIP << ":" << sourcePort << " => " << destIP << ":" << destPort 
+                   << " datalen = " << dataLength << " byte(s)";
         } 
         else if (ipHeader->ip_p == IPPROTO_UDP) 
         {
@@ -234,10 +238,15 @@ void PacketSniffer::digestPCAPEtherPacket(int ether_type,
             sourcePort = ntohs(udpHeader->source);
             destPort   = ntohs(udpHeader->dest);
 
-            data       = (u_char*)(packet + sizeof(struct ip) + sizeof(struct udphdr));
-            dataLength = pkthdr->len - (data_offs + sizeof(struct ip) + sizeof(struct udphdr));
+            data          = (u_char*)(packet + sizeof(struct ip) + sizeof(struct udphdr));
+            dataLength    = pkthdr->len - (data_offs + sizeof(struct ip) + sizeof(struct udphdr));
+            payloadLength = ntohs(udpHeader->len) - sizeof(struct udphdr); //should respect padding
 
-            logdbg << "UDP Packet " << sourceIP << ":" << sourcePort << " => " << destIP << ":" << destPort << " = " << dataLength << " byte(s)";
+            logdbg << "UDP Packet " << sourceIP << ":" << sourcePort << " => " << destIP << ":" << destPort 
+                   << " datalen = " << dataLength << " byte(s), payload = " << payloadLength << " byte(s)";
+
+            //use length from udp header to drop any existing padding
+            dataLength = payloadLength;
         }
         else
         {
@@ -249,13 +258,16 @@ void PacketSniffer::digestPCAPEtherPacket(int ether_type,
         unknown_eth_types_.push_back(ether_type);
     }
 
-    //supported packet?
+    //packet not supported? => drop
     if (!data)
+    {
+        ++num_dropped_;
+        ++num_dropped_total_;
         return;
+    }
 
     addPacket(sourceIP, sourcePort, destIP, destPort, data, dataLength, read_config);
 }
-
 
 /**
 */
@@ -515,9 +527,10 @@ boost::optional<PacketSniffer::Chunk> PacketSniffer::readFileNext(size_t max_pac
     config.read_config.packet_filter.signatures = signatures_to_read;
 
     //reset counts
-    num_read_   = 0;
-    bytes_read_ = 0;
-    data_       = {};
+    num_read_    = 0;
+    num_dropped_ = 0;
+    bytes_read_  = 0;
+    data_        = {};
 
     struct pcap_pkthdr *pkthdr;
     const u_char *packet;

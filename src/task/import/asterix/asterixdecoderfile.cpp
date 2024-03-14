@@ -22,6 +22,8 @@
 #include "files.h"
 #include "stringconv.h"
 
+const std::vector<std::string> ASTERIXDecoderFile::SupportedArchives = { ".zip", ".gz", ".tgz", ".tar" };
+
 /**
  * @param source_type File source the decoder is able to decode.
  * @param source Import source to retrieve data from.
@@ -365,4 +367,15 @@ void ASTERIXDecoderFile::chunkFinished()
 {
     current_file_bytes_read_ += current_chunk_bytes_read_;
     current_chunk_bytes_read_ = 0;
+}
+
+/**
+*/
+bool ASTERIXDecoderFile::isSupportedArchive(const ASTERIXImportFileInfo& file_info)
+{
+    for (const auto& ext : SupportedArchives)
+        if (Utils::String::hasEnding(file_info.filename, ext))
+            return true;
+
+    return false;
 }

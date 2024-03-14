@@ -322,11 +322,20 @@ void MainWindow::createMenus ()
     connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
     import_menu_->addAction(import_ast_file_action);
 
-    QAction* import_pcap_file_action = new QAction("&PCAP Network Recording");
+    QAction* import_pcap_file_action = new QAction("&PCAP ASTERIX Recording");
     import_pcap_file_action->setShortcut(tr("Ctrl+P"));
-    import_pcap_file_action->setToolTip("Import ASTERIX data from PCAP network recording");
+    import_pcap_file_action->setToolTip("Import PCAP Recording File");
     connect(import_pcap_file_action, &QAction::triggered, this, &MainWindow::importAsterixFromPCAPSlot);
     import_menu_->addAction(import_pcap_file_action);
+
+    // if (!COMPASS::instance().isAppImage())
+    // {
+    //     QAction* import_ast_json_action = new QAction("ASTERIX From JSON Recording");
+    //     //import_ast_json_action->setShortcut(tr("Ctrl+P"));
+    //     import_ast_json_action->setToolTip("Import ASTERIX data from JSON recording file");
+    //     connect(import_ast_json_action, &QAction::triggered, this, &MainWindow::importAsterixFromJSONSlot);
+    //     import_menu_->addAction(import_ast_json_action);
+    // }
 
     QAction* import_ast_net_action = new QAction("ASTERIX From Network");
     import_ast_net_action->setToolTip("Import ASTERIX From Network");
@@ -806,6 +815,25 @@ void MainWindow::importAsterixFromPCAPSlot()
     ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
 
     task.source().setSourceType(ASTERIXImportSource::SourceType::FilePCAP, { fn.toStdString() });
+
+    updateMenus();
+
+    task.runDialog(this);
+}
+
+void MainWindow::importAsterixFromJSONSlot()
+{
+    loginf << "MainWindow: importAsterixFromJSONSlot";
+
+    auto fn = QFileDialog::getOpenFileName(this, 
+                                           "Import JSON File", 
+                                           COMPASS::instance().lastUsedPath().c_str());
+    if (fn.isEmpty())
+        return;
+
+    ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FileJSON, { fn.toStdString() });
 
     updateMenus();
 

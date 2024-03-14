@@ -19,6 +19,7 @@
 
 #include "asterixfiledecoder.h"
 #include "asterixpcapdecoder.h"
+#include "asterixjsondecoder.h"
 #include "asterixnetworkdecoder.h"
 #include "asteriximporttask.h"
 
@@ -54,6 +55,8 @@ std::unique_ptr<ASTERIXDecoderBase> ASTERIXDecoderBase::createDecoder(ASTERIXImp
         return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXFileDecoder(source, settings));
     else if (source.sourceType() == ASTERIXImportSource::SourceType::FilePCAP)
         return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXPCAPDecoder(source, settings));
+    else if (source.sourceType() == ASTERIXImportSource::SourceType::FileJSON)
+        return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXJSONDecoder(source, settings));
     else if (source.sourceType() == ASTERIXImportSource::SourceType::NetASTERIX)
         return std::unique_ptr<ASTERIXDecoderBase>(new ASTERIXNetworkDecoder(source, settings));
 

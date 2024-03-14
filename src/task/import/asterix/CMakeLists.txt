@@ -16,6 +16,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asterixnetworkdecoder.h"
         "${CMAKE_CURRENT_LIST_DIR}/asteriximportsource.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixpcapdecoder.h"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixjsondecoder.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/asteriximporttask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asteriximporttaskwidget.cpp"
@@ -29,4 +30,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asterixnetworkdecoder.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asteriximportsource.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asterixpcapdecoder.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixjsondecoder.cpp"
 )

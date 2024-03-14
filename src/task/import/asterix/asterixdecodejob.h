@@ -86,6 +86,7 @@ private:
     friend class ASTERIXFileDecoder;
     friend class ASTERIXNetworkDecoder;
     friend class ASTERIXPCAPDecoder; 
+    friend class ASTERIXJSONDecoder;
 
     ASTERIXImportTask& task_;
     const ASTERIXImportTaskSettings& settings_;
