@@ -119,6 +119,22 @@ bool ReconstructorKalman::smoothChain(KalmanChain& chain)
 
 /**
 */
+bool ReconstructorKalman::filterChain(KalmanChain& chain, const boost::posix_time::ptime& t_last)
+{
+    size_t n   = chain.references.size();
+    size_t idx = 0;
+
+    for (size_t i = 0; i < n; ++i)
+        if (chain.references[ i ].t <= t_last)
+            chain.references[ idx++ ] = chain.references[ i ];
+
+    chain.references.resize(idx);
+
+    return true;
+}
+
+/**
+*/
 bool ReconstructorKalman::resampleResult(KalmanChain& result_chain, double dt_sec)
 {
     if (result_chain.references.size() < 2)
@@ -457,6 +473,17 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::finalize()
             }
         }
 
+        //filter chains before resampling?
+        if (base_config_.last_update.has_value())
+        {
+            if (!filterChain(c, base_config_.last_update.value()))
+            {
+                logerr << "ReconstructorKalman::finalize(): Filtering chains failed";
+                return {};
+            }
+        }
+
+        //resample chains?
         if (base_config_.resample_result)
         {
             if (!resampleResult(c, base_config_.resample_dt))
@@ -560,6 +587,7 @@ void ReconstructorKalman::storeState(Reference& ref,
     storeState_impl(ref, state); //invoke derived impl
 
     ref.cov = state.P;
+    ref.dt  = state.dt;
 }
 
 /**
@@ -613,7 +641,8 @@ bool ReconstructorKalman::needsReinit(const Reference& ref,
 /**
 */
 void ReconstructorKalman::init(Measurement& mm,
-                               const std::string& data_info)
+                               const std::string& data_info, 
+                               bool first_mm)
 {
     //init projection and project measurement
     proj_handler_.initProjection(mm, true);
@@ -626,7 +655,12 @@ void ReconstructorKalman::init(Measurement& mm,
 
     //add first state
     kalman::KalmanState state = kalmanState();
-    Reference           ref   = storeState(state, mm);
+
+    //first mm: apply external cov if provided
+    if (first_mm && base_config_.init_cov.has_value())
+        state.P  = base_config_.init_cov.value();
+
+    Reference ref = storeState(state, mm);
 
     ref.reset_pos   = true;
     ref.nospeed_pos = mm.hasVelocity();
@@ -703,7 +737,7 @@ boost::optional<std::vector<Reference>> ReconstructorKalman::reconstruct_impl(st
 
     //init kalman using first target report
     auto& mm0 = measurements.at(0);
-    init(mm0, data_info);
+    init(mm0, data_info, true);
 
     size_t n = measurements.size();
 

@@ -169,10 +169,11 @@ boost::optional<kalman::KalmanState> Reconstructor_UMKalman2D::kalmanStep(double
         return {};
 
     kalman::KalmanState state;
-    state.x = kalman_->getX();
-    state.P = kalman_->getP();
-    state.F = F;
-    state.Q = Q;
+    state.x  = kalman_->getX();
+    state.P  = kalman_->getP();
+    state.F  = F;
+    state.Q  = Q;
+    state.dt = dt;
 
     return state;
 }
