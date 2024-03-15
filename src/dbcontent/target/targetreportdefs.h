@@ -32,37 +32,8 @@ class DBContentAccessor;
 namespace targetReport
 {
 
-struct ID
-{
-    ID() {}
 
-    unsigned int buffer_index_ {0};
-    unsigned long record_num_ {0};
-    unsigned int ds_id_ {0};
-    unsigned int line_id_ {0};
-    boost::posix_time::ptime timestamp_;
-};
-
-
-//class PerDSChain
-//{
-//public:
-//    PerDSChain(std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name,
-//             unsigned int ds_id);
-//    virtual ~PerDSChain();
-
-//    void addIndex (boost::posix_time::ptime timestamp, unsigned int index);
-
-//    bool hasData() const;
-//    unsigned int size () const;
-//};
-
-//class FullChain
-//{
-
-//};
-
-
+class TargetReportAccessor;
 
 /**
 */
@@ -150,6 +121,91 @@ struct VelocityAccuracy
     double vx_stddev_ {0}; // m/s
     double vy_stddev_ {0}; // m/s
 };
+
+struct ModeACode
+{
+    ModeACode() {}
+    ModeACode(unsigned int code,
+              const boost::optional<bool>& v,
+              const boost::optional<bool>& g,
+              const boost::optional<bool>& smoothed)
+        :   code_  (code)
+          ,   valid_   (v)
+          ,   garbled_ (g)
+          ,   smoothed_(smoothed)
+    {}
+
+    unsigned int code_;
+    boost::optional<bool> valid_;
+    boost::optional<bool> garbled_;
+    boost::optional<bool> smoothed_;
+};
+
+struct BaseInfo
+{
+    unsigned int buffer_index_ {0};
+    unsigned long record_num_ {0};
+    unsigned int ds_id_ {0};
+    unsigned int line_id_ {0};
+    boost::posix_time::ptime timestamp_;
+};
+
+
+struct ReconstructorInfo : public BaseInfo
+{
+    bool in_current_slice_ {false}; // true in current, false if from old slice (glue data)
+
+    boost::optional<unsigned int> acad_;
+    boost::optional<std::string> acid_;
+    boost::optional<targetReport::ModeACode> mode_a_code_;
+
+    boost::optional<unsigned int> track_number_;
+    boost::optional<bool> track_begin_;
+    boost::optional<bool> track_end_;
+
+    boost::optional<targetReport::Position> position_;
+    boost::optional<targetReport::PositionAccuracy> position_accuracy_;
+    boost::optional<targetReport::BarometricAltitude> barometric_altitude_;
+    boost::optional<targetReport::Velocity> velocity_;
+    boost::optional<targetReport::VelocityAccuracy> velocity_accuracy_;
+    boost::optional<double> track_angle_;
+    boost::optional<bool> ground_bit_;
+
+
+   TargetReportAccessor* accessor_ {nullptr};
+};
+
+// tmp list
+
+// flag old/current slice
+
+// secondary stuff: acid, acad, mode a, mode c
+// position, corrected position, position acc, corrected pos acc
+// velocity, velocity acc
+// ground bit
+
+// Kalman update (x,P,F,Q, ...)
+
+
+
+//class PerDSChain
+//{
+//public:
+//    PerDSChain(std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name,
+//             unsigned int ds_id);
+//    virtual ~PerDSChain();
+
+//    void addIndex (boost::posix_time::ptime timestamp, unsigned int index);
+
+//    bool hasData() const;
+//    unsigned int size () const;
+//};
+
+//class FullChain
+//{
+
+//};
+
 
 } // namespace targetReport
 

@@ -341,6 +341,19 @@ boost::optional<bool> TargetReportAccessor::groundBit(unsigned int index) const
     return getOptional<bool>(meta_ground_bit_vec_, index);
 }
 
+boost::optional<targetReport::ModeACode> TargetReportAccessor::modeACode(unsigned int index) const
+{
+    boost::optional<unsigned int> code = modeA(index);
+
+    if (!code)
+        return {};
+    else
+        return targetReport::ModeACode(code.value(),
+                                       modeAValid(index),
+                                       modeAGarbled(index),
+                                       modeASmoothed(index));
+}
+
 /**
 */
 boost::optional<unsigned int> TargetReportAccessor::modeA(unsigned int index) const
@@ -399,7 +412,7 @@ boost::optional<unsigned int> TargetReportAccessor::trackNumber(unsigned int ind
 
 /**
 */
-boost::optional<bool> TargetReportAccessor::trackStart(unsigned int index) const
+boost::optional<bool> TargetReportAccessor::trackBegin(unsigned int index) const
 {
     return getOptional<bool>(meta_track_begin_vec_, index);
 }

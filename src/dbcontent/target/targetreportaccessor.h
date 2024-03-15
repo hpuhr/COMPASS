@@ -34,6 +34,7 @@ namespace targetReport
     class BarometricAltitude;
     class Velocity;
     class VelocityAccuracy;
+    class ModeACode;
 }
 
 /**
@@ -65,7 +66,7 @@ public:
     boost::optional<double> trackAngle(unsigned int index) const;
     boost::optional<bool> groundBit(unsigned int index) const;
     
-    // HP: do as struct
+    boost::optional<targetReport::ModeACode> modeACode(unsigned int index) const;
     boost::optional<unsigned int> modeA(unsigned int index) const;
     boost::optional<bool> modeAValid(unsigned int index) const;
     boost::optional<bool> modeAGarbled(unsigned int index) const;
@@ -76,7 +77,7 @@ public:
     boost::optional<bool> modeCGarbled(unsigned int index) const;
 
     boost::optional<unsigned int> trackNumber(unsigned int index) const;
-    boost::optional<bool> trackStart(unsigned int index) const;
+    boost::optional<bool> trackBegin(unsigned int index) const;
     boost::optional<bool> trackEnd(unsigned int index) const;
 
 private:

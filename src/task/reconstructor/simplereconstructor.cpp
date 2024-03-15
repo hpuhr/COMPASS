@@ -198,7 +198,7 @@ void SimpleReconstructor::createTargetReports()
     boost::posix_time::ptime ts;
     unsigned int record_num;
 
-    dbContent::targetReport::ID id;
+    dbContent::targetReport::BaseInfo id;
 
     for (auto& buf_it : *accessor_)
     {
