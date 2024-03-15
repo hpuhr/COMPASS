@@ -30,6 +30,8 @@ public:
                        const ASTERIXImportTaskSettings* settings = nullptr);
     virtual ~ASTERIXFileDecoder();
 
+    std::string name() const override final { return "ASTERIXFileDecoder"; }
+
 protected:
     void stop_impl() override final;
 
