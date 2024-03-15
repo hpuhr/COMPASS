@@ -306,9 +306,13 @@ void ASTERIXImportTask::checkSubConfigurables()
 */
 void ASTERIXImportTask::sourceChanged()
 {
+    loginf << "ASTERIXImportTask: sourceChanged: new type = " << source_.sourceTypeAsString();
+
     //update to suitable decoder
     decoder_ = ASTERIXDecoderBase::createDecoder(source_);
     assert(decoder_);
+
+    loginf << "ASTERIXImportTask: sourceChanged: created new decoder "  << decoder_->name();
 
     //switch to framing required by the decoder?
     auto required_framing = decoder_->requiredASTERIXFraming();
@@ -614,19 +618,21 @@ void ASTERIXImportTask::testFileDecoding()
     if (!decoder_)
         return;
 
-    auto check_decoding = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
+    loginf << "ASTERIXImportTask: testFileDecoding: Checking decoding with decoder " << decoder_->name();
+
+    file_decoding_tested_ = false;
+
+    auto check_decoding = [ this ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
     {
         //refresh decoder check
-        assert(decoder_);
-        decoder_->canDecode(true);
+        assert(this->decoder_);
+        this->decoder_->canDecode(true);
 
         return AsyncTaskResult(true, "");
     };
 
-    file_decoding_tested_ = false;
-
     AsyncFuncTask task(check_decoding, "Testing decoding", "Please wait...", false);
-    AsyncTask::runAsyncDialog(&task, true, nullptr);
+    task.runAsyncDialog(true, nullptr);
 
     file_decoding_tested_ = true;
 

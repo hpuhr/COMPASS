@@ -39,6 +39,8 @@ public:
                        const ASTERIXImportTaskSettings* settings = nullptr);
     virtual ~ASTERIXDecoderBase();
 
+    virtual std::string name() const { return ""; }
+
     bool canRun() const;
     bool canDecode(bool force_recompute) const;
     
