@@ -792,7 +792,8 @@ void MainWindow::importAsterixFromPCAPSlot()
 
     auto fn = QFileDialog::getOpenFileName(this, 
                                            "Import PCAP File", 
-                                           COMPASS::instance().lastUsedPath().c_str());
+                                           COMPASS::instance().lastUsedPath().c_str(),
+                                           "PCAP Files (*.pcap *.PCAP)");
     if (fn.isEmpty())
         return;
 
