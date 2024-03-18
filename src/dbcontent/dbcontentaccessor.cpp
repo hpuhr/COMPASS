@@ -18,9 +18,15 @@
 #include "dbcontentaccessor.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
 #include "bufferaccessor.h"
 #include "targetreportaccessor.h"
+#include "timeconv.h"
+
+using namespace std;
+using namespace Utils;
 
 namespace dbContent 
 {
@@ -66,6 +72,62 @@ bool DBContentAccessor::add(std::map<std::string, std::shared_ptr<Buffer>> buffe
         updateDBContentLookup();
 
     return something_changed;
+}
+
+void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime remove_before_time)
+{
+    unsigned int buffer_size;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    loginf << "DBContentAccessor::removeContentBeforeTimestamp: remove_before_time "
+           << Time::toString(remove_before_time);
+
+    for (auto& buf_it : buffers_)
+    {
+        buffer_size = buf_it.second->size();
+
+        assert (dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
+
+        dbContent::Variable& ts_var = dbcont_man.metaVariable(
+                                                    DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
+
+        Property ts_prop {ts_var.name(), ts_var.dataType()};
+        assert (buf_it.second->hasProperty(ts_prop));
+
+        NullableVector<boost::posix_time::ptime>& ts_vec = buf_it.second->get<boost::posix_time::ptime>(ts_var.name());
+
+        unsigned int index=0;
+        bool cutoff_found = false;
+
+        for (; index < buffer_size; ++index)
+        {
+            if (!ts_vec.isNull(index) && ts_vec.get(index) > remove_before_time)
+            {
+                logdbg << "DBContentAccessor: removeContentBeforeTimestamp: found " << buf_it.first
+                       << " cutoff tod index " << index
+                       << " ts " << Time::toString(ts_vec.get(index));
+
+                cutoff_found = true;
+                break;
+            }
+        }
+        // index == buffer_size if none bigger than min_ts
+
+        if (cutoff_found) // index found
+        {
+            index--; // cut at previous
+
+            logdbg << "DBContentAccessor: removeContentBeforeTimestamp: cutting " << buf_it.first
+                   << " up to index " << index
+                   << " total size " << buffer_size
+                   << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
+            assert (index < buffer_size);
+            buf_it.second->cutUpToIndex(index);
+        }
+    }
+
+    removeEmptyBuffers();
 }
 
 void DBContentAccessor::removeEmptyBuffers()

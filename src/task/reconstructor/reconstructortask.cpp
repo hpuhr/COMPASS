@@ -147,6 +147,9 @@ void ReconstructorTask::loadingDoneSlot()
 
     dbcontent_man.clearData(); // clear previous
 
+    // TODO: do async, check if not already processing
+    assert (simple_reconstructor_->processSlice(std::move(data)));
+
     if (last_slice) // disconnect everything
     {
         disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
@@ -162,9 +165,6 @@ void ReconstructorTask::loadingDoneSlot()
         loginf << "ReconstructorTask: loadingDoneSlot: next slice";
         loadDataSlice();
     }
-
-    // TODO: do async, check if not already processing
-    assert (simple_reconstructor_->processSlice(std::move(data)));
 
     if (last_slice)
     {

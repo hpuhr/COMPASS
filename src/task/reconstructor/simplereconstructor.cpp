@@ -149,20 +149,31 @@ bool SimpleReconstructor::processSlice_impl()
 
             // remove_before_time_, new data >= current_slice_begin_
 
+    clearOldTargetReports();
+
+    createTargetReports();
+
+
     return true;
 }
 
 
 void SimpleReconstructor::clearOldTargetReports()
 {
-    loginf << "SimpleReconstructor: clearOldTargetReports";
+    loginf << "SimpleReconstructor: clearOldTargetReports: remove_before_time " << Time::toString(remove_before_time_);
 
     for (auto ts_it = target_reports_ids_.cbegin(); ts_it != target_reports_ids_.cend() /* not hoisted */; /* no increment */)
     {
         if (ts_it->second.timestamp_ < remove_before_time_)
+        {
+            //loginf << "SimpleReconstructor: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
             ts_it = target_reports_ids_.erase(ts_it);
+        }
         else
+        {
+            //loginf << "SimpleReconstructor: clearOldTargetReports: keeping " << Time::toString(ts_it->second.timestamp_);
             ++ts_it;
+        }
     }
 
     for (auto ts_it = tr_timestamps_.cbegin(); ts_it != tr_timestamps_.cend() /* not hoisted */; /* no increment */)
@@ -193,10 +204,10 @@ void SimpleReconstructor::clearOldTargetReports()
 
 void SimpleReconstructor::createTargetReports()
 {
-    loginf << "SimpleReconstructor: createTargetReports";
+    loginf << "SimpleReconstructor: createTargetReports: current_slice_begin " << Time::toString(current_slice_begin_);
 
     boost::posix_time::ptime ts;
-    unsigned int record_num;
+    unsigned long record_num;
 
     dbContent::targetReport::BaseInfo id;
 
@@ -209,6 +220,8 @@ void SimpleReconstructor::createTargetReports()
         {
             record_num = tgt_acc.recordNumber(cnt);
             ts = tgt_acc.timestamp(cnt);
+
+            //loginf << "SimpleReconstructor: createTargetReports: ts " << Time::toString(ts);
 
             if (ts >= current_slice_begin_) // insert
             {
@@ -229,6 +242,11 @@ void SimpleReconstructor::createTargetReports()
             }
             else // update buffer_index_
             {
+                assert (ts > remove_before_time_);
+
+                if (!target_reports_ids_.count(record_num))
+                    logerr << "SimpleReconstructor: createTargetReports: missing prev ts " << Time::toString(ts);
+
                 assert (target_reports_ids_.count(record_num));
                 target_reports_ids_.at(record_num).buffer_index_ = cnt;
                 assert (target_reports_ids_.at(record_num).timestamp_ == ts); // just to be sure
