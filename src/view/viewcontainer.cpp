@@ -346,6 +346,19 @@ void ViewContainer::showViewMenuSlot()
     menu.exec(QCursor::pos());
 }
 
+void ViewContainer::resetToStartupConfiguration()
+{
+    //remove views
+    while (!views_.empty())
+    {
+        views_.rbegin()->get()->setTmpDisableRemoveConfigOnDelete(true);
+        views_.pop_back();
+    }
+
+    //recreate views from config
+    createSubConfigurables();
+}
+
 // void ViewContainerWidget::saveViewTemplate ()
 //{
 //    assert (last_active_manage_button_);

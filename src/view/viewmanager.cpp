@@ -610,34 +610,45 @@ void ViewManager::resetToStartupConfiguration()
 
     enableStoredReadSets();
 
-    logdbg << "ViewManager: resetToStartupConfiguration: deleting container widgets";
-    while (container_widgets_.size())
-    {
-        auto first_it = container_widgets_.begin();
-        logdbg << "ViewManager: resetToStartupConfiguration: deleting container widget " << first_it->first;
+    // logdbg << "ViewManager: resetToStartupConfiguration: deleting container widgets";
+    // while (container_widgets_.size())
+    // {
+    //     auto first_it = container_widgets_.begin();
+    //     logdbg << "ViewManager: resetToStartupConfiguration: deleting container widget " << first_it->first;
 
-        first_it->second->setTmpDisableRemoveConfigOnDelete(true);
-        delete first_it->second; // deletes the respective view container, which removes itself from this
+    //     first_it->second->setTmpDisableRemoveConfigOnDelete(true);
+    //     delete first_it->second; // deletes the respective view container, which removes itself from this
 
-        container_widgets_.erase(first_it);
-    }
+    //     container_widgets_.erase(first_it);
+    // }
 
-    logdbg << "ViewManager: resetToStartupConfiguration: deleting containers size " << containers_.size();
-    while (containers_.size())
-    {
-        auto first_it = containers_.begin();
-        logdbg << "ViewManager: resetToStartupConfiguration: deleting container " << first_it->first;
+    // logdbg << "ViewManager: resetToStartupConfiguration: deleting containers size " << containers_.size();
+    // while (containers_.size())
+    // {
+    //     auto first_it = containers_.begin();
+    //     logdbg << "ViewManager: resetToStartupConfiguration: deleting container " << first_it->first;
 
-        first_it->second->setTmpDisableRemoveConfigOnDelete(true);
-        delete first_it->second;
-        //containers_.erase(first_it);  // TODO CAUSES SEGFAULT, FIX THIS
-    }
+    //     first_it->second->setTmpDisableRemoveConfigOnDelete(true);
+    //     delete first_it->second;
+    //     //containers_.erase(first_it);  // TODO CAUSES SEGFAULT, FIX THIS
+    // }
 
-    logdbg << "ViewManager: resetToStartupConfiguration: view points generator";
-    view_points_report_gen_->setTmpDisableRemoveConfigOnDelete(true);
-    view_points_report_gen_ = nullptr;
+    logdbg << "ViewManager: resetToStartupConfiguration: resettings containers";
 
-    createSubConfigurables();
+    for (auto& cw : container_widgets_)
+        cw.second->setVisible(false);
+
+    for (auto& c : containers_)
+        c.second->resetToStartupConfiguration();
+
+    for (auto& cw : container_widgets_)
+        cw.second->setVisible(true);
+
+    //logdbg << "ViewManager: resetToStartupConfiguration: view points generator";
+    //view_points_report_gen_->setTmpDisableRemoveConfigOnDelete(true);
+    //view_points_report_gen_ = nullptr;
+
+    //createSubConfigurables();
 
     disableStoredReadSets();
 }

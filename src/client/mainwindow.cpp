@@ -808,7 +808,8 @@ void MainWindow::importAsterixFromPCAPSlot()
 
     auto fn = QFileDialog::getOpenFileName(this, 
                                            "Import PCAP File", 
-                                           COMPASS::instance().lastUsedPath().c_str());
+                                           COMPASS::instance().lastUsedPath().c_str(),
+                                           "PCAP Files (*.pcap *.PCAP)");
     if (fn.isEmpty())
         return;
 
@@ -1022,46 +1023,48 @@ void MainWindow::resetViewsMenuSlot()
         assert (tab_widget_);
         int index = tab_widget_->currentIndex();
 
-        QMessageBox msg_box;
-        msg_box.setWindowTitle("Resetting");
-        msg_box.setText( "Please wait...");
-        msg_box.setStandardButtons(QMessageBox::NoButton);
-        msg_box.setWindowModality(Qt::ApplicationModal);
-        msg_box.show();
-
-        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
-        setVisible(false);
-
-        while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
         {
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep(1);
+            QMessageBox msg_box;
+            msg_box.setWindowTitle("Resetting");
+            msg_box.setText( "Please wait...");
+            msg_box.setStandardButtons(QMessageBox::NoButton);
+            msg_box.setWindowModality(Qt::ApplicationModal);
+            msg_box.show();
+
+            boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+            setVisible(false);
+
+            while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(1);
+            }
+
+            // reset stuff
+            COMPASS::instance().dbContentManager().resetToStartupConfiguration();
+
+            COMPASS::instance().dataSourceManager().resetToStartupConfiguration();
+
+            COMPASS::instance().filterManager().resetToStartupConfiguration();
+
+    #ifdef USE_EXPERIMENTAL_SOURCE
+            GeometryTreeItem::clearHiddenIdentifierStrs(); // clears hidden layers
+    #endif
+
+            COMPASS::instance().viewManager().resetToStartupConfiguration();
+
+            // set AppMode
+            if (COMPASS::instance().appMode() == AppMode::LivePaused)
+                COMPASS::instance().appMode(AppMode::LiveRunning);
+            else
+            {
+                COMPASS::instance().viewManager().appModeSwitchSlot(
+                            COMPASS::instance().appMode(), COMPASS::instance().appMode());
+            }
+
+            msg_box.hide();
         }
-
-        // reset stuff
-        COMPASS::instance().dbContentManager().resetToStartupConfiguration();
-
-        COMPASS::instance().dataSourceManager().resetToStartupConfiguration();
-
-        COMPASS::instance().filterManager().resetToStartupConfiguration();
-
-#ifdef USE_EXPERIMENTAL_SOURCE
-        GeometryTreeItem::clearHiddenIdentifierStrs(); // clears hidden layers
-#endif
-
-        COMPASS::instance().viewManager().resetToStartupConfiguration();
-
-        // set AppMode
-        if (COMPASS::instance().appMode() == AppMode::LivePaused)
-            COMPASS::instance().appMode(AppMode::LiveRunning);
-        else
-        {
-            COMPASS::instance().viewManager().appModeSwitchSlot(
-                        COMPASS::instance().appMode(), COMPASS::instance().appMode());
-        }
-
-        msg_box.close();
 
         tab_widget_->setCurrentIndex(index);
 
