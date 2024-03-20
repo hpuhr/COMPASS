@@ -129,7 +129,7 @@ void SimpleReconstructor::reset()
 {
     loginf << "SimpleReconstructor: reset";
 
-    target_reports_ids_.clear();
+    target_reports_.clear();
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
@@ -162,12 +162,12 @@ void SimpleReconstructor::clearOldTargetReports()
 {
     loginf << "SimpleReconstructor: clearOldTargetReports: remove_before_time " << Time::toString(remove_before_time_);
 
-    for (auto ts_it = target_reports_ids_.cbegin(); ts_it != target_reports_ids_.cend() /* not hoisted */; /* no increment */)
+    for (auto ts_it = target_reports_.cbegin(); ts_it != target_reports_.cend() /* not hoisted */; /* no increment */)
     {
         if (ts_it->second.timestamp_ < remove_before_time_)
         {
             //loginf << "SimpleReconstructor: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
-            ts_it = target_reports_ids_.erase(ts_it);
+            ts_it = target_reports_.erase(ts_it);
         }
         else
         {
@@ -209,12 +209,17 @@ void SimpleReconstructor::createTargetReports()
     boost::posix_time::ptime ts;
     unsigned long record_num;
 
-    dbContent::targetReport::BaseInfo id;
+    dbContent::targetReport::ReconstructorInfo info;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     for (auto& buf_it : *accessor_)
     {
         dbContent::TargetReportAccessor tgt_acc = accessor_->targetReportAccessor(buf_it.first);
         unsigned int buffer_size = tgt_acc.size();
+
+        assert (dbcont_man.existsDBContent(buf_it.first));
+        unsigned int dbcont_id = dbcont_man.dbContent(buf_it.first).id();
 
         for (unsigned int cnt=0; cnt < buffer_size; cnt++)
         {
@@ -225,32 +230,125 @@ void SimpleReconstructor::createTargetReports()
 
             if (ts >= current_slice_begin_) // insert
             {
-                id.buffer_index_ = cnt;
-                id.record_num_ = record_num;
-                id.ds_id_ = tgt_acc.dsID(cnt);
-                id.line_id_ = tgt_acc.lineID(cnt);
-                id.timestamp_ = ts;
+                // base info
+                info.buffer_index_ = cnt;
+                info.record_num_ = record_num;
+                info.ds_id_ = tgt_acc.dsID(cnt);
+                info.line_id_ = tgt_acc.lineID(cnt);
+                info.timestamp_ = ts;
 
-                // insert id
-                assert (!target_reports_ids_.count(record_num));
-                target_reports_ids_[record_num] = id;
+                // reconstructor info
+                info.in_current_slice_ = true;
+                info.acad_ = tgt_acc.acad(cnt);
+                info.acid_ = tgt_acc.acid(cnt);
 
-                // insert others
+                info.mode_a_code_ = tgt_acc.modeACode(cnt);
+
+                info.track_number_ = tgt_acc.trackNumber(cnt);
+                info.track_begin_ = tgt_acc.trackBegin(cnt);
+                info.track_end_ = tgt_acc.trackEnd(cnt);
+
+                info.position_ = tgt_acc.position(cnt);
+                info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
+
+                info.barometric_altitude_ = tgt_acc.barometricAltitude(cnt);
+
+                info.velocity_ = tgt_acc.velocity(cnt);
+                info.velocity_accuracy_ = tgt_acc.velocityAccuracy(cnt);
+
+                info.track_angle_ = tgt_acc.trackAngle(cnt);
+                info.ground_bit_ = tgt_acc.groundBit(cnt);
+
+                // insert info
+                assert (!target_reports_.count(record_num));
+                target_reports_[record_num] = info;
+
+                // insert into lookups
                 tr_timestamps_.insert({ts, record_num});
-                // dbcontent -> ds_id -> ts ->  record_num
-                tr_ds_timestamps_[buf_it.first][id.ds_id_].insert({ts, record_num});
+                // dbcontent id -> ds_id -> ts ->  record_num
+
+                tr_ds_timestamps_[dbcont_id][info.ds_id_].insert({ts, record_num});
             }
             else // update buffer_index_
             {
                 assert (ts > remove_before_time_);
 
-                if (!target_reports_ids_.count(record_num))
+                if (!target_reports_.count(record_num))
                     logerr << "SimpleReconstructor: createTargetReports: missing prev ts " << Time::toString(ts);
 
-                assert (target_reports_ids_.count(record_num));
-                target_reports_ids_.at(record_num).buffer_index_ = cnt;
-                assert (target_reports_ids_.at(record_num).timestamp_ == ts); // just to be sure
+                assert (target_reports_.count(record_num));
+
+                target_reports_.at(record_num).buffer_index_ = cnt;
+                target_reports_.at(record_num).in_current_slice_ = false;
+
+                assert (target_reports_.at(record_num).timestamp_ == ts); // just to be sure
             }
         }
     }
+}
+
+void SimpleReconstructor::createReferenceUTNs()
+{
+    loginf << "SimpleReconstructor: createReferenceUTNs";
+
+//    std::map<unsigned int, Association::Target> sum_targets;
+
+//    if (!target_reports_.count("RefTraj"))
+//    {
+//        loginf << "CreateAssociationsJob: createReferenceUTNs: no tracker data";
+//        return sum_targets;
+//    }
+
+//    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+//            // create utn for all tracks
+//    for (auto& ds_it : target_reports_.at("RefTraj")) // ds_id->trs
+//    {
+//        loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first;
+
+//        assert (ds_man.hasDBDataSource(ds_it.first));
+//        string ds_name = ds_man.dbDataSource(ds_it.first).name();
+
+//        loginf << "CreateAssociationsJob: createReferenceUTNs: creating tmp targets for ds_id " << ds_it.first;
+
+//        emit statusSignal(("Creating new "+ds_name+" UTNs").c_str());
+
+//        map<unsigned int, Association::Target> tracker_targets = createTrackedTargets("RefTraj", ds_it.first);
+
+//        if (!tracker_targets.size())
+//        {
+//            logwrn << "CreateAssociationsJob: createReferenceUTNs: ref ds_id " << ds_it.first
+//                   << " created no utns";
+//            continue;
+//        }
+
+//        loginf << "CreateAssociationsJob: createReferenceUTNs: cleaning new utns for ds_id " << ds_it.first;
+
+//        emit statusSignal(("Cleaning new "+ds_name+" Targets").c_str());
+
+//        cleanTrackerUTNs (tracker_targets);
+
+//        loginf << "CreateAssociationsJob: createReferenceUTNs: creating new utns for ds_id " << ds_it.first;
+
+//        emit statusSignal(("Creating new "+ds_name+" Targets").c_str());
+
+//        addTrackerUTNs (ds_name, move(tracker_targets), sum_targets);
+
+//                // try to associate targets to each other
+
+//        loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first << " done";
+
+//        emit statusSignal("Checking Sum Targets");
+//        cleanTrackerUTNs(sum_targets);
+//    }
+
+//    emit statusSignal("Self-associating Sum Reference Targets");
+//    map<unsigned int, Association::Target> final_targets = selfAssociateTrackerUTNs(sum_targets);
+
+//    emit statusSignal("Checking Final Reference Targets");
+//    cleanTrackerUTNs(final_targets);
+
+//    markDubiousUTNs (final_targets);
+
+//    return final_targets;
 }

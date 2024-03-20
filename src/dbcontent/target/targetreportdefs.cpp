@@ -16,6 +16,20 @@
  */
 
 #include "targetreportdefs.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
+#include "util/number.h"
+#include "compass.h"
+#include "dbcontentmanager.h"
+
+#include <boost/optional/optional_io.hpp>
+
+#include <cassert>
+#include <algorithm>
+#include <sstream>
+
+using namespace std;
+using namespace Utils;
 
 namespace dbContent 
 {
@@ -99,6 +113,46 @@ const std::map<int, float> AccuracyTables::adsb_v12_accuracies =
     {10, 5    },
     {11, 1.5  }
 };
+
+std::string BaseInfo::asStr() const
+{
+    stringstream ss;
+
+    ss << "dbcont " << COMPASS::instance().dbContentManager().dbContentWithId(Number::recNumGetDBContId(record_num_))
+       << " ds_id " << ds_id_  << " line_id " << line_id_ << " rec_num " << record_num_
+       << " ts " << Time::toString(timestamp_);
+
+    return ss.str();
+}
+
+
+
+std::string ReconstructorInfo::asStr() const
+{
+    stringstream ss;
+
+    ss << BaseInfo::asStr();
+
+    ss << " acad " << (acad_ ? String::hexStringFromInt(*acad_, 6, '0') : "''")
+       << " acid '" << (acid_ ? *acid_ : "")  << "'"
+       << " m3a " << (mode_a_code_ ? mode_a_code_->asStr() : "");
+
+    return ss.str();
+}
+
+std::string ModeACode::asStr() const
+{
+    stringstream ss;
+
+    ss << String::octStringFromInt(code_, 4, '0')
+       << (valid_ ? (*valid_ ? "V" : "I") : "")
+       << (garbled_ ? (*garbled_ ? "G" : "") : "")
+       << (smoothed_ ? (*smoothed_ ? "S" : "") : "");
+
+    return ss.str();
+}
+
+
 
 } // namespace TargetReport
 

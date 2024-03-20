@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_TARGET_H
-#define DBCONTENT_TARGET_H
+#pragma once
 
 #include "json.hpp"
 
@@ -74,4 +73,3 @@ protected:
 };
 
 }
-#endif // DBCONTENT_TARGET_H

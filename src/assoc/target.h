@@ -5,7 +5,6 @@
 #include "projection/transformation.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
-//#include "boost/date_time/time_duration.hpp"
 
 #include <vector>
 #include <string>
@@ -30,8 +29,6 @@ namespace Association
     public:
         Target(unsigned int utn, bool tmp);
         ~Target();
-
-        //static bool in_appimage_;
 
         unsigned int utn_{0};
         bool tmp_ {false};

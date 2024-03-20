@@ -48,8 +48,10 @@ struct Position
 
 /**
 */
-struct BarometricAltitude
+class BarometricAltitude
 {
+  public:
+
     enum class Source
     {
         Barometric_ModeC = 0,
@@ -70,7 +72,18 @@ struct BarometricAltitude
     Source                source_   = Source::Barometric_ModeC;
     float                 altitude_ = 0.0f;
     boost::optional<bool> valid_;
-    boost::optional<bool> garbled_;   
+    boost::optional<bool> garbled_;
+
+    bool hasReliableValue () const
+    {
+        if (valid_ && *valid_ == false)
+            return false;
+
+        if (garbled_ && *garbled_ == true)
+            return false;
+
+        return true;
+    }
 };
 
 /**
@@ -122,8 +135,10 @@ struct VelocityAccuracy
     double vy_stddev_ {0}; // m/s
 };
 
-struct ModeACode
+class ModeACode
 {
+  public:
+
     ModeACode() {}
     ModeACode(unsigned int code,
               const boost::optional<bool>& v,
@@ -139,6 +154,19 @@ struct ModeACode
     boost::optional<bool> valid_;
     boost::optional<bool> garbled_;
     boost::optional<bool> smoothed_;
+
+    bool hasReliableValue () const
+    {
+        if (valid_ && *valid_ == false)
+            return false;
+
+        if (garbled_ && *garbled_ == true)
+            return false;
+
+        return true;
+    }
+
+    virtual std::string asStr() const;
 };
 
 struct BaseInfo
@@ -148,6 +176,8 @@ struct BaseInfo
     unsigned int ds_id_ {0};
     unsigned int line_id_ {0};
     boost::posix_time::ptime timestamp_;
+
+    virtual std::string asStr() const;
 };
 
 
@@ -165,14 +195,18 @@ struct ReconstructorInfo : public BaseInfo
 
     boost::optional<targetReport::Position> position_;
     boost::optional<targetReport::PositionAccuracy> position_accuracy_;
+
     boost::optional<targetReport::BarometricAltitude> barometric_altitude_;
+
     boost::optional<targetReport::Velocity> velocity_;
     boost::optional<targetReport::VelocityAccuracy> velocity_accuracy_;
+
     boost::optional<double> track_angle_;
     boost::optional<bool> ground_bit_;
 
+    TargetReportAccessor* accessor_ {nullptr};
 
-   TargetReportAccessor* accessor_ {nullptr};
+    virtual std::string asStr() const;
 };
 
 // tmp list
