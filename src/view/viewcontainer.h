@@ -60,6 +60,8 @@ class ViewContainer : public QObject, public Configurable
     void enableViewTab(QWidget* widget, bool value);
     void showView(QWidget* widget);
 
+    void resetToStartupConfiguration();
+
     time_t created() const { return creation_time_; }
 
   protected:
