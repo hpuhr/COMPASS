@@ -44,9 +44,9 @@ class ReconstructorTarget
     std::map<unsigned int, std::map<unsigned int, std::multimap<boost::posix_time::ptime, unsigned long>>> tr_ds_timestamps_;
     // dbcontent id -> ds_id -> ts -> record_num
 
-    std::set<unsigned int> tas_;
-    std::set<std::string> ids_;
-    std::set<unsigned int> mas_;
+    std::set<unsigned int> acads_;
+    std::set<std::string> acids_;
+    std::set<unsigned int> mode_as_;
     //std::set<unsigned int> mops_versions_;
 
     boost::posix_time::ptime timestamp_min_;
@@ -69,17 +69,18 @@ class ReconstructorTarget
     unsigned int numAssociated() const;
     unsigned long lastAssociated() const;
 
-    bool hasTA () const;
-    bool hasTA (unsigned int ta)  const;
-    bool hasAllOfTAs (std::set<unsigned int> tas) const;
-    bool hasAnyOfTAs (std::set<unsigned int> tas) const;
+    bool hasACAD () const;
+    bool hasACAD (unsigned int ta)  const;
+    bool hasAllOfACADs (std::set<unsigned int> tas) const;
+    bool hasAnyOfACADs (std::set<unsigned int> tas) const;
 
-    bool hasMA () const;
-    bool hasMA (unsigned int ma) const;
+    bool hasModeA () const;
+    bool hasModeA (unsigned int ma) const;
 
     std::string asStr() const;
     std::string timeStr() const;
 
+    bool hasTimestamps() const;
     bool isTimeInside (boost::posix_time::ptime timestamp) const;
     bool hasDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 

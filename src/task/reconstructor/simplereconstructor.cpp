@@ -6,6 +6,7 @@
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
+#include "datasourcemanager.h"
 
 #include "timeconv.h"
 
@@ -14,7 +15,7 @@ using namespace Utils;
 
 SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std::string& instance_id,
                                          ReconstructorTask& task)
-    : ReconstructorBase(class_id, instance_id, task)
+    : ReconstructorBase(class_id, instance_id, task), associatior_(*this)
 {
     // common
     registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);
@@ -131,7 +132,7 @@ void SimpleReconstructor::reset()
 
     target_reports_.clear();
     tr_timestamps_.clear();
-    tr_ds_timestamps_.clear();
+    tr_ds_.clear();
 
     ReconstructorBase::reset();
 }
@@ -152,7 +153,6 @@ bool SimpleReconstructor::processSlice_impl()
     clearOldTargetReports();
 
     createTargetReports();
-
 
     return true;
 }
@@ -184,19 +184,24 @@ void SimpleReconstructor::clearOldTargetReports()
             ++ts_it;
     }
 
-    // dbcontent -> ds_id -> ts ->  record_num
-    //std::map<std::string, std::map<unsigned int, std::map<boost::posix_time::ptime, unsigned long>>> tr_ds_timestamps_;
+    // dbcontent -> ds_id -> record_num
+    //std::map<unsigned int, std::map<unsigned int,std::vector<unsigned long>>>
 
-    for (auto& dbcont_it : tr_ds_timestamps_)
+    for (auto& dbcont_it : tr_ds_)
     {
         for (auto& ds_it : dbcont_it.second)
         {
             for (auto ts_it = ds_it.second.cbegin(); ts_it != ds_it.second.cend() /* not hoisted */; /* no increment */)
             {
-                if (ts_it->first < remove_before_time_)
+                if (!target_reports_.count(*ts_it)) // TODO could be made faster
                     ts_it = ds_it.second.erase(ts_it);
                 else
                     ++ts_it;
+
+//                if (ts_it->first < remove_before_time_)
+//                    ts_it = ds_it.second.erase(ts_it);
+//                else
+//                    ++ts_it;
             }
         }
     }
@@ -267,7 +272,7 @@ void SimpleReconstructor::createTargetReports()
                 tr_timestamps_.insert({ts, record_num});
                 // dbcontent id -> ds_id -> ts ->  record_num
 
-                tr_ds_timestamps_[dbcont_id][info.ds_id_].insert({ts, record_num});
+                tr_ds_[dbcont_id][info.ds_id_].push_back(record_num);
             }
             else // update buffer_index_
             {
@@ -287,68 +292,3 @@ void SimpleReconstructor::createTargetReports()
     }
 }
 
-void SimpleReconstructor::createReferenceUTNs()
-{
-    loginf << "SimpleReconstructor: createReferenceUTNs";
-
-//    std::map<unsigned int, Association::Target> sum_targets;
-
-//    if (!target_reports_.count("RefTraj"))
-//    {
-//        loginf << "CreateAssociationsJob: createReferenceUTNs: no tracker data";
-//        return sum_targets;
-//    }
-
-//    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
-
-//            // create utn for all tracks
-//    for (auto& ds_it : target_reports_.at("RefTraj")) // ds_id->trs
-//    {
-//        loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first;
-
-//        assert (ds_man.hasDBDataSource(ds_it.first));
-//        string ds_name = ds_man.dbDataSource(ds_it.first).name();
-
-//        loginf << "CreateAssociationsJob: createReferenceUTNs: creating tmp targets for ds_id " << ds_it.first;
-
-//        emit statusSignal(("Creating new "+ds_name+" UTNs").c_str());
-
-//        map<unsigned int, Association::Target> tracker_targets = createTrackedTargets("RefTraj", ds_it.first);
-
-//        if (!tracker_targets.size())
-//        {
-//            logwrn << "CreateAssociationsJob: createReferenceUTNs: ref ds_id " << ds_it.first
-//                   << " created no utns";
-//            continue;
-//        }
-
-//        loginf << "CreateAssociationsJob: createReferenceUTNs: cleaning new utns for ds_id " << ds_it.first;
-
-//        emit statusSignal(("Cleaning new "+ds_name+" Targets").c_str());
-
-//        cleanTrackerUTNs (tracker_targets);
-
-//        loginf << "CreateAssociationsJob: createReferenceUTNs: creating new utns for ds_id " << ds_it.first;
-
-//        emit statusSignal(("Creating new "+ds_name+" Targets").c_str());
-
-//        addTrackerUTNs (ds_name, move(tracker_targets), sum_targets);
-
-//                // try to associate targets to each other
-
-//        loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first << " done";
-
-//        emit statusSignal("Checking Sum Targets");
-//        cleanTrackerUTNs(sum_targets);
-//    }
-
-//    emit statusSignal("Self-associating Sum Reference Targets");
-//    map<unsigned int, Association::Target> final_targets = selfAssociateTrackerUTNs(sum_targets);
-
-//    emit statusSignal("Checking Final Reference Targets");
-//    cleanTrackerUTNs(final_targets);
-
-//    markDubiousUTNs (final_targets);
-
-//    return final_targets;
-}

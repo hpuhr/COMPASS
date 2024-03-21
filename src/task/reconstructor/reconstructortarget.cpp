@@ -66,8 +66,8 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
     //    if (tr.track_number_ && !track_nums_.count({tr.ds_id_, *tr.track_number_}))
     //        track_nums_.insert({tr.ds_id_, *tr.track_number_});
 
-    if (tr.mode_a_code_ && !mas_.count(tr.mode_a_code_->code_))
-        mas_.insert(tr.mode_a_code_->code_);
+    if (tr.mode_a_code_ && !mode_as_.count(tr.mode_a_code_->code_))
+        mode_as_.insert(tr.mode_a_code_->code_);
 
     target_reports_.push_back(tr.record_num_);
     tr_timestamps_.insert({tr.timestamp_,tr.record_num_});
@@ -77,21 +77,21 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
 
     if (tr.acad_)
     {
-        if (tas_.size() && !tas_.count(*tr.acad_))
+        if (acads_.size() && !acads_.count(*tr.acad_))
         {
             logwrn << "Target: addAssociated: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
         }
 
-        if (!tas_.count(*tr.acad_))
-            tas_.insert(*tr.acad_);
+        if (!acads_.count(*tr.acad_))
+            acads_.insert(*tr.acad_);
     }
 
     if (tr.acid_)
     {
         string acid = String::trim(*tr.acid_);
 
-        if (!ids_.count(acid))
-            ids_.insert(acid);
+        if (!acids_.count(acid))
+            acids_.insert(acid);
     }
 
     //    if (tr.has_adsb_info_ && tr.has_mops_version_)
@@ -121,49 +121,49 @@ unsigned long ReconstructorTarget::lastAssociated() const
     return target_reports_.back();
 }
 
-bool ReconstructorTarget::hasTA () const
+bool ReconstructorTarget::hasACAD () const
 {
-    return tas_.size();
+    return acads_.size();
 }
 
-bool ReconstructorTarget::hasTA (unsigned int ta) const
+bool ReconstructorTarget::hasACAD (unsigned int ta) const
 {
-    return tas_.count(ta);
+    return acads_.count(ta);
 }
 
-bool ReconstructorTarget::hasAllOfTAs (std::set<unsigned int> tas) const
+bool ReconstructorTarget::hasAllOfACADs (std::set<unsigned int> tas) const
 {
-    assert (hasTA() && tas.size());
+    assert (hasACAD() && tas.size());
 
     for (auto other_ta : tas)
     {
-        if (!tas_.count(other_ta))
+        if (!acads_.count(other_ta))
             return false;
     }
 
     return true;
 }
 
-bool ReconstructorTarget::hasAnyOfTAs (std::set<unsigned int> tas) const
+bool ReconstructorTarget::hasAnyOfACADs (std::set<unsigned int> tas) const
 {
-    assert (hasTA() && tas.size());
+    assert (hasACAD() && tas.size());
 
     for (auto other_ta : tas)
     {
-        if (tas_.count(other_ta))
+        if (acads_.count(other_ta))
             return true;
     }
     return false;
 }
 
-bool ReconstructorTarget::hasMA () const
+bool ReconstructorTarget::hasModeA () const
 {
-    return mas_.size();
+    return mode_as_.size();
 }
 
-bool ReconstructorTarget::hasMA (unsigned int ma)  const
+bool ReconstructorTarget::hasModeA (unsigned int ma)  const
 {
-    return mas_.count(ma);
+    return mode_as_.count(ma);
 }
 
 std::string ReconstructorTarget::asStr() const
@@ -172,12 +172,12 @@ std::string ReconstructorTarget::asStr() const
 
     ss << "utn " << utn_ ? to_string(*utn_) : "none";  //<< " tmp " << tmp_
 
-    if (tas_.size())
+    if (acads_.size())
     {
         ss << " acads '";
 
         bool first {true};
-        for (auto ta_it : tas_)
+        for (auto ta_it : acads_)
         {
             if (first)
                 ss << String::hexStringFromInt(ta_it, 6, '0');
@@ -190,12 +190,12 @@ std::string ReconstructorTarget::asStr() const
         ss << "'";
     }
 
-    if (ids_.size())
+    if (acids_.size())
     {
         ss << " acids ";
 
         bool first {true};
-        for (auto& it : tas_)
+        for (auto& it : acads_)
         {
             if (first)
                 ss << "'" << it << "'";
@@ -206,12 +206,12 @@ std::string ReconstructorTarget::asStr() const
         }
     }
 
-    if (mas_.size())
+    if (mode_as_.size())
     {
         ss << " m3as '";
 
         bool first {true};
-        for (auto it : tas_)
+        for (auto it : acads_)
         {
             if (first)
                 ss << String::octStringFromInt(it, 4, '0');
@@ -250,6 +250,11 @@ std::string ReconstructorTarget::timeStr() const
         return "[]";
 
     return "["+Time::toString(timestamp_min_)+" - "+Time::toString(timestamp_max_)+"]";
+}
+
+bool ReconstructorTarget::hasTimestamps() const
+{
+    return !timestamp_min_.is_not_a_date_time() && !timestamp_min_.is_not_a_date_time();
 }
 
 bool ReconstructorTarget::isTimeInside (boost::posix_time::ptime timestamp) const
