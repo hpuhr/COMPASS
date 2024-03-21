@@ -30,12 +30,13 @@ class ReconstructorTarget
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,
                       dbContent::targetReport::ReconstructorInfo*> ReconstructorInfoPair; // both can be nullptr
 
-    ReconstructorTarget(SimpleReconstructor& reconstructor);
+    ReconstructorTarget(SimpleReconstructor& reconstructor, unsigned int utn, bool tmp_utn);
     virtual ~ReconstructorTarget();
 
     SimpleReconstructor& reconstructor_; // to get the real target reports
 
-    boost::optional<unsigned int> utn_;
+    unsigned int utn_;
+    bool tmp_utn_ {false};
 
     // target report aggregation & search structures, by record numbers
     std::vector<unsigned long> target_reports_;

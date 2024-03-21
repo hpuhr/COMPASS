@@ -154,6 +154,8 @@ bool SimpleReconstructor::processSlice_impl()
 
     createTargetReports();
 
+    associatior_.associateNewData();
+
     return true;
 }
 

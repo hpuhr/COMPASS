@@ -18,7 +18,7 @@ class SimpleAssociator
     std::map<unsigned int, unsigned int> targets_acad_;
     // acad -> utn
 
-    void createReferenceUTNs();
+    std::map<unsigned int, dbContent::ReconstructorTarget> createReferenceUTNs();
 
     void createTrackerUTNs(std::map<unsigned int, dbContent::ReconstructorTarget>& sum_targets);
     void createNonTrackerUTNS(std::map<unsigned int, dbContent::ReconstructorTarget>& targets);

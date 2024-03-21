@@ -13,8 +13,8 @@ using namespace boost::posix_time;
 
 namespace dbContent {
 
-ReconstructorTarget::ReconstructorTarget(SimpleReconstructor& reconstructor)
-    : reconstructor_(reconstructor)
+ReconstructorTarget::ReconstructorTarget(SimpleReconstructor& reconstructor, unsigned int utn, bool tmp_utn)
+    : reconstructor_(reconstructor), utn_(utn), tmp_utn_(tmp_utn)
 {
 
 }
@@ -170,7 +170,7 @@ std::string ReconstructorTarget::asStr() const
 {
     stringstream ss;
 
-    ss << "utn " << utn_ ? to_string(*utn_) : "none";  //<< " tmp " << tmp_
+    ss << "utn " << utn_ << " tmp_utn " << tmp_utn_;  //<< " tmp " << tmp_
 
     if (acads_.size())
     {
@@ -864,12 +864,13 @@ ComparisonResult ReconstructorTarget::compareModeCCode (dbContent::targetReport:
         || (!lower_mc_usable && upper_mc_usable)) // only 1 usable
     {
         dbContent::targetReport::ReconstructorInfo& ref1 = lower_mc_usable ? *lower_tr : *upper_tr;
+        assert (ref1.barometric_altitude_);
 
-        if (!tr.mode_a_code_.has_value())
+        if (!tr.barometric_altitude_.has_value())
             return ComparisonResult::DIFFERENT;
 
-                // mode a exists
-        if (fabs(tr.mode_a_code_->code_ - ref1.mode_a_code_->code_) < max_alt_diff) // is same
+                // barometric_altitude exists
+        if (fabs(tr.barometric_altitude_->altitude_ - ref1.barometric_altitude_->altitude_) < max_alt_diff) // is same
             return ComparisonResult::SAME;
         else
             return ComparisonResult::DIFFERENT;
@@ -879,13 +880,13 @@ ComparisonResult ReconstructorTarget::compareModeCCode (dbContent::targetReport:
     dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
     dbContent::targetReport::ReconstructorInfo& ref2 = *upper_tr;
 
-    if (!tr.mode_a_code_.has_value())
+    if (!tr.barometric_altitude_.has_value())
         return ComparisonResult::DIFFERENT; // no mode a here, but in other
 
             // everything exists
 
-    if ((fabs(tr.mode_a_code_->code_ - ref1.mode_a_code_->code_) < max_alt_diff)
-        || (fabs(tr.mode_a_code_->code_ - ref2.mode_a_code_->code_)) < max_alt_diff) // one of them is same
+    if ((fabs(tr.barometric_altitude_->altitude_ - ref1.barometric_altitude_->altitude_) < max_alt_diff)
+        || (fabs(tr.barometric_altitude_->altitude_ - ref2.barometric_altitude_->altitude_)) < max_alt_diff) // one of them is same
     {
         return ComparisonResult::SAME;
     }
@@ -895,8 +896,7 @@ ComparisonResult ReconstructorTarget::compareModeCCode (dbContent::targetReport:
 
 //void ReconstructorTarget::calculateSpeeds()
 //{
-//    has_speed_ = false;
-
+//    has_speed_ = false;´
 //    ptime timestamp;
 //    double latitude {0};
 //    double longitude {0};
