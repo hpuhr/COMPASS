@@ -1026,6 +1026,20 @@ std::map <std::string, unsigned int> ReconstructorTarget::getDBContentCounts()
     return counts;
 }
 
+void ReconstructorTarget::removeOutdatedTargetReports()
+{
+    auto tmp_target_reports = std::move(target_reports_);
+
+    tr_timestamps_.clear();
+    tr_ds_timestamps_.clear();
+
+    for (auto rec_num : tmp_target_reports)
+    {
+        if (reconstructor_.target_reports_.count(rec_num))
+            addTargetReport(rec_num);
+    }
+}
+
 //bool ReconstructorTarget::hasADSBMOPSVersion()
 //{
 //    return mops_versions_.size();

@@ -134,6 +134,8 @@ class ReconstructorTarget
 
     std::map <std::string, unsigned int> getDBContentCounts();
 
+    void removeOutdatedTargetReports();
+
 //    bool hasADSBMOPSVersion();
 //    std::set<unsigned int> getADSBMOPSVersions();
 };

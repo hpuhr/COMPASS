@@ -7,6 +7,8 @@
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
 #include "datasourcemanager.h"
+#include "dbinterface.h"
+#include "number.h"
 
 #include "timeconv.h"
 
@@ -156,15 +158,22 @@ bool SimpleReconstructor::processSlice_impl()
 
     associatior_.associateNewData();
 
+    auto associations = createAssociations();
+    saveAssociations(associations);
+
     return true;
 }
 
 
 void SimpleReconstructor::clearOldTargetReports()
 {
-    loginf << "SimpleReconstructor: clearOldTargetReports: remove_before_time " << Time::toString(remove_before_time_);
+    loginf << "SimpleReconstructor: clearOldTargetReports: remove_before_time " << Time::toString(remove_before_time_)
+           << " size " << target_reports_.size();
 
-    for (auto ts_it = target_reports_.cbegin(); ts_it != target_reports_.cend() /* not hoisted */; /* no increment */)
+    tr_timestamps_.clear();
+    tr_ds_.clear();
+
+    for (auto ts_it = target_reports_.begin(); ts_it != target_reports_.end() /* not hoisted */; /* no increment */)
     {
         if (ts_it->second.timestamp_ < remove_before_time_)
         {
@@ -174,39 +183,60 @@ void SimpleReconstructor::clearOldTargetReports()
         else
         {
             //loginf << "SimpleReconstructor: clearOldTargetReports: keeping " << Time::toString(ts_it->second.timestamp_);
+
+            ts_it->second.in_current_slice_ = false;
+
+            // add to lookup structures
+            tr_timestamps_.insert({ts_it->second.timestamp_, ts_it->second.record_num_});
+            tr_ds_[Number::recNumGetDBContId(ts_it->second.record_num_)][ts_it->second.ds_id_].push_back(
+                ts_it->second.record_num_);
+
             ++ts_it;
         }
     }
 
-    for (auto ts_it = tr_timestamps_.cbegin(); ts_it != tr_timestamps_.cend() /* not hoisted */; /* no increment */)
-    {
-        if (ts_it->first < remove_before_time_)
-            ts_it = tr_timestamps_.erase(ts_it);
-        else
-            ++ts_it;
-    }
+    loginf << "SimpleReconstructor: clearOldTargetReports: size after " << target_reports_.size();
 
-    // dbcontent -> ds_id -> record_num
-    //std::map<unsigned int, std::map<unsigned int,std::vector<unsigned long>>>
+//    for (auto ts_it = tr_timestamps_.cbegin(); ts_it != tr_timestamps_.cend() /* not hoisted */; /* no increment */)
+//    {
+//        if (ts_it->first < remove_before_time_)
+//            ts_it = tr_timestamps_.erase(ts_it);
+//        else
+//            ++ts_it;
+//    }
 
-    for (auto& dbcont_it : tr_ds_)
-    {
-        for (auto& ds_it : dbcont_it.second)
-        {
-            for (auto ts_it = ds_it.second.cbegin(); ts_it != ds_it.second.cend() /* not hoisted */; /* no increment */)
-            {
-                if (!target_reports_.count(*ts_it)) // TODO could be made faster
-                    ts_it = ds_it.second.erase(ts_it);
-                else
-                    ++ts_it;
+//    // dbcontent -> ds_id -> record_num
+//    //std::map<unsigned int, std::map<unsigned int,std::vector<unsigned long>>>
 
-//                if (ts_it->first < remove_before_time_)
+//    unsigned int removed_cnt {0}, not_removed_cnt{0};
+
+//    for (auto& dbcont_it : tr_ds_)
+//    {
+//        for (auto& ds_it : dbcont_it.second)
+//        {
+//            for (auto ts_it = ds_it.second.cbegin(); ts_it != ds_it.second.cend() /* not hoisted */; /* no increment */)
+//            {
+//                if (!target_reports_.count(*ts_it)) // TODO could be made faster
+//                {
 //                    ts_it = ds_it.second.erase(ts_it);
+//                    ++removed_cnt;
+//                }
 //                else
+//                {
 //                    ++ts_it;
-            }
-        }
-    }
+//                    ++not_removed_cnt;
+//                }
+//            }
+//        }
+//    }
+
+//    loginf << "SimpleReconstructor: clearOldTargetReports: per ds removed_cnt " << removed_cnt
+//           << " not_removed_cnt " << not_removed_cnt;
+
+    // clear old data from targets
+    for (auto& tgt_it : targets_)
+        tgt_it.second.removeOutdatedTargetReports();
+
 }
 
 void SimpleReconstructor::createTargetReports()
@@ -278,7 +308,7 @@ void SimpleReconstructor::createTargetReports()
             }
             else // update buffer_index_
             {
-                assert (ts > remove_before_time_);
+                assert (ts >= remove_before_time_);
 
                 if (!target_reports_.count(record_num))
                     logerr << "SimpleReconstructor: createTargetReports: missing prev ts " << Time::toString(ts);
@@ -294,3 +324,203 @@ void SimpleReconstructor::createTargetReports()
     }
 }
 
+std::map<unsigned int, std::map<unsigned long, unsigned int>> SimpleReconstructor::createAssociations()
+{
+    loginf << "SimpleReconstructor: createAssociations";
+
+    std::map<unsigned int, std::map<unsigned long, unsigned int>> associations;
+    unsigned int num_assoc {0};
+
+    for (auto& tgt_it : targets_)
+    {
+        for (auto rn_it : tgt_it.second.target_reports_)
+        {
+            assert (target_reports_.count(rn_it));
+
+            dbContent::targetReport::ReconstructorInfo& tr = target_reports_.at(rn_it);
+
+            if (tr.in_current_slice_)
+            {
+                associations[Number::recNumGetDBContId(rn_it)][rn_it] = tgt_it.first;
+                ++num_assoc;
+            }
+        }
+    }
+
+    loginf << "SimpleReconstructor: createAssociations: done with " << num_assoc << " associated";
+
+    return associations;
+}
+
+void SimpleReconstructor::saveAssociations(
+    std::map<unsigned int, std::map<unsigned long,unsigned int>> associations)
+{
+    loginf << "SimpleReconstructor: saveAssociations";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    DBInterface& db_interface = COMPASS::instance().interface();
+
+            // write association info to buffers
+
+    for (auto& cont_assoc_it : associations) // dbcontent -> rec_nums
+    {
+        unsigned int num_associated {0};
+        unsigned int num_not_associated {0};
+
+        unsigned int dbcontent_id = cont_assoc_it.first;
+        string dbcontent_name = dbcontent_man.dbContentWithId(cont_assoc_it.first);
+        DBContent& dbcontent = dbcontent_man.dbContent(dbcontent_name);
+
+        std::map<unsigned long, unsigned int>& tr_associations = cont_assoc_it.second;
+
+        loginf << "SimpleReconstructor: saveAssociations: db content " << dbcontent_name;
+
+        string rec_num_col_name =
+            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
+
+        string utn_col_name =
+            dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).dbColumnName();
+
+        PropertyList properties;
+        properties.addProperty(utn_col_name,  DBContent::meta_var_utn_.dataType());
+        properties.addProperty(rec_num_col_name,  DBContent::meta_var_rec_num_.dataType());
+
+        shared_ptr <Buffer> buffer {new Buffer(properties)};
+
+        NullableVector<unsigned int>& utn_col_vec = buffer->get<unsigned int>(utn_col_name);
+        NullableVector<unsigned long>& rec_num_col_vec = buffer->get<unsigned long>(rec_num_col_name);
+
+        assert (tr_ds_.count(dbcontent_id));
+
+        unsigned int buf_cnt = 0;
+        for (auto& ds_it : tr_ds_.at(dbcontent_id))  // iterate over all rec nums
+        {
+            for (auto rn_it : ds_it.second)
+            {
+                assert (target_reports_.count(rn_it));
+
+                if (!target_reports_.at(rn_it).in_current_slice_)
+                    continue;
+
+                rec_num_col_vec.set(buf_cnt, rn_it);
+
+                if (tr_associations.count(rn_it))
+                {
+                    utn_col_vec.set(buf_cnt, tr_associations.at(rn_it));
+                    ++num_associated;
+                }
+                else
+                    ++num_not_associated;
+                // else null
+
+                ++buf_cnt;
+            }
+        }
+
+//        assert (accessor_->hasMetaVar<unsigned long>(dbcontent_name, DBContent::meta_var_rec_num_));
+//        NullableVector<unsigned long>& rec_num_vec = accessor_->getMetaVar<unsigned long>(
+//            dbcontent_name, DBContent::meta_var_rec_num_);
+
+//        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+//        NullableVector<unsigned int>& assoc_vec = accessor_->getMetaVar<unsigned int>(
+//            dbcontent_name, DBContent::meta_var_utn_);
+
+//        assert (accessor_->has(dbcontent_name));
+//        unsigned int buffer_size = accessor_->get(dbcontent_name)->size();
+
+//        for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+//        {
+//            assert (!rec_num_vec.isNull(cnt));
+
+//            rec_num = rec_num_vec.get(cnt);
+
+//            if (associations.count(rec_num))
+//            {
+//               //if (assoc_vec.isNull(cnt))
+//                assoc_vec.set(cnt, get<0>(associations.at(rec_num)));
+//                //else
+//                //assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
+
+//                ++num_associated;
+//            }
+//            else
+//                ++num_not_associated;
+//        }
+
+//        association_counts_[dbcontent_name] = {buffer_size, num_associated};
+
+        loginf << "CreateAssociationsJob: saveAssociations: dcontent " << dbcontent_name
+               <<  " assoc " << num_associated << " not assoc " << num_not_associated
+               << " buffer size " << buffer->size();
+
+        db_interface.updateBuffer(dbcontent.dbTableName(), rec_num_col_name, buffer);
+
+        loginf << "CreateAssociationsJob: saveAssociations: dcontent " << dbcontent_name << " done";
+    }
+
+            // delete all data from buffer except rec_nums and associations, rename to db column names
+//    for (auto& buf_it : *accessor_)
+//    {
+//        string dbcontent_name = buf_it.first;
+
+//        string rec_num_var_name =
+//            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).name();
+//        string rec_num_col_name =
+//            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
+
+//        string utn_var_name =
+//            dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).name();
+//        string utn_col_name =
+//            dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).dbColumnName();
+
+//        PropertyList properties = buf_it.second->properties();
+
+//        for (auto& prop_it : properties.properties())
+//        {
+//            if (prop_it.name() == rec_num_var_name)
+//                buf_it.second->rename<unsigned long>(rec_num_var_name, rec_num_col_name);
+//            else if (prop_it.name() == utn_var_name)
+//                buf_it.second->rename<unsigned int>(utn_var_name, utn_col_name);
+//            else
+//                buf_it.second->deleteProperty(prop_it);
+//        }
+//    }
+
+//            // actually save data, ok since DB job
+//    for (auto& buf_it : *accessor_)
+//    {
+//        string dbcontent_name = buf_it.first;
+
+//        loginf << "CreateAssociationsJob: saveAssociations: saving for " << dbcontent_name;
+
+//        DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
+//        dbContent::Variable& key_var =
+//            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name);
+
+//        unsigned int chunk_size = 50000;
+
+//        unsigned int steps = buf_it.second->size() / chunk_size;
+
+//        unsigned int index_from = 0;
+//        unsigned int index_to = 0;
+
+//        for (unsigned int cnt = 0; cnt <= steps; cnt++)
+//        {
+//            index_from = cnt * chunk_size;
+//            index_to = index_from + chunk_size;
+
+//            if (index_to > buf_it.second->size() - 1)
+//                index_to = buf_it.second->size() - 1;
+
+//            loginf << "CreateAssociationsJob: saveAssociations: step " << cnt << " steps " << steps << " from "
+//                   << index_from << " to " << index_to;
+
+//            db_interface_.updateBuffer(dbcontent.dbTableName(), key_var.dbColumnName(),
+//                                       buf_it.second, index_from, index_to);
+
+//        }
+//    }
+
+    loginf << "CreateAssociationsJob: saveAssociations: done";
+}

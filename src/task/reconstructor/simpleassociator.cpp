@@ -28,18 +28,20 @@ SimpleAssociator::SimpleAssociator(SimpleReconstructor& reconstructor)
 
 void SimpleAssociator::associateNewData()
 {
-    // create reference utns
+    // create reference targets
     //emit statusSignal("Creating Reference UTNs");
-    std::map<unsigned int, dbContent::ReconstructorTarget> targets = createReferenceUTNs();
 
-            // create tracker utns
+    // create reference targets
+    createReferenceUTNs();
+
+            // create tracker targets
     //emit statusSignal("Creating Tracker UTNs");
-    createTrackerUTNs(targets);
+    createTrackerUTNs();
 
     unsigned int multiple_associated {0};
     unsigned int single_associated {0};
 
-    for (auto& target_it : targets)
+    for (auto& target_it : targets_)
     {
         if (target_it.second.ds_ids_.size() > 1)
             ++multiple_associated;
@@ -47,18 +49,18 @@ void SimpleAssociator::associateNewData()
             ++single_associated;
     }
 
-    loginf << "SimpleAssociator: run: tracker targets " << targets.size()
+    loginf << "SimpleAssociator: run: tracker targets " << targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 
             // create non-tracker utns
 
-    //emit statusSignal("Creating non-Tracker UTNs");
-    createNonTrackerUTNS(targets);
+            //emit statusSignal("Creating non-Tracker UTNs");
+    createNonTrackerUTNS();
 
     multiple_associated = 0;
     single_associated = 0;
 
-    for (auto& target_it : targets)
+    for (auto& target_it : targets_)
     {
         if (target_it.second.ds_ids_.size() > 1)
             ++multiple_associated;
@@ -66,19 +68,19 @@ void SimpleAssociator::associateNewData()
             ++single_associated;
     }
 
-    loginf << "SimpleAssociator: run: after non-tracker targets " << targets.size()
+    loginf << "SimpleAssociator: run: after non-tracker targets " << targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 
             // create associations
-//    emit statusSignal("Creating Associations");
-//    createAssociations();
+    //    emit statusSignal("Creating Associations");
+    //    createAssociations();
 }
 
-std::map<unsigned int, dbContent::ReconstructorTarget> SimpleAssociator::createReferenceUTNs()
+void SimpleAssociator::createReferenceUTNs()
 {
     loginf << "SimpleAssociator: createReferenceUTNs";
 
-    std::map<unsigned int, dbContent::ReconstructorTarget> sum_targets;
+    //std::map<unsigned int, dbContent::ReconstructorTarget> sum_targets;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     unsigned int reftraj_id = dbcont_man.dbContent("RefTraj").id();
@@ -86,7 +88,7 @@ std::map<unsigned int, dbContent::ReconstructorTarget> SimpleAssociator::createR
     if (!reconstructor_.tr_ds_.count(reftraj_id))
     {
         loginf << "SimpleAssociator: createReferenceUTNs: no tracker data";
-        return sum_targets;
+        return;
     }
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
@@ -121,7 +123,7 @@ std::map<unsigned int, dbContent::ReconstructorTarget> SimpleAssociator::createR
 
                 //emit statusSignal(("Creating new "+ds_name+" Targets").c_str());
 
-        addTrackerUTNs (ds_name, std::move(tracker_targets), sum_targets);
+        addTrackerUTNs (ds_name, std::move(tracker_targets), targets_);
 
                 // try to associate targets to each other
 
@@ -129,12 +131,12 @@ std::map<unsigned int, dbContent::ReconstructorTarget> SimpleAssociator::createR
     }
 
             //emit statusSignal("Self-associating Sum Reference Targets");
-    map<unsigned int, ReconstructorTarget> final_targets = selfAssociateTrackerUTNs(sum_targets);
+    //map<unsigned int, ReconstructorTarget> final_targets = selfAssociateTrackerUTNs(targets_);
 
-    return final_targets;
+    return;
 }
 
-void SimpleAssociator::createTrackerUTNs(std::map<unsigned int, ReconstructorTarget>& sum_targets)
+void SimpleAssociator::createTrackerUTNs()
 {
     loginf << "SimpleAssociator: createTrackerUTNs";
 
@@ -182,7 +184,7 @@ void SimpleAssociator::createTrackerUTNs(std::map<unsigned int, ReconstructorTar
 
                 //emit statusSignal(("Creating new "+ds_name+" Targets").c_str());
 
-        addTrackerUTNs (ds_name, std::move(tracker_targets), sum_targets);
+        addTrackerUTNs (ds_name, std::move(tracker_targets), targets_);
 
                 // try to associate targets to each other
 
@@ -193,7 +195,7 @@ void SimpleAssociator::createTrackerUTNs(std::map<unsigned int, ReconstructorTar
     }
 
             //emit statusSignal("Self-associating Sum Targets");
-    sum_targets = selfAssociateTrackerUTNs(sum_targets);
+    //selfAssociateTrackerUTNs(targets_);
 
             //emit statusSignal("Checking Final Targets");
             //cleanTrackerUTNs(sum_targets);
@@ -203,7 +205,7 @@ void SimpleAssociator::createTrackerUTNs(std::map<unsigned int, ReconstructorTar
     return;
 }
 
-void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, ReconstructorTarget>& targets)
+void SimpleAssociator::createNonTrackerUTNS()
 {
     loginf << "SimpleAssociator: createNonTrackerUTNS";
 
@@ -224,7 +226,7 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
     loginf << "SimpleAssociator: createNonTrackerUTNS: num_data_sources " << num_data_sources;
 
             // get ta lookup map
-    std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(targets);
+    std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(targets_);
 
             //DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
@@ -271,27 +273,33 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
             tbb::parallel_for(uint(0), num_target_reports, [&](unsigned int tr_cnt)
                               {
                                   unsigned int rec_num = rec_nums.at(tr_cnt);
-                                  targetReport::ReconstructorInfo& tr_it =
+
+                                  targetReport::ReconstructorInfo& tr =
                                       reconstructor_.target_reports_.at(rec_num);
+
+                                  assert (tr.timestamp_ >= reconstructor_.remove_before_time_);
 
                                   tmp_assoc_utns[tr_cnt] = -1; // set as not associated
 
-                                  if (tr_it.acad_ && ta_2_utn.count(*tr_it.acad_)) // check ta with lookup
-                                  {
-                                      unsigned int tmp_utn = ta_2_utn.at(*tr_it.acad_);
+                                  if(!tr.in_current_slice_) // already processed
+                                      return;
 
-                                      assert (targets.count(tmp_utn));
+                                  if (tr.acad_ && ta_2_utn.count(*tr.acad_)) // check ta with lookup
+                                  {
+                                      unsigned int tmp_utn = ta_2_utn.at(*tr.acad_);
+
+                                      assert (targets_.count(tmp_utn));
                                       tmp_assoc_utns[tr_cnt] = tmp_utn;
                                       return;
                                   }
 
                                           // lookup by mode s failed
 
-                                  if (tr_it.acad_) // create new utn if tr has ta
-                                                    //  && (!tr_it.has_ma_ || mode_a_conspic.count(tr_it.ma_))  and can not be associated using mode a
+                                  if (tr.acad_) // create new utn if tr has ta
+                                                 //  && (!tr_it.has_ma_ || mode_a_conspic.count(tr_it.ma_))  and can not be associated using mode a
                                   {
                                       boost::mutex::scoped_lock lock(create_todos_mutex);
-                                      create_todos[*tr_it.acad_].push_back(rec_num);
+                                      create_todos[*tr.acad_].push_back(rec_num);
 
                                       return;
                                   }
@@ -305,22 +313,22 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
                                   vector<tuple<bool, unsigned int, double>> results;
                                   // usable, utn, distance
 
-                                  results.resize(targets.size());
+                                  results.resize(targets_.size());
 
-                                  timestamp = tr_it.timestamp_;
+                                  timestamp = tr.timestamp_;
 
-                                  if (!tr_it.position_)
+                                  if (!tr.position_)
                                       return;
 
-//                                  TargetPosition tst_pos;
+                                          //                                  TargetPosition tst_pos;
 
-//                                  tst_pos.latitude_ = tr_it.latitude_;
-//                                  tst_pos.longitude_ = tr_it.longitude_;
-//                                  tst_pos.has_altitude_ = tr_it.has_mc_;
-//                                  tst_pos.altitude_ = tr_it.mc_;
+                                          //                                  tst_pos.latitude_ = tr_it.latitude_;
+                                          //                                  tst_pos.longitude_ = tr_it.longitude_;
+                                          //                                  tst_pos.has_altitude_ = tr_it.has_mc_;
+                                          //                                  tst_pos.altitude_ = tr_it.mc_;
 
-                                  FixedTransformation trafo (tr_it.position_->latitude_,
-                                                            tr_it.position_->longitude_);
+                                  FixedTransformation trafo (tr.position_->latitude_,
+                                                            tr.position_->longitude_);
 
                                           //loginf << "UGA: checking tr a/c/pos";
 
@@ -331,13 +339,13 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
                                   bool ok;
 
                                   unsigned int target_cnt=0;
-                                  for (auto& target_it : targets)
+                                  for (auto& target_it : targets_)
                                   {
                                       ReconstructorTarget& other = target_it.second;
 
                                       results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
-                                      if ((tr_it.acad_ && other.hasACAD())) // only try if not both mode s
+                                      if ((tr.acad_ && other.hasACAD())) // only try if not both mode s
                                       {
                                           ++target_cnt;
                                           continue;
@@ -349,14 +357,14 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
                                           continue;
                                       }
 
-                                      if (tr_it.mode_a_code_ || tr_it.barometric_altitude_) // mode a/c based
+                                      if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
                                       {
                                           // check mode a code
 
-                                          if (tr_it.mode_a_code_)
+                                          if (tr.mode_a_code_)
                                           {
                                               ComparisonResult ma_res = other.compareModeACode(
-                                                  tr_it, max_time_diff_sensor);
+                                                  tr, max_time_diff_sensor);
 
                                               if (ma_res == ComparisonResult::DIFFERENT)
                                               {
@@ -367,10 +375,10 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
                                           //loginf << "UGA3 same mode a";
 
                                                   // check mode c code
-                                          if (tr_it.barometric_altitude_)
+                                          if (tr.barometric_altitude_)
                                           {
                                               ComparisonResult mc_res = other.compareModeCCode(
-                                                  tr_it, max_time_diff_sensor, max_altitude_diff_sensor, false);
+                                                  tr, max_time_diff_sensor, max_altitude_diff_sensor, false);
 
                                               if (mc_res == ComparisonResult::DIFFERENT)
                                               {
@@ -436,8 +444,8 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
                                   }
                               });
 
-//            emit statusSignal(("Creating "+dbcont_it.first+" "+ds_name+" Associations ("
-//                               +to_string(done_perc)+"%)").c_str());
+                    //            emit statusSignal(("Creating "+dbcont_it.first+" "+ds_name+" Associations ("
+                    //                               +to_string(done_perc)+"%)").c_str());
 
                     // create associations
             int tmp_utn;
@@ -446,8 +454,8 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
                 tmp_utn = tmp_assoc_utns.at(tr_cnt);
                 if (tmp_utn != -1)
                 {
-                    assert (targets.count(tmp_utn));
-                    targets.at(tmp_utn).addTargetReport(rec_nums.at(tr_cnt));
+                    assert (targets_.count(tmp_utn));
+                    targets_.at(tmp_utn).addTargetReport(rec_nums.at(tr_cnt));
                 }
             }
 
@@ -459,23 +467,23 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
 
                 unsigned int new_utn;
 
-                if (targets.size())
-                    new_utn = targets.rbegin()->first + 1;
+                if (targets_.size())
+                    new_utn = targets_.rbegin()->first + 1;
                 else
                     new_utn = 0;
 
                         //addTargetByTargetReport(*trs.at(0));
 
-                targets.emplace(
+                targets_.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(new_utn),   // args for key
                     std::forward_as_tuple(reconstructor_, new_utn, false));  // args for mapped value, new_utn, tmp_utn false
 
-                targets.at(new_utn).addTargetReports(trs);
+                targets_.at(new_utn).addTargetReports(trs);
 
-                // add to mode s lookup
+                        // add to mode s lookup
 
-                for (auto acad : targets.at(new_utn).acads_)
+                for (auto acad : targets_.at(new_utn).acads_)
                 {
                     if (ta_2_utn.count(acad))
                     {
@@ -486,17 +494,17 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
                         ta_2_utn[acad] = {new_utn};
                 }
 
-//                if (trs.at(0)->has_ta_)
-//                    ta_2_utn[trs.at(0)->ta_] = {new_utn};
+                        //                if (trs.at(0)->has_ta_)
+                        //                    ta_2_utn[trs.at(0)->ta_] = {new_utn};
 
-//                targets.at(new_utn).addAssociated(trs.at(0));
+                        //                targets.at(new_utn).addAssociated(trs.at(0));
 
 
-//                for (unsigned int tr_cnt=0; tr_cnt < trs.size(); ++tr_cnt)
-//                {
-//                    assert (targets.count(new_utn));
-//                    targets.at(new_utn).addAssociated(trs.at(tr_cnt));
-//                }
+                        //                for (unsigned int tr_cnt=0; tr_cnt < trs.size(); ++tr_cnt)
+                        //                {
+                        //                    assert (targets.count(new_utn));
+                        //                    targets.at(new_utn).addAssociated(trs.at(tr_cnt));
+                        //                }
             }
 
             ++ds_cnt;
@@ -509,7 +517,10 @@ void SimpleAssociator::createNonTrackerUTNS(std::map<unsigned int, Reconstructor
 std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTargets(
     unsigned int dbcont_id, unsigned int ds_id)
 {
+    loginf << "SimpleAssociator: createTrackedTargets: dbcont_id " << dbcont_id << " ds_id " << ds_id;
+
     map<unsigned int, ReconstructorTarget> tracker_targets; // utn -> target
+    vector<ReconstructorTarget*> tracker_targets_vec;
 
             //DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -518,8 +529,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
     assert (ds_man.hasDBDataSource(ds_id));
     string ds_name = ds_man.dbDataSource(ds_id).name();
 
-    std::map<unsigned int,std::vector<unsigned long>>& ds_id_trs =
-        reconstructor_.tr_ds_.at(dbcont_id);
+    std::map<unsigned int,std::vector<unsigned long>>& ds_id_trs = reconstructor_.tr_ds_.at(dbcont_id);
     // ds_id -> ts ->  record_num
 
     if (!ds_id_trs.count(ds_id))
@@ -528,101 +538,117 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
         return tracker_targets;
     }
 
-    bool attached_to_existing_utn;
     unsigned int tmp_utn_cnt {0};
+    bool attached_to_existing_utn;
     unsigned int utn;
+
+//    std::map<unsigned int, std::map<unsigned int,
+//                                    std::map<unsigned int,
+//                                             std::pair<unsigned int, boost::posix_time::ptime>>>> tmp_tn2utn_;
 
             // iterate over lines
     for (unsigned int line_cnt = 0; line_cnt < 4; line_cnt++)
     {
-        map<unsigned int, pair<unsigned int, ptime>> tn2utn; // track num -> utn, last tod
+        loginf << "SimpleAssociator: createTrackedTargets: iterating line " << line_cnt;
 
-                // create temporary targets
+        //track num -> tmp_utn, last tod
+
+        std::map<unsigned int, std::pair<unsigned int, boost::posix_time::ptime>> tmp_tn2utn_;
+
+       // create temporary targets
         for (auto& tr_it : ds_id_trs.at(ds_id))
         {
+            assert (reconstructor_.target_reports_.count(tr_it));
             targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(tr_it);
+
+            assert (tr.timestamp_ >= reconstructor_.remove_before_time_);
+
+            if(!tr.in_current_slice_) // already processed
+                continue;
 
             if (tr.line_id_ != line_cnt) // check for current line
                 continue;
 
             if (tr.track_number_) // has track number
             {
-                if (!tn2utn.count(*tr.track_number_)) // if not yet mapped to utn
+                if (!tmp_tn2utn_.count(*tr.track_number_)) // if not yet mapped to utn
                 {
                     attached_to_existing_utn = false;
 
                             // check if can be attached to already existing utn
                     if (!tr.acad_ && reconstructor_.settings_.associate_non_mode_s_) // not for mode-s targets
                     {
-                        int cont_utn = findContinuationUTNForTrackerUpdate(tr, tracker_targets);
+                        int cont_utn = findContinuationUTNForTrackerUpdate(tr, tracker_targets, tracker_targets_vec);
 
                         if (cont_utn != -1)
                         {
-                            logdbg << "SimpleAssociator: createPerTrackerTargets: continuing target "
+                            loginf << "SimpleAssociator: createPerTrackerTargets: continuing target "
                                    << cont_utn << " with tn " << *tr.track_number_ << " at time "
                                    << Time::toString(tr.timestamp_);
-                            tn2utn[*tr.track_number_] = {cont_utn, tr.timestamp_};
+                            tmp_tn2utn_[*tr.track_number_] = {cont_utn, tr.timestamp_};
                             attached_to_existing_utn = true;
                         }
                     }
 
                     if (!attached_to_existing_utn)
                     {
-                        logdbg << "SimpleAssociator: createPerTrackerTargets: registering new tmp target "
+                        loginf << "SimpleAssociator: createPerTrackerTargets: registering new tmp target "
                                << tmp_utn_cnt << " for tn " << *tr.track_number_;
 
-                        tn2utn[*tr.track_number_] = {tmp_utn_cnt, tr.timestamp_};
+                        tmp_tn2utn_[*tr.track_number_] = {tmp_utn_cnt, tr.timestamp_};
                         ++tmp_utn_cnt;
                     }
                 }
 
-                        //loginf << "UGA1";
-                if (tracker_targets.count(tn2utn.at(*tr.track_number_).first)) // additional checks if already exists
+                if (tracker_targets.count(tmp_tn2utn_.at(*tr.track_number_).first)) // additional checks if already exists
                 {
                     ReconstructorTarget& existing_target = tracker_targets.at(
-                        tn2utn.at(*tr.track_number_).first);
+                        tmp_tn2utn_.at(*tr.track_number_).first);
 
                     if (tr.acad_ && existing_target.hasACAD() // new target part if ta change
                         && !existing_target.hasACAD(*tr.acad_))
                     {
-                        logdbg << "SimpleAssociator: createPerTrackerTargets: registering new tmp target "
+                        loginf << "SimpleAssociator: createPerTrackerTargets: registering new tmp target "
                                << tmp_utn_cnt << " for tn " << *tr.track_number_ << " because of ta switch "
                                << " at " << Time::toString(tr.timestamp_)
                                << " existing " << existing_target.asStr()
                                << " tr " << tr.asStr();
 
-                        tn2utn[*tr.track_number_] = {tmp_utn_cnt, tr.timestamp_};
+                        tmp_tn2utn_[*tr.track_number_] = {tmp_utn_cnt, tr.timestamp_};
                         ++tmp_utn_cnt;
                     }
                 }
-                //loginf << "UGA2";
 
-                if (tn2utn.at(*tr.track_number_).second > tr.timestamp_)
+                if (tmp_tn2utn_.at(*tr.track_number_).second > tr.timestamp_)
                 {
                     logwrn << "SimpleAssociator: createPerTrackerTargets: tod backjump -"
-                           << Time::toString(tn2utn.at(*tr.track_number_).second - tr.timestamp_)
+                           << " tmp_tn2utn_ ts "
+                           << Time::toString(tmp_tn2utn_.at(*tr.track_number_).second)
+                           << " tr " << Time::toString(tr.timestamp_)
+                           << " delta "
+                           << Time::toString(tmp_tn2utn_.at(*tr.track_number_).second - tr.timestamp_)
                            << " tmp target " << tmp_utn_cnt << " at tr " << tr.asStr() << " tn " << *tr.track_number_;
+
+                    unsigned int tmp_utn = tmp_tn2utn_.at(*tr.track_number_).first;
+                    assert (tracker_targets.count(tmp_utn));
+                    logwrn << tracker_targets.at(tmp_utn).asStr();
                 }
-                assert (tn2utn.at(*tr.track_number_).second <= tr.timestamp_);
+                assert (tmp_tn2utn_.at(*tr.track_number_).second <= tr.timestamp_);
 
-                        //loginf << "UGA3";
-
-                if ((tr.timestamp_ - tn2utn.at(*tr.track_number_).second).total_seconds() > 60.0) // gap, new track // TODO parameter
+                if ((tr.timestamp_ - tmp_tn2utn_.at(*tr.track_number_).second).total_seconds() > 60.0) // gap, new track // TODO parameter
                 {
                     logdbg << "SimpleAssociator: createPerTrackerTargets: registering new tmp target "
                            << tmp_utn_cnt << " for tn " << *tr.track_number_ << " because of gap "
-                           << Time::toString(tr.timestamp_ - tn2utn.at(*tr.track_number_).second)
+                           << Time::toString(tr.timestamp_ - tmp_tn2utn_.at(*tr.track_number_).second)
                            << " at " << Time::toString(tr.timestamp_);
 
-                    tn2utn[*tr.track_number_] = {tmp_utn_cnt, tr.timestamp_};
+                    tmp_tn2utn_[*tr.track_number_] = {tmp_utn_cnt, tr.timestamp_};
                     ++tmp_utn_cnt;
                 }
 
-                        //loginf << "UGA4";
-
-                assert (tn2utn.count(*tr.track_number_));
-                utn = tn2utn.at(*tr.track_number_).first;
-                tn2utn.at(*tr.track_number_).second = tr.timestamp_;
+                assert (tmp_tn2utn_.count(*tr.track_number_));
+                utn = tmp_tn2utn_.at(*tr.track_number_).first;
+                tmp_tn2utn_.at(*tr.track_number_).second = tr.timestamp_;
 
                 if (!tracker_targets.count(utn)) // add new target if not existing
                 {
@@ -632,6 +658,8 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
                         std::piecewise_construct,
                         std::forward_as_tuple(utn),   // args for key
                         std::forward_as_tuple(reconstructor_, utn, true));  // args for mapped value utn, tmp_utn true
+
+                    tracker_targets_vec.push_back(&tracker_targets.at(utn));
                 }
 
                 tracker_targets.at(utn).addTargetReport(tr.record_num_);
@@ -642,9 +670,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
                        << tr.ds_id_ << " at tod " << Time::toString(tr.timestamp_);
             }
         }
-
     }
-
 
     return tracker_targets;
 }
@@ -698,8 +724,8 @@ std::map<unsigned int, dbContent::ReconstructorTarget> SimpleAssociator::selfAss
 }
 
 void SimpleAssociator::addTrackerUTNs(const std::string& ds_name,
-                                           std::map<unsigned int, dbContent::ReconstructorTarget> from_targets,
-                                           std::map<unsigned int, dbContent::ReconstructorTarget>& to_targets)
+                                      std::map<unsigned int, dbContent::ReconstructorTarget> from_targets,
+                                      std::map<unsigned int, dbContent::ReconstructorTarget>& to_targets)
 {
     loginf << "SimpleAssociator: addTrackerUTNs: src " << ds_name
            << " from_targets size " << from_targets.size() << " to_targets size " << to_targets.size();
@@ -714,8 +740,8 @@ void SimpleAssociator::addTrackerUTNs(const std::string& ds_name,
     while (from_targets.size())
     {
         done_ratio = (float)target_cnt / (float)from_targets_size;
-//        emit statusSignal(("Creating "+ds_name+" UTNs ("
-//                           +String::percentToString(100.0*done_ratio)+"%)").c_str());
+        //        emit statusSignal(("Creating "+ds_name+" UTNs ("
+        //                           +String::percentToString(100.0*done_ratio)+"%)").c_str());
 
         ++target_cnt;
 
@@ -775,9 +801,12 @@ void SimpleAssociator::addTrackerUTNs(const std::string& ds_name,
 
 int SimpleAssociator::findContinuationUTNForTrackerUpdate (
     const targetReport::ReconstructorInfo& tr,
-    const std::map<unsigned int, ReconstructorTarget>& targets)
+    const std::map<unsigned int, ReconstructorTarget>& targets,
+    const std::vector<dbContent::ReconstructorTarget*> tracker_targets_vec)
 // tries to find existing utn for tracker update, -1 if failed
 {
+    loginf << "SimpleAssociator: findContinuationUTNForTrackerUpdate";
+
     if (tr.acad_)
         return -1;
 
@@ -786,15 +815,23 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
     const double max_altitude_diff_tracker = reconstructor_.settings_.max_altitude_diff_tracker_;
     const double max_distance_acceptable_tracker = reconstructor_.settings_.cont_max_distance_acceptable_tracker_;
 
-    unsigned int num_targets = targets.size();
+    unsigned int num_targets = tracker_targets_vec.size();
 
     vector<tuple<bool, unsigned int, double>> results;
     // usable, other utn, distance
     results.resize(num_targets);
 
+    //    for (auto& tgt_it : targets)
+    //        loginf << "UGA " << tgt_it.first;
+
     tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
                       {
-                          const ReconstructorTarget& other = targets.at(cnt);
+                         //loginf << "SimpleAssociator: findContinuationUTNForTrackerUpdate: 1";
+                          assert (tracker_targets_vec.at(cnt));
+                          unsigned int utn = tracker_targets_vec.at(cnt)->utn_;
+                          assert (targets.count(utn));
+
+                          const ReconstructorTarget& other = targets.at(utn);
                           Transformation trafo;
 
                           results[cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
@@ -811,6 +848,10 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
                                   // tr.tod_ > other.tod_max_
                           if (tr.timestamp_ - other.timestamp_max_ > max_time_diff_tracker) // check if last updated longer ago than threshold
                               return;
+
+                                  //loginf << "SimpleAssociator: findContinuationUTNForTrackerUpdate: 2";
+
+                          assert (reconstructor_.target_reports_.count(other.lastAssociated()));
 
                           const targetReport::ReconstructorInfo& other_last_tr =
                               reconstructor_.target_reports_.at(other.lastAssociated());
@@ -830,11 +871,13 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
 
                                   // mode a codes the same
 
+                                  //loginf << "SimpleAssociator: findContinuationUTNForTrackerUpdate: 3";
+
                           if (other_last_tr.barometric_altitude_ && tr.barometric_altitude_
                               && other_last_tr.barometric_altitude_->hasReliableValue()
                               && tr.barometric_altitude_ ->hasReliableValue()
                               && fabs(other_last_tr.barometric_altitude_->altitude_
-                                    - tr.barometric_altitude_->altitude_) > max_altitude_diff_tracker)
+                                      - tr.barometric_altitude_->altitude_) > max_altitude_diff_tracker)
                               return; // check mode c codes if existing
 
                           bool ok;
@@ -855,9 +898,13 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
                           if (distance > max_distance_acceptable_tracker)
                               return;
 
+                                  //loginf << "SimpleAssociator: findContinuationUTNForTrackerUpdate: 4";
+
                           results[cnt] = tuple<bool, unsigned int, double>(
                               true, other.utn_, distance);
                       });
+
+    loginf << "SimpleAssociator: findContinuationUTNForTrackerUpdate: finding best matches";
 
             // find best match
     unsigned int num_matches = 0;
@@ -904,7 +951,7 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
 }
 
 int SimpleAssociator::findUTNForTrackerTarget (const ReconstructorTarget& target,
-                                                   const std::map<unsigned int, ReconstructorTarget>& targets)
+                                              const std::map<unsigned int, ReconstructorTarget>& targets)
 // tries to find existing utn for target, -1 if failed
 {
     if (!targets.size()) // check if targets exist
@@ -939,9 +986,14 @@ int SimpleAssociator::findUTNForTrackerTarget (const ReconstructorTarget& target
     const double max_distance_dubious_tracker = reconstructor_.settings_.max_distance_dubious_tracker_;
     const double max_distance_acceptable_tracker = reconstructor_.settings_.cont_max_distance_acceptable_tracker_;
 
+    //    for (auto& tgt_it : targets)
+    //        loginf << "UGA " << tgt_it.first;
+
     tbb::parallel_for(uint(0), num_utns, [&](unsigned int cnt)
                                                                 //for (unsigned int cnt=0; cnt < utn_cnt_; ++cnt)
                       {
+                          assert (targets.count(cnt));
+
                           const ReconstructorTarget& other = targets.at(cnt);
                           Transformation trafo;
 
@@ -1209,7 +1261,7 @@ int SimpleAssociator::findUTNForTrackerTarget (const ReconstructorTarget& target
 }
 
 int SimpleAssociator::findUTNForTargetByTA (const ReconstructorTarget& target,
-                                                const std::map<unsigned int, ReconstructorTarget>& targets)
+                                           const std::map<unsigned int, ReconstructorTarget>& targets)
 {
     if (!target.hasACAD()) // cant be found
         return -1;

@@ -15,14 +15,24 @@ class SimpleAssociator
   private:
     SimpleReconstructor& reconstructor_;
 
-    std::map<unsigned int, unsigned int> targets_acad_;
+    std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> target
+    //std::vector<dbContent::ReconstructorTarget*> tracker_targets_vec_;
+
+    //std::map<unsigned int, unsigned int> targets_acad_;
     // acad -> utn
 
-    std::map<unsigned int, dbContent::ReconstructorTarget> createReferenceUTNs();
+//    std::map<unsigned int, std::map<unsigned int,
+//                                std::map<unsigned int,
+//                                        std::pair<unsigned int, boost::posix_time::ptime>>>> tmp_tn2utn_;
+    // ds_id -> line_id -> track num -> tmp_utn, last tod
+    //unsigned int tmp_utn_cnt_ {0};
 
-    void createTrackerUTNs(std::map<unsigned int, dbContent::ReconstructorTarget>& sum_targets);
-    void createNonTrackerUTNS(std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
+    void createReferenceUTNs();
 
+    void createTrackerUTNs();
+    void createNonTrackerUTNS();
+
+    // creates tmp tracked targets to be added
     std::map<unsigned int, dbContent::ReconstructorTarget> createTrackedTargets(
         unsigned int dbcont_id, unsigned int ds_id);
     std::map<unsigned int, dbContent::ReconstructorTarget> selfAssociateTrackerUTNs(
@@ -32,7 +42,8 @@ class SimpleAssociator
                         std::map<unsigned int, dbContent::ReconstructorTarget>& to_targets);
 
     int findContinuationUTNForTrackerUpdate (const dbContent::targetReport::ReconstructorInfo& tr,
-                                            const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
+                                            const std::map<unsigned int, dbContent::ReconstructorTarget>& targets,
+                                            const std::vector<dbContent::ReconstructorTarget*> tracker_targets_vec);
     // tries to find existing utn for tracker update, -1 if failed
     int findUTNForTrackerTarget (const dbContent::ReconstructorTarget& target,
                                 const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
