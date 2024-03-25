@@ -58,9 +58,10 @@ class SimpleReconstructor : public ReconstructorBase
     SimpleReconstructorSettings& settings();
 
   protected:
-
+  
     friend class dbContent::ReconstructorTarget;
     friend class SimpleAssociator;
+    friend class SimpleReferenceCalculator;
 
     SimpleReconstructorSettings settings_;
     SimpleAssociator associatior_;
