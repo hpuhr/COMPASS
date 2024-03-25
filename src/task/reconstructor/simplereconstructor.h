@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QObject>
+
 #include "reconstructorbase.h"
 #include "targetreportdefs.h"
 #include "global.h"
@@ -13,9 +15,9 @@ class SimpleReconstructorSettings
     SimpleReconstructorSettings() {};
 
     bool associate_non_mode_s_ {true};
-    bool clean_dubious_utns_ {true};
-    bool mark_dubious_utns_unused_ {false};
-    bool comment_dubious_utns_ {true};
+    //bool clean_dubious_utns_ {true};
+    //bool mark_dubious_utns_unused_ {false};
+    //bool comment_dubious_utns_ {true};
 
     // tracker stuff
     double max_time_diff_tracker_ {15.0};
@@ -31,7 +33,7 @@ class SimpleReconstructorSettings
 
     double prob_min_time_overlap_tracker_ {0.5}; //kb 0.7
 
-    double max_speed_tracker_kts_ {100000};
+    //double max_speed_tracker_kts_ {100000};
 
     double cont_max_time_diff_tracker_ {30.0};
     double cont_max_distance_acceptable_tracker_ {1852.0};
@@ -45,8 +47,15 @@ class SimpleReconstructorSettings
     std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal, oct 1000, 2000
 };
 
-class SimpleReconstructor : public ReconstructorBase
+class SimpleReconstructorWidget;
+
+class SimpleReconstructor : public QObject, public ReconstructorBase
 {
+    Q_OBJECT
+
+  signals:
+    void updateWidgetsSignal();
+
   public:
     SimpleReconstructor(const std::string& class_id, const std::string& instance_id,
                         ReconstructorTask& task);
@@ -57,6 +66,10 @@ class SimpleReconstructor : public ReconstructorBase
     virtual void reset() override;
 
     SimpleReconstructorSettings& settings();
+
+    SimpleReconstructorWidget* widget(); // ownage by caller
+
+    void updateWidgets();
 
   protected:
   

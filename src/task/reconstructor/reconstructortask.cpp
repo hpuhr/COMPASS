@@ -24,6 +24,9 @@ using namespace std;
 using namespace Utils;
 using namespace dbContent;
 
+const std::string ReconstructorTask::ScoringUMReconstructorName {"Scoring + UMKalman"};
+const std::string ReconstructorTask::ProbImmReconstructorName {"Probabilistic + IMM"};
+
 ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
     : Task(task_manager),
@@ -31,7 +34,12 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 {
     tooltip_ = "Associate target reports and calculate reference trajectories based on all DB Content.";
 
-    //reconstructor_.reset(new SimpleReconstructor());
+    registerParameter("current_reconstructor_str", &current_reconstructor_str_, {});
+
+    if (!current_reconstructor_str_.size()
+        || (current_reconstructor_str_ != ScoringUMReconstructorName
+                                               && current_reconstructor_str_ != ProbImmReconstructorName))
+        current_reconstructor_str_ = ScoringUMReconstructorName;
 
     createSubConfigurables();
 }
@@ -106,6 +114,21 @@ void ReconstructorTask::run()
 
     loadDataSlice();
 
+}
+
+std::string ReconstructorTask::currentReconstructorStr() const
+{
+    return current_reconstructor_str_;
+}
+
+void ReconstructorTask::currentReconstructorStr(const std::string& value)
+{
+    current_reconstructor_str_ = value;
+}
+
+SimpleReconstructor*ReconstructorTask::simpleReconstructor() const
+{
+    return simple_reconstructor_.get();
 }
 
 
