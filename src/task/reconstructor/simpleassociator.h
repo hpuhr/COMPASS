@@ -34,10 +34,12 @@ class SimpleAssociator
                                             const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     // tries to find existing utn for tracker update, -1 if failed
     int findUTNForTrackerTarget (const dbContent::ReconstructorTarget& target,
-                                const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
+                                const std::map<unsigned int, dbContent::ReconstructorTarget>& targets,
+                                int max_utn=-100);
     // tries to find existing utn for target, -1 if failed
     int findUTNForTargetByTA (const dbContent::ReconstructorTarget& target,
-                             const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
+                             const std::map<unsigned int, dbContent::ReconstructorTarget>& targets,
+                             int max_utn);
     // tries to find existing utn for target by target address, -1 if failed
 
     std::map<unsigned int, unsigned int> getTALookupMap (
