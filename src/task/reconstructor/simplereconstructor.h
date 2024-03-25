@@ -72,9 +72,10 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
     void updateWidgets();
 
   protected:
-
+  
     friend class dbContent::ReconstructorTarget;
     friend class SimpleAssociator;
+    friend class SimpleReferenceCalculator;
 
     SimpleReconstructorSettings settings_;
     SimpleAssociator associatior_;
