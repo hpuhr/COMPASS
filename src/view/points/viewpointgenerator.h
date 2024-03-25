@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "rasterreference.h"
+
 #include <memory>
 #include <vector>
 #include <map>
@@ -26,10 +28,9 @@
 #include <QColor>
 #include <QRectF>
 #include <QVariant>
+#include <QImage>
 
 #include <boost/optional.hpp>
-
-#include "json.h"
 
 /**
 */
@@ -301,6 +302,38 @@ private:
     double        y_;
     float         font_size_;
     TextDirection text_dir_;
+};
+
+/**
+*/
+class ViewPointGenFeatureGeoImage : public ViewPointGenFeature
+{
+public:
+    ViewPointGenFeatureGeoImage(const std::string& fn,
+                                const RasterReference& ref);
+    ViewPointGenFeatureGeoImage(const QImage& data,
+                                const RasterReference& ref);
+    virtual ~ViewPointGenFeatureGeoImage() = default;
+
+    static std::string imageToByteString(const QImage& img);
+    static QImage byteStringToImage(const std::string& str);
+
+    virtual size_t size() const { return 1; }
+    virtual std::string name() const override { return "geoimage"; }
+
+    static const std::string FeatureTypeNameGeoImage;
+    static const std::string FeatureGeoImageFieldNameSource;
+    static const std::string FeatureGeoImageFieldNameFn;
+    static const std::string FeatureGeoImageFieldNameData;
+    static const std::string FeatureGeoImageFieldNameReference;
+
+protected:
+    virtual void toJSON_impl(nlohmann::json& j) const override;
+
+private:
+    std::string     fn_;
+    QImage          data_;
+    RasterReference ref_;
 };
 
 /**
