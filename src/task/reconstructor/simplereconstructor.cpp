@@ -352,6 +352,8 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> SimpleReconstructo
             }
         }
         tgt_it.second.associations_written_ = true;
+
+        tgt_it.second.updateCounts();
     }
 
     loginf << "SimpleReconstructor: createAssociations: done with " << num_assoc << " associated";
