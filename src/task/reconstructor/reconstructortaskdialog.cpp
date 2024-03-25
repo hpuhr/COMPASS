@@ -1,11 +1,16 @@
 #include "reconstructortaskdialog.h"
 #include "reconstructortask.h"
+#include "simplereconstructor.h"
+#include "simplereconstructorwidget.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QStackedWidget>
+#include <QFormLayout>
+#include <QComboBox>
 
 ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     : QDialog(), task_(task)
@@ -25,8 +30,30 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-//    task_widget_ = new ReconstructorTaskWidget(task_, this);
-//    main_layout->addWidget(task_widget_);
+    QFormLayout* combo_layout = new QFormLayout;
+    combo_layout->setMargin(0);
+    combo_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
+
+    reconstructor_box_ = new QComboBox();
+    reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ScoringUMReconstructorName));
+    reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ProbImmReconstructorName));
+    int idx = reconstructor_box_->findText(QString::fromStdString(task_.currentReconstructorStr()));
+    reconstructor_box_->setCurrentIndex(idx);
+
+    connect(reconstructor_box_, &QComboBox::currentTextChanged,
+            this, &ReconstructorTaskDialog::reconstructorMethodChangedSlot);
+
+    combo_layout->addRow(tr("Reconstructor Method"), reconstructor_box_);
+
+    main_layout->addLayout(combo_layout);
+
+    reconstructor_widget_stack_ = new QStackedWidget();
+    reconstructor_widget_stack_->addWidget(task_.simpleReconstructor()->widget());
+    reconstructor_widget_stack_->addWidget(new QWidget());
+
+    showCurrentReconstructorWidget();
+
+    main_layout->addWidget(reconstructor_widget_stack_);
 
     QHBoxLayout* button_layout = new QHBoxLayout();
 
@@ -47,11 +74,32 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     updateButtons();
 }
 
+void ReconstructorTaskDialog::showCurrentReconstructorWidget()
+{
+    const auto& reconst_str = task_.currentReconstructorStr();
+    int idx = reconstructor_box_->findText(QString::fromStdString(reconst_str));
+
+    loginf << "ReconstructorTaskDialog: showCurrentReconstructorWidget: value " << idx;
+
+    assert(idx >= 0);
+
+    reconstructor_widget_stack_->setCurrentIndex(idx);
+}
+
 void ReconstructorTaskDialog::updateButtons()
 {
     assert (run_button_);
 
     run_button_->setDisabled(!task_.canRun());
+}
+
+void ReconstructorTaskDialog::reconstructorMethodChangedSlot(const QString& value)
+{
+    loginf << "ReconstructorTaskDialog: reconstructorMethodChangedSlot: value " << value.toStdString();
+
+    task_.currentReconstructorStr(value.toStdString());
+
+    showCurrentReconstructorWidget();
 }
 
 void ReconstructorTaskDialog::runClickedSlot()

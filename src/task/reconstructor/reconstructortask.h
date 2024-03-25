@@ -52,7 +52,17 @@ class ReconstructorTask : public Task, public Configurable
     virtual bool canRun() override;
     virtual void run() override;
 
+    std::string currentReconstructorStr() const;
+    void currentReconstructorStr(const std::string& value);
+
+    static const std::string ScoringUMReconstructorName;
+    static const std::string ProbImmReconstructorName;
+
+    SimpleReconstructor*simpleReconstructor() const;
+
   protected:
+
+    std::string current_reconstructor_str_;
 
     std::unique_ptr<ReconstructorTaskDialog> dialog_;
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QObject>
+
 #include "reconstructorbase.h"
 #include "targetreportdefs.h"
 #include "global.h"
@@ -45,8 +47,15 @@ class SimpleReconstructorSettings
     std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal, oct 1000, 2000
 };
 
-class SimpleReconstructor : public ReconstructorBase
+class SimpleReconstructorWidget;
+
+class SimpleReconstructor : public QObject, public ReconstructorBase
 {
+    Q_OBJECT
+
+  signals:
+    void updateWidgetsSignal();
+
   public:
     SimpleReconstructor(const std::string& class_id, const std::string& instance_id,
                         ReconstructorTask& task);
@@ -57,6 +66,10 @@ class SimpleReconstructor : public ReconstructorBase
     virtual void reset() override;
 
     SimpleReconstructorSettings& settings();
+
+    SimpleReconstructorWidget* widget(); // ownage by caller
+
+    void updateWidgets();
 
   protected:
 

@@ -11,6 +11,7 @@ target_sources(compass
         #"${CMAKE_CURRENT_LIST_DIR}/calculatereferencestarget.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructorbase.h"
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructor.h"
+        "${CMAKE_CURRENT_LIST_DIR}/simplereconstructorwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/simpleassociator.h"
         "${CMAKE_CURRENT_LIST_DIR}/simpleaccuracyestimator.h"
 
@@ -22,6 +23,7 @@ target_sources(compass
         #"${CMAKE_CURRENT_LIST_DIR}/calculatereferencestarget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructorbase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructor.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/simplereconstructorwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/simpleassociator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/simpleaccuracyestimator.cpp"
 )

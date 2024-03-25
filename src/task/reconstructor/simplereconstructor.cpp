@@ -1,4 +1,5 @@
 #include "simplereconstructor.h"
+#include "simplereconstructorwidget.h"
 #include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
@@ -143,6 +144,21 @@ void SimpleReconstructor::reset()
 SimpleReconstructorSettings& SimpleReconstructor::settings()
 {
     return settings_;
+}
+
+SimpleReconstructorWidget* SimpleReconstructor::widget() // ownage by caller
+{
+    SimpleReconstructorWidget* widget = new SimpleReconstructorWidget(*this);
+
+    connect (this, &SimpleReconstructor::updateWidgetsSignal,
+            widget, &SimpleReconstructorWidget::updateSlot);
+
+    return widget;
+}
+
+void SimpleReconstructor::updateWidgets()
+{
+    emit updateWidgetsSignal();
 }
 
 bool SimpleReconstructor::processSlice_impl()
