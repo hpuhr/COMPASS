@@ -2,13 +2,27 @@
 
 #include "targetreportdefs.h"
 #include "accuracyestimatorbase.h"
+#include "adsbaccuracyestimator.h"
+#include "mlataccuracyestimator.h"
+#include "trackeraccuracyestimator.h"
+#include "radaraccuracyestimator.h"
 
-class SimpleReconstructor;
+class ComplexReconstructor;
 
-class SimpleAccuracyEstimator : public AccuracyEstimatorBase
+//    • Target report position accuracy
+//        ◦ Integrate into current code
+//        ◦ "Do not use position" flag
+//    • Radar
+//        ◦ Model-based accuracy: Pre-defined, re-estimated
+//    • MLAT
+//        ◦ Model-based pre-defined accuracy
+//    • ADS-B
+//        ◦ Minimal position quality indicator verification
+
+class ComplexAccuracyEstimator : public AccuracyEstimatorBase
 {
   public:
-    SimpleAccuracyEstimator(SimpleReconstructor& reconstructor);
+    ComplexAccuracyEstimator(ComplexReconstructor& reconstructor);
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
@@ -18,7 +32,12 @@ class SimpleAccuracyEstimator : public AccuracyEstimatorBase
         const dbContent::targetReport::ReconstructorInfo& tr) override;
 
   private:
-    SimpleReconstructor& reconstructor_;
+    ComplexReconstructor& reconstructor_;
+
+    ADSBAccuracyEstimator adsb_estimator_;
+    MLATAccuracyEstimator mlat_estimator_;
+    TrackerAccuracyEstimator tracker_estimator_;
+    RadarAccuracyEstimator radar_estimator_;
 
     static const double PosAccStdDevDefault;
     static const dbContent::targetReport::PositionAccuracy PosAccStdDefault;

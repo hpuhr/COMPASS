@@ -1,3 +1,5 @@
+include("${CMAKE_CURRENT_LIST_DIR}/complex/CMakeLists.txt")
+
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
@@ -17,6 +19,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/simpleassociator.h"
         "${CMAKE_CURRENT_LIST_DIR}/simplereferencecalculator.h"
         "${CMAKE_CURRENT_LIST_DIR}/simpleaccuracyestimator.h"
+        "${CMAKE_CURRENT_LIST_DIR}/accuracyestimatorbase.h"
 
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortask.cpp"
@@ -32,4 +35,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/simpleassociator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/simplereferencecalculator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/simpleaccuracyestimator.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/accuracyestimatorbase.cpp"
 )
