@@ -6,6 +6,7 @@
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
+#include "datasourcemanager.h"
 
 #include "timeconv.h"
 
@@ -14,7 +15,7 @@ using namespace Utils;
 
 SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std::string& instance_id,
                                          ReconstructorTask& task)
-    : ReconstructorBase(class_id, instance_id, task)
+    : ReconstructorBase(class_id, instance_id, task), associatior_(*this)
 {
     // common
     registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);
@@ -129,9 +130,9 @@ void SimpleReconstructor::reset()
 {
     loginf << "SimpleReconstructor: reset";
 
-    target_reports_ids_.clear();
+    target_reports_.clear();
     tr_timestamps_.clear();
-    tr_ds_timestamps_.clear();
+    tr_ds_.clear();
 
     ReconstructorBase::reset();
 }
@@ -149,20 +150,32 @@ bool SimpleReconstructor::processSlice_impl()
 
             // remove_before_time_, new data >= current_slice_begin_
 
+    clearOldTargetReports();
+
+    createTargetReports();
+
+    associatior_.associateNewData();
+
     return true;
 }
 
 
 void SimpleReconstructor::clearOldTargetReports()
 {
-    loginf << "SimpleReconstructor: clearOldTargetReports";
+    loginf << "SimpleReconstructor: clearOldTargetReports: remove_before_time " << Time::toString(remove_before_time_);
 
-    for (auto ts_it = target_reports_ids_.cbegin(); ts_it != target_reports_ids_.cend() /* not hoisted */; /* no increment */)
+    for (auto ts_it = target_reports_.cbegin(); ts_it != target_reports_.cend() /* not hoisted */; /* no increment */)
     {
         if (ts_it->second.timestamp_ < remove_before_time_)
-            ts_it = target_reports_ids_.erase(ts_it);
+        {
+            //loginf << "SimpleReconstructor: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
+            ts_it = target_reports_.erase(ts_it);
+        }
         else
+        {
+            //loginf << "SimpleReconstructor: clearOldTargetReports: keeping " << Time::toString(ts_it->second.timestamp_);
             ++ts_it;
+        }
     }
 
     for (auto ts_it = tr_timestamps_.cbegin(); ts_it != tr_timestamps_.cend() /* not hoisted */; /* no increment */)
@@ -173,19 +186,24 @@ void SimpleReconstructor::clearOldTargetReports()
             ++ts_it;
     }
 
-    // dbcontent -> ds_id -> ts ->  record_num
-    //std::map<std::string, std::map<unsigned int, std::map<boost::posix_time::ptime, unsigned long>>> tr_ds_timestamps_;
+    // dbcontent -> ds_id -> record_num
+    //std::map<unsigned int, std::map<unsigned int,std::vector<unsigned long>>>
 
-    for (auto& dbcont_it : tr_ds_timestamps_)
+    for (auto& dbcont_it : tr_ds_)
     {
         for (auto& ds_it : dbcont_it.second)
         {
             for (auto ts_it = ds_it.second.cbegin(); ts_it != ds_it.second.cend() /* not hoisted */; /* no increment */)
             {
-                if (ts_it->first < remove_before_time_)
+                if (!target_reports_.count(*ts_it)) // TODO could be made faster
                     ts_it = ds_it.second.erase(ts_it);
                 else
                     ++ts_it;
+
+//                if (ts_it->first < remove_before_time_)
+//                    ts_it = ds_it.second.erase(ts_it);
+//                else
+//                    ++ts_it;
             }
         }
     }
@@ -193,46 +211,86 @@ void SimpleReconstructor::clearOldTargetReports()
 
 void SimpleReconstructor::createTargetReports()
 {
-    loginf << "SimpleReconstructor: createTargetReports";
+    loginf << "SimpleReconstructor: createTargetReports: current_slice_begin " << Time::toString(current_slice_begin_);
 
     boost::posix_time::ptime ts;
-    unsigned int record_num;
+    unsigned long record_num;
 
-    dbContent::targetReport::BaseInfo id;
+    dbContent::targetReport::ReconstructorInfo info;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     for (auto& buf_it : *accessor_)
     {
         dbContent::TargetReportAccessor tgt_acc = accessor_->targetReportAccessor(buf_it.first);
         unsigned int buffer_size = tgt_acc.size();
 
+        assert (dbcont_man.existsDBContent(buf_it.first));
+        unsigned int dbcont_id = dbcont_man.dbContent(buf_it.first).id();
+
         for (unsigned int cnt=0; cnt < buffer_size; cnt++)
         {
             record_num = tgt_acc.recordNumber(cnt);
             ts = tgt_acc.timestamp(cnt);
 
+            //loginf << "SimpleReconstructor: createTargetReports: ts " << Time::toString(ts);
+
             if (ts >= current_slice_begin_) // insert
             {
-                id.buffer_index_ = cnt;
-                id.record_num_ = record_num;
-                id.ds_id_ = tgt_acc.dsID(cnt);
-                id.line_id_ = tgt_acc.lineID(cnt);
-                id.timestamp_ = ts;
+                // base info
+                info.buffer_index_ = cnt;
+                info.record_num_ = record_num;
+                info.ds_id_ = tgt_acc.dsID(cnt);
+                info.line_id_ = tgt_acc.lineID(cnt);
+                info.timestamp_ = ts;
 
-                // insert id
-                assert (!target_reports_ids_.count(record_num));
-                target_reports_ids_[record_num] = id;
+                // reconstructor info
+                info.in_current_slice_ = true;
+                info.acad_ = tgt_acc.acad(cnt);
+                info.acid_ = tgt_acc.acid(cnt);
 
-                // insert others
+                info.mode_a_code_ = tgt_acc.modeACode(cnt);
+
+                info.track_number_ = tgt_acc.trackNumber(cnt);
+                info.track_begin_ = tgt_acc.trackBegin(cnt);
+                info.track_end_ = tgt_acc.trackEnd(cnt);
+
+                info.position_ = tgt_acc.position(cnt);
+                info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
+
+                info.barometric_altitude_ = tgt_acc.barometricAltitude(cnt);
+
+                info.velocity_ = tgt_acc.velocity(cnt);
+                info.velocity_accuracy_ = tgt_acc.velocityAccuracy(cnt);
+
+                info.track_angle_ = tgt_acc.trackAngle(cnt);
+                info.ground_bit_ = tgt_acc.groundBit(cnt);
+
+                // insert info
+                assert (!target_reports_.count(record_num));
+                target_reports_[record_num] = info;
+
+                // insert into lookups
                 tr_timestamps_.insert({ts, record_num});
-                // dbcontent -> ds_id -> ts ->  record_num
-                tr_ds_timestamps_[buf_it.first][id.ds_id_].insert({ts, record_num});
+                // dbcontent id -> ds_id -> ts ->  record_num
+
+                tr_ds_[dbcont_id][info.ds_id_].push_back(record_num);
             }
             else // update buffer_index_
             {
-                assert (target_reports_ids_.count(record_num));
-                target_reports_ids_.at(record_num).buffer_index_ = cnt;
-                assert (target_reports_ids_.at(record_num).timestamp_ == ts); // just to be sure
+                assert (ts > remove_before_time_);
+
+                if (!target_reports_.count(record_num))
+                    logerr << "SimpleReconstructor: createTargetReports: missing prev ts " << Time::toString(ts);
+
+                assert (target_reports_.count(record_num));
+
+                target_reports_.at(record_num).buffer_index_ = cnt;
+                target_reports_.at(record_num).in_current_slice_ = false;
+
+                assert (target_reports_.at(record_num).timestamp_ == ts); // just to be sure
             }
         }
     }
 }
+

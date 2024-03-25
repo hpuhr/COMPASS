@@ -37,6 +37,7 @@ public:
     virtual ~DBContentAccessor() = default;
 
     bool add(std::map<std::string, std::shared_ptr<Buffer>> buffers); // something changed flag
+    void removeContentBeforeTimestamp(boost::posix_time::ptime remove_before_time);
     void removeEmptyBuffers();
     void clear();
 

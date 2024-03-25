@@ -3,6 +3,8 @@
 #include "reconstructorbase.h"
 #include "targetreportdefs.h"
 #include "global.h"
+#include "reconstructortarget.h"
+#include "simpleassociator.h"
 
 class SimpleReconstructorSettings
 {
@@ -57,16 +59,28 @@ class SimpleReconstructor : public ReconstructorBase
 
   protected:
 
-    SimpleReconstructorSettings settings_;
+    friend class dbContent::ReconstructorTarget;
+    friend class SimpleAssociator;
 
-    std::map<unsigned long, dbContent::targetReport::BaseInfo> target_reports_ids_; // all sources, record_num -> id
-    std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_; // all sources sorted by time, ts -> record_num
-    std::map<std::string, std::map<unsigned int, std::multimap<boost::posix_time::ptime, unsigned long>>> tr_ds_timestamps_;
-    // dbcontent -> ds_id -> ts ->  record_num
+    SimpleReconstructorSettings settings_;
+    SimpleAssociator associatior_;
+
+    std::map<unsigned long, dbContent::targetReport::ReconstructorInfo> target_reports_;
+    // all sources, record_num -> base info
+    std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
+    // all sources sorted by time, ts -> record_num
+    std::map<unsigned int, std::map<unsigned int,std::vector<unsigned long>>> tr_ds_;
+    // dbcontent id -> ds_id -> record_num, sorted by ts
+
+    std::map<unsigned int, dbContent::ReconstructorTarget> targets_;
+    // utn -> tgt
+
 
     virtual bool processSlice_impl() override;
 
     void clearOldTargetReports();
     void createTargetReports();
+
+
 };
 
