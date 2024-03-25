@@ -442,6 +442,102 @@ void ViewPointGenFeatureText::toJSON_impl(nlohmann::json& j) const
 }
 
 /********************************************************************************
+ * ViewPointGenFeatureGeoImage
+ ********************************************************************************/
+
+const std::string ViewPointGenFeatureGeoImage::FeatureTypeNameGeoImage            = "geoimage";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSource     = "source";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameFn         = "fn";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameData       = "data";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameReference  = "reference";
+
+/**
+*/
+ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const std::string& fn,
+                                                         const RasterReference& ref)
+:   ViewPointGenFeature(FeatureTypeNameGeoImage)
+,   fn_ (fn )
+,   ref_(ref)
+{
+}
+
+/**
+*/
+ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const QImage& data,
+                                                         const RasterReference& ref)
+:   ViewPointGenFeature(FeatureTypeNameGeoImage)
+,   data_(data)
+,   ref_ (ref )
+{
+}
+
+/**
+*/
+void ViewPointGenFeatureGeoImage::toJSON_impl(nlohmann::json& j) const
+{
+    //source
+    j[FeatureGeoImageFieldNameSource] = nlohmann::json::object();
+    auto& source = j[FeatureGeoImageFieldNameSource];
+
+    if (!data_.isNull())
+    {
+        source[ FeatureGeoImageFieldNameData ] = ViewPointGenFeatureGeoImage::imageToByteString(data_);
+    }
+    else
+    {
+        source[ FeatureGeoImageFieldNameFn ] = fn_;
+    }
+
+    //reference
+    j[FeatureGeoImageFieldNameReference] = ref_.toJSON();
+}
+
+/**
+*/
+std::string ViewPointGenFeatureGeoImage::imageToByteString(const QImage& img)
+{
+    int w      = img.width();
+    int h      = img.height();
+    int stride = img.bytesPerLine();
+    int format = (int)img.format();
+
+    QByteArray ba;
+
+    //add meta-info
+    ba.append((const char*)&w     , sizeof(int));
+    ba.append((const char*)&h     , sizeof(int));
+    ba.append((const char*)&stride, sizeof(int));
+    ba.append((const char*)&format, sizeof(int));
+    
+    //add image data
+    ba.append((const char*)img.bits(), img.byteCount());
+
+    //code base 64
+    QString byte_str(ba.toBase64());
+
+    return byte_str.toStdString();
+}
+
+/**
+*/
+QImage ViewPointGenFeatureGeoImage::byteStringToImage(const std::string& str)
+{
+    QByteArray ba_base64(str.data(), str.size());
+    QByteArray ba = QByteArray::fromBase64(ba_base64);
+
+    int* w      = (int*)(ba.data() + 0 * sizeof(int));
+    int* h      = (int*)(ba.data() + 1 * sizeof(int));
+    int* stride = (int*)(ba.data() + 2 * sizeof(int));
+    int* format = (int*)(ba.data() + 3 * sizeof(int));
+
+    std::cout << "byte image - w: " << *w << ", h: " << *h << ", stride: " << *stride << ", format: " << *format << std::endl;
+
+    const char* data = ba.data() + 4 * sizeof(int);
+
+    return QImage((const uchar*)data, *w, *h, *stride, (QImage::Format)(*format));
+}
+
+/********************************************************************************
  * ViewPointGenAnnotation
  ********************************************************************************/
 
@@ -660,7 +756,8 @@ void ViewPointGenVP::toJSON(nlohmann::json& j) const
 
     nlohmann::json filters;
     filters_.toJSON(filters);
-    j[ViewPointFieldFilters] = filters;
+    if (!filters.is_null())
+        j[ViewPointFieldFilters] = filters;
 
     for (const auto& cf : custom_fields_)
     {
