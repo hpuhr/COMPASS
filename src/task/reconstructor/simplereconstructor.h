@@ -69,8 +69,8 @@ class SimpleReconstructor : public ReconstructorBase
     // all sources, record_num -> base info
     std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
     // all sources sorted by time, ts -> record_num
-    std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>> tr_ds_;
-    // dbcontent id -> ds_id -> record_num, sorted by ts
+    std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>> tr_ds_;
+    // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
 
     std::map<unsigned int, dbContent::ReconstructorTarget> targets_;
     // utn -> tgt

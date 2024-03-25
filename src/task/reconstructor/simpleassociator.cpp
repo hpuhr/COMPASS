@@ -261,252 +261,256 @@ void SimpleAssociator::createNonTrackerUTNS()
 
                     //emit statusSignal(("Creating "+dbcont_it.first+" "+ds_name+" UTNs ("+to_string(done_perc)+"%)").c_str());
 
-            std::vector<unsigned long>& rec_nums = ds_it.second;
-            unsigned int num_target_reports = rec_nums.size();
-            vector<int> tmp_assoc_utns; // tr_cnt -> utn
-            tmp_assoc_utns.resize(num_target_reports);
+            for (auto& line_it : ds_it.second)
+            {
 
-            map<unsigned int, vector<unsigned long>> create_todos; // ta -> tr rec_nums
-            boost::mutex create_todos_mutex;
+                std::vector<unsigned long>& rec_nums = line_it.second;
+                unsigned int num_target_reports = rec_nums.size();
+                vector<int> tmp_assoc_utns; // tr_cnt -> utn
+                tmp_assoc_utns.resize(num_target_reports);
 
-                    //for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt)
-            tbb::parallel_for(uint(0), num_target_reports, [&](unsigned int tr_cnt)
-                              {
-                                  unsigned int rec_num = rec_nums.at(tr_cnt);
+                map<unsigned int, vector<unsigned long>> create_todos; // ta -> tr rec_nums
+                boost::mutex create_todos_mutex;
 
-                                  targetReport::ReconstructorInfo& tr =
-                                      reconstructor_.target_reports_.at(rec_num);
-
-                                  assert (tr.timestamp_ >= reconstructor_.remove_before_time_);
-
-                                  tmp_assoc_utns[tr_cnt] = -1; // set as not associated
-
-                                  if(!tr.in_current_slice_) // already processed
-                                      return;
-
-                                  if (tr.acad_ && ta_2_utn.count(*tr.acad_)) // check ta with lookup
+                        //for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt)
+                tbb::parallel_for(uint(0), num_target_reports, [&](unsigned int tr_cnt)
                                   {
-                                      unsigned int tmp_utn = ta_2_utn.at(*tr.acad_);
+                                      unsigned int rec_num = rec_nums.at(tr_cnt);
 
-                                      assert (targets_.count(tmp_utn));
-                                      tmp_assoc_utns[tr_cnt] = tmp_utn;
-                                      return;
-                                  }
+                                      targetReport::ReconstructorInfo& tr =
+                                          reconstructor_.target_reports_.at(rec_num);
 
-                                          // lookup by mode s failed
+                                      assert (tr.timestamp_ >= reconstructor_.remove_before_time_);
 
-                                  if (tr.acad_) // create new utn if tr has ta
-                                                 //  && (!tr_it.has_ma_ || mode_a_conspic.count(tr_it.ma_))  and can not be associated using mode a
-                                  {
-                                      boost::mutex::scoped_lock lock(create_todos_mutex);
-                                      create_todos[*tr.acad_].push_back(rec_num);
+                                      tmp_assoc_utns[tr_cnt] = -1; // set as not associated
 
-                                      return;
-                                  }
+                                      if(!tr.in_current_slice_) // already processed
+                                          return;
 
-                                          // tr non mode s
-
-                                  if (!associate_non_mode_s)
-                                      return;
-
-                                  ptime timestamp;
-                                  vector<tuple<bool, unsigned int, double>> results;
-                                  // usable, utn, distance
-
-                                  results.resize(targets_.size());
-
-                                  timestamp = tr.timestamp_;
-
-                                  if (!tr.position_)
-                                      return;
-
-                                          //                                  TargetPosition tst_pos;
-
-                                          //                                  tst_pos.latitude_ = tr_it.latitude_;
-                                          //                                  tst_pos.longitude_ = tr_it.longitude_;
-                                          //                                  tst_pos.has_altitude_ = tr_it.has_mc_;
-                                          //                                  tst_pos.altitude_ = tr_it.mc_;
-
-                                  FixedTransformation trafo (tr.position_->latitude_,
-                                                            tr.position_->longitude_);
-
-                                          //loginf << "UGA: checking tr a/c/pos";
-
-                                  double x_pos, y_pos;
-                                  double distance;
-
-                                  targetReport::Position ref_pos;
-                                  bool ok;
-
-                                  unsigned int target_cnt=0;
-                                  for (auto& target_it : targets_)
-                                  {
-                                      ReconstructorTarget& other = target_it.second;
-
-                                      results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
-
-                                      if ((tr.acad_ && other.hasACAD())) // only try if not both mode s
+                                      if (tr.acad_ && ta_2_utn.count(*tr.acad_)) // check ta with lookup
                                       {
-                                          ++target_cnt;
-                                          continue;
+                                          unsigned int tmp_utn = ta_2_utn.at(*tr.acad_);
+
+                                          assert (targets_.count(tmp_utn));
+                                          tmp_assoc_utns[tr_cnt] = tmp_utn;
+                                          return;
                                       }
 
-                                      if (!other.isTimeInside(timestamp))
+                                              // lookup by mode s failed
+
+                                      if (tr.acad_) // create new utn if tr has ta
+                                                     //  && (!tr_it.has_ma_ || mode_a_conspic.count(tr_it.ma_))  and can not be associated using mode a
                                       {
-                                          ++target_cnt;
-                                          continue;
+                                          boost::mutex::scoped_lock lock(create_todos_mutex);
+                                          create_todos[*tr.acad_].push_back(rec_num);
+
+                                          return;
                                       }
 
-                                      if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
-                                      {
-                                          // check mode a code
+                                              // tr non mode s
 
-                                          if (tr.mode_a_code_)
+                                      if (!associate_non_mode_s)
+                                          return;
+
+                                      ptime timestamp;
+                                      vector<tuple<bool, unsigned int, double>> results;
+                                      // usable, utn, distance
+
+                                      results.resize(targets_.size());
+
+                                      timestamp = tr.timestamp_;
+
+                                      if (!tr.position_)
+                                          return;
+
+                                              //                                  TargetPosition tst_pos;
+
+                                              //                                  tst_pos.latitude_ = tr_it.latitude_;
+                                              //                                  tst_pos.longitude_ = tr_it.longitude_;
+                                              //                                  tst_pos.has_altitude_ = tr_it.has_mc_;
+                                              //                                  tst_pos.altitude_ = tr_it.mc_;
+
+                                      FixedTransformation trafo (tr.position_->latitude_,
+                                                                tr.position_->longitude_);
+
+                                              //loginf << "UGA: checking tr a/c/pos";
+
+                                      double x_pos, y_pos;
+                                      double distance;
+
+                                      targetReport::Position ref_pos;
+                                      bool ok;
+
+                                      unsigned int target_cnt=0;
+                                      for (auto& target_it : targets_)
+                                      {
+                                          ReconstructorTarget& other = target_it.second;
+
+                                          results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
+
+                                          if ((tr.acad_ && other.hasACAD())) // only try if not both mode s
                                           {
-                                              ComparisonResult ma_res = other.compareModeACode(
-                                                  tr, max_time_diff_sensor);
+                                              ++target_cnt;
+                                              continue;
+                                          }
 
-                                              if (ma_res == ComparisonResult::DIFFERENT)
+                                          if (!other.isTimeInside(timestamp))
+                                          {
+                                              ++target_cnt;
+                                              continue;
+                                          }
+
+                                          if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
+                                          {
+                                              // check mode a code
+
+                                              if (tr.mode_a_code_)
                                               {
-                                                  target_cnt++;
-                                                  continue;
+                                                  ComparisonResult ma_res = other.compareModeACode(
+                                                      tr, max_time_diff_sensor);
+
+                                                  if (ma_res == ComparisonResult::DIFFERENT)
+                                                  {
+                                                      target_cnt++;
+                                                      continue;
+                                                  }
+                                              }
+                                              //loginf << "UGA3 same mode a";
+
+                                                      // check mode c code
+                                              if (tr.barometric_altitude_)
+                                              {
+                                                  ComparisonResult mc_res = other.compareModeCCode(
+                                                      tr, max_time_diff_sensor, max_altitude_diff_sensor, false);
+
+                                                  if (mc_res == ComparisonResult::DIFFERENT)
+                                                  {
+                                                      target_cnt++;
+                                                      continue;
+                                                  }
                                               }
                                           }
-                                          //loginf << "UGA3 same mode a";
 
-                                                  // check mode c code
-                                          if (tr.barometric_altitude_)
+                                                  // check positions
+
+                                          tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
+                                              timestamp, max_time_diff_sensor);
+
+                                          tie(ok, x_pos, y_pos) = trafo.distanceCart(ref_pos.latitude_, ref_pos.longitude_);
+
+                                          if (!ok)
                                           {
-                                              ComparisonResult mc_res = other.compareModeCCode(
-                                                  tr, max_time_diff_sensor, max_altitude_diff_sensor, false);
 
-                                              if (mc_res == ComparisonResult::DIFFERENT)
-                                              {
-                                                  target_cnt++;
-                                                  continue;
-                                              }
+                                              loginf << "UGA3 NOT OK";
+                                              ++target_cnt;
+                                              continue;
+                                          }
+
+                                          distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+
+                                                  //loginf << "UGA3 distance " << distance;
+
+                                          if (distance < max_distance_acceptable_sensor)
+                                              results[target_cnt] = tuple<bool, unsigned int, double>(
+                                                  true, other.utn_, distance);
+
+                                          ++target_cnt;
+                                      }
+
+                                              // find best match
+                                      bool usable;
+                                      unsigned int other_utn;
+
+                                      bool first = true;
+                                      unsigned int best_other_utn;
+                                      double best_distance;
+
+                                      for (auto& res_it : results) // usable, other utn, num updates, avg distance
+                                      {
+                                          tie(usable, other_utn, distance) = res_it;
+
+                                          if (!usable)
+                                              continue;
+
+                                          if (first || distance < best_distance)
+                                          {
+                                              best_other_utn = other_utn;
+                                              best_distance = distance;
+
+                                              first = false;
                                           }
                                       }
 
-                                              // check positions
-
-                                      tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
-                                          timestamp, max_time_diff_sensor);
-
-                                      tie(ok, x_pos, y_pos) = trafo.distanceCart(ref_pos.latitude_, ref_pos.longitude_);
-
-                                      if (!ok)
+                                      if (!first)
                                       {
-
-                                          loginf << "UGA3 NOT OK";
-                                          ++target_cnt;
-                                          continue;
+                                          tmp_assoc_utns[tr_cnt] = best_other_utn;
                                       }
+                                  });
 
-                                      distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+                        //            emit statusSignal(("Creating "+dbcont_it.first+" "+ds_name+" Associations ("
+                        //                               +to_string(done_perc)+"%)").c_str());
 
-                                              //loginf << "UGA3 distance " << distance;
-
-                                      if (distance < max_distance_acceptable_sensor)
-                                          results[target_cnt] = tuple<bool, unsigned int, double>(
-                                              true, other.utn_, distance);
-
-                                      ++target_cnt;
-                                  }
-
-                                          // find best match
-                                  bool usable;
-                                  unsigned int other_utn;
-
-                                  bool first = true;
-                                  unsigned int best_other_utn;
-                                  double best_distance;
-
-                                  for (auto& res_it : results) // usable, other utn, num updates, avg distance
-                                  {
-                                      tie(usable, other_utn, distance) = res_it;
-
-                                      if (!usable)
-                                          continue;
-
-                                      if (first || distance < best_distance)
-                                      {
-                                          best_other_utn = other_utn;
-                                          best_distance = distance;
-
-                                          first = false;
-                                      }
-                                  }
-
-                                  if (!first)
-                                  {
-                                      tmp_assoc_utns[tr_cnt] = best_other_utn;
-                                  }
-                              });
-
-                    //            emit statusSignal(("Creating "+dbcont_it.first+" "+ds_name+" Associations ("
-                    //                               +to_string(done_perc)+"%)").c_str());
-
-                    // create associations
-            int tmp_utn;
-            for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt) // tr_cnt -> utn
-            {
-                tmp_utn = tmp_assoc_utns.at(tr_cnt);
-                if (tmp_utn != -1)
+                        // create associations
+                int tmp_utn;
+                for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt) // tr_cnt -> utn
                 {
-                    assert (targets_.count(tmp_utn));
-                    targets_.at(tmp_utn).addTargetReport(rec_nums.at(tr_cnt));
-                }
-            }
-
-                    // create new targets
-            for (auto& todo_it : create_todos) // ta -> trs
-            {
-                vector<unsigned long>& trs = todo_it.second;
-                assert (trs.size());
-
-                unsigned int new_utn;
-
-                if (targets_.size())
-                    new_utn = targets_.rbegin()->first + 1;
-                else
-                    new_utn = 0;
-
-                        //addTargetByTargetReport(*trs.at(0));
-
-                targets_.emplace(
-                    std::piecewise_construct,
-                    std::forward_as_tuple(new_utn),   // args for key
-                    std::forward_as_tuple(reconstructor_, new_utn, false));  // args for mapped value, new_utn, tmp_utn false
-
-                targets_.at(new_utn).addTargetReports(trs);
-
-                        // add to mode s lookup
-
-                for (auto acad : targets_.at(new_utn).acads_)
-                {
-                    if (ta_2_utn.count(acad))
+                    tmp_utn = tmp_assoc_utns.at(tr_cnt);
+                    if (tmp_utn != -1)
                     {
-                        logwrn << "SimpleAssociator: createNonTrackerUTNS: acad "
-                               << String::hexStringFromInt(acad, 6, '0') << " multiple usage";
+                        assert (targets_.count(tmp_utn));
+                        targets_.at(tmp_utn).addTargetReport(rec_nums.at(tr_cnt));
                     }
-                    else
-                        ta_2_utn[acad] = {new_utn};
                 }
 
-                        //                if (trs.at(0)->has_ta_)
-                        //                    ta_2_utn[trs.at(0)->ta_] = {new_utn};
+                        // create new targets
+                for (auto& todo_it : create_todos) // ta -> trs
+                {
+                    vector<unsigned long>& trs = todo_it.second;
+                    assert (trs.size());
 
-                        //                targets.at(new_utn).addAssociated(trs.at(0));
+                    unsigned int new_utn;
+
+                    if (targets_.size())
+                        new_utn = targets_.rbegin()->first + 1;
+                    else
+                        new_utn = 0;
+
+                            //addTargetByTargetReport(*trs.at(0));
+
+                    targets_.emplace(
+                        std::piecewise_construct,
+                        std::forward_as_tuple(new_utn),   // args for key
+                        std::forward_as_tuple(reconstructor_, new_utn, false));  // args for mapped value, new_utn, tmp_utn false
+
+                    targets_.at(new_utn).addTargetReports(trs);
+
+                            // add to mode s lookup
+
+                    for (auto acad : targets_.at(new_utn).acads_)
+                    {
+                        if (ta_2_utn.count(acad))
+                        {
+                            logwrn << "SimpleAssociator: createNonTrackerUTNS: acad "
+                                   << String::hexStringFromInt(acad, 6, '0') << " multiple usage";
+                        }
+                        else
+                            ta_2_utn[acad] = {new_utn};
+                    }
+
+                            //                if (trs.at(0)->has_ta_)
+                            //                    ta_2_utn[trs.at(0)->ta_] = {new_utn};
+
+                            //                targets.at(new_utn).addAssociated(trs.at(0));
 
 
-                        //                for (unsigned int tr_cnt=0; tr_cnt < trs.size(); ++tr_cnt)
-                        //                {
-                        //                    assert (targets.count(new_utn));
-                        //                    targets.at(new_utn).addAssociated(trs.at(tr_cnt));
-                        //                }
+                            //                for (unsigned int tr_cnt=0; tr_cnt < trs.size(); ++tr_cnt)
+                            //                {
+                            //                    assert (targets.count(new_utn));
+                            //                    targets.at(new_utn).addAssociated(trs.at(tr_cnt));
+                            //                }
+                }
+
             }
-
             ++ds_cnt;
         }
     }
@@ -529,14 +533,19 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
     assert (ds_man.hasDBDataSource(ds_id));
     string ds_name = ds_man.dbDataSource(ds_id).name();
 
-    std::map<unsigned int,std::vector<unsigned long>>& ds_id_trs = reconstructor_.tr_ds_.at(dbcont_id);
-    // ds_id -> ts ->  record_num
+
+
+    std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>& ds_id_trs =
+        reconstructor_.tr_ds_.at(dbcont_id);
+    // ds_id -> line_id -> ts ->  record_num
 
     if (!ds_id_trs.count(ds_id))
     {
         loginf << "SimpleAssociator: createPerTrackerTargets: ds " << ds_name << " has not target reports";
         return tracker_targets;
     }
+
+    std::map<unsigned int, std::vector<unsigned long>>& line_id_trs = ds_id_trs.at(ds_id);
 
     unsigned int tmp_utn_cnt {0};
     bool attached_to_existing_utn;
@@ -547,16 +556,16 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
             //                                             std::pair<unsigned int, boost::posix_time::ptime>>>> tmp_tn2utn_;
 
             // iterate over lines
-    for (unsigned int line_cnt = 0; line_cnt < 4; line_cnt++)
+    for (auto& line_it : line_id_trs)
     {
-        loginf << "SimpleAssociator: createTrackedTargets: iterating line " << line_cnt;
+        loginf << "SimpleAssociator: createTrackedTargets: iterating line " << line_it.first;
 
                 //track num -> tmp_utn, last tod
 
         std::map<unsigned int, std::pair<unsigned int, boost::posix_time::ptime>> tmp_tn2utn_;
 
                 // create temporary targets
-        for (auto& tr_it : ds_id_trs.at(ds_id))
+        for (auto& tr_it : line_it.second)
         {
             assert (reconstructor_.target_reports_.count(tr_it));
             targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(tr_it);
@@ -566,8 +575,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
             if(!tr.in_current_slice_) // already processed
                 continue;
 
-            if (tr.line_id_ != line_cnt) // check for current line
-                continue;
+            assert (tr.line_id_ == line_it.first); // check for current line
 
             if (tr.track_number_) // has track number
             {
@@ -685,7 +693,7 @@ void SimpleAssociator::selfAssociateTrackerUTNs()
         {
             loginf << "SimpleAssociator: selfAssociateTrackerUTNs: processing target utn " << tgt_it->first;
 
-            // only check for targets before
+                    // only check for targets before
             int tmp_utn = findUTNForTrackerTarget(tgt_it->second, targets_, tgt_it->first - 1);
 
             if (tmp_utn != -1) // found match

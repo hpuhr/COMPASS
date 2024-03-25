@@ -152,14 +152,21 @@ bool SimpleReconstructor::processSlice_impl()
 
             // remove_before_time_, new data >= current_slice_begin_
 
+    bool is_last_slice = hasNextTimeSlice();
+
     clearOldTargetReports();
 
     createTargetReports();
 
     associatior_.associateNewData();
 
+
+
     auto associations = createAssociations();
     saveAssociations(associations);
+
+    if (is_last_slice)
+        ;
 
     return true;
 }
@@ -186,10 +193,11 @@ void SimpleReconstructor::clearOldTargetReports()
 
             ts_it->second.in_current_slice_ = false;
 
-            // add to lookup structures
+                    // add to lookup structures
             tr_timestamps_.insert({ts_it->second.timestamp_, ts_it->second.record_num_});
-            tr_ds_[Number::recNumGetDBContId(ts_it->second.record_num_)][ts_it->second.ds_id_].push_back(
-                ts_it->second.record_num_);
+            tr_ds_[Number::recNumGetDBContId(ts_it->second.record_num_)]
+                  [ts_it->second.ds_id_][ts_it->second.line_id_].push_back(
+                          ts_it->second.record_num_);
 
             ++ts_it;
         }
@@ -197,43 +205,43 @@ void SimpleReconstructor::clearOldTargetReports()
 
     loginf << "SimpleReconstructor: clearOldTargetReports: size after " << target_reports_.size();
 
-//    for (auto ts_it = tr_timestamps_.cbegin(); ts_it != tr_timestamps_.cend() /* not hoisted */; /* no increment */)
-//    {
-//        if (ts_it->first < remove_before_time_)
-//            ts_it = tr_timestamps_.erase(ts_it);
-//        else
-//            ++ts_it;
-//    }
+    //    for (auto ts_it = tr_timestamps_.cbegin(); ts_it != tr_timestamps_.cend() /* not hoisted */; /* no increment */)
+    //    {
+    //        if (ts_it->first < remove_before_time_)
+    //            ts_it = tr_timestamps_.erase(ts_it);
+    //        else
+    //            ++ts_it;
+    //    }
 
-//    // dbcontent -> ds_id -> record_num
-//    //std::map<unsigned int, std::map<unsigned int,std::vector<unsigned long>>>
+    //    // dbcontent -> ds_id -> record_num
+    //    //std::map<unsigned int, std::map<unsigned int,std::vector<unsigned long>>>
 
-//    unsigned int removed_cnt {0}, not_removed_cnt{0};
+    //    unsigned int removed_cnt {0}, not_removed_cnt{0};
 
-//    for (auto& dbcont_it : tr_ds_)
-//    {
-//        for (auto& ds_it : dbcont_it.second)
-//        {
-//            for (auto ts_it = ds_it.second.cbegin(); ts_it != ds_it.second.cend() /* not hoisted */; /* no increment */)
-//            {
-//                if (!target_reports_.count(*ts_it)) // TODO could be made faster
-//                {
-//                    ts_it = ds_it.second.erase(ts_it);
-//                    ++removed_cnt;
-//                }
-//                else
-//                {
-//                    ++ts_it;
-//                    ++not_removed_cnt;
-//                }
-//            }
-//        }
-//    }
+    //    for (auto& dbcont_it : tr_ds_)
+    //    {
+    //        for (auto& ds_it : dbcont_it.second)
+    //        {
+    //            for (auto ts_it = ds_it.second.cbegin(); ts_it != ds_it.second.cend() /* not hoisted */; /* no increment */)
+    //            {
+    //                if (!target_reports_.count(*ts_it)) // TODO could be made faster
+    //                {
+    //                    ts_it = ds_it.second.erase(ts_it);
+    //                    ++removed_cnt;
+    //                }
+    //                else
+    //                {
+    //                    ++ts_it;
+    //                    ++not_removed_cnt;
+    //                }
+    //            }
+    //        }
+    //    }
 
-//    loginf << "SimpleReconstructor: clearOldTargetReports: per ds removed_cnt " << removed_cnt
-//           << " not_removed_cnt " << not_removed_cnt;
+    //    loginf << "SimpleReconstructor: clearOldTargetReports: per ds removed_cnt " << removed_cnt
+    //           << " not_removed_cnt " << not_removed_cnt;
 
-    // clear old data from targets
+            // clear old data from targets
     for (auto& tgt_it : targets_)
         tgt_it.second.removeOutdatedTargetReports();
 
@@ -263,7 +271,7 @@ void SimpleReconstructor::createTargetReports()
             record_num = tgt_acc.recordNumber(cnt);
             ts = tgt_acc.timestamp(cnt);
 
-            //loginf << "SimpleReconstructor: createTargetReports: ts " << Time::toString(ts);
+                    //loginf << "SimpleReconstructor: createTargetReports: ts " << Time::toString(ts);
 
             if (ts >= current_slice_begin_) // insert
             {
@@ -274,7 +282,7 @@ void SimpleReconstructor::createTargetReports()
                 info.line_id_ = tgt_acc.lineID(cnt);
                 info.timestamp_ = ts;
 
-                // reconstructor info
+                        // reconstructor info
                 info.in_current_slice_ = true;
                 info.acad_ = tgt_acc.acad(cnt);
                 info.acid_ = tgt_acc.acid(cnt);
@@ -296,15 +304,15 @@ void SimpleReconstructor::createTargetReports()
                 info.track_angle_ = tgt_acc.trackAngle(cnt);
                 info.ground_bit_ = tgt_acc.groundBit(cnt);
 
-                // insert info
+                        // insert info
                 assert (!target_reports_.count(record_num));
                 target_reports_[record_num] = info;
 
-                // insert into lookups
+                        // insert into lookups
                 tr_timestamps_.insert({ts, record_num});
                 // dbcontent id -> ds_id -> ts ->  record_num
 
-                tr_ds_[dbcont_id][info.ds_id_].push_back(record_num);
+                tr_ds_[dbcont_id][info.ds_id_][info.line_id_].push_back(record_num);
             }
             else // update buffer_index_
             {
@@ -397,59 +405,62 @@ void SimpleReconstructor::saveAssociations(
         unsigned int buf_cnt = 0;
         for (auto& ds_it : tr_ds_.at(dbcontent_id))  // iterate over all rec nums
         {
-            for (auto rn_it : ds_it.second)
+            for (auto& line_it : ds_it.second)
             {
-                assert (target_reports_.count(rn_it));
-
-                if (!target_reports_.at(rn_it).in_current_slice_)
-                    continue;
-
-                rec_num_col_vec.set(buf_cnt, rn_it);
-
-                if (tr_associations.count(rn_it))
+                for (auto& rn_it : line_it.second)
                 {
-                    utn_col_vec.set(buf_cnt, tr_associations.at(rn_it));
-                    ++num_associated;
-                }
-                else
-                    ++num_not_associated;
-                // else null
+                    assert (target_reports_.count(rn_it));
 
-                ++buf_cnt;
+                    if (!target_reports_.at(rn_it).in_current_slice_)
+                        continue;
+
+                    rec_num_col_vec.set(buf_cnt, rn_it);
+
+                    if (tr_associations.count(rn_it))
+                    {
+                        utn_col_vec.set(buf_cnt, tr_associations.at(rn_it));
+                        ++num_associated;
+                    }
+                    else
+                        ++num_not_associated;
+                    // else null
+
+                    ++buf_cnt;
+                }
             }
         }
 
-//        assert (accessor_->hasMetaVar<unsigned long>(dbcontent_name, DBContent::meta_var_rec_num_));
-//        NullableVector<unsigned long>& rec_num_vec = accessor_->getMetaVar<unsigned long>(
-//            dbcontent_name, DBContent::meta_var_rec_num_);
+        //        assert (accessor_->hasMetaVar<unsigned long>(dbcontent_name, DBContent::meta_var_rec_num_));
+        //        NullableVector<unsigned long>& rec_num_vec = accessor_->getMetaVar<unsigned long>(
+        //            dbcontent_name, DBContent::meta_var_rec_num_);
 
-//        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
-//        NullableVector<unsigned int>& assoc_vec = accessor_->getMetaVar<unsigned int>(
-//            dbcontent_name, DBContent::meta_var_utn_);
+        //        assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+        //        NullableVector<unsigned int>& assoc_vec = accessor_->getMetaVar<unsigned int>(
+        //            dbcontent_name, DBContent::meta_var_utn_);
 
-//        assert (accessor_->has(dbcontent_name));
-//        unsigned int buffer_size = accessor_->get(dbcontent_name)->size();
+        //        assert (accessor_->has(dbcontent_name));
+        //        unsigned int buffer_size = accessor_->get(dbcontent_name)->size();
 
-//        for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
-//        {
-//            assert (!rec_num_vec.isNull(cnt));
+        //        for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+        //        {
+        //            assert (!rec_num_vec.isNull(cnt));
 
-//            rec_num = rec_num_vec.get(cnt);
+        //            rec_num = rec_num_vec.get(cnt);
 
-//            if (associations.count(rec_num))
-//            {
-//               //if (assoc_vec.isNull(cnt))
-//                assoc_vec.set(cnt, get<0>(associations.at(rec_num)));
-//                //else
-//                //assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
+        //            if (associations.count(rec_num))
+        //            {
+        //               //if (assoc_vec.isNull(cnt))
+        //                assoc_vec.set(cnt, get<0>(associations.at(rec_num)));
+        //                //else
+        //                //assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
 
-//                ++num_associated;
-//            }
-//            else
-//                ++num_not_associated;
-//        }
+        //                ++num_associated;
+        //            }
+        //            else
+        //                ++num_not_associated;
+        //        }
 
-//        association_counts_[dbcontent_name] = {buffer_size, num_associated};
+        //        association_counts_[dbcontent_name] = {buffer_size, num_associated};
 
         loginf << "CreateAssociationsJob: saveAssociations: dcontent " << dbcontent_name
                <<  " assoc " << num_associated << " not assoc " << num_not_associated
@@ -461,67 +472,67 @@ void SimpleReconstructor::saveAssociations(
     }
 
             // delete all data from buffer except rec_nums and associations, rename to db column names
-//    for (auto& buf_it : *accessor_)
-//    {
-//        string dbcontent_name = buf_it.first;
+    //    for (auto& buf_it : *accessor_)
+    //    {
+    //        string dbcontent_name = buf_it.first;
 
-//        string rec_num_var_name =
-//            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).name();
-//        string rec_num_col_name =
-//            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
+    //        string rec_num_var_name =
+    //            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).name();
+    //        string rec_num_col_name =
+    //            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
 
-//        string utn_var_name =
-//            dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).name();
-//        string utn_col_name =
-//            dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).dbColumnName();
+    //        string utn_var_name =
+    //            dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).name();
+    //        string utn_col_name =
+    //            dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).dbColumnName();
 
-//        PropertyList properties = buf_it.second->properties();
+    //        PropertyList properties = buf_it.second->properties();
 
-//        for (auto& prop_it : properties.properties())
-//        {
-//            if (prop_it.name() == rec_num_var_name)
-//                buf_it.second->rename<unsigned long>(rec_num_var_name, rec_num_col_name);
-//            else if (prop_it.name() == utn_var_name)
-//                buf_it.second->rename<unsigned int>(utn_var_name, utn_col_name);
-//            else
-//                buf_it.second->deleteProperty(prop_it);
-//        }
-//    }
+    //        for (auto& prop_it : properties.properties())
+    //        {
+    //            if (prop_it.name() == rec_num_var_name)
+    //                buf_it.second->rename<unsigned long>(rec_num_var_name, rec_num_col_name);
+    //            else if (prop_it.name() == utn_var_name)
+    //                buf_it.second->rename<unsigned int>(utn_var_name, utn_col_name);
+    //            else
+    //                buf_it.second->deleteProperty(prop_it);
+    //        }
+    //    }
 
-//            // actually save data, ok since DB job
-//    for (auto& buf_it : *accessor_)
-//    {
-//        string dbcontent_name = buf_it.first;
+    //            // actually save data, ok since DB job
+    //    for (auto& buf_it : *accessor_)
+    //    {
+    //        string dbcontent_name = buf_it.first;
 
-//        loginf << "CreateAssociationsJob: saveAssociations: saving for " << dbcontent_name;
+    //        loginf << "CreateAssociationsJob: saveAssociations: saving for " << dbcontent_name;
 
-//        DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
-//        dbContent::Variable& key_var =
-//            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name);
+    //        DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
+    //        dbContent::Variable& key_var =
+    //            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name);
 
-//        unsigned int chunk_size = 50000;
+    //        unsigned int chunk_size = 50000;
 
-//        unsigned int steps = buf_it.second->size() / chunk_size;
+    //        unsigned int steps = buf_it.second->size() / chunk_size;
 
-//        unsigned int index_from = 0;
-//        unsigned int index_to = 0;
+    //        unsigned int index_from = 0;
+    //        unsigned int index_to = 0;
 
-//        for (unsigned int cnt = 0; cnt <= steps; cnt++)
-//        {
-//            index_from = cnt * chunk_size;
-//            index_to = index_from + chunk_size;
+    //        for (unsigned int cnt = 0; cnt <= steps; cnt++)
+    //        {
+    //            index_from = cnt * chunk_size;
+    //            index_to = index_from + chunk_size;
 
-//            if (index_to > buf_it.second->size() - 1)
-//                index_to = buf_it.second->size() - 1;
+    //            if (index_to > buf_it.second->size() - 1)
+    //                index_to = buf_it.second->size() - 1;
 
-//            loginf << "CreateAssociationsJob: saveAssociations: step " << cnt << " steps " << steps << " from "
-//                   << index_from << " to " << index_to;
+    //            loginf << "CreateAssociationsJob: saveAssociations: step " << cnt << " steps " << steps << " from "
+    //                   << index_from << " to " << index_to;
 
-//            db_interface_.updateBuffer(dbcontent.dbTableName(), key_var.dbColumnName(),
-//                                       buf_it.second, index_from, index_to);
+    //            db_interface_.updateBuffer(dbcontent.dbTableName(), key_var.dbColumnName(),
+    //                                       buf_it.second, index_from, index_to);
 
-//        }
-//    }
+    //        }
+    //    }
 
     loginf << "CreateAssociationsJob: saveAssociations: done";
 }

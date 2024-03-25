@@ -72,7 +72,8 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
     target_reports_.push_back(tr.record_num_);
     tr_timestamps_.insert({tr.timestamp_,tr.record_num_});
     // all sources sorted by time, ts -> record_num
-    tr_ds_timestamps_[Number::recNumGetDBContId(tr.record_num_)][tr.ds_id_].insert({tr.timestamp_, tr.record_num_});
+    tr_ds_timestamps_[Number::recNumGetDBContId(tr.record_num_)][tr.ds_id_][tr.line_id_].insert(
+        {tr.timestamp_, tr.record_num_});
     // dbcontent id -> ds_id -> ts -> record_num
 
     if (tr.acad_)

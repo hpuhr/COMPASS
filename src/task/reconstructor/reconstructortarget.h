@@ -43,8 +43,10 @@ class ReconstructorTarget
     std::vector<unsigned long> target_reports_;
     std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
     // all sources sorted by time, ts -> record_num
-    std::map<unsigned int, std::map<unsigned int, std::multimap<boost::posix_time::ptime, unsigned long>>> tr_ds_timestamps_;
-    // dbcontent id -> ds_id -> ts -> record_num
+    std::map<unsigned int, std::map<unsigned int,
+                                    std::map<unsigned int,
+                                             std::multimap<boost::posix_time::ptime, unsigned long>>>> tr_ds_timestamps_;
+    // dbcontent id -> ds_id -> line_id -> ts -> record_num
 
     std::set<unsigned int> acads_;
     std::set<std::string> acids_;
