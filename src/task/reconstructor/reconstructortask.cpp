@@ -86,6 +86,9 @@ void ReconstructorTask::run()
 
     deleteCalculatedReferences();
 
+    DBContentManager& cont_man = COMPASS::instance().dbContentManager();
+    cont_man.clearTargetsInfo();
+
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
     simple_reconstructor_->reset();

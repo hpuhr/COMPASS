@@ -66,6 +66,8 @@ class ReconstructorTarget
     std::set <unsigned int> ds_ids_;
     //std::set <std::pair<unsigned int, unsigned int>> track_nums_; // ds_id, tn
 
+    std::map <unsigned int, unsigned int> counts_; // dbcontent id -> count
+
     mutable Transformation trafo_;
 
     void addTargetReport (unsigned long rec_num);
@@ -79,7 +81,9 @@ class ReconstructorTarget
     bool hasAnyOfACADs (std::set<unsigned int> tas) const;
 
     bool hasModeA () const;
-    bool hasModeA (unsigned int ma) const;
+    bool hasModeA (unsigned int code) const;
+
+    bool hasModeC () const;
 
     std::string asStr() const;
     std::string timeStr() const;
@@ -135,6 +139,7 @@ class ReconstructorTarget
     //void calculateSpeeds();
     //void removeNonModeSTRs();
 
+    void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts();
 
     void removeOutdatedTargetReports();

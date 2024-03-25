@@ -162,9 +162,14 @@ bool ReconstructorTarget::hasModeA () const
     return mode_as_.size();
 }
 
-bool ReconstructorTarget::hasModeA (unsigned int ma)  const
+bool ReconstructorTarget::hasModeA (unsigned int code)  const
 {
-    return mode_as_.count(ma);
+    return mode_as_.count(code);
+}
+
+bool ReconstructorTarget::hasModeC () const
+{
+    return mode_c_min_ && mode_c_max_;
 }
 
 std::string ReconstructorTarget::asStr() const
@@ -1011,17 +1016,29 @@ ComparisonResult ReconstructorTarget::compareModeCCode (dbContent::targetReport:
 //    }
 //}
 
+void ReconstructorTarget::updateCounts()
+{
+    for (auto& rn_it : target_reports_)
+    {
+        assert (reconstructor_.target_reports_.count(rn_it));
+        dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rn_it);
+
+        if (!tr.in_current_slice_)
+            continue;
+
+        counts_[Number::recNumGetDBContId(rn_it)] += 1;
+    }
+}
+
 std::map <std::string, unsigned int> ReconstructorTarget::getDBContentCounts()
 {
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     std::map <std::string, unsigned int> counts;
-    unsigned int dbcont_id;
 
-    for (auto& rn_it : target_reports_)
+    for (auto& cnt_it : counts_)
     {
-        dbcont_id = Number::recNumGetDBContId(dataFor(rn_it).record_num_);
-        counts[dbcont_man.dbContentWithId(dbcont_id)] += 1;
+        counts[dbcont_man.dbContentWithId(cnt_it.first)] = cnt_it.second;
     }
 
     return counts;
