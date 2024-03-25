@@ -16,13 +16,18 @@
  */
 
 #include "simplereferencecalculator.h"
+#include "spline_interpolator.h"
+#include "simplereconstructor.h"
+#include "targetreportdefs.h"
+
+#include "kalman_estimator.h"
+#include "kalman_interface_umkalman2d.h"
+#if USE_EXPERIMENTAL_SOURCE
+#include "kalman_interface_amkalman2d.h"
+#endif
 
 #include "util/timeconv.h"
 #include "util/number.h"
-#include "targetreportchain.h"
-#include "viewpointgenerator.h"
-#include "spline_interpolator.h"
-#include "simplereconstructor.h"
 #include "logger.h"
 
 #include <ogr_spatialref.h>
@@ -42,21 +47,46 @@ SimpleReferenceCalculator::~SimpleReferenceCalculator() = default;
 
 /**
 */
-bool SimpleReferenceCalculator::computeReferences()
+void SimpleReferenceCalculator::prepareForNextSlice()
 {
-    reset();
-    generateMeasurements();
-    reconstructMeasurements();
-    
+    auto ThresRemove = reconstructor_.remove_before_time_;
+    auto ThresJoin   = getJoinThreshold();
 
-    return true;
+    //remove previous updates which are no longer needed (either too old or above the join threshold)
+    for (auto& ref : references_)
+    {
+        std::remove_if(ref.second.updates.begin(),
+                       ref.second.updates.end(),
+                       [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                                                           update.t >= ThresJoin; });
+        ref.second.updates.shrink_to_fit();
+    }
+
+    //reset data structs
+    reset();
 }
 
 /**
 */
 void SimpleReferenceCalculator::reset()
 {
-    measurements_.clear();
+    for (auto& ref : references_)
+    {
+        ref.second.measurements.resize(0);
+        ref.second.init_update.reset();
+        ref.second.start_index.reset();
+    }
+}
+
+/**
+*/
+bool SimpleReferenceCalculator::computeReferences()
+{
+    reset();
+    generateMeasurements();
+    reconstructMeasurements();
+    
+    return true;
 }
 
 /**
@@ -74,7 +104,11 @@ void SimpleReferenceCalculator::generateTargetMeasurements(const dbContent::Reco
     for (const auto& dbcontent_targets : target.tr_ds_timestamps_)
         for (const auto& ds_targets : dbcontent_targets.second)
             for (const auto& line_targets : ds_targets.second)
-                generateLineMeasurements(target, dbcontent_targets.first, ds_targets.first, line_targets.first, line_targets.second);
+                generateLineMeasurements(target, 
+                                         dbcontent_targets.first, 
+                                         ds_targets.first, 
+                                         line_targets.first, 
+                                         line_targets.second);
 
 }
 
@@ -84,11 +118,55 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
                                                          unsigned int dbcontent_id,
                                                          unsigned int sensor_id,
                                                          unsigned int line_id,
-                                                         const std::multimap<boost::posix_time::ptime, unsigned long>& target_reports)
+                                                         const TargetReports& target_reports)
 {
     std::vector<reconstruction::Measurement> line_measurements;
 
-    //@TODO: collect measurements
+    for (const auto& elem : target_reports)
+    {
+        const auto& tr_info = reconstructor_.target_reports_.at(elem.second);
+
+        reconstruction::Measurement mm;
+        mm.source_id = elem.second;
+        
+        auto pos = tr_info.position_;
+        assert(pos.has_value());
+
+        auto vel = tr_info.velocity_;
+
+        auto pos_acc = reconstructor_.acc_estimator_.positionAccuracy(tr_info);
+        auto vel_acc = reconstructor_.acc_estimator_.velocityAccuracy(tr_info);
+        auto acc_acc = reconstructor_.acc_estimator_.accelerationAccuracy(tr_info);
+
+        //position
+        mm.lat = pos.value().latitude_;
+        mm.lon = pos.value().longitude_;
+
+        //velocity
+        if (vel.has_value())
+        {
+            auto speed_vec = Utils::Number::speedAngle2SpeedVec(vel->speed_, vel->track_angle_);
+
+            mm.vx = speed_vec.first;
+            mm.vy = speed_vec.second;
+            //@TODO: vz?
+        }
+
+        //@TODO: acceleration?
+
+        //accuracies
+        mm.x_stddev = pos_acc.x_stddev_;
+        mm.y_stddev = pos_acc.y_stddev_;
+        mm.xy_cov   = pos_acc.xy_cov_;
+
+        mm.vx_stddev = vel_acc.vx_stddev_;
+        mm.vy_stddev = vel_acc.vy_stddev_;
+
+        mm.ax_stddev = acc_acc.ax_stddev_;
+        mm.ay_stddev = acc_acc.ay_stddev_;
+
+        line_measurements.push_back(mm);
+    }
 
     addMeasurements(target.utn_, dbcontent_id, line_measurements);
 }
@@ -103,10 +181,11 @@ void SimpleReferenceCalculator::addMeasurements(unsigned int utn,
     preprocessMeasurements(dbcontent_id, measurements);
 
     //add to utn measurements
-    auto& utn_mms = measurements_[ utn ];
+    auto& utn_ref = references_[ utn ];
+    utn_ref.utn = utn;
 
     if (!measurements.empty())
-        utn_mms.insert(utn_mms.end(), measurements.begin(), measurements.end());
+        utn_ref.measurements.insert(utn_ref.measurements.end(), measurements.begin(), measurements.end());
 }
 
 /**
@@ -165,166 +244,184 @@ void SimpleReferenceCalculator::interpolateMeasurements(Measurements& measuremen
 */
 void SimpleReferenceCalculator::reconstructMeasurements()
 {
-    if (measurements_.empty())
+    if (references_.empty())
         return;
 
-    
-
-    std::vector<CalcRefJob> jobs;
+    std::vector<TargetReferences*> refs;
 
     //collect jobs
-    for (auto& mms : measurements_)
-    {
-        CalcRefJob job;
-        job.utn          = mms.first;
-        job.measurements = &mms.second;
+    for (auto& ref : references_)
+        refs.push_back(&ref.second);
 
-        jobs.push_back(job);
-    }
-
-    unsigned int num_targets = jobs.size();
+    unsigned int num_targets = refs.size();
 
     //compute references in parallel
     tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
     {
-        reconstructMeasurements(jobs[ tgt_cnt ]);
+        reconstructMeasurements(*refs[ tgt_cnt ]);
     });
 }
 
 /**
 */
-void SimpleReferenceCalculator::reconstructMeasurements(CalcRefJob& job)
+boost::posix_time::ptime SimpleReferenceCalculator::getJoinThreshold() const
 {
-    assert(job.measurements);
+    const auto ThresJoin = reconstructor_.remove_before_time_ + (reconstructor_.current_slice_begin_ - reconstructor_.remove_before_time_) / 2;
+    return ThresJoin;
+}
+
+/**
+*/
+bool SimpleReferenceCalculator::initReconstruction(TargetReferences& refs)
+{
+    refs.start_index.reset();
+    refs.init_update.reset();
+
+    if (refs.measurements.size() < 1)
+        return false;
 
     //sort measurements by timestamp
-    std::sort(job.measurements->begin(), job.measurements->end(), mmSortPred);
+    std::sort(refs.measurements.begin(), refs.measurements.end(), mmSortPred);
 
-    // 1) create kalman variant
-    // 2) init kalman to last slice end (if available)
-    // 3) run kalman and get updates
-    // 4) store updates
+    //join old and new updates in the mid of the overlap timeframe
+    const auto ThresJoin = getJoinThreshold();
 
+    //get start index of new measurements (first measurement above join threshold)
+    for (size_t i = 0; i < refs.measurements.size(); ++i)
+    {
+        if (refs.measurements[ i ].t >= ThresJoin)
+        {
+            refs.start_index = i;
+            break;
+        }
+    }
 
+    //no new measurements to add?
+    if (!refs.start_index.has_value())
+        return false;
+
+    //get last slice's last update for init
+    if (!refs.updates.empty())
+        refs.init_update = *refs.updates.rbegin();
+
+    return true;
 }
 
+/**
+*/
+void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
+{
+    //init
+    if (!initReconstruction(refs))
+        return;
 
+    assert(refs.start_index.has_value());
 
+    //create and configure kalman estimator
+    reconstruction::KalmanEstimator estimator;
 
+    auto rec_type = settings_.rec_type;
 
+    std::unique_ptr<reconstruction::KalmanInterface> interface;
+    if (rec_type == Settings::Rec_UMKalman2D)
+    {
+        interface.reset(new reconstruction::KalmanInterfaceUMKalman2D(true));
+    }
+    else
+    {
+#if USE_EXPERIMENTAL_SOURCE
+        interface.reset(new reconstruction::KalmanInterfaceAMKalman2D());
+#else
+        throw std::runtime_error("SimpleReferenceCalculator: reconstructMeasurements: reconstructor type not supported by build");
+#endif
+    }
 
+    estimator.init(std::move(interface));
 
+    estimator.settings().min_chain_size = settings_.min_chain_size;
+    estimator.settings().min_dt         = settings_.min_dt;
+    estimator.settings().max_dt         = settings_.max_dt;
+    estimator.settings().max_distance   = settings_.max_distance;
 
+    estimator.settings().Q_var     = settings_.Q_std * settings_.Q_std;
+    estimator.settings().verbosity = settings_.verbosity;
 
+    estimator.settings().resample_dt          = settings_.resample_dt;
+    estimator.settings().resample_Q_var       = settings_.resample_Q_std * settings_.resample_Q_std;
+    estimator.settings().resample_interp_mode = reconstruction::StateInterpMode::BlendVar;
 
+    estimator.settings().max_proj_distance_cart = settings_.max_proj_distance_cart;
 
+    std::vector<kalman::KalmanUpdate> updates_new;
+    kalman::KalmanUpdate update;
+    size_t offs = 0;
 
+    //init kalman (either from last slice's update or from new measurement)
+    if (refs.init_update.has_value())
+    {
+        //init kalman from last slice's update
+        estimator.kalmanInit(refs.init_update.value());
 
+        //continue with first measurement
+    }
+    else
+    {
+        //reinit kalman with first measurement
+        auto& mm0 = refs.measurements[ refs.start_index.value() ];
+        estimator.kalmanInit(update, mm0);
+        updates_new.push_back(update);
 
+        ++offs; //continue with second measurement
+    }
 
+    //add new measurements to kalman and collect updates
+    for (size_t i = offs; i < refs.measurements.size(); ++i)
+    {
+        estimator.kalmanStep(update, refs.measurements[ i ]);
+        updates_new.push_back(update);
+    }
 
+    //run rts smoothing?
+    if (settings_.smooth_rts)
+    {
+        //jointly smooth old + new updates RTS
+        std::vector<kalman::KalmanUpdate> updates_joint = refs.updates;
+        updates_joint.insert(updates_joint.end(), updates_new.begin(), updates_new.end());
 
+        estimator.smoothUpdates(updates_joint);
+
+        //retrieve new RTS updates
+        size_t offs = refs.updates.size();
+        for (size_t i = 0; i < updates_new.size(); ++i)
+            updates_new[ i ] = updates_joint[ offs + i ];
+    }
+
+    //resample?
+    if (settings_.resample_result)
+    {
+        //add last update of old slice if available
+        if (refs.init_update.has_value())
+            updates_new.insert(updates_new.begin(), refs.init_update.value());
+        
+        //interpolate measurements
+        std::vector<kalman::KalmanUpdate> updates_interp;
+        estimator.interpUpdates(updates_interp, updates_new);
+
+        updates_new = updates_interp;
+    }
+
+    //join old and new measurements
+    const auto ThresJoin = getJoinThreshold();
+
+    refs.updates.reserve(refs.updates.size() + updates_new.size());
+    for (size_t i = 0; i < updates_new.size(); ++i)
+        if (updates_new[ i ].t >= ThresJoin)
+            refs.updates.push_back(updates_new[ i ]);
+
+    refs.updates.shrink_to_fit();
+}
 
 #if 0
-
-/**
-*/
-void Reconstructor::addChain(const dbContent::TargetReport::Chain* tr_chain, const std::string& dbcontent)
-{
-    assert(tr_chain);
-
-    uint32_t source_id = source_cnt_++;
-    sources_[source_id] = tr_chain;
-
-    source_uncerts_.push_back({}); //add empty uncertainty
-
-    DBContentInfo& info = dbcontent_infos_[dbcontent];
-
-    //if uncertainty is stored for dbcontent => assign
-    if (info.uncert.has_value())
-        source_uncerts_.back() = info.uncert.value();
-
-    const auto& indices = tr_chain->timestampIndexes();
-
-    info.count += indices.size();
-
-    std::vector<Measurement> mms;
-    mms.reserve(indices.size());
-
-    for (const auto& index : indices)
-    {
-        Measurement mm;
-        mm.source_id = source_id;
-        mm.t         = index.first;
-
-        boost::optional<dbContent::TargetPosition>         pos;
-        boost::optional<dbContent::TargetVelocity>         speed;
-        boost::optional<dbContent::TargetPositionAccuracy> accuracy_pos;
-        boost::optional<dbContent::TargetVelocityAccuracy> accuracy_vel;
-
-        if (tr_chain->ignorePosition(index))
-            continue;
-
-        pos = tr_chain->pos(index);
-
-        mm.lat = pos->latitude_;
-        mm.lon = pos->longitude_;
-        
-        //kepp track of min/max height
-        if (pos->has_altitude_ && (!min_height_.has_value() || pos->altitude_ < min_height_.value()))
-            min_height_ = pos->altitude_;
-        if (pos->has_altitude_ && (!max_height_.has_value() || pos->altitude_ > max_height_.value()))
-            max_height_ = pos->altitude_;
-
-        speed        = tr_chain->speed(index);
-        accuracy_pos = tr_chain->posAccuracy(index);
-        accuracy_vel = tr_chain->speedAccuracy(index);
-
-        if (speed.has_value())
-        {
-            auto speed_vec = Utils::Number::speedAngle2SpeedVec(speed->speed_, speed->track_angle_);
-
-            mm.vx = speed_vec.first;
-            mm.vy = speed_vec.second;
-            //@TODO: vz?
-        }
-
-        //@TODO: acceleration?
-
-        if (accuracy_pos.has_value())
-        {
-            mm.x_stddev = accuracy_pos->x_stddev_;
-            mm.y_stddev = accuracy_pos->y_stddev_;
-            mm.xy_cov   = accuracy_pos->xy_cov_;
-        }
-
-        if (accuracy_vel.has_value())
-        {
-            mm.vx_stddev = accuracy_vel->vx_stddev_;
-            mm.vy_stddev = accuracy_vel->vy_stddev_;
-        }
-
-        mms.push_back(mm);
-    }
-
-    //resample input data?
-    if (info.interp_options.has_value())
-    {
-        //loginf << "Interpolating measurements of dbcontent " << dbcontent;
-        interpolateMeasurements(mms, info.interp_options.value());
-    }
-
-    if (!mms.empty())
-        measurements_.insert(measurements_.end(), mms.begin(), mms.end());
-}
-
-
-/**
-*/
-void Reconstructor::postprocessReferences(std::vector<Reference>& references)
-{
-    //nothing to do at the moment
-}
 
 /**
 */

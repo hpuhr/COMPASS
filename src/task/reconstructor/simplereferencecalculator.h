@@ -35,16 +35,50 @@ class SimpleReferenceCalculator
 public:
     struct Settings
     {
+        enum ReconstructorType
+        {
+            Rec_UMKalman2D = 0,
+            Rec_AMKalman2D
+        };
+
         int verbosity = 0;
+
+        ReconstructorType rec_type = ReconstructorType::Rec_UMKalman2D;
+
+        //default noise
+        double Q_std = 30.0;
+
+        //reinit related
+        int    min_chain_size = 2;
+        double min_dt         = 0.0;
+        double max_dt         = 11.0;
+        double max_distance   = 50000.0;
+
+        bool smooth_rts = true;
+
+        //result resampling related
+        bool   resample_result;
+        double resample_Q_std = 10.0;
+        double resample_dt    = 2.0;
+
+        //dynamic projection change
+        double max_proj_distance_cart = 20000.0;
+
+        //systrack resampling related
+        //bool   resample_systracks        = true; // resample system tracks using spline interpolation
+        //double resample_systracks_dt     = 1.0;  // resample interval in seconds
+        //double resample_systracks_max_dt = 30.0; // maximum timestep to interpolate
 
         std::map<unsigned int, reconstruction::InterpOptions> interp_options;
     };
 
-    typedef std::vector<reconstruction::Measurement> Measurements;
+    typedef std::vector<reconstruction::Measurement>               Measurements;
+    typedef std::multimap<boost::posix_time::ptime, unsigned long> TargetReports;
 
     SimpleReferenceCalculator(SimpleReconstructor& reconstructor);
     virtual ~SimpleReferenceCalculator();
 
+    void prepareForNextSlice();
     bool computeReferences();
 
     Settings& settings() { return settings_; }
@@ -52,11 +86,15 @@ public:
     static std::vector<std::vector<reconstruction::Measurement>> splitMeasurements(const Measurements& measurements,
                                                                                    double max_dt);
 private:
-    struct CalcRefJob
+    struct TargetReferences
     {
         unsigned int utn;
-        std::vector<reconstruction::Measurement>* measurements;
-        std::vector<kalman::KalmanUpdate>         updates;
+
+        std::vector<reconstruction::Measurement> measurements;
+        std::vector<kalman::KalmanUpdate>        updates;
+
+        boost::optional<kalman::KalmanUpdate> init_update;
+        boost::optional<size_t>               start_index;
     };
 
     void reset();
@@ -67,7 +105,7 @@ private:
                                   unsigned int dbcontent_id,
                                   unsigned int sensor_id,
                                   unsigned int line_id,
-                                  const std::multimap<boost::posix_time::ptime, unsigned long>& target_reports);
+                                  const TargetReports& target_reports);
     
     void addMeasurements(unsigned int utn,
                          unsigned int dbcontent_id, 
@@ -78,11 +116,14 @@ private:
                                  const reconstruction::InterpOptions& options) const;
     
     void reconstructMeasurements();
-    void reconstructMeasurements(CalcRefJob& job);
+    bool initReconstruction(TargetReferences& refs);
+    void reconstructMeasurements(TargetReferences& refs);
+
+    boost::posix_time::ptime getJoinThreshold() const;
 
     SimpleReconstructor& reconstructor_;
 
     Settings settings_;
 
-    std::map<unsigned int, std::vector<reconstruction::Measurement>> measurements_;
+    std::map<unsigned int, TargetReferences> references_;
 };
