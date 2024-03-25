@@ -5,6 +5,7 @@
 #include "global.h"
 #include "reconstructortarget.h"
 #include "simpleassociator.h"
+#include "simpleaccuracyestimator.h"
 
 class SimpleReconstructorSettings
 {
@@ -64,6 +65,7 @@ class SimpleReconstructor : public ReconstructorBase
 
     SimpleReconstructorSettings settings_;
     SimpleAssociator associatior_;
+    SimpleAccuracyEstimator acc_estimator_;
 
     std::map<unsigned long, dbContent::targetReport::ReconstructorInfo> target_reports_;
     // all sources, record_num -> base info

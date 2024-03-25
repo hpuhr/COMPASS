@@ -17,7 +17,8 @@ using namespace Utils;
 
 SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std::string& instance_id,
                                          ReconstructorTask& task)
-    : ReconstructorBase(class_id, instance_id, task), associatior_(*this)
+    : ReconstructorBase(class_id, instance_id, task), associatior_(*this),
+      acc_estimator_(*this)
 {
     // common
     registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);

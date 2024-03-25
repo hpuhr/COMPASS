@@ -135,6 +135,15 @@ struct VelocityAccuracy
     double vy_stddev_ {0}; // m/s
 };
 
+struct AccelerationAccuracy
+{
+    AccelerationAccuracy() = default;
+    AccelerationAccuracy(double ax_stddev, double ay_stddev) : ax_stddev_(ax_stddev), ay_stddev_(ay_stddev) {}
+
+    double ax_stddev_ {0}; // m/s^2
+    double ay_stddev_ {0}; // m/s^2
+};
+
 class ModeACode
 {
   public:

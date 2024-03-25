@@ -195,7 +195,7 @@ void SimpleAssociator::createTrackerUTNs()
     }
 
             //emit statusSignal("Self-associating Sum Targets");
-    //selfAssociateTrackerUTNs(); TODO
+    //selfAssociateTrackerUTNs();
 
             //emit statusSignal("Checking Final Targets");
             //cleanTrackerUTNs(sum_targets);
