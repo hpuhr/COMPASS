@@ -23,9 +23,9 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std:
 {
     // common
     registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);
-    registerParameter("clean_dubious_utns", &settings_.clean_dubious_utns_, true);
-    registerParameter("mark_dubious_utns_unused", &settings_.mark_dubious_utns_unused_, false);
-    registerParameter("comment_dubious_utns", &settings_.comment_dubious_utns_, true);
+//    registerParameter("clean_dubious_utns", &settings_.clean_dubious_utns_, true);
+//    registerParameter("mark_dubious_utns_unused", &settings_.mark_dubious_utns_unused_, false);
+//    registerParameter("comment_dubious_utns", &settings_.comment_dubious_utns_, true);
 
             // tracker stuff
     registerParameter("max_time_diff_tracker", &settings_.max_time_diff_tracker_, 15.0);
@@ -40,7 +40,7 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std:
 
     registerParameter("min_updates_tracker", &settings_.min_updates_tracker_, 2u); // kb 3!!!
     registerParameter("prob_min_time_overlap_tracker", &settings_.prob_min_time_overlap_tracker_, 0.5); //kb 0.7
-    registerParameter("max_speed_tracker_kts", &settings_.max_speed_tracker_kts_, 100000.0);
+    //registerParameter("max_speed_tracker_kts", &settings_.max_speed_tracker_kts_, 100000.0);
 
     registerParameter("cont_max_time_diff_tracker", &settings_.cont_max_time_diff_tracker_, 30.0);
     registerParameter("cont_max_distance_acceptable_tracker", &settings_.cont_max_distance_acceptable_tracker_, 1852.0);
