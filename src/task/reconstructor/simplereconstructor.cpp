@@ -152,7 +152,7 @@ bool SimpleReconstructor::processSlice_impl()
 
             // remove_before_time_, new data >= current_slice_begin_
 
-    bool is_last_slice = hasNextTimeSlice();
+    bool is_last_slice = !hasNextTimeSlice();
 
     clearOldTargetReports();
 
@@ -160,13 +160,11 @@ bool SimpleReconstructor::processSlice_impl()
 
     associatior_.associateNewData();
 
-
-
     auto associations = createAssociations();
     saveAssociations(associations);
 
     if (is_last_slice)
-        ;
+        saveTargets();
 
     return true;
 }
@@ -462,13 +460,13 @@ void SimpleReconstructor::saveAssociations(
 
         //        association_counts_[dbcontent_name] = {buffer_size, num_associated};
 
-        loginf << "CreateAssociationsJob: saveAssociations: dcontent " << dbcontent_name
+        loginf << "SimpleReconstructor: saveAssociations: dcontent " << dbcontent_name
                <<  " assoc " << num_associated << " not assoc " << num_not_associated
                << " buffer size " << buffer->size();
 
         db_interface.updateBuffer(dbcontent.dbTableName(), rec_num_col_name, buffer);
 
-        loginf << "CreateAssociationsJob: saveAssociations: dcontent " << dbcontent_name << " done";
+        loginf << "SimpleReconstructor: saveAssociations: dcontent " << dbcontent_name << " done";
     }
 
             // delete all data from buffer except rec_nums and associations, rename to db column names
@@ -534,5 +532,49 @@ void SimpleReconstructor::saveAssociations(
     //        }
     //    }
 
-    loginf << "CreateAssociationsJob: saveAssociations: done";
+    loginf << "SimpleReconstructor: saveAssociations: done";
+}
+
+void SimpleReconstructor::saveTargets()
+{
+    loginf << "SimpleReconstructor: saveTargets: num " << targets_.size();
+
+    DBContentManager& cont_man = COMPASS::instance().dbContentManager();
+
+    for (auto& tgt_it : targets_)
+    {
+        cont_man.createNewTarget(tgt_it.first);
+
+        dbContent::Target& target = cont_man.target(tgt_it.first);
+
+        //target.useInEval(tgt_it.second.use_in_eval_);
+
+        //if (tgt_it.second.comment_.size())
+        //    target.comment(tgt_it.second.comment_);
+
+        target.aircraftAddresses(tgt_it.second.acads_);
+        target.aircraftIdentifications(tgt_it.second.acids_);
+        target.modeACodes(tgt_it.second.mode_as_);
+
+        if (tgt_it.second.hasTimestamps())
+        {
+            target.timeBegin(tgt_it.second.timestamp_min_);
+            target.timeEnd(tgt_it.second.timestamp_max_);
+        }
+
+        if (tgt_it.second.hasModeC())
+            target.modeCMinMax(*tgt_it.second.mode_c_min_, *tgt_it.second.mode_c_max_);
+
+                // set counts
+        for (auto& count_it : tgt_it.second.getDBContentCounts())
+            target.dbContentCount(count_it.first, count_it.second);
+
+                // set adsb stuff
+//        if (tgt_it.second.hasADSBMOPSVersion() && tgt_it.second.getADSBMOPSVersions().size())
+//            target.adsbMOPSVersions(tgt_it.second.getADSBMOPSVersions());
+    }
+
+    cont_man.saveTargets();
+
+    loginf << "SimpleReconstructor: saveTargets: done";
 }

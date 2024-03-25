@@ -79,7 +79,9 @@ class ReconstructorTarget
     bool hasAnyOfACADs (std::set<unsigned int> tas) const;
 
     bool hasModeA () const;
-    bool hasModeA (unsigned int ma) const;
+    bool hasModeA (unsigned int code) const;
+
+    bool hasModeC () const;
 
     std::string asStr() const;
     std::string timeStr() const;

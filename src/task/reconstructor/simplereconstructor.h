@@ -72,8 +72,7 @@ class SimpleReconstructor : public ReconstructorBase
     std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>> tr_ds_;
     // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
 
-    std::map<unsigned int, dbContent::ReconstructorTarget> targets_;
-    // utn -> tgt
+    std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> tgt
 
     //std::map<unsigned int, std::map<unsigned long, std::tuple<unsigned int>>> associations_;
     // dbcontent if -> rec_num -> utn, no src rec_nums (dbcontent, rec_num)
@@ -85,6 +84,6 @@ class SimpleReconstructor : public ReconstructorBase
 
     std::map<unsigned int, std::map<unsigned long, unsigned int>> createAssociations();
     void saveAssociations(std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
-    //void saveTargets(std::map<unsigned int, Association::Target>& targets);
+    void saveTargets();
 };
 

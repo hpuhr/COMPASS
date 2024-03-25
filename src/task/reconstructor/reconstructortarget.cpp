@@ -162,9 +162,14 @@ bool ReconstructorTarget::hasModeA () const
     return mode_as_.size();
 }
 
-bool ReconstructorTarget::hasModeA (unsigned int ma)  const
+bool ReconstructorTarget::hasModeA (unsigned int code)  const
 {
-    return mode_as_.count(ma);
+    return mode_as_.count(code);
+}
+
+bool ReconstructorTarget::hasModeC () const
+{
+    return mode_c_min_ && mode_c_max_;
 }
 
 std::string ReconstructorTarget::asStr() const
