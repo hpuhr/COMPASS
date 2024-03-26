@@ -152,6 +152,7 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
 
         reconstruction::Measurement mm;
         mm.source_id = elem.second;
+        mm.t         = elem.first;
         
         auto pos = tr_info.position_;
         assert(pos.has_value());
