@@ -103,7 +103,7 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
     std::vector<kalman::Vector> x_smooth;
     std::vector<kalman::Matrix> P_smooth;
 
-    loginf << "KalmanInterface: smoothUpdates: #updates: " << updates.size() << ", idx0: " << idx0 << ", idx1: " << idx1 << ", n: " << n;
+    //loginf << "KalmanInterface: smoothUpdates: #updates: " << updates.size() << ", idx0: " << idx0 << ", idx1: " << idx1 << ", n: " << n;
 
     //@TODO: duplicate states really needed!?
     std::vector<kalman::KalmanState> states(n); 

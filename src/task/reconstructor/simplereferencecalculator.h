@@ -68,6 +68,8 @@ public:
         bool   resample_systracks        = true; // resample system tracks using spline interpolation
         double resample_systracks_dt     = 1.0;  // resample interval in seconds
         double resample_systracks_max_dt = 30.0; // maximum timestep to interpolate in seconds
+
+        bool multithreading = true;
     };
 
     typedef std::vector<reconstruction::Measurement>                       Measurements;
@@ -97,6 +99,13 @@ private:
         boost::optional<size_t>               start_index;
     };
 
+    enum class InitRecResult
+    {
+        NoMeasurements = 0,
+        NoStartIndex,
+        Success
+    };
+
     void reset();
     void updateInterpOptions();
 
@@ -117,10 +126,12 @@ private:
                                  const reconstruction::InterpOptions& options) const;
     
     void reconstructMeasurements();
-    bool initReconstruction(TargetReferences& refs);
+    InitRecResult initReconstruction(TargetReferences& refs);
     void reconstructMeasurements(TargetReferences& refs);
 
     void updateReferences();
+
+    int verbosity() const;
 
     boost::posix_time::ptime getJoinThreshold() const;
 

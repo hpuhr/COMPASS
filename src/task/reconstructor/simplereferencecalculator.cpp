@@ -47,6 +47,13 @@ SimpleReferenceCalculator::~SimpleReferenceCalculator() = default;
 
 /**
 */
+int SimpleReferenceCalculator::verbosity() const
+{
+    return (settings_.multithreading ? 0 : settings_.verbosity);
+}
+
+/**
+*/
 void SimpleReferenceCalculator::prepareForNextSlice()
 {
     if (!reconstructor_.first_slice_)
@@ -280,18 +287,23 @@ void SimpleReferenceCalculator::reconstructMeasurements()
 
     unsigned int num_targets = refs.size();
 
+    loginf << "SimpleReferenceCalculator: reconstructMeasurements: reconstructing " << num_targets << (settings_.multithreading ? " multithreaded" : "") << "...";
+
     //compute references in parallel
-#if 0
-    tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
+    if (settings_.multithreading)
     {
-        reconstructMeasurements(*refs[ tgt_cnt ]);
-    });
-#else
-    for (unsigned int i = 0; i < num_targets; ++i)
-    {
-        reconstructMeasurements(*refs[ i ]);
+        tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
+        {
+            reconstructMeasurements(*refs[ tgt_cnt ]);
+        });
     }
-#endif
+    else
+    {
+        for (unsigned int i = 0; i < num_targets; ++i)
+        {
+            reconstructMeasurements(*refs[ i ]);
+        }
+    }
 }
 
 /**
@@ -304,16 +316,13 @@ boost::posix_time::ptime SimpleReferenceCalculator::getJoinThreshold() const
 
 /**
 */
-bool SimpleReferenceCalculator::initReconstruction(TargetReferences& refs)
+SimpleReferenceCalculator::InitRecResult SimpleReferenceCalculator::initReconstruction(TargetReferences& refs)
 {
     refs.start_index.reset();
     refs.init_update.reset();
 
     if (refs.measurements.size() < 1)
-    {
-        loginf << "    initReconstruction: UTN " << refs.utn << " obtains no measurements";
-        return false;
-    }
+        return InitRecResult::NoMeasurements;
 
     //sort measurements by timestamp
     std::sort(refs.measurements.begin(), refs.measurements.end(), mmSortPred);
@@ -321,16 +330,11 @@ bool SimpleReferenceCalculator::initReconstruction(TargetReferences& refs)
     if (reconstructor_.first_slice_)
     {
         refs.start_index = 0;
-        return true;
+        return InitRecResult::Success;
     }
 
     //join old and new updates in the mid of the overlap timeframe
     const auto ThresJoin = getJoinThreshold();
-
-    loginf << "    initReconstruction: ThresJoin = " 
-           << Utils::Time::toString(ThresJoin)
-           << ", remove before time = " << Utils::Time::toString(reconstructor_.remove_before_time_)
-           << ", slice begin = " << Utils::Time::toString(reconstructor_.current_slice_begin_);
 
     //get start index of new measurements (first measurement above join threshold)
     for (size_t i = 0; i < refs.measurements.size(); ++i)
@@ -345,34 +349,47 @@ bool SimpleReferenceCalculator::initReconstruction(TargetReferences& refs)
     //no new measurements to add?
     if (!refs.start_index.has_value())
     {
-        loginf << "    initReconstruction: UTN " << refs.utn << " obtains no measurement above t = " << Utils::Time::toString(ThresJoin);
-        return false;
+        return InitRecResult::NoStartIndex;
     }
 
     //get last slice's last update for init
     if (!refs.updates.empty())
         refs.init_update = *refs.updates.rbegin();
 
-    return true;
+    return InitRecResult::Success;
 }
 
 /**
 */
 void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 {
-    loginf << "SimpleReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
-
-    //init
-    if (!initReconstruction(refs))
+    if(verbosity() > 0) 
     {
-        loginf << "    init failed";
+        loginf << "SimpleReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
+    }
+
+    //try to init
+    auto res = initReconstruction(refs);
+    if (res != InitRecResult::Success)
+    {
+        //int failed
+        if (verbosity() > 0)
+        {
+            if (res == InitRecResult::NoMeasurements)
+                loginf << "    skipping: no measurements";
+            else if (res == InitRecResult::NoStartIndex)
+                loginf << "    skipping: no start index found";
+        }
         return;
     }
 
-    loginf << "    #measurements: " << refs.measurements.size();
-    loginf << "    #old updates:  " << refs.updates.size();
-    loginf << "    start index:   " << refs.start_index.value();
-    loginf << "    init update:   " << (refs.init_update.has_value() ? "yes" : "no");
+    if (verbosity() > 0) 
+    {
+        loginf << "    #measurements: " << refs.measurements.size();
+        loginf << "    #old updates:  " << refs.updates.size();
+        loginf << "    start index:   " << refs.start_index.value();
+        loginf << "    init update:   " << (refs.init_update.has_value() ? "yes" : "no");
+    }
 
     assert(refs.start_index.has_value());
 
@@ -403,7 +420,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     estimator.settings().max_distance   = settings_.max_distance;
 
     estimator.settings().Q_var     = settings_.Q_std * settings_.Q_std;
-    estimator.settings().verbosity = settings_.verbosity;
+    estimator.settings().verbosity = verbosity() >= 2 ? verbosity() - 1 : 0;
 
     estimator.settings().resample_dt          = settings_.resample_dt;
     estimator.settings().resample_Q_var       = settings_.resample_Q_std * settings_.resample_Q_std;
@@ -419,7 +436,11 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     if (refs.init_update.has_value())
     {
         auto& mm0 = refs.measurements[ refs.start_index.value() ];
-        loginf << "    initializing to update t=" << Utils::Time::toString(refs.init_update.value().t) << ", mm0 t=" << Utils::Time::toString(mm0.t);
+
+        if (verbosity() > 0) 
+        {
+            loginf << "    initializing to update t=" << Utils::Time::toString(refs.init_update.value().t) << ", mm0 t=" << Utils::Time::toString(mm0.t);
+        }
 
         //init kalman from last slice's update
         estimator.kalmanInit(refs.init_update.value());
@@ -430,7 +451,11 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     {
         //reinit kalman with first measurement
         auto& mm0 = refs.measurements[ refs.start_index.value() ];
-        loginf << "    initializing to mm t=" << Utils::Time::toString(mm0.t);
+
+        if (verbosity() > 0) 
+        {
+            loginf << "    initializing to mm t=" << Utils::Time::toString(mm0.t);
+        }
 
         estimator.kalmanInit(update, mm0);
 
@@ -447,8 +472,6 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //add new measurements to kalman and collect updates
     for (size_t i = refs.start_index.value() + offs; i < refs.measurements.size(); ++i)
     {
-        //loginf << "    adding mm" << i << ", t = " << Utils::Time::toString(refs.measurements[ i ].t) << ", current time = " << Utils::Time::toString(estimator.currentTime());
-
         estimator.kalmanStep(update, refs.measurements[ i ]);
 
         assert(update.valid);
@@ -456,7 +479,10 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         updates_new.push_back(update);
     }
 
-    loginf << "    #new updates (initial): " << updates_new.size();
+    if (verbosity() > 0)
+    {
+        loginf << "    #new updates (initial): " << updates_new.size();
+    }
 
     //run rts smoothing?
     if (settings_.smooth_rts)
@@ -464,21 +490,6 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         //jointly smooth old + new updates RTS
         std::vector<kalman::KalmanUpdate> updates_joint = refs.updates;
         updates_joint.insert(updates_joint.end(), updates_new.begin(), updates_new.end());
-
-        size_t i = 0;
-        for (const auto& update : updates_joint)
-        {
-            if (update.state.F.size() == 0)
-                loginf << "   F is null @" << i << "(" << (i < refs.updates.size() ? "old" : "new") << ")";
-            if (update.state.P.size() == 0)
-                loginf << "   P is null @" << i << "(" << (i < refs.updates.size() ? "old" : "new") << ")";
-            if (update.state.Q.size() == 0)
-                loginf << "   Q is null @" << i << "(" << (i < refs.updates.size() ? "old" : "new") << ")";
-            if (update.state.x.size() == 0)
-                loginf << "   x is null @" << i << "(" << (i < refs.updates.size() ? "old" : "new") << ")";
-
-            ++i;
-        }
 
         estimator.smoothUpdates(updates_joint);
 
@@ -491,7 +502,10 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
             assert(update.valid);
     }
 
-    loginf << "    #new updates (smoothed): " << updates_new.size();
+    if (verbosity() > 0)
+    {
+        loginf << "    #new updates (smoothed): " << updates_new.size();
+    }
 
     //resample?
     if (settings_.resample_result)
@@ -507,7 +521,10 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         updates_new = updates_interp;
     }
 
-    loginf << "    #new updates (resampled): " << updates_new.size();
+    if (verbosity() > 0)
+    {
+        loginf << "    #new updates (resampled): " << updates_new.size();
+    }
 
     //join old and new measurements
     const auto ThresJoin = getJoinThreshold();
@@ -522,16 +539,18 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     refs.updates.shrink_to_fit();
 
-    loginf << "    #updates final: " << refs.updates.size();
+    if (verbosity() > 0)
+    {
+        loginf << "    #updates final: " << refs.updates.size();
+    }
 
     //generate references
     estimator.storeUpdates(refs.references, refs.updates);
 
-    loginf << "    #references final: " << refs.references.size();
-
-    if (refs.references.size() > 0)
-        loginf << "    timeframe: " << Utils::Time::toString(refs.references.begin()->t) + " - "
-                                    << Utils::Time::toString(refs.references.rbegin()->t);
+    if (verbosity() > 0)
+    {
+        loginf << "    #references final: " << refs.references.size();
+    }
 }
 
 /**
@@ -544,8 +563,6 @@ void SimpleReferenceCalculator::updateReferences()
 
         auto& target = reconstructor_.targets_.at(ref.first);
         target.references_ = std::move(ref.second.references);
-
-        loginf << "UTN " << ref.first << ": " << target.references_.size();
     }
 }
 
