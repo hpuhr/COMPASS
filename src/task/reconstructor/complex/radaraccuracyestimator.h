@@ -16,5 +16,15 @@ class RadarAccuracyEstimator : public DataSourceAccuracyEstimator
 
   private:
 
+    bool has_position_ {false};
+    double latitude_deg_{0}, latitude_rad_{0};
+    double longitude_deg_{0}, longitude_rad_{0};
+
+    double primary_azimuth_stddev_{0};    // degrees
+    double primary_range_stddev_{0};      // meters
+    double secondary_azimuth_stddev_{0};  // degrees
+    double secondary_range_stddev_{0};    // meters
+    double mode_s_azimuth_stddev_{0};     // degrees
+    double mode_s_range_stddev_{0};       // meters
 };
 
