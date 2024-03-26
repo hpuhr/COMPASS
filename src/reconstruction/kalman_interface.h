@@ -63,7 +63,7 @@ public:
     double distanceSqr(const Measurement& mm) const;
     
     //needed for feeding kalman
-    virtual void stateVecX(kalman::Vector& x, const Measurement& mm) const = 0;
+    virtual void stateVecXFromMM(kalman::Vector& x, const Measurement& mm) const = 0;
     virtual void stateVecX(const kalman::Vector& x) = 0;
     virtual void measurementVecZ(kalman::Vector& z, const Measurement& mm) const = 0;
     virtual void covarianceMatP(kalman::Matrix& P,

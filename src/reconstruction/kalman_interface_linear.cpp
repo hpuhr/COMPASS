@@ -49,7 +49,7 @@ void KalmanInterfaceLinear::kalmanInit_impl(kalman::KalmanState& init_state,
     const double dt_start = 1.0;
 
     //init kalman
-    //KalmanInterface::stateVecX(kalman_filter_->getX(), mm);
+    stateVecXFromMM(kalman_filter_->getX(), mm);
     covarianceMatP(kalman_filter_->getP(), mm, default_uncert);
     stateTransitionMatF(kalman_filter_->getF(), dt_start);
     processUncertMatQ(kalman_filter_->getQ(), dt_start, Q_var);

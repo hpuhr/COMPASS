@@ -53,7 +53,7 @@ size_t KalmanInterfaceUMKalman2D::dimU() const
 
 /**
 */
-void KalmanInterfaceUMKalman2D::stateVecX(kalman::Vector& x, const Measurement& mm) const
+void KalmanInterfaceUMKalman2D::stateVecXFromMM(kalman::Vector& x, const Measurement& mm) const
 {
     x.setZero(4);
 
