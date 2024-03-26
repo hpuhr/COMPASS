@@ -46,6 +46,8 @@ class SimpleReconstructorSettings
 
     // other, not registered
     std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal, oct 1000, 2000
+
+    SimpleReferenceCalculator::Settings ref_calc_settings_;
 };
 
 class SimpleReconstructorWidget;

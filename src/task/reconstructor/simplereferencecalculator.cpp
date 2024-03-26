@@ -278,10 +278,17 @@ void SimpleReferenceCalculator::reconstructMeasurements()
     unsigned int num_targets = refs.size();
 
     //compute references in parallel
+#if 0
     tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
     {
         reconstructMeasurements(*refs[ tgt_cnt ]);
     });
+#else
+    for (unsigned int i = 0; i < num_targets; ++i)
+    {
+        reconstructMeasurements(*refs[ i ]);
+    }
+#endif
 }
 
 /**
@@ -333,9 +340,19 @@ bool SimpleReferenceCalculator::initReconstruction(TargetReferences& refs)
 */
 void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 {
+    loginf << "SimpleReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
+
     //init
     if (!initReconstruction(refs))
+    {
+        loginf << "    init failed";
         return;
+    }
+
+    loginf << "    #measurements: " << refs.measurements.size();
+    loginf << "    #old updates:  " << refs.updates.size();
+    loginf << "    start index:   " << refs.start_index.value();
+    loginf << "    init update:   " << (refs.init_update.has_value() ? "yes" : "no");
 
     assert(refs.start_index.has_value());
 
@@ -403,6 +420,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         updates_new.push_back(update);
     }
 
+    loginf << "    #new updates (initial): " << updates_new.size();
+
     //run rts smoothing?
     if (settings_.smooth_rts)
     {
@@ -418,6 +437,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
             updates_new[ i ] = updates_joint[ offs + i ];
     }
 
+    loginf << "    #new updates (smoothed): " << updates_new.size();
+
     //resample?
     if (settings_.resample_result)
     {
@@ -432,6 +453,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         updates_new = updates_interp;
     }
 
+    loginf << "    #new updates (resampled): " << updates_new.size();
+
     //join old and new measurements
     const auto ThresJoin = getJoinThreshold();
 
@@ -442,8 +465,12 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     refs.updates.shrink_to_fit();
 
+    loginf << "    #updates final: " << refs.updates.size();
+
     //generate references
     estimator.storeUpdates(refs.references, refs.updates);
+
+    loginf << "    #references final: " << refs.references.size();
 }
 
 /**
@@ -456,6 +483,8 @@ void SimpleReferenceCalculator::updateReferences()
 
         auto& target = reconstructor_.targets_.at(ref.first);
         target.references_ = std::move(ref.second.references);
+
+        loginf << "UTN " << ref.first << ": " << target.references_.size();
     }
 }
 

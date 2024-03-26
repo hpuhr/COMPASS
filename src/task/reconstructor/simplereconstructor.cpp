@@ -23,37 +23,64 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std:
     , acc_estimator_ (*this)
     , ref_calculator_(*this)
 {
-    // common
-    registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);
-//    registerParameter("clean_dubious_utns", &settings_.clean_dubious_utns_, true);
-//    registerParameter("mark_dubious_utns_unused", &settings_.mark_dubious_utns_unused_, false);
-//    registerParameter("comment_dubious_utns", &settings_.comment_dubious_utns_, true);
+    //association
+    {
+        // common
+        registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);
+        //    registerParameter("clean_dubious_utns", &settings_.clean_dubious_utns_, true);
+        //    registerParameter("mark_dubious_utns_unused", &settings_.mark_dubious_utns_unused_, false);
+        //    registerParameter("comment_dubious_utns", &settings_.comment_dubious_utns_, true);
 
-            // tracker stuff
-    registerParameter("max_time_diff_tracker", &settings_.max_time_diff_tracker_, 15.0);
+        // tracker stuff
+        registerParameter("max_time_diff_tracker", &settings_.max_time_diff_tracker_, 15.0);
 
-    registerParameter("max_distance_quit_tracker", &settings_.max_distance_quit_tracker_, 10*NM2M); // kb 5nm
-    registerParameter("max_distance_dubious_tracker", &settings_.max_distance_dubious_tracker_, 3*NM2M);
-    //kb 2.5? 2.5 lowest
-    registerParameter("max_positions_dubious_tracker", &settings_.max_positions_dubious_tracker_, 5u);
+        registerParameter("max_distance_quit_tracker", &settings_.max_distance_quit_tracker_, 10*NM2M); // kb 5nm
+        registerParameter("max_distance_dubious_tracker", &settings_.max_distance_dubious_tracker_, 3*NM2M);
+        //kb 2.5? 2.5 lowest
+        registerParameter("max_positions_dubious_tracker", &settings_.max_positions_dubious_tracker_, 5u);
 
-    registerParameter("max_distance_acceptable_tracker", &settings_.max_distance_acceptable_tracker_, NM2M/2.0);
-    registerParameter("max_altitude_diff_tracker", &settings_.max_altitude_diff_tracker_, 300.0);
+        registerParameter("max_distance_acceptable_tracker", &settings_.max_distance_acceptable_tracker_, NM2M/2.0);
+        registerParameter("max_altitude_diff_tracker", &settings_.max_altitude_diff_tracker_, 300.0);
 
-    registerParameter("min_updates_tracker", &settings_.min_updates_tracker_, 2u); // kb 3!!!
-    registerParameter("prob_min_time_overlap_tracker", &settings_.prob_min_time_overlap_tracker_, 0.5); //kb 0.7
-    //registerParameter("max_speed_tracker_kts", &settings_.max_speed_tracker_kts_, 100000.0);
+        registerParameter("min_updates_tracker", &settings_.min_updates_tracker_, 2u); // kb 3!!!
+        registerParameter("prob_min_time_overlap_tracker", &settings_.prob_min_time_overlap_tracker_, 0.5); //kb 0.7
+        //registerParameter("max_speed_tracker_kts", &settings_.max_speed_tracker_kts_, 100000.0);
 
-    registerParameter("cont_max_time_diff_tracker", &settings_.cont_max_time_diff_tracker_, 30.0);
-    registerParameter("cont_max_distance_acceptable_tracker", &settings_.cont_max_distance_acceptable_tracker_, 1852.0);
+        registerParameter("cont_max_time_diff_tracker", &settings_.cont_max_time_diff_tracker_, 30.0);
+        registerParameter("cont_max_distance_acceptable_tracker", &settings_.cont_max_distance_acceptable_tracker_, 1852.0);
 
-            // sensor
-    registerParameter("max_time_diff_sensor", &settings_.max_time_diff_sensor_, 15.0);
-    registerParameter("max_distance_acceptable_sensor", &settings_.max_distance_acceptable_sensor_, 2*NM2M);
-    registerParameter("max_altitude_diff_sensor", &settings_.max_altitude_diff_sensor_, 300.0);
+                // sensor
+        registerParameter("max_time_diff_sensor", &settings_.max_time_diff_sensor_, 15.0);
+        registerParameter("max_distance_acceptable_sensor", &settings_.max_distance_acceptable_sensor_, 2*NM2M);
+        registerParameter("max_altitude_diff_sensor", &settings_.max_altitude_diff_sensor_, 300.0);
 
-            // target id? kb: nope
-            // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
+        // target id? kb: nope
+        // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
+    }
+
+    //reference computation
+    {
+        registerParameter("ref_rec_type", (int*)&settings_.ref_calc_settings_.rec_type, (int)SimpleReferenceCalculator::Settings().rec_type);
+
+        registerParameter("ref_Q_std", &settings_.ref_calc_settings_.Q_std, SimpleReferenceCalculator::Settings().Q_std);
+
+        registerParameter("ref_min_chain_size", &settings_.ref_calc_settings_.min_chain_size   , SimpleReferenceCalculator::Settings().min_chain_size);
+        registerParameter("ref_min_dt"        , &settings_.ref_calc_settings_.min_dt   , SimpleReferenceCalculator::Settings().min_dt);
+        registerParameter("ref_max_dt"        , &settings_.ref_calc_settings_.max_dt   , SimpleReferenceCalculator::Settings().max_dt);
+        registerParameter("ref_max_distance"  , &settings_.ref_calc_settings_.max_distance   , SimpleReferenceCalculator::Settings().max_distance);
+
+        registerParameter("ref_smooth_rts", &settings_.ref_calc_settings_.smooth_rts, SimpleReferenceCalculator::Settings().smooth_rts);
+
+        registerParameter("ref_resample_result", &settings_.ref_calc_settings_.resample_result, SimpleReferenceCalculator::Settings().resample_result);
+        registerParameter("ref_resample_Q_std" , &settings_.ref_calc_settings_.resample_Q_std , SimpleReferenceCalculator::Settings().resample_Q_std);
+        registerParameter("ref_resample_dt"    , &settings_.ref_calc_settings_.resample_dt    , SimpleReferenceCalculator::Settings().resample_dt);
+
+        registerParameter("ref_max_proj_distance_cart", &settings_.ref_calc_settings_.max_proj_distance_cart, SimpleReferenceCalculator::Settings().max_proj_distance_cart);
+
+        registerParameter("ref_resample_systracks"       , &settings_.ref_calc_settings_.resample_systracks       , SimpleReferenceCalculator::Settings().resample_systracks);
+        registerParameter("ref_resample_systracks_dt"    , &settings_.ref_calc_settings_.resample_systracks_dt    , SimpleReferenceCalculator::Settings().resample_systracks_dt);
+        registerParameter("ref_resample_systracks_max_dt", &settings_.ref_calc_settings_.resample_systracks_max_dt, SimpleReferenceCalculator::Settings().resample_systracks_max_dt);
+    }
 }
 
 SimpleReconstructor::~SimpleReconstructor() {}
@@ -174,6 +201,8 @@ bool SimpleReconstructor::processSlice_impl()
     bool is_last_slice = !hasNextTimeSlice();
 
     clearOldTargetReports();
+
+    ref_calculator_.settings() = settings_.ref_calc_settings_;
     ref_calculator_.prepareForNextSlice();
 
     createTargetReports();
