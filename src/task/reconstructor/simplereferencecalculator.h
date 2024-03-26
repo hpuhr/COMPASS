@@ -72,14 +72,15 @@ public:
         std::map<unsigned int, reconstruction::InterpOptions> interp_options;
     };
 
-    typedef std::vector<reconstruction::Measurement>               Measurements;
-    typedef std::multimap<boost::posix_time::ptime, unsigned long> TargetReports;
+    typedef std::vector<reconstruction::Measurement>                       Measurements;
+    typedef std::multimap<boost::posix_time::ptime, unsigned long>         TargetReports;
+    typedef std::map<unsigned int, std::vector<reconstruction::Reference>> References;
 
     SimpleReferenceCalculator(SimpleReconstructor& reconstructor);
     virtual ~SimpleReferenceCalculator();
 
     void prepareForNextSlice();
-    bool computeReferences();
+    References computeReferences();
 
     Settings& settings() { return settings_; }
     
@@ -92,6 +93,7 @@ private:
 
         std::vector<reconstruction::Measurement> measurements;
         std::vector<kalman::KalmanUpdate>        updates;
+        std::vector<reconstruction::Reference>   references;
 
         boost::optional<kalman::KalmanUpdate> init_update;
         boost::optional<size_t>               start_index;
@@ -118,6 +120,8 @@ private:
     void reconstructMeasurements();
     bool initReconstruction(TargetReferences& refs);
     void reconstructMeasurements(TargetReferences& refs);
+
+    References generateReferences();
 
     boost::posix_time::ptime getJoinThreshold() const;
 

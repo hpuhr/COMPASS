@@ -18,8 +18,10 @@ using namespace Utils;
 
 SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std::string& instance_id,
                                          ReconstructorTask& task)
-    : ReconstructorBase(class_id, instance_id, task), associatior_(*this),
-      acc_estimator_(*this)
+    : ReconstructorBase(class_id, instance_id, task)
+    , associatior_   (*this)
+    , acc_estimator_ (*this)
+    , ref_calculator_(*this)
 {
     // common
     registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);
@@ -172,6 +174,7 @@ bool SimpleReconstructor::processSlice_impl()
     bool is_last_slice = !hasNextTimeSlice();
 
     clearOldTargetReports();
+    ref_calculator_.prepareForNextSlice();
 
     createTargetReports();
 
@@ -179,6 +182,8 @@ bool SimpleReconstructor::processSlice_impl()
 
     auto associations = createAssociations();
     saveAssociations(associations);
+
+    auto references = ref_calculator_.computeReferences();
 
     if (is_last_slice)
         saveTargets();

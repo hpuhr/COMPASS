@@ -49,17 +49,20 @@ SimpleReferenceCalculator::~SimpleReferenceCalculator() = default;
 */
 void SimpleReferenceCalculator::prepareForNextSlice()
 {
-    auto ThresRemove = reconstructor_.remove_before_time_;
-    auto ThresJoin   = getJoinThreshold();
-
-    //remove previous updates which are no longer needed (either too old or above the join threshold)
-    for (auto& ref : references_)
+    if (!reconstructor_.first_slice_)
     {
-        std::remove_if(ref.second.updates.begin(),
-                       ref.second.updates.end(),
-                       [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                                                           update.t >= ThresJoin; });
-        ref.second.updates.shrink_to_fit();
+        auto ThresRemove = reconstructor_.remove_before_time_;
+        auto ThresJoin   = getJoinThreshold();
+
+        //remove previous updates which are no longer needed (either too old or above the join threshold)
+        for (auto& ref : references_)
+        {
+            std::remove_if(ref.second.updates.begin(),
+                        ref.second.updates.end(),
+                        [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                                                            update.t >= ThresJoin; });
+            ref.second.updates.shrink_to_fit();
+        }
     }
 
     //reset data structs
@@ -73,6 +76,7 @@ void SimpleReferenceCalculator::reset()
     for (auto& ref : references_)
     {
         ref.second.measurements.resize(0);
+        ref.second.references.resize(0);
         ref.second.init_update.reset();
         ref.second.start_index.reset();
     }
@@ -80,13 +84,13 @@ void SimpleReferenceCalculator::reset()
 
 /**
 */
-bool SimpleReferenceCalculator::computeReferences()
+SimpleReferenceCalculator::References SimpleReferenceCalculator::computeReferences()
 {
     reset();
     generateMeasurements();
     reconstructMeasurements();
-    
-    return true;
+
+    return generateReferences();
 }
 
 /**
@@ -419,6 +423,22 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
             refs.updates.push_back(updates_new[ i ]);
 
     refs.updates.shrink_to_fit();
+
+    //generate references
+    estimator.storeUpdates(refs.references, refs.updates);
+}
+
+/**
+*/
+SimpleReferenceCalculator::References SimpleReferenceCalculator::generateReferences()
+{
+    References refs;
+
+    for (auto& ref : references_)
+        if (!ref.second.references.empty())
+            refs[ ref.first ] = std::move(ref.second.references);
+
+    return refs;
 }
 
 #if 0
