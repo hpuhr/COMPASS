@@ -46,6 +46,12 @@ class SimpleReconstructorSettings
 
     // other, not registered
     std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal, oct 1000, 2000
+
+    // output
+    std::string ds_name {"CalcRef"};
+    unsigned int ds_sac {0};
+    unsigned int ds_sic {1};
+    unsigned int ds_line {0};
 };
 
 class SimpleReconstructorWidget;
@@ -102,6 +108,7 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
 
     std::map<unsigned int, std::map<unsigned long, unsigned int>> createAssociations();
     void saveAssociations(std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
+    void saveReferences();
     void saveTargets();
 };
 
