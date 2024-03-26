@@ -98,6 +98,8 @@ public:
     void interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
                        std::vector<kalman::KalmanUpdate>& updates);
 
+    const boost::posix_time::ptime& currentTime() const;
+
     Settings& settings() { return settings_; }
 
 private:

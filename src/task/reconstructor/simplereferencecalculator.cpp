@@ -57,11 +57,11 @@ void SimpleReferenceCalculator::prepareForNextSlice()
         //remove previous updates which are no longer needed (either too old or above the join threshold)
         for (auto& ref : references_)
         {
-            std::remove_if(ref.second.updates.begin(),
-                        ref.second.updates.end(),
-                        [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                                                            update.t >= ThresJoin; });
-            ref.second.updates.shrink_to_fit();
+            auto it = std::remove_if(ref.second.updates.begin(),
+                                     ref.second.updates.end(),
+                                     [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                                                                         update.t >= ThresJoin; });
+            ref.second.updates.erase(it, ref.second.updates.end());
         }
     }
 
@@ -310,13 +310,27 @@ bool SimpleReferenceCalculator::initReconstruction(TargetReferences& refs)
     refs.init_update.reset();
 
     if (refs.measurements.size() < 1)
+    {
+        loginf << "    initReconstruction: UTN " << refs.utn << " obtains no measurements";
         return false;
+    }
 
     //sort measurements by timestamp
     std::sort(refs.measurements.begin(), refs.measurements.end(), mmSortPred);
 
+    if (reconstructor_.first_slice_)
+    {
+        refs.start_index = 0;
+        return true;
+    }
+
     //join old and new updates in the mid of the overlap timeframe
     const auto ThresJoin = getJoinThreshold();
+
+    loginf << "    initReconstruction: ThresJoin = " 
+           << Utils::Time::toString(ThresJoin)
+           << ", remove before time = " << Utils::Time::toString(reconstructor_.remove_before_time_)
+           << ", slice begin = " << Utils::Time::toString(reconstructor_.current_slice_begin_);
 
     //get start index of new measurements (first measurement above join threshold)
     for (size_t i = 0; i < refs.measurements.size(); ++i)
@@ -330,7 +344,10 @@ bool SimpleReferenceCalculator::initReconstruction(TargetReferences& refs)
 
     //no new measurements to add?
     if (!refs.start_index.has_value())
+    {
+        loginf << "    initReconstruction: UTN " << refs.utn << " obtains no measurement above t = " << Utils::Time::toString(ThresJoin);
         return false;
+    }
 
     //get last slice's last update for init
     if (!refs.updates.empty())
@@ -397,10 +414,13 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     std::vector<kalman::KalmanUpdate> updates_new;
     kalman::KalmanUpdate update;
     size_t offs = 0;
-
+            
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
     {
+        auto& mm0 = refs.measurements[ refs.start_index.value() ];
+        loginf << "    initializing to update t=" << Utils::Time::toString(refs.init_update.value().t) << ", mm0 t=" << Utils::Time::toString(mm0.t);
+
         //init kalman from last slice's update
         estimator.kalmanInit(refs.init_update.value());
 
@@ -410,16 +430,29 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     {
         //reinit kalman with first measurement
         auto& mm0 = refs.measurements[ refs.start_index.value() ];
+        loginf << "    initializing to mm t=" << Utils::Time::toString(mm0.t);
+
         estimator.kalmanInit(update, mm0);
+
+        assert(update.valid);
+
         updates_new.push_back(update);
 
         ++offs; //continue with second measurement
     }
 
+    for (const auto& update : refs.updates)
+        assert(update.valid);
+
     //add new measurements to kalman and collect updates
-    for (size_t i = offs; i < refs.measurements.size(); ++i)
+    for (size_t i = refs.start_index.value() + offs; i < refs.measurements.size(); ++i)
     {
+        //loginf << "    adding mm" << i << ", t = " << Utils::Time::toString(refs.measurements[ i ].t) << ", current time = " << Utils::Time::toString(estimator.currentTime());
+
         estimator.kalmanStep(update, refs.measurements[ i ]);
+
+        assert(update.valid);
+
         updates_new.push_back(update);
     }
 
@@ -432,12 +465,30 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         std::vector<kalman::KalmanUpdate> updates_joint = refs.updates;
         updates_joint.insert(updates_joint.end(), updates_new.begin(), updates_new.end());
 
+        size_t i = 0;
+        for (const auto& update : updates_joint)
+        {
+            if (update.state.F.size() == 0)
+                loginf << "   F is null @" << i << "(" << (i < refs.updates.size() ? "old" : "new") << ")";
+            if (update.state.P.size() == 0)
+                loginf << "   P is null @" << i << "(" << (i < refs.updates.size() ? "old" : "new") << ")";
+            if (update.state.Q.size() == 0)
+                loginf << "   Q is null @" << i << "(" << (i < refs.updates.size() ? "old" : "new") << ")";
+            if (update.state.x.size() == 0)
+                loginf << "   x is null @" << i << "(" << (i < refs.updates.size() ? "old" : "new") << ")";
+
+            ++i;
+        }
+
         estimator.smoothUpdates(updates_joint);
 
         //retrieve new RTS updates
         size_t offs = refs.updates.size();
         for (size_t i = 0; i < updates_new.size(); ++i)
             updates_new[ i ] = updates_joint[ offs + i ];
+
+        for (const auto& update : updates_new)
+            assert(update.valid);
     }
 
     loginf << "    #new updates (smoothed): " << updates_new.size();
@@ -463,8 +514,11 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     refs.updates.reserve(refs.updates.size() + updates_new.size());
     for (size_t i = 0; i < updates_new.size(); ++i)
-        if (updates_new[ i ].t >= ThresJoin)
+        if (reconstructor_.first_slice_ || updates_new[ i ].t >= ThresJoin)
             refs.updates.push_back(updates_new[ i ]);
+
+    for (const auto& update : refs.updates)
+        assert(update.valid);
 
     refs.updates.shrink_to_fit();
 
@@ -474,6 +528,10 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     estimator.storeUpdates(refs.references, refs.updates);
 
     loginf << "    #references final: " << refs.references.size();
+
+    if (refs.references.size() > 0)
+        loginf << "    timeframe: " << Utils::Time::toString(refs.references.begin()->t) + " - "
+                                    << Utils::Time::toString(refs.references.rbegin()->t);
 }
 
 /**

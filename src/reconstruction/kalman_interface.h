@@ -61,6 +61,8 @@ public:
 
     double timestep(const Measurement& mm) const;
     double distanceSqr(const Measurement& mm) const;
+
+    const boost::posix_time::ptime& currrentTime() const { return ts_; }
     
     //needed for feeding kalman
     virtual void stateVecXFromMM(kalman::Vector& x, const Measurement& mm) const = 0;

@@ -20,6 +20,7 @@
 #include "kalman_projection.h"
 
 #include "timeconv.h"
+#include "logger.h"
 
 namespace reconstruction
 {
@@ -102,10 +103,14 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
     std::vector<kalman::Vector> x_smooth;
     std::vector<kalman::Matrix> P_smooth;
 
+    loginf << "KalmanInterface: smoothUpdates: #updates: " << updates.size() << ", idx0: " << idx0 << ", idx1: " << idx1 << ", n: " << n;
+
     //@TODO: duplicate states really needed!?
-    std::vector<kalman::KalmanState> states(n);
+    std::vector<kalman::KalmanState> states(n); 
     for (size_t i = idx0; i <= idx1; ++i)
-        states[ i ] = updates[ i ].state;
+    {
+        states[ i - idx0 ] = updates[ i ].state;
+    }
 
     //get reprojection transfer func
     auto x_tr = proj_handler.reprojectionTransform(&updates, this, idx0);

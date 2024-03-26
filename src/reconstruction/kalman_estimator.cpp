@@ -56,6 +56,14 @@ void KalmanEstimator::init(std::unique_ptr<KalmanInterface>&& interface)
 
 /**
 */
+const boost::posix_time::ptime& KalmanEstimator::currentTime() const
+{
+    assert(kalman_interface_);
+    return kalman_interface_->currrentTime();
+}
+
+/**
+*/
 void KalmanEstimator::storeUpdate(Reference& ref, 
                                   const kalman::KalmanUpdate& update,
                                   KalmanProjectionHandler& phandler) const
@@ -217,7 +225,10 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
 
     //check if timestep is too small
     if (kalman_interface_->timestep(mm) < settings_.min_dt)
+    {
+        loginf << "KalmanEstimator: kalmanStep: step = " << kalman_interface_->timestep(mm) << ", dt = " << settings_.min_dt;
         return KalmanEstimator::StepResult::FailStepTooSmall;
+    }
 
     //check if reinit is needed
     if (needsReinit(mm) != ReinitState::ReinitNotNeeded)
@@ -229,7 +240,10 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
     {
         //normal step
         if (!step(update, mm))
+        {
+            loginf << "KalmanEstimator: kalmanStep: step failed";
             return KalmanEstimator::StepResult::FailKalmanError;
+        }
     }
 
     //update projection if needed
