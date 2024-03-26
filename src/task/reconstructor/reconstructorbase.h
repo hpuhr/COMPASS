@@ -67,9 +67,10 @@ class ReconstructorBase : public Configurable
     bool first_slice_ {false};
 
     boost::posix_time::ptime remove_before_time_;
+    boost::posix_time::ptime write_before_time_;
 
     const boost::posix_time::time_duration slice_duration_ {0, 10, 0}; // 1 hour
-    const boost::posix_time::time_duration outdated_duration_ {0, 1, 0}; // 5 minutes
+    const boost::posix_time::time_duration outdated_duration_ {0, 2, 0}; // 5 minutes
 
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual bool processSlice_impl() = 0;
