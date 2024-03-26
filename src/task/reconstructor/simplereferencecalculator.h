@@ -57,9 +57,9 @@ public:
         bool smooth_rts = true;
 
         //result resampling related
-        bool   resample_result;
-        double resample_Q_std = 10.0;
-        double resample_dt    = 2.0;
+        bool   resample_result = false;
+        double resample_Q_std  = 10.0;
+        double resample_dt     = 2.0;
 
         //dynamic projection change
         double max_proj_distance_cart = 20000.0;
