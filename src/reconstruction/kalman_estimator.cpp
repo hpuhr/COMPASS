@@ -224,7 +224,10 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
     initMeasurement(update, mm);
 
     //check if timestep is too small
-    if (kalman_interface_->timestep(mm) < settings_.min_dt)
+    auto tstep = kalman_interface_->timestep(mm);
+    assert(tstep >= 0);
+    
+    if (tstep < settings_.min_dt)
     {
         loginf << "KalmanEstimator: kalmanStep: step = " << kalman_interface_->timestep(mm) << ", dt = " << settings_.min_dt;
         return KalmanEstimator::StepResult::FailStepTooSmall;
