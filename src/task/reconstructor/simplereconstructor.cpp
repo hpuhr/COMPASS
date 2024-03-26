@@ -367,7 +367,7 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> SimpleReconstructo
 
             dbContent::targetReport::ReconstructorInfo& tr = target_reports_.at(rn_it);
 
-            if (tr.in_current_slice_)
+            if (tr.timestamp_ < write_before_time_ ) // tr.in_current_slice_
             {
                 associations[Number::recNumGetDBContId(rn_it)][rn_it] = tgt_it.first;
                 ++num_assoc;

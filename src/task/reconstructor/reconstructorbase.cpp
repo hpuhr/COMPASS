@@ -81,6 +81,7 @@ TimeWindow ReconstructorBase::getNextTimeSlice()
     first_slice_ = current_slice_begin_ == timestamp_min_;
 
     remove_before_time_ = current_slice_begin_ - outdated_duration_;
+    write_before_time_ = current_slice_end - outdated_duration_;
 
     next_slice_begin_ = current_slice_end; // for next iteration
 
