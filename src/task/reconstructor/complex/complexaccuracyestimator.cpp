@@ -9,6 +9,7 @@
 #include "number.h"
 #include "logger.h"
 
+using namespace std;
 using namespace Utils;
 
 const double ComplexAccuracyEstimator::PosAccStdDevDefault = 100.0;
@@ -24,7 +25,7 @@ const dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::VelAcc
 const dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::VelAccStdDefaultCAT021
     { ComplexAccuracyEstimator::VelAccStdDevDefaultCAT021, ComplexAccuracyEstimator::VelAccStdDevDefaultCAT021};
 const dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::VelAccStdDefaultCAT062
-{ ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062, ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062};
+    { ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062, ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062};
 
 
 const double ComplexAccuracyEstimator::AccAccStdDevDefault = 30.0;
@@ -70,43 +71,39 @@ void ComplexAccuracyEstimator::updateDataSourcesInfoSlot()
 
 std::unique_ptr<AccuracyEstimatorBase> ComplexAccuracyEstimator::createAccuracyEstimator(dbContent::DBDataSource& ds)
 {
+    string ds_type = ds.dsType();
 
+    std::unique_ptr<AccuracyEstimatorBase> ret;
+
+    if (ds_type == "Radar")
+        ret.reset(new RadarAccuracyEstimator());
+    else if (ds_type == "MLAT")
+        ret.reset(new MLATAccuracyEstimator());
+    else if (ds_type == "ADSB")
+        ret.reset(new ADSBAccuracyEstimator());
+    else // ds_type == "Tracker", "RefTraj", "Other"
+        ret.reset(new TrackerAccuracyEstimator());
+
+    return ret;
 }
 
 dbContent::targetReport::PositionAccuracy ComplexAccuracyEstimator::positionAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
-    if (tr.position_accuracy_)
-        return *tr.position_accuracy_;
-
-    return PosAccStdDefault;
+    assert (ds_acc_estimators_.count(tr.ds_id_));
+    return ds_acc_estimators_.at(tr.ds_id_)->positionAccuracy(tr);
 }
 
 dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::velocityAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
-    if (tr.velocity_accuracy_)
-        return *tr.velocity_accuracy_;
-
-    unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
-
-    if (dbcont_id == 21)
-        return VelAccStdDefaultCAT021;
-    else if (dbcont_id == 62)
-        return VelAccStdDefaultCAT062;
-    else
-        return VelAccStdDefault;
+    assert (ds_acc_estimators_.count(tr.ds_id_));
+    return ds_acc_estimators_.at(tr.ds_id_)->velocityAccuracy(tr);
 }
 
 dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::accelerationAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
-    unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
-
-    if (dbcont_id == 21)
-        return AccAccStdDefaultCAT021;
-    else if (dbcont_id == 62)
-        return AccAccStdDefaultCAT062;
-    else
-        return AccAccStdDefault;
+    assert (ds_acc_estimators_.count(tr.ds_id_));
+    return ds_acc_estimators_.at(tr.ds_id_)->accelerationAccuracy(tr);
 }

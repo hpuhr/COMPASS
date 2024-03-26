@@ -69,7 +69,7 @@ bool DBDataSourceWidget::needsRecreate()
         return true;
 
     // check counts shown
-    bool show_counts = ds_man_.loadWidgetShowCounts();
+    bool show_counts = ds_man_.config().load_widget_show_counts_;
 
     if (last_show_counts_ != show_counts)
         return true;
@@ -90,7 +90,7 @@ bool DBDataSourceWidget::needsRecreate()
 
 void DBDataSourceWidget::recreateWidgets()
 {
-    bool show_counts = ds_man_.loadWidgetShowCounts();
+    bool show_counts = ds_man_.config().load_widget_show_counts_;
 
     loginf << "DBDataSourceWidget " << src_.name() << ": recreateWidgets: show_counts " << show_counts;
 
@@ -109,7 +109,7 @@ void DBDataSourceWidget::recreateWidgets()
     total_cnt_labels_.clear();
 
     QFont font;
-    font.setPointSize(ds_man_.dsFontSize());
+    font.setPointSize(ds_man_.config().ds_font_size_);
 
     // update load check
     load_check_ = new QCheckBox(src_.name().c_str());
@@ -212,7 +212,7 @@ void DBDataSourceWidget::updateWidgets()
 {
     logdbg << "DBDataSourceWidget: updateWidgets";
 
-    bool show_counts = ds_man_.loadWidgetShowCounts();
+    bool show_counts = ds_man_.config().load_widget_show_counts_;
 
     assert (load_check_);
     load_check_->setText(src_.name().c_str());

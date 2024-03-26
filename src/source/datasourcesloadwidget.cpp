@@ -304,7 +304,9 @@ void DataSourcesLoadWidget::toogleShowCountsSlot()
 {
     loginf << "DataSourcesLoadWidget: toogleShowCountsSlot";
 
-    ds_man_.loadWidgetShowCounts(!ds_man_.loadWidgetShowCounts());
+    ds_man_.config().load_widget_show_counts_ = !ds_man_.config().load_widget_show_counts_;
+
+    updateContent();
 }
 
 //void DataSourcesLoadWidget::toggleUseLimit()
@@ -454,7 +456,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
     QFont font_bold;
     font_bold.setBold(true);
-    font_bold.setPointSize(ds_man_.dsFontSize());
+    font_bold.setPointSize(ds_man_.config().ds_font_size_);
 
     unsigned int row = 0;
     unsigned int col = 0;
