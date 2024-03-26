@@ -3,6 +3,7 @@
 //#include "dbcontent/target/targetposition.h"
 #include "dbcontent/target/targetreportdefs.h"
 #include "projection/transformation.h"
+#include "reconstructor_defs.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
 #include "boost/optional.hpp"
@@ -67,6 +68,8 @@ class ReconstructorTarget
     //std::set <std::pair<unsigned int, unsigned int>> track_nums_; // ds_id, tn
 
     std::map <unsigned int, unsigned int> counts_; // dbcontent id -> count
+
+    std::vector<reconstruction::Reference> references_;
 
     mutable Transformation trafo_;
 

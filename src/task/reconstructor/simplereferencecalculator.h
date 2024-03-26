@@ -65,11 +65,9 @@ public:
         double max_proj_distance_cart = 20000.0;
 
         //systrack resampling related
-        //bool   resample_systracks        = true; // resample system tracks using spline interpolation
-        //double resample_systracks_dt     = 1.0;  // resample interval in seconds
-        //double resample_systracks_max_dt = 30.0; // maximum timestep to interpolate
-
-        std::map<unsigned int, reconstruction::InterpOptions> interp_options;
+        bool   resample_systracks        = true; // resample system tracks using spline interpolation
+        double resample_systracks_dt     = 1.0;  // resample interval in seconds
+        double resample_systracks_max_dt = 30.0; // maximum timestep to interpolate in seconds
     };
 
     typedef std::vector<reconstruction::Measurement>                       Measurements;
@@ -80,7 +78,7 @@ public:
     virtual ~SimpleReferenceCalculator();
 
     void prepareForNextSlice();
-    References computeReferences();
+    bool computeReferences();
 
     Settings& settings() { return settings_; }
     
@@ -100,6 +98,7 @@ private:
     };
 
     void reset();
+    void updateInterpOptions();
 
     void generateMeasurements();
     void generateTargetMeasurements(const dbContent::ReconstructorTarget& target);
@@ -121,7 +120,7 @@ private:
     bool initReconstruction(TargetReferences& refs);
     void reconstructMeasurements(TargetReferences& refs);
 
-    References generateReferences();
+    void updateReferences();
 
     boost::posix_time::ptime getJoinThreshold() const;
 
@@ -129,5 +128,6 @@ private:
 
     Settings settings_;
 
-    std::map<unsigned int, TargetReferences> references_;
+    std::map<unsigned int, TargetReferences>              references_;
+    std::map<unsigned int, reconstruction::InterpOptions> interp_options_;
 };

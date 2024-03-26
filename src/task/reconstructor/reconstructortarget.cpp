@@ -1056,6 +1056,8 @@ void ReconstructorTarget::removeOutdatedTargetReports()
         if (reconstructor_.target_reports_.count(rec_num))
             addTargetReport(rec_num);
     }
+
+    references_.clear();
 }
 
 //bool ReconstructorTarget::hasADSBMOPSVersion()

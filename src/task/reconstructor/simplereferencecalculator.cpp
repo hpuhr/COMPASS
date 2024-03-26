@@ -80,17 +80,35 @@ void SimpleReferenceCalculator::reset()
         ref.second.init_update.reset();
         ref.second.start_index.reset();
     }
+
+    updateInterpOptions();
 }
 
 /**
 */
-SimpleReferenceCalculator::References SimpleReferenceCalculator::computeReferences()
+void SimpleReferenceCalculator::updateInterpOptions()
+{
+    if (settings_.resample_systracks)
+    {
+        interp_options_[ 62 ].sample_dt = settings_.resample_systracks_dt;
+        interp_options_[ 62 ].max_dt    = settings_.resample_systracks_max_dt;
+    }
+    else if (interp_options_.count(62))
+    {
+        interp_options_.erase(62);
+    }
+}
+
+/**
+*/
+bool SimpleReferenceCalculator::computeReferences()
 {
     reset();
     generateMeasurements();
     reconstructMeasurements();
+    updateReferences();
 
-    return generateReferences();
+    return true;
 }
 
 /**
@@ -198,8 +216,8 @@ void SimpleReferenceCalculator::preprocessMeasurements(unsigned int dbcontent_id
                                                        Measurements& measurements)
 {
     //interpolate if options are set for dbcontent
-    if (settings_.interp_options.count(dbcontent_id))
-        interpolateMeasurements(measurements, settings_.interp_options.at(dbcontent_id));
+    if (interp_options_.count(dbcontent_id))
+        interpolateMeasurements(measurements, interp_options_.at(dbcontent_id));
 }
 
 namespace
@@ -430,15 +448,15 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
 /**
 */
-SimpleReferenceCalculator::References SimpleReferenceCalculator::generateReferences()
+void SimpleReferenceCalculator::updateReferences()
 {
-    References refs;
-
     for (auto& ref : references_)
-        if (!ref.second.references.empty())
-            refs[ ref.first ] = std::move(ref.second.references);
+    {
+        assert(reconstructor_.targets_.count(ref.first));
 
-    return refs;
+        auto& target = reconstructor_.targets_.at(ref.first);
+        target.references_ = std::move(ref.second.references);
+    }
 }
 
 #if 0

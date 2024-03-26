@@ -183,7 +183,7 @@ bool SimpleReconstructor::processSlice_impl()
     auto associations = createAssociations();
     saveAssociations(associations);
 
-    auto references = ref_calculator_.computeReferences();
+    ref_calculator_.computeReferences();
 
     if (is_last_slice)
         saveTargets();
