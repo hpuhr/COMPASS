@@ -1,8 +1,18 @@
 #pragma once
+
 #include "targetreportdefs.h"
 
-class AccuracyEstimatorBase
+#include <QObject>
+
+class DataSourceManager;
+
+class AccuracyEstimatorBase : public QObject
 {
+    Q_OBJECT
+
+  public slots:
+    void updateDataSourcesInfoSlot();
+
   public:
     AccuracyEstimatorBase();
 
@@ -22,6 +32,8 @@ class AccuracyEstimatorBase
 
     static const double AccAccStdDevFallback;
     static const dbContent::targetReport::AccelerationAccuracy AccAccStdFallback;
+
+//    DataSourceManager& ds_man_;
 };
 
 

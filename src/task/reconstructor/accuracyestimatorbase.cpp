@@ -1,4 +1,8 @@
 #include "accuracyestimatorbase.h"
+#include "datasourcemanager.h"
+#include "dbdatasource.h"
+
+#include "compass.h"
 
 const double AccuracyEstimatorBase::PosAccStdDevFallback = 10000.0;
 const dbContent::targetReport::PositionAccuracy AccuracyEstimatorBase::PosAccStdFallback
@@ -16,5 +20,16 @@ const dbContent::targetReport::AccelerationAccuracy AccuracyEstimatorBase::AccAc
     { AccuracyEstimatorBase::AccAccStdDevFallback, AccuracyEstimatorBase::AccAccStdDevFallback};
 
 AccuracyEstimatorBase::AccuracyEstimatorBase()
+//    : ds_man_ (COMPASS::instance().dataSourceManager())
 {
+//    connect (&ds_man_, &DataSourceManager::dataSourcesChangedSignal,
+//            this, &AccuracyEstimatorBase::updateDataSourcesInfoSlot);
+}
+
+void AccuracyEstimatorBase::updateDataSourcesInfoSlot()
+{
+//    for (const auto& ds_it : ds_man_.dbDataSources())
+//    {
+
+//    }
 }
