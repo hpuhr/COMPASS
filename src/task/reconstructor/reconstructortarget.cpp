@@ -2,6 +2,9 @@
 #include "simplereconstructor.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
+#include "dbcontent.h"
+#include "dbcontent/variable/variable.h"
+#include "buffer.h"
 #include "util/number.h"
 #include "util/timeconv.h"
 
@@ -63,8 +66,8 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
     if (!ds_ids_.count(tr.ds_id_))
         ds_ids_.insert(tr.ds_id_);
 
-    //    if (tr.track_number_ && !track_nums_.count({tr.ds_id_, *tr.track_number_}))
-    //        track_nums_.insert({tr.ds_id_, *tr.track_number_});
+            //    if (tr.track_number_ && !track_nums_.count({tr.ds_id_, *tr.track_number_}))
+            //        track_nums_.insert({tr.ds_id_, *tr.track_number_});
 
     if (tr.mode_a_code_ && !mode_as_.count(tr.mode_a_code_->code_))
         mode_as_.insert(tr.mode_a_code_->code_);
@@ -95,14 +98,14 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
             acids_.insert(acid);
     }
 
-    //    if (tr.has_adsb_info_ && tr.has_mops_version_)
-    //    {
-    //        if (!mops_versions_.count(tr.mops_version_))
-    //            mops_versions_.insert(tr.mops_version_);
-    //    }
+            //    if (tr.has_adsb_info_ && tr.has_mops_version_)
+            //    {
+            //        if (!mops_versions_.count(tr.mops_version_))
+            //            mops_versions_.insert(tr.mops_version_);
+            //    }
 
-    //    if (!tmp_)
-    //        tr.addAssociated(this);
+            //    if (!tmp_)
+            //        tr.addAssociated(this);
 }
 
 void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums)
@@ -231,21 +234,21 @@ std::string ReconstructorTarget::asStr() const
     }
 
 
-    //    if (track_nums_.size())
-    //    {
-    //        ss << " tns ";
+            //    if (track_nums_.size())
+            //    {
+            //        ss << " tns ";
 
-    //        bool first {true};
-    //        for (auto tn_it : track_nums_)
-    //        {
-    //            if (first)
-    //                ss << "(" << tn_it.first << "," << tn_it.second << ")";
-    //            else
-    //                ss << ", " << "(" << tn_it.first << "," << tn_it.second << ")";
+            //        bool first {true};
+            //        for (auto tn_it : track_nums_)
+            //        {
+            //            if (first)
+            //                ss << "(" << tn_it.first << "," << tn_it.second << ")";
+            //            else
+            //                ss << ", " << "(" << tn_it.first << "," << tn_it.second << ")";
 
-    //            first = false;
-    //        }
-    //    }
+            //            first = false;
+            //        }
+            //    }
 
     return ss.str();
 }
@@ -511,35 +514,35 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
             // TODO no alt 4 u!
 
-    //    bool has_altitude = false;
-    //    float altitude = 0.0;
+            //    bool has_altitude = false;
+            //    float altitude = 0.0;
 
-    //    if (pos1.has_altitude_ && !pos2.has_altitude_)
-    //    {
-    //        has_altitude = true;
-    //        altitude = pos1.altitude_;
-    //    }
-    //    else if (!pos1.has_altitude_ && pos2.has_altitude_)
-    //    {
-    //        has_altitude = true;
-    //        altitude = pos2.altitude_;
-    //    }
-    //    else if (pos1.has_altitude_ && pos2.has_altitude_)
-    //    {
-    //        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
-    //        has_altitude = true;
-    //        altitude = pos1.altitude_ + v_alt*d_t2;
-    //    }
+            //    if (pos1.has_altitude_ && !pos2.has_altitude_)
+            //    {
+            //        has_altitude = true;
+            //        altitude = pos1.altitude_;
+            //    }
+            //    else if (!pos1.has_altitude_ && pos2.has_altitude_)
+            //    {
+            //        has_altitude = true;
+            //        altitude = pos2.altitude_;
+            //    }
+            //    else if (pos1.has_altitude_ && pos2.has_altitude_)
+            //    {
+            //        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
+            //        has_altitude = true;
+            //        altitude = pos1.altitude_ + v_alt*d_t2;
+            //    }
 
-    //    logdbg << "Target: interpolatedPosForTime: pos1 has alt "
-    //           << pos1.has_altitude_ << " alt " << pos1.altitude_
-    //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
-    //           << " interpolated has alt " << has_altitude << " alt " << altitude;
+            //    logdbg << "Target: interpolatedPosForTime: pos1 has alt "
+            //           << pos1.has_altitude_ << " alt " << pos1.altitude_
+            //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
+            //           << " interpolated has alt " << has_altitude << " alt " << altitude;
 
-    //            //        if (in_appimage_) // inside appimage
-    //            //            return {{y_pos, x_pos, has_altitude, true, altitude}, true};
-    //            //        else
-    //    return {{x_pos, y_pos, has_altitude, true, altitude}, true};
+            //            //        if (in_appimage_) // inside appimage
+            //            //            return {{y_pos, x_pos, has_altitude, true, altitude}, true};
+            //            //        else
+            //    return {{x_pos, y_pos, has_altitude, true, altitude}, true};
 
     return {{x_pos, y_pos}, true};
 }
@@ -598,29 +601,29 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     //    bool has_altitude = false;
     //    float altitude = 0.0;
 
-    //    if (pos1.has_altitude_ && !pos2.has_altitude_)
-    //    {
-    //        has_altitude = true;
-    //        altitude = pos1.altitude_;
-    //    }
-    //    else if (!pos1.has_altitude_ && pos2.has_altitude_)
-    //    {
-    //        has_altitude = true;
-    //        altitude = pos2.altitude_;
-    //    }
-    //    else if (pos1.has_altitude_ && pos2.has_altitude_)
-    //    {
-    //        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
-    //        has_altitude = true;
-    //        altitude = pos1.altitude_ + v_alt*d_t2;
-    //    }
+            //    if (pos1.has_altitude_ && !pos2.has_altitude_)
+            //    {
+            //        has_altitude = true;
+            //        altitude = pos1.altitude_;
+            //    }
+            //    else if (!pos1.has_altitude_ && pos2.has_altitude_)
+            //    {
+            //        has_altitude = true;
+            //        altitude = pos2.altitude_;
+            //    }
+            //    else if (pos1.has_altitude_ && pos2.has_altitude_)
+            //    {
+            //        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
+            //        has_altitude = true;
+            //        altitude = pos1.altitude_ + v_alt*d_t2;
+            //    }
 
-    //    logdbg << "Target: interpolatedPosForTimeFast: pos1 has alt "
-    //           << pos1.has_altitude_ << " alt " << pos1.altitude_
-    //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
-    //           << " interpolated has alt " << has_altitude << " alt " << altitude;
+            //    logdbg << "Target: interpolatedPosForTimeFast: pos1 has alt "
+            //           << pos1.has_altitude_ << " alt " << pos1.altitude_
+            //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
+            //           << " interpolated has alt " << has_altitude << " alt " << altitude;
 
-    //    return {{int_lat, int_long, has_altitude, true, altitude}, true};
+            //    return {{int_lat, int_long, has_altitude, true, altitude}, true};
 
     return {{int_lat, int_long}, true};
 }
@@ -857,10 +860,10 @@ ComparisonResult ReconstructorTarget::compareModeCCode (dbContent::targetReport:
         return ComparisonResult::SAME;
 
     bool lower_mc_usable = lower_tr && lower_tr->barometric_altitude_.has_value()
-                            && lower_tr->barometric_altitude_->hasReliableValue();
+                           && lower_tr->barometric_altitude_->hasReliableValue();
 
     bool upper_mc_usable = upper_tr && upper_tr->barometric_altitude_.has_value()
-                            && upper_tr->barometric_altitude_->hasReliableValue();
+                           && upper_tr->barometric_altitude_->hasReliableValue();
 
             // no able to compare
     if (!lower_mc_usable && !upper_mc_usable)
@@ -1023,7 +1026,7 @@ void ReconstructorTarget::updateCounts()
         assert (reconstructor_.target_reports_.count(rn_it));
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rn_it);
 
-        if (!tr.in_current_slice_)
+        if (tr.timestamp_ >= reconstructor_.write_before_time_) // tr.in_current_slice_
             continue;
 
         counts_[Number::recNumGetDBContId(rn_it)] += 1;
@@ -1042,6 +1045,314 @@ std::map <std::string, unsigned int> ReconstructorTarget::getDBContentCounts()
     }
 
     return counts;
+}
+
+std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
+{
+    loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref size " << references_.size();
+
+    string dbcontent_name = "RefTraj";
+    unsigned int dbcontent_id = 255;
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    PropertyList buffer_list;
+
+            // basics
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sac_id_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
+
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
+
+            // pos
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_));
+
+            // spd
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+
+            // stddevs
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_xy_cov_));
+
+            // secondary
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_));
+
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
+
+    std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
+
+    NullableVector<unsigned int>& ds_id_vec = buffer->get<unsigned int> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_).name());
+    NullableVector<unsigned char>& sac_vec = buffer->get<unsigned char> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sac_id_).name());
+    NullableVector<unsigned char>& sic_vec = buffer->get<unsigned char> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_).name());
+    NullableVector<unsigned int>& line_vec = buffer->get<unsigned int> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_).name());
+
+    NullableVector<float>& tod_vec = buffer->get<float> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_).name());
+    NullableVector<ptime>& ts_vec = buffer->get<ptime> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_).name());
+
+    NullableVector<double>& lat_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name());
+    NullableVector<double>& lon_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name());
+    NullableVector<float>& mc_vec = buffer->get<float> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
+
+            // speed, track angle
+    NullableVector<double>& vx_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_).name());
+    NullableVector<double>& vy_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_).name());
+
+    NullableVector<double>& speed_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name());
+    NullableVector<double>& track_angle_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name());
+
+            // stddevs
+    NullableVector<double>& x_stddev_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_).name());
+    NullableVector<double>& y_stddev_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_).name());
+    NullableVector<double>& xy_cov_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_xy_cov_).name());
+
+            // ground bit
+    NullableVector<bool>& gb_vec = buffer->get<bool> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_).name());
+
+    NullableVector<unsigned int>& m3a_vec = buffer->get<unsigned int> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_).name());
+    NullableVector<unsigned int>& acad_vec = buffer->get<unsigned int> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_).name());
+    NullableVector<string>& acid_vec = buffer->get<string> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_).name());
+
+    NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).name());
+
+            //DataMapping mapping;
+
+            //unsigned int cnt=0;
+            //bool data_written=false;
+
+    unsigned int sac = reconstructor_.settings_.ds_sac;
+    unsigned int sic = reconstructor_.settings_.ds_sic;
+    unsigned int ds_id = Number::dsIdFrom(sac, sic);
+    assert (reconstructor_.settings_.ds_line >= 0 && reconstructor_.settings_.ds_line <= 3);
+    //std::vector<unsigned int> assoc_val ({utn_});
+
+    double speed_ms, bearing_rad, xy_cov;
+
+    unsigned int buffer_cnt = 0;
+
+    boost::posix_time::time_duration d_max = Time::partialSeconds(reconstructor_.settings_.max_time_diff_sensor_);
+
+    for (size_t i = 0; i < references_.size(); ++i)
+    {
+        const reconstruction::Reference& ref = references_[ i ];
+
+        loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref ts " << Time::toString(ref.t)
+               << " wbt " << Time::toString(reconstructor_.write_before_time_) <<
+            " skip " << (ref.t >= reconstructor_.write_before_time_);
+
+        if (ref.t >= reconstructor_.write_before_time_)
+            continue;
+
+        //        const Chain* chain = rec.chainOfReference(ref);
+        //        assert(chain);
+
+        //        auto it = chain_targets.find(chain);
+        //        assert(it != chain_targets.end());
+
+                // hack to skip no mode c
+
+                //                bool has_any_mode_c = false;
+
+                //                for (auto& chain_it : chains_) // iterate over both chains
+                //                {
+                //                    mapping = chain_it.second->calculateDataMapping(ref.t);
+
+                //                    if (mapping.pos_ref_.has_altitude_)
+                //                    {
+                //                        has_any_mode_c = true;
+                //                        break;
+                //                    }
+                //                }
+
+                //                if (!has_any_mode_c)
+                //                    continue;
+
+        ds_id_vec.set(buffer_cnt, ds_id);
+        sac_vec.set(buffer_cnt, sac);
+        sic_vec.set(buffer_cnt, sic);
+        line_vec.set(buffer_cnt, reconstructor_.settings_.ds_line);
+
+        ts_vec.set(buffer_cnt, ref.t);
+        tod_vec.set(buffer_cnt, ref.t.time_of_day().total_milliseconds() / 1000.0);
+
+        lat_vec.set(buffer_cnt, ref.lat);
+        lon_vec.set(buffer_cnt, ref.lon);
+
+        utn_vec.set(buffer_cnt, utn_);
+
+                // set speed
+
+        if (ref.vx.has_value() && ref.vy.has_value())
+        {
+            vx_vec.set(buffer_cnt, *ref.vx);
+            vy_vec.set(buffer_cnt, *ref.vy);
+
+            speed_ms = sqrt(pow(*ref.vx, 2)+pow(*ref.vy, 2)) ; // for 1s
+            bearing_rad = atan2(*ref.vx, *ref.vy);
+
+            speed_vec.set(buffer_cnt, speed_ms * M_S2KNOTS);
+            track_angle_vec.set(buffer_cnt, bearing_rad * RAD2DEG);
+        }
+
+                // set stddevs
+
+        if (ref.x_stddev.has_value() && ref.y_stddev.has_value() && ref.xy_cov.has_value())
+        {
+            x_stddev_vec.set(buffer_cnt, *ref.x_stddev);
+            y_stddev_vec.set(buffer_cnt, *ref.y_stddev);
+
+            xy_cov = *ref.xy_cov;
+
+                    // to inverse of this asterix rep
+                    // if (xy_cov < 0)
+                    //     xy_cov = - pow(xy_cov, 2);
+                    // else
+                    //     xy_cov = pow(xy_cov, 2);
+
+            if (xy_cov < 0)
+                xy_cov_vec.set(buffer_cnt, -sqrt(-xy_cov));
+            else
+                xy_cov_vec.set(buffer_cnt, sqrt(xy_cov));
+        }
+
+                // set other data
+
+        //        for (auto& chain_it : chains_) // iterate over both chains
+        //        {
+        //            mapping = chain_it.second->calculateDataMapping(ref.t);
+
+                // TODO crappy
+
+        ReconstructorInfoPair info = dataFor(ref.t, d_max);
+
+        if (info.first && info.first->barometric_altitude_
+            && info.first->barometric_altitude_->hasReliableValue())
+        {
+            if (mc_vec.isNull(i))
+                mc_vec.set(buffer_cnt, info.first->barometric_altitude_->altitude_);
+        }
+
+        if (info.second && info.second->barometric_altitude_
+            && info.second->barometric_altitude_->hasReliableValue())
+        {
+            if (mc_vec.isNull(i))
+                mc_vec.set(buffer_cnt, info.second->barometric_altitude_->altitude_);
+            else
+                mc_vec.set(buffer_cnt,
+                           (info.second->barometric_altitude_->altitude_ + mc_vec.get(buffer_cnt))/2.0);
+        }
+
+        if (info.first)
+        {
+//            boost::optional<unsigned int> m3a = chain_it.second->modeA(mapping.dataid_ref1_);
+//            boost::optional<std::string> acid = chain_it.second->acid(mapping.dataid_ref1_);
+//            boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref1_);
+
+            if (info.first->mode_a_code_ && info.first->mode_a_code_->hasReliableValue() && m3a_vec.isNull(i))
+                m3a_vec.set(buffer_cnt, info.first->mode_a_code_->code_);
+
+            if (info.first->acad_ && acad_vec.isNull(i))
+                acad_vec.set(buffer_cnt, *info.first->acad_);
+
+//            if (acad_vec.isNull(i) && acad.has_value())
+//                acad_vec.set(buffer_cnt, *acad);
+
+            if (info.first->acid_ && acid_vec.isNull(i))
+                acid_vec.set(buffer_cnt, *info.first->acid_);
+
+//            if (acid_vec.isNull(i) && acid.has_value())
+//                acid_vec.set(buffer_cnt, *acid);
+
+            if (info.first->ground_bit_ && gb_vec.isNull(i))
+                gb_vec.set(buffer_cnt, *info.first->ground_bit_);
+
+//            if (gb_vec.isNull(i) || (!gb_vec.isNull(i) && !gb_vec.get(i)))
+//            {
+//                boost::optional<bool> gbs = chain_it.second->groundBit(mapping.dataid_ref1_);
+
+//                if (gbs.has_value())
+//                    gb_vec.set(buffer_cnt, *gbs);
+//            }
+        }
+
+        if (info.second)
+        {
+            if (info.second->mode_a_code_ && info.second->mode_a_code_->hasReliableValue() && m3a_vec.isNull(i))
+                m3a_vec.set(buffer_cnt, info.second->mode_a_code_->code_);
+
+            if (info.second->acad_ && acad_vec.isNull(i))
+                acad_vec.set(buffer_cnt, *info.second->acad_);
+
+            if (info.second->acid_ && acid_vec.isNull(i))
+                acid_vec.set(buffer_cnt, *info.second->acid_);
+
+            if (info.second->ground_bit_ && gb_vec.isNull(i))
+                gb_vec.set(buffer_cnt, *info.second->ground_bit_);
+
+//            boost::optional<unsigned int> m3a = chain_it.second->modeA(mapping.dataid_ref2_);
+//            boost::optional<std::string> acid = chain_it.second->acid(mapping.dataid_ref2_);
+//            boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref2_);
+
+//            if (m3a_vec.isNull(i) && m3a.has_value())
+//                m3a_vec.set(buffer_cnt, *m3a);
+
+//            if (acad_vec.isNull(i) && acad.has_value())
+//                acad_vec.set(buffer_cnt, *acad);
+
+//            if (acid_vec.isNull(i) && acid.has_value())
+//                acid_vec.set(buffer_cnt, *acid);
+
+//            if (gb_vec.isNull(i) || (!gb_vec.isNull(i) && !gb_vec.get(i)))
+//            {
+//                boost::optional<bool> gbs = chain_it.second->groundBit(mapping.dataid_ref2_);
+
+//                if (gbs.has_value())
+//                    gb_vec.set(buffer_cnt, *gbs);
+//            }
+        }
+
+        ++buffer_cnt;
+    }
+
+    counts_[dbcontent_id] += buffer->size();
+
+    loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " buffer size " << buffer->size();
+    //assert (buffer->size());
+
+    return buffer;
 }
 
 void ReconstructorTarget::removeOutdatedTargetReports()

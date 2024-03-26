@@ -2,17 +2,8 @@
 
 #include "targetreportdefs.h"
 
-#include <QObject>
-
-class DataSourceManager;
-
-class AccuracyEstimatorBase : public QObject
+class AccuracyEstimatorBase
 {
-    Q_OBJECT
-
-  public slots:
-    void updateDataSourcesInfoSlot();
-
   public:
     AccuracyEstimatorBase();
 

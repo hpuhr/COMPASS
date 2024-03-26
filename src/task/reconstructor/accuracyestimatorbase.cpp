@@ -26,10 +26,3 @@ AccuracyEstimatorBase::AccuracyEstimatorBase()
 //            this, &AccuracyEstimatorBase::updateDataSourcesInfoSlot);
 }
 
-void AccuracyEstimatorBase::updateDataSourcesInfoSlot()
-{
-//    for (const auto& ds_it : ds_man_.dbDataSources())
-//    {
-
-//    }
-}

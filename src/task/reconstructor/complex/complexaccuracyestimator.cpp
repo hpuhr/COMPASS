@@ -1,5 +1,13 @@
 #include "complexaccuracyestimator.h"
+#include "compass.h"
+#include "datasourcemanager.h"
+#include "dbdatasource.h"
+#include "adsbaccuracyestimator.h"
+#include "mlataccuracyestimator.h"
+#include "trackeraccuracyestimator.h"
+#include "radaraccuracyestimator.h"
 #include "number.h"
+#include "logger.h"
 
 using namespace Utils;
 
@@ -33,6 +41,34 @@ const dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::Ac
 
 ComplexAccuracyEstimator::ComplexAccuracyEstimator(ComplexReconstructor& reconstructor)
     : reconstructor_(reconstructor)
+{
+
+}
+
+void ComplexAccuracyEstimator::init()
+{
+    connect(&COMPASS::instance().dataSourceManager(), &DataSourceManager::dataSourcesChangedSignal,
+            this, &ComplexAccuracyEstimator::updateDataSourcesInfoSlot);
+
+    initialized_ = true;
+}
+
+void ComplexAccuracyEstimator::updateDataSourcesInfoSlot()
+{
+    loginf << "ComplexAccuracyEstimator: updateDataSourcesInfoSlot";
+
+    ds_acc_estimators_.clear();
+
+    for (const auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+    {
+        assert (ds_it);
+        ds_acc_estimators_.emplace(std::piecewise_construct,
+                                   std::forward_as_tuple(ds_it->id()),  // args for key
+                                   std::forward_as_tuple(createAccuracyEstimator(*ds_it)));
+    }
+}
+
+std::unique_ptr<AccuracyEstimatorBase> ComplexAccuracyEstimator::createAccuracyEstimator(dbContent::DBDataSource& ds)
 {
 
 }

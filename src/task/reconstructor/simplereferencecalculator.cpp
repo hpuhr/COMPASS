@@ -103,6 +103,8 @@ void SimpleReferenceCalculator::updateInterpOptions()
 */
 bool SimpleReferenceCalculator::computeReferences()
 {
+    loginf << "SimpleReferenceCalculator: computeReferences";
+
     reset();
     generateMeasurements();
     reconstructMeasurements();

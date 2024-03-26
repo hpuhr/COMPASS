@@ -2,10 +2,8 @@
 
 #include "targetreportdefs.h"
 #include "accuracyestimatorbase.h"
-#include "adsbaccuracyestimator.h"
-#include "mlataccuracyestimator.h"
-#include "trackeraccuracyestimator.h"
-#include "radaraccuracyestimator.h"
+
+#include <memory>
 
 class ComplexReconstructor;
 
@@ -19,10 +17,26 @@ class ComplexReconstructor;
 //    • ADS-B
 //        ◦ Minimal position quality indicator verification
 
-class ComplexAccuracyEstimator : public AccuracyEstimatorBase
+#include <QObject>
+
+class DataSourceManager;
+
+namespace dbContent
 {
+class DBDataSource;
+}
+
+class ComplexAccuracyEstimator : public QObject, public AccuracyEstimatorBase
+{
+    Q_OBJECT
+
+  public slots:
+    void updateDataSourcesInfoSlot();
+
   public:
     ComplexAccuracyEstimator(ComplexReconstructor& reconstructor);
+
+    void init();
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
@@ -34,10 +48,14 @@ class ComplexAccuracyEstimator : public AccuracyEstimatorBase
   private:
     ComplexReconstructor& reconstructor_;
 
-    ADSBAccuracyEstimator adsb_estimator_;
-    MLATAccuracyEstimator mlat_estimator_;
-    TrackerAccuracyEstimator tracker_estimator_;
-    RadarAccuracyEstimator radar_estimator_;
+    bool initialized_ {false};
+
+    std::map<unsigned int, std::unique_ptr<AccuracyEstimatorBase>> ds_acc_estimators_;
+
+//    ADSBAccuracyEstimator adsb_estimator_;
+//    MLATAccuracyEstimator mlat_estimator_;
+//    TrackerAccuracyEstimator tracker_estimator_;
+//    RadarAccuracyEstimator radar_estimator_;
 
     static const double PosAccStdDevDefault;
     static const dbContent::targetReport::PositionAccuracy PosAccStdDefault;
@@ -55,5 +73,7 @@ class ComplexAccuracyEstimator : public AccuracyEstimatorBase
     static const dbContent::targetReport::AccelerationAccuracy AccAccStdDefault;
     static const dbContent::targetReport::AccelerationAccuracy AccAccStdDefaultCAT021;
     static const dbContent::targetReport::AccelerationAccuracy AccAccStdDefaultCAT062;
+
+    std::unique_ptr<AccuracyEstimatorBase> createAccuracyEstimator(dbContent::DBDataSource& ds);
 };
 

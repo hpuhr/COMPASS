@@ -209,10 +209,11 @@ bool SimpleReconstructor::processSlice_impl()
 
     associatior_.associateNewData();
 
-    auto associations = createAssociations();
+    auto associations = createAssociations(); // only for ts < write_before_time, also updates target counts
     saveAssociations(associations);
 
     ref_calculator_.computeReferences();
+    saveReferences(); // only for ts < write_before_time
 
     if (is_last_slice)
         saveTargets();
@@ -396,7 +397,7 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> SimpleReconstructo
 
             dbContent::targetReport::ReconstructorInfo& tr = target_reports_.at(rn_it);
 
-            if (tr.timestamp_ < write_before_time_ ) // tr.in_current_slice_
+            if (tr.timestamp_ < write_before_time_) // tr.in_current_slice_
             {
                 associations[Number::recNumGetDBContId(rn_it)][rn_it] = tgt_it.first;
                 ++num_assoc;
@@ -586,6 +587,35 @@ void SimpleReconstructor::saveAssociations(
     //    }
 
     loginf << "SimpleReconstructor: saveAssociations: done";
+}
+
+void SimpleReconstructor::saveReferences()
+{
+    loginf << "SimpleReconstructor: saveReferences: num " << targets_.size();
+
+    DBContentManager& cont_man = COMPASS::instance().dbContentManager();
+
+    std::shared_ptr<Buffer> buffer;
+
+    for (auto& tgt_it : targets_)
+    {
+        if (!buffer)
+            buffer = tgt_it.second.getReferenceBuffer(); // also updates count
+        else
+        {
+            auto tmp = tgt_it.second.getReferenceBuffer();
+            buffer->seizeBuffer(*tmp);
+        }
+    }
+
+    if (buffer && buffer->size())
+    {
+        loginf << "SimpleReconstructor: saveReferences: buffer size " << buffer->size();
+
+        cont_man.insertData({{buffer->dbContentName(), buffer}});
+    }
+    else
+        loginf << "SimpleReconstructor: saveReferences: empty buffer";
 }
 
 void SimpleReconstructor::saveTargets()

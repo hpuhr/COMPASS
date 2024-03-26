@@ -14,6 +14,7 @@
 #include <set>
 
 
+class Buffer;
 class SimpleReconstructor;
 
 namespace dbContent {
@@ -144,6 +145,8 @@ class ReconstructorTarget
 
     void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts();
+
+    std::shared_ptr<Buffer> getReferenceBuffer();
 
     void removeOutdatedTargetReports();
 
