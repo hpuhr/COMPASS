@@ -91,6 +91,9 @@ public:
     StepResult kalmanStep(kalman::KalmanUpdate& update,
                           Measurement& mm);
 
+    void storeUpdates(std::vector<Reference>& refs,
+                      const std::vector<kalman::KalmanUpdate>& updates) const;
+    
     void smoothUpdates(std::vector<kalman::KalmanUpdate>& updates);
     void interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
                        std::vector<kalman::KalmanUpdate>& updates);
@@ -118,6 +121,10 @@ private:
                        double Q_var,
                        StateInterpMode interp_mode,
                        KalmanProjectionHandler& proj_handler) const;
+    
+    void storeUpdate(Reference& ref, 
+                     const kalman::KalmanUpdate& update,
+                     KalmanProjectionHandler& phandler) const;
 
     std::unique_ptr<KalmanInterface>         kalman_interface_;
     std::unique_ptr<KalmanProjectionHandler> proj_handler_;

@@ -55,6 +55,38 @@ void KalmanEstimator::init(std::unique_ptr<KalmanInterface>&& interface)
 }
 
 /**
+*/
+void KalmanEstimator::storeUpdate(Reference& ref, 
+                                  const kalman::KalmanUpdate& update,
+                                  KalmanProjectionHandler& phandler) const
+{
+    assert(kalman_interface_);
+
+    kalman_interface_->storeState(ref, update.state);
+
+    ref.t   = update.t;
+    ref.cov = update.state.P;
+
+    //unproject to lat/lon
+    phandler.unproject(ref.lat, ref.lon, ref.x, ref.y, &update.projection_center);
+}
+
+/**
+*/
+void KalmanEstimator::storeUpdates(std::vector<Reference>& refs,
+                                   const std::vector<kalman::KalmanUpdate>& updates) const
+{
+    KalmanProjectionHandler phandler;
+
+    size_t n = updates.size();
+
+    refs.resize(n);
+
+    for (size_t i = 0; i < n; ++i)
+        storeUpdate(refs[ i ], updates[ i ], phandler);
+}
+
+/**
  * Inits the measurement and its respective update.
 */
 void KalmanEstimator::initMeasurement(kalman::KalmanUpdate& update,

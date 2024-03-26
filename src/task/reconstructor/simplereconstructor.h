@@ -8,6 +8,7 @@
 #include "reconstructortarget.h"
 #include "simpleassociator.h"
 #include "simpleaccuracyestimator.h"
+#include "simplereferencecalculator.h"
 
 class SimpleReconstructorSettings
 {
@@ -80,6 +81,7 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
     SimpleReconstructorSettings settings_;
     SimpleAssociator associatior_;
     SimpleAccuracyEstimator acc_estimator_;
+    SimpleReferenceCalculator ref_calculator_;
 
     std::map<unsigned long, dbContent::targetReport::ReconstructorInfo> target_reports_;
     // all sources, record_num -> base info
