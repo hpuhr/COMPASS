@@ -223,7 +223,7 @@ void SimpleAssociator::createNonTrackerUTNS()
         num_data_sources += dbcont_it.second.size();
     }
 
-    loginf << "SimpleAssociator: createNonTrackerUTNS: num_data_sources " << num_data_sources;
+    logdbg << "SimpleAssociator: createNonTrackerUTNS: num_data_sources " << num_data_sources;
 
             // get ta lookup map
     std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(reconstructor_.targets_);
@@ -401,7 +401,7 @@ void SimpleAssociator::createNonTrackerUTNS()
                                           if (!ok)
                                           {
 
-                                              loginf << "UGA3 NOT OK";
+                                              //loginf << "UGA3 NOT OK";
                                               ++target_cnt;
                                               continue;
                                           }
@@ -541,7 +541,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
 
     if (!ds_id_trs.count(ds_id))
     {
-        loginf << "SimpleAssociator: createPerTrackerTargets: ds " << ds_name << " has not target reports";
+        loginf << "SimpleAssociator: createTrackedTargets: ds " << ds_name << " has not target reports";
         return tracker_targets;
     }
 
@@ -558,7 +558,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
             // iterate over lines
     for (auto& line_it : line_id_trs)
     {
-        loginf << "SimpleAssociator: createTrackedTargets: iterating line " << line_it.first;
+        logdbg << "SimpleAssociator: createTrackedTargets: iterating line " << line_it.first;
 
                 //track num -> tmp_utn, last tod
 
@@ -590,7 +590,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
 
                         if (cont_utn != -1)
                         {
-                            loginf << "SimpleAssociator: createPerTrackerTargets: continuing target "
+                            logdbg << "SimpleAssociator: createPerTrackerTargets: continuing target "
                                    << cont_utn << " with tn " << *tr.track_number_ << " at time "
                                    << Time::toString(tr.timestamp_);
                             tmp_tn2utn_[*tr.track_number_] = {cont_utn, tr.timestamp_};
@@ -600,7 +600,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
 
                     if (!attached_to_existing_utn)
                     {
-                        loginf << "SimpleAssociator: createPerTrackerTargets: registering new tmp target "
+                        logdbg << "SimpleAssociator: createPerTrackerTargets: registering new tmp target "
                                << tmp_utn_cnt << " for tn " << *tr.track_number_;
 
                         tmp_tn2utn_[*tr.track_number_] = {tmp_utn_cnt, tr.timestamp_};
@@ -616,7 +616,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
                     if (tr.acad_ && existing_target.hasACAD() // new target part if ta change
                         && !existing_target.hasACAD(*tr.acad_))
                     {
-                        loginf << "SimpleAssociator: createPerTrackerTargets: registering new tmp target "
+                        logdbg << "SimpleAssociator: createPerTrackerTargets: registering new tmp target "
                                << tmp_utn_cnt << " for tn " << *tr.track_number_ << " because of ta switch "
                                << " at " << Time::toString(tr.timestamp_)
                                << " existing " << existing_target.asStr()
@@ -836,7 +836,7 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
     const std::map<unsigned int, ReconstructorTarget>& targets)
 // tries to find existing utn for tracker update, -1 if failed
 {
-    loginf << "SimpleAssociator: findContinuationUTNForTrackerUpdate";
+    logdbg << "SimpleAssociator: findContinuationUTNForTrackerUpdate";
 
     if (tr.acad_)
         return -1;
@@ -936,7 +936,7 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
                               true, other.utn_, distance);
                       });
 
-    loginf << "SimpleAssociator: findContinuationUTNForTrackerUpdate: finding best matches";
+    logdbg << "SimpleAssociator: findContinuationUTNForTrackerUpdate: finding best matches";
 
             // find best match
     unsigned int num_matches = 0;

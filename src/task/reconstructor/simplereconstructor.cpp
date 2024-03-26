@@ -463,8 +463,11 @@ void SimpleReconstructor::saveAssociations(
                 {
                     assert (target_reports_.count(rn_it));
 
-                    if (!target_reports_.at(rn_it).in_current_slice_)
+                    if (target_reports_.at(rn_it).timestamp_ >= write_before_time_)
                         continue;
+
+//                    if (!target_reports_.at(rn_it).in_current_slice_)
+//                        continue;
 
                     rec_num_col_vec.set(buf_cnt, rn_it);
 

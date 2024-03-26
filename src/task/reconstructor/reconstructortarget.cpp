@@ -1049,7 +1049,7 @@ std::map <std::string, unsigned int> ReconstructorTarget::getDBContentCounts()
 
 std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 {
-    loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref size " << references_.size();
+    logdbg << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref size " << references_.size();
 
     string dbcontent_name = "RefTraj";
     unsigned int dbcontent_id = 255;
@@ -1169,9 +1169,9 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     {
         const reconstruction::Reference& ref = references_[ i ];
 
-        loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref ts " << Time::toString(ref.t)
-               << " wbt " << Time::toString(reconstructor_.write_before_time_) <<
-            " skip " << (ref.t >= reconstructor_.write_before_time_);
+//        loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref ts " << Time::toString(ref.t)
+//               << " wbt " << Time::toString(reconstructor_.write_before_time_) <<
+//            " skip " << (ref.t >= reconstructor_.write_before_time_);
 
         if (ref.t >= reconstructor_.write_before_time_)
             continue;
@@ -1349,7 +1349,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     counts_[dbcontent_id] += buffer->size();
 
-    loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " buffer size " << buffer->size();
+    logdbg << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " buffer size " << buffer->size();
     //assert (buffer->size());
 
     return buffer;
