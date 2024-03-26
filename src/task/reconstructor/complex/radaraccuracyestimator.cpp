@@ -2,7 +2,6 @@
 
 RadarAccuracyEstimator::RadarAccuracyEstimator()
 {
-
 }
 
 dbContent::targetReport::PositionAccuracy RadarAccuracyEstimator::positionAccuracy (

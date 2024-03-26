@@ -52,11 +52,6 @@ class ComplexAccuracyEstimator : public QObject, public AccuracyEstimatorBase
 
     std::map<unsigned int, std::unique_ptr<AccuracyEstimatorBase>> ds_acc_estimators_;
 
-//    ADSBAccuracyEstimator adsb_estimator_;
-//    MLATAccuracyEstimator mlat_estimator_;
-//    TrackerAccuracyEstimator tracker_estimator_;
-//    RadarAccuracyEstimator radar_estimator_;
-
     static const double PosAccStdDevDefault;
     static const dbContent::targetReport::PositionAccuracy PosAccStdDefault;
 
