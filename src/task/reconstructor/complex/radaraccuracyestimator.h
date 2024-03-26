@@ -1,11 +1,11 @@
 #pragma once
 
-#include "accuracyestimatorbase.h"
+#include "datasourceaccuracyestimator.h"
 
-class RadarAccuracyEstimator : public AccuracyEstimatorBase
+class RadarAccuracyEstimator : public DataSourceAccuracyEstimator
 {
   public:
-    RadarAccuracyEstimator();
+    RadarAccuracyEstimator(const dbContent::DBDataSource& source);
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;

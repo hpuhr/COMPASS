@@ -1,6 +1,7 @@
 #include "radaraccuracyestimator.h"
 
-RadarAccuracyEstimator::RadarAccuracyEstimator()
+RadarAccuracyEstimator::RadarAccuracyEstimator(const dbContent::DBDataSource& source)
+    : DataSourceAccuracyEstimator(source)
 {
 }
 

@@ -1,6 +1,7 @@
 #include "trackeraccuracyestimator.h"
 
-TrackerAccuracyEstimator::TrackerAccuracyEstimator()
+TrackerAccuracyEstimator::TrackerAccuracyEstimator(const dbContent::DBDataSource& source)
+    : DataSourceAccuracyEstimator(source)
 {
 
 }

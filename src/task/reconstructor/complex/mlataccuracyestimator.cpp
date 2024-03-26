@@ -1,6 +1,7 @@
 #include "mlataccuracyestimator.h"
 
-MLATAccuracyEstimator::MLATAccuracyEstimator()
+MLATAccuracyEstimator::MLATAccuracyEstimator(const dbContent::DBDataSource& source)
+    : DataSourceAccuracyEstimator(source)
 {
 
 }

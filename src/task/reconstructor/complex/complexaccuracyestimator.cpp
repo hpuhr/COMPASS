@@ -76,13 +76,13 @@ std::unique_ptr<AccuracyEstimatorBase> ComplexAccuracyEstimator::createAccuracyE
     std::unique_ptr<AccuracyEstimatorBase> ret;
 
     if (ds_type == "Radar")
-        ret.reset(new RadarAccuracyEstimator());
+        ret.reset(new RadarAccuracyEstimator(ds));
     else if (ds_type == "MLAT")
-        ret.reset(new MLATAccuracyEstimator());
+        ret.reset(new MLATAccuracyEstimator(ds));
     else if (ds_type == "ADSB")
-        ret.reset(new ADSBAccuracyEstimator());
+        ret.reset(new ADSBAccuracyEstimator(ds));
     else // ds_type == "Tracker", "RefTraj", "Other"
-        ret.reset(new TrackerAccuracyEstimator());
+        ret.reset(new TrackerAccuracyEstimator(ds));
 
     return ret;
 }

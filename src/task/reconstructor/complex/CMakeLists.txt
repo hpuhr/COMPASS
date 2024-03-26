@@ -5,6 +5,7 @@ include_directories (
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/complexaccuracyestimator.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourceaccuracyestimator.h"
         "${CMAKE_CURRENT_LIST_DIR}/adsbaccuracyestimator.h"
         "${CMAKE_CURRENT_LIST_DIR}/mlataccuracyestimator.h"
         "${CMAKE_CURRENT_LIST_DIR}/trackeraccuracyestimator.h"
@@ -12,6 +13,7 @@ target_sources(compass
 
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/complexaccuracyestimator.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourceaccuracyestimator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/adsbaccuracyestimator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/mlataccuracyestimator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/trackeraccuracyestimator.cpp"

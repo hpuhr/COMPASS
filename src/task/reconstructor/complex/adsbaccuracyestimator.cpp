@@ -1,6 +1,7 @@
 #include "adsbaccuracyestimator.h"
 
-ADSBAccuracyEstimator::ADSBAccuracyEstimator()
+ADSBAccuracyEstimator::ADSBAccuracyEstimator(const dbContent::DBDataSource& source)
+    : DataSourceAccuracyEstimator(source)
 {
 }
 
