@@ -140,6 +140,21 @@ std::string ReconstructorInfo::asStr() const
     return ss.str();
 }
 
+bool ReconstructorInfo::isModeSDetection() const
+{
+    return acad_ || acid_;
+}
+
+bool ReconstructorInfo::isModeACDetection() const
+{
+    return !isModeSDetection() && (mode_a_code_ || barometric_altitude_);
+}
+
+bool ReconstructorInfo::isPrimaryOnlyDetection() const
+{
+    return !isModeSDetection() && !isModeACDetection();
+}
+
 std::string ModeACode::asStr() const
 {
     stringstream ss;

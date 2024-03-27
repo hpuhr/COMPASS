@@ -216,6 +216,10 @@ struct ReconstructorInfo : public BaseInfo
     TargetReportAccessor* accessor_ {nullptr};
 
     virtual std::string asStr() const;
+
+    bool isModeSDetection() const;
+    bool isModeACDetection() const;
+    bool isPrimaryOnlyDetection() const;
 };
 
 // tmp list

@@ -11,6 +11,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/optional/optional_io.hpp>
 
+#include <osgEarth/GeoMath>
+
 #include <tuple>
 
 using namespace std;
@@ -49,7 +51,7 @@ void SimpleAssociator::associateNewData()
             ++single_associated;
     }
 
-    loginf << "SimpleAssociator: run: tracker targets " << reconstructor_.targets_.size()
+    loginf << "SimpleAssociator: associateNewData: tracker targets " << reconstructor_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 
             // create non-tracker utns
@@ -68,7 +70,7 @@ void SimpleAssociator::associateNewData()
             ++single_associated;
     }
 
-    loginf << "SimpleAssociator: run: after non-tracker targets " << reconstructor_.targets_.size()
+    loginf << "SimpleAssociator: associateNewData: after non-tracker targets " << reconstructor_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 
             // create associations
@@ -864,7 +866,7 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
 
                           const ReconstructorTarget& other = targets.at(cnt);
 
-                          Transformation trafo;
+                          //Transformation trafo;
 
                           results[cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
@@ -913,19 +915,24 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
                               return; // check mode c codes if existing
 
                           bool ok;
-                          double x_pos, y_pos;
+                          //double x_pos, y_pos;
                           double distance;
 
                           assert (tr.position_ && other_last_tr.position_);
 
-                          tie(ok, x_pos, y_pos) = trafo.distanceCart(
-                              other_last_tr.position_->latitude_, other_last_tr.position_->longitude_,
-                              tr.position_->latitude_, tr.position_->longitude_);
+//                          tie(ok, x_pos, y_pos) = trafo.distanceCart(
+//                              other_last_tr.position_->latitude_, other_last_tr.position_->longitude_,
+//                              tr.position_->latitude_, tr.position_->longitude_);
 
-                          if (!ok)
-                              return;
+//                          if (!ok)
+//                              return;
 
-                          distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+//                          distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+
+                          distance = osgEarth::GeoMath::distance(
+                              other_last_tr.position_->latitude_ * DEG2RAD,
+                              other_last_tr.position_->longitude_  * DEG2RAD,
+                              tr.position_->latitude_ * DEG2RAD, tr.position_->longitude_ * DEG2RAD);
 
                           if (distance > max_distance_acceptable_tracker)
                               return;
