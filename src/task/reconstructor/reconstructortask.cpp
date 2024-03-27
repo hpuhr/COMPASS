@@ -15,6 +15,7 @@
 #include "viewmanager.h"
 #include "buffer.h"
 #include "simplereconstructor.h"
+#include "probimmreconstructor.h"
 #include "timeconv.h"
 
 #include <QApplication>
@@ -58,6 +59,12 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
         simple_reconstructor_.reset(new SimpleReconstructor(class_id, instance_id, *this));
         assert(simple_reconstructor_);
     }
+    else if (class_id == "ProbIMMReconstructor")
+    {
+        assert(!probimm_reconstructor_);
+        probimm_reconstructor_.reset(new ProbIMMReconstructor(class_id, instance_id, *this));
+        assert(probimm_reconstructor_);
+    }
     else
         throw std::runtime_error("ReconstructorTask: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -81,9 +88,9 @@ ReconstructorTaskDialog* ReconstructorTask::dialog()
 
 bool ReconstructorTask::canRun()
 {
-    assert (simple_reconstructor_);
+    assert (currentReconstructor());
 
-    return COMPASS::instance().dbContentManager().hasData() && simple_reconstructor_->hasNextTimeSlice();
+    return COMPASS::instance().dbContentManager().hasData() && currentReconstructor()->hasNextTimeSlice();
 }
 
 void ReconstructorTask::run()
@@ -99,7 +106,7 @@ void ReconstructorTask::run()
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
-    simple_reconstructor_->reset();
+    currentReconstructor()->reset();
 
     QMessageBox box;
     box.setText("Running Reconstruction...");
@@ -123,14 +130,32 @@ std::string ReconstructorTask::currentReconstructorStr() const
 
 void ReconstructorTask::currentReconstructorStr(const std::string& value)
 {
+    assert (value == ReconstructorTask::ScoringUMReconstructorName
+           || value == ReconstructorTask::ProbImmReconstructorName);
+
     current_reconstructor_str_ = value;
 }
 
-SimpleReconstructor*ReconstructorTask::simpleReconstructor() const
+ReconstructorBase* ReconstructorTask::currentReconstructor() const
+{
+    assert (current_reconstructor_str_ == ReconstructorTask::ScoringUMReconstructorName
+           || current_reconstructor_str_ == ReconstructorTask::ProbImmReconstructorName);
+
+    if (current_reconstructor_str_ == ReconstructorTask::ScoringUMReconstructorName)
+        return dynamic_cast<ReconstructorBase*> (simple_reconstructor_.get());
+    else
+        return dynamic_cast<ReconstructorBase*> (probimm_reconstructor_.get());
+}
+
+SimpleReconstructor* ReconstructorTask::simpleReconstructor() const
 {
     return simple_reconstructor_.get();
 }
 
+ProbIMMReconstructor* ReconstructorTask::probIMMReconstructor() const
+{
+    return probimm_reconstructor_.get();
+}
 
 void ReconstructorTask::dialogRunSlot()
 {
@@ -161,9 +186,9 @@ void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_p
 
 void ReconstructorTask::loadingDoneSlot()
 {
-    assert (simple_reconstructor_);
+    assert (currentReconstructor());
 
-    bool last_slice = !simple_reconstructor_->hasNextTimeSlice();
+    bool last_slice = !currentReconstructor()->hasNextTimeSlice();
 
     loginf << "ReconstructorTask: loadingDoneSlot: last_slice " << last_slice;
 
@@ -174,7 +199,7 @@ void ReconstructorTask::loadingDoneSlot()
     dbcontent_man.clearData(); // clear previous
 
     // TODO: do async, check if not already processing
-    assert (simple_reconstructor_->processSlice(std::move(data)));
+    assert (currentReconstructor()->processSlice(std::move(data)));
 
     if (last_slice) // disconnect everything
     {
@@ -195,7 +220,7 @@ void ReconstructorTask::loadingDoneSlot()
     if (last_slice)
     {
         loginf << "ReconstructorTask: loadingDoneSlot: data loading done";
-        simple_reconstructor_->reset();
+        currentReconstructor()->reset();
     }
 
 //    assert(status_dialog_);
@@ -217,6 +242,12 @@ void ReconstructorTask::checkSubConfigurables()
     {
         generateSubConfigurable("SimpleReconstructor", "SimpleReconstructor0");
         assert (simple_reconstructor_);
+    }
+
+    if (!probimm_reconstructor_)
+    {
+        generateSubConfigurable("ProbIMMReconstructor", "ProbIMMReconstructor0");
+        assert (probimm_reconstructor_);
     }
 }
 
@@ -248,15 +279,15 @@ void ReconstructorTask::deleteCalculatedReferences()
 
 void ReconstructorTask::loadDataSlice()
 {
-    assert (simple_reconstructor_);
-    assert (simple_reconstructor_->hasNextTimeSlice());
+    assert (currentReconstructor());
+    assert (currentReconstructor()->hasNextTimeSlice());
 
     boost::posix_time::ptime min_ts, max_ts;
 
-    std::tie(min_ts, max_ts) = simple_reconstructor_->getNextTimeSlice();
+    std::tie(min_ts, max_ts) = currentReconstructor()->getNextTimeSlice();
     assert (min_ts <= max_ts);
 
-    bool last_slice = !simple_reconstructor_->hasNextTimeSlice();
+    bool last_slice = !currentReconstructor()->hasNextTimeSlice();
 
     loginf << "ReconstructorTask: loadDataSlice: min " << Time::toString(min_ts)
            << " max " << Time::toString(max_ts) << " last " << last_slice;
@@ -277,7 +308,7 @@ void ReconstructorTask::loadDataSlice()
         if (!dbo_it.second->hasData())
             continue;
 
-        VariableSet read_set = simple_reconstructor_->getReadSetFor(dbo_it.first);
+        VariableSet read_set = currentReconstructor()->getReadSetFor(dbo_it.first);
 
         dbo_it.second->load(read_set, false, false, timestamp_filter);
     }

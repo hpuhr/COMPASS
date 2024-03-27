@@ -1,5 +1,5 @@
 #include "reconstructortarget.h"
-#include "simplereconstructor.h"
+#include "reconstructorbase.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
 #include "dbcontent.h"
@@ -7,6 +7,7 @@
 #include "buffer.h"
 #include "util/number.h"
 #include "util/timeconv.h"
+#include "global.h"
 
 #include <boost/optional/optional_io.hpp>
 
@@ -16,7 +17,7 @@ using namespace boost::posix_time;
 
 namespace dbContent {
 
-ReconstructorTarget::ReconstructorTarget(SimpleReconstructor& reconstructor, unsigned int utn, bool tmp_utn)
+ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor, unsigned int utn, bool tmp_utn)
     : reconstructor_(reconstructor), utn_(utn), tmp_utn_(tmp_utn)
 {
 
@@ -24,11 +25,6 @@ ReconstructorTarget::ReconstructorTarget(SimpleReconstructor& reconstructor, uns
 
 ReconstructorTarget::~ReconstructorTarget()
 {
-   //    if (!tmp_)
-   //    {
-   //        for (auto& tr_it : target_reports_)
-   //            tr_it->removeAssociated(this);
-   //    }
 }
 
 void ReconstructorTarget::addTargetReport (unsigned long rec_num)
@@ -903,122 +899,6 @@ ComparisonResult ReconstructorTarget::compareModeCCode (dbContent::targetReport:
         return ComparisonResult::DIFFERENT;
 }
 
-//void ReconstructorTarget::calculateSpeeds()
-//{
-//    has_speed_ = false;´
-//    ptime timestamp;
-//    double latitude {0};
-//    double longitude {0};
-//    TargetReport* tr;
-
-//    ptime timestamp_prev;
-//    double latitude_prev {0};
-//    double longitude_prev {0};
-
-//            //        OGRSpatialReference wgs84;
-//            //        wgs84.SetWellKnownGeogCS("WGS84");
-//            //        OGRSpatialReference local;
-
-//    Transformation trafo;
-
-//    double x_pos, y_pos;
-//    bool ok;
-
-//    float d_t;
-//    double v_x, v_y;
-//    double spd;
-//    double spd_sum {0};
-//    unsigned int num_spd {0};
-
-//    bool first = true;
-//    for (auto& time_it : tr_timestamps_)
-//    {
-//        timestamp_prev = timestamp;
-//        latitude_prev = latitude;
-//        longitude_prev = longitude;
-
-//        timestamp = time_it.first;
-
-//        assert (time_it.second < target_reports_.size());
-//        tr = target_reports_.at(time_it.second);
-
-//        latitude = info.latitude_;
-//        longitude = info.longitude_;
-
-//        if (first)
-//        {
-//            first = false;
-//            continue;
-//        }
-
-//        d_t = Time::partialSeconds(timestamp - timestamp_prev);
-//        assert (d_t >= 0);
-
-//        tie(ok, x_pos, y_pos) = trafo.distanceCart(
-//            latitude, longitude, latitude_prev, longitude_prev);
-
-//        if (!ok)
-//            continue;
-
-//        v_x = x_pos/d_t;
-//        v_y = y_pos/d_t;
-
-//        spd = sqrt(pow(v_x,2)+pow(v_y,2)) * M_S2KNOTS;
-
-//        if (!has_speed_)
-//        {
-//            has_speed_ = true;
-
-//            speed_min_ = spd;
-//            speed_max_ = spd;
-//        }
-//        else
-//        {
-//            speed_min_ = min(speed_min_, spd);
-//            speed_max_ = max(speed_max_, spd);
-//        }
-
-//        spd_sum += spd;
-//        ++num_spd;
-//    }
-
-//    if (num_spd)
-//    {
-//        speed_avg_ = spd_sum/(float)num_spd;
-//    }
-//}
-
-//void ReconstructorTarget::removeNonModeSTRs()
-//{
-//    vector<TargetReport*> tmp_trs = target_reports_;
-
-//    if (!tmp_)
-//    {
-//        loginf << "Target: removeNonModeSTRs: " << asStr();
-
-//        for (auto tr_it : tmp_trs)
-//            tr_it->removeAssociated(this);
-//    }
-
-//    target_reports_.clear();
-
-//    tas_.clear();
-//    ids_.clear();
-//    mas_.clear();
-//    mops_versions_.clear();
-//    has_timestamps_ = false;
-//    has_speed_ = false;
-//    tr_timestamps_.clear();
-//    ds_ids_.clear();
-//    track_nums_.clear();
-
-//    for (auto tr_it : tmp_trs)
-//    {
-//        if (tr_it->has_ta_)
-//            addAssociated(tr_it);
-//    }
-//}
-
 void ReconstructorTarget::updateCounts()
 {
     for (auto& rn_it : target_reports_)
@@ -1148,22 +1028,17 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).name());
 
-            //DataMapping mapping;
-
-            //unsigned int cnt=0;
-            //bool data_written=false;
-
-    unsigned int sac = reconstructor_.settings_.ds_sac;
-    unsigned int sic = reconstructor_.settings_.ds_sic;
+    unsigned int sac = reconstructor_.ds_sac_;
+    unsigned int sic = reconstructor_.ds_sic_;
     unsigned int ds_id = Number::dsIdFrom(sac, sic);
-    assert (reconstructor_.settings_.ds_line >= 0 && reconstructor_.settings_.ds_line <= 3);
+    assert (reconstructor_.ds_line_ >= 0 && reconstructor_.ds_line_ <= 3);
     //std::vector<unsigned int> assoc_val ({utn_});
 
     double speed_ms, bearing_rad, xy_cov;
 
     unsigned int buffer_cnt = 0;
 
-    boost::posix_time::time_duration d_max = Time::partialSeconds(reconstructor_.settings_.max_time_diff_sensor_);
+    boost::posix_time::time_duration d_max = Time::partialSeconds(10);
 
     for (size_t i = 0; i < references_.size(); ++i)
     {
@@ -1176,34 +1051,10 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         if (ref.t >= reconstructor_.write_before_time_)
             continue;
 
-        //        const Chain* chain = rec.chainOfReference(ref);
-        //        assert(chain);
-
-        //        auto it = chain_targets.find(chain);
-        //        assert(it != chain_targets.end());
-
-                // hack to skip no mode c
-
-                //                bool has_any_mode_c = false;
-
-                //                for (auto& chain_it : chains_) // iterate over both chains
-                //                {
-                //                    mapping = chain_it.second->calculateDataMapping(ref.t);
-
-                //                    if (mapping.pos_ref_.has_altitude_)
-                //                    {
-                //                        has_any_mode_c = true;
-                //                        break;
-                //                    }
-                //                }
-
-                //                if (!has_any_mode_c)
-                //                    continue;
-
         ds_id_vec.set(buffer_cnt, ds_id);
         sac_vec.set(buffer_cnt, sac);
         sic_vec.set(buffer_cnt, sic);
-        line_vec.set(buffer_cnt, reconstructor_.settings_.ds_line);
+        line_vec.set(buffer_cnt, reconstructor_.ds_line_);
 
         ts_vec.set(buffer_cnt, ref.t);
         tod_vec.set(buffer_cnt, ref.t.time_of_day().total_milliseconds() / 1000.0);
@@ -1249,11 +1100,6 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         }
 
                 // set other data
-
-        //        for (auto& chain_it : chains_) // iterate over both chains
-        //        {
-        //            mapping = chain_it.second->calculateDataMapping(ref.t);
-
                 // TODO crappy
 
         ReconstructorInfoPair info = dataFor(ref.t, d_max);
@@ -1277,35 +1123,17 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
         if (info.first)
         {
-//            boost::optional<unsigned int> m3a = chain_it.second->modeA(mapping.dataid_ref1_);
-//            boost::optional<std::string> acid = chain_it.second->acid(mapping.dataid_ref1_);
-//            boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref1_);
-
             if (info.first->mode_a_code_ && info.first->mode_a_code_->hasReliableValue() && m3a_vec.isNull(i))
                 m3a_vec.set(buffer_cnt, info.first->mode_a_code_->code_);
 
             if (info.first->acad_ && acad_vec.isNull(i))
                 acad_vec.set(buffer_cnt, *info.first->acad_);
 
-//            if (acad_vec.isNull(i) && acad.has_value())
-//                acad_vec.set(buffer_cnt, *acad);
-
             if (info.first->acid_ && acid_vec.isNull(i))
                 acid_vec.set(buffer_cnt, *info.first->acid_);
 
-//            if (acid_vec.isNull(i) && acid.has_value())
-//                acid_vec.set(buffer_cnt, *acid);
-
             if (info.first->ground_bit_ && gb_vec.isNull(i))
                 gb_vec.set(buffer_cnt, *info.first->ground_bit_);
-
-//            if (gb_vec.isNull(i) || (!gb_vec.isNull(i) && !gb_vec.get(i)))
-//            {
-//                boost::optional<bool> gbs = chain_it.second->groundBit(mapping.dataid_ref1_);
-
-//                if (gbs.has_value())
-//                    gb_vec.set(buffer_cnt, *gbs);
-//            }
         }
 
         if (info.second)
@@ -1321,27 +1149,6 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
             if (info.second->ground_bit_ && gb_vec.isNull(i))
                 gb_vec.set(buffer_cnt, *info.second->ground_bit_);
-
-//            boost::optional<unsigned int> m3a = chain_it.second->modeA(mapping.dataid_ref2_);
-//            boost::optional<std::string> acid = chain_it.second->acid(mapping.dataid_ref2_);
-//            boost::optional<unsigned int> acad = chain_it.second->acad(mapping.dataid_ref2_);
-
-//            if (m3a_vec.isNull(i) && m3a.has_value())
-//                m3a_vec.set(buffer_cnt, *m3a);
-
-//            if (acad_vec.isNull(i) && acad.has_value())
-//                acad_vec.set(buffer_cnt, *acad);
-
-//            if (acid_vec.isNull(i) && acid.has_value())
-//                acid_vec.set(buffer_cnt, *acid);
-
-//            if (gb_vec.isNull(i) || (!gb_vec.isNull(i) && !gb_vec.get(i)))
-//            {
-//                boost::optional<bool> gbs = chain_it.second->groundBit(mapping.dataid_ref2_);
-
-//                if (gbs.has_value())
-//                    gb_vec.set(buffer_cnt, *gbs);
-//            }
         }
 
         ++buffer_cnt;

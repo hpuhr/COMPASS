@@ -2,6 +2,8 @@
 #include "reconstructortask.h"
 #include "simplereconstructor.h"
 #include "simplereconstructorwidget.h"
+#include "probimmreconstructor.h"
+#include "probimmreconstructorwidget.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -49,7 +51,7 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     reconstructor_widget_stack_ = new QStackedWidget();
     reconstructor_widget_stack_->addWidget(task_.simpleReconstructor()->widget());
-    reconstructor_widget_stack_->addWidget(new QWidget());
+    reconstructor_widget_stack_->addWidget(task_.probIMMReconstructor()->widget());
 
     showCurrentReconstructorWidget();
 

@@ -17,7 +17,9 @@ class TaskManager;
 class ReconstructorTaskDialog;
 class DBContent;
 class Buffer;
+class ReconstructorBase;
 class SimpleReconstructor;
+class ProbIMMReconstructor;
 
 namespace dbContent
 {
@@ -58,7 +60,9 @@ class ReconstructorTask : public Task, public Configurable
     static const std::string ScoringUMReconstructorName;
     static const std::string ProbImmReconstructorName;
 
-    SimpleReconstructor*simpleReconstructor() const;
+    ReconstructorBase* currentReconstructor() const;
+    SimpleReconstructor* simpleReconstructor() const;
+    ProbIMMReconstructor* probIMMReconstructor() const;
 
   protected:
 
@@ -72,8 +76,8 @@ class ReconstructorTask : public Task, public Configurable
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
-    //std::unique_ptr<ReconstructorBase> reconstructor_;
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
+    std::unique_ptr<ProbIMMReconstructor> probimm_reconstructor_; // has to be reset after each calculation
 
 
     bool job_done_{false};

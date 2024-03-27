@@ -15,7 +15,7 @@
 
 
 class Buffer;
-class SimpleReconstructor;
+class ReconstructorBase;
 
 namespace dbContent {
 
@@ -32,10 +32,10 @@ class ReconstructorTarget
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,
                       dbContent::targetReport::ReconstructorInfo*> ReconstructorInfoPair; // both can be nullptr
 
-    ReconstructorTarget(SimpleReconstructor& reconstructor, unsigned int utn, bool tmp_utn);
+    ReconstructorTarget(ReconstructorBase& reconstructor, unsigned int utn, bool tmp_utn);
     virtual ~ReconstructorTarget();
 
-    SimpleReconstructor& reconstructor_; // to get the real target reports
+    ReconstructorBase& reconstructor_; // to get the real target reports
 
     unsigned int utn_;
     bool tmp_utn_ {false};

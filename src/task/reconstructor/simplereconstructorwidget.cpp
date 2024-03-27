@@ -31,9 +31,6 @@ SimpleReconstructorWidget::SimpleReconstructorWidget(SimpleReconstructor& recons
     setContentsMargins(0, 0, 0, 0);
 
     main_layout->addWidget(tab_widget);
-    //main_layout->addStretch();
-
-    //expertModeChangedSlot();
 
     setLayout(main_layout);
 }

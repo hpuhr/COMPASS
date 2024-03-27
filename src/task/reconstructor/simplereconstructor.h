@@ -16,9 +16,6 @@ class SimpleReconstructorSettings
     SimpleReconstructorSettings() {};
 
     bool associate_non_mode_s_ {true};
-    //bool clean_dubious_utns_ {true};
-    //bool mark_dubious_utns_unused_ {false};
-    //bool comment_dubious_utns_ {true};
 
     // tracker stuff
     double max_time_diff_tracker_ {15.0};
@@ -34,8 +31,6 @@ class SimpleReconstructorSettings
 
     double prob_min_time_overlap_tracker_ {0.5}; //kb 0.7
 
-    //double max_speed_tracker_kts_ {100000};
-
     double cont_max_time_diff_tracker_ {30.0};
     double cont_max_distance_acceptable_tracker_ {1852.0};
 
@@ -46,12 +41,6 @@ class SimpleReconstructorSettings
 
     // other, not registered
     std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal, oct 1000, 2000
-
-    // output
-    std::string ds_name {"CalcRef"};
-    unsigned int ds_sac {0};
-    unsigned int ds_sic {1};
-    unsigned int ds_line {0};
 
     //ref calculation
     SimpleReferenceCalculator::Settings ref_calc_settings_;
@@ -92,26 +81,6 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
     SimpleAccuracyEstimator acc_estimator_;
     SimpleReferenceCalculator ref_calculator_;
 
-    std::map<unsigned long, dbContent::targetReport::ReconstructorInfo> target_reports_;
-    // all sources, record_num -> base info
-    std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
-    // all sources sorted by time, ts -> record_num
-    std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>> tr_ds_;
-    // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
-
-    std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> tgt
-
-    //std::map<unsigned int, std::map<unsigned long, std::tuple<unsigned int>>> associations_;
-    // dbcontent if -> rec_num -> utn, no src rec_nums (dbcontent, rec_num)
-
     virtual bool processSlice_impl() override;
-
-    void clearOldTargetReports();
-    void createTargetReports();
-
-    std::map<unsigned int, std::map<unsigned long, unsigned int>> createAssociations();
-    void saveAssociations(std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
-    void saveReferences();
-    void saveTargets();
 };
 
