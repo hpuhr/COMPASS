@@ -20,6 +20,8 @@
 
 #include "projection/projector.h"
 
+#include "logger.h"
+
 namespace reconstruction
 {
 
@@ -52,6 +54,8 @@ void KalmanProjectionHandler::initProjection(double lat,
     //update to measurement location
     proj_->update(lat, lon);
     assert(proj_->valid());
+
+    //loginf << "KalmanProjectionHandler: initProjection: " << proj_->centerLat() << "," << proj_->centerLon() << " (" << proj_->centerCart().x() << "," << proj_->centerCart().y() << ")";
 }
 
 /**
