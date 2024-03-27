@@ -112,6 +112,10 @@ bool SimpleReferenceCalculator::computeReferences()
 {
     loginf << "SimpleReferenceCalculator: computeReferences";
 
+    settings_.smooth_rts = false;
+    settings_.resample_result = false;
+    settings_.resample_systracks = false;
+
     reset();
     generateMeasurements();
     reconstructMeasurements();
@@ -287,7 +291,7 @@ void SimpleReferenceCalculator::reconstructMeasurements()
 
     unsigned int num_targets = refs.size();
 
-    loginf << "SimpleReferenceCalculator: reconstructMeasurements: reconstructing " << num_targets << (settings_.multithreading ? " multithreaded" : "") << "...";
+    loginf << "SimpleReferenceCalculator: reconstructMeasurements: reconstructing " << num_targets << " target(s) " << (settings_.multithreading ? "multithreaded" : "") << "...";
 
     //compute references in parallel
     if (settings_.multithreading)

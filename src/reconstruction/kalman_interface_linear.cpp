@@ -82,6 +82,8 @@ void KalmanInterfaceLinear::kalmanInit_impl(const kalman::KalmanState& init_stat
     kalman_filter_->setP(init_state.P);
     kalman_filter_->setQ(init_state.Q);
     kalman_filter_->setF(init_state.F);
+
+    measurementMatH(kalman_filter_->getH());
 }
 
 /**

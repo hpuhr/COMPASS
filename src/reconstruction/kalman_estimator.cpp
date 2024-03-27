@@ -49,7 +49,7 @@ void KalmanEstimator::init(std::unique_ptr<KalmanInterface>&& interface)
     kalman_interface_->setVerbosity(settings_.verbosity);
     kalman_interface_->init();
     
-    proj_handler_->settings().proj_max_dist_cart_sqr = settings_.max_proj_distance_cart;
+    proj_handler_->settings().proj_max_dist_cart_sqr = settings_.max_proj_distance_cart * settings_.max_proj_distance_cart;
 
     max_distance_sqr_ = settings_.max_distance * settings_.max_distance;
 }
@@ -77,6 +77,9 @@ void KalmanEstimator::storeUpdate(Reference& ref,
 
     //unproject to lat/lon
     phandler.unproject(ref.lat, ref.lon, ref.x, ref.y, &update.projection_center);
+
+    //loginf << "KalmanEstimator: storeUpdate: (" << update.projection_center.x() << "," << update.projection_center.y() << ") "
+    //                                            << ref.x << "," << ref.y << " => " << ref.lat << "," << ref.lon;
 }
 
 /**
@@ -127,7 +130,8 @@ void KalmanEstimator::kalmanInit(kalman::KalmanUpdate& update,
     //reinit kalman
     reinit(update, mm);
 
-    update.valid = true;
+    update.projection_center = proj_handler_->projectionCenter();
+    update.valid             = true;
 }
 
 /**
@@ -174,7 +178,7 @@ void KalmanEstimator::reinit(kalman::KalmanUpdate& update,
                              const Measurement& mm)
 {
     if (settings_.verbosity > 0)
-            loginf << "KalmanEstimator: reinit: Reinitializing kalman filter at t = " << mm.t;
+        loginf << "KalmanEstimator: reinit: Reinitializing kalman filter at t = " << mm.t;
 
     //reinit kalman state
     kalman_interface_->kalmanInit(update.state, mm, settings_.default_uncert, settings_.Q_var);
@@ -211,6 +215,9 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
         if (settings_.verbosity > 1)
             loginf << "Changed map projection @t=" << update.t;
     }
+
+    //store current projection to update
+    update.projection_center = proj_handler_->projectionCenter();
 }
 
 /**
@@ -226,7 +233,7 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
     //check if timestep is too small
     auto tstep = kalman_interface_->timestep(mm);
     assert(tstep >= 0);
-    
+
     if (tstep < settings_.min_dt)
     {
         loginf << "KalmanEstimator: kalmanStep: step = " << kalman_interface_->timestep(mm) << ", dt = " << settings_.min_dt;
