@@ -57,7 +57,7 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
 
   public:
     SimpleReconstructor(const std::string& class_id, const std::string& instance_id,
-                        ReconstructorTask& task);
+                        ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator);
     virtual ~SimpleReconstructor();
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const override;
@@ -78,7 +78,6 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
 
     SimpleReconstructorSettings settings_;
     SimpleAssociator associatior_;
-    SimpleAccuracyEstimator acc_estimator_;
     SimpleReferenceCalculator ref_calculator_;
 
     virtual bool processSlice_impl() override;

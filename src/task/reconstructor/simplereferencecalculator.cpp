@@ -17,7 +17,7 @@
 
 #include "simplereferencecalculator.h"
 #include "spline_interpolator.h"
-#include "simplereconstructor.h"
+#include "reconstructorbase.h"
 #include "targetreportdefs.h"
 
 #include "kalman_estimator.h"
@@ -36,7 +36,7 @@
 
 /**
 */
-SimpleReferenceCalculator::SimpleReferenceCalculator(SimpleReconstructor& reconstructor)
+SimpleReferenceCalculator::SimpleReferenceCalculator(ReconstructorBase& reconstructor)
 :   reconstructor_(reconstructor)
 {
 }
@@ -157,6 +157,8 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
 {
     std::vector<reconstruction::Measurement> line_measurements;
 
+    assert (reconstructor_.acc_estimator_);
+
     for (const auto& elem : target_reports)
     {
         const auto& tr_info = reconstructor_.target_reports_.at(elem.second);
@@ -170,9 +172,9 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
 
         auto vel = tr_info.velocity_;
 
-        auto pos_acc = reconstructor_.acc_estimator_.positionAccuracy(tr_info);
-        auto vel_acc = reconstructor_.acc_estimator_.velocityAccuracy(tr_info);
-        auto acc_acc = reconstructor_.acc_estimator_.accelerationAccuracy(tr_info);
+        auto pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr_info);
+        auto vel_acc = reconstructor_.acc_estimator_->velocityAccuracy(tr_info);
+        auto acc_acc = reconstructor_.acc_estimator_->accelerationAccuracy(tr_info);
 
         //position
         mm.lat = pos.value().latitude_;

@@ -18,6 +18,7 @@
 #pragma once
 
 #include "dbcontentaccessor.h"
+#include "accuracyestimatorbase.h"
 #include "configurable.h"
 #include "targetreportdefs.h"
 #include "reconstructortarget.h"
@@ -49,7 +50,7 @@ class ReconstructorBase : public Configurable
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
 
     ReconstructorBase(const std::string& class_id, const std::string& instance_id,
-                      ReconstructorTask& task);
+                      ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator);
     virtual ~ReconstructorBase();
 
     bool hasNextTimeSlice();
@@ -64,6 +65,9 @@ class ReconstructorBase : public Configurable
   protected:
 
     friend class dbContent::ReconstructorTarget;
+    friend class SimpleReferenceCalculator;
+
+    std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
 
     Buffers buffers_;
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;

@@ -31,8 +31,7 @@ const dbContent::targetReport::AccelerationAccuracy SimpleAccuracyEstimator::Acc
     { SimpleAccuracyEstimator::AccAccStdDevDefaultCAT062, SimpleAccuracyEstimator::AccAccStdDevDefaultCAT062};
 
 
-SimpleAccuracyEstimator::SimpleAccuracyEstimator(SimpleReconstructor& reconstructor)
-    : reconstructor_(reconstructor)
+SimpleAccuracyEstimator::SimpleAccuracyEstimator()
 {
 
 }

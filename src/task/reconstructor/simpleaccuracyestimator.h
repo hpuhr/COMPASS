@@ -8,8 +8,7 @@ class SimpleReconstructor;
 class SimpleAccuracyEstimator : public AccuracyEstimatorBase
 {
   public:
-    SimpleAccuracyEstimator(SimpleReconstructor& reconstructor);
-
+    SimpleAccuracyEstimator();
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
     virtual dbContent::targetReport::VelocityAccuracy velocityAccuracy (
@@ -18,8 +17,6 @@ class SimpleAccuracyEstimator : public AccuracyEstimatorBase
         const dbContent::targetReport::ReconstructorInfo& tr) override;
 
   private:
-    SimpleReconstructor& reconstructor_;
-
     static const double PosAccStdDevDefault;
     static const dbContent::targetReport::PositionAccuracy PosAccStdDefault;
 

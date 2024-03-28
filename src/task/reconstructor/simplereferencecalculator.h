@@ -21,7 +21,7 @@
 
 #include <vector>
 
-class SimpleReconstructor;
+class ReconstructorBase;
 
 namespace dbContent 
 {
@@ -76,7 +76,7 @@ public:
     typedef std::multimap<boost::posix_time::ptime, unsigned long>         TargetReports;
     typedef std::map<unsigned int, std::vector<reconstruction::Reference>> References;
 
-    SimpleReferenceCalculator(SimpleReconstructor& reconstructor);
+    SimpleReferenceCalculator(ReconstructorBase& reconstructor);
     virtual ~SimpleReferenceCalculator();
 
     void prepareForNextSlice();
@@ -135,7 +135,7 @@ private:
 
     boost::posix_time::ptime getJoinThreshold() const;
 
-    SimpleReconstructor& reconstructor_;
+    ReconstructorBase& reconstructor_;
 
     Settings settings_;
 

@@ -34,8 +34,8 @@ using namespace Utils;
 /**
  */
 ReconstructorBase::ReconstructorBase(const std::string& class_id, const std::string& instance_id,
-                                     ReconstructorTask& task)
-    : Configurable (class_id, instance_id, &task)
+                                     ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
+    : Configurable (class_id, instance_id, &task), acc_estimator_(std::move(acc_estimator))
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 }

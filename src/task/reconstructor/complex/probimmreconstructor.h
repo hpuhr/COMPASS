@@ -6,13 +6,16 @@
 //#include "targetreportdefs.h"
 //#include "global.h"
 //#include "simpleassociator.h"
-//#include "simpleaccuracyestimator.h"
-//#include "simplereferencecalculator.h"
+#include "accuracyestimatorbase.h"
+#include "simplereferencecalculator.h"
 
 class ProbIMMReconstructorSettings
 {
   public:
     ProbIMMReconstructorSettings() {};
+
+    //ref calculation
+    SimpleReferenceCalculator::Settings ref_calc_settings_;
 };
 
 
@@ -27,7 +30,7 @@ class ProbIMMReconstructor : public QObject, public ReconstructorBase
 
   public:
     ProbIMMReconstructor(const std::string& class_id, const std::string& instance_id,
-                         ReconstructorTask& task);
+                         ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator);
     virtual ~ProbIMMReconstructor();
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const override;
@@ -44,19 +47,14 @@ class ProbIMMReconstructor : public QObject, public ReconstructorBase
 
     friend class dbContent::ReconstructorTarget;
 //    friend class SimpleAssociator;
-//    friend class SimpleReferenceCalculator;
+    friend class SimpleReferenceCalculator;
 
     ProbIMMReconstructorSettings settings_;
 
+    //SimpleAccuracyEstimator acc_estimator_;
+    SimpleReferenceCalculator ref_calculator_;
 
     virtual bool processSlice_impl() override;
 
-    void clearOldTargetReports();
-    void createTargetReports();
-
-    std::map<unsigned int, std::map<unsigned long, unsigned int>> createAssociations();
-    void saveAssociations(std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
-    void saveReferences();
-    void saveTargets();
 };
 

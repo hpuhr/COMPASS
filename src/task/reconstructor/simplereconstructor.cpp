@@ -13,10 +13,9 @@ using namespace std;
 using namespace Utils;
 
 SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std::string& instance_id,
-                                         ReconstructorTask& task)
-    : ReconstructorBase(class_id, instance_id, task)
+                                         ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
+    : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator))
     , associatior_   (*this)
-    , acc_estimator_ (*this)
     , ref_calculator_(*this)
 {
     //association
