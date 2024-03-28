@@ -5,7 +5,7 @@
 #include "reconstructorbase.h"
 //#include "targetreportdefs.h"
 //#include "global.h"
-//#include "simpleassociator.h"
+#include "probabilisticassociator.h"
 #include "accuracyestimatorbase.h"
 #include "simplereferencecalculator.h"
 
@@ -45,13 +45,8 @@ class ProbIMMReconstructor : public QObject, public ReconstructorBase
 
   protected:
 
-    friend class dbContent::ReconstructorTarget;
-//    friend class SimpleAssociator;
-    friend class SimpleReferenceCalculator;
-
     ProbIMMReconstructorSettings settings_;
-
-    //SimpleAccuracyEstimator acc_estimator_;
+    ProbabilisticAssociator associatior_;
     SimpleReferenceCalculator ref_calculator_;
 
     virtual bool processSlice_impl() override;

@@ -15,8 +15,6 @@ class SimpleAssociator
   private:
     SimpleReconstructor& reconstructor_;
 
-    //std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> target
-
     void createReferenceUTNs();
 
     void createTrackerUTNs();

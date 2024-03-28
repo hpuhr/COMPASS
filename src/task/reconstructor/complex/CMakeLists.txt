@@ -12,6 +12,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/radaraccuracyestimator.h"
         "${CMAKE_CURRENT_LIST_DIR}/probimmreconstructor.h"
         "${CMAKE_CURRENT_LIST_DIR}/probimmreconstructorwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/probabilisticassociator.h"
 
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/complexaccuracyestimator.cpp"
@@ -22,4 +23,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/radaraccuracyestimator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/probimmreconstructor.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/probimmreconstructorwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/probabilisticassociator.cpp"
 )

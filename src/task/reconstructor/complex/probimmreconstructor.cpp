@@ -16,11 +16,11 @@
 using namespace std;
 using namespace Utils;
 
-ProbIMMReconstructor::ProbIMMReconstructor(const std::string& class_id, const std::string& instance_id,
-                                           ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
+ProbIMMReconstructor::ProbIMMReconstructor(
+    const std::string& class_id, const std::string& instance_id,
+    ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
     : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator))
-      //, associatior_   (*this)
-      //, acc_estimator_ (*this)
+      , associatior_   (*this)
       , ref_calculator_(*this)
 {
 
@@ -146,18 +146,18 @@ bool ProbIMMReconstructor::processSlice_impl()
 
     clearOldTargetReports();
 
-//    ref_calculator_.settings() = settings_.ref_calc_settings_;
-//    ref_calculator_.prepareForNextSlice();
+    ref_calculator_.settings() = settings_.ref_calc_settings_;
+    ref_calculator_.prepareForNextSlice();
 
-//    createTargetReports();
+    createTargetReports();
 
-//    associatior_.associateNewData();
+    associatior_.associateNewData();
 
-//    auto associations = createAssociations(); // only for ts < write_before_time, also updates target counts
-//    saveAssociations(associations);
+    auto associations = createAssociations(); // only for ts < write_before_time, also updates target counts
+    saveAssociations(associations);
 
-//    ref_calculator_.computeReferences();
-//    saveReferences(); // only for ts < write_before_time
+    ref_calculator_.computeReferences();
+    saveReferences(); // only for ts < write_before_time
 
     if (is_last_slice)
         saveTargets();
