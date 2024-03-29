@@ -151,6 +151,7 @@ bool ProbIMMReconstructor::processSlice_impl()
 
     createTargetReports();
 
+    assert (acc_estimator_);
     associatior_.associateNewData();
 
     auto associations = createAssociations(); // only for ts < write_before_time, also updates target counts

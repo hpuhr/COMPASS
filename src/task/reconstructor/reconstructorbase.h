@@ -74,6 +74,7 @@ class ReconstructorBase : public Configurable
   protected:
     friend class dbContent::ReconstructorTarget;
     friend class SimpleReferenceCalculator;
+    friend class ProbabilisticAssociator;
 
     std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
 

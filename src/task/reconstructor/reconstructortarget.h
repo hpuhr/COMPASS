@@ -65,10 +65,6 @@ class ReconstructorTarget
     boost::optional<float> mode_c_min_;
     boost::optional<float> mode_c_max_;
 
-//    boost::optional<double> speed_min_;
-//    boost::optional<double> speed_avg_;
-//    boost::optional<double> speed_max_;
-
     std::set <unsigned int> ds_ids_;
     //std::set <std::pair<unsigned int, unsigned int>> track_nums_; // ds_id, tn
 
@@ -82,6 +78,7 @@ class ReconstructorTarget
 
     void addTargetReport (unsigned long rec_num);
     void addTargetReports (std::vector<unsigned long> rec_nums);
+
     unsigned int numAssociated() const;
     unsigned long lastAssociated() const;
 

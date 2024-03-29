@@ -66,7 +66,10 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id, const std::str
 
 /**
  */
-ReconstructorBase::~ReconstructorBase() = default;
+ReconstructorBase::~ReconstructorBase()
+{
+    acc_estimator_ = nullptr;
+}
 
 bool ReconstructorBase::hasNextTimeSlice()
 {
@@ -495,6 +498,9 @@ void ReconstructorBase::reset()
     next_slice_begin_ = {};
     timestamp_min_ = {};
     timestamp_max_ = {};
+
+    if (acc_estimator_)
+        acc_estimator_->init();
 }
 
 

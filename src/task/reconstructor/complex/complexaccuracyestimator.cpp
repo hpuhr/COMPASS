@@ -39,17 +39,28 @@ const dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::Ac
 const dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::AccAccStdDefaultCAT062
     { ComplexAccuracyEstimator::AccAccStdDevDefaultCAT062, ComplexAccuracyEstimator::AccAccStdDevDefaultCAT062};
 
-
-ComplexAccuracyEstimator::ComplexAccuracyEstimator(ComplexReconstructor& reconstructor)
-    : reconstructor_(reconstructor)
+ComplexAccuracyEstimator::ComplexAccuracyEstimator()
 {
 
+}
+
+ComplexAccuracyEstimator::~ComplexAccuracyEstimator()
+{
+    //loginf << "ComplexAccuracyEstimator: dtor";
+
+    ds_acc_estimators_.clear();
+
+    initialized_ = false;
+
+    //loginf << "ComplexAccuracyEstimator: dtor: done";
 }
 
 void ComplexAccuracyEstimator::init()
 {
     connect(&COMPASS::instance().dataSourceManager(), &DataSourceManager::dataSourcesChangedSignal,
             this, &ComplexAccuracyEstimator::updateDataSourcesInfoSlot);
+
+    updateDataSourcesInfoSlot();
 
     initialized_ = true;
 }
@@ -90,6 +101,7 @@ std::unique_ptr<AccuracyEstimatorBase> ComplexAccuracyEstimator::createAccuracyE
 dbContent::targetReport::PositionAccuracy ComplexAccuracyEstimator::positionAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
+    assert (initialized_);
     assert (ds_acc_estimators_.count(tr.ds_id_));
     return ds_acc_estimators_.at(tr.ds_id_)->positionAccuracy(tr);
 }
@@ -97,6 +109,7 @@ dbContent::targetReport::PositionAccuracy ComplexAccuracyEstimator::positionAccu
 dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::velocityAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
+    assert (initialized_);
     assert (ds_acc_estimators_.count(tr.ds_id_));
     return ds_acc_estimators_.at(tr.ds_id_)->velocityAccuracy(tr);
 }
@@ -104,6 +117,7 @@ dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::velocityAccu
 dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::accelerationAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
+    assert (initialized_);
     assert (ds_acc_estimators_.count(tr.ds_id_));
     return ds_acc_estimators_.at(tr.ds_id_)->accelerationAccuracy(tr);
 }

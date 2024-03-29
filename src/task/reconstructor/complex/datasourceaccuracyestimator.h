@@ -13,6 +13,7 @@ class DataSourceAccuracyEstimator : public AccuracyEstimatorBase
 {
   public:
     DataSourceAccuracyEstimator(const dbContent::DBDataSource& source);
+    virtual ~DataSourceAccuracyEstimator() {};
 
   protected:
     std::string ds_name_;

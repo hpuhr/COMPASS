@@ -6,6 +6,7 @@ class MLATAccuracyEstimator : public DataSourceAccuracyEstimator
 {
   public:
     MLATAccuracyEstimator(const dbContent::DBDataSource& source);
+    virtual ~MLATAccuracyEstimator() {};
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;

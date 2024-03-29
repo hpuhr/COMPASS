@@ -6,6 +6,7 @@ class ADSBAccuracyEstimator : public DataSourceAccuracyEstimator
 {
   public:
     ADSBAccuracyEstimator(const dbContent::DBDataSource& source);
+    virtual ~ADSBAccuracyEstimator() {};
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
