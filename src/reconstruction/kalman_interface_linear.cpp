@@ -130,6 +130,24 @@ bool KalmanInterfaceLinear::kalmanStep_impl(kalman::KalmanState& new_state,
 
 /**
 */
+bool KalmanInterfaceLinear::kalmanPrediction_impl(kalman::Vector& x,
+                                                  kalman::Matrix& P,
+                                                  double dt,
+                                                  double Q_var) const
+{
+    assert(kalman_filter_);
+
+    kalman::Matrix F, Q;
+    stateTransitionMatF(F, dt);
+    processUncertMatQ(Q, dt, Q_var);
+
+    kalman_filter_->predictState(x, P, F, Q);
+
+    return true;
+}
+
+/**
+*/
 void KalmanInterfaceLinear::stateVecX(const kalman::Vector& x)
 {
     kalman_filter_->setX(x);

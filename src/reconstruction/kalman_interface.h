@@ -53,7 +53,11 @@ public:
                     const Measurement& mm, 
                     const reconstruction::Uncertainty& default_uncert, 
                     double Q_var);
-
+    bool kalmanPrediction(kalman::Vector& x,
+                          kalman::Matrix& P,
+                          double dt,
+                          double Q_var) const;
+                          
     bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                        size_t idx0,
                        size_t idx1,
@@ -87,6 +91,7 @@ public:
     virtual void xPos(kalman::Vector& x_vec, double x, double y) const = 0;
     virtual double xVar(const kalman::Matrix& P) const = 0;
     virtual double yVar(const kalman::Matrix& P) const = 0;
+    virtual double xyCov(const kalman::Matrix& P) const = 0;
     virtual void stateVecXInv(kalman::Vector& x_inv, const kalman::Vector& x) const = 0;
 
     kalman::Vector stateVecXInv(const kalman::Vector& x) const;
@@ -109,6 +114,10 @@ protected:
                                  const Measurement& mm,
                                  const reconstruction::Uncertainty& default_uncert, 
                                  double Q_var) = 0;
+    virtual bool kalmanPrediction_impl(kalman::Vector& x,
+                                       kalman::Matrix& P,
+                                       double dt,
+                                       double Q_var) const = 0;
     virtual bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
                                     std::vector<kalman::Matrix>& P_smooth,
                                     const std::vector<kalman::KalmanState>& states,

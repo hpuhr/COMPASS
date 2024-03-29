@@ -13,9 +13,13 @@
 #include <map>
 #include <set>
 
-
 class Buffer;
 class ReconstructorBase;
+
+namespace reconstruction
+{
+    class KalmanOnlineTracker;
+}
 
 namespace dbContent {
 
@@ -73,6 +77,8 @@ class ReconstructorTarget
     std::vector<reconstruction::Reference> references_;
 
     mutable Transformation trafo_;
+
+    std::unique_ptr<reconstruction::KalmanOnlineTracker> tracker_;
 
     void addTargetReport (unsigned long rec_num);
     void addTargetReports (std::vector<unsigned long> rec_nums);
@@ -149,6 +155,8 @@ class ReconstructorTarget
     std::shared_ptr<Buffer> getReferenceBuffer();
 
     void removeOutdatedTargetReports();
+    void reinitTracker();
+    void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr);
 
 //    bool hasADSBMOPSVersion();
 //    std::set<unsigned int> getADSBMOPSVersions();

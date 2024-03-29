@@ -8,6 +8,7 @@
 #include "util/number.h"
 #include "util/timeconv.h"
 #include "global.h"
+#include "kalman_online_tracker.h"
 
 #include <boost/optional/optional_io.hpp>
 
@@ -1176,6 +1177,27 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     }
 
     references_.clear();
+}
+
+void ReconstructorTarget::reinitTracker()
+{
+    //reset, reconfigure and initialize tracker
+    tracker_.reset(new reconstruction::KalmanOnlineTracker);
+    tracker_->settings() = reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings();
+    tracker_->init(reconstructor_.referenceCalculatorSettings().kalman_type);
+
+    //@TODO: init tracker from last slice's final state (where is it stored?)
+    //tracker_->kalmanInit(mm)
+}
+
+void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr)
+{
+    assert(tracker_);
+    
+    reconstruction::Measurement mm;
+    reconstructor_.createMeasurement(mm, tr);
+
+    tracker_->kalmanStep(mm);
 }
 
 //bool ReconstructorTarget::hasADSBMOPSVersion()

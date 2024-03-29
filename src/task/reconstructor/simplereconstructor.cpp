@@ -48,30 +48,6 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std:
         // target id? kb: nope
         // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
     }
-
-    //reference computation
-    {
-        registerParameter("ref_rec_type", (int*)&settings_.ref_calc_settings_.rec_type, (int)SimpleReferenceCalculator::Settings().rec_type);
-
-        registerParameter("ref_Q_std", &settings_.ref_calc_settings_.Q_std, SimpleReferenceCalculator::Settings().Q_std);
-
-        registerParameter("ref_min_chain_size", &settings_.ref_calc_settings_.min_chain_size   , SimpleReferenceCalculator::Settings().min_chain_size);
-        registerParameter("ref_min_dt"        , &settings_.ref_calc_settings_.min_dt   , SimpleReferenceCalculator::Settings().min_dt);
-        registerParameter("ref_max_dt"        , &settings_.ref_calc_settings_.max_dt   , SimpleReferenceCalculator::Settings().max_dt);
-        registerParameter("ref_max_distance"  , &settings_.ref_calc_settings_.max_distance   , SimpleReferenceCalculator::Settings().max_distance);
-
-        registerParameter("ref_smooth_rts", &settings_.ref_calc_settings_.smooth_rts, SimpleReferenceCalculator::Settings().smooth_rts);
-
-        registerParameter("ref_resample_result", &settings_.ref_calc_settings_.resample_result, SimpleReferenceCalculator::Settings().resample_result);
-        registerParameter("ref_resample_Q_std" , &settings_.ref_calc_settings_.resample_Q_std , SimpleReferenceCalculator::Settings().resample_Q_std);
-        registerParameter("ref_resample_dt"    , &settings_.ref_calc_settings_.resample_dt    , SimpleReferenceCalculator::Settings().resample_dt);
-
-        registerParameter("ref_max_proj_distance_cart", &settings_.ref_calc_settings_.max_proj_distance_cart, SimpleReferenceCalculator::Settings().max_proj_distance_cart);
-
-        registerParameter("ref_resample_systracks"       , &settings_.ref_calc_settings_.resample_systracks       , SimpleReferenceCalculator::Settings().resample_systracks);
-        registerParameter("ref_resample_systracks_dt"    , &settings_.ref_calc_settings_.resample_systracks_dt    , SimpleReferenceCalculator::Settings().resample_systracks_dt);
-        registerParameter("ref_resample_systracks_max_dt", &settings_.ref_calc_settings_.resample_systracks_max_dt, SimpleReferenceCalculator::Settings().resample_systracks_max_dt);
-    }
 }
 
 SimpleReconstructor::~SimpleReconstructor() {}
@@ -193,7 +169,7 @@ bool SimpleReconstructor::processSlice_impl()
 
     clearOldTargetReports();
 
-    ref_calculator_.settings() = settings_.ref_calc_settings_;
+    ref_calculator_.settings() = referenceCalculatorSettings();
     ref_calculator_.prepareForNextSlice();
 
     createTargetReports();

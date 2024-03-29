@@ -290,6 +290,13 @@ double KalmanInterfaceUMKalman2D::yVar(const kalman::Matrix& P) const
 
 /**
 */
+double KalmanInterfaceUMKalman2D::xyCov(const kalman::Matrix& P) const
+{
+    return P(2, 0);
+}
+
+/**
+*/
 void KalmanInterfaceUMKalman2D::stateVecXInv(kalman::Vector& x_inv, const kalman::Vector& x) const
 {
     x_inv = x;

@@ -38,6 +38,30 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id, const std::str
     : Configurable (class_id, instance_id, &task), acc_estimator_(std::move(acc_estimator))
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
+
+    //reference computation
+    {
+        registerParameter("ref_rec_type", (int*)&ref_calc_settings_.kalman_type, (int)ReferenceCalculatorSettings().kalman_type);
+
+        registerParameter("ref_Q_std", &ref_calc_settings_.Q_std, ReferenceCalculatorSettings().Q_std);
+
+        registerParameter("ref_min_chain_size", &ref_calc_settings_.min_chain_size   , ReferenceCalculatorSettings().min_chain_size);
+        registerParameter("ref_min_dt"        , &ref_calc_settings_.min_dt   , ReferenceCalculatorSettings().min_dt);
+        registerParameter("ref_max_dt"        , &ref_calc_settings_.max_dt   , ReferenceCalculatorSettings().max_dt);
+        registerParameter("ref_max_distance"  , &ref_calc_settings_.max_distance   , ReferenceCalculatorSettings().max_distance);
+
+        registerParameter("ref_smooth_rts", &ref_calc_settings_.smooth_rts, ReferenceCalculatorSettings().smooth_rts);
+
+        registerParameter("ref_resample_result", &ref_calc_settings_.resample_result, ReferenceCalculatorSettings().resample_result);
+        registerParameter("ref_resample_Q_std" , &ref_calc_settings_.resample_Q_std , ReferenceCalculatorSettings().resample_Q_std);
+        registerParameter("ref_resample_dt"    , &ref_calc_settings_.resample_dt    , ReferenceCalculatorSettings().resample_dt);
+
+        registerParameter("ref_max_proj_distance_cart", &ref_calc_settings_.max_proj_distance_cart, ReferenceCalculatorSettings().max_proj_distance_cart);
+
+        registerParameter("ref_resample_systracks"       , &ref_calc_settings_.resample_systracks       , ReferenceCalculatorSettings().resample_systracks);
+        registerParameter("ref_resample_systracks_dt"    , &ref_calc_settings_.resample_systracks_dt    , ReferenceCalculatorSettings().resample_systracks_dt);
+        registerParameter("ref_resample_systracks_max_dt", &ref_calc_settings_.resample_systracks_max_dt, ReferenceCalculatorSettings().resample_systracks_max_dt);
+    }
 }
 
 /**
@@ -420,7 +444,50 @@ void ReconstructorBase::saveTargets()
     loginf << "ReconstructorBase: saveTargets: done";
 }
 
+void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 
+                                          const dbContent::targetReport::ReconstructorInfo& ri)
+{
+    mm = {};
 
+    mm.source_id = ri.record_num_;
+    mm.t         = ri.timestamp_;
+    
+    auto pos = ri.position_;
+    assert(pos.has_value());
+
+    auto vel = ri.velocity_;
+
+    auto pos_acc = acc_estimator_->positionAccuracy(ri);
+    auto vel_acc = acc_estimator_->velocityAccuracy(ri);
+    auto acc_acc = acc_estimator_->accelerationAccuracy(ri);
+
+    //position
+    mm.lat = pos.value().latitude_;
+    mm.lon = pos.value().longitude_;
+
+    //velocity
+    if (vel.has_value())
+    {
+        auto speed_vec = Utils::Number::speedAngle2SpeedVec(vel->speed_, vel->track_angle_);
+
+        mm.vx = speed_vec.first;
+        mm.vy = speed_vec.second;
+        //@TODO: vz?
+    }
+
+    //@TODO: acceleration?
+
+    //accuracies
+    mm.x_stddev = pos_acc.x_stddev_;
+    mm.y_stddev = pos_acc.y_stddev_;
+    mm.xy_cov   = pos_acc.xy_cov_;
+
+    mm.vx_stddev = vel_acc.vx_stddev_;
+    mm.vy_stddev = vel_acc.vy_stddev_;
+
+    mm.ax_stddev = acc_acc.ax_stddev_;
+    mm.ay_stddev = acc_acc.ay_stddev_;
+}
 
 void ReconstructorBase::reset()
 {

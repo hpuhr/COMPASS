@@ -42,7 +42,7 @@ public:
             ReinitCheckDistance = 1 << 1  //checks for reinit using a metric distance-based threshold
         };
 
-        double Q_var;                    // variance of kalman process
+        double Q_var = 30.0; // variance of kalman process
 
         size_t min_chain_size = 2;       // minimum number of consecutive kalman updates without reinit            (0 = do not check)
         double max_distance   = 50000.0; // maximum allowed distance of consecutive measurements in meters         (0 = do not check)
@@ -54,13 +54,16 @@ public:
         double max_proj_distance_cart = 20000.0; // maximum distance from the current map projection origin in meters 
                                                  // before changing the projection center
 
-        reconstruction::Uncertainty default_uncert;
-
         double          resample_dt          = 2.0;                       // resampling step size in seconds
         double          resample_Q_var       = 10.0;                      // resampling process noise
         StateInterpMode resample_interp_mode = StateInterpMode::BlendVar; // kalman state interpolation mode used during resampling
 
+        bool track_velocities    = true;
+        bool track_accelerations = true;
+
         int verbosity = 0;
+
+        reconstruction::Uncertainty default_uncert; //default uncertainties used if none are provided in the measurement
     };
 
     enum class ReinitState
@@ -83,23 +86,31 @@ public:
     KalmanEstimator();
     virtual ~KalmanEstimator();
 
+    bool isInit() const;
+
     void init(std::unique_ptr<KalmanInterface>&& interface);
+    void init(kalman::KalmanType ktype);
     
     void kalmanInit(kalman::KalmanUpdate& update,
                     Measurement& mm);
     void kalmanInit(const kalman::KalmanUpdate& update);
     StepResult kalmanStep(kalman::KalmanUpdate& update,
                           Measurement& mm);
+    bool kalmanPrediction(Measurement& mm,
+                          double dt) const;
 
     void storeUpdates(std::vector<Reference>& refs,
                       const std::vector<kalman::KalmanUpdate>& updates) const;
     
-    void smoothUpdates(std::vector<kalman::KalmanUpdate>& updates);
+    void smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const;
     void interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
-                       std::vector<kalman::KalmanUpdate>& updates);
+                       std::vector<kalman::KalmanUpdate>& updates) const;
 
     const boost::posix_time::ptime& currentTime() const;
 
+    static std::unique_ptr<KalmanInterface> createInterface(kalman::KalmanType ktype, 
+                                                            bool track_velocity = true, 
+                                                            bool track_accel = true);
     Settings& settings() { return settings_; }
 
 private:
@@ -112,7 +123,7 @@ private:
               const Measurement& mm);
     void checkProjection(kalman::KalmanUpdate& update);
 
-    void executeChainFunc(Updates& updates, const ChainFunc& func);
+    void executeChainFunc(Updates& updates, const ChainFunc& func) const;
 
     bool interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
                        const std::vector<kalman::KalmanUpdate>& updates,

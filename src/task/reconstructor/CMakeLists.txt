@@ -17,6 +17,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructorassociationwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructorreferencecalculationwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/simpleassociator.h"
+        "${CMAKE_CURRENT_LIST_DIR}/referencecalculator.h"
         "${CMAKE_CURRENT_LIST_DIR}/simplereferencecalculator.h"
         "${CMAKE_CURRENT_LIST_DIR}/simpleaccuracyestimator.h"
         "${CMAKE_CURRENT_LIST_DIR}/accuracyestimatorbase.h"

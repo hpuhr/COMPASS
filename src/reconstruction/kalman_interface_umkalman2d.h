@@ -59,6 +59,7 @@ public:
     void xPos(kalman::Vector& x_vec, double x, double y) const override final;
     double xVar(const kalman::Matrix& P) const override final;
     double yVar(const kalman::Matrix& P) const override final;
+    double xyCov(const kalman::Matrix& P) const override final;
     void stateVecXInv(kalman::Vector& x_inv, const kalman::Vector& x) const override final;
 
 private:

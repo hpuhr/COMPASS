@@ -19,10 +19,17 @@
 #include "kalman_projection.h"
 #include "kalman_interface.h"
 
+#include "targetreportdefs.h"
+
 #include "timeconv.h"
 #include "spline_interpolator.h"
 
 #include "logger.h"
+
+#include "kalman_interface_umkalman2d.h"
+#if USE_EXPERIMENTAL_SOURCE
+#include "kalman_interface_amkalman2d.h"
+#endif
 
 namespace reconstruction
 {
@@ -37,6 +44,13 @@ KalmanEstimator::KalmanEstimator()
 /**
 */
 KalmanEstimator::~KalmanEstimator() = default;
+
+/**
+*/
+bool KalmanEstimator::isInit() const
+{
+    return (kalman_interface_ != nullptr);
+}
 
 /**
  * Initializes the estimator based on its current settings and the passed interface.
@@ -56,9 +70,44 @@ void KalmanEstimator::init(std::unique_ptr<KalmanInterface>&& interface)
 
 /**
 */
+std::unique_ptr<KalmanInterface> KalmanEstimator::createInterface(kalman::KalmanType ktype,
+                                                                  bool track_velocity, 
+                                                                  bool track_accel)
+{
+    if (ktype == kalman::KalmanType::UMKalman2D)
+    {
+        return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceUMKalman2D(track_velocity));
+    }
+    else if (ktype == kalman::KalmanType::AMKalman2D)
+    {
+#if USE_EXPERIMENTAL_SOURCE
+        return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceAMKalman2D());
+#else
+        throw std::runtime_error("KalmanEstimator: createInterface: reconstructor type not supported by build");
+#endif
+    }
+    else
+    {
+        throw std::runtime_error("KalmanEstimator: createInterface: unknown kalman type");
+    }
+
+    return {};
+}
+
+/**
+ * Initializes the estimator based on its current settings and the passed kalman variant.
+ */
+void KalmanEstimator::init(kalman::KalmanType ktype)
+{
+    auto interface = KalmanEstimator::createInterface(ktype, settings_.track_velocities, settings_.track_accelerations);
+    init(std::move(interface));
+}
+
+/**
+*/
 const boost::posix_time::ptime& KalmanEstimator::currentTime() const
 {
-    assert(kalman_interface_);
+    assert(isInit());
     return kalman_interface_->currrentTime();
 }
 
@@ -68,7 +117,7 @@ void KalmanEstimator::storeUpdate(Reference& ref,
                                   const kalman::KalmanUpdate& update,
                                   KalmanProjectionHandler& phandler) const
 {
-    assert(kalman_interface_);
+    assert(isInit());
 
     kalman_interface_->storeState(ref, update.state);
 
@@ -119,7 +168,7 @@ void KalmanEstimator::initMeasurement(kalman::KalmanUpdate& update,
 void KalmanEstimator::kalmanInit(kalman::KalmanUpdate& update,
                                  Measurement& mm)
 {
-    assert(kalman_interface_);
+    assert(isInit());
 
     //init projection
     proj_handler_->initProjection(mm.lat, mm.lon);
@@ -139,7 +188,7 @@ void KalmanEstimator::kalmanInit(kalman::KalmanUpdate& update,
  */
 void KalmanEstimator::kalmanInit(const kalman::KalmanUpdate& update)
 {
-    assert(kalman_interface_);
+    assert(isInit());
     assert(update.valid);
 
     //init projection
@@ -225,7 +274,7 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
 KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& update,
                                                         Measurement& mm)
 {
-    assert(kalman_interface_);
+    assert(isInit());
 
     //init measurement
     initMeasurement(update, mm);
@@ -266,7 +315,24 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
 
 /**
 */
-void KalmanEstimator::executeChainFunc(Updates& updates, const ChainFunc& func)
+bool KalmanEstimator::kalmanPrediction(Measurement& mm,
+                                       double dt) const
+{
+    assert(isInit());
+
+    kalman::KalmanState state;
+    if (!kalman_interface_->kalmanPrediction(state.x, state.P, dt, settings_.Q_var))
+        return false;
+
+    kalman_interface_->storeState(mm, state);
+    proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
+
+    return true;
+}
+
+/**
+*/
+void KalmanEstimator::executeChainFunc(Updates& updates, const ChainFunc& func) const
 {
     if (!func || updates.empty())
         return;
@@ -295,8 +361,10 @@ void KalmanEstimator::executeChainFunc(Updates& updates, const ChainFunc& func)
 
 /**
 */
-void KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates)
+void KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const
 {
+    assert(isInit());
+
     KalmanProjectionHandler phandler;
 
     auto func = [ & ] (std::vector<kalman::KalmanUpdate>& updates, size_t idx0, size_t idx1)
@@ -310,7 +378,7 @@ void KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates)
 /**
 */
 void KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
-                                    std::vector<kalman::KalmanUpdate>& updates)
+                                    std::vector<kalman::KalmanUpdate>& updates) const
 {
     KalmanProjectionHandler phandler;
 
@@ -346,6 +414,8 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
                                     StateInterpMode interp_mode,
                                     KalmanProjectionHandler& proj_handler) const
 {
+    assert(isInit());
+
     interp_updates.clear();
 
     assert(idx1 >= idx0);

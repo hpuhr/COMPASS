@@ -25,6 +25,12 @@
 namespace kalman
 {
 
+enum KalmanType
+{
+    UMKalman2D = 0, // uniform motion kalman in the plane
+    AMKalman2D      // accelerated motion kalman in the plane
+};
+
 typedef Eigen::MatrixXd         Matrix;
 typedef Eigen::VectorXd         Vector;
 typedef boost::optional<Matrix> OMatrix;

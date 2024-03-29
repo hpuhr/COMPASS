@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "reconstructor_defs.h"
+#include "referencecalculator.h"
 
 #include <vector>
 
@@ -33,44 +33,7 @@ namespace dbContent
 class SimpleReferenceCalculator
 {
 public:
-    struct Settings
-    {
-        enum ReconstructorType
-        {
-            Rec_UMKalman2D = 0,
-            Rec_AMKalman2D
-        };
-
-        int verbosity = 0;
-
-        ReconstructorType rec_type = ReconstructorType::Rec_UMKalman2D;
-
-        //default noise
-        double Q_std = 30.0;
-
-        //reinit related
-        int    min_chain_size = 2;
-        double min_dt         = 0.0;
-        double max_dt         = 11.0;
-        double max_distance   = 50000.0;
-
-        bool smooth_rts = true;
-
-        //result resampling related
-        bool   resample_result = false;
-        double resample_Q_std  = 10.0;
-        double resample_dt     = 2.0;
-
-        //dynamic projection change
-        double max_proj_distance_cart = 20000.0;
-
-        //systrack resampling related
-        bool   resample_systracks        = true; // resample system tracks using spline interpolation
-        double resample_systracks_dt     = 1.0;  // resample interval in seconds
-        double resample_systracks_max_dt = 30.0; // maximum timestep to interpolate in seconds
-
-        bool multithreading = true;
-    };
+    typedef ReferenceCalculatorSettings Settings;
 
     typedef std::vector<reconstruction::Measurement>                       Measurements;
     typedef std::multimap<boost::posix_time::ptime, unsigned long>         TargetReports;
@@ -130,8 +93,6 @@ private:
     void reconstructMeasurements(TargetReferences& refs);
 
     void updateReferences();
-
-    int verbosity() const;
 
     boost::posix_time::ptime getJoinThreshold() const;
 

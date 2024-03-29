@@ -21,10 +21,6 @@
 #include "targetreportdefs.h"
 
 #include "kalman_estimator.h"
-#include "kalman_interface_umkalman2d.h"
-#if USE_EXPERIMENTAL_SOURCE
-#include "kalman_interface_amkalman2d.h"
-#endif
 
 #include "util/timeconv.h"
 #include "util/number.h"
@@ -44,13 +40,6 @@ SimpleReferenceCalculator::SimpleReferenceCalculator(ReconstructorBase& reconstr
 /**
 */
 SimpleReferenceCalculator::~SimpleReferenceCalculator() = default;
-
-/**
-*/
-int SimpleReferenceCalculator::verbosity() const
-{
-    return (settings_.multithreading ? 0 : settings_.verbosity);
-}
 
 /**
 */
@@ -164,44 +153,7 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
         const auto& tr_info = reconstructor_.target_reports_.at(elem.second);
 
         reconstruction::Measurement mm;
-        mm.source_id = elem.second;
-        mm.t         = elem.first;
-        
-        auto pos = tr_info.position_;
-        assert(pos.has_value());
-
-        auto vel = tr_info.velocity_;
-
-        auto pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr_info);
-        auto vel_acc = reconstructor_.acc_estimator_->velocityAccuracy(tr_info);
-        auto acc_acc = reconstructor_.acc_estimator_->accelerationAccuracy(tr_info);
-
-        //position
-        mm.lat = pos.value().latitude_;
-        mm.lon = pos.value().longitude_;
-
-        //velocity
-        if (vel.has_value())
-        {
-            auto speed_vec = Utils::Number::speedAngle2SpeedVec(vel->speed_, vel->track_angle_);
-
-            mm.vx = speed_vec.first;
-            mm.vy = speed_vec.second;
-            //@TODO: vz?
-        }
-
-        //@TODO: acceleration?
-
-        //accuracies
-        mm.x_stddev = pos_acc.x_stddev_;
-        mm.y_stddev = pos_acc.y_stddev_;
-        mm.xy_cov   = pos_acc.xy_cov_;
-
-        mm.vx_stddev = vel_acc.vx_stddev_;
-        mm.vy_stddev = vel_acc.vy_stddev_;
-
-        mm.ax_stddev = acc_acc.ax_stddev_;
-        mm.ay_stddev = acc_acc.ay_stddev_;
+        reconstructor_.createMeasurement(mm, tr_info);
 
         line_measurements.push_back(mm);
     }
@@ -369,7 +321,7 @@ SimpleReferenceCalculator::InitRecResult SimpleReferenceCalculator::initReconstr
 */
 void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 {
-    if(verbosity() > 0) 
+    if(settings_.activeVerbosity() > 0) 
     {
         loginf << "SimpleReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
     }
@@ -379,7 +331,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     if (res != InitRecResult::Success)
     {
         //int failed
-        if (verbosity() > 0)
+        if (settings_.activeVerbosity() > 0)
         {
             if (res == InitRecResult::NoMeasurements)
                 loginf << "    skipping: no measurements";
@@ -389,7 +341,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         return;
     }
 
-    if (verbosity() > 0) 
+    if (settings_.activeVerbosity() > 0) 
     {
         loginf << "    #measurements: " << refs.measurements.size();
         loginf << "    #old updates:  " << refs.updates.size();
@@ -399,40 +351,11 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     assert(refs.start_index.has_value());
 
-    //create and configure kalman estimator
+    //configure and init estimator
     reconstruction::KalmanEstimator estimator;
+    estimator.settings() = settings_.kalmanEstimatorSettings();
 
-    auto rec_type = settings_.rec_type;
-
-    std::unique_ptr<reconstruction::KalmanInterface> interface;
-    if (rec_type == Settings::Rec_UMKalman2D)
-    {
-        interface.reset(new reconstruction::KalmanInterfaceUMKalman2D(true));
-    }
-    else
-    {
-#if USE_EXPERIMENTAL_SOURCE
-        interface.reset(new reconstruction::KalmanInterfaceAMKalman2D());
-#else
-        throw std::runtime_error("SimpleReferenceCalculator: reconstructMeasurements: reconstructor type not supported by build");
-#endif
-    }
-
-    estimator.init(std::move(interface));
-
-    estimator.settings().min_chain_size = settings_.min_chain_size;
-    estimator.settings().min_dt         = settings_.min_dt;
-    estimator.settings().max_dt         = settings_.max_dt;
-    estimator.settings().max_distance   = settings_.max_distance;
-
-    estimator.settings().Q_var     = settings_.Q_std * settings_.Q_std;
-    estimator.settings().verbosity = verbosity() >= 2 ? verbosity() - 1 : 0;
-
-    estimator.settings().resample_dt          = settings_.resample_dt;
-    estimator.settings().resample_Q_var       = settings_.resample_Q_std * settings_.resample_Q_std;
-    estimator.settings().resample_interp_mode = reconstruction::StateInterpMode::BlendVar;
-
-    estimator.settings().max_proj_distance_cart = settings_.max_proj_distance_cart;
+    estimator.init(settings_.kalman_type);
 
     std::vector<kalman::KalmanUpdate> updates_new;
     kalman::KalmanUpdate update;
@@ -443,7 +366,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     {
         auto& mm0 = refs.measurements[ refs.start_index.value() ];
 
-        if (verbosity() > 0) 
+        if (settings_.activeVerbosity() > 0) 
         {
             loginf << "    initializing to update t=" << Utils::Time::toString(refs.init_update.value().t) << ", mm0 t=" << Utils::Time::toString(mm0.t);
         }
@@ -458,7 +381,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         //reinit kalman with first measurement
         auto& mm0 = refs.measurements[ refs.start_index.value() ];
 
-        if (verbosity() > 0) 
+        if (settings_.activeVerbosity() > 0) 
         {
             loginf << "    initializing to mm t=" << Utils::Time::toString(mm0.t);
         }
@@ -485,7 +408,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         updates_new.push_back(update);
     }
 
-    if (verbosity() > 0)
+    if (settings_.activeVerbosity() > 0)
     {
         loginf << "    #new updates (initial): " << updates_new.size();
     }
@@ -508,7 +431,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
             assert(update.valid);
     }
 
-    if (verbosity() > 0)
+    if (settings_.activeVerbosity() > 0)
     {
         loginf << "    #new updates (smoothed): " << updates_new.size();
     }
@@ -527,7 +450,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         updates_new = updates_interp;
     }
 
-    if (verbosity() > 0)
+    if (settings_.activeVerbosity() > 0)
     {
         loginf << "    #new updates (resampled): " << updates_new.size();
     }
@@ -545,7 +468,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     refs.updates.shrink_to_fit();
 
-    if (verbosity() > 0)
+    if (settings_.activeVerbosity() > 0)
     {
         loginf << "    #updates final: " << refs.updates.size();
     }
@@ -553,7 +476,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //generate references
     estimator.storeUpdates(refs.references, refs.updates);
 
-    if (verbosity() > 0)
+    if (settings_.activeVerbosity() > 0)
     {
         loginf << "    #references final: " << refs.references.size();
     }

@@ -22,7 +22,7 @@
 #include "configurable.h"
 #include "targetreportdefs.h"
 #include "reconstructortarget.h"
-
+#include "referencecalculator.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -34,7 +34,11 @@ namespace dbContent
 {
 class VariableSet;
 class ReconstructorTarget;
+}
 
+namespace reconstruction
+{
+struct Measurement;
 }
 
 class Buffer;
@@ -62,8 +66,12 @@ class ReconstructorBase : public Configurable
 
     virtual void reset();
 
-  protected:
+    ReferenceCalculatorSettings& referenceCalculatorSettings() { return ref_calc_settings_; }
+    const ReferenceCalculatorSettings& referenceCalculatorSettings() const { return ref_calc_settings_; }
 
+    void createMeasurement(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& ri);
+
+  protected:
     friend class dbContent::ReconstructorTarget;
     friend class SimpleReferenceCalculator;
 
@@ -110,4 +118,5 @@ class ReconstructorBase : public Configurable
     void saveTargets();
 
   private:
+    ReferenceCalculatorSettings ref_calc_settings_;
 };

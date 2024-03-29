@@ -12,6 +12,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface_linear.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface_umkalman2d.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_estimator.h"
+        "${CMAKE_CURRENT_LIST_DIR}/kalman_online_tracker.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructor_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/spline_interpolator.h"
 
@@ -28,6 +29,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface_linear.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface_umkalman2d.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_estimator.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/kalman_online_tracker.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/spline_interpolator.cpp"
 
         "${CMAKE_CURRENT_LIST_DIR}/reconstructor.cpp"

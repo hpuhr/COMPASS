@@ -97,6 +97,24 @@ void KalmanFilter::predict(const OMatrix& F,
 
 /**
 */
+void KalmanFilter::predictState(Vector& x,
+                                Matrix& P,
+                                const Matrix& F,
+                                const Matrix& Q,
+                                const OMatrix& B,
+                                const OVector& u) const
+{
+    // x = Fx + Bu
+    x = F * x_;
+    if (B.has_value() && u.has_value())
+        x += B.value() * u.value();
+
+    // P = FPF' + Q
+    P = alpha_sq_ * (F * P_ * F.transpose()) + Q;
+}
+
+/**
+*/
 bool KalmanFilter::update(const Vector& z,
                           const OMatrix& R,
                           const OMatrix& H)

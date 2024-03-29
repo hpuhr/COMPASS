@@ -22,8 +22,8 @@ SimpleReconstructorReferenceCalculationWidget::SimpleReconstructorReferenceCalcu
     setLayout(layout);
 
     rec_type_combo_ = new QComboBox;
-    rec_type_combo_->addItem("Uniform Motion"    , QVariant(SimpleReferenceCalculator::Settings::Rec_UMKalman2D));
-    rec_type_combo_->addItem("Accelerated Motion", QVariant(SimpleReferenceCalculator::Settings::Rec_AMKalman2D));
+    rec_type_combo_->addItem("Uniform Motion"    , QVariant(kalman::UMKalman2D));
+    rec_type_combo_->addItem("Accelerated Motion", QVariant(kalman::AMKalman2D));
     layout->addRow("Kalman Type", rec_type_combo_);
 
     Q_std_edit_ = new QDoubleSpinBox;
@@ -76,5 +76,5 @@ SimpleReconstructorReferenceCalculationWidget::~SimpleReconstructorReferenceCalc
 */
 void SimpleReconstructorReferenceCalculationWidget::update()
 {
-    const auto& settings = reconstructor_.settings().ref_calc_settings_;
+    const auto& settings = reconstructor_.referenceCalculatorSettings();
 }

@@ -46,6 +46,12 @@ public:
                  const OMatrix& Q = OMatrix(),
                  const OMatrix& B = OMatrix(),
                  const OVector& u = OVector());
+    void predictState(Vector& x,
+                      Matrix& P,
+                      const Matrix& F,
+                      const Matrix& Q,
+                      const OMatrix& B = OMatrix(),
+                      const OVector& u = OVector()) const;
 
     bool update(const Vector& z,
                 const OMatrix& R = OMatrix(), 
