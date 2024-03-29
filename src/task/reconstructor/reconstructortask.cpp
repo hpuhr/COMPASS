@@ -17,6 +17,7 @@
 #include "simplereconstructor.h"
 #include "probimmreconstructor.h"
 #include "simpleaccuracyestimator.h"
+#include "complexaccuracyestimator.h"
 #include "timeconv.h"
 
 #include <QApplication>
@@ -69,7 +70,7 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
         assert(!probimm_reconstructor_);
 
         std::unique_ptr<AccuracyEstimatorBase> acc_estimator;
-        acc_estimator.reset(new SimpleAccuracyEstimator());
+        acc_estimator.reset(new ComplexAccuracyEstimator());
 
         probimm_reconstructor_.reset(new ProbIMMReconstructor(class_id, instance_id, *this, std::move(acc_estimator)));
         assert(probimm_reconstructor_);

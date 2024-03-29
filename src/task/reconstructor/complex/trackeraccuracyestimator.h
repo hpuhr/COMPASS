@@ -6,6 +6,7 @@ class TrackerAccuracyEstimator : public DataSourceAccuracyEstimator
 {
   public:
     TrackerAccuracyEstimator(const dbContent::DBDataSource& source);
+    virtual ~TrackerAccuracyEstimator() {};
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;

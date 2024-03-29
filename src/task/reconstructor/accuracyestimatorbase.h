@@ -6,6 +6,9 @@ class AccuracyEstimatorBase
 {
   public:
     AccuracyEstimatorBase();
+    virtual ~AccuracyEstimatorBase() {};
+
+    virtual void init() {};
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) = 0;

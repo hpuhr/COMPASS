@@ -14,5 +14,14 @@ class ProbabilisticAssociator
 
   private:
     ProbIMMReconstructor& reconstructor_;
+
+
+    std::map<unsigned int, unsigned int> getTALookupMap (
+        const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
+
+    // tries to find existing utn for target report, -1 if failed
+    int findUTNForTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
+                               std::map<unsigned int, unsigned int> ta_2_utn,
+                               const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
 };
 

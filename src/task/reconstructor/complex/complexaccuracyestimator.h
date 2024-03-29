@@ -5,7 +5,7 @@
 
 #include <memory>
 
-class ComplexReconstructor;
+//class ComplexReconstructor;
 
 //    • Target report position accuracy
 //        ◦ Integrate into current code
@@ -34,9 +34,10 @@ class ComplexAccuracyEstimator : public QObject, public AccuracyEstimatorBase
     void updateDataSourcesInfoSlot();
 
   public:
-    ComplexAccuracyEstimator(ComplexReconstructor& reconstructor);
+    ComplexAccuracyEstimator();
+    virtual ~ComplexAccuracyEstimator();
 
-    void init();
+    virtual void init() override;
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
@@ -46,7 +47,7 @@ class ComplexAccuracyEstimator : public QObject, public AccuracyEstimatorBase
         const dbContent::targetReport::ReconstructorInfo& tr) override;
 
   private:
-    ComplexReconstructor& reconstructor_;
+    //ComplexReconstructor& reconstructor_;
 
     bool initialized_ {false};
 
