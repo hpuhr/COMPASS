@@ -58,6 +58,12 @@ void SimpleReferenceCalculator::prepareForNextSlice()
                                      [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
                                                                                          update.t >= ThresJoin; });
             ref.second.updates.erase(it, ref.second.updates.end());
+
+            auto it_s = std::remove_if(ref.second.updates_smooth.begin(),
+                                       ref.second.updates_smooth.end(),
+                                       [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                                                                           update.t >= ThresJoin; });
+            ref.second.updates_smooth.erase(it_s, ref.second.updates_smooth.end());
         }
     }
 
@@ -100,10 +106,6 @@ void SimpleReferenceCalculator::updateInterpOptions()
 bool SimpleReferenceCalculator::computeReferences()
 {
     loginf << "SimpleReferenceCalculator: computeReferences";
-
-    settings_.smooth_rts = false;
-    settings_.resample_result = false;
-    settings_.resample_systracks = false;
 
     reset();
     generateMeasurements();
@@ -354,12 +356,14 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //configure and init estimator
     reconstruction::KalmanEstimator estimator;
     estimator.settings() = settings_.kalmanEstimatorSettings();
-
     estimator.init(settings_.kalman_type);
 
-    std::vector<kalman::KalmanUpdate> updates_new;
     kalman::KalmanUpdate update;
-    size_t offs = 0;
+    size_t offs     = 0;
+    size_t n_before = refs.updates.size();
+    size_t n_mm     = refs.measurements.size() - refs.start_index.value() + 1;
+
+    refs.updates.reserve(n_before + n_mm);
             
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
@@ -390,13 +394,10 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
         assert(update.valid);
 
-        updates_new.push_back(update);
+        refs.updates.push_back(update);
 
         ++offs; //continue with second measurement
     }
-
-    for (const auto& update : refs.updates)
-        assert(update.valid);
 
     //add new measurements to kalman and collect updates
     for (size_t i = refs.start_index.value() + offs; i < refs.measurements.size(); ++i)
@@ -405,81 +406,54 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
         assert(update.valid);
 
-        updates_new.push_back(update);
+        refs.updates.push_back(update);
     }
 
     if (settings_.activeVerbosity() > 0)
     {
-        loginf << "    #new updates (initial): " << updates_new.size();
+        loginf << "    #new updates: " << refs.updates.size() - n_before;
+        loginf << "    #updates: " << refs.updates.size();
     }
+
+    //start with joined kalman updates
+    std::vector<kalman::KalmanUpdate> updates = refs.updates;
 
     //run rts smoothing?
     if (settings_.smooth_rts)
     {
-        //jointly smooth old + new updates RTS
-        std::vector<kalman::KalmanUpdate> updates_joint = refs.updates;
-        updates_joint.insert(updates_joint.end(), updates_new.begin(), updates_new.end());
+        //jointly smooth old + new kalman updates RTS
+        estimator.smoothUpdates(updates);
 
-        estimator.smoothUpdates(updates_joint);
+        //combine old rts updates with new rts updates
+        refs.updates_smooth.insert(refs.updates_smooth.end(),
+                                   updates.begin() + n_before,
+                                   updates.end());
 
-        //retrieve new RTS updates
-        size_t offs = refs.updates.size();
-        for (size_t i = 0; i < updates_new.size(); ++i)
-            updates_new[ i ] = updates_joint[ offs + i ];
+        updates = refs.updates_smooth;
 
-        for (const auto& update : updates_new)
-            assert(update.valid);
-    }
-
-    if (settings_.activeVerbosity() > 0)
-    {
-        loginf << "    #new updates (smoothed): " << updates_new.size();
+        if (settings_.activeVerbosity() > 0)
+        {
+            loginf << "    #updates (smoothed): " << updates.size();
+        }
     }
 
     //resample?
     if (settings_.resample_result)
     {
-        //add last update of old slice if available
-        if (refs.init_update.has_value())
-            updates_new.insert(updates_new.begin(), refs.init_update.value());
-        
         //interpolate measurements
         std::vector<kalman::KalmanUpdate> updates_interp;
-        estimator.interpUpdates(updates_interp, updates_new);
+        estimator.interpUpdates(updates_interp, updates);
 
-        updates_new = updates_interp;
-    }
+        updates = updates_interp;
 
-    if (settings_.activeVerbosity() > 0)
-    {
-        loginf << "    #new updates (resampled): " << updates_new.size();
-    }
-
-    //join old and new measurements
-    const auto ThresJoin = getJoinThreshold();
-
-    refs.updates.reserve(refs.updates.size() + updates_new.size());
-    for (size_t i = 0; i < updates_new.size(); ++i)
-        if (reconstructor_.first_slice_ || updates_new[ i ].t >= ThresJoin)
-            refs.updates.push_back(updates_new[ i ]);
-
-    for (const auto& update : refs.updates)
-        assert(update.valid);
-
-    refs.updates.shrink_to_fit();
-
-    if (settings_.activeVerbosity() > 0)
-    {
-        loginf << "    #updates final: " << refs.updates.size();
+        if (settings_.activeVerbosity() > 0)
+        {
+            loginf << "    #updates (resampled): " << updates.size();
+        }
     }
 
     //generate references
-    estimator.storeUpdates(refs.references, refs.updates);
-
-    if (settings_.activeVerbosity() > 0)
-    {
-        loginf << "    #references final: " << refs.references.size();
-    }
+    estimator.storeUpdates(refs.references, updates);
 }
 
 /**

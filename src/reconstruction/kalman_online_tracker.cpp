@@ -61,6 +61,42 @@ void KalmanOnlineTracker::init(kalman::KalmanType ktype)
 
 /**
 */
+bool KalmanOnlineTracker::track(Measurement& mm)
+{
+    assert(isInit());
+
+    if (!isTracking())
+    {
+        kalmanInit(mm);
+        return true;
+    }
+
+    return (estimator_->kalmanStep(current_update_.value(), mm) == KalmanEstimator::StepResult::Success);
+}
+
+/**
+*/
+bool KalmanOnlineTracker::track(const kalman::KalmanUpdate& update)
+{
+    assert(isInit());
+
+    kalmanInit(update);
+    return true;
+}
+
+/**
+*/
+bool KalmanOnlineTracker::predict(Measurement& mm,
+                                  double dt) const
+{
+    assert(isInit());
+    assert(isTracking());
+
+    return estimator_->kalmanPrediction(mm, dt);
+}
+
+/**
+*/
 void KalmanOnlineTracker::kalmanInit(Measurement& mm)
 {
     assert(isInit());
@@ -80,27 +116,6 @@ void KalmanOnlineTracker::kalmanInit(const kalman::KalmanUpdate& update)
     current_update_ = update;
 
     estimator_->kalmanInit(current_update_.value());
-}
-
-/**
-*/
-bool KalmanOnlineTracker::kalmanStep(Measurement& mm)
-{
-    assert(isInit());
-    assert(isTracking());
-
-    return (estimator_->kalmanStep(current_update_.value(), mm) == KalmanEstimator::StepResult::Success);
-}
-
-/**
-*/
-bool KalmanOnlineTracker::kalmanPrediction(Measurement& mm,
-                                           double dt) const
-{
-    assert(isInit());
-    assert(isTracking());
-
-    return estimator_->kalmanPrediction(mm, dt);
 }
 
 /**

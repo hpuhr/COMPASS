@@ -1197,7 +1197,7 @@ void ReconstructorTarget::addToTracker(const dbContent::targetReport::Reconstruc
     reconstruction::Measurement mm;
     reconstructor_.createMeasurement(mm, tr);
 
-    tracker_->kalmanStep(mm);
+    tracker_->track(mm);
 }
 
 //bool ReconstructorTarget::hasADSBMOPSVersion()
