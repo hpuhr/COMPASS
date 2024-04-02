@@ -11,6 +11,7 @@ class ProbabilisticAssociator
     ProbabilisticAssociator(ProbIMMReconstructor& reconstructor);
 
     void associateNewData();
+    void reset();
 
   private:
     ProbIMMReconstructor& reconstructor_;

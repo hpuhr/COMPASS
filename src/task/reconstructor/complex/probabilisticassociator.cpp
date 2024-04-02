@@ -67,6 +67,11 @@ void ProbabilisticAssociator::associateNewData()
     }
 }
 
+void ProbabilisticAssociator::reset()
+{
+    logdbg << "ProbabilisticAssociator: reset";
+}
+
 
 std::map<unsigned int, unsigned int> ProbabilisticAssociator::getTALookupMap (
     const std::map<unsigned int, ReconstructorTarget>& targets)

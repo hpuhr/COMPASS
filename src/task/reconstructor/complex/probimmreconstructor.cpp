@@ -106,9 +106,8 @@ void ProbIMMReconstructor::reset()
 {
     loginf << "ProbIMMReconstructor: reset";
 
-    target_reports_.clear();
-    tr_timestamps_.clear();
-    tr_ds_.clear();
+    associatior_.reset();
+    ref_calculator_.reset();
 
     ReconstructorBase::reset();
 }
