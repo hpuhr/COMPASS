@@ -58,6 +58,7 @@ private:
 
         std::vector<reconstruction::Measurement> measurements;
         std::vector<kalman::KalmanUpdate>        updates;
+        std::vector<kalman::KalmanUpdate>        updates_smooth;
         std::vector<reconstruction::Reference>   references;
 
         boost::optional<kalman::KalmanUpdate> init_update;

@@ -42,11 +42,10 @@ public:
     void init(std::unique_ptr<KalmanInterface>&& interface);
     void init(kalman::KalmanType ktype);
 
-    void kalmanInit(Measurement& mm);
-    void kalmanInit(const kalman::KalmanUpdate& update);
-    bool kalmanStep(Measurement& mm);
-    bool kalmanPrediction(Measurement& mm,
-                          double dt) const;
+    bool track(Measurement& mm);
+    bool track(const kalman::KalmanUpdate& update);
+    bool predict(Measurement& mm,
+                 double dt) const;
 
     bool isTracking() const;
 
@@ -55,6 +54,9 @@ public:
     const KalmanEstimator& estimator() const;
 
 private:
+    void kalmanInit(Measurement& mm);
+    void kalmanInit(const kalman::KalmanUpdate& update);
+
     std::unique_ptr<KalmanEstimator>      estimator_;
     boost::optional<kalman::KalmanUpdate> current_update_;
 };
