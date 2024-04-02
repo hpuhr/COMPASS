@@ -332,6 +332,23 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 
 /**
 */
+bool KalmanEstimator::kalmanPrediction(Measurement& mm,
+                                       const boost::posix_time::ptime& ts) const
+{
+    assert(isInit());
+
+    kalman::KalmanState state;
+    if (!kalman_interface_->kalmanPrediction(state.x, state.P, ts, settings_.Q_var))
+        return false;
+
+    kalman_interface_->storeState(mm, state);
+    proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
+
+    return true;
+}
+
+/**
+*/
 void KalmanEstimator::executeChainFunc(Updates& updates, const ChainFunc& func) const
 {
     if (!func || updates.empty())

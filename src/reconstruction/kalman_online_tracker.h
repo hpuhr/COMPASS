@@ -44,8 +44,10 @@ public:
 
     bool track(Measurement& mm);
     bool track(const kalman::KalmanUpdate& update);
-    bool predict(Measurement& mm,
+    bool predict(Measurement& mm_predicted,
                  double dt) const;
+    bool predict(Measurement& mm_predicted,
+                 const boost::posix_time::ptime& ts) const;
 
     bool isTracking() const;
 

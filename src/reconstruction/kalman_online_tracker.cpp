@@ -86,13 +86,24 @@ bool KalmanOnlineTracker::track(const kalman::KalmanUpdate& update)
 
 /**
 */
-bool KalmanOnlineTracker::predict(Measurement& mm,
+bool KalmanOnlineTracker::predict(Measurement& mm_predicted,
                                   double dt) const
 {
     assert(isInit());
     assert(isTracking());
 
-    return estimator_->kalmanPrediction(mm, dt);
+    return estimator_->kalmanPrediction(mm_predicted, dt);
+}
+
+/**
+*/
+bool KalmanOnlineTracker::predict(Measurement& mm_predicted,
+                                  const boost::posix_time::ptime& ts) const
+{
+    assert(isInit());
+    assert(isTracking());
+
+    return estimator_->kalmanPrediction(mm_predicted, ts);
 }
 
 /**

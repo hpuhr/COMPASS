@@ -71,6 +71,17 @@ bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
 
 /**
 */
+bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
+                                       kalman::Matrix& P,
+                                       const boost::posix_time::ptime& ts,
+                                       double Q_var) const
+{
+    double dt = Utils::Time::partialSeconds(ts - ts_);
+    return kalmanPrediction_impl(x, P, dt, Q_var);
+}
+
+/**
+*/
 double KalmanInterface::timestep(const Measurement& mm) const
 {
     return Utils::Time::partialSeconds(mm.t - ts_);

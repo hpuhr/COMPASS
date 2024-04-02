@@ -1200,6 +1200,13 @@ void ReconstructorTarget::addToTracker(const dbContent::targetReport::Reconstruc
     tracker_->track(mm);
 }
 
+bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
+                                  const dbContent::targetReport::ReconstructorInfo& tr) const
+{
+    assert(tracker_);
+    return tracker_->predict(mm, tr.timestamp_);
+}
+
 //bool ReconstructorTarget::hasADSBMOPSVersion()
 //{
 //    return mops_versions_.size();

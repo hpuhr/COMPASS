@@ -98,6 +98,8 @@ public:
                           Measurement& mm);
     bool kalmanPrediction(Measurement& mm,
                           double dt) const;
+    bool kalmanPrediction(Measurement& mm,
+                          const boost::posix_time::ptime& ts) const;
 
     void storeUpdates(std::vector<Reference>& refs,
                       const std::vector<kalman::KalmanUpdate>& updates) const;

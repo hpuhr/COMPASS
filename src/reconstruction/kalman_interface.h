@@ -57,6 +57,10 @@ public:
                           kalman::Matrix& P,
                           double dt,
                           double Q_var) const;
+    bool kalmanPrediction(kalman::Vector& x,
+                          kalman::Matrix& P,
+                          const boost::posix_time::ptime& ts,
+                          double Q_var) const;
                           
     bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                        size_t idx0,

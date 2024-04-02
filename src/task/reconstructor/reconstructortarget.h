@@ -154,6 +154,7 @@ class ReconstructorTarget
     void removeOutdatedTargetReports();
     void reinitTracker();
     void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr);
+    bool predict(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& tr) const;
 
 //    bool hasADSBMOPSVersion();
 //    std::set<unsigned int> getADSBMOPSVersions();
