@@ -329,7 +329,7 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
     bool ok = kalman_interface_->kalmanPrediction(state.x, state.P, dt, settings_.Q_var);
 
     //@TODO: we assert for the moment to see when and how often this happens
-        assert(ok);
+    assert(ok);
 
     if (!ok)
         return false;
@@ -348,7 +348,12 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
     assert(isInit());
 
     kalman::KalmanState state;
-    if (!kalman_interface_->kalmanPrediction(state.x, state.P, ts, settings_.Q_var))
+    bool ok = kalman_interface_->kalmanPrediction(state.x, state.P, ts, settings_.Q_var);
+    
+    //@TODO: we assert for the moment to see when and how often this happens
+    assert(ok);
+
+    if (!ok)
         return false;
 
     kalman_interface_->storeState(mm, state);
