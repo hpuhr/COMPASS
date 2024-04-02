@@ -298,7 +298,12 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
     else
     {
         //normal step
-        if (!step(update, mm))
+        bool ok = step(update, mm);
+
+        //@TODO: we assert for the moment to see when and how often this happens
+        assert(ok);
+
+        if (!ok)
         {
             loginf << "KalmanEstimator: kalmanStep: step failed";
             return KalmanEstimator::StepResult::FailKalmanError;
@@ -321,7 +326,12 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
     assert(isInit());
 
     kalman::KalmanState state;
-    if (!kalman_interface_->kalmanPrediction(state.x, state.P, dt, settings_.Q_var))
+    bool ok = kalman_interface_->kalmanPrediction(state.x, state.P, dt, settings_.Q_var);
+
+    //@TODO: we assert for the moment to see when and how often this happens
+        assert(ok);
+
+    if (!ok)
         return false;
 
     kalman_interface_->storeState(mm, state);
