@@ -130,9 +130,12 @@ void SimpleReconstructor::reset()
 {
     loginf << "SimpleReconstructor: reset";
 
-    target_reports_.clear();
-    tr_timestamps_.clear();
-    tr_ds_.clear();
+//    target_reports_.clear(); // done in base
+//    tr_timestamps_.clear();
+//    tr_ds_.clear();
+
+    associatior_.reset();
+    ref_calculator_.reset();
 
     ReconstructorBase::reset();
 }

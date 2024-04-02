@@ -494,10 +494,21 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
 
 void ReconstructorBase::reset()
 {
+    buffers_.clear();
+    accessor_->clear();
+
     current_slice_begin_ = {};
     next_slice_begin_ = {};
     timestamp_min_ = {};
     timestamp_max_ = {};
+    first_slice_ = false;
+
+    remove_before_time_ = {};
+    write_before_time_ = {};
+
+    target_reports_.clear();
+    tr_timestamps_.clear();
+    tr_ds_.clear();
 
     if (acc_estimator_)
         acc_estimator_->init();

@@ -87,6 +87,9 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
     {
         buffer_size = buf_it.second->size();
 
+        if (buffer_size == 0)
+            continue;
+
         assert (dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
 
         dbContent::Variable& ts_var = dbcont_man.metaVariable(
@@ -114,11 +117,11 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
         }
         // index == buffer_size if none bigger than min_ts
 
-        if (cutoff_found) // index found
+        if (cutoff_found && index) // index found and has data before
         {
             index--; // cut at previous
 
-            logdbg << "DBContentAccessor: removeContentBeforeTimestamp: cutting " << buf_it.first
+            loginf << "DBContentAccessor: removeContentBeforeTimestamp: cutting " << buf_it.first
                    << " up to index " << index
                    << " total size " << buffer_size
                    << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));

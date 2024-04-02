@@ -62,12 +62,12 @@ void SimpleReferenceCalculator::prepareForNextSlice()
     }
 
     //reset data structs
-    reset();
+    resetDataStructs();
 }
 
 /**
 */
-void SimpleReferenceCalculator::reset()
+void SimpleReferenceCalculator::resetDataStructs()
 {
     for (auto& ref : references_)
     {
@@ -105,12 +105,20 @@ bool SimpleReferenceCalculator::computeReferences()
     settings_.resample_result = false;
     settings_.resample_systracks = false;
 
-    reset();
+    resetDataStructs();
     generateMeasurements();
     reconstructMeasurements();
     updateReferences();
 
     return true;
+}
+
+void SimpleReferenceCalculator::reset()
+{
+    loginf << "SimpleReferenceCalculator: reset";
+
+    references_.clear();
+    interp_options_.clear();
 }
 
 /**

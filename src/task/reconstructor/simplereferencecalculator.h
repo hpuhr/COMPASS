@@ -45,6 +45,8 @@ public:
     void prepareForNextSlice();
     bool computeReferences();
 
+    void reset();
+
     Settings& settings() { return settings_; }
     
     static std::vector<std::vector<reconstruction::Measurement>> splitMeasurements(const Measurements& measurements,
@@ -69,7 +71,7 @@ private:
         Success
     };
 
-    void reset();
+    void resetDataStructs();
     void updateInterpOptions();
 
     void generateMeasurements();

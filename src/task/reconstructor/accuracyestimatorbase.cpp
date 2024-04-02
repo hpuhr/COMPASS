@@ -4,17 +4,17 @@
 
 #include "compass.h"
 
-const double AccuracyEstimatorBase::PosAccStdDevFallback = 10000.0;
+const double AccuracyEstimatorBase::PosAccStdDevFallback = 1000.0;
 const dbContent::targetReport::PositionAccuracy AccuracyEstimatorBase::PosAccStdFallback
     { AccuracyEstimatorBase::PosAccStdDevFallback, AccuracyEstimatorBase::PosAccStdDevFallback, 0};
 
-const double AccuracyEstimatorBase::VelAccStdDevFallback = 10000.0;
+const double AccuracyEstimatorBase::VelAccStdDevFallback = 1000.0;
 
 const dbContent::targetReport::VelocityAccuracy AccuracyEstimatorBase::VelAccStdFallback
     { AccuracyEstimatorBase::VelAccStdDevFallback, AccuracyEstimatorBase::VelAccStdDevFallback};
 
 
-const double AccuracyEstimatorBase::AccAccStdDevFallback = 10000.0;
+const double AccuracyEstimatorBase::AccAccStdDevFallback = 1000.0;
 
 const dbContent::targetReport::AccelerationAccuracy AccuracyEstimatorBase::AccAccStdFallback
     { AccuracyEstimatorBase::AccAccStdDevFallback, AccuracyEstimatorBase::AccAccStdDevFallback};

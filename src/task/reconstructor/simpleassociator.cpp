@@ -78,6 +78,11 @@ void SimpleAssociator::associateNewData()
     //    createAssociations();
 }
 
+void SimpleAssociator::reset()
+{
+    loginf << "SimpleAssociator: reset";
+}
+
 void SimpleAssociator::createReferenceUTNs()
 {
     loginf << "SimpleAssociator: createReferenceUTNs";

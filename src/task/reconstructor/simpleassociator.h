@@ -11,6 +11,7 @@ class SimpleAssociator
     SimpleAssociator(SimpleReconstructor& reconstructor);
 
     void associateNewData();
+    void reset();
 
   private:
     SimpleReconstructor& reconstructor_;
