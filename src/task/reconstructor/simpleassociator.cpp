@@ -895,8 +895,9 @@ int SimpleAssociator::findContinuationUTNForTrackerUpdate (
                           const targetReport::ReconstructorInfo& other_last_tr =
                               reconstructor_.target_reports_.at(other.lastAssociated());
 
-                          assert (other_last_tr.track_end_ && other_last_tr.track_end_);
-                          if (!*other_last_tr.track_end_ || !*other_last_tr.track_end_) // check if other track was ended
+                          assert (other_last_tr.track_end_);
+
+                          if (!*other_last_tr.track_end_) // check if other track was ended
                               return;
 
                           if (!other_last_tr.mode_a_code_ || !tr.mode_a_code_) // check mode a codes exist
