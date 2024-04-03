@@ -28,7 +28,7 @@ ReconstructorTarget::~ReconstructorTarget()
 {
 }
 
-void ReconstructorTarget::addTargetReport (unsigned long rec_num)
+void ReconstructorTarget::addTargetReport (unsigned long rec_num, bool add_to_tracker)
 {
     assert (reconstructor_.target_reports_.count(rec_num));
 
@@ -117,7 +117,7 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
             //    if (!tmp_)
             //        tr.addAssociated(this);
 
-    if (!tr.do_not_use_position_)
+    if (add_to_tracker && !tr.do_not_use_position_)
     {
         if (!tracker_)
             reinitTracker();
@@ -127,10 +127,10 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
     }
 }
 
-void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums)
+void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums, bool add_to_tracker)
 {
     for (auto& rn_it : rec_nums)
-        addTargetReport(rn_it);
+        addTargetReport(rn_it, add_to_tracker);
 }
 
 unsigned int ReconstructorTarget::numAssociated() const
@@ -1230,10 +1230,10 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
-    for (auto ts_it : tr_timestamps_)
+    for (auto ts_it : tmp_tr_timestamps)
     {
         if (reconstructor_.target_reports_.count(ts_it.second))
-            addTargetReport(ts_it.second);
+            addTargetReport(ts_it.second, false);
     }
 
     references_.clear();

@@ -385,8 +385,13 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     refs.updates.reserve(n_before + n_mm);
 
-    //loginf << "update_end: " << (refs.updates.empty() ? "-" : Utils::Time::toString(refs.updates.rbegin()->t)) << ", "
-    //       << "mm_begin: " << Utils::Time::toString(refs.measurements[ refs.start_index.value() ].t);
+    // auto ThresRemove = reconstructor_.remove_before_time_;
+    // auto ThresJoin   = getJoinThreshold();
+
+    // loginf << "update_end: " << (refs.updates.empty() ? "-" : Utils::Time::toString(refs.updates.rbegin()->t)) << ", "
+    //        << "mm_begin: " << Utils::Time::toString(refs.measurements[ refs.start_index.value() ].t) << ", "
+    //        << "thres_rem: " << Utils::Time::toString(ThresRemove) << ", thres_join: " << Utils::Time::toString(ThresJoin) << ", "
+    //        << "idx: " << refs.start_index.value();
             
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())

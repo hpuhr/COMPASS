@@ -677,8 +677,8 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
             }
             else
             {
-                logwrn << "SimpleAssociator: createPerTrackerTargets: tracker target report w/o track num in ds_id "
-                       << tr.ds_id_ << " at tod " << Time::toString(tr.timestamp_);
+                //logwrn << "SimpleAssociator: createPerTrackerTargets: tracker target report w/o track num in ds_id "
+                //       << tr.ds_id_ << " at tod " << Time::toString(tr.timestamp_);
             }
         }
     }
