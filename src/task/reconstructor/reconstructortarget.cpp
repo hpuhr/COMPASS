@@ -117,11 +117,14 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
             //    if (!tmp_)
             //        tr.addAssociated(this);
 
-    if (!tracker_)
-        reinitTracker();
+    if (!tr.do_not_use_position_)
+    {
+        if (!tracker_)
+            reinitTracker();
 
-    if (ts_newer)
-        addToTracker(tr);
+        if (ts_newer)
+            addToTracker(tr);
+    }
 }
 
 void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums)

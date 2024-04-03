@@ -345,13 +345,16 @@ void ReconstructorTask::loadDataSlice()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    for (auto& dbo_it : dbcontent_man)
+    for (auto& dbcont_it : dbcontent_man)
     {
-        if (!dbo_it.second->hasData())
+        loginf << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
+               << " has data " << dbcont_it.second->hasData();
+
+        if (!dbcont_it.second->hasData())
             continue;
 
-        VariableSet read_set = currentReconstructor()->getReadSetFor(dbo_it.first);
+        VariableSet read_set = currentReconstructor()->getReadSetFor(dbcont_it.first);
 
-        dbo_it.second->load(read_set, false, false, timestamp_filter);
+        dbcont_it.second->load(read_set, false, false, timestamp_filter);
     }
 }

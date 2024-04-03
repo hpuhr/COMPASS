@@ -320,7 +320,7 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
 
         if (ds_man.lineSpecificLoadingRequired(name_)) // ds specific line loading
         {
-            loginf << "DBContent " << name_ << ": load: line specific loading wanted";
+            logdbg << "DBContent " << name_ << ": load: line specific loading wanted";
 
             assert (hasVariable(DBContent::meta_var_line_id_.name()));
 
@@ -375,7 +375,7 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
         }
         else // simple ds id in statement
         {
-            loginf << "DBContent " << name_ << ": load: no line specific loading wanted";
+            logdbg << "DBContent " << name_ << ": load: no line specific loading wanted";
 
             filter_clause = datasource_var.dbColumnName() + " IN (";
 
@@ -391,7 +391,7 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
         }
     }
 
-    loginf << "DBContent " << name_ << ": load: use_filters " << use_filters;
+    logdbg << "DBContent " << name_ << ": load: use_filters " << use_filters;
 
     if (use_filters)
     {
@@ -414,7 +414,7 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
         filter_clause += custom_filter_clause;
     }
 
-    loginf << "DBContent: load: filter_clause '" << filter_clause << "'";
+    logdbg << "DBContent: load: filter_clause '" << filter_clause << "'";
 
     loadFiltered(read_set, filter_clause);
 }
@@ -691,7 +691,7 @@ void DBContent::deleteJobDoneSlot()
     // remove from targets count
     //dbcont_manager_.removeDBContentFromTargets(name_);
 
-    count_ = 0;
+    count_ = COMPASS::instance().interface().count(db_table_name_);
 }
 
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)

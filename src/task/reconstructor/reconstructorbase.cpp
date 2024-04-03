@@ -188,6 +188,8 @@ void ReconstructorBase::createTargetReports()
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
+    unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+
     for (auto& buf_it : *accessor_)
     {
         dbContent::TargetReportAccessor tgt_acc = accessor_->targetReportAccessor(buf_it.first);
@@ -225,6 +227,7 @@ void ReconstructorBase::createTargetReports()
 
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
+                info.do_not_use_position_ = (info.ds_id_ == calc_ref_ds_id);
 
                 info.barometric_altitude_ = tgt_acc.barometricAltitude(cnt);
 

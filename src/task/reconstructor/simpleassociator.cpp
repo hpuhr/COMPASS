@@ -533,14 +533,10 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
     map<unsigned int, ReconstructorTarget> tracker_targets; // utn -> target
     vector<ReconstructorTarget*> tracker_targets_vec;
 
-            //DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
-
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     assert (ds_man.hasDBDataSource(ds_id));
     string ds_name = ds_man.dbDataSource(ds_id).name();
-
-
 
     std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>& ds_id_trs =
         reconstructor_.tr_ds_.at(dbcont_id);

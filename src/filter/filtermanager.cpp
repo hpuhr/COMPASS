@@ -303,7 +303,7 @@ std::string FilterManager::getSQLCondition(const std::string& dbcontent_name)
 
     for (auto& filter : filters_)
     {
-        loginf << "FilterManager: getSQLCondition: filter " << filter->instanceId() << " active "
+        logdbg << "FilterManager: getSQLCondition: filter " << filter->instanceId() << " active "
                << filter->getActive() << " filters " << dbcontent_name << " "
                << filter->filters(dbcontent_name);
 
@@ -313,7 +313,7 @@ std::string FilterManager::getSQLCondition(const std::string& dbcontent_name)
         }
     }
 
-    loginf << "FilterManager: getSQLCondition: name " << dbcontent_name << " '" << ss.str() << "'";
+    logdbg << "FilterManager: getSQLCondition: name " << dbcontent_name << " '" << ss.str() << "'";
     return ss.str();
 }
 

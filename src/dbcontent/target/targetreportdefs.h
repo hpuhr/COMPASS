@@ -204,6 +204,7 @@ struct ReconstructorInfo : public BaseInfo
 
     boost::optional<targetReport::Position> position_;
     boost::optional<targetReport::PositionAccuracy> position_accuracy_;
+    bool do_not_use_position_ {false};
 
     boost::optional<targetReport::BarometricAltitude> barometric_altitude_;
 

@@ -100,12 +100,14 @@ class ReconstructorTarget
     bool isTimeInside (boost::posix_time::ptime timestamp) const;
     bool hasDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
+    // TODO lambda for selective data
     ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
 //    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timesFor (
 //        boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     // lower/upper times, -1 if not existing
 
+    // TODO lambda for selective data without do not use pos
     std::pair<dbContent::targetReport::Position, bool> interpolatedPosForTime (
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     std::pair<dbContent::targetReport::Position, bool> interpolatedPosForTimeFast (
