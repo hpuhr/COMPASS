@@ -1,6 +1,9 @@
 #include "probabilisticassociator.h"
 #include "probimmreconstructor.h"
 #include "logger.h"
+#include "global.h"
+
+#include <osgEarth/GeoMath>
 
 using namespace std;
 using namespace dbContent;
@@ -20,6 +23,10 @@ void ProbabilisticAssociator::associateNewData()
     int utn;
 
     std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(reconstructor_.targets_);
+
+    reconstruction::Measurement mm;
+    bool ret;
+    double distance_m;
 
     for (auto& ts_it : reconstructor_.tr_timestamps_)
     {
@@ -60,6 +67,19 @@ void ProbabilisticAssociator::associateNewData()
 
             // add associated target reports
             assert (reconstructor_.targets_.count(utn));
+
+            // only if not newly created
+            if (reconstructor_.targets_.at(utn).canPredict(tr.timestamp_))
+            {
+                ret = reconstructor_.targets_.at(utn).predict(mm, tr);
+                assert (ret);
+
+//                distance_m   = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
+//                                                         tr.position_->longitude_ * DEG2RAD,
+//                                                         mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+
+                //loginf << distance_m;
+            }
 
             reconstructor_.targets_.at(utn).addTargetReport(rec_num);
             continue; // done

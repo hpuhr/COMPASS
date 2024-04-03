@@ -152,9 +152,13 @@ class ReconstructorTarget
     std::shared_ptr<Buffer> getReferenceBuffer();
 
     void removeOutdatedTargetReports();
+
+    // online reconstructor
     void reinitTracker();
     void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr);
+    bool canPredict(boost::posix_time::ptime timestamp) const;
     bool predict(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& tr) const;
+    // hp: plz rework to tr -> posix timestamp, mm to targetreportdefs structs pos, posacc, maybe by return
 
 //    bool hasADSBMOPSVersion();
 //    std::set<unsigned int> getADSBMOPSVersions();

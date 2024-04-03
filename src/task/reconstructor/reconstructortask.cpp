@@ -19,6 +19,7 @@
 #include "simpleaccuracyestimator.h"
 #include "complexaccuracyestimator.h"
 #include "timeconv.h"
+#include "number.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -231,6 +232,12 @@ void ReconstructorTask::loadingDoneSlot()
     {
         loginf << "ReconstructorTask: loadingDoneSlot: data loading done";
         currentReconstructor()->reset();
+
+        COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+
+        done_ = true;
+
+        emit doneSignal();
     }
 
 //    assert(status_dialog_);
@@ -266,25 +273,50 @@ void ReconstructorTask::deleteCalculatedReferences()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
+    dbcontent_man.dbContent("RefTraj").deleteDBContentData(
+        currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_,
+        currentReconstructor()->ds_line_);
+
+    while (dbcontent_man.dbContent("RefTraj").isDeleting())
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(10);
+    }
+
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    for (auto& ds_it : ds_man.dbDataSources())
+    unsigned int ds_id = Number::dsIdFrom(currentReconstructor()->ds_sac_,
+                                          currentReconstructor()->ds_sic_);
+
+    // clear counts
+    if (ds_man.hasDBDataSource(ds_id))
     {
-        if (ds_it->isCalculatedReferenceSource())
-        {
-            //status_dialog_->setStatus("Deleting From Data Source " + ds_it->name());
+        dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
 
-            dbcontent_man.dbContent("RefTraj").deleteDBContentData(ds_it->sac(), ds_it->sic());
-
-            while (dbcontent_man.dbContent("RefTraj").isDeleting())
-            {
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                QThread::msleep(10);
-            }
-
-            ds_it->clearNumInserted("RefTraj");
-        }
+        ds.clearNumInserted("RefTraj", currentReconstructor()->ds_line_);
     }
+
+//    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+//    for (auto& ds_it : ds_man.dbDataSources())
+//    {
+//        if (ds_it->isCalculatedReferenceSource())
+//        {
+//            //status_dialog_->setStatus("Deleting From Data Source " + ds_it->name());
+
+//            dbcontent_man.dbContent("RefTraj").deleteDBContentData(
+//                currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_,
+//                currentReconstructor()->ds_line_);
+
+//            while (dbcontent_man.dbContent("RefTraj").isDeleting())
+//            {
+//                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//                QThread::msleep(10);
+//            }
+
+//            ds_it->clearNumInserted("RefTraj");
+//        }
+//    }
 }
 
 void ReconstructorTask::loadDataSlice()

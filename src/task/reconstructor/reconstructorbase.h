@@ -71,6 +71,12 @@ class ReconstructorBase : public Configurable
 
     void createMeasurement(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& ri);
 
+    // output
+    std::string ds_name_ {"CalcRef"};
+    unsigned int ds_sac_ {255};
+    unsigned int ds_sic_ {1};
+    unsigned int ds_line_ {0};
+
   protected:
     friend class dbContent::ReconstructorTarget;
     friend class SimpleReferenceCalculator;
@@ -91,12 +97,6 @@ class ReconstructorBase : public Configurable
 
     const boost::posix_time::time_duration slice_duration_ {0, 10, 0}; // 1 hour
     const boost::posix_time::time_duration outdated_duration_ {0, 2, 0}; // 5 minutes
-
-    // output
-    std::string ds_name_ {"CalcRef"};
-    unsigned int ds_sac_ {0};
-    unsigned int ds_sic_ {1};
-    unsigned int ds_line_ {0};
 
     std::map<unsigned long, dbContent::targetReport::ReconstructorInfo> target_reports_;
     // all sources, record_num -> base info

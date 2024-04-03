@@ -327,7 +327,8 @@ void DBContentManager::load(const std::string& custom_filter_clause)
     {
         loginf << "DBContentManager: loadSlot: object " << object.first
                << " loadable " << object.second->loadable()
-               << " loading wanted " << ds_man.loadingWanted(object.first);
+               << " loading wanted " << ds_man.loadingWanted(object.first)
+               << " filters " << COMPASS::instance().filterManager().useFilters();
 
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
@@ -619,6 +620,10 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
         assert(existsDBContent(buf_it.first));
         dbContent(buf_it.first).insertData(buf_it.second);
     }
+
+    COMPASS::instance().dataSourceManager().saveDBDataSources();
+    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+
 }
 
 void DBContentManager::insertDone(DBContent& object)

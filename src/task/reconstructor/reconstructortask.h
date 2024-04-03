@@ -79,8 +79,7 @@ class ReconstructorTask : public Task, public Configurable
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
     std::unique_ptr<ProbIMMReconstructor> probimm_reconstructor_; // has to be reset after each calculation
 
-
-    bool job_done_{false};
+    //bool job_done_{false};
 
     virtual void checkSubConfigurables() override;
     void deleteCalculatedReferences();

@@ -184,6 +184,7 @@ public:
     void insertData(std::shared_ptr<Buffer> buffer);
     void updateData(dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer);
 
+    // counts and targets have to be adjusted outside
     void deleteDBContentData();
     void deleteDBContentData(unsigned int sac, unsigned int sic);
     void deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id);

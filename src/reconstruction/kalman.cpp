@@ -293,8 +293,8 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
     for (int i = 0; i < n; ++i)
     {
         x_smooth[ i ] = states[ i ].x;
-        P_smooth[ i ] = states[ i ].P;
-        Pp      [ i ] = states[ i ].P;
+        P_smooth[ i ] = states[ i ].P / 10.0; // TODO HACK
+        Pp      [ i ] = states[ i ].P / 10.0;
         K       [ i ].setZero(dim_x, dim_x);
     }
 

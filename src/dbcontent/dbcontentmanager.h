@@ -15,15 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_DBCONTENTMANAGER_H_
-#define DBCONTENT_DBCONTENTMANAGER_H_
+#pragma once
 
 #include "configurable.h"
-//#include "global.h"
-//#include "singleton.h"
 #include "buffer.h"
 #include "targetmodel.h"
-//#include "dbcontent/dbcontentcache.h"
 #include "viewabledataconfig.h"
 
 #include <boost/optional.hpp>
@@ -47,7 +43,6 @@ namespace dbContent
     class VariableSet;
     class Target;
     class TargetListWidget;
-//    class LabelGenerator;
     class VariableSet;
 }
 
@@ -253,4 +248,3 @@ protected:
     void restoreSelectedRecNums();
 };
 
-#endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

@@ -391,6 +391,8 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
         }
     }
 
+    loginf << "DBContent " << name_ << ": load: use_filters " << use_filters;
+
     if (use_filters)
     {
         string filter_sql = COMPASS::instance().filterManager().getSQLCondition(name_);
@@ -633,6 +635,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic)
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
     delete_job_->setSpecificDBContent(name_);
+    delete_job_->setSpecificSacSic(sac, sic);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
             Qt::QueuedConnection);
@@ -652,6 +655,8 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
     delete_job_->setSpecificDBContent(name_);
+    delete_job_->setSpecificSacSic(sac, sic);
+    delete_job_->setSpecificLineId(line_id);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
             Qt::QueuedConnection);
@@ -676,12 +681,15 @@ void DBContent::deleteJobDoneSlot()
 
     delete_job_ = nullptr;
 
-    // remove from inserted count
-    COMPASS::instance().dataSourceManager().clearInsertedCounts(name_);
     COMPASS::instance().dataSourceManager().saveDBDataSources();
+    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+
+    // remove from inserted count
+    //COMPASS::instance().dataSourceManager().clearInsertedCounts(name_);
+    //COMPASS::instance().dataSourceManager().saveDBDataSources();
 
     // remove from targets count
-    dbcont_manager_.removeDBContentFromTargets(name_);
+    //dbcont_manager_.removeDBContentFromTargets(name_);
 
     count_ = 0;
 }

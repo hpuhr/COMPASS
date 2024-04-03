@@ -321,7 +321,8 @@ void CalculateReferencesTask::run()
             {
                 status_dialog_->setStatusSlot(("Deleting From Data Source " + ds_it->name()).c_str());
 
-                dbcontent_man.dbContent("RefTraj").deleteDBContentData(settings_.ds_sac, settings_.ds_sic, settings_.ds_line);
+                dbcontent_man.dbContent("RefTraj").deleteDBContentData(
+                    settings_.ds_sac, settings_.ds_sic, settings_.ds_line);
 
                 while (dbcontent_man.dbContent("RefTraj").isDeleting())
                 {

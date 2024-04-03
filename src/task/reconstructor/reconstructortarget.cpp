@@ -34,6 +34,17 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
 
     const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
+//    if (!timestamp_max_.is_not_a_date_time()) // there is time
+//    {
+//        if (tr.timestamp_ < timestamp_max_)
+//            logerr << "ReconstructorTarget: addTargetReport: old max " << Time::toString(timestamp_max_)
+//                   << " tr ts " << Time::toString(tr.timestamp_);
+
+//        assert (tr.timestamp_ >= timestamp_max_);
+//    }
+
+    bool ts_newer = true;
+
             // update min/max
     if (!target_reports_.size())
     {
@@ -42,6 +53,8 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
     }
     else
     {
+        ts_newer = tr.timestamp_ >= timestamp_max_;
+
         timestamp_min_ = min(timestamp_min_, tr.timestamp_);
         timestamp_max_ = max(timestamp_max_, tr.timestamp_);
     }
@@ -103,6 +116,12 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num)
 
             //    if (!tmp_)
             //        tr.addAssociated(this);
+
+    if (!tracker_)
+        reinitTracker();
+
+    if (ts_newer)
+        addToTracker(tr);
 }
 
 void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums)
@@ -973,6 +992,8 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
 
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
+
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
 
     NullableVector<unsigned int>& ds_id_vec = buffer->get<unsigned int> (
@@ -1029,6 +1050,9 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).name());
 
+    NullableVector<unsigned int>& track_num_vec = buffer->get<unsigned int> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_).name());
+
     unsigned int sac = reconstructor_.ds_sac_;
     unsigned int sic = reconstructor_.ds_sic_;
     unsigned int ds_id = Number::dsIdFrom(sac, sic);
@@ -1064,6 +1088,8 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         lon_vec.set(buffer_cnt, ref.lon);
 
         utn_vec.set(buffer_cnt, utn_);
+
+        track_num_vec.set(buffer_cnt, utn_);
 
                 // set speed
 
@@ -1165,15 +1191,16 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
 void ReconstructorTarget::removeOutdatedTargetReports()
 {
-    auto tmp_target_reports = std::move(target_reports_);
+    auto tmp_tr_timestamps = std::move(tr_timestamps_);
 
+    target_reports_.clear();
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
-    for (auto rec_num : tmp_target_reports)
+    for (auto ts_it : tr_timestamps_)
     {
-        if (reconstructor_.target_reports_.count(rec_num))
-            addTargetReport(rec_num);
+        if (reconstructor_.target_reports_.count(ts_it.second))
+            addTargetReport(ts_it.second);
     }
 
     references_.clear();
@@ -1198,6 +1225,22 @@ void ReconstructorTarget::addToTracker(const dbContent::targetReport::Reconstruc
     reconstructor_.createMeasurement(mm, tr);
 
     tracker_->track(mm);
+}
+
+bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const
+{
+    if (!tracker_)
+        return false;
+
+    if (!tr_timestamps_.size())
+        return false;
+
+    assert (timestamp >= tr_timestamps_.rbegin()->first);
+
+    if (Time::partialSeconds(timestamp - tr_timestamps_.rbegin()->first) > 30.0)
+        return false;
+
+    return true;
 }
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
