@@ -144,7 +144,6 @@ void SimpleReferenceCalculator::generateTargetMeasurements(const dbContent::Reco
                                          ds_targets.first, 
                                          line_targets.first, 
                                          line_targets.second);
-
 }
 
 /**
@@ -155,8 +154,8 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
                                                          unsigned int line_id,
                                                          const TargetReports& target_reports)
 {
-    //if (dbcontent_id != 21 && dbcontent_id != 62)
-    //    return;
+    if (dbcontent_id != 21 && dbcontent_id != 62)
+        return;
 
     std::vector<reconstruction::Measurement> line_measurements;
 
@@ -168,6 +167,12 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
 
         reconstruction::Measurement mm;
         reconstructor_.createMeasurement(mm, tr_info);
+
+        // if (tr_info.track_number_.value() == 69 || target.utn_ == 69)
+        // {
+        //     loginf << "POS (" << mm.lat << "," << mm.lon << ") " << "(" << (mm.vx.has_value() ? mm.vx.value() : 666) << "," << (mm.vy.has_value() ? mm.vy.value() : 666) << ")";
+        //     loginf << "ACC (" << mm.x_stddev.value() << "," << mm.y_stddev.value() << "," << mm.xy_cov.value() << ") " << "(" << mm.vx_stddev.value() << "," << mm.vy_stddev.value() << ")";
+        // }
 
         line_measurements.push_back(mm);
     }

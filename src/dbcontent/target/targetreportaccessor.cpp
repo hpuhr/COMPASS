@@ -20,6 +20,7 @@
 #include "dbcontent.h"
 #include "dbcontentmanager.h"
 #include "compass.h"
+#include "global.h"
 
 #include "targetreportdefs.h"
 
@@ -54,11 +55,14 @@ dbContent::VariableSet TargetReportAccessor::getReadSetFor(const std::string& db
 
     auto add = [ & ] (const Property& p, bool is_meta_var)
     {
-        if (dbcont_man.canGetVariable(dbcontent_name, p))
+        if (is_meta_var)
         {
-            if (is_meta_var)
+            if (dbcont_man.metaCanGetVariable(dbcontent_name, p))
                 read_set.add(dbcont_man.metaGetVariable(dbcontent_name, p));
-            else
+        }
+        else
+        {
+            if (dbcont_man.canGetVariable(dbcontent_name, p))
                 read_set.add(dbcont_man.getVariable(dbcontent_name, p));
         }
     };
@@ -308,8 +312,8 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
         }
 
         return targetReport::PositionAccuracy(meta_pos_std_dev_x_m_vec_->get(index),
-                                                meta_pos_std_dev_y_m_vec_->get(index),
-                                                xy_cov);
+                                              meta_pos_std_dev_y_m_vec_->get(index),
+                                              xy_cov);
     }
 
     //not implemented for dbcontent
@@ -323,23 +327,23 @@ boost::optional<targetReport::BarometricAltitude> TargetReportAccessor::barometr
     if (is_tracker_ && cat062_alt_trusted_vec_ && !cat062_alt_trusted_vec_->isNull(index))
     {
         return targetReport::BarometricAltitude(targetReport::BarometricAltitude::Source::Barometric_CAT062_Trusted,
-                                             cat062_alt_trusted_vec_->get(index),
-                                             meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
-                                             meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
+                                                cat062_alt_trusted_vec_->get(index),
+                                                meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
+                                                meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
     }
     else if (meta_mode_c_vec_ && !meta_mode_c_vec_->isNull(index))
     {
         return targetReport::BarometricAltitude(targetReport::BarometricAltitude::Source::Barometric_ModeC,
-                                             meta_mode_c_vec_->get(index),
-                                             meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
-                                             meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
+                                                meta_mode_c_vec_->get(index),
+                                                meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
+                                                meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
     }
     else if (is_tracker_ && cat062_alt_sec_vec_ && !cat062_alt_sec_vec_->isNull(index))
     {
         return targetReport::BarometricAltitude(targetReport::BarometricAltitude::Source::Barometric_CAT062_Secondary,
-                                             cat062_alt_sec_vec_->get(index),
-                                             meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
-                                             meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
+                                                cat062_alt_sec_vec_->get(index),
+                                                meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
+                                                meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
     }
 
     //not implemented for dbcontent
@@ -356,7 +360,7 @@ boost::optional<targetReport::Velocity> TargetReportAccessor::velocity(unsigned 
          meta_track_angle_vec_->isNull(index))
         return {};
 
-    return targetReport::Velocity(meta_track_angle_vec_->get(index), meta_speed_vec_->get(index));
+    return targetReport::Velocity(meta_track_angle_vec_->get(index), meta_speed_vec_->get(index)  * KNOTS2M_S);
 }
 
 /**
