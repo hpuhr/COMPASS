@@ -396,7 +396,12 @@ void ReconstructorBase::saveReferences()
 
     if (buffer && buffer->size())
     {
-        loginf << "ReconstructorBase: saveReferences: buffer size " << buffer->size();
+        NullableVector<boost::posix_time::ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(
+            DBContent::meta_var_timestamp_.name());
+
+        loginf << "ReconstructorBase: saveReferences: buffer size " << buffer->size()
+               << " ts min " << Time::toString(ts_vec.get(0))
+               << " max " << Time::toString(ts_vec.get(ts_vec.size()-1));
 
         DataSourceManager& src_man = COMPASS::instance().dataSourceManager();
 
