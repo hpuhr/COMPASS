@@ -99,6 +99,8 @@ dbContent::VariableSet ProbIMMReconstructor::getReadSetFor(const std::string& db
         read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
     }
 
+    read_set.add(dbContent::TargetReportAccessor::getReadSetFor(dbcontent_name));
+
     return read_set;
 }
 

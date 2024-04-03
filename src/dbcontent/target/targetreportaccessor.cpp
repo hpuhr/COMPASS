@@ -18,6 +18,8 @@
 #include "targetreportaccessor.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent.h"
+#include "dbcontentmanager.h"
+#include "compass.h"
 
 #include "targetreportdefs.h"
 
@@ -40,6 +42,69 @@ TargetReportAccessor::TargetReportAccessor(const std::shared_ptr<DBContentVariab
 :   BufferAccessor(lookup)
 {
     cacheVectors();
+}
+
+/**
+*/
+dbContent::VariableSet TargetReportAccessor::getReadSetFor(const std::string& dbcontent_name)
+{
+    dbContent::VariableSet read_set;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    auto add = [ & ] (const Property& p, bool is_meta_var)
+    {
+        if (dbcont_man.canGetVariable(dbcontent_name, p))
+        {
+            if (is_meta_var)
+                read_set.add(dbcont_man.metaGetVariable(dbcontent_name, p));
+            else
+                read_set.add(dbcont_man.getVariable(dbcontent_name, p));
+        }
+    };
+
+    add(DBContent::meta_var_timestamp_, true);
+    add(DBContent::meta_var_rec_num_, true);
+    add(DBContent::meta_var_ds_id_, true);
+    add(DBContent::meta_var_line_id_, true);
+
+    add(DBContent::meta_var_acad_, true);
+    add(DBContent::meta_var_acid_, true);
+
+    add(DBContent::meta_var_latitude_, true);
+    add(DBContent::meta_var_longitude_, true);
+    add(DBContent::var_cat062_fl_measured_, false);
+    add(DBContent::var_cat062_baro_alt_, false);
+    add(DBContent::meta_var_ground_bit_, true);
+
+    add(DBContent::var_cat021_mops_version_, false);
+    add(DBContent::var_cat021_nacp_, false);
+    add(DBContent::var_cat021_nucp_nic_, false);
+    add(DBContent::meta_var_x_stddev_, true);
+    add(DBContent::meta_var_y_stddev_, true);
+    add(DBContent::meta_var_xy_cov_, true);
+
+    add(DBContent::meta_var_ground_speed_, true);
+    add(DBContent::meta_var_track_angle_, true);
+
+    add(DBContent::var_cat021_nucv_nacv_, false);
+    add(DBContent::var_cat062_vx_stddev_, false);
+    add(DBContent::var_cat062_vy_stddev_, false);
+
+    add(DBContent::meta_var_m3a_, true);
+    add(DBContent::meta_var_m3a_g_, true);
+    add(DBContent::meta_var_m3a_v_, true);
+    add(DBContent::meta_var_m3a_smoothed_, true);
+
+    add(DBContent::meta_var_mc_, true);
+    add(DBContent::meta_var_mc_g_, true);
+    add(DBContent::meta_var_mc_v_, true);
+
+    add(DBContent::meta_var_track_num_, true);
+    add(DBContent::meta_var_track_begin_, true);
+    add(DBContent::meta_var_track_end_, true);
+
+    return read_set;
 }
 
 /**
@@ -227,7 +292,9 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
             !meta_pos_std_dev_y_m_vec_ ||
              meta_pos_std_dev_x_m_vec_->isNull(index) ||
              meta_pos_std_dev_y_m_vec_->isNull(index))
+        {
             return {};
+        }
 
         double xy_cov = 0.0;
         if (meta_pos_std_dev_xy_corr_coeff_vec_ && !meta_pos_std_dev_xy_corr_coeff_vec_->isNull(index))

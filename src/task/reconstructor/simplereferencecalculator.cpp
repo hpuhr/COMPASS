@@ -155,6 +155,9 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
                                                          unsigned int line_id,
                                                          const TargetReports& target_reports)
 {
+    //if (dbcontent_id != 21 && dbcontent_id != 62)
+    //    return;
+
     std::vector<reconstruction::Measurement> line_measurements;
 
     assert (reconstructor_.acc_estimator_);

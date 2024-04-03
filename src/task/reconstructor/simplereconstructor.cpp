@@ -5,6 +5,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableset.h"
 #include "dbcontent/variable/variable.h"
+#include "dbcontent/target/targetreportaccessor.h"
 
 
 #include "timeconv.h"
@@ -124,6 +125,8 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
         assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
         read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
     }
+
+    read_set.add(dbContent::TargetReportAccessor::getReadSetFor(dbcontent_name));
 
     return read_set;
 }
