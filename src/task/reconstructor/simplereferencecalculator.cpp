@@ -154,8 +154,8 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
                                                          unsigned int line_id,
                                                          const TargetReports& target_reports)
 {
-    if (dbcontent_id != 21 && dbcontent_id != 62)
-        return;
+    // if (dbcontent_id != 21 && dbcontent_id != 62)
+    //     return;
 
     std::vector<reconstruction::Measurement> line_measurements;
 
@@ -381,6 +381,9 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     size_t n_mm     = refs.measurements.size() - refs.start_index.value() + 1;
 
     refs.updates.reserve(n_before + n_mm);
+
+    //loginf << "update_end: " << (refs.updates.empty() ? "-" : Utils::Time::toString(refs.updates.rbegin()->t)) << ", "
+    //       << "mm_begin: " << Utils::Time::toString(refs.measurements[ refs.start_index.value() ].t);
             
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
