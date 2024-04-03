@@ -408,13 +408,6 @@ void ReconstructorBase::saveReferences()
 
             src_man.createConfigDataSource(ds_id);
             assert (src_man.hasConfigDataSource(ds_id));
-
-//            ds_man.createConfigDataSource(ds_id);
-//            ds_man.configDataSource(ds_id).dsType("RefTraj");
-//            ds_man.configDataSource(ds_id).name(ds_name_);
-
-//            assert(ds_man.canAddNewDataSourceFromConfig(ds_id));
-//            //ds_man.addNewDataSource(ds_id);
         }
 
         dbContent::ConfigurationDataSource& src = src_man.configDataSource(ds_id);

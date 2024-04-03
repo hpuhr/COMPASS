@@ -63,7 +63,7 @@ boost::posix_time::ptime getTimeFrom (const nmea::GPSTimestamp& ts)
 */
 GPSTrailImportTask::Settings::Settings()
 :   ds_name           ("GPS Trail")
-,   ds_sac            (0)
+,   ds_sac            (255)
 ,   ds_sic            (0)
 ,   use_tod_offset    (false)
 ,   tod_offset        (0.0f)
@@ -742,12 +742,15 @@ void GPSTrailImportTask::run()
     {
         DataSourceManager& src_man = COMPASS::instance().dataSourceManager();
 
-        if (!src_man.hasDBDataSource(ds_id))
-            src_man.addNewDataSource(ds_id);
+        if (!src_man.hasConfigDataSource(ds_id))
+        {
+            loginf << "GPSTrailImportTask: run: creating data source";
 
-        assert (src_man.hasDBDataSource(ds_id));
+            src_man.createConfigDataSource(ds_id);
+            assert (src_man.hasConfigDataSource(ds_id));
+        }
 
-        dbContent::DBDataSource& src = src_man.dbDataSource(ds_id);
+        dbContent::ConfigurationDataSource& src = src_man.configDataSource(ds_id);
 
         src.name(settings_.ds_name);
         src.dsType(dbcontent_name); // same as dstype
