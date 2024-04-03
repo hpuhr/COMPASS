@@ -974,6 +974,11 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_));
 
+    // track num begin, end
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_begin_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_end_));
+
             // spd
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_));
@@ -991,8 +996,6 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_));
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
-
-    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
 
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
 
@@ -1016,6 +1019,14 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name());
     NullableVector<float>& mc_vec = buffer->get<float> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
+
+    // track num begin, end
+    NullableVector<bool>& track_begin_vec = buffer->get<bool> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_begin_).name());
+    NullableVector<bool>& track_end_vec = buffer->get<bool> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_end_).name());
+    NullableVector<unsigned int>& track_num_vec = buffer->get<unsigned int> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_).name());
 
             // speed, track angle
     NullableVector<double>& vx_vec = buffer->get<double> (
@@ -1050,9 +1061,6 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).name());
 
-    NullableVector<unsigned int>& track_num_vec = buffer->get<unsigned int> (
-        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_).name());
-
     unsigned int sac = reconstructor_.ds_sac_;
     unsigned int sic = reconstructor_.ds_sic_;
     unsigned int ds_id = Number::dsIdFrom(sac, sic);
@@ -1064,10 +1072,11 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     unsigned int buffer_cnt = 0;
 
     boost::posix_time::time_duration d_max = Time::partialSeconds(10);
+    boost::posix_time::time_duration track_end_time = Time::partialSeconds(30);
 
     for (size_t i = 0; i < references_.size(); ++i)
     {
-        const reconstruction::Reference& ref = references_[ i ];
+        const reconstruction::Reference& ref = references_.at(i);
 
 //        loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref ts " << Time::toString(ref.t)
 //               << " wbt " << Time::toString(reconstructor_.write_before_time_) <<
@@ -1090,6 +1099,18 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         utn_vec.set(buffer_cnt, utn_);
 
         track_num_vec.set(buffer_cnt, utn_);
+
+        // track end
+        if (i > 0 && ref.t - references_.at(i-1).t > track_end_time) // have time before and dt > track end time
+        {
+            track_end_vec.set(buffer_cnt-1, true); // set at previous update
+            track_begin_ = true;
+        }
+
+        track_end_vec.set(buffer_cnt, false);
+        track_begin_vec.set(buffer_cnt, track_begin_);
+
+        track_begin_ = false;
 
                 // set speed
 
@@ -1179,6 +1200,15 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         }
 
         ++buffer_cnt;
+    }
+
+    // check last update for track end
+    if (buffer->size())
+    {
+        unsigned int last_index = buffer_cnt - 1;
+
+        if (reconstructor_.next_slice_begin_ - ts_vec.get(last_index) > track_end_time)
+            track_end_vec.set(last_index, true);
     }
 
     counts_[dbcontent_id] += buffer->size();
