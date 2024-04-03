@@ -22,6 +22,7 @@
 #include "dbcontent/dbcontent.h"
 #include "logger.h"
 #include "timeconv.h"
+#include "datasourcemanager.h"
 
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
@@ -396,6 +397,30 @@ void ReconstructorBase::saveReferences()
     if (buffer && buffer->size())
     {
         loginf << "ReconstructorBase: saveReferences: buffer size " << buffer->size();
+
+        DataSourceManager& src_man = COMPASS::instance().dataSourceManager();
+
+        unsigned int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+
+        if (!src_man.hasConfigDataSource(ds_id))
+        {
+            loginf << "ReconstructorBase: saveReferences: creating data source";
+
+            src_man.createConfigDataSource(ds_id);
+            assert (src_man.hasConfigDataSource(ds_id));
+
+//            ds_man.createConfigDataSource(ds_id);
+//            ds_man.configDataSource(ds_id).dsType("RefTraj");
+//            ds_man.configDataSource(ds_id).name(ds_name_);
+
+//            assert(ds_man.canAddNewDataSourceFromConfig(ds_id));
+//            //ds_man.addNewDataSource(ds_id);
+        }
+
+        dbContent::ConfigurationDataSource& src = src_man.configDataSource(ds_id);
+
+        src.name(ds_name_);
+        src.dsType("RefTraj"); // same as dstype
 
         cont_man.insertData({{buffer->dbContentName(), buffer}});
     }
