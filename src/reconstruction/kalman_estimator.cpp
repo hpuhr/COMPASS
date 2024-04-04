@@ -303,7 +303,7 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
 
     if (tstep < settings_.min_dt)
     {
-        loginf << "KalmanEstimator: kalmanStep: step = " << kalman_interface_->timestep(mm) << ", dt = " << settings_.min_dt;
+        logwrn << "KalmanEstimator: kalmanStep: step " << kalman_interface_->timestep(mm) << " too small (<" << settings_.min_dt << "), skipping...";
         return KalmanEstimator::StepResult::FailStepTooSmall;
     }
 
@@ -316,15 +316,29 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
     else
     {
         //normal step
-        bool ok = step(update, mm);
+        bool kalman_step_ok = step(update, mm);
 
-        //@TODO: we assert for the moment to see when and how often this happens
-        assert(ok);
-
-        if (!ok)
+        //handle failed step?
+        if (!kalman_step_ok)
         {
-            loginf << "KalmanEstimator: kalmanStep: step failed";
-            return KalmanEstimator::StepResult::FailKalmanError;
+            logwrn << "KalmanEstimator: kalmanStep: step failed";
+
+            if (settings_.step_fail_strategy == Settings::StepFailStrategy::Reinit)
+            {
+                //reinit
+                reinit(update, mm);
+            }
+            else if (settings_.step_fail_strategy == Settings::StepFailStrategy::ReturnInvalid)
+            {
+                //return error
+                return KalmanEstimator::StepResult::FailKalmanError;
+            }
+            else
+            {
+                //assert
+                assert(kalman_step_ok);
+                return KalmanEstimator::StepResult::FailKalmanError;
+            }
         }
     }
 
@@ -344,13 +358,14 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
     assert(isInit());
 
     kalman::KalmanState state;
-    bool ok = kalman_interface_->kalmanPrediction(state.x, state.P, dt, settings_.Q_var);
+    bool kalman_prediction_ok = kalman_interface_->kalmanPrediction(state.x, state.P, dt, settings_.Q_var);
 
-    //@TODO: we assert for the moment to see when and how often this happens
-    assert(ok);
-
-    if (!ok)
+    if (!kalman_prediction_ok)
+    {
+        if (settings_.step_fail_strategy == Settings::StepFailStrategy::Assert)
+            assert(kalman_prediction_ok);
         return false;
+    }
 
     kalman_interface_->storeState(mm, state);
     proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
@@ -366,13 +381,14 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
     assert(isInit());
 
     kalman::KalmanState state;
-    bool ok = kalman_interface_->kalmanPrediction(state.x, state.P, ts, settings_.Q_var);
+    bool kalman_prediction_ok = kalman_interface_->kalmanPrediction(state.x, state.P, ts, settings_.Q_var);
     
-    //@TODO: we assert for the moment to see when and how often this happens
-    assert(ok);
-
-    if (!ok)
+    if (!kalman_prediction_ok)
+    {
+        if (settings_.step_fail_strategy == Settings::StepFailStrategy::Assert)
+            assert(kalman_prediction_ok);
         return false;
+    }
 
     kalman_interface_->storeState(mm, state);
     proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);

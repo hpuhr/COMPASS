@@ -65,10 +65,28 @@ void SimpleReferenceCalculator::prepareForNextSlice()
                                                                                            update.t >= ThresJoin; });
             ref.second.updates_smooth.erase(it_s, ref.second.updates_smooth.end());
         }
+
+        ++slice_idx_;
+    }
+    else
+    {
+        slice_idx_ = 0;
     }
 
     //reset data structs
     resetDataStructs();
+}
+
+/**
+*/
+void SimpleReferenceCalculator::reset()
+{
+    loginf << "SimpleReferenceCalculator: reset";
+
+    references_.clear();
+    interp_options_.clear();
+
+    slice_idx_ = 0;
 }
 
 /**
@@ -109,8 +127,9 @@ bool SimpleReferenceCalculator::computeReferences()
 
     resetDataStructs();
 
-    //if (!reconstructor_.first_slice_)
-    //    return true;
+    //skip slice? (debug)
+    if (settings_.max_slice_index >= 0 && slice_idx_ > settings_.max_slice_index)
+        return true;
 
     generateMeasurements();
     reconstructMeasurements();
@@ -119,13 +138,6 @@ bool SimpleReferenceCalculator::computeReferences()
     return true;
 }
 
-void SimpleReferenceCalculator::reset()
-{
-    loginf << "SimpleReferenceCalculator: reset";
-
-    references_.clear();
-    interp_options_.clear();
-}
 
 /**
 */
@@ -157,8 +169,9 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
                                                          unsigned int line_id,
                                                          const TargetReports& target_reports)
 {
-    //if (dbcontent_id != 21 && dbcontent_id != 62)
-    //    return;
+    //compatibility mode: only use systracks and adsb (debug)
+    if (settings_.compat_mode && dbcontent_id != 21 && dbcontent_id != 62)
+        return;
 
     std::vector<reconstruction::Measurement> line_measurements;
 
@@ -399,10 +412,9 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
     {
-        auto& mm0 = refs.measurements[ refs.start_index.value() ];
-
         if (settings_.activeVerbosity() > 0) 
         {
+            auto& mm0 = refs.measurements[ refs.start_index.value() ];
             loginf << "    initializing to update t=" << Utils::Time::toString(refs.init_update.value().t) << ", mm0 t=" << Utils::Time::toString(mm0.t);
         }
 
@@ -413,7 +425,6 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     }
     else
     {
-        //reinit kalman with first measurement
         auto& mm0 = refs.measurements[ refs.start_index.value() ];
 
         if (settings_.activeVerbosity() > 0) 
@@ -421,8 +432,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
             loginf << "    initializing to mm t=" << Utils::Time::toString(mm0.t);
         }
 
+        //reinit kalman with first measurement
         estimator.kalmanInit(update, mm0);
-
         assert(update.valid);
 
         refs.updates.push_back(update);
@@ -435,9 +446,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     {
         estimator.kalmanStep(update, refs.measurements[ i ]);
 
-        assert(update.valid);
-
-        refs.updates.push_back(update);
+        if (update.valid)
+            refs.updates.push_back(update);
     }
 
     if (settings_.activeVerbosity() > 0)
