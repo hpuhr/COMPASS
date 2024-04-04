@@ -42,7 +42,8 @@ public:
             ReinitCheckDistance = 1 << 1  //checks for reinit using a metric distance-based threshold
         };
 
-        double Q_var = 30.0; // variance of kalman process
+        double Q_var       = 900.0;   // variance of kalman process (30*30)
+        double R_var_undef = HighVar; // high variance for undefined values (1000*1000)
 
         size_t min_chain_size = 2;       // minimum number of consecutive kalman updates without reinit            (0 = do not check)
         double max_distance   = 50000.0; // maximum allowed distance of consecutive measurements in meters         (0 = do not check)
@@ -55,7 +56,7 @@ public:
                                                  // before changing the projection center
 
         double          resample_dt          = 2.0;                       // resampling step size in seconds
-        double          resample_Q_var       = 10.0;                      // resampling process noise
+        double          resample_Q_var       = 100.0;                     // resampling process noise (10*10)
         StateInterpMode resample_interp_mode = StateInterpMode::BlendVar; // kalman state interpolation mode used during resampling
 
         bool track_velocities    = true;
@@ -115,6 +116,9 @@ public:
                                                             bool track_accel = true);
     Settings& settings() { return settings_; }
 
+    static const double HighStdDev;
+    static const double HighVar;
+
 private:
     void initMeasurement(kalman::KalmanUpdate& update,
                          Measurement& mm);
@@ -140,6 +144,8 @@ private:
     void storeUpdate(Reference& ref, 
                      const kalman::KalmanUpdate& update,
                      KalmanProjectionHandler& phandler) const;
+
+    reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
 
     std::unique_ptr<KalmanInterface>         kalman_interface_;
     std::unique_ptr<KalmanProjectionHandler> proj_handler_;

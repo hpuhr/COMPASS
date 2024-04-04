@@ -109,6 +109,9 @@ bool SimpleReferenceCalculator::computeReferences()
 
     resetDataStructs();
 
+    //if (!reconstructor_.first_slice_)
+    //    return true;
+
     generateMeasurements();
     reconstructMeasurements();
     updateReferences();
@@ -154,8 +157,8 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
                                                          unsigned int line_id,
                                                          const TargetReports& target_reports)
 {
-    // if (dbcontent_id != 21 && dbcontent_id != 62)
-    //     return;
+    //if (dbcontent_id != 21 && dbcontent_id != 62)
+    //    return;
 
     std::vector<reconstruction::Measurement> line_measurements;
 

@@ -34,6 +34,9 @@
 namespace reconstruction
 {
 
+const double KalmanEstimator::HighStdDev = 1000.0;
+const double KalmanEstimator::HighVar    = KalmanEstimator::HighStdDev * KalmanEstimator::HighStdDev;
+
 /**
 */
 KalmanEstimator::KalmanEstimator()
@@ -221,6 +224,21 @@ KalmanEstimator::ReinitState KalmanEstimator::needsReinit(const Measurement& mm)
 }
 
 /**
+*/
+reconstruction::Uncertainty KalmanEstimator::defaultUncert(const Measurement& mm) const
+{
+    reconstruction::Uncertainty uncert = settings_.default_uncert;
+
+    //set to high uncertainty if value is missing (pos is always available)
+    if (!mm.hasVelocity())
+        uncert.speed_var = settings_.R_var_undef;
+    if (!mm.hasAcceleration())
+        uncert.acc_var = settings_.R_var_undef;
+
+    return uncert;
+}
+
+/**
  * Reinitializes the kalman filter and marks the update.
 */
 void KalmanEstimator::reinit(kalman::KalmanUpdate& update,
@@ -230,7 +248,7 @@ void KalmanEstimator::reinit(kalman::KalmanUpdate& update,
         loginf << "KalmanEstimator: reinit: Reinitializing kalman filter at t = " << mm.t;
 
     //reinit kalman state
-    kalman_interface_->kalmanInit(update.state, mm, settings_.default_uncert, settings_.Q_var);
+    kalman_interface_->kalmanInit(update.state, mm, defaultUncert(mm), settings_.Q_var);
 
     update.reinit = true;
 }
@@ -241,7 +259,7 @@ void KalmanEstimator::reinit(kalman::KalmanUpdate& update,
 bool KalmanEstimator::step(kalman::KalmanUpdate& update,
                            const Measurement& mm)
 {
-    if (!kalman_interface_->kalmanStep(update.state, mm, settings_.default_uncert, settings_.Q_var))
+    if (!kalman_interface_->kalmanStep(update.state, mm, defaultUncert(mm), settings_.Q_var))
     {
         logwrn << "KalmanEstimator: step: Kalman step failed @ t=" << mm.t;
         return false;
