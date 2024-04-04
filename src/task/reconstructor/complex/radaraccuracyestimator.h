@@ -8,6 +8,8 @@ class RadarAccuracyEstimator : public DataSourceAccuracyEstimator
     RadarAccuracyEstimator(const dbContent::DBDataSource& source);
     virtual ~RadarAccuracyEstimator() {};
 
+    virtual void validate (dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor) override;
+
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
     virtual dbContent::targetReport::VelocityAccuracy velocityAccuracy (

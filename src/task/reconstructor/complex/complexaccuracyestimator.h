@@ -39,6 +39,8 @@ class ComplexAccuracyEstimator : public QObject, public AccuracyEstimatorBase
 
     virtual void init() override;
 
+    virtual void validate (dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor) override;
+
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
     virtual dbContent::targetReport::VelocityAccuracy velocityAccuracy (

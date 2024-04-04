@@ -6,6 +6,12 @@ MLATAccuracyEstimator::MLATAccuracyEstimator(const dbContent::DBDataSource& sour
 
 }
 
+void MLATAccuracyEstimator::validate (
+    dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor)
+{
+
+}
+
 dbContent::targetReport::PositionAccuracy MLATAccuracyEstimator::positionAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {

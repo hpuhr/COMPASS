@@ -6,6 +6,12 @@ TrackerAccuracyEstimator::TrackerAccuracyEstimator(const dbContent::DBDataSource
 
 }
 
+void TrackerAccuracyEstimator::validate (
+    dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor)
+{
+
+}
+
 dbContent::targetReport::PositionAccuracy TrackerAccuracyEstimator::positionAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {

@@ -1,8 +1,19 @@
 #include "adsbaccuracyestimator.h"
+#include "reconstructorbase.h"
+#include "targetreportaccessor.h"
 
 ADSBAccuracyEstimator::ADSBAccuracyEstimator(const dbContent::DBDataSource& source)
     : DataSourceAccuracyEstimator(source)
 {
+}
+
+void ADSBAccuracyEstimator::validate (
+    dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor)
+{
+    boost::optional<unsigned char> mops_version = reconstructor.accessor(tr).mopsVersion(tr.buffer_index_);
+
+    if (mops_version && *mops_version == 0)
+        tr.do_not_use_position_ = true;
 }
 
 dbContent::targetReport::PositionAccuracy ADSBAccuracyEstimator::positionAccuracy (

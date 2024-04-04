@@ -16,7 +16,6 @@ class ProbabilisticAssociator
   private:
     ProbIMMReconstructor& reconstructor_;
 
-
     std::map<unsigned int, unsigned int> getTALookupMap (
         const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
 

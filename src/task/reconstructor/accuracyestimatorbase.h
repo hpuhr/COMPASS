@@ -2,6 +2,8 @@
 
 #include "targetreportdefs.h"
 
+class ReconstructorBase;
+
 class AccuracyEstimatorBase
 {
   public:
@@ -9,6 +11,9 @@ class AccuracyEstimatorBase
     virtual ~AccuracyEstimatorBase() {};
 
     virtual void init() {};
+
+    virtual void validate (dbContent::targetReport::ReconstructorInfo& tr,
+                          ReconstructorBase& reconstructor) = 0; // can set do not use position flag
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) = 0;

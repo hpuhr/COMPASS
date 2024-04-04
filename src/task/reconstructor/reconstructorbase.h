@@ -71,6 +71,8 @@ class ReconstructorBase : public Configurable
 
     void createMeasurement(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& ri);
 
+    const dbContent::TargetReportAccessor& accessor(dbContent::targetReport::ReconstructorInfo& tr) const;
+
     // output
     std::string ds_name_ {"CalcRef"};
     unsigned int ds_sac_ {255};
@@ -81,6 +83,8 @@ class ReconstructorBase : public Configurable
     friend class dbContent::ReconstructorTarget;
     friend class SimpleReferenceCalculator;
     friend class ProbabilisticAssociator;
+
+    std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
 
     std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
 
@@ -117,6 +121,7 @@ class ReconstructorBase : public Configurable
     void saveAssociations(std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     void saveReferences();
     void saveTargets();
+
 
   private:
     ReferenceCalculatorSettings ref_calc_settings_;

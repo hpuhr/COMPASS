@@ -188,15 +188,19 @@ void ReconstructorBase::createTargetReports()
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
+    accessors_.clear();
+
     unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     for (auto& buf_it : *accessor_)
     {
-        dbContent::TargetReportAccessor tgt_acc = accessor_->targetReportAccessor(buf_it.first);
-        unsigned int buffer_size = tgt_acc.size();
-
         assert (dbcont_man.existsDBContent(buf_it.first));
         unsigned int dbcont_id = dbcont_man.dbContent(buf_it.first).id();
+
+        accessors_.emplace(dbcont_id, accessor_->targetReportAccessor(buf_it.first));
+
+        dbContent::TargetReportAccessor& tgt_acc = accessors_.at(dbcont_id);
+        unsigned int buffer_size = tgt_acc.size();
 
         for (unsigned int cnt=0; cnt < buffer_size; cnt++)
         {
@@ -210,6 +214,7 @@ void ReconstructorBase::createTargetReports()
                 // base info
                 info.buffer_index_ = cnt;
                 info.record_num_ = record_num;
+                info.dbcont_id_ = dbcont_id;
                 info.ds_id_ = tgt_acc.dsID(cnt);
                 info.line_id_ = tgt_acc.lineID(cnt);
                 info.timestamp_ = ts;
@@ -471,6 +476,12 @@ void ReconstructorBase::saveTargets()
     cont_man.saveTargets();
 
     loginf << "ReconstructorBase: saveTargets: done";
+}
+
+const dbContent::TargetReportAccessor& ReconstructorBase::accessor(dbContent::targetReport::ReconstructorInfo& tr) const
+{
+    assert (accessors_.count(tr.dbcont_id_));
+    return accessors_.at(tr.dbcont_id_);
 }
 
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 

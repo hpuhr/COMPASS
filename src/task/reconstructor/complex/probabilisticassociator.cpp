@@ -2,11 +2,13 @@
 #include "probimmreconstructor.h"
 #include "logger.h"
 #include "global.h"
+#include "stringconv.h"
 
 #include <osgEarth/GeoMath>
 
 using namespace std;
 using namespace dbContent;
+using namespace Utils;
 
 ProbabilisticAssociator::ProbabilisticAssociator(ProbIMMReconstructor& reconstructor)
     : reconstructor_(reconstructor)
@@ -27,6 +29,8 @@ void ProbabilisticAssociator::associateNewData()
     reconstruction::Measurement mm;
     bool ret;
     double distance_m;
+    dbContent::targetReport::PositionAccuracy pos_acc;
+    double max_std_dev;
 
     for (auto& ts_it : reconstructor_.tr_timestamps_)
     {
@@ -68,17 +72,28 @@ void ProbabilisticAssociator::associateNewData()
             // add associated target reports
             assert (reconstructor_.targets_.count(utn));
 
+            reconstructor_.acc_estimator_->validate(tr, reconstructor_);
+
             // only if not newly created
-            if (reconstructor_.targets_.at(utn).canPredict(tr.timestamp_))
+            if (!tr.do_not_use_position_ && reconstructor_.targets_.at(utn).canPredict(tr.timestamp_))
             {
                 ret = reconstructor_.targets_.at(utn).predict(mm, tr);
                 assert (ret);
 
-//                distance_m   = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
-//                                                         tr.position_->longitude_ * DEG2RAD,
-//                                                         mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+                distance_m   = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
+                                                         tr.position_->longitude_ * DEG2RAD,
+                                                         mm.lat * DEG2RAD, mm.lon * DEG2RAD);
 
-                //loginf << distance_m;
+                max_std_dev = 0;
+
+                pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
+
+                max_std_dev += max (pos_acc.x_stddev_, pos_acc.y_stddev_);
+                assert (mm.hasStdDevPosition());
+                max_std_dev += max (*mm.x_stddev, *mm.y_stddev);
+
+                loginf << " dist " << distance_m << " mahala "
+                       << String::doubleToStringPrecision(distance_m / max_std_dev, 2);
             }
 
             reconstructor_.targets_.at(utn).addTargetReport(rec_num);

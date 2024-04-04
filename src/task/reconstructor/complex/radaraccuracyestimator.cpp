@@ -57,6 +57,12 @@ RadarAccuracyEstimator::RadarAccuracyEstimator(const dbContent::DBDataSource& ds
     }
 }
 
+void RadarAccuracyEstimator::validate (
+    dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor)
+{
+
+}
+
 dbContent::targetReport::PositionAccuracy RadarAccuracyEstimator::positionAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {

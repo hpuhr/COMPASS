@@ -65,6 +65,15 @@ void ComplexAccuracyEstimator::init()
     initialized_ = true;
 }
 
+void ComplexAccuracyEstimator::validate (
+    dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor)
+{
+    assert (initialized_);
+    assert (ds_acc_estimators_.count(tr.ds_id_));
+    ds_acc_estimators_.at(tr.ds_id_)->validate(tr, reconstructor);
+}
+
+
 void ComplexAccuracyEstimator::updateDataSourcesInfoSlot()
 {
     loginf << "ComplexAccuracyEstimator: updateDataSourcesInfoSlot";

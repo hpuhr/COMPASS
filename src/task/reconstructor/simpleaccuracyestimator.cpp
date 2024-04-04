@@ -1,4 +1,6 @@
 #include "simpleaccuracyestimator.h"
+#include "reconstructorbase.h"
+#include "targetreportaccessor.h"
 #include "number.h"
 
 using namespace Utils;
@@ -33,6 +35,16 @@ const dbContent::targetReport::AccelerationAccuracy SimpleAccuracyEstimator::Acc
 
 SimpleAccuracyEstimator::SimpleAccuracyEstimator()
 {
+
+}
+
+void SimpleAccuracyEstimator::validate (
+    dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor)
+{
+    boost::optional<unsigned char> mops_version = reconstructor.accessor(tr).mopsVersion(tr.buffer_index_);
+
+    if (mops_version && *mops_version == 0)
+        tr.do_not_use_position_ = true;
 
 }
 

@@ -28,12 +28,10 @@ namespace dbContent
 {
 
 class DBContentAccessor;
+class TargetReportAccessor;
 
 namespace targetReport
 {
-
-
-class TargetReportAccessor;
 
 /**
 */
@@ -182,6 +180,7 @@ struct BaseInfo
 {
     unsigned int buffer_index_ {0};
     unsigned long record_num_ {0};
+    unsigned int dbcont_id_ {0};
     unsigned int ds_id_ {0};
     unsigned int line_id_ {0};
     boost::posix_time::ptime timestamp_;
@@ -213,8 +212,6 @@ struct ReconstructorInfo : public BaseInfo
 
     boost::optional<double> track_angle_;
     boost::optional<bool> ground_bit_;
-
-    TargetReportAccessor* accessor_ {nullptr};
 
     virtual std::string asStr() const;
 
