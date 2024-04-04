@@ -33,14 +33,16 @@ struct ReferenceCalculatorSettings
         settings.max_dt         = max_dt;
         settings.max_distance   = max_distance;
 
-        settings.Q_var     = Q_std * Q_std;
-        settings.verbosity = activeVerbosity() >= 2 ? activeVerbosity() - 1 : 0;
-
+        settings.Q_var       = Q_std       * Q_std;
+        settings.R_var_undef = R_std_undef * R_std_undef;
+        
         settings.resample_dt          = resample_dt;
         settings.resample_Q_var       = resample_Q_std * resample_Q_std;
         settings.resample_interp_mode = resample_blend_mode;
 
         settings.max_proj_distance_cart = max_proj_distance_cart;
+
+        settings.verbosity = activeVerbosity() >= 2 ? activeVerbosity() - 1 : 0;
 
         return settings;
     }
@@ -55,7 +57,8 @@ struct ReferenceCalculatorSettings
     kalman::KalmanType kalman_type = kalman::KalmanType::UMKalman2D;
 
     //default noise
-    double Q_std = 30.0;
+    double Q_std       = 30.0;
+    double R_std_undef = reconstruction::KalmanEstimator::HighStdDev;
 
     //reinit related
     int    min_chain_size = 2;
