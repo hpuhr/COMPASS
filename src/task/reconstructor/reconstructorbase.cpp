@@ -209,6 +209,9 @@ void ReconstructorBase::createTargetReports()
 
                     //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
 
+            if (!tgt_acc.position(cnt))
+                continue;
+
             if (ts >= current_slice_begin_) // insert
             {
                 // base info

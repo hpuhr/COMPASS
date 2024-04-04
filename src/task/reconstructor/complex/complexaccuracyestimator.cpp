@@ -130,3 +130,25 @@ dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::accelera
     assert (ds_acc_estimators_.count(tr.ds_id_));
     return ds_acc_estimators_.at(tr.ds_id_)->accelerationAccuracy(tr);
 }
+
+void ComplexAccuracyEstimator::addAssociatedDistance(
+    dbContent::targetReport::ReconstructorInfo& tr, const AssociatedDistance& dist)
+{
+    assert (initialized_);
+    assert (ds_acc_estimators_.count(tr.ds_id_));
+    ds_acc_estimators_.at(tr.ds_id_)->addAssociatedDistance(tr, dist);
+}
+
+
+void ComplexAccuracyEstimator::analyzeAssociatedDistances() const
+{
+    for (auto& acc_it : ds_acc_estimators_)
+        acc_it.second->analyzeAssociatedDistances();
+}
+
+void ComplexAccuracyEstimator::clearAssociatedDistances()
+{
+    for (auto& acc_it : ds_acc_estimators_)
+        acc_it.second->clearAssociatedDistances();
+}
+

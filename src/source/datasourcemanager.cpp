@@ -26,11 +26,11 @@ DataSourceManager::Config::Config()
     : load_widget_show_counts_ {true}
       , load_widget_show_lines_{true}
       , ds_font_size_ {10}
-      , primary_azimuth_stddev_               (0.15)
+      , primary_azimuth_stddev_               (0.05)
       ,   primary_range_stddev_                 (120.0)
-      ,   secondary_azimuth_stddev_             (0.08)
+      ,   secondary_azimuth_stddev_             (0.025)
       ,   secondary_range_stddev_               (70.0)
-      ,   mode_s_azimuth_stddev_                (0.06)
+      ,   mode_s_azimuth_stddev_                (0.02) // 70m in 200km, 0.02 * 2 * pi * 200000 /360
       ,   mode_s_range_stddev_                  (50)
       //,   use_radar_min_stddev_                 (false)
 {

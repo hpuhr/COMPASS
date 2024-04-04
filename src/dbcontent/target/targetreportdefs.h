@@ -86,8 +86,9 @@ class BarometricAltitude
 
 /**
 */
-struct PositionAccuracy
+class PositionAccuracy
 {
+  public:
     PositionAccuracy() = default;
     PositionAccuracy(double x_stddev,
                        double y_stddev, 
@@ -99,6 +100,8 @@ struct PositionAccuracy
     double x_stddev_ {0}; // m
     double y_stddev_ {0}; // m
     double xy_cov_   {0}; // m^2
+
+    double maxStdDev() { return std::max(x_stddev_, y_stddev_); }
 };
 
 /**

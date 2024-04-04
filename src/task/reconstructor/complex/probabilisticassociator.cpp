@@ -4,6 +4,8 @@
 #include "global.h"
 #include "stringconv.h"
 
+#include <Eigen/Dense>
+
 #include <osgEarth/GeoMath>
 
 using namespace std;
@@ -28,9 +30,15 @@ void ProbabilisticAssociator::associateNewData()
 
     reconstruction::Measurement mm;
     bool ret;
-    double distance_m;
-    dbContent::targetReport::PositionAccuracy pos_acc;
-    double max_std_dev;
+    double distance_m, bearing_rad;
+    dbContent::targetReport::PositionAccuracy tr_pos_acc;
+    dbContent::targetReport::PositionAccuracy mm_pos_acc;
+    EllipseDef acc_ell;
+    double est_std_dev;
+    double mahalanobis_dist;
+    bool not_use_tr_pos;
+
+    AccuracyEstimatorBase::AssociatedDistance dist;
 
     for (auto& ts_it : reconstructor_.tr_timestamps_)
     {
@@ -80,26 +88,50 @@ void ProbabilisticAssociator::associateNewData()
                 ret = reconstructor_.targets_.at(utn).predict(mm, tr);
                 assert (ret);
 
-                distance_m   = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
+                distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
                                                          tr.position_->longitude_ * DEG2RAD,
                                                          mm.lat * DEG2RAD, mm.lon * DEG2RAD);
 
-                max_std_dev = 0;
+                bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
+                                                         tr.position_->longitude_ * DEG2RAD,
+                                                         mm.lat * DEG2RAD, mm.lon * DEG2RAD);
 
-                pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
+                tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
+                estimateEllipse(tr_pos_acc, acc_ell);
+                est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
-                max_std_dev += max (pos_acc.x_stddev_, pos_acc.y_stddev_);
                 assert (mm.hasStdDevPosition());
-                max_std_dev += max (*mm.x_stddev, *mm.y_stddev);
+                mm_pos_acc = mm.positionAccuracy();
+                estimateEllipse(mm_pos_acc, acc_ell);
+                est_std_dev += estimateAccuracyAt(acc_ell, bearing_rad);
 
-                loginf << " dist " << distance_m << " mahala "
-                       << String::doubleToStringPrecision(distance_m / max_std_dev, 2);
+                mahalanobis_dist = distance_m / est_std_dev;
+
+                dist.latitude_deg_ = tr.position_->latitude_;
+                dist.longitude_deg_ = tr.position_->longitude_;
+                dist.est_std_dev_ = est_std_dev;
+                dist.distance_m_ = distance_m;
+                dist.mahalanobis_distance_ = mahalanobis_dist;
+
+                reconstructor_.acc_estimator_->addAssociatedDistance(tr, dist);
+
+//                not_use_tr_pos = distance_m > 50 && mahalanobis_dist > 10;
+
+//                loginf << " dist " << String::doubleToStringPrecision(distance_m, 2)
+//                       << " est_std_dev " << String::doubleToStringPrecision(est_std_dev, 2)
+//                       << " mahala " << String::doubleToStringPrecision(mahalanobis_dist, 2)
+//                       << " use pos " << !not_use_tr_pos;
+
+//                tr.do_not_use_position_ = not_use_tr_pos;
             }
 
             reconstructor_.targets_.at(utn).addTargetReport(rec_num);
             continue; // done
         }
     }
+
+    reconstructor_.acc_estimator_->analyzeAssociatedDistances();
+    reconstructor_.acc_estimator_->clearAssociatedDistances();
 }
 
 void ProbabilisticAssociator::reset()
@@ -138,5 +170,31 @@ int ProbabilisticAssociator::findUTNForTargetReport (
     std::map<unsigned int, unsigned int> ta_2_utn,
     const std::map<unsigned int, dbContent::ReconstructorTarget>& targets)
 {
+    return -1;
+}
 
+
+void ProbabilisticAssociator::estimateEllipse(dbContent::targetReport::PositionAccuracy& acc, EllipseDef& def) const
+{
+    Eigen::Matrix2f cov_mat;
+    cov_mat << std::pow(acc.x_stddev_, 2), acc.xy_cov_, acc.xy_cov_, std::pow(acc.y_stddev_, 2);
+
+    Eigen::JacobiSVD<Eigen::MatrixXf> svd(cov_mat, Eigen::ComputeThinU); //  | ComputeThinV
+
+    auto singular_values = svd.singularValues();
+    auto U = svd.matrixU();
+
+    def.theta_rad = std::atan2(U(1,0), U(0, 0));
+    def.rad1      = std::sqrt(singular_values(0));
+    def.rad2      = std::sqrt(singular_values(1));
+}
+
+double ProbabilisticAssociator::estimateAccuracyAt (EllipseDef& def, double bearing_rad) const
+{
+    double x_e, y_e;
+
+    x_e = def.rad1 * std::cos(def.theta_rad) * std::cos(bearing_rad) - def.rad2 * std::sin(def.theta_rad) * std::sin(bearing_rad);
+    y_e = def.rad1 * std::sin(def.theta_rad) * std::cos(bearing_rad) + def.rad2 * std::cos(def.theta_rad) * std::sin(bearing_rad);
+
+    return std::sqrt(std::pow(x_e, 2) + std::pow(y_e, 2));
 }

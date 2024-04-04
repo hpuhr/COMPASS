@@ -18,6 +18,7 @@
 #pragma once
 
 #include "kalman_defs.h"
+#include "targetreportdefs.h"
 
 #include <ostream>
 
@@ -124,6 +125,18 @@ struct Measurement
     {
         return (x_stddev.has_value() && y_stddev.has_value());
     }
+
+    dbContent::targetReport::PositionAccuracy positionAccuracy() const
+    {
+        assert (hasStdDevPosition());
+
+        if (xy_cov.has_value())
+            return dbContent::targetReport::PositionAccuracy(*x_stddev, *y_stddev, *xy_cov);
+        else
+            return dbContent::targetReport::PositionAccuracy(*x_stddev, *y_stddev, 0);
+    }
+
+
     bool hasStdDevVelocity() const
     {
         return (vx_stddev.has_value() && vy_stddev.has_value());

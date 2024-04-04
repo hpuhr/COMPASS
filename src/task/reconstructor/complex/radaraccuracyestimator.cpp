@@ -2,6 +2,7 @@
 #include "compass.h"
 #include "datasourcemanager.h"
 #include "global.h"
+#include "logger.h"
 
 #include <osgEarth/GeoMath>
 
@@ -117,6 +118,13 @@ dbContent::targetReport::PositionAccuracy RadarAccuracyEstimator::positionAccura
     x_stddev = sqrt(cov_cart(0, 0));
     y_stddev = sqrt(cov_cart(1, 1));
     xy_cov   = cov_cart(0, 1);
+
+    if (x_stddev > AccuracyEstimatorBase::PosAccStdDevMax
+        || y_stddev > AccuracyEstimatorBase::PosAccStdDevMax)
+    {
+        //loginf << "UGA distance_m " << distance_m << " x_stddev " << x_stddev << " y_stddev " << y_stddev;
+        return PosAccStdMax;
+    }
 
     return dbContent::targetReport::PositionAccuracy (x_stddev, y_stddev, xy_cov);
 }

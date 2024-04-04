@@ -48,6 +48,11 @@ class ComplexAccuracyEstimator : public QObject, public AccuracyEstimatorBase
     virtual dbContent::targetReport::AccelerationAccuracy accelerationAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
 
+    virtual void addAssociatedDistance(
+        dbContent::targetReport::ReconstructorInfo& tr, const AssociatedDistance& dist) override;
+    virtual void analyzeAssociatedDistances() const override;
+    virtual void clearAssociatedDistances() override;
+
   private:
     //ComplexReconstructor& reconstructor_;
 

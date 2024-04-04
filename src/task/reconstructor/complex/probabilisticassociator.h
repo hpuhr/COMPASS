@@ -14,6 +14,14 @@ class ProbabilisticAssociator
     void reset();
 
   private:
+
+    struct EllipseDef
+    {
+        double rad1;
+        double rad2;
+        double theta_rad;
+    };
+
     ProbIMMReconstructor& reconstructor_;
 
     std::map<unsigned int, unsigned int> getTALookupMap (
@@ -23,5 +31,8 @@ class ProbabilisticAssociator
     int findUTNForTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
                                std::map<unsigned int, unsigned int> ta_2_utn,
                                const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
+
+    void estimateEllipse(dbContent::targetReport::PositionAccuracy& acc, EllipseDef& def) const;
+    double estimateAccuracyAt (EllipseDef& def, double bearing_rad) const;
 };
 
