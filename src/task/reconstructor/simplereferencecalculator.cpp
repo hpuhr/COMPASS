@@ -506,7 +506,14 @@ void SimpleReferenceCalculator::updateReferences()
         assert(reconstructor_.targets_.count(ref.first));
 
         auto& target = reconstructor_.targets_.at(ref.first);
-        target.references_ = std::move(ref.second.references);
+        //target.references_ = std::move(ref.second.references);
+
+        target.references_.clear();
+
+        for (auto& ref_it : ref.second.references)
+            target.references_[ref_it.t] = ref_it;
+
+        ref.second.references.clear();
     }
 }
 

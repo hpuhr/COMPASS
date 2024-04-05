@@ -40,9 +40,14 @@ dbContent::targetReport::AccelerationAccuracy ADSBAccuracyEstimator::acceleratio
     return AccuracyEstimatorBase::AccAccStdFallback;
 }
 
-void ADSBAccuracyEstimator::estimateAccuracies()
+void ADSBAccuracyEstimator::estimateAccuracyUsing(
+    dbContent::ReconstructorTarget& target, unsigned int dbcont_id,
+    const std::map<unsigned int, std::multimap<boost::posix_time::ptime, unsigned long>>& tr_ds_timestamps_)
 {
 
 }
+void ADSBAccuracyEstimator::finalizeEstimateAccuracy()
+{
 
+}
 

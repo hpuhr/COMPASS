@@ -141,8 +141,13 @@ dbContent::targetReport::AccelerationAccuracy RadarAccuracyEstimator::accelerati
     return AccuracyEstimatorBase::AccAccStdFallback;
 }
 
-void RadarAccuracyEstimator::estimateAccuracies()
+void RadarAccuracyEstimator::estimateAccuracyUsing(
+    dbContent::ReconstructorTarget& target, unsigned int dbcont_id,
+    const std::map<unsigned int, std::multimap<boost::posix_time::ptime, unsigned long>>& tr_ds_timestamps_)
 {
 
 }
+void RadarAccuracyEstimator::finalizeEstimateAccuracy()
+{
 
+}

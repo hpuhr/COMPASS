@@ -82,7 +82,13 @@ class ReconstructorBase : public Configurable
   protected:
     friend class dbContent::ReconstructorTarget;
     friend class SimpleReferenceCalculator;
+    friend class ComplexAccuracyEstimator;
     friend class ProbabilisticAssociator;
+    friend class DataSourceAccuracyEstimator;
+    friend class ADSBAccuracyEstimator;
+    friend class MLATAccuracyEstimator;
+    friend class RadarAccuracyEstimator;
+    friend class TrackerAccuracyEstimator;
 
     std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
 

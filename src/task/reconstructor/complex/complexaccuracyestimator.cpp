@@ -55,8 +55,12 @@ ComplexAccuracyEstimator::~ComplexAccuracyEstimator()
     //loginf << "ComplexAccuracyEstimator: dtor: done";
 }
 
-void ComplexAccuracyEstimator::init()
+void ComplexAccuracyEstimator::init(ReconstructorBase* reconstructor)
 {
+    loginf << "ComplexAccuracyEstimator: init";
+
+    AccuracyEstimatorBase::init(reconstructor);
+
     connect(&COMPASS::instance().dataSourceManager(), &DataSourceManager::dataSourcesChangedSignal,
             this, &ComplexAccuracyEstimator::updateDataSourcesInfoSlot);
 
@@ -86,6 +90,9 @@ void ComplexAccuracyEstimator::updateDataSourcesInfoSlot()
         ds_acc_estimators_.emplace(std::piecewise_construct,
                                    std::forward_as_tuple(ds_it->id()),  // args for key
                                    std::forward_as_tuple(createAccuracyEstimator(*ds_it)));
+
+        if (reconstructor_)
+            ds_acc_estimators_.at(ds_it->id())->init(reconstructor_);
     }
 }
 

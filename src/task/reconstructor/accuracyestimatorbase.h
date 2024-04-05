@@ -28,7 +28,7 @@ class AccuracyEstimatorBase
     AccuracyEstimatorBase();
     virtual ~AccuracyEstimatorBase() {};
 
-    virtual void init() {};
+    virtual void init (ReconstructorBase* reconstructor);
 
     virtual void validate (dbContent::targetReport::ReconstructorInfo& tr,
                           ReconstructorBase& reconstructor) = 0; // can set do not use position flag
@@ -60,6 +60,8 @@ class AccuracyEstimatorBase
     static const dbContent::targetReport::AccelerationAccuracy AccAccStdFallback;
 
     std::string name_;
+
+    ReconstructorBase* reconstructor_ {nullptr};
 
     std::vector<AssociatedDistance> distances_;
 

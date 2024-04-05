@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "stringconv.h"
 
+
 using namespace Utils;
 
 const double AccuracyEstimatorBase::PosAccStdDevFallback = 1000.0;
@@ -29,8 +30,17 @@ const dbContent::targetReport::AccelerationAccuracy AccuracyEstimatorBase::AccAc
 AccuracyEstimatorBase::AccuracyEstimatorBase()
 //    : ds_man_ (COMPASS::instance().dataSourceManager())
 {
-//    connect (&ds_man_, &DataSourceManager::dataSourcesChangedSignal,
-//            this, &AccuracyEstimatorBase::updateDataSourcesInfoSlot);
+    //    connect (&ds_man_, &DataSourceManager::dataSourcesChangedSignal,
+    //            this, &AccuracyEstimatorBase::updateDataSourcesInfoSlot);
+}
+
+void AccuracyEstimatorBase::init(ReconstructorBase* reconstructor)
+{
+    logdbg << "AccuracyEstimatorBase: init";
+
+    assert (reconstructor);
+    reconstructor_ = reconstructor;
+    distances_.clear();
 }
 
 void AccuracyEstimatorBase::addAssociatedDistance(

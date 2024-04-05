@@ -399,6 +399,56 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
     return {&dataFor(tr_timestamps_.find(lower)->second), &dataFor(tr_timestamps_.find(upper)->second)};
 }
 
+ReconstructorTarget::ReferencePair ReconstructorTarget::refDataFor (ptime timestamp, time_duration d_max) const
+// lower/upper times, invalid ts if not existing
+{
+    if (references_.count(timestamp))
+        return {&references_.at(timestamp), nullptr}; // contains exact value
+
+            //    Return iterator to lower bound
+            //    Returns an iterator pointing to the first element in the container whose key is not considered to go
+            //    before k (i.e., either it is equivalent or goes after).
+
+    auto lb_it = references_.lower_bound(timestamp);
+
+    if (lb_it == references_.end())
+        return {nullptr, nullptr};
+
+    assert (lb_it->first >= timestamp);
+
+    if (lb_it->first - timestamp > d_max)
+        return {nullptr, nullptr}; // too much time difference
+
+            // save value
+    ptime upper = lb_it->first;
+
+            // TODO lb_it--; ?
+    while (lb_it != references_.end() && timestamp < lb_it->first)
+    {
+        if (lb_it == references_.begin()) // exit condition on first value
+        {
+            if (timestamp < lb_it->first) // set as not found
+                lb_it = references_.end();
+
+            break;
+        }
+
+        lb_it--;
+    }
+
+    if (lb_it == references_.end())
+        return {nullptr, &references_.at(upper)};
+
+    assert (timestamp >= lb_it->first);
+
+    if (timestamp - lb_it->first > d_max)
+        return {nullptr, &references_.at(upper)}; // too much time difference
+
+    ptime lower = lb_it->first;
+
+    return {&references_.at(lower), &references_.at(upper)};
+}
+
 //std::pair<ptime, ptime> ReconstructorTarget::timesFor (
 //    ptime timestamp, time_duration  d_max) const
 //// lower/upper times, invalid ts if not existing
@@ -645,6 +695,54 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
             //    return {{int_lat, int_long, has_altitude, true, altitude}, true};
 
     return {{int_lat, int_long}, true};
+}
+
+boost::optional<dbContent::targetReport::Position> ReconstructorTarget::interpolatedRefPosForTimeFast (
+    ptime timestamp, time_duration d_max) const
+{
+    const reconstruction::Reference* lower_ref, *upper_ref;
+
+    tie(lower_ref, upper_ref) = refDataFor(timestamp, d_max);
+
+    if (lower_ref && !upper_ref) // exact time
+        return lower_ref->position();
+
+    if (!lower_ref || !upper_ref)
+        return {};
+
+    dbContent::targetReport::Position pos1 = lower_ref->position();
+    dbContent::targetReport::Position pos2 = upper_ref->position();
+    float d_t = Time::partialSeconds(upper_ref->t - lower_ref->t);
+
+    logdbg << "Target: interpolatedRefPosForTimeFast: d_t " << d_t;
+
+    assert (d_t >= 0);
+
+    if (pos1.latitude_ == pos2.latitude_
+        && pos1.longitude_ == pos2.longitude_) // same pos
+        return pos1;
+
+    if (lower_ref == upper_ref) // same time
+    {
+        logwrn << "Target: interpolatedRefPosForTimeFast: ref has same time twice";
+        return {};
+    }
+
+    double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
+    double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
+    logdbg << "Target: interpolatedRefPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
+
+    float d_t2 = Time::partialSeconds(timestamp - lower_ref->t);
+    logdbg << "Target: interpolatedRefPosForTimeFast: d_t2 " << d_t2;
+
+    assert (d_t2 >= 0);
+
+    double int_lat = pos1.latitude_ + v_lat * d_t2;
+    double int_long = pos1.longitude_ + v_long * d_t2;
+
+    logdbg << "Target: interpolatedRefPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
+
+    return dbContent::targetReport::Position{int_lat, int_long};
 }
 
 //bool ReconstructorTarget::hasDataForExactTime (ptime timestamp) const
@@ -1077,15 +1175,17 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     boost::posix_time::time_duration d_max = Time::partialSeconds(10);
     boost::posix_time::time_duration track_end_time = Time::partialSeconds(30);
 
-    for (size_t i = 0; i < references_.size(); ++i)
+    boost::posix_time::ptime ts_prev;
+
+    for (auto& ref_it : references_)
     {
-        const reconstruction::Reference& ref = references_.at(i);
+        //const reconstruction::Reference& ref = references_.at(i);
 
 //        loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref ts " << Time::toString(ref.t)
 //               << " wbt " << Time::toString(reconstructor_.write_before_time_) <<
 //            " skip " << (ref.t >= reconstructor_.write_before_time_);
 
-        if (ref.t >= reconstructor_.write_before_time_)
+        if (ref_it.second.t >= reconstructor_.write_before_time_)
             continue;
 
         ds_id_vec.set(buffer_cnt, ds_id);
@@ -1093,18 +1193,18 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         sic_vec.set(buffer_cnt, sic);
         line_vec.set(buffer_cnt, reconstructor_.ds_line_);
 
-        ts_vec.set(buffer_cnt, ref.t);
-        tod_vec.set(buffer_cnt, ref.t.time_of_day().total_milliseconds() / 1000.0);
+        ts_vec.set(buffer_cnt, ref_it.second.t);
+        tod_vec.set(buffer_cnt, ref_it.second.t.time_of_day().total_milliseconds() / 1000.0);
 
-        lat_vec.set(buffer_cnt, ref.lat);
-        lon_vec.set(buffer_cnt, ref.lon);
+        lat_vec.set(buffer_cnt, ref_it.second.lat);
+        lon_vec.set(buffer_cnt, ref_it.second.lon);
 
         utn_vec.set(buffer_cnt, utn_);
 
         track_num_vec.set(buffer_cnt, utn_);
 
         // track end
-        if (i > 0 && ref.t - references_.at(i-1).t > track_end_time) // have time before and dt > track end time
+        if (!ts_prev.is_not_a_date_time() && ref_it.second.t - ts_prev > track_end_time) // have time before and dt > track end time
         {
             track_end_vec.set(buffer_cnt-1, true); // set at previous update
             track_begin_ = true;
@@ -1117,13 +1217,13 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
                 // set speed
 
-        if (ref.vx.has_value() && ref.vy.has_value())
+        if (ref_it.second.vx.has_value() && ref_it.second.vy.has_value())
         {
-            vx_vec.set(buffer_cnt, *ref.vx);
-            vy_vec.set(buffer_cnt, *ref.vy);
+            vx_vec.set(buffer_cnt, *ref_it.second.vx);
+            vy_vec.set(buffer_cnt, *ref_it.second.vy);
 
-            speed_ms = sqrt(pow(*ref.vx, 2)+pow(*ref.vy, 2)) ; // for 1s
-            bearing_rad = atan2(*ref.vx, *ref.vy);
+            speed_ms = sqrt(pow(*ref_it.second.vx, 2)+pow(*ref_it.second.vy, 2)) ; // for 1s
+            bearing_rad = atan2(*ref_it.second.vx, *ref_it.second.vy);
 
             speed_vec.set(buffer_cnt, speed_ms * M_S2KNOTS);
             track_angle_vec.set(buffer_cnt, bearing_rad * RAD2DEG);
@@ -1131,12 +1231,12 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
                 // set stddevs
 
-        if (ref.x_stddev.has_value() && ref.y_stddev.has_value() && ref.xy_cov.has_value())
+        if (ref_it.second.x_stddev.has_value() && ref_it.second.y_stddev.has_value() && ref_it.second.xy_cov.has_value())
         {
-            x_stddev_vec.set(buffer_cnt, *ref.x_stddev);
-            y_stddev_vec.set(buffer_cnt, *ref.y_stddev);
+            x_stddev_vec.set(buffer_cnt, *ref_it.second.x_stddev);
+            y_stddev_vec.set(buffer_cnt, *ref_it.second.y_stddev);
 
-            xy_cov = *ref.xy_cov;
+            xy_cov = *ref_it.second.xy_cov;
 
                     // to inverse of this asterix rep
                     // if (xy_cov < 0)
@@ -1153,19 +1253,19 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
                 // set other data
                 // TODO crappy
 
-        ReconstructorInfoPair info = dataFor(ref.t, d_max);
+        ReconstructorInfoPair info = dataFor(ref_it.second.t, d_max);
 
         if (info.first && info.first->barometric_altitude_
             && info.first->barometric_altitude_->hasReliableValue())
         {
-            if (mc_vec.isNull(i))
+            if (mc_vec.isNull(buffer_cnt))
                 mc_vec.set(buffer_cnt, info.first->barometric_altitude_->altitude_);
         }
 
         if (info.second && info.second->barometric_altitude_
             && info.second->barometric_altitude_->hasReliableValue())
         {
-            if (mc_vec.isNull(i))
+            if (mc_vec.isNull(buffer_cnt))
                 mc_vec.set(buffer_cnt, info.second->barometric_altitude_->altitude_);
             else
                 mc_vec.set(buffer_cnt,
@@ -1174,35 +1274,37 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
         if (info.first)
         {
-            if (info.first->mode_a_code_ && info.first->mode_a_code_->hasReliableValue() && m3a_vec.isNull(i))
+            if (info.first->mode_a_code_ && info.first->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
                 m3a_vec.set(buffer_cnt, info.first->mode_a_code_->code_);
 
-            if (info.first->acad_ && acad_vec.isNull(i))
+            if (info.first->acad_ && acad_vec.isNull(buffer_cnt))
                 acad_vec.set(buffer_cnt, *info.first->acad_);
 
-            if (info.first->acid_ && acid_vec.isNull(i))
+            if (info.first->acid_ && acid_vec.isNull(buffer_cnt))
                 acid_vec.set(buffer_cnt, *info.first->acid_);
 
-            if (info.first->ground_bit_ && gb_vec.isNull(i))
+            if (info.first->ground_bit_ && gb_vec.isNull(buffer_cnt))
                 gb_vec.set(buffer_cnt, *info.first->ground_bit_);
         }
 
         if (info.second)
         {
-            if (info.second->mode_a_code_ && info.second->mode_a_code_->hasReliableValue() && m3a_vec.isNull(i))
+            if (info.second->mode_a_code_ && info.second->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
                 m3a_vec.set(buffer_cnt, info.second->mode_a_code_->code_);
 
-            if (info.second->acad_ && acad_vec.isNull(i))
+            if (info.second->acad_ && acad_vec.isNull(buffer_cnt))
                 acad_vec.set(buffer_cnt, *info.second->acad_);
 
-            if (info.second->acid_ && acid_vec.isNull(i))
+            if (info.second->acid_ && acid_vec.isNull(buffer_cnt))
                 acid_vec.set(buffer_cnt, *info.second->acid_);
 
-            if (info.second->ground_bit_ && gb_vec.isNull(i))
+            if (info.second->ground_bit_ && gb_vec.isNull(buffer_cnt))
                 gb_vec.set(buffer_cnt, *info.second->ground_bit_);
         }
 
         ++buffer_cnt;
+
+        ts_prev = ref_it.second.t;
     }
 
     // check last update for track end

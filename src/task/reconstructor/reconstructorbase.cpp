@@ -63,6 +63,8 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id, const std::str
         registerParameter("ref_resample_systracks_dt"    , &ref_calc_settings_.resample_systracks_dt    , ReferenceCalculatorSettings().resample_systracks_dt);
         registerParameter("ref_resample_systracks_max_dt", &ref_calc_settings_.resample_systracks_max_dt, ReferenceCalculatorSettings().resample_systracks_max_dt);
     }
+
+    assert (acc_estimator_);
 }
 
 /**
@@ -534,6 +536,8 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
 
 void ReconstructorBase::reset()
 {
+    loginf << "ReconstructorBase: reset/init";
+
     buffers_.clear();
     accessor_->clear();
 
@@ -550,8 +554,8 @@ void ReconstructorBase::reset()
     tr_timestamps_.clear();
     tr_ds_.clear();
 
-    if (acc_estimator_)
-        acc_estimator_->init();
+    assert (acc_estimator_);
+    acc_estimator_->init(this);
 }
 
 

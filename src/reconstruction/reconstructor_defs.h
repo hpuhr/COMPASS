@@ -126,6 +126,11 @@ struct Measurement
         return (x_stddev.has_value() && y_stddev.has_value());
     }
 
+    dbContent::targetReport::Position position() const
+    {
+        return {lat, lon};
+    }
+
     dbContent::targetReport::PositionAccuracy positionAccuracy() const
     {
         assert (hasStdDevPosition());

@@ -36,6 +36,9 @@ class ReconstructorTarget
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,
                       dbContent::targetReport::ReconstructorInfo*> ReconstructorInfoPair; // both can be nullptr
 
+    typedef std::pair<const reconstruction::Reference*,
+                      const reconstruction::Reference*> ReferencePair; // both can be nullptr
+
     ReconstructorTarget(ReconstructorBase& reconstructor, unsigned int utn, bool tmp_utn);
     virtual ~ReconstructorTarget();
 
@@ -71,7 +74,7 @@ class ReconstructorTarget
 
     std::map <unsigned int, unsigned int> counts_; // dbcontent id -> count
 
-    std::vector<reconstruction::Reference> references_;
+    std::map< boost::posix_time::ptime, reconstruction::Reference> references_; // ts -> tr
 
     mutable Transformation trafo_;
 
@@ -102,6 +105,7 @@ class ReconstructorTarget
 
     // TODO lambda for selective data
     ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+    ReferencePair refDataFor (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
 //    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timesFor (
 //        boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
@@ -111,6 +115,9 @@ class ReconstructorTarget
     std::pair<dbContent::targetReport::Position, bool> interpolatedPosForTime (
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     std::pair<dbContent::targetReport::Position, bool> interpolatedPosForTimeFast (
+        boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+
+    boost::optional<dbContent::targetReport::Position> interpolatedRefPosForTimeFast (
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
 //    bool hasDataForExactTime (boost::posix_time::ptime timestamp) const;

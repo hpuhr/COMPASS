@@ -37,7 +37,7 @@ class ComplexAccuracyEstimator : public QObject, public AccuracyEstimatorBase
     ComplexAccuracyEstimator();
     virtual ~ComplexAccuracyEstimator();
 
-    virtual void init() override;
+    virtual void init(ReconstructorBase* reconstructor) override;
 
     virtual void validate (dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor) override;
 

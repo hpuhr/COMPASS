@@ -18,6 +18,11 @@ class ADSBAccuracyEstimator : public DataSourceAccuracyEstimator
     virtual dbContent::targetReport::AccelerationAccuracy accelerationAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
 
-    virtual void estimateAccuracies() override;
+  protected:
+    virtual void estimateAccuracyUsing(
+        dbContent::ReconstructorTarget& target, unsigned int dbcont_id,
+        const std::map<unsigned int, std::multimap<boost::posix_time::ptime, unsigned long>>& tr_ds_timestamps_)
+         override;
+    virtual void finalizeEstimateAccuracy() override;
 };
 

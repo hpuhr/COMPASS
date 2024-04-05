@@ -36,7 +36,13 @@ dbContent::targetReport::AccelerationAccuracy MLATAccuracyEstimator::acceleratio
     return AccuracyEstimatorBase::AccAccStdFallback;
 }
 
-void MLATAccuracyEstimator::estimateAccuracies()
+void MLATAccuracyEstimator::estimateAccuracyUsing(
+    dbContent::ReconstructorTarget& target, unsigned int dbcont_id,
+    const std::map<unsigned int, std::multimap<boost::posix_time::ptime, unsigned long>>& tr_ds_timestamps_)
+{
+
+}
+void MLATAccuracyEstimator::finalizeEstimateAccuracy()
 {
 
 }
