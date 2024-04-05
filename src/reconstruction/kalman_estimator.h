@@ -42,6 +42,13 @@ public:
             ReinitCheckDistance = 1 << 1  //checks for reinit using a metric distance-based threshold
         };
 
+        enum class StepFailStrategy
+        {
+            Assert = 0,      //assert if step fails
+            Reinit,          //reinit kalman if step fails       
+            ReturnInvalid    //return error and set update to invalid
+        };
+
         double Q_var       = 900.0;   // variance of kalman process (30*30)
         double R_var_undef = HighVar; // high variance for undefined values (1000*1000)
 
@@ -59,8 +66,10 @@ public:
         double          resample_Q_var       = 100.0;                     // resampling process noise (10*10)
         StateInterpMode resample_interp_mode = StateInterpMode::BlendVar; // kalman state interpolation mode used during resampling
 
-        bool track_velocities    = true;
-        bool track_accelerations = true;
+        StepFailStrategy step_fail_strategy = StepFailStrategy::ReturnInvalid;
+
+        bool track_velocities      = true;
+        bool track_accelerations   = true;
 
         int verbosity = 0;
 

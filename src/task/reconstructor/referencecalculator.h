@@ -44,6 +44,8 @@ struct ReferenceCalculatorSettings
 
         settings.verbosity = activeVerbosity() >= 2 ? activeVerbosity() - 1 : 0;
 
+        settings.step_fail_strategy = allow_invalid_updates ? reconstruction::KalmanEstimator::Settings::StepFailStrategy::ReturnInvalid :
+                                                              reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
         return settings;
     }
 
@@ -69,9 +71,9 @@ struct ReferenceCalculatorSettings
     bool smooth_rts = true;
 
     //result resampling related
-    bool                            resample_result = true;
-    double                          resample_Q_std  = 10.0;
-    double                          resample_dt     = 2.0;
+    bool                            resample_result     = true;
+    double                          resample_Q_std      = 10.0;
+    double                          resample_dt         = 2.0;
     reconstruction::StateInterpMode resample_blend_mode = reconstruction::StateInterpMode::BlendVar;
 
     //dynamic projection change
@@ -82,5 +84,10 @@ struct ReferenceCalculatorSettings
     double resample_systracks_dt     = 1.0;  // resample interval in seconds
     double resample_systracks_max_dt = 30.0; // maximum timestep to interpolate in seconds
 
-    bool multithreading = true;
+    bool multithreading        = true;
+    bool allow_invalid_updates = false;
+
+    //debug options
+    bool compat_mode     = false;
+    int  max_slice_index = -1;
 };

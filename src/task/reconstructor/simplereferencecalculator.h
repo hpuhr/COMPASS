@@ -103,6 +103,8 @@ private:
 
     Settings settings_;
 
+    int slice_idx_ = -1;
+
     std::map<unsigned int, TargetReferences>              references_;
     std::map<unsigned int, reconstruction::InterpOptions> interp_options_;
 };

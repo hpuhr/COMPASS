@@ -76,7 +76,7 @@ SimpleReconstructorReferenceCalculationWidget::SimpleReconstructorReferenceCalcu
 
     //@TODO: hide
     min_dt_box_ = new QDoubleSpinBox;
-    min_dt_box_->setDecimals(3);
+    min_dt_box_->setDecimals(8);
     min_dt_box_->setMinimum(0.0);
     min_dt_box_->setMaximum(DBL_MAX);
     connect(min_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->min_dt = v; });
