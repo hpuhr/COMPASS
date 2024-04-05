@@ -17,6 +17,8 @@ class RadarAccuracyEstimator : public DataSourceAccuracyEstimator
     virtual dbContent::targetReport::AccelerationAccuracy accelerationAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
 
+    virtual void estimateAccuracies() override;
+
   private:
 
     bool has_position_ {false};

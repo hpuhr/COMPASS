@@ -18,5 +18,6 @@ class ADSBAccuracyEstimator : public DataSourceAccuracyEstimator
     virtual dbContent::targetReport::AccelerationAccuracy accelerationAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
 
+    virtual void estimateAccuracies() override;
 };
 

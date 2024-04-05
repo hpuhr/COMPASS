@@ -140,3 +140,9 @@ dbContent::targetReport::AccelerationAccuracy RadarAccuracyEstimator::accelerati
 {
     return AccuracyEstimatorBase::AccAccStdFallback;
 }
+
+void RadarAccuracyEstimator::estimateAccuracies()
+{
+
+}
+

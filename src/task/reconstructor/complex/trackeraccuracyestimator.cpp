@@ -35,3 +35,8 @@ dbContent::targetReport::AccelerationAccuracy TrackerAccuracyEstimator::accelera
 {
     return AccuracyEstimatorBase::AccAccStdFallback;
 }
+
+void TrackerAccuracyEstimator::estimateAccuracies()
+{
+
+}

@@ -420,20 +420,20 @@ void MainWindow::createMenus ()
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
-    QAction* assoc_action = new QAction("Calculate Unique Targets (Old)");
+    QAction* assoc_action = new QAction("(Old) Calculate Unique Targets");
     assoc_action->setToolTip("Create Unique Targets based on all DB Content");
     connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsOldSlot);
     process_menu_->addAction(assoc_action);
+
+    calculate_references_action_ = new QAction("(Old) Calculate References ");
+    calculate_references_action_->setToolTip("Calculate References from System Tracker and ADS-B data");
+    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesOldSlot);
+    process_menu_->addAction(calculate_references_action_);
 
     QAction* assoc_artas_action = new QAction("Calculate ARTAS Target Report Usage");
     assoc_artas_action->setToolTip("Create target report usage based on ARTAS TRI information");
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
-
-    calculate_references_action_ = new QAction("Calculate References (Old)");
-    calculate_references_action_->setToolTip("Calculate References from System Tracker and ADS-B data");
-    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesOldSlot);
-    process_menu_->addAction(calculate_references_action_);
 
     QAction* reconstruct_action = new QAction("Reconstruct References");
     reconstruct_action->setToolTip("Associate Unique Targets andd reconstruct Reference Trajectories");

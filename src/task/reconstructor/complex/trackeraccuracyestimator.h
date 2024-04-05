@@ -16,5 +16,7 @@ class TrackerAccuracyEstimator : public DataSourceAccuracyEstimator
         const dbContent::targetReport::ReconstructorInfo& tr) override;
     virtual dbContent::targetReport::AccelerationAccuracy accelerationAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
+
+    virtual void estimateAccuracies() override;
 };
 

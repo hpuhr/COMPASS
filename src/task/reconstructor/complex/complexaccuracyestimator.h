@@ -53,6 +53,8 @@ class ComplexAccuracyEstimator : public QObject, public AccuracyEstimatorBase
     virtual void analyzeAssociatedDistances() const override;
     virtual void clearAssociatedDistances() override;
 
+    virtual void estimateAccuracies() override;
+
   private:
     //ComplexReconstructor& reconstructor_;
 

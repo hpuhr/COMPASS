@@ -44,6 +44,8 @@ class AccuracyEstimatorBase
     virtual void analyzeAssociatedDistances() const;
     virtual void clearAssociatedDistances();
 
+    virtual void estimateAccuracies() = 0; // when targets with calculated references are done
+
   protected:
     static const double PosAccStdDevFallback;
     static const dbContent::targetReport::PositionAccuracy PosAccStdFallback;

@@ -39,3 +39,10 @@ dbContent::targetReport::AccelerationAccuracy ADSBAccuracyEstimator::acceleratio
 {
     return AccuracyEstimatorBase::AccAccStdFallback;
 }
+
+void ADSBAccuracyEstimator::estimateAccuracies()
+{
+
+}
+
+

@@ -139,7 +139,6 @@ void ComplexAccuracyEstimator::addAssociatedDistance(
     ds_acc_estimators_.at(tr.ds_id_)->addAssociatedDistance(tr, dist);
 }
 
-
 void ComplexAccuracyEstimator::analyzeAssociatedDistances() const
 {
     for (auto& acc_it : ds_acc_estimators_)
@@ -150,5 +149,11 @@ void ComplexAccuracyEstimator::clearAssociatedDistances()
 {
     for (auto& acc_it : ds_acc_estimators_)
         acc_it.second->clearAssociatedDistances();
+}
+
+void ComplexAccuracyEstimator::estimateAccuracies()
+{
+    for (auto& acc_it : ds_acc_estimators_)
+        acc_it.second->estimateAccuracies();
 }
 

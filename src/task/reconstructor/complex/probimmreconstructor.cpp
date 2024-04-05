@@ -159,6 +159,9 @@ bool ProbIMMReconstructor::processSlice_impl()
     saveAssociations(associations);
 
     ref_calculator_.computeReferences();
+
+    acc_estimator_->estimateAccuracies();
+
     saveReferences(); // only for ts < write_before_time
 
     if (is_last_slice)

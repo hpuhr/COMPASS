@@ -19,6 +19,8 @@ class SimpleAccuracyEstimator : public AccuracyEstimatorBase
     virtual dbContent::targetReport::AccelerationAccuracy accelerationAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
 
+    virtual void estimateAccuracies() override {}
+
   private:
     static const double PosAccStdDevDefault;
     static const dbContent::targetReport::PositionAccuracy PosAccStdDefault;

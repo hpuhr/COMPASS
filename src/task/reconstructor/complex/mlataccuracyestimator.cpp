@@ -35,3 +35,8 @@ dbContent::targetReport::AccelerationAccuracy MLATAccuracyEstimator::acceleratio
 {
     return AccuracyEstimatorBase::AccAccStdFallback;
 }
+
+void MLATAccuracyEstimator::estimateAccuracies()
+{
+
+}
