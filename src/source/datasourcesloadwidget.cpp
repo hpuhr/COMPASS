@@ -50,8 +50,8 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     QScrollArea* scroll_area = new QScrollArea();
     scroll_area->setWidgetResizable(true);
     scroll_area->setContentsMargins(0, 0, 0, 0);
-//    scroll_area->setStyleSheet(" QAbstractScrollArea { background-color: transparent; }"
-//                               " QWidget#scrollAreaWidgetContents{ background-color: transparent; }");
+    //    scroll_area->setStyleSheet(" QAbstractScrollArea { background-color: transparent; }"
+    //                               " QWidget#scrollAreaWidgetContents{ background-color: transparent; }");
 
     sub_layout->addWidget(scroll_area);
 
@@ -64,7 +64,7 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     QVBoxLayout* main_layout = new QVBoxLayout();
     //main_layout->setContentsMargins(1, 1, 1, 1);
 
-    // button
+            // button
 
     QHBoxLayout* button_layout = new QHBoxLayout();
     //button_layout->setContentsMargins(0, 0, 0, 0);
@@ -81,14 +81,14 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     main_layout->addLayout(button_layout);
 
-//    main_layout->addLayout(vlay);
+    //    main_layout->addLayout(vlay);
 
-//    main_layout->addStretch();
+    //    main_layout->addStretch();
 
-//    QHBoxLayout* vlay = new QHBoxLayout();
-//    vlay->setContentsMargins(0, 0, 0, 0);
+    //    QHBoxLayout* vlay = new QHBoxLayout();
+    //    vlay->setContentsMargins(0, 0, 0, 0);
 
-    // data sources, per type
+            // data sources, per type
 
     type_layout_ = new QGridLayout();
 
@@ -96,11 +96,11 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     main_layout->addStretch();
 
-    // associations
+            // associations
 
     QHBoxLayout* assoc_layout = new QHBoxLayout();
 
-    // time
+            // time
     QLabel* ts_label = new QLabel("Timestamps");
     ts_label->setFont(font_bold);
     assoc_layout->addWidget(ts_label);
@@ -117,7 +117,7 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     assoc_layout->addStretch();
 
-    // assoc
+            // assoc
     QLabel* assoc_label = new QLabel("Associations");
     assoc_label->setFont(font_bold);
     assoc_layout->addWidget(assoc_label);
@@ -136,7 +136,7 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     setLayout(sub_layout);
 
-    // menu
+            // menu
     QAction* sel_dstyp_action = edit_menu_.addAction("Select All DSTypes");
     connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDSTypesSlot);
 
@@ -209,19 +209,19 @@ void DataSourcesLoadWidget::loadDSTypeChangedSlot()
     COMPASS::instance().dataSourceManager().dsTypeLoadingWanted(ds_type_name, load);
 }
 
-void DataSourcesLoadWidget::loadDSChangedSlot()
-{
-    QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
-    assert (box);
+//void DataSourcesLoadWidget::loadDSChangedSlot()
+//{
+//    QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
+//    assert (box);
 
-    unsigned int ds_id = box->property("DS ID").toUInt();
+//    unsigned int ds_id = box->property("DS ID").toUInt();
 
-    bool load = box->checkState() == Qt::Checked;
+//    bool load = box->checkState() == Qt::Checked;
 
-    loginf << "DataSourcesLoadWidget: loadDSChangedSlot: ds_id " << ds_id << " load " << load;
+//    loginf << "DataSourcesLoadWidget: loadDSChangedSlot: ds_id " << ds_id << " load " << load;
 
-    ds_man_.dbDataSource(ds_id).loadingWanted(load);
-}
+//    ds_man_.dbDataSource(ds_id).loadingWanted(load);
+//}
 
 void DataSourcesLoadWidget::editClickedSlot()
 {
@@ -387,7 +387,7 @@ void DataSourcesLoadWidget::updateContent()
             ds_widget_it.second->updateContent();
     }
 
-    // TODO move this
+            // TODO move this
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     assert (ts_min_label_);
@@ -425,9 +425,13 @@ void DataSourcesLoadWidget::clear()
 
     ds_widgets_.clear(); // delete by data sources
 
-    // remove all previous
-    while (QLayoutItem* item = type_layout_->takeAt(0))
-        type_layout_->removeItem(item);
+            // delete all previous
+    while (QLayoutItem* child = type_layout_->takeAt(0))
+    {
+        if (child->widget())
+            delete child->widget();
+        delete child;
+    }
 }
 
 void DataSourcesLoadWidget::arrangeSourceWidgetWidths()
@@ -469,7 +473,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
     using namespace dbContent;
 
-    //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+            //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
     bool ds_found;
 
     logdbg << "DataSourcesLoadWidget: clearAndCreateContent: iterating data source types";
@@ -517,7 +521,23 @@ void DataSourcesLoadWidget::clearAndCreateContent()
             logdbg << "DataSourcesLoadWidget: clearAndCreateContent: create '" << ds_it->dsType()
                    << "' '" << ds_name << "'";
 
-            DBDataSourceWidget* ds_widget = ds_it->widget();
+            std::function<bool()> get_use_ds_func =
+                [&ds_it] () { return ds_it->loadingWanted(); };
+            std::function<void(bool)> set_use_ds_func  =
+                [&ds_it] (bool value) { return ds_it->loadingWanted(value); };
+            std::function<bool(unsigned int)> get_use_ds_line_func =
+                [&ds_it] (unsigned int line_id) { return ds_it->lineLoadingWanted(line_id); };
+            std::function<void(unsigned int, bool)> set_use_ds_line_func  =
+                [&ds_it] (unsigned int line_id, bool value) { return ds_it->lineLoadingWanted(line_id, value); };
+
+            std::function<bool()> show_counts_func =
+                [this] () { return ds_man_.config().load_widget_show_counts_; };
+
+
+            DBDataSourceWidget* ds_widget = new DBDataSourceWidget(
+                *ds_it, get_use_ds_func, set_use_ds_func,
+                get_use_ds_line_func, set_use_ds_line_func,
+                show_counts_func);
 
             type_layout_->addWidget(ds_widget, row, col);
 

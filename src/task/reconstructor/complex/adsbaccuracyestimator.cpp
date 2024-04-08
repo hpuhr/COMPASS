@@ -14,6 +14,11 @@ void ADSBAccuracyEstimator::validate (
 
     if (mops_version && *mops_version == 0)
         tr.do_not_use_position_ = true;
+
+    boost::optional<unsigned char> nacp = reconstructor.accessor(tr).nacp(tr.buffer_index_);
+
+    if (nacp && *nacp == 0)
+        tr.do_not_use_position_ = true;
 }
 
 dbContent::targetReport::PositionAccuracy ADSBAccuracyEstimator::positionAccuracy (

@@ -22,22 +22,35 @@ class DBDataSourceWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     void loadingChangedSlot();
 
     void lineButtonClickedSlot();
 
-public:
-    explicit DBDataSourceWidget(DBDataSource& src, QWidget *parent = nullptr);
+  public:
+    explicit DBDataSourceWidget(
+        DBDataSource& src,
+        std::function<bool()> get_use_ds_func,
+        std::function<void(bool)> set_use_ds_func,
+        std::function<bool(unsigned int)> get_use_ds_line_func,
+        std::function<void(unsigned int, bool)> set_use_ds_line_func,
+        std::function<bool()> show_counts_func,
+        QWidget *parent = nullptr);
 
     void updateContent();
 
     unsigned int getLabelMinWidth();
     void updateLabelMinWidth(unsigned int width);
 
-protected:
+  protected:
     DBDataSource& src_;
     DataSourceManager& ds_man_;
+
+    std::function<bool()> get_use_ds_func_;
+    std::function<void(bool)> set_use_ds_func_;
+    std::function<bool(unsigned int)> get_use_ds_line_func_;
+    std::function<void(unsigned int, bool)> set_use_ds_line_func_;
+    std::function<bool()> show_counts_func_;
 
     QVBoxLayout* main_layout_ {nullptr};
     QGridLayout* grid_layout_ {nullptr};
@@ -49,7 +62,7 @@ protected:
     std::map<std::string, QLabel*> loaded_cnt_labels_; // cont -> loaded count label
     std::map<std::string, QLabel*> total_cnt_labels_; // cont -> total count label
 
-    //bool last_net_lines_shown_ {false};
+            //bool last_net_lines_shown_ {false};
     bool last_show_counts_ {false}; // indicates if counts where added to layout last time
 
     bool needsRecreate();

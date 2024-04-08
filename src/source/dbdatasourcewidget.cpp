@@ -18,8 +18,19 @@ namespace dbContent
 {
 
 
-DBDataSourceWidget::DBDataSourceWidget(DBDataSource& src, QWidget *parent)
-    : QWidget(parent), src_(src), ds_man_(COMPASS::instance().dataSourceManager())
+DBDataSourceWidget::DBDataSourceWidget(
+    DBDataSource& src,
+    std::function<bool()> get_use_ds_func,
+    std::function<void(bool)> set_use_ds_func,
+    std::function<bool(unsigned int)> get_use_ds_line_func,
+    std::function<void(unsigned int, bool)> set_use_ds_line_func,
+    std::function<bool()> show_counts_func,
+    QWidget *parent)
+    : QWidget(parent), src_(src),
+      ds_man_(COMPASS::instance().dataSourceManager()),
+      get_use_ds_func_(get_use_ds_func), set_use_ds_func_(set_use_ds_func),
+      get_use_ds_line_func_(get_use_ds_line_func), set_use_ds_line_func_(set_use_ds_line_func),
+      show_counts_func_(show_counts_func)
 {
     main_layout_ = new QVBoxLayout();
 
@@ -37,14 +48,12 @@ DBDataSourceWidget::DBDataSourceWidget(DBDataSource& src, QWidget *parent)
 void DBDataSourceWidget::updateContent()
 {
     if (needsRecreate())
-    {
         recreateWidgets();
-    }
 
     try {
      updateWidgets();
     } catch (std::exception& e) {
-        logerr << "UGA2 what " << e.what();
+        logerr << "DBDataSourceWidget: updateContent: exception " << e.what();
     }
 
 }
@@ -69,7 +78,7 @@ bool DBDataSourceWidget::needsRecreate()
         return true;
 
     // check counts shown
-    bool show_counts = ds_man_.config().load_widget_show_counts_;
+    bool show_counts = show_counts_func_();
 
     if (last_show_counts_ != show_counts)
         return true;
@@ -90,7 +99,7 @@ bool DBDataSourceWidget::needsRecreate()
 
 void DBDataSourceWidget::recreateWidgets()
 {
-    bool show_counts = ds_man_.config().load_widget_show_counts_;
+    bool show_counts = show_counts_func_();
 
     loginf << "DBDataSourceWidget " << src_.name() << ": recreateWidgets: show_counts " << show_counts;
 
@@ -212,11 +221,11 @@ void DBDataSourceWidget::updateWidgets()
 {
     logdbg << "DBDataSourceWidget: updateWidgets";
 
-    bool show_counts = ds_man_.config().load_widget_show_counts_;
+    bool show_counts = show_counts_func_();
 
     assert (load_check_);
     load_check_->setText(src_.name().c_str());
-    load_check_->setChecked(src_.loadingWanted());
+    load_check_->setChecked(get_use_ds_func_());
 
     AppMode app_mode = COMPASS::instance().appMode();
 
@@ -274,7 +283,7 @@ void DBDataSourceWidget::updateWidgets()
                 }
                 else
                 {
-                    button->setChecked(src_.lineLoadingWanted(line_cnt));
+                    button->setChecked(get_use_ds_line_func_(line_cnt));
 
                     logdbg << "DBDataSourceWidget: updateWidgets: src " << src_.name()
                            << " " << line_str << " live " << src_.hasLiveData(line_cnt, current_time);
@@ -314,7 +323,7 @@ void DBDataSourceWidget::updateWidgets()
 
             assert (line_buttons_.count(line_str));
 
-            line_buttons_.at(line_str)->setChecked(src_.lineLoadingWanted(line_cnt));
+            line_buttons_.at(line_str)->setChecked(get_use_ds_line_func_(line_cnt));
             line_buttons_.at(line_str)->setHidden(!inserted_lines.count(line_cnt)); // hide if no data
         }
     }
@@ -341,9 +350,11 @@ void DBDataSourceWidget::updateWidgets()
 
 void DBDataSourceWidget::loadingChangedSlot()
 {
+
     loginf << "DBDataSourceWidget: loadingChangedSlot";
 
-    src_.loadingWanted(!src_.loadingWanted());
+    set_use_ds_func_(!get_use_ds_func_());
+    //src_.loadingWanted(!src_.loadingWanted());
 }
 
 void DBDataSourceWidget::lineButtonClickedSlot()
@@ -355,7 +366,8 @@ void DBDataSourceWidget::lineButtonClickedSlot()
 
     loginf << "DBDataSourceWidget: lineButtonClickedSlot: line " << line_id;
 
-    src_.lineLoadingWanted(line_id, !src_.lineLoadingWanted(line_id));
+    //src_.lineLoadingWanted(line_id, !src_.lineLoadingWanted(line_id));
+    set_use_ds_line_func_(line_id, !get_use_ds_line_func_(line_id));
 }
 
 }

@@ -36,7 +36,7 @@ using namespace Utils;
  */
 ReconstructorBase::ReconstructorBase(const std::string& class_id, const std::string& instance_id,
                                      ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
-    : Configurable (class_id, instance_id, &task), acc_estimator_(std::move(acc_estimator))
+    : Configurable (class_id, instance_id, &task), task_(task), acc_estimator_(std::move(acc_estimator))
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
@@ -487,6 +487,11 @@ const dbContent::TargetReportAccessor& ReconstructorBase::accessor(dbContent::ta
 {
     assert (accessors_.count(tr.dbcont_id_));
     return accessors_.at(tr.dbcont_id_);
+}
+
+ReconstructorTask& ReconstructorBase::task() const
+{
+    return task_;
 }
 
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 

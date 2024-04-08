@@ -38,6 +38,10 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 {
     tooltip_ = "Associate target reports and calculate reference trajectories based on all DB Content.";
 
+    registerParameter("use_dstypes", &use_dstypes_, nlohmann::json::object());
+    registerParameter("use_data_sources", &use_data_sources_, nlohmann::json::object());
+    registerParameter("use_data_sources_lines", &use_data_sources_lines_, nlohmann::json::object());
+
     registerParameter("current_reconstructor_str", &current_reconstructor_str_, {});
 
     if (!current_reconstructor_str_.size()
@@ -252,6 +256,52 @@ void ReconstructorTask::closeStatusDialogSlot()
 //    status_dialog_ = nullptr;
 }
 
+bool ReconstructorTask::useDStype(const std::string& ds_type)
+{
+    if (!use_dstypes_.contains(ds_type))
+        return true;
+
+    return use_dstypes_.at(ds_type);
+}
+
+void ReconstructorTask::useDSType(const std::string& ds_type, bool value)
+{
+    use_dstypes_[ds_type] = value;
+}
+
+bool ReconstructorTask::useDataSource(unsigned int ds_id)
+{
+    string ds_id_str = to_string(ds_id);
+
+    if (!use_data_sources_.contains(ds_id_str))
+        return true;
+
+    return use_data_sources_.at(ds_id_str);
+}
+
+void ReconstructorTask::useDataSource(unsigned int ds_id, bool value)
+{
+    use_data_sources_[to_string(ds_id)] = value;
+}
+
+bool ReconstructorTask::useDataSourceLine(unsigned int ds_id, unsigned int line_id)
+{
+    string ds_id_str = to_string(ds_id);
+    string line_id_str = to_string(line_id);
+
+    if (!use_data_sources_lines_.contains(ds_id_str))
+        return true;
+
+    if (!use_data_sources_lines_.at(ds_id_str).contains(line_id_str))
+        return true;
+
+    return use_data_sources_lines_.at(ds_id_str).at(line_id_str);
+}
+
+void ReconstructorTask::useDataSourceLine(unsigned int ds_id, unsigned int line_id, bool value)
+{
+    use_data_sources_lines_[to_string(ds_id)][to_string(line_id)] = value;
+}
 
 void ReconstructorTask::checkSubConfigurables()
 {

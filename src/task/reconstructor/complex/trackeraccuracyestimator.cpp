@@ -85,7 +85,7 @@ void TrackerAccuracyEstimator::finalizeEstimateAccuracy()
 {
     std::tuple<double,double,double,double> dist_stat = Number::getStatistics (distances_);
 
-    loginf << " SRC " << name_ << ": dist "
+    loginf << "TrackerAccuracyEstimator SRC " << name_ << ": dist "
            << " avg " << String::doubleToStringPrecision(get<0>(dist_stat), 2)
            << " stddev " << String::doubleToStringPrecision(get<1>(dist_stat), 2)
            << " min " << String::doubleToStringPrecision(get<2>(dist_stat), 2)
@@ -93,7 +93,7 @@ void TrackerAccuracyEstimator::finalizeEstimateAccuracy()
 
     std::tuple<double,double,double,double> stddev_stat = Number::getStatistics (std_devs_);
 
-    loginf << " SRC " << name_ << ": stddev "
+    loginf << "TrackerAccuracyEstimator SRC " << name_ << ": stddev "
            << " avg " << String::doubleToStringPrecision(get<0>(stddev_stat), 2)
            << " stddev " << String::doubleToStringPrecision(get<1>(stddev_stat), 2)
            << " min " << String::doubleToStringPrecision(get<2>(stddev_stat), 2)

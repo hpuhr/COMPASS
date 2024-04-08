@@ -61,7 +61,7 @@ RadarAccuracyEstimator::RadarAccuracyEstimator(const dbContent::DBDataSource& ds
 void RadarAccuracyEstimator::validate (
     dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor)
 {
-
+    tr.do_not_use_position_ = true;
 }
 
 dbContent::targetReport::PositionAccuracy RadarAccuracyEstimator::positionAccuracy (

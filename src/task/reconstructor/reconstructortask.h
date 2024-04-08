@@ -5,6 +5,7 @@
 #include "dbcontent/dbcontentaccessor.h"
 #include "task.h"
 #include "global.h"
+#include "json.hpp"
 
 
 #include <QObject>
@@ -41,6 +42,13 @@ class ReconstructorTask : public Task, public Configurable
 
     void closeStatusDialogSlot();
 
+    bool useDStype(const std::string& ds_type);
+    void useDSType(const std::string& ds_type, bool value);
+    bool useDataSource(unsigned int ds_id);
+    void useDataSource(unsigned int ds_id, bool value);
+    bool useDataSourceLine(unsigned int ds_id, unsigned int line_id);
+    void useDataSourceLine(unsigned int ds_id, unsigned int line_id, bool value);
+
   public:
     ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                       TaskManager& task_manager);
@@ -67,6 +75,10 @@ class ReconstructorTask : public Task, public Configurable
   protected:
 
     std::string current_reconstructor_str_;
+
+    nlohmann::json use_dstypes_; // dstype -> bool
+    nlohmann::json use_data_sources_; // ds_id -> bool
+    nlohmann::json use_data_sources_lines_; // ds_id -> line_id -> bool
 
     std::unique_ptr<ReconstructorTaskDialog> dialog_;
 

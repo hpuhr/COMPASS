@@ -5,6 +5,7 @@
 #include "probimmreconstructor.h"
 #include "probimmreconstructorwidget.h"
 
+
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -22,7 +23,7 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     setModal(true);
 
-    setMinimumSize(QSize(800, 600));
+    setMinimumSize(QSize(1000, 800));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -50,6 +51,7 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     main_layout->addLayout(combo_layout);
 
     reconstructor_widget_stack_ = new QStackedWidget();
+
     reconstructor_widget_stack_->addWidget(task_.simpleReconstructor()->widget());
     reconstructor_widget_stack_->addWidget(task_.probIMMReconstructor()->widget());
 

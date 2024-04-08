@@ -79,6 +79,8 @@ class ReconstructorBase : public Configurable
     unsigned int ds_sic_ {1};
     unsigned int ds_line_ {0};
 
+    ReconstructorTask& task() const;
+
   protected:
     friend class dbContent::ReconstructorTarget;
     friend class SimpleReferenceCalculator;
@@ -89,6 +91,8 @@ class ReconstructorBase : public Configurable
     friend class MLATAccuracyEstimator;
     friend class RadarAccuracyEstimator;
     friend class TrackerAccuracyEstimator;
+
+    ReconstructorTask& task_;
 
     std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
 

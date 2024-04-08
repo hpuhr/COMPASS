@@ -210,6 +210,11 @@ boost::optional<unsigned char> TargetReportAccessor::mopsVersion(unsigned int in
     return getOptional<unsigned char>(cat021_mops_version_vec_, index);
 }
 
+boost::optional<unsigned char> TargetReportAccessor::nacp(unsigned int index) const
+{
+    return getOptional<unsigned char>(cat021_nac_p_vec_, index);
+}
+
 /**
 */
 boost::optional<unsigned int> TargetReportAccessor::acad(unsigned int index) const
@@ -272,7 +277,7 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
             auto nac_p = cat021_nac_p_vec_->get(index);
 
             if (!targetReport::AccuracyTables::adsb_v12_accuracies.count(nac_p))
-                return {}; // value unknown, also for 0 (undefined)
+                return {}; // value unknown
 
             x_stddev = targetReport::AccuracyTables::adsb_v12_accuracies.at(nac_p);
             y_stddev = x_stddev;
