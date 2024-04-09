@@ -107,6 +107,9 @@ public:
     static const Property meta_var_track_angle_; // deg
     static const Property meta_var_horizontal_man_;
 
+    static const Property meta_var_ax_;
+    static const Property meta_var_ay_;
+
     static const Property meta_var_x_stddev_;
     static const Property meta_var_y_stddev_;
     static const Property meta_var_xy_cov_;
@@ -116,6 +119,7 @@ public:
     static const Property meta_var_latlon_cov_;
 
     static const Property meta_var_climb_descent_;
+    static const Property meta_var_rocd_;
     static const Property meta_var_spi_;
 
     static const Property var_radar_range_;
@@ -137,6 +141,14 @@ public:
     static const Property var_cat062_type_lm_;
     static const Property var_cat062_baro_alt_;
     static const Property var_cat062_fl_measured_; // trusted, not valid
+
+    static const Property var_cat062_mom_long_acc_;
+    static const Property var_cat062_mom_trans_acc_;
+    static const Property var_cat062_mom_vert_rate_;
+
+    //Rate of Climb/Descent float feet / min
+    //Ax Ay float m/s2
+    // trans long vert "MOM Longitudinal Acc" "MOM Transversal Acc" "MOM Vertical Rate" uchar
 
     static const Property var_cat062_wtc_;
     static const Property var_cat062_callsign_fpl_;

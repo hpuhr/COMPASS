@@ -82,6 +82,9 @@ const Property DBContent::meta_var_ground_speed_ {"Track Groundspeed", PropertyD
 const Property DBContent::meta_var_track_angle_ {"Track Angle", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_horizontal_man_ {"Track Horizontal Manoeuvre", PropertyDataType::BOOL};
 
+const Property DBContent::meta_var_ax_ {"Ax", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_ay_ {"Ay", PropertyDataType::DOUBLE};
+
 const Property DBContent::meta_var_x_stddev_ {"X StdDev", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_y_stddev_ {"Y StdDev", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_xy_cov_ {"X/Y Covariance", PropertyDataType::DOUBLE};
@@ -90,6 +93,7 @@ const Property DBContent::meta_var_longitude_stddev_ {"Longitude StdDev", Proper
 const Property DBContent::meta_var_latlon_cov_ {"Lat/Lon Cov", PropertyDataType::DOUBLE};
 
 const Property DBContent::meta_var_climb_descent_{"Track Climbing/Descending", PropertyDataType::UCHAR};
+const Property DBContent::meta_var_rocd_ {"Rate Of Climb/Descent", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_spi_{"SPI", PropertyDataType::BOOL};
 
 const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
@@ -111,6 +115,10 @@ const Property DBContent::var_cat062_mono_sensor_ {"Monosensor", PropertyDataTyp
 const Property DBContent::var_cat062_type_lm_ {"Type LM", PropertyDataType::UCHAR};
 const Property DBContent::var_cat062_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
 const Property DBContent::var_cat062_fl_measured_ {"Flight Level Measured", PropertyDataType::FLOAT};
+
+const Property DBContent::var_cat062_mom_long_acc_ {"MOM Longitudinal Acc", PropertyDataType::UCHAR};
+const Property DBContent::var_cat062_mom_trans_acc_ {"MOM Transversal Acc", PropertyDataType::UCHAR};
+const Property DBContent::var_cat062_mom_vert_rate_ {"MOM Vertical Rate", PropertyDataType::UCHAR};
 
 const Property DBContent::var_cat062_wtc_ {"Wake Turbulence Category FPL", PropertyDataType::STRING};
 const Property DBContent::var_cat062_callsign_fpl_ {"Callsign FPL", PropertyDataType::STRING};
