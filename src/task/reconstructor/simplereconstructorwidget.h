@@ -6,7 +6,7 @@
 
 class SimpleReconstructor;
 class SimpleReconstructorAssociationWidget;
-class SimpleReconstructorReferenceCalculationWidget;
+class SimpleReferenceCalculatorWidget;
 
 class QLineEdit;
 class QCheckBox;
@@ -28,6 +28,6 @@ class SimpleReconstructorWidget : public QWidget
     SimpleReconstructor& reconstructor_;
 
     std::unique_ptr<SimpleReconstructorAssociationWidget> assoc_widget_;
-    std::unique_ptr<SimpleReconstructorReferenceCalculationWidget> calc_widget_;
+    std::unique_ptr<SimpleReferenceCalculatorWidget>      calc_widget_;
 };
 

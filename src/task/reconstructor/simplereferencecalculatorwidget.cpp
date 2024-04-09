@@ -1,8 +1,7 @@
 
-#include "simplereconstructorreferencecalculationwidget.h"
+#include "simplereferencecalculatorwidget.h"
 
-#include "simplereconstructorwidget.h"
-#include "simplereconstructor.h"
+#include "reconstructorbase.h"
 
 #include "compass.h"
 
@@ -15,10 +14,8 @@
 
 /**
 */
-SimpleReconstructorReferenceCalculationWidget::SimpleReconstructorReferenceCalculationWidget(SimpleReconstructor& reconstructor, 
-                                                                                             SimpleReconstructorWidget& parent)
+SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBase& reconstructor)
 :   reconstructor_(reconstructor)
-,   parent_       (parent       )
 {
     auto layout = new QFormLayout;
     setLayout(layout);
@@ -75,13 +72,15 @@ SimpleReconstructorReferenceCalculationWidget::SimpleReconstructorReferenceCalcu
     connect(min_chain_size_box_, QOverload<int>::of(&QSpinBox::valueChanged), [ = ] (int v) { settings->min_chain_size = v; });
     layout->addRow("Minimum Chain Size", min_chain_size_box_);
 
-    //@TODO: hide
-    min_dt_box_ = new QDoubleSpinBox;
-    min_dt_box_->setDecimals(8);
-    min_dt_box_->setMinimum(0.0);
-    min_dt_box_->setMaximum(DBL_MAX);
-    connect(min_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->min_dt = v; });
-    layout->addRow("Minimum Time Step [s]", min_dt_box_);
+    if (is_appimage)
+    {
+        min_dt_box_ = new QDoubleSpinBox;
+        min_dt_box_->setDecimals(8);
+        min_dt_box_->setMinimum(0.0);
+        min_dt_box_->setMaximum(DBL_MAX);
+        connect(min_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->min_dt = v; });
+        layout->addRow("Minimum Time Step [s]", min_dt_box_);
+    }
 
     max_dt_box_ = new QDoubleSpinBox;
     max_dt_box_->setDecimals(3);
@@ -90,13 +89,15 @@ SimpleReconstructorReferenceCalculationWidget::SimpleReconstructorReferenceCalcu
     connect(max_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_dt = v; });
     layout->addRow("Maximum Time Step [s]", max_dt_box_);
 
-    //@TODO: hide
-    max_distance_box_ = new QDoubleSpinBox;
-    max_distance_box_->setDecimals(3);
-    max_distance_box_->setMinimum(0.0);
-    max_distance_box_->setMaximum(DBL_MAX);
-    connect(max_distance_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_distance = v; });
-    layout->addRow("Maximum Distance [m]", max_distance_box_);
+    if (is_appimage)
+    {
+        max_distance_box_ = new QDoubleSpinBox;
+        max_distance_box_->setDecimals(3);
+        max_distance_box_->setMinimum(0.0);
+        max_distance_box_->setMaximum(DBL_MAX);
+        connect(max_distance_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_distance = v; });
+        layout->addRow("Maximum Distance [m]", max_distance_box_);
+    }
 
     addHeader("Input Data Preprocessing");
 
@@ -147,32 +148,32 @@ SimpleReconstructorReferenceCalculationWidget::SimpleReconstructorReferenceCalcu
 
 /**
 */
-SimpleReconstructorReferenceCalculationWidget::~SimpleReconstructorReferenceCalculationWidget() = default;
+SimpleReferenceCalculatorWidget::~SimpleReferenceCalculatorWidget() = default;
 
 /**
 */
-void SimpleReconstructorReferenceCalculationWidget::update()
+void SimpleReferenceCalculatorWidget::update()
 {
     const auto& settings = reconstructor_.referenceCalculatorSettings();
 
-    rec_type_combo_->setCurrentIndex(rec_type_combo_->findData(QVariant(settings.kalman_type)));
+    if (rec_type_combo_) rec_type_combo_->setCurrentIndex(rec_type_combo_->findData(QVariant(settings.kalman_type)));
 
-    Q_std_edit_->setValue(settings.Q_std);
+    if (Q_std_edit_) Q_std_edit_->setValue(settings.Q_std);
 
-    repr_distance_box_->setValue(settings.max_proj_distance_cart);
+    if (repr_distance_box_) repr_distance_box_->setValue(settings.max_proj_distance_cart);
 
-    min_chain_size_box_->setValue(settings.min_chain_size);
-    min_dt_box_->setValue(settings.min_dt);
-    max_dt_box_->setValue(settings.max_dt);
-    max_distance_box_->setValue(settings.max_distance);
+    if (min_chain_size_box_) min_chain_size_box_->setValue(settings.min_chain_size);
+    if (min_dt_box_) min_dt_box_->setValue(settings.min_dt);
+    if (max_dt_box_) max_dt_box_->setValue(settings.max_dt);
+    if (max_distance_box_) max_distance_box_->setValue(settings.max_distance);
 
-    smooth_rts_box_->setChecked(settings.smooth_rts);
+    if (smooth_rts_box_) smooth_rts_box_->setChecked(settings.smooth_rts);
 
-    resample_systracks_box_->setChecked(settings.resample_systracks);
-    resample_systracks_dt_box_->setValue(settings.resample_systracks_dt);
-    resample_systracks_maxdt_box_->setValue(settings.resample_systracks_max_dt);
+    if (resample_systracks_box_) resample_systracks_box_->setChecked(settings.resample_systracks);
+    if (resample_systracks_dt_box_) resample_systracks_dt_box_->setValue(settings.resample_systracks_dt);
+    if (resample_systracks_maxdt_box_) resample_systracks_maxdt_box_->setValue(settings.resample_systracks_max_dt);
 
-    resample_result_box_->setChecked(settings.resample_result);
-    resample_dt_box_->setValue(settings.resample_dt);
-    resample_Q_std_box_->setValue(settings.resample_Q_std);
+    if (resample_result_box_) resample_result_box_->setChecked(settings.resample_result);
+    if (resample_dt_box_) resample_dt_box_->setValue(settings.resample_dt);
+    if (resample_Q_std_box_) resample_Q_std_box_->setValue(settings.resample_Q_std);
 }

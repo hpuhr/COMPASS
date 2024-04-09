@@ -2,8 +2,7 @@
 
 #include <QWidget>
 
-class SimpleReconstructor;
-class SimpleReconstructorWidget;
+class ReconstructorBase;
 
 class QComboBox;
 class QDoubleSpinBox;
@@ -12,22 +11,20 @@ class QCheckBox;
 
 /**
 */
-class SimpleReconstructorReferenceCalculationWidget : public QWidget
+class SimpleReferenceCalculatorWidget : public QWidget
 {
     Q_OBJECT
 
   signals:
 
   public:
-    explicit SimpleReconstructorReferenceCalculationWidget(SimpleReconstructor& reconstructor, 
-                                                           SimpleReconstructorWidget& parent);
-    virtual ~SimpleReconstructorReferenceCalculationWidget();
+    explicit SimpleReferenceCalculatorWidget(ReconstructorBase& reconstructor);
+    virtual ~SimpleReferenceCalculatorWidget();
 
     void update();
 
   private:
-    SimpleReconstructor&       reconstructor_;
-    SimpleReconstructorWidget& parent_;
+    ReconstructorBase& reconstructor_;
 
     QComboBox*      rec_type_combo_               = nullptr;
     QDoubleSpinBox* Q_std_edit_                   = nullptr;

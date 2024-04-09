@@ -1,7 +1,7 @@
 #include "simplereconstructorwidget.h"
 #include "simplereconstructor.h"
 #include "simplereconstructorassociationwidget.h"
-#include "simplereconstructorreferencecalculationwidget.h"
+#include "simplereferencecalculatorwidget.h"
 #include "datasourcesusewidget.h"
 #include "reconstructortask.h"
 
@@ -50,7 +50,7 @@ SimpleReconstructorWidget::SimpleReconstructorWidget(SimpleReconstructor& recons
     assoc_widget_.reset(new SimpleReconstructorAssociationWidget(reconstructor_, *this));
     tab_widget->addTab(assoc_widget_.get(), "Association");
 
-    calc_widget_.reset(new SimpleReconstructorReferenceCalculationWidget(reconstructor_, *this));
+    calc_widget_.reset(new SimpleReferenceCalculatorWidget(reconstructor_));
     tab_widget->addTab(calc_widget_.get(), "Reference Calculation");
 
     update();

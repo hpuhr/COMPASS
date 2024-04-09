@@ -1,7 +1,9 @@
 #include "probimmreconstructorwidget.h"
+
 #include "probimmreconstructor.h"
 #include "datasourcesusewidget.h"
 #include "reconstructortask.h"
+#include "simplereferencecalculatorwidget.h"
 
 #include <QCheckBox>
 #include <QTabWidget>
@@ -45,13 +47,12 @@ ProbIMMReconstructorWidget::ProbIMMReconstructorWidget(ProbIMMReconstructor& rec
     tab_widget->addTab(use_widget, "Data Sources");
 
     tab_widget->addTab(new QWidget(), "Association");
-    tab_widget->addTab(new QWidget(), "Reference Calculation");
 
 //    assoc_widget_.reset(new SimpleReconstructorAssociationWidget(reconstructor_, *this));
 //    tab_widget->addTab(assoc_widget_.get(), "Association");
 
-//    calc_widget_.reset(new SimpleReconstructorReferenceCalculationWidget(reconstructor_, *this));
-//    tab_widget->addTab(calc_widget_.get(), "Reference Calculation");
+    calc_widget_.reset(new SimpleReferenceCalculatorWidget(reconstructor_));
+    tab_widget->addTab(calc_widget_.get(), "Reference Calculation");
 
     update();
 
@@ -65,18 +66,16 @@ ProbIMMReconstructorWidget::ProbIMMReconstructorWidget(ProbIMMReconstructor& rec
 ProbIMMReconstructorWidget::~ProbIMMReconstructorWidget()
 {
 //    assoc_widget_ = nullptr;
-//    calc_widget_ = nullptr;
+      calc_widget_ = nullptr;
 }
 
 void ProbIMMReconstructorWidget::update()
 {
 //    assoc_widget_->update();
-//    calc_widget_->update();
+      calc_widget_->update();
 }
-
 
 void ProbIMMReconstructorWidget::updateSlot()
 {
     update();
 }
-
