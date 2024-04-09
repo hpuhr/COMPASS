@@ -39,18 +39,22 @@ public:
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     virtual bool hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+            
 
     void exportAsCSV();
 
 protected:
     void update() override;
+
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
 
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

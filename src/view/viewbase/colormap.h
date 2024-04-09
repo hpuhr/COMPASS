@@ -40,7 +40,10 @@ public:
              size_t steps);
     
     QColor sample(double t) const;
+    QColor sampleValue(double v) const;
 
 private:
+    void reset();
+
     std::vector<QColor> colors_;
 };

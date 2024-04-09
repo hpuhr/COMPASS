@@ -232,7 +232,7 @@ bool JoinedPositionAlong::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionAlong::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedPositionAlong::viewableDataImpl(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
@@ -251,7 +251,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionAlong::getErrorsViewable
     tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
 
     (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
+    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;
 
     double lat_w = lat_max-lat_min;
     double lon_w = lon_max-lon_min;

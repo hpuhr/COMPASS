@@ -234,7 +234,7 @@ bool JoinedPositionDistance::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistance::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistance::viewableDataImpl(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
@@ -244,28 +244,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistance::viewableData(
 
 std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistance::getErrorsViewable ()
 {
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-    double lat_min, lat_max, lon_min, lon_max;
-
-    tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
-    tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
-
-    (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
-
-    double lat_w = lat_max-lat_min;
-    double lon_w = lon_max-lon_min;
-
-    if (lat_w < eval_man_.settings().result_detail_zoom_)
-        lat_w = eval_man_.settings().result_detail_zoom_;
-
-    if (lon_w < eval_man_.settings().result_detail_zoom_)
-        lon_w = eval_man_.settings().result_detail_zoom_;
-
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
+    std::unique_ptr<nlohmann::json::object_t> viewable_ptr = createViewable();
 
     addAnnotationsFromSingles(*viewable_ptr);
 
@@ -342,6 +321,22 @@ void JoinedPositionDistance::exportAsCSV()
                 output_file << all_values.at(cnt) << "\n";
         }
     }
+}
+
+std::map<std::string, std::vector<Joined::LayerDefinition>> JoinedPositionDistance::gridLayers() const
+{
+    std::map<std::string, std::vector<Joined::LayerDefinition>> layer_defs;
+
+    Joined::LayerDefinition def;
+    def.value_type = Grid2D::ValueType::ValueTypeMax;
+    def.render_settings.color_map.set(QColor(0, 255, 0), QColor(255, 0, 0), 1);
+    def.render_settings.pixels_per_cell = eval_man_.settings().grid_pixels_per_cell;
+    def.render_settings.min_value = 0.0;
+    def.render_settings.max_value = 1.0;
+    
+    layer_defs[ requirement_->name() ].push_back(def);
+
+    return layer_defs;
 }
 
 }

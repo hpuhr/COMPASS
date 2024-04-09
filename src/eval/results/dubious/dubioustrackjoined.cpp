@@ -251,7 +251,7 @@ bool JoinedDubiousTrack::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTrack::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTrack::viewableDataImpl(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));

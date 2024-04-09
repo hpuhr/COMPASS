@@ -120,8 +120,6 @@ public:
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     virtual bool hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -139,6 +137,9 @@ protected:
 
     virtual void join_impl(std::shared_ptr<Single> other) override;
     virtual void updatesToUseChanges_impl() override;
+
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     virtual std::vector<ReportParam> detailsOverviewDescriptions() const;
 

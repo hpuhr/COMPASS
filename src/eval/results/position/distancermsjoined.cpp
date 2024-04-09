@@ -259,7 +259,7 @@ bool JoinedPositionDistanceRMS::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistanceRMS::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistanceRMS::viewableDataImpl(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));

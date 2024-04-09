@@ -95,8 +95,8 @@ void Grid2DLayers::addLayer(const std::string& name,
 
 /**
 */
-QImage Grid2DLayerRenderer::render(const Grid2DLayer& layer,
-                                   const Grid2DRenderSettings& settings)
+std::pair<QImage,RasterReference> Grid2DLayerRenderer::render(const Grid2DLayer& layer,
+                                                              const Grid2DRenderSettings& settings)
 {
     const auto& data = layer.data;
 
@@ -121,6 +121,8 @@ QImage Grid2DLayerRenderer::render(const Grid2DLayer& layer,
     {
         return {};
     }
+
+    //std::cout << "vmin: " << vmin << ", vmax: " << vmax << std::endl;
 
     int pixels_per_cell = std::max(1, settings.pixels_per_cell);
 
@@ -161,5 +163,10 @@ QImage Grid2DLayerRenderer::render(const Grid2DLayer& layer,
         }
     }
 
-    return img;
+    RasterReference ref = layer.ref;
+
+    ref.img_pixel_size_x /= pixels_per_cell;
+    ref.img_pixel_size_y /= pixels_per_cell;
+
+    return std::make_pair(img, ref);
 }

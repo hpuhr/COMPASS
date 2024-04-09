@@ -22,6 +22,7 @@
 
 class QLineEdit;
 class QCheckBox;
+class QSpinBox;
 
 class EvaluationResultsGenerator;
 class EvaluationManager;
@@ -58,6 +59,10 @@ protected:
     QCheckBox* show_ok_joined_target_reports_check_ {nullptr};
 
     QLineEdit* result_detail_zoom_edit_{nullptr};
+
+    QSpinBox*  grid_num_cells_x_box_  = nullptr;
+    QSpinBox*  grid_num_cells_y_box_  = nullptr;
+    QSpinBox*  grid_pix_per_cell_box_ = nullptr;
 };
 
 #endif // EVALUATIONRESULTSGENERATORWIDGET_H

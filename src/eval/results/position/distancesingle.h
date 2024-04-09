@@ -61,8 +61,11 @@ public:
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     EvaluationRequirement::PositionDistance* req ();
+    const EvaluationRequirement::PositionDistance* req () const;
 
     void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+
+    virtual std::vector<Eigen::Vector3d> getGridValues(const std::string& layer) const override;
 
 protected:
     void update();

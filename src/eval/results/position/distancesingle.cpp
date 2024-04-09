@@ -539,5 +539,48 @@ EvaluationRequirement::PositionDistance* SinglePositionDistance::req ()
     return req;
 }
 
+const EvaluationRequirement::PositionDistance* SinglePositionDistance::req () const
+{
+    const EvaluationRequirement::PositionDistance* req =
+            dynamic_cast<const EvaluationRequirement::PositionDistance*>(requirement_.get());
+    assert (req);
+    return req;
+}
+
+std::vector<Eigen::Vector3d> SinglePositionDistance::getGridValues(const std::string& layer) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    bool failed_values_of_interest = req()->failedValuesOfInterest();
+
+    if (layer == requirement_->name())
+    {
+        const auto& details = getDetails();
+
+        values.reserve(details.size());
+
+        for (auto& detail_it : details)
+        {
+            if (detail_it.numPositions() == 1) // no ref pos
+                continue;
+
+            assert (detail_it.numPositions() == 2);
+
+            //double d = detail_it.getValue(DetailKey::Value).toDouble();
+
+            auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
+            assert(check_passed.has_value());
+
+            bool ok = (( failed_values_of_interest &&  check_passed.value()) ||
+                       (!failed_values_of_interest && !check_passed.value()));
+
+            values.emplace_back(detail_it.position(1).longitude_,
+                                detail_it.position(1).latitude_,
+                                ok ? 0.0 : 1.0);
+        } 
+    }
+
+    return values;
+}
 
 }

@@ -244,7 +244,7 @@ bool JoinedPositionRadarRange::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionRadarRange::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedPositionRadarRange::viewableDataImpl(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));

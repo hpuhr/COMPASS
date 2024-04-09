@@ -44,6 +44,7 @@ SimpleReconstructorReferenceCalculationWidget::SimpleReconstructorReferenceCalcu
     rec_type_combo_ = new QComboBox;
     rec_type_combo_->addItem("Uniform Motion"    , QVariant(kalman::UMKalman2D));
     rec_type_combo_->addItem("Accelerated Motion", QVariant(kalman::AMKalman2D));
+    rec_type_combo_->setEnabled(false);
     connect(rec_type_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), 
         [ = ] (int idx) { settings->kalman_type = (kalman::KalmanType)rec_type_combo_->currentData().toInt(); });
     layout->addRow("Kalman Type", rec_type_combo_);

@@ -44,9 +44,16 @@ struct RasterReference
         is_north_up      = srs_is_north_up;
     }
 
-    std::vector<double> geoTransform() const
+    std::vector<double> geoTransform(int offsx = 0, int offsy = 0) const
     {
-        return { img_origin_x, img_pixel_size_x, 0, img_origin_y, 0, is_north_up ? -img_pixel_size_y : img_pixel_size_y };
+        const double dy = is_north_up ? -img_pixel_size_y : img_pixel_size_y;
+
+        return { img_origin_x + offsx * img_pixel_size_x, 
+                 img_pixel_size_x, 
+                 0, 
+                 img_origin_y + offsy * dy, 
+                 0, 
+                 dy };
     }
 
     bool fromJSON(const nlohmann::json& json_ref)

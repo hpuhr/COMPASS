@@ -269,7 +269,7 @@ bool JoinedDubiousTarget::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTarget::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTarget::viewableDataImpl(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));

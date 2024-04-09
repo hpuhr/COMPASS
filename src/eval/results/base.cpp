@@ -102,7 +102,7 @@ bool Base::hasViewableData (
 std::unique_ptr<nlohmann::json::object_t> Base::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-    return nullptr;
+    return {};
 }
 
 

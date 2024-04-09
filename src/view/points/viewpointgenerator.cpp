@@ -530,7 +530,7 @@ QImage ViewPointGenFeatureGeoImage::byteStringToImage(const std::string& str)
     int* stride = (int*)(ba.data() + 2 * sizeof(int));
     int* format = (int*)(ba.data() + 3 * sizeof(int));
 
-    std::cout << "byte image - w: " << *w << ", h: " << *h << ", stride: " << *stride << ", format: " << *format << std::endl;
+    //std::cout << "byte image - w: " << *w << ", h: " << *h << ", stride: " << *stride << ", format: " << *format << std::endl;
 
     const char* data = ba.data() + 4 * sizeof(int);
 

@@ -766,7 +766,7 @@ bool JoinedIntervalBase::hasViewableData (
 
 /**
 */
-std::unique_ptr<nlohmann::json::object_t> JoinedIntervalBase::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedIntervalBase::viewableDataImpl(
         const EvaluationResultsReport::SectionContentTable& table, 
         const QVariant& annotation)
 {

@@ -318,7 +318,6 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
 
     //ATTENTION: !ORDER IMPORTANT!
 
-
     if (type == AnnotationType::TypeHighlight)
     {
         // should be first

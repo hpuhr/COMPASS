@@ -190,7 +190,7 @@ bool JoinedModeCCorrect::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedModeCCorrect::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedModeCCorrect::viewableDataImpl(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));

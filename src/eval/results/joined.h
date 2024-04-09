@@ -19,6 +19,8 @@
 #define JOINEDEVALUATIONREQUIREMENTRESULT_H
 
 #include "eval/results/base.h"
+#include "view/gridview/grid2d.h"
+#include "view/gridview/grid2dlayer.h"
 
 namespace EvaluationRequirementResult
 {
@@ -41,6 +43,9 @@ public:
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override final;
+
     std::vector<std::shared_ptr<Single>>& results();
 
     void updatesToUseChanges();
@@ -52,12 +57,32 @@ public:
 protected:
     std::vector<std::shared_ptr<Single>> results_;
 
+    std::unique_ptr<Grid2D> grid_;
+
+    struct LayerDefinition
+    {
+        Grid2D::ValueType    value_type;
+        Grid2DRenderSettings render_settings;
+    };
+
     void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
 
     virtual void join_impl(std::shared_ptr<Single> other) = 0;
     virtual void updatesToUseChanges_impl() = 0;
 
+    std::unique_ptr<nlohmann::json::object_t> createViewable() const;
+
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) { return {}; }
+
     void addAnnotationsFromSingles(nlohmann::json::object_t& viewable_ref);
+
+    void createGrid(size_t num_cells_x, size_t num_cells_y);
+    void createGrid(double cell_size_x, double cell_size_y);
+    bool addToGrid(double lon, double lat, double value);
+    void addGridToViewData(nlohmann::json::object_t& view_data);
+
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const { return {}; }
 };
 
 }

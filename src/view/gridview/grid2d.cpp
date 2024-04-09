@@ -43,12 +43,41 @@ const double Grid2D::InvalidValue = std::numeric_limits<double>::max();
 */
 Grid2D::Grid2D()
 {
+    vtype_indices_.resize(NumValueTypes);
+    vtype_indices_[ ValueTypeCount  ] = IndexCount;
+    vtype_indices_[ ValueTypeMin    ] = IndexMin;
+    vtype_indices_[ ValueTypeMax    ] = IndexMax;
+    vtype_indices_[ ValueTypeMean   ] = IndexMean;
+    vtype_indices_[ ValueTypeVar    ] = IndexVar;
+    vtype_indices_[ ValueTypeStddev ] = IndexStddev;
 }
 
 /**
 */
 Grid2D::~Grid2D()
 {
+}
+
+/**
+*/
+std::string Grid2D::valueTypeToString(ValueType vtype)
+{
+    switch (vtype)
+    {
+        case ValueTypeCount:
+            return "count";
+        case ValueTypeMin:
+            return "min";
+        case ValueTypeMax:
+            return "max";
+        case ValueTypeMean:
+            return "mean";
+        case ValueTypeVar:
+            return "var";
+        case ValueTypeStddev:
+            return "stddev";
+    }
+    return "";
 }
 
 /**
@@ -121,8 +150,8 @@ bool Grid2D::create(const QRectF& roi,
     n_cells_y_ = num_cells_y;
     n_cells_   = n_cells_x_ * n_cells_y_;
 
-    double cell_size_x = 1.0 / n_cells_x_;
-    double cell_size_y = 1.0 / n_cells_y_;
+    double cell_size_x = roi.width()  / n_cells_x_;
+    double cell_size_y = roi.height() / n_cells_y_;
 
     if (cell_size_x < 1e-09 || 
         cell_size_y < 1e-09)
@@ -272,9 +301,11 @@ bool Grid2D::setCount(double x, double y, size_t count)
 
 /**
 */
-Eigen::MatrixXd Grid2D::getValues(Value vtype) const
+Eigen::MatrixXd Grid2D::getValues(ValueType vtype) const
 {
-    Eigen::MatrixXd l = layers_[ vtype ];
+    ValueIndex vindex = vtype_indices_[ vtype ];
+
+    Eigen::MatrixXd l = layers_[ vindex ];
     double* d = l.data();
 
     const auto&   count  = layers_[ IndexCount ];
@@ -286,13 +317,13 @@ Eigen::MatrixXd Grid2D::getValues(Value vtype) const
         if(dcount[ i ] == 0)
             d[ i ] = InvalidValue;
     
-    if (vtype == Value::IndexVar)
+    if (vtype == ValueType::ValueTypeVar)
     {
         for (size_t i = 0; i < n; ++i)
             if (d[ i ] != InvalidValue)
                 d[ i ] /= dcount[ i ];
     }
-    else if (vtype == Value::IndexStddev)
+    else if (vtype == ValueType::ValueTypeStddev)
     {
         for (size_t i = 0; i < n; ++i)
             if (d[ i ] != InvalidValue)

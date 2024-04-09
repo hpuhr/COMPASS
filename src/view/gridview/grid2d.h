@@ -56,7 +56,7 @@ public:
         double mean2     = 0.0;
     };
 
-    enum Value
+    enum ValueIndex
     {
         IndexValue    = 0,
         IndexCount    = 0,
@@ -67,6 +67,17 @@ public:
         IndexVar      = 4,
         IndexStddev   = 4,
         NumLayers     = 5
+    };
+
+    enum ValueType
+    {
+        ValueTypeCount = 0,
+        ValueTypeMin,
+        ValueTypeMax,
+        ValueTypeMean,
+        ValueTypeVar,
+        ValueTypeStddev,
+        NumValueTypes
     };
 
     Grid2D();
@@ -95,8 +106,10 @@ public:
     bool setValue(double x, double y, double v);
     bool setCount(double x, double y, size_t count);
 
-    Eigen::MatrixXd getValues(Value vtype) const;
+    Eigen::MatrixXd getValues(ValueType vtype) const;
     const RasterReference& getReference() const;
+
+    static std::string valueTypeToString(ValueType vtype);
 
     static const double InvalidValue;
 
@@ -129,4 +142,5 @@ private:
     RasterReference ref_;
 
     std::vector<Eigen::MatrixXd> layers_;
+    std::vector<ValueIndex>      vtype_indices_;
 };

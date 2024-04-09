@@ -24,6 +24,8 @@
 
 #include <boost/optional.hpp>
 
+#include <Eigen/Core>
+
 const double OSGVIEW_POS_WINDOW_SCALE {1.8};
 
 namespace EvaluationRequirementResult
@@ -63,6 +65,8 @@ public:
     const static std::string target_table_name_;
 
     virtual void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) = 0;
+
+    virtual std::vector<Eigen::Vector3d> getGridValues(const std::string& layer) const { return {}; }
 
 protected:
     enum AnnotationType

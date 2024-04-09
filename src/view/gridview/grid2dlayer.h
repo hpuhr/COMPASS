@@ -74,6 +74,6 @@ struct Grid2DRenderSettings
 class Grid2DLayerRenderer
 {
 public:
-    static QImage render(const Grid2DLayer& layer,
-                         const Grid2DRenderSettings& settings);
+    static std::pair<QImage,RasterReference> render(const Grid2DLayer& layer,
+                                                    const Grid2DRenderSettings& settings);
 };

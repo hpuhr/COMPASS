@@ -251,6 +251,11 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
         settings_.report_open_created_pdf_ = false;
     }
 
+    //grid generation
+    registerParameter("grid_num_cells_x", &settings_.grid_num_cells_x, Settings().grid_num_cells_x);
+    registerParameter("grid_num_cells_y", &settings_.grid_num_cells_y, Settings().grid_num_cells_y);
+    registerParameter("grid_pixels_per_cell", &settings_.grid_pixels_per_cell, Settings().grid_pixels_per_cell);
+
     registerParameter("warning_shown", &settings_.warning_shown_, Settings().warning_shown_);
 
     createSubConfigurables();

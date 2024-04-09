@@ -239,7 +239,7 @@ bool JoinedTrackAngle::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedTrackAngle::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedTrackAngle::viewableDataImpl(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
