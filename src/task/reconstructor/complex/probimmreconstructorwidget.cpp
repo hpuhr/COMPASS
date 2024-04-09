@@ -40,6 +40,7 @@ ProbIMMReconstructorWidget::ProbIMMReconstructorWidget(ProbIMMReconstructor& rec
         get_use_dstype_func, set_use_dstype_func,
         get_use_ds_func, set_use_ds_func,
         get_use_ds_line_func, set_use_ds_line_func);
+    use_widget->disableDataSources(reconstructor_.task().disabledDataSources());
 
     tab_widget->addTab(use_widget, "Data Sources");
 

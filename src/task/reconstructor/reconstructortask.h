@@ -42,12 +42,15 @@ class ReconstructorTask : public Task, public Configurable
 
     void closeStatusDialogSlot();
 
-    bool useDStype(const std::string& ds_type);
+    bool useDStype(const std::string& ds_type) const;
     void useDSType(const std::string& ds_type, bool value);
-    bool useDataSource(unsigned int ds_id);
+    bool useDataSource(unsigned int ds_id) const;
     void useDataSource(unsigned int ds_id, bool value);
-    bool useDataSourceLine(unsigned int ds_id, unsigned int line_id);
+    bool useDataSourceLine(unsigned int ds_id, unsigned int line_id) const;
     void useDataSourceLine(unsigned int ds_id, unsigned int line_id, bool value);
+
+    std::set<unsigned int> unusedDSIDs() const;
+    std::map<unsigned int, std::set<unsigned int>> unusedDSIDLines() const;
 
   public:
     ReconstructorTask(const std::string& class_id, const std::string& instance_id,
@@ -72,6 +75,8 @@ class ReconstructorTask : public Task, public Configurable
     SimpleReconstructor* simpleReconstructor() const;
     ProbIMMReconstructor* probIMMReconstructor() const;
 
+    std::set<unsigned int> disabledDataSources() const;
+
   protected:
 
     std::string current_reconstructor_str_;
@@ -79,6 +84,8 @@ class ReconstructorTask : public Task, public Configurable
     nlohmann::json use_dstypes_; // dstype -> bool
     nlohmann::json use_data_sources_; // ds_id -> bool
     nlohmann::json use_data_sources_lines_; // ds_id -> line_id -> bool
+
+    //unsigned int calculated_reftraj_ds_id{0};
 
     std::unique_ptr<ReconstructorTaskDialog> dialog_;
 

@@ -37,6 +37,7 @@ class DBDataSourceWidget : public QWidget
         std::function<bool()> show_counts_func,
         QWidget *parent = nullptr);
 
+    void setLoadChecked (bool value);
     void updateContent();
 
     unsigned int getLabelMinWidth();

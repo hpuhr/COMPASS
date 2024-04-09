@@ -114,6 +114,8 @@ void ReconstructorTask::run()
 
     loginf << "ReconstructorTask: run: started";
 
+    //calculated_reftraj_ds_id = Number::dsIdFrom(currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_);
+
     deleteCalculatedReferences();
 
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
@@ -170,6 +172,22 @@ SimpleReconstructor* ReconstructorTask::simpleReconstructor() const
 ProbIMMReconstructor* ReconstructorTask::probIMMReconstructor() const
 {
     return probimm_reconstructor_.get();
+}
+
+std::set<unsigned int> ReconstructorTask::disabledDataSources() const
+{
+    std::set<unsigned int> disabled_ds;
+
+    disabled_ds.insert(Number::dsIdFrom(currentReconstructor()->ds_sac_,
+                                        currentReconstructor()->ds_sic_));
+
+    for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+    {
+        if (ds_it->dsType() == "Radar")
+            disabled_ds.insert(ds_it->id());
+    }
+
+    return disabled_ds;
 }
 
 void ReconstructorTask::dialogRunSlot()
@@ -256,7 +274,7 @@ void ReconstructorTask::closeStatusDialogSlot()
 //    status_dialog_ = nullptr;
 }
 
-bool ReconstructorTask::useDStype(const std::string& ds_type)
+bool ReconstructorTask::useDStype(const std::string& ds_type) const
 {
     if (!use_dstypes_.contains(ds_type))
         return true;
@@ -269,7 +287,7 @@ void ReconstructorTask::useDSType(const std::string& ds_type, bool value)
     use_dstypes_[ds_type] = value;
 }
 
-bool ReconstructorTask::useDataSource(unsigned int ds_id)
+bool ReconstructorTask::useDataSource(unsigned int ds_id) const
 {
     string ds_id_str = to_string(ds_id);
 
@@ -284,7 +302,7 @@ void ReconstructorTask::useDataSource(unsigned int ds_id, bool value)
     use_data_sources_[to_string(ds_id)] = value;
 }
 
-bool ReconstructorTask::useDataSourceLine(unsigned int ds_id, unsigned int line_id)
+bool ReconstructorTask::useDataSourceLine(unsigned int ds_id, unsigned int line_id) const
 {
     string ds_id_str = to_string(ds_id);
     string line_id_str = to_string(line_id);
@@ -301,6 +319,43 @@ bool ReconstructorTask::useDataSourceLine(unsigned int ds_id, unsigned int line_
 void ReconstructorTask::useDataSourceLine(unsigned int ds_id, unsigned int line_id, bool value)
 {
     use_data_sources_lines_[to_string(ds_id)][to_string(line_id)] = value;
+}
+
+std::set<unsigned int> ReconstructorTask::unusedDSIDs() const
+{
+    std::set<unsigned int> unused_ds = disabledDataSources();
+
+    for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+    {
+        if (unused_ds.count(ds_it->id()))
+            continue;
+
+        if (!useDStype(ds_it->dsType()) || !useDataSource(ds_it->id()))
+            unused_ds.insert(ds_it->id());
+    }
+
+    return unused_ds;
+}
+
+std::map<unsigned int, std::set<unsigned int>> ReconstructorTask::unusedDSIDLines() const
+{
+    std::set<unsigned int> unused_ds = unusedDSIDs();
+
+    std::map<unsigned int, std::set<unsigned int>> unused_lines;
+
+    for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+    {
+        if (unused_ds.count(ds_it->id()))
+            continue;
+
+        for (unsigned int line_id = 0; line_id < 4; ++line_id)
+        {
+            if (!useDataSourceLine(ds_it->id(), line_id))
+                unused_lines[ds_it->id()].insert(line_id);
+        }
+    }
+
+    return unused_lines;
 }
 
 void ReconstructorTask::checkSubConfigurables()

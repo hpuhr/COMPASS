@@ -192,7 +192,10 @@ void ReconstructorBase::createTargetReports()
 
     accessors_.clear();
 
-    unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+    //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+
+    std::set<unsigned int> unused_ds_ids = task_.unusedDSIDs();
+    std::map<unsigned int, std::set<unsigned int>> unused_lines = task_.unusedDSIDLines();
 
     for (auto& buf_it : *accessor_)
     {
@@ -237,7 +240,10 @@ void ReconstructorBase::createTargetReports()
 
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
-                info.do_not_use_position_ = (info.ds_id_ == calc_ref_ds_id);
+
+                info.do_not_use_position_ =
+                    (unused_ds_ids.count(info.ds_id_)
+                     || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
 
                 info.barometric_altitude_ = tgt_acc.barometricAltitude(cnt);
 

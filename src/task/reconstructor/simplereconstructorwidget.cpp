@@ -33,14 +33,17 @@ SimpleReconstructorWidget::SimpleReconstructorWidget(SimpleReconstructor& recons
     std::function<void(unsigned int,bool)> set_use_ds_func =
         [this] (unsigned int ds_id, bool value) { return reconstructor_.task().useDataSource(ds_id, value); };
     std::function<bool(unsigned int,unsigned int)> get_use_ds_line_func =
-        [this] (unsigned int ds_id, unsigned int line_id) { return reconstructor_.task().useDataSourceLine(ds_id, line_id); };
+        [this] (unsigned int ds_id, unsigned int line_id)
+    { return reconstructor_.task().useDataSourceLine(ds_id, line_id); };
     std::function<void(unsigned int,unsigned int, bool)> set_use_ds_line_func =
-        [this] (unsigned int ds_id, unsigned int line_id, bool value) { return reconstructor_.task().useDataSourceLine(ds_id, line_id, value); };
+        [this] (unsigned int ds_id, unsigned int line_id, bool value)
+    { return reconstructor_.task().useDataSourceLine(ds_id, line_id, value); };
 
     DataSourcesUseWidget* use_widget = new DataSourcesUseWidget(
         get_use_dstype_func, set_use_dstype_func,
         get_use_ds_func, set_use_ds_func,
         get_use_ds_line_func, set_use_ds_line_func);
+    use_widget->disableDataSources(reconstructor_.task().disabledDataSources());
 
     tab_widget->addTab(use_widget, "Data Sources");
 

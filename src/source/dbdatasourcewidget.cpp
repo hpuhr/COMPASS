@@ -45,6 +45,12 @@ DBDataSourceWidget::DBDataSourceWidget(
     //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 }
 
+void DBDataSourceWidget::setLoadChecked (bool value)
+{
+    assert (load_check_);
+    load_check_->setChecked(value);
+}
+
 void DBDataSourceWidget::updateContent()
 {
     if (needsRecreate())
@@ -350,10 +356,11 @@ void DBDataSourceWidget::updateWidgets()
 
 void DBDataSourceWidget::loadingChangedSlot()
 {
-
     loginf << "DBDataSourceWidget: loadingChangedSlot";
 
     set_use_ds_func_(!get_use_ds_func_());
+
+    load_check_->setChecked(get_use_ds_func_());
     //src_.loadingWanted(!src_.loadingWanted());
 }
 
