@@ -110,6 +110,10 @@ public:
     static const Property meta_var_ax_;
     static const Property meta_var_ay_;
 
+    static const Property meta_var_mom_long_acc_;
+    static const Property meta_var_mom_trans_acc_;
+    static const Property meta_var_mom_vert_rate_;
+
     static const Property meta_var_x_stddev_;
     static const Property meta_var_y_stddev_;
     static const Property meta_var_xy_cov_;
@@ -141,10 +145,6 @@ public:
     static const Property var_cat062_type_lm_;
     static const Property var_cat062_baro_alt_;
     static const Property var_cat062_fl_measured_; // trusted, not valid
-
-    static const Property var_cat062_mom_long_acc_;
-    static const Property var_cat062_mom_trans_acc_;
-    static const Property var_cat062_mom_vert_rate_;
 
     //Rate of Climb/Descent float feet / min
     //Ax Ay float m/s2

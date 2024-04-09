@@ -74,6 +74,69 @@
             }
         },
         "MetaVariable": {
+            "MetaMOMLongitudinalAcc0": {
+                "parameters": {
+                    "name": "MOM Longitudinal Acc"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062MOMLongitudinalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Longitudinal Acc"
+                            }
+                        },
+                        "VariableDefinitionRefTrajMOMLongitudinalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "MOM Longitudinal Acc"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaMOMTransversalAcc0": {
+                "parameters": {
+                    "name": "MOM Transversal Acc"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062MOMTransversalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Transversal Acc"
+                            }
+                        },
+                        "VariableDefinitionRefTrajMOMTransversalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "MOM Transversal Acc"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaMOMVerticalRate0": {
+                "parameters": {
+                    "name": "MOM VerticalRate"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062MOMVerticalRateAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Vertical Rate"
+                            }
+                        },
+                        "VariableDefinitionRefTrajMOMVerticalRatelAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "MOM Vertical Rate"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaVariableARTAS Hash0": {
                 "parameters": {
                     "name": "ARTAS Hash"

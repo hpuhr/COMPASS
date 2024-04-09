@@ -85,6 +85,10 @@ const Property DBContent::meta_var_horizontal_man_ {"Track Horizontal Manoeuvre"
 const Property DBContent::meta_var_ax_ {"Ax", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_ay_ {"Ay", PropertyDataType::DOUBLE};
 
+const Property DBContent::meta_var_mom_long_acc_ {"MOM Longitudinal Acc", PropertyDataType::UCHAR};
+const Property DBContent::meta_var_mom_trans_acc_ {"MOM Transversal Acc", PropertyDataType::UCHAR};
+const Property DBContent::meta_var_mom_vert_rate_ {"MOM Vertical Rate", PropertyDataType::UCHAR};
+
 const Property DBContent::meta_var_x_stddev_ {"X StdDev", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_y_stddev_ {"Y StdDev", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_xy_cov_ {"X/Y Covariance", PropertyDataType::DOUBLE};
@@ -115,10 +119,6 @@ const Property DBContent::var_cat062_mono_sensor_ {"Monosensor", PropertyDataTyp
 const Property DBContent::var_cat062_type_lm_ {"Type LM", PropertyDataType::UCHAR};
 const Property DBContent::var_cat062_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
 const Property DBContent::var_cat062_fl_measured_ {"Flight Level Measured", PropertyDataType::FLOAT};
-
-const Property DBContent::var_cat062_mom_long_acc_ {"MOM Longitudinal Acc", PropertyDataType::UCHAR};
-const Property DBContent::var_cat062_mom_trans_acc_ {"MOM Transversal Acc", PropertyDataType::UCHAR};
-const Property DBContent::var_cat062_mom_vert_rate_ {"MOM Vertical Rate", PropertyDataType::UCHAR};
 
 const Property DBContent::var_cat062_wtc_ {"Wake Turbulence Category FPL", PropertyDataType::STRING};
 const Property DBContent::var_cat062_callsign_fpl_ {"Callsign FPL", PropertyDataType::STRING};

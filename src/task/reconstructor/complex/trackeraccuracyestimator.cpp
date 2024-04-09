@@ -83,6 +83,9 @@ void TrackerAccuracyEstimator::estimateAccuracyUsing(
 
 void TrackerAccuracyEstimator::finalizeEstimateAccuracy()
 {
+    if (!distances_.size())
+        return;
+
     std::tuple<double,double,double,double> dist_stat = Number::getStatistics (distances_);
 
     loginf << "TrackerAccuracyEstimator SRC " << name_ << ": dist "
