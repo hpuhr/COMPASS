@@ -832,6 +832,11 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
     double acceleration_ms2;
     double speed_ms, angle_deg;
 
+    boost::optional<double> acc1, acc2;
+    double delta_acc;
+    boost::optional<double> rocd1, rocd2;
+    double delta_rocd;
+
     logdbg << "Chain: addPositionsSpeedsToMapping: d_t " << d_t;
 
     assert (d_t > 0);
@@ -960,6 +965,30 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
                     mapping.has_ref_spd_          = true;
                     mapping.spd_ref_.speed_       = speed_ms;
                     mapping.spd_ref_.track_angle_ = angle_deg;
+                }
+
+                // acceleration
+                acc1 = acceleration(mapping.dataid_ref1_);
+                acc2 = acceleration(mapping.dataid_ref2_);
+
+                if (acc1.has_value() && acc2.has_value())
+                {
+                    delta_acc = (*acc2 - *acc1)/d_t;
+
+                    mapping.has_ref_acc_ = true;
+                    mapping.ref_acc_ = *acc1 + delta_acc * d_t2;
+                }
+
+                // rocd
+                rocd1 = acceleration(mapping.dataid_ref1_);
+                rocd2 = acceleration(mapping.dataid_ref2_);
+
+                if (rocd1.has_value() && rocd2.has_value())
+                {
+                    delta_rocd = (*rocd2 - *rocd1)/d_t;
+
+                    mapping.has_ref_rocd_ = true;
+                    mapping.ref_rocd_ = *rocd1 + delta_rocd * d_t2;
                 }
             }
         }

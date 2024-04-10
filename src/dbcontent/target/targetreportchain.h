@@ -104,6 +104,12 @@ struct DataMapping // mapping to respective ref data
 
     bool has_ref_spd_ {false};
     dbContent::TargetVelocity spd_ref_;
+
+    bool has_ref_acc_ {false}; // acceleration m/s2
+    double ref_acc_{0};
+
+    bool has_ref_rocd_ {false}; // rate of limb/descent ft/min
+    double ref_rocd_{0};
 };
 
 class Chain

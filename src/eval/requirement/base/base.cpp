@@ -32,7 +32,7 @@ namespace EvaluationRequirement
 std::function<boost::optional<std::string>(const dbContent::TargetReport::Chain&,
                                            const dbContent::TargetReport::Chain::DataID&)> Base::getACID =
     [] (const dbContent::TargetReport::Chain& chain,
-           const dbContent::TargetReport::Chain::DataID& id) { return chain.acid(id); };
+       const dbContent::TargetReport::Chain::DataID& id) { return chain.acid(id); };
 
 std::function<bool(const std::string&, const std::string&)> Base::cmpACID =
     [] (const std::string& val1, const std::string& val2) { return val1 == val2; };
@@ -42,7 +42,7 @@ std::function<std::string(const std::string&)> Base::printACID =
 
 // acad
 std::function<boost::optional<unsigned int>(const dbContent::TargetReport::Chain&,
-                                           const dbContent::TargetReport::Chain::DataID&)> Base::getACAD =
+                                            const dbContent::TargetReport::Chain::DataID&)> Base::getACAD =
     [] (const dbContent::TargetReport::Chain& chain,
        const dbContent::TargetReport::Chain::DataID& id) { return chain.acad(id); };
 
@@ -66,7 +66,7 @@ std::function<std::string(const unsigned int&)> Base::printModeA =
 
 // mode c
 std::function<boost::optional<float>(const dbContent::TargetReport::Chain&,
-                                            const dbContent::TargetReport::Chain::DataID&)> Base::getModeC =
+                                     const dbContent::TargetReport::Chain::DataID&)> Base::getModeC =
     [] (const dbContent::TargetReport::Chain& chain,
        const dbContent::TargetReport::Chain::DataID& id) { return chain.modeC(id); };
 
@@ -75,6 +75,30 @@ std::function<bool(const float&, const float&, const float&)> Base::cmpModeC =
 
 std::function<std::string(const float&)> Base::printModeC =
     [] (const unsigned int& val) { return String::doubleToStringPrecision(val, 2); };
+
+// moms
+
+std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chain&,
+                                             const dbContent::TargetReport::Chain::DataID&)> Base::getMomLongAcc =
+    [] (const dbContent::TargetReport::Chain& chain,
+       const dbContent::TargetReport::Chain::DataID& id) { return chain.momLongAcc(id); };
+
+std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chain&,
+                                             const dbContent::TargetReport::Chain::DataID&)> Base::getMomTransAcc  =
+    [] (const dbContent::TargetReport::Chain& chain,
+       const dbContent::TargetReport::Chain::DataID& id) { return chain.momTransAcc(id); };
+
+std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chain&,
+                                             const dbContent::TargetReport::Chain::DataID&)> Base::getMomVertRate  =
+    [] (const dbContent::TargetReport::Chain& chain,
+       const dbContent::TargetReport::Chain::DataID& id) { return chain.momVertRate(id); };
+
+std::function<bool(const unsigned char&, const unsigned char&)> Base::cmpMomAny =
+    [] (const unsigned char& val1, const unsigned char& val2) { return val1 == val2; };
+
+std::function<std::string(const unsigned char&)> Base::printMomAny =
+    [] (const unsigned char& val) { return to_string((unsigned int) val); };
+
 
 Base::Base(const std::string& name, const std::string& short_name, const std::string& group_name,
            EvaluationManager& eval_man)
@@ -106,35 +130,56 @@ std::string Base::groupName() const
 
 
 std::pair<ValueComparisonResult, std::string> Base::compareTi (
-        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff) const
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    time_duration max_ref_time_diff) const
 {
     return compare<std::string>(id, target_data, max_ref_time_diff, getACID, cmpACID, printACID);
 }
 
 std::pair<ValueComparisonResult, std::string> Base::compareTa (
-        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff) const
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    time_duration max_ref_time_diff) const
 {
     return compare<unsigned int>(id, target_data, max_ref_time_diff, getACAD, cmpACAD, printACAD);
 }
 
 std::pair<ValueComparisonResult, std::string> Base::compareModeA (
-        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff) const
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    time_duration max_ref_time_diff) const
 {
     return compare<unsigned int>(id, target_data, max_ref_time_diff, getModeA, cmpModeA, printModeA);
 }
 
 std::pair<ValueComparisonResult, std::string> Base::compareModeC (
-        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
-        time_duration max_ref_time_diff, float max_val_diff) const
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    time_duration max_ref_time_diff, float max_val_diff) const
 {
 
     std::function<bool(const float&, const float&)> tmp_cmpModeC =
         [max_val_diff] (const float& val1, const float& val2) { return fabs(val1 - val2) <= max_val_diff; };
 
-     return compare<float>(id, target_data, max_ref_time_diff, getModeC, tmp_cmpModeC, printModeC);
+    return compare<float>(id, target_data, max_ref_time_diff, getModeC, tmp_cmpModeC, printModeC);
+}
+
+std::pair<ValueComparisonResult, std::string> Base::compareMomLongAcc (
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    boost::posix_time::time_duration max_ref_time_diff) const
+{
+    return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomLongAcc, cmpMomAny, printMomAny);
+}
+
+std::pair<ValueComparisonResult, std::string> Base::compareMomTransAcc (
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    boost::posix_time::time_duration max_ref_time_diff) const
+{
+    return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomTransAcc, cmpMomAny, printMomAny);
+}
+
+std::pair<ValueComparisonResult, std::string> Base::compareMomVertRate (
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    boost::posix_time::time_duration max_ref_time_diff) const
+{
+    return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomVertRate, cmpMomAny, printMomAny);
 }
 
 }

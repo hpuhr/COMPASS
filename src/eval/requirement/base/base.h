@@ -100,6 +100,20 @@ class Base
     static std::function<bool(const float&, const float&, const float&)> cmpModeC;
     static std::function<std::string(const float&)> printModeC;
 
+    // moms
+
+    static std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chain&,
+                                                       const dbContent::TargetReport::Chain::DataID&)> getMomLongAcc;
+
+    static std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chain&,
+                                                       const dbContent::TargetReport::Chain::DataID&)> getMomTransAcc;
+
+    static std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chain&,
+                                                       const dbContent::TargetReport::Chain::DataID&)> getMomVertRate;
+
+    static std::function<bool(const unsigned char&, const unsigned char&)> cmpMomAny;
+    static std::function<std::string(const unsigned char&)> printMomAny;
+
     template <typename T>
     std::pair<ValueComparisonResult, std::string> compare (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
@@ -108,97 +122,117 @@ class Base
                                                     const dbContent::TargetReport::Chain::DataID& id)>& getter,
         std::function<bool(const T& val1, const T& val2)>& cmp,
         std::function<std::string(const T& val)>& to_str
-        ) const // tst timestamp
-    {
-        boost::posix_time::ptime ref_lower, ref_upper;
-        std::tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
-
-        boost::optional<T> tst_value, ref_value_lower, ref_value_upper;
-
-        tst_value = getter(target_data.tstChain(), id);
-
-        if (!ref_lower.is_not_a_date_time())
-            ref_value_lower = getter(target_data.refChain(), ref_lower);
-
-        if (!ref_upper.is_not_a_date_time())
-            ref_value_upper = getter(target_data.refChain(), ref_upper);
-
-        bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
-
-        if (!has_ref_data)
-        {
-            if (tst_value.has_value())
-                return {ValueComparisonResult::Different, "Tst data without ref value"};
-            else
-                return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
-        }
-
-        if (tst_value.has_value())
-        {
-            bool value_ok;
-            bool lower_nok, upper_nok;
-
-            assert (has_ref_data); // ref times possible
-
-            value_ok = false;
-
-            lower_nok = false;
-            upper_nok = false;
-
-            if (ref_value_lower.has_value())
-            {
-                value_ok = cmp(*ref_value_lower, *tst_value);
-                lower_nok = !value_ok;
-            }
-
-            if (!value_ok && ref_value_upper.has_value())
-            {
-                value_ok = cmp(*ref_value_upper, *tst_value);
-                upper_nok = !value_ok;
-            }
-
-            if (value_ok)
-                return {ValueComparisonResult::Same, "OK"};
-            else
-            {
-                std::string comment = "Not OK:";
-
-                if (lower_nok)
-                {
-                    comment += " tst '" + to_str(*tst_value)
-                               +"' ref at " + Utils::Time::toString(ref_lower)
-                               + " '" + to_str(*ref_value_lower) + "'";
-                }
-                else
-                {
-                    assert (upper_nok);
-                    comment += " tst '" + to_str(*tst_value)
-                               +"' ref at " + Utils::Time::toString(ref_upper)
-                               + " '" + to_str(*ref_value_upper)
-                               + "'";
-                }
-
-                return {ValueComparisonResult::Different, comment};
-            }
-
-        }
-        else
-            return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
-    }
+        ) const;
 
     std::pair<ValueComparisonResult, std::string> compareTi (
-        const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
-        boost::posix_time::time_duration max_ref_time_diff) const; // tst timestamp
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff) const;
     std::pair<ValueComparisonResult, std::string> compareTa (
-        const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
-        boost::posix_time::time_duration max_ref_time_diff) const; // tst timestamp
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff) const;
     std::pair<ValueComparisonResult, std::string> compareModeA (
-        const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
-        boost::posix_time::time_duration max_ref_time_diff) const; // tst timestamp
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff) const;
     std::pair<ValueComparisonResult, std::string> compareModeC (
-        const dbContent::TargetReport::Chain::DataID& id_tst, const EvaluationTargetData& target_data,
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
         boost::posix_time::time_duration max_ref_time_diff, float max_val_diff) const; // tod tst
+
+    std::pair<ValueComparisonResult, std::string> compareMomLongAcc (
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff) const;
+    std::pair<ValueComparisonResult, std::string> compareMomTransAcc (
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff) const;
+    std::pair<ValueComparisonResult, std::string> compareMomVertRate (
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff) const;
 };
+
+template <typename T>
+std::pair<ValueComparisonResult, std::string> Base::compare (
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    boost::posix_time::time_duration max_ref_time_diff,
+    std::function<boost::optional<T>(const dbContent::TargetReport::Chain& chain,
+                                     const dbContent::TargetReport::Chain::DataID& id)>& getter,
+    std::function<bool(const T& val1, const T& val2)>& cmp,
+    std::function<std::string(const T& val)>& to_str
+    ) const // tst timestamp
+{
+    boost::posix_time::ptime ref_lower, ref_upper;
+    std::tie(ref_lower, ref_upper) = target_data.mappedRefTimes(id, max_ref_time_diff);
+
+    boost::optional<T> tst_value, ref_value_lower, ref_value_upper;
+
+    tst_value = getter(target_data.tstChain(), id);
+
+    if (!ref_lower.is_not_a_date_time())
+        ref_value_lower = getter(target_data.refChain(), ref_lower);
+
+    if (!ref_upper.is_not_a_date_time())
+        ref_value_upper = getter(target_data.refChain(), ref_upper);
+
+    bool has_ref_data = ref_value_lower.has_value() || ref_value_upper.has_value();
+
+    if (!has_ref_data)
+    {
+        if (tst_value.has_value())
+            return {ValueComparisonResult::Different, "Tst data without ref value"};
+        else
+            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+    }
+
+    if (tst_value.has_value())
+    {
+        bool value_ok;
+        bool lower_nok, upper_nok;
+
+        assert (has_ref_data); // ref times possible
+
+        value_ok = false;
+
+        lower_nok = false;
+        upper_nok = false;
+
+        if (ref_value_lower.has_value())
+        {
+            value_ok = cmp(*ref_value_lower, *tst_value);
+            lower_nok = !value_ok;
+        }
+
+        if (!value_ok && ref_value_upper.has_value())
+        {
+            value_ok = cmp(*ref_value_upper, *tst_value);
+            upper_nok = !value_ok;
+        }
+
+        if (value_ok)
+            return {ValueComparisonResult::Same, "OK"};
+        else
+        {
+            std::string comment = "Not OK:";
+
+            if (lower_nok)
+            {
+                comment += " tst '" + to_str(*tst_value)
+                           +"' ref at " + Utils::Time::toString(ref_lower)
+                           + " '" + to_str(*ref_value_lower) + "'";
+            }
+            else
+            {
+                assert (upper_nok);
+                comment += " tst '" + to_str(*tst_value)
+                           +"' ref at " + Utils::Time::toString(ref_upper)
+                           + " '" + to_str(*ref_value_upper)
+                           + "'";
+            }
+
+            return {ValueComparisonResult::Different, comment};
+        }
+
+    }
+    else
+        return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
+}
 
 }
 
