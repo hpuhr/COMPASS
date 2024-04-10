@@ -1086,6 +1086,12 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rocd_));
+
+    // accs
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ax_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ay_));
+
             // stddevs
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_y_stddev_));
@@ -1097,6 +1103,11 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_));
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
+
+    // yo mom so acc
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_long_acc_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_trans_acc_));
+    buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_vert_rate_));
 
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
 
@@ -1140,6 +1151,15 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<double>& track_angle_vec = buffer->get<double> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name());
 
+    NullableVector<float>& rocd_vec = buffer->get<float> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rocd_).name());
+
+    // accs
+    NullableVector<double>& ax_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ax_).name());
+    NullableVector<double>& ay_vec = buffer->get<double> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ay_).name());
+
             // stddevs
     NullableVector<double>& x_stddev_vec = buffer->get<double> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_x_stddev_).name());
@@ -1159,6 +1179,14 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<string>& acid_vec = buffer->get<string> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_).name());
 
+    // mom
+    NullableVector<unsigned char>& mom_long_acc_vec = buffer->get<unsigned char> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_long_acc_).name());
+    NullableVector<unsigned char>& mom_trans_acc_vec = buffer->get<unsigned char> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_trans_acc_).name());
+    NullableVector<unsigned char>& mom_vert_rate_vec = buffer->get<unsigned char> (
+        dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_vert_rate_).name());
+
     NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).name());
 
@@ -1169,13 +1197,16 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     //std::vector<unsigned int> assoc_val ({utn_});
 
     double speed_ms, bearing_rad, xy_cov;
+    double ax, ay, bearing_new_rad, turnrate_rad, a_ms2;
+    double rocd_ft_s;
+    double dt;
 
     unsigned int buffer_cnt = 0;
 
     boost::posix_time::time_duration d_max = Time::partialSeconds(10);
     boost::posix_time::time_duration track_end_time = Time::partialSeconds(30);
 
-    boost::posix_time::ptime ts_prev;
+    //boost::posix_time::ptime ts_prev;
 
     for (auto& ref_it : references_)
     {
@@ -1187,6 +1218,9 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
         if (ref_it.second.t >= reconstructor_.write_before_time_)
             continue;
+
+        if (!ts_prev_.is_not_a_date_time())
+            assert (ref_it.second.t > ts_prev_);
 
         ds_id_vec.set(buffer_cnt, ds_id);
         sac_vec.set(buffer_cnt, sac);
@@ -1204,10 +1238,16 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         track_num_vec.set(buffer_cnt, utn_);
 
         // track end
-        if (!ts_prev.is_not_a_date_time() && ref_it.second.t - ts_prev > track_end_time) // have time before and dt > track end time
+        if (!ts_prev_.is_not_a_date_time()
+            && ref_it.second.t - ts_prev_ > track_end_time) // have time before and dt > track end time
         {
-            track_end_vec.set(buffer_cnt-1, true); // set at previous update
+            if (buffer_cnt != 0)
+                track_end_vec.set(buffer_cnt-1, true); // set at previous update if possible
+
             track_begin_ = true;
+
+            has_prev_v_ = false; // info too old
+            has_prev_baro_alt_ = false;
         }
 
         track_end_vec.set(buffer_cnt, false);
@@ -1222,12 +1262,65 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
             vx_vec.set(buffer_cnt, *ref_it.second.vx);
             vy_vec.set(buffer_cnt, *ref_it.second.vy);
 
-            speed_ms = sqrt(pow(*ref_it.second.vx, 2)+pow(*ref_it.second.vy, 2)) ; // for 1s
+            speed_ms = sqrt(pow(*ref_it.second.vx, 2)+pow(*ref_it.second.vy, 2)); // for 1s
             bearing_rad = atan2(*ref_it.second.vx, *ref_it.second.vy);
 
             speed_vec.set(buffer_cnt, speed_ms * M_S2KNOTS);
             track_angle_vec.set(buffer_cnt, bearing_rad * RAD2DEG);
+
+            // set ax, ay
+            if (has_prev_v_)
+            {
+                ax = *ref_it.second.vx - v_x_prev_;
+                ay = *ref_it.second.vy - v_y_prev_;
+
+                ax_vec.set(buffer_cnt, ax);
+                ay_vec.set(buffer_cnt, ay);
+
+                a_ms2 = sqrt(pow(ax, 2)+pow(ay, 2)); // for 1s2
+
+                        // LONG ACC
+                if (fabs(a_ms2) < 1) // like 0
+                    mom_long_acc_vec.set(buffer_cnt, (unsigned char) MOM_LONG_ACC::ConstantGroundspeed);
+                else if (a_ms2 > 0)
+                    mom_long_acc_vec.set(buffer_cnt, (unsigned char) MOM_LONG_ACC::IncreasingGroundspeed);
+                else if (a_ms2 < 0)
+                    mom_long_acc_vec.set(buffer_cnt, (unsigned char) MOM_LONG_ACC::DecreasingGroundspeed);
+
+                bearing_new_rad = atan2(*ref_it.second.vx + ax, *ref_it.second.vy + ay); // for 1s
+
+                turnrate_rad = bearing_new_rad - bearing_rad;
+
+                if (turnrate_rad > M_PI)
+                    turnrate_rad -= 2*M_PI;
+                else if (turnrate_rad < M_PI)
+                    turnrate_rad += 2*M_PI;
+
+                //turnrate_rad = atan2(ax, ay); //(bearing_rad + atan2(ax, ay)) - bearing_rad;
+                assert (fabs(turnrate_rad) <= M_PI);
+
+                // TRANS ACC
+                if (fabs(turnrate_rad) < M_PI/20) // like 0
+                    mom_trans_acc_vec.set(buffer_cnt, (unsigned char) MOM_TRANS_ACC::ConstantCourse);
+                else if (turnrate_rad > 0)
+                    mom_trans_acc_vec.set(buffer_cnt, (unsigned char) MOM_TRANS_ACC::RightTurn);
+                else if (turnrate_rad < 0)
+                    mom_trans_acc_vec.set(buffer_cnt, (unsigned char) MOM_TRANS_ACC::LeftTurn);
+            }
+
+            v_x_prev_ = *ref_it.second.vx;
+            v_y_prev_ = *ref_it.second.vy;
+            has_prev_v_ = true;
         }
+        else
+            has_prev_v_ = false;
+
+
+        if (mom_long_acc_vec.isNull(buffer_cnt))
+            mom_long_acc_vec.set(buffer_cnt, (unsigned char) MOM_LONG_ACC::Undetermined);
+
+        if (mom_trans_acc_vec.isNull(buffer_cnt))
+            mom_trans_acc_vec.set(buffer_cnt, (unsigned char) MOM_TRANS_ACC::Undetermined);
 
                 // set stddevs
 
@@ -1272,6 +1365,33 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
                            (info.second->barometric_altitude_->altitude_ + mc_vec.get(buffer_cnt))/2.0);
         }
 
+        if (!mc_vec.isNull(buffer_cnt)) // has current alt
+        {
+            if (has_prev_baro_alt_)
+            {
+                dt = (ts_vec.get(buffer_cnt) - ts_prev_).total_milliseconds() / 1000.0;
+
+                rocd_ft_s = (mc_vec.get(buffer_cnt) - baro_alt_prev_) / dt;
+                rocd_vec.set(buffer_cnt, rocd_ft_s * 60); // ft per minute
+
+                // MOM Vertical Rate
+                if (rocd_ft_s == 0)
+                    mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Level);
+                else if (rocd_ft_s > 0)
+                    mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Climb);
+                else if (rocd_ft_s < 0)
+                    mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Descent);
+            }
+
+            has_prev_baro_alt_ = true;
+            baro_alt_prev_ = mc_vec.get(buffer_cnt);
+        }
+        else
+            has_prev_baro_alt_ = false;
+
+        if (mom_vert_rate_vec.isNull(buffer_cnt))
+            mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Undetermined);
+
         if (info.first)
         {
             if (info.first->mode_a_code_ && info.first->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
@@ -1304,7 +1424,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
         ++buffer_cnt;
 
-        ts_prev = ref_it.second.t;
+        ts_prev_ = ref_it.second.t;
     }
 
     // check last update for track end

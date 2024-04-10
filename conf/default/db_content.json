@@ -118,7 +118,7 @@
             },
             "MetaMOMVerticalRate0": {
                 "parameters": {
-                    "name": "MOM VerticalRate"
+                    "name": "MOM Vertical Rate"
                 },
                 "sub_configs": {
                     "VariableDefinition": {

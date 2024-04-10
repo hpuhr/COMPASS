@@ -97,7 +97,7 @@ const Property DBContent::meta_var_longitude_stddev_ {"Longitude StdDev", Proper
 const Property DBContent::meta_var_latlon_cov_ {"Lat/Lon Cov", PropertyDataType::DOUBLE};
 
 const Property DBContent::meta_var_climb_descent_{"Track Climbing/Descending", PropertyDataType::UCHAR};
-const Property DBContent::meta_var_rocd_ {"Rate Of Climb/Descent", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_rocd_ {"Rate Of Climb/Descent", PropertyDataType::FLOAT};
 const Property DBContent::meta_var_spi_{"SPI", PropertyDataType::BOOL};
 
 const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};

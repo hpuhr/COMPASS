@@ -44,7 +44,58 @@ class DBContentDeleteDBJob;
 namespace dbContent
 {
 class VariableSet;
+
+//bits 8/7
+//    (TRANS)
+//    Transversal Acceleration
+//    = 00 Constant Course
+//    = 01 Right Turn
+//    = 10 Left Turn
+//    = 11 Undetermined
+//      bits 6/5
+
+enum class MOM_TRANS_ACC
+{
+    ConstantCourse=0,
+    RightTurn, // 1
+    LeftTurn, // 2
+    Undetermined // 3
+};
+
+//      (LONG)
+//      Longitudinal Acceleration
+//    = 00 Constant Groundspeed
+//    = 01 Increasing Groundspeed
+//    = 10 Decreasing Groundspeed
+//    = 11 Undetermined
+
+enum class MOM_LONG_ACC
+{
+    ConstantGroundspeed=0,
+    IncreasingGroundspeed, // 1
+    DecreasingGroundspeed, // 2
+    Undetermined // 3
+};
+
+//      bits 4/3
+//      (VERT)
+//      Vertical Rate
+//    = 00 Level
+//    = 01 Climb
+//    = 10 Descent
+//    = 11 Undetermined
+
+enum class MOM_VERT_RATE
+{
+    Level=0,
+    Climb, // 1
+    Descent, // 2
+    Undetermined // 3
+};
+
 }
+
+
 
 class DBContent : public QObject, public Configurable
 {

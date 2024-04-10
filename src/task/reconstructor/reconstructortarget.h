@@ -74,7 +74,14 @@ class ReconstructorTarget
 
     std::map <unsigned int, unsigned int> counts_; // dbcontent id -> count
 
-    std::map< boost::posix_time::ptime, reconstruction::Reference> references_; // ts -> tr
+    std::map<boost::posix_time::ptime, reconstruction::Reference> references_; // ts -> tr
+
+    boost::posix_time::ptime ts_prev_;
+    bool has_prev_v_ {false};
+    double v_x_prev_, v_y_prev_;
+
+    bool has_prev_baro_alt_ {false};
+    float baro_alt_prev_;
 
     mutable Transformation trafo_;
 
