@@ -521,12 +521,102 @@ boost::optional<float> Chain::trackAngle(const DataID& id) const // deg
     if (!accessor_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_track_angle_))
         return {};
 
-    NullableVector<double>& ta_vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_track_angle_);
+    NullableVector<double>& vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_track_angle_);
 
-    if (ta_vec.isNull(index_ext))
+    if (vec.isNull(index_ext))
         return {};
 
-    return ta_vec.get(index_ext);
+    return vec.get(index_ext);
+}
+
+boost::optional<double> Chain::acceleration(const DataID& id) const // m/s2
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_ax_)
+        || !accessor_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_ay_))
+        return {};
+
+    NullableVector<double>& ax_vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_ax_);
+    NullableVector<double>& ay_vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_ay_);
+
+    if (ax_vec.isNull(index_ext) || ay_vec.isNull(index_ext))
+        return {};
+
+    return sqrt(pow(ax_vec.get(index_ext), 2) + pow(ay_vec.get(index_ext), 2));
+}
+
+boost::optional<double> Chain::rocd(const DataID& id) const // ft/min
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_rocd_))
+        return {};
+
+    NullableVector<double>& vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_rocd_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
+}
+
+boost::optional<unsigned char> Chain::momLongAcc(const DataID& id) const
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<unsigned char>(dbcontent_name_, DBContent::meta_var_mom_long_acc_))
+        return {};
+
+    NullableVector<unsigned char>& vec = accessor_->getMetaVar<unsigned char>(
+        dbcontent_name_, DBContent::meta_var_mom_long_acc_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
+}
+
+boost::optional<unsigned char> Chain::momTransAcc(const DataID& id) const
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<unsigned char>(dbcontent_name_, DBContent::meta_var_mom_trans_acc_))
+        return {};
+
+    NullableVector<unsigned char>& vec = accessor_->getMetaVar<unsigned char>(
+        dbcontent_name_, DBContent::meta_var_mom_trans_acc_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
+}
+
+boost::optional<unsigned char> Chain::momVertRate(const DataID& id) const
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<unsigned char>(dbcontent_name_, DBContent::meta_var_mom_vert_rate_))
+        return {};
+
+    NullableVector<unsigned char>& vec = accessor_->getMetaVar<unsigned char>(
+        dbcontent_name_, DBContent::meta_var_mom_vert_rate_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
 }
 
 std::pair<bool, float> Chain::estimateAltitude (const boost::posix_time::ptime& timestamp,

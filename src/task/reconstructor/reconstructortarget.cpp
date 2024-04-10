@@ -1291,12 +1291,13 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
                 turnrate_rad = bearing_new_rad - bearing_rad;
 
-                if (turnrate_rad > M_PI)
+                //loginf << " turnrate_rad " << turnrate_rad;
+
+                while (turnrate_rad > M_PI)
                     turnrate_rad -= 2*M_PI;
-                else if (turnrate_rad < M_PI)
+                while (turnrate_rad < -M_PI)
                     turnrate_rad += 2*M_PI;
 
-                //turnrate_rad = atan2(ax, ay); //(bearing_rad + atan2(ax, ay)) - bearing_rad;
                 assert (fabs(turnrate_rad) <= M_PI);
 
                 // TRANS ACC

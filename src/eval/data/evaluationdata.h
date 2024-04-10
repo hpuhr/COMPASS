@@ -65,8 +65,8 @@ public:
     EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man);
 
     void setBuffers(std::map<std::string, std::shared_ptr<Buffer>> buffers);
-    void addReferenceData (std::string dbcontent_name, unsigned int line_id);
-    void addTestData (std::string dbcontent_name, unsigned int line_id);
+    void addReferenceData (const std::string& dbcontent_name, unsigned int line_id);
+    void addTestData (const std::string& dbcontent_name, unsigned int line_id);
     void finalize ();
 
     bool hasTargetData (unsigned int utn);

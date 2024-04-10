@@ -62,7 +62,7 @@ public:
         file_stream_.close();
         fn_ = "";
         open_count_ = 0;
-        tmp_stream_ = {};
+        tmp_stream_.str("");
     }
 
     /**

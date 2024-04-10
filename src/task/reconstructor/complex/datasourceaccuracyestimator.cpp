@@ -47,5 +47,5 @@ std::tuple<double, double> DataSourceAccuracyEstimator::getOffset(
         tr.position_->latitude_ * DEG2RAD, tr.position_->longitude_ * DEG2RAD,
         ref_pos.latitude_ * DEG2RAD, ref_pos.longitude_ * DEG2RAD);
 
-    return {distance_m, bearing_rad};
+    return std::tuple<double, double>{distance_m, bearing_rad};
 }

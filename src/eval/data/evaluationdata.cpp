@@ -62,7 +62,7 @@ void EvaluationData::setBuffers(std::map<std::string, std::shared_ptr<Buffer>> b
     accessor_->add(buffers);
 }
 
-void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_id)
+void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsigned int line_id)
 {
     loginf << "EvaluationData: addReferenceData: dbcontent " << dbcontent_name;
 
@@ -162,7 +162,7 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
            << " num_skipped " << num_skipped;
 }
 
-void EvaluationData::addTestData (string dbcontent_name, unsigned int line_id)
+void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned int line_id)
 {
     loginf << "EvaluationData: addTestData: dbcontent " << dbcontent_name;
 
