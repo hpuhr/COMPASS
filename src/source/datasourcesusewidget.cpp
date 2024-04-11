@@ -173,10 +173,12 @@ void DataSourcesUseWidget::disableDataSources (const std::set<unsigned int>& dis
     for (auto ds_id : disabled_ds)
     {
         set_use_ds_func_(ds_id, false);
-        assert (ds_widgets_.count(ds_id));
 
-        ds_widgets_.at(ds_id)->setLoadChecked(false);
-        ds_widgets_.at(ds_id)->setDisabled(true);
+        if (ds_widgets_.count(ds_id))
+        {
+            ds_widgets_.at(ds_id)->setLoadChecked(false);
+            ds_widgets_.at(ds_id)->setDisabled(true);
+        }
     }
 }
 
