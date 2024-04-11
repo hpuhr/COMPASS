@@ -191,26 +191,14 @@ void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
 
         //loginf << "Generating value layer " << l.first;
 
-        size_t total = 0;
-        size_t added = 0;
-
         //add result values
         for (const auto& single : results_)
         {
             if (!single->use())
                 continue;
 
-            auto values = single->getGridValues(l.first);
-            total += values.size();
-
-            //loginf << "Adding " << values.size() << " value(s) to grid";
-
-            for (const auto& v : values)
-                if (addToGrid(v.x(), v.y(), v.z()))
-                    ++added;
+            single->addValuesToGrid(*grid_, l.first);
         }
-
-        //loginf << "Could add " << added << " / " << total << " value(s)";
 
         //obtain all layer values
         for (const auto& layer_def : l.second)

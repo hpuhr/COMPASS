@@ -451,13 +451,9 @@ std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
 /**
  * Generates binary grid values from a certain bool detail param.
  */
-std::vector<Eigen::Vector3d> Single::getGridValuesBinary(int detail_key, bool invert) const
+void Single::addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert) const
 {
-    std::vector<Eigen::Vector3d> values;
-
     const auto& details = getDetails();
-
-    values.reserve(details.size());
 
     for (auto& detail_it : details)
     {
@@ -475,12 +471,10 @@ std::vector<Eigen::Vector3d> Single::getGridValuesBinary(int detail_key, bool in
                    ( invert && !check_passed.value()));
 
         //interpolate between 0 = green and 1 = red
-        values.emplace_back(detail_it.position(1).longitude_,
-                            detail_it.position(1).latitude_,
-                            ok ? 0.0 : 1.0);
-    } 
-
-    return values;
+        grid.addValue(detail_it.position(1).longitude_,
+                      detail_it.position(1).latitude_,
+                      ok ? 0.0 : 1.0);
+    }
 }
 
 /**

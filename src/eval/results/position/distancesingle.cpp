@@ -518,18 +518,14 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionDistan
     return layer_defs;
 }
 
-std::vector<Eigen::Vector3d> SinglePositionDistance::getGridValues(const std::string& layer) const
+void SinglePositionDistance::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
-    std::vector<Eigen::Vector3d> values;
-
     bool failed_values_of_interest = req()->failedValuesOfInterest();
 
     if (layer == requirement_->name())
     {
-        values = getGridValuesBinary(DetailKey::CheckPassed, !failed_values_of_interest);
+        addValuesToGridBinary(grid, DetailKey::CheckPassed, !failed_values_of_interest);
     }
-
-    return values;
 }
 
 bool SinglePositionDistance::hasReference (

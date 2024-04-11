@@ -385,16 +385,12 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SingleModeCCorrect::
     return layer_defs;
 }
 
-std::vector<Eigen::Vector3d> SingleModeCCorrect::getGridValues(const std::string& layer) const
+void SingleModeCCorrect::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
-    std::vector<Eigen::Vector3d> values;
-
     if (layer == requirement_->name())
     {
-        values = getGridValuesBinary(EvaluationRequirementResult::SingleModeCCorrect::DetailKey::IsNotCorrect, true);
+        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleModeCCorrect::DetailKey::IsNotCorrect, true);
     }
-
-    return values;
 }
 
 std::shared_ptr<Joined> SingleModeCCorrect::createEmptyJoined(const std::string& result_id)
