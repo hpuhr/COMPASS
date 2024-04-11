@@ -19,6 +19,7 @@
 #include <rasterreference.h>
 
 #include <vector>
+#include <set>
 #include <limits>
 #include <math.h>
 
@@ -103,6 +104,19 @@ public:
     void reset();
 
     bool addValue(double x, double y, double v);
+    size_t addLine(double x0, 
+                   double y0, 
+                   double x1, 
+                   double y1, 
+                   double v, 
+                   int subsampling = 10);
+    size_t addPoly(const std::vector<Eigen::Vector2d>& positions,
+                   double v, 
+                   int subsampling = 10);
+    size_t addPoly(const std::function<void(double&, double&, size_t)>& pos_getter,
+                   size_t n,
+                   double v, 
+                   int subsampling = 10);
     bool setValue(double x, double y, double v);
     bool setCount(double x, double y, size_t count);
 
@@ -124,6 +138,14 @@ private:
     IndexError index(size_t& idx_x, size_t& idx_y, double x, double y) const;
     IndexError checkAdd(size_t& idx_x, size_t& idx_y, double x, double y, double v);
 
+    size_t addLineInternal(double x0, 
+                           double y0, 
+                           double x1, 
+                           double y1, 
+                           double v,
+                           std::set<std::pair<size_t, size_t>>& visited,
+                           int subsampling = 10);
+
     size_t n_cells_x_       = 0;
     size_t n_cells_y_       = 0;
     size_t n_cells_         = 0;
@@ -132,6 +154,8 @@ private:
     double y0_              = 0.0;
     double x1_              = 1.0;
     double y1_              = 1.0;
+    double cell_size_x_     = 1.0;
+    double cell_size_y_     = 1.0;
     double cell_size_x_inv_ = 1.0;
     double cell_size_y_inv_ = 1.0;
 
