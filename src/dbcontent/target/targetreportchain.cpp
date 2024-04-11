@@ -798,6 +798,19 @@ DataMapping Chain::calculateDataMapping(ptime timestamp) const
 
     ret.timestamp_ = timestamp;
 
+    if (timestamp_index_lookup_.count(timestamp)) // found exact time
+    {
+        ret.has_ref1_ = true;
+        ret.timestamp_ref1_ = timestamp;
+        ret.dataid_ref1_ = dataID(timestamp_index_lookup_.find(timestamp)->first);
+
+        ret.has_ref2_ = false;
+
+        addPositionsSpeedsToMapping(ret);
+
+        return ret;
+    }
+
     //    Return iterator to lower bound
     //    Returns an iterator pointing to the first element in the container whose key is not considered to go
     //    before k (i.e., either it is equivalent or goes after).
@@ -854,8 +867,29 @@ DataMapping Chain::calculateDataMapping(ptime timestamp) const
 
 void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
 {
-    if (!mapping.has_ref1_ || !mapping.has_ref2_)
+    if (!mapping.has_ref1_ && !mapping.has_ref2_)
         return;
+
+    if (mapping.has_ref1_ && !mapping.has_ref2_)
+    {
+        boost::optional<dbContent::TargetPosition> pos1 = posOpt(mapping.dataid_ref1_);
+
+        if (!pos1.has_value())
+            return;
+
+        mapping.has_ref_pos_ = true;
+        mapping.pos_ref_ = *pos1;
+
+        boost::optional<dbContent::TargetVelocity> spd1 = speed(mapping.dataid_ref1_);
+
+        if (spd1.has_value())
+        {
+            mapping.has_ref_spd_ = true;
+            mapping.spd_ref_ = *spd1;
+        }
+
+        return;
+    }
 
     boost::optional<dbContent::TargetPosition> pos1 = posOpt(mapping.dataid_ref1_);
     boost::optional<dbContent::TargetPosition> pos2 = posOpt(mapping.dataid_ref2_);
