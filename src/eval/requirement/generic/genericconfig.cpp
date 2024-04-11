@@ -22,7 +22,8 @@
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
-//#include "stringconv.h"
+
+#include "eval/requirement/mom/momlongacccorrect.h"
 
 //using namespace Utils;
 using namespace EvaluationResultsReport;
@@ -31,19 +32,21 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-GenericConfig::GenericConfig(const std::string& class_id, const std::string& instance_id,
+GenericConfig::GenericConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
                                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man), variant_(variant)
 {
-
+    assert (variant_.size());
 }
 
 std::shared_ptr<Base> GenericConfig::createRequirement()
 {
-    shared_ptr<Generic> req = make_shared<Generic>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+    //shared_ptr<Generic> req = make_shared<Generic>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
-    return req;
+    if (variant_ == "MomLongAccCorrect")
+        return make_shared<MomLongAccCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+
+    assert (false);
 }
 
 void GenericConfig::createWidget()

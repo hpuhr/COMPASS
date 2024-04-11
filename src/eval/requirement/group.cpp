@@ -40,6 +40,7 @@
 #include "eval/requirement/extra/trackconfig.h"
 #include "eval/requirement/dubious/dubioustrackconfig.h"
 #include "eval/requirement/dubious/dubioustargetconfig.h"
+#include "eval/requirement/generic/genericconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>
@@ -73,7 +74,8 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementPositionAcrossConfig", "Position Across"},
     {"EvaluationRequirementPositionLatencyConfig", "Position Latency"},
     {"EvaluationRequirementSpeedConfig", "Speed"},
-    {"EvaluationRequirementTrackAngleConfig", "TrackAngle"}
+    {"EvaluationRequirementTrackAngleConfig", "TrackAngle"},
+    {"EvaluationRequirementMoMLongAccConfig", "MoM Longitutidinal Acceleration Correct"}
 };
 
 
@@ -326,6 +328,15 @@ void Group::generateSubConfigurable(const std::string& class_id,
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
+    else if (class_id == "EvaluationRequirementMoMLongAccConfig")
+    {
+        EvaluationRequirement::GenericConfig* config = new EvaluationRequirement::GenericConfig(
+                class_id, instance_id, "MomLongAccCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
     else
         throw std::runtime_error("EvaluationRequirementGroup: generateSubConfigurable: unknown class_id " +
                                  class_id);
@@ -345,8 +356,7 @@ bool Group::hasRequirementConfig (const std::string& name)
     return iter != configs_.end();
 }
 
-void Group::addRequirementConfig (const std::string& class_id, const std::string& name,
-                                                       const std::string& short_name)
+void Group::addRequirementConfig (const std::string& class_id, const std::string& name, const std::string& short_name)
 {
     loginf << "EvaluationRequirementGroup: addRequirementConfig: class_id " << class_id << " name " << name
            << " short_name " << short_name;

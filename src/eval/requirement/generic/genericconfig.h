@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 class GenericConfig : public ProbabilityBaseConfig
 {
 public:
-    GenericConfig(const std::string& class_id, const std::string& instance_id,
+    GenericConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
                      Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
 
     std::shared_ptr<Base> createRequirement() override;
@@ -37,6 +37,7 @@ public:
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
 protected:
+    std::string variant_;
 
     virtual void createWidget() override;
 };
