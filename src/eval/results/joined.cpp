@@ -165,7 +165,7 @@ bool Joined::addToGrid(double lon, double lat, double value)
 
 void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
 {
-    if (view_data.count(ViewPoint::VP_ANNOTATION_KEY) == 0)
+    if (results_.empty() || view_data.count(ViewPoint::VP_ANNOTATION_KEY) == 0)
         return;
 
     loginf << "Joined: addGridToViewData: creating grid";
@@ -181,7 +181,7 @@ void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
     std::map<std::string, Grid2DRenderSettings> render_settings;
 
     //get layers to be generated
-    auto layer_defs = gridLayers();
+    auto layer_defs = results_[ 0 ]->gridLayers();
 
     //generate layers
     for (const auto& l : layer_defs)
@@ -275,13 +275,43 @@ void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
 std::unique_ptr<nlohmann::json::object_t> Joined::viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                                const QVariant& annotation)
 {
-    auto vdata = viewableDataImpl(table, annotation);
+    //no results no viewable
+    if (results_.empty())
+        return {};
 
-    auto grid_layers = gridLayers();
+    auto overview_mode = overviewMode();
 
-    //generate grid layers?
-    if (vdata && !grid_layers.empty())
-        addGridToViewData(*vdata);
+    std::unique_ptr<nlohmann::json::object_t> vdata;
+
+    bool has_grid_info = !results_[ 0 ]->gridLayers().empty();
+
+    //create features?
+    if (overview_mode == OverviewMode::Features ||
+        overview_mode == OverviewMode::GridPlusFeatures ||
+        overview_mode == OverviewMode::GridOrFeatures)
+    {
+        if (overview_mode != OverviewMode::GridOrFeatures || !has_grid_info)
+            vdata = viewableDataImpl(table, annotation);
+    }
+
+    //create grid?
+    if (overview_mode == OverviewMode::Grid ||
+        overview_mode == OverviewMode::GridPlusFeatures ||
+        overview_mode == OverviewMode::GridOrFeatures)
+    {
+        if (overview_mode != OverviewMode::GridOrFeatures || !vdata)
+        {
+            if (has_grid_info)
+            {
+                //create viewable if not created yet
+                if (!vdata)
+                    vdata = createViewable();
+
+                //add grid data if grid layers are specified
+                addGridToViewData(*vdata);
+            }
+        }
+    }
 
     return vdata;
 }

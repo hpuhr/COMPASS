@@ -164,10 +164,20 @@ public:
 
     DataID dataID(const boost::posix_time::ptime& timestamp) const;
 
+    std::vector<DataID> dataIDsBetween(const boost::posix_time::ptime& timestamp0,
+                                       const boost::posix_time::ptime& timestamp1,
+                                       bool include_t0,
+                                       bool include_t1) const;
+
     unsigned int dsID(const DataID& id) const;
 
     TargetPosition pos(const DataID& id) const;
     boost::optional<TargetPosition> posOpt(const DataID& id) const;
+
+    std::vector<TargetPosition> positionsBetween(const boost::posix_time::ptime& timestamp0,
+                                                 const boost::posix_time::ptime& timestamp1,
+                                                 bool include_t0,
+                                                 bool include_t1) const;
 
     boost::optional<TargetPositionAccuracy> posAccuracy(const DataID& id) const;
 

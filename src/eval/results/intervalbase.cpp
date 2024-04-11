@@ -59,11 +59,13 @@ SingleIntervalBase::SingleIntervalBase(const std::string& result_type,
                                        const EvaluationDetails& details,
                                        int sum_uis,
                                        int missed_uis,
-                                      TimePeriodCollection ref_periods)
+                                       TimePeriodCollection ref_periods,
+                                       const std::vector<dbContent::TargetPosition>& ref_updates)
     :   Single      (result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
-    ,   sum_uis_    (sum_uis)
-    ,   missed_uis_ (missed_uis)
+    ,   sum_uis_    (sum_uis    )
+    ,   missed_uis_ (missed_uis )
     ,   ref_periods_(ref_periods)
+    ,   ref_updates_(ref_updates)
 {
     updateProbability();
 }
@@ -516,23 +518,60 @@ void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable, bool
 
         assert (detail_it.numPositions() >= 2);
 
+        auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex);
+        auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex);
+
+        loginf << "SingleIntervalBase: addAnnotations: " << idx0.value() << " - " << idx1.value();
+
         if (check_failed)
         {
-            error_point_coordinates.push_back(detail_it.position(0).asVector());
-            error_point_coordinates.push_back(detail_it.position(1).asVector());
+            if (overview)
+            {
+                assert(idx0.has_value() && idx1.has_value());
 
-            error_line_coordinates.push_back(detail_it.position(0).asVector());
-            error_line_coordinates.push_back(detail_it.position(1).asVector());
+                for (unsigned int idx = idx0.value(); idx <= idx1.value(); ++idx)
+                    error_point_coordinates.push_back(ref_updates_[ idx ].asVector());
+
+                for (unsigned int idx = idx0.value() + 1; idx <= idx1.value(); ++idx)
+                {
+                    error_line_coordinates.push_back(ref_updates_[ idx - 1 ].asVector());
+                    error_line_coordinates.push_back(ref_updates_[ idx     ].asVector());
+                }
+            }
+            else
+            {
+                error_point_coordinates.push_back(detail_it.position(0).asVector());
+                error_point_coordinates.push_back(detail_it.position(1).asVector());
+
+                error_line_coordinates.push_back(detail_it.position(0).asVector());
+                error_line_coordinates.push_back(detail_it.position(1).asVector());
+            }
         }
         else if (add_ok)
         {
-            ok_point_coordinates.push_back(detail_it.position(0).asVector());
-            ok_point_coordinates.push_back(detail_it.position(1).asVector());
-
-            if (!overview)
+            if (overview)
             {
-                ok_line_coordinates.push_back(detail_it.position(0).asVector());
-                ok_line_coordinates.push_back(detail_it.position(1).asVector());
+                assert(idx0.has_value() && idx1.has_value());
+
+                for (unsigned int idx = idx0.value(); idx <= idx1.value(); ++idx)
+                    ok_point_coordinates.push_back(ref_updates_[ idx ].asVector());
+
+                for (unsigned int idx = idx0.value() + 1; idx <= idx1.value(); ++idx)
+                {
+                    ok_line_coordinates.push_back(ref_updates_[ idx - 1 ].asVector());
+                    ok_line_coordinates.push_back(ref_updates_[ idx     ].asVector());
+                }
+            }
+            else
+            {
+                ok_point_coordinates.push_back(detail_it.position(0).asVector());
+                ok_point_coordinates.push_back(detail_it.position(1).asVector());
+
+                if (!overview)
+                {
+                    ok_line_coordinates.push_back(detail_it.position(0).asVector());
+                    ok_line_coordinates.push_back(detail_it.position(1).asVector());
+                }
             }
         }
     }

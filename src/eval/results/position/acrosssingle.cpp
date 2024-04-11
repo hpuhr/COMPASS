@@ -496,6 +496,27 @@ void SinglePositionAcross::addAnnotations(nlohmann::json::object_t& viewable, bo
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionAcross::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+std::vector<Eigen::Vector3d> SinglePositionAcross::getGridValues(const std::string& layer) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    if (layer == requirement_->name())
+    {
+        values = getGridValuesBinary(DetailKey::CheckPassed);
+    }
+
+    return values;
+}
+
 std::shared_ptr<Joined> SinglePositionAcross::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedPositionAcross> (result_id, requirement_, sector_layer_, eval_man_);

@@ -55,15 +55,17 @@ public:
     unsigned int numUnusableResults();
 
 protected:
+    enum class OverviewMode
+    {
+        Features = 0,
+        Grid,
+        GridPlusFeatures,
+        GridOrFeatures
+    };
+
     std::vector<std::shared_ptr<Single>> results_;
 
     std::unique_ptr<Grid2D> grid_;
-
-    struct LayerDefinition
-    {
-        Grid2D::ValueType    value_type;
-        Grid2DRenderSettings render_settings;
-    };
 
     void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
 
@@ -71,6 +73,8 @@ protected:
     virtual void updatesToUseChanges_impl() = 0;
 
     std::unique_ptr<nlohmann::json::object_t> createViewable() const;
+
+    virtual OverviewMode overviewMode() const { return OverviewMode::GridPlusFeatures; }
 
     virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) { return {}; }
@@ -81,8 +85,6 @@ protected:
     void createGrid(double cell_size_x, double cell_size_y);
     bool addToGrid(double lon, double lat, double value);
     void addGridToViewData(nlohmann::json::object_t& view_data);
-
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const { return {}; }
 };
 
 }

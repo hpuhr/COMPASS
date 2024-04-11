@@ -378,6 +378,26 @@ void SingleModeAFalse::addAnnotations(nlohmann::json::object_t& viewable, bool o
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleModeAFalse::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+std::vector<Eigen::Vector3d> SingleModeAFalse::getGridValues(const std::string& layer) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    if (layer == requirement_->name())
+    {
+        values = getGridValuesBinary(EvaluationRequirementResult::SingleModeAFalse::DetailKey::IsNotOk, true);
+    }
+
+    return values;
+}
 
 std::shared_ptr<Joined> SingleModeAFalse::createEmptyJoined(const std::string& result_id)
 {

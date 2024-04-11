@@ -99,6 +99,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
 
     auto addDetail = [ & ] (const ptime& ts,
                             const dbContent::TargetPosition& tst_pos,
+                            const boost::optional<dbContent::TargetPosition>& ref_pos,
                             const QVariant& ref_exists,
                             const QVariant& pos_inside,
                             const QVariant& is_not_correct,
@@ -119,6 +120,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
                                              .setValue(Result::DetailKey::NumOutside, num_pos_outside)
                                              .setValue(Result::DetailKey::NumCorrect, num_correct)
                                              .setValue(Result::DetailKey::NumNotCorrect, num_not_correct)
+                                             .addPosition(ref_pos)
                                              .generalComment(comment));
     };
 
@@ -138,7 +140,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
         if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, {},
                             false, {}, false, // ref_exists, pos_inside, is_not_correct
                             num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
                             num_correct, num_not_correct, "No reference data");
@@ -155,7 +157,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
         if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, {},
                             false, {}, false, // ref_exists, pos_inside, is_not_correct
                             num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
                             num_correct, num_not_correct, "No reference position");
@@ -170,7 +172,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, ref_pos,
                             ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
                             num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
                             num_correct, num_not_correct, "Outside sector");
@@ -187,7 +189,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
         if (mc_no_ref) // none has a reference
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, ref_pos,
                             ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
                             num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
                             num_correct, num_not_correct, "No reference Mode C");
@@ -215,7 +217,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
             ++num_not_correct;
 
         if (!skip_detail)
-            addDetail(timestamp, pos_current,
+            addDetail(timestamp, pos_current, ref_pos,
                         ref_exists, is_inside, !result_ok,
                         num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
                         num_correct, num_not_correct, comment);

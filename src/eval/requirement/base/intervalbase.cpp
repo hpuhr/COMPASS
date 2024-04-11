@@ -18,6 +18,7 @@
 #include "intervalbase.h"
 #include "timeperiod.h"
 #include "evaluationmanager.h"
+#include "timeconv.h"
 
 #include "eval/results/intervalbase.h"
 
@@ -130,22 +131,28 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
     auto addDetail = [ & ] (const boost::posix_time::ptime& timestamp,
                             const dbContent::TargetPosition& pos_event,
                             const boost::optional<dbContent::TargetPosition>& pos_event_ref,
+                            const QVariant& ref_updates_idx0,
+                            const QVariant& ref_updates_idx1,
                             const QVariant& d_tod,
                             const QVariant& miss_occurred,
                             const QVariant& ref_exists,
                             const QVariant& missed_uis,
                             const std::string& comment)
     {
-        details.push_back(Detail(timestamp, pos_event).setValue(Result::DetailKey::DiffTOD     , d_tod        )
-                                                      .setValue(Result::DetailKey::MissOccurred, miss_occurred)
-                                                      .setValue(Result::DetailKey::RefExists   , ref_exists   )
-                                                      .setValue(Result::DetailKey::MissedUIs   , missed_uis   )
+        details.push_back(Detail(timestamp, pos_event).setValue(Result::DetailKey::DiffTOD            , d_tod           )
+                                                      .setValue(Result::DetailKey::MissOccurred       , miss_occurred   )
+                                                      .setValue(Result::DetailKey::RefExists          , ref_exists      )
+                                                      .setValue(Result::DetailKey::MissedUIs          , missed_uis      )
+                                                      .setValue(Result::DetailKey::RefUpdateStartIndex, ref_updates_idx0)
+                                                      .setValue(Result::DetailKey::RefUpdateEndIndex  , ref_updates_idx1)
                                                       .addPosition(pos_event_ref)
                                                       .generalComment(comment));
     };
 
     size_t   ne           = events.size();
     uint32_t misses_total = 0;
+
+    std::vector<dbContent::TargetPosition> ref_updates;
 
     for (size_t i = 0; i < ne; ++i)
     {
@@ -155,7 +162,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
         misses_total += event.misses;
 
         //generate detail info for event and skip if no detail shall be generated
-        auto detail_info = eventDetailInfo(target_data, event);
+        auto detail_info = eventDetailInfo(target_data, event, ref_updates);
         if (!detail_info.generate_detail)
             continue;
 
@@ -166,6 +173,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
         addDetail(detail_info.evt_time, 
                   detail_info.evt_position, 
                   detail_info.evt_position_ref, 
+                  detail_info.evt_ref_updates_idx0.has_value() ? QVariant(detail_info.evt_ref_updates_idx0.value()) : QVariant(),
+                  detail_info.evt_ref_updates_idx1.has_value() ? QVariant(detail_info.evt_ref_updates_idx1.value()) : QVariant(),
                   detail_info.evt_has_dt ? detail_info.evt_dt : QVariant(), 
                   detail_info.evt_has_misses, 
                   detail_info.evt_has_ref,
@@ -180,6 +189,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
                         sector_layer,
                         details,
                         periods,
+                        ref_updates,
                         sum_uis,
                         misses_total);
 }
@@ -383,7 +393,8 @@ uint32_t IntervalBase::numMisses(double dt) const
 /**
 */
 IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetData& target_data, 
-                                                       const Event& event) const
+                                                       const Event& event,
+                                                       std::vector<dbContent::TargetPosition>& ref_updates) const
 {
     std::string thres        = Utils::String::doubleToStringPrecision(missThreshold(), 2);
     std::string period       = "period " + (event.period.has_value() ? std::to_string(event.period.value()) : "");
@@ -399,6 +410,58 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
     dinfo.evt_has_misses = has_miss;
     dinfo.evt_dt         = event.dtSeconds();
     dinfo.evt_has_dt     = false;
+
+    auto storeRefUpdates = [ & ] (IntervalBase::DetailInfo& dinfo,
+                                  const dbContent::TargetReport::DataID& id0,
+                                  const dbContent::TargetReport::DataID& id1,
+                                  const boost::optional<dbContent::TargetPosition>& ref_pos0,
+                                  const boost::optional<dbContent::TargetPosition>& ref_pos1)
+    {
+        //if (!dinfo.evt_has_misses)
+        //    return;
+
+        boost::optional<dbContent::TargetPosition> pos0 = ref_pos0;
+        boost::optional<dbContent::TargetPosition> pos1 = ref_pos1;
+
+        bool include_t0 = false; //!pos0.has_value();
+        bool include_t1 = false; //!pos1.has_value();
+
+        if (!pos0.has_value()) pos0 = target_data.mappedRefPos(id0);
+        if (!pos1.has_value()) pos1 = target_data.mappedRefPos(id1);
+
+        if (!pos0.has_value() && id0.timestamp() == target_data.refChain().timeBegin()) pos0 = target_data.refChain().pos(id0.timestamp());
+        if (!pos1.has_value() && id1.timestamp() == target_data.refChain().timeBegin()) pos1 = target_data.refChain().pos(id1.timestamp());
+
+        if (!pos0 || !pos1)
+        {
+            logwrn << "IntervalBase: eventDetailInfo: FAIL";
+            logwrn << "IntervalBase: eventDetailInfo: range = " 
+                   << target_data.refChain().timeBeginStr() << " - "
+                   << target_data.refChain().timeEndStr();
+            logwrn << "IntervalBase: eventDetailInfo: ts0 = " << Utils::Time::toString(id0.timestamp()) << " " 
+                   << (id0.timestamp() == target_data.refChain().timeBegin()) << " "
+                   << (id0.timestamp() == target_data.refChain().timeEnd()) << " => " << pos0.has_value();
+            logwrn << "IntervalBase: eventDetailInfo: ts1 = " << Utils::Time::toString(id1.timestamp()) << " " 
+                   << (id1.timestamp() == target_data.refChain().timeBegin()) << " "
+                   << (id1.timestamp() == target_data.refChain().timeEnd()) << " => " << pos1.has_value();
+        }
+
+        assert(pos0.has_value() && pos1.has_value());
+
+        auto positions = target_data.refChain().positionsBetween(id0.timestamp(), 
+                                                                 id1.timestamp(), 
+                                                                 include_t0, 
+                                                                 include_t1);
+        unsigned int idx0 = ref_updates.size();
+        unsigned int idx1 = idx0 + positions.size() + 2 - 1;
+        
+        ref_updates.push_back(pos0.value());
+        ref_updates.insert(ref_updates.end(), positions.begin(), positions.end());
+        ref_updates.push_back(pos1.value());
+
+        dinfo.evt_ref_updates_idx0 = idx0;
+        dinfo.evt_ref_updates_idx1 = idx1;
+    };
 
     switch (event.type)
     {
@@ -451,7 +514,12 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_has_ref      = true;
             dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = true;
-            
+
+            storeRefUpdates(dinfo, 
+                            event.interval_time0, 
+                            event.data_id, 
+                            dinfo.evt_position_ref,
+                            {});
             break;
         }
         case Event::TypeValid:
@@ -467,6 +535,13 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = true;
 
+            target_data.mappedRefPos(event.data_id);
+
+            storeRefUpdates(dinfo, 
+                            event.interval_time0, 
+                            event.data_id,
+                            {},
+                            {});
             break;
         }
         case Event::TypeValidLast:
@@ -483,6 +558,11 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = true;
 
+            storeRefUpdates(dinfo, 
+                            event.data_id, 
+                            event.interval_time1, 
+                            {},
+                            dinfo.evt_position_ref);
             break;
         }
         case Event::TypeInvalid:
@@ -546,6 +626,11 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
             dinfo.evt_has_dt       = true;
             dinfo.generate_detail  = has_miss;
 
+            storeRefUpdates(dinfo, 
+                            event.interval_time0, 
+                            event.interval_time1,
+                            dinfo.evt_position_ref,
+                            dinfo.evt_position);
             break;
         }
     }

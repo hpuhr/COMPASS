@@ -557,4 +557,25 @@ void SingleSpeed::addAnnotations(nlohmann::json::object_t& viewable, bool overvi
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleSpeed::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+std::vector<Eigen::Vector3d> SingleSpeed::getGridValues(const std::string& layer) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    if (layer == requirement_->name())
+    {
+        values = getGridValuesBinary(DetailKey::CheckPassed);
+    }
+
+    return values;
+}
+
 }

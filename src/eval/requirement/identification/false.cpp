@@ -98,6 +98,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
 
     auto addDetail = [ & ] (const ptime& ts,
                             const dbContent::TargetPosition& tst_pos,
+                            const boost::optional<dbContent::TargetPosition>& ref_pos,
                             const QVariant& ref_exists,
                             const QVariant& pos_inside,
                             const QVariant& is_not_ok,
@@ -120,6 +121,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
                                              .setValue(Result::DetailKey::NumUnknownID, num_unknown_id)
                                              .setValue(Result::DetailKey::NumCorrectID, num_correct_id)
                                              .setValue(Result::DetailKey::NumFalseID, num_false_id)
+                                             .addPosition(ref_pos)
                                              .generalComment(comment));
     };
 
@@ -139,7 +141,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
         if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, {},
                             false, {}, false, // ref_exists, pos_inside,
                             num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                             num_unknown, num_correct, num_false, "No reference data");
@@ -156,7 +158,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
         if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, {},
                             false, {}, false, // ref_exists, pos_inside,
                             num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                             num_unknown, num_correct, num_false, "No reference position");
@@ -171,7 +173,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, ref_pos,
                             ref_exists, is_inside, false, // ref_exists, pos_inside,
                             num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                             num_unknown, num_correct, num_false, "Outside sector");
@@ -248,7 +250,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
             ++num_correct;
 
         if (!skip_detail)
-            addDetail(timestamp, pos_current,
+            addDetail(timestamp, pos_current, ref_pos,
                         ref_exists, is_inside, result_false,
                         num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                         num_unknown, num_correct, num_false, comment);

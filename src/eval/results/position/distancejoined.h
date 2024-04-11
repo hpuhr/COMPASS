@@ -54,8 +54,6 @@ protected:
     virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
-
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 

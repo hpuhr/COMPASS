@@ -10,6 +10,8 @@
 #include "util/timeconv.h"
 #include "global.h"
 
+#include <algorithm>
+
 #include <boost/algorithm/string.hpp>
 
 using namespace std;
@@ -221,13 +223,38 @@ Chain::DataID Chain::dataID(const boost::posix_time::ptime& timestamp) const
     return DataID(timestamp).addIndex(range.first->second);
 }
 
+std::vector<DataID> Chain::dataIDsBetween(const boost::posix_time::ptime& timestamp0,
+                                          const boost::posix_time::ptime& timestamp1,
+                                          bool include_t0,
+                                          bool include_t1) const
+{
+    assert(timestamp0 <= timestamp1);
+    auto it_start = timestamp_index_lookup_.lower_bound(timestamp0);
+
+    if (it_start == timestamp_index_lookup_.end())
+        return {};
+
+    std::vector<DataID> ids;
+
+    for (auto it = it_start; it != timestamp_index_lookup_.end(); ++it)
+    {
+        bool ok0 = (include_t0 && it->first >= timestamp0) || (!include_t0 && it->first > timestamp0);
+        bool ok1 = (include_t1 && it->first <= timestamp1) || (!include_t1 && it->first < timestamp1);
+        
+        if(ok0 && ok1)
+            ids.push_back(DataID(it->first).addIndex(it->second));
+    }
+
+    return ids;
+}
+
 unsigned int Chain::dsID(const DataID& id) const
 {
     auto index     = indexFromDataID(id);
 
     unsigned int index_ext = index.idx_external;
 
-    NullableVector<unsigned int>& dsid_vec  =
+    NullableVector<unsigned int>& dsid_vec =
             accessor_->getMetaVar<unsigned int>(dbcontent_name_, DBContent::meta_var_ds_id_);
 
     assert (!dsid_vec.isNull(index_ext));
@@ -241,7 +268,7 @@ dbContent::TargetPosition Chain::pos(const DataID& id) const
 
     assert (timestamp_index_lookup_.count(timestamp));
 
-    auto index     = indexFromDataID(id);
+    auto index = indexFromDataID(id);
 
     unsigned int index_ext = index.idx_external;
 
@@ -300,6 +327,21 @@ dbContent::TargetPosition Chain::pos(const DataID& id) const
     }
 
     return pos;
+}
+
+std::vector<TargetPosition> Chain::positionsBetween(const boost::posix_time::ptime& timestamp0,
+                                                    const boost::posix_time::ptime& timestamp1,
+                                                    bool include_t0,
+                                                    bool include_t1) const
+{
+    auto ids = dataIDsBetween(timestamp0, timestamp1, include_t0, include_t1);
+
+    std::vector<TargetPosition> positions(ids.size());
+
+    for (size_t i = 0; i < ids.size(); ++i)
+        positions[ i ] = pos(ids[ i ]);
+
+    return positions;
 }
 
 boost::optional<TargetPosition> Chain::posOpt(const DataID& id) const

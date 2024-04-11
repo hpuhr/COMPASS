@@ -20,6 +20,9 @@
 
 #include "eval/results/base.h"
 
+#include "view/gridview/grid2d.h"
+#include "view/gridview/grid2dlayer.h"
+
 #include <vector>
 
 #include <boost/optional.hpp>
@@ -38,6 +41,12 @@ class Joined;
 class Single : public Base
 {
 public:
+    struct LayerDefinition
+    {
+        Grid2D::ValueType    value_type;
+        Grid2DRenderSettings render_settings;
+    };
+
     Single(const std::string& type, 
             const std::string& result_id,
             std::shared_ptr<EvaluationRequirement::Base> requirement, 
@@ -66,6 +75,7 @@ public:
 
     virtual void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) = 0;
 
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const { return {}; }
     virtual std::vector<Eigen::Vector3d> getGridValues(const std::string& layer) const { return {}; }
 
 protected:
@@ -106,6 +116,9 @@ protected:
     nlohmann::json& annotationLineCoords(nlohmann::json::object_t& viewable, AnnotationType type, bool overview=false) const;
     nlohmann::json& getOrCreateAnnotation(nlohmann::json::object_t& viewable, AnnotationType type, bool overview) const;
     // creates if not existing
+
+    std::vector<Eigen::Vector3d> getGridValuesBinary(int detail_key, bool invert = false) const;
+    LayerDefinition getGridLayerDefBinary() const;
 };
 
 }

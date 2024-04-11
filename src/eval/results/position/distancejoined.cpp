@@ -323,20 +323,4 @@ void JoinedPositionDistance::exportAsCSV()
     }
 }
 
-std::map<std::string, std::vector<Joined::LayerDefinition>> JoinedPositionDistance::gridLayers() const
-{
-    std::map<std::string, std::vector<Joined::LayerDefinition>> layer_defs;
-
-    Joined::LayerDefinition def;
-    def.value_type = Grid2D::ValueType::ValueTypeMax;
-    def.render_settings.color_map.set(QColor(0, 255, 0), QColor(255, 0, 0), 1);
-    def.render_settings.pixels_per_cell = eval_man_.settings().grid_pixels_per_cell;
-    def.render_settings.min_value = 0.0;
-    def.render_settings.max_value = 1.0;
-    
-    layer_defs[ requirement_->name() ].push_back(def);
-
-    return layer_defs;
-}
-
 }

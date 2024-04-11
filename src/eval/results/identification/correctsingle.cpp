@@ -374,6 +374,27 @@ void SingleIdentificationCorrect::addAnnotations(nlohmann::json::object_t& viewa
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleIdentificationCorrect::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+std::vector<Eigen::Vector3d> SingleIdentificationCorrect::getGridValues(const std::string& layer) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    if (layer == requirement_->name())
+    {
+        values = getGridValuesBinary(EvaluationRequirementResult::SingleIdentificationCorrect::DetailKey::IsNotCorrect, true);
+    }
+
+    return values;
+}
+
 std::shared_ptr<Joined> SingleIdentificationCorrect::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedIdentificationCorrect> (result_id, requirement_, sector_layer_, eval_man_);

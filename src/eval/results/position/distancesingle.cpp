@@ -509,6 +509,29 @@ void SinglePositionDistance::addAnnotations(nlohmann::json::object_t& viewable, 
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionDistance::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+std::vector<Eigen::Vector3d> SinglePositionDistance::getGridValues(const std::string& layer) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    bool failed_values_of_interest = req()->failedValuesOfInterest();
+
+    if (layer == requirement_->name())
+    {
+        values = getGridValuesBinary(DetailKey::CheckPassed, !failed_values_of_interest);
+    }
+
+    return values;
+}
+
 bool SinglePositionDistance::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
@@ -545,42 +568,6 @@ const EvaluationRequirement::PositionDistance* SinglePositionDistance::req () co
             dynamic_cast<const EvaluationRequirement::PositionDistance*>(requirement_.get());
     assert (req);
     return req;
-}
-
-std::vector<Eigen::Vector3d> SinglePositionDistance::getGridValues(const std::string& layer) const
-{
-    std::vector<Eigen::Vector3d> values;
-
-    bool failed_values_of_interest = req()->failedValuesOfInterest();
-
-    if (layer == requirement_->name())
-    {
-        const auto& details = getDetails();
-
-        values.reserve(details.size());
-
-        for (auto& detail_it : details)
-        {
-            if (detail_it.numPositions() == 1) // no ref pos
-                continue;
-
-            assert (detail_it.numPositions() == 2);
-
-            //double d = detail_it.getValue(DetailKey::Value).toDouble();
-
-            auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
-            assert(check_passed.has_value());
-
-            bool ok = (( failed_values_of_interest &&  check_passed.value()) ||
-                       (!failed_values_of_interest && !check_passed.value()));
-
-            values.emplace_back(detail_it.position(1).longitude_,
-                                detail_it.position(1).latitude_,
-                                ok ? 0.0 : 1.0);
-        } 
-    }
-
-    return values;
 }
 
 }

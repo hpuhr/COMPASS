@@ -448,4 +448,54 @@ std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
     return std::unique_ptr<EvaluationDetails>(eval_details);
 }
 
+/**
+ * Generates binary grid values from a certain bool detail param.
+ */
+std::vector<Eigen::Vector3d> Single::getGridValuesBinary(int detail_key, bool invert) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    const auto& details = getDetails();
+
+    values.reserve(details.size());
+
+    for (auto& detail_it : details)
+    {
+        if (detail_it.numPositions() == 1) // no ref pos
+            continue;
+
+        assert (detail_it.numPositions() == 2);
+
+        //double d = detail_it.getValue(DetailKey::Value).toDouble();
+
+        auto check_passed = detail_it.getValueAs<bool>(detail_key);
+        assert(check_passed.has_value());
+
+        bool ok = ((!invert &&  check_passed.value()) ||
+                   ( invert && !check_passed.value()));
+
+        //interpolate between 0 = green and 1 = red
+        values.emplace_back(detail_it.position(1).longitude_,
+                            detail_it.position(1).latitude_,
+                            ok ? 0.0 : 1.0);
+    } 
+
+    return values;
+}
+
+/**
+ * Grid layer definition suitable for getGridValuesBinary().
+ */
+Single::LayerDefinition Single::getGridLayerDefBinary() const
+{
+    Single::LayerDefinition def;
+    def.value_type = Grid2D::ValueType::ValueTypeMax;
+    def.render_settings.color_map.set(QColor(0, 255, 0), QColor(255, 0, 0), 1);
+    def.render_settings.pixels_per_cell = eval_man_.settings().grid_pixels_per_cell;
+    def.render_settings.min_value = 0.0;
+    def.render_settings.max_value = 1.0;
+    
+    return def;
+}
+
 }

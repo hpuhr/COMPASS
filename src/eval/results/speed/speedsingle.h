@@ -74,6 +74,9 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual std::vector<Eigen::Vector3d> getGridValues(const std::string& layer) const override;
+
     EvaluationRequirement::Speed* req ();
 
     enum DetailKey

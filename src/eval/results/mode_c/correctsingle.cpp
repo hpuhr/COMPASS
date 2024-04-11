@@ -376,6 +376,27 @@ void SingleModeCCorrect::addAnnotations(nlohmann::json::object_t& viewable, bool
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleModeCCorrect::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+std::vector<Eigen::Vector3d> SingleModeCCorrect::getGridValues(const std::string& layer) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    if (layer == requirement_->name())
+    {
+        values = getGridValuesBinary(EvaluationRequirementResult::SingleModeCCorrect::DetailKey::IsNotCorrect, true);
+    }
+
+    return values;
+}
+
 std::shared_ptr<Joined> SingleModeCCorrect::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedModeCCorrect> (result_id, requirement_, sector_layer_, eval_man_);

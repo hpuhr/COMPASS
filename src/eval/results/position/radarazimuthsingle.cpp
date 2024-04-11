@@ -467,6 +467,27 @@ void SinglePositionRadarAzimuth::addAnnotations(nlohmann::json::object_t& viewab
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionRadarAzimuth::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+std::vector<Eigen::Vector3d> SinglePositionRadarAzimuth::getGridValues(const std::string& layer) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    if (layer == requirement_->name())
+    {
+        values = getGridValuesBinary(DetailKey::CheckPassed);
+    }
+
+    return values;
+}
+
 bool SinglePositionRadarAzimuth::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
@@ -496,6 +517,5 @@ EvaluationRequirement::PositionRadarAzimuth* SinglePositionRadarAzimuth::req ()
     assert (req);
     return req;
 }
-
 
 }
