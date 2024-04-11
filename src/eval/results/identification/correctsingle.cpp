@@ -383,16 +383,12 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SingleIdentification
     return layer_defs;
 }
 
-std::vector<Eigen::Vector3d> SingleIdentificationCorrect::getGridValues(const std::string& layer) const
+void SingleIdentificationCorrect::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
-    std::vector<Eigen::Vector3d> values;
-
     if (layer == requirement_->name())
     {
-        values = getGridValuesBinary(EvaluationRequirementResult::SingleIdentificationCorrect::DetailKey::IsNotCorrect, true);
+        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleIdentificationCorrect::DetailKey::IsNotCorrect, true);
     }
-
-    return values;
 }
 
 std::shared_ptr<Joined> SingleIdentificationCorrect::createEmptyJoined(const std::string& result_id)

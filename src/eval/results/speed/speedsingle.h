@@ -75,7 +75,7 @@ public:
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
-    virtual std::vector<Eigen::Vector3d> getGridValues(const std::string& layer) const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     EvaluationRequirement::Speed* req ();
 

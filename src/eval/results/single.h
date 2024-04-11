@@ -76,7 +76,7 @@ public:
     virtual void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) = 0;
 
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const { return {}; }
-    virtual std::vector<Eigen::Vector3d> getGridValues(const std::string& layer) const { return {}; }
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const {}
 
 protected:
     enum AnnotationType
@@ -117,7 +117,7 @@ protected:
     nlohmann::json& getOrCreateAnnotation(nlohmann::json::object_t& viewable, AnnotationType type, bool overview) const;
     // creates if not existing
 
-    std::vector<Eigen::Vector3d> getGridValuesBinary(int detail_key, bool invert = false) const;
+    void addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert = false) const;
     LayerDefinition getGridLayerDefBinary() const;
 };
 

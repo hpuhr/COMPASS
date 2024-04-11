@@ -505,16 +505,12 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionAcross
     return layer_defs;
 }
 
-std::vector<Eigen::Vector3d> SinglePositionAcross::getGridValues(const std::string& layer) const
+void SinglePositionAcross::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
-    std::vector<Eigen::Vector3d> values;
-
     if (layer == requirement_->name())
     {
-        values = getGridValuesBinary(DetailKey::CheckPassed);
+        addValuesToGridBinary(grid, DetailKey::CheckPassed);
     }
-
-    return values;
 }
 
 std::shared_ptr<Joined> SinglePositionAcross::createEmptyJoined(const std::string& result_id)

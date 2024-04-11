@@ -411,54 +411,53 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
     dinfo.evt_dt         = event.dtSeconds();
     dinfo.evt_has_dt     = false;
 
+    //stores all reference updates in the timespan of an interval (plus the reference interpolated end positions of the interval)
     auto storeRefUpdates = [ & ] (IntervalBase::DetailInfo& dinfo,
                                   const dbContent::TargetReport::DataID& id0,
                                   const dbContent::TargetReport::DataID& id1,
                                   const boost::optional<dbContent::TargetPosition>& ref_pos0,
                                   const boost::optional<dbContent::TargetPosition>& ref_pos1)
     {
-        //if (!dinfo.evt_has_misses)
-        //    return;
-
+        //reference-interpolated interval end positions
         boost::optional<dbContent::TargetPosition> pos0 = ref_pos0;
         boost::optional<dbContent::TargetPosition> pos1 = ref_pos1;
 
-        bool include_t0 = false; //!pos0.has_value();
-        bool include_t1 = false; //!pos1.has_value();
-
+        //not passed directly => interpolate now
         if (!pos0.has_value()) pos0 = target_data.mappedRefPos(id0);
         if (!pos1.has_value()) pos1 = target_data.mappedRefPos(id1);
 
-        if (!pos0.has_value() && id0.timestamp() == target_data.refChain().timeBegin()) pos0 = target_data.refChain().pos(id0.timestamp());
-        if (!pos1.has_value() && id1.timestamp() == target_data.refChain().timeBegin()) pos1 = target_data.refChain().pos(id1.timestamp());
+        // if (!pos0 || !pos1)
+        // {
+        //     logwrn << "IntervalBase: eventDetailInfo: FAIL";
+        //     logwrn << "IntervalBase: eventDetailInfo: range = " 
+        //            << target_data.refChain().timeBeginStr() << " - "
+        //            << target_data.refChain().timeEndStr();
+        //     logwrn << "IntervalBase: eventDetailInfo: ts0 = " << Utils::Time::toString(id0.timestamp()) << " " 
+        //            << (id0.timestamp() == target_data.refChain().timeBegin()) << " "
+        //            << (id0.timestamp() == target_data.refChain().timeEnd()) << " => " << pos0.has_value();
+        //     logwrn << "IntervalBase: eventDetailInfo: ts1 = " << Utils::Time::toString(id1.timestamp()) << " " 
+        //            << (id1.timestamp() == target_data.refChain().timeBegin()) << " "
+        //            << (id1.timestamp() == target_data.refChain().timeEnd()) << " => " << pos1.has_value();
+        // }
 
-        if (!pos0 || !pos1)
-        {
-            logwrn << "IntervalBase: eventDetailInfo: FAIL";
-            logwrn << "IntervalBase: eventDetailInfo: range = " 
-                   << target_data.refChain().timeBeginStr() << " - "
-                   << target_data.refChain().timeEndStr();
-            logwrn << "IntervalBase: eventDetailInfo: ts0 = " << Utils::Time::toString(id0.timestamp()) << " " 
-                   << (id0.timestamp() == target_data.refChain().timeBegin()) << " "
-                   << (id0.timestamp() == target_data.refChain().timeEnd()) << " => " << pos0.has_value();
-            logwrn << "IntervalBase: eventDetailInfo: ts1 = " << Utils::Time::toString(id1.timestamp()) << " " 
-                   << (id1.timestamp() == target_data.refChain().timeBegin()) << " "
-                   << (id1.timestamp() == target_data.refChain().timeEnd()) << " => " << pos1.has_value();
-        }
-
+        //interpolation of ref should always be possible, since the period is inside a valid reference period
         assert(pos0.has_value() && pos1.has_value());
 
+        //retrieve all ref updates inside the interval
         auto positions = target_data.refChain().positionsBetween(id0.timestamp(), 
                                                                  id1.timestamp(), 
-                                                                 include_t0, 
-                                                                 include_t1);
+                                                                 false, 
+                                                                 false);
         unsigned int idx0 = ref_updates.size();
-        unsigned int idx1 = idx0 + positions.size() + 2 - 1;
         
+        //collect all updates
         ref_updates.push_back(pos0.value());
         ref_updates.insert(ref_updates.end(), positions.begin(), positions.end());
         ref_updates.push_back(pos1.value());
 
+        unsigned int idx1 = ref_updates.size() - 1;
+
+        //store index range into detail info
         dinfo.evt_ref_updates_idx0 = idx0;
         dinfo.evt_ref_updates_idx1 = idx1;
     };

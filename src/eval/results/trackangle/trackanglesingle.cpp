@@ -578,16 +578,12 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SingleTrackAngle::gr
     return layer_defs;
 }
 
-std::vector<Eigen::Vector3d> SingleTrackAngle::getGridValues(const std::string& layer) const
+void SingleTrackAngle::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
-    std::vector<Eigen::Vector3d> values;
-
     if (layer == requirement_->name())
     {
-        values = getGridValuesBinary(DetailKey::CheckPassed);
+        addValuesToGridBinary(grid, DetailKey::CheckPassed);
     }
-
-    return values;
 }
 
 }

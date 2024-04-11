@@ -406,16 +406,12 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SingleModeCFalse::gr
     return layer_defs;
 }
 
-std::vector<Eigen::Vector3d> SingleModeCFalse::getGridValues(const std::string& layer) const
+void SingleModeCFalse::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
-    std::vector<Eigen::Vector3d> values;
-
     if (layer == requirement_->name())
     {
-        values = getGridValuesBinary(EvaluationRequirementResult::SingleModeCFalse::DetailKey::IsNotOk, true);
+        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleModeCFalse::DetailKey::IsNotOk, true);
     }
-
-    return values;
 }
 
 std::shared_ptr<Joined> SingleModeCFalse::createEmptyJoined(const std::string& result_id)

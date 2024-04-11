@@ -513,16 +513,12 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionRadarR
     return layer_defs;
 }
 
-std::vector<Eigen::Vector3d> SinglePositionRadarRange::getGridValues(const std::string& layer) const
+void SinglePositionRadarRange::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
-    std::vector<Eigen::Vector3d> values;
-
     if (layer == requirement_->name())
     {
-        values = getGridValuesBinary(DetailKey::CheckPassed);
+        addValuesToGridBinary(grid, DetailKey::CheckPassed);
     }
-
-    return values;
 }
 
 const vector<double>& SinglePositionRadarRange::refRangeValues() const

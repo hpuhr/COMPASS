@@ -521,7 +521,7 @@ void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable, bool
         auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex);
         auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex);
 
-        loginf << "SingleIntervalBase: addAnnotations: " << idx0.value() << " - " << idx1.value();
+        //loginf << "SingleIntervalBase: addAnnotations: " << idx0.value() << " - " << idx1.value();
 
         if (check_failed)
         {
