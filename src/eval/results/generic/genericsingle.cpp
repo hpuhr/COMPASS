@@ -445,17 +445,14 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SingleGeneric::gridL
     return layer_defs;
 }
 
-std::vector<Eigen::Vector3d> SingleGeneric::getGridValues(const std::string& layer) const
+void SingleGeneric::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
-    std::vector<Eigen::Vector3d> values;
-
     if (layer == requirement_->name())
     {
-        values = getGridValuesBinary(EvaluationRequirementResult::SingleGeneric::DetailKey::IsNotOk, true);
+        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleGeneric::DetailKey::IsNotOk, true);
     }
-
-    return values;
 }
+
 
 std::shared_ptr<Joined> SingleGeneric::createEmptyJoined(const std::string& result_id)
 {
