@@ -72,14 +72,14 @@ void SingleGeneric::updateProbabilities()
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
 
-    p_false_.reset();
+    prob_.reset();
 
     if (num_correct_ + num_false_)
     {
-        p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
+        prob_ = (float)(num_correct_)/(float)(num_correct_+num_false_);
     }
     
-    result_usable_ = p_false_.has_value();
+    result_usable_ = prob_.has_value();
 
     updateUseFromTarget();
 }
@@ -162,8 +162,8 @@ void SingleGeneric::addTargetDetailsToTable (
 
     QVariant pf_var;
 
-    if (p_false_.has_value())
-        pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
+    if (prob_.has_value())
+        pf_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -204,8 +204,8 @@ void SingleGeneric::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport:
     {
         QVariant pf_var;
 
-        if (p_false_.has_value())
-            pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
+        if (prob_.has_value())
+            pf_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({(req.probabilityNameShort()+" [%]").c_str(), req.probabilityName().c_str(), pf_var}, this);
 
@@ -213,8 +213,8 @@ void SingleGeneric::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport:
 
         string result {"Unknown"};
 
-        if (p_false_.has_value())
-            result = req.getConditionResultStr(p_false_.value());
+        if (prob_.has_value())
+            result = req.getConditionResultStr(prob_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -226,7 +226,7 @@ void SingleGeneric::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport:
 
     }
 
-    if (p_false_.has_value() && p_false_.value() != 0.0)
+    if (prob_.has_value() && prob_.value() != 0.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   [this](void) { return this->getTargetErrorsViewable(); });

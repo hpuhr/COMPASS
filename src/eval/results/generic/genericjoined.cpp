@@ -79,11 +79,11 @@ void JoinedGeneric::updateProbabilities()
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
 
-    p_false_.reset();
+    prob_.reset();
 
     if (num_correct_+num_false_)
     {
-        p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
+        prob_ = (float)(num_correct_)/(float)(num_correct_+num_false_);
     }
 }
 
@@ -119,10 +119,10 @@ void JoinedGeneric::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::
 
         string result {"Unknown"};
 
-        if (p_false_.has_value())
+        if (prob_.has_value())
         {
-            result = req->getConditionResultStr(p_false_.value());
-            pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
+            result = req->getConditionResultStr(prob_.value());
+            pf_var = roundf(prob_.value() * 10000.0) / 100.0;
         }
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -163,8 +163,8 @@ void JoinedGeneric::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem
     {
         QVariant pf_var;
 
-        if (p_false_.has_value())
-            pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
+        if (prob_.has_value())
+            pf_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         sec_det_table.addRow({(req.probabilityNameShort()+" [%]").c_str(), req.probabilityName().c_str(), pf_var}, this);
 
@@ -172,8 +172,8 @@ void JoinedGeneric::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem
 
         string result {"Unknown"};
 
-        if (p_false_.has_value())
-            result = req.getConditionResultStr(p_false_.value());
+        if (prob_.has_value())
+            result = req.getConditionResultStr(prob_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }

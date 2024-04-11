@@ -58,7 +58,7 @@ protected:
     unsigned int num_correct_     {0};
     unsigned int num_false_       {0};
 
-    boost::optional<float> p_false_;
+    boost::optional<float> prob_;
 
     void addToValues (std::shared_ptr<SingleGeneric> single_result);
     void updateProbabilities();

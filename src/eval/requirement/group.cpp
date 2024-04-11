@@ -75,7 +75,9 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementPositionLatencyConfig", "Position Latency"},
     {"EvaluationRequirementSpeedConfig", "Speed"},
     {"EvaluationRequirementTrackAngleConfig", "TrackAngle"},
-    {"EvaluationRequirementMoMLongAccConfig", "MoM Longitutidinal Acceleration Correct"}
+    {"EvaluationRequirementMoMLongAccConfig", "MoM Longitutidinal Acceleration Correct"},
+    {"EvaluationRequirementMoMTransAccConfig", "MoM Transversal Acceleration Correct"},
+    {"EvaluationRequirementMoMVertRateConfig", "MoM Vertical Rate Correct"}
 };
 
 
@@ -332,6 +334,24 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::GenericConfig* config = new EvaluationRequirement::GenericConfig(
                 class_id, instance_id, "MomLongAccCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementMoMTransAccConfig")
+    {
+        EvaluationRequirement::GenericConfig* config = new EvaluationRequirement::GenericConfig(
+            class_id, instance_id, "MomTransAccCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementMoMVertRateConfig")
+    {
+        EvaluationRequirement::GenericConfig* config = new EvaluationRequirement::GenericConfig(
+            class_id, instance_id, "MomVertRateCorrect", *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));

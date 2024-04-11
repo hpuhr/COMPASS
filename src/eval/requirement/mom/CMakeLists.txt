@@ -4,9 +4,9 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/momlongacccorrect.h"
+        "${CMAKE_CURRENT_LIST_DIR}/momcorrect.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/momlongacccorrect.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/momcorrect.cpp"
 )
 
 

@@ -108,6 +108,7 @@ void SectionContentTable::addToLayout (QVBoxLayout* layout)
         table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
         table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
         table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+        table_view_->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
         table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
         table_view_->setWordWrap(true);
         table_view_->reset();
@@ -123,8 +124,8 @@ void SectionContentTable::addToLayout (QVBoxLayout* layout)
                 this, &SectionContentTable::doubleClickedSlot);
     }
 
-    if (num_columns_ > 5)
-        table_view_->horizontalHeader()->setMaximumSectionSize(150);
+//    if (num_columns_ > 5)
+//        table_view_->horizontalHeader()->setMaximumSectionSize(150);
 
     table_view_->resizeColumnsToContents();
     table_view_->resizeRowsToContents();

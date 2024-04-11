@@ -105,7 +105,7 @@ class SingleGeneric : public Single
     unsigned int num_correct_     {0};
     unsigned int num_false_       {0};
 
-    boost::optional<float> p_false_;
+    boost::optional<float> prob_;
 
     void updateProbabilities();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

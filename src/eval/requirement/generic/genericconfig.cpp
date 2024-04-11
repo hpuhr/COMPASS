@@ -23,7 +23,7 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
 
-#include "eval/requirement/mom/momlongacccorrect.h"
+#include "eval/requirement/mom/momcorrect.h"
 
 //using namespace Utils;
 using namespace EvaluationResultsReport;
@@ -45,6 +45,10 @@ std::shared_ptr<Base> GenericConfig::createRequirement()
 
     if (variant_ == "MomLongAccCorrect")
         return make_shared<MomLongAccCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+    else if (variant_ == "MomTransAccCorrect")
+        return make_shared<MomTransAccCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+    else if (variant_ == "MomVertRateCorrect")
+        return make_shared<MomVertRateCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
     assert (false);
 }
