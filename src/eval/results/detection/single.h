@@ -38,7 +38,8 @@ public:
                     const EvaluationDetails& details,
                     int sum_uis, 
                     int missed_uis, 
-                    TimePeriodCollection ref_periods);
+                    TimePeriodCollection ref_periods,
+                    const std::vector<dbContent::TargetPosition>& ref_updates);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -59,15 +60,20 @@ public:
 
     enum DetailKey
     {
-        MissOccurred, //bool
-        DiffTOD,      //float
-        RefExists,    //bool
-        MissedUIs,    //unsigned int
-        MaxGapUIs,    //unsigned int
-        NoRefUIs     //unsigned int
+        MissOccurred,        //bool
+        DiffTOD,             //float
+        RefExists,           //bool
+        MissedUIs,           //unsigned int
+        MaxGapUIs,           //unsigned int
+        NoRefUIs,            //unsigned int
+        RefUpdateStartIndex, //unsigned int
+        RefUpdateEndIndex    //unsigned int
     };
 
     void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     bool hasFailed() const;
 
@@ -85,6 +91,7 @@ protected:
     int missed_uis_ {0};
 
     TimePeriodCollection ref_periods_;
+    std::vector<dbContent::TargetPosition> ref_updates_;
 
     boost::optional<float> pd_;
 };
