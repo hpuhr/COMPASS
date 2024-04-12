@@ -24,6 +24,7 @@
 #include "eval/results/report/sectioncontenttable.h"
 
 #include "eval/requirement/mom/momcorrect.h"
+#include "eval/requirement/status/coastingcorrect.h"
 #include "eval/requirement/mode_c/rocdcorrect.h"
 #include "eval/requirement/speed/accelerationcorrect.h"
 
@@ -51,6 +52,8 @@ std::shared_ptr<Base> GenericIntegerConfig::createRequirement()
         return make_shared<MomTransAccCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
     else if (variant_ == "MomVertRateCorrect")
         return make_shared<MomVertRateCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+    else if (variant_ == "CoastingCorrect")
+        return make_shared<CoastingCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
     assert (false);
 }
