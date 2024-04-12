@@ -27,21 +27,43 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-GenericConfigWidget::GenericConfigWidget(GenericConfig& cfg)
+GenericIntegerConfigWidget::GenericIntegerConfigWidget(GenericIntegerConfig& cfg)
     : ProbabilityBaseConfigWidget(cfg)
 {
     assert (prob_edit_);
-    prob_edit_->setToolTip("Probability of false Mode 3/A code");
+    prob_edit_->setToolTip("Probability");
 
     assert (check_type_box_);
 }
 
 
-GenericConfig& GenericConfigWidget::config()
+GenericIntegerConfig& GenericIntegerConfigWidget::config()
 {
-    GenericConfig* config = dynamic_cast<GenericConfig*>(&config_);
+    GenericIntegerConfig* config = dynamic_cast<GenericIntegerConfig*>(&config_);
     assert (config);
 
     return *config;
 }
+
+
+// ---------------------------------------------
+
+GenericDoubleConfigWidget::GenericDoubleConfigWidget(GenericDoubleConfig& cfg)
+    : ProbabilityBaseConfigWidget(cfg)
+{
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability");
+
+    assert (check_type_box_);
+}
+
+
+GenericDoubleConfig& GenericDoubleConfigWidget::config()
+{
+    GenericDoubleConfig* config = dynamic_cast<GenericDoubleConfig*>(&config_);
+    assert (config);
+
+    return *config;
+}
+
 }

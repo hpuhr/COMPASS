@@ -109,8 +109,8 @@ void JoinedGeneric::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::
     EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
     // condition
-    std::shared_ptr<EvaluationRequirement::Generic> req =
-            std::static_pointer_cast<EvaluationRequirement::Generic>(requirement_);
+    std::shared_ptr<EvaluationRequirement::GenericInteger> req =
+            std::static_pointer_cast<EvaluationRequirement::GenericInteger>(requirement_);
     assert (req);
 
     // p false
@@ -145,7 +145,7 @@ void JoinedGeneric::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem
 
     addCommonDetails(sec_det_table);
 
-    EvaluationRequirement::Generic& req = genericRequirement();
+    EvaluationRequirement::GenericBase& req = genericRequirement();
 
     sec_det_table.addRow({"Use", "To be used in results", use_}, this);
     sec_det_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
@@ -291,10 +291,10 @@ void JoinedGeneric::updatesToUseChanges_impl()
     //            loginf << "JoinedGeneric: updatesToUseChanges: updt result " << result_id_ << " has no data";
 }
 
-EvaluationRequirement::Generic& JoinedGeneric::genericRequirement() const
+EvaluationRequirement::GenericBase& JoinedGeneric::genericRequirement() const
 {
     assert (requirement_);
-    EvaluationRequirement::Generic* req_ptr = dynamic_cast<EvaluationRequirement::Generic*>(requirement_.get());
+    EvaluationRequirement::GenericBase* req_ptr = dynamic_cast<EvaluationRequirement::GenericBase*>(requirement_.get());
     assert (req_ptr);
 
     return *req_ptr;

@@ -26,20 +26,39 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-class GenericConfig;
 
-class GenericConfigWidget : public ProbabilityBaseConfigWidget
+class GenericIntegerConfig;
+class GenericDoubleConfig;
+
+class GenericIntegerConfigWidget : public ProbabilityBaseConfigWidget
 {
     Q_OBJECT
 
 public slots:
 
 public:
-    GenericConfigWidget(GenericConfig& cfg);
+    GenericIntegerConfigWidget(GenericIntegerConfig& cfg);
 
 protected:
 
-    GenericConfig& config();
+    GenericIntegerConfig& config();
 };
+
+
+class GenericDoubleConfigWidget : public ProbabilityBaseConfigWidget
+{
+    Q_OBJECT
+
+  public slots:
+
+  public:
+    GenericDoubleConfigWidget(GenericDoubleConfig& cfg);
+
+  protected:
+
+    GenericDoubleConfig& config();
+};
+
+
 
 }

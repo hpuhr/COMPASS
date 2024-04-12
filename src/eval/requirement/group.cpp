@@ -77,7 +77,9 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementTrackAngleConfig", "TrackAngle"},
     {"EvaluationRequirementMoMLongAccConfig", "MoM Longitutidinal Acceleration Correct"},
     {"EvaluationRequirementMoMTransAccConfig", "MoM Transversal Acceleration Correct"},
-    {"EvaluationRequirementMoMVertRateConfig", "MoM Vertical Rate Correct"}
+    {"EvaluationRequirementMoMVertRateConfig", "MoM Vertical Rate Correct"},
+    {"EvaluationRequirementROCDCorrectConfig", "ROCD Correct"},
+    {"EvaluationRequirementAccelerationCorrectConfig", "Acceleration Correct"}
 };
 
 
@@ -332,7 +334,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "EvaluationRequirementMoMLongAccConfig")
     {
-        EvaluationRequirement::GenericConfig* config = new EvaluationRequirement::GenericConfig(
+        EvaluationRequirement::GenericIntegerConfig* config = new EvaluationRequirement::GenericIntegerConfig(
                 class_id, instance_id, "MomLongAccCorrect", *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -341,7 +343,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "EvaluationRequirementMoMTransAccConfig")
     {
-        EvaluationRequirement::GenericConfig* config = new EvaluationRequirement::GenericConfig(
+        EvaluationRequirement::GenericIntegerConfig* config = new EvaluationRequirement::GenericIntegerConfig(
             class_id, instance_id, "MomTransAccCorrect", *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -350,8 +352,26 @@ void Group::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "EvaluationRequirementMoMVertRateConfig")
     {
-        EvaluationRequirement::GenericConfig* config = new EvaluationRequirement::GenericConfig(
+        EvaluationRequirement::GenericIntegerConfig* config = new EvaluationRequirement::GenericIntegerConfig(
             class_id, instance_id, "MomVertRateCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementROCDCorrectConfig")
+    {
+        EvaluationRequirement::GenericDoubleConfig* config = new EvaluationRequirement::GenericDoubleConfig(
+            class_id, instance_id, "ROCDCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementAccelerationCorrectConfig")
+    {
+        EvaluationRequirement::GenericDoubleConfig* config = new EvaluationRequirement::GenericDoubleConfig(
+            class_id, instance_id, "AccelerationCorrect", *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));

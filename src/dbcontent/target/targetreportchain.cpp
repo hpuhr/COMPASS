@@ -590,16 +590,16 @@ boost::optional<double> Chain::acceleration(const DataID& id) const // m/s2
     return sqrt(pow(ax_vec.get(index_ext), 2) + pow(ay_vec.get(index_ext), 2));
 }
 
-boost::optional<double> Chain::rocd(const DataID& id) const // ft/min
+boost::optional<float> Chain::rocd(const DataID& id) const // ft/min
 {
     auto index = indexFromDataID(id);
 
     auto index_ext = index.idx_external;
 
-    if (!accessor_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_rocd_))
+    if (!accessor_->hasMetaVar<float>(dbcontent_name_, DBContent::meta_var_rocd_))
         return {};
 
-    NullableVector<double>& vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_rocd_);
+    NullableVector<float>& vec = accessor_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_rocd_);
 
     if (vec.isNull(index_ext))
         return {};

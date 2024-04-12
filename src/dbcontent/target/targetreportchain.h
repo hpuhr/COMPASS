@@ -205,7 +205,7 @@ public:
     boost::optional<float> trackAngle(const DataID& id) const; // deg
 
     boost::optional<double> acceleration(const DataID& id) const; // m/s2
-    boost::optional<double> rocd(const DataID& id) const; // ft/min
+    boost::optional<float> rocd(const DataID& id) const; // ft/min
     boost::optional<unsigned char> momLongAcc(const DataID& id) const;
     boost::optional<unsigned char> momTransAcc(const DataID& id) const;
     boost::optional<unsigned char> momVertRate(const DataID& id) const;

@@ -150,7 +150,7 @@ void SingleGeneric::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport:
 void SingleGeneric::addTargetDetailsToTable (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
-        EvaluationRequirement::Generic& req = genericRequirement();
+        EvaluationRequirement::GenericBase& req = genericRequirement();
 
     if (!section.hasTable(table_name))
         section.addTable(table_name, 14,
@@ -186,7 +186,7 @@ void SingleGeneric::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport:
 
     addCommonDetails(root_item);
 
-    EvaluationRequirement::Generic& req = genericRequirement();
+    EvaluationRequirement::GenericBase& req = genericRequirement();
 
     utn_req_table.addRow({"Use", "To be used in results", use_}, this);
     utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
@@ -391,10 +391,10 @@ std::unique_ptr<nlohmann::json::object_t> SingleGeneric::getTargetErrorsViewable
     return viewable_ptr;
 }
 
-EvaluationRequirement::Generic& SingleGeneric::genericRequirement() const
+EvaluationRequirement::GenericBase& SingleGeneric::genericRequirement() const
 {
     assert (requirement_);
-    EvaluationRequirement::Generic* req_ptr = dynamic_cast<EvaluationRequirement::Generic*>(requirement_.get());
+    EvaluationRequirement::GenericBase* req_ptr = dynamic_cast<EvaluationRequirement::GenericBase*>(requirement_.get());
     assert (req_ptr);
 
     return *req_ptr;

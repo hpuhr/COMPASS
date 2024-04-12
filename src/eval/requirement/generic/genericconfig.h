@@ -26,10 +26,11 @@ class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
-class GenericConfig : public ProbabilityBaseConfig
+
+class GenericIntegerConfig : public ProbabilityBaseConfig
 {
 public:
-    GenericConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
+    GenericIntegerConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
                      Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
 
     std::shared_ptr<Base> createRequirement() override;
@@ -41,5 +42,28 @@ protected:
 
     virtual void createWidget() override;
 };
+
+
+class GenericDoubleConfig : public ProbabilityBaseConfig
+{
+  public:
+    GenericDoubleConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
+                         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+
+    std::shared_ptr<Base> createRequirement() override;
+
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+
+    double threshold() const;
+    void threshold(double value);
+
+  protected:
+    std::string variant_;
+
+    double threshold_ {0};
+
+    virtual void createWidget() override;
+};
+
 
 }

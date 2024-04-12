@@ -28,7 +28,7 @@
 
 namespace EvaluationRequirement
 {
-class Generic;
+class GenericBase;
 }
 
 namespace EvaluationRequirementResult
@@ -115,7 +115,7 @@ class SingleGeneric : public Single
 
     std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
 
-    EvaluationRequirement::Generic& genericRequirement() const;
+    EvaluationRequirement::GenericBase& genericRequirement() const;
 };
 
 }

@@ -114,6 +114,20 @@ class Base
     static std::function<bool(const unsigned char&, const unsigned char&)> cmpMomAny;
     static std::function<std::string(const unsigned char&)> printMomAny;
 
+    // rocd
+
+    static std::function<boost::optional<float>(const dbContent::TargetReport::Chain&,
+                                                      const dbContent::TargetReport::Chain::DataID&)> getROCD;
+    static std::function<bool(const float&, const float&, const float&)> cmpROCD;
+    static std::function<std::string(const float&)> printROCD;
+
+    // acceleration
+
+    static std::function<boost::optional<double>(const dbContent::TargetReport::Chain&,
+                                                 const dbContent::TargetReport::Chain::DataID&)> getAcceleration;
+    static std::function<bool(const double&, const double&, const double&)> cmpAcceleration;
+    static std::function<std::string(const double&)> printAcceleration;
+
     template <typename T>
     std::pair<ValueComparisonResult, std::string> compare (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
@@ -146,6 +160,14 @@ class Base
     std::pair<ValueComparisonResult, std::string> compareMomVertRate (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
         boost::posix_time::time_duration max_ref_time_diff) const;
+
+    std::pair<ValueComparisonResult, std::string> compareROCD (
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff, float max_val_diff) const; // tod tst
+
+    std::pair<ValueComparisonResult, std::string> compareAcceleration (
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff, float max_val_diff) const; // tod tst
 };
 
 template <typename T>

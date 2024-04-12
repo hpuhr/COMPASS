@@ -24,6 +24,8 @@
 #include "eval/results/report/sectioncontenttable.h"
 
 #include "eval/requirement/mom/momcorrect.h"
+#include "eval/requirement/mode_c/rocdcorrect.h"
+#include "eval/requirement/speed/accelerationcorrect.h"
 
 //using namespace Utils;
 using namespace EvaluationResultsReport;
@@ -32,14 +34,14 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-GenericConfig::GenericConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
+GenericIntegerConfig::GenericIntegerConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
                                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man), variant_(variant)
 {
     assert (variant_.size());
 }
 
-std::shared_ptr<Base> GenericConfig::createRequirement()
+std::shared_ptr<Base> GenericIntegerConfig::createRequirement()
 {
     //shared_ptr<Generic> req = make_shared<Generic>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
@@ -53,14 +55,14 @@ std::shared_ptr<Base> GenericConfig::createRequirement()
     assert (false);
 }
 
-void GenericConfig::createWidget()
+void GenericIntegerConfig::createWidget()
 {
     assert (!widget_);
-    widget_.reset(new GenericConfigWidget(*this));
+    widget_.reset(new GenericIntegerConfigWidget(*this));
     assert (widget_);
 }
 
-void GenericConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void GenericIntegerConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
@@ -68,7 +70,55 @@ void GenericConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootIt
 
     EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
 
-    table.addRow({"Probability [1]", "Probability of false Mode 3/A code",
+    table.addRow({"Probability [1]", "Probability",
+                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+    table.addRow({"Probability Check Type", "",
+                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+
+}
+
+//---------------------------------------------
+
+GenericDoubleConfig::GenericDoubleConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
+                                           Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man), variant_(variant)
+{
+    assert (variant_.size());
+
+    registerParameter("threshold", &threshold_, 0.0);
+}
+
+std::shared_ptr<Base> GenericDoubleConfig::createRequirement()
+{
+    //shared_ptr<Generic> req = make_shared<Generic>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+
+    if (variant_ == "ROCDCorrect") // ft / min
+        return make_shared<ROCDCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, 1000, eval_man_);
+    else if (variant_ == "AccelerationCorrect")
+        return make_shared<AccelerationCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, 10, eval_man_);
+//    else if (variant_ == "MomVertRateCorrect")
+//        return make_shared<MomVertRateCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+
+    assert (false);
+}
+
+void GenericDoubleConfig::createWidget()
+{
+    assert (!widget_);
+    widget_.reset(new GenericDoubleConfigWidget(*this));
+    assert (widget_);
+}
+
+void GenericDoubleConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    table.addRow({"Threshold [1]", "Threshold", threshold_}, nullptr);
+    table.addRow({"Probability [1]", "Probability",
                   roundf(prob_ * 10000.0) / 100.0}, nullptr);
     table.addRow({"Probability Check Type", "",
                   comparisonTypeString(prob_check_type_).c_str()}, nullptr);

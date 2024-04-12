@@ -21,7 +21,7 @@
 
 namespace EvaluationRequirement
 {
-class Generic;
+class GenericBase;
 }
 
 namespace EvaluationRequirementResult
@@ -73,7 +73,7 @@ protected:
     virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-    EvaluationRequirement::Generic& genericRequirement() const;
+    EvaluationRequirement::GenericBase& genericRequirement() const;
 };
 
 }

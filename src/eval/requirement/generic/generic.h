@@ -22,15 +22,11 @@
 namespace EvaluationRequirement
 {
 
-class Generic : public ProbabilityBase
+class GenericBase : public ProbabilityBase
 {
   public:
-    Generic(const std::string& name, const std::string& short_name, const std::string& group_name,
-               float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
-
-    virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
-        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
-        const SectorLayer& sector_layer) override;
+    GenericBase(const std::string& name, const std::string& short_name, const std::string& group_name,
+                   float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
 
     std::string valueName() const;
     std::string valueNameShort() const;
@@ -40,7 +36,6 @@ class Generic : public ProbabilityBase
     std::string probabilityName() const;
     std::string probabilityNameShort() const;
 
-  protected:
     std::string result_type_; // e.g. FalseMode3A
 
     std::string value_name_; // the thing, the whole thing and the essence of the thing, e.g. "Mode 3/A Code"
@@ -49,11 +44,49 @@ class Generic : public ProbabilityBase
 
     std::string probability_name_;
     std::string probability_name_short_;
+};
+
+
+class GenericInteger : public GenericBase
+{
+  public:
+    GenericInteger(const std::string& name, const std::string& short_name, const std::string& group_name,
+               float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
+
+    virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
+        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+        const SectorLayer& sector_layer) override;
+
+  protected:
 
     std::function <std::pair<ValueComparisonResult,std::string> (
         const dbContent::TargetReport::Chain::DataID& id,
         const EvaluationTargetData& target_data,
         boost::posix_time::time_duration max_ref_time_diff)> value_compare_func_;
+
+};
+
+
+class GenericDouble : public GenericBase
+{
+  public:
+    GenericDouble(const std::string& name, const std::string& short_name, const std::string& group_name,
+                  float prob, COMPARISON_TYPE prob_check_type, double threshold, EvaluationManager& eval_man);
+
+    virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
+        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+        const SectorLayer& sector_layer) override;
+
+  protected:
+
+    double threshold_ {0};
+
+    std::function <std::pair<ValueComparisonResult,std::string> (
+        const dbContent::TargetReport::Chain::DataID& id,
+        const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff, double threshold)> value_compare_func_;
+
+
 };
 
 }
