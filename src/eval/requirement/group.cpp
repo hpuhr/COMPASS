@@ -79,7 +79,8 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementMoMTransAccConfig", "MoM Transversal Acceleration Correct"},
     {"EvaluationRequirementMoMVertRateConfig", "MoM Vertical Rate Correct"},
     {"EvaluationRequirementROCDCorrectConfig", "ROCD Correct"},
-    {"EvaluationRequirementAccelerationCorrectConfig", "Acceleration Correct"}
+    {"EvaluationRequirementAccelerationCorrectConfig", "Acceleration Correct"},
+    {"EvaluationRequirementCoastingCorrectConfig", "Track Coasting Correct"}
 };
 
 
@@ -354,6 +355,15 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::GenericIntegerConfig* config = new EvaluationRequirement::GenericIntegerConfig(
             class_id, instance_id, "MomVertRateCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementCoastingCorrectConfig")
+    {
+        EvaluationRequirement::GenericIntegerConfig* config = new EvaluationRequirement::GenericIntegerConfig(
+            class_id, instance_id, "CoastingCorrect", *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));

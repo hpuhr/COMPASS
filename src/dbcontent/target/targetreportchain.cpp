@@ -661,6 +661,24 @@ boost::optional<unsigned char> Chain::momVertRate(const DataID& id) const
     return vec.get(index_ext);
 }
 
+boost::optional<unsigned char> Chain::trackCoasting(const DataID& id) const
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<unsigned char>(dbcontent_name_, DBContent::meta_var_track_coasting_))
+        return {};
+
+    NullableVector<unsigned char>& vec = accessor_->getMetaVar<unsigned char>(
+        dbcontent_name_, DBContent::meta_var_track_coasting_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
+}
+
 std::pair<bool, float> Chain::estimateAltitude (const boost::posix_time::ptime& timestamp,
                                                 unsigned int index_internal) const
 {

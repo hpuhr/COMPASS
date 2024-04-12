@@ -96,9 +96,50 @@ std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chai
 std::function<bool(const unsigned char&, const unsigned char&)> Base::cmpMomAny =
     [] (const unsigned char& val1, const unsigned char& val2) { return val1 == val2; };
 
-std::function<std::string(const unsigned char&)> Base::printMomAny =
-    [] (const unsigned char& val) { return to_string((unsigned int) val); };
+std::function<std::string(const unsigned char&)> Base::printMomTransAcc =
+    [] (const unsigned char& val) {
 
+        if (val == 0)
+            return "ConstantCourse";
+        else if (val == 1)
+            return "RightTurn";
+        else if (val == 2)
+            return "LeftTurn";
+        else if (val == 3)
+            return "Undetermined";
+
+        assert (false);
+    };
+
+std::function<std::string(const unsigned char&)> Base::printMomLongAcc =
+    [] (const unsigned char& val) {
+
+        if (val == 0)
+            return "ConstantGroundspeed";
+        else if (val == 1)
+            return "IncreasingGroundspeed";
+        else if (val == 2)
+            return "DecreasingGroundspeed";
+        else if (val == 3)
+            return "Undetermined";
+
+        assert (false);
+    };
+
+std::function<std::string(const unsigned char&)> Base::printMomVertRate =
+    [] (const unsigned char& val) {
+
+        if (val == 0)
+            return "Level";
+        else if (val == 1)
+            return "Climb";
+        else if (val == 2)
+            return "Descent";
+        else if (val == 3)
+            return "Undetermined";
+
+        assert (false);
+    };
 
 // rocd
 
@@ -133,6 +174,19 @@ Base::Base(const std::string& name, const std::string& short_name, const std::st
       eval_man_(eval_man)
 {
 }
+
+// coasting
+
+std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chain&,
+                                     const dbContent::TargetReport::Chain::DataID&)> Base::getCoasting =
+    [] (const dbContent::TargetReport::Chain& chain,
+       const dbContent::TargetReport::Chain::DataID& id) { return chain.trackCoasting(id); };
+
+std::function<bool(const unsigned char&, const unsigned char&)> Base::cmpCoasting =
+    [] (const float& val1, const float& val2) { return val1 == val2; };
+
+std::function<std::string(const unsigned char&)> Base::printCoasting =
+    [] (const unsigned int& val) { return to_string((unsigned int) val); };
 
 Base::~Base()
 {
@@ -192,21 +246,21 @@ std::pair<ValueComparisonResult, std::string> Base::compareMomLongAcc (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     boost::posix_time::time_duration max_ref_time_diff) const
 {
-    return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomLongAcc, cmpMomAny, printMomAny);
+    return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomLongAcc, cmpMomAny, printMomLongAcc);
 }
 
 std::pair<ValueComparisonResult, std::string> Base::compareMomTransAcc (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     boost::posix_time::time_duration max_ref_time_diff) const
 {
-    return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomTransAcc, cmpMomAny, printMomAny);
+    return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomTransAcc, cmpMomAny, printMomTransAcc);
 }
 
 std::pair<ValueComparisonResult, std::string> Base::compareMomVertRate (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     boost::posix_time::time_duration max_ref_time_diff) const
 {
-    return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomVertRate, cmpMomAny, printMomAny);
+    return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomVertRate, cmpMomAny, printMomVertRate);
 }
 
 std::pair<ValueComparisonResult, std::string> Base::compareROCD (
@@ -230,5 +284,13 @@ std::pair<ValueComparisonResult, std::string> Base::compareAcceleration (
 
     return compare<double>(id, target_data, max_ref_time_diff, getAcceleration, tmp_cmpAcceleration, printAcceleration);
 }
+
+std::pair<ValueComparisonResult, std::string> Base::compareCoasting (
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    boost::posix_time::time_duration max_ref_time_diff) const
+{
+    return compare<unsigned char>(id, target_data, max_ref_time_diff, getCoasting, cmpCoasting, printCoasting);
+}
+
 
 }

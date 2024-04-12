@@ -210,6 +210,8 @@ public:
     boost::optional<unsigned char> momTransAcc(const DataID& id) const;
     boost::optional<unsigned char> momVertRate(const DataID& id) const;
 
+    boost::optional<unsigned char> trackCoasting(const DataID& id) const;
+
     Index indexFromDataID(const DataID& id) const;
     boost::posix_time::ptime timestampFromDataID(const DataID& id) const;
 

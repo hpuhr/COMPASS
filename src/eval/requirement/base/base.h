@@ -112,7 +112,9 @@ class Base
                                                        const dbContent::TargetReport::Chain::DataID&)> getMomVertRate;
 
     static std::function<bool(const unsigned char&, const unsigned char&)> cmpMomAny;
-    static std::function<std::string(const unsigned char&)> printMomAny;
+    static std::function<std::string(const unsigned char&)> printMomTransAcc;
+    static std::function<std::string(const unsigned char&)> printMomLongAcc;
+    static std::function<std::string(const unsigned char&)> printMomVertRate;
 
     // rocd
 
@@ -127,6 +129,12 @@ class Base
                                                  const dbContent::TargetReport::Chain::DataID&)> getAcceleration;
     static std::function<bool(const double&, const double&, const double&)> cmpAcceleration;
     static std::function<std::string(const double&)> printAcceleration;
+
+    // coasting
+    static std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chain&,
+                                                const dbContent::TargetReport::Chain::DataID&)> getCoasting;
+    static std::function<bool(const unsigned char&, const unsigned char&)> cmpCoasting;
+    static std::function<std::string(const unsigned char&)> printCoasting;
 
     template <typename T>
     std::pair<ValueComparisonResult, std::string> compare (
@@ -168,6 +176,10 @@ class Base
     std::pair<ValueComparisonResult, std::string> compareAcceleration (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
         boost::posix_time::time_duration max_ref_time_diff, float max_val_diff) const; // tod tst
+
+    std::pair<ValueComparisonResult, std::string> compareCoasting (
+        const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+        boost::posix_time::time_duration max_ref_time_diff) const;
 };
 
 template <typename T>
@@ -197,9 +209,9 @@ std::pair<ValueComparisonResult, std::string> Base::compare (
 
     if (!has_ref_data)
     {
-        if (tst_value.has_value())
-            return {ValueComparisonResult::Different, "Tst data without ref value"};
-        else
+//        if (tst_value.has_value())
+//            return {ValueComparisonResult::Different, "Tst data without ref value"};
+//        else
             return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
     }
 

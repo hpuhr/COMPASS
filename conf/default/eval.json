@@ -1,17 +1,17 @@
 {
     "parameters": {
-        "active_sources_ref": {
-        },
-        "active_sources_tst": {
-        },
-        "current_standard": "EUROCAE ED-87E",
+        "active_sources_ref": {},
+        "current_standard": "test",
         "dbcontent_name_ref": "RefTraj",
-        "dbcontent_name_tst": "CAT020",
+        "dbcontent_name_tst": "CAT062",
         "generate_details": true,
-        "line_id_ref": 0,
+        "grid_num_cells_x": 512,
+        "grid_num_cells_y": 512,
+        "grid_pixels_per_cell": 5,
+        "line_id_ref": 1,
         "line_id_tst": 0,
-        "load_timestamp_begin": "2023-09-28 15:37:58.116",
-        "load_timestamp_end": "2023-09-28 16:07:59.704",
+        "load_timestamp_begin": "2024-04-11 15:37:58.116",
+        "load_timestamp_end": "2024-04-11 16:07:59.704",
         "max_nacp": 5,
         "max_nic": 5,
         "max_nucp": 4,
@@ -26,8 +26,8 @@
         "min_sil_v2": 4,
         "ref_traj_minimum_accuracy": 50.0,
         "report_abstract": "",
-        "report_author": "sk",
-        "report_include_target_details": false,
+        "report_author": "",
+        "report_include_target_details": true,
         "report_include_target_tr_details": false,
         "report_num_max_table_col_width": 18,
         "report_num_max_table_rows": 500,
@@ -1230,12 +1230,12 @@
                                             "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
-                                            "miss_tolerance": 0.8999999761581421,
+                                            "miss_tolerance": 0.20000000298023224,
                                             "name": "Probability of Detection",
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
                                             "short_name": "PD",
-                                            "update_interval": 2.0,
+                                            "update_interval": 1.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
                                             "use_miss_tolerance": true
@@ -2346,6 +2346,29 @@
                                 "name": "Mandatory"
                             },
                             "sub_configs": {
+                                "EvaluationRequirementAccelerationCorrectConfig": {
+                                    "EvaluationRequirementAccelerationCorrectConfigAcceleration Correct0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "Acceleration Correct",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "AccCorrect",
+                                            "threshold": 5.0
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementCoastingCorrectConfig": {
+                                    "EvaluationRequirementCoastingCorrectConfigTrack Coasting Correct0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "Track Coasting Correct",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "TCst"
+                                        }
+                                    }
+                                },
                                 "EvaluationRequirementDetectionConfig": {
                                     "EvaluationRequirementDetectionConfigProbability of Detection0": {
                                         "parameters": {
@@ -2361,7 +2384,7 @@
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
                                             "short_name": "PD",
-                                            "update_interval": 2.0,
+                                            "update_interval": 5.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
                                             "use_miss_tolerance": true
@@ -2486,7 +2509,7 @@
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
                                             "short_name": "PCID P",
-                                            "update_interval": 1.0,
+                                            "update_interval": 5.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
                                             "use_miss_tolerance": false
@@ -2505,6 +2528,39 @@
                                             "use_mode_a": true,
                                             "use_ms_ta": true,
                                             "use_ms_ti": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementMoMLongAccConfig": {
+                                    "EvaluationRequirementMoMLongAccConfigMoM Long ACC Correct0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "MoM Long ACC Correct",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "MoMLong"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementMoMTransAccConfig": {
+                                    "EvaluationRequirementMoMTransAccConfigMoM Transversal Acceleration Correct0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "MoM Trans Acc Correct",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "MoMTrans"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementMoMVertRateConfig": {
+                                    "EvaluationRequirementMoMVertRateConfigMoM Vertical Rate Correct0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "MoM Vertical Rate Correct",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "MoMVert"
                                         }
                                     }
                                 },
@@ -2559,7 +2615,7 @@
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
                                             "short_name": "MCC P",
-                                            "update_interval": 1.0,
+                                            "update_interval": 5.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
                                             "use_miss_tolerance": false
@@ -2670,13 +2726,25 @@
                                     "EvaluationRequirementPositionLatencyConfigLatency0": {
                                         "parameters": {
                                             "comment": "",
-                                            "max_abs_value": 0.20000000298023224,
+                                            "max_abs_value": 0.5,
                                             "max_ref_time_diff": 5.0,
                                             "minimum_probability": 0.8999999761581421,
                                             "name": "Latency",
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
                                             "short_name": "LT"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementROCDCorrectConfig": {
+                                    "EvaluationRequirementROCDCorrectConfigROCD Correct0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "name": "ROCD Correct",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "ROCDCorrect",
+                                            "threshold": 500.0
                                         }
                                     }
                                 },
