@@ -17,10 +17,12 @@
 
 #include "eval/requirement/generic/genericconfigwidget.h"
 #include "eval/requirement/generic/genericconfig.h"
+#include "logger.h"
 
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QDoubleValidator>
 
 using namespace std;
 
@@ -55,6 +57,14 @@ GenericDoubleConfigWidget::GenericDoubleConfigWidget(GenericDoubleConfig& cfg)
     prob_edit_->setToolTip("Probability");
 
     assert (check_type_box_);
+
+    threshold_value_edit_ = new QLineEdit(QString::number(config().threshold()));
+    threshold_value_edit_->setValidator(new QDoubleValidator(0.0, 1000.0, 4, this));
+    prob_edit_->setToolTip("Maximum value difference between the test and the reference");
+    connect(threshold_value_edit_, &QLineEdit::textEdited,
+            this, &GenericDoubleConfigWidget::thresholdValueEditSlot);
+
+    form_layout_->addRow("Maximum Difference", threshold_value_edit_);
 }
 
 
@@ -64,6 +74,19 @@ GenericDoubleConfig& GenericDoubleConfigWidget::config()
     assert (config);
 
     return *config;
+}
+
+void GenericDoubleConfigWidget::thresholdValueEditSlot(QString value)
+{
+    loginf << "EvaluationRequirement GenericDoubleConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config().threshold(val);
+    else
+        loginf << "EvaluationRequirement GenericDoubleConfigWidget: thresholdValueEditSlot: invalid value";
 }
 
 }

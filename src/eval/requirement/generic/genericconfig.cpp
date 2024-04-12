@@ -93,9 +93,9 @@ std::shared_ptr<Base> GenericDoubleConfig::createRequirement()
     //shared_ptr<Generic> req = make_shared<Generic>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
     if (variant_ == "ROCDCorrect") // ft / min
-        return make_shared<ROCDCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, 1000, eval_man_);
+        return make_shared<ROCDCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, threshold_, eval_man_);
     else if (variant_ == "AccelerationCorrect")
-        return make_shared<AccelerationCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, 10, eval_man_);
+        return make_shared<AccelerationCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, threshold_, eval_man_);
 //    else if (variant_ == "MomVertRateCorrect")
 //        return make_shared<MomVertRateCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
@@ -123,6 +123,15 @@ void GenericDoubleConfig::addToReport (std::shared_ptr<EvaluationResultsReport::
     table.addRow({"Probability Check Type", "",
                   comparisonTypeString(prob_check_type_).c_str()}, nullptr);
 
+}
+
+double GenericDoubleConfig::threshold() const
+{
+    return threshold_;
+}
+void GenericDoubleConfig::threshold(double value)
+{
+    threshold_ = value;
 }
 
 }

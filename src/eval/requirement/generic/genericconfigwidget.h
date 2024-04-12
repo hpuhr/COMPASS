@@ -50,11 +50,13 @@ class GenericDoubleConfigWidget : public ProbabilityBaseConfigWidget
     Q_OBJECT
 
   public slots:
+    void thresholdValueEditSlot(QString value);
 
   public:
     GenericDoubleConfigWidget(GenericDoubleConfig& cfg);
 
   protected:
+    QLineEdit* threshold_value_edit_{nullptr};
 
     GenericDoubleConfig& config();
 };
