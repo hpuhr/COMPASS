@@ -79,7 +79,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
     bool is_inside;
     //pair<dbContent::TargetPosition, bool> ret_pos;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    bool ok;
 
     string comment;
     //bool lower_nok, upper_nok;

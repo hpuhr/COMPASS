@@ -451,16 +451,16 @@ std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
 /**
  * Generates binary grid values from a certain bool detail param.
  */
-void Single::addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert) const
+void Single::addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert, bool use_ref_pos) const
 {
     const auto& details = getDetails();
 
     for (auto& detail_it : details)
     {
-        if (detail_it.numPositions() == 1) // no ref pos
+        if (use_ref_pos && detail_it.numPositions() == 1) // no ref pos
             continue;
 
-        assert (detail_it.numPositions() == 2);
+        assert (detail_it.numPositions() >= 1 && detail_it.numPositions() <= 2);
 
         //double d = detail_it.getValue(DetailKey::Value).toDouble();
 
@@ -471,8 +471,8 @@ void Single::addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert) co
                    ( invert && !check_passed.value()));
 
         //interpolate between 0 = green and 1 = red
-        grid.addValue(detail_it.position(1).longitude_,
-                      detail_it.position(1).latitude_,
+        grid.addValue(detail_it.position(use_ref_pos ? 1 : 0).longitude_,
+                      detail_it.position(use_ref_pos ? 1 : 0).latitude_,
                       ok ? 0.0 : 1.0);
     }
 }
