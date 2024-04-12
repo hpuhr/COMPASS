@@ -117,7 +117,7 @@ protected:
     nlohmann::json& getOrCreateAnnotation(nlohmann::json::object_t& viewable, AnnotationType type, bool overview) const;
     // creates if not existing
 
-    void addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert = false) const;
+    void addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert = false, bool use_ref_pos = true) const;
     LayerDefinition getGridLayerDefBinary() const;
 };
 

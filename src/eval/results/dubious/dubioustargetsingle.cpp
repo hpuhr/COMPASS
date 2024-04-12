@@ -429,15 +429,12 @@ EvaluationRequirement::DubiousTarget* SingleDubiousTarget::req ()
 
 void SingleDubiousTarget::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-
     //addAnnotationFeatures(viewable, overview); // TODO rework
 
     json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
     json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
     json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
     json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
-
-
 }
 
 }

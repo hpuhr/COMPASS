@@ -99,7 +99,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         if (!track_num.has_value())
             continue;
 
-
         if (!active_tracks.count(*track_num)) // not yet existing
         {
             //active_tracks[track_num] = {tod, tod};

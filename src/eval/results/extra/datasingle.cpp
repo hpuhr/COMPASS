@@ -269,60 +269,56 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraData::getTargetErrorsViewab
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
 
-    //    bool has_pos = false;
-    //    double lat_min, lat_max, lon_min, lon_max;
+    bool has_pos = false;
+    double lat_min, lat_max, lon_min, lon_max;
 
-    //    for (auto& detail_it : details_)
-    //    {
-    //        if (!detail_it.miss_occurred_)
-    //            continue;
+    for (auto& detail_it : getDetails())
+    {
+        assert(detail_it.numPositions() >= 1);
 
-    //        if (has_pos)
-    //        {
-    //            lat_min = min(lat_min, detail_it.pos_current_.latitude_);
-    //            lat_max = max(lat_max, detail_it.pos_current_.latitude_);
+        auto is_extra = detail_it.getValueAs<bool>(DetailKey::Extra);
+        assert(is_extra.has_value());
 
-    //            lon_min = min(lon_min, detail_it.pos_current_.longitude_);
-    //            lon_max = max(lon_max, detail_it.pos_current_.longitude_);
-    //        }
-    //        else // tst pos always set
-    //        {
-    //            lat_min = detail_it.pos_current_.latitude_;
-    //            lat_max = detail_it.pos_current_.latitude_;
+        if (!is_extra.value())
+            continue;
 
-    //            lon_min = detail_it.pos_current_.longitude_;
-    //            lon_max = detail_it.pos_current_.longitude_;
+        if (has_pos)
+        {
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-    //            has_pos = true;
-    //        }
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
+        }
+        else // tst pos always set
+        {
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-    //        if (detail_it.has_last_position_)
-    //        {
-    //            lat_min = min(lat_min, detail_it.pos_last.latitude_);
-    //            lat_max = max(lat_max, detail_it.pos_last.latitude_);
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
-    //            lon_min = min(lon_min, detail_it.pos_last.longitude_);
-    //            lon_max = max(lon_max, detail_it.pos_last.longitude_);
-    //        }
-    //    }
+            has_pos = true;
+        }
+    }
 
-    //    if (has_pos)
-    //    {
-    //        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    //        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
+    if (has_pos)
+    {
+        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
+        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
 
-    //        double lat_w = lat_max-lat_min;
-    //        double lon_w = lon_max-lon_min;
+        double lat_w = lat_max-lat_min;
+        double lon_w = lon_max-lon_min;
 
-    //        if (lat_w < eval_man_.settings().result_detail_zoom_)
-    //            lat_w = eval_man_.settings().result_detail_zoom_;
+        if (lat_w < eval_man_.settings().result_detail_zoom_)
+            lat_w = eval_man_.settings().result_detail_zoom_;
 
-    //        if (lon_w < eval_man_.settings().result_detail_zoom_)
-    //            lon_w = eval_man_.settings().result_detail_zoom_;
+        if (lon_w < eval_man_.settings().result_detail_zoom_)
+            lon_w = eval_man_.settings().result_detail_zoom_;
 
-    //        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
-    //        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
-    //    }
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
+    }
 
     addAnnotations(*viewable_ptr, false, true);
 
@@ -335,7 +331,7 @@ bool SingleExtraData::hasReference (
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
     else
-        return false;;
+        return false;
 }
 
 std::string SingleExtraData::reference(
@@ -373,12 +369,38 @@ unsigned int SingleExtraData::numOK() const
 
 void SingleExtraData::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-     //addAnnotationFeatures(viewable, overview); // TODO rework
-
-     json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
      json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
-     json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
      json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+
+     for (auto& detail_it : getDetails())
+    {
+        auto is_extra = detail_it.getValueAsOrAssert<bool>(
+                    EvaluationRequirementResult::SingleExtraData::DetailKey::Extra);
+
+        assert (detail_it.numPositions() >= 1);
+
+        if (is_extra)
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
+        else if (add_ok)
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+    }
+}
+
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleExtraData::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SingleExtraData::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleExtraData::DetailKey::Extra, true, false);
+    }
 }
 
 }
