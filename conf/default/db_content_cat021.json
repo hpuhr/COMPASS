@@ -1647,7 +1647,7 @@
             },
             "VariableADSBbaro_vertical_rate_ftm0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
+                    "data_type_str": "FLOAT",
                     "db_column_name": "barometric_vertical_rate",
                     "description": "From 155.Barometric Vertical Rate\n\nBarometric Vertical Rate in ft/min",
                     "dimension": "",

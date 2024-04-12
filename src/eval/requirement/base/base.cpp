@@ -100,6 +100,33 @@ std::function<std::string(const unsigned char&)> Base::printMomAny =
     [] (const unsigned char& val) { return to_string((unsigned int) val); };
 
 
+// rocd
+
+std::function<boost::optional<float>(const dbContent::TargetReport::Chain&,
+                                     const dbContent::TargetReport::Chain::DataID&)> Base::getROCD =
+    [] (const dbContent::TargetReport::Chain& chain,
+       const dbContent::TargetReport::Chain::DataID& id) { return chain.rocd(id); };
+
+std::function<bool(const float&, const float&, const float&)> Base::cmpROCD =
+    [] (const float& val1, const float& val2, const float& max_val_diff) { return fabs(val1 - val2) <= max_val_diff; };
+
+std::function<std::string(const float&)> Base::printROCD =
+    [] (const unsigned int& val) { return String::doubleToStringPrecision(val, 2); };
+
+
+// acceleration
+
+std::function<boost::optional<double>(const dbContent::TargetReport::Chain&,
+                                      const dbContent::TargetReport::Chain::DataID&)> Base::getAcceleration =
+    [] (const dbContent::TargetReport::Chain& chain,
+       const dbContent::TargetReport::Chain::DataID& id) { return chain.acceleration(id); };
+
+std::function<bool(const double&, const double&, const double&)> Base::cmpAcceleration =
+    [] (const float& val1, const float& val2, const float& max_val_diff) { return fabs(val1 - val2) <= max_val_diff; };
+
+std::function<std::string(const double&)> Base::printAcceleration =
+    [] (const unsigned int& val) { return String::doubleToStringPrecision(val, 2); };
+
 Base::Base(const std::string& name, const std::string& short_name, const std::string& group_name,
            EvaluationManager& eval_man)
     : name_(name), short_name_(short_name), group_name_(group_name),
@@ -180,6 +207,28 @@ std::pair<ValueComparisonResult, std::string> Base::compareMomVertRate (
     boost::posix_time::time_duration max_ref_time_diff) const
 {
     return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomVertRate, cmpMomAny, printMomAny);
+}
+
+std::pair<ValueComparisonResult, std::string> Base::compareROCD (
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    time_duration max_ref_time_diff, float max_val_diff) const
+{
+
+    std::function<bool(const float&, const float&)> tmp_cmpROCD =
+        [max_val_diff] (const float& val1, const float& val2) { return fabs(val1 - val2) <= max_val_diff; };
+
+    return compare<float>(id, target_data, max_ref_time_diff, getROCD, tmp_cmpROCD, printROCD);
+}
+
+std::pair<ValueComparisonResult, std::string> Base::compareAcceleration (
+    const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
+    time_duration max_ref_time_diff, float max_val_diff) const
+{
+
+    std::function<bool(const double&, const double&)> tmp_cmpAcceleration =
+        [max_val_diff] (const double& val1, const double& val2) { return fabs(val1 - val2) <= max_val_diff; };
+
+    return compare<double>(id, target_data, max_ref_time_diff, getAcceleration, tmp_cmpAcceleration, printAcceleration);
 }
 
 }
