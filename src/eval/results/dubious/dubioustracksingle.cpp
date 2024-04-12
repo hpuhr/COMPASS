@@ -407,7 +407,6 @@ bool SingleDubiousTrack::hasViewableData (
 std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -497,12 +496,64 @@ EvaluationRequirement::DubiousTrack* SingleDubiousTrack::req ()
 
 void SingleDubiousTrack::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-     //addAnnotationFeatures(viewable, overview); // TODO rework
-
-    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
     json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
-    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
     json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+
+    //iterate over details
+    for (auto& rq_det_it : getDetails())
+    {
+        if (!rq_det_it.hasDetails())
+            continue;
+
+        //iterate over updates
+        for (auto& update : rq_det_it.details())
+        {
+            assert(update.numPositions() >= 1);
+
+            auto comments = update.comments().group(DetailCommentGroupDubious);
+            bool is_dub = (comments.has_value() && !comments->empty());
+
+            if (is_dub)
+                error_point_coordinates.push_back(update.position(0).asVector());
+            else if (add_ok)
+                ok_point_coordinates.push_back(update.position(0).asVector());
+        }
+    }
+}
+
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleDubiousTrack::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SingleDubiousTrack::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    const auto& details = getDetails();
+
+    if (layer == requirement_->name())
+    {
+        for (const auto& d : details)
+        {
+            if (d.hasDetails())
+            {
+                const auto& updates = d.details();
+
+                auto is_ok = [ & ] (size_t idx)
+                {
+                    auto comments = updates[ idx ].comments().group(DetailCommentGroupDubious);
+                    bool is_dub = (comments.has_value() && !comments->empty());
+
+                    return !is_dub;
+                };
+            
+                addValuesToGridBinary(grid, updates, is_ok, false);
+            }
+        }
+    }
 }
 
 float SingleDubiousTrack::trackDurationAll() const

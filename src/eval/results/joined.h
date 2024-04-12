@@ -74,7 +74,7 @@ protected:
 
     std::unique_ptr<nlohmann::json::object_t> createViewable() const;
 
-    virtual OverviewMode overviewMode() const { return OverviewMode::GridPlusFeatures; }
+    virtual OverviewMode overviewMode() const { return OverviewMode::GridOrFeatures; }
 
     virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) { return {}; }

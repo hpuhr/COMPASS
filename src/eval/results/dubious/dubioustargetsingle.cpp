@@ -134,7 +134,6 @@ void SingleDubiousTarget::addTargetDetailsToTable (EvaluationResultsReport::Sect
                 || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
             order = Qt::DescendingOrder;
 
-
         section.addTable(table_name, 13,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                           "#PosInside", "#DU", "PDU", "Reasons", "PDT"}, true, 12, order);
@@ -354,7 +353,6 @@ bool SingleDubiousTarget::hasViewableData (const EvaluationResultsReport::Sectio
 std::unique_ptr<nlohmann::json::object_t> SingleDubiousTarget::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -431,10 +429,63 @@ void SingleDubiousTarget::addAnnotations(nlohmann::json::object_t& viewable, boo
 {
     //addAnnotationFeatures(viewable, overview); // TODO rework
 
-    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
     json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
-    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
     json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+
+    assert(numDetails() > 0);
+    const auto& detail = getDetail(0);
+
+    if (detail.hasDetails())
+    {
+        for (auto& update : detail.details())
+        {
+            assert(update.numPositions() >= 1);
+
+            auto comments = update.comments().group(DetailCommentGroupDubious);
+            bool is_dub = (comments.has_value() && !comments->empty());
+
+            if (is_dub)
+                error_point_coordinates.push_back(update.position(0).asVector());
+            else if (add_ok)
+                ok_point_coordinates.push_back(update.position(0).asVector());
+        }
+    }
+}
+
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleDubiousTarget::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SingleDubiousTarget::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    assert(numDetails() > 0);
+    const auto& detail = getDetail(0);
+
+    if (!detail.hasDetails())
+        return;
+
+    const auto& details = detail.details();
+
+    if (layer == requirement_->name())
+    {
+        if (detail.hasDetails())
+        {
+            auto is_ok = [ & ] (size_t idx)
+            {
+                auto comments = details[ idx ].comments().group(DetailCommentGroupDubious);
+                bool is_dub = (comments.has_value() && !comments->empty());
+
+                return !is_dub;
+            };
+        
+            addValuesToGridBinary(grid, details, is_ok, false);
+        }
+    }
 }
 
 }

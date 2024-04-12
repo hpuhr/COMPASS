@@ -244,7 +244,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
                         track_num_var, // track_num
                         false, "OK"); // extra
         }
-
     }
 
     bool ignore = false;

@@ -103,6 +103,25 @@ std::pair<QImage,RasterReference> Grid2DLayerRenderer::render(const Grid2DLayer&
     if (data.size() == 0)
         return {};
 
+    //create empty (transparent) image
+    int pixels_per_cell = std::max(1, settings.pixels_per_cell);
+
+    size_t nrows  = layer.data.rows();
+    size_t ncols  = layer.data.cols();
+
+    size_t nrows_out = nrows * pixels_per_cell;
+    size_t ncols_out = ncols * pixels_per_cell;
+
+    QImage img(ncols_out, nrows_out, QImage::Format_ARGB32);
+        img.fill(QColor(0, 0, 0, 0));
+
+    //create reference corrected for oversampling
+    RasterReference ref = layer.ref;
+
+    ref.img_pixel_size_x /= pixels_per_cell;
+    ref.img_pixel_size_y /= pixels_per_cell;
+
+    //determine range
     auto range = layer.range();
 
     double vmin, vmax;
@@ -119,21 +138,11 @@ std::pair<QImage,RasterReference> Grid2DLayerRenderer::render(const Grid2DLayer&
     }
     else
     {
-        return {};
+        //no range => cannot render
+        return std::make_pair(img, ref);
     }
 
     //std::cout << "vmin: " << vmin << ", vmax: " << vmax << std::endl;
-
-    int pixels_per_cell = std::max(1, settings.pixels_per_cell);
-
-    size_t nrows  = layer.data.rows();
-    size_t ncols  = layer.data.cols();
-
-    size_t nrows_out = nrows * pixels_per_cell;
-    size_t ncols_out = ncols * pixels_per_cell;
-
-    QImage img(ncols_out, nrows_out, QImage::Format_ARGB32);
-    img.fill(QColor(0, 0, 0));
 
     double vrange = vmax - vmin;
     
@@ -162,11 +171,6 @@ std::pair<QImage,RasterReference> Grid2DLayerRenderer::render(const Grid2DLayer&
                     img.setPixelColor(x0 + x2, y0 + y2, col);
         }
     }
-
-    RasterReference ref = layer.ref;
-
-    ref.img_pixel_size_x /= pixels_per_cell;
-    ref.img_pixel_size_y /= pixels_per_cell;
 
     return std::make_pair(img, ref);
 }
