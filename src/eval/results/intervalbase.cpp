@@ -577,6 +577,8 @@ void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable, bool
     }
 }
 
+/**
+*/
 std::map<std::string, std::vector<Single::LayerDefinition>> SingleIntervalBase::gridLayers() const
 {
     std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
@@ -586,6 +588,8 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SingleIntervalBase::
     return layer_defs;
 }
 
+/**
+*/
 void SingleIntervalBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
     if (layer == requirement_->name())

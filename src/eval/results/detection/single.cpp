@@ -48,11 +48,13 @@ SingleDetection::SingleDetection(const std::string& result_id,
                                  const EvaluationDetails& details,
                                  int sum_uis,
                                  int missed_uis,
-                                 TimePeriodCollection ref_periods)
+                                 TimePeriodCollection ref_periods,
+                                 const std::vector<dbContent::TargetPosition>& ref_updates)
     :   Single      ("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man, details)
     ,   sum_uis_    (sum_uis)
     ,   missed_uis_ (missed_uis)
     ,   ref_periods_(ref_periods)
+    ,   ref_updates_(ref_updates)
 {
     updatePD();
 }
@@ -448,6 +450,49 @@ void SingleDetection::addAnnotations(nlohmann::json::object_t& viewable, bool ov
                 ok_line_coordinates.push_back(detail_it.position(0).asVector());
                 ok_line_coordinates.push_back(detail_it.position(1).asVector());
             }
+        }
+    }
+}
+
+/**
+*/
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleDetection::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+/**
+*/
+void SingleDetection::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        for (auto& detail_it : getDetails())
+        {
+            auto check_failed = detail_it.getValueAsOrAssert<bool>(
+                        EvaluationRequirementResult::SingleDetection::DetailKey::MissOccurred);
+
+            if (detail_it.numPositions() == 1)
+                continue;
+
+            assert (detail_it.numPositions() >= 2);
+
+            auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleDetection::DetailKey::RefUpdateStartIndex).value();
+            auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleDetection::DetailKey::RefUpdateEndIndex).value();
+
+            size_t n = idx1 - idx0 + 1;
+
+            auto pos_getter = [ & ] (double& x, double& y, size_t idx) 
+            { 
+                x =  ref_updates_[ idx0 + idx ].longitude_;
+                y =  ref_updates_[ idx0 + idx ].latitude_;
+            };
+
+            grid.addPoly(pos_getter, n, check_failed ? 1.0 : 0.0);
         }
     }
 }
