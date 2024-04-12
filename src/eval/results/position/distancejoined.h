@@ -44,8 +44,7 @@ public:
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-            
-
+    
     void exportAsCSV();
 
 protected:
@@ -53,6 +52,8 @@ protected:
 
     virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+
+    virtual OverviewMode overviewMode() const override { return OverviewMode::GridPlusFeatures; }
 
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

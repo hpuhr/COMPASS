@@ -61,6 +61,8 @@ protected:
     virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
+    virtual OverviewMode overviewMode() const override { return OverviewMode::GridPlusFeatures; }
+
     unsigned int sum_uis_    {0};
     unsigned int missed_uis_ {0};
 
