@@ -577,6 +577,45 @@ void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable, bool
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleIntervalBase::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SingleIntervalBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        for (auto& detail_it : getDetails())
+        {
+            auto check_failed = detail_it.getValueAsOrAssert<bool>(
+                        EvaluationRequirementResult::SingleIntervalBase::DetailKey::MissOccurred);
+
+            if (detail_it.numPositions() == 1)
+                continue;
+
+            assert (detail_it.numPositions() >= 2);
+
+            auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex).value();
+            auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex).value();
+
+            size_t n = idx1 - idx0 + 1;
+
+            auto pos_getter = [ & ] (double& x, double& y, size_t idx) 
+            { 
+                x =  ref_updates_[ idx0 + idx ].longitude_;
+                y =  ref_updates_[ idx0 + idx ].latitude_;
+            };
+
+            grid.addPoly(pos_getter, n, check_failed ? 1.0 : 0.0);
+        }
+    }
+}
+
 /**
 */
 void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable,

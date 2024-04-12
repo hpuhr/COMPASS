@@ -104,6 +104,8 @@ bool Grid2D::create(const QRectF& roi,
         cell_size_y < 1e-09)
         return false;
 
+    cell_size_x_     = cell_size_x;
+    cell_size_y_     = cell_size_y;
     cell_size_x_inv_ = 1.0 / cell_size_x;
     cell_size_y_inv_ = 1.0 / cell_size_y;
 
@@ -150,15 +152,15 @@ bool Grid2D::create(const QRectF& roi,
     n_cells_y_ = num_cells_y;
     n_cells_   = n_cells_x_ * n_cells_y_;
 
-    double cell_size_x = roi.width()  / n_cells_x_;
-    double cell_size_y = roi.height() / n_cells_y_;
+    cell_size_x_ = roi.width()  / n_cells_x_;
+    cell_size_y_ = roi.height() / n_cells_y_;
 
-    if (cell_size_x < 1e-09 || 
-        cell_size_y < 1e-09)
+    if (cell_size_x_ < 1e-09 || 
+        cell_size_y_ < 1e-09)
         return false;
 
-    cell_size_x_inv_ = 1.0 / cell_size_x;
-    cell_size_y_inv_ = 1.0 / cell_size_y;
+    cell_size_x_inv_ = 1.0 / cell_size_x_;
+    cell_size_y_inv_ = 1.0 / cell_size_y_;
 
     x0_ = roi.left();
     y0_ = roi.top();
@@ -270,6 +272,102 @@ bool Grid2D::addValue(double x, double y, double v)
     ++num_added_;
 
     return true;
+}
+
+/**
+*/
+size_t Grid2D::addLineInternal(double x0, 
+                               double y0, 
+                               double x1, 
+                               double y1, 
+                               double v, 
+                               std::set<std::pair<size_t, size_t>>& visited,
+                               int subsampling)
+{
+    int cells_x = std::max(1, (int)std::ceil(std::fabs(x1 - x0) * cell_size_x_inv_));
+    int cells_y = std::max(1, (int)std::ceil(std::fabs(y1 - y0) * cell_size_y_inv_));
+    int samples = std::max(cells_x, cells_y) * 2 * subsampling;
+
+    size_t idx_x, idx_y;
+    size_t added = 0;
+    for (int i = 0; i <= samples; ++i)
+    {
+        double t1 = (double)i / (double)samples;
+        double t0 = (1.0 - t1);
+        double  x = t0 * x0 + t1 * x1;
+        double  y = t0 * y0 + t1 * y1;
+
+        if (index(idx_x, idx_y, x, y) != Grid2D::IndexError::NoError)
+            continue;
+
+        if (visited.find(std::make_pair(idx_x, idx_y)) != visited.end())
+            continue;
+
+        if (!addValue(x, y, v))
+            continue;
+
+        visited.insert(std::make_pair(idx_x, idx_y));
+        ++added;
+    }
+
+    return added;
+}
+
+/**
+*/
+size_t Grid2D::addLine(double x0, 
+                       double y0, 
+                       double x1, 
+                       double y1, 
+                       double v, 
+                       int subsampling)
+{
+    std::set<std::pair<size_t, size_t>> visited;
+    return addLineInternal(x0, y0, x1, y1, v, visited, subsampling);
+}
+
+/**
+*/
+size_t Grid2D::addPoly(const std::vector<Eigen::Vector2d>& positions,
+                       double v, 
+                       int subsampling)
+{
+    std::set<std::pair<size_t, size_t>> visited;
+    size_t added = 0;
+    for (size_t i = 1; i < positions.size(); ++i)
+    {
+        added += addLineInternal(positions[ i - 1 ][ 0 ],
+                                 positions[ i - 1 ][ 1 ],
+                                 positions[ i     ][ 0 ],
+                                 positions[ i     ][ 1 ],
+                                 v,
+                                 visited,
+                                 subsampling);
+    }
+    
+    return added;
+}
+
+/**
+*/
+size_t Grid2D::addPoly(const std::function<void(double&, double&, size_t)>& pos_getter,
+                       size_t n,
+                       double v, 
+                       int subsampling)
+{
+    assert(pos_getter);
+
+    std::set<std::pair<size_t, size_t>> visited;
+    double x0, y0, x1, y1;
+    size_t added = 0;
+    for (size_t i = 1; i < n; ++i)
+    {
+        pos_getter(x0, y0, i - 1);
+        pos_getter(x1, y1, i    );
+        added += addLineInternal(x0, y0, x1, y1, v, visited, subsampling);
+    }
+
+    return added;
 }
 
 /**
