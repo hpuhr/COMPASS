@@ -209,7 +209,7 @@ std::pair<ValueComparisonResult, std::string> Base::compare (
 
     if (!has_ref_data)
     {
-//        if (tst_value.has_value())
+//        if (tst_value.has_value()) TODO really?????
 //            return {ValueComparisonResult::Different, "Tst data without ref value"};
 //        else
             return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
