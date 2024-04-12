@@ -60,6 +60,8 @@ class ReconstructorBase : public Configurable
     bool hasNextTimeSlice();
     TimeWindow getNextTimeSlice();
 
+    int numSlices() const;
+
     bool processSlice(Buffers&& buffers);
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
@@ -131,7 +133,6 @@ class ReconstructorBase : public Configurable
     void saveAssociations(std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     void saveReferences();
     void saveTargets();
-
 
   private:
     ReferenceCalculatorSettings ref_calc_settings_;

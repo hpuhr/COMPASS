@@ -28,6 +28,7 @@ class Variable;
 class MetaVariable;
 }
 
+class QProgressDialog;
 
 class ReconstructorTask : public Task, public Configurable
 {
@@ -78,7 +79,6 @@ class ReconstructorTask : public Task, public Configurable
     std::set<unsigned int> disabledDataSources() const;
 
   protected:
-
     std::string current_reconstructor_str_;
 
     nlohmann::json use_dstypes_; // dstype -> bool
@@ -98,6 +98,10 @@ class ReconstructorTask : public Task, public Configurable
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
     std::unique_ptr<ProbIMMReconstructor> probimm_reconstructor_; // has to be reset after each calculation
 
+    std::unique_ptr<QProgressDialog> progress_dialog_;
+
+    size_t current_slice_idx_ = 0;
+
     //bool job_done_{false};
 
     virtual void checkSubConfigurables() override;
@@ -105,5 +109,5 @@ class ReconstructorTask : public Task, public Configurable
 
     void loadDataSlice();
 
+    void updateProgress(const QString& msg, bool add_slice_progress);
 };
-

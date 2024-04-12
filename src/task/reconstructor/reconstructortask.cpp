@@ -23,6 +23,7 @@
 
 #include <QApplication>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 using namespace std;
 using namespace Utils;
@@ -54,7 +55,6 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 
 ReconstructorTask::~ReconstructorTask()
 {
-
 }
 
 void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
@@ -112,9 +112,20 @@ void ReconstructorTask::run()
 {
     assert(canRun());
 
+    current_slice_idx_ = 0;
+
     loginf << "ReconstructorTask: run: started";
 
     //calculated_reftraj_ds_id = Number::dsIdFrom(currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_);
+
+    progress_dialog_.reset(new QProgressDialog);
+    progress_dialog_->setCancelButton(nullptr);
+    progress_dialog_->setMinimum(0);
+    progress_dialog_->setMinimum(100);
+    progress_dialog_->setWindowTitle("Reconstructing...");
+    progress_dialog_->show();
+
+    updateProgress("Initializing", false);
 
     deleteCalculatedReferences();
 
@@ -125,9 +136,9 @@ void ReconstructorTask::run()
 
     currentReconstructor()->reset();
 
-    QMessageBox box;
-    box.setText("Running Reconstruction...");
-    box.show();
+    // QMessageBox box;
+    // box.setText("Running Reconstruction...");
+    // box.show();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -137,7 +148,33 @@ void ReconstructorTask::run()
             this, &ReconstructorTask::loadingDoneSlot);
 
     loadDataSlice();
+}
 
+void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progress)
+{
+    if (!progress_dialog_)
+        return;
+
+    int ns = currentReconstructor()->numSlices();
+    QString slice_p;
+    if (ns >= 0)
+        slice_p = " " + QString::number(current_slice_idx_ + 1) + "/" + QString::number(ns);
+
+    QString pmsg = msg;
+    if (add_slice_progress)
+        pmsg += slice_p;
+
+    double progress = 0.0;
+    if (ns >= 1)
+        progress = (double)current_slice_idx_ / (double)ns;
+
+    //@TODO: helmut (progress bar not updated)
+    progress_dialog_->setLabelText(pmsg);
+    progress_dialog_->setValue(progress_dialog_->maximum() * progress);
+    
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+    while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
+        qApp->processEvents();
 }
 
 std::string ReconstructorTask::currentReconstructorStr() const
@@ -225,11 +262,15 @@ void ReconstructorTask::loadingDoneSlot()
 
     loginf << "ReconstructorTask: loadingDoneSlot: last_slice " << last_slice;
 
+    updateProgress("Processing slice", true);
+
     std::map<std::string, std::shared_ptr<Buffer>> data = std::move(data_); // move out of there
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     dbcontent_man.clearData(); // clear previous
+
+    ++current_slice_idx_;
 
     // TODO: do async, check if not already processing
     assert (currentReconstructor()->processSlice(std::move(data)));
@@ -242,7 +283,6 @@ void ReconstructorTask::loadingDoneSlot()
                    this, &ReconstructorTask::loadingDoneSlot);
 
         COMPASS::instance().viewManager().disableDataDistribution(false);
-
     }
     else // do next load
     {
@@ -258,6 +298,9 @@ void ReconstructorTask::loadingDoneSlot()
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
         done_ = true;
+
+        //close progress dialog
+        progress_dialog_.reset();
 
         emit doneSignal();
     }
@@ -428,6 +471,8 @@ void ReconstructorTask::loadDataSlice()
 {
     assert (currentReconstructor());
     assert (currentReconstructor()->hasNextTimeSlice());
+
+    updateProgress("Loading slice", true);
 
     boost::posix_time::ptime min_ts, max_ts;
 
