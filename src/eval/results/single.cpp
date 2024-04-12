@@ -455,24 +455,43 @@ void Single::addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert, bo
 {
     const auto& details = getDetails();
 
-    for (auto& detail_it : details)
+    auto is_ok = [ & ] (size_t idx)
     {
-        if (use_ref_pos && detail_it.numPositions() == 1) // no ref pos
-            continue;
-
-        assert (detail_it.numPositions() >= 1 && detail_it.numPositions() <= 2);
-
-        //double d = detail_it.getValue(DetailKey::Value).toDouble();
-
-        auto check_passed = detail_it.getValueAs<bool>(detail_key);
+        auto check_passed = details[ idx ].getValueAs<bool>(detail_key);
         assert(check_passed.has_value());
 
         bool ok = ((!invert &&  check_passed.value()) ||
                    ( invert && !check_passed.value()));
+        
+        return ok;
+    };
+
+    addValuesToGridBinary(grid, details, is_ok, use_ref_pos);
+}
+
+/**
+*/
+void Single::addValuesToGridBinary(Grid2D& grid, 
+                                   const EvaluationDetails& details, 
+                                   const std::function<bool(size_t)>& is_ok, 
+                                   bool use_ref_pos) const
+{
+    assert(is_ok);
+
+    for (size_t i = 0; i < details.size(); ++i)
+    {
+        const auto& d = details[ i ];
+
+        if (use_ref_pos && d.numPositions() == 1) // no ref pos
+            continue;
+
+        assert (d.numPositions() >= 1 && d.numPositions() <= 2);
+
+        bool ok = is_ok(i);
 
         //interpolate between 0 = green and 1 = red
-        grid.addValue(detail_it.position(use_ref_pos ? 1 : 0).longitude_,
-                      detail_it.position(use_ref_pos ? 1 : 0).latitude_,
+        grid.addValue(d.position(use_ref_pos ? 1 : 0).longitude_,
+                      d.position(use_ref_pos ? 1 : 0).latitude_,
                       ok ? 0.0 : 1.0);
     }
 }

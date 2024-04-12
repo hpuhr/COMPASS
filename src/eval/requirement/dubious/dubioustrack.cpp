@@ -335,7 +335,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
                     if (use_max_acceleration_ && tst_spd.has_value() && tst_spd_last.has_value())
                     {
-
                         acceleration = fabs(*tst_spd - *tst_spd_last) / time_diff;
 
                         if (acceleration > max_acceleration_)
