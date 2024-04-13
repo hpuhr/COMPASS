@@ -66,9 +66,9 @@ void JoinedDetection::addToValues (std::shared_ptr<SingleDetection> single_resul
     missed_uis_ += single_result->missedUIs();
 
     ++num_single_targets_;
+
     if (single_result->hasFailed())
         ++num_failed_single_targets_;
-
 
     updatePD();
 }

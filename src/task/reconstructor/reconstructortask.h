@@ -41,8 +41,6 @@ class ReconstructorTask : public Task, public Configurable
     void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
-    void closeStatusDialogSlot();
-
     bool useDStype(const std::string& ds_type) const;
     void useDSType(const std::string& ds_type, bool value);
     bool useDataSource(unsigned int ds_id) const;
@@ -85,11 +83,7 @@ class ReconstructorTask : public Task, public Configurable
     nlohmann::json use_data_sources_; // ds_id -> bool
     nlohmann::json use_data_sources_lines_; // ds_id -> line_id -> bool
 
-    //unsigned int calculated_reftraj_ds_id{0};
-
     std::unique_ptr<ReconstructorTaskDialog> dialog_;
-
-    //std::unique_ptr<CreateAssociationsStatusDialog> status_dialog_;
 
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
@@ -99,10 +93,9 @@ class ReconstructorTask : public Task, public Configurable
     std::unique_ptr<ProbIMMReconstructor> probimm_reconstructor_; // has to be reset after each calculation
 
     std::unique_ptr<QProgressDialog> progress_dialog_;
+    boost::posix_time::ptime run_start_time_;
 
     size_t current_slice_idx_ = 0;
-
-    //bool job_done_{false};
 
     virtual void checkSubConfigurables() override;
     void deleteCalculatedReferences();

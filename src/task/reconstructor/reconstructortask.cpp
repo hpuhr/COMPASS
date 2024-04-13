@@ -3,13 +3,13 @@
 #include "compass.h"
 #include "reconstructortaskdialog.h"
 #include "datasourcemanager.h"
-#include "dbinterface.h"
+//#include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-#include "jobmanager.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "jobmanager.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "viewmanager.h"
@@ -21,9 +21,11 @@
 #include "timeconv.h"
 #include "number.h"
 
+
 #include <QApplication>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QThread>
 
 using namespace std;
 using namespace Utils;
@@ -116,13 +118,14 @@ void ReconstructorTask::run()
 
     loginf << "ReconstructorTask: run: started";
 
-    //calculated_reftraj_ds_id = Number::dsIdFrom(currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_);
+    run_start_time_ = boost::posix_time::microsec_clock::local_time();
 
     progress_dialog_.reset(new QProgressDialog);
     progress_dialog_->setCancelButton(nullptr);
     progress_dialog_->setMinimum(0);
-    progress_dialog_->setMinimum(100);
+    progress_dialog_->setMaximum(100);
     progress_dialog_->setWindowTitle("Reconstructing...");
+
     progress_dialog_->show();
 
     updateProgress("Initializing", false);
@@ -136,10 +139,6 @@ void ReconstructorTask::run()
 
     currentReconstructor()->reset();
 
-    // QMessageBox box;
-    // box.setText("Running Reconstruction...");
-    // box.show();
-
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
@@ -152,6 +151,9 @@ void ReconstructorTask::run()
 
 void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progress)
 {
+    logdbg << "ReconstructorTask: updateProgress: slice " << add_slice_progress
+           << " dialog " << (progress_dialog_ != nullptr);
+
     if (!progress_dialog_)
         return;
 
@@ -164,17 +166,37 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
     if (add_slice_progress)
         pmsg += slice_p;
 
+    double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
+
     double progress = 0.0;
     if (ns >= 1)
-        progress = (double)current_slice_idx_ / (double)ns;
+    {
+        progress = (double) current_slice_idx_ / (double) ns;
+    }
 
-    //@TODO: helmut (progress bar not updated)
+    pmsg += ("\n\nElapsed: "+String::timeStringFromDouble(time_elapsed_s, false)).c_str();
+
+    if (ns && current_slice_idx_) // do remaining time estimate if possible
+    {
+        double seconds_per_slice = time_elapsed_s / (float) (current_slice_idx_ + 1);
+
+        int num_slices_remaining = ns - (current_slice_idx_ + 1);
+        double time_remaining_s = num_slices_remaining * seconds_per_slice;
+
+        logdbg << "ReconstructorTask: updateProgress: current_slice_idx " << current_slice_idx_
+               << " ns " << ns << " num_slices_remaining " << num_slices_remaining
+               << " time_remaining_s " << time_remaining_s;
+
+        pmsg += ("\tRemaining: "+String::timeStringFromDouble(time_remaining_s, false)).c_str();
+
+    }
+
     progress_dialog_->setLabelText(pmsg);
     progress_dialog_->setValue(progress_dialog_->maximum() * progress);
     
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
     while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
-        qApp->processEvents();
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 }
 
 std::string ReconstructorTask::currentReconstructorStr() const
@@ -249,9 +271,6 @@ void ReconstructorTask::dialogCancelSlot()
 void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     data_ = data;
-
-//    assert (status_dialog_);
-//    status_dialog_->updateTime();
 }
 
 void ReconstructorTask::loadingDoneSlot()
@@ -292,7 +311,11 @@ void ReconstructorTask::loadingDoneSlot()
 
     if (last_slice)
     {
-        loginf << "ReconstructorTask: loadingDoneSlot: data loading done";
+        double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
+
+        loginf << "ReconstructorTask: loadingDoneSlot: data loading done after "
+               << String::timeStringFromDouble(time_elapsed_s, false);
+
         currentReconstructor()->reset();
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
@@ -305,16 +328,6 @@ void ReconstructorTask::loadingDoneSlot()
         emit doneSignal();
     }
 
-//    assert(status_dialog_);
-//    status_dialog_->setStatus("Loading done, starting association");
-
-}
-
-void ReconstructorTask::closeStatusDialogSlot()
-{
-//    assert(status_dialog_);
-//    status_dialog_->close();
-//    status_dialog_ = nullptr;
 }
 
 bool ReconstructorTask::useDStype(const std::string& ds_type) const
@@ -443,28 +456,6 @@ void ReconstructorTask::deleteCalculatedReferences()
 
         ds.clearNumInserted("RefTraj", currentReconstructor()->ds_line_);
     }
-
-//    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
-
-//    for (auto& ds_it : ds_man.dbDataSources())
-//    {
-//        if (ds_it->isCalculatedReferenceSource())
-//        {
-//            //status_dialog_->setStatus("Deleting From Data Source " + ds_it->name());
-
-//            dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-//                currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_,
-//                currentReconstructor()->ds_line_);
-
-//            while (dbcontent_man.dbContent("RefTraj").isDeleting())
-//            {
-//                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-//                QThread::msleep(10);
-//            }
-
-//            ds_it->clearNumInserted("RefTraj");
-//        }
-//    }
 }
 
 void ReconstructorTask::loadDataSlice()

@@ -101,7 +101,8 @@ int ReconstructorBase::numSlices() const
     if (timestamp_min_.is_not_a_date_time() || timestamp_max_.is_not_a_date_time())
         return -1;
 
-    return (int)std::ceil(Utils::Time::partialSeconds(timestamp_max_ - timestamp_min_) / Utils::Time::partialSeconds(slice_duration_));
+    return (int)std::ceil(Utils::Time::partialSeconds(timestamp_max_ - timestamp_min_)
+                          / Utils::Time::partialSeconds(slice_duration_));
 }
 
 TimeWindow ReconstructorBase::getNextTimeSlice()
