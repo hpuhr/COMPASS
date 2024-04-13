@@ -49,7 +49,7 @@ namespace EvaluationRequirementResult
 
     protected:
         //void addToValues (std::shared_ptr<SinglePositionLatency> single_result);
-        void update() override;
+        virtual void updateToChanges_impl() override;
 
         virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
                 const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;

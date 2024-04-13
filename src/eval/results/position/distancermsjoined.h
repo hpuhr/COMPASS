@@ -49,7 +49,7 @@ public:
 
 protected:
     //void addToValues (std::shared_ptr<SinglePositionDistanceRMS> single_result);
-    void update() override;
+    void updateToChanges_impl() override;
 
     virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;

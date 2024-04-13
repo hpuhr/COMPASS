@@ -51,71 +51,6 @@ JoinedTrackAngle::JoinedTrackAngle(const std::string& result_id,
 {
 }
 
-void JoinedTrackAngle::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleTrackAngle> other_sub =
-            std::static_pointer_cast<SingleTrackAngle>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedTrackAngle::addToValues (std::shared_ptr<SingleTrackAngle> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_pos_          += single_result->numPos();
-    num_no_ref_       += single_result->numNoRef();
-    num_pos_outside_  += single_result->numPosOutside();
-    num_pos_inside_   += single_result->numPosInside();
-    num_no_tst_value_ += single_result->numNoTstValues();
-    num_comp_failed_  += single_result->numCompFailed();
-    num_comp_passed_  += single_result->numCompPassed();
-
-    const vector<double>& other_values = single_result->values();
-
-    values_.insert(values_.end(), other_values.begin(), other_values.end());
-
-    update();
-}
-
-void JoinedTrackAngle::update()
-{
-    assert (num_no_ref_ <= num_pos_);
-    assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
-
-    assert (values_.size() == num_comp_failed_+num_comp_passed_);
-
-    p_passed_.reset();
-
-    unsigned int num_trackangles = values_.size();
-
-    if (num_trackangles)
-    {
-        value_min_ = *min_element(values_.begin(), values_.end());
-        value_max_ = *max_element(values_.begin(), values_.end());
-        value_avg_ = std::accumulate(values_.begin(), values_.end(), 0.0) / (float) num_trackangles;
-
-        value_var_ = 0;
-        for(auto val : values_)
-            value_var_ += pow(val - value_avg_, 2);
-        value_var_ /= (float)num_trackangles;
-
-        assert (num_comp_failed_ <= num_trackangles);
-        p_passed_ = (float)num_comp_passed_/(float)num_trackangles;
-    }
-    else
-    {
-        value_min_ = 0;
-        value_max_ = 0;
-        value_avg_ = 0;
-        value_var_ = 0;
-    }
-}
-
 void JoinedTrackAngle::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -293,9 +228,9 @@ std::string JoinedTrackAngle::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedTrackAngle::updatesToUseChanges_impl()
+void JoinedTrackAngle::updateToChanges_impl()
 {
-    loginf << "JoinedTrackAngle: updatesToUseChanges";
+    loginf << "JoinedTrackAngle: updateToChanges_impl";
 
     num_pos_          = 0;
     num_no_ref_       = 0;
@@ -307,13 +242,57 @@ void JoinedTrackAngle::updatesToUseChanges_impl()
 
     values_.clear();
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleTrackAngle> result =
+        std::shared_ptr<SingleTrackAngle> single_result =
                 std::static_pointer_cast<SingleTrackAngle>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        num_pos_          += single_result->numPos();
+        num_no_ref_       += single_result->numNoRef();
+        num_pos_outside_  += single_result->numPosOutside();
+        num_pos_inside_   += single_result->numPosInside();
+        num_no_tst_value_ += single_result->numNoTstValues();
+        num_comp_failed_  += single_result->numCompFailed();
+        num_comp_passed_  += single_result->numCompPassed();
+
+        const vector<double>& other_values = single_result->values();
+
+        values_.insert(values_.end(), other_values.begin(), other_values.end());
+    }
+
+    assert (num_no_ref_ <= num_pos_);
+    assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+
+    assert (values_.size() == num_comp_failed_+num_comp_passed_);
+
+    p_passed_.reset();
+
+    unsigned int num_trackangles = values_.size();
+
+    if (num_trackangles)
+    {
+        value_min_ = *min_element(values_.begin(), values_.end());
+        value_max_ = *max_element(values_.begin(), values_.end());
+        value_avg_ = std::accumulate(values_.begin(), values_.end(), 0.0) / (float) num_trackangles;
+
+        value_var_ = 0;
+        for(auto val : values_)
+            value_var_ += pow(val - value_avg_, 2);
+        value_var_ /= (float)num_trackangles;
+
+        assert (num_comp_failed_ <= num_trackangles);
+        p_passed_ = (float)num_comp_passed_/(float)num_trackangles;
+    }
+    else
+    {
+        value_min_ = 0;
+        value_max_ = 0;
+        value_avg_ = 0;
+        value_var_ = 0;
     }
 }
 

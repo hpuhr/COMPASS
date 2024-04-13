@@ -51,7 +51,7 @@ protected:
     QVariant range_gain_;
     QVariant range_bias_;
 
-    void update() override;
+    void updateToChanges_impl() override;
 
     virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;

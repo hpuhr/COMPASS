@@ -49,64 +49,6 @@ JoinedDubiousTrack::JoinedDubiousTrack(const std::string& result_id,
 {
 }
 
-void JoinedDubiousTrack::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleDubiousTrack> other_sub =
-            std::static_pointer_cast<SingleDubiousTrack>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedDubiousTrack::addToValues(std::shared_ptr<SingleDubiousTrack> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_            += single_result->numUpdates();
-    num_pos_outside_        += single_result->numPosOutside();
-    num_pos_inside_         += single_result->numPosInside();
-    num_pos_inside_dubious_ += single_result->numPosInsideDubious();
-    num_tracks_             += single_result->numTracks();
-    num_tracks_dubious_     += single_result->numTracksDubious();
-
-    duration_all_     += single_result->trackDurationAll();
-    duration_nondub_  += single_result->trackDurationNondub();
-    duration_dubious_ += single_result->trackDurationDubious();
-
-    Base::addDetails(single_result->getDetails());
-
-    //const vector<double>& other_values = single_result->values();
-    //values_.insert(values_.end(), other_values.begin(), other_values.end());
-
-    update();
-}
-
-void JoinedDubiousTrack::update()
-{
-    assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_tracks_ >= num_tracks_dubious_);
-
-    //assert (values_.size() == num_comp_failed_+num_comp_passed_);
-
-    //unsigned int num_speeds = values_.size();
-
-    p_dubious_.reset();
-    p_dubious_update_.reset();
-
-    if (num_tracks_)
-    {
-        p_dubious_ = (float)num_tracks_dubious_/(float)num_tracks_;
-    }
-
-    if (num_pos_inside_)
-    {
-        p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
-    }
-}
-
 void JoinedDubiousTrack::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -285,10 +227,11 @@ std::string JoinedDubiousTrack::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedDubiousTrack::updatesToUseChanges_impl()
+void JoinedDubiousTrack::updateToChanges_impl()
 {
-    loginf << "JoinedDubiousTrack: updatesToUseChanges";
+    loginf << "JoinedDubiousTrack: updateToChanges_impl";
 
+    // clear
     num_updates_ = 0;
     num_pos_outside_ = 0;
     num_pos_inside_ = 0;
@@ -300,13 +243,47 @@ void JoinedDubiousTrack::updatesToUseChanges_impl()
     duration_nondub_ = 0;
     duration_dubious_ = 0;
 
-    for (auto result_it : results_)
+    // process
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleDubiousTrack> result =
+        std::shared_ptr<SingleDubiousTrack> single_result =
                 std::static_pointer_cast<SingleDubiousTrack>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        num_updates_            += single_result->numUpdates();
+        num_pos_outside_        += single_result->numPosOutside();
+        num_pos_inside_         += single_result->numPosInside();
+        num_pos_inside_dubious_ += single_result->numPosInsideDubious();
+        num_tracks_             += single_result->numTracks();
+        num_tracks_dubious_     += single_result->numTracksDubious();
+
+        duration_all_     += single_result->trackDurationAll();
+        duration_nondub_  += single_result->trackDurationNondub();
+        duration_dubious_ += single_result->trackDurationDubious();
+
+        Base::addDetails(single_result->getDetails());
+    }
+
+    assert (num_tracks_ >= num_tracks_dubious_);
+
+            //assert (values_.size() == num_comp_failed_+num_comp_passed_);
+
+            //unsigned int num_speeds = values_.size();
+
+    p_dubious_.reset();
+    p_dubious_update_.reset();
+
+    if (num_tracks_)
+    {
+        p_dubious_ = (float)num_tracks_dubious_/(float)num_tracks_;
+    }
+
+    if (num_pos_inside_)
+    {
+        p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
     }
 }
 

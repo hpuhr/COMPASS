@@ -51,16 +51,13 @@ public:
     void exportAsCSV();
 
 protected:
-    void addToValues (std::shared_ptr<SingleDubiousTarget> single_result);
-    void update();
 
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
     std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
 
-    virtual void join_impl(std::shared_ptr<Single> other) override;
-    virtual void updatesToUseChanges_impl() override;
+    virtual void updateToChanges_impl() override;
 
     virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;

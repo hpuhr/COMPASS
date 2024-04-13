@@ -46,46 +46,6 @@ JoinedModeAPresent::JoinedModeAPresent(const std::string& result_id,
 {
 }
 
-void JoinedModeAPresent::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleModeAPresent> other_sub =
-            std::static_pointer_cast<SingleModeAPresent>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedModeAPresent::addToValues (std::shared_ptr<SingleModeAPresent> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_     += single_result->numUpdates();
-    num_no_ref_pos_  += single_result->numNoRefPos();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_no_ref_val_  += single_result->numNoRefValue();
-    num_present_     += single_result->numPresent();
-    num_missing_     += single_result->numMissing();
-
-    updateProbabilities();
-}
-
-void JoinedModeAPresent::updateProbabilities()
-{
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);
-
-    p_present_.reset();
-
-    if (num_no_ref_val_ + num_present_ + num_missing_)
-    {
-        p_present_ = (float)(num_no_ref_val_ + num_present_) / (float)(num_no_ref_val_ + num_present_ + num_missing_);
-    }
-}
-
 void JoinedModeAPresent::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -257,18 +217,12 @@ std::string JoinedModeAPresent::reference(
     return nullptr;
 }
 
-void JoinedModeAPresent::updatesToUseChanges_impl()
+void JoinedModeAPresent::updateToChanges_impl()
 {
-    loginf << "JoinedModeA: updatesToUseChanges: prev num_updates " << num_updates_
+    loginf << "JoinedModeAPresent: updateToChanges_impl: prev num_updates " << num_updates_
             << " num_no_ref_pos " << num_no_ref_pos_
             << " num_no_ref_id " << num_no_ref_val_
             << " num_present_id " << num_present_ << " num_missing_id " << num_missing_;
-
-//        if (has_pid_)
-//            loginf << "JoinedModeA: updatesToUseChanges: prev result " << result_id_
-//                   << " pid " << 100.0 * pid_;
-//        else
-//            loginf << "JoinedModeA: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
     num_updates_     = 0;
     num_no_ref_pos_  = 0;
@@ -278,25 +232,38 @@ void JoinedModeAPresent::updatesToUseChanges_impl()
     num_present_     = 0;
     num_missing_     = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleModeAPresent> result =
+        std::shared_ptr<SingleModeAPresent> single_result =
                 std::static_pointer_cast<SingleModeAPresent>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        num_updates_     += single_result->numUpdates();
+        num_no_ref_pos_  += single_result->numNoRefPos();
+        num_pos_outside_ += single_result->numPosOutside();
+        num_pos_inside_  += single_result->numPosInside();
+        num_no_ref_val_  += single_result->numNoRefValue();
+        num_present_     += single_result->numPresent();
+        num_missing_     += single_result->numMissing();
     }
 
-    loginf << "JoinedModeA: updatesToUseChanges: updt num_updates " << num_updates_
+    loginf << "JoinedModeAPresent: updateToChanges_impl: updt num_updates " << num_updates_
             << " num_no_ref_pos " << num_no_ref_pos_
             << " num_no_ref_id " << num_no_ref_val_
             << " num_present_id " << num_present_ << " num_missing_id " << num_missing_;
 
-//        if (has_pid_)
-//            loginf << "JoinedModeA: updatesToUseChanges: updt result " << result_id_
-//                   << " pid " << 100.0 * pid_;
-//        else
-//            loginf << "JoinedModeA: updatesToUseChanges: updt result " << result_id_ << " has no data";
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);
+
+    p_present_.reset();
+
+    if (num_no_ref_val_ + num_present_ + num_missing_)
+    {
+        p_present_ = (float)(num_no_ref_val_ + num_present_) / (float)(num_no_ref_val_ + num_present_ + num_missing_);
+    }
 }
 
 }

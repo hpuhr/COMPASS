@@ -120,24 +120,6 @@ JoinedPositionBase::JoinedPositionBase(const std::string& result_type,
 {
 }
 
-void JoinedPositionBase::addToValues (std::shared_ptr<SinglePositionBase> single_result, bool do_update)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_pos_         += single_result->numPos();
-    num_no_ref_      += single_result->numNoRef();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_passed_      += single_result->numPassed();
-    num_failed_      += single_result->numFailed();
-
-    if (do_update)
-        update();
-}
-
 vector<double> JoinedPositionBase::values() const
 {
     vector<double> values;
@@ -156,18 +138,9 @@ vector<double> JoinedPositionBase::values() const
     return values;
 }
 
-void JoinedPositionBase::join_impl(std::shared_ptr<Single> other)
+void JoinedPositionBase::updateToChanges_impl()
 {
-    std::shared_ptr<SinglePositionBase> other_sub =
-            std::static_pointer_cast<SinglePositionBase>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedPositionBase::updatesToUseChanges_impl()
-{
-    loginf << "JoinedPositionBase: updatesToUseChanges";
+    loginf << "JoinedPositionBase: updateToChanges_impl";
 
     num_pos_         = 0;
     num_no_ref_      = 0;
@@ -176,16 +149,23 @@ void JoinedPositionBase::updatesToUseChanges_impl()
     num_failed_      = 0;
     num_passed_      = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SinglePositionBase> result =
+        std::shared_ptr<SinglePositionBase> single_result =
                 std::static_pointer_cast<SinglePositionBase>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result, false);
+        if (!single_result->use())
+            continue;
+
+        num_pos_         += single_result->numPos();
+        num_no_ref_      += single_result->numNoRef();
+        num_pos_outside_ += single_result->numPosOutside();
+        num_pos_inside_  += single_result->numPosInside();
+        num_passed_      += single_result->numPassed();
+        num_failed_      += single_result->numFailed();
     }
 
-    update();
 }
 
 }

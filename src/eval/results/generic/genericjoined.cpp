@@ -46,47 +46,6 @@ JoinedGeneric::JoinedGeneric(const std::string& result_type, const std::string& 
 {
 }
 
-void JoinedGeneric::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleGeneric> other_sub =
-            std::static_pointer_cast<SingleGeneric>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedGeneric::addToValues (std::shared_ptr<SingleGeneric> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_     += single_result->numUpdates();
-    num_no_ref_pos_  += single_result->numNoRefPos();
-    num_no_ref_val_  += single_result->numNoRefValue();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_unknown_     += single_result->numUnknown();
-    num_correct_     += single_result->numCorrect();
-    num_false_       += single_result->numFalse();
-
-    updateProbabilities();
-}
-
-void JoinedGeneric::updateProbabilities()
-{
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
-
-    prob_.reset();
-
-    if (num_correct_+num_false_)
-    {
-        prob_ = (float)(num_correct_)/(float)(num_correct_+num_false_);
-    }
-}
-
 void JoinedGeneric::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -248,18 +207,12 @@ std::string JoinedGeneric::reference(
     return nullptr;
 }
 
-void JoinedGeneric::updatesToUseChanges_impl()
+void JoinedGeneric::updateToChanges_impl()
 {
-    loginf << "JoinedGeneric: updatesToUseChanges: prev num_updates " << num_updates_
+    loginf << "JoinedGeneric: updateToChanges_impl: prev num_updates " << num_updates_
            << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
            << " num_unknown_id " << num_unknown_
            << " num_correct_id " << num_correct_ << " num_false_id " << num_false_;
-
-    //        if (has_pid_)
-    //            loginf << "JoinedGeneric: updatesToUseChanges: prev result " << result_id_
-    //                   << " pid " << 100.0 * pid_;
-    //        else
-    //            loginf << "JoinedGeneric: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
     num_updates_     = 0;
     num_no_ref_pos_  = 0;
@@ -270,25 +223,41 @@ void JoinedGeneric::updatesToUseChanges_impl()
     num_correct_     = 0;
     num_false_       = 0;
 
-    for (auto result_it : results_)
+    // process
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleGeneric> result =
+        std::shared_ptr<SingleGeneric> single_result =
                 std::static_pointer_cast<SingleGeneric>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        num_updates_     += single_result->numUpdates();
+        num_no_ref_pos_  += single_result->numNoRefPos();
+        num_no_ref_val_  += single_result->numNoRefValue();
+        num_pos_outside_ += single_result->numPosOutside();
+        num_pos_inside_  += single_result->numPosInside();
+        num_unknown_     += single_result->numUnknown();
+        num_correct_     += single_result->numCorrect();
+        num_false_       += single_result->numFalse();
+
     }
 
-    loginf << "JoinedGeneric: updatesToUseChanges: updt num_updates " << num_updates_
+    loginf << "JoinedGeneric: updateToChanges_impl: updt num_updates " << num_updates_
            << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
            << " num_unknown_id " << num_unknown_
            << " num_correct_id " << num_correct_ << " num_false_id " << num_false_;
 
-    //        if (has_pid_)
-    //            loginf << "JoinedGeneric: updatesToUseChanges: updt result " << result_id_
-    //                   << " pid " << 100.0 * pid_;
-    //        else
-    //            loginf << "JoinedGeneric: updatesToUseChanges: updt result " << result_id_ << " has no data";
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
+
+    prob_.reset();
+
+    if (num_correct_+num_false_)
+    {
+        prob_ = (float)(num_correct_)/(float)(num_correct_+num_false_);
+    }
 }
 
 EvaluationRequirement::GenericBase& JoinedGeneric::genericRequirement() const

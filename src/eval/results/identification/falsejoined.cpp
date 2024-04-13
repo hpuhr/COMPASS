@@ -46,47 +46,6 @@ JoinedIdentificationFalse::JoinedIdentificationFalse(const std::string& result_i
 {
 }
 
-void JoinedIdentificationFalse::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleIdentificationFalse> other_sub =
-            std::static_pointer_cast<SingleIdentificationFalse>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedIdentificationFalse::addToValues (std::shared_ptr<SingleIdentificationFalse> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_     += single_result->numUpdates();
-    num_no_ref_pos_  += single_result->numNoRefPos();
-    num_no_ref_val_  += single_result->numNoRefValue();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_unknown_     += single_result->numUnknown();
-    num_correct_     += single_result->numCorrect();
-    num_false_       += single_result->numFalse();
-
-    updateProbabilities();
-}
-
-void JoinedIdentificationFalse::updateProbabilities()
-{
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
-
-    p_false_.reset();
-
-    if (num_correct_+num_false_)
-    {
-        p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
-    }
-}
-
 void JoinedIdentificationFalse::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -256,7 +215,7 @@ std::string JoinedIdentificationFalse::reference(
     return nullptr;
 }
 
-void JoinedIdentificationFalse::updatesToUseChanges_impl()
+void JoinedIdentificationFalse::updateToChanges_impl()
 {
     num_updates_     = 0;
     num_no_ref_pos_  = 0;
@@ -267,13 +226,33 @@ void JoinedIdentificationFalse::updatesToUseChanges_impl()
     num_correct_     = 0;
     num_false_       = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleIdentificationFalse> result =
+        std::shared_ptr<SingleIdentificationFalse> single_result =
                 std::static_pointer_cast<SingleIdentificationFalse>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        num_updates_     += single_result->numUpdates();
+        num_no_ref_pos_  += single_result->numNoRefPos();
+        num_no_ref_val_  += single_result->numNoRefValue();
+        num_pos_outside_ += single_result->numPosOutside();
+        num_pos_inside_  += single_result->numPosInside();
+        num_unknown_     += single_result->numUnknown();
+        num_correct_     += single_result->numCorrect();
+        num_false_       += single_result->numFalse();
+    }
+
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
+
+    p_false_.reset();
+
+    if (num_correct_+num_false_)
+    {
+        p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
     }
 }
 

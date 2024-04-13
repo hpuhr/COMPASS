@@ -51,8 +51,10 @@ JoinedPositionRadarAzimuth::JoinedPositionRadarAzimuth(const std::string& result
 {
 }
 
-void JoinedPositionRadarAzimuth::update()
+void JoinedPositionRadarAzimuth::updateToChanges_impl()
 {
+    JoinedPositionBase::updateToChanges_impl();
+
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 

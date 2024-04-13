@@ -19,11 +19,9 @@
 #include "eval/results/extra/datasingle.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/extra/data.h"
-//#include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -44,38 +42,6 @@ JoinedExtraData::JoinedExtraData(const std::string& result_id,
                                  EvaluationManager& eval_man)
 :   Joined("JoinedExtraData", result_id, requirement, sector_layer, eval_man)
 {
-}
-
-void JoinedExtraData::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleExtraData> other_sub =
-            std::static_pointer_cast<SingleExtraData>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedExtraData::addToValues (std::shared_ptr<SingleExtraData> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_extra_ += single_result->numExtra();
-    num_ok_ += single_result->numOK();
-
-    updateProb();
-}
-
-void JoinedExtraData::updateProb()
-{
-    prob_.reset();
-
-    if (num_extra_ + num_ok_)
-    {
-        prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
-    }
 }
 
 void JoinedExtraData::addToReport (
@@ -230,18 +196,29 @@ std::string JoinedExtraData::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedExtraData::updatesToUseChanges_impl()
+void JoinedExtraData::updateToChanges_impl()
 {
     num_extra_ = 0;
     num_ok_  = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleExtraData> result =
+        std::shared_ptr<SingleExtraData> single_result =
                 std::static_pointer_cast<SingleExtraData>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        num_extra_ += single_result->numExtra();
+        num_ok_ += single_result->numOK();
+    }
+
+    prob_.reset();
+
+    if (num_extra_ + num_ok_)
+    {
+        prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
     }
 }
 

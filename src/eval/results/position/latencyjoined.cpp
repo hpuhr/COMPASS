@@ -52,34 +52,10 @@ JoinedPositionLatency::JoinedPositionLatency(const std::string& result_id,
 {
 }
 
-//void JoinedPositionLatency::join_impl(std::shared_ptr<Single> other)
-//{
-//    std::shared_ptr<SinglePositionLatency> other_sub =
-//            std::static_pointer_cast<SinglePositionLatency>(other);
-//    assert (other_sub);
-
-//    addToValues(other_sub);
-//}
-
-//void JoinedPositionLatency::addToValues (std::shared_ptr<SinglePositionLatency> single_result)
-//{
-//    assert (single_result);
-
-//    if (!single_result->use())
-//        return;
-
-//    num_pos_         += single_result->numPos();
-//    num_no_ref_      += single_result->numNoRef();
-//    num_pos_outside_ += single_result->numPosOutside();
-//    num_pos_inside_  += single_result->numPosInside();
-//    num_passed_      += single_result->numPassed();
-//    num_failed_      += single_result->numFailed();
-
-//    update();
-//}
-
-void JoinedPositionLatency::update()
+void JoinedPositionLatency::updateToChanges_impl()
 {
+    JoinedPositionBase::updateToChanges_impl();
+
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 

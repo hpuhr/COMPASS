@@ -46,47 +46,6 @@ JoinedModeCFalse::JoinedModeCFalse(const std::string& result_id,
 {
 }
 
-void JoinedModeCFalse::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleModeCFalse> other_sub =
-            std::static_pointer_cast<SingleModeCFalse>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedModeCFalse::addToValues (std::shared_ptr<SingleModeCFalse> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_     += single_result->numUpdates();
-    num_no_ref_pos_  += single_result->numNoRefPos();
-    num_no_ref_val_  += single_result->numNoRefValue();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_unknown_     += single_result->numUnknown();
-    num_correct_     += single_result->numCorrect();
-    num_false_       += single_result->numFalse();
-
-    updateProbabilities();
-}
-
-void JoinedModeCFalse::updateProbabilities()
-{
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
-
-    p_false_.reset();
-
-    if (num_correct_+num_false_)
-    {
-        p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
-    }
-}
-
 void JoinedModeCFalse::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -258,18 +217,12 @@ std::string JoinedModeCFalse::reference(
     return nullptr;
 }
 
-void JoinedModeCFalse::updatesToUseChanges_impl()
+void JoinedModeCFalse::updateToChanges_impl()
 {
-    loginf << "JoinedModeC: updatesToUseChanges: prev num_updates " << num_updates_
+    loginf << "JoinedModeCFalse: updateToChanges_impl: prev num_updates " << num_updates_
            << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
            << " num_unknown_id " << num_unknown_
            << " num_correct_id " << num_correct_ << " num_false_id " << num_false_;
-
-    //        if (has_pid_)
-    //            loginf << "JoinedModeC: updatesToUseChanges: prev result " << result_id_
-    //                   << " pid " << 100.0 * pid_;
-    //        else
-    //            loginf << "JoinedModeC: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
     num_updates_     = 0;
     num_no_ref_pos_  = 0;
@@ -280,25 +233,39 @@ void JoinedModeCFalse::updatesToUseChanges_impl()
     num_correct_     = 0;
     num_false_       = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleModeCFalse> result =
+        std::shared_ptr<SingleModeCFalse> single_result =
                 std::static_pointer_cast<SingleModeCFalse>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        num_updates_     += single_result->numUpdates();
+        num_no_ref_pos_  += single_result->numNoRefPos();
+        num_no_ref_val_  += single_result->numNoRefValue();
+        num_pos_outside_ += single_result->numPosOutside();
+        num_pos_inside_  += single_result->numPosInside();
+        num_unknown_     += single_result->numUnknown();
+        num_correct_     += single_result->numCorrect();
+        num_false_       += single_result->numFalse();
     }
 
-    loginf << "JoinedModeC: updatesToUseChanges: updt num_updates " << num_updates_
+    loginf << "JoinedModeCFalse: updateToChanges_impl: updt num_updates " << num_updates_
            << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
            << " num_unknown_id " << num_unknown_
            << " num_correct_id " << num_correct_ << " num_false_id " << num_false_;
 
-    //        if (has_pid_)
-    //            loginf << "JoinedModeC: updatesToUseChanges: updt result " << result_id_
-    //                   << " pid " << 100.0 * pid_;
-    //        else
-    //            loginf << "JoinedModeC: updatesToUseChanges: updt result " << result_id_ << " has no data";
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
+
+    p_false_.reset();
+
+    if (num_correct_+num_false_)
+    {
+        p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
+    }
 }
 
 }

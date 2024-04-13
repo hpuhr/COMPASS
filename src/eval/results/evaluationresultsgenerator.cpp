@@ -297,7 +297,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     if (!result_sum)
                         result_sum = result_it->createEmptyJoined("Sum");
 
-                    result_sum->join(result_it);
+                    result_sum->add(result_it);
 
                     if (eval_man_.settings().report_split_results_by_mops_)
                     {
@@ -312,7 +312,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                             extra_results_sums[subresult_str+" Sum"] =
                                     result_it->createEmptyJoined(subresult_str+" Sum");
 
-                        extra_results_sums.at(subresult_str+" Sum")->join(result_it);
+                        extra_results_sums.at(subresult_str+" Sum")->add(result_it);
                     }
 
                     if (eval_man_.settings().report_split_results_by_aconly_ms_)
@@ -330,7 +330,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                             extra_results_sums[subresult_str+" Sum"] =
                                     result_it->createEmptyJoined(subresult_str+" Sum");
 
-                        extra_results_sums.at(subresult_str+" Sum")->join(result_it);
+                        extra_results_sums.at(subresult_str+" Sum")->add(result_it);
                     }
                 }
 
@@ -360,6 +360,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
         }
     }
 
+    updateToChanges();
+
     elapsed_time = boost::posix_time::microsec_clock::local_time();
 
     time_diff = elapsed_time - start_time;
@@ -376,7 +378,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     loginf << "EvaluationResultsGenerator: evaluate: generating results";
 
     // generating results GUI
-    generateResultsReportGUI();
+    //generateResultsReportGUI();
 
     loginf << "EvaluationResultsGenerator: evaluate: done " << String::timeStringFromDouble(elapsed_time_s, true);
 
@@ -491,6 +493,7 @@ void EvaluationResultsGenerator::updateToChanges ()
     results_model_.clear();
     results_model_.endReset();
 
+    // first check all single results if should be used
     for (auto& result_it : results_vec_)
     {
         if (result_it->isSingle()) // single result
@@ -503,15 +506,18 @@ void EvaluationResultsGenerator::updateToChanges ()
             assert (result);
             result->updateUseFromTarget();
         }
-        else
-        {
-            assert (result_it->isJoined()); // joined result
+    }
 
+    // then do the joined ones
+    for (auto& result_it : results_vec_)
+    {
+        if (result_it->isJoined()) // single result
+        {
             shared_ptr<EvaluationRequirementResult::Joined> result =
-                    static_pointer_cast<EvaluationRequirementResult::Joined>(result_it);
+                static_pointer_cast<EvaluationRequirementResult::Joined>(result_it);
 
             assert (result);
-            result->updatesToUseChanges();
+            result->updateToChanges();
         }
     }
 

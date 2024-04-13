@@ -46,46 +46,6 @@ JoinedModeCCorrect::JoinedModeCCorrect(const std::string& result_id,
 {
 }
 
-void JoinedModeCCorrect::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleModeCCorrect> other_sub =
-            std::static_pointer_cast<SingleModeCCorrect>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedModeCCorrect::addToValues (std::shared_ptr<SingleModeCCorrect> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_     += single_result->numUpdates();
-    num_no_ref_pos_  += single_result->numNoRefPos();
-    num_no_ref_id_   += single_result->numNoRefId();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_correct_     += single_result->numCorrect();
-    num_not_correct_ += single_result->numNotCorrect();
-
-    updatePCor();
-}
-
-void JoinedModeCCorrect::updatePCor()
-{
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_id_+ num_correct_+num_not_correct_);
-
-    pcor_.reset();
-
-    if (num_correct_ + num_not_correct_)
-    {
-        pcor_ = (float)num_correct_/(float)(num_correct_+num_not_correct_);
-    }
-}
-
 void JoinedModeCCorrect::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -248,7 +208,7 @@ std::string JoinedModeCCorrect::reference(
     return nullptr;
 }
 
-void JoinedModeCCorrect::updatesToUseChanges_impl()
+void JoinedModeCCorrect::updateToChanges_impl()
 {
     num_updates_     = 0;
     num_no_ref_pos_  = 0;
@@ -258,13 +218,32 @@ void JoinedModeCCorrect::updatesToUseChanges_impl()
     num_correct_     = 0;
     num_not_correct_ = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleModeCCorrect> result =
+        std::shared_ptr<SingleModeCCorrect> single_result =
                 std::static_pointer_cast<SingleModeCCorrect>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        num_updates_     += single_result->numUpdates();
+        num_no_ref_pos_  += single_result->numNoRefPos();
+        num_no_ref_id_   += single_result->numNoRefId();
+        num_pos_outside_ += single_result->numPosOutside();
+        num_pos_inside_  += single_result->numPosInside();
+        num_correct_     += single_result->numCorrect();
+        num_not_correct_ += single_result->numNotCorrect();
+    }
+
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_id_+ num_correct_+num_not_correct_);
+
+    pcor_.reset();
+
+    if (num_correct_ + num_not_correct_)
+    {
+        pcor_ = (float)num_correct_/(float)(num_correct_+num_not_correct_);
     }
 }
 

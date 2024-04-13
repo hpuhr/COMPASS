@@ -19,11 +19,9 @@
 #include "eval/results/detection/single.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/detection/detection.h"
-//#include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -44,55 +42,6 @@ JoinedDetection::JoinedDetection(const std::string& result_id,
                                  EvaluationManager& eval_man)
 :   Joined("JoinedDetection", result_id, requirement, sector_layer, eval_man)
 {
-}
-
-void JoinedDetection::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleDetection> other_sub =
-            std::static_pointer_cast<SingleDetection>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedDetection::addToValues (std::shared_ptr<SingleDetection> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    sum_uis_    += single_result->sumUIs();
-    missed_uis_ += single_result->missedUIs();
-
-    ++num_single_targets_;
-
-    if (single_result->hasFailed())
-        ++num_failed_single_targets_;
-
-    updatePD();
-}
-
-void JoinedDetection::updatePD()
-{
-    pd_.reset();
-
-    if (sum_uis_)
-    {
-        logdbg << "JoinedDetection: updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_
-                << " sum_uis " << sum_uis_;
-
-        assert (missed_uis_ <= sum_uis_);
-
-        std::shared_ptr<EvaluationRequirement::Detection> req =
-                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
-        assert (req);
-
-        if (req->invertProb())
-            pd_ = (float)missed_uis_/(float)(sum_uis_);
-        else
-            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
-    }
 }
 
 void JoinedDetection::addToReport (
@@ -265,37 +214,62 @@ std::string JoinedDetection::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedDetection::updatesToUseChanges_impl()
+void JoinedDetection::updateToChanges_impl()
 {
-    loginf << "JoinedDetection: updatesToUseChanges: prev sum_uis " << sum_uis_
+    loginf << "JoinedDetection: updateToChanges_impl: prev sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
-
-    if (pd_.has_value())
-        loginf << "JoinedDetection: updatesToUseChanges: prev result " << result_id_
-                << " pd " << 100.0 * pd_.value();
-    else
-        loginf << "JoinedDetection: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
     sum_uis_    = 0;
     missed_uis_ = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleDetection> result =
+        std::shared_ptr<SingleDetection> single_result =
                 std::static_pointer_cast<SingleDetection>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        sum_uis_    += single_result->sumUIs();
+        missed_uis_ += single_result->missedUIs();
+
+        ++num_single_targets_;
+
+        if (single_result->hasFailed())
+            ++num_failed_single_targets_;
+
     }
 
-    loginf << "JoinedDetection: updatesToUseChanges: updt sum_uis " << sum_uis_
+    loginf << "JoinedDetection: updateToChanges_impl: updt sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
 
+    // calculate pd
+
+    pd_.reset();
+
+    if (sum_uis_)
+    {
+        logdbg << "JoinedDetection: updateToChanges_impl: result_id " << result_id_ << " missed_uis " << missed_uis_
+               << " sum_uis " << sum_uis_;
+
+        assert (missed_uis_ <= sum_uis_);
+
+        std::shared_ptr<EvaluationRequirement::Detection> req =
+            std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+        assert (req);
+
+        if (req->invertProb())
+            pd_ = (float)missed_uis_/(float)(sum_uis_);
+        else
+            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+    }
+
     if (pd_.has_value())
-        loginf << "JoinedDetection: updatesToUseChanges: updt result " << result_id_
+        loginf << "JoinedDetection: updateToChanges_impl: updt result " << result_id_
                 << " pd " << 100.0 * pd_.value();
     else
-        loginf << "JoinedDetection: updatesToUseChanges: updt result " << result_id_ << " has no data";
+        loginf << "JoinedDetection: updateToChanges_impl: updt result " << result_id_ << " has no data";
 }
 
 }

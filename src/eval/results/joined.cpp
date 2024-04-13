@@ -79,21 +79,17 @@ void Joined::addCommonDetails (EvaluationResultsReport::SectionContentTable& sec
     sector_details_table.addRow({"Num Unusable Results", "Number of unusable results", numUnusableResults()}, this);
 }
 
-void Joined::updatesToUseChanges()
+void Joined::updateToChanges()
 {
     clearDetails();
 
     //invoke derived
-    updatesToUseChanges_impl();
+    updateToChanges_impl();
 }
 
-void Joined::join(std::shared_ptr<Single> other)
+void Joined::add(std::shared_ptr<Single> other)
 {
-    //add result
     results_.push_back(other);
-
-    //invoke derived
-    join_impl(other);
 }
 
 std::vector<std::shared_ptr<Single>>& Joined::results() 

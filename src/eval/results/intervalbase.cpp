@@ -666,54 +666,6 @@ JoinedIntervalBase::JoinedIntervalBase(const std::string& result_type,
 
 /**
 */
-void JoinedIntervalBase::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleIntervalBase> other_sub = std::static_pointer_cast<SingleIntervalBase>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-/**
-*/
-void JoinedIntervalBase::addToValues (std::shared_ptr<SingleIntervalBase> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    sum_uis_    += single_result->sumUIs();
-    missed_uis_ += single_result->missedUIs();
-
-    ++num_single_targets_;
-    if (single_result->hasFailed())
-        ++num_failed_single_targets_;
-
-    updateProbability();
-}
-
-/**
-*/
-void JoinedIntervalBase::updateProbability()
-{
-    probability_.reset();
-
-    if (sum_uis_)
-    {
-        logdbg << type() << ": updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
-
-        assert (missed_uis_ <= sum_uis_);
-
-        std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
-        assert (req);
-
-        probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
-    }
-}
-
-/**
-*/
 void JoinedIntervalBase::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     logdbg << type() << " " <<  requirement_->name() <<": addToReport";
@@ -912,36 +864,59 @@ std::string JoinedIntervalBase::reference(
 
 /**
 */
-void JoinedIntervalBase::updatesToUseChanges_impl()
+void JoinedIntervalBase::updateToChanges_impl()
 {
-    loginf << type() << ": updatesToUseChanges: prev sum_uis " << sum_uis_
+    loginf << type() << ": updateToChanges_impl: prev sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
 
     if (probability_.has_value())
-        loginf << type() << ": updatesToUseChanges: prev result " << result_id_
+        loginf << type() << ": updateToChanges_impl: prev result " << result_id_
                 << " pcd " << 100.0 * probability_.value();
     else
-        loginf << type() << ": updatesToUseChanges: prev result " << result_id_ << " has no data";
+        loginf << type() << ": updateToChanges_impl: prev result " << result_id_ << " has no data";
 
     sum_uis_    = 0;
     missed_uis_ = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleIntervalBase> result = std::static_pointer_cast<SingleIntervalBase>(result_it);
-        assert (result);
+        std::shared_ptr<SingleIntervalBase> single_result = std::static_pointer_cast<SingleIntervalBase>(result_it);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        sum_uis_    += single_result->sumUIs();
+        missed_uis_ += single_result->missedUIs();
+
+        ++num_single_targets_;
+
+        if (single_result->hasFailed())
+            ++num_failed_single_targets_;
     }
 
     loginf << type() << ": updatesToUseChanges: updt sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
+
+
+    if (sum_uis_)
+    {
+        logdbg << type() << ": updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
+
+        assert (missed_uis_ <= sum_uis_);
+
+        std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
+        assert (req);
+
+        probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+    }
 
     if (probability_.has_value())
         loginf << type() << ": updatesToUseChanges: updt result " << result_id_
                 << " pcd " << 100.0 * probability_.value();
     else
         loginf << type() << ": updatesToUseChanges: updt result " << result_id_ << " has no data";
+
 }
 
 }

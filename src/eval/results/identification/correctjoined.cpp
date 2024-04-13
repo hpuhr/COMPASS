@@ -19,11 +19,9 @@
 #include "eval/results/identification/correctjoined.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/identification/correct.h"
-//#include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -44,46 +42,6 @@ JoinedIdentificationCorrect::JoinedIdentificationCorrect(const std::string& resu
                                                          EvaluationManager& eval_man)
 :   Joined("JoinedIdentificationCorrect", result_id, requirement, sector_layer, eval_man)
 {
-}
-
-void JoinedIdentificationCorrect::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleIdentificationCorrect> other_sub =
-            std::static_pointer_cast<SingleIdentificationCorrect>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedIdentificationCorrect::addToValues (std::shared_ptr<SingleIdentificationCorrect> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_     += single_result->numUpdates();
-    num_no_ref_pos_  += single_result->numNoRefPos();
-    num_no_ref_id_   += single_result->numNoRefId();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_correct_     += single_result->numCorrect();
-    num_not_correct_ += single_result->numNotCorrect();
-
-    updatePID();
-}
-
-void JoinedIdentificationCorrect::updatePID()
-{
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_id_+ num_correct_+num_not_correct_);
-
-    pid_.reset();
-
-    if (num_correct_ + num_not_correct_)
-    {
-        pid_ = (float)num_correct_/(float)(num_correct_+num_not_correct_);
-    }
 }
 
 void JoinedIdentificationCorrect::addToReport (
@@ -248,7 +206,7 @@ std::string JoinedIdentificationCorrect::reference(
     return nullptr;
 }
 
-void JoinedIdentificationCorrect::updatesToUseChanges_impl()
+void JoinedIdentificationCorrect::updateToChanges_impl()
 {
     num_updates_     = 0;
     num_no_ref_pos_  = 0;
@@ -258,13 +216,32 @@ void JoinedIdentificationCorrect::updatesToUseChanges_impl()
     num_correct_     = 0;
     num_not_correct_ = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleIdentificationCorrect> result =
+        std::shared_ptr<SingleIdentificationCorrect> single_result =
                 std::static_pointer_cast<SingleIdentificationCorrect>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        num_updates_     += single_result->numUpdates();
+        num_no_ref_pos_  += single_result->numNoRefPos();
+        num_no_ref_id_   += single_result->numNoRefId();
+        num_pos_outside_ += single_result->numPosOutside();
+        num_pos_inside_  += single_result->numPosInside();
+        num_correct_     += single_result->numCorrect();
+        num_not_correct_ += single_result->numNotCorrect();
+    }
+
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_id_+ num_correct_+num_not_correct_);
+
+    pid_.reset();
+
+    if (num_correct_ + num_not_correct_)
+    {
+        pid_ = (float)num_correct_/(float)(num_correct_+num_not_correct_);
     }
 }
 

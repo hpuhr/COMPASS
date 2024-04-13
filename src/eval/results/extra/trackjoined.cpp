@@ -46,43 +46,6 @@ JoinedExtraTrack::JoinedExtraTrack(const std::string& result_id,
 {
 }
 
-void JoinedExtraTrack::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleExtraTrack> other_sub =
-            std::static_pointer_cast<SingleExtraTrack>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedExtraTrack::addToValues (std::shared_ptr<SingleExtraTrack> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_inside_ += single_result->numInside();
-    num_extra_ += single_result->numExtra();
-    num_ok_ += single_result->numOK();
-
-    updateProb();
-}
-
-void JoinedExtraTrack::updateProb()
-{
-    assert (num_inside_ >= num_extra_ + num_ok_);
-
-    prob_.reset();
-
-    if (num_extra_ + num_ok_)
-    {
-        logdbg << "JoinedTrack: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
-                << " num_ok " << num_ok_;
-
-        prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
-    }
-}
 
 void JoinedExtraTrack::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -236,19 +199,37 @@ std::string JoinedExtraTrack::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedExtraTrack::updatesToUseChanges_impl()
+void JoinedExtraTrack::updateToChanges_impl()
 {
     num_inside_ = 0;
     num_extra_  = 0;
     num_ok_     = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleExtraTrack> result =
+        std::shared_ptr<SingleExtraTrack> single_result =
                 std::static_pointer_cast<SingleExtraTrack>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+
+        if (!single_result->use())
+            continue;
+
+        num_inside_ += single_result->numInside();
+        num_extra_ += single_result->numExtra();
+        num_ok_ += single_result->numOK();
+    }
+
+    assert (num_inside_ >= num_extra_ + num_ok_);
+
+    prob_.reset();
+
+    if (num_extra_ + num_ok_)
+    {
+        logdbg << "JoinedTrack: updateToChanges_impl: result_id " << result_id_ << " num_extra " << num_extra_
+               << " num_ok " << num_ok_;
+
+        prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
     }
 }
 

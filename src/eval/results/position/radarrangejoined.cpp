@@ -53,8 +53,10 @@ JoinedPositionRadarRange::JoinedPositionRadarRange(const std::string& result_id,
 {
 }
 
-void JoinedPositionRadarRange::update()
+void JoinedPositionRadarRange::updateToChanges_impl()
 {
+    JoinedPositionBase::updateToChanges_impl();
+
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 

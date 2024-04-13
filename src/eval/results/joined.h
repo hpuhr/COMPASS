@@ -39,16 +39,16 @@ public:
 
     virtual BaseType baseType() const override { return BaseType::Joined; }
 
-    void join(std::shared_ptr<Single> other);
+    void add(std::shared_ptr<Single> other);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override = 0 ;
 
     virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override final;
 
     std::vector<std::shared_ptr<Single>>& results();
 
-    void updatesToUseChanges();
+    void updateToChanges();
 
     unsigned int numResults();
     unsigned int numUsableResults();
@@ -69,8 +69,8 @@ protected:
 
     void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
 
-    virtual void join_impl(std::shared_ptr<Single> other) = 0;
-    virtual void updatesToUseChanges_impl() = 0;
+    //virtual void join_impl(std::shared_ptr<Single> other) = 0;
+    virtual void updateToChanges_impl() = 0;
 
     std::unique_ptr<nlohmann::json::object_t> createViewable() const;
 
