@@ -253,6 +253,26 @@ void JoinedIdentificationFalse::updateToChanges_impl()
     if (num_correct_+num_false_)
     {
         p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
+
+        // add importance
+
+        if (num_false_)
+        {
+            for (auto& result_it : results_)
+            {
+                std::shared_ptr<SingleIdentificationFalse> single_result =
+                    std::static_pointer_cast<SingleIdentificationFalse>(result_it);
+                assert (single_result);
+
+                if (!single_result->use())
+                    continue;
+
+                assert (num_false_ >= single_result->numFalse());
+
+                single_result->addInterestFactor(
+                    (float) single_result->numFalse() / (float) num_false_);
+            }
+        }
     }
 }
 

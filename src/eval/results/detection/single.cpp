@@ -502,12 +502,12 @@ std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& re
     return make_shared<JoinedDetection> (result_id, requirement_, sector_layer_, eval_man_);
 }
 
-int SingleDetection::sumUIs() const
+unsigned int SingleDetection::sumUIs() const
 {
     return sum_uis_;
 }
 
-int SingleDetection::missedUIs() const
+unsigned int SingleDetection::missedUIs() const
 {
     return missed_uis_;
 }

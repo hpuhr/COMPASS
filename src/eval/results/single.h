@@ -65,6 +65,7 @@ public:
 
     unsigned int utn() const;
     const EvaluationTargetData* target() const;
+    void addInterestFactor(double factor);
 
     void updateUseFromTarget ();
 

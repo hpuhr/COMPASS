@@ -94,6 +94,8 @@ public:
 
     EvaluationDataWidget* widget();
 
+    void clearInterestFactors();
+
     // ref
     unsigned int ref_line_id_;
 
@@ -104,7 +106,8 @@ protected:
     EvaluationManager& eval_man_;
     DBContentManager& dbcont_man_;
 
-    QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
+    QStringList table_columns_ {"Use", "UTN", "Comment", "Interest",
+                               "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
                                 "M3/A", "MC Min", "MC Max"};
 
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;

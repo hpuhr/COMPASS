@@ -392,6 +392,10 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
         {
             return dbcont_man_.utnComment(target.utn_).c_str();
         }
+        else if (col_name == "Interest")
+        {
+            return QString::number(target.interestFactorsSum(), 'f', 3);
+        }
         else if (col_name == "Begin")
         {
             return target.timeBeginStr().c_str();
@@ -452,6 +456,25 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
             const EvaluationTargetData& target = target_data_.at(index.row());
             return ("comment_"+to_string(target.utn_)).c_str();
+        }
+    }
+    case Qt::ToolTipRole:
+    {
+        logdbg << "EvaluationData: data: tooltip role: row " << index.row() << " col " << index.column();
+
+        assert (index.row() >= 0);
+        assert (index.row() < target_data_.size());
+
+        const EvaluationTargetData& target = target_data_.at(index.row());
+
+        logdbg << "EvaluationData: data: got utn " << target.utn_;
+
+        assert (index.column() < table_columns_.size());
+        std::string col_name = table_columns_.at(index.column()).toStdString();
+
+        if (col_name == "Interest")
+        {
+            return target.interestFactorsStr().c_str();
         }
     }
     default:
@@ -567,6 +590,14 @@ EvaluationDataWidget* EvaluationData::widget()
         widget_.reset(new EvaluationDataWidget(*this, eval_man_));
 
     return widget_.get();
+}
+
+void EvaluationData::clearInterestFactors()
+{
+    for (auto tgt_it = begin(); tgt_it != end(); ++tgt_it)
+    {
+        target_data_.modify(target_data_.project<0>(tgt_it), [](EvaluationTargetData& t) { t.clearInterestFactors(); });
+    }
 }
 
 void EvaluationData::targetChangedSlot(unsigned int utn) // for one utn

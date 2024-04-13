@@ -61,7 +61,15 @@ unsigned int Single::utn() const
 
 const EvaluationTargetData* Single::target() const
 {
+    assert (target_);
     return target_;
+}
+
+void Single::addInterestFactor(double factor)
+{
+    assert (target_);
+    target_->addInterestFactor(getRequirementSectionID(), factor);
+
 }
 
 void Single::updateUseFromTarget ()

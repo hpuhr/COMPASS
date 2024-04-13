@@ -813,6 +813,55 @@ std::string EvaluationTargetData::acadsStr() const
     return out.str().c_str();
 }
 
+void EvaluationTargetData::clearInterestFactors() const
+{
+    interest_factors_.clear();
+    interest_factors_sum_ = 0.0;
+
+}
+void EvaluationTargetData::addInterestFactor (const std::string& req_section_id, double factor) const
+{
+    logdbg << "EvaluationTargetData: addInterestFactor: utn " << utn_
+           << " req_section_id " << req_section_id << " factor " << factor;
+
+
+    interest_factors_[req_section_id] += factor;
+    interest_factors_sum_ += factor;
+}
+
+const std::map<std::string, double>& EvaluationTargetData::interestFactors() const
+{
+    return interest_factors_;
+}
+
+std::string EvaluationTargetData::interestFactorsStr() const
+{
+    std::string ret;
+
+    //<font color=\"#ff0000\">bar</font>
+    std::string color;
+
+    for (auto& fac_it : interest_factors_)
+    {
+        if (fac_it.second < 0.01)
+            color = "#00AA00";
+        else if (fac_it.second < 0.05)
+            color = "#FFA500";
+        else
+            color = "#FF0000";
+
+        ret += "<font color=\"" + color +"\">" + fac_it.first + "\t"
+               + String::doubleToStringPrecision(fac_it.second, 3)+"</font><br>\n";
+    }
+
+    return ret;
+}
+
+double EvaluationTargetData::interestFactorsSum() const
+{
+    return interest_factors_sum_;
+}
+
 void EvaluationTargetData::updateACIDs() const
 {
     acids_.clear();

@@ -242,6 +242,26 @@ void JoinedIdentificationCorrect::updateToChanges_impl()
     if (num_correct_ + num_not_correct_)
     {
         pid_ = (float)num_correct_/(float)(num_correct_+num_not_correct_);
+
+        // add importance
+
+        if (num_not_correct_)
+        {
+            for (auto& result_it : results_)
+            {
+                std::shared_ptr<SingleIdentificationCorrect> single_result =
+                    std::static_pointer_cast<SingleIdentificationCorrect>(result_it);
+                assert (single_result);
+
+                if (!single_result->use())
+                    continue;
+
+                assert (num_not_correct_ >= single_result->numNotCorrect());
+
+                single_result->addInterestFactor(
+                    (float) single_result->numNotCorrect() / (float)num_not_correct_);
+            }
+        }
     }
 }
 

@@ -45,8 +45,8 @@ public:
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    int sumUIs() const;
-    int missedUIs() const;
+    unsigned int sumUIs() const;
+    unsigned int missedUIs() const;
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -87,8 +87,8 @@ protected:
 
     std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
 
-    int sum_uis_    {0};
-    int missed_uis_ {0};
+    unsigned int sum_uis_    {0};
+    unsigned int missed_uis_ {0};
 
     TimePeriodCollection ref_periods_;
     std::vector<dbContent::TargetPosition> ref_updates_;

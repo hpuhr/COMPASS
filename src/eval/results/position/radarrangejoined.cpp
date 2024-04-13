@@ -114,6 +114,24 @@ void JoinedPositionRadarRange::updateToChanges_impl()
         range_gain_ = x(0, 0);
         range_bias_ = x(1, 0);
 
+                // add importance
+        if (num_failed_)
+        {
+            for (auto& result_it : results_)
+            {
+                std::shared_ptr<SinglePositionBase> single_result =
+                    std::static_pointer_cast<SinglePositionBase>(result_it);
+                assert (single_result);
+
+                if (!single_result->use())
+                    continue;
+
+                assert (num_failed_ >= single_result->numFailed());
+
+                single_result->addInterestFactor(
+                    (float) single_result->numFailed() / (float)num_failed_);
+            }
+        }
     }
     else
     {

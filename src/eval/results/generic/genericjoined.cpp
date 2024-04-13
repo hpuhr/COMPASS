@@ -257,6 +257,22 @@ void JoinedGeneric::updateToChanges_impl()
     if (num_correct_+num_false_)
     {
         prob_ = (float)(num_correct_)/(float)(num_correct_+num_false_);
+
+        // add importance
+        for (auto& result_it : results_)
+        {
+            std::shared_ptr<SingleGeneric> single_result =
+                std::static_pointer_cast<SingleGeneric>(result_it);
+            assert (single_result);
+
+            if (!single_result->use())
+                continue;
+
+            assert (num_false_ >= single_result->numFalse());
+
+            single_result->addInterestFactor(
+                (float) single_result->numFalse() / (float)num_false_);
+        }
     }
 }
 

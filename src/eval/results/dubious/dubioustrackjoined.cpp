@@ -279,6 +279,22 @@ void JoinedDubiousTrack::updateToChanges_impl()
     if (num_tracks_)
     {
         p_dubious_ = (float)num_tracks_dubious_/(float)num_tracks_;
+
+        // add importance
+        for (auto& result_it : results_)
+        {
+            std::shared_ptr<SingleDubiousTrack> single_result =
+                std::static_pointer_cast<SingleDubiousTrack>(result_it);
+            assert (single_result);
+
+            if (!single_result->use())
+                continue;
+
+            assert (num_tracks_dubious_ >= single_result->numPosInsideDubious());
+
+            single_result->addInterestFactor(
+                (float) single_result->numPosInsideDubious() / (float)num_pos_inside_dubious_);
+        }
     }
 
     if (num_pos_inside_)

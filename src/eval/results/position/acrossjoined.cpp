@@ -78,6 +78,25 @@ void JoinedPositionAcross::updateToChanges_impl()
 
         assert (num_passed_ <= num_distances);
         prob_ = (float)num_passed_ / (float)num_distances;
+
+                // add importance
+        if (num_failed_)
+        {
+            for (auto& result_it : results_)
+            {
+                std::shared_ptr<SinglePositionBase> single_result =
+                    std::static_pointer_cast<SinglePositionBase>(result_it);
+                assert (single_result);
+
+                if (!single_result->use())
+                    continue;
+
+                assert (num_failed_ >= single_result->numFailed());
+
+                single_result->addInterestFactor(
+                    (float) single_result->numFailed() / (float)num_failed_);
+            }
+        }
     }
     else
     {
@@ -89,7 +108,7 @@ void JoinedPositionAcross::updateToChanges_impl()
 }
 
 void JoinedPositionAcross::addToReport (
-        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     logdbg << "JoinedPositionAcross " <<  requirement_->name() <<": addToReport";
 
@@ -109,9 +128,9 @@ void JoinedPositionAcross::addToOverviewTable(std::shared_ptr<EvaluationResultsR
 {
     EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
-    // condition
+            // condition
     std::shared_ptr<EvaluationRequirement::PositionAcross> req =
-            std::static_pointer_cast<EvaluationRequirement::PositionAcross>(requirement_);
+        std::static_pointer_cast<EvaluationRequirement::PositionAcross>(requirement_);
     assert (req);
 
     QVariant p_min_var;
@@ -124,7 +143,7 @@ void JoinedPositionAcross::addToOverviewTable(std::shared_ptr<EvaluationResultsR
         result = req->getConditionResultStr(prob_.value());
     }
 
-    // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+            // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                      +(requirement_->shortname()+" Across").c_str(),
                      result_id_.c_str(), {num_passed_+num_failed_},
@@ -139,20 +158,20 @@ void JoinedPositionAcross::addDetails(std::shared_ptr<EvaluationResultsReport::R
         sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
 
     std::shared_ptr<EvaluationRequirement::PositionAcross> req =
-            std::static_pointer_cast<EvaluationRequirement::PositionAcross>(requirement_);
+        std::static_pointer_cast<EvaluationRequirement::PositionAcross>(requirement_);
     assert (req);
 
     EvaluationResultsReport::SectionContentTable& sec_det_table =
-            sector_section.getTable("sector_details_table");
+        sector_section.getTable("sector_details_table");
 
-    // callbacks
+            // callbacks
     auto exportAsCSV_lambda = [this]() {
         this->exportAsCSV();
     };
 
     sec_det_table.registerCallBack("Save Data As CSV", exportAsCSV_lambda);
 
-    // details
+            // details
     addCommonDetails(sec_det_table);
 
     sec_det_table.addRow({"Use", "To be used in results", use_}, this);
@@ -161,7 +180,7 @@ void JoinedPositionAcross::addDetails(std::shared_ptr<EvaluationResultsReport::R
     sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
     sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
 
-    // along
+            // along
     sec_det_table.addRow({"ACMin [m]", "Minimum of across-track error",
                           String::doubleToStringPrecision(value_min_,2).c_str()}, this);
     sec_det_table.addRow({"ACMax [m]", "Maximum of across-track error",
@@ -194,13 +213,13 @@ void JoinedPositionAcross::addDetails(std::shared_ptr<EvaluationResultsReport::R
         sec_det_table.addRow({"Condition Across Fulfilled", "", result.c_str()}, this);
     }
 
-    // figure
+            // figure
     sector_section.addFigure("sector_overview", "Sector Overview",
                              [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedPositionAcross::hasViewableData (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == req_overview_table_name_)
         return true;
@@ -209,7 +228,7 @@ bool JoinedPositionAcross::hasViewableData (
 }
 
 std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::viewableDataImpl(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
 
@@ -219,7 +238,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::viewableDataImpl
 std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::getErrorsViewable ()
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
+        eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
 
     double lat_min, lat_max, lon_min, lon_max;
 
@@ -247,7 +266,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::getErrorsViewabl
 }
 
 bool JoinedPositionAcross::hasReference (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == req_overview_table_name_)
         return true;
@@ -256,7 +275,7 @@ bool JoinedPositionAcross::hasReference (
 }
 
 std::string JoinedPositionAcross::reference(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasReference(table, annotation));
     return "Report:Results:"+getRequirementSectionID();

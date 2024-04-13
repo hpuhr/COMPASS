@@ -219,6 +219,22 @@ void JoinedExtraData::updateToChanges_impl()
     if (num_extra_ + num_ok_)
     {
         prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
+
+        // add importance
+        for (auto& result_it : results_)
+        {
+            std::shared_ptr<SingleExtraData> single_result =
+                std::static_pointer_cast<SingleExtraData>(result_it);
+            assert (single_result);
+
+            if (!single_result->use())
+                continue;
+
+            assert (num_extra_ >= single_result->numExtra());
+
+            single_result->addInterestFactor(
+                (float) single_result->numExtra() / (float)num_extra_);
+        }
     }
 }
 

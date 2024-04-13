@@ -263,6 +263,25 @@ void JoinedModeAPresent::updateToChanges_impl()
     if (num_no_ref_val_ + num_present_ + num_missing_)
     {
         p_present_ = (float)(num_no_ref_val_ + num_present_) / (float)(num_no_ref_val_ + num_present_ + num_missing_);
+
+                // add importance
+        if (num_missing_)
+        {
+            for (auto& result_it : results_)
+            {
+                std::shared_ptr<SingleModeAPresent> single_result =
+                    std::static_pointer_cast<SingleModeAPresent>(result_it);
+                assert (single_result);
+
+                if (!single_result->use())
+                    continue;
+
+                assert (num_missing_ >= single_result->numMissing());
+
+                single_result->addInterestFactor(
+                    (float) single_result->numMissing() / (float)num_missing_);
+            }
+        }
     }
 }
 

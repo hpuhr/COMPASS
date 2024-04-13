@@ -263,13 +263,25 @@ void JoinedDetection::updateToChanges_impl()
             pd_ = (float)missed_uis_/(float)(sum_uis_);
         else
             pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+
+
+        // attribute interest
+        for (auto& result_it : results_)
+        {
+            std::shared_ptr<SingleDetection> single_result =
+                std::static_pointer_cast<SingleDetection>(result_it);
+            assert (single_result);
+
+            if (!single_result->use())
+                continue;
+
+            assert (missed_uis_ >= single_result->missedUIs());
+
+            single_result->addInterestFactor((float)single_result->missedUIs() / (float)missed_uis_);
+        }
     }
 
-    if (pd_.has_value())
-        loginf << "JoinedDetection: updateToChanges_impl: updt result " << result_id_
-                << " pd " << 100.0 * pd_.value();
-    else
-        loginf << "JoinedDetection: updateToChanges_impl: updt result " << result_id_ << " has no data";
+
 }
 
 }

@@ -311,6 +311,26 @@ void JoinedDubiousTarget::updateToChanges_impl()
     if (num_utns_)
     {
         p_dubious_ = (float)num_utns_dubious_/(float)num_utns_;
+
+        // attribute interest
+
+        for (auto& result_it : results_)
+        {
+            std::shared_ptr<SingleDubiousTarget> single_result =
+                std::static_pointer_cast<SingleDubiousTarget>(result_it);
+            assert (single_result);
+
+            if (!single_result->use())
+                continue;
+
+            const auto& detail = single_result->getDetail(0);
+
+            auto is_dubious = detail.getValueAs<bool>(SingleDubiousTarget::DetailKey::IsDubious);
+            assert(is_dubious.has_value());
+
+            if (is_dubious.value())
+                single_result->addInterestFactor(1.0 / (float)num_utns_dubious_);
+        }
     }
 
     if (num_pos_inside_)

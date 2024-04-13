@@ -163,6 +163,14 @@ public:
 
     static const int InterpGroundBitMaxSeconds = 15;
 
+    // targets of interest
+
+    void clearInterestFactors() const;
+    void addInterestFactor (const std::string& req_section_id, double factor) const;
+    const std::map<std::string, double>& interestFactors() const;
+    std::string interestFactorsStr() const;
+    double interestFactorsSum() const;
+
 protected:
     void updateACIDs() const;
     void updateACADs() const;
@@ -223,6 +231,9 @@ protected:
     mutable InsideCheckMatrix                    inside_tst_;
     mutable InsideCheckMatrix                    inside_map_;
     mutable std::map<const SectorLayer*, size_t> inside_sector_layers_;
+
+    mutable std::map<std::string, double> interest_factors_;
+    mutable double interest_factors_sum_ {0};
 };
 
 #endif // EVALUATIONTARGETDATA_H
