@@ -791,6 +791,8 @@ void EvaluationManager::evaluate()
 
     // clean previous
     results_gen_.clear();
+
+    data_.resetModelBegin();
     data_.clearInterestFactors();
 
     evaluated_ = false;
@@ -803,7 +805,7 @@ void EvaluationManager::evaluate()
     // eval
     results_gen_.evaluate(data_, currentStandard());
 
-    //data_.beginResetModel();
+    data_.resetModelEnd();
 
     evaluated_ = true;
 

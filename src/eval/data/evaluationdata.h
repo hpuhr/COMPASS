@@ -95,12 +95,18 @@ public:
     EvaluationDataWidget* widget();
 
     void clearInterestFactors();
+    void resetModelBegin();
+    void resetModelEnd();
 
     // ref
     unsigned int ref_line_id_;
 
     // tst
     unsigned int tst_line_id_;
+
+    static QColor color_interest_high_, color_interest_mid_, color_interest_low_;
+
+
 
 protected:
     EvaluationManager& eval_man_;
@@ -111,6 +117,7 @@ protected:
                                 "M3/A", "MC Min", "MC Max"};
 
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
+
 
     TargetCache target_data_;
     bool finalized_ {false};

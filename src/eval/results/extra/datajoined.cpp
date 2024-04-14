@@ -38,14 +38,14 @@ namespace EvaluationRequirementResult
 
 JoinedExtraData::JoinedExtraData(const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                 const SectorLayer& sector_layer, 
+                                 const SectorLayer& sector_layer,
                                  EvaluationManager& eval_man)
-:   Joined("JoinedExtraData", result_id, requirement, sector_layer, eval_man)
+    :   Joined("JoinedExtraData", result_id, requirement, sector_layer, eval_man)
 {
 }
 
 void JoinedExtraData::addToReport (
-        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     logdbg << "JoinedExtraData " <<  requirement_->name() <<": addToReport";
 
@@ -65,12 +65,12 @@ void JoinedExtraData::addToOverviewTable(std::shared_ptr<EvaluationResultsReport
 {
     EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
-    // condition
+            // condition
     std::shared_ptr<EvaluationRequirement::ExtraData> req =
-            std::static_pointer_cast<EvaluationRequirement::ExtraData>(requirement_);
+        std::static_pointer_cast<EvaluationRequirement::ExtraData>(requirement_);
     assert (req);
 
-    // pd
+            // pd
     QVariant prob_var;
 
     string result {"Unknown"};
@@ -82,11 +82,11 @@ void JoinedExtraData::addToOverviewTable(std::shared_ptr<EvaluationResultsReport
         result = req->getConditionResultStr(prob_.value());
     }
 
-    // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+            // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                        requirement_->shortname().c_str(),
-                        result_id_.c_str(), {num_extra_+num_ok_},
-                        prob_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
+                     requirement_->shortname().c_str(),
+                     result_id_.c_str(), {num_extra_+num_ok_},
+                     prob_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
     // "Report:Results:Overview"
 }
 
@@ -98,7 +98,7 @@ void JoinedExtraData::addDetails(std::shared_ptr<EvaluationResultsReport::RootIt
         sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
 
     EvaluationResultsReport::SectionContentTable& sec_det_table =
-            sector_section.getTable("sector_details_table");
+        sector_section.getTable("sector_details_table");
 
     addCommonDetails(sec_det_table);
 
@@ -106,12 +106,12 @@ void JoinedExtraData::addDetails(std::shared_ptr<EvaluationResultsReport::RootIt
     sec_det_table.addRow({"#OK.", "Number of OK test updates", num_ok_}, this);
     sec_det_table.addRow({"#Extra", "Number of extra test updates", num_extra_}, this);
 
-    // condition
+            // condition
     std::shared_ptr<EvaluationRequirement::ExtraData> req =
-            std::static_pointer_cast<EvaluationRequirement::ExtraData>(requirement_);
+        std::static_pointer_cast<EvaluationRequirement::ExtraData>(requirement_);
     assert (req);
 
-    // pd
+            // pd
     QVariant prob_var;
 
     string result {"Unknown"};
@@ -127,13 +127,13 @@ void JoinedExtraData::addDetails(std::shared_ptr<EvaluationResultsReport::RootIt
     sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
     sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
 
-    // figure
+            // figure
     sector_section.addFigure("sector_overview", "Sector Overview",
                              [this](void) { return this->getErrorsViewable(); });
 }
 
 bool JoinedExtraData::hasViewableData (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == req_overview_table_name_)
         return true;
@@ -142,7 +142,7 @@ bool JoinedExtraData::hasViewableData (
 }
 
 std::unique_ptr<nlohmann::json::object_t> JoinedExtraData::viewableDataImpl(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
     return getErrorsViewable();
@@ -151,7 +151,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedExtraData::viewableDataImpl(
 std::unique_ptr<nlohmann::json::object_t> JoinedExtraData::getErrorsViewable ()
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
+        eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
 
     double lat_min, lat_max, lon_min, lon_max;
 
@@ -179,7 +179,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedExtraData::getErrorsViewable ()
 }
 
 bool JoinedExtraData::hasReference (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     //loginf << "UGA3 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
 
@@ -190,7 +190,7 @@ bool JoinedExtraData::hasReference (
 }
 
 std::string JoinedExtraData::reference(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasReference(table, annotation));
     return "Report:Results:"+getRequirementSectionID();
@@ -204,7 +204,7 @@ void JoinedExtraData::updateToChanges_impl()
     for (auto& result_it : results_)
     {
         std::shared_ptr<SingleExtraData> single_result =
-                std::static_pointer_cast<SingleExtraData>(result_it);
+            std::static_pointer_cast<SingleExtraData>(result_it);
         assert (single_result);
 
         if (!single_result->use())
@@ -220,20 +220,23 @@ void JoinedExtraData::updateToChanges_impl()
     {
         prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
 
-        // add importance
-        for (auto& result_it : results_)
+                // add importance
+        if (num_extra_)
         {
-            std::shared_ptr<SingleExtraData> single_result =
-                std::static_pointer_cast<SingleExtraData>(result_it);
-            assert (single_result);
+            for (auto& result_it : results_)
+            {
+                std::shared_ptr<SingleExtraData> single_result =
+                    std::static_pointer_cast<SingleExtraData>(result_it);
+                assert (single_result);
 
-            if (!single_result->use())
-                continue;
+                if (!single_result->use())
+                    continue;
 
-            assert (num_extra_ >= single_result->numExtra());
+                assert (num_extra_ >= single_result->numExtra());
 
-            single_result->addInterestFactor(
-                (float) single_result->numExtra() / (float)num_extra_);
+                single_result->addInterestFactor(
+                    (float) single_result->numExtra() / (float) num_extra_);
+            }
         }
     }
 }

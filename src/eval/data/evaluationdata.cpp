@@ -45,6 +45,10 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
+QColor EvaluationData::color_interest_high_{"#FF6666"};
+QColor EvaluationData::color_interest_mid_{"#FFA500"};
+QColor EvaluationData::color_interest_low_{"#66AA66"};
+
 EvaluationData::EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man)
     : eval_man_(eval_man), dbcont_man_(dbcont_man)
 {
@@ -359,8 +363,22 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
         const EvaluationTargetData& target = target_data_.at(index.row());
 
+        assert (index.column() < table_columns_.size());
+        std::string col_name = table_columns_.at(index.column()).toStdString();
+
         if (!dbcont_man_.utnUseEval(target.utn_))
             return QBrush(Qt::lightGray);
+        else if (col_name == "Interest")
+        {
+            double interest = target.interestFactorsSum();
+
+            if (interest < 0.05)
+                return color_interest_low_;
+            else if (interest < 0.1)
+                return color_interest_mid_;
+            else
+                return color_interest_high_;
+        }
         else
             return QVariant();
 
@@ -598,6 +616,15 @@ void EvaluationData::clearInterestFactors()
     {
         target_data_.modify(target_data_.project<0>(tgt_it), [](EvaluationTargetData& t) { t.clearInterestFactors(); });
     }
+}
+
+void EvaluationData::resetModelBegin()
+{
+    beginResetModel();
+}
+void EvaluationData::resetModelEnd()
+{
+    endResetModel();
 }
 
 void EvaluationData::targetChangedSlot(unsigned int utn) // for one utn

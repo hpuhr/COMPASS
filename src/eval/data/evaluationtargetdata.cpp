@@ -844,11 +844,11 @@ std::string EvaluationTargetData::interestFactorsStr() const
     for (auto& fac_it : interest_factors_)
     {
         if (fac_it.second < 0.01)
-            color = "#00AA00";
+            color = EvaluationData::color_interest_low_.name().toStdString();
         else if (fac_it.second < 0.05)
-            color = "#FFA500";
+            color = EvaluationData::color_interest_mid_.name().toStdString();
         else
-            color = "#FF0000";
+            color = EvaluationData::color_interest_high_.name().toStdString();
 
         ret += "<font color=\"" + color +"\">" + fac_it.first + "\t"
                + String::doubleToStringPrecision(fac_it.second, 3)+"</font><br>\n";
