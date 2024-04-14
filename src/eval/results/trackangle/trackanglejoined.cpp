@@ -248,6 +248,8 @@ void JoinedTrackAngle::updateToChanges_impl()
                 std::static_pointer_cast<SingleTrackAngle>(result_it);
         assert (single_result);
 
+        single_result->setInterestFactor(0);
+
         if (!single_result->use())
             continue;
 
@@ -300,7 +302,7 @@ void JoinedTrackAngle::updateToChanges_impl()
 
                 assert (num_comp_failed_ >= single_result->numCompFailed());
 
-                single_result->addInterestFactor(
+                single_result->setInterestFactor(
                     (float) single_result->numCompFailed() / (float)num_comp_failed_);
             }
         }

@@ -264,6 +264,8 @@ void JoinedDubiousTarget::updateToChanges_impl()
                 std::static_pointer_cast<SingleDubiousTarget>(result_it);
         assert (single_result);
 
+        single_result->setInterestFactor(0);
+
         if (!single_result->use())
             continue;
 
@@ -329,7 +331,7 @@ void JoinedDubiousTarget::updateToChanges_impl()
             assert(is_dubious.has_value());
 
             if (is_dubious.value())
-                single_result->addInterestFactor(1.0 / (float)num_utns_dubious_);
+                single_result->setInterestFactor(1.0 / (float)num_utns_dubious_);
         }
     }
 

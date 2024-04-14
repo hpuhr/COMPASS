@@ -228,6 +228,8 @@ void JoinedDetection::updateToChanges_impl()
                 std::static_pointer_cast<SingleDetection>(result_it);
         assert (single_result);
 
+        single_result->setInterestFactor(0);
+
         if (!single_result->use())
             continue;
 
@@ -277,7 +279,7 @@ void JoinedDetection::updateToChanges_impl()
 
             assert (missed_uis_ >= single_result->missedUIs());
 
-            single_result->addInterestFactor((float)single_result->missedUIs() / (float)missed_uis_);
+            single_result->setInterestFactor((float)single_result->missedUIs() / (float)missed_uis_);
         }
     }
 

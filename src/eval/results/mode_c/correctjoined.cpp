@@ -224,6 +224,8 @@ void JoinedModeCCorrect::updateToChanges_impl()
                 std::static_pointer_cast<SingleModeCCorrect>(result_it);
         assert (single_result);
 
+        single_result->setInterestFactor(0);
+
         if (!single_result->use())
             continue;
 
@@ -259,7 +261,7 @@ void JoinedModeCCorrect::updateToChanges_impl()
 
                 assert (num_not_correct_ >= single_result->numNotCorrect());
 
-                single_result->addInterestFactor(
+                single_result->setInterestFactor(
                     (float) single_result->numNotCorrect() / (float)num_not_correct_);
             }
         }

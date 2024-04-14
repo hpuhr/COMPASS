@@ -65,11 +65,13 @@ const EvaluationTargetData* Single::target() const
     return target_;
 }
 
-void Single::addInterestFactor(double factor)
+void Single::setInterestFactor(double factor)
 {
-    assert (target_);
-    target_->addInterestFactor(getRequirementSectionID(), factor);
+    interest_factor_ = factor;
 
+    assert (target_);
+
+    target_->addInterestFactor(getRequirementSectionID(), factor);
 }
 
 void Single::updateUseFromTarget ()

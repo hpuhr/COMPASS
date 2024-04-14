@@ -207,6 +207,8 @@ void JoinedExtraData::updateToChanges_impl()
             std::static_pointer_cast<SingleExtraData>(result_it);
         assert (single_result);
 
+        single_result->setInterestFactor(0);
+
         if (!single_result->use())
             continue;
 
@@ -234,7 +236,7 @@ void JoinedExtraData::updateToChanges_impl()
 
                 assert (num_extra_ >= single_result->numExtra());
 
-                single_result->addInterestFactor(
+                single_result->setInterestFactor(
                     (float) single_result->numExtra() / (float) num_extra_);
             }
         }

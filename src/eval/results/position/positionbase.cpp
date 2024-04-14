@@ -155,6 +155,8 @@ void JoinedPositionBase::updateToChanges_impl()
                 std::static_pointer_cast<SinglePositionBase>(result_it);
         assert (single_result);
 
+        single_result->setInterestFactor(0);
+
         if (!single_result->use())
             continue;
 

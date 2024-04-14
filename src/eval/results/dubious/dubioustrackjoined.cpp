@@ -250,6 +250,8 @@ void JoinedDubiousTrack::updateToChanges_impl()
                 std::static_pointer_cast<SingleDubiousTrack>(result_it);
         assert (single_result);
 
+        single_result->setInterestFactor(0);
+
         if (!single_result->use())
             continue;
 
@@ -292,7 +294,7 @@ void JoinedDubiousTrack::updateToChanges_impl()
 
             assert (num_tracks_dubious_ >= single_result->numPosInsideDubious());
 
-            single_result->addInterestFactor(
+            single_result->setInterestFactor(
                 (float) single_result->numPosInsideDubious() / (float)num_pos_inside_dubious_);
         }
     }

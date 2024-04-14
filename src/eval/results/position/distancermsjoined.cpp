@@ -105,7 +105,7 @@ void JoinedPositionDistanceRMS::updateToChanges_impl()
 
                 assert (num_failed_ >= single_result->numFailed());
 
-                single_result->addInterestFactor(
+                single_result->setInterestFactor(
                     (float) single_result->numFailed() / (float)num_failed_);
             }
         }

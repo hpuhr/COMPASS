@@ -239,6 +239,8 @@ void JoinedModeCFalse::updateToChanges_impl()
                 std::static_pointer_cast<SingleModeCFalse>(result_it);
         assert (single_result);
 
+        single_result->setInterestFactor(0);
+
         if (!single_result->use())
             continue;
 
@@ -280,7 +282,7 @@ void JoinedModeCFalse::updateToChanges_impl()
 
                 assert (num_false_ >= single_result->numFalse());
 
-                single_result->addInterestFactor(
+                single_result->setInterestFactor(
                     (float) single_result->numFalse() / (float)num_false_);
             }
         }

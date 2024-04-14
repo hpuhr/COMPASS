@@ -238,6 +238,8 @@ void JoinedModeAPresent::updateToChanges_impl()
                 std::static_pointer_cast<SingleModeAPresent>(result_it);
         assert (single_result);
 
+        single_result->setInterestFactor(0);
+
         if (!single_result->use())
             continue;
 
@@ -278,7 +280,7 @@ void JoinedModeAPresent::updateToChanges_impl()
 
                 assert (num_missing_ >= single_result->numMissing());
 
-                single_result->addInterestFactor(
+                single_result->setInterestFactor(
                     (float) single_result->numMissing() / (float)num_missing_);
             }
         }

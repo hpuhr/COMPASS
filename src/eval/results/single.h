@@ -65,7 +65,7 @@ public:
 
     unsigned int utn() const;
     const EvaluationTargetData* target() const;
-    void addInterestFactor(double factor);
+    void setInterestFactor(double factor);
 
     void updateUseFromTarget ();
 
@@ -79,7 +79,7 @@ public:
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const { return {}; }
     virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const {}
 
-protected:
+  protected:
     enum AnnotationType
     {
         TypeOk = 0,
@@ -93,6 +93,8 @@ protected:
     const EvaluationTargetData* target_; // used to generate result
 
     bool result_usable_ {true}; // whether valid data exists, changed in subclass
+
+    double interest_factor_ {0};
 
     std::string getTargetSectionID();
     std::string getTargetRequirementSectionID();
