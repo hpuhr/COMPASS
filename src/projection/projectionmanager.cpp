@@ -196,6 +196,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     // set up projections
     assert(hasCurrentProjection());
     Projection& projection = currentProjection();
+    projection.addAllRadarCoordinateSystems();
     assert (projection.radarCoordinateSystemsAdded()); // needs to have been prepared, otherwise multi-threading issue
 
     for (auto ds_id_it : datasource_vec.distinctValues())

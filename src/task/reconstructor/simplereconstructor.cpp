@@ -49,7 +49,7 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std:
         // target id? kb: nope
         // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
 
-        ds_line_ = 1;
+        ds_line_ = 0;
     }
 }
 

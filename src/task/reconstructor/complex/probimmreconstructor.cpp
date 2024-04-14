@@ -23,7 +23,7 @@ ProbIMMReconstructor::ProbIMMReconstructor(
       , associatior_   (*this)
       , ref_calculator_(*this)
 {
-    ds_line_ = 2;
+    ds_line_ = 1;
 }
 
 ProbIMMReconstructor::~ProbIMMReconstructor() {}
