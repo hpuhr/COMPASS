@@ -4,6 +4,7 @@
 #include "global.h"
 #include "stringconv.h"
 #include "timeconv.h"
+#include "util/tbbhack.h"
 
 #include <Eigen/Dense>
 
@@ -34,20 +35,19 @@ void ProbabilisticAssociator::associateNewData()
     vector<tuple<bool, unsigned int, double>> results;
     const boost::posix_time::time_duration max_time_diff = Time::partialSeconds(5);
     const float max_altitude_diff = 300.0;
-    const float max_mahalanobis_dist = 10;
+    const float max_mahalanobis_sec_verified_dist = 5;
+    const float max_mahalanobis_sec_unknown_dist = 3;
     //targetReport::Position ref_pos;
     //bool ok;
 
+    std::vector<unsigned int> utn_vec;
 
-    reconstruction::Measurement mm;
-    bool ret;
-    double distance_m, bearing_rad;
-    dbContent::targetReport::PositionAccuracy tr_pos_acc;
-    dbContent::targetReport::PositionAccuracy mm_pos_acc;
-    EllipseDef acc_ell;
-    double est_std_dev;
-    double mahalanobis_dist;
-    //bool not_use_tr_pos;
+    for (auto& target_it : reconstructor_.targets_)
+        utn_vec.push_back(target_it.first);
+
+
+
+            //bool not_use_tr_pos;
 
     AccuracyEstimatorBase::AssociatedDistance dist;
 
@@ -64,7 +64,7 @@ void ProbabilisticAssociator::associateNewData()
 
         utn = -1; // not yet found
 
-        // try by mode-s address
+                // try by mode-s address
         if (tr.acad_)
         {
             // find utn
@@ -85,99 +85,126 @@ void ProbabilisticAssociator::associateNewData()
                     std::forward_as_tuple(utn),   // args for key
                     std::forward_as_tuple(reconstructor_, utn, false));  // args for mapped value tmp_utn, false
 
-                // add to lookup
+                        // add to lookup
                 ta_2_utn[*tr.acad_] = utn;
-
+                utn_vec.push_back(utn);
             }
         }
 
         if (utn == -1) // not associated by acad
         {
-            results.resize(reconstructor_.targets_.size());
+            unsigned int num_targets = reconstructor_.targets_.size();
+            assert (utn_vec.size() == num_targets);
+
+            results.resize(num_targets);
             timestamp = timestamp = tr.timestamp_;;
 
-            unsigned int target_cnt=0;
-            for (auto& target_it : reconstructor_.targets_)
-            {
-                ReconstructorTarget& other = target_it.second;
+                    //unsigned int target_cnt=0;
+                    //for (auto& target_it : reconstructor_.targets_)
+            tbb::parallel_for(uint(0), num_targets, [&](unsigned int target_cnt)
+                              {
+                                  unsigned int other_utn = utn_vec.at(target_cnt);
+                                  ReconstructorTarget& other = reconstructor_.targets_.at(other_utn);
 
-                results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
+                                  results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
-                if (other.hasACAD()) // only try if not mode s
-                {
-                    ++target_cnt;
-                    continue;
-                }
+                                  if (other.hasACAD()) // only try if not mode s
+                                  {
+                                      //++target_cnt;
+                                      return;
+                                  }
 
-                if (!other.isTimeInside(timestamp, max_time_diff))
-                {
-                    ++target_cnt;
-                    continue;
-                }
+                                  if (!other.isTimeInside(timestamp, max_time_diff))
+                                  {
+                                      //++target_cnt;
+                                      return;
+                                  }
 
-                if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
-                {
-                    // check mode a code
+                                  bool mode_a_verified = false;
 
-                    if (tr.mode_a_code_)
-                    {
-                        ComparisonResult ma_res = other.compareModeACode(tr, max_time_diff);
+                                  if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
+                                  {
+                                      // check mode a code
 
-                        if (ma_res == ComparisonResult::DIFFERENT)
-                        {
-                            target_cnt++;
-                            continue;
-                        }
-                    }
-                    //loginf << "UGA3 same mode a";
+                                      if (tr.mode_a_code_)
+                                      {
+                                          ComparisonResult ma_res = other.compareModeACode(tr, max_time_diff);
 
-                            // check mode c code
-                    if (tr.barometric_altitude_)
-                    {
-                        ComparisonResult mc_res = other.compareModeCCode(tr, max_time_diff, max_altitude_diff, false);
+                                          if (ma_res == ComparisonResult::DIFFERENT)
+                                          {
+                                              //target_cnt++;
+                                              return;
+                                          }
 
-                        if (mc_res == ComparisonResult::DIFFERENT)
-                        {
-                            target_cnt++;
-                            continue;
-                        }
-                    }
-                }
+                                          mode_a_verified = ma_res == ComparisonResult::SAME;
+                                      }
+                                      //loginf << "UGA3 same mode a";
 
-                        // check positions
+                                              // check mode c code
+                                      if (tr.barometric_altitude_)
+                                      {
+                                          ComparisonResult mc_res = other.compareModeCCode(tr, max_time_diff, max_altitude_diff, false);
 
-//                tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
-//                    timestamp, max_time_diff_sensor);
+                                          if (mc_res == ComparisonResult::DIFFERENT)
+                                          {
+                                              //target_cnt++;
+                                              return;
+                                          }
+                                      }
+                                  }
 
-                ret = other.predict(mm, tr);
-                assert (ret);
+                                          // check positions
 
-                distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
-                                                         tr.position_->longitude_ * DEG2RAD,
-                                                         mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+                                  //                tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
+                                  //                    timestamp, max_time_diff_sensor);
+                                  reconstruction::Measurement mm;
+                                  bool ret;
+                                  double distance_m, bearing_rad;
+                                  dbContent::targetReport::PositionAccuracy tr_pos_acc;
+                                  dbContent::targetReport::PositionAccuracy mm_pos_acc;
+                                  EllipseDef acc_ell;
+                                  double est_std_dev;
+                                  double mahalanobis_dist;
 
-                bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
-                                                         tr.position_->longitude_ * DEG2RAD,
-                                                         mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+                                  ret = other.predict(mm, tr);
+                                  assert (ret);
 
-                tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
-                estimateEllipse(tr_pos_acc, acc_ell);
-                est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+                                  distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
+                                                                           tr.position_->longitude_ * DEG2RAD,
+                                                                           mm.lat * DEG2RAD, mm.lon * DEG2RAD);
 
-                assert (mm.hasStdDevPosition());
-                mm_pos_acc = mm.positionAccuracy();
-                estimateEllipse(mm_pos_acc, acc_ell);
-                est_std_dev += estimateAccuracyAt(acc_ell, bearing_rad);
+                                  bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
+                                                                           tr.position_->longitude_ * DEG2RAD,
+                                                                           mm.lat * DEG2RAD, mm.lon * DEG2RAD);
 
-                mahalanobis_dist = distance_m / est_std_dev;
+                                  tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
+                                  estimateEllipse(tr_pos_acc, acc_ell);
+                                  est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
-                        //loginf << "UGA3 distance " << distance;
+                                  assert (mm.hasStdDevPosition());
+                                  mm_pos_acc = mm.positionAccuracy();
+                                  estimateEllipse(mm_pos_acc, acc_ell);
+                                  est_std_dev += estimateAccuracyAt(acc_ell, bearing_rad);
 
-                if (mahalanobis_dist < max_mahalanobis_dist)
-                    results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, mahalanobis_dist);
+                                  mahalanobis_dist = distance_m / est_std_dev;
 
-                ++target_cnt;
-            }
+                                          //loginf << "UGA3 distance " << distance;
+
+                                  if (mode_a_verified)
+                                  {
+                                      if (mahalanobis_dist < max_mahalanobis_sec_verified_dist)
+                                          results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, mahalanobis_dist);
+                                  }
+                                  else
+                                  {
+                                      {
+                                          if (mahalanobis_dist < max_mahalanobis_sec_unknown_dist)
+                                              results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, mahalanobis_dist);
+                                      }
+                                  }
+
+                                          //++target_cnt;
+                              });
 
                     // find best match
             bool usable;
@@ -186,6 +213,7 @@ void ProbabilisticAssociator::associateNewData()
             bool first = true;
             unsigned int best_other_utn;
             double best_mahalanobis_dist;
+            double mahalanobis_dist;
 
             for (auto& res_it : results) // usable, other utn, num updates, avg distance
             {
@@ -215,13 +243,22 @@ void ProbabilisticAssociator::associateNewData()
             // add associated target reports
             assert (reconstructor_.targets_.count(utn));
 
-            // check if position usable
+                    // check if position usable
             reconstructor_.acc_estimator_->validate(tr, reconstructor_);
 
                     // only if not newly created
             if (!tr.do_not_use_position_ && reconstructor_.targets_.at(utn).canPredict(tr.timestamp_))
             {
-                // predict pos from target and estimate accuracies
+                reconstruction::Measurement mm;
+                bool ret;
+                double distance_m, bearing_rad;
+                dbContent::targetReport::PositionAccuracy tr_pos_acc;
+                dbContent::targetReport::PositionAccuracy mm_pos_acc;
+                EllipseDef acc_ell;
+                double est_std_dev;
+                double mahalanobis_dist;
+
+                        // predict pos from target and estimate accuracies
                 ret = reconstructor_.targets_.at(utn).predict(mm, tr);
                 assert (ret);
 

@@ -12,32 +12,32 @@
 using namespace std;
 using namespace Utils;
 
-const double ComplexAccuracyEstimator::PosAccStdDevDefault = 100.0;
-const dbContent::targetReport::PositionAccuracy ComplexAccuracyEstimator::PosAccStdDefault
-    { ComplexAccuracyEstimator::PosAccStdDevDefault, ComplexAccuracyEstimator::PosAccStdDevDefault, 0};
+//const double ComplexAccuracyEstimator::PosAccStdDevDefault = 100.0;
+//const dbContent::targetReport::PositionAccuracy ComplexAccuracyEstimator::PosAccStdDefault
+//    { ComplexAccuracyEstimator::PosAccStdDevDefault, ComplexAccuracyEstimator::PosAccStdDevDefault, 0};
 
-const double ComplexAccuracyEstimator::VelAccStdDevDefault = 30.0;
-const double ComplexAccuracyEstimator::VelAccStdDevDefaultCAT021 = 10.0;
-const double ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062 = 20.0;
+//const double ComplexAccuracyEstimator::VelAccStdDevDefault = 30.0;
+//const double ComplexAccuracyEstimator::VelAccStdDevDefaultCAT021 = 10.0;
+//const double ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062 = 20.0;
 
-const dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::VelAccStdDefault
-    { ComplexAccuracyEstimator::VelAccStdDevDefault, ComplexAccuracyEstimator::VelAccStdDevDefault};
-const dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::VelAccStdDefaultCAT021
-    { ComplexAccuracyEstimator::VelAccStdDevDefaultCAT021, ComplexAccuracyEstimator::VelAccStdDevDefaultCAT021};
-const dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::VelAccStdDefaultCAT062
-    { ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062, ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062};
+//const dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::VelAccStdDefault
+//    { ComplexAccuracyEstimator::VelAccStdDevDefault, ComplexAccuracyEstimator::VelAccStdDevDefault};
+//const dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::VelAccStdDefaultCAT021
+//    { ComplexAccuracyEstimator::VelAccStdDevDefaultCAT021, ComplexAccuracyEstimator::VelAccStdDevDefaultCAT021};
+//const dbContent::targetReport::VelocityAccuracy ComplexAccuracyEstimator::VelAccStdDefaultCAT062
+//    { ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062, ComplexAccuracyEstimator::VelAccStdDevDefaultCAT062};
 
 
-const double ComplexAccuracyEstimator::AccAccStdDevDefault = 30.0;
-const double ComplexAccuracyEstimator::AccAccStdDevDefaultCAT021 = 10.0;
-const double ComplexAccuracyEstimator::AccAccStdDevDefaultCAT062 = 20.0;
+//const double ComplexAccuracyEstimator::AccAccStdDevDefault = 30.0;
+//const double ComplexAccuracyEstimator::AccAccStdDevDefaultCAT021 = 10.0;
+//const double ComplexAccuracyEstimator::AccAccStdDevDefaultCAT062 = 20.0;
 
-const dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::AccAccStdDefault
-    { ComplexAccuracyEstimator::AccAccStdDevDefault, ComplexAccuracyEstimator::AccAccStdDevDefault};
-const dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::AccAccStdDefaultCAT021
-    { ComplexAccuracyEstimator::AccAccStdDevDefaultCAT021, ComplexAccuracyEstimator::AccAccStdDevDefaultCAT021};
-const dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::AccAccStdDefaultCAT062
-    { ComplexAccuracyEstimator::AccAccStdDevDefaultCAT062, ComplexAccuracyEstimator::AccAccStdDevDefaultCAT062};
+//const dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::AccAccStdDefault
+//    { ComplexAccuracyEstimator::AccAccStdDevDefault, ComplexAccuracyEstimator::AccAccStdDevDefault};
+//const dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::AccAccStdDefaultCAT021
+//    { ComplexAccuracyEstimator::AccAccStdDevDefaultCAT021, ComplexAccuracyEstimator::AccAccStdDevDefaultCAT021};
+//const dbContent::targetReport::AccelerationAccuracy ComplexAccuracyEstimator::AccAccStdDefaultCAT062
+//    { ComplexAccuracyEstimator::AccAccStdDevDefaultCAT062, ComplexAccuracyEstimator::AccAccStdDevDefaultCAT062};
 
 ComplexAccuracyEstimator::ComplexAccuracyEstimator()
 {
