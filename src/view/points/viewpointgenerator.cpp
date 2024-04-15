@@ -534,7 +534,9 @@ QImage ViewPointGenFeatureGeoImage::byteStringToImage(const std::string& str)
 
     const char* data = ba.data() + 4 * sizeof(int);
 
-    return QImage((const uchar*)data, *w, *h, *stride, (QImage::Format)(*format));
+    //data pointer has to live over the whole QImage's lifetime, so we copy the
+    //image, which should do a deep copy of the data
+    return QImage((const uchar*)data, *w, *h, *stride, (QImage::Format)(*format)).copy();
 }
 
 /********************************************************************************
