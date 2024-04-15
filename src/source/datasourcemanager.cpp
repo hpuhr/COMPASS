@@ -846,7 +846,7 @@ dbContent::DBDataSource& DataSourceManager::dbDataSource(unsigned int ds_id)
 
     return *find_if(db_data_sources_.begin(), db_data_sources_.end(),
                     [ds_id] (const std::unique_ptr<dbContent::DBDataSource>& s)
-    { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } )->get();
+    { return s->id() == ds_id; } )->get();
 }
 
 bool DataSourceManager::dsTypeFiltered()

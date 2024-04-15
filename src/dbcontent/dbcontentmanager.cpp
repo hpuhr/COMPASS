@@ -621,8 +621,8 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
         dbContent(buf_it.first).insertData(buf_it.second);
     }
 
-    COMPASS::instance().dataSourceManager().saveDBDataSources();
-    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+//    COMPASS::instance().dataSourceManager().saveDBDataSources();
+//    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
 
 }
 

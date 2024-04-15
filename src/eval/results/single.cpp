@@ -259,7 +259,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
 {
     string anno_name = annotation_type_names_.at(type);
 
-    loginf << "Single: getOrCreateAnnotation: anno_name '" << anno_name << "' overview " << overview;
+    logdbg << "Single: getOrCreateAnnotation: anno_name '" << anno_name << "' overview " << overview;
 
     if (!viewable.count(ViewPoint::VP_ANNOTATION_KEY))
         viewable[ViewPoint::VP_ANNOTATION_KEY] = json::array();
@@ -276,11 +276,11 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
             const std::string& line_color,
             int line_width)
     {
-        loginf << "Single: getOrCreateAnnotation: size " << annos.size()
+        logdbg << "Single: getOrCreateAnnotation: size " << annos.size()
                << " creating '" << name << "' at pos " << position;
 
         for (unsigned int cnt=0; cnt < annos.size(); ++cnt)
-            loginf << "Single: getOrCreateAnnotation: start: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
+            logdbg << "Single: getOrCreateAnnotation: start: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
 
         annos.insert(annos.begin() + position, json::object()); // errors
         assert (position < annos.size());
@@ -323,7 +323,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
         feature_points.at("properties")["symbol_size"] = point_size;
 
         for (unsigned int cnt=0; cnt < annos.size(); ++cnt)
-            loginf << "Single: getOrCreateAnnotation: end: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
+            logdbg << "Single: getOrCreateAnnotation: end: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
     };
 
     //ATTENTION: !ORDER IMPORTANT!

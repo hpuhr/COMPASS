@@ -258,7 +258,7 @@ void SimpleAssociator::createNonTrackerUTNS()
 
         for (auto& ds_it : dbcont_it.second) // ds_id -> ts ->  record_num
         {
-            loginf << "SimpleAssociator: createNonTrackerUTNS: ds " << ds_it.first;
+            //loginf << "SimpleAssociator: createNonTrackerUTNS: ds " << ds_it.first;
 
             assert (num_data_sources);
             done_perc = (unsigned int)(100.0 * (float)ds_cnt/(float)num_data_sources);
@@ -267,6 +267,8 @@ void SimpleAssociator::createNonTrackerUTNS()
             string ds_name = ds_man.dbDataSource(ds_it.first).name();
 
                     //emit statusSignal(("Creating "+dbcont_it.first+" "+ds_name+" UTNs ("+to_string(done_perc)+"%)").c_str());
+
+            //loginf << "SimpleAssociator: createNonTrackerUTNS: iterating lines";
 
             for (auto& line_it : ds_it.second)
             {
@@ -282,7 +284,8 @@ void SimpleAssociator::createNonTrackerUTNS()
                         //for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt)
                 tbb::parallel_for(uint(0), num_target_reports, [&](unsigned int tr_cnt)
                                   {
-                                      unsigned int rec_num = rec_nums.at(tr_cnt);
+                                      unsigned long rec_num = rec_nums.at(tr_cnt);
+                                      assert (reconstructor_.target_reports_.count(rec_num));
 
                                       targetReport::ReconstructorInfo& tr =
                                           reconstructor_.target_reports_.at(rec_num);
@@ -457,6 +460,9 @@ void SimpleAssociator::createNonTrackerUTNS()
                         //            emit statusSignal(("Creating "+dbcont_it.first+" "+ds_name+" Associations ("
                         //                               +to_string(done_perc)+"%)").c_str());
 
+
+                //loginf << "SimpleAssociator: createNonTrackerUTNS: adding target reports";
+
                         // create associations
                 int tmp_utn;
                 for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt) // tr_cnt -> utn
@@ -468,6 +474,8 @@ void SimpleAssociator::createNonTrackerUTNS()
                         reconstructor_.targets_.at(tmp_utn).addTargetReport(rec_nums.at(tr_cnt));
                     }
                 }
+
+                //loginf << "SimpleAssociator: createNonTrackerUTNS: creating new targets";
 
                         // create new targets
                 for (auto& todo_it : create_todos) // ta -> trs

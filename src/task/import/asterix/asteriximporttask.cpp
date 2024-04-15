@@ -1141,7 +1141,7 @@ void ASTERIXImportTask::insertData()
         num_records_ += job_it.second->size();
     }
 
-    loginf << "ASTERIXImportTask: insertData: inserting " << current_num_records << " records/s";
+    logdbg << "ASTERIXImportTask: insertData: inserting " << current_num_records << " records/s";
 
     if (!insert_slot_connected_)
     {
