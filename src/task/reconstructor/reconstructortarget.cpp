@@ -293,6 +293,14 @@ bool ReconstructorTarget::isTimeInside (boost::posix_time::ptime timestamp) cons
     return timestamp >= timestamp_min_ && timestamp <= timestamp_max_;
 }
 
+bool ReconstructorTarget::isTimeInside (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const
+{
+    if (timestamp_min_.is_not_a_date_time() || timestamp_min_.is_not_a_date_time())
+        return false;
+
+    return timestamp >= timestamp_min_ - d_max && timestamp <= timestamp_max_ + d_max;
+}
+
 bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) const
 {
     if (!isTimeInside(timestamp))

@@ -108,6 +108,7 @@ class ReconstructorTarget
 
     bool hasTimestamps() const;
     bool isTimeInside (boost::posix_time::ptime timestamp) const;
+    bool isTimeInside (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     bool hasDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
     // TODO lambda for selective data
