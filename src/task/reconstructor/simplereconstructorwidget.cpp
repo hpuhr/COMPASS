@@ -81,6 +81,7 @@ void SimpleReconstructorWidget::update()
 {
     assert (use_widget_);
     use_widget_->updateContent();
+    use_widget_->disableDataSources(reconstructor_.task().disabledDataSources());
 
     assert (assoc_widget_);
     assoc_widget_->update();

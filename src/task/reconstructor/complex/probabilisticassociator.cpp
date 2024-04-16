@@ -31,12 +31,12 @@ void ProbabilisticAssociator::associateNewData()
     const std::set<unsigned int> debug_utns = reconstructor_.task().debugUTNs();
 
     if (debug_utns.size())
-        loginf << "UGA tns '" << String::compress(debug_utns, ',') << "'";
+        loginf << "DBG tns '" << String::compress(debug_utns, ',') << "'";
 
     const std::set<unsigned long> debug_rec_nums = reconstructor_.task().debugRecNums();
 
     if (debug_rec_nums.size())
-        loginf << "UGA recnums '" << String::compress(debug_rec_nums, ',') << "'";
+        loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
 
     unsigned long rec_num;
     boost::posix_time::ptime timestamp;
@@ -69,14 +69,14 @@ void ProbabilisticAssociator::associateNewData()
         bool do_debug = debug_rec_nums.count(rec_num);
 
         if (do_debug)
-            loginf << "UGA tr " << rec_num;
+            loginf << "DBG tr " << rec_num;
 
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
         if (!tr.in_current_slice_)
         {
             if(do_debug)
-                loginf << "UGA tr " << rec_num << " not in current slice";
+                loginf << "DBG tr " << rec_num << " not in current slice";
 
             continue;
         }
@@ -112,7 +112,7 @@ void ProbabilisticAssociator::associateNewData()
             }
 
             if(do_debug)
-                loginf << "UGA tr " << rec_num << " utn by acad";
+                loginf << "DBG tr " << rec_num << " utn by acad";
         }
 
         if (debug_utns.count(utn))
@@ -121,13 +121,13 @@ void ProbabilisticAssociator::associateNewData()
         if (utn == -1) // not associated by acad
         {
             if(do_debug)
-                loginf << "UGA tr " << rec_num << " no utn by acad, doing mode a/c + pos";
+                loginf << "DBG tr " << rec_num << " no utn by acad, doing mode a/c + pos";
 
             unsigned int num_targets = reconstructor_.targets_.size();
             assert (utn_vec.size() == num_targets);
 
             results.resize(num_targets);
-            timestamp = timestamp = tr.timestamp_;;
+            timestamp = tr.timestamp_;
 
                     //unsigned int target_cnt=0;
                     //for (auto& target_it : reconstructor_.targets_)
@@ -140,17 +140,20 @@ void ProbabilisticAssociator::associateNewData()
 
                                   results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
-                                  if (other.hasACAD()) // only try if not mode s
-                                  {
-                                      //++target_cnt;
-                                      return;
-                                  }
+//                                  if (other.hasACAD()) // not only try if not mode s - could be
+//                                  {
+//                                      //++target_cnt;
+//                                      return;
+//                                  }
 
                                   if (!other.isTimeInside(timestamp, max_time_diff))
                                   {
                                       //++target_cnt;
                                       return;
                                   }
+
+                                  if (!other.canPredict(timestamp))
+                                      return;
 
                                   bool mode_a_checked = false;
                                   bool mode_a_verified = false;
@@ -175,7 +178,7 @@ void ProbabilisticAssociator::associateNewData()
                                       }
 
                                       if (do_debug || do_other_debug)
-                                          loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                          loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
                                                  << other_utn << ": possible mode a match, verified "
                                                  << mode_a_verified;
 
@@ -195,12 +198,12 @@ void ProbabilisticAssociator::associateNewData()
                                       }
 
                                       if (do_debug || do_other_debug)
-                                          loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                          loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
                                                  << other_utn << ": possible mode c match";
                                   }
 
                                   if (do_debug || do_other_debug)
-                                      loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
                                              << other_utn << ": mode_a_checked " << mode_a_checked
                                              << " mode_a_verified " << mode_a_verified
                                              << " mode_c_checked " << mode_c_checked;
@@ -236,7 +239,7 @@ void ProbabilisticAssociator::associateNewData()
                                   tr_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
                                   if (do_debug || do_other_debug)
-                                      loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
                                              << other_utn << ": distance_m " << distance_m
                                              << " tr_est_std_dev " << tr_est_std_dev;
 
@@ -246,16 +249,16 @@ void ProbabilisticAssociator::associateNewData()
                                   tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
                                   if (do_debug || do_other_debug)
-                                      loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
                                              << other_utn << ": distance_m " << distance_m
                                              << " tgt_est_std_dev " << tgt_est_std_dev;
 
                                   mahalanobis_dist = distance_m / (tr_est_std_dev + tgt_est_std_dev);
 
-                                          //loginf << "UGA3 distance " << distance;
+                                          //loginf << "DBG3 distance " << distance;
 
                                   if (do_debug || do_other_debug)
-                                      loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
                                              << other_utn << ": distance_m " << distance_m
                                              << " est_std_dev sum " << (tr_est_std_dev + tgt_est_std_dev)
                                              << "mahalanobis_dist " << mahalanobis_dist;
