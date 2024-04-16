@@ -65,7 +65,7 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
 
     SimpleReconstructorWidget* widget(); // ownage by caller
 
-    void updateWidgets();
+    virtual void updateWidgets();
 
   protected:
   

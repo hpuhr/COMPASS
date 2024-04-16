@@ -249,6 +249,26 @@ std::set<unsigned int> ReconstructorTask::disabledDataSources() const
     return disabled_ds;
 }
 
+const std::set<unsigned int>& ReconstructorTask::debugUTNs() const
+{
+    return debug_utns_;
+}
+
+void ReconstructorTask::debugUTNs(const std::set<unsigned int>& utns)
+{
+    debug_utns_ = utns;
+}
+
+std::set<unsigned long> ReconstructorTask::debugRecNums() const
+{
+    return debug_rec_nums_;
+}
+
+void ReconstructorTask::debugRecNums(const std::set<unsigned long>& rec_nums)
+{
+    debug_rec_nums_ = rec_nums;
+}
+
 void ReconstructorTask::dialogRunSlot()
 {
     loginf << "ReconstructorTask: dialogRunSlot";
