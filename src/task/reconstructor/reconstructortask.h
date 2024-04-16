@@ -79,7 +79,7 @@ class ReconstructorTask : public Task, public Configurable
     const std::set<unsigned int>& debugUTNs() const;
     void debugUTNs(const std::set<unsigned int>& utns);
 
-    std::set<unsigned long> debugRecNums() const;
+    const std::set<unsigned long>& debugRecNums() const;
     void debugRecNums(const std::set<unsigned long>& rec_nums);
 
   protected:

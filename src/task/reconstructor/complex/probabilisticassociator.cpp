@@ -5,6 +5,7 @@
 #include "stringconv.h"
 #include "timeconv.h"
 #include "util/tbbhack.h"
+#include "reconstructortask.h"
 
 #include <Eigen/Dense>
 
@@ -27,6 +28,16 @@ void ProbabilisticAssociator::associateNewData()
 {
     loginf << "ProbabilisticAssociator: associateNewData";
 
+    const std::set<unsigned int> debug_utns = reconstructor_.task().debugUTNs();
+
+    if (debug_utns.size())
+        loginf << "UGA tns '" << String::compress(debug_utns, ',') << "'";
+
+    const std::set<unsigned long> debug_rec_nums = reconstructor_.task().debugRecNums();
+
+    if (debug_rec_nums.size())
+        loginf << "UGA recnums '" << String::compress(debug_rec_nums, ',') << "'";
+
     unsigned long rec_num;
     boost::posix_time::ptime timestamp;
     int utn;
@@ -45,8 +56,6 @@ void ProbabilisticAssociator::associateNewData()
     for (auto& target_it : reconstructor_.targets_)
         utn_vec.push_back(target_it.first);
 
-
-
             //bool not_use_tr_pos;
 
     AccuracyEstimatorBase::AssociatedDistance dist;
@@ -57,10 +66,20 @@ void ProbabilisticAssociator::associateNewData()
 
         assert (reconstructor_.target_reports_.count(rec_num));
 
+        bool do_debug = debug_rec_nums.count(rec_num);
+
+        if (do_debug)
+            loginf << "UGA tr " << rec_num;
+
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
         if (!tr.in_current_slice_)
+        {
+            if(do_debug)
+                loginf << "UGA tr " << rec_num << " not in current slice";
+
             continue;
+        }
 
         utn = -1; // not yet found
 
@@ -76,7 +95,9 @@ void ProbabilisticAssociator::associateNewData()
             else // not yet existing, create & add target
             {
                 if (reconstructor_.targets_.size())
+                {
                     utn = reconstructor_.targets_.rbegin()->first + 1; // new utn
+                }
                 else
                     utn = 0;
 
@@ -89,10 +110,19 @@ void ProbabilisticAssociator::associateNewData()
                 ta_2_utn[*tr.acad_] = utn;
                 utn_vec.push_back(utn);
             }
+
+            if(do_debug)
+                loginf << "UGA tr " << rec_num << " utn by acad";
         }
+
+        if (debug_utns.count(utn))
+            do_debug = true;
 
         if (utn == -1) // not associated by acad
         {
+            if(do_debug)
+                loginf << "UGA tr " << rec_num << " no utn by acad, doing mode a/c + pos";
+
             unsigned int num_targets = reconstructor_.targets_.size();
             assert (utn_vec.size() == num_targets);
 
@@ -104,6 +134,8 @@ void ProbabilisticAssociator::associateNewData()
             tbb::parallel_for(uint(0), num_targets, [&](unsigned int target_cnt)
                               {
                                   unsigned int other_utn = utn_vec.at(target_cnt);
+                                  bool do_other_debug = debug_utns.count(other_utn);
+
                                   ReconstructorTarget& other = reconstructor_.targets_.at(other_utn);
 
                                   results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
@@ -120,7 +152,9 @@ void ProbabilisticAssociator::associateNewData()
                                       return;
                                   }
 
+                                  bool mode_a_checked = false;
                                   bool mode_a_verified = false;
+                                  bool mode_c_checked = false;
 
                                   if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
                                   {
@@ -136,9 +170,15 @@ void ProbabilisticAssociator::associateNewData()
                                               return;
                                           }
 
+                                          mode_a_checked = true;
                                           mode_a_verified = ma_res == ComparisonResult::SAME;
                                       }
-                                      //loginf << "UGA3 same mode a";
+
+                                      if (do_debug || do_other_debug)
+                                          loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                                 << other_utn << ": possible mode a match, verified "
+                                                 << mode_a_verified;
+
 
                                               // check mode c code
                                       if (tr.barometric_altitude_)
@@ -150,21 +190,35 @@ void ProbabilisticAssociator::associateNewData()
                                               //target_cnt++;
                                               return;
                                           }
+
+                                          mode_c_checked = true;
                                       }
+
+                                      if (do_debug || do_other_debug)
+                                          loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                                 << other_utn << ": possible mode c match";
                                   }
+
+                                  if (do_debug || do_other_debug)
+                                      loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                             << other_utn << ": mode_a_checked " << mode_a_checked
+                                             << " mode_a_verified " << mode_a_verified
+                                             << " mode_c_checked " << mode_c_checked;
 
                                           // check positions
 
                                   //                tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
                                   //                    timestamp, max_time_diff_sensor);
+
                                   reconstruction::Measurement mm;
                                   bool ret;
-                                  double distance_m, bearing_rad;
+                                  double distance_m{0}, bearing_rad{0};
                                   dbContent::targetReport::PositionAccuracy tr_pos_acc;
                                   dbContent::targetReport::PositionAccuracy mm_pos_acc;
                                   EllipseDef acc_ell;
-                                  double est_std_dev;
-                                  double mahalanobis_dist;
+                                  double tr_est_std_dev{0};
+                                  double tgt_est_std_dev{0};
+                                  double mahalanobis_dist{0};
 
                                   ret = other.predict(mm, tr);
                                   assert (ret);
@@ -179,27 +233,45 @@ void ProbabilisticAssociator::associateNewData()
 
                                   tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
                                   estimateEllipse(tr_pos_acc, acc_ell);
-                                  est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+                                  tr_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+
+                                  if (do_debug || do_other_debug)
+                                      loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                             << other_utn << ": distance_m " << distance_m
+                                             << " tr_est_std_dev " << tr_est_std_dev;
 
                                   assert (mm.hasStdDevPosition());
                                   mm_pos_acc = mm.positionAccuracy();
                                   estimateEllipse(mm_pos_acc, acc_ell);
-                                  est_std_dev += estimateAccuracyAt(acc_ell, bearing_rad);
+                                  tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
-                                  mahalanobis_dist = distance_m / est_std_dev;
+                                  if (do_debug || do_other_debug)
+                                      loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                             << other_utn << ": distance_m " << distance_m
+                                             << " tgt_est_std_dev " << tgt_est_std_dev;
+
+                                  mahalanobis_dist = distance_m / (tr_est_std_dev + tgt_est_std_dev);
 
                                           //loginf << "UGA3 distance " << distance;
+
+                                  if (do_debug || do_other_debug)
+                                      loginf << "UGA tr " << rec_num << " utn " << utn << " other_utn "
+                                             << other_utn << ": distance_m " << distance_m
+                                             << " est_std_dev sum " << (tr_est_std_dev + tgt_est_std_dev)
+                                             << "mahalanobis_dist " << mahalanobis_dist;
 
                                   if (mode_a_verified)
                                   {
                                       if (mahalanobis_dist < max_mahalanobis_sec_verified_dist)
-                                          results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, mahalanobis_dist);
+                                          results[target_cnt] = tuple<bool, unsigned int, double>
+                                              (true, other.utn_, mahalanobis_dist);
                                   }
                                   else
                                   {
                                       {
                                           if (mahalanobis_dist < max_mahalanobis_sec_unknown_dist)
-                                              results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, mahalanobis_dist);
+                                              results[target_cnt] = tuple<bool, unsigned int, double>
+                                                  (true, other.utn_, mahalanobis_dist);
                                       }
                                   }
 
@@ -310,6 +382,8 @@ void ProbabilisticAssociator::associateNewData()
 void ProbabilisticAssociator::reset()
 {
     logdbg << "ProbabilisticAssociator: reset";
+
+
 }
 
 

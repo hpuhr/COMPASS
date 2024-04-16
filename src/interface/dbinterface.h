@@ -163,6 +163,8 @@ public:
     void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets);
     void saveTarget(const std::unique_ptr<dbContent::Target>& target);
 
+    void clearAssociations(const DBContent& dbcontent);
+
     void clearTableContent(const std::string& table_name);
 
     unsigned long getMaxRecordNumber(DBContent& object);

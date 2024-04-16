@@ -3,13 +3,9 @@
 #include "compass.h"
 #include "reconstructortaskdialog.h"
 #include "datasourcemanager.h"
-//#include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-//#include "jobmanager.h"
-//#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "viewmanager.h"
@@ -20,7 +16,7 @@
 #include "complexaccuracyestimator.h"
 #include "timeconv.h"
 #include "number.h"
-
+#include "dbinterface.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -128,12 +124,24 @@ void ReconstructorTask::run()
 
     progress_dialog_->show();
 
-    updateProgress("Initializing", false);
+    updateProgress("Deleting Previous References", false);
 
     deleteCalculatedReferences();
 
+    updateProgress("Deleting Previous Targets", false);
+
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
     cont_man.clearTargetsInfo();
+
+    updateProgress("Deleting Previous Associations", false);
+
+    for (auto& dbcont_it : cont_man)
+    {
+        if (dbcont_it.second->existsInDB())
+            COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
+    }
+
+    updateProgress("Initializing", false);
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
@@ -256,16 +264,20 @@ const std::set<unsigned int>& ReconstructorTask::debugUTNs() const
 
 void ReconstructorTask::debugUTNs(const std::set<unsigned int>& utns)
 {
+    loginf << "ReconstructorTask: debugRecNums: values '" << String::compress(utns, ',') << "'";
+
     debug_utns_ = utns;
 }
 
-std::set<unsigned long> ReconstructorTask::debugRecNums() const
+const std::set<unsigned long>& ReconstructorTask::debugRecNums() const
 {
     return debug_rec_nums_;
 }
 
 void ReconstructorTask::debugRecNums(const std::set<unsigned long>& rec_nums)
 {
+    loginf << "ReconstructorTask: debugRecNums: values '" << String::compress(rec_nums, ',') << "'";
+
     debug_rec_nums_ = rec_nums;
 }
 
