@@ -70,8 +70,11 @@ PDFGeneratorDialog& PDFGenerator::dialog()
 
         string current_filename = COMPASS::instance().lastDbFilename();
 
+        string sub_path = Files::getFilenameFromPath(current_filename);
+        std::replace(sub_path.begin(), sub_path.end(), ' ', '_'); // replace all 'x' to 'y'
+
         report_path_ = Files::getDirectoryFromPath(current_filename)+"/eval_report_"
-                    + Files::getFilenameFromPath(current_filename) + "/";
+                    + sub_path + "/";
         loginf << "PDFGenerator: dialog: report path '" << report_path_ << "'"
                << " filename '"  << report_filename_ << "'";
     }
@@ -221,8 +224,8 @@ void PDFGenerator::run ()
             if (eval_settings_.report_run_pdflatex_)
             {
                 std::string command_out;
-                std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
-                        +" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
+                std::string command = "cd \""+report_path_+"\" && pdflatex --interaction=nonstopmode \""+report_filename_
+                        +"\" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
 
                 loginf << "EvaluationResultsReportPDFGenerator: run: running pdflatex";
                 dialog_->setStatus("Running pdflatex");
@@ -231,7 +234,7 @@ void PDFGenerator::run ()
                 //while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-                logdbg << "EvaluationResultsReportPDFGenerator: run: cmd '" << command << "'";
+                loginf << "EvaluationResultsReportPDFGenerator: run: cmd '" << command << "'";
 
                 command_out = System::exec(command);
 
