@@ -102,7 +102,14 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     addHeader("Input Data Preprocessing");
 
     resample_systracks_box_ = new QCheckBox;
-    connect(resample_systracks_box_, &QCheckBox::toggled, [ = ] (bool ok) { settings->resample_systracks = ok; });
+    connect(resample_systracks_box_, &QCheckBox::toggled, 
+        [ = ] (bool ok) 
+        { 
+            settings->resample_systracks = ok; 
+
+            resample_systracks_dt_box_->setEnabled(ok);
+            resample_systracks_maxdt_box_->setEnabled(ok);
+        });
     layout->addRow("Resample SystemTracks", resample_systracks_box_);
 
     resample_systracks_dt_box_ = new QDoubleSpinBox;
@@ -126,7 +133,14 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     layout->addRow("Smooth Results", smooth_rts_box_);
 
     resample_result_box_ = new QCheckBox;
-    connect(resample_result_box_, &QCheckBox::toggled, [ = ] (bool ok) { settings->resample_result = ok; });
+    connect(resample_result_box_, &QCheckBox::toggled, 
+        [ = ] (bool ok) 
+        { 
+            settings->resample_result = ok; 
+
+            resample_dt_box_->setEnabled(ok);
+            resample_Q_std_box_->setEnabled(ok);
+        });
     layout->addRow("Resample Results", resample_result_box_);
 
     resample_dt_box_ = new QDoubleSpinBox;
