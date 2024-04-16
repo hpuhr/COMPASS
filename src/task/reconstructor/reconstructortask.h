@@ -76,6 +76,12 @@ class ReconstructorTask : public Task, public Configurable
 
     std::set<unsigned int> disabledDataSources() const;
 
+    const std::set<unsigned int>& debugUTNs() const;
+    void debugUTNs(const std::set<unsigned int>& utns);
+
+    std::set<unsigned long> debugRecNums() const;
+    void debugRecNums(const std::set<unsigned long>& rec_nums);
+
   protected:
     std::string current_reconstructor_str_;
 
@@ -96,6 +102,9 @@ class ReconstructorTask : public Task, public Configurable
     boost::posix_time::ptime run_start_time_;
 
     size_t current_slice_idx_ = 0;
+
+    std::set<unsigned int> debug_utns_;
+    std::set<unsigned long> debug_rec_nums_;
 
     virtual void checkSubConfigurables() override;
     void deleteCalculatedReferences();

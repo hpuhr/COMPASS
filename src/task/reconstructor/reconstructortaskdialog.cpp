@@ -5,7 +5,6 @@
 #include "probimmreconstructor.h"
 #include "probimmreconstructorwidget.h"
 
-
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -88,6 +87,8 @@ void ReconstructorTaskDialog::showCurrentReconstructorWidget()
     assert(idx >= 0);
 
     reconstructor_widget_stack_->setCurrentIndex(idx);
+
+    task_.currentReconstructor()->updateWidgets();
 }
 
 void ReconstructorTaskDialog::updateButtons()

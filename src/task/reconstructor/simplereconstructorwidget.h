@@ -5,8 +5,10 @@
 #include <memory>
 
 class SimpleReconstructor;
+class DataSourcesUseWidget;
 class SimpleReconstructorAssociationWidget;
 class SimpleReferenceCalculatorWidget;
+class ReconstructorTaskDebugWidget;
 
 class QLineEdit;
 class QCheckBox;
@@ -27,7 +29,9 @@ class SimpleReconstructorWidget : public QWidget
   private:
     SimpleReconstructor& reconstructor_;
 
+    std::unique_ptr<DataSourcesUseWidget> use_widget_;
     std::unique_ptr<SimpleReconstructorAssociationWidget> assoc_widget_;
     std::unique_ptr<SimpleReferenceCalculatorWidget>      calc_widget_;
+    std::unique_ptr<ReconstructorTaskDebugWidget> debug_widget_;
 };
 

@@ -5,7 +5,9 @@
 #include <memory>
 
 class ProbIMMReconstructor;
+class DataSourcesUseWidget;
 class SimpleReferenceCalculatorWidget;
+class ReconstructorTaskDebugWidget;
 
 class ProbIMMReconstructorWidget : public QWidget
 {
@@ -23,6 +25,8 @@ class ProbIMMReconstructorWidget : public QWidget
   private:
     ProbIMMReconstructor& reconstructor_;
 
+    std::unique_ptr<DataSourcesUseWidget> use_widget_;
     std::unique_ptr<SimpleReferenceCalculatorWidget> calc_widget_;
+    std::unique_ptr<ReconstructorTaskDebugWidget> debug_widget_;
 };
 

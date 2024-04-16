@@ -75,6 +75,8 @@ class ReconstructorBase : public Configurable
 
     const dbContent::TargetReportAccessor& accessor(dbContent::targetReport::ReconstructorInfo& tr) const;
 
+    virtual void updateWidgets() = 0;
+
     // output
     std::string ds_name_ {"CalcRef"};
     unsigned int ds_sac_ {255};
