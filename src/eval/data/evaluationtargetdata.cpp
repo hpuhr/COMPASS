@@ -38,6 +38,8 @@
 
 #include <Eigen/Core>
 
+#include <QString>
+
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
@@ -837,22 +839,52 @@ const std::map<std::string, double>& EvaluationTargetData::interestFactors() con
 std::string EvaluationTargetData::interestFactorsStr() const
 {
     std::string ret;
+    if (interest_factors_.empty())
+        return ret;
+
+    auto coloredText = [ & ] (const std::string& txt, const QColor& color)
+    {
+        return "<font color=\"" + color.name().toStdString() + "\">" + txt + "</font>";
+    };
+
+    auto factorColor = [ & ] (double factor)
+    {
+        if (factor < 0.01)
+            return EvaluationData::color_interest_low_;
+        else if (factor < 0.05)
+            return EvaluationData::color_interest_mid_;
+        
+        return EvaluationData::color_interest_high_;
+    };
+
+    auto generateRow = [ & ] (const std::string& interest, double factor, int prec, int spacing)
+    {
+        auto factor_color = factorColor(factor);
+        auto prec_str     = String::doubleToStringPrecision(factor, prec);
+
+        std::string ret;
+        ret += "<tr>";
+        ret += "<td align=\"left\">"  + coloredText(interest, factor_color) + "</td>";
+        ret += "<td>" + QString().fill(' ', spacing).toStdString() + "</td>";
+        ret += "<td align=\"right\">" + coloredText(prec_str, factor_color) + "</td>";
+        ret += "</tr>";
+
+        return ret;
+    };
 
     //<font color=\"#ff0000\">bar</font>
-    std::string color;
+
+    const int Precision = 3;
+    const int Spacing   = 4;
+
+    ret = "<html><body><table>";
 
     for (auto& fac_it : interest_factors_)
     {
-        if (fac_it.second < 0.01)
-            color = EvaluationData::color_interest_low_.name().toStdString();
-        else if (fac_it.second < 0.05)
-            color = EvaluationData::color_interest_mid_.name().toStdString();
-        else
-            color = EvaluationData::color_interest_high_.name().toStdString();
-
-        ret += "<font color=\"" + color +"\">" + fac_it.first + "\t"
-               + String::doubleToStringPrecision(fac_it.second, 3)+"</font><br>\n";
+        ret += generateRow(fac_it.first, fac_it.second, Precision, Spacing);
     }
+
+    ret += "</table></body></html>";
 
     return ret;
 }
