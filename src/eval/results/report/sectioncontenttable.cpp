@@ -55,6 +55,9 @@ SectionContentTable::SectionContentTable(const string& name, unsigned int num_co
     : SectionContent(name, parent_section, eval_man), num_columns_(num_columns), headings_(headings),
       sortable_(sortable), sort_column_(sort_column), order_(order)
 {
+    click_action_timer_.setSingleShot(true);
+    click_action_timer_.setInterval(200);
+    connect(&click_action_timer_, &QTimer::timeout, this, &SectionContentTable::performClickAction);
 }
 
 void SectionContentTable::addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
@@ -461,6 +464,11 @@ void SectionContentTable::createOnDemandIfNeeded()
     }
 }
 
+void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)
+{
+    clickedSlot(current);
+}
+
 void SectionContentTable::clickedSlot(const QModelIndex& index)
 {
     if (!index.isValid())
@@ -475,10 +483,22 @@ void SectionContentTable::clickedSlot(const QModelIndex& index)
     assert (source_index.row() >= 0);
     assert (source_index.row() < rows_.size());
 
-    unsigned int row_index = source_index.row();
+    last_clicked_row_index_ = source_index.row();
 
-    if (result_ptrs_.at(row_index)
-            && result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
+    //fire timer to perform delayed click action
+    click_action_timer_.start();
+}
+
+void SectionContentTable::performClickAction()
+{
+    //double click did not interrupt click action => perform
+    if (!last_clicked_row_index_.has_value())
+        return;
+
+    unsigned int row_index = last_clicked_row_index_.value();
+    last_clicked_row_index_.reset();
+
+    if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
     {
         loginf << "SectionContentTable: clickedSlot: index has associated viewable";
 
@@ -490,13 +510,11 @@ void SectionContentTable::clickedSlot(const QModelIndex& index)
     }
 }
 
-void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)
-{
-    clickedSlot(current);
-}
-
 void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
 {
+    //double click detected => interrupt any previously triggered click action
+    click_action_timer_.stop();
+
     if (!index.isValid())
     {
         loginf << "SectionContentTable: doubleClickedSlot: invalid index";

@@ -24,11 +24,14 @@
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 #include <QBrush>
+#include <QTimer>
 
 //#include "json.hpp"
 
 #include <vector>
 #include <functional>
+
+#include <boost/optional.hpp>
 
 class ViewableDataConfig;
 
@@ -171,10 +174,15 @@ protected:
 
     std::map<std::string, std::function<void()>> callback_map_;
 
+    QTimer click_action_timer_;
+    boost::optional<unsigned int> last_clicked_row_index_;
+
     bool canFetchMore(const QModelIndex &parent) const override;
     void fetchMore(const QModelIndex &parent) override;
 
     void createOnDemandIfNeeded();
+
+    void performClickAction();
 };
 
 }
