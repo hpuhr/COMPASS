@@ -534,6 +534,11 @@ string SQLGenerator::getSelectAllPropertiesStatement()
     return ss.str();
 }
 
+std::string SQLGenerator::getSetNullStatement (const std::string& table_name, const std::string& col_name)
+{
+    return "UPDATE "+ table_name +" SET " + col_name + " = NULL";
+}
+
 string SQLGenerator::getInsertViewPointStatement(const unsigned int id, const string& json)
 {
     stringstream ss;

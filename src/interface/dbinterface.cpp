@@ -1150,6 +1150,14 @@ void DBInterface::saveTarget(const std::unique_ptr<dbContent::Target>& target)
     db_connection_->executeSQL(str);
 }
 
+void DBInterface::clearAssociations(const DBContent& dbcontent)
+{
+    string str = sql_generator_.getSetNullStatement(dbcontent.dbTableName(),
+                                                    dbcontent.variable("UTN").dbColumnName());
+    // uses replace with utn as unique key
+    db_connection_->executeSQL(str);
+}
+
 
 void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buffer)
 {
