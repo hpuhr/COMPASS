@@ -836,6 +836,21 @@ const std::map<std::string, double>& EvaluationTargetData::interestFactors() con
     return interest_factors_;
 }
 
+QColor EvaluationTargetData::colorForInterestFactor(double factor)
+{
+    if (factor < 0.01)
+        return EvaluationData::color_interest_low_;
+    else if (factor < 0.05)
+        return EvaluationData::color_interest_mid_;
+    
+    return EvaluationData::color_interest_high_;
+}
+
+std::string EvaluationTargetData::stringForInterestFactor(const std::string& req_id, double factor)
+{
+    return req_id + " (" + String::doubleToStringPrecision(factor, InterestFactorPrecision) + ")";
+}
+
 std::string EvaluationTargetData::interestFactorsStr() const
 {
     std::string ret;
@@ -847,19 +862,9 @@ std::string EvaluationTargetData::interestFactorsStr() const
         return "<font color=\"" + color.name().toStdString() + "\">" + txt + "</font>";
     };
 
-    auto factorColor = [ & ] (double factor)
-    {
-        if (factor < 0.01)
-            return EvaluationData::color_interest_low_;
-        else if (factor < 0.05)
-            return EvaluationData::color_interest_mid_;
-        
-        return EvaluationData::color_interest_high_;
-    };
-
     auto generateRow = [ & ] (const std::string& interest, double factor, int prec, int spacing)
     {
-        auto factor_color = factorColor(factor);
+        auto factor_color = colorForInterestFactor(factor);
         auto prec_str     = String::doubleToStringPrecision(factor, prec);
 
         std::string ret;
@@ -874,14 +879,13 @@ std::string EvaluationTargetData::interestFactorsStr() const
 
     //<font color=\"#ff0000\">bar</font>
 
-    const int Precision = 3;
-    const int Spacing   = 4;
+    const int Spacing = 4;
 
     ret = "<html><body><table>";
 
     for (auto& fac_it : interest_factors_)
     {
-        ret += generateRow(fac_it.first, fac_it.second, Precision, Spacing);
+        ret += generateRow(fac_it.first, fac_it.second, InterestFactorPrecision, Spacing);
     }
 
     ret += "</table></body></html>";

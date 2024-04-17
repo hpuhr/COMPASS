@@ -111,9 +111,29 @@ void EvaluationResultsTabWidget::expand()
     tree_view_->expandToDepth(3);
 }
 
+namespace 
+{
+    void iterateTreeModel(const EvaluationResultsReport::TreeModel& model, const QModelIndex& index, const std::string& spacing)
+    {
+        std::cout << spacing << model.data(index, Qt::UserRole).toString().toStdString() << std::endl;
+
+        if (model.hasChildren(index))
+        {
+            int rc = model.rowCount(index);
+            int cc = model.columnCount(index);
+            for (int r = 0; r < rc; ++r)
+                for (int c = 0; c < cc; ++c)
+                    iterateTreeModel(model, model.index(r, c, index), spacing + "   ");
+        }
+    }
+}
+
 void EvaluationResultsTabWidget::selectId (const std::string& id)
 {
     loginf << "EvaluationResultsTabWidget: selectId: id '" << id << "'";
+
+    //const auto& model = eval_man_.resultsGenerator().resultsModel();
+    //iterateTreeModel(model, model.index(0, 0), "");
 
     QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(id);
 

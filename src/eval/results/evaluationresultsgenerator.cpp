@@ -461,7 +461,6 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
         }
     }
 
-
     // generate non-result details
     addNonResultsContent (root_item);
 

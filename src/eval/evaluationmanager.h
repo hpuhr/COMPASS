@@ -282,7 +282,7 @@ public:
             const std::string& req_grp_id, const std::string& result_id); // empty load
     std::unique_ptr<nlohmann::json::object_t> getViewableForEvaluation (
             unsigned int utn, const std::string& req_grp_id, const std::string& result_id); // with data
-    void showResultId (const std::string& id);
+    void showResultId (const std::string& id, bool select_tab = false);
 
     typedef std::map<std::string,
       std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
@@ -322,6 +322,9 @@ public:
     bool hasSelectedTestDataSources();
 
     const dbContent::DataSourceCompoundCoverage& tstSrcsCoverage() const;
+
+    static std::string createSectionIDForTarget(unsigned int utn);
+
 
 protected:
     virtual void checkSubConfigurables() override;
