@@ -34,10 +34,11 @@ class ProbabilisticAssociator
 //                                            const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     // tries to find existing utn for tracker update, -1 if failed
 
-    // tries to find existing utn for target report, -1 if failed
-//    int findUTNForTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
-//                               const std::vector<unsigned int>& utn_vec,
-//                               const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
+    // tries to find existing utn for target report, based on mode a/c and position, -1 if failed
+    int findUTNForTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
+                               const std::vector<unsigned int>& utn_vec,
+                               const std::set<unsigned long>& debug_rec_nums,
+                               const std::set<unsigned int>& debug_utns);
 
     void estimateEllipse(dbContent::targetReport::PositionAccuracy& acc, EllipseDef& def) const;
     double estimateAccuracyAt (EllipseDef& def, double bearing_rad) const;

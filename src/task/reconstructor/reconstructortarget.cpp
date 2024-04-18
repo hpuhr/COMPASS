@@ -875,7 +875,7 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
 }
 
 ComparisonResult ReconstructorTarget::compareModeACode (
-    dbContent::targetReport::ReconstructorInfo& tr, time_duration max_time_diff) const
+    const dbContent::targetReport::ReconstructorInfo& tr, time_duration max_time_diff) const
 {
     if (tr.mode_a_code_.has_value() && !tr.mode_a_code_->hasReliableValue()) // check if reliable value
         return ComparisonResult::UNKNOWN;
@@ -964,8 +964,9 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
     return std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>>(unknown, same, different);
 }
 
-ComparisonResult ReconstructorTarget::compareModeCCode (dbContent::targetReport::ReconstructorInfo& tr,
-                                                       time_duration max_time_diff, float max_alt_diff, bool debug) const
+ComparisonResult ReconstructorTarget::compareModeCCode (
+    const dbContent::targetReport::ReconstructorInfo& tr,
+    time_duration max_time_diff, float max_alt_diff, bool debug) const
 {
     if (tr.barometric_altitude_.has_value() && !tr.barometric_altitude_->hasReliableValue()) // check if reliable value
         return ComparisonResult::UNKNOWN;

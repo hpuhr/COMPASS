@@ -148,7 +148,7 @@ class ReconstructorTarget
         const ReconstructorTarget& other, boost::posix_time::time_duration max_time_diff) const;
     // unknown, same, different
     ComparisonResult compareModeACode (
-        dbContent::targetReport::ReconstructorInfo& tr, boost::posix_time::time_duration max_time_diff) const;
+        const dbContent::targetReport::ReconstructorInfo& tr, boost::posix_time::time_duration max_time_diff) const;
 
     std::tuple<std::vector<unsigned long>,
                std::vector<unsigned long>,
@@ -156,7 +156,7 @@ class ReconstructorTarget
         const ReconstructorTarget& other, const std::vector<unsigned long>& rec_nums,
         boost::posix_time::time_duration max_time_diff, float max_alt_diff, bool debug) const;
 
-    ComparisonResult compareModeCCode (dbContent::targetReport::ReconstructorInfo& tr,
+    ComparisonResult compareModeCCode (const dbContent::targetReport::ReconstructorInfo& tr,
                                    boost::posix_time::time_duration max_time_diff, float max_alt_diff,
                                    bool debug) const;
     // unknown, same, different timestamps from this
