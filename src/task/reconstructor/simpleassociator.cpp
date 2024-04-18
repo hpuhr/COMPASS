@@ -358,7 +358,7 @@ void SimpleAssociator::createNonTrackerUTNS()
 
                                           results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
-                                          if ((tr.acad_ && other.hasACAD())) // only try if not both mode s
+                                          if (tr.acad_ && other.hasACAD()) // only try if not both mode s
                                           {
                                               ++target_cnt;
                                               continue;

@@ -573,6 +573,7 @@ void ReconstructorBase::reset()
     target_reports_.clear();
     tr_timestamps_.clear();
     tr_ds_.clear();
+    targets_.clear();
 
     assert (acc_estimator_);
     acc_estimator_->init(this);

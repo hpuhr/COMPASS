@@ -6,6 +6,7 @@
 #include "timeconv.h"
 #include "util/tbbhack.h"
 #include "reconstructortask.h"
+#include "number.h"
 
 #include <Eigen/Dense>
 
@@ -39,15 +40,22 @@ void ProbabilisticAssociator::associateNewData()
         loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
 
     unsigned long rec_num;
+    unsigned int ds_id;
+    unsigned int dbcont_id;
     boost::posix_time::ptime timestamp;
     int utn;
+    boost::posix_time::ptime timestamp_prev;
 
     std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(reconstructor_.targets_);
     vector<tuple<bool, unsigned int, double>> results;
-    const boost::posix_time::time_duration max_time_diff = Time::partialSeconds(5);
-    const float max_altitude_diff = 300.0;
-    const float max_mahalanobis_sec_verified_dist = 5;
-    const float max_mahalanobis_sec_unknown_dist = 3;
+    const boost::posix_time::time_duration max_time_diff =
+        Time::partialSeconds(reconstructor_.settings().max_time_diff_);
+    const boost::posix_time::time_duration track_max_time_diff =
+        Time::partialSeconds(reconstructor_.settings().track_max_time_diff_);
+    const float max_altitude_diff = reconstructor_.settings().max_altitude_diff_;
+    const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
+    const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
+    const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
     //targetReport::Position ref_pos;
     //bool ok;
 
@@ -63,6 +71,7 @@ void ProbabilisticAssociator::associateNewData()
     for (auto& ts_it : reconstructor_.tr_timestamps_)
     {
         rec_num = ts_it.second;
+        dbcont_id = Number::recNumGetDBContId(rec_num);
 
         assert (reconstructor_.target_reports_.count(rec_num));
 
@@ -72,6 +81,8 @@ void ProbabilisticAssociator::associateNewData()
             loginf << "DBG tr " << rec_num;
 
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
+
+        ds_id = tr.ds_id_;
 
         if (!tr.in_current_slice_)
         {
@@ -83,8 +94,95 @@ void ProbabilisticAssociator::associateNewData()
 
         utn = -1; // not yet found
 
+            // try by track number
+        if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
+        {
+            // track number of cat062 and reftraj are reliable enough to do utn assoc based on them
+
+            // check if not already done by acad
+            // find utn
+
+            if (tr.acad_ && ta_2_utn.count(*tr.acad_)) // already exists based on acad
+            {
+                utn = ta_2_utn.at(*tr.acad_);
+
+                if (!tn2utn_[ds_id].count(*tr.track_number_))
+                    tn2utn_[ds_id][*tr.track_number_] =
+                        std::pair<unsigned int, boost::posix_time::ptime>(utn, timestamp);
+            }
+            else if (!tn2utn_[ds_id].count(*tr.track_number_))
+            {
+                // create new and add
+
+                if (reconstructor_.targets_.size())
+                    utn = reconstructor_.targets_.rbegin()->first + 1; // new utn
+                else
+                    utn = 0;
+
+                reconstructor_.targets_.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(utn),   // args for key
+                    std::forward_as_tuple(reconstructor_, utn, false));  // args for mapped value tmp_utn, false
+
+                        // add to lookup
+
+                tn2utn_[ds_id][*tr.track_number_] = std::pair<unsigned int, boost::posix_time::ptime>(utn, timestamp);
+
+                if (tr.acad_)
+                    ta_2_utn[*tr.acad_] = utn;
+
+                utn_vec.push_back(utn);
+            }
+            else // already exists
+            {
+                std::tie(utn, timestamp_prev) = tn2utn_.at(ds_id).at(*tr.track_number_);
+
+                if (timestamp - timestamp_prev > track_max_time_diff) // too old
+                {
+                    // create new and add
+
+                    if (reconstructor_.targets_.size())
+                        utn = reconstructor_.targets_.rbegin()->first + 1; // new utn
+                    else
+                        utn = 0;
+
+                    reconstructor_.targets_.emplace(
+                        std::piecewise_construct,
+                        std::forward_as_tuple(utn),   // args for key
+                        std::forward_as_tuple(reconstructor_, utn, false));  // args for mapped value tmp_utn, false
+
+                            // add to lookup
+
+                    tn2utn_[ds_id][*tr.track_number_] = std::pair<unsigned int, boost::posix_time::ptime>(utn, timestamp);
+
+                    if (tr.acad_)
+                        ta_2_utn[*tr.acad_] = utn;
+
+                    utn_vec.push_back(utn);
+                }
+                else // ok, just update and check acad lookup
+                {
+                    tn2utn_[ds_id][*tr.track_number_].second = timestamp;
+
+                    if (tr.acad_)
+                    {
+                        if (ta_2_utn.count(*tr.acad_))
+                        {
+                            if (utn != ta_2_utn.at(*tr.acad_))
+                            {
+                                logwrn << "ProbabilisticAssociator: associateNewData: acad issue, "
+                                       << String::hexStringFromInt(*tr.acad_, 6, '0')
+                                       << " found both in utn " << utn << " and lookup utn " << ta_2_utn.at(*tr.acad_);
+                                ta_2_utn.at(*tr.acad_) = utn;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
                 // try by mode-s address
-        if (tr.acad_)
+        if (utn == -1 && tr.acad_)
         {
             // find utn
 
@@ -95,9 +193,7 @@ void ProbabilisticAssociator::associateNewData()
             else // not yet existing, create & add target
             {
                 if (reconstructor_.targets_.size())
-                {
                     utn = reconstructor_.targets_.rbegin()->first + 1; // new utn
-                }
                 else
                     utn = 0;
 
@@ -248,6 +344,14 @@ void ProbabilisticAssociator::associateNewData()
                                   estimateEllipse(mm_pos_acc, acc_ell);
                                   tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
+                                  if (tgt_est_std_dev > max_tgt_est_std_dev)
+                                  {
+                                      if (do_debug || do_other_debug)
+                                          loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
+                                                 << other_utn << " tgt_est_std_dev hit maximum";
+                                      return;
+                                  }
+
                                   if (do_debug || do_other_debug)
                                       loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
                                              << other_utn << ": distance_m " << distance_m
@@ -386,7 +490,7 @@ void ProbabilisticAssociator::reset()
 {
     logdbg << "ProbabilisticAssociator: reset";
 
-
+    tn2utn_.clear();
 }
 
 
@@ -409,19 +513,175 @@ std::map<unsigned int, unsigned int> ProbabilisticAssociator::getTALookupMap (
         ta_2_utn[*target_it.second.acads_.begin()] = target_it.second.utn_;
     }
 
-    logdbg << "SimpleAssociator: getTALookupMap: done";
+    logdbg << "ProbabilisticAssociator: getTALookupMap: done";
 
     return ta_2_utn;
 }
 
+//int ProbabilisticAssociator::findContinuationUTNForTrackerUpdate (
+//    const targetReport::ReconstructorInfo& tr,
+//    const std::map<unsigned int, ReconstructorTarget>& targets)
+//// tries to find existing utn for tracker update, -1 if failed
+//{
+//    logdbg << "ProbabilisticAssociator: findContinuationUTNForTrackerUpdate";
+
+//    if (tr.acad_)
+//        return -1;
+
+//    const boost::posix_time::time_duration max_time_diff_tracker = Time::partialSeconds(15);
+//    const double max_altitude_diff_tracker = 300.0;
+//    //const double max_distance_acceptable_tracker = reconstructor_.settings_.cont_max_distance_acceptable_tracker_;
+
+//    unsigned int num_targets = targets.size();
+
+//    vector<tuple<bool, unsigned int, double>> results;
+//    // usable, other utn, distance
+//    results.resize(num_targets);
+
+//            //    for (auto& tgt_it : targets)
+//            //        loginf << "UGA " << tgt_it.first;
+
+//    tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
+//                      {
+//                         //loginf << "ProbabilisticAssociator: findContinuationUTNForTrackerUpdate: 1";
+//                          //                          assert (tracker_reconstructor_.targets_vec.at(cnt));
+//                          //                          unsigned int utn = tracker_reconstructor_.targets_vec.at(cnt)->utn_;
+//                          assert (targets.count(cnt));
+
+//                          const ReconstructorTarget& other = targets.at(cnt);
+
+//                                  //Transformation trafo;
+
+//                          results[cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
+
+//                          if (!other.numAssociated()) // check if target has associated target reports
+//                              return;
+
+//                          if (other.hasACAD()) // not for mode-s targets
+//                              return;
+
+//                          if (tr.timestamp_ <= other.timestamp_max_) // check if not recently updated
+//                              return;
+
+//                                  // tr.tod_ > other.tod_max_
+//                          if (tr.timestamp_ - other.timestamp_max_ > max_time_diff_tracker) // check if last updated longer ago than threshold
+//                              return;
+
+//                                  //loginf << "ProbabilisticAssociator: findContinuationUTNForTrackerUpdate: 2";
+
+//                          assert (reconstructor_.target_reports_.count(other.lastAssociated()));
+
+//                          const targetReport::ReconstructorInfo& other_last_tr =
+//                              reconstructor_.target_reports_.at(other.lastAssociated());
+
+//                          assert (other_last_tr.track_end_);
+
+//                          if (!*other_last_tr.track_end_) // check if other track was ended
+//                              return;
+
+//                          if (!other_last_tr.mode_a_code_ || !tr.mode_a_code_) // check mode a codes exist
+//                              return;
+
+//                          if (!other_last_tr.mode_a_code_->hasReliableValue() || !tr.mode_a_code_->hasReliableValue())
+//                              return;  // check reliable mode a codes exist
+
+//                          if (other_last_tr.mode_a_code_->code_ != tr.mode_a_code_->code_) // check mode-a
+//                              return;
+
+//                                  // mode a codes the same
+
+//                                  //loginf << "ProbabilisticAssociator: findContinuationUTNForTrackerUpdate: 3";
+
+//                          if (other_last_tr.barometric_altitude_ && tr.barometric_altitude_
+//                              && other_last_tr.barometric_altitude_->hasReliableValue()
+//                              && tr.barometric_altitude_ ->hasReliableValue()
+//                              && fabs(other_last_tr.barometric_altitude_->altitude_
+//                                      - tr.barometric_altitude_->altitude_) > max_altitude_diff_tracker)
+//                              return; // check mode c codes if existing
+
+//                          bool ok;
+//                          //double x_pos, y_pos;
+//                          double distance;
+
+//                          assert (tr.position_ && other_last_tr.position_);
+
+//                          //                          tie(ok, x_pos, y_pos) = trafo.distanceCart(
+//                          //                              other_last_tr.position_->latitude_, other_last_tr.position_->longitude_,
+//                          //                              tr.position_->latitude_, tr.position_->longitude_);
+
+//                          //                          if (!ok)
+//                          //                              return;
+
+//                          //                          distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+
+//                          distance = osgEarth::GeoMath::distance(
+//                              other_last_tr.position_->latitude_ * DEG2RAD,
+//                              other_last_tr.position_->longitude_  * DEG2RAD,
+//                              tr.position_->latitude_ * DEG2RAD, tr.position_->longitude_ * DEG2RAD);
+
+//                          if (distance > max_distance_acceptable_tracker)
+//                              return;
+
+//                                  //loginf << "ProbabilisticAssociator: findContinuationUTNForTrackerUpdate: 4";
+
+//                          results[cnt] = tuple<bool, unsigned int, double>(
+//                              true, other.utn_, distance);
+//                      });
+
+//    logdbg << "ProbabilisticAssociator: findContinuationUTNForTrackerUpdate: finding best matches";
+
+//            // find best match
+//    unsigned int num_matches = 0;
+
+//    bool usable;
+//    unsigned int other_utn;
+//    double distance;
+
+//    bool first = true;
+//    unsigned int best_other_utn;
+//    double best_distance;
+
+//    for (auto& res_it : results) // usable, other utn, distance
+//    {
+//        tie(usable, other_utn, distance) = res_it;
+
+//        if (!usable)
+//            continue;
+
+//        ++num_matches;
+
+//        if (first || distance < best_distance)
+//        {
+//            best_other_utn = other_utn;
+//            best_distance = distance;
+
+//            first = false;
+//        }
+//    }
+
+//    if (first)
+//        return -1;
+
+//    if (num_matches > 1)
+//    {
+//        logdbg << "ProbabilisticAssociator: findContinuationUTNForTrackerUpdate: " << num_matches << " found";
+//        return -1;
+//    }
+
+//    logdbg << "ProbabilisticAssociator: findContinuationUTNForTrackerUpdate: continuation match utn "
+//           << best_other_utn << " found, distance " << best_distance;
+
+//    return best_other_utn;
+//}
+
         // tries to find existing utn for target report, -1 if failed
-int ProbabilisticAssociator::findUTNForTargetReport (
-    const dbContent::targetReport::ReconstructorInfo& tr,
-    std::map<unsigned int, unsigned int> ta_2_utn,
-    const std::map<unsigned int, dbContent::ReconstructorTarget>& targets)
-{
-    return -1;
-}
+//int ProbabilisticAssociator::findUTNForTargetReport (
+//    const dbContent::targetReport::ReconstructorInfo& tr,
+//    const std::vector<unsigned int>& utn_vec,
+//    const std::map<unsigned int, dbContent::ReconstructorTarget>& targets)
+//{
+//    return -1;
+//}
 
 
 void ProbabilisticAssociator::estimateEllipse(dbContent::targetReport::PositionAccuracy& acc, EllipseDef& def) const

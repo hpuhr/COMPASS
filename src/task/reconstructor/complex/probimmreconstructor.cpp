@@ -23,6 +23,17 @@ ProbIMMReconstructor::ProbIMMReconstructor(
       , associatior_   (*this)
       , ref_calculator_(*this)
 {
+    registerParameter("max_time_diff", &settings_.max_time_diff_, settings_.max_time_diff_);
+    registerParameter("track_max_time_diff", &settings_.track_max_time_diff_, settings_.track_max_time_diff_);
+
+    registerParameter("max_altitude_diff", &settings_.max_altitude_diff_, settings_.max_altitude_diff_);
+
+    registerParameter("max_mahalanobis_sec_verified_dist", &settings_.max_mahalanobis_sec_verified_dist_,
+                      settings_.max_mahalanobis_sec_verified_dist_);
+    registerParameter("max_mahalanobis_sec_unknown_dist", &settings_.max_mahalanobis_sec_unknown_dist_,
+                      settings_.max_mahalanobis_sec_unknown_dist_);
+    registerParameter("max_tgt_est_std_dev", &settings_.max_tgt_est_std_dev_, settings_.max_tgt_est_std_dev_);
+
     ds_line_ = 1;
 }
 
