@@ -20,12 +20,17 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "evaluationmanager.h"
 
+#include "grid2d_defs.h"
+
 #include "eval/requirement/base/base.h"
 
 #include "sectorlayer.h"
 
 #include "view/points/viewpointgenerator.h"
 #include "view/points/viewpoint.h"
+
+#include "view/gridview/grid2d.h"
+#include "view/gridview/grid2dlayer.h"
 
 namespace EvaluationRequirementResult
 {
@@ -113,50 +118,18 @@ namespace
         auto lat_range = sector_layer.getMinMaxLatitude();
         auto lon_range = sector_layer.getMinMaxLongitude();
 
-        double lat_size = lat_range.second - lat_range.first;
-        double lon_size = lon_range.second - lon_range.first;
+        QRectF roi(lon_range.first, lat_range.first, lon_range.second - lon_range.first, lat_range.second - lat_range.first);
 
-        double lat_border = lat_size * border_factor * 0.5;
-        double lon_border = lon_size * border_factor * 0.5;
-
-        //std::cout << lat_range.first << "-" << lat_range.second << " / "
-        //          << lon_range.first << "-" << lon_range.second << std::endl;
-
-        lat_range.first  = std::max( -90.0, lat_range.first  - lat_border);
-        lat_range.second = std::min(  90.0, lat_range.second + lat_border);
-        lon_range.first  = std::max(-180.0, lon_range.first  - lon_border);
-        lon_range.second = std::min( 180.0, lon_range.second + lon_border);
-
-        //std::cout << lat_range.first << "-" << lat_range.second << " / "
-        //          << lon_range.first << "-" << lon_range.second << std::endl;
-
-        return QRectF(lon_range.first, 
-                      lat_range.first, 
-                      lon_range.second - lon_range.first,
-                      lat_range.second - lat_range.first);
+        return grid2d::GridResolution::addBorder(roi, border_factor, -180.0, 180.0, -90.0, 90.0);
     }
 }
 
-void Joined::createGrid(size_t num_cells_x, size_t num_cells_y)
+void Joined::createGrid(const grid2d::GridResolution& resolution)
 {
-    QRectF roi = gridBounds(sector_layer_, 0.05);
+    QRectF roi = gridBounds(sector_layer_, 0.01);
 
     grid_.reset(new Grid2D);
-    grid_->create(roi, num_cells_x, num_cells_y, "wgs84", true);
-}
-
-void Joined::createGrid(double cell_size_x, double cell_size_y)
-{
-    QRectF roi = gridBounds(sector_layer_, 0.05);
-
-    grid_.reset(new Grid2D);
-    grid_->create(roi, cell_size_x, cell_size_y, "wgs84", true);
-}
-
-bool Joined::addToGrid(double lon, double lat, double value)
-{
-    assert(grid_);
-    return grid_->addValue(lon, lat, value);
+    grid_->create(roi, resolution, "wgs84", true);
 }
 
 void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
@@ -167,8 +140,8 @@ void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
     loginf << "Joined: addGridToViewData: creating grid";
 
     //create the grid
-    createGrid((size_t)eval_man_.settings().grid_num_cells_x, 
-               (size_t)eval_man_.settings().grid_num_cells_y);
+    createGrid(grid2d::GridResolution().setCellCount(eval_man_.settings().grid_num_cells_x,
+                                                     eval_man_.settings().grid_num_cells_y));
 
     loginf << "Joined: addGridToViewData: creating grid layers";
 
@@ -196,10 +169,12 @@ void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
             single->addValuesToGrid(*grid_, l.first);
         }
 
+        assert(grid_->numOutOfRange() == 0);
+
         //obtain all layer values
         for (const auto& layer_def : l.second)
         {
-            std::string lname = l.first + (l.second.size() > 1 ? "_" + Grid2D::valueTypeToString(layer_def.value_type) : "");
+            std::string lname = l.first + (l.second.size() > 1 ? "_" + grid2d::valueTypeToString(layer_def.value_type) : "");
 
             //loginf << "Generating render layer " << lname;
 

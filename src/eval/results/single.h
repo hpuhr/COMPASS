@@ -43,7 +43,7 @@ class Single : public Base
 public:
     struct LayerDefinition
     {
-        Grid2D::ValueType    value_type;
+        grid2d::ValueType    value_type;
         Grid2DRenderSettings render_settings;
     };
 

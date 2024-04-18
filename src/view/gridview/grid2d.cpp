@@ -20,65 +20,24 @@
 
 #include <iostream>
 
-/**
-*/
-void Grid2D::Cell::reset()
-{
-    count = 0;
-}
-
-/**
-*/
-void Grid2D::CellStats::reset()
-{
-    value_min = std::numeric_limits<double>::max();
-    value_max = std::numeric_limits<double>::min();
-    mean      = 0.0;
-    mean2     = 0.0;
-}
-
 const double Grid2D::InvalidValue = std::numeric_limits<double>::max();
 
 /**
 */
 Grid2D::Grid2D()
 {
-    vtype_indices_.resize(NumValueTypes);
-    vtype_indices_[ ValueTypeCount  ] = IndexCount;
-    vtype_indices_[ ValueTypeMin    ] = IndexMin;
-    vtype_indices_[ ValueTypeMax    ] = IndexMax;
-    vtype_indices_[ ValueTypeMean   ] = IndexMean;
-    vtype_indices_[ ValueTypeVar    ] = IndexVar;
-    vtype_indices_[ ValueTypeStddev ] = IndexStddev;
+    vtype_indices_.resize(grid2d::NumValueTypes);
+    vtype_indices_[ grid2d::ValueTypeCount  ] = IndexCount;
+    vtype_indices_[ grid2d::ValueTypeMin    ] = IndexMin;
+    vtype_indices_[ grid2d::ValueTypeMax    ] = IndexMax;
+    vtype_indices_[ grid2d::ValueTypeMean   ] = IndexMean;
+    vtype_indices_[ grid2d::ValueTypeVar    ] = IndexVar;
+    vtype_indices_[ grid2d::ValueTypeStddev ] = IndexStddev;
 }
 
 /**
 */
-Grid2D::~Grid2D()
-{
-}
-
-/**
-*/
-std::string Grid2D::valueTypeToString(ValueType vtype)
-{
-    switch (vtype)
-    {
-        case ValueTypeCount:
-            return "count";
-        case ValueTypeMin:
-            return "min";
-        case ValueTypeMax:
-            return "max";
-        case ValueTypeMean:
-            return "mean";
-        case ValueTypeVar:
-            return "var";
-        case ValueTypeStddev:
-            return "stddev";
-    }
-    return "";
-}
+Grid2D::~Grid2D() = default;
 
 /**
 */
@@ -90,86 +49,35 @@ bool Grid2D::valid() const
 /**
 */
 bool Grid2D::create(const QRectF& roi,
-                    double cell_size_x,
-                    double cell_size_y,
+                    const grid2d::GridResolution& resolution,
                     const std::string& srs,
                     bool srs_is_north_up)
 {
     clear();
 
-    if (roi.isEmpty()               || 
-        !std::isfinite(cell_size_x) ||
-        !std::isfinite(cell_size_y) ||
-        cell_size_x < 1e-09         || 
-        cell_size_y < 1e-09)
+    if (roi.isEmpty() || !resolution.valid())
         return false;
 
-    cell_size_x_     = cell_size_x;
-    cell_size_y_     = cell_size_y;
-    cell_size_x_inv_ = 1.0 / cell_size_x;
-    cell_size_y_inv_ = 1.0 / cell_size_y;
-
-    //@TODO: upper cell limit?
-    n_cells_x_ = std::max((size_t)1, (size_t)std::ceil(roi.width()  / cell_size_x));
-    n_cells_y_ = std::max((size_t)1, (size_t)std::ceil(roi.height() / cell_size_y));
-    n_cells_   = n_cells_x_ * n_cells_y_;
-
-    double region_w = n_cells_x_ * cell_size_x;
-    double region_h = n_cells_y_ * cell_size_y;
-
-    x0_ = roi.center().x() - region_w / 2;
-    y0_ = roi.center().y() - region_h / 2;
-    x1_ = x0_ + region_w;
-    y1_ = y0_ + region_h;
-
-    layers_.resize(NumLayers, Eigen::MatrixXd(n_cells_y_, n_cells_x_));
-
-    ref_.set(srs, QRectF(x0_, y0_, x1_ - x0_, y1_ - y0_), n_cells_x_, n_cells_y_, srs_is_north_up);
-
-    reset();
-
-    return true;
-}
-
-/**
-*/
-bool Grid2D::create(const QRectF& roi,
-                    size_t num_cells_x,
-                    size_t num_cells_y,
-                    const std::string& srs,
-                    bool srs_is_north_up)
-{
-    clear();
-
-    if (roi.isEmpty()   || 
-        num_cells_x < 1 || 
-        num_cells_y < 1)
-        return false;
-
-    //@TODO: upper cell limit?
-
-    n_cells_x_ = num_cells_x;
-    n_cells_y_ = num_cells_y;
-    n_cells_   = n_cells_x_ * n_cells_y_;
-
-    cell_size_x_ = roi.width()  / n_cells_x_;
-    cell_size_y_ = roi.height() / n_cells_y_;
-
-    if (cell_size_x_ < 1e-09 || 
-        cell_size_y_ < 1e-09)
+    //compute needed resolution values and adjusted roi
+    QRectF roi_adj = resolution.resolution(n_cells_x_,
+                                           n_cells_y_,
+                                           cell_size_x_,
+                                           cell_size_y_,
+                                           roi);
+    if (roi_adj.isEmpty())
         return false;
 
     cell_size_x_inv_ = 1.0 / cell_size_x_;
     cell_size_y_inv_ = 1.0 / cell_size_y_;
-
-    x0_ = roi.left();
-    y0_ = roi.top();
-    x1_ = roi.right();
-    y1_ = roi.bottom();
+    n_cells_         = n_cells_x_ * n_cells_y_;
+    x0_              = roi_adj.left();
+    y0_              = roi_adj.top();
+    x1_              = roi_adj.right();
+    y1_              = roi_adj.bottom();
 
     layers_.resize(NumLayers, Eigen::MatrixXd(n_cells_y_, n_cells_x_));
 
-    ref_.set(srs, QRectF(x0_, y0_, x1_ - x0_, y1_ - y0_), n_cells_x_, n_cells_y_, srs_is_north_up);
+    ref_.set(srs, roi_adj, n_cells_x_, n_cells_y_, srs_is_north_up);
 
     reset();
 
@@ -399,7 +307,7 @@ bool Grid2D::setCount(double x, double y, size_t count)
 
 /**
 */
-Eigen::MatrixXd Grid2D::getValues(ValueType vtype) const
+Eigen::MatrixXd Grid2D::getValues(grid2d::ValueType vtype) const
 {
     ValueIndex vindex = vtype_indices_[ vtype ];
 
@@ -415,13 +323,13 @@ Eigen::MatrixXd Grid2D::getValues(ValueType vtype) const
         if(dcount[ i ] == 0)
             d[ i ] = InvalidValue;
     
-    if (vtype == ValueType::ValueTypeVar)
+    if (vtype == grid2d::ValueType::ValueTypeVar)
     {
         for (size_t i = 0; i < n; ++i)
             if (d[ i ] != InvalidValue)
                 d[ i ] /= dcount[ i ];
     }
-    else if (vtype == ValueType::ValueTypeStddev)
+    else if (vtype == grid2d::ValueType::ValueTypeStddev)
     {
         for (size_t i = 0; i < n; ++i)
             if (d[ i ] != InvalidValue)

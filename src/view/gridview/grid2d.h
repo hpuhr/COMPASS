@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include <rasterreference.h>
+#include "grid2d_defs.h"
+#include "rasterreference.h"
 
 #include <vector>
 #include <set>
@@ -35,52 +36,6 @@
 class Grid2D
 {
 public:
-    /**
-    */
-    struct Cell
-    {
-        void reset();
-
-        double value = 0.0;
-        size_t count;
-    };
-
-    /**
-    */
-    struct CellStats
-    {
-        void reset();
-
-        double value_min = std::numeric_limits<double>::max();
-        double value_max = std::numeric_limits<double>::min();
-        double mean      = 0.0;
-        double mean2     = 0.0;
-    };
-
-    enum ValueIndex
-    {
-        IndexValue    = 0,
-        IndexCount    = 0,
-        IndexMin      = 1,
-        IndexMax      = 2,
-        IndexMean     = 3,
-        IndexMean2    = 4,
-        IndexVar      = 4,
-        IndexStddev   = 4,
-        NumLayers     = 5
-    };
-
-    enum ValueType
-    {
-        ValueTypeCount = 0,
-        ValueTypeMin,
-        ValueTypeMax,
-        ValueTypeMean,
-        ValueTypeVar,
-        ValueTypeStddev,
-        NumValueTypes
-    };
-
     Grid2D();
     virtual ~Grid2D();
 
@@ -91,13 +46,7 @@ public:
     size_t numCells() const { return n_cells_; }
 
     bool create(const QRectF& roi,
-                double cell_size_x,
-                double cell_size_y,
-                const std::string& srs = "wgs84",
-                bool srs_is_north_up = true);
-    bool create(const QRectF& roi,
-                size_t num_cells_x,
-                size_t num_cells_y,
+                const grid2d::GridResolution& resolution,
                 const std::string& srs = "wgs84",
                 bool srs_is_north_up = true);
     void clear();
@@ -120,10 +69,12 @@ public:
     bool setValue(double x, double y, double v);
     bool setCount(double x, double y, size_t count);
 
-    Eigen::MatrixXd getValues(ValueType vtype) const;
+    Eigen::MatrixXd getValues(grid2d::ValueType vtype) const;
     const RasterReference& getReference() const;
 
-    static std::string valueTypeToString(ValueType vtype);
+    size_t numAdded() const { return num_added_; }
+    size_t numOutOfRange() const { return num_oor_; }
+    size_t numInf() const { return num_inf_; }
 
     static const double InvalidValue;
 
@@ -133,6 +84,19 @@ private:
         NoError = 0,
         Inf,
         OOR
+    };
+
+    enum ValueIndex
+    {
+        IndexValue    = 0,
+        IndexCount    = 0,
+        IndexMin      = 1,
+        IndexMax      = 2,
+        IndexMean     = 3,
+        IndexMean2    = 4,
+        IndexVar      = 4,
+        IndexStddev   = 4,
+        NumLayers     = 5
     };
 
     IndexError index(size_t& idx_x, size_t& idx_y, double x, double y) const;

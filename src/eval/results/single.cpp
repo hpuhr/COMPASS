@@ -512,7 +512,7 @@ void Single::addValuesToGridBinary(Grid2D& grid,
 Single::LayerDefinition Single::getGridLayerDefBinary() const
 {
     Single::LayerDefinition def;
-    def.value_type = Grid2D::ValueType::ValueTypeMax;
+    def.value_type = grid2d::ValueType::ValueTypeMax;
     def.render_settings.color_map.set(QColor(0, 255, 0), QColor(255, 0, 0), 1);
     def.render_settings.pixels_per_cell = eval_man_.settings().grid_pixels_per_cell;
     def.render_settings.min_value = 0.0;

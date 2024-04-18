@@ -15,12 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JOINEDEVALUATIONREQUIREMENTRESULT_H
-#define JOINEDEVALUATIONREQUIREMENTRESULT_H
+#pragma once
 
 #include "eval/results/base.h"
-#include "view/gridview/grid2d.h"
-#include "view/gridview/grid2dlayer.h"
+#include "view/gridview/grid2d_defs.h"
+
+class Grid2D;
 
 namespace EvaluationRequirementResult
 {
@@ -81,11 +81,8 @@ protected:
 
     void addAnnotationsFromSingles(nlohmann::json::object_t& viewable_ref);
 
-    void createGrid(size_t num_cells_x, size_t num_cells_y);
-    void createGrid(double cell_size_x, double cell_size_y);
-    bool addToGrid(double lon, double lat, double value);
+    void createGrid(const grid2d::GridResolution& resolution);
     void addGridToViewData(nlohmann::json::object_t& view_data);
 };
 
 }
-#endif // JOINEDEVALUATIONREQUIREMENTRESULT_H
