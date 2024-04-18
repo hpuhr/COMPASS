@@ -14,6 +14,15 @@ class ProbIMMReconstructorSettings
   public:
     ProbIMMReconstructorSettings() {};
 
+    float max_time_diff_ {5}; // sec
+    float track_max_time_diff_ {300.0}; // sec
+
+    float max_altitude_diff_ {300.0};
+
+    float max_mahalanobis_sec_verified_dist_ {10.0};
+    float max_mahalanobis_sec_unknown_dist_ {5.0};
+    float max_tgt_est_std_dev_  {2000.0};
+
     //ref calculation
     SimpleReferenceCalculator::Settings ref_calc_settings_;
 };

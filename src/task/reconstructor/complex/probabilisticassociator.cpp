@@ -48,12 +48,14 @@ void ProbabilisticAssociator::associateNewData()
 
     std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(reconstructor_.targets_);
     vector<tuple<bool, unsigned int, double>> results;
-    const boost::posix_time::time_duration max_time_diff = Time::partialSeconds(5);
-    const boost::posix_time::time_duration track_max_time_diff = Time::partialSeconds(300.0);
-    const float max_altitude_diff = 300.0;
-    const float max_mahalanobis_sec_verified_dist = 10;
-    const float max_mahalanobis_sec_unknown_dist = 5;
-    const float max_tgt_est_std_dev = 2000;
+    const boost::posix_time::time_duration max_time_diff =
+        Time::partialSeconds(reconstructor_.settings().max_time_diff_);
+    const boost::posix_time::time_duration track_max_time_diff =
+        Time::partialSeconds(reconstructor_.settings().track_max_time_diff_);
+    const float max_altitude_diff = reconstructor_.settings().max_altitude_diff_;
+    const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
+    const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
+    const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
     //targetReport::Position ref_pos;
     //bool ok;
 
