@@ -25,6 +25,7 @@
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "eval/results/report/sectioncontentfigure.h"
 #include "files.h"
 #include "logger.h"
 
@@ -128,7 +129,8 @@ namespace
     }
 }
 
-void EvaluationResultsTabWidget::selectId (const std::string& id)
+void EvaluationResultsTabWidget::selectId (const std::string& id, 
+                                           bool show_figure)
 {
     loginf << "EvaluationResultsTabWidget: selectId: id '" << id << "'";
 
@@ -150,7 +152,11 @@ void EvaluationResultsTabWidget::selectId (const std::string& id)
 
     tree_view_->selectionModel()->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     tree_view_->scrollTo(index);
+
     itemClickedSlot(index);
+
+    if (show_figure)
+        showFigure(index);
 }
 
 void EvaluationResultsTabWidget::reshowLastId ()
@@ -187,6 +193,30 @@ void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
     }
 
     updateBackButton();
+}
+
+void EvaluationResultsTabWidget::showFigure(const QModelIndex& index)
+{
+    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
+    assert (item);
+
+    loginf << "EvaluationResultsTabWidget: showFigure: name " << item->name() << " id " << item->id();
+
+    if (dynamic_cast<EvaluationResultsReport::RootItem*>(item))
+    {
+        return;
+    }
+    else if (dynamic_cast<EvaluationResultsReport::Section*>(item))
+    {
+        EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
+        assert (section);
+
+        loginf << "EvaluationResultsTabWidget: showFigure: section " << section->name();
+        
+        auto figures = section->getFigures();
+        if (!figures.empty())
+            figures[ 0 ]->viewSlot();
+    }
 }
 
 void EvaluationResultsTabWidget::stepBackSlot()

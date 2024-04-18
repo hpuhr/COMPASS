@@ -250,7 +250,7 @@ void EvaluationDataWidget::jumpToRequirement(const std::string& req_id, unsigned
 
     loginf << "EvaluationDataWidget: jumpToRequirement: utn id: " << utn_id;
 
-    eval_man_.widget()->showResultId(utn_id, true);
+    eval_man_.widget()->showResultId(utn_id, true, true);
 }
 
 void EvaluationDataWidget::showFullUTNSlot ()

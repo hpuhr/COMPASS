@@ -77,6 +77,7 @@ namespace EvaluationResultsReport
         void addFigure (const std::string& name, const string& caption,
                         std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc);
                         //std::unique_ptr<nlohmann::json::object_t> viewable_data);
+        std::vector<SectionContentFigure*> getFigures() const;
 
         unsigned int numSections(); // all sections contained
         void addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details,

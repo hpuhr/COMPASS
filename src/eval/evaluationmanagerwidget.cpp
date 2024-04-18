@@ -165,7 +165,9 @@ void EvaluationManagerWidget::expandResults()
     results_tab_widget_->expand();
 }
 
-void EvaluationManagerWidget::showResultId (const std::string& id, bool select_tab)
+void EvaluationManagerWidget::showResultId (const std::string& id, 
+                                            bool select_tab,
+                                            bool show_figure)
 {
     assert(tab_widget_);
     assert (results_tab_widget_);
@@ -173,7 +175,7 @@ void EvaluationManagerWidget::showResultId (const std::string& id, bool select_t
     if (select_tab) 
         tab_widget_->setCurrentWidget(results_tab_widget_.get());
 
-    results_tab_widget_->selectId(id);
+    results_tab_widget_->selectId(id, show_figure);
 }
 
 void EvaluationManagerWidget::reshowLastResultId()
