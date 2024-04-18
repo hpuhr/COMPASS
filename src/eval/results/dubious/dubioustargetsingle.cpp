@@ -29,6 +29,7 @@
 //#include "util/stringconv.h"
 #include "util/timeconv.h"
 //#include "util/number.h"
+#include "viewpoint.h"
 
 #include <cassert>
 #include <algorithm>
@@ -369,25 +370,25 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTarget::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        //        assert (numDetails() > 0);
-        //        const auto& detail = getDetail(0);
+        assert (numDetails() > 0);
+        const auto& detail = getDetail(0);
 
-        //        unsigned int per_detail_update_cnt = detail_update_cnt;
+        unsigned int per_detail_update_cnt = detail_update_cnt;
 
-        //        assert (per_detail_update_cnt < detail.numDetails());
+        assert (per_detail_update_cnt < detail.numDetails());
 
-        //        const auto& update_detail = detail.details().at(per_detail_update_cnt);
+        const auto& update_detail = detail.details().at(per_detail_update_cnt);
 
-        //        assert (update_detail.numPositions() >= 1);
+        assert (update_detail.numPositions() >= 1);
 
-        //        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
-        //        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
-        //        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
-        //        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
-        //        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
+        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
+        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-        //        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
-        //            (*viewable_ptr)[ViewPoint::VP_EVAL_KEY][ViewPoint::VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
+        //if (update_detail.comments().hasComments(DetailCommentGroupDubious))
+        //    (*viewable_ptr)[ViewPoint::VP_EVAL_KEY][ViewPoint::VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }

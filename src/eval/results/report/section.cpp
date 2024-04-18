@@ -205,6 +205,18 @@ namespace EvaluationResultsReport
         assert (hasFigure(name));
     }
 
+    std::vector<SectionContentFigure*> Section::getFigures() const
+    {
+        std::vector<SectionContentFigure*> figures;
+        for (auto& cont_it : content_)
+        {
+            auto f = dynamic_cast<SectionContentFigure*>(cont_it.get());
+            if (f)
+                figures.push_back(f);
+        }
+        return figures;
+    }
+
     unsigned int Section::numSections()
     {
         unsigned int num = 1; // me

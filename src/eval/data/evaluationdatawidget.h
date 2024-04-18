@@ -50,6 +50,8 @@ public:
     void resizeColumnsToContents();
 
 protected:
+    void jumpToRequirement(const std::string& req_id, unsigned int utn);
+
     EvaluationData& eval_data_;
     EvaluationManager& eval_man_;
 

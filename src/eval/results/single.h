@@ -92,7 +92,7 @@ public:
     unsigned int                utn_;    // used to generate result
     const EvaluationTargetData* target_; // used to generate result
 
-    bool result_usable_ {true}; // whether valid data exists, changed in subclass
+    bool result_usable_ {true}; // whether data valid for result computation exists, changed in subclass
 
     double interest_factor_ {0};
 

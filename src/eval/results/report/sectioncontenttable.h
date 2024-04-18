@@ -147,6 +147,8 @@ public:
 
     void setCreateOnDemand(std::function<void(void)> create_on_demand_fnc);
 
+    static const int DoubleClickCheckIntervalMSecs;
+
 protected:
     bool create_on_demand_ {false};
     std::function<void(void)> create_on_demand_fnc_;

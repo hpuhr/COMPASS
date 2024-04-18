@@ -51,10 +51,12 @@ public:
 
     void showResultWidget(QWidget* widget); // can be nullptr
 
-    void selectId (const std::string& id);
+    void selectId (const std::string& id, bool show_figure = false);
     void reshowLastId ();
 
     boost::optional<nlohmann::json> getTableData(const std::string& result_id, const std::string& table_id) const;
+
+    void showFigure(const QModelIndex& index);
 
 protected:
     EvaluationManager& eval_man_;

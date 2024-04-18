@@ -1838,12 +1838,14 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
 
-void EvaluationManager::showResultId (const std::string& id)
+void EvaluationManager::showResultId (const std::string& id, 
+                                      bool select_tab,
+                                      bool show_figure)
 {
     loginf << "EvaluationManager: showResultId: id '" << id << "'";
 
     assert (widget_);
-    widget_->showResultId(id);
+    widget_->showResultId(id, select_tab, show_figure);
 }
 
 EvaluationManager::ResultIterator EvaluationManager::begin()

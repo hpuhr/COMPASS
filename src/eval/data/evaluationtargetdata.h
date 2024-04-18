@@ -32,6 +32,8 @@
 
 #include <Eigen/Core>
 
+#include <QColor>
+
 class Buffer;
 class EvaluationData;
 class EvaluationManager;
@@ -162,14 +164,18 @@ public:
                             const dbContent::TargetReport::Chain::DataID& id) const;
 
     static const int InterpGroundBitMaxSeconds = 15;
+    static const int InterestFactorPrecision   = 3;
 
     // targets of interest
 
     void clearInterestFactors() const;
-    void addInterestFactor (const std::string& req_section_id, double factor) const;
+    void addInterestFactor (const std::string& req_id, double factor) const;
     const std::map<std::string, double>& interestFactors() const;
     std::string interestFactorsStr() const;
     double interestFactorsSum() const;
+
+    static QColor colorForInterestFactor(double factor);
+    static std::string stringForInterestFactor(const std::string& req_id, double factor);
 
 protected:
     void updateACIDs() const;

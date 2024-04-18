@@ -48,6 +48,8 @@ using namespace Utils;
 namespace EvaluationResultsReport
 {
 
+const int SectionContentTable::DoubleClickCheckIntervalMSecs = 300;
+
 SectionContentTable::SectionContentTable(const string& name, unsigned int num_columns,
                                          vector<string> headings, Section* parent_section,
                                          EvaluationManager& eval_man, bool sortable,
@@ -56,7 +58,7 @@ SectionContentTable::SectionContentTable(const string& name, unsigned int num_co
       sortable_(sortable), sort_column_(sort_column), order_(order)
 {
     click_action_timer_.setSingleShot(true);
-    click_action_timer_.setInterval(200);
+    click_action_timer_.setInterval(DoubleClickCheckIntervalMSecs);
     connect(&click_action_timer_, &QTimer::timeout, this, &SectionContentTable::performClickAction);
 }
 

@@ -20,12 +20,16 @@
 #include "evaluationmanager.h"
 #include "logger.h"
 
+#include "section_id.h"
+
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
 #include <QMenu>
 #include <QToolBar>
+#include <QWidgetAction>
+#include <QLabel>
 
 EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, EvaluationManager& eval_man)
     : QWidget(), eval_data_(eval_data), eval_man_(eval_man)
@@ -127,6 +131,61 @@ void EvaluationDataWidget::resizeColumnsToContents()
 //    dialog.show();
 //}
 
+class InterestFactorLabel : public QWidget
+{
+public:
+    /**
+    */
+    InterestFactorLabel(const std::string& req_id, 
+                        double interest_factor,
+                        QWidget* parent = nullptr)
+    :   QWidget(parent)
+    {
+        QHBoxLayout* layout = new QHBoxLayout;
+        setLayout(layout);
+
+        QColor      color = EvaluationTargetData::colorForInterestFactor (interest_factor);
+        std::string name  = EvaluationTargetData::stringForInterestFactor(req_id, interest_factor);
+
+        QLabel* label = new QLabel(QString::fromStdString(name));
+        layout->addWidget(label);
+
+        label->setStyleSheet("QLabel { color: " + color.name() + "; }");
+    }
+
+    /**
+    */
+    virtual ~InterestFactorLabel() = default;
+
+protected:
+    /**
+    */
+    void enterEvent(QEvent* event)
+    {
+        if (!inside_)
+        {
+            inside_ = true;
+            setBackgroundRole(QPalette::ColorRole::Highlight);
+            setAutoFillBackground(true);
+        }
+    }
+
+    /**
+    */
+    void leaveEvent(QEvent* event)
+    {
+        if (inside_)
+        {
+            inside_ = false;
+            setBackgroundRole(QPalette::ColorRole::Background);
+            setAutoFillBackground(false);
+        }
+    }
+
+private:
+    bool inside_ = false;
+};
+
 void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)
 {
     logdbg << "EvaluationDataWidget: customContextMenuSlot";
@@ -157,7 +216,41 @@ void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)
     action2->setData(utn);
     menu.addAction(action2);
 
+    //add interest values
+    if (!target.interestFactors().empty())
+    {
+        auto req_menu = menu.addMenu("Jump to Requirement");
+
+        const auto& interest_factors = target.interestFactors();
+
+        for (const auto& ifactor : interest_factors)
+        {
+            std::string req = ifactor.first;
+
+            QWidgetAction* waction = new QWidgetAction(this);
+            auto label = new InterestFactorLabel(ifactor.first, ifactor.second);
+            waction->setDefaultWidget(label);
+
+            req_menu->addAction(waction);
+
+            connect(waction, &QAction::triggered, [ this, req, utn ] () { this->jumpToRequirement(req, utn); });
+        }
+    }
+
     menu.exec(table_view_->viewport()->mapToGlobal(p));
+}
+
+void EvaluationDataWidget::jumpToRequirement(const std::string& req_id, unsigned int utn)
+{
+    std::string sum_id = EvaluationResultsReport::SectionID::prependReportResultID(req_id);
+
+    loginf << "EvaluationDataWidget: jumpToRequirement: sum id: " << sum_id;
+
+    std::string utn_id = EvaluationResultsReport::SectionID::sumResult2Target(sum_id, utn, eval_man_);
+
+    loginf << "EvaluationDataWidget: jumpToRequirement: utn id: " << utn_id;
+
+    eval_man_.widget()->showResultId(utn_id, true, true);
 }
 
 void EvaluationDataWidget::showFullUTNSlot ()
