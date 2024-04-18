@@ -129,7 +129,9 @@ void Joined::createGrid(const grid2d::GridResolution& resolution)
     QRectF roi = gridBounds(sector_layer_, 0.01);
 
     grid_.reset(new Grid2D);
-    grid_->create(roi, resolution, "wgs84", true);
+    bool grid_ok = grid_->create(roi, resolution, "wgs84", true);
+
+    assert(grid_ok);
 }
 
 void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
