@@ -131,60 +131,84 @@ void EvaluationDataWidget::resizeColumnsToContents()
 //    dialog.show();
 //}
 
-class InterestFactorLabel : public QWidget
+namespace
 {
-public:
     /**
     */
-    InterestFactorLabel(const std::string& req_id, 
-                        double interest_factor,
-                        QWidget* parent = nullptr)
-    :   QWidget(parent)
+    class InterestFactorLabel : public QWidget
     {
-        QHBoxLayout* layout = new QHBoxLayout;
-        setLayout(layout);
+    public:
+        /**
+        */
+        InterestFactorLabel(const std::string& req_id, 
+                            double interest_factor,
+                            QWidget* parent = nullptr)
+        :   QWidget(parent)
+        {
+            QHBoxLayout* layout = new QHBoxLayout;
+            setLayout(layout);
 
+            QColor      color = EvaluationTargetData::colorForInterestFactor (interest_factor);
+            std::string name  = EvaluationTargetData::stringForInterestFactor(req_id, interest_factor);
+
+            QLabel* label = new QLabel(QString::fromStdString(name));
+            layout->addWidget(label);
+
+            label->setStyleSheet("QLabel { color: " + color.name() + "; }");
+        }
+
+        /**
+        */
+        virtual ~InterestFactorLabel() = default;
+
+    protected:
+        /**
+        */
+        void enterEvent(QEvent* event)
+        {
+            if (!inside_)
+            {
+                inside_ = true;
+                setBackgroundRole(QPalette::ColorRole::Highlight);
+                setAutoFillBackground(true);
+            }
+        }
+
+        /**
+        */
+        void leaveEvent(QEvent* event)
+        {
+            if (inside_)
+            {
+                inside_ = false;
+                setBackgroundRole(QPalette::ColorRole::Background);
+                setAutoFillBackground(false);
+            }
+        }
+
+    private:
+        bool inside_ = false;
+    };
+
+    /**
+    */
+    static QAction* interestFactorAction(const std::string& req_id, 
+                                         double interest_factor)
+    {
         QColor      color = EvaluationTargetData::colorForInterestFactor (interest_factor);
         std::string name  = EvaluationTargetData::stringForInterestFactor(req_id, interest_factor);
 
-        QLabel* label = new QLabel(QString::fromStdString(name));
-        layout->addWidget(label);
+        QAction* action = new QAction(QString::fromStdString(name));
 
-        label->setStyleSheet("QLabel { color: " + color.name() + "; }");
+        QImage img(16, 16, QImage::Format_ARGB32);
+        img.fill(color);
+        QIcon icon = QIcon(QPixmap::fromImage(img));
+
+        action->setIcon(icon);
+
+        return action;
     }
-
-    /**
-    */
-    virtual ~InterestFactorLabel() = default;
-
-protected:
-    /**
-    */
-    void enterEvent(QEvent* event)
-    {
-        if (!inside_)
-        {
-            inside_ = true;
-            setBackgroundRole(QPalette::ColorRole::Highlight);
-            setAutoFillBackground(true);
-        }
-    }
-
-    /**
-    */
-    void leaveEvent(QEvent* event)
-    {
-        if (inside_)
-        {
-            inside_ = false;
-            setBackgroundRole(QPalette::ColorRole::Background);
-            setAutoFillBackground(false);
-        }
-    }
-
-private:
-    bool inside_ = false;
-};
+}
 
 void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)
 {
@@ -227,13 +251,19 @@ void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)
         {
             std::string req = ifactor.first;
 
+            QAction* action = nullptr;
+#if 1
+            action = interestFactorAction(ifactor.first, ifactor.second);
+
+#else
             QWidgetAction* waction = new QWidgetAction(this);
-            auto label = new InterestFactorLabel(ifactor.first, ifactor.second);
-            waction->setDefaultWidget(label);
+            waction->setDefaultWidget(new InterestFactorLabel(ifactor.first, ifactor.second));
 
-            req_menu->addAction(waction);
+            action = waction;  
+#endif
+            req_menu->addAction(action);
 
-            connect(waction, &QAction::triggered, [ this, req, utn ] () { this->jumpToRequirement(req, utn); });
+            connect(action, &QAction::triggered, [ this, req, utn ] () { this->jumpToRequirement(req, utn); });
         }
     }
 
