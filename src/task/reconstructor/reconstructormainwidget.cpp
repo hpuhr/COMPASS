@@ -8,6 +8,7 @@
 #include <QComboBox>
 #include <QSpinBox>
 #include <QLineEdit>
+#include <QCheckBox>
 
 /**
 */
@@ -90,6 +91,15 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
 
     layout->addRow("Slice Overlap Length", slice_overlap_box_);
 
+    addSection("");
+
+    delete_refs_box_ = new QCheckBox("Delete All Calculated Reference Trajectories");
+
+    connect(delete_refs_box_, &QCheckBox::toggled, 
+        [ = ] (bool ok) { this->reconstructor_.baseSettings().delete_all_calc_reftraj = ok; });
+
+    layout->addRow("", delete_refs_box_);
+
     updateValues();
 }
 
@@ -124,4 +134,7 @@ void ReconstructorMainWidget::updateValues()
 
     assert (slice_overlap_box_);
     slice_overlap_box_->setValue(settings.outdated_duration_in_minutes);
+
+    assert(delete_refs_box_);
+    delete_refs_box_->setChecked(settings.delete_all_calc_reftraj);
 }

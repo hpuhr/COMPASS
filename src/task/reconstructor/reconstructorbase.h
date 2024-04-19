@@ -71,6 +71,8 @@ public:
         // slicing
         unsigned int slice_duration_in_minutes    {10};
         unsigned int outdated_duration_in_minutes {2};
+
+        bool delete_all_calc_reftraj {false};
     };
 
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
