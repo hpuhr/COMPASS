@@ -43,6 +43,8 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 
     registerParameter("current_reconstructor_str", &current_reconstructor_str_, {});
 
+    registerParameter("delete_all_calc_reftraj", &delete_all_calc_reftraj_, true);
+
     if (!current_reconstructor_str_.size()
         || (current_reconstructor_str_ != ScoringUMReconstructorName
                                                && current_reconstructor_str_ != ProbImmReconstructorName))
@@ -466,9 +468,13 @@ void ReconstructorTask::deleteCalculatedReferences()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
-    dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-        currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_,
-        currentReconstructor()->ds_line_);
+    if (delete_all_calc_reftraj_)
+        dbcontent_man.dbContent("RefTraj").deleteDBContentData(
+            currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_);
+    else
+        dbcontent_man.dbContent("RefTraj").deleteDBContentData(
+            currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_,
+            currentReconstructor()->ds_line_);
 
     while (dbcontent_man.dbContent("RefTraj").isDeleting())
     {
