@@ -47,7 +47,11 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
     tree_view_->setRootIsDecorated(false);
     tree_view_->expandAll();
 
+    tree_view_->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
+    connect (tree_view_.get(), &QTreeView::customContextMenuRequested, this, &EvaluationStandardWidget::showContextMenu);
     connect (tree_view_.get(), &QTreeView::clicked, this, &EvaluationStandardWidget::itemClickedSlot);
+    connect (&standard_, &EvaluationStandard::selectionChanged, &standard_model_, &EvaluationStandardTreeModel::updateCheckStates);
 
     splitter_->addWidget(tree_view_.get());
     //req_layout->addWidget(tree_view_.get());
@@ -88,6 +92,34 @@ EvaluationStandardTreeModel& EvaluationStandardWidget::model()
     return standard_model_;
 }
 
+void EvaluationStandardWidget::showContextMenu(const QPoint& pos)
+{
+    assert(tree_view_);
+
+    QModelIndex index = tree_view_->indexAt(pos);
+    if (!index.isValid())
+        return;
+
+    EvaluationStandardTreeItem* item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
+    assert (item);
+
+    if (dynamic_cast<EvaluationStandard*>(item))
+    {
+        loginf << "EvaluationStandardWidget: showContextMenu: got standard";
+
+        EvaluationStandard* std = dynamic_cast<EvaluationStandard*>(item);
+        std->showMenu();
+
+    }
+    else if (dynamic_cast<Group*>(item))
+    {
+        loginf << "EvaluationStandardWidget: showContextMenu: got group";
+
+        Group* group = dynamic_cast<Group*>(item);
+        group->showMenu();
+    }
+}
+
 void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 {
     EvaluationStandardTreeItem* item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
@@ -97,22 +129,13 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got standard";
 
-        EvaluationStandard* std = dynamic_cast<EvaluationStandard*>(item);
-
         showRequirementWidget(nullptr);
-
-        std->showMenu();
-
     }
     else if (dynamic_cast<Group*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got group";
 
-        Group* group = dynamic_cast<Group*>(item);
-
         showRequirementWidget(nullptr);
-
-        group->showMenu();
     }
     else if (dynamic_cast<EvaluationRequirement::BaseConfig*>(item))
     {

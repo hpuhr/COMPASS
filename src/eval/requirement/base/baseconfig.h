@@ -53,6 +53,10 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
+    void use(bool ok) override;
+    bool used() const override;
+    bool checkable() const override;
+
     std::string name() const;
     void name(const std::string& name);
 
@@ -79,6 +83,7 @@ protected:
     EvaluationStandard& standard_;
     EvaluationManager& eval_man_;
 
+    bool        use_ = true;
     std::string name_;
     std::string short_name_;
     std::string comment_;

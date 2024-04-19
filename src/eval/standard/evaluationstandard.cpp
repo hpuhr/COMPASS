@@ -64,6 +64,7 @@ void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
     if (class_id.compare("EvaluationRequirementGroup") == 0)
     {
         Group* group = new Group(class_id, instance_id, *this, eval_man_);
+
         logdbg << "EvaluationStandard: generateSubConfigurable: adding group " << group->name();
 
         assert (!hasGroup(group->name()));
@@ -71,6 +72,7 @@ void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
         groups_.emplace_back(group);
 
         connect (group, &Group::configsChangedSignal, this, &EvaluationStandard::groupsChangedSlot);
+        connect (group, &Group::selectionChanged, this, &EvaluationStandard::selectionChanged);
     }
     else
         throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
@@ -275,8 +277,14 @@ void EvaluationStandard::addToReport (std::shared_ptr<EvaluationResultsReport::R
 
     for (auto& std_it : groups_)
     {
+        if (!std_it->used())
+            continue;
+
         for (auto& req_it : *std_it)
         {
+            if (!req_it->used())
+                continue;
+
             req_table.addRow({req_it->shortName().c_str(), req_it->name().c_str(), std_it->name().c_str(),
                               Group::requirement_type_mapping_.at(req_it->classId()).c_str()}, nullptr);
 

@@ -90,13 +90,16 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
         for (auto& req_group_it : standard)
         {
+            if (!req_group_it->used())
+                continue;
+
             const string& requirement_group_name = req_group_it->name();
 
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
-            num_req_evals += req_group_it->size() * data.size(); // num reqs * num target
-            num_req_evals += req_group_it->size(); // num reqs for sector sum
+            num_req_evals += req_group_it->numUsedRequirements() * data.size(); // num reqs * num target
+            num_req_evals += req_group_it->numUsedRequirements(); // num reqs for sector sum
         }
     }
 
@@ -143,6 +146,9 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
         for (auto& req_group_it : standard)
         {
+            if (!req_group_it->used())
+                continue;
+
             const string& requirement_group_name = req_group_it->name();
 
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
@@ -153,6 +159,9 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             for (auto& req_cfg_it : *req_group_it)
             {
+                if (!req_cfg_it->used())
+                    continue;
+
                 loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
                        << " group " << requirement_group_name
                        << " req '" << req_cfg_it->name() << "'";

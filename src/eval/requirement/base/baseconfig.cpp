@@ -69,6 +69,7 @@ BaseConfig::BaseConfig(
     : Configurable(class_id, instance_id, &group), EvaluationStandardTreeItem(&group),
       group_(group), standard_(standard), eval_man_(eval_man)
 {
+    registerParameter("use", &use_, true);
     registerParameter("name", &name_, std::string());
     registerParameter("short_name", &short_name_, std::string());
     registerParameter("comment", &comment_, std::string());
@@ -83,6 +84,20 @@ BaseConfig::~BaseConfig()
 {
 }
 
+void BaseConfig::use(bool ok)
+{
+    use_ = ok;
+}
+
+bool BaseConfig::used() const
+{
+    return use_;
+}
+
+bool BaseConfig::checkable() const
+{
+    return true;
+}
 
 void BaseConfig::generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id)

@@ -90,6 +90,7 @@ Group::Group(const std::string& class_id, const std::string& instance_id,
       eval_man_(eval_man)
 {
     registerParameter("name", &name_, std::string());
+    registerParameter("use", &use_, true);
 
     assert (name_.size());
 
@@ -98,6 +99,21 @@ Group::Group(const std::string& class_id, const std::string& instance_id,
 
 Group::~Group()
 {
+}
+
+void Group::use(bool ok)
+{
+    use_ = ok;
+}
+
+bool Group::used() const
+{
+    return use_;
+}
+
+bool Group::checkable() const
+{
+    return true;
 }
 
 void Group::generateSubConfigurable(const std::string& class_id,
@@ -598,6 +614,15 @@ void Group::showMenu ()
             }
         }
 
+        menu.addSeparator();
+
+        {
+            QAction* sel_action = menu.addAction("Select All");
+            connect(sel_action, &QAction::triggered, this, &Group::useAll);
+
+            QAction* unsel_action = menu.addAction("Deselect All");
+            connect(unsel_action, &QAction::triggered, this, &Group::useNone);
+        }
     }
 
     menu.exec(QCursor::pos());
@@ -702,7 +727,6 @@ void Group::deleteRequirementSlot()
       }
 }
 
-
 void Group::sortConfigs()
 {
     sort(configs_.begin(), configs_.end(),
@@ -710,4 +734,31 @@ void Group::sortConfigs()
     {
         return a->name() > b->name();
     });
+}
+
+unsigned int Group::numUsedRequirements() const
+{
+    unsigned int n = 0;
+
+    for (const auto& c : configs_)
+        if (c->used())
+            ++n;
+
+    return n;
+}
+
+void Group::useAll()
+{
+    for (auto& c : configs_)
+        c->use(true);
+
+    emit selectionChanged();
+}
+
+void Group::useNone()
+{
+    for (auto& c : configs_)
+        c->use(false);
+
+    emit selectionChanged();
 }
