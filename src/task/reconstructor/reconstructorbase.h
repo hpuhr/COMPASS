@@ -50,11 +50,36 @@ typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow
  */
 class ReconstructorBase : public Configurable
 {
-  public:
+public:
+    struct BaseSettings
+    {
+        boost::posix_time::time_duration sliceDuration() const
+        {
+            return boost::posix_time::minutes(slice_duration_in_minutes);
+        }
+        boost::posix_time::time_duration outdatedDuration() const
+        {
+            return boost::posix_time::minutes(outdated_duration_in_minutes);
+        }
+
+        // output
+        std::string  ds_name {"CalcRef"};
+        unsigned int ds_sac  {255};
+        unsigned int ds_sic  {1};
+        unsigned int ds_line {0};
+
+        // slicing
+        unsigned int slice_duration_in_minutes    {10};
+        unsigned int outdated_duration_in_minutes {2};
+    };
+
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
 
-    ReconstructorBase(const std::string& class_id, const std::string& instance_id,
-                      ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator);
+    ReconstructorBase(const std::string& class_id, 
+                      const std::string& instance_id,
+                      ReconstructorTask& task, 
+                      std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator,
+                      unsigned int default_line_id = 0);
     virtual ~ReconstructorBase();
 
     bool hasNextTimeSlice();
@@ -68,6 +93,9 @@ class ReconstructorBase : public Configurable
 
     virtual void reset();
 
+    BaseSettings& baseSettings() { return base_settings_; }
+    const BaseSettings& baseSettings() const { return base_settings_; }
+
     ReferenceCalculatorSettings& referenceCalculatorSettings() { return ref_calc_settings_; }
     const ReferenceCalculatorSettings& referenceCalculatorSettings() const { return ref_calc_settings_; }
 
@@ -77,15 +105,9 @@ class ReconstructorBase : public Configurable
 
     virtual void updateWidgets() = 0;
 
-    // output
-    std::string ds_name_ {"CalcRef"};
-    unsigned int ds_sac_ {255};
-    unsigned int ds_sic_ {1};
-    unsigned int ds_line_ {0};
-
     ReconstructorTask& task() const;
 
-  protected:
+protected:
     friend class dbContent::ReconstructorTarget;
     friend class SimpleReferenceCalculator;
     friend class ComplexAccuracyEstimator;
@@ -113,9 +135,6 @@ class ReconstructorBase : public Configurable
     boost::posix_time::ptime remove_before_time_;
     boost::posix_time::ptime write_before_time_;
 
-    const boost::posix_time::time_duration slice_duration_ {0, 10, 0}; // 1 hour
-    const boost::posix_time::time_duration outdated_duration_ {0, 2, 0}; // 5 minutes
-
     std::map<unsigned long, dbContent::targetReport::ReconstructorInfo> target_reports_;
     // all sources, record_num -> base info
     std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
@@ -124,6 +143,8 @@ class ReconstructorBase : public Configurable
     // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
 
     std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> tgt
+
+    BaseSettings base_settings_;
 
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual bool processSlice_impl() = 0;
@@ -136,6 +157,6 @@ class ReconstructorBase : public Configurable
     void saveReferences();
     void saveTargets();
 
-  private:
+private:
     ReferenceCalculatorSettings ref_calc_settings_;
 };

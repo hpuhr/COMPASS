@@ -34,11 +34,21 @@ using namespace Utils;
 
 /**
  */
-ReconstructorBase::ReconstructorBase(const std::string& class_id, const std::string& instance_id,
-                                     ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
+ReconstructorBase::ReconstructorBase(const std::string& class_id, 
+                                     const std::string& instance_id,
+                                     ReconstructorTask& task, 
+                                     std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator,
+                                     unsigned int default_line_id)
     : Configurable (class_id, instance_id, &task), task_(task), acc_estimator_(std::move(acc_estimator))
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
+
+    //base settings
+    {
+        registerParameter("ds_line", &base_settings_.ds_line, default_line_id);
+        registerParameter("slice_duration_in_minutes", &base_settings_.slice_duration_in_minutes, BaseSettings().slice_duration_in_minutes);
+        registerParameter("outdated_duration_in_minutes", &base_settings_.outdated_duration_in_minutes, BaseSettings().outdated_duration_in_minutes);
+    }
 
     //reference computation
     {
@@ -102,7 +112,7 @@ int ReconstructorBase::numSlices() const
         return -1;
 
     return (int)std::ceil(Utils::Time::partialSeconds(timestamp_max_ - timestamp_min_)
-                          / Utils::Time::partialSeconds(slice_duration_));
+                          / Utils::Time::partialSeconds(base_settings_.sliceDuration()));
 }
 
 TimeWindow ReconstructorBase::getNextTimeSlice()
@@ -116,7 +126,7 @@ TimeWindow ReconstructorBase::getNextTimeSlice()
 
     assert (current_slice_begin_ <= timestamp_max_);
 
-    boost::posix_time::ptime current_slice_end = current_slice_begin_ + slice_duration_;
+    boost::posix_time::ptime current_slice_end = current_slice_begin_ + base_settings_.sliceDuration();
 
     TimeWindow window {current_slice_begin_, current_slice_end};
 
@@ -125,8 +135,8 @@ TimeWindow ReconstructorBase::getNextTimeSlice()
 
     first_slice_ = current_slice_begin_ == timestamp_min_;
 
-    remove_before_time_ = current_slice_begin_ - outdated_duration_;
-    write_before_time_ = current_slice_end - outdated_duration_;
+    remove_before_time_ = current_slice_begin_ - base_settings_.outdatedDuration();
+    write_before_time_ = current_slice_end - base_settings_.outdatedDuration();
 
     next_slice_begin_ = current_slice_end; // for next iteration
 
@@ -433,7 +443,7 @@ void ReconstructorBase::saveReferences()
 
         DataSourceManager& src_man = COMPASS::instance().dataSourceManager();
 
-        unsigned int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+        unsigned int ds_id = Number::dsIdFrom(base_settings_.ds_sac, base_settings_.ds_sic);
 
         if (!src_man.hasConfigDataSource(ds_id))
         {
@@ -445,7 +455,7 @@ void ReconstructorBase::saveReferences()
 
         dbContent::ConfigurationDataSource& src = src_man.configDataSource(ds_id);
 
-        src.name(ds_name_);
+        src.name(base_settings_.ds_name);
         src.dsType("RefTraj"); // same as dstype
 
         cont_man.insertData({{buffer->dbContentName(), buffer}});

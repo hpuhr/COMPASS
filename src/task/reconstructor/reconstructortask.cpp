@@ -247,8 +247,8 @@ std::set<unsigned int> ReconstructorTask::disabledDataSources() const
 {
     std::set<unsigned int> disabled_ds;
 
-    disabled_ds.insert(Number::dsIdFrom(currentReconstructor()->ds_sac_,
-                                        currentReconstructor()->ds_sic_));
+    disabled_ds.insert(Number::dsIdFrom(currentReconstructor()->baseSettings().ds_sac,
+                                        currentReconstructor()->baseSettings().ds_sic));
 
     for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
     {
@@ -470,11 +470,11 @@ void ReconstructorTask::deleteCalculatedReferences()
 
     if (delete_all_calc_reftraj_)
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-            currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_);
+            currentReconstructor()->baseSettings().ds_sac, currentReconstructor()->baseSettings().ds_sic);
     else
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-            currentReconstructor()->ds_sac_, currentReconstructor()->ds_sic_,
-            currentReconstructor()->ds_line_);
+            currentReconstructor()->baseSettings().ds_sac, currentReconstructor()->baseSettings().ds_sic,
+            currentReconstructor()->baseSettings().ds_line);
 
     while (dbcontent_man.dbContent("RefTraj").isDeleting())
     {
@@ -484,8 +484,8 @@ void ReconstructorTask::deleteCalculatedReferences()
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    unsigned int ds_id = Number::dsIdFrom(currentReconstructor()->ds_sac_,
-                                          currentReconstructor()->ds_sic_);
+    unsigned int ds_id = Number::dsIdFrom(currentReconstructor()->baseSettings().ds_sac,
+                                          currentReconstructor()->baseSettings().ds_sic);
 
             // clear counts
     if (ds_man.hasDBDataSource(ds_id))
@@ -495,7 +495,7 @@ void ReconstructorTask::deleteCalculatedReferences()
         if (delete_all_calc_reftraj_)
             ds.clearNumInserted("RefTraj");
         else
-            ds.clearNumInserted("RefTraj", currentReconstructor()->ds_line_);
+            ds.clearNumInserted("RefTraj", currentReconstructor()->baseSettings().ds_line);
     }
 }
 

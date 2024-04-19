@@ -36,7 +36,6 @@ ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& ta
 
 ReconstructorTaskDebugWidget::~ReconstructorTaskDebugWidget()
 {
-
 }
 
 void ReconstructorTaskDebugWidget::updateValues()
@@ -49,7 +48,6 @@ void ReconstructorTaskDebugWidget::updateValues()
     assert (rec_nums_edit_);
     rec_nums_edit_->setText(String::compress(task_.debugRecNums(), ',').c_str());
 }
-
 
 void ReconstructorTaskDebugWidget::utnsChangedSlot(const QString& value)
 {

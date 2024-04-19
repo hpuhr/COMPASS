@@ -1,5 +1,8 @@
+
 #include "simplereconstructorwidget.h"
+
 #include "simplereconstructor.h"
+#include "reconstructormainwidget.h"
 #include "simplereconstructorassociationwidget.h"
 #include "simplereferencecalculatorwidget.h"
 #include "datasourcesusewidget.h"
@@ -23,6 +26,10 @@ SimpleReconstructorWidget::SimpleReconstructorWidget(SimpleReconstructor& recons
     QVBoxLayout* main_layout = new QVBoxLayout();
 
     QTabWidget* tab_widget = new QTabWidget();
+
+    // main widget
+    main_widget_.reset(new ReconstructorMainWidget(reconstructor, tab_widget));
+    tab_widget->addTab(main_widget_.get(), "Main");
 
     // use ds widget
 

@@ -1,6 +1,7 @@
 #include "probimmreconstructorwidget.h"
 
 #include "probimmreconstructor.h"
+#include "reconstructormainwidget.h"
 #include "datasourcesusewidget.h"
 #include "reconstructortask.h"
 #include "simplereferencecalculatorwidget.h"
@@ -25,7 +26,11 @@ ProbIMMReconstructorWidget::ProbIMMReconstructorWidget(ProbIMMReconstructor& rec
 
     QTabWidget* tab_widget = new QTabWidget();
 
-            // use ds widget
+    // main widget
+    main_widget_.reset(new ReconstructorMainWidget(reconstructor, tab_widget));
+    tab_widget->addTab(main_widget_.get(), "Main");
+
+    // use ds widget
 
     std::function<bool(const std::string&)> get_use_dstype_func =
         [this] (const std::string& ds_type) { return reconstructor_.task().useDStype(ds_type); };

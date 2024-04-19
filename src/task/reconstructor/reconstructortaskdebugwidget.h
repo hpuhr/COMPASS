@@ -1,5 +1,7 @@
 #pragma once
 
+#pragma once
+
 #include <QWidget>
 
 class ReconstructorTask;
@@ -9,11 +11,9 @@ class QLineEdit;
 class ReconstructorTaskDebugWidget : public QWidget
 {
     Q_OBJECT
-
   signals:
 
   public slots:
-
     void utnsChangedSlot(const QString& value);
     void recNumsChangedSlot(const QString& value);
 
@@ -28,6 +28,4 @@ class ReconstructorTaskDebugWidget : public QWidget
 
     QLineEdit* utns_edit_{nullptr};
     QLineEdit* rec_nums_edit_{nullptr};
-
 };
-

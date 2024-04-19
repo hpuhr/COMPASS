@@ -13,9 +13,11 @@
 using namespace std;
 using namespace Utils;
 
-SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std::string& instance_id,
-                                         ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
-    : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator))
+SimpleReconstructor::SimpleReconstructor(const std::string& class_id, 
+                                         const std::string& instance_id,
+                                         ReconstructorTask& task, 
+                                         std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
+    : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator), 0)
     , associatior_   (*this)
     , ref_calculator_(*this)
 {
@@ -48,8 +50,6 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id, const std:
 
         // target id? kb: nope
         // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
-
-        ds_line_ = 0;
     }
 }
 
@@ -168,7 +168,7 @@ void SimpleReconstructor::updateWidgets()
 bool SimpleReconstructor::processSlice_impl()
 {
     loginf << "SimpleReconstructor: processSlice_impl: current_slice_begin " << Time::toString(current_slice_begin_)
-           << " end " << Time::toString(current_slice_begin_ + slice_duration_)
+           << " end " << Time::toString(current_slice_begin_ + baseSettings().sliceDuration())
            << " has next " << hasNextTimeSlice();
 
             // remove_before_time_, new data >= current_slice_begin_

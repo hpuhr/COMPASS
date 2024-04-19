@@ -16,10 +16,11 @@
 using namespace std;
 using namespace Utils;
 
-ProbIMMReconstructor::ProbIMMReconstructor(
-    const std::string& class_id, const std::string& instance_id,
-    ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
-    : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator))
+ProbIMMReconstructor::ProbIMMReconstructor(const std::string& class_id, 
+                                           const std::string& instance_id,
+                                           ReconstructorTask& task, 
+                                           std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
+    : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator), 1)
       , associatior_   (*this)
       , ref_calculator_(*this)
 {
@@ -33,8 +34,6 @@ ProbIMMReconstructor::ProbIMMReconstructor(
     registerParameter("max_mahalanobis_sec_unknown_dist", &settings_.max_mahalanobis_sec_unknown_dist_,
                       settings_.max_mahalanobis_sec_unknown_dist_);
     registerParameter("max_tgt_est_std_dev", &settings_.max_tgt_est_std_dev_, settings_.max_tgt_est_std_dev_);
-
-    ds_line_ = 1;
 }
 
 ProbIMMReconstructor::~ProbIMMReconstructor() {}
@@ -149,7 +148,7 @@ void ProbIMMReconstructor::updateWidgets()
 bool ProbIMMReconstructor::processSlice_impl()
 {
     loginf << "ProbIMMReconstructor: processSlice_impl: current_slice_begin " << Time::toString(current_slice_begin_)
-           << " end " << Time::toString(current_slice_begin_ + slice_duration_)
+           << " end " << Time::toString(current_slice_begin_ + baseSettings().sliceDuration())
            << " has next " << hasNextTimeSlice();
 
             // remove_before_time_, new data >= current_slice_begin_

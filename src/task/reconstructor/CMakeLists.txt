@@ -20,6 +20,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/simpleaccuracyestimator.h"
         "${CMAKE_CURRENT_LIST_DIR}/accuracyestimatorbase.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskdebugwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructormainwidget.h"
 
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortask.cpp"
@@ -35,4 +36,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/simpleaccuracyestimator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/accuracyestimatorbase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskdebugwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructormainwidget.cpp"
 )
