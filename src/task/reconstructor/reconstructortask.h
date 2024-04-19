@@ -89,8 +89,6 @@ class ReconstructorTask : public Task, public Configurable
     nlohmann::json use_data_sources_; // ds_id -> bool
     nlohmann::json use_data_sources_lines_; // ds_id -> line_id -> bool
 
-    bool delete_all_calc_reftraj_ {true};
-
     std::unique_ptr<ReconstructorTaskDialog> dialog_;
 
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;

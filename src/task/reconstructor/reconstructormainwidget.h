@@ -9,6 +9,7 @@ class ReconstructorBase;
 class QComboBox;
 class QSpinBox;
 class QLineEdit;
+class QCheckBox;
 
 /**
 */
@@ -27,6 +28,9 @@ protected:
     QSpinBox*  ds_sac_box_        = nullptr;
     QSpinBox*  ds_sic_box_        = nullptr;
     QComboBox* ds_line_combo_     = nullptr;
+
     QSpinBox*  slice_length_box_  = nullptr;
     QSpinBox*  slice_overlap_box_ = nullptr;
+
+    QCheckBox* delete_refs_box_   = nullptr;
 };

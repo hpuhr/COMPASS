@@ -46,8 +46,11 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
     //base settings
     {
         registerParameter("ds_line", &base_settings_.ds_line, default_line_id);
+
         registerParameter("slice_duration_in_minutes", &base_settings_.slice_duration_in_minutes, BaseSettings().slice_duration_in_minutes);
         registerParameter("outdated_duration_in_minutes", &base_settings_.outdated_duration_in_minutes, BaseSettings().outdated_duration_in_minutes);
+
+        registerParameter("delete_all_calc_reftraj", &base_settings_.delete_all_calc_reftraj, BaseSettings().delete_all_calc_reftraj);
     }
 
     //reference computation
