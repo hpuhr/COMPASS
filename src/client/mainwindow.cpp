@@ -420,15 +420,15 @@ void MainWindow::createMenus ()
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
-    QAction* assoc_action = new QAction("(Old) Calculate Unique Targets");
-    assoc_action->setToolTip("Create Unique Targets based on all DB Content");
-    connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsOldSlot);
-    process_menu_->addAction(assoc_action);
+//    QAction* assoc_action = new QAction("(Old) Calculate Unique Targets");
+//    assoc_action->setToolTip("Create Unique Targets based on all DB Content");
+//    connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsOldSlot);
+//    process_menu_->addAction(assoc_action);
 
-    calculate_references_action_ = new QAction("(Old) Calculate References ");
-    calculate_references_action_->setToolTip("Calculate References from System Tracker and ADS-B data");
-    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesOldSlot);
-    process_menu_->addAction(calculate_references_action_);
+//    calculate_references_action_ = new QAction("(Old) Calculate References ");
+//    calculate_references_action_->setToolTip("Calculate References from System Tracker and ADS-B data");
+//    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesOldSlot);
+//    process_menu_->addAction(calculate_references_action_);
 
     QAction* assoc_artas_action = new QAction("Calculate ARTAS Target Report Usage");
     assoc_artas_action->setToolTip("Create target report usage based on ARTAS TRI information");
@@ -513,8 +513,8 @@ void MainWindow::updateMenus()
     process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
                                || in_live);
 
-    assert (calculate_references_action_);
-    calculate_references_action_->setEnabled(COMPASS::instance().dbContentManager().hasAssociations());
+//    assert (calculate_references_action_);
+//    calculate_references_action_->setEnabled(COMPASS::instance().dbContentManager().hasAssociations());
 
     assert (config_menu_);
     config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
@@ -934,12 +934,12 @@ void MainWindow::calculateAssociationsARTASSlot()
     COMPASS::instance().taskManager().createArtasAssociationsTask().dialog()->show();
 }
 
-void MainWindow::calculateAssociationsOldSlot()
-{
-    loginf << "MainWindow: calculateAssociationsSlot";
+//void MainWindow::calculateAssociationsOldSlot()
+//{
+//    loginf << "MainWindow: calculateAssociationsSlot";
 
-    COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
-}
+//    COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
+//}
 
 void MainWindow::reconstructReferencesSlot()
 {
@@ -948,12 +948,12 @@ void MainWindow::reconstructReferencesSlot()
     COMPASS::instance().taskManager().reconstructReferencesTask().dialog()->show();
 }
 
-void MainWindow::calculateReferencesOldSlot()
-{
-    loginf << "MainWindow: calculateReferencesOldSlot";
+//void MainWindow::calculateReferencesOldSlot()
+//{
+//    loginf << "MainWindow: calculateReferencesOldSlot";
 
-    COMPASS::instance().taskManager().calculateReferencesTask().dialog()->show();
-}
+//    COMPASS::instance().taskManager().calculateReferencesTask().dialog()->show();
+//}
 
 void MainWindow::configureDataSourcesSlot()
 {

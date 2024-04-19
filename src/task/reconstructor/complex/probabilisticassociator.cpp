@@ -221,28 +221,29 @@ void ProbabilisticAssociator::associateNewData()
                         }
                     }
                 }
-                else
+                else // track num, acad present - but not yet mapped
                 {
-                    // not mapped, create new
 
-                    if (reconstructor_.targets_.size())
-                        utn = reconstructor_.targets_.rbegin()->first + 1; // new utn
-                    else
-                        utn = 0;
+                        // not mapped, create new
 
-                    reconstructor_.targets_.emplace(
-                        std::piecewise_construct,
-                        std::forward_as_tuple(utn),   // args for key
-                        std::forward_as_tuple(reconstructor_, utn, false));  // args for mapped value tmp_utn, false
+                        if (reconstructor_.targets_.size())
+                            utn = reconstructor_.targets_.rbegin()->first + 1; // new utn
+                        else
+                            utn = 0;
 
-                            // add to lookup
+                        reconstructor_.targets_.emplace(
+                            std::piecewise_construct,
+                            std::forward_as_tuple(utn),   // args for key
+                            std::forward_as_tuple(reconstructor_, utn, false));  // args for mapped value tmp_utn, false
 
-                    tn2utn_[ds_id][*tr.track_number_] = std::pair<unsigned int, boost::posix_time::ptime>(utn, timestamp);
+                                // add to lookup
 
-                    assert(tr.acad_);
-                    ta_2_utn[*tr.acad_] = utn;
+                        tn2utn_[ds_id][*tr.track_number_] = std::pair<unsigned int, boost::posix_time::ptime>(utn, timestamp);
 
-                    utn_vec.push_back(utn);
+                        assert(tr.acad_);
+                        ta_2_utn[*tr.acad_] = utn;
+
+                        utn_vec.push_back(utn);
                 }
 
 //                        // add to track number lookup
@@ -253,6 +254,9 @@ void ProbabilisticAssociator::associateNewData()
             }
             else // have unmapped track number and no mode s - do by mode a/c and position
             {
+                utn = findUTNForTargetReport (tr, utn_vec, debug_rec_nums, debug_utns);
+
+                if (utn == -1)
                 { // do based on track number alone
                     // create new and add
 
@@ -316,202 +320,205 @@ void ProbabilisticAssociator::associateNewData()
             if(do_debug)
                 loginf << "DBG tr " << rec_num << " no utn by acad, doing mode a/c + pos";
 
-            unsigned int num_targets = reconstructor_.targets_.size();
-            assert (utn_vec.size() == num_targets);
+            utn = findUTNForTargetReport (tr, utn_vec, debug_rec_nums, debug_utns);
 
-            results.resize(num_targets);
-            timestamp = tr.timestamp_;
+//            unsigned int num_targets = reconstructor_.targets_.size();
+//            assert (utn_vec.size() == num_targets);
 
-                    //unsigned int target_cnt=0;
-                    //for (auto& target_it : reconstructor_.targets_)
-            tbb::parallel_for(uint(0), num_targets, [&](unsigned int target_cnt)
-                              {
-                                  unsigned int other_utn = utn_vec.at(target_cnt);
-                                  bool do_other_debug = debug_utns.count(other_utn);
+//            results.resize(num_targets);
+//            timestamp = tr.timestamp_;
 
-                                  ReconstructorTarget& other = reconstructor_.targets_.at(other_utn);
+//                    //unsigned int target_cnt=0;
+//                    //for (auto& target_it : reconstructor_.targets_)
+//            tbb::parallel_for(uint(0), num_targets, [&](unsigned int target_cnt)
+//                              {
+//                                  unsigned int other_utn = utn_vec.at(target_cnt);
+//                                  bool do_other_debug = debug_utns.count(other_utn);
 
-                                  results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
+//                                  ReconstructorTarget& other = reconstructor_.targets_.at(other_utn);
 
-                                  //                                  if (other.hasACAD()) // not only try if not mode s - could be
-                                  //                                  {
-                                  //                                      //++target_cnt;
-                                  //                                      return;
-                                  //                                  }
+//                                  results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
-                                  if (!other.isTimeInside(timestamp, max_time_diff))
-                                  {
-                                      //++target_cnt;
-                                      return;
-                                  }
+//                                  //                                  if (other.hasACAD()) // not only try if not mode s - could be
+//                                  //                                  {
+//                                  //                                      //++target_cnt;
+//                                  //                                      return;
+//                                  //                                  }
 
-                                  if (!other.canPredict(timestamp))
-                                      return;
+//                                  if (!other.isTimeInside(timestamp, max_time_diff))
+//                                  {
+//                                      //++target_cnt;
+//                                      return;
+//                                  }
 
-                                  bool mode_a_checked = false;
-                                  bool mode_a_verified = false;
-                                  bool mode_c_checked = false;
+//                                  if (!other.canPredict(timestamp))
+//                                      return;
 
-                                  if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
-                                  {
-                                      // check mode a code
+//                                  bool mode_a_checked = false;
+//                                  bool mode_a_verified = false;
+//                                  bool mode_c_checked = false;
 
-                                      if (tr.mode_a_code_)
-                                      {
-                                          ComparisonResult ma_res = other.compareModeACode(tr, max_time_diff);
+//                                  if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
+//                                  {
+//                                      // check mode a code
 
-                                          if (ma_res == ComparisonResult::DIFFERENT)
-                                          {
-                                              //target_cnt++;
-                                              return;
-                                          }
+//                                      if (tr.mode_a_code_)
+//                                      {
+//                                          ComparisonResult ma_res = other.compareModeACode(tr, max_time_diff);
 
-                                          mode_a_checked = true;
-                                          mode_a_verified = ma_res == ComparisonResult::SAME;
-                                      }
+//                                          if (ma_res == ComparisonResult::DIFFERENT)
+//                                          {
+//                                              //target_cnt++;
+//                                              return;
+//                                          }
 
-                                      if (do_debug || do_other_debug)
-                                          loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
-                                                 << other_utn << ": possible mode a match, verified "
-                                                 << mode_a_verified;
+//                                          mode_a_checked = true;
+//                                          mode_a_verified = ma_res == ComparisonResult::SAME;
+//                                      }
+
+//                                      if (do_debug || do_other_debug)
+//                                          loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
+//                                                 << other_utn << ": possible mode a match, verified "
+//                                                 << mode_a_verified;
 
 
-                                              // check mode c code
-                                      if (tr.barometric_altitude_)
-                                      {
-                                          ComparisonResult mc_res = other.compareModeCCode(tr, max_time_diff, max_altitude_diff, false);
+//                                              // check mode c code
+//                                      if (tr.barometric_altitude_)
+//                                      {
+//                                          ComparisonResult mc_res = other.compareModeCCode(tr, max_time_diff, max_altitude_diff, false);
 
-                                          if (mc_res == ComparisonResult::DIFFERENT)
-                                          {
-                                              //target_cnt++;
-                                              return;
-                                          }
+//                                          if (mc_res == ComparisonResult::DIFFERENT)
+//                                          {
+//                                              //target_cnt++;
+//                                              return;
+//                                          }
 
-                                          mode_c_checked = true;
-                                      }
+//                                          mode_c_checked = true;
+//                                      }
 
-                                      if (do_debug || do_other_debug)
-                                          loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
-                                                 << other_utn << ": possible mode c match";
-                                  }
+//                                      if (do_debug || do_other_debug)
+//                                          loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
+//                                                 << other_utn << ": possible mode c match";
+//                                  }
 
-                                  if (do_debug || do_other_debug)
-                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
-                                             << other_utn << ": mode_a_checked " << mode_a_checked
-                                             << " mode_a_verified " << mode_a_verified
-                                             << " mode_c_checked " << mode_c_checked;
+//                                  if (do_debug || do_other_debug)
+//                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
+//                                             << other_utn << ": mode_a_checked " << mode_a_checked
+//                                             << " mode_a_verified " << mode_a_verified
+//                                             << " mode_c_checked " << mode_c_checked;
 
-                                          // check positions
+//                                          // check positions
 
-                                          //                tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
-                                          //                    timestamp, max_time_diff_sensor);
+//                                          //                tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
+//                                          //                    timestamp, max_time_diff_sensor);
 
-                                  reconstruction::Measurement mm;
-                                  bool ret;
-                                  double distance_m{0}, bearing_rad{0};
-                                  dbContent::targetReport::PositionAccuracy tr_pos_acc;
-                                  dbContent::targetReport::PositionAccuracy mm_pos_acc;
-                                  EllipseDef acc_ell;
-                                  double tr_est_std_dev{0};
-                                  double tgt_est_std_dev{0};
-                                  double mahalanobis_dist{0};
+//                                  reconstruction::Measurement mm;
+//                                  bool ret;
+//                                  double distance_m{0}, bearing_rad{0};
+//                                  dbContent::targetReport::PositionAccuracy tr_pos_acc;
+//                                  dbContent::targetReport::PositionAccuracy mm_pos_acc;
+//                                  EllipseDef acc_ell;
+//                                  double tr_est_std_dev{0};
+//                                  double tgt_est_std_dev{0};
+//                                  double mahalanobis_dist{0};
 
-                                  ret = other.predict(mm, tr);
-                                  assert (ret);
+//                                  ret = other.predict(mm, tr);
+//                                  assert (ret);
 
-                                  distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
-                                                                           tr.position_->longitude_ * DEG2RAD,
-                                                                           mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+//                                  distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
+//                                                                           tr.position_->longitude_ * DEG2RAD,
+//                                                                           mm.lat * DEG2RAD, mm.lon * DEG2RAD);
 
-                                  bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
-                                                                           tr.position_->longitude_ * DEG2RAD,
-                                                                           mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+//                                  bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
+//                                                                           tr.position_->longitude_ * DEG2RAD,
+//                                                                           mm.lat * DEG2RAD, mm.lon * DEG2RAD);
 
-                                  tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
-                                  estimateEllipse(tr_pos_acc, acc_ell);
-                                  tr_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+//                                  tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
+//                                  estimateEllipse(tr_pos_acc, acc_ell);
+//                                  tr_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
-                                  if (do_debug || do_other_debug)
-                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
-                                             << other_utn << ": distance_m " << distance_m
-                                             << " tr_est_std_dev " << tr_est_std_dev;
+//                                  if (do_debug || do_other_debug)
+//                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
+//                                             << other_utn << ": distance_m " << distance_m
+//                                             << " tr_est_std_dev " << tr_est_std_dev;
 
-                                  assert (mm.hasStdDevPosition());
-                                  mm_pos_acc = mm.positionAccuracy();
-                                  estimateEllipse(mm_pos_acc, acc_ell);
-                                  tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+//                                  assert (mm.hasStdDevPosition());
+//                                  mm_pos_acc = mm.positionAccuracy();
+//                                  estimateEllipse(mm_pos_acc, acc_ell);
+//                                  tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
-                                  if (tgt_est_std_dev > max_tgt_est_std_dev)
-                                  {
-                                      if (do_debug || do_other_debug)
-                                          loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
-                                                 << other_utn << " tgt_est_std_dev hit maximum";
-                                      return;
-                                  }
+//                                  if (tgt_est_std_dev > max_tgt_est_std_dev)
+//                                  {
+//                                      if (do_debug || do_other_debug)
+//                                          loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
+//                                                 << other_utn << " tgt_est_std_dev hit maximum";
+//                                      return;
+//                                  }
 
-                                  if (do_debug || do_other_debug)
-                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
-                                             << other_utn << ": distance_m " << distance_m
-                                             << " tgt_est_std_dev " << tgt_est_std_dev;
+//                                  if (do_debug || do_other_debug)
+//                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
+//                                             << other_utn << ": distance_m " << distance_m
+//                                             << " tgt_est_std_dev " << tgt_est_std_dev;
 
-                                  mahalanobis_dist = distance_m / (tr_est_std_dev + tgt_est_std_dev);
+//                                  mahalanobis_dist = distance_m / (tr_est_std_dev + tgt_est_std_dev);
 
-                                          //loginf << "DBG3 distance " << distance;
+//                                          //loginf << "DBG3 distance " << distance;
 
-                                  if (do_debug || do_other_debug)
-                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
-                                             << other_utn << ": distance_m " << distance_m
-                                             << " est_std_dev sum " << (tr_est_std_dev + tgt_est_std_dev)
-                                             << "mahalanobis_dist " << mahalanobis_dist;
+//                                  if (do_debug || do_other_debug)
+//                                      loginf << "DBG tr " << rec_num << " utn " << utn << " other_utn "
+//                                             << other_utn << ": distance_m " << distance_m
+//                                             << " est_std_dev sum " << (tr_est_std_dev + tgt_est_std_dev)
+//                                             << "mahalanobis_dist " << mahalanobis_dist;
 
-                                  if (mode_a_verified)
-                                  {
-                                      if (mahalanobis_dist < max_mahalanobis_sec_verified_dist)
-                                          results[target_cnt] = tuple<bool, unsigned int, double>
-                                              (true, other.utn_, mahalanobis_dist);
-                                  }
-                                  else
-                                  {
-                                      {
-                                          if (mahalanobis_dist < max_mahalanobis_sec_unknown_dist)
-                                              results[target_cnt] = tuple<bool, unsigned int, double>
-                                                  (true, other.utn_, mahalanobis_dist);
-                                      }
-                                  }
+//                                  if (mode_a_verified)
+//                                  {
+//                                      if (mahalanobis_dist < max_mahalanobis_sec_verified_dist)
+//                                          results[target_cnt] = tuple<bool, unsigned int, double>
+//                                              (true, other.utn_, mahalanobis_dist);
+//                                  }
+//                                  else
+//                                  {
+//                                      {
+//                                          if (mahalanobis_dist < max_mahalanobis_sec_unknown_dist)
+//                                              results[target_cnt] = tuple<bool, unsigned int, double>
+//                                                  (true, other.utn_, mahalanobis_dist);
+//                                      }
+//                                  }
 
-                                          //++target_cnt;
-                              });
+//                                          //++target_cnt;
+//                              });
 
-                    // find best match
-            bool usable;
-            unsigned int other_utn;
+//                    // find best match
+//            bool usable;
+//            unsigned int other_utn;
 
-            bool first = true;
-            unsigned int best_other_utn;
-            double best_mahalanobis_dist;
-            double mahalanobis_dist;
+//            bool first = true;
+//            unsigned int best_other_utn;
+//            double best_mahalanobis_dist;
+//            double mahalanobis_dist;
 
-            for (auto& res_it : results) // usable, other utn, num updates, avg distance
-            {
-                tie(usable, other_utn, mahalanobis_dist) = res_it;
+//            for (auto& res_it : results) // usable, other utn, num updates, avg distance
+//            {
+//                tie(usable, other_utn, mahalanobis_dist) = res_it;
 
-                if (!usable)
-                    continue;
+//                if (!usable)
+//                    continue;
 
-                if (first || mahalanobis_dist < best_mahalanobis_dist)
-                {
-                    best_other_utn = other_utn;
-                    best_mahalanobis_dist = mahalanobis_dist;
+//                if (first || mahalanobis_dist < best_mahalanobis_dist)
+//                {
+//                    best_other_utn = other_utn;
+//                    best_mahalanobis_dist = mahalanobis_dist;
 
-                    first = false;
-                }
-            }
+//                    first = false;
+//                }
+//            }
 
-            if (!first)
-            {
-                utn = best_other_utn;
-                //tmp_assoc_utns[tr_cnt] = best_other_utn;
-            }
+//            if (!first)
+//            {
+//                utn = best_other_utn;
+//                //tmp_assoc_utns[tr_cnt] = best_other_utn;
+//            }
+
         }
 
         if (utn != -1) // estimate accuarcy and associate
