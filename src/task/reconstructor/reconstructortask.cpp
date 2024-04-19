@@ -47,7 +47,7 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 
     if (!current_reconstructor_str_.size()
         || (current_reconstructor_str_ != ScoringUMReconstructorName
-                                               && current_reconstructor_str_ != ProbImmReconstructorName))
+            && current_reconstructor_str_ != ProbImmReconstructorName))
         current_reconstructor_str_ = ScoringUMReconstructorName;
 
     createSubConfigurables();
@@ -325,7 +325,7 @@ void ReconstructorTask::loadingDoneSlot()
 
     ++current_slice_idx_;
 
-    // TODO: do async, check if not already processing
+            // TODO: do async, check if not already processing
     assert (currentReconstructor()->processSlice(std::move(data)));
 
     if (last_slice) // disconnect everything
@@ -356,7 +356,7 @@ void ReconstructorTask::loadingDoneSlot()
 
         done_ = true;
 
-        //close progress dialog
+                //close progress dialog
         progress_dialog_.reset();
 
         emit doneSignal();
@@ -487,12 +487,15 @@ void ReconstructorTask::deleteCalculatedReferences()
     unsigned int ds_id = Number::dsIdFrom(currentReconstructor()->ds_sac_,
                                           currentReconstructor()->ds_sic_);
 
-    // clear counts
+            // clear counts
     if (ds_man.hasDBDataSource(ds_id))
     {
         dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
 
-        ds.clearNumInserted("RefTraj", currentReconstructor()->ds_line_);
+        if (delete_all_calc_reftraj_)
+            ds.clearNumInserted("RefTraj");
+        else
+            ds.clearNumInserted("RefTraj", currentReconstructor()->ds_line_);
     }
 }
 
