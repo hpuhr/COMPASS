@@ -3,8 +3,6 @@
 #include <QObject>
 
 #include "reconstructorbase.h"
-//#include "targetreportdefs.h"
-//#include "global.h"
 #include "probabilisticassociator.h"
 #include "accuracyestimatorbase.h"
 #include "simplereferencecalculator.h"
@@ -14,7 +12,7 @@ class ProbIMMReconstructorSettings
   public:
     ProbIMMReconstructorSettings() {};
 
-    float max_time_diff_ {5}; // sec
+    float max_time_diff_ {15}; // sec
     float track_max_time_diff_ {300.0}; // sec
 
     float max_altitude_diff_ {300.0};

@@ -231,7 +231,7 @@ SimpleReconstructorAssociationWidget::~SimpleReconstructorAssociationWidget()
 
 }
 
-void SimpleReconstructorAssociationWidget::update()
+void SimpleReconstructorAssociationWidget::updateValues()
 {
     //    QCheckBox* associate_non_mode_s_check_{nullptr};
     assert (associate_non_mode_s_check_);

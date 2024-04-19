@@ -43,7 +43,7 @@ class SimpleReconstructorAssociationWidget : public QWidget
         SimpleReconstructor& reconstructor, SimpleReconstructorWidget& parent);
     virtual ~SimpleReconstructorAssociationWidget();
 
-    void update();
+    void updateValues();
 
   private:
 

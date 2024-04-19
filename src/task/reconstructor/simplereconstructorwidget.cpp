@@ -91,7 +91,7 @@ void SimpleReconstructorWidget::update()
     use_widget_->disableDataSources(reconstructor_.task().disabledDataSources());
 
     assert (assoc_widget_);
-    assoc_widget_->update();
+    assoc_widget_->updateValues();
 
     assert (calc_widget_);
     calc_widget_->update();
