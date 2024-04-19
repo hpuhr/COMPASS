@@ -7,6 +7,7 @@
 #include "simplereferencecalculatorwidget.h"
 #include "reconstructortaskdebugwidget.h"
 #include "compass.h"
+#include "probabilisticassociationwidget.h"
 
 #include <QCheckBox>
 #include <QTabWidget>
@@ -53,7 +54,9 @@ ProbIMMReconstructorWidget::ProbIMMReconstructorWidget(ProbIMMReconstructor& rec
 
     tab_widget->addTab(use_widget_.get(), "Data Sources");
 
-    tab_widget->addTab(new QWidget(), "Association");
+    assoc_widget_.reset(new ProbabilisticAssociationWidget(reconstructor_, *this));
+
+    tab_widget->addTab(assoc_widget_.get(), "Association");
 
     //    assoc_widget_.reset(new SimpleReconstructorAssociationWidget(reconstructor_, *this));
     //    tab_widget->addTab(assoc_widget_.get(), "Association");

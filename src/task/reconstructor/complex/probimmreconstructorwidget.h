@@ -7,6 +7,7 @@
 class ProbIMMReconstructor;
 class ReconstructorMainWidget;
 class DataSourcesUseWidget;
+class ProbabilisticAssociationWidget;
 class SimpleReferenceCalculatorWidget;
 class ReconstructorTaskDebugWidget;
 
@@ -28,6 +29,7 @@ class ProbIMMReconstructorWidget : public QWidget
 
     std::unique_ptr<ReconstructorMainWidget> main_widget_;
     std::unique_ptr<DataSourcesUseWidget> use_widget_;
+    std::unique_ptr<ProbabilisticAssociationWidget> assoc_widget_;
     std::unique_ptr<SimpleReferenceCalculatorWidget> calc_widget_;
     std::unique_ptr<ReconstructorTaskDebugWidget> debug_widget_;
 };
