@@ -48,6 +48,8 @@ class ReconstructorTask : public Task, public Configurable
     void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
+    void writeDoneSlot();
+
     bool useDStype(const std::string& ds_type) const;
     void useDSType(const std::string& ds_type, bool value);
     bool useDataSource(unsigned int ds_id) const;

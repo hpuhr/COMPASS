@@ -383,22 +383,22 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
 
         loginf << "ReconstructorBase: createAssociationBuffers: db content " << dbcontent_name;
 
-        string rec_num_col_name =
-            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
+        string rec_num_name =
+            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).name();
 
-        string utn_col_name =
-            dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).dbColumnName();
+        string utn_name =
+            dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name).name();
 
         PropertyList properties;
-        properties.addProperty(utn_col_name,  DBContent::meta_var_utn_.dataType());
-        properties.addProperty(rec_num_col_name,  DBContent::meta_var_rec_num_.dataType());
+        properties.addProperty(utn_name,  DBContent::meta_var_utn_.dataType());
+        properties.addProperty(rec_num_name,  DBContent::meta_var_rec_num_.dataType());
 
         assoc_data [dbcontent_name].reset(new Buffer(properties));
 
         shared_ptr<Buffer> buffer  = assoc_data.at(dbcontent_name);
 
-        NullableVector<unsigned int>& utn_col_vec = buffer->get<unsigned int>(utn_col_name);
-        NullableVector<unsigned long>& rec_num_col_vec = buffer->get<unsigned long>(rec_num_col_name);
+        NullableVector<unsigned int>& utn_col_vec = buffer->get<unsigned int>(utn_name);
+        NullableVector<unsigned long>& rec_num_col_vec = buffer->get<unsigned long>(rec_num_name);
 
         assert (tr_ds_.count(dbcontent_id));
 
@@ -617,6 +617,7 @@ void ReconstructorBase::reset()
     loginf << "ReconstructorBase: reset/init";
 
     //buffers_.clear();
+    current_slice_ = nullptr;
     accessor_->clear();
 
     slice_cnt_ = 0;

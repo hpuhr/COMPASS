@@ -351,12 +351,8 @@ void ReconstructorTask::writeDataSlice()
 
     assert (writing_slice_);
 
-    bool is_last_slice = writing_slice_->is_last_slice_;
-
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-    DBInterface& db_interface = COMPASS::instance().interface();
 
-            // TODO move to DB job
 
     for (auto& buf_it : writing_slice_->assoc_data_)
     {
@@ -364,30 +360,21 @@ void ReconstructorTask::writeDataSlice()
 
         DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
 
-        string rec_num_col_name =
-            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(buf_it.first).dbColumnName();
+//        string rec_num_col_name =
+//            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(buf_it.first).dbColumnName();
 
-        db_interface.updateBuffer(dbcontent.dbTableName(), rec_num_col_name, buf_it.second);
+        //db_interface.updateBuffer(dbcontent.dbTableName(), rec_num_col_name, buf_it.second);
+
+        dbcontent.updateData(
+            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(buf_it.first), buf_it.second);
     }
 
-    for (auto& buf_it : writing_slice_->reftraj_data_)
-    {
-        loginf << "ReconstructorTask: writeDataSlice: references dbcontent " << buf_it.first;
+    if (writing_slice_->first_slice_)
+        connect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+                this, &ReconstructorTask::writeDoneSlot);
 
-        DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
-
-        string rec_num_col_name =
-            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(buf_it.first).dbColumnName();
-
-        dbcontent.insertData(buf_it.second);
-    }
-
-    writing_slice_->write_done_ = true;
-
-    if (is_last_slice)
-        currentReconstructor()->saveTargets();
-
-    writing_slice_ = nullptr;
+    loginf << "ReconstructorTask: writeDataSlice: references dbcontent";
+    dbcontent_man.insertData(writing_slice_->reftraj_data_);
 }
 
 
@@ -424,9 +411,16 @@ void ReconstructorTask::loadingDoneSlot()
     assert(currentReconstructor()->currentSlice().processing_done_);
 
     // do write
+
+    while (writing_slice_)
+    {
+        QCoreApplication::processEvents();
+        QThread::msleep(1);
+    }
+
     assert (!writing_slice_);
     writing_slice_ = currentReconstructor()->moveCurrentSlice();
-    writeDataSlice();
+    writeDataSlice(); // starts the async jobs
 
     if (last_slice) // disconnect everything
     {
@@ -445,12 +439,14 @@ void ReconstructorTask::loadingDoneSlot()
 
     if (last_slice)
     {
+        currentReconstructor()->saveTargets();
+        currentReconstructor()->reset();
+
         double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
 
         loginf << "ReconstructorTask: loadingDoneSlot: data loading done after "
                << String::timeStringFromDouble(time_elapsed_s, false);
 
-        currentReconstructor()->reset();
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
@@ -461,7 +457,25 @@ void ReconstructorTask::loadingDoneSlot()
 
         emit doneSignal();
     }
+}
 
+void ReconstructorTask::writeDoneSlot()
+{
+    loginf << "ReconstructorTask: writeDoneSlot";
+
+    assert (writing_slice_);
+
+    writing_slice_->write_done_ = true;
+
+    if (writing_slice_->is_last_slice_)
+    {
+        DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+        disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+                   this, &ReconstructorTask::writeDoneSlot);
+    }
+
+    writing_slice_ = nullptr;
 }
 
 bool ReconstructorTask::useDStype(const std::string& ds_type) const
