@@ -118,7 +118,7 @@ int ReconstructorBase::numSlices() const
                           / Utils::Time::partialSeconds(base_settings_.sliceDuration()));
 }
 
-TimeWindow ReconstructorBase::getNextTimeSlice()
+std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlice()
 {
     assert (hasNextTimeSlice());
 
@@ -145,26 +145,51 @@ TimeWindow ReconstructorBase::getNextTimeSlice()
 
             //assert (current_slice_begin_ <= timestamp_max_); can be bigger
 
-    return window;
+    std::unique_ptr<DataSlice> slice (new DataSlice());
+
+    slice->slice_count_ = slice_cnt_;
+    slice->slice_begin_ = current_slice_begin_;
+    slice->next_slice_begin_ = next_slice_begin_;
+    slice->timestamp_min_ = timestamp_min_;
+    slice->timestamp_max_ = timestamp_max_;;
+    slice->first_slice_ = first_slice_;
+    slice->is_last_slice_ = !hasNextTimeSlice();
+
+    slice->remove_before_time_ = remove_before_time_;
+    slice->write_before_time_ = write_before_time_;
+
+    slice->loading_done_ = false;
+    slice->processing_done_ = false;
+    slice->write_done_ = false;
+
+    ++slice_cnt_;
+
+    return slice;
 }
 
 /**
  */
-bool ReconstructorBase::processSlice(Buffers&& buffers)
+void ReconstructorBase::processSlice(std::unique_ptr<ReconstructorBase::DataSlice> data_slice)
 {
-    loginf << "ReconstructorBase: processSlice: first_slice " << first_slice_;
+    assert (!current_slice_);
+    current_slice_ = std::move(data_slice);
 
-    if (!first_slice_)
-        accessor_->removeContentBeforeTimestamp(remove_before_time_);
+    loginf << "ReconstructorBase: processSlice: first_slice " << currentSlice().first_slice_;
 
-    accessor_->add(buffers);
+    if (!currentSlice().first_slice_)
+        accessor_->removeContentBeforeTimestamp(currentSlice().remove_before_time_);
 
-    return processSlice_impl();
+    accessor_->add(currentSlice().data_);
+
+    processSlice_impl();
+
+    currentSlice().processing_done_ = true;
 }
 
 void ReconstructorBase::clearOldTargetReports()
 {
-    loginf << "ReconstructorBase: clearOldTargetReports: remove_before_time " << Time::toString(remove_before_time_)
+    loginf << "ReconstructorBase: clearOldTargetReports: remove_before_time "
+           << Time::toString(currentSlice().remove_before_time_)
            << " size " << target_reports_.size();
 
     tr_timestamps_.clear();
@@ -172,7 +197,7 @@ void ReconstructorBase::clearOldTargetReports()
 
     for (auto ts_it = target_reports_.begin(); ts_it != target_reports_.end() /* not hoisted */; /* no increment */)
     {
-        if (ts_it->second.timestamp_ < remove_before_time_)
+        if (ts_it->second.timestamp_ < currentSlice().remove_before_time_)
         {
             //loginf << "ReconstructorBase: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
             ts_it = target_reports_.erase(ts_it);
@@ -334,16 +359,16 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase:
     return associations;
 }
 
-void ReconstructorBase::saveAssociations(
+std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociationBuffers(
     std::map<unsigned int, std::map<unsigned long,unsigned int>> associations)
 {
-    loginf << "ReconstructorBase: saveAssociations";
+    loginf << "ReconstructorBase: createAssociationBuffers";
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    DBInterface& db_interface = COMPASS::instance().interface();
-
             // write association info to buffers
+
+    std::map<std::string, std::shared_ptr<Buffer>> assoc_data;
 
     for (auto& cont_assoc_it : associations) // dbcontent -> rec_nums
     {
@@ -352,11 +377,11 @@ void ReconstructorBase::saveAssociations(
 
         unsigned int dbcontent_id = cont_assoc_it.first;
         string dbcontent_name = dbcontent_man.dbContentWithId(cont_assoc_it.first);
-        DBContent& dbcontent = dbcontent_man.dbContent(dbcontent_name);
+        //DBContent& dbcontent = dbcontent_man.dbContent(dbcontent_name);
 
         std::map<unsigned long, unsigned int>& tr_associations = cont_assoc_it.second;
 
-        loginf << "ReconstructorBase: saveAssociations: db content " << dbcontent_name;
+        loginf << "ReconstructorBase: createAssociationBuffers: db content " << dbcontent_name;
 
         string rec_num_col_name =
             dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
@@ -368,7 +393,9 @@ void ReconstructorBase::saveAssociations(
         properties.addProperty(utn_col_name,  DBContent::meta_var_utn_.dataType());
         properties.addProperty(rec_num_col_name,  DBContent::meta_var_rec_num_.dataType());
 
-        shared_ptr <Buffer> buffer {new Buffer(properties)};
+        assoc_data [dbcontent_name].reset(new Buffer(properties));
+
+        shared_ptr<Buffer> buffer  = assoc_data.at(dbcontent_name);
 
         NullableVector<unsigned int>& utn_col_vec = buffer->get<unsigned int>(utn_col_name);
         NullableVector<unsigned long>& rec_num_col_vec = buffer->get<unsigned long>(rec_num_col_name);
@@ -403,24 +430,21 @@ void ReconstructorBase::saveAssociations(
             }
         }
 
-        loginf << "ReconstructorBase: saveAssociations: dcontent " << dbcontent_name
+        loginf << "ReconstructorBase: createAssociationBuffers: dcontent " << dbcontent_name
                <<  " assoc " << num_associated << " not assoc " << num_not_associated
                << " buffer size " << buffer->size();
 
-        // TODO move to DB job
-        db_interface.updateBuffer(dbcontent.dbTableName(), rec_num_col_name, buffer);
-
-        loginf << "ReconstructorBase: saveAssociations: dcontent " << dbcontent_name << " done";
+        loginf << "ReconstructorBase: createAssociationBuffers: dcontent " << dbcontent_name << " done";
     }
 
-    loginf << "ReconstructorBase: saveAssociations: done";
+    loginf << "ReconstructorBase: createAssociationBuffers: done";
+
+    return assoc_data;
 }
 
-void ReconstructorBase::saveReferences()
+std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenceBuffers()
 {
-    loginf << "ReconstructorBase: saveReferences: num " << targets_.size();
-
-    DBContentManager& cont_man = COMPASS::instance().dbContentManager();
+    loginf << "ReconstructorBase: createReferenceBuffers: num " << targets_.size();
 
     std::shared_ptr<Buffer> buffer;
 
@@ -440,7 +464,7 @@ void ReconstructorBase::saveReferences()
         NullableVector<boost::posix_time::ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(
             DBContent::meta_var_timestamp_.name());
 
-        loginf << "ReconstructorBase: saveReferences: buffer size " << buffer->size()
+        loginf << "ReconstructorBase: createReferenceBuffers: buffer size " << buffer->size()
                << " ts min " << Time::toString(ts_vec.get(0))
                << " max " << Time::toString(ts_vec.get(ts_vec.size()-1));
 
@@ -450,7 +474,7 @@ void ReconstructorBase::saveReferences()
 
         if (!src_man.hasConfigDataSource(ds_id))
         {
-            loginf << "ReconstructorBase: saveReferences: creating data source";
+            loginf << "ReconstructorBase: createReferenceBuffers: creating data source";
 
             src_man.createConfigDataSource(ds_id);
             assert (src_man.hasConfigDataSource(ds_id));
@@ -461,10 +485,14 @@ void ReconstructorBase::saveReferences()
         src.name(base_settings_.ds_name);
         src.dsType("RefTraj"); // same as dstype
 
-        cont_man.insertData({{buffer->dbContentName(), buffer}});
+        return std::map<std::string, std::shared_ptr<Buffer>> {{buffer->dbContentName(), buffer}};
     }
     else
-        loginf << "ReconstructorBase: saveReferences: empty buffer";
+    {
+        loginf << "ReconstructorBase: createReferenceBuffers: empty buffer";
+
+        return std::map<std::string, std::shared_ptr<Buffer>> {};
+    }
 }
 
 void ReconstructorBase::saveTargets()
@@ -522,6 +550,23 @@ ReconstructorTask& ReconstructorBase::task() const
     return task_;
 }
 
+bool ReconstructorBase::hasCurrentSlice() const
+{
+    return current_slice_ != nullptr;
+}
+
+ReconstructorBase::DataSlice& ReconstructorBase::currentSlice()
+{
+    assert (current_slice_);
+    return *current_slice_;
+}
+
+std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::moveCurrentSlice()
+{
+    assert (current_slice_);
+    return std::move(current_slice_);
+}
+
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 
                                           const dbContent::targetReport::ReconstructorInfo& ri)
 {
@@ -571,9 +616,10 @@ void ReconstructorBase::reset()
 {
     loginf << "ReconstructorBase: reset/init";
 
-    buffers_.clear();
+    //buffers_.clear();
     accessor_->clear();
 
+    slice_cnt_ = 0;
     current_slice_begin_ = {};
     next_slice_begin_ = {};
     timestamp_min_ = {};

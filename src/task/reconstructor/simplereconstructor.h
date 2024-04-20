@@ -65,7 +65,7 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
 
     SimpleReconstructorWidget* widget(); // ownage by caller
 
-    virtual void updateWidgets();
+    virtual void updateWidgets() override;
 
   protected:
   
@@ -77,6 +77,6 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
     SimpleAssociator associatior_;
     SimpleReferenceCalculator ref_calculator_;
 
-    virtual bool processSlice_impl() override;
+    virtual void processSlice_impl() override;
 };
 

@@ -290,7 +290,7 @@ void SimpleAssociator::createNonTrackerUTNS()
                                       targetReport::ReconstructorInfo& tr =
                                           reconstructor_.target_reports_.at(rec_num);
 
-                                      assert (tr.timestamp_ >= reconstructor_.remove_before_time_);
+                                      assert (tr.timestamp_ >= reconstructor_.currentSlice().remove_before_time_);
 
                                       tmp_assoc_utns[tr_cnt] = -1; // set as not associated
 
@@ -581,7 +581,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
             assert (reconstructor_.target_reports_.count(tr_it));
             targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(tr_it);
 
-            assert (tr.timestamp_ >= reconstructor_.remove_before_time_);
+            assert (tr.timestamp_ >= reconstructor_.currentSlice().remove_before_time_);
 
             if(!tr.in_current_slice_) // already processed
                 continue;

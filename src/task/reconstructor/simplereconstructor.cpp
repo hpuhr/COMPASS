@@ -165,15 +165,14 @@ void SimpleReconstructor::updateWidgets()
     emit updateWidgetsSignal();
 }
 
-bool SimpleReconstructor::processSlice_impl()
+void SimpleReconstructor::processSlice_impl()
 {
-    loginf << "SimpleReconstructor: processSlice_impl: current_slice_begin " << Time::toString(current_slice_begin_)
-           << " end " << Time::toString(current_slice_begin_ + baseSettings().sliceDuration())
-           << " has next " << hasNextTimeSlice();
+    loginf << "SimpleReconstructor: processSlice_impl: current_slice_begin "
+           << Time::toString(currentSlice().slice_begin_)
+           << " end " << Time::toString(currentSlice().slice_begin_ + baseSettings().sliceDuration())
+           << " is last " << currentSlice().is_last_slice_;
 
             // remove_before_time_, new data >= current_slice_begin_
-
-    bool is_last_slice = !hasNextTimeSlice();
 
     clearOldTargetReports();
 
@@ -184,17 +183,15 @@ bool SimpleReconstructor::processSlice_impl()
 
     associatior_.associateNewData();
 
-    auto associations = createAssociations(); // only for ts < write_before_time, also updates target counts
-    saveAssociations(associations);
+    std::map<unsigned int, std::map<unsigned long, unsigned int>> associations = createAssociations();
+    // only for ts < write_before_time, also updates target counts
+    currentSlice().assoc_data_ = createAssociationBuffers(associations);
 
     ref_calculator_.computeReferences();
 
-    saveReferences(); // only for ts < write_before_time
+    currentSlice().reftraj_data_ = createReferenceBuffers(); // only for ts < write_before_time
 
-    if (is_last_slice)
-        saveTargets();
-
-    return true;
+    return;
 }
 
 

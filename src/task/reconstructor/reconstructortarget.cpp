@@ -1035,7 +1035,7 @@ void ReconstructorTarget::updateCounts()
         assert (reconstructor_.target_reports_.count(rn_it));
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rn_it);
 
-        if (tr.timestamp_ >= reconstructor_.write_before_time_) // tr.in_current_slice_
+        if (tr.timestamp_ >= reconstructor_.currentSlice().write_before_time_) // tr.in_current_slice_
             continue;
 
         counts_[Number::recNumGetDBContId(rn_it)] += 1;
@@ -1224,7 +1224,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 //               << " wbt " << Time::toString(reconstructor_.write_before_time_) <<
 //            " skip " << (ref.t >= reconstructor_.write_before_time_);
 
-        if (ref_it.second.t >= reconstructor_.write_before_time_)
+        if (ref_it.second.t >= reconstructor_.currentSlice().write_before_time_)
             continue;
 
         if (!ts_prev_.is_not_a_date_time())
@@ -1441,7 +1441,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     {
         unsigned int last_index = buffer_cnt - 1;
 
-        if (reconstructor_.next_slice_begin_ - ts_vec.get(last_index) > track_end_time)
+        if (reconstructor_.currentSlice().next_slice_begin_ - ts_vec.get(last_index) > track_end_time)
             track_end_vec.set(last_index, true);
     }
 

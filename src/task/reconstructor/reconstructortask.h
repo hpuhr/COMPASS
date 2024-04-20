@@ -3,6 +3,7 @@
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
 #include "dbcontent/dbcontentaccessor.h"
+#include "reconstructorbase.h"
 #include "task.h"
 #include "global.h"
 #include "json.hpp"
@@ -27,6 +28,12 @@ namespace dbContent
 class Variable;
 class MetaVariable;
 }
+
+//class ReconstructorBase
+//{
+//  public:
+//    struct DataSlice;
+//};
 
 class QProgressDialog;
 
@@ -91,9 +98,9 @@ class ReconstructorTask : public Task, public Configurable
 
     std::unique_ptr<ReconstructorTaskDialog> dialog_;
 
-    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
+    //std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
-    std::map<std::string, std::shared_ptr<Buffer>> data_;
+            //std::map<std::string, std::shared_ptr<Buffer>> data_;
 
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
     std::unique_ptr<ProbIMMReconstructor> probimm_reconstructor_; // has to be reset after each calculation
@@ -102,6 +109,9 @@ class ReconstructorTask : public Task, public Configurable
     boost::posix_time::ptime run_start_time_;
 
     size_t current_slice_idx_ = 0;
+    //std::map<unsigned int, ReconstructorBase::DataSlice> data_slices_;
+    std::unique_ptr<ReconstructorBase::DataSlice> loading_slice_;
+    std::unique_ptr<ReconstructorBase::DataSlice> writing_slice_;
 
     std::set<unsigned int> debug_utns_;
     std::set<unsigned long> debug_rec_nums_;
@@ -110,6 +120,7 @@ class ReconstructorTask : public Task, public Configurable
     void deleteCalculatedReferences();
 
     void loadDataSlice();
+    void writeDataSlice();
 
     void updateProgress(const QString& msg, bool add_slice_progress);
 };

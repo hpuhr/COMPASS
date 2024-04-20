@@ -145,15 +145,14 @@ void ProbIMMReconstructor::updateWidgets()
     emit updateWidgetsSignal();
 }
 
-bool ProbIMMReconstructor::processSlice_impl()
+void ProbIMMReconstructor::processSlice_impl()
 {
-    loginf << "ProbIMMReconstructor: processSlice_impl: current_slice_begin " << Time::toString(current_slice_begin_)
-           << " end " << Time::toString(current_slice_begin_ + baseSettings().sliceDuration())
-           << " has next " << hasNextTimeSlice();
+    loginf << "ProbIMMReconstructor: processSlice_impl: current_slice_begin "
+           << Time::toString(currentSlice().slice_begin_)
+           << " end " << Time::toString(currentSlice().slice_begin_ + baseSettings().sliceDuration())
+           << " is last " << currentSlice().is_last_slice_;
 
             // remove_before_time_, new data >= current_slice_begin_
-
-    bool is_last_slice = !hasNextTimeSlice();
 
     clearOldTargetReports();
 
@@ -165,19 +164,17 @@ bool ProbIMMReconstructor::processSlice_impl()
     assert (acc_estimator_);
     associatior_.associateNewData();
 
-    auto associations = createAssociations(); // only for ts < write_before_time, also updates target counts
-    saveAssociations(associations);
+    std::map<unsigned int, std::map<unsigned long, unsigned int>> associations = createAssociations();
+    // only for ts < write_before_time, also updates target counts
+    currentSlice().assoc_data_ = createAssociationBuffers(associations);
 
     ref_calculator_.computeReferences();
 
     acc_estimator_->estimateAccuracies();
 
-    saveReferences(); // only for ts < write_before_time
+    currentSlice().reftraj_data_ = createReferenceBuffers(); // only for ts < write_before_time
 
-    if (is_last_slice)
-        saveTargets();
-
-    return true;
+    return;
 }
 
 

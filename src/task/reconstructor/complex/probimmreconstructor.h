@@ -48,7 +48,7 @@ class ProbIMMReconstructor : public QObject, public ReconstructorBase
 
     ProbIMMReconstructorWidget* widget(); // ownage by caller
 
-    void updateWidgets();
+    void updateWidgets() override;
 
   protected:
 
@@ -56,7 +56,7 @@ class ProbIMMReconstructor : public QObject, public ReconstructorBase
     ProbabilisticAssociator associatior_;
     SimpleReferenceCalculator ref_calculator_;
 
-    virtual bool processSlice_impl() override;
+    virtual void processSlice_impl() override;
 
 };
 

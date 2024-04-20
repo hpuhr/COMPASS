@@ -17,6 +17,7 @@
 #include "timeconv.h"
 #include "number.h"
 #include "dbinterface.h"
+#include "metavariable.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -104,57 +105,6 @@ bool ReconstructorTask::canRun()
     assert (currentReconstructor());
 
     return COMPASS::instance().dbContentManager().hasData() && currentReconstructor()->hasNextTimeSlice();
-}
-
-void ReconstructorTask::run()
-{
-    assert(canRun());
-
-    current_slice_idx_ = 0;
-
-    loginf << "ReconstructorTask: run: started";
-
-    run_start_time_ = boost::posix_time::microsec_clock::local_time();
-
-    progress_dialog_.reset(new QProgressDialog);
-    progress_dialog_->setCancelButton(nullptr);
-    progress_dialog_->setMinimum(0);
-    progress_dialog_->setMaximum(100);
-    progress_dialog_->setWindowTitle("Reconstructing...");
-
-    progress_dialog_->show();
-
-    updateProgress("Deleting Previous References", false);
-
-    deleteCalculatedReferences();
-
-    updateProgress("Deleting Previous Targets", false);
-
-    DBContentManager& cont_man = COMPASS::instance().dbContentManager();
-    cont_man.clearTargetsInfo();
-
-    updateProgress("Deleting Previous Associations", false);
-
-    for (auto& dbcont_it : cont_man)
-    {
-        if (dbcont_it.second->existsInDB())
-            COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
-    }
-
-    updateProgress("Initializing", false);
-
-    COMPASS::instance().viewManager().disableDataDistribution(true);
-
-    currentReconstructor()->reset();
-
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
-            this, &ReconstructorTask::loadedDataSlot);
-    connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
-            this, &ReconstructorTask::loadingDoneSlot);
-
-    loadDataSlice();
 }
 
 void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progress)
@@ -300,31 +250,183 @@ void ReconstructorTask::dialogCancelSlot()
     dialog_->hide();
 }
 
+void ReconstructorTask::run()
+{
+    assert(canRun());
+
+    current_slice_idx_ = 0;
+
+    loginf << "ReconstructorTask: run: started";
+
+    run_start_time_ = boost::posix_time::microsec_clock::local_time();
+
+    progress_dialog_.reset(new QProgressDialog);
+    progress_dialog_->setCancelButton(nullptr);
+    progress_dialog_->setMinimum(0);
+    progress_dialog_->setMaximum(100);
+    progress_dialog_->setWindowTitle("Reconstructing...");
+
+    progress_dialog_->show();
+
+    updateProgress("Deleting Previous References", false);
+
+    deleteCalculatedReferences();
+
+    updateProgress("Deleting Previous Targets", false);
+
+    DBContentManager& cont_man = COMPASS::instance().dbContentManager();
+    cont_man.clearTargetsInfo();
+
+    updateProgress("Deleting Previous Associations", false);
+
+    for (auto& dbcont_it : cont_man)
+    {
+        if (dbcont_it.second->existsInDB())
+            COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
+    }
+
+    updateProgress("Initializing", false);
+
+    COMPASS::instance().viewManager().disableDataDistribution(true);
+
+    currentReconstructor()->reset();
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+            this, &ReconstructorTask::loadedDataSlot);
+    connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+            this, &ReconstructorTask::loadingDoneSlot);
+
+    loadDataSlice();
+}
+
+void ReconstructorTask::loadDataSlice()
+{
+    assert (currentReconstructor());
+    assert (currentReconstructor()->hasNextTimeSlice());
+    assert (!loading_slice_);
+
+    updateProgress("Loading slice", true);
+
+            //boost::posix_time::ptime min_ts, max_ts;
+
+    loading_slice_ = currentReconstructor()->getNextTimeSlice();
+    //assert (min_ts <= max_ts);
+
+            //bool last_slice = !currentReconstructor()->hasNextTimeSlice();
+
+    loginf << "ReconstructorTask: loadDataSlice: min " << Time::toString(loading_slice_->slice_begin_)
+           << " max " << Time::toString(loading_slice_->next_slice_begin_)
+           << " last " << loading_slice_->is_last_slice_;
+
+    string timestamp_filter;
+
+    timestamp_filter = "timestamp >= " + to_string(Time::toLong(loading_slice_->slice_begin_));
+
+    if (loading_slice_->is_last_slice_)
+        timestamp_filter += " AND timestamp <= " + to_string(Time::toLong(loading_slice_->next_slice_begin_));
+    else
+        timestamp_filter += " AND timestamp < " + to_string(Time::toLong(loading_slice_->next_slice_begin_));
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    for (auto& dbcont_it : dbcontent_man)
+    {
+        loginf << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
+               << " has data " << dbcont_it.second->hasData();
+
+        if (!dbcont_it.second->hasData())
+            continue;
+
+        VariableSet read_set = currentReconstructor()->getReadSetFor(dbcont_it.first);
+
+        dbcont_it.second->load(read_set, false, false, timestamp_filter);
+    }
+}
+
+void ReconstructorTask::writeDataSlice()
+{
+    loginf << "ReconstructorTask: writeDataSlice";
+
+    assert (writing_slice_);
+
+    bool is_last_slice = writing_slice_->is_last_slice_;
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    DBInterface& db_interface = COMPASS::instance().interface();
+
+            // TODO move to DB job
+
+    for (auto& buf_it : writing_slice_->assoc_data_)
+    {
+        loginf << "ReconstructorTask: writeDataSlice: association dbcontent " << buf_it.first;
+
+        DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
+
+        string rec_num_col_name =
+            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(buf_it.first).dbColumnName();
+
+        db_interface.updateBuffer(dbcontent.dbTableName(), rec_num_col_name, buf_it.second);
+    }
+
+    for (auto& buf_it : writing_slice_->reftraj_data_)
+    {
+        loginf << "ReconstructorTask: writeDataSlice: references dbcontent " << buf_it.first;
+
+        DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
+
+        string rec_num_col_name =
+            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(buf_it.first).dbColumnName();
+
+        dbcontent.insertData(buf_it.second);
+    }
+
+    writing_slice_->write_done_ = true;
+
+    if (is_last_slice)
+        currentReconstructor()->saveTargets();
+
+    writing_slice_ = nullptr;
+}
+
+
 void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-    data_ = data;
+    assert (loading_slice_);
 }
 
 void ReconstructorTask::loadingDoneSlot()
 {
     assert (currentReconstructor());
+    assert (loading_slice_);
 
-    bool last_slice = !currentReconstructor()->hasNextTimeSlice();
+    bool last_slice = loading_slice_->is_last_slice_;
 
-    loginf << "ReconstructorTask: loadingDoneSlot: last_slice " << last_slice;
+    loginf << "ReconstructorTask: loadingDoneSlot: is_last_slice " << last_slice;
 
     updateProgress("Processing slice", true);
 
-    std::map<std::string, std::shared_ptr<Buffer>> data = std::move(data_); // move out of there
+    //std::map<std::string, std::shared_ptr<Buffer>> data = std::move(data_); // move out of there
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    loading_slice_->data_ = dbcontent_man.data();
 
     dbcontent_man.clearData(); // clear previous
 
     ++current_slice_idx_;
 
             // TODO: do async, check if not already processing
-    assert (currentReconstructor()->processSlice(std::move(data)));
+    assert (!currentReconstructor()->hasCurrentSlice());
+    currentReconstructor()->processSlice(std::move(loading_slice_));
+
+    // processing done
+    assert(currentReconstructor()->currentSlice().processing_done_);
+
+    // do write
+    assert (!writing_slice_);
+    writing_slice_ = currentReconstructor()->moveCurrentSlice();
+    writeDataSlice();
 
     if (last_slice) // disconnect everything
     {
@@ -497,44 +599,3 @@ void ReconstructorTask::deleteCalculatedReferences()
     }
 }
 
-void ReconstructorTask::loadDataSlice()
-{
-    assert (currentReconstructor());
-    assert (currentReconstructor()->hasNextTimeSlice());
-
-    updateProgress("Loading slice", true);
-
-    boost::posix_time::ptime min_ts, max_ts;
-
-    std::tie(min_ts, max_ts) = currentReconstructor()->getNextTimeSlice();
-    assert (min_ts <= max_ts);
-
-    bool last_slice = !currentReconstructor()->hasNextTimeSlice();
-
-    loginf << "ReconstructorTask: loadDataSlice: min " << Time::toString(min_ts)
-           << " max " << Time::toString(max_ts) << " last " << last_slice;
-
-    string timestamp_filter;
-
-    timestamp_filter = "timestamp >= " + to_string(Time::toLong(min_ts));
-
-    if (last_slice)
-        timestamp_filter += " AND timestamp <= " + to_string(Time::toLong(max_ts));
-    else
-        timestamp_filter += " AND timestamp < " + to_string(Time::toLong(max_ts));
-
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    for (auto& dbcont_it : dbcontent_man)
-    {
-        loginf << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
-               << " has data " << dbcont_it.second->hasData();
-
-        if (!dbcont_it.second->hasData())
-            continue;
-
-        VariableSet read_set = currentReconstructor()->getReadSetFor(dbcont_it.first);
-
-        dbcont_it.second->load(read_set, false, false, timestamp_filter);
-    }
-}

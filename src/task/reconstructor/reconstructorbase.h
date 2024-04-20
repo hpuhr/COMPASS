@@ -50,7 +50,7 @@ typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow
  */
 class ReconstructorBase : public Configurable
 {
-public:
+  public:
     struct BaseSettings
     {
         boost::posix_time::time_duration sliceDuration() const
@@ -62,17 +62,39 @@ public:
             return boost::posix_time::minutes(outdated_duration_in_minutes);
         }
 
-        // output
+                // output
         std::string  ds_name {"CalcRef"};
         unsigned int ds_sac  {255};
         unsigned int ds_sic  {1};
         unsigned int ds_line {0};
 
-        // slicing
+                // slicing
         unsigned int slice_duration_in_minutes    {10};
         unsigned int outdated_duration_in_minutes {2};
 
         bool delete_all_calc_reftraj {false};
+    };
+
+    struct DataSlice
+    {
+        unsigned int slice_count_;
+        boost::posix_time::ptime slice_begin_;
+        boost::posix_time::ptime next_slice_begin_;
+        boost::posix_time::ptime timestamp_min_, timestamp_max_;
+        bool first_slice_ {false};
+        bool is_last_slice_ {false};
+
+        boost::posix_time::ptime remove_before_time_;
+        boost::posix_time::ptime write_before_time_;
+
+        std::map<std::string, std::shared_ptr<Buffer>> data_;
+        bool loading_done_ {false}; // set if data_ is set correctly and can be processed
+
+        std::map<std::string, std::shared_ptr<Buffer>> assoc_data_;
+        std::map<std::string, std::shared_ptr<Buffer>> reftraj_data_;
+
+        bool processing_done_ {false}; // set if assoc_data_, reftraj_data_ are set correctly and can be written
+        bool write_done_ {false}; // set if data has been written
     };
 
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
@@ -85,11 +107,14 @@ public:
     virtual ~ReconstructorBase();
 
     bool hasNextTimeSlice();
-    TimeWindow getNextTimeSlice();
+    std::unique_ptr<ReconstructorBase::DataSlice> getNextTimeSlice();
 
     int numSlices() const;
 
-    bool processSlice(Buffers&& buffers);
+    void processSlice(std::unique_ptr<ReconstructorBase::DataSlice> data_slice);
+    bool hasCurrentSlice() const;
+    ReconstructorBase::DataSlice& currentSlice();
+    std::unique_ptr<ReconstructorBase::DataSlice> moveCurrentSlice();
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 
@@ -109,34 +134,9 @@ public:
 
     ReconstructorTask& task() const;
 
-protected:
-    friend class dbContent::ReconstructorTarget;
-    friend class SimpleReferenceCalculator;
-    friend class ComplexAccuracyEstimator;
-    friend class ProbabilisticAssociator;
-    friend class DataSourceAccuracyEstimator;
-    friend class ADSBAccuracyEstimator;
-    friend class MLATAccuracyEstimator;
-    friend class RadarAccuracyEstimator;
-    friend class TrackerAccuracyEstimator;
+    void saveTargets();
 
-    ReconstructorTask& task_;
-
-    std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
-
-    std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
-
-    Buffers buffers_;
-    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
-
-    boost::posix_time::ptime current_slice_begin_;
-    boost::posix_time::ptime next_slice_begin_;
-    boost::posix_time::ptime timestamp_min_, timestamp_max_;
-    bool first_slice_ {false};
-
-    boost::posix_time::ptime remove_before_time_;
-    boost::posix_time::ptime write_before_time_;
-
+    // our data structures
     std::map<unsigned long, dbContent::targetReport::ReconstructorInfo> target_reports_;
     // all sources, record_num -> base info
     std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
@@ -146,19 +146,49 @@ protected:
 
     std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> tgt
 
+    std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
+
+  protected:
+//    friend class dbContent::ReconstructorTarget;
+//    friend class SimpleReferenceCalculator;
+//    friend class ComplexAccuracyEstimator;
+//    friend class ProbabilisticAssociator;
+//    friend class DataSourceAccuracyEstimator;
+//    friend class ADSBAccuracyEstimator;
+//    friend class MLATAccuracyEstimator;
+//    friend class RadarAccuracyEstimator;
+//    friend class TrackerAccuracyEstimator;
+
+    ReconstructorTask& task_;
+
+    std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
+
+            //Buffers buffers_;
+    std::unique_ptr<DataSlice> current_slice_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
+
     BaseSettings base_settings_;
 
     void removeOldBufferData(); // remove all data before current_slice_begin_
-    virtual bool processSlice_impl() = 0;
+    virtual void processSlice_impl() = 0;
 
     void clearOldTargetReports();
     void createTargetReports();
 
     std::map<unsigned int, std::map<unsigned long, unsigned int>> createAssociations();
-    void saveAssociations(std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
-    void saveReferences();
-    void saveTargets();
+    std::map<std::string, std::shared_ptr<Buffer>> createAssociationBuffers(
+        std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
+    std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
 
-private:
+  private:
     ReferenceCalculatorSettings ref_calc_settings_;
+
+    unsigned int slice_cnt_ {0};
+    boost::posix_time::ptime current_slice_begin_;
+    boost::posix_time::ptime next_slice_begin_;
+    boost::posix_time::ptime timestamp_min_, timestamp_max_;
+    bool first_slice_ {false};
+
+    boost::posix_time::ptime remove_before_time_;
+    boost::posix_time::ptime write_before_time_;
 };
