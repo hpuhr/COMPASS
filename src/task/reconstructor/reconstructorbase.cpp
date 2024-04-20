@@ -167,6 +167,33 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
     return slice;
 }
 
+void ReconstructorBase::reset()
+{
+    loginf << "ReconstructorBase: reset/init";
+
+            //buffers_.clear();
+    current_slice_ = nullptr;
+    accessor_->clear();
+
+    slice_cnt_ = 0;
+    current_slice_begin_ = {};
+    next_slice_begin_ = {};
+    timestamp_min_ = {};
+    timestamp_max_ = {};
+    first_slice_ = false;
+
+    remove_before_time_ = {};
+    write_before_time_ = {};
+
+    target_reports_.clear();
+    tr_timestamps_.clear();
+    tr_ds_.clear();
+    targets_.clear();
+
+    assert (acc_estimator_);
+    acc_estimator_->init(this);
+}
+
 /**
  */
 void ReconstructorBase::processSlice(std::unique_ptr<ReconstructorBase::DataSlice> data_slice)
@@ -228,7 +255,8 @@ void ReconstructorBase::clearOldTargetReports()
 
 void ReconstructorBase::createTargetReports()
 {
-    loginf << "ReconstructorBase: createTargetReports: current_slice_begin " << Time::toString(current_slice_begin_);
+    loginf << "ReconstructorBase: createTargetReports: current_slice_begin "
+           << Time::toString(currentSlice().slice_begin_);
 
     boost::posix_time::ptime ts;
     unsigned long record_num;
@@ -264,7 +292,7 @@ void ReconstructorBase::createTargetReports()
             if (!tgt_acc.position(cnt))
                 continue;
 
-            if (ts >= current_slice_begin_) // insert
+            if (ts >= currentSlice().slice_begin_) // insert
             {
                 // base info
                 info.buffer_index_ = cnt;
@@ -312,7 +340,7 @@ void ReconstructorBase::createTargetReports()
             }
             else // update buffer_index_
             {
-                assert (ts >= remove_before_time_);
+                assert (ts >= currentSlice().remove_before_time_);
 
                 if (!target_reports_.count(record_num))
                     logerr << "ReconstructorBase: createTargetReports: missing prev ts " << Time::toString(ts);
@@ -343,7 +371,7 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase:
 
             dbContent::targetReport::ReconstructorInfo& tr = target_reports_.at(rn_it);
 
-            if (tr.timestamp_ < write_before_time_) // tr.in_current_slice_
+            if (tr.timestamp_ < currentSlice().write_before_time_) // tr.in_current_slice_
             {
                 associations[Number::recNumGetDBContId(rn_it)][rn_it] = tgt_it.first;
                 ++num_assoc;
@@ -411,7 +439,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
                 {
                     assert (target_reports_.count(rn_it));
 
-                    if (target_reports_.at(rn_it).timestamp_ >= write_before_time_)
+                    if (target_reports_.at(rn_it).timestamp_ >= currentSlice().write_before_time_)
                         continue;
 
                     rec_num_col_vec.set(buf_cnt, rn_it);
@@ -612,31 +640,6 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     mm.ay_stddev = acc_acc.ay_stddev_;
 }
 
-void ReconstructorBase::reset()
-{
-    loginf << "ReconstructorBase: reset/init";
 
-    //buffers_.clear();
-    current_slice_ = nullptr;
-    accessor_->clear();
-
-    slice_cnt_ = 0;
-    current_slice_begin_ = {};
-    next_slice_begin_ = {};
-    timestamp_min_ = {};
-    timestamp_max_ = {};
-    first_slice_ = false;
-
-    remove_before_time_ = {};
-    write_before_time_ = {};
-
-    target_reports_.clear();
-    tr_timestamps_.clear();
-    tr_ds_.clear();
-    targets_.clear();
-
-    assert (acc_estimator_);
-    acc_estimator_->init(this);
-}
 
 

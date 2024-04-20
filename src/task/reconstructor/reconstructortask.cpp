@@ -307,7 +307,7 @@ void ReconstructorTask::loadDataSlice()
     assert (currentReconstructor()->hasNextTimeSlice());
     assert (!loading_slice_);
 
-    updateProgress("Loading slice", true);
+    //updateProgress("Loading slice", true);
 
             //boost::posix_time::ptime min_ts, max_ts;
 
@@ -392,10 +392,6 @@ void ReconstructorTask::loadingDoneSlot()
 
     loginf << "ReconstructorTask: loadingDoneSlot: is_last_slice " << last_slice;
 
-    updateProgress("Processing slice", true);
-
-    //std::map<std::string, std::shared_ptr<Buffer>> data = std::move(data_); // move out of there
-
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     loading_slice_->data_ = dbcontent_man.data();
 
@@ -403,24 +399,26 @@ void ReconstructorTask::loadingDoneSlot()
 
     ++current_slice_idx_;
 
-            // TODO: do async, check if not already processing
-    assert (!currentReconstructor()->hasCurrentSlice());
-    currentReconstructor()->processSlice(std::move(loading_slice_));
+            // check if not already processing
 
-    // processing done
-    assert(currentReconstructor()->currentSlice().processing_done_);
-
-    // do write
-
-    while (writing_slice_)
+    while (currentReconstructor()->hasCurrentSlice())
     {
         QCoreApplication::processEvents();
         QThread::msleep(1);
     }
 
-    assert (!writing_slice_);
-    writing_slice_ = currentReconstructor()->moveCurrentSlice();
-    writeDataSlice(); // starts the async jobs
+    updateProgress("Processing slice", true);
+
+    std::unique_ptr<ReconstructorBase::DataSlice> tmp_slice = std::move(loading_slice_);
+
+    assert (!currentReconstructor()->hasCurrentSlice());
+    std::future<void> pending_future = std::async(std::launch::async, [&] {
+
+        currentReconstructor()->processSlice(std::move(tmp_slice));
+
+        QMetaObject::invokeMethod(this, "processingDoneSlot", Qt::QueuedConnection);
+    });
+
 
     if (last_slice) // disconnect everything
     {
@@ -436,32 +434,31 @@ void ReconstructorTask::loadingDoneSlot()
         loginf << "ReconstructorTask: loadingDoneSlot: next slice";
         loadDataSlice();
     }
+}
 
-    if (last_slice)
+void ReconstructorTask::processingDoneSlot()
+{
+    loginf << "ReconstructorTask: processingDoneSlot";
+
+    // processing done
+    assert(currentReconstructor()->currentSlice().processing_done_);
+
+            // do write
+
+    while (writing_slice_)
     {
-        currentReconstructor()->saveTargets();
-        currentReconstructor()->reset();
-
-        double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
-
-        loginf << "ReconstructorTask: loadingDoneSlot: data loading done after "
-               << String::timeStringFromDouble(time_elapsed_s, false);
-
-
-        COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
-
-        done_ = true;
-
-                //close progress dialog
-        progress_dialog_.reset();
-
-        emit doneSignal();
+        QCoreApplication::processEvents();
+        QThread::msleep(1);
     }
+
+    assert (!writing_slice_);
+    writing_slice_ = currentReconstructor()->moveCurrentSlice();
+    writeDataSlice(); // starts the async jobs
 }
 
 void ReconstructorTask::writeDoneSlot()
 {
-    loginf << "ReconstructorTask: writeDoneSlot";
+    loginf << "ReconstructorTask: writeDoneSlot: last " << writing_slice_->is_last_slice_;
 
     assert (writing_slice_);
 
@@ -473,6 +470,24 @@ void ReconstructorTask::writeDoneSlot()
 
         disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
                    this, &ReconstructorTask::writeDoneSlot);
+
+        currentReconstructor()->saveTargets();
+        currentReconstructor()->reset();
+
+        double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
+
+        loginf << "ReconstructorTask: writeDoneSlot: done after "
+               << String::timeStringFromDouble(time_elapsed_s, false);
+
+
+        COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+
+        done_ = true;
+
+                //close progress dialog
+        progress_dialog_.reset();
+
+        emit doneSignal();
     }
 
     writing_slice_ = nullptr;

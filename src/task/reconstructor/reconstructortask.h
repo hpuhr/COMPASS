@@ -12,6 +12,7 @@
 #include <QObject>
 
 #include <memory>
+#include <future>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -48,6 +49,7 @@ class ReconstructorTask : public Task, public Configurable
     void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
+    void processingDoneSlot();
     void writeDoneSlot();
 
     bool useDStype(const std::string& ds_type) const;
@@ -113,6 +115,8 @@ class ReconstructorTask : public Task, public Configurable
     size_t current_slice_idx_ = 0;
     //std::map<unsigned int, ReconstructorBase::DataSlice> data_slices_;
     std::unique_ptr<ReconstructorBase::DataSlice> loading_slice_;
+    //std::unique_ptr<ReconstructorBase::DataSlice> processing_slice_; // not required, moved into reconstructor
+    std::future<void> processing_future_;
     std::unique_ptr<ReconstructorBase::DataSlice> writing_slice_;
 
     std::set<unsigned int> debug_utns_;
