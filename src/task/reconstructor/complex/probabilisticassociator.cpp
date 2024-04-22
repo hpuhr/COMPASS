@@ -97,7 +97,6 @@ void ProbabilisticAssociator::associateNewData()
 
             if (!tr.acad_ && tn2utn_[ds_id][line_id].count(*tr.track_number_)) // no acad but already mapped
             {
-
                         // check/add using track number mapping
                 std::tie(utn, timestamp_prev) = tn2utn_.at(ds_id).at(line_id).at(*tr.track_number_);
 
@@ -184,13 +183,14 @@ void ProbabilisticAssociator::associateNewData()
             }
             else // have unmapped track number and no mode s - do by mode a/c and position
             {
+                assert (!tn2utn_[ds_id][line_id].count(*tr.track_number_));
+
                 utn = findUTNForTargetReport (tr, utn_vec_, debug_rec_nums, debug_utns);
 
                 if (utn == -1)
                 { // do based on track number alone
                    // create new and add
-
-                    utn = createNewTarget(tr);
+                    utn = createNewTarget(tr); // HEAR
                 }
             }
         }
@@ -293,9 +293,9 @@ void ProbabilisticAssociator::associateNewData()
     checkACADLookup();
 
             // self-associate created utns
-    selfAccociateNewUTNs();
+//    selfAccociateNewUTNs();
 
-    checkACADLookup();
+//    checkACADLookup();
 
             // clear new flags
     for (auto utn : utn_vec_)
@@ -1097,6 +1097,8 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
     else
         utn = 0;
 
+    //assert (utn != 261);
+
     reconstructor_.targets_.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(utn),   // args for key
@@ -1107,7 +1109,8 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
     reconstructor_.targets_.at(utn).created_in_current_slice_ = true;
 
     if (tr.track_number_)
-        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] = std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
+        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
+            std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
 
     if (tr.acad_)
         acad_2_utn_[*tr.acad_] = utn;
