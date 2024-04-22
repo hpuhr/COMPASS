@@ -39,6 +39,8 @@ class ReconstructorTarget
     typedef std::pair<const reconstruction::Reference*,
                       const reconstruction::Reference*> ReferencePair; // both can be nullptr
 
+    typedef std::function<bool(const dbContent::targetReport::ReconstructorInfo& tr_info)> InfoValidFunc;
+
     ReconstructorTarget(ReconstructorBase& reconstructor, unsigned int utn, bool tmp_utn);
     virtual ~ReconstructorTarget();
 
@@ -115,7 +117,9 @@ class ReconstructorTarget
     bool hasDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
     // TODO lambda for selective data
-    ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+    ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp, 
+                                   boost::posix_time::time_duration d_max,
+                                   const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
     ReferencePair refDataFor (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
 //    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timesFor (
