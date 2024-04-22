@@ -67,7 +67,7 @@ void AccuracyEstimatorBase::analyzeAssociatedDistances() const
 //    printStatistics("est acc ", estacc_lambda);
 //    printStatistics("maha dist", ma_lambda);
 
-    loginf << "";
+//    loginf << "";
 }
 
 void AccuracyEstimatorBase::clearAssociatedDistances()

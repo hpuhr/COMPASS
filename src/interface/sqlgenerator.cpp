@@ -828,7 +828,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     command->set(ss.str());
     command->list(property_list);
 
-    loginf << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
+    logdbg << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
 
     return command;
 }

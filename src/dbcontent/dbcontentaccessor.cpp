@@ -50,19 +50,19 @@ bool DBContentAccessor::add(std::map<std::string, std::shared_ptr<Buffer>> buffe
 
         if (buffers_.count(buf_it.first))
         {
-            loginf << "DBContentAccessor: add: adding buffer dbo " << buf_it.first
+            logdbg << "DBContentAccessor: add: adding buffer dbcont " << buf_it.first
                    << " adding size " << buf_it.second->size() << " current size " << buffers_.at(buf_it.first)->size();
 
             buffers_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
 
-            loginf << "DBContentAccessor: add: new buffer dbo " << buf_it.first
+            logdbg << "DBContentAccessor: add: new buffer dbcont " << buf_it.first
                    << " size " << buffers_.at(buf_it.first)->size();
         }
         else
         {
             buffers_[buf_it.first] = std::move(buf_it.second);
 
-            loginf << "DBContentAccessor: add: created buffer dbo " << buf_it.first
+            logdbg << "DBContentAccessor: add: created buffer dbcont " << buf_it.first
                    << " size " << buffers_.at(buf_it.first)->size();
         }
         something_changed = true;
@@ -80,7 +80,7 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    loginf << "DBContentAccessor::removeContentBeforeTimestamp: remove_before_time "
+    loginf << "DBContentAccessor: removeContentBeforeTimestamp: remove_before_time "
            << Time::toString(remove_before_time);
 
     for (auto& buf_it : buffers_)
@@ -121,7 +121,7 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
         {
             index--; // cut at previous
 
-            loginf << "DBContentAccessor: removeContentBeforeTimestamp: cutting " << buf_it.first
+            logdbg << "DBContentAccessor: removeContentBeforeTimestamp: cutting " << buf_it.first
                    << " up to index " << index
                    << " total size " << buffer_size
                    << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));

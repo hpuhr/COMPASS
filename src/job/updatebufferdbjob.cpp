@@ -83,7 +83,7 @@ void UpdateBufferDBJob::run()
     boost::posix_time::time_duration diff = loading_stop_time_ - loading_start_time_;
     load_time = diff.total_milliseconds() / 1000.0;
 
-    loginf << "UpdateBufferDBJob: run: " << dbobject_.name()
+    logdbg << "UpdateBufferDBJob: run: " << dbobject_.name()
            << " write done (" << doubleToStringPrecision(load_time, 2) << " s).";
 
     done_ = true;

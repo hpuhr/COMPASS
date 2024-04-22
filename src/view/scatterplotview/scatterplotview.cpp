@@ -207,7 +207,7 @@ VariableSet ScatterPlotView::getSet(const std::string& dbcontent_name)
 
             if (meta_var.existsIn(dbcontent_name) && !set.hasVariable(meta_var.getFor(dbcontent_name)))
             {
-                loginf << "ScatterPlotView: getSet: adding y var " << meta_var.getFor(dbcontent_name).name();
+                logdbg << "ScatterPlotView: getSet: adding y var " << meta_var.getFor(dbcontent_name).name();
                 set.add(meta_var.getFor(dbcontent_name));
             }
         }
@@ -215,7 +215,7 @@ VariableSet ScatterPlotView::getSet(const std::string& dbcontent_name)
         {
             if (dataVarY().dbContentName() == dbcontent_name && !set.hasVariable(dataVarY()))
             {
-                loginf << "ScatterPlotView: getSet: adding y var " << dataVarY().name();
+                logdbg << "ScatterPlotView: getSet: adding y var " << dataVarY().name();
                 set.add(dataVarY());
             }
         }

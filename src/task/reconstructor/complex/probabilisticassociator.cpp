@@ -127,9 +127,16 @@ void ProbabilisticAssociator::associateNewData()
             }
             else if (tr.acad_) // has mode s address, may already be mapped by track number
             {
-                if (!acad_2_utn_.count(*tr.acad_) && tn2utn_[ds_id].count(*tr.track_number_)) // not already existing, create
+                if (!acad_2_utn_.count(*tr.acad_) && !tn2utn_[ds_id].count(*tr.track_number_)) // not already existing, create
                 {
-                    utn = createNewTarget(tr);
+                    // check if position match to other target would exist
+                    utn = findUTNForTargetReport (tr, utn_vec_, debug_rec_nums, debug_utns);
+
+                    if (utn == -1)
+                    {
+                       // create new and add
+                        utn = createNewTarget(tr);
+                    }
                 }
                 else if (acad_2_utn_.count(*tr.acad_)) // already mapped by acad
                     utn = acad_2_utn_.at(*tr.acad_);

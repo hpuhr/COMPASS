@@ -293,7 +293,7 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
     if (load_in_progress_)
     {
-        loginf << "DBContentManager: loadSlot: quitting previous load";
+        logdbg << "DBContentManager: loadSlot: quitting previous load";
 
         for (auto& object : dbcontent_)
         {
@@ -325,14 +325,14 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
     for (auto& object : dbcontent_)
     {
-        loginf << "DBContentManager: loadSlot: object " << object.first
+        logdbg << "DBContentManager: loadSlot: object " << object.first
                << " loadable " << object.second->loadable()
                << " loading wanted " << ds_man.loadingWanted(object.first)
                << " filters " << COMPASS::instance().filterManager().useFilters();
 
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
-            loginf << "DBContentManager: loadSlot: loading object " << object.first;
+            logdbg << "DBContentManager: loadSlot: loading object " << object.first;
             VariableSet read_set = view_man.getReadSet(object.first);
 
             // add required vars for processing

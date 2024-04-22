@@ -127,10 +127,14 @@ void DBContentReadDBJob::run()
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
     if (diff.total_seconds() > 0)
-        loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": done after " << diff << ", "
+    {
+        logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": done after " << diff << ", "
                << 1000.0 * row_count_ / diff.total_milliseconds() << " el/s";
+    }
     else
-        loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": done";
+    {
+        logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": done";
+    }
 
     done_ = true;
 
