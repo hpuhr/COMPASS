@@ -49,8 +49,9 @@ class ProbabilisticAssociator
 
     unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
-    std::tuple<double, double> getPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
-                                                 const dbContent::ReconstructorTarget& target, bool do_debug);
+    // distance, target acc, tr acc
+    std::tuple<double, double, double> getPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
+                                                         const dbContent::ReconstructorTarget& target, bool do_debug);
 
     void estimateEllipse(dbContent::targetReport::PositionAccuracy& acc, EllipseDef& def) const;
     double estimateAccuracyAt (EllipseDef& def, double bearing_rad) const;

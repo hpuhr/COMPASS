@@ -59,12 +59,14 @@ void ProbabilisticAssociator::associateNewData()
     const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
     const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
     const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
+    const float max_sum_est_std_dev = 1000;
+    const float min_sum_est_std_dev = 100.0;
 
     assert (reconstructor_.targets_.size() == utn_vec_.size());
 
     AccuracyEstimatorBase::AssociatedDistance dist;
 
-    double distance_m{0}, sum_est_std_dev{0};
+    double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0}, sum_est_std_dev{0};
     double mahalanobis_dist{0};
 
     for (auto& ts_it : reconstructor_.tr_timestamps_)
@@ -118,19 +120,26 @@ void ProbabilisticAssociator::associateNewData()
                     assert (reconstructor_.targets_.count(utn));
 
                     // check for position offsets
-                    std::tie(distance_m, sum_est_std_dev) = getPositionOffset(
+                    std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(
                         tr, reconstructor_.targets_.at(utn), do_debug);
 
-                    if (sum_est_std_dev > max_tgt_est_std_dev)
-                        sum_est_std_dev = max_tgt_est_std_dev;
-
-                    mahalanobis_dist = distance_m / sum_est_std_dev;
-
-                    if (mahalanobis_dist > max_mahalanobis_sec_verified_dist)
+                    if (tgt_est_std_dev < max_tgt_est_std_dev) // target estimate reliable enough to break up
                     {
-                        // position offset too large
-                        tn2utn_[ds_id][line_id].erase(*tr.track_number_);
-                        goto YOU_FUCK;
+                        sum_est_std_dev = tgt_est_std_dev + tr_est_std_dev;
+
+                        if (sum_est_std_dev > max_sum_est_std_dev)
+                            sum_est_std_dev = max_sum_est_std_dev;
+                        if (sum_est_std_dev < min_sum_est_std_dev)
+                            sum_est_std_dev = min_sum_est_std_dev;
+
+                        mahalanobis_dist = distance_m / sum_est_std_dev;
+
+                        if (mahalanobis_dist > max_mahalanobis_sec_verified_dist)
+                        {
+                            // position offset too large
+                            tn2utn_[ds_id][line_id].erase(*tr.track_number_);
+                            goto YOU_FUCK;
+                        }
                     }
                 }
             }
@@ -210,16 +219,24 @@ void ProbabilisticAssociator::associateNewData()
             }
             else // not yet existing, create & add target
             {
-                utn = createNewTarget(tr);
-                assert (reconstructor_.targets_.count(utn));
+                utn = findUTNForTargetReport (tr, utn_vec_, debug_rec_nums, debug_utns);
+
+                if (utn == -1)
+                { // do based on track number alone
+                   // create new and add
+                    utn = createNewTarget(tr); // HEAR
+                    assert (reconstructor_.targets_.count(utn));
+                }
+                else
+                    assert (reconstructor_.targets_.count(utn));
             }
 
             if(do_debug)
                 loginf << "DBG tr " << rec_num << " utn by acad";
         }
 
-        if (debug_utns.count(utn))
-            do_debug = true;
+//        if (debug_utns.count(utn))
+//            do_debug = true;
 
         if (utn == -1) // not associated by acad
         {
@@ -460,6 +477,8 @@ int ProbabilisticAssociator::findUTNForTargetReport (
     const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
     const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
     const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
+    const float max_sum_est_std_dev = 1000;
+    const float min_sum_est_std_dev = 100.0;
 
     bool do_debug = debug_rec_nums.count(tr.record_num_);
 
@@ -469,11 +488,14 @@ int ProbabilisticAssociator::findUTNForTargetReport (
     tbb::parallel_for(uint(0), num_targets, [&](unsigned int target_cnt)
                       {
                           unsigned int other_utn = utn_vec.at(target_cnt);
-                          bool do_other_debug = debug_utns.count(other_utn);
+                          bool do_other_debug = false; //debug_utns.count(other_utn);
 
                           ReconstructorTarget& other = reconstructor_.targets_.at(other_utn);
 
                           results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
+
+                          if (tr.acad_ && other.hasACAD()) // has to be covered outside
+                              return;
 
                           if (!other.isTimeInside(timestamp, max_time_diff))
                           {
@@ -542,57 +564,32 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                                   //                tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
                                   //                    timestamp, max_time_diff_sensor);
 
-//                          reconstruction::Measurement mm;
-//                          bool ret;
-//                          double distance_m{0}, bearing_rad{0};
-//                          dbContent::targetReport::PositionAccuracy tr_pos_acc;
-//                          dbContent::targetReport::PositionAccuracy mm_pos_acc;
-//                          EllipseDef acc_ell;
-//                          double tr_est_std_dev{0};
-//                          double tgt_est_std_dev{0};
-//                          double sum_est_std_dev{0};
-//                          double mahalanobis_dist{0};
-
-//                          ret = other.predict(mm, tr);
-//                          assert (ret);
-
-//                          distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
-//                                                                   tr.position_->longitude_ * DEG2RAD,
-//                                                                   mm.lat * DEG2RAD, mm.lon * DEG2RAD);
-
-//                          bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
-//                                                                   tr.position_->longitude_ * DEG2RAD,
-//                                                                   mm.lat * DEG2RAD, mm.lon * DEG2RAD);
-
-//                          tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
-//                          estimateEllipse(tr_pos_acc, acc_ell);
-//                          tr_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
-
-//                          if (do_debug)
-//                              loginf << "DBG tr " << tr.record_num_ << " other_utn "
-//                                     << other_utn << ": distance_m " << distance_m
-//                                     << " tr_est_std_dev " << tr_est_std_dev;
-
-//                          assert (mm.hasStdDevPosition());
-//                          mm_pos_acc = mm.positionAccuracy();
-//                          estimateEllipse(mm_pos_acc, acc_ell);
-//                          tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
-
-//                          sum_est_std_dev = tr_est_std_dev + tgt_est_std_dev;
-
-                          double distance_m{0}, sum_est_std_dev{0};
+                          double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0}, sum_est_std_dev{0};
                           double mahalanobis_dist{0};
 
-                          std::tie(distance_m, sum_est_std_dev) = getPositionOffset(tr, other, do_debug);
+                          std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(tr, other, do_debug);
 
-                          if (sum_est_std_dev > max_tgt_est_std_dev)
+                          if (tgt_est_std_dev > max_tgt_est_std_dev)
+                          {
+                              if (do_debug)
+                                  loginf << "DBG tr " << tr.record_num_ << " other_utn "
+                                         << other_utn << " tgt_est_std_dev hit maximum";
+                              return;
+                          }
+
+                          sum_est_std_dev = tgt_est_std_dev + tr_est_std_dev;
+
+                          if (sum_est_std_dev > max_sum_est_std_dev)
                           {
                               if (do_debug)
                                   loginf << "DBG tr " << tr.record_num_ << " other_utn "
                                          << other_utn << " sum_est_std_dev hit maximum";
 
-                              sum_est_std_dev = max_tgt_est_std_dev;
+                              sum_est_std_dev = max_sum_est_std_dev;
                           }
+
+                          if (sum_est_std_dev < min_sum_est_std_dev)
+                              sum_est_std_dev = min_sum_est_std_dev;
 
                           if (do_debug)
                               loginf << "DBG tr " << tr.record_num_ << " other_utn "
@@ -668,7 +665,7 @@ int ProbabilisticAssociator::findUTNForTargetReport (
 
     if (!first)
     {
-        if (do_debug || debug_utns.count(other_utn))
+        if (do_debug)
         {
             loginf << "DBG tr " << tr.record_num_ << " other_utn "
                    << other_utn << ": match with best_mahalanobis_dist " << best_mahalanobis_dist;
@@ -691,10 +688,10 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
 
     const dbContent::ReconstructorTarget& target = reconstructor_.targets_.at(utn);
 
-    bool print_debug_target = debug_utns.count(utn);
+    bool print_debug_target = false; //debug_utns.count(utn);
 
-    if (print_debug_target)
-        loginf << "ProbabilisticAssociator: findUTNForTarget: utn " << utn;
+//    if (print_debug_target)
+//        loginf << "ProbabilisticAssociator: findUTNForTarget: utn " << utn;
 
             // dont check by mode s, should never work
 
@@ -716,17 +713,20 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
 
     const double prob_min_time_overlap_tracker = 0.1;
     const boost::posix_time::time_duration max_time_diff_tracker = Time::partialSeconds(15.0);
-    const unsigned int min_updates_tracker = 2;
+    const unsigned int min_updates_tracker = 5;
     const double max_altitude_diff_tracker = 300;
-    const unsigned int max_positions_dubious_tracker = 5;
+    const double max_positions_dubious_verified_rate = 0.5;
+    const double max_positions_dubious_unknown_rate = 0.3;
     const double max_distance_quit_tracker = 10*NM2M;
     const double max_distance_dubious_tracker = 3*NM2M;
-    const double max_distance_acceptable_tracker = NM2M/2.0;
+    const double max_distance_acceptable_tracker = 2*NM2M;
 
     tbb::parallel_for(uint(0), num_utns, [&](unsigned int cnt)
                                                                 //for (unsigned int cnt=0; cnt < utn_cnt_; ++cnt)
                       {
                           unsigned int other_utn = utn_vec_.at(cnt);
+
+                          //bool print_debug_target = debug_utns.count(utn) && debug_utns.count(other_utn);
 
                                   // only check for previous targets
                           const dbContent::ReconstructorTarget& other = reconstructor_.targets_.at(other_utn);
@@ -736,15 +736,12 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                           if (utn == other_utn)
                               return;
 
-                                  //                          if (other_utn >= utn)
-                                  //                              return;
-
                           if (target.hasACAD() && other.hasACAD())
                               return;
 
                           Transformation trafo;
 
-                          bool print_debug = debug_utns.count(utn) || debug_utns.count(other_utn);
+                          bool print_debug = debug_utns.count(utn) && debug_utns.count(other_utn);
 
                           if (print_debug)
                           {
@@ -801,10 +798,11 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                           loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check passed";
                                       // check positions
 
-                                      vector<pair<unsigned long, double>> same_distances;
+                                      vector<pair<unsigned long, double>> distances;
                                       double distances_sum {0};
 
                                       unsigned int pos_dubious_cnt {0};
+                                      unsigned int pos_ok_cnt {0};
 
                                       dbContent::targetReport::Position tst_pos;
 
@@ -853,11 +851,14 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
 
                                           if (distance > max_distance_dubious_tracker)
                                               ++pos_dubious_cnt;
+                                          if (distance < max_distance_acceptable_tracker)
+                                              ++pos_ok_cnt;
 
                                           if (distance > max_distance_quit_tracker)
                                                                                      // too far or dubious, quit
                                           {
-                                              same_distances.clear();
+                                              distances.clear();
+                                              pos_ok_cnt = 0;
 
                                               if (print_debug)
                                                   loginf << "\ttarget " << target.utn_ << " other " << other.utn_
@@ -867,27 +868,17 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                               break;
                                           }
 
-                                          if (pos_dubious_cnt > max_positions_dubious_tracker)
-                                          {
-                                              same_distances.clear();
-
-                                              if (print_debug)
-                                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                         << " pos dubious failed "
-                                                         << pos_dubious_cnt << " > " << max_positions_dubious_tracker;
-
-                                              break;
-                                          }
-
                                                   //loginf << "\tdist " << distance;
 
-                                          same_distances.push_back({rn_it, distance});
+                                          distances.push_back({rn_it, distance});
                                           distances_sum += distance;
                                       }
 
-                                      if (same_distances.size() >= min_updates_tracker)
+                                      if (pos_ok_cnt
+                                          && (float) pos_dubious_cnt / (float) pos_ok_cnt < max_positions_dubious_unknown_rate
+                                          && distances.size() >= min_updates_tracker)
                                       {
-                                          double distance_avg = distances_sum / (float) same_distances.size();
+                                          double distance_avg = distances_sum / (float) distances.size();
 
                                           if (distance_avg < max_distance_acceptable_tracker)
                                           {
@@ -895,11 +886,11 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                               {
                                                   loginf << "\ttarget " << target.utn_ << " other " << other.utn_
                                                          << " next utn " << num_utns << " dist avg " << distance_avg
-                                                         << " num " << same_distances.size();
+                                                         << " num " << distances.size();
                                               }
 
                                               results[cnt] = tuple<bool, unsigned int, unsigned int, double>(
-                                                  true, other.utn_, same_distances.size(), distance_avg);
+                                                  true, other.utn_, distances.size(), distance_avg);
                                           }
                                           else
                                           {
@@ -914,7 +905,7 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                           if (print_debug)
                                               loginf << "\ttarget " << target.utn_ << " other " << other.utn_
                                                      << " same distances failed "
-                                                     << same_distances.size() << " < " << min_updates_tracker;
+                                                     << distances.size() << " < " << min_updates_tracker;
                                       }
                                   }
                                   else
@@ -925,10 +916,11 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                               }
                               else if (!ma_different.size()) // check based on pos only
                               {
-                                  vector<pair<unsigned long, double>> same_distances;
+                                  vector<pair<unsigned long, double>> distances;
                                   double distances_sum {0};
 
                                   unsigned int pos_dubious_cnt {0};
+                                  unsigned int pos_ok_cnt {0};
 
                                   dbContent::targetReport::Position tst_pos;
 
@@ -977,11 +969,13 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
 
                                       if (distance > max_distance_dubious_tracker)
                                           ++pos_dubious_cnt;
+                                      if (distance < max_distance_acceptable_tracker)
+                                          ++pos_ok_cnt;
 
                                       if (distance > max_distance_quit_tracker)
                                                                                  // too far or dubious, quit
                                       {
-                                          same_distances.clear();
+                                          distances.clear();
 
                                           if (print_debug)
                                               loginf << "\ttarget " << target.utn_ << " other " << other.utn_
@@ -990,28 +984,17 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
 
                                           break;
                                       }
-
-                                      if (pos_dubious_cnt > max_positions_dubious_tracker)
-                                      {
-                                          same_distances.clear();
-
-                                          if (print_debug)
-                                              loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                     << " pos dubious failed "
-                                                     << pos_dubious_cnt << " > " << max_positions_dubious_tracker;
-
-                                          break;
-                                      }
-
                                               //loginf << "\tdist " << distance;
 
-                                      same_distances.push_back({rn_it, distance});
+                                      distances.push_back({rn_it, distance});
                                       distances_sum += distance;
                                   }
 
-                                  if (same_distances.size() >= min_updates_tracker)
+                                  if (pos_ok_cnt
+                                      && (float) pos_dubious_cnt / (float) pos_ok_cnt < max_positions_dubious_verified_rate
+                                      && distances.size() >= min_updates_tracker)
                                   {
-                                      double distance_avg = distances_sum / (float) same_distances.size();
+                                      double distance_avg = distances_sum / (float) distances.size();
 
                                       if (distance_avg < max_distance_acceptable_tracker)
                                       {
@@ -1019,11 +1002,11 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                           {
                                               loginf << "\ttarget " << target.utn_ << " other " << other.utn_
                                                      << " next utn " << num_utns << " dist avg " << distance_avg
-                                                     << " num " << same_distances.size();
+                                                     << " num " << distances.size();
                                           }
 
                                           results[cnt] = tuple<bool, unsigned int, unsigned int, double>(
-                                              true, other.utn_, same_distances.size(), distance_avg);
+                                              true, other.utn_, distances.size(), distance_avg);
                                       }
                                       else
                                       {
@@ -1038,7 +1021,7 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                       if (print_debug)
                                           loginf << "\ttarget " << target.utn_ << " other " << other.utn_
                                                  << " same distances failed "
-                                                 << same_distances.size() << " < " << min_updates_tracker;
+                                                 << distances.size() << " < " << min_updates_tracker;
                                   }
                               }
                               else
@@ -1068,8 +1051,8 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
     double best_distance_avg;
     double best_score;
 
-    if (print_debug_target)
-        loginf << "\ttarget " << target.utn_ << " checking results";
+//    if (print_debug_target)
+//        loginf << "\ttarget " << target.utn_ << " checking results";
 
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
     {
@@ -1145,7 +1128,8 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
     return utn;
 }
 
-std::tuple<double, double> ProbabilisticAssociator::getPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
+// distance, target acc, tr acc
+std::tuple<double, double, double> ProbabilisticAssociator::getPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
                                              const dbContent::ReconstructorTarget& target, bool do_debug)
 {
     reconstruction::Measurement mm;
@@ -1154,9 +1138,8 @@ std::tuple<double, double> ProbabilisticAssociator::getPositionOffset(const dbCo
     dbContent::targetReport::PositionAccuracy tr_pos_acc;
     dbContent::targetReport::PositionAccuracy mm_pos_acc;
     EllipseDef acc_ell;
-    double tr_est_std_dev{0};
     double tgt_est_std_dev{0};
-    double sum_est_std_dev{0};
+    double tr_est_std_dev{0};
 
     ret = target.predict(mm, tr);
     assert (ret);
@@ -1183,9 +1166,8 @@ std::tuple<double, double> ProbabilisticAssociator::getPositionOffset(const dbCo
     estimateEllipse(mm_pos_acc, acc_ell);
     tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
-    sum_est_std_dev = tr_est_std_dev + tgt_est_std_dev;
-
-    return std::tuple<double, double>(distance_m, sum_est_std_dev);
+    // distance, target acc, tr acc
+    return std::tuple<double, double, double>(distance_m, tgt_est_std_dev, tr_est_std_dev);
 }
 
 void ProbabilisticAssociator::checkACADLookup()
