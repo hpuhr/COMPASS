@@ -317,7 +317,6 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
 
     int other_utn;
 
-
     while (do_it_again)
     {
         loginf << "ProbabilisticAssociator: selfAccociateNewUTNs: run " << run_cnt;
