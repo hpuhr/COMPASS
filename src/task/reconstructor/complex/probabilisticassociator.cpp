@@ -55,13 +55,17 @@ void ProbabilisticAssociator::associateNewData()
     const boost::posix_time::time_duration track_max_time_diff =
         Time::partialSeconds(reconstructor_.settings().track_max_time_diff_);
     //    const float max_altitude_diff = reconstructor_.settings().max_altitude_diff_;
-    //    const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
-    //    const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
-    //    const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
+
+    const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
+    const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
+    const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
 
     assert (reconstructor_.targets_.size() == utn_vec_.size());
 
     AccuracyEstimatorBase::AssociatedDistance dist;
+
+    double distance_m{0}, sum_est_std_dev{0};
+    double mahalanobis_dist{0};
 
     for (auto& ts_it : reconstructor_.tr_timestamps_)
     {
@@ -88,6 +92,8 @@ void ProbabilisticAssociator::associateNewData()
             continue;
         }
 
+        YOU_FUCK:
+
         utn = -1; // not yet found
 
                 // try by track number
@@ -100,8 +106,6 @@ void ProbabilisticAssociator::associateNewData()
                // check/add using track number mapping
                 std::tie(utn, timestamp_prev) = tn2utn_.at(ds_id).at(line_id).at(*tr.track_number_);
 
-                        // TODO could also check for position offsets
-
                         // check for larger time offset
                 if (timestamp - timestamp_prev > track_max_time_diff) // too old
                 {
@@ -110,7 +114,25 @@ void ProbabilisticAssociator::associateNewData()
                     assert (reconstructor_.targets_.count(utn));
                 }
                 else
+                {
                     assert (reconstructor_.targets_.count(utn));
+
+                    // check for position offsets
+                    std::tie(distance_m, sum_est_std_dev) = getPositionOffset(
+                        tr, reconstructor_.targets_.at(utn), do_debug);
+
+                    if (sum_est_std_dev > max_tgt_est_std_dev)
+                        sum_est_std_dev = max_tgt_est_std_dev;
+
+                    mahalanobis_dist = distance_m / sum_est_std_dev;
+
+                    if (mahalanobis_dist > max_mahalanobis_sec_verified_dist)
+                    {
+                        // position offset too large
+                        tn2utn_[ds_id][line_id].erase(*tr.track_number_);
+                        goto YOU_FUCK;
+                    }
+                }
             }
             else if (tr.acad_) // has mode s address, may already be mapped by track number
             {
@@ -288,9 +310,9 @@ void ProbabilisticAssociator::associateNewData()
     checkACADLookup();
 
             // self-associate created utns
-//    selfAccociateNewUTNs();
+    selfAccociateNewUTNs();
 
-//    checkACADLookup();
+    checkACADLookup();
 
             // clear new flags
     for (auto utn : utn_vec_)
@@ -520,43 +542,48 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                                   //                tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
                                   //                    timestamp, max_time_diff_sensor);
 
-                          reconstruction::Measurement mm;
-                          bool ret;
-                          double distance_m{0}, bearing_rad{0};
-                          dbContent::targetReport::PositionAccuracy tr_pos_acc;
-                          dbContent::targetReport::PositionAccuracy mm_pos_acc;
-                          EllipseDef acc_ell;
-                          double tr_est_std_dev{0};
-                          double tgt_est_std_dev{0};
-                          double sum_est_std_dev{0};
+//                          reconstruction::Measurement mm;
+//                          bool ret;
+//                          double distance_m{0}, bearing_rad{0};
+//                          dbContent::targetReport::PositionAccuracy tr_pos_acc;
+//                          dbContent::targetReport::PositionAccuracy mm_pos_acc;
+//                          EllipseDef acc_ell;
+//                          double tr_est_std_dev{0};
+//                          double tgt_est_std_dev{0};
+//                          double sum_est_std_dev{0};
+//                          double mahalanobis_dist{0};
+
+//                          ret = other.predict(mm, tr);
+//                          assert (ret);
+
+//                          distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
+//                                                                   tr.position_->longitude_ * DEG2RAD,
+//                                                                   mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+
+//                          bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
+//                                                                   tr.position_->longitude_ * DEG2RAD,
+//                                                                   mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+
+//                          tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
+//                          estimateEllipse(tr_pos_acc, acc_ell);
+//                          tr_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+
+//                          if (do_debug)
+//                              loginf << "DBG tr " << tr.record_num_ << " other_utn "
+//                                     << other_utn << ": distance_m " << distance_m
+//                                     << " tr_est_std_dev " << tr_est_std_dev;
+
+//                          assert (mm.hasStdDevPosition());
+//                          mm_pos_acc = mm.positionAccuracy();
+//                          estimateEllipse(mm_pos_acc, acc_ell);
+//                          tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+
+//                          sum_est_std_dev = tr_est_std_dev + tgt_est_std_dev;
+
+                          double distance_m{0}, sum_est_std_dev{0};
                           double mahalanobis_dist{0};
 
-                          ret = other.predict(mm, tr);
-                          assert (ret);
-
-                          distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
-                                                                   tr.position_->longitude_ * DEG2RAD,
-                                                                   mm.lat * DEG2RAD, mm.lon * DEG2RAD);
-
-                          bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
-                                                                   tr.position_->longitude_ * DEG2RAD,
-                                                                   mm.lat * DEG2RAD, mm.lon * DEG2RAD);
-
-                          tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
-                          estimateEllipse(tr_pos_acc, acc_ell);
-                          tr_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
-
-                          if (do_debug)
-                              loginf << "DBG tr " << tr.record_num_ << " other_utn "
-                                     << other_utn << ": distance_m " << distance_m
-                                     << " tr_est_std_dev " << tr_est_std_dev;
-
-                          assert (mm.hasStdDevPosition());
-                          mm_pos_acc = mm.positionAccuracy();
-                          estimateEllipse(mm_pos_acc, acc_ell);
-                          tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
-
-                          sum_est_std_dev = tr_est_std_dev + tgt_est_std_dev;
+                          std::tie(distance_m, sum_est_std_dev) = getPositionOffset(tr, other, do_debug);
 
                           if (sum_est_std_dev > max_tgt_est_std_dev)
                           {
@@ -570,7 +597,7 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                           if (do_debug)
                               loginf << "DBG tr " << tr.record_num_ << " other_utn "
                                      << other_utn << ": distance_m " << distance_m
-                                     << " tgt_est_std_dev " << tgt_est_std_dev;
+                                     << " sum_est_std_dev " << sum_est_std_dev;
 
                           mahalanobis_dist = distance_m / sum_est_std_dev;
 
@@ -600,7 +627,7 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                               {
                                   loginf << "DBG tr " << tr.record_num_ << " other_utn "
                                          << other_utn << ": distance_m " << distance_m
-                                         << " est_std_dev sum " << (tr_est_std_dev + tgt_est_std_dev)
+                                         << " sum_est_std_dev sum " << sum_est_std_dev
                                          << " mahalanobis_dist " << mahalanobis_dist
                                          << " nver ok " << (mahalanobis_dist < max_mahalanobis_sec_unknown_dist);
                               }
@@ -1113,16 +1140,52 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
 
     reconstructor_.targets_.at(utn).created_in_current_slice_ = true;
 
-            //    if (tr.track_number_)
-            //        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
-            //            std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
-
-            //    if (tr.acad_)
-            //        acad_2_utn_[*tr.acad_] = utn;
-
     utn_vec_.push_back(utn);
 
     return utn;
+}
+
+std::tuple<double, double> ProbabilisticAssociator::getPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
+                                             const dbContent::ReconstructorTarget& target, bool do_debug)
+{
+    reconstruction::Measurement mm;
+    bool ret;
+    double distance_m{0}, bearing_rad{0};
+    dbContent::targetReport::PositionAccuracy tr_pos_acc;
+    dbContent::targetReport::PositionAccuracy mm_pos_acc;
+    EllipseDef acc_ell;
+    double tr_est_std_dev{0};
+    double tgt_est_std_dev{0};
+    double sum_est_std_dev{0};
+
+    ret = target.predict(mm, tr);
+    assert (ret);
+
+    distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
+                                             tr.position_->longitude_ * DEG2RAD,
+                                             mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+
+    bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
+                                             tr.position_->longitude_ * DEG2RAD,
+                                             mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+
+    tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
+    estimateEllipse(tr_pos_acc, acc_ell);
+    tr_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+
+    if (do_debug)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn "
+               << target.utn_ << ": distance_m " << distance_m
+               << " tr_est_std_dev " << tr_est_std_dev;
+
+    assert (mm.hasStdDevPosition());
+    mm_pos_acc = mm.positionAccuracy();
+    estimateEllipse(mm_pos_acc, acc_ell);
+    tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+
+    sum_est_std_dev = tr_est_std_dev + tgt_est_std_dev;
+
+    return std::tuple<double, double>(distance_m, sum_est_std_dev);
 }
 
 void ProbabilisticAssociator::checkACADLookup()
