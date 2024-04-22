@@ -356,54 +356,99 @@ bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) 
     return true;
 }
 
-ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime timestamp, time_duration d_max) const
+ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime timestamp, 
+                                                                         time_duration d_max,
+                                                                         const InfoValidFunc& tr_valid_func) const
 // lower/upper times, invalid ts if not existing
 {
-    if (tr_timestamps_.count(timestamp))
-        return {&dataFor(tr_timestamps_.find(timestamp)->second), nullptr}; // contains exact value
+    std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_lower, it_upper;
+    bool has_lower = false;
+    bool has_upper = false;
 
-            //    Return iterator to lower bound
-            //    Returns an iterator pointing to the first element in the container whose key is not considered to go
-            //    before k (i.e., either it is equivalent or goes after).
-
-    auto lb_it = tr_timestamps_.lower_bound(timestamp);
-
-    if (lb_it == tr_timestamps_.end())
-        return {nullptr, nullptr};
-
-    assert (lb_it->first >= timestamp);
-
-    if (lb_it->first - timestamp > d_max)
-        return {nullptr, nullptr}; // too much time difference
-
-            // save value
-    ptime upper = lb_it->first;
-
-            // TODO lb_it--; ?
-    while (lb_it != tr_timestamps_.end() && timestamp < lb_it->first)
+    auto it_available = tr_timestamps_.find(timestamp);
+    if (it_available != tr_timestamps_.end())
     {
-        if (lb_it == tr_timestamps_.begin()) // exit condition on first value
+        //timestamp in map => start from timestamp
+        it_lower  = it_available;
+        it_upper  = it_available;
+        has_lower = true;
+        has_upper = true;
+    }
+    else
+    {
+        //get lower bound
+        it_upper = tr_timestamps_.lower_bound(timestamp);
+
+        //lower bound not found => stop
+        if (it_upper == tr_timestamps_.end())
+            return {nullptr, nullptr};
+
+        assert (it_upper->first >= timestamp);
+
+        //too much time difference?
+        if (it_upper->first - timestamp <= d_max)
+            has_upper = true;
+
+        //our upper element is the first element => no lower element
+        if (it_upper != tr_timestamps_.begin())
         {
-            if (timestamp < lb_it->first) // set as not found
-                lb_it = tr_timestamps_.end();
+            //set lower iterator to last elem
+            it_lower = it_upper;
+            --it_lower;
 
-            break;
+            assert (it_lower->first < timestamp);
+
+            //lower item too far away?
+            if (timestamp - it_lower->first <= d_max)
+                has_lower = true;
         }
-
-        lb_it--;
     }
 
-    if (lb_it == tr_timestamps_.end())
-        return {nullptr, &dataFor(tr_timestamps_.find(upper)->second)};
+    if (!tr_valid_func)
+        return {has_lower ? &dataFor(it_lower->second) : nullptr, has_upper ? &dataFor(it_upper->second) : nullptr};
 
-    assert (timestamp >= lb_it->first);
+    if (has_upper)
+    {
+        has_upper = false;
+        for (auto it = it_upper; it != tr_timestamps_.end(); ++it)
+        {
+            if (has_upper || it->first - timestamp > d_max)
+                break;
 
-    if (timestamp - lb_it->first > d_max)
-        return {nullptr, &dataFor(tr_timestamps_.find(upper)->second)}; // too much time difference
+            if (tr_valid_func(dataFor(it->second)))
+            {
+                it_upper  = it;
+                has_upper = true;
+                break;
+            }
+        }
+    }
 
-    ptime lower = lb_it->first;
+    if (has_lower)
+    {
+        has_lower = false;
+        auto it = it_lower;
+        while (1)
+        {
+            if (timestamp - it->first > d_max)
+                break;
 
-    return {&dataFor(tr_timestamps_.find(lower)->second), &dataFor(tr_timestamps_.find(upper)->second)};
+            if (tr_valid_func(dataFor(it->second)))
+            {
+                it_lower  = it;
+                has_lower = true;
+                break;
+            }
+
+            if (it == tr_timestamps_.begin())
+                break;
+            
+            --it;
+        }
+    }
+
+    return {has_lower ? &dataFor(it_lower->second) : nullptr,
+            has_upper ? &dataFor(it_upper->second) : nullptr};
 }
 
 ReconstructorTarget::ReferencePair ReconstructorTarget::refDataFor (ptime timestamp, time_duration d_max) const
@@ -628,7 +673,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 {
     dbContent::targetReport::ReconstructorInfo* lower_rec_num, *upper_rec_num;
 
-    tie(lower_rec_num, upper_rec_num) = dataFor(timestamp, d_max);
+    tie(lower_rec_num, upper_rec_num) = dataFor(timestamp, d_max, [ & ] (const dbContent::targetReport::ReconstructorInfo& ti) { return !ti.do_not_use_position_; });
 
     if (lower_rec_num && !upper_rec_num) // exact time
     {
