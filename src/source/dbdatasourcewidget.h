@@ -4,6 +4,7 @@
 #include <QWidget>
 
 #include <map>
+#include <functional>
 
 class QCheckBox;
 class QLabel;

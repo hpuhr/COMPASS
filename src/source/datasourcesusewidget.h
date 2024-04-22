@@ -22,6 +22,7 @@
 
 #include <map>
 #include <set>
+#include <functional>
 
 class DataSourceManager;
 
