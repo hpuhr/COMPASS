@@ -522,7 +522,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
             return {{}, false};
     }
 
-    if (!lower || !lower->position_ || !upper || upper->position_)
+    if (!lower || !lower->position_ || !upper || !upper->position_)
         return {{}, false};
 
     dbContent::targetReport::Position pos1 = *lower->position_;
@@ -638,7 +638,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
             return {{}, false};
     }
 
-    if (!lower_rec_num || !lower_rec_num->position_ || !upper_rec_num || upper_rec_num->position_)
+    if (!lower_rec_num || !lower_rec_num->position_ || !upper_rec_num || !upper_rec_num->position_)
         return {{}, false};
 
     dbContent::targetReport::Position pos1 = *lower_rec_num->position_;

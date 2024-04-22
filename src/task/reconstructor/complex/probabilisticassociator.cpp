@@ -842,7 +842,7 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                           {
                                               if (print_debug)
                                                   loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                         << " pos calc failed ";
+                                                         << " pos calc distance failed ";
 
                                               continue;
                                           }
