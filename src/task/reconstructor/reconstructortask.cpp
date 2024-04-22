@@ -333,7 +333,7 @@ void ReconstructorTask::loadDataSlice()
 
     for (auto& dbcont_it : dbcontent_man)
     {
-        loginf << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
+        logdbg << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
                << " has data " << dbcont_it.second->hasData();
 
         if (!dbcont_it.second->hasData())
@@ -356,14 +356,9 @@ void ReconstructorTask::writeDataSlice()
 
     for (auto& buf_it : writing_slice_->assoc_data_)
     {
-        loginf << "ReconstructorTask: writeDataSlice: association dbcontent " << buf_it.first;
+        logdbg << "ReconstructorTask: writeDataSlice: association dbcontent " << buf_it.first;
 
         DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
-
-//        string rec_num_col_name =
-//            dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(buf_it.first).dbColumnName();
-
-        //db_interface.updateBuffer(dbcontent.dbTableName(), rec_num_col_name, buf_it.second);
 
         dbcontent.updateData(
             dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(buf_it.first), buf_it.second);

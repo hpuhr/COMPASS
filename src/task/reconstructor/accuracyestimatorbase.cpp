@@ -63,9 +63,9 @@ void AccuracyEstimatorBase::analyzeAssociatedDistances() const
     std::function<double(const AssociatedDistance&)> ma_lambda =
         [] (const AssociatedDistance& dist) { return dist.mahalanobis_distance_; };
 
-    printStatistics("distance ", dist_lambda);
-    printStatistics("est acc ", estacc_lambda);
-    printStatistics("maha dist", ma_lambda);
+//    printStatistics("distance ", dist_lambda);
+//    printStatistics("est acc ", estacc_lambda);
+//    printStatistics("maha dist", ma_lambda);
 
     loginf << "";
 }

@@ -51,12 +51,12 @@ DBContentReadDBJob::~DBContentReadDBJob() {}
 
 void DBContentReadDBJob::run()
 {
-    loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": start";
+    logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": start";
     started_ = true;
 
     if (obsolete_)
     {
-        loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": obsolete before prepared";
+        logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": obsolete before prepared";
         done_ = true;
         return;
     }
@@ -103,7 +103,7 @@ void DBContentReadDBJob::run()
 
         if (!view_manager.isProcessingData() || last_buffer) // distribute data
         {
-            loginf << "DBContentReadDBJob: run: " << dbcontent_.name()
+            logdbg << "DBContentReadDBJob: run: " << dbcontent_.name()
                    << ": emitting intermediate read, size " << row_count_;
 
             emit intermediateSignal(cached_buffer_);
@@ -113,7 +113,7 @@ void DBContentReadDBJob::run()
 
         if (last_buffer)
         {
-            loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": last buffer";
+            logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": last buffer";
             break;
         }
     }

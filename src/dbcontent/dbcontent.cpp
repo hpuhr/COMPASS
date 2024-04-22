@@ -705,7 +705,7 @@ void DBContent::deleteJobDoneSlot()
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
     assert(buffer);
-    loginf << "DBContent: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
+    logdbg << "DBContent: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
 
     DBContentReadDBJob* sender = dynamic_cast<DBContentReadDBJob*>(QObject::sender());
 
@@ -758,7 +758,7 @@ void DBContent::readJobDoneSlot()
 
     if (!isLoading()) // also no more finalize jobs
     {
-        loginf << "DBContent: " << name_ << " readJobDoneSlot: done";
+        logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
         dbcont_manager_.loadingDone(*this);
     }
 }

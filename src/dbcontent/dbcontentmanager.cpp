@@ -1523,7 +1523,7 @@ void DBContentManager::saveSelectedRecNums()
 
 void DBContentManager::restoreSelectedRecNums()
 {
-    loginf << "DBContentManager: restoreSelectedRecNums";
+    logdbg << "DBContentManager: restoreSelectedRecNums";
 
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {

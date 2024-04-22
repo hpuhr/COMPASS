@@ -512,6 +512,7 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                           EllipseDef acc_ell;
                           double tr_est_std_dev{0};
                           double tgt_est_std_dev{0};
+                          double sum_est_std_dev{0};
                           double mahalanobis_dist{0};
 
                           ret = other.predict(mm, tr);
@@ -539,12 +540,15 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                           estimateEllipse(mm_pos_acc, acc_ell);
                           tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
-                          if (tgt_est_std_dev > max_tgt_est_std_dev)
+                          sum_est_std_dev = tr_est_std_dev + tgt_est_std_dev;
+
+                          if (sum_est_std_dev > max_tgt_est_std_dev)
                           {
                               if (do_debug)
                                   loginf << "DBG tr " << tr.record_num_ << " other_utn "
-                                         << other_utn << " tgt_est_std_dev hit maximum";
-                              return;
+                                         << other_utn << " sum_est_std_dev hit maximum";
+
+                              sum_est_std_dev = max_tgt_est_std_dev;
                           }
 
                           if (do_debug)
@@ -552,7 +556,7 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                                      << other_utn << ": distance_m " << distance_m
                                      << " tgt_est_std_dev " << tgt_est_std_dev;
 
-                          mahalanobis_dist = distance_m / (tr_est_std_dev + tgt_est_std_dev);
+                          mahalanobis_dist = distance_m / sum_est_std_dev;
 
                                   //loginf << "DBG3 distance " << distance;
 
@@ -562,7 +566,7 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                               {
                                   loginf << "DBG tr " << tr.record_num_ << " other_utn "
                                          << other_utn << ": distance_m " << distance_m
-                                         << " est_std_dev sum " << (tr_est_std_dev + tgt_est_std_dev)
+                                         << " sum_est_std_dev sum " << sum_est_std_dev
                                          << " mahalanobis_dist " << mahalanobis_dist
                                          << " ver ok " << (mahalanobis_dist < max_mahalanobis_sec_verified_dist);
                               }

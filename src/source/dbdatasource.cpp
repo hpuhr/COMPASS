@@ -235,7 +235,7 @@ bool DBDataSource::loadingWanted() const
 
 void DBDataSource::loadingWanted(bool loading_wanted)
 {
-    loginf << "DBDataSource: loadingWanted: ds " << name_ << " wanted " << loading_wanted;
+    logdbg << "DBDataSource: loadingWanted: ds " << name_ << " wanted " << loading_wanted;
 
     loading_wanted_ = loading_wanted;
 }

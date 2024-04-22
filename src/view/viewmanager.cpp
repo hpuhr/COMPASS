@@ -362,17 +362,17 @@ void ViewManager::unsetCurrentViewPoint ()
 
 void ViewManager::doViewPointAfterLoad ()
 {
-    loginf << "ViewManager: doViewPointAfterLoad";
+    logdbg << "ViewManager: doViewPointAfterLoad";
 
     if (!current_viewable_)
     {
-        loginf << "ViewManager: doViewPointAfterLoad: no viewable";
+        logdbg << "ViewManager: doViewPointAfterLoad: no viewable";
         return; // nothing to do
     }
 
     if (view_point_data_selected_)
     {
-        loginf << "ViewManager: doViewPointAfterLoad: data already selected";
+        logdbg << "ViewManager: doViewPointAfterLoad: data already selected";
         return; // already done, this is a re-load
     }
 

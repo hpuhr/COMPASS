@@ -390,7 +390,7 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase:
 std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociationBuffers(
     std::map<unsigned int, std::map<unsigned long,unsigned int>> associations)
 {
-    loginf << "ReconstructorBase: createAssociationBuffers";
+    logdbg << "ReconstructorBase: createAssociationBuffers";
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -409,7 +409,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
 
         std::map<unsigned long, unsigned int>& tr_associations = cont_assoc_it.second;
 
-        loginf << "ReconstructorBase: createAssociationBuffers: db content " << dbcontent_name;
+        logdbg << "ReconstructorBase: createAssociationBuffers: db content " << dbcontent_name;
 
         string rec_num_name =
             dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).name();
@@ -458,21 +458,21 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
             }
         }
 
-        loginf << "ReconstructorBase: createAssociationBuffers: dcontent " << dbcontent_name
+        logdbg << "ReconstructorBase: createAssociationBuffers: dcontent " << dbcontent_name
                <<  " assoc " << num_associated << " not assoc " << num_not_associated
                << " buffer size " << buffer->size();
 
-        loginf << "ReconstructorBase: createAssociationBuffers: dcontent " << dbcontent_name << " done";
+        logdbg << "ReconstructorBase: createAssociationBuffers: dcontent " << dbcontent_name << " done";
     }
 
-    loginf << "ReconstructorBase: createAssociationBuffers: done";
+    logdbg << "ReconstructorBase: createAssociationBuffers: done";
 
     return assoc_data;
 }
 
 std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenceBuffers()
 {
-    loginf << "ReconstructorBase: createReferenceBuffers: num " << targets_.size();
+    logdbg << "ReconstructorBase: createReferenceBuffers: num " << targets_.size();
 
     std::shared_ptr<Buffer> buffer;
 
@@ -492,7 +492,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
         NullableVector<boost::posix_time::ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(
             DBContent::meta_var_timestamp_.name());
 
-        loginf << "ReconstructorBase: createReferenceBuffers: buffer size " << buffer->size()
+        logdbg << "ReconstructorBase: createReferenceBuffers: buffer size " << buffer->size()
                << " ts min " << Time::toString(ts_vec.get(0))
                << " max " << Time::toString(ts_vec.get(ts_vec.size()-1));
 
@@ -502,7 +502,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
 
         if (!src_man.hasConfigDataSource(ds_id))
         {
-            loginf << "ReconstructorBase: createReferenceBuffers: creating data source";
+            logdbg << "ReconstructorBase: createReferenceBuffers: creating data source";
 
             src_man.createConfigDataSource(ds_id);
             assert (src_man.hasConfigDataSource(ds_id));
@@ -517,7 +517,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
     }
     else
     {
-        loginf << "ReconstructorBase: createReferenceBuffers: empty buffer";
+        logdbg << "ReconstructorBase: createReferenceBuffers: empty buffer";
 
         return std::map<std::string, std::shared_ptr<Buffer>> {};
     }
@@ -564,7 +564,7 @@ void ReconstructorBase::saveTargets()
 
     cont_man.saveTargets();
 
-    loginf << "ReconstructorBase: saveTargets: done";
+    logdbg << "ReconstructorBase: saveTargets: done";
 }
 
 const dbContent::TargetReportAccessor& ReconstructorBase::accessor(dbContent::targetReport::ReconstructorInfo& tr) const

@@ -18,7 +18,7 @@ DataSourceAccuracyEstimator::DataSourceAccuracyEstimator(const dbContent::DBData
 
 void DataSourceAccuracyEstimator::estimateAccuracies()
 {
-    loginf << "DataSourceAccuracyEstimator " << name_ << ": estimateAccuracies";
+    logdbg << "DataSourceAccuracyEstimator " << name_ << ": estimateAccuracies";
 
     assert (reconstructor_);
 
