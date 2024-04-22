@@ -288,9 +288,9 @@ void ProbabilisticAssociator::associateNewData()
     checkACADLookup();
 
             // self-associate created utns
-    selfAccociateNewUTNs();
+//    selfAccociateNewUTNs();
 
-    checkACADLookup();
+//    checkACADLookup();
 
             // clear new flags
     for (auto utn : utn_vec_)
@@ -588,8 +588,11 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                               }
 
                               if (mahalanobis_dist < max_mahalanobis_sec_verified_dist)
+                              {
                                   results[target_cnt] = tuple<bool, unsigned int, double>
                                       (true, other.utn_, mahalanobis_dist);
+                                  assert (distance_m <= max_mahalanobis_sec_verified_dist * max_tgt_est_std_dev);
+                              }
                           }
                           else
                           {
@@ -603,8 +606,11 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                               }
 
                               if (mahalanobis_dist < max_mahalanobis_sec_unknown_dist)
+                              {
                                   results[target_cnt] = tuple<bool, unsigned int, double>
                                       (true, other.utn_, mahalanobis_dist);
+                                  assert (distance_m <= max_mahalanobis_sec_unknown_dist * max_tgt_est_std_dev);
+                              }
                           }
                       });
 
