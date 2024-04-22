@@ -25,11 +25,14 @@ class ProbabilisticAssociator
     ProbIMMReconstructor& reconstructor_;
 
     std::vector<unsigned int> utn_vec_;
-    std::map<unsigned int, unsigned int> acad_2_utn_;
+    std::map<unsigned int, unsigned int> acad_2_utn_; // acad dec -> utn
 
             // ds_id -> track num -> utn, last tod
     std::map<unsigned int, std::map<unsigned int, std::pair<unsigned int, boost::posix_time::ptime>>> tn2utn_;
 
+    unsigned int num_merges_ {0};
+
+    void selfAccociateNewUTNs();
     void checkACADLookup();
 
             // tries to find existing utn for target report, based on mode a/c and position, -1 if failed
@@ -37,6 +40,11 @@ class ProbabilisticAssociator
                                const std::vector<unsigned int>& utn_vec,
                                const std::set<unsigned long>& debug_rec_nums,
                                const std::set<unsigned int>& debug_utns);
+
+    int findUTNForTarget (unsigned int utn,
+                         std::set<unsigned int> utns_to_be_removed,
+                         const std::set<unsigned long>& debug_rec_nums,
+                         const std::set<unsigned int>& debug_utns);
 
     unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 

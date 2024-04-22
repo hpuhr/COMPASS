@@ -46,6 +46,9 @@ class ReconstructorTarget
 
     unsigned int utn_;
     bool tmp_utn_ {false};
+
+    bool created_in_current_slice_ {false};
+
     bool associations_written_ {false}; // set after the utn was used in db at least once
     bool track_begin_ {true}; // unset after first target report written
 
