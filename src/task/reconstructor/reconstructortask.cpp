@@ -138,7 +138,7 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
     {
         double seconds_per_slice = time_elapsed_s / (float) (current_slice_idx_ + 1);
 
-        int num_slices_remaining = ns - (current_slice_idx_ + 1);
+        int num_slices_remaining = ns - current_slice_idx_; // not -1, since will display and async run
         double time_remaining_s = num_slices_remaining * seconds_per_slice;
 
         logdbg << "ReconstructorTask: updateProgress: current_slice_idx " << current_slice_idx_

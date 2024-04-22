@@ -26,6 +26,9 @@ class ProbabilisticAssociationWidget : public QWidget
 
     void maxTgtEstStdDevEditedSlot (double value);
 
+    void maxSumEstStdDevEditedSlot (double value);
+    void minSumEstStdDevEditedSlot (double value);
+
   public:
     explicit ProbabilisticAssociationWidget(
         ProbIMMReconstructor& reconstructor, ProbIMMReconstructorWidget& parent);
@@ -50,7 +53,11 @@ class ProbabilisticAssociationWidget : public QWidget
 
     QDoubleSpinBox* max_mahalanobis_sec_verified_dist_edit_{nullptr};
     QDoubleSpinBox* max_mahalanobis_sec_unknown_dist_edit_{nullptr};
+
     QDoubleSpinBox* max_tgt_est_std_dev_edit_{nullptr};
+
+    QDoubleSpinBox* max_sum_est_std_dev_edit_{nullptr};
+    QDoubleSpinBox* min_sum_est_std_dev_edit_{nullptr};
 
             //    float max_mahalanobis_sec_verified_dist_ {10.0};
             //    float max_mahalanobis_sec_unknown_dist_ {5.0};

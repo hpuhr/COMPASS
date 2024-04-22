@@ -57,10 +57,11 @@ void ProbabilisticAssociator::associateNewData()
     //    const float max_altitude_diff = reconstructor_.settings().max_altitude_diff_;
 
     const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
-    const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
+    //const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
     const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
-    const float max_sum_est_std_dev = 1000;
-    const float min_sum_est_std_dev = 100.0;
+
+    const float max_sum_est_std_dev = reconstructor_.settings().max_sum_est_std_dev_;
+    const float min_sum_est_std_dev = reconstructor_.settings().min_sum_est_std_dev_;
 
     assert (reconstructor_.targets_.size() == utn_vec_.size());
 
@@ -94,7 +95,7 @@ void ProbabilisticAssociator::associateNewData()
             continue;
         }
 
-        YOU_FUCK:
+        START_TR_ASSOC:
 
         utn = -1; // not yet found
 
@@ -138,7 +139,7 @@ void ProbabilisticAssociator::associateNewData()
                         {
                             // position offset too large
                             tn2utn_[ds_id][line_id].erase(*tr.track_number_);
-                            goto YOU_FUCK;
+                            goto START_TR_ASSOC;
                         }
                     }
                 }
@@ -169,8 +170,6 @@ void ProbabilisticAssociator::associateNewData()
                     // check/add using track number mapping
                     std::tie(utn, timestamp_prev) = tn2utn_.at(ds_id).at(line_id).at(*tr.track_number_);
 
-                    // TODO could also check for position offsets
-
                             // check for larger time offset
                     if (timestamp - timestamp_prev > track_max_time_diff) // too old
                     {
@@ -179,8 +178,33 @@ void ProbabilisticAssociator::associateNewData()
                         utn = createNewTarget(tr);
                         assert (reconstructor_.targets_.count(utn));
                     }
-                    else
+                    else // check for position offsets
+                    {
                         assert (reconstructor_.targets_.count(utn));
+
+                                // check for position offsets
+                        std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(
+                            tr, reconstructor_.targets_.at(utn), do_debug);
+
+                        if (tgt_est_std_dev < max_tgt_est_std_dev) // target estimate reliable enough to break up
+                        {
+                            sum_est_std_dev = tgt_est_std_dev + tr_est_std_dev;
+
+                            if (sum_est_std_dev > max_sum_est_std_dev)
+                                sum_est_std_dev = max_sum_est_std_dev;
+                            if (sum_est_std_dev < min_sum_est_std_dev)
+                                sum_est_std_dev = min_sum_est_std_dev;
+
+                            mahalanobis_dist = distance_m / sum_est_std_dev;
+
+                            if (mahalanobis_dist > max_mahalanobis_sec_verified_dist)
+                            {
+                                // position offset too large
+                                tn2utn_[ds_id][line_id].erase(*tr.track_number_);
+                                goto START_TR_ASSOC;
+                            }
+                        }
+                    }
                 }
                 else // track num, acad present - but not yet mapped
                 {
@@ -477,8 +501,9 @@ int ProbabilisticAssociator::findUTNForTargetReport (
     const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
     const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
     const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
-    const float max_sum_est_std_dev = 1000;
-    const float min_sum_est_std_dev = 100.0;
+
+    const float max_sum_est_std_dev = reconstructor_.settings().max_sum_est_std_dev_;
+    const float min_sum_est_std_dev = reconstructor_.settings().min_sum_est_std_dev_;
 
     bool do_debug = debug_rec_nums.count(tr.record_num_);
 
@@ -615,7 +640,7 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                               {
                                   results[target_cnt] = tuple<bool, unsigned int, double>
                                       (true, other.utn_, mahalanobis_dist);
-                                  assert (distance_m <= max_mahalanobis_sec_verified_dist * max_tgt_est_std_dev);
+                                  assert (distance_m <= max_mahalanobis_sec_verified_dist * max_sum_est_std_dev);
                               }
                           }
                           else
@@ -633,7 +658,7 @@ int ProbabilisticAssociator::findUTNForTargetReport (
                               {
                                   results[target_cnt] = tuple<bool, unsigned int, double>
                                       (true, other.utn_, mahalanobis_dist);
-                                  assert (distance_m <= max_mahalanobis_sec_unknown_dist * max_tgt_est_std_dev);
+                                  assert (distance_m <= max_mahalanobis_sec_unknown_dist * max_sum_est_std_dev);
                               }
                           }
                       });

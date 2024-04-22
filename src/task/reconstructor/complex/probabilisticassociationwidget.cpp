@@ -68,9 +68,31 @@ ProbabilisticAssociationWidget::ProbabilisticAssociationWidget(
     connect(max_tgt_est_std_dev_edit_, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &ProbabilisticAssociationWidget::maxTgtEstStdDevEditedSlot);
 
-    layout->addRow( new QLabel("Maxmimum Tracking Std.Dev. for Positon Matching [m]"),
+    layout->addRow( new QLabel("Maximimum Tracking Std.Dev. for Position Matching [m]"),
                    max_tgt_est_std_dev_edit_);
 
+
+//    QDoubleSpinBox* max_sum_est_std_dev_edit_{nullptr};
+
+    max_sum_est_std_dev_edit_ = new QDoubleSpinBox();
+    max_sum_est_std_dev_edit_->setRange(0, 10000);
+    max_sum_est_std_dev_edit_->setDecimals(2);
+    connect(max_sum_est_std_dev_edit_, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            this, &ProbabilisticAssociationWidget::maxSumEstStdDevEditedSlot);
+
+    layout->addRow( new QLabel("Maximimum Sum Std.Dev. for Position Matching [m]"),
+                   max_sum_est_std_dev_edit_);
+
+//    QDoubleSpinBox* min_sum_est_std_dev_edit_{nullptr};
+
+    min_sum_est_std_dev_edit_ = new QDoubleSpinBox();
+    min_sum_est_std_dev_edit_->setRange(0, 10000);
+    min_sum_est_std_dev_edit_->setDecimals(2);
+    connect(min_sum_est_std_dev_edit_, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            this, &ProbabilisticAssociationWidget::minSumEstStdDevEditedSlot);
+
+    layout->addRow( new QLabel("Minimum Sum Std.Dev. for Position Matching [m]"),
+                   min_sum_est_std_dev_edit_);
 
     main_layout->addLayout(layout);
 
@@ -121,6 +143,17 @@ void ProbabilisticAssociationWidget::updateValues()
             //    float max_mahalanobis_sec_verified_dist_ {10.0};
             //    float max_mahalanobis_sec_unknown_dist_ {5.0};
             //    float max_tgt_est_std_dev_  {2000.0};
+
+
+//    QDoubleSpinBox* max_sum_est_std_dev_edit_{nullptr};
+
+    assert (max_sum_est_std_dev_edit_);
+    max_sum_est_std_dev_edit_->setValue(reconstructor_.settings().max_sum_est_std_dev_);
+
+//    QDoubleSpinBox* min_sum_est_std_dev_edit_{nullptr};
+
+    assert (min_sum_est_std_dev_edit_);
+    min_sum_est_std_dev_edit_->setValue(reconstructor_.settings().min_sum_est_std_dev_);
 }
 
 void ProbabilisticAssociationWidget::maxTimeDiffEditedSlot (int value)
@@ -161,4 +194,17 @@ void ProbabilisticAssociationWidget::maxTgtEstStdDevEditedSlot (double value)
     loginf << "SimpleReconstructorAssociationWidget: maxTgtEstStdDevEditedSlot: value '" << value << "'";
 
     reconstructor_.settings().max_tgt_est_std_dev_ = value;
+}
+
+void ProbabilisticAssociationWidget::maxSumEstStdDevEditedSlot (double value)
+{
+    loginf << "SimpleReconstructorAssociationWidget: maxSumEstStdDevEditedSlot: value '" << value << "'";
+
+    reconstructor_.settings().max_sum_est_std_dev_ = value;
+}
+void ProbabilisticAssociationWidget::minSumEstStdDevEditedSlot (double value)
+{
+    loginf << "SimpleReconstructorAssociationWidget: minSumEstStdDevEditedSlot: value '" << value << "'";
+
+    reconstructor_.settings().min_sum_est_std_dev_ = value;
 }

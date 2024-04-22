@@ -33,7 +33,11 @@ ProbIMMReconstructor::ProbIMMReconstructor(const std::string& class_id,
                       settings_.max_mahalanobis_sec_verified_dist_);
     registerParameter("max_mahalanobis_sec_unknown_dist", &settings_.max_mahalanobis_sec_unknown_dist_,
                       settings_.max_mahalanobis_sec_unknown_dist_);
+
     registerParameter("max_tgt_est_std_dev", &settings_.max_tgt_est_std_dev_, settings_.max_tgt_est_std_dev_);
+
+    registerParameter("max_sum_est_std_dev", &settings_.max_sum_est_std_dev_, settings_.max_sum_est_std_dev_);
+    registerParameter("min_sum_est_std_dev", &settings_.min_sum_est_std_dev_, settings_.min_sum_est_std_dev_);
 }
 
 ProbIMMReconstructor::~ProbIMMReconstructor() {}

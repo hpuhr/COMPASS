@@ -19,7 +19,10 @@ class ProbIMMReconstructorSettings
 
     float max_mahalanobis_sec_verified_dist_ {10.0};
     float max_mahalanobis_sec_unknown_dist_ {5.0};
-    float max_tgt_est_std_dev_  {2000.0};
+    float max_tgt_est_std_dev_  {1000.0};
+
+    float max_sum_est_std_dev_ {2000.0};
+    float min_sum_est_std_dev_ {50.0};
 
     //ref calculation
     SimpleReferenceCalculator::Settings ref_calc_settings_;
