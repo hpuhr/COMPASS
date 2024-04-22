@@ -44,7 +44,6 @@ class ProbabilisticAssociator
                                const std::set<unsigned int>& debug_utns);
 
     int findUTNForTarget (unsigned int utn,
-                         std::set<unsigned int> utns_to_be_removed,
                          const std::set<unsigned long>& debug_rec_nums,
                          const std::set<unsigned int>& debug_utns);
 
