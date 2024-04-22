@@ -97,7 +97,7 @@ void ProbabilisticAssociator::associateNewData()
 
             if (!tr.acad_ && tn2utn_[ds_id][line_id].count(*tr.track_number_)) // no acad but already mapped
             {
-                        // check/add using track number mapping
+               // check/add using track number mapping
                 std::tie(utn, timestamp_prev) = tn2utn_.at(ds_id).at(line_id).at(*tr.track_number_);
 
                         // TODO could also check for position offsets
@@ -108,23 +108,23 @@ void ProbabilisticAssociator::associateNewData()
                     // create new and add
                     utn = createNewTarget(tr);
                 }
-                else // time ok, just update and check acad lookup
-                {
-                    tn2utn_[ds_id][line_id][*tr.track_number_].second = timestamp;
+                //                else // time ok, just update and check acad lookup
+                //                {
+                //                    tn2utn_[ds_id][line_id][*tr.track_number_].second = timestamp;
 
-                            // check acad mapping
-                    if (tr.acad_ && acad_2_utn_.count(*tr.acad_))
-                    {
-                        if (utn != acad_2_utn_.at(*tr.acad_))
-                        {
-                            logwrn << "ProbabilisticAssociator: associateNewData: acad issue, "
-                                   << String::hexStringFromInt(*tr.acad_, 6, '0')
-                                   << " found both in utn " << utn << " and lookup utn " << acad_2_utn_.at(*tr.acad_);
+                //                            // check acad mapping
+                //                    if (tr.acad_ && acad_2_utn_.count(*tr.acad_))
+                //                    {
+                //                        if (utn != acad_2_utn_.at(*tr.acad_))
+                //                        {
+                //                            logwrn << "ProbabilisticAssociator: associateNewData: acad issue, "
+                //                                   << String::hexStringFromInt(*tr.acad_, 6, '0')
+                //                                   << " found both in utn " << utn << " and lookup utn " << acad_2_utn_.at(*tr.acad_);
 
-                            acad_2_utn_.at(*tr.acad_) = utn;
-                        }
-                    }
-                }
+                //                            acad_2_utn_.at(*tr.acad_) = utn;
+                //                        }
+                //                    }
+                //                }
             }
             else if (tr.acad_) // has mode s address, may already be mapped by track number
             {
@@ -140,7 +140,9 @@ void ProbabilisticAssociator::associateNewData()
                     }
                 }
                 else if (acad_2_utn_.count(*tr.acad_)) // already mapped by acad
+                {
                     utn = acad_2_utn_.at(*tr.acad_);
+                }
                 else if (tn2utn_[ds_id][line_id].count(*tr.track_number_)) // already mapped by tn
                 {
                     // check/add using track number mapping
@@ -155,29 +157,28 @@ void ProbabilisticAssociator::associateNewData()
 
                         utn = createNewTarget(tr);
                     }
-                    else // time ok, just update and check acad lookup
-                    {
-                        tn2utn_[ds_id][line_id][*tr.track_number_].second = timestamp;
+                    //                    else // time ok, just update and check acad lookup
+                    //                    {
+                    //                        tn2utn_[ds_id][line_id][*tr.track_number_].second = timestamp;
 
-                                // check acad mapping
-                        if (tr.acad_ && acad_2_utn_.count(*tr.acad_))
-                        {
-                            if (utn != acad_2_utn_.at(*tr.acad_))
-                            {
-                                logwrn << "ProbabilisticAssociator: associateNewData: acad issue, "
-                                       << String::hexStringFromInt(*tr.acad_, 6, '0')
-                                       << " found both in utn " << utn << " and lookup utn " << acad_2_utn_.at(*tr.acad_);
+                    //                                // check acad mapping
+                    //                        if (tr.acad_ && acad_2_utn_.count(*tr.acad_))
+                    //                        {
+                    //                            if (utn != acad_2_utn_.at(*tr.acad_))
+                    //                            {
+                    //                                logwrn << "ProbabilisticAssociator: associateNewData: acad issue, "
+                    //                                       << String::hexStringFromInt(*tr.acad_, 6, '0')
+                    //                                       << " found both in utn " << utn << " and lookup utn " << acad_2_utn_.at(*tr.acad_);
 
-                                acad_2_utn_.at(*tr.acad_) = utn;
-                            }
-                        }
-                    }
+                    //                                acad_2_utn_.at(*tr.acad_) = utn;
+                    //                            }
+                    //                        }
+                    //                    }
                 }
                 else // track num, acad present - but not yet mapped
                 {
 
                             // not mapped, create new
-
                     utn = createNewTarget(tr);
                 }
             }
@@ -222,7 +223,6 @@ void ProbabilisticAssociator::associateNewData()
                 loginf << "DBG tr " << rec_num << " no utn by acad, doing mode a/c + pos";
 
             utn = findUTNForTargetReport (tr, utn_vec_, debug_rec_nums, debug_utns);
-
         }
 
         if (utn != -1) // estimate accuarcy and associate
@@ -287,15 +287,22 @@ void ProbabilisticAssociator::associateNewData()
             }
 
             reconstructor_.targets_.at(utn).addTargetReport(rec_num);
+
+            if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
+                tn2utn_[ds_id][line_id][*tr.track_number_] =
+                    std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
+
+            if (tr.acad_)
+                acad_2_utn_[*tr.acad_] = utn;
         }
     }
 
     checkACADLookup();
 
             // self-associate created utns
-//    selfAccociateNewUTNs();
+    selfAccociateNewUTNs();
 
-//    checkACADLookup();
+    checkACADLookup();
 
             // clear new flags
     for (auto utn : utn_vec_)
@@ -366,16 +373,16 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
                 {
                     for (auto& line_it : ds_it.second)
                     {
-                    for (auto& tn_it : line_it.second)
-                    {
-                        if (tn_it.first == utn)
+                        for (auto& tn_it : line_it.second)
                         {
-                            // replace utn
-                            tn2utn_[ds_it.first][line_it.first][tn_it.first] =
-                                std::pair<unsigned int, boost::posix_time::ptime> (
-                                    (unsigned int) other_utn, tn_it.second.second);
+                            if (tn_it.first == utn)
+                            {
+                                // replace utn
+                                tn2utn_[ds_it.first][line_it.first][tn_it.first] =
+                                    std::pair<unsigned int, boost::posix_time::ptime> (
+                                        (unsigned int) other_utn, tn_it.second.second);
+                            }
                         }
-                    }
                     }
 
                 }
@@ -706,8 +713,8 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                           if (utns_to_be_removed.count(other_utn))
                               return;
 
-//                          if (other_utn >= utn)
-//                              return;
+                          //                          if (other_utn >= utn)
+                          //                              return;
 
                           if (target.hasACAD() && other.hasACAD())
                               return;
@@ -1097,7 +1104,9 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
     else
         utn = 0;
 
-    //assert (utn != 261);
+            //assert (utn != 261);
+    if (tr.track_number_)
+        assert (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
 
     reconstructor_.targets_.emplace(
         std::piecewise_construct,
@@ -1108,12 +1117,12 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
 
     reconstructor_.targets_.at(utn).created_in_current_slice_ = true;
 
-    if (tr.track_number_)
-        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
-            std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
+    //    if (tr.track_number_)
+    //        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
+    //            std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
 
-    if (tr.acad_)
-        acad_2_utn_[*tr.acad_] = utn;
+    //    if (tr.acad_)
+    //        acad_2_utn_[*tr.acad_] = utn;
 
     utn_vec_.push_back(utn);
 
