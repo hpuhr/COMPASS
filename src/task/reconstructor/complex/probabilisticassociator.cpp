@@ -41,6 +41,7 @@ void ProbabilisticAssociator::associateNewData()
 
     unsigned long rec_num;
     unsigned int ds_id;
+    unsigned int line_id;
     unsigned int dbcont_id;
     boost::posix_time::ptime timestamp;
     int utn;
@@ -77,6 +78,7 @@ void ProbabilisticAssociator::associateNewData()
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
         ds_id = tr.ds_id_;
+        line_id = tr.line_id_;
 
         if (!tr.in_current_slice_)
         {
@@ -93,11 +95,11 @@ void ProbabilisticAssociator::associateNewData()
         {
             // track number of cat062 and reftraj are reliable enough to do utn assoc based on them
 
-            if (!tr.acad_ && tn2utn_[ds_id].count(*tr.track_number_)) // no acad but already mapped
+            if (!tr.acad_ && tn2utn_[ds_id][line_id].count(*tr.track_number_)) // no acad but already mapped
             {
 
                         // check/add using track number mapping
-                std::tie(utn, timestamp_prev) = tn2utn_.at(ds_id).at(*tr.track_number_);
+                std::tie(utn, timestamp_prev) = tn2utn_.at(ds_id).at(line_id).at(*tr.track_number_);
 
                         // TODO could also check for position offsets
 
@@ -109,7 +111,7 @@ void ProbabilisticAssociator::associateNewData()
                 }
                 else // time ok, just update and check acad lookup
                 {
-                    tn2utn_[ds_id][*tr.track_number_].second = timestamp;
+                    tn2utn_[ds_id][line_id][*tr.track_number_].second = timestamp;
 
                             // check acad mapping
                     if (tr.acad_ && acad_2_utn_.count(*tr.acad_))
@@ -127,7 +129,7 @@ void ProbabilisticAssociator::associateNewData()
             }
             else if (tr.acad_) // has mode s address, may already be mapped by track number
             {
-                if (!acad_2_utn_.count(*tr.acad_) && !tn2utn_[ds_id].count(*tr.track_number_)) // not already existing, create
+                if (!acad_2_utn_.count(*tr.acad_) && !tn2utn_[ds_id][line_id].count(*tr.track_number_)) // not already existing, create
                 {
                     // check if position match to other target would exist
                     utn = findUTNForTargetReport (tr, utn_vec_, debug_rec_nums, debug_utns);
@@ -140,10 +142,10 @@ void ProbabilisticAssociator::associateNewData()
                 }
                 else if (acad_2_utn_.count(*tr.acad_)) // already mapped by acad
                     utn = acad_2_utn_.at(*tr.acad_);
-                else if (tn2utn_[ds_id].count(*tr.track_number_)) // already mapped by tn
+                else if (tn2utn_[ds_id][line_id].count(*tr.track_number_)) // already mapped by tn
                 {
                     // check/add using track number mapping
-                    std::tie(utn, timestamp_prev) = tn2utn_.at(ds_id).at(*tr.track_number_);
+                    std::tie(utn, timestamp_prev) = tn2utn_.at(ds_id).at(line_id).at(*tr.track_number_);
 
                             // TODO could also check for position offsets
 
@@ -156,7 +158,7 @@ void ProbabilisticAssociator::associateNewData()
                     }
                     else // time ok, just update and check acad lookup
                     {
-                        tn2utn_[ds_id][*tr.track_number_].second = timestamp;
+                        tn2utn_[ds_id][line_id][*tr.track_number_].second = timestamp;
 
                                 // check acad mapping
                         if (tr.acad_ && acad_2_utn_.count(*tr.acad_))
@@ -362,16 +364,20 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
 
                 for (auto& ds_it : tn2utn_)
                 {
-                    for (auto& tn_it : ds_it.second)
+                    for (auto& line_it : ds_it.second)
+                    {
+                    for (auto& tn_it : line_it.second)
                     {
                         if (tn_it.first == utn)
                         {
                             // replace utn
-                            tn2utn_[ds_it.first][tn_it.first] =
+                            tn2utn_[ds_it.first][line_it.first][tn_it.first] =
                                 std::pair<unsigned int, boost::posix_time::ptime> (
                                     (unsigned int) other_utn, tn_it.second.second);
                         }
                     }
+                    }
+
                 }
 
                 do_it_again = true;
@@ -1101,7 +1107,7 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
     reconstructor_.targets_.at(utn).created_in_current_slice_ = true;
 
     if (tr.track_number_)
-        tn2utn_[tr.ds_id_][*tr.track_number_] = std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
+        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] = std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
 
     if (tr.acad_)
         acad_2_utn_[*tr.acad_] = utn;

@@ -27,8 +27,10 @@ class ProbabilisticAssociator
     std::vector<unsigned int> utn_vec_;
     std::map<unsigned int, unsigned int> acad_2_utn_; // acad dec -> utn
 
-            // ds_id -> track num -> utn, last tod
-    std::map<unsigned int, std::map<unsigned int, std::pair<unsigned int, boost::posix_time::ptime>>> tn2utn_;
+            // ds_id -> line id -> track num -> utn, last tod
+    std::map<unsigned int, std::map<unsigned int,
+                                    std::map<unsigned int,
+                                             std::pair<unsigned int, boost::posix_time::ptime>>>> tn2utn_;
 
     unsigned int num_merges_ {0};
 
