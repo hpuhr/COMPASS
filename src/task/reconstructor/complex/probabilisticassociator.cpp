@@ -116,7 +116,7 @@ void ProbabilisticAssociator::associateNewData()
                     utn = createNewTarget(tr);
                     assert (reconstructor_.targets_.count(utn));
                 }
-                else
+                else if (canGetPositionOffset(tr, reconstructor_.targets_.at(utn)))
                 {
                     assert (reconstructor_.targets_.count(utn));
 
@@ -178,7 +178,7 @@ void ProbabilisticAssociator::associateNewData()
                         utn = createNewTarget(tr);
                         assert (reconstructor_.targets_.count(utn));
                     }
-                    else // check for position offsets
+                    else if (canGetPositionOffset(tr, reconstructor_.targets_.at(utn))) // check for position offsets
                     {
                         assert (reconstructor_.targets_.count(utn));
 
@@ -385,8 +385,10 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
 
         do_it_again = false;
 
-        for (auto utn : utn_vec_)
+        for (auto utn_it = utn_vec_.begin(); utn_it != utn_vec_.end(); utn_it++)
         {
+            unsigned int utn = *utn_it;
+
             if (!reconstructor_.targets_.at(utn).created_in_current_slice_)
                 continue;
 
@@ -414,7 +416,8 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
                 reconstructor_.targets_.erase(utn);
 
                         // remove from utn list
-                utn_vec_.erase(std::remove(utn_vec_.begin(), utn_vec_.end(), utn), utn_vec_.end());
+
+                utn_it = utn_vec_.erase(utn_it);
 
                         // remove from acad lookup
                 for (auto& acad_it : acad_2_utn_)
@@ -456,8 +459,6 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
                 do_it_again = true;
 
                 ++num_merges_;
-
-                break;
             }
         }
 
@@ -591,6 +592,9 @@ int ProbabilisticAssociator::findUTNForTargetReport (
 
                           double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0}, sum_est_std_dev{0};
                           double mahalanobis_dist{0};
+
+                          if (!canGetPositionOffset(tr, other))
+                              return;
 
                           std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(tr, other, do_debug);
 
@@ -744,7 +748,7 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
     const double max_positions_dubious_unknown_rate = 0.3;
     const double max_distance_quit_tracker = 10*NM2M;
     const double max_distance_dubious_tracker = 3*NM2M;
-    const double max_distance_acceptable_tracker = 2*NM2M;
+    const double max_distance_acceptable_tracker = NM2M/2;
 
     tbb::parallel_for(uint(0), num_utns, [&](unsigned int cnt)
                                                                 //for (unsigned int cnt=0; cnt < utn_cnt_; ++cnt)
@@ -1151,6 +1155,12 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
     utn_vec_.push_back(utn);
 
     return utn;
+}
+
+bool ProbabilisticAssociator::canGetPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
+                           const dbContent::ReconstructorTarget& target)
+{
+    return tr.position_ && target.canPredict(tr.timestamp_);
 }
 
 // distance, target acc, tr acc

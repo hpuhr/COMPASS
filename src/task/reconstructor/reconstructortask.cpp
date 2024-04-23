@@ -589,6 +589,9 @@ void ReconstructorTask::checkSubConfigurables()
 
 void ReconstructorTask::deleteCalculatedReferences()
 {
+    loginf << "ReconstructorTask: deleteCalculatedReferences: delete_all_calc_reftraj "
+           << currentReconstructor()->baseSettings().delete_all_calc_reftraj;
+
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 

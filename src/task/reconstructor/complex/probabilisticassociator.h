@@ -50,6 +50,8 @@ class ProbabilisticAssociator
     unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
     // distance, target acc, tr acc
+    bool canGetPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
+                               const dbContent::ReconstructorTarget& target);
     std::tuple<double, double, double> getPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
                                                          const dbContent::ReconstructorTarget& target, bool do_debug);
 
