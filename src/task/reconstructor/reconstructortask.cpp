@@ -115,10 +115,12 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
     if (!progress_dialog_)
         return;
 
-    int ns = currentReconstructor()->numSlices();
+    int ns   = currentReconstructor()->numSlices();
+    int sidx = std::max(0, std::min((int)current_slice_idx_, ns - 1));
+
     QString slice_p;
     if (ns >= 0)
-        slice_p = " " + QString::number(current_slice_idx_ + 1) + "/" + QString::number(ns);
+        slice_p = " " + QString::number(sidx + 1) + "/" + QString::number(ns);
 
     QString pmsg = msg;
     if (add_slice_progress)
@@ -129,24 +131,23 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
     double progress = 0.0;
     if (ns >= 1)
     {
-        progress = (double) current_slice_idx_ / (double) ns;
+        progress = (double) sidx / (double) ns;
     }
 
     pmsg += ("\n\nElapsed: "+String::timeStringFromDouble(time_elapsed_s, false)).c_str();
 
-    if (ns && current_slice_idx_) // do remaining time estimate if possible
+    if (ns && sidx) // do remaining time estimate if possible
     {
-        double seconds_per_slice = time_elapsed_s / (float) (current_slice_idx_ + 1);
+        double seconds_per_slice = time_elapsed_s / (float) (sidx + 1);
 
-        int num_slices_remaining = ns - current_slice_idx_; // not -1, since will display and async run
+        int num_slices_remaining = ns - sidx; // not -1, since will display and async run
         double time_remaining_s = num_slices_remaining * seconds_per_slice;
 
-        logdbg << "ReconstructorTask: updateProgress: current_slice_idx " << current_slice_idx_
+        logdbg << "ReconstructorTask: updateProgress: current_slice_idx " << sidx
                << " ns " << ns << " num_slices_remaining " << num_slices_remaining
                << " time_remaining_s " << time_remaining_s;
 
-        pmsg += ("\tRemaining: "+String::timeStringFromDouble(time_remaining_s, false)).c_str();
-
+        pmsg += ("\tRemaining: " + String::timeStringFromDouble(time_remaining_s, false)).c_str();
     }
 
     progress_dialog_->setLabelText(pmsg);
@@ -264,6 +265,7 @@ void ReconstructorTask::run()
     progress_dialog_->setCancelButton(nullptr);
     progress_dialog_->setMinimum(0);
     progress_dialog_->setMaximum(100);
+    progress_dialog_->setAutoClose(false);
     progress_dialog_->setWindowTitle("Reconstructing...");
 
     progress_dialog_->show();
@@ -309,12 +311,12 @@ void ReconstructorTask::loadDataSlice()
 
     //updateProgress("Loading slice", true);
 
-            //boost::posix_time::ptime min_ts, max_ts;
+    //boost::posix_time::ptime min_ts, max_ts;
 
     loading_slice_ = currentReconstructor()->getNextTimeSlice();
     //assert (min_ts <= max_ts);
 
-            //bool last_slice = !currentReconstructor()->hasNextTimeSlice();
+    //bool last_slice = !currentReconstructor()->hasNextTimeSlice();
 
     loginf << "ReconstructorTask: loadDataSlice: min " << Time::toString(loading_slice_->slice_begin_)
            << " max " << Time::toString(loading_slice_->next_slice_begin_)
@@ -352,7 +354,6 @@ void ReconstructorTask::writeDataSlice()
     assert (writing_slice_);
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
 
     for (auto& buf_it : writing_slice_->assoc_data_)
     {
@@ -392,10 +393,7 @@ void ReconstructorTask::loadingDoneSlot()
 
     dbcontent_man.clearData(); // clear previous
 
-    ++current_slice_idx_;
-
-            // check if not already processing
-
+    // check if not already processing
     while (currentReconstructor()->hasCurrentSlice())
     {
         QCoreApplication::processEvents();
@@ -403,6 +401,7 @@ void ReconstructorTask::loadingDoneSlot()
     }
 
     updateProgress("Processing slice", true);
+    ++current_slice_idx_;
 
     std::unique_ptr<ReconstructorBase::DataSlice> tmp_slice = std::move(loading_slice_);
 
@@ -413,7 +412,6 @@ void ReconstructorTask::loadingDoneSlot()
 
         QMetaObject::invokeMethod(this, "processingDoneSlot", Qt::QueuedConnection);
     });
-
 
     if (last_slice) // disconnect everything
     {
@@ -438,8 +436,7 @@ void ReconstructorTask::processingDoneSlot()
     // processing done
     assert(currentReconstructor()->currentSlice().processing_done_);
 
-            // do write
-
+    // do write
     while (writing_slice_)
     {
         QCoreApplication::processEvents();
@@ -479,7 +476,7 @@ void ReconstructorTask::writeDoneSlot()
 
         done_ = true;
 
-                //close progress dialog
+        //close progress dialog
         progress_dialog_.reset();
 
         emit doneSignal();
