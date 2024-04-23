@@ -1,6 +1,7 @@
 {
     "parameters": {
         "active_sources_ref": {},
+        "active_sources_tst": {},
         "current_standard": "test",
         "dbcontent_name_ref": "RefTraj",
         "dbcontent_name_tst": "CAT062",
