@@ -401,7 +401,7 @@ void SingleExtraTrack::addValuesToGrid(Grid2D& grid, const std::string& layer) c
 {
     if (layer == requirement_->name())
     {
-        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleExtraTrack::DetailKey::Extra, true);
+        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleExtraTrack::DetailKey::Extra, true, false);
     }
 }
 
