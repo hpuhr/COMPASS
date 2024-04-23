@@ -679,6 +679,9 @@ void EvaluationManager::databaseClosedSlot()
     data_sources_ref_.clear();
     data_sources_tst_.clear();
 
+    results_gen_.clear();
+    data_.clear();
+
     widget()->updateDataSources();
     widget()->updateSectors();
     widget()->setDisabled(true);
