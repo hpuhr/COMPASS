@@ -23,21 +23,17 @@
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/single.h"
-//#include "eval/results/detection/joined.h"
 #include "eval/results/joined.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 
 #include "compass.h"
-//#include "dbinterface.h"
-//#include "sqliteconnection.h"
-
 #include "logger.h"
 #include "stringconv.h"
 #include "global.h"
 #include "sectorlayer.h"
+#include "async.h"
 
 #include <QProgressDialog>
 #include <QApplication>
@@ -217,41 +213,14 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     task_done = true;
                 });
 
-//                tbb::task_group g;
-
-//                g.run([&] {
-//                    loginf << "EvaluateTask: execute: starting";
-
-//                    unsigned int num_utns = utns.size();
-//                    assert (done_flags.size() == num_utns);
-
-//                    if (single_thread)
-//                    {
-//                        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
-//                        {
-//                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
-//                            done_flags[utn_cnt] = true;
-//                        }
-//                    }
-//                    else
-//                    {
-//                        tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
-//                        {
-//                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
-//                            done_flags[utn_cnt] = true;
-//                        });
-//                    }
-
-//                    for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
-//                        assert (results[utn_cnt]);
-//                });
-
                 unsigned int tmp_done_cnt;
 
                 postprocess_dialog.setLabelText(
                             ("Sector Layer "+sector_layer_name
                              +":\n Requirement: "+req_group_it->name()+":\n    "+req_cfg_it->name()+"\n\n\n").c_str());
                 postprocess_dialog.setValue(eval_cnt);
+
+                Async::waitAndProcessEventsFor(50);
 
                 logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it->name()
                        << " req '" << req_cfg_it->name() << "'";
@@ -287,12 +256,14 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                                      +" (estimated)").c_str());
 
                         postprocess_dialog.setValue(eval_cnt+tmp_done_cnt);
+
+                        Async::waitAndProcessEventsFor(50);
                     }
 
                     if (!task_done)
                     {
                         QCoreApplication::processEvents();
-                        QThread::msleep(200);
+                        QThread::msleep(100);
                     }
                 }
 
@@ -369,6 +340,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
         }
     }
 
+    postprocess_dialog.close();
+
     updateToChanges();
 
     elapsed_time = boost::posix_time::microsec_clock::local_time();
@@ -381,8 +354,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     // 00:06:22.852 with no parallel
 
     emit eval_man_.resultsChangedSignal();
-
-    postprocess_dialog.close();
 
     loginf << "EvaluationResultsGenerator: evaluate: generating results";
 

@@ -24,6 +24,8 @@
 #include <QProgressDialog>
 #include <QThread>
 
+#include <malloc.h>
+
 using namespace std;
 using namespace Utils;
 using namespace dbContent;
@@ -473,6 +475,8 @@ void ReconstructorTask::writeDoneSlot()
 
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+
+        malloc_trim(0); // release unused memory
 
         done_ = true;
 

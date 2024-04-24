@@ -30,12 +30,6 @@ class Variable;
 class MetaVariable;
 }
 
-//class ReconstructorBase
-//{
-//  public:
-//    struct DataSlice;
-//};
-
 class QProgressDialog;
 
 class ReconstructorTask : public Task, public Configurable
@@ -102,10 +96,6 @@ class ReconstructorTask : public Task, public Configurable
 
     std::unique_ptr<ReconstructorTaskDialog> dialog_;
 
-    //std::shared_ptr<dbContent::DBContentAccessor> accessor_;
-
-            //std::map<std::string, std::shared_ptr<Buffer>> data_;
-
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
     std::unique_ptr<ProbIMMReconstructor> probimm_reconstructor_; // has to be reset after each calculation
 
@@ -113,7 +103,7 @@ class ReconstructorTask : public Task, public Configurable
     boost::posix_time::ptime run_start_time_;
 
     size_t current_slice_idx_ = 0;
-    //std::map<unsigned int, ReconstructorBase::DataSlice> data_slices_;
+
     std::unique_ptr<ReconstructorBase::DataSlice> loading_slice_;
     //std::unique_ptr<ReconstructorBase::DataSlice> processing_slice_; // not required, moved into reconstructor
     std::future<void> processing_future_;
