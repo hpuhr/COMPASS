@@ -47,16 +47,10 @@ public:
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
 protected:
-
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
-
     virtual void updateToChanges_impl() override;
-
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     unsigned int num_extra_ {0};
     unsigned int num_ok_    {0};
