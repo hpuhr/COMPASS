@@ -303,17 +303,7 @@ void EvaluationManager::loadData ()
         viewable_data_cfg_ = nullptr;
     }
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    dbcontent_man.clearData(); // clear any previously loaded data
-
-    results_gen_.clear();
-
-    reference_data_loaded_ = false;
-    test_data_loaded_ = false;
-    data_loaded_ = false;
-
-    evaluated_ = false;
+    clearLoadedDataAndResults();
 
     if (widget_)
         widget_->updateButtons();
@@ -552,6 +542,8 @@ void EvaluationManager::loadData ()
     }
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
             this, &EvaluationManager::loadedDataDataSlot);
@@ -1033,6 +1025,28 @@ void EvaluationManager::loadSectors()
     checkMinHeightFilterValid(); // checks if min fl filter sector exists
 }
 
+void EvaluationManager::clearLoadedDataAndResults()
+{
+    loginf << "EvaluationManager: clearLoadedDataAndResults";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    dbcontent_man.clearData(); // clear any previously loaded data
+
+    data_.clear();
+
+    results_gen_.clear();
+
+    reference_data_loaded_ = false;
+    test_data_loaded_ = false;
+    data_loaded_ = false;
+
+    evaluated_ = false;
+
+    if (widget_)
+        widget_->updateButtons();
+}
+
 void EvaluationManager::updateSectorLayers()
 {
     if (use_fast_sector_inside_check_)
@@ -1080,6 +1094,10 @@ void EvaluationManager::createNewSector (const std::string& name,
 
     if (widget_)
         widget_->updateSectors();
+
+    clearLoadedDataAndResults();
+
+    emit sectorsChangedSignal();
 }
 
 bool EvaluationManager::hasSector (const string& name, const string& layer_name)
@@ -1154,6 +1172,10 @@ void EvaluationManager::moveSector(unsigned int id, const std::string& old_layer
 
     if (widget_)
         widget_->updateSectors();
+
+    clearLoadedDataAndResults();
+
+    emit sectorsChangedSignal();
 }
 
 std::vector<std::shared_ptr<SectorLayer>>& EvaluationManager::sectorsLayers()
@@ -1206,6 +1228,8 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
     if (widget_)
         widget_->updateSectors();
 
+    clearLoadedDataAndResults();
+
     emit sectorsChangedSignal();
 }
 
@@ -1220,6 +1244,8 @@ void EvaluationManager::deleteAllSectors()
 
     if (widget_)
         widget_->updateSectors();
+
+    clearLoadedDataAndResults();
 
     emit sectorsChangedSignal();
 }
@@ -1299,6 +1325,8 @@ void EvaluationManager::importSectors(const std::string& filename)
     }
 
     checkMinHeightFilterValid();
+
+    clearLoadedDataAndResults();
 
     if (widget_)
         widget_->updateSectors();
