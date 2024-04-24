@@ -19,11 +19,9 @@
 #include "eval/results/detection/single.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/detection/detection.h"
-//#include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -44,55 +42,6 @@ JoinedDetection::JoinedDetection(const std::string& result_id,
                                  EvaluationManager& eval_man)
 :   Joined("JoinedDetection", result_id, requirement, sector_layer, eval_man)
 {
-}
-
-void JoinedDetection::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleDetection> other_sub =
-            std::static_pointer_cast<SingleDetection>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedDetection::addToValues (std::shared_ptr<SingleDetection> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    sum_uis_    += single_result->sumUIs();
-    missed_uis_ += single_result->missedUIs();
-
-    ++num_single_targets_;
-    if (single_result->hasFailed())
-        ++num_failed_single_targets_;
-
-
-    updatePD();
-}
-
-void JoinedDetection::updatePD()
-{
-    pd_.reset();
-
-    if (sum_uis_)
-    {
-        logdbg << "JoinedDetection: updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_
-                << " sum_uis " << sum_uis_;
-
-        assert (missed_uis_ <= sum_uis_);
-
-        std::shared_ptr<EvaluationRequirement::Detection> req =
-                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
-        assert (req);
-
-        if (req->invertProb())
-            pd_ = (float)missed_uis_/(float)(sum_uis_);
-        else
-            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
-    }
 }
 
 void JoinedDetection::addToReport (
@@ -195,8 +144,7 @@ void JoinedDetection::addDetails(std::shared_ptr<EvaluationResultsReport::RootIt
     sec_det_table.addRow({"#Failed Single Targets", {}, num_failed_single_targets_}, this);
 
     // figure
-    sector_section.addFigure("sector_overview", "Sector Overview",
-                             [this](void) { return this->getErrorsViewable(); });
+    addOverview(sector_section);
 }
 
 bool JoinedDetection::hasViewableData (
@@ -208,43 +156,6 @@ bool JoinedDetection::hasViewableData (
         return true;
     else
         return false;;
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedDetection::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-    return getErrorsViewable();
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedDetection::getErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-    double lat_min, lat_max, lon_min, lon_max;
-
-    tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
-    tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
-
-    (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
-
-    double lat_w = lat_max-lat_min;
-    double lon_w = lon_max-lon_min;
-
-    if (lat_w < eval_man_.settings().result_detail_zoom_)
-        lat_w = eval_man_.settings().result_detail_zoom_;
-
-    if (lon_w < eval_man_.settings().result_detail_zoom_)
-        lon_w = eval_man_.settings().result_detail_zoom_;
-
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
-
-    addAnnotationsFromSingles(*viewable_ptr);
-
-    return viewable_ptr;
 }
 
 bool JoinedDetection::hasReference (
@@ -265,37 +176,74 @@ std::string JoinedDetection::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedDetection::updatesToUseChanges_impl()
+void JoinedDetection::updateToChanges_impl()
 {
-    loginf << "JoinedDetection: updatesToUseChanges: prev sum_uis " << sum_uis_
+    loginf << "JoinedDetection: updateToChanges_impl: prev sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
-
-    if (pd_.has_value())
-        loginf << "JoinedDetection: updatesToUseChanges: prev result " << result_id_
-                << " pd " << 100.0 * pd_.value();
-    else
-        loginf << "JoinedDetection: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
     sum_uis_    = 0;
     missed_uis_ = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleDetection> result =
+        std::shared_ptr<SingleDetection> single_result =
                 std::static_pointer_cast<SingleDetection>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        single_result->setInterestFactor(0);
+
+        if (!single_result->use())
+            continue;
+
+        sum_uis_    += single_result->sumUIs();
+        missed_uis_ += single_result->missedUIs();
+
+        ++num_single_targets_;
+
+        if (single_result->hasFailed())
+            ++num_failed_single_targets_;
+
     }
 
-    loginf << "JoinedDetection: updatesToUseChanges: updt sum_uis " << sum_uis_
+    loginf << "JoinedDetection: updateToChanges_impl: updt sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
 
-    if (pd_.has_value())
-        loginf << "JoinedDetection: updatesToUseChanges: updt result " << result_id_
-                << " pd " << 100.0 * pd_.value();
-    else
-        loginf << "JoinedDetection: updatesToUseChanges: updt result " << result_id_ << " has no data";
+    // calculate pd
+
+    pd_.reset();
+
+    if (sum_uis_)
+    {
+        logdbg << "JoinedDetection: updateToChanges_impl: result_id " << result_id_ << " missed_uis " << missed_uis_
+               << " sum_uis " << sum_uis_;
+
+        assert (missed_uis_ <= sum_uis_);
+
+        std::shared_ptr<EvaluationRequirement::Detection> req =
+            std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+        assert (req);
+
+        if (req->invertProb())
+            pd_ = (float)missed_uis_/(float)(sum_uis_);
+        else
+            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+
+
+        // attribute interest
+        for (auto& result_it : results_)
+        {
+            std::shared_ptr<SingleDetection> single_result =
+                std::static_pointer_cast<SingleDetection>(result_it);
+            assert (single_result);
+
+            if (!single_result->use())
+                continue;
+
+            assert (missed_uis_ >= single_result->missedUIs());
+
+            single_result->setInterestFactor((float)single_result->missedUIs() / (float)missed_uis_);
+        }
+    }
 }
 
 }

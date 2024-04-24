@@ -178,7 +178,7 @@
             },
             "Variable32": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "ax",
                     "description": "Calculated Acceleration of the target expressed in Cartesian co-\nordinates\n\n(LSB) = 0.25 m/s^2",
                     "dimension": "",
@@ -191,7 +191,7 @@
             },
             "Variable33": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "ay",
                     "description": "Calculated Acceleration of the target expressed in Cartesian co-\nordinates\n\n(LSB) = 0.25 m/s^2",
                     "dimension": "",
@@ -446,6 +446,45 @@
                     "name": "Mode 3/A Valid",
                     "representation_str": "STANDARD",
                     "short_name": "MA V",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajmof_long0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "mom_longitudinal_acc",
+                    "description": "Mode of Movement\n\nLongitudinal Acceleration :\n0 Constant Groundspeed\n1 Increasing Groundspeed\n2 Decreasing Groundspeed\n3 Undetermined",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "MOM Longitudinal Acc",
+                    "representation_str": "STANDARD",
+                    "short_name": "MON LONG",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajmof_trans0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "mom_transversal_acc",
+                    "description": "Mode of Movement\n\nTransversal Acceleration:\n0 Constant Course\n1 Right Turn\n2 Left Turn\n3 Undetermined",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "MOM Transversal Acc",
+                    "representation_str": "STANDARD",
+                    "short_name": "MOM TRANS",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajmof_vert0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "mom_vertical_rate",
+                    "description": "Mode of Movement\n\nVertical Rate :\n0 Level\n1 Climb\n2 Descent\n3 Undetermined",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "MOM Vertical Rate",
+                    "representation_str": "CLIMB_DESCENT",
+                    "short_name": "MOM VERT",
                     "unit": ""
                 }
             },

@@ -70,44 +70,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
 
     // create ref time periods, irrespective of inside
     TimePeriodCollection ref_periods;
-
-    unsigned int num_ref_inside = 0;
+    ref_periods.createFromReference(target_data, sector_layer, max_ref_time_diff);
+ 
     ptime timestamp;
     bool inside;
 
-    {
-        const auto& ref_data = target_data.refChain().timestampIndexes();
-
-        bool first {true};
-
-        for (auto& ref_it : ref_data)
-        {
-            timestamp = ref_it.first;
-
-            // for ref
-            inside = target_data.refPosInside(sector_layer, ref_it);
-
-            if (inside)
-                ++num_ref_inside;
-
-            if (first)
-            {
-                ref_periods.add({timestamp, timestamp});
-
-                first = false;
-
-                continue;
-            }
-
-            // not first, was_inside is valid
-
-            // extend last time period, if possible, or finish last and create new one
-            if (ref_periods.lastPeriod().isCloseToEnd(timestamp, max_ref_time_diff)) // 4.9
-                ref_periods.lastPeriod().extend(timestamp);
-            else
-                ref_periods.add({timestamp, timestamp});
-        }
-    }
     ref_periods.removeSmallPeriods(seconds(1));
 
     bool is_inside_ref_time_period {false};
@@ -175,8 +142,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
                     tod_max = max (timestamp, tod_max);
                 }
             }
-            else if (skip_no_data_details)
+            else if (!skip_no_data_details)
+            {
                 addDetail(timestamp, tst_pos, false, false, false, "Tst outside"); // inside, extra, ref
+            }
         }
     }
 

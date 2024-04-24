@@ -62,8 +62,8 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     Variable& utn_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_);
 
     Variable* acid_var {nullptr};
-    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
-        acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
+    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_))
+        acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_);
 
     dbContent::Variable* acid_fpl_var {nullptr}; // only set in cat062
 
@@ -77,8 +77,8 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     }
 
     Variable* acad_var {nullptr};
-    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
-        acad_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
+    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
+        acad_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_);
 
     Variable& m3a_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
 
@@ -209,8 +209,8 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         Variable& utn_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_);
 
         Variable* acid_var {nullptr};
-        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
-            acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_))
+            acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_);
 
         dbContent::Variable* acid_fpl_var {nullptr}; // only set in cat062
 
@@ -224,8 +224,8 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         }
 
         Variable* acad_var {nullptr};
-        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
-            acad_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
+            acad_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_);
 
         Variable& m3a_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
 
@@ -733,9 +733,9 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
         assert (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_line_id_));
         dbContent::Variable& line_var = dbcont_manager_.metaGetVariable(
                     dbcont_name, DBContent::meta_var_line_id_);
-        assert (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_datasource_id_));
+        assert (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ds_id_));
         dbContent::Variable& ds_id_var = dbcont_manager_.metaGetVariable(
-                    dbcont_name, DBContent::meta_var_datasource_id_);
+                    dbcont_name, DBContent::meta_var_ds_id_);
 
 
         assert (buffer->has<unsigned int> (line_var.name()));
@@ -802,10 +802,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (config_.filter_ti_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ti_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_acid_))
             return false;
 
-        dbContent::Variable& acid_var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ti_);
+        dbContent::Variable& acid_var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_acid_);
 
         assert (buffer->has<string> (acid_var.name()));
 
@@ -870,10 +870,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (config_.filter_ta_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ta_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_acad_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ta_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_acad_);
 
         assert (buffer->has<unsigned int> (var.name()));
 
@@ -907,17 +907,17 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
         }
 
         NullableVector<unsigned int>* ta_vec {nullptr};
-        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ta_))
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_acad_))
         {
-            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ta_);
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_acad_);
             assert (buffer->has<unsigned int> (var.name()));
             ta_vec = &buffer->get<unsigned int> (var.name());
         }
 
         NullableVector<string>* ti_vec {nullptr};
-        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ti_))
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_acid_))
         {
-            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ti_);
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_acid_);
             assert (buffer->has<string> (var.name()));
             ti_vec = &buffer->get<string> (var.name());
         }
@@ -1114,13 +1114,13 @@ void LabelGenerator::checkLabelConfig()
                     if (row == 0 && col == 0)
                         dbcont_def[key] = "Best available Identification";
                     else if (row == 0 && col == 1
-                             && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_ti_))
+                             && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_acid_))
                         dbcont_def[key] =
-                                dbcont_manager_.metaGetVariable(dbcont_it.first, DBContent::meta_var_ti_).name();
+                                dbcont_manager_.metaGetVariable(dbcont_it.first, DBContent::meta_var_acid_).name();
                     else if (row == 0 && col == 2
-                             && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_ta_))
+                             && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_acad_))
                         dbcont_def[key] =
-                                dbcont_manager_.metaGetVariable(dbcont_it.first, DBContent::meta_var_ta_).name();
+                                dbcont_manager_.metaGetVariable(dbcont_it.first, DBContent::meta_var_acad_).name();
                     else if (row == 1 && col == 0
                              && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_m3a_))
                         dbcont_def[key] =
@@ -1130,9 +1130,9 @@ void LabelGenerator::checkLabelConfig()
                         dbcont_def[key] =
                                 dbcont_manager_.metaGetVariable(dbcont_it.first, DBContent::meta_var_mc_).name();
                     else if (row == 1 && col == 2
-                             && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_datasource_id_))
+                             && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_ds_id_))
                         dbcont_def[key] =
-                                dbcont_manager_.metaGetVariable(dbcont_it.first, DBContent::meta_var_datasource_id_).name();
+                                dbcont_manager_.metaGetVariable(dbcont_it.first, DBContent::meta_var_ds_id_).name();
                     else if (row == 2 && col == 0
                              && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_ground_speed_))
                         dbcont_def[key] =

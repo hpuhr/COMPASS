@@ -20,20 +20,21 @@ public:
     double xy_cov_ {0}; // m^2
 };
 
-class Cache;
+class DBContentAccessor;
+class BufferAccessor;
 
 boost::optional<TargetPositionAccuracy> getPositionAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index);
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index);
 
 boost::optional<TargetPositionAccuracy> getRadarPositionAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index);
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index);
 
 boost::optional<TargetPositionAccuracy> getADSBPositionAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index);
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index);
 
 // cat010, cat020, cat062, reftraj
 boost::optional<TargetPositionAccuracy> getXYPositionAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index);
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index);
 
 } // namespace dbContent
 

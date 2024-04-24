@@ -79,14 +79,17 @@ class IntervalBase : public ProbabilityBase
 public:
     struct DetailInfo
     {
-        boost::posix_time::ptime                   evt_time;          // time the event occurs at
-        double                                     evt_dt;            // event duration
-        std::string                                evt_comment;       // event comment
-        dbContent::TargetPosition                  evt_position;      // event location
-        boost::optional<dbContent::TargetPosition> evt_position_ref;  // event reference position (e.g. start of interval)
-        bool                                       evt_has_misses;    // event has misses
-        bool                                       evt_has_ref;       // event has reference
-        bool                                       evt_has_dt;        // event has a valid tod diff
+        boost::posix_time::ptime                                evt_time;             // time the event occurs at
+        double                                                  evt_dt;               // event duration
+        std::string                                             evt_comment;          // event comment
+        dbContent::TargetPosition                               evt_position;         // event location
+        boost::optional<dbContent::TargetPosition>              evt_position_ref;     // event reference position (e.g. start of interval)
+        boost::optional<unsigned int>                           evt_ref_updates_idx0; // optional event reference updates start index
+        boost::optional<unsigned int>                           evt_ref_updates_idx1; // optional event reference updates end index
+
+        bool evt_has_misses;    // event has misses
+        bool evt_has_ref;       // event has reference
+        bool evt_has_dt;        // event has a valid tod diff
 
         bool generate_detail = false; // generate a detail for this event
     };
@@ -136,7 +139,8 @@ public:
 protected:
     virtual uint32_t numMisses(double dt) const;
     virtual DetailInfo eventDetailInfo(const EvaluationTargetData& target_data,
-                                       const Event& event) const;
+                                       const Event& event,
+                                       std::vector<dbContent::TargetPosition>& ref_updates) const;
 
     virtual Validity isValid(const dbContent::TargetReport::DataID& data_id,
                          const EvaluationTargetData& target_data,
@@ -148,6 +152,7 @@ protected:
                                                                               const SectorLayer& sector_layer, 
                                                                               const std::vector<EvaluationDetail>& details,
                                                                               const TimePeriodCollection& periods,
+                                                                              const std::vector<dbContent::TargetPosition>& ref_updates,
                                                                               unsigned int sum_uis,
                                                                               unsigned int misses_total) = 0;
 private:

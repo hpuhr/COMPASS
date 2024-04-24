@@ -63,7 +63,7 @@ boost::posix_time::ptime getTimeFrom (const nmea::GPSTimestamp& ts)
 */
 GPSTrailImportTask::Settings::Settings()
 :   ds_name           ("GPS Trail")
-,   ds_sac            (0)
+,   ds_sac            (255)
 ,   ds_sic            (0)
 ,   use_tod_offset    (false)
 ,   tod_offset        (0.0f)
@@ -83,7 +83,7 @@ GPSTrailImportTask::Settings::Settings()
 GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, 
                                        const std::string& instance_id,
                                        TaskManager& task_manager)
-:   Task        ("GPSTrailImportTask", "Import GPS Trail", task_manager)
+:   Task        (task_manager)
 ,   Configurable(class_id, instance_id, &task_manager, "task_import_gps.json")
 {
     tooltip_ = "Allows importing of GPS trails as NMEA into the opened database.";
@@ -153,7 +153,6 @@ void GPSTrailImportTask::importFilename(const std::string& filename)
     parseCurrentFile();
 
     emit fileChanged();
-    emit statusChangedSignal(name_);
 }
 
 /**
@@ -634,15 +633,15 @@ void GPSTrailImportTask::run()
 
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_sac_id_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_sic_id_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_vx_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_vy_));
@@ -657,15 +656,15 @@ void GPSTrailImportTask::run()
 
     Variable& sac_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sac_id_);
     Variable& sic_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_);
-    Variable& ds_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_);
+    Variable& ds_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_);
     Variable& line_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_);
     Variable& tod_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_);
     Variable& ts_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
     Variable& lat_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
     Variable& long_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
     Variable& m3a_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
-    Variable& ta_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
-    Variable& ti_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
+    Variable& ta_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_);
+    Variable& ti_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_);
     Variable& tn_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_);
     Variable& vx_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_);
     Variable& vy_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_);
@@ -743,12 +742,15 @@ void GPSTrailImportTask::run()
     {
         DataSourceManager& src_man = COMPASS::instance().dataSourceManager();
 
-        if (!src_man.hasDBDataSource(ds_id))
-            src_man.addNewDataSource(ds_id);
+        if (!src_man.hasConfigDataSource(ds_id))
+        {
+            loginf << "GPSTrailImportTask: run: creating data source";
 
-        assert (src_man.hasDBDataSource(ds_id));
+            src_man.createConfigDataSource(ds_id);
+            assert (src_man.hasConfigDataSource(ds_id));
+        }
 
-        dbContent::DBDataSource& src = src_man.dbDataSource(ds_id);
+        dbContent::ConfigurationDataSource& src = src_man.configDataSource(ds_id);
 
         src.name(settings_.ds_name);
         src.dsType(dbcontent_name); // same as dstype
@@ -946,7 +948,7 @@ void GPSTrailImportTask::insertDoneSlot()
     if (allow_user_interactions_)
         msg_box.exec();
 
-    emit doneSignal(name_);
+    emit doneSignal();
 }
 
 /**

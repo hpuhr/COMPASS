@@ -58,8 +58,10 @@ public:
 
     void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
-protected:
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
+protected:
     void updateProbabilities();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);

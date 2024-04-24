@@ -38,14 +38,15 @@ public:
                     const EvaluationDetails& details,
                     int sum_uis, 
                     int missed_uis, 
-                    TimePeriodCollection ref_periods);
+                    TimePeriodCollection ref_periods,
+                    const std::vector<dbContent::TargetPosition>& ref_updates);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    int sumUIs() const;
-    int missedUIs() const;
+    unsigned int sumUIs() const;
+    unsigned int missedUIs() const;
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -59,15 +60,20 @@ public:
 
     enum DetailKey
     {
-        MissOccurred, //bool
-        DiffTOD,      //float
-        RefExists,    //bool
-        MissedUIs,    //unsigned int
-        MaxGapUIs,    //unsigned int
-        NoRefUIs     //unsigned int
+        MissOccurred,        //bool
+        DiffTOD,             //float
+        RefExists,           //bool
+        MissedUIs,           //unsigned int
+        MaxGapUIs,           //unsigned int
+        NoRefUIs,            //unsigned int
+        RefUpdateStartIndex, //unsigned int
+        RefUpdateEndIndex    //unsigned int
     };
 
     void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     bool hasFailed() const;
 
@@ -81,10 +87,11 @@ protected:
 
     std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
 
-    int sum_uis_    {0};
-    int missed_uis_ {0};
+    unsigned int sum_uis_    {0};
+    unsigned int missed_uis_ {0};
 
     TimePeriodCollection ref_periods_;
+    std::vector<dbContent::TargetPosition> ref_updates_;
 
     boost::optional<float> pd_;
 };

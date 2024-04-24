@@ -49,64 +49,6 @@ JoinedDubiousTrack::JoinedDubiousTrack(const std::string& result_id,
 {
 }
 
-void JoinedDubiousTrack::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleDubiousTrack> other_sub =
-            std::static_pointer_cast<SingleDubiousTrack>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedDubiousTrack::addToValues(std::shared_ptr<SingleDubiousTrack> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_            += single_result->numUpdates();
-    num_pos_outside_        += single_result->numPosOutside();
-    num_pos_inside_         += single_result->numPosInside();
-    num_pos_inside_dubious_ += single_result->numPosInsideDubious();
-    num_tracks_             += single_result->numTracks();
-    num_tracks_dubious_     += single_result->numTracksDubious();
-
-    duration_all_     += single_result->trackDurationAll();
-    duration_nondub_  += single_result->trackDurationNondub();
-    duration_dubious_ += single_result->trackDurationDubious();
-
-    Base::addDetails(single_result->getDetails());
-
-    //const vector<double>& other_values = single_result->values();
-    //values_.insert(values_.end(), other_values.begin(), other_values.end());
-
-    update();
-}
-
-void JoinedDubiousTrack::update()
-{
-    assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_tracks_ >= num_tracks_dubious_);
-
-    //assert (values_.size() == num_comp_failed_+num_comp_passed_);
-
-    //unsigned int num_speeds = values_.size();
-
-    p_dubious_.reset();
-    p_dubious_update_.reset();
-
-    if (num_tracks_)
-    {
-        p_dubious_ = (float)num_tracks_dubious_/(float)num_tracks_;
-    }
-
-    if (num_pos_inside_)
-    {
-        p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
-    }
-}
-
 void JoinedDubiousTrack::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -237,9 +179,8 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
-//    // figure
-//        sector_section.addFigure("sector_overview", "Sector Overview",
-//                                 [this](void) { return this->getErrorsViewable(); });
+    // figure
+    addOverview(sector_section);
 }
 
 bool JoinedDubiousTrack::hasViewableData (
@@ -249,24 +190,6 @@ bool JoinedDubiousTrack::hasViewableData (
         return true;
     else
         return false;
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTrack::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-
-    return getErrorsViewable();
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTrack::getErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-    addAnnotationsFromSingles(*viewable_ptr);
-
-    return viewable_ptr;
 }
 
 bool JoinedDubiousTrack::hasReference (
@@ -285,10 +208,11 @@ std::string JoinedDubiousTrack::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedDubiousTrack::updatesToUseChanges_impl()
+void JoinedDubiousTrack::updateToChanges_impl()
 {
-    loginf << "JoinedDubiousTrack: updatesToUseChanges";
+    loginf << "JoinedDubiousTrack: updateToChanges_impl";
 
+    // clear
     num_updates_ = 0;
     num_pos_outside_ = 0;
     num_pos_inside_ = 0;
@@ -300,13 +224,65 @@ void JoinedDubiousTrack::updatesToUseChanges_impl()
     duration_nondub_ = 0;
     duration_dubious_ = 0;
 
-    for (auto result_it : results_)
+    // process
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleDubiousTrack> result =
+        std::shared_ptr<SingleDubiousTrack> single_result =
                 std::static_pointer_cast<SingleDubiousTrack>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        single_result->setInterestFactor(0);
+
+        if (!single_result->use())
+            continue;
+
+        num_updates_            += single_result->numUpdates();
+        num_pos_outside_        += single_result->numPosOutside();
+        num_pos_inside_         += single_result->numPosInside();
+        num_pos_inside_dubious_ += single_result->numPosInsideDubious();
+        num_tracks_             += single_result->numTracks();
+        num_tracks_dubious_     += single_result->numTracksDubious();
+
+        duration_all_     += single_result->trackDurationAll();
+        duration_nondub_  += single_result->trackDurationNondub();
+        duration_dubious_ += single_result->trackDurationDubious();
+
+        Base::addDetails(single_result->getDetails());
+    }
+
+    assert (num_tracks_ >= num_tracks_dubious_);
+
+            //assert (values_.size() == num_comp_failed_+num_comp_passed_);
+
+            //unsigned int num_speeds = values_.size();
+
+    p_dubious_.reset();
+    p_dubious_update_.reset();
+
+    if (num_tracks_)
+    {
+        p_dubious_ = (float)num_tracks_dubious_/(float)num_tracks_;
+
+        // add importance
+        for (auto& result_it : results_)
+        {
+            std::shared_ptr<SingleDubiousTrack> single_result =
+                std::static_pointer_cast<SingleDubiousTrack>(result_it);
+            assert (single_result);
+
+            if (!single_result->use())
+                continue;
+
+            assert (num_pos_inside_dubious_ >= single_result->numPosInsideDubious());
+
+            single_result->setInterestFactor(
+                (float) single_result->numPosInsideDubious() / (float)num_pos_inside_dubious_);
+        }
+    }
+
+    if (num_pos_inside_)
+    {
+        p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
     }
 }
 

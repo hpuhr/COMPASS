@@ -59,11 +59,13 @@ SingleIntervalBase::SingleIntervalBase(const std::string& result_type,
                                        const EvaluationDetails& details,
                                        int sum_uis,
                                        int missed_uis,
-                                      TimePeriodCollection ref_periods)
+                                       TimePeriodCollection ref_periods,
+                                       const std::vector<dbContent::TargetPosition>& ref_updates)
     :   Single      (result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
-    ,   sum_uis_    (sum_uis)
-    ,   missed_uis_ (missed_uis)
+    ,   sum_uis_    (sum_uis    )
+    ,   missed_uis_ (missed_uis )
     ,   ref_periods_(ref_periods)
+    ,   ref_updates_(ref_updates)
 {
     updateProbability();
 }
@@ -516,24 +518,104 @@ void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable, bool
 
         assert (detail_it.numPositions() >= 2);
 
+        auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex);
+        auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex);
+
+        //loginf << "SingleIntervalBase: addAnnotations: " << idx0.value() << " - " << idx1.value();
+
         if (check_failed)
         {
-            error_point_coordinates.push_back(detail_it.position(0).asVector());
-            error_point_coordinates.push_back(detail_it.position(1).asVector());
+            if (overview)
+            {
+                assert(idx0.has_value() && idx1.has_value());
 
-            error_line_coordinates.push_back(detail_it.position(0).asVector());
-            error_line_coordinates.push_back(detail_it.position(1).asVector());
+                for (unsigned int idx = idx0.value(); idx <= idx1.value(); ++idx)
+                    error_point_coordinates.push_back(ref_updates_[ idx ].asVector());
+
+                for (unsigned int idx = idx0.value() + 1; idx <= idx1.value(); ++idx)
+                {
+                    error_line_coordinates.push_back(ref_updates_[ idx - 1 ].asVector());
+                    error_line_coordinates.push_back(ref_updates_[ idx     ].asVector());
+                }
+            }
+            else
+            {
+                error_point_coordinates.push_back(detail_it.position(0).asVector());
+                error_point_coordinates.push_back(detail_it.position(1).asVector());
+
+                error_line_coordinates.push_back(detail_it.position(0).asVector());
+                error_line_coordinates.push_back(detail_it.position(1).asVector());
+            }
         }
         else if (add_ok)
         {
-            ok_point_coordinates.push_back(detail_it.position(0).asVector());
-            ok_point_coordinates.push_back(detail_it.position(1).asVector());
-
-            if (!overview)
+            if (overview)
             {
-                ok_line_coordinates.push_back(detail_it.position(0).asVector());
-                ok_line_coordinates.push_back(detail_it.position(1).asVector());
+                assert(idx0.has_value() && idx1.has_value());
+
+                for (unsigned int idx = idx0.value(); idx <= idx1.value(); ++idx)
+                    ok_point_coordinates.push_back(ref_updates_[ idx ].asVector());
+
+                for (unsigned int idx = idx0.value() + 1; idx <= idx1.value(); ++idx)
+                {
+                    ok_line_coordinates.push_back(ref_updates_[ idx - 1 ].asVector());
+                    ok_line_coordinates.push_back(ref_updates_[ idx     ].asVector());
+                }
             }
+            else
+            {
+                ok_point_coordinates.push_back(detail_it.position(0).asVector());
+                ok_point_coordinates.push_back(detail_it.position(1).asVector());
+
+                if (!overview)
+                {
+                    ok_line_coordinates.push_back(detail_it.position(0).asVector());
+                    ok_line_coordinates.push_back(detail_it.position(1).asVector());
+                }
+            }
+        }
+    }
+}
+
+/**
+*/
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleIntervalBase::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+/**
+*/
+void SingleIntervalBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        for (auto& detail_it : getDetails())
+        {
+            auto check_failed = detail_it.getValueAsOrAssert<bool>(
+                        EvaluationRequirementResult::SingleIntervalBase::DetailKey::MissOccurred);
+
+            if (detail_it.numPositions() == 1)
+                continue;
+
+            assert (detail_it.numPositions() >= 2);
+
+            auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex).value();
+            auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex).value();
+
+            size_t n = idx1 - idx0 + 1;
+
+            auto pos_getter = [ & ] (double& x, double& y, size_t idx) 
+            { 
+                x =  ref_updates_[ idx0 + idx ].longitude_;
+                y =  ref_updates_[ idx0 + idx ].latitude_;
+            };
+
+            grid.addPoly(pos_getter, n, check_failed ? 1.0 : 0.0);
         }
     }
 }
@@ -580,54 +662,6 @@ JoinedIntervalBase::JoinedIntervalBase(const std::string& result_type,
                                        EvaluationManager& eval_man)
 :   Joined(result_type, result_id, requirement, sector_layer, eval_man)
 {
-}
-
-/**
-*/
-void JoinedIntervalBase::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleIntervalBase> other_sub = std::static_pointer_cast<SingleIntervalBase>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-/**
-*/
-void JoinedIntervalBase::addToValues (std::shared_ptr<SingleIntervalBase> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    sum_uis_    += single_result->sumUIs();
-    missed_uis_ += single_result->missedUIs();
-
-    ++num_single_targets_;
-    if (single_result->hasFailed())
-        ++num_failed_single_targets_;
-
-    updateProbability();
-}
-
-/**
-*/
-void JoinedIntervalBase::updateProbability()
-{
-    probability_.reset();
-
-    if (sum_uis_)
-    {
-        logdbg << type() << ": updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
-
-        assert (missed_uis_ <= sum_uis_);
-
-        std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
-        assert (req);
-
-        probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
-    }
 }
 
 /**
@@ -747,8 +781,7 @@ void JoinedIntervalBase::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
         sec_det_table.addRow({d.name.c_str(), d.descr.c_str(), d.value}, this);
 
     // figure
-    sector_section.addFigure("sector_overview", "Sector Overview",
-                             [this](void) { return this->getErrorsViewable(); });
+    addOverview(sector_section);
 }
 
 /**
@@ -762,48 +795,6 @@ bool JoinedIntervalBase::hasViewableData (
         return true;
     else
         return false;;
-}
-
-/**
-*/
-std::unique_ptr<nlohmann::json::object_t> JoinedIntervalBase::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, 
-        const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-    return getErrorsViewable();
-}
-
-/**
-*/
-std::unique_ptr<nlohmann::json::object_t> JoinedIntervalBase::getErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-    double lat_min, lat_max, lon_min, lon_max;
-
-    tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
-    tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
-
-    (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
-
-    double lat_w = lat_max-lat_min;
-    double lon_w = lon_max-lon_min;
-
-    if (lat_w < eval_man_.settings().result_detail_zoom_)
-        lat_w = eval_man_.settings().result_detail_zoom_;
-
-    if (lon_w < eval_man_.settings().result_detail_zoom_)
-        lon_w = eval_man_.settings().result_detail_zoom_;
-
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
-
-    addAnnotationsFromSingles(*viewable_ptr);
-
-    return viewable_ptr;
 }
 
 /**
@@ -830,36 +821,59 @@ std::string JoinedIntervalBase::reference(
 
 /**
 */
-void JoinedIntervalBase::updatesToUseChanges_impl()
+void JoinedIntervalBase::updateToChanges_impl()
 {
-    loginf << type() << ": updatesToUseChanges: prev sum_uis " << sum_uis_
+    loginf << type() << ": updateToChanges_impl: prev sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
 
     if (probability_.has_value())
-        loginf << type() << ": updatesToUseChanges: prev result " << result_id_
+        loginf << type() << ": updateToChanges_impl: prev result " << result_id_
                 << " pcd " << 100.0 * probability_.value();
     else
-        loginf << type() << ": updatesToUseChanges: prev result " << result_id_ << " has no data";
+        loginf << type() << ": updateToChanges_impl: prev result " << result_id_ << " has no data";
 
     sum_uis_    = 0;
     missed_uis_ = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleIntervalBase> result = std::static_pointer_cast<SingleIntervalBase>(result_it);
-        assert (result);
+        std::shared_ptr<SingleIntervalBase> single_result = std::static_pointer_cast<SingleIntervalBase>(result_it);
+        assert (single_result);
 
-        addToValues(result);
+        if (!single_result->use())
+            continue;
+
+        sum_uis_    += single_result->sumUIs();
+        missed_uis_ += single_result->missedUIs();
+
+        ++num_single_targets_;
+
+        if (single_result->hasFailed())
+            ++num_failed_single_targets_;
     }
 
     loginf << type() << ": updatesToUseChanges: updt sum_uis " << sum_uis_
             << " missed_uis " << missed_uis_;
+
+
+    if (sum_uis_)
+    {
+        logdbg << type() << ": updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
+
+        assert (missed_uis_ <= sum_uis_);
+
+        std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
+        assert (req);
+
+        probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+    }
 
     if (probability_.has_value())
         loginf << type() << ": updatesToUseChanges: updt result " << result_id_
                 << " pcd " << 100.0 * probability_.value();
     else
         loginf << type() << ": updatesToUseChanges: updt result " << result_id_ << " has no data";
+
 }
 
 }

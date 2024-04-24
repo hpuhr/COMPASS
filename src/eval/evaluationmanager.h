@@ -141,6 +141,11 @@ struct EvaluationManagerSettings
 
     bool warning_shown_ {false};
 
+    //grid generation
+    unsigned int grid_num_cells_x     = 512;
+    unsigned int grid_num_cells_y     = 512;
+    unsigned int grid_pixels_per_cell = 5;
+
     //not written to config
     bool load_only_sector_data_ {true};
 
@@ -277,7 +282,9 @@ public:
             const std::string& req_grp_id, const std::string& result_id); // empty load
     std::unique_ptr<nlohmann::json::object_t> getViewableForEvaluation (
             unsigned int utn, const std::string& req_grp_id, const std::string& result_id); // with data
-    void showResultId (const std::string& id);
+    void showResultId (const std::string& id, 
+                       bool select_tab = false,
+                       bool show_figure = false);
 
     typedef std::map<std::string,
       std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
@@ -322,6 +329,7 @@ protected:
     virtual void checkSubConfigurables() override;
 
     void loadSectors();
+    void clearLoadedDataAndResults();
 
     void checkReferenceDataSources();
     void checkTestDataSources();

@@ -20,9 +20,14 @@
 
 #include "eval/results/base.h"
 
+#include "view/gridview/grid2d.h"
+#include "view/gridview/grid2dlayer.h"
+
 #include <vector>
 
 #include <boost/optional.hpp>
+
+#include <Eigen/Core>
 
 const double OSGVIEW_POS_WINDOW_SCALE {1.8};
 
@@ -36,6 +41,12 @@ class Joined;
 class Single : public Base
 {
 public:
+    struct LayerDefinition
+    {
+        grid2d::ValueType    value_type;
+        Grid2DRenderSettings render_settings;
+    };
+
     Single(const std::string& type, 
             const std::string& result_id,
             std::shared_ptr<EvaluationRequirement::Base> requirement, 
@@ -54,6 +65,7 @@ public:
 
     unsigned int utn() const;
     const EvaluationTargetData* target() const;
+    void setInterestFactor(double factor);
 
     void updateUseFromTarget ();
 
@@ -64,7 +76,10 @@ public:
 
     virtual void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) = 0;
 
-protected:
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const { return {}; }
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const {}
+
+  protected:
     enum AnnotationType
     {
         TypeOk = 0,
@@ -77,7 +92,9 @@ protected:
     unsigned int                utn_;    // used to generate result
     const EvaluationTargetData* target_; // used to generate result
 
-    bool result_usable_ {true}; // whether valid data exists, changed in subclass
+    bool result_usable_ {true}; // whether data valid for result computation exists, changed in subclass
+
+    double interest_factor_ {0};
 
     std::string getTargetSectionID();
     std::string getTargetRequirementSectionID();
@@ -102,6 +119,16 @@ protected:
     nlohmann::json& annotationLineCoords(nlohmann::json::object_t& viewable, AnnotationType type, bool overview=false) const;
     nlohmann::json& getOrCreateAnnotation(nlohmann::json::object_t& viewable, AnnotationType type, bool overview) const;
     // creates if not existing
+
+    void addValuesToGridBinary(Grid2D& grid, 
+                               int detail_key, 
+                               bool invert = false, 
+                               bool use_ref_pos = true) const;
+    void addValuesToGridBinary(Grid2D& grid, 
+                               const EvaluationDetails& details, 
+                               const std::function<bool(size_t)>& is_ok, 
+                               bool use_ref_pos = true) const;
+    LayerDefinition getGridLayerDefBinary() const;
 };
 
 }

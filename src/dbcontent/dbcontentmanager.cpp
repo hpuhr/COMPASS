@@ -16,7 +16,6 @@
  */
 
 #include "dbcontent/dbcontentmanager.h"
-//#include "dbcontent/label/labelgenerator.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
@@ -294,7 +293,7 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
     if (load_in_progress_)
     {
-        loginf << "DBContentManager: loadSlot: quitting previous load";
+        logdbg << "DBContentManager: loadSlot: quitting previous load";
 
         for (auto& object : dbcontent_)
         {
@@ -326,13 +325,14 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
     for (auto& object : dbcontent_)
     {
-        loginf << "DBContentManager: loadSlot: object " << object.first
+        logdbg << "DBContentManager: loadSlot: object " << object.first
                << " loadable " << object.second->loadable()
-               << " loading wanted " << ds_man.loadingWanted(object.first);
+               << " loading wanted " << ds_man.loadingWanted(object.first)
+               << " filters " << COMPASS::instance().filterManager().useFilters();
 
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
-            loginf << "DBContentManager: loadSlot: loading object " << object.first;
+            logdbg << "DBContentManager: loadSlot: loading object " << object.first;
             VariableSet read_set = view_man.getReadSet(object.first);
 
             // add required vars for processing
@@ -620,6 +620,10 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
         assert(existsDBContent(buf_it.first));
         dbContent(buf_it.first).insertData(buf_it.second);
     }
+
+//    COMPASS::instance().dataSourceManager().saveDBDataSources();
+//    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+
 }
 
 void DBContentManager::insertDone(DBContent& object)
@@ -1000,10 +1004,10 @@ void DBContentManager::filterDataSources()
         std::advance(buf_it, buffer_cnt);
 
         // remove unwanted data sources
-        assert (metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(buf_it->first));
+        assert (metaVariable(DBContent::meta_var_ds_id_.name()).existsIn(buf_it->first));
         assert (metaVariable(DBContent::meta_var_line_id_.name()).existsIn(buf_it->first));
 
-        Variable& ds_id_var = metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(buf_it->first);
+        Variable& ds_id_var = metaVariable(DBContent::meta_var_ds_id_.name()).getFor(buf_it->first);
         Variable& line_id_var = metaVariable(DBContent::meta_var_line_id_.name()).getFor(buf_it->first);
 
         Property ds_id_prop {ds_id_var.name(), ds_id_var.dataType()};
@@ -1122,10 +1126,10 @@ void DBContentManager::updateNumLoadedCounts()
 
     for (auto& buf_it : data_)
     {
-        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_datasource_id_));
+        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_ds_id_));
         assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_line_id_));
 
-        Variable& ds_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_datasource_id_);
+        Variable& ds_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_ds_id_);
         Variable& line_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_line_id_);
 
         NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
@@ -1456,8 +1460,8 @@ void DBContentManager::addStandardVariables(std::string dbcont_name, dbContent::
     assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_rec_num_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_rec_num_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_datasource_id_));
-    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_datasource_id_));
+    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_ds_id_));
+    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_ds_id_));
 
     assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_line_id_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_line_id_));
@@ -1519,7 +1523,7 @@ void DBContentManager::saveSelectedRecNums()
 
 void DBContentManager::restoreSelectedRecNums()
 {
-    loginf << "DBContentManager: restoreSelectedRecNums";
+    logdbg << "DBContentManager: restoreSelectedRecNums";
 
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {

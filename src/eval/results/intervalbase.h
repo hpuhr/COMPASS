@@ -43,7 +43,8 @@ public:
                        const EvaluationDetails& details,
                        int sum_uis, 
                        int missed_uis, 
-                       TimePeriodCollection ref_periods);
+                       TimePeriodCollection ref_periods,
+                       const std::vector<dbContent::TargetPosition>& ref_updates);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -62,13 +63,18 @@ public:
 
     enum DetailKey
     {
-        MissOccurred, //bool
-        DiffTOD,      //float
-        RefExists,    //bool
-        MissedUIs,    //unsigned int
+        MissOccurred,        //bool
+        DiffTOD,             //float
+        RefExists,           //bool
+        MissedUIs,           //unsigned int
+        RefUpdateStartIndex, //unsigned int
+        RefUpdateEndIndex    //unsigned int
     };
 
     void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     bool hasFailed() const;
 
@@ -100,7 +106,8 @@ protected:
     int sum_uis_    {0};
     int missed_uis_ {0};
 
-    TimePeriodCollection ref_periods_;
+    TimePeriodCollection                   ref_periods_;
+    std::vector<dbContent::TargetPosition> ref_updates_;
 
     boost::optional<float> probability_;
 };
@@ -120,8 +127,6 @@ public:
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     virtual bool hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -129,16 +134,10 @@ public:
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
 protected:
-    void addToValues (std::shared_ptr<SingleIntervalBase> single_result);
-    void updateProbability();
-
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
-
-    virtual void join_impl(std::shared_ptr<Single> other) override;
-    virtual void updatesToUseChanges_impl() override;
+    virtual void updateToChanges_impl() override;
 
     virtual std::vector<ReportParam> detailsOverviewDescriptions() const;
 

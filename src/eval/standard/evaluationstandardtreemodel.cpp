@@ -18,6 +18,8 @@
 #include "evaluationstandardtreemodel.h"
 #include "evaluationstandard.h"
 
+#include "logger.h"
+
 EvaluationStandardTreeModel::EvaluationStandardTreeModel(EvaluationStandard& standard, QObject* parent)
     : QAbstractItemModel(parent), standard_(standard)
 {
@@ -40,12 +42,36 @@ QVariant EvaluationStandardTreeModel::data(const QModelIndex &index, int role) c
     if (!index.isValid())
         return QVariant();
 
+    EvaluationStandardTreeItem *item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
+
+    if (role == Qt::CheckStateRole)
+    {
+        if (!item->checkable())
+            return QVariant();
+
+        return item->used() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
+    }
+
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    EvaluationStandardTreeItem *item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
-
     return item->data(index.column());
+}
+
+bool EvaluationStandardTreeModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid())
+        return false;
+
+    if (role == Qt::CheckStateRole)
+    {
+        EvaluationStandardTreeItem* item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
+
+        item->use(value.toInt() == Qt::Checked);
+        return true;
+    }
+
+    return false;
 }
 
 Qt::ItemFlags EvaluationStandardTreeModel::flags(const QModelIndex &index) const
@@ -53,7 +79,7 @@ Qt::ItemFlags EvaluationStandardTreeModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::NoItemFlags;
 
-    return QAbstractItemModel::flags(index);
+    return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
 }
 
 QVariant EvaluationStandardTreeModel::headerData(int section, Qt::Orientation orientation,
@@ -115,9 +141,13 @@ void EvaluationStandardTreeModel::beginReset()
 {
     beginResetModel();
 }
+
 void EvaluationStandardTreeModel::endReset()
 {
     endResetModel();
 }
 
-
+void EvaluationStandardTreeModel::updateCheckStates()
+{
+    emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1), { Qt::CheckStateRole });
+}

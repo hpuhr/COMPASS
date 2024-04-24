@@ -15,12 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NUMBER_H_
-#define NUMBER_H_
+#pragma once
 
 #include <string>
-
-//#include "nullablevector.h"
+#include <vector>
+#include <tuple>
 
 namespace Utils
 {
@@ -64,8 +63,12 @@ extern unsigned long recNumAddDBContId (unsigned long rec_num_wo_dbcont_id, unsi
 extern unsigned long recNumGetWithoutDBContId (unsigned long rec_num);
 extern unsigned int recNumGetDBContId (unsigned long rec_num);
 
+extern std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values);
+
+//template <typename T>
+//double getStatistics(const std::vector<>);
+
 }  // namespace Number
 
 }  // namespace Utils
 
-#endif /* NUMBER_H_ */

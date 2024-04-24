@@ -376,6 +376,23 @@ void SingleIdentificationFalse::addAnnotations(nlohmann::json::object_t& viewabl
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleIdentificationFalse::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SingleIdentificationFalse::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleIdentificationFalse::DetailKey::IsNotOk, true);
+    }
+}
+
 std::shared_ptr<Joined> SingleIdentificationFalse::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedIdentificationFalse> (result_id, requirement_, sector_layer_, eval_man_);

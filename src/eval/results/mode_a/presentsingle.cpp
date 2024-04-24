@@ -374,6 +374,23 @@ void SingleModeAPresent::addAnnotations(nlohmann::json::object_t& viewable, bool
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleModeAPresent::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SingleModeAPresent::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleModeAPresent::DetailKey::IsNotOk, true);
+    }
+}
+
 std::shared_ptr<Joined> SingleModeAPresent::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedModeAPresent> (result_id, requirement_, sector_layer_, eval_man_);

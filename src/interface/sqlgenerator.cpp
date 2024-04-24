@@ -153,7 +153,7 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
 
     ss << "\nCREATE INDEX DS_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
     ss << COMPASS::instance().dbContentManager().metaGetVariable(
-              object.name(), DBContent::meta_var_datasource_id_).dbColumnName()
+              object.name(), DBContent::meta_var_ds_id_).dbColumnName()
        << ");";
 
     ss << "\nCREATE INDEX LINE_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
@@ -534,6 +534,11 @@ string SQLGenerator::getSelectAllPropertiesStatement()
     return ss.str();
 }
 
+std::string SQLGenerator::getSetNullStatement (const std::string& table_name, const std::string& col_name)
+{
+    return "UPDATE "+ table_name +" SET " + col_name + " = NULL";
+}
+
 string SQLGenerator::getInsertViewPointStatement(const unsigned int id, const string& json)
 {
     stringstream ss;
@@ -823,7 +828,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     command->set(ss.str());
     command->list(property_list);
 
-    loginf << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
+    logdbg << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
 
     return command;
 }

@@ -37,8 +37,8 @@ class EvaluationStandard : public QObject, public Configurable, public Evaluatio
 {
     Q_OBJECT
 
-//signals:
-//    void groupsChangedSignal();
+signals:
+    void selectionChanged();
 
 public slots:
     void addGroupSlot();
@@ -53,7 +53,6 @@ public:
 
     std::string name() const;
     void name(const std::string &name);
-
 
     bool hasGroup (const std::string& name);
     void addGroup (const std::string& name);

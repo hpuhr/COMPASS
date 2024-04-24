@@ -59,6 +59,9 @@ public:
 
     void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
+
 protected:
     void update();
 

@@ -17,6 +17,7 @@
 #include <QFormLayout>
 
 using namespace std;
+using namespace dbContent;
 
 DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog)
     : ds_man_(ds_man), dialog_(dialog)
@@ -145,7 +146,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     psr_min_edit_ = new QLineEdit();
     psr_min_edit_->setValidator(new TextFieldDoubleValidator(0, 10000, 2));
-    psr_min_edit_->setProperty("key", "primary_ir_min");
+    psr_min_edit_->setProperty("key", DataSourceBase::PSRIRMinKey.c_str());
     connect(psr_min_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarRangeEditedSlot);
     ranges_layout->addWidget(psr_min_edit_, row_cnt, 1);
 
@@ -154,7 +155,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     psr_max_edit_ = new QLineEdit();
     psr_max_edit_->setValidator(new TextFieldDoubleValidator(0, 10000, 2));
-    psr_max_edit_->setProperty("key", "primary_ir_max");
+    psr_max_edit_->setProperty("key", DataSourceBase::PSRIRMaxKey.c_str());
     connect(psr_max_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarRangeEditedSlot);
     ranges_layout->addWidget(psr_max_edit_, row_cnt, 1);
 
@@ -164,7 +165,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     ssr_min_edit_ = new QLineEdit();
     ssr_min_edit_->setValidator(new TextFieldDoubleValidator(0, 10000, 2));
-    ssr_min_edit_->setProperty("key", "secondary_ir_min");
+    ssr_min_edit_->setProperty("key", DataSourceBase::SSRIRMinKey.c_str());
     connect(ssr_min_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarRangeEditedSlot);
     ranges_layout->addWidget(ssr_min_edit_, row_cnt, 1);
 
@@ -173,7 +174,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     ssr_max_edit_ = new QLineEdit();
     ssr_max_edit_->setValidator(new TextFieldDoubleValidator(0, 10000, 2));
-    ssr_max_edit_->setProperty("key", "secondary_ir_max");
+    ssr_max_edit_->setProperty("key", DataSourceBase::SSRIRMaxKey.c_str());
     connect(ssr_max_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarRangeEditedSlot);
     ranges_layout->addWidget(ssr_max_edit_, row_cnt, 1);
 
@@ -183,7 +184,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     mode_s_min_edit_ = new QLineEdit();
     mode_s_min_edit_->setValidator(new TextFieldDoubleValidator(0, 10000, 2));
-    mode_s_min_edit_->setProperty("key", "mode_s_ir_min");
+    mode_s_min_edit_->setProperty("key", DataSourceBase::ModeSIRMinKey.c_str());
     connect(mode_s_min_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarRangeEditedSlot);
     ranges_layout->addWidget(mode_s_min_edit_, row_cnt, 1);
 
@@ -192,7 +193,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     mode_s_max_edit_ = new QLineEdit();
     mode_s_max_edit_->setValidator(new TextFieldDoubleValidator(0, 10000, 2));
-    mode_s_max_edit_->setProperty("key", "mode_s_ir_max");
+    mode_s_max_edit_->setProperty("key", DataSourceBase::ModeSIRMaxKey.c_str());
     connect(mode_s_max_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarRangeEditedSlot);
     ranges_layout->addWidget(mode_s_max_edit_, row_cnt, 1);
 
@@ -220,7 +221,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     acc_psr_azm_edit_ = new QLineEdit();
     acc_psr_azm_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 2));
-    acc_psr_azm_edit_->setProperty("key", "primary_azimuth_stddev");
+    acc_psr_azm_edit_->setProperty("key", DataSourceBase::PSRAzmSDKey.c_str());
     connect(acc_psr_azm_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
     accuracies_layout->addWidget(acc_psr_azm_edit_, row_cnt, 1);
 
@@ -229,7 +230,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     acc_psr_rng_edit_ = new QLineEdit();
     acc_psr_rng_edit_->setValidator(new TextFieldDoubleValidator(-50000, 50000, 2));
-    acc_psr_rng_edit_->setProperty("key", "primary_range_stddev");
+    acc_psr_rng_edit_->setProperty("key", DataSourceBase::PSRRngSDKey.c_str());
     connect(acc_psr_rng_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
     accuracies_layout->addWidget(acc_psr_rng_edit_, row_cnt, 1);
 
@@ -239,7 +240,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     acc_ssr_azm_edit_ = new QLineEdit();
     acc_ssr_azm_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 2));
-    acc_ssr_azm_edit_->setProperty("key", "secondary_azimuth_stddev");
+    acc_ssr_azm_edit_->setProperty("key", DataSourceBase::SSRAzmSDKey.c_str());
     connect(acc_ssr_azm_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
     accuracies_layout->addWidget(acc_ssr_azm_edit_, row_cnt, 1);
 
@@ -248,7 +249,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     acc_ssr_rng_edit_ = new QLineEdit();
     acc_ssr_rng_edit_->setValidator(new TextFieldDoubleValidator(-50000, 50000, 2));
-    acc_ssr_rng_edit_->setProperty("key", "secondary_range_stddev");
+    acc_ssr_rng_edit_->setProperty("key", DataSourceBase::SSRRngSDKey.c_str());
     connect(acc_ssr_rng_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
     accuracies_layout->addWidget(acc_ssr_rng_edit_, row_cnt, 1);
 
@@ -258,7 +259,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     acc_mode_s_azm_edit_ = new QLineEdit();
     acc_mode_s_azm_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 2));
-    acc_mode_s_azm_edit_->setProperty("key", "mode_s_azimuth_stddev");
+    acc_mode_s_azm_edit_->setProperty("key", DataSourceBase::ModeSAzmSDKey.c_str());
     connect(acc_mode_s_azm_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
     accuracies_layout->addWidget(acc_mode_s_azm_edit_, row_cnt, 1);
 
@@ -267,7 +268,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     acc_mode_s_rng_edit_ = new QLineEdit();
     acc_mode_s_rng_edit_->setValidator(new TextFieldDoubleValidator(-50000, 50000, 2));
-    acc_mode_s_rng_edit_->setProperty("key", "mode_s_range_stddev");
+    acc_mode_s_rng_edit_->setProperty("key", DataSourceBase::ModeSRngSDKey.c_str());
     connect(acc_mode_s_rng_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
     accuracies_layout->addWidget(acc_mode_s_rng_edit_, row_cnt, 1);
 
@@ -876,35 +877,35 @@ void DataSourceEditWidget::updateContent()
                 std::map<std::string, double> ranges = ds->radarRanges();
 
                 // psr
-                if (ranges.count("primary_ir_min"))
-                    psr_min_edit_->setText(QString::number(ranges.at("primary_ir_min")));
+                if (ranges.count(DataSourceBase::PSRIRMinKey))
+                    psr_min_edit_->setText(QString::number(ranges.at(DataSourceBase::PSRIRMinKey)));
                 else
                     psr_min_edit_->setText("");
 
-                if (ranges.count("primary_ir_max"))
-                    psr_max_edit_->setText(QString::number(ranges.at("primary_ir_max")));
+                if (ranges.count(DataSourceBase::PSRIRMaxKey))
+                    psr_max_edit_->setText(QString::number(ranges.at(DataSourceBase::PSRIRMaxKey)));
                 else
                     psr_max_edit_->setText("");
 
                 // ssr
-                if (ranges.count("secondary_ir_min"))
-                    ssr_min_edit_->setText(QString::number(ranges.at("secondary_ir_min")));
+                if (ranges.count(DataSourceBase::SSRIRMinKey))
+                    ssr_min_edit_->setText(QString::number(ranges.at(DataSourceBase::SSRIRMinKey)));
                 else
                     ssr_min_edit_->setText("");
 
-                if (ranges.count("secondary_ir_max"))
-                    ssr_max_edit_->setText(QString::number(ranges.at("secondary_ir_max")));
+                if (ranges.count(DataSourceBase::SSRIRMaxKey))
+                    ssr_max_edit_->setText(QString::number(ranges.at(DataSourceBase::SSRIRMaxKey)));
                 else
                     ssr_max_edit_->setText("");
 
                 // mode s
-                if (ranges.count("mode_s_ir_min"))
-                    mode_s_min_edit_->setText(QString::number(ranges.at("mode_s_ir_min")));
+                if (ranges.count(DataSourceBase::ModeSIRMinKey))
+                    mode_s_min_edit_->setText(QString::number(ranges.at(DataSourceBase::ModeSIRMinKey)));
                 else
                     mode_s_min_edit_->setText("");
 
-                if (ranges.count("mode_s_ir_max"))
-                    mode_s_max_edit_->setText(QString::number(ranges.at("mode_s_ir_max")));
+                if (ranges.count(DataSourceBase::ModeSIRMaxKey))
+                    mode_s_max_edit_->setText(QString::number(ranges.at(DataSourceBase::ModeSIRMaxKey)));
                 else
                     mode_s_max_edit_->setText("");
             }
@@ -922,35 +923,35 @@ void DataSourceEditWidget::updateContent()
                 std::map<std::string, double> ranges = ds->radarAccuracies();
 
                 // psr
-                if (ranges.count("primary_azimuth_stddev"))
-                    acc_psr_azm_edit_->setText(QString::number(ranges.at("primary_azimuth_stddev")));
+                if (ranges.count(DataSourceBase::PSRAzmSDKey))
+                    acc_psr_azm_edit_->setText(QString::number(ranges.at(DataSourceBase::PSRAzmSDKey)));
                 else
                     acc_psr_azm_edit_->setText("");
 
-                if (ranges.count("primary_range_stddev"))
-                    acc_psr_rng_edit_->setText(QString::number(ranges.at("primary_range_stddev")));
+                if (ranges.count(DataSourceBase::PSRRngSDKey))
+                    acc_psr_rng_edit_->setText(QString::number(ranges.at(DataSourceBase::PSRRngSDKey)));
                 else
                     acc_psr_rng_edit_->setText("");
 
                 // ssr
-                if (ranges.count("secondary_azimuth_stddev"))
-                    acc_ssr_azm_edit_->setText(QString::number(ranges.at("secondary_azimuth_stddev")));
+                if (ranges.count(DataSourceBase::SSRAzmSDKey))
+                    acc_ssr_azm_edit_->setText(QString::number(ranges.at(DataSourceBase::SSRAzmSDKey)));
                 else
                     acc_ssr_azm_edit_->setText("");
 
-                if (ranges.count("secondary_range_stddev"))
-                    acc_ssr_rng_edit_->setText(QString::number(ranges.at("secondary_range_stddev")));
+                if (ranges.count(DataSourceBase::SSRRngSDKey))
+                    acc_ssr_rng_edit_->setText(QString::number(ranges.at(DataSourceBase::SSRRngSDKey)));
                 else
                     acc_ssr_rng_edit_->setText("");
 
                 // mode s
-                if (ranges.count("mode_s_azimuth_stddev"))
-                    acc_mode_s_azm_edit_->setText(QString::number(ranges.at("mode_s_azimuth_stddev")));
+                if (ranges.count(DataSourceBase::ModeSAzmSDKey))
+                    acc_mode_s_azm_edit_->setText(QString::number(ranges.at(DataSourceBase::ModeSAzmSDKey)));
                 else
                     acc_mode_s_azm_edit_->setText("");
 
-                if (ranges.count("mode_s_range_stddev"))
-                    acc_mode_s_rng_edit_->setText(QString::number(ranges.at("mode_s_range_stddev")));
+                if (ranges.count(DataSourceBase::ModeSRngSDKey))
+                    acc_mode_s_rng_edit_->setText(QString::number(ranges.at(DataSourceBase::ModeSRngSDKey)));
                 else
                     acc_mode_s_rng_edit_->setText("");
             }

@@ -186,6 +186,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
     unsigned int tst_data_size = tst_data.size();
 
+    std::vector<dbContent::TargetPosition> ref_updates;
+
     auto addDetail = [ & ] (const ptime& ts,
                             const dbContent::TargetPosition& tst_pos,
                             const boost::optional<dbContent::TargetPosition>& last_pos,
@@ -195,6 +197,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                             const QVariant& missed_uis,
                             const QVariant& max_gap_uis,
                             const QVariant& no_ref_uis,
+                            const QVariant& ref_updates_idx0,
+                            const QVariant& ref_updates_idx1,
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::DiffTOD, d_tod)
@@ -203,8 +207,59 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                                              .setValue(Result::DetailKey::MissedUIs, missed_uis)
                                              .setValue(Result::DetailKey::MaxGapUIs, max_gap_uis)
                                              .setValue(Result::DetailKey::NoRefUIs, no_ref_uis)
+                                             .setValue(Result::DetailKey::RefUpdateStartIndex, ref_updates_idx0)
+                                             .setValue(Result::DetailKey::RefUpdateEndIndex, ref_updates_idx1)
                                              .addPosition(last_pos)
                                              .generalComment(comment));
+    };
+
+    //stores all reference updates in the timespan of an interval (plus the reference interpolated end positions of the interval)
+    auto storeRefUpdates = [ & ] (const dbContent::TargetReport::DataID& id0,
+                                  const dbContent::TargetReport::DataID& id1,
+                                  const boost::optional<dbContent::TargetPosition>& ref_pos0,
+                                  const boost::optional<dbContent::TargetPosition>& ref_pos1)
+    {
+        //reference-interpolated interval end positions
+        boost::optional<dbContent::TargetPosition> pos0 = ref_pos0;
+        boost::optional<dbContent::TargetPosition> pos1 = ref_pos1;
+
+        //not passed directly => interpolate now
+        if (!pos0.has_value()) pos0 = target_data.mappedRefPos(id0);
+        if (!pos1.has_value()) pos1 = target_data.mappedRefPos(id1);
+
+        // if (!pos0 || !pos1)
+        // {
+        //     logwrn << "IntervalBase: eventDetailInfo: FAIL";
+        //     logwrn << "IntervalBase: eventDetailInfo: range = " 
+        //            << target_data.refChain().timeBeginStr() << " - "
+        //            << target_data.refChain().timeEndStr();
+        //     logwrn << "IntervalBase: eventDetailInfo: ts0 = " << Utils::Time::toString(id0.timestamp()) << " " 
+        //            << (id0.timestamp() == target_data.refChain().timeBegin()) << " "
+        //            << (id0.timestamp() == target_data.refChain().timeEnd()) << " => " << pos0.has_value();
+        //     logwrn << "IntervalBase: eventDetailInfo: ts1 = " << Utils::Time::toString(id1.timestamp()) << " " 
+        //            << (id1.timestamp() == target_data.refChain().timeBegin()) << " "
+        //            << (id1.timestamp() == target_data.refChain().timeEnd()) << " => " << pos1.has_value();
+        // }
+
+        //interpolation of ref should always be possible, since the period is inside a valid reference period
+        assert(pos0.has_value() && pos1.has_value());
+
+        //retrieve all ref updates inside the interval
+        auto positions = target_data.refChain().positionsBetween(id0.timestamp(), 
+                                                                 id1.timestamp(), 
+                                                                 false, 
+                                                                 false);
+        unsigned int idx0 = ref_updates.size();
+        
+        //collect all updates
+        ref_updates.push_back(pos0.value());
+        ref_updates.insert(ref_updates.end(), positions.begin(), positions.end());
+        ref_updates.push_back(pos1.value());
+
+        unsigned int idx1 = ref_updates.size() - 1;
+
+        //store index range into detail info
+        return std::make_pair(idx0, idx1);
     };
 
     if (!tst_data_size) // if not test data, add everything as misses
@@ -235,13 +290,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
                 auto last_pos = target_data.refChain().pos(last_ts);
 
-                addDetail(timestamp, pos_current, last_pos, t_diff, true, true, sum_missed_uis, 0, 0, comment); 
+                auto ref_update_interval = storeRefUpdates(last_ts, timestamp, last_pos, pos_current);
+                addDetail(timestamp, pos_current, last_pos, t_diff, true, true, sum_missed_uis, 0, 0, ref_update_interval.first, ref_update_interval.second, comment); 
             }
         }
 
         return make_shared<EvaluationRequirementResult::SingleDetection>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, details, sum_uis, sum_missed_uis, ref_periods);
+                    eval_man_, details, sum_uis, sum_missed_uis, ref_periods, ref_updates);
     }
 
     // collect test times in ref periods
@@ -254,6 +310,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     set<unsigned int> finished_periods;
 
     int period_max_index_before_ts;
+
+    typedef boost::optional<dbContent::TargetPosition> OptPos;
 
     string comment;
 
@@ -326,14 +384,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                             last_pos = target_data.refChain().pos(last_period_ts);
                         }
 
-                        addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, comment);
+                        auto ref_update_interval = storeRefUpdates(last_period_ts, last_period_ts_end, tst_time_found ? OptPos() : OptPos(last_pos), pos_current);
+                        addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, ref_update_interval.first, ref_update_interval.second, comment);
                     }
                     else
                     {
                         comment = "Previous period "+to_string(period_cnt)
                                 +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
-                        addDetail(timestamp, pos_current, {}, t_diff, false, false, sum_missed_uis, 0, 0, comment);
+                        addDetail(timestamp, pos_current, {}, t_diff, false, false, sum_missed_uis, 0, 0, {}, {}, comment);
                     }
 
                     finished_periods.insert(period_cnt);
@@ -345,7 +404,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         {
             if (!skip_no_data_details)
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, {}, {},
                           "Outside of reference time periods");
             }
 
@@ -366,7 +425,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         {
             if (!skip_no_data_details)
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, {}, {},
                           "At exact beginning of reference time period");
             }
 
@@ -382,7 +441,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             if (!skip_no_data_details)
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, {}, {},
                           "Outside sector");
             }
 
@@ -400,12 +459,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             if (was_outside)
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, {}, {},
                           "First target report after outside sector");
             }
             else // first in period
             {
-                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, {}, {},
                           "First target report in period " + to_string(period_index));
 
                 // check if begin time in period is miss
@@ -432,7 +491,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                     auto tst_pos  = target_data.tstChain().pos(tst_it);
                     auto last_pos = target_data.refChain().pos(ref_periods.period(period_index).begin());
 
-                    addDetail(timestamp, tst_pos, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
+                    auto ref_update_interval = storeRefUpdates(ref_periods.period(period_index).begin(), timestamp, last_pos, {});
+                    addDetail(timestamp, tst_pos, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, ref_update_interval.first, ref_update_interval.second, comment);
                 }
             }
 
@@ -464,8 +524,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
             string comment = "Miss detected (DToD > "
                     +String::doubleToStringPrecision(missThreshold(), 2)
                     +"), last was "+Time::toString(last_ts);
-
-            addDetail(timestamp, pos_current, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+            
+            auto ref_update_interval = storeRefUpdates(last_ts, timestamp, {}, {});
+            addDetail(timestamp, pos_current, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, ref_update_interval.first, ref_update_interval.second,
                       comment);
         }
         else
@@ -475,7 +536,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             std::string comment = "OK (DToD <= " + String::doubleToStringPrecision(missThreshold(), 2) + ")";
 
-            addDetail(timestamp, pos_current, last_pos, t_diff, false, is_inside_ref_time_period, sum_missed_uis, 0, 0,
+            auto ref_update_interval = storeRefUpdates(last_ts, timestamp, {}, {});
+            addDetail(timestamp, pos_current, last_pos, t_diff, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, ref_update_interval.first, ref_update_interval.second,
                       comment);
         }
 
@@ -535,14 +597,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                     last_pos = target_data.refChain().pos(last_period_tod);
                 }
 
-                addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, comment);
+                auto ref_update_interval = storeRefUpdates(last_period_tod, last_period_end, tst_time_found ? OptPos() : OptPos(last_pos), pos_current);
+                addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, ref_update_interval.first, ref_update_interval.second, comment);
             }
             else
             {
                 comment = "Previous period "+to_string(period_cnt)
                         +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
-                addDetail(timestamp, pos_current, {}, t_diff, false, false, sum_missed_uis, 0, 0, comment);
+                addDetail(timestamp, pos_current, {}, t_diff, false, false, sum_missed_uis, 0, 0, {}, {}, comment);
             }
 
             finished_periods.insert(period_cnt);
@@ -554,7 +617,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleDetection>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, sum_uis, sum_missed_uis, ref_periods);
+                eval_man_, details, sum_uis, sum_missed_uis, ref_periods, ref_updates);
 }
 
 bool Detection::holdForAnyTarget() const

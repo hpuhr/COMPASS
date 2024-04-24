@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "createassociationsstatusdialog.h"
 #include "dbcontent/variable/variableset.h"
-#include "dbcontent/dbcontentcache.h"
+#include "dbcontent/dbcontentaccessor.h"
 #include "task.h"
 #include "global.h"
 
@@ -47,7 +47,7 @@ class CreateAssociationsTask : public Task, public Configurable
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     void dialogRunSlot();
     void dialogCancelSlot();
 
@@ -61,7 +61,7 @@ public slots:
 
     void closeStatusDialogSlot();
 
-public:
+  public:
     CreateAssociationsTask(const std::string& class_id, const std::string& instance_id,
                            TaskManager& task_manager);
     virtual ~CreateAssociationsTask();
@@ -129,13 +129,13 @@ public:
 
     const std::set<unsigned int>& modeAConspicuityCodes() const;
 
-protected:
+  protected:
     bool associate_non_mode_s_ {true};
     bool clean_dubious_utns_ {true};
     bool mark_dubious_utns_unused_ {false};
     bool comment_dubious_utns_ {true};
 
-    // tracker stuff
+            // tracker stuff
     double max_time_diff_tracker_ {15.0};
 
     double max_distance_quit_tracker_ {10*NM2M}; //10nm in meters // kb 5
@@ -154,12 +154,12 @@ protected:
     double cont_max_time_diff_tracker_ {30.0};
     double cont_max_distance_acceptable_tracker_ {1852.0};
 
-    // sensor
+            // sensor
     double max_time_diff_sensor_ {15.0};
     double max_distance_acceptable_sensor_ {2*NM2M};
     double max_altitude_diff_sensor_ {300.0};
 
-    // other
+            // other
     std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal
 
     boost::posix_time::ptime start_time_;
@@ -169,7 +169,7 @@ protected:
 
     std::unique_ptr<CreateAssociationsStatusDialog> status_dialog_;
 
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 

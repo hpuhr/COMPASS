@@ -29,6 +29,7 @@
 #include "util/stringconv.h"
 #include "util/timeconv.h"
 //#include "util/number.h"
+#include "viewpoint.h"
 
 #include <cassert>
 #include <algorithm>
@@ -407,7 +408,6 @@ bool SingleDubiousTrack::hasViewableData (
 std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -424,40 +424,40 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        //        unsigned int detail_cnt = 0;
-        //        unsigned int per_detail_update_cnt = detail_update_cnt;
+        unsigned int detail_cnt = 0;
+        unsigned int per_detail_update_cnt = detail_update_cnt;
 
-        //        const auto& details = getDetails();
-        //        assert (details.size());
+        const auto& details = getDetails();
+        assert (details.size());
 
-        //        while (per_detail_update_cnt >= details.at(detail_cnt).numDetails())
-        //        {
-        //            per_detail_update_cnt -= details.at(detail_cnt).numDetails();
-        //            ++detail_cnt;
+        while (per_detail_update_cnt >= details.at(detail_cnt).numDetails())
+        {
+            per_detail_update_cnt -= details.at(detail_cnt).numDetails();
+            ++detail_cnt;
 
-        //            assert (detail_cnt < details.size());
-        //        }
+            assert (detail_cnt < details.size());
+        }
 
-        //        logdbg << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
-        //               << " update detail size " << details.at(detail_cnt).numDetails()
-        //               << " per_detail_update_cnt " << per_detail_update_cnt;
+        logdbg << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
+                << " update detail size " << details.at(detail_cnt).numDetails()
+                << " per_detail_update_cnt " << per_detail_update_cnt;
 
-        //        assert (detail_cnt < details.size());
-        //        assert (per_detail_update_cnt < details.at(detail_cnt).numDetails());
+        assert (detail_cnt < details.size());
+        assert (per_detail_update_cnt < details.at(detail_cnt).numDetails());
 
-        //        const auto& detail        = details.at(detail_cnt);
-        //        const auto& update_detail = detail.details().at(per_detail_update_cnt);
+        const auto& detail        = details.at(detail_cnt);
+        const auto& update_detail = detail.details().at(per_detail_update_cnt);
 
-        //        assert(update_detail.numPositions() >= 1);
+        assert(update_detail.numPositions() >= 1);
 
-        //        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
-        //        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
-        //        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
-        //        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
-        //        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
+        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
+        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-        //        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
-        //            (*viewable_ptr)[ViewPoint::VP_EVAL_KEY][ViewPoint::VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
+        //if (update_detail.comments().hasComments(DetailCommentGroupDubious))
+        //    (*viewable_ptr)[ViewPoint::VP_EVAL_KEY][ViewPoint::VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }
@@ -497,12 +497,64 @@ EvaluationRequirement::DubiousTrack* SingleDubiousTrack::req ()
 
 void SingleDubiousTrack::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
 {
-     //addAnnotationFeatures(viewable, overview); // TODO rework
-
-    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
     json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
-    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
     json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+
+    //iterate over details
+    for (auto& rq_det_it : getDetails())
+    {
+        if (!rq_det_it.hasDetails())
+            continue;
+
+        //iterate over updates
+        for (auto& update : rq_det_it.details())
+        {
+            assert(update.numPositions() >= 1);
+
+            auto comments = update.comments().group(DetailCommentGroupDubious);
+            bool is_dub = (comments.has_value() && !comments->empty());
+
+            if (is_dub)
+                error_point_coordinates.push_back(update.position(0).asVector());
+            else if (add_ok)
+                ok_point_coordinates.push_back(update.position(0).asVector());
+        }
+    }
+}
+
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleDubiousTrack::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SingleDubiousTrack::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    const auto& details = getDetails();
+
+    if (layer == requirement_->name())
+    {
+        for (const auto& d : details)
+        {
+            if (d.hasDetails())
+            {
+                const auto& updates = d.details();
+
+                auto is_ok = [ & ] (size_t idx)
+                {
+                    auto comments = updates[ idx ].comments().group(DetailCommentGroupDubious);
+                    bool is_dub = (comments.has_value() && !comments->empty());
+
+                    return !is_dub;
+                };
+            
+                addValuesToGridBinary(grid, updates, is_ok, false);
+            }
+        }
+    }
 }
 
 float SingleDubiousTrack::trackDurationAll() const

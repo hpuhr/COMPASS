@@ -74,6 +74,69 @@
             }
         },
         "MetaVariable": {
+            "MetaMOMLongitudinalAcc0": {
+                "parameters": {
+                    "name": "MOM Longitudinal Acc"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062MOMLongitudinalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Longitudinal Acc"
+                            }
+                        },
+                        "VariableDefinitionRefTrajMOMLongitudinalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "MOM Longitudinal Acc"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaMOMTransversalAcc0": {
+                "parameters": {
+                    "name": "MOM Transversal Acc"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062MOMTransversalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Transversal Acc"
+                            }
+                        },
+                        "VariableDefinitionRefTrajMOMTransversalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "MOM Transversal Acc"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaMOMVerticalRate0": {
+                "parameters": {
+                    "name": "MOM Vertical Rate"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062MOMVerticalRateAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Vertical Rate"
+                            }
+                        },
+                        "VariableDefinitionRefTrajMOMVerticalRatelAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "MOM Vertical Rate"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaVariableARTAS Hash0": {
                 "parameters": {
                     "name": "ARTAS Hash"
@@ -198,6 +261,72 @@
                             "parameters": {
                                 "dbcontent_name": "RefTraj",
                                 "variable_name": "Aircraft Identification"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableAx0": {
+                "parameters": {
+                    "name": "Ax"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT010Ax0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT010",
+                                "variable_name": "Ax"
+                            }
+                        },
+                        "VariableDefinitionCAT020Ax0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Ax"
+                            }
+                        },
+                        "VariableDefinitionCAT062Ax0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Ax"
+                            }
+                        },
+                        "VariableDefinitionRefTrajAx0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Ax"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableAy0": {
+                "parameters": {
+                    "name": "Ay"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT010Ay0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT010",
+                                "variable_name": "Ay"
+                            }
+                        },
+                        "VariableDefinitionCAT020Ay0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Ay"
+                            }
+                        },
+                        "VariableDefinitionCAT062Ay0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Ay"
+                            }
+                        },
+                        "VariableDefinitionRefTrajVy0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Ay"
                             }
                         }
                     }
@@ -2283,6 +2412,33 @@
                             "parameters": {
                                 "dbcontent_name": "RefTraj",
                                 "variable_name": "Record Number"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVerticalRate0": {
+                "parameters": {
+                    "name": "Rate Of Climb/Descent"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT021VerticalRate0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Barometric Vertical Rate"
+                            }
+                        },
+                        "VariableDefinitionCAT062VerticalRate0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Rate Of Climb/Descent"
+                            }
+                        },
+                        "VariableDefinitionRefTrajVerticalRate0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Rate Of Climb/Descent"
                             }
                         }
                     }

@@ -509,6 +509,25 @@ void SinglePositionDistance::addAnnotations(nlohmann::json::object_t& viewable, 
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionDistance::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SinglePositionDistance::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    bool failed_values_of_interest = req()->failedValuesOfInterest();
+
+    if (layer == requirement_->name())
+    {
+        addValuesToGridBinary(grid, DetailKey::CheckPassed, !failed_values_of_interest);
+    }
+}
+
 bool SinglePositionDistance::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
@@ -539,5 +558,12 @@ EvaluationRequirement::PositionDistance* SinglePositionDistance::req ()
     return req;
 }
 
+const EvaluationRequirement::PositionDistance* SinglePositionDistance::req () const
+{
+    const EvaluationRequirement::PositionDistance* req =
+            dynamic_cast<const EvaluationRequirement::PositionDistance*>(requirement_.get());
+    assert (req);
+    return req;
+}
 
 }

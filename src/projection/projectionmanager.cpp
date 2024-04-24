@@ -143,14 +143,14 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     unsigned int buffer_size = buffer->size();
     assert(buffer_size);
 
-    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
     assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_range_));
     assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_azimuth_));
     assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_altitude_));
     assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
     assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
 
-    datasource_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_).name();
+    datasource_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_).name();
     range_var_name = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_range_).name();
     azimuth_var_name = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_).name();
     altitude_var_name = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_altitude_).name();
@@ -176,9 +176,9 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     // optional data for fft check
     NullableVector<unsigned int>* mode_s_address_vec {nullptr};
 
-    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
+    if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
     {
-        mode_s_address_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_).name();
+        mode_s_address_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_).name();
         assert (buffer->has<unsigned int>(mode_s_address_var_name));
 
         mode_s_address_vec = &buffer->get<unsigned int>(mode_s_address_var_name);
@@ -196,6 +196,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     // set up projections
     assert(hasCurrentProjection());
     Projection& projection = currentProjection();
+    projection.addAllRadarCoordinateSystems();
     assert (projection.radarCoordinateSystemsAdded()); // needs to have been prepared, otherwise multi-threading issue
 
     for (auto ds_id_it : datasource_vec.distinctValues())

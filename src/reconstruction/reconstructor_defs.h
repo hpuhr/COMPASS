@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include "kalman_defs.h"
+#include "targetreportdefs.h"
+
 #include <ostream>
 
 #include <boost/optional.hpp>
@@ -122,6 +125,23 @@ struct Measurement
     {
         return (x_stddev.has_value() && y_stddev.has_value());
     }
+
+    dbContent::targetReport::Position position() const
+    {
+        return {lat, lon};
+    }
+
+    dbContent::targetReport::PositionAccuracy positionAccuracy() const
+    {
+        assert (hasStdDevPosition());
+
+        if (xy_cov.has_value())
+            return dbContent::targetReport::PositionAccuracy(*x_stddev, *y_stddev, *xy_cov);
+        else
+            return dbContent::targetReport::PositionAccuracy(*x_stddev, *y_stddev, 0);
+    }
+
+
     bool hasStdDevVelocity() const
     {
         return (vx_stddev.has_value() && vy_stddev.has_value());
@@ -167,7 +187,7 @@ struct Measurement
     uint32_t                 source_id;            // source of the measurement
     boost::posix_time::ptime t;                    // timestamp
 
-    bool                     mm_interp = false;    //measurement has been interpolated (e.g. by spline interpolator)
+    bool                     mm_interp = false;    // measurement has been interpolated (e.g. by spline interpolator)
 
     double                   lat;                  // wgs84 latitude
     double                   lon;                  // wgs84 longitude
@@ -205,9 +225,10 @@ struct Reference : public Measurement
     bool nostddev_pos   = false; // did this position not obtain stddev information
     bool projchange_pos = false; // position where a change of map projection happened 
 
-    bool ref_interp   = false; // reference has been interpolated (e.g. from kalman samples)
+    bool ref_interp     = false; // reference has been interpolated (e.g. from kalman samples)
 
-    Eigen::MatrixXd cov; //covariance matrix
+    Eigen::MatrixXd cov; // covariance matrix
+    double          dt;  // last timestep (only set for non-interpolated)
 };
 
 /**

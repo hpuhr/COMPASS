@@ -97,6 +97,24 @@ void KalmanFilter::predict(const OMatrix& F,
 
 /**
 */
+void KalmanFilter::predictState(Vector& x,
+                                Matrix& P,
+                                const Matrix& F,
+                                const Matrix& Q,
+                                const OMatrix& B,
+                                const OVector& u) const
+{
+    // x = Fx + Bu
+    x = F * x_;
+    if (B.has_value() && u.has_value())
+        x += B.value() * u.value();
+
+    // P = FPF' + Q
+    P = alpha_sq_ * (F * P_ * F.transpose()) + Q;
+}
+
+/**
+*/
 bool KalmanFilter::update(const Vector& z,
                           const OMatrix& R,
                           const OMatrix& H)
@@ -158,10 +176,11 @@ bool KalmanFilter::update(const Vector& z,
 
 /**
 */
-Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
-                                          double dt,
-                                          double spectral_density,
-                                          size_t block_size)
+void KalmanFilter::continuousWhiteNoise(Matrix& Q_noise, 
+                                        size_t dim, 
+                                        double dt, 
+                                        double spectral_density, 
+                                        size_t block_size)
 {
     if (dim < 2 || dim > 4)
         throw std::runtime_error("KalmanFilter::continuousWhiteNoise(): dim must be between 2 and 4");
@@ -170,8 +189,7 @@ Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
 
     size_t full_size = dim * block_size;
 
-    Eigen::MatrixXd Q_full;
-    Q_full.setZero(full_size, full_size);
+    Q_noise.setZero(full_size, full_size);
 
     const double dt2 = dt * dt;
 
@@ -184,12 +202,12 @@ Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
 
         if (block_size == 1)
         {
-            Q_full = Q;
+            Q_noise = Q;
         }
         else
         {
             for (size_t i = 0; i < block_size; ++i)
-                Q_full.block<2, 2>(i * 2, i * 2) = Q;
+                Q_noise.block<2, 2>(i * 2, i * 2) = Q;
         }
     }
     else if (dim == 3)
@@ -205,12 +223,12 @@ Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
 
         if (block_size == 1)
         {
-            Q_full = Q;
+            Q_noise = Q;
         }
         else
         {
             for (size_t i = 0; i < block_size; ++i)
-                Q_full.block<3, 3>(i * 3, i * 3) = Q;
+                Q_noise.block<3, 3>(i * 3, i * 3) = Q;
         }
     }
     else // dim == 4
@@ -229,16 +247,28 @@ Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
 
         if (block_size == 1)
         {
-            Q_full = Q;
+            Q_noise = Q;
         }
         else
         {
             for (size_t i = 0; i < block_size; ++i)
-                Q_full.block<4, 4>(i * 4, i * 4) = Q;
+                Q_noise.block<4, 4>(i * 4, i * 4) = Q;
         }
     }
 
-    return Q_full* spectral_density;
+    Q_noise *= spectral_density;
+}
+
+/**
+*/
+Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
+                                          double dt,
+                                          double spectral_density,
+                                          size_t block_size)
+{
+    Matrix Q_noise;
+    continuousWhiteNoise(Q_noise, dim, dt, spectral_density, block_size);
+    return Q_noise;
 }
 
 /**
@@ -263,8 +293,8 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
     for (int i = 0; i < n; ++i)
     {
         x_smooth[ i ] = states[ i ].x;
-        P_smooth[ i ] = states[ i ].P;
-        Pp      [ i ] = states[ i ].P;
+        P_smooth[ i ] = states[ i ].P / 10.0; // TODO HACK
+        Pp      [ i ] = states[ i ].P / 10.0;
         K       [ i ].setZero(dim_x, dim_x);
     }
 

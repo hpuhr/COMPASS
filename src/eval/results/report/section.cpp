@@ -198,11 +198,24 @@ namespace EvaluationResultsReport
     }
 
     void Section::addFigure (const std::string& name, const string& caption,
-                             std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc)
+                             std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
+                             int render_delay_msec)
     {
         assert (!hasFigure(name));
-        content_.push_back(make_shared<SectionContentFigure>(name, caption, viewable_fnc, this, eval_man_));
+        content_.push_back(make_shared<SectionContentFigure>(name, caption, viewable_fnc, this, eval_man_, render_delay_msec));
         assert (hasFigure(name));
+    }
+
+    std::vector<SectionContentFigure*> Section::getFigures() const
+    {
+        std::vector<SectionContentFigure*> figures;
+        for (auto& cont_it : content_)
+        {
+            auto f = dynamic_cast<SectionContentFigure*>(cont_it.get());
+            if (f)
+                figures.push_back(f);
+        }
+        return figures;
     }
 
     unsigned int Section::numSections()

@@ -3,23 +3,18 @@
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
-#include "dbcontent/dbcontentcache.h"
+#include "dbcontent/dbcontentaccessor.h"
 #include "task.h"
-//#include "global.h"
 #include "reconstruction/reconstructor_defs.h"
 
 #include <QObject>
 
 #include <memory>
 
-//#include "boost/date_time/posix_time/posix_time.hpp"
-
 class CalculateReferencesTaskDialog;
 class CalculateReferencesStatusDialog;
 class CalculateReferencesJob;
 class ViewableDataConfig;
-
-// delete from data_reftraj;
 
 struct CalculateReferencesTaskSettings
 {
@@ -177,7 +172,7 @@ protected:
 
     // calculate only utns list
 
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 

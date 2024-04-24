@@ -50,78 +50,14 @@ JoinedDubiousTarget::JoinedDubiousTarget(const std::string& result_id,
 {
 }
 
-void JoinedDubiousTarget::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleDubiousTarget> other_sub =
-            std::static_pointer_cast<SingleDubiousTarget>(other);
-    assert (other_sub);
+//void JoinedDubiousTarget::join_impl(std::shared_ptr<Single> other)
+//{
+//    std::shared_ptr<SingleDubiousTarget> other_sub =
+//            std::static_pointer_cast<SingleDubiousTarget>(other);
+//    assert (other_sub);
 
-    addToValues(other_sub);
-}
-
-void JoinedDubiousTarget::addToValues (std::shared_ptr<SingleDubiousTarget> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_            += single_result->numUpdates();
-    num_pos_outside_        += single_result->numPosOutside();
-    num_pos_inside_         += single_result->numPosInside();
-    num_pos_inside_dubious_ += single_result->numPosInsideDubious();
-    
-    num_utns_ += 1;
-
-    assert (single_result->numDetails() >= 1);
-
-    const auto& detail = single_result->getDetail(0);
-
-    auto is_dubious = detail.getValueAs<bool>(SingleDubiousTarget::DetailKey::IsDubious);
-    assert(is_dubious.has_value());
-
-    auto duration = detail.getValueAs<boost::posix_time::time_duration>(SingleDubiousTarget::DetailKey::Duration);
-    assert(duration.has_value());
-
-    if (is_dubious.value())
-        num_utns_dubious_ += 1;
-
-    duration_all_ += Time::partialSeconds(duration.value());
-    if (is_dubious.value())
-        duration_dubious_ += Time::partialSeconds(duration.value());
-    else
-        duration_nondub_ += Time::partialSeconds(duration.value());
-
-    Base::addDetails(single_result->getDetails());
-
-    //const vector<double>& other_values = single_result->values();
-    //values_.insert(values_.end(), other_values.begin(), other_values.end());
-
-    update();
-}
-
-void JoinedDubiousTarget::update()
-{
-    assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_utns_ >= num_utns_dubious_);
-
-    //assert (values_.size() == num_comp_failed_+num_comp_passed_);
-
-    //unsigned int num_speeds = values_.size();
-
-    p_dubious_.reset();
-    p_dubious_update_.reset();
-
-    if (num_utns_)
-    {
-        p_dubious_ = (float)num_utns_dubious_/(float)num_utns_;
-    }
-
-    if (num_pos_inside_)
-    {
-        p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
-    }
-}
+//    addToValues(other_sub);
+//}
 
 void JoinedDubiousTarget::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -254,10 +190,8 @@ void JoinedDubiousTarget::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
-//    // figure
-//        sector_section.addFigure("sector_overview", "Sector Overview",
-//                                 [this](void) { return this->getErrorsViewable(); });
-
+    // figure
+    addOverview(sector_section);
 }
 
 bool JoinedDubiousTarget::hasViewableData (
@@ -267,24 +201,6 @@ bool JoinedDubiousTarget::hasViewableData (
         return true;
     else
         return false;
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTarget::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-
-    return getErrorsViewable();
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTarget::getErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-    addAnnotationsFromSingles(*viewable_ptr);
-
-    return viewable_ptr;
 }
 
 bool JoinedDubiousTarget::hasReference (
@@ -303,9 +219,11 @@ std::string JoinedDubiousTarget::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedDubiousTarget::updatesToUseChanges_impl()
+void JoinedDubiousTarget::updateToChanges_impl()
 {
-    loginf << "JoinedDubiousTarget: updatesToUseChanges";
+    loginf << "JoinedDubiousTarget: updateToChanges_impl";
+
+    // reset
 
     num_updates_ = 0;
     num_pos_outside_ = 0;
@@ -318,13 +236,88 @@ void JoinedDubiousTarget::updatesToUseChanges_impl()
     duration_nondub_ = 0;
     duration_dubious_ = 0;
 
-    for (auto result_it : results_)
-    {
-        std::shared_ptr<SingleDubiousTarget> result =
-                std::static_pointer_cast<SingleDubiousTarget>(result_it);
-        assert (result);
+    // process results
 
-        addToValues(result);
+    for (auto& result_it : results_)
+    {
+        std::shared_ptr<SingleDubiousTarget> single_result =
+                std::static_pointer_cast<SingleDubiousTarget>(result_it);
+        assert (single_result);
+
+        single_result->setInterestFactor(0);
+
+        if (!single_result->use())
+            continue;
+
+        num_updates_            += single_result->numUpdates();
+        num_pos_outside_        += single_result->numPosOutside();
+        num_pos_inside_         += single_result->numPosInside();
+        num_pos_inside_dubious_ += single_result->numPosInsideDubious();
+
+        num_utns_ += 1;
+
+        assert (single_result->numDetails() >= 1);
+
+        const auto& detail = single_result->getDetail(0);
+
+        auto is_dubious = detail.getValueAs<bool>(SingleDubiousTarget::DetailKey::IsDubious);
+        assert(is_dubious.has_value());
+
+        auto duration = detail.getValueAs<boost::posix_time::time_duration>(SingleDubiousTarget::DetailKey::Duration);
+        assert(duration.has_value());
+
+        if (is_dubious.value())
+            num_utns_dubious_ += 1;
+
+        duration_all_ += Time::partialSeconds(duration.value());
+        if (is_dubious.value())
+            duration_dubious_ += Time::partialSeconds(duration.value());
+        else
+            duration_nondub_ += Time::partialSeconds(duration.value());
+
+        Base::addDetails(single_result->getDetails());
+    }
+
+    // calc pd
+
+    assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_utns_ >= num_utns_dubious_);
+
+            //assert (values_.size() == num_comp_failed_+num_comp_passed_);
+
+            //unsigned int num_speeds = values_.size();
+
+    p_dubious_.reset();
+    p_dubious_update_.reset();
+
+    if (num_utns_)
+    {
+        p_dubious_ = (float)num_utns_dubious_/(float)num_utns_;
+
+        // attribute interest
+
+        for (auto& result_it : results_)
+        {
+            std::shared_ptr<SingleDubiousTarget> single_result =
+                std::static_pointer_cast<SingleDubiousTarget>(result_it);
+            assert (single_result);
+
+            if (!single_result->use())
+                continue;
+
+            const auto& detail = single_result->getDetail(0);
+
+            auto is_dubious = detail.getValueAs<bool>(SingleDubiousTarget::DetailKey::IsDubious);
+            assert(is_dubious.has_value());
+
+            if (is_dubious.value())
+                single_result->setInterestFactor(1.0 / (float)num_utns_dubious_);
+        }
+    }
+
+    if (num_pos_inside_)
+    {
+        p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
     }
 }
 

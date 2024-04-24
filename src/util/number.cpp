@@ -20,6 +20,8 @@
 
 #include <cmath>
 #include <stdlib.h>
+#include <algorithm>
+#include <numeric>
 
 #include <Eigen/Core>
 
@@ -226,6 +228,26 @@ unsigned long recNumGetWithoutDBContId (unsigned long rec_num)
 unsigned int recNumGetDBContId (unsigned long rec_num)
 {
     return rec_num & 0xFF; // first byte
+}
+
+std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values)
+{
+    double mean=0, stddev=0, min=0, max=0;
+
+    double sum = std::accumulate(values.begin(), values.end(), 0.0);
+
+    mean = sum / values.size();
+
+    std::vector<double> diff(values.size());
+    std::transform(values.begin(), values.end(), diff.begin(),
+                   [mean](const double val) { return val - mean; });
+    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    stddev = std::sqrt(sq_sum / values.size());
+
+    min = *std::min_element(values.begin(), values.end());
+    max = *std::max_element(values.begin(), values.end());
+
+    return std::tuple<double,double,double,double>(mean, stddev, min, max);
 }
 
 }  // namespace Number

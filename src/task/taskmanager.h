@@ -21,8 +21,6 @@
 #include <QObject>
 
 #include "configurable.h"
-//#include "global.h"
-//#include "singleton.h"
 #include "task.h"
 
 class COMPASS;
@@ -36,6 +34,7 @@ class RadarPlotPositionCalculatorTask;
 class CalculateReferencesTask;
 class ManageSectorsTask;
 class CreateAssociationsTask;
+class ReconstructorTask;
 class MainWindow;
 
 class QMainWindow;
@@ -57,8 +56,7 @@ class TaskManager : public QObject, public Configurable
 
     virtual ~TaskManager();
 
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override;
 
     void shutdown();
 
@@ -76,6 +74,7 @@ class TaskManager : public QObject, public Configurable
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     CreateAssociationsTask& createAssociationsTask() const;
     CalculateReferencesTask& calculateReferencesTask() const;
+    ReconstructorTask& reconstructReferencesTask() const;
 
 protected:
     // tasks
@@ -89,8 +88,9 @@ protected:
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<CreateAssociationsTask> create_associations_task_;
     std::unique_ptr<CalculateReferencesTask> calculate_references_task_;
+    std::unique_ptr<ReconstructorTask> reconstruct_references_task_;
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
 
     std::map<std::string, Task*> tasks_;
 

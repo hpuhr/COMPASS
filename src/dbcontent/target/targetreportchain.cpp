@@ -5,10 +5,12 @@
 //#include "dbcontent/variable/metavariable.h"
 //#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent.h"
-#include "dbcontentcache.h"
+#include "dbcontentaccessor.h"
 #include "util/number.h"
 #include "util/timeconv.h"
 #include "global.h"
+
+#include <algorithm>
 
 #include <boost/algorithm/string.hpp>
 
@@ -20,8 +22,8 @@ namespace dbContent {
 
 namespace TargetReport {
 
-Chain::Chain(std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name)
-    : cache_(cache), dbcontent_name_(dbcontent_name)
+Chain::Chain(std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name)
+    : accessor_(accessor), dbcontent_name_(dbcontent_name)
 {
 
 }
@@ -221,14 +223,39 @@ Chain::DataID Chain::dataID(const boost::posix_time::ptime& timestamp) const
     return DataID(timestamp).addIndex(range.first->second);
 }
 
+std::vector<DataID> Chain::dataIDsBetween(const boost::posix_time::ptime& timestamp0,
+                                          const boost::posix_time::ptime& timestamp1,
+                                          bool include_t0,
+                                          bool include_t1) const
+{
+    assert(timestamp0 <= timestamp1);
+    auto it_start = timestamp_index_lookup_.lower_bound(timestamp0);
+
+    if (it_start == timestamp_index_lookup_.end())
+        return {};
+
+    std::vector<DataID> ids;
+
+    for (auto it = it_start; it != timestamp_index_lookup_.end(); ++it)
+    {
+        bool ok0 = (include_t0 && it->first >= timestamp0) || (!include_t0 && it->first > timestamp0);
+        bool ok1 = (include_t1 && it->first <= timestamp1) || (!include_t1 && it->first < timestamp1);
+        
+        if(ok0 && ok1)
+            ids.push_back(DataID(it->first).addIndex(it->second));
+    }
+
+    return ids;
+}
+
 unsigned int Chain::dsID(const DataID& id) const
 {
     auto index     = indexFromDataID(id);
 
     unsigned int index_ext = index.idx_external;
 
-    NullableVector<unsigned int>& dsid_vec  =
-            cache_->getMetaVar<unsigned int>(dbcontent_name_, DBContent::meta_var_datasource_id_);
+    NullableVector<unsigned int>& dsid_vec =
+            accessor_->getMetaVar<unsigned int>(dbcontent_name_, DBContent::meta_var_ds_id_);
 
     assert (!dsid_vec.isNull(index_ext));
 
@@ -241,23 +268,23 @@ dbContent::TargetPosition Chain::pos(const DataID& id) const
 
     assert (timestamp_index_lookup_.count(timestamp));
 
-    auto index     = indexFromDataID(id);
+    auto index = indexFromDataID(id);
 
     unsigned int index_ext = index.idx_external;
 
     dbContent::TargetPosition pos;
 
-    NullableVector<double>& latitude_vec  = cache_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_latitude_);
-    NullableVector<double>& longitude_vec = cache_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_longitude_);
-    NullableVector<float>& altitude_vec   = cache_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_mc_);
+    NullableVector<double>& latitude_vec  = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_latitude_);
+    NullableVector<double>& longitude_vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_longitude_);
+    NullableVector<float>& altitude_vec   = accessor_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_mc_);
 
     NullableVector<float>* altitude_trusted_vec {nullptr};
     NullableVector<float>* altitude_secondary_vec {nullptr};
 
     if (dbcontent_name_ == "CAT062")
     {
-        altitude_trusted_vec = &cache_->getVar<float>(dbcontent_name_, DBContent::var_cat062_fl_measured_);
-        altitude_secondary_vec = &cache_->getVar<float>(dbcontent_name_, DBContent::var_cat062_baro_alt_);
+        altitude_trusted_vec = &accessor_->getVar<float>(dbcontent_name_, DBContent::var_cat062_fl_measured_);
+        altitude_secondary_vec = &accessor_->getVar<float>(dbcontent_name_, DBContent::var_cat062_baro_alt_);
     }
 
     assert (!latitude_vec.isNull(index_ext));
@@ -302,6 +329,21 @@ dbContent::TargetPosition Chain::pos(const DataID& id) const
     return pos;
 }
 
+std::vector<TargetPosition> Chain::positionsBetween(const boost::posix_time::ptime& timestamp0,
+                                                    const boost::posix_time::ptime& timestamp1,
+                                                    bool include_t0,
+                                                    bool include_t1) const
+{
+    auto ids = dataIDsBetween(timestamp0, timestamp1, include_t0, include_t1);
+
+    std::vector<TargetPosition> positions(ids.size());
+
+    for (size_t i = 0; i < ids.size(); ++i)
+        positions[ i ] = pos(ids[ i ]);
+
+    return positions;
+}
+
 boost::optional<TargetPosition> Chain::posOpt(const DataID& id) const
 {
     auto timestamp = timestampFromDataID(id);
@@ -319,7 +361,7 @@ boost::optional<TargetPositionAccuracy> Chain::posAccuracy(const DataID& id) con
 
     unsigned int index_ext = index.idx_external;
 
-    return getPositionAccuracy(cache_, dbcontent_name_, index_ext);
+    return getPositionAccuracy(accessor_, dbcontent_name_, index_ext);
 }
 
 boost::optional<dbContent::TargetVelocity> Chain::speed(const DataID& id) const
@@ -328,9 +370,9 @@ boost::optional<dbContent::TargetVelocity> Chain::speed(const DataID& id) const
 
     unsigned int index_ext = index.idx_external;
 
-    NullableVector<double>& speed_vec = cache_->getMetaVar<double>(
+    NullableVector<double>& speed_vec = accessor_->getMetaVar<double>(
                 dbcontent_name_, DBContent::meta_var_ground_speed_);
-    NullableVector<double>& track_angle_vec = cache_->getMetaVar<double>(
+    NullableVector<double>& track_angle_vec = accessor_->getMetaVar<double>(
                 dbcontent_name_, DBContent::meta_var_track_angle_);
 
     if (speed_vec.isNull(index_ext) || track_angle_vec.isNull(index_ext))
@@ -353,7 +395,7 @@ boost::optional<TargetVelocityAccuracy> Chain::speedAccuracy(const DataID& id) c
 
     unsigned int index_ext = index.idx_external;
 
-    return getVelocityAccuracy(cache_, dbcontent_name_, index_ext);
+    return getVelocityAccuracy(accessor_, dbcontent_name_, index_ext);
 }
 
 boost::optional<std::string> Chain::acid(const DataID& id) const
@@ -362,7 +404,7 @@ boost::optional<std::string> Chain::acid(const DataID& id) const
 
     unsigned int index_ext = index.idx_external;
 
-    NullableVector<string>& callsign_vec = cache_->getMetaVar<string>(dbcontent_name_, DBContent::meta_var_ti_);
+    NullableVector<string>& callsign_vec = accessor_->getMetaVar<string>(dbcontent_name_, DBContent::meta_var_acid_);
 
     if (callsign_vec.isNull(index_ext))
         return {};
@@ -378,23 +420,23 @@ boost::optional<unsigned int> Chain::modeA(const DataID& id, bool ignore_invalid
 
     unsigned int index_ext = index.idx_external;
 
-    NullableVector<unsigned int>& modea_vec = cache_->getMetaVar<unsigned int>(
+    NullableVector<unsigned int>& modea_vec = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name_, DBContent::meta_var_m3a_);
 
     if (modea_vec.isNull(index_ext))
         return {};
 
-    if (ignore_invalid && cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_v_))
+    if (ignore_invalid && accessor_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_v_))
     {
-        NullableVector<bool>& modea_v_vec = cache_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_v_);
+        NullableVector<bool>& modea_v_vec = accessor_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_v_);
 
         if (!modea_v_vec.isNull(index_ext) && !modea_v_vec.get(index_ext)) // not valid
             return {};
     }
 
-    if (ignore_garbled && cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_g_))
+    if (ignore_garbled && accessor_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_g_))
     {
-        NullableVector<bool>& modea_g_vec = cache_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_g_);
+        NullableVector<bool>& modea_g_vec = accessor_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_m3a_g_);
 
         if (!modea_g_vec.isNull(index_ext) && modea_g_vec.get(index_ext)) // garbled
             return {};
@@ -413,29 +455,29 @@ boost::optional<float> Chain::modeC(const DataID& id, bool ignore_invalid, bool 
 
     if (dbcontent_name_ == "CAT062")
     {
-        NullableVector<float>& altitude_trusted_vec = cache_->getVar<float>(
+        NullableVector<float>& altitude_trusted_vec = accessor_->getVar<float>(
                     dbcontent_name_, DBContent::var_cat062_fl_measured_);
 
         if (!altitude_trusted_vec.isNull(index_ext))
             return altitude_trusted_vec.get(index_ext);
     }
 
-    NullableVector<float>& modec_vec = cache_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_mc_);
+    NullableVector<float>& modec_vec = accessor_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_mc_);
 
     if (modec_vec.isNull(index_ext))
         return {};
 
-    if (ignore_invalid && cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_v_))
+    if (ignore_invalid && accessor_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_v_))
     {
-        NullableVector<bool>& mc_v_vec = cache_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_v_);
+        NullableVector<bool>& mc_v_vec = accessor_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_v_);
 
         if (!mc_v_vec.isNull(index_ext) && !mc_v_vec.get(index_ext)) // not valid
             return {};
     }
 
-    if (ignore_garbled && cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_g_))
+    if (ignore_garbled && accessor_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_g_))
     {
-        NullableVector<bool>& modec_g_vec = cache_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_g_);
+        NullableVector<bool>& modec_g_vec = accessor_->getMetaVar<bool>(dbcontent_name_, DBContent::meta_var_mc_g_);
 
         if (!modec_g_vec.isNull(index_ext) && modec_g_vec.get(index_ext)) // garbled
             return {};
@@ -450,8 +492,8 @@ boost::optional<unsigned int> Chain::acad(const DataID& id) const
 
     unsigned int index_ext = index.idx_external;
 
-    NullableVector<unsigned int>& ta_vec = cache_->getMetaVar<unsigned int>(
-                dbcontent_name_, DBContent::meta_var_ta_);
+    NullableVector<unsigned int>& ta_vec = accessor_->getMetaVar<unsigned int>(
+                dbcontent_name_, DBContent::meta_var_acad_);
 
     if (ta_vec.isNull(index_ext))
         return {};
@@ -461,14 +503,14 @@ boost::optional<unsigned int> Chain::acad(const DataID& id) const
 
 boost::optional<bool> Chain::groundBit(const DataID& id) const
 {
-    if (!cache_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_ground_bit_))
+    if (!accessor_->hasMetaVar<bool>(dbcontent_name_, DBContent::meta_var_ground_bit_))
         return {};
 
     auto index = indexFromDataID(id);
 
     unsigned int index_ext = index.idx_external;
 
-    NullableVector<bool>& db_vec = cache_->getMetaVar<bool>(
+    NullableVector<bool>& db_vec = accessor_->getMetaVar<bool>(
                 dbcontent_name_, DBContent::meta_var_ground_bit_);
 
     if (db_vec.isNull(index_ext))
@@ -483,10 +525,10 @@ boost::optional<unsigned int> Chain::tstTrackNum(const DataID& id) const
 
     auto index_ext = index.idx_external;
 
-    if (!cache_->hasMetaVar<unsigned int>(dbcontent_name_, DBContent::meta_var_track_num_))
+    if (!accessor_->hasMetaVar<unsigned int>(dbcontent_name_, DBContent::meta_var_track_num_))
         return {};
 
-    NullableVector<unsigned int>& tn_vec = cache_->getMetaVar<unsigned int>(
+    NullableVector<unsigned int>& tn_vec = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name_, DBContent::meta_var_track_num_);
 
     if (tn_vec.isNull(index_ext))
@@ -501,10 +543,10 @@ boost::optional<float> Chain::groundSpeed(const DataID& id) const // m/s
 
     auto index_ext = index.idx_external;
 
-    if (!cache_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_ground_speed_))
+    if (!accessor_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_ground_speed_))
         return {};
 
-    NullableVector<double>& gs_vec = cache_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_ground_speed_);
+    NullableVector<double>& gs_vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_ground_speed_);
 
     if (gs_vec.isNull(index_ext))
         return {};
@@ -518,15 +560,123 @@ boost::optional<float> Chain::trackAngle(const DataID& id) const // deg
 
     auto index_ext = index.idx_external;
 
-    if (!cache_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_track_angle_))
+    if (!accessor_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_track_angle_))
         return {};
 
-    NullableVector<double>& ta_vec = cache_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_track_angle_);
+    NullableVector<double>& vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_track_angle_);
 
-    if (ta_vec.isNull(index_ext))
+    if (vec.isNull(index_ext))
         return {};
 
-    return ta_vec.get(index_ext);
+    return vec.get(index_ext);
+}
+
+boost::optional<double> Chain::acceleration(const DataID& id) const // m/s2
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_ax_)
+        || !accessor_->hasMetaVar<double>(dbcontent_name_, DBContent::meta_var_ay_))
+        return {};
+
+    NullableVector<double>& ax_vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_ax_);
+    NullableVector<double>& ay_vec = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_ay_);
+
+    if (ax_vec.isNull(index_ext) || ay_vec.isNull(index_ext))
+        return {};
+
+    return sqrt(pow(ax_vec.get(index_ext), 2) + pow(ay_vec.get(index_ext), 2));
+}
+
+boost::optional<float> Chain::rocd(const DataID& id) const // ft/min
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<float>(dbcontent_name_, DBContent::meta_var_rocd_))
+        return {};
+
+    NullableVector<float>& vec = accessor_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_rocd_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
+}
+
+boost::optional<unsigned char> Chain::momLongAcc(const DataID& id) const
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<unsigned char>(dbcontent_name_, DBContent::meta_var_mom_long_acc_))
+        return {};
+
+    NullableVector<unsigned char>& vec = accessor_->getMetaVar<unsigned char>(
+        dbcontent_name_, DBContent::meta_var_mom_long_acc_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
+}
+
+boost::optional<unsigned char> Chain::momTransAcc(const DataID& id) const
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<unsigned char>(dbcontent_name_, DBContent::meta_var_mom_trans_acc_))
+        return {};
+
+    NullableVector<unsigned char>& vec = accessor_->getMetaVar<unsigned char>(
+        dbcontent_name_, DBContent::meta_var_mom_trans_acc_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
+}
+
+boost::optional<unsigned char> Chain::momVertRate(const DataID& id) const
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<unsigned char>(dbcontent_name_, DBContent::meta_var_mom_vert_rate_))
+        return {};
+
+    NullableVector<unsigned char>& vec = accessor_->getMetaVar<unsigned char>(
+        dbcontent_name_, DBContent::meta_var_mom_vert_rate_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
+}
+
+boost::optional<unsigned char> Chain::trackCoasting(const DataID& id) const
+{
+    auto index = indexFromDataID(id);
+
+    auto index_ext = index.idx_external;
+
+    if (!accessor_->hasMetaVar<unsigned char>(dbcontent_name_, DBContent::meta_var_track_coasting_))
+        return {};
+
+    NullableVector<unsigned char>& vec = accessor_->getMetaVar<unsigned char>(
+        dbcontent_name_, DBContent::meta_var_track_coasting_);
+
+    if (vec.isNull(index_ext))
+        return {};
+
+    return vec.get(index_ext);
 }
 
 std::pair<bool, float> Chain::estimateAltitude (const boost::posix_time::ptime& timestamp,
@@ -534,13 +684,13 @@ std::pair<bool, float> Chain::estimateAltitude (const boost::posix_time::ptime& 
 {
     assert(index_internal < indexes_.size());
 
-    NullableVector<float>& altitude_vec = cache_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_mc_);
-    NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(dbcontent_name_, DBContent::meta_var_timestamp_);
+    NullableVector<float>& altitude_vec = accessor_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_mc_);
+    NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(dbcontent_name_, DBContent::meta_var_timestamp_);
 
     NullableVector<float>* altitude_trusted_vec {nullptr};
 
     if (dbcontent_name_ == "CAT062")
-        altitude_trusted_vec = &cache_->getVar<float>(dbcontent_name_, DBContent::var_cat062_fl_measured_);
+        altitude_trusted_vec = &accessor_->getVar<float>(dbcontent_name_, DBContent::var_cat062_fl_measured_);
 
     bool found_prev {false};
     float altitude_prev {0.0};
@@ -666,6 +816,19 @@ DataMapping Chain::calculateDataMapping(ptime timestamp) const
 
     ret.timestamp_ = timestamp;
 
+    if (timestamp_index_lookup_.count(timestamp)) // found exact time
+    {
+        ret.has_ref1_ = true;
+        ret.timestamp_ref1_ = timestamp;
+        ret.dataid_ref1_ = dataID(timestamp_index_lookup_.find(timestamp)->first);
+
+        ret.has_ref2_ = false;
+
+        addPositionsSpeedsToMapping(ret);
+
+        return ret;
+    }
+
     //    Return iterator to lower bound
     //    Returns an iterator pointing to the first element in the container whose key is not considered to go
     //    before k (i.e., either it is equivalent or goes after).
@@ -722,8 +885,29 @@ DataMapping Chain::calculateDataMapping(ptime timestamp) const
 
 void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
 {
-    if (!mapping.has_ref1_ || !mapping.has_ref2_)
+    if (!mapping.has_ref1_ && !mapping.has_ref2_)
         return;
+
+    if (mapping.has_ref1_ && !mapping.has_ref2_)
+    {
+        boost::optional<dbContent::TargetPosition> pos1 = posOpt(mapping.dataid_ref1_);
+
+        if (!pos1.has_value())
+            return;
+
+        mapping.has_ref_pos_ = true;
+        mapping.pos_ref_ = *pos1;
+
+        boost::optional<dbContent::TargetVelocity> spd1 = speed(mapping.dataid_ref1_);
+
+        if (spd1.has_value())
+        {
+            mapping.has_ref_spd_ = true;
+            mapping.spd_ref_ = *spd1;
+        }
+
+        return;
+    }
 
     boost::optional<dbContent::TargetPosition> pos1 = posOpt(mapping.dataid_ref1_);
     boost::optional<dbContent::TargetPosition> pos2 = posOpt(mapping.dataid_ref2_);
@@ -741,6 +925,11 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
 
     double acceleration_ms2;
     double speed_ms, angle_deg;
+
+    boost::optional<double> acc1, acc2;
+    double delta_acc;
+    boost::optional<double> rocd1, rocd2;
+    double delta_rocd;
 
     logdbg << "Chain: addPositionsSpeedsToMapping: d_t " << d_t;
 
@@ -870,6 +1059,30 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
                     mapping.has_ref_spd_          = true;
                     mapping.spd_ref_.speed_       = speed_ms;
                     mapping.spd_ref_.track_angle_ = angle_deg;
+                }
+
+                // acceleration
+                acc1 = acceleration(mapping.dataid_ref1_);
+                acc2 = acceleration(mapping.dataid_ref2_);
+
+                if (acc1.has_value() && acc2.has_value())
+                {
+                    delta_acc = (*acc2 - *acc1)/d_t;
+
+                    mapping.has_ref_acc_ = true;
+                    mapping.ref_acc_ = *acc1 + delta_acc * d_t2;
+                }
+
+                // rocd
+                rocd1 = acceleration(mapping.dataid_ref1_);
+                rocd2 = acceleration(mapping.dataid_ref2_);
+
+                if (rocd1.has_value() && rocd2.has_value())
+                {
+                    delta_rocd = (*rocd2 - *rocd1)/d_t;
+
+                    mapping.has_ref_rocd_ = true;
+                    mapping.ref_rocd_ = *rocd1 + delta_rocd * d_t2;
                 }
             }
         }
@@ -1001,7 +1214,7 @@ void Chain::updateACIDs() const
 
     if (timestamp_index_lookup_.size())
     {
-        NullableVector<string>& value_vec = cache_->getMetaVar<string>(dbcontent_name_, DBContent::meta_var_ti_);
+        NullableVector<string>& value_vec = accessor_->getMetaVar<string>(dbcontent_name_, DBContent::meta_var_acid_);
         map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
 
         for (auto& val_it : distinct_values)
@@ -1018,8 +1231,8 @@ void Chain::updateACADs() const
 
     if (timestamp_index_lookup_.size())
     {
-        NullableVector<unsigned int>& value_vec = cache_->getMetaVar<unsigned int>(
-                    dbcontent_name_, DBContent::meta_var_ta_);
+        NullableVector<unsigned int>& value_vec = accessor_->getMetaVar<unsigned int>(
+                    dbcontent_name_, DBContent::meta_var_acad_);
         map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
 
         for (auto& val_it : distinct_values)
@@ -1039,7 +1252,7 @@ void Chain::updateModeACodes() const
 
     if (timestamp_index_lookup_.size())
     {
-        NullableVector<unsigned int>& mode_a_codes = cache_->getMetaVar<unsigned int>(
+        NullableVector<unsigned int>& mode_a_codes = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name_, DBContent::meta_var_m3a_);
         map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(indexes_);
         //unsigned int null_cnt = mode_a_codes.nullValueIndexes(ref_rec_nums_).size();
@@ -1070,12 +1283,12 @@ void Chain::updateModeCMinMax() const
 
     if (timestamp_index_lookup_.size())
     {
-        NullableVector<float>& modec_codes_ft = cache_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_mc_);
+        NullableVector<float>& modec_codes_ft = accessor_->getMetaVar<float>(dbcontent_name_, DBContent::meta_var_mc_);
 
         NullableVector<float>* altitude_trusted_vec {nullptr};
 
         if (dbcontent_name_ == "CAT062")
-            altitude_trusted_vec = &cache_->getVar<float>(dbcontent_name_, DBContent::var_cat062_fl_measured_);
+            altitude_trusted_vec = &accessor_->getVar<float>(dbcontent_name_, DBContent::var_cat062_fl_measured_);
 
         for (auto ind_it : indexes_)
         {
@@ -1111,8 +1324,8 @@ void Chain::updatePositionMinMax() const
 
     if (timestamp_index_lookup_.size())
     {
-        NullableVector<double>& lats = cache_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_latitude_);
-        NullableVector<double>& longs = cache_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_longitude_);
+        NullableVector<double>& lats = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_latitude_);
+        NullableVector<double>& longs = accessor_->getMetaVar<double>(dbcontent_name_, DBContent::meta_var_longitude_);
 
         for (auto ind_it : indexes_)
         {

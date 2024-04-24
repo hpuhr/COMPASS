@@ -20,9 +20,16 @@
 #include <Eigen/Core>
 
 #include <boost/optional.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace kalman
 {
+
+enum KalmanType
+{
+    UMKalman2D = 0, // uniform motion kalman in the plane
+    AMKalman2D      // accelerated motion kalman in the plane
+};
 
 typedef Eigen::MatrixXd         Matrix;
 typedef Eigen::VectorXd         Vector;
@@ -51,6 +58,26 @@ struct KalmanState
     Matrix P;        // state uncertainty
     Matrix F;        // transition mat
     Matrix Q;        // process noise
+};
+
+/**
+ * Low-level struct for a kalman update.
+ * Contains everything needed for postprocessing and extraction of a final reference.
+ */
+struct KalmanUpdate
+{
+    void resetFlags()
+    {
+        valid  = false;
+        reinit = false;
+    }
+
+    KalmanState              state;             // kalman internal state, can be used for rts smooting, state interpolation, etc.
+    Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
+    boost::posix_time::ptime t;                 // time of update
+
+    bool valid  = false; // kalman update is valid
+    bool reinit = false; // kalman was reinitialized at this update, represents the beginning of a new kalman chain
 };
 
 } // namespace kalman

@@ -368,15 +368,15 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        //        const auto& detail = getDetail(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        //        assert(detail.numPositions() >= 1);
+        assert(detail.numPositions() >= 1);
 
-        //        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
-        //        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = detail.position(0).longitude_;
-        //        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
-        //        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
-        //        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
         //        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
         //        assert(check_passed.has_value());
@@ -444,8 +444,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::getTargetErrorsViewable (
 
     if (has_pos)
     {
-        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY ] = (lat_max+lat_min)/2.0;
-        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
+        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
+        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;
 
         double lat_w = lat_max-lat_min;
         double lon_w = lon_max-lon_min;
@@ -554,6 +554,23 @@ void SingleSpeed::addAnnotations(nlohmann::json::object_t& viewable, bool overvi
             error_point_coordinates.push_back(detail_it.position(0).asVector());
         else if (add_ok)
             ok_point_coordinates.push_back(detail_it.position(0).asVector());
+    }
+}
+
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleSpeed::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SingleSpeed::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        addValuesToGridBinary(grid, DetailKey::CheckPassed);
     }
 }
 

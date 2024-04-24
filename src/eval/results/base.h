@@ -93,6 +93,8 @@ public:
     const EvaluationDetails& getDetails() const;
     const EvaluationDetail& getDetail(int idx) const;
 
+    const SectorLayer& sectorLayer() const { return sector_layer_; } 
+
     const static std::string req_overview_table_name_;
 
 protected:

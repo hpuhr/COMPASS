@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#pragma once
 
 #include <QObject>
 
@@ -28,34 +27,14 @@ class Task : public QObject
     Q_OBJECT
 
   signals:
-    void statusChangedSignal(std::string task_name);  // emitted when settings where changes which
-                                                      // influence the prerequisites
-    void doneSignal(std::string task_name);           // emitted when task is done
+    void doneSignal();           // emitted when task is done
 
   public:
-    Task(const std::string& name, const std::string& gui_name, TaskManager& task_manager)
-        : name_(name),
-          gui_name_(gui_name),
-          task_manager_(task_manager)
+    Task(TaskManager& task_manager)
+        : task_manager_(task_manager)
     {
     }
     virtual ~Task() {}
-
-    std::string name() const { return name_; }
-
-//    virtual TaskWidget* widget() = 0;
-//    virtual void deleteWidget() = 0;
-
-//    bool guiOnly() const { return gui_only_; }
-
-    std::string guiName() const { return gui_name_; }
-
-//    virtual bool checkPrerequisites() = 0;        // returns true can be shown, false if not yet
-//    virtual bool canRun() { return !gui_only_; }  // returns true if can be run, to be overriden
-//    virtual bool isRecommended() = 0;  // returns true if it is recommended to run this task
-//    virtual bool isRequired() = 0;     // returns true if it is required to run this task
-
-//    bool expertOnly() const { return expert_only_; }
 
     bool done() const { return done_; }
 
@@ -72,10 +51,6 @@ class Task : public QObject
     void allowUserInteractions(bool value) { allow_user_interactions_ = value; }
 
   protected:
-    std::string name_;
-    std::string gui_name_;
-//    bool gui_only_{false};
-//    bool expert_only_{false};
     bool stopped_ {false};
     bool done_{false};
     bool allow_user_interactions_{true};
@@ -85,4 +60,3 @@ class Task : public QObject
     TaskManager& task_manager_;
 };
 
-#endif  // TASK_H

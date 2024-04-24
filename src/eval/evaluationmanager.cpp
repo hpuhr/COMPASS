@@ -251,6 +251,11 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
         settings_.report_open_created_pdf_ = false;
     }
 
+    //grid generation
+    registerParameter("grid_num_cells_x", &settings_.grid_num_cells_x, Settings().grid_num_cells_x);
+    registerParameter("grid_num_cells_y", &settings_.grid_num_cells_y, Settings().grid_num_cells_y);
+    registerParameter("grid_pixels_per_cell", &settings_.grid_pixels_per_cell, Settings().grid_pixels_per_cell);
+
     registerParameter("warning_shown", &settings_.warning_shown_, Settings().warning_shown_);
 
     createSubConfigurables();
@@ -298,17 +303,7 @@ void EvaluationManager::loadData ()
         viewable_data_cfg_ = nullptr;
     }
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    dbcontent_man.clearData(); // clear any previously loaded data
-
-    results_gen_.clear();
-
-    reference_data_loaded_ = false;
-    test_data_loaded_ = false;
-    data_loaded_ = false;
-
-    evaluated_ = false;
+    clearLoadedDataAndResults();
 
     if (widget_)
         widget_->updateButtons();
@@ -548,6 +543,8 @@ void EvaluationManager::loadData ()
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
     connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
             this, &EvaluationManager::loadedDataDataSlot);
     connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
@@ -674,6 +671,9 @@ void EvaluationManager::databaseClosedSlot()
     data_sources_ref_.clear();
     data_sources_tst_.clear();
 
+    results_gen_.clear();
+    data_.clear();
+
     widget()->updateDataSources();
     widget()->updateSectors();
     widget()->setDisabled(true);
@@ -787,6 +787,9 @@ void EvaluationManager::evaluate()
     // clean previous
     results_gen_.clear();
 
+    data_.resetModelBegin();
+    data_.clearInterestFactors();
+
     evaluated_ = false;
 
     if (widget_)
@@ -796,6 +799,8 @@ void EvaluationManager::evaluate()
     
     // eval
     results_gen_.evaluate(data_, currentStandard());
+
+    data_.resetModelEnd();
 
     evaluated_ = true;
 
@@ -847,56 +852,76 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_line_id_.name()).getFor(dbcontent_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_));
 
     // flight level
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_g_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_g_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_v_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_v_));
 
     //if (settings_.dbcontent_name_ref_ == dbcontent_name && settings_.dbcontent_name_ref_ == "CAT062")
 
     // flight level trusted
     if (dbcontent_name == "CAT062")
     {
-        read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_baro_alt_.name()));
-        read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_fl_measured_.name()));
+        read_set.add(dbcontent_man.getVariable("CAT062", DBContent::var_cat062_baro_alt_));
+        read_set.add(dbcontent_man.getVariable("CAT062", DBContent::var_cat062_fl_measured_));
     }
 
     // m3a
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_g_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_g_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_v_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_v_));
 
     // tn
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_num_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
 
     // ground bit
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_));
 
     // speed & track angle
-  
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+
+    // accs
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ax_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ax_));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ay_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ay_));
+
+    // rocd
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rocd_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rocd_));
+
+    // moms
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mom_long_acc_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_long_acc_));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mom_trans_acc_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_trans_acc_));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mom_vert_rate_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_vert_rate_));
+
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_coasting_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_coasting_));
 
     //        // for mono sensor + lu sensor
 
@@ -1000,6 +1025,28 @@ void EvaluationManager::loadSectors()
     checkMinHeightFilterValid(); // checks if min fl filter sector exists
 }
 
+void EvaluationManager::clearLoadedDataAndResults()
+{
+    loginf << "EvaluationManager: clearLoadedDataAndResults";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    dbcontent_man.clearData(); // clear any previously loaded data
+
+    data_.clear();
+
+    results_gen_.clear();
+
+    reference_data_loaded_ = false;
+    test_data_loaded_ = false;
+    data_loaded_ = false;
+
+    evaluated_ = false;
+
+    if (widget_)
+        widget_->updateButtons();
+}
+
 void EvaluationManager::updateSectorLayers()
 {
     if (use_fast_sector_inside_check_)
@@ -1047,6 +1094,10 @@ void EvaluationManager::createNewSector (const std::string& name,
 
     if (widget_)
         widget_->updateSectors();
+
+    clearLoadedDataAndResults();
+
+    emit sectorsChangedSignal();
 }
 
 bool EvaluationManager::hasSector (const string& name, const string& layer_name)
@@ -1121,6 +1172,10 @@ void EvaluationManager::moveSector(unsigned int id, const std::string& old_layer
 
     if (widget_)
         widget_->updateSectors();
+
+    clearLoadedDataAndResults();
+
+    emit sectorsChangedSignal();
 }
 
 std::vector<std::shared_ptr<SectorLayer>>& EvaluationManager::sectorsLayers()
@@ -1173,6 +1228,8 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
     if (widget_)
         widget_->updateSectors();
 
+    clearLoadedDataAndResults();
+
     emit sectorsChangedSignal();
 }
 
@@ -1187,6 +1244,8 @@ void EvaluationManager::deleteAllSectors()
 
     if (widget_)
         widget_->updateSectors();
+
+    clearLoadedDataAndResults();
 
     emit sectorsChangedSignal();
 }
@@ -1266,6 +1325,8 @@ void EvaluationManager::importSectors(const std::string& filename)
     }
 
     checkMinHeightFilterValid();
+
+    clearLoadedDataAndResults();
 
     if (widget_)
         widget_->updateSectors();
@@ -1808,12 +1869,14 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
 
-void EvaluationManager::showResultId (const std::string& id)
+void EvaluationManager::showResultId (const std::string& id, 
+                                      bool select_tab,
+                                      bool show_figure)
 {
     loginf << "EvaluationManager: showResultId: id '" << id << "'";
 
     assert (widget_);
-    widget_->showResultId(id);
+    widget_->showResultId(id, select_tab, show_figure);
 }
 
 EvaluationManager::ResultIterator EvaluationManager::begin()

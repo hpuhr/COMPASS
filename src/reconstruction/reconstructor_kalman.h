@@ -90,6 +90,9 @@ public:
         double P_std      = 30.0;   // system noise (standard)
         double P_std_high = 1000.0; // system noise (high)
 
+        boost::optional<kalman::Matrix>           init_cov;    // initial covariance for first measurement        (optional)
+        boost::optional<boost::posix_time::ptime> last_update; // last input update to be returned as a reference (optional)
+
         size_t min_chain_size = 2;       // minimum number of connected points used as result (and input for RTS smoother)
         double max_distance   = 50000.0; // maximum allowed distance of consecutive target reports in meters (0 = do not check)
         double min_dt         = 1e-06;   // minimum allowed time difference of consecutive target reports in seconds (0 = do not check)
@@ -188,7 +191,7 @@ private:
                      const Measurement& mm,
                      int flags,
                      std::string* reason = nullptr) const;
-    void init(Measurement& mm, const std::string& data_info);
+    void init(Measurement& mm, const std::string& data_info, bool first_mm = false);
     bool reinitIfNeeded(Measurement& mm, 
                         const std::string& data_info,
                         int flags);
@@ -198,6 +201,7 @@ private:
     
     //kalman chain operations
     bool smoothChain(KalmanChain& chain);
+    bool filterChain(KalmanChain& chain, const boost::posix_time::ptime& t_last);
     bool resampleResult(KalmanChain& result_chain, double dt_sec);
 
     //various

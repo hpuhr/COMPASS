@@ -32,6 +32,8 @@
 
 #include <Eigen/Core>
 
+#include <QColor>
+
 class Buffer;
 class EvaluationData;
 class EvaluationManager;
@@ -45,7 +47,7 @@ public:
 
     EvaluationTargetData(unsigned int utn, 
                          EvaluationData& eval_data,
-                         std::shared_ptr<dbContent::Cache> cache,
+                         std::shared_ptr<dbContent::DBContentAccessor> accessor,
                          EvaluationManager& eval_man, 
                          DBContentManager& dbcont_man);
     virtual ~EvaluationTargetData();
@@ -162,6 +164,18 @@ public:
                             const dbContent::TargetReport::Chain::DataID& id) const;
 
     static const int InterpGroundBitMaxSeconds = 15;
+    static const int InterestFactorPrecision   = 3;
+
+    // targets of interest
+
+    void clearInterestFactors() const;
+    void addInterestFactor (const std::string& req_id, double factor) const;
+    const std::map<std::string, double>& interestFactors() const;
+    std::string interestFactorsStr() const;
+    double interestFactorsSum() const;
+
+    static QColor colorForInterestFactor(double factor);
+    static std::string stringForInterestFactor(const std::string& req_id, double factor);
 
 protected:
     void updateACIDs() const;
@@ -187,7 +201,7 @@ protected:
                      const dbContent::TargetReport::Index& index) const;
     
     EvaluationData&    eval_data_;
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
     EvaluationManager& eval_man_;
     DBContentManager&  dbcont_man_;
 
@@ -223,6 +237,9 @@ protected:
     mutable InsideCheckMatrix                    inside_tst_;
     mutable InsideCheckMatrix                    inside_map_;
     mutable std::map<const SectorLayer*, size_t> inside_sector_layers_;
+
+    mutable std::map<std::string, double> interest_factors_;
+    mutable double interest_factors_sum_ {0};
 };
 
 #endif // EVALUATIONTARGETDATA_H

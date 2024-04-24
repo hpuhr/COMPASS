@@ -442,7 +442,7 @@ void RTCommandImportViewPointsFile::assignVariables_impl(const VariablesMap& var
 RTCommandImportASTERIXFile::RTCommandImportASTERIXFile()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal", -1); // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportASTERIXFile::valid() const
@@ -619,7 +619,7 @@ void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variab
 RTCommandImportASTERIXFiles::RTCommandImportASTERIXFiles()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal", -1); // think about max duration
 }
 
 rtcommand::IsValid RTCommandImportASTERIXFiles::valid() const
@@ -967,7 +967,7 @@ bool RTCommandImportASTERIXNetworkStop::run_impl()
 RTCommandImportJSONFile::RTCommandImportJSONFile()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.jsonimporttask.doneSignal(std::string)", -1);  // think about max duration
+    condition.setSignal("compass.taskmanager.jsonimporttask.doneSignal", -1);  // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportJSONFile::valid() const
@@ -1039,7 +1039,7 @@ void RTCommandImportJSONFile::assignVariables_impl(const VariablesMap& variables
 RTCommandImportGPSTrail::RTCommandImportGPSTrail()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.gpstrailimporttask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.gpstrailimporttask.doneSignal", -1); // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportGPSTrail::valid() const
@@ -1192,7 +1192,7 @@ void RTCommandImportSectorsJSON::assignVariables_impl(const VariablesMap& variab
 RTCommandCalculateRadarPlotPositions::RTCommandCalculateRadarPlotPositions()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.radarplotpositioncalculatortask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.radarplotpositioncalculatortask.doneSignal", -1); // think about max duration
 }
 
 bool RTCommandCalculateRadarPlotPositions::run_impl()
@@ -1228,7 +1228,7 @@ bool RTCommandCalculateRadarPlotPositions::run_impl()
 RTCommandCalculateAssociations::RTCommandCalculateAssociations()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.createassociationstask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.createassociationstask.doneSignal", -1); // think about max duration
 }
 
 bool RTCommandCalculateAssociations::run_impl()
@@ -1265,7 +1265,7 @@ bool RTCommandCalculateAssociations::run_impl()
 RTCommandCalculateARTASAssociations::RTCommandCalculateARTASAssociations()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.createartasassociationstask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.createartasassociationstask.doneSignal", -1); // think about max duration
 }
 
 bool RTCommandCalculateARTASAssociations::run_impl()
@@ -1301,7 +1301,7 @@ bool RTCommandCalculateARTASAssociations::run_impl()
 RTCommandCalculateReferences::RTCommandCalculateReferences()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.calculatereferencestask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.calculatereferencestask.doneSignal", -1); // think about max duration
 }
 
 bool RTCommandCalculateReferences::run_impl()

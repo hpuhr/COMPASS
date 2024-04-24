@@ -46,46 +46,6 @@ JoinedModeCPresent::JoinedModeCPresent(const std::string& result_id,
 {
 }
 
-void JoinedModeCPresent::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleModeCPresent> other_sub =
-            std::static_pointer_cast<SingleModeCPresent>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedModeCPresent::addToValues (std::shared_ptr<SingleModeCPresent> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_     += single_result->numUpdates();
-    num_no_ref_pos_  += single_result->numNoRefPos();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_no_ref_val_  += single_result->numNoRefValue();
-    num_present_     += single_result->numPresent();
-    num_missing_     += single_result->numMissing();
-
-    updateProbabilities();
-}
-
-void JoinedModeCPresent::updateProbabilities()
-{
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);
-
-    p_present_.reset();
-
-    if (num_no_ref_val_ + num_present_ + num_missing_)
-    {
-        p_present_ = (float)(num_no_ref_val_ + num_present_) / (float)(num_no_ref_val_ + num_present_ + num_missing_);
-    }
-}
-
 void JoinedModeCPresent::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -184,8 +144,7 @@ void JoinedModeCPresent::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
     }
 
     // figure
-    sector_section.addFigure("sector_overview", "Sector Overview",
-                             [this](void) { return this->getErrorsViewable(); });
+    addOverview(sector_section);
 }
 
 
@@ -198,44 +157,6 @@ bool JoinedModeCPresent::hasViewableData (
         return true;
     
     return false;
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedModeCPresent::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-
-    return getErrorsViewable();
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedModeCPresent::getErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-    double lat_min, lat_max, lon_min, lon_max;
-
-    tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
-    tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
-
-    (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
-
-    double lat_w = lat_max-lat_min;
-    double lon_w = lon_max-lon_min;
-
-    if (lat_w < eval_man_.settings().result_detail_zoom_)
-        lat_w = eval_man_.settings().result_detail_zoom_;
-
-    if (lon_w < eval_man_.settings().result_detail_zoom_)
-        lon_w = eval_man_.settings().result_detail_zoom_;
-
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
-
-    addAnnotationsFromSingles(*viewable_ptr);
-
-    return viewable_ptr;
 }
 
 bool JoinedModeCPresent::hasReference (
@@ -258,18 +179,12 @@ std::string JoinedModeCPresent::reference(
     return nullptr;
 }
 
-void JoinedModeCPresent::updatesToUseChanges_impl()
+void JoinedModeCPresent::updateToChanges_impl()
 {
-    loginf << "JoinedModeC: updatesToUseChanges: prev num_updates " << num_updates_
+    loginf << "JoinedModeCPresent: updateToChanges_impl: prev num_updates " << num_updates_
             << " num_no_ref_pos " << num_no_ref_pos_
             << " num_no_ref_id " << num_no_ref_val_
             << " num_present_id " << num_present_ << " num_missing_id " << num_missing_;
-
-//        if (has_pid_)
-//            loginf << "JoinedModeC: updatesToUseChanges: prev result " << result_id_
-//                   << " pid " << 100.0 * pid_;
-//        else
-//            loginf << "JoinedModeC: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
     num_updates_     = 0;
     num_no_ref_pos_  = 0;
@@ -279,25 +194,59 @@ void JoinedModeCPresent::updatesToUseChanges_impl()
     num_present_     = 0;
     num_missing_     = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleModeCPresent> result =
+        std::shared_ptr<SingleModeCPresent> single_result =
                 std::static_pointer_cast<SingleModeCPresent>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        single_result->setInterestFactor(0);
+
+        if (!single_result->use())
+            continue;
+
+        num_updates_     += single_result->numUpdates();
+        num_no_ref_pos_  += single_result->numNoRefPos();
+        num_pos_outside_ += single_result->numPosOutside();
+        num_pos_inside_  += single_result->numPosInside();
+        num_no_ref_val_  += single_result->numNoRefValue();
+        num_present_     += single_result->numPresent();
+        num_missing_     += single_result->numMissing();
     }
 
-    loginf << "JoinedModeC: updatesToUseChanges: updt num_updates " << num_updates_
+    loginf << "JoinedModeCPresent: updateToChanges_impl: updt num_updates " << num_updates_
             << " num_no_ref_pos " << num_no_ref_pos_
             << " num_no_ref_id " << num_no_ref_val_
             << " num_present_id " << num_present_ << " num_missing_id " << num_missing_;
 
-//        if (has_pid_)
-//            loginf << "JoinedModeC: updatesToUseChanges: updt result " << result_id_
-//                   << " pid " << 100.0 * pid_;
-//        else
-//            loginf << "JoinedModeC: updatesToUseChanges: updt result " << result_id_ << " has no data";
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);
+
+    p_present_.reset();
+
+    if (num_no_ref_val_ + num_present_ + num_missing_)
+    {
+        p_present_ = (float)(num_no_ref_val_ + num_present_) / (float)(num_no_ref_val_ + num_present_ + num_missing_);
+
+                // add importance
+        if (num_missing_)
+        {
+            for (auto& result_it : results_)
+            {
+                std::shared_ptr<SingleModeCPresent> single_result =
+                    std::static_pointer_cast<SingleModeCPresent>(result_it);
+                assert (single_result);
+
+                if (!single_result->use())
+                    continue;
+
+                assert (num_missing_ >= single_result->numMissing());
+
+                single_result->setInterestFactor(
+                    (float) single_result->numMissing() / (float)num_missing_);
+            }
+        }
+    }
 }
 
 }

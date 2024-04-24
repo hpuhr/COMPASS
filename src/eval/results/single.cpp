@@ -61,7 +61,17 @@ unsigned int Single::utn() const
 
 const EvaluationTargetData* Single::target() const
 {
+    assert (target_);
     return target_;
+}
+
+void Single::setInterestFactor(double factor)
+{
+    interest_factor_ = factor;
+
+    assert (target_);
+
+    target_->addInterestFactor(getRequirementSectionID(), factor);
 }
 
 void Single::updateUseFromTarget ()
@@ -249,7 +259,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
 {
     string anno_name = annotation_type_names_.at(type);
 
-    loginf << "Single: getOrCreateAnnotation: anno_name '" << anno_name << "' overview " << overview;
+    logdbg << "Single: getOrCreateAnnotation: anno_name '" << anno_name << "' overview " << overview;
 
     if (!viewable.count(ViewPoint::VP_ANNOTATION_KEY))
         viewable[ViewPoint::VP_ANNOTATION_KEY] = json::array();
@@ -266,11 +276,11 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
             const std::string& line_color,
             int line_width)
     {
-        loginf << "Single: getOrCreateAnnotation: size " << annos.size()
+        logdbg << "Single: getOrCreateAnnotation: size " << annos.size()
                << " creating '" << name << "' at pos " << position;
 
         for (unsigned int cnt=0; cnt < annos.size(); ++cnt)
-            loginf << "Single: getOrCreateAnnotation: start: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
+            logdbg << "Single: getOrCreateAnnotation: start: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
 
         annos.insert(annos.begin() + position, json::object()); // errors
         assert (position < annos.size());
@@ -313,11 +323,10 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
         feature_points.at("properties")["symbol_size"] = point_size;
 
         for (unsigned int cnt=0; cnt < annos.size(); ++cnt)
-            loginf << "Single: getOrCreateAnnotation: end: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
+            logdbg << "Single: getOrCreateAnnotation: end: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
     };
 
     //ATTENTION: !ORDER IMPORTANT!
-
 
     if (type == AnnotationType::TypeHighlight)
     {
@@ -447,6 +456,69 @@ std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
     *eval_details = result->getDetails();
 
     return std::unique_ptr<EvaluationDetails>(eval_details);
+}
+
+/**
+ * Generates binary grid values from a certain bool detail param.
+ */
+void Single::addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert, bool use_ref_pos) const
+{
+    const auto& details = getDetails();
+
+    auto is_ok = [ & ] (size_t idx)
+    {
+        auto check_passed = details[ idx ].getValueAs<bool>(detail_key);
+        assert(check_passed.has_value());
+
+        bool ok = ((!invert &&  check_passed.value()) ||
+                   ( invert && !check_passed.value()));
+        
+        return ok;
+    };
+
+    addValuesToGridBinary(grid, details, is_ok, use_ref_pos);
+}
+
+/**
+*/
+void Single::addValuesToGridBinary(Grid2D& grid, 
+                                   const EvaluationDetails& details, 
+                                   const std::function<bool(size_t)>& is_ok, 
+                                   bool use_ref_pos) const
+{
+    assert(is_ok);
+
+    for (size_t i = 0; i < details.size(); ++i)
+    {
+        const auto& d = details[ i ];
+
+        if (use_ref_pos && d.numPositions() == 1) // no ref pos
+            continue;
+
+        assert (d.numPositions() >= 1 && d.numPositions() <= 2);
+
+        bool ok = is_ok(i);
+
+        //interpolate between 0 = green and 1 = red
+        grid.addValue(d.position(use_ref_pos ? 1 : 0).longitude_,
+                      d.position(use_ref_pos ? 1 : 0).latitude_,
+                      ok ? 0.0 : 1.0);
+    }
+}
+
+/**
+ * Grid layer definition suitable for getGridValuesBinary().
+ */
+Single::LayerDefinition Single::getGridLayerDefBinary() const
+{
+    Single::LayerDefinition def;
+    def.value_type = grid2d::ValueType::ValueTypeMax;
+    def.render_settings.color_map.set(QColor(0, 255, 0), QColor(255, 0, 0), 1);
+    def.render_settings.pixels_per_cell = eval_man_.settings().grid_pixels_per_cell;
+    def.render_settings.min_value = 0.0;
+    def.render_settings.max_value = 1.0;
+    
+    return def;
 }
 
 }

@@ -46,47 +46,6 @@ JoinedIdentificationFalse::JoinedIdentificationFalse(const std::string& result_i
 {
 }
 
-void JoinedIdentificationFalse::join_impl(std::shared_ptr<Single> other)
-{
-    std::shared_ptr<SingleIdentificationFalse> other_sub =
-            std::static_pointer_cast<SingleIdentificationFalse>(other);
-    assert (other_sub);
-
-    addToValues(other_sub);
-}
-
-void JoinedIdentificationFalse::addToValues (std::shared_ptr<SingleIdentificationFalse> single_result)
-{
-    assert (single_result);
-
-    if (!single_result->use())
-        return;
-
-    num_updates_     += single_result->numUpdates();
-    num_no_ref_pos_  += single_result->numNoRefPos();
-    num_no_ref_val_  += single_result->numNoRefValue();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_  += single_result->numPosInside();
-    num_unknown_     += single_result->numUnknown();
-    num_correct_     += single_result->numCorrect();
-    num_false_       += single_result->numFalse();
-
-    updateProbabilities();
-}
-
-void JoinedIdentificationFalse::updateProbabilities()
-{
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
-
-    p_false_.reset();
-
-    if (num_correct_+num_false_)
-    {
-        p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
-    }
-}
-
 void JoinedIdentificationFalse::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -182,10 +141,8 @@ void JoinedIdentificationFalse::addDetails(std::shared_ptr<EvaluationResultsRepo
     }
 
     // figure
-    sector_section.addFigure("sector_overview", "Sector Overview",
-                             [this](void) { return this->getErrorsViewable(); });
+    addOverview(sector_section);
 }
-
 
 bool JoinedIdentificationFalse::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
@@ -196,44 +153,6 @@ bool JoinedIdentificationFalse::hasViewableData (
         return true;
     else
         return false;
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedIdentificationFalse::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-
-    return getErrorsViewable();
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedIdentificationFalse::getErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-    double lat_min, lat_max, lon_min, lon_max;
-
-    tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
-    tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
-
-    (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
-
-    double lat_w = lat_max-lat_min;
-    double lon_w = lon_max-lon_min;
-
-    if (lat_w < eval_man_.settings().result_detail_zoom_)
-        lat_w = eval_man_.settings().result_detail_zoom_;
-
-    if (lon_w < eval_man_.settings().result_detail_zoom_)
-        lon_w = eval_man_.settings().result_detail_zoom_;
-
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
-
-    addAnnotationsFromSingles(*viewable_ptr);
-
-    return viewable_ptr;
 }
 
 bool JoinedIdentificationFalse::hasReference (
@@ -256,7 +175,7 @@ std::string JoinedIdentificationFalse::reference(
     return nullptr;
 }
 
-void JoinedIdentificationFalse::updatesToUseChanges_impl()
+void JoinedIdentificationFalse::updateToChanges_impl()
 {
     num_updates_     = 0;
     num_no_ref_pos_  = 0;
@@ -267,13 +186,55 @@ void JoinedIdentificationFalse::updatesToUseChanges_impl()
     num_correct_     = 0;
     num_false_       = 0;
 
-    for (auto result_it : results_)
+    for (auto& result_it : results_)
     {
-        std::shared_ptr<SingleIdentificationFalse> result =
+        std::shared_ptr<SingleIdentificationFalse> single_result =
                 std::static_pointer_cast<SingleIdentificationFalse>(result_it);
-        assert (result);
+        assert (single_result);
 
-        addToValues(result);
+        single_result->setInterestFactor(0);
+
+        if (!single_result->use())
+            continue;
+
+        num_updates_     += single_result->numUpdates();
+        num_no_ref_pos_  += single_result->numNoRefPos();
+        num_no_ref_val_  += single_result->numNoRefValue();
+        num_pos_outside_ += single_result->numPosOutside();
+        num_pos_inside_  += single_result->numPosInside();
+        num_unknown_     += single_result->numUnknown();
+        num_correct_     += single_result->numCorrect();
+        num_false_       += single_result->numFalse();
+    }
+
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
+
+    p_false_.reset();
+
+    if (num_correct_+num_false_)
+    {
+        p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
+
+        // add importance
+
+        if (num_false_)
+        {
+            for (auto& result_it : results_)
+            {
+                std::shared_ptr<SingleIdentificationFalse> single_result =
+                    std::static_pointer_cast<SingleIdentificationFalse>(result_it);
+                assert (single_result);
+
+                if (!single_result->use())
+                    continue;
+
+                assert (num_false_ >= single_result->numFalse());
+
+                single_result->setInterestFactor(
+                    (float) single_result->numFalse() / (float) num_false_);
+            }
+        }
     }
 }
 

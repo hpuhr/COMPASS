@@ -32,14 +32,14 @@ bool ACIDFilter::filters(const std::string& dbcont_type)
         return true; // acid and callsign fpl
     else
         return COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_ti_.name()).existsIn(dbcont_type);
+                    DBContent::meta_var_acid_.name()).existsIn(dbcont_type);
 }
 
 std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "ACIDFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
-    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
+    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acid_.name()).existsIn(dbcontent_name))
         return "";
 
     stringstream ss;
@@ -47,7 +47,7 @@ std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bo
     if (active_  && (values_.size() || null_wanted_))
     {
         dbContent::Variable& acid_var = COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_ti_.name()).getFor(dbcontent_name);
+                    DBContent::meta_var_acid_.name()).getFor(dbcontent_name);
 
         dbContent::Variable* cs_fpl_var {nullptr}; // only set in cat062
 
@@ -175,11 +175,11 @@ std::vector<size_t> ACIDFilter::filterBuffer(const std::string& dbcontent_name, 
 {
     std::vector<size_t> to_be_removed;
 
-    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
+    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acid_.name()).existsIn(dbcontent_name))
         return to_be_removed;
 
     dbContent::Variable& acid_var = COMPASS::instance().dbContentManager().metaVariable(
-                DBContent::meta_var_ti_.name()).getFor(dbcontent_name);
+                DBContent::meta_var_acid_.name()).getFor(dbcontent_name);
 
     assert (buffer->has<string> (acid_var.name()));
 

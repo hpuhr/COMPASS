@@ -42,7 +42,7 @@ std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbco
     stringstream ss;
 
     assert (COMPASS::instance().dbContentManager().metaVariable(
-                DBContent::meta_var_datasource_id_.name()).existsIn(dbcontent_name));
+                DBContent::meta_var_ds_id_.name()).existsIn(dbcontent_name));
 
     assert (COMPASS::instance().dbContentManager().metaVariable(
                 DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name));
@@ -53,7 +53,7 @@ std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbco
     if (active_ && active_tns.size())
     {
         dbContent::Variable& ds_id_var = COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name);
+                    DBContent::meta_var_ds_id_.name()).getFor(dbcontent_name);
 
         dbContent::Variable& line_var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_line_id_.name()).getFor(dbcontent_name);

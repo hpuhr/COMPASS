@@ -2,7 +2,7 @@
 #define CALCULATEREFERENCESJOB_H
 
 #include "job.h"
-#include "dbcontent/dbcontentcache.h"
+#include "dbcontent/dbcontentaccessor.h"
 #include "calculatereferencestarget.h"
 #include "calculatereferencesstatusdialog.h"
 
@@ -31,7 +31,7 @@ public:
 
     CalculateReferencesJob(CalculateReferencesTask& task,
                            CalculateReferencesStatusDialog& status_dialog,
-                           std::shared_ptr<dbContent::Cache> cache);
+                           std::shared_ptr<dbContent::DBContentAccessor> accessor);
     virtual ~CalculateReferencesJob();
 
     nlohmann::json viewPointsJSON() const { return viewpoint_json_; }
@@ -43,7 +43,7 @@ public:
 protected:
     CalculateReferencesTask& task_;
     CalculateReferencesStatusDialog& status_dialog_;
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     std::vector<std::unique_ptr<CalculateReferences::Target>> targets_;
 

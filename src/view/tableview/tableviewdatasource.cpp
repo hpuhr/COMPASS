@@ -308,20 +308,20 @@ void TableViewDataSource::addDefaultVariables (VariableOrderedSet& set)
         set.add(dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()));
 
     // Datasource
-    if (dbcont_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()))
-        set.add(dbcont_man.metaVariable(DBContent::meta_var_datasource_id_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_ds_id_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_ds_id_.name()));
 
     // Mode 3/A code
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_m3a_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_m3a_.name()));
 
     // Mode S TA
-    if (dbcont_man.existsMetaVariable(DBContent::meta_var_ta_.name()))
-        set.add(dbcont_man.metaVariable(DBContent::meta_var_ta_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_acad_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_acad_.name()));
 
     // Mode S Callsign
-    if (dbcont_man.existsMetaVariable(DBContent::meta_var_ti_.name()))
-        set.add(dbcont_man.metaVariable(DBContent::meta_var_ti_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_acid_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_acid_.name()));
 
     // Mode C
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_mc_.name()))

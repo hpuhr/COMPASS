@@ -569,4 +569,21 @@ void SingleTrackAngle::addAnnotations(nlohmann::json::object_t& viewable, bool o
     }
 }
 
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleTrackAngle::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+void SingleTrackAngle::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        addValuesToGridBinary(grid, DetailKey::CheckPassed);
+    }
+}
+
 }

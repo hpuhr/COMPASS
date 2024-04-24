@@ -15,10 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JOINEDEVALUATIONREQUIREMENTRESULT_H
-#define JOINEDEVALUATIONREQUIREMENTRESULT_H
+#pragma once
 
 #include "eval/results/base.h"
+#include "view/gridview/grid2d_defs.h"
+
+class Grid2D;
 
 namespace EvaluationRequirementResult
 {
@@ -37,28 +39,53 @@ public:
 
     virtual BaseType baseType() const override { return BaseType::Joined; }
 
-    void join(std::shared_ptr<Single> other);
+    void add(std::shared_ptr<Single> other);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override = 0 ;
+
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override final;
+    std::unique_ptr<nlohmann::json::object_t> viewableData();
 
     std::vector<std::shared_ptr<Single>>& results();
 
-    void updatesToUseChanges();
+    void updateToChanges();
 
     unsigned int numResults();
     unsigned int numUsableResults();
     unsigned int numUnusableResults();
 
+    static const std::string SectorOverviewID;
+    static const int         SectorOverviewRenderDelayMSec;
+
 protected:
+    enum class OverviewMode
+    {
+        Annotations = 0,
+        Grid,
+        GridPlusAnnotations,
+        GridOrAnnotations
+    };
+
     std::vector<std::shared_ptr<Single>> results_;
 
+    std::unique_ptr<Grid2D> grid_;
+
     void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
+    void addOverview (EvaluationResultsReport::Section& section,
+                      const std::string& name = "Sector Overview");
 
-    virtual void join_impl(std::shared_ptr<Single> other) = 0;
-    virtual void updatesToUseChanges_impl() = 0;
+    //virtual void join_impl(std::shared_ptr<Single> other) = 0;
+    virtual void updateToChanges_impl() = 0;
 
+    std::unique_ptr<nlohmann::json::object_t> createViewable() const;
+
+    virtual OverviewMode overviewMode() const { return OverviewMode::GridOrAnnotations; }
+
+    void createGrid(const grid2d::GridResolution& resolution);
+    void addGridToViewData(nlohmann::json::object_t& view_data);
+    void addAnnotationsToViewData(nlohmann::json::object_t& view_data);
     void addAnnotationsFromSingles(nlohmann::json::object_t& viewable_ref);
 };
 
 }
-#endif // JOINEDEVALUATIONREQUIREMENTRESULT_H

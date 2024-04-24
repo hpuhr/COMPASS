@@ -105,8 +105,6 @@ protected:
     unsigned int num_passed_      {0};
     unsigned int num_failed_      {0};
 
-    //vector<double> values_;
-
     double value_min_ {0};
     double value_max_ {0};
     double value_avg_ {0};
@@ -115,11 +113,7 @@ protected:
 
     boost::optional<float> prob_;
 
-    void addToValues (std::shared_ptr<SinglePositionBase> single_result, bool do_update=true);
-    virtual void update() = 0;
-
-    virtual void join_impl(std::shared_ptr<Single> other) override;
-    virtual void updatesToUseChanges_impl() override;
+    virtual void updateToChanges_impl() override;
 
     vector<double> values() const;
 };

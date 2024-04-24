@@ -52,34 +52,10 @@ JoinedPositionLatency::JoinedPositionLatency(const std::string& result_id,
 {
 }
 
-//void JoinedPositionLatency::join_impl(std::shared_ptr<Single> other)
-//{
-//    std::shared_ptr<SinglePositionLatency> other_sub =
-//            std::static_pointer_cast<SinglePositionLatency>(other);
-//    assert (other_sub);
-
-//    addToValues(other_sub);
-//}
-
-//void JoinedPositionLatency::addToValues (std::shared_ptr<SinglePositionLatency> single_result)
-//{
-//    assert (single_result);
-
-//    if (!single_result->use())
-//        return;
-
-//    num_pos_         += single_result->numPos();
-//    num_no_ref_      += single_result->numNoRef();
-//    num_pos_outside_ += single_result->numPosOutside();
-//    num_pos_inside_  += single_result->numPosInside();
-//    num_passed_      += single_result->numPassed();
-//    num_failed_      += single_result->numFailed();
-
-//    update();
-//}
-
-void JoinedPositionLatency::update()
+void JoinedPositionLatency::updateToChanges_impl()
 {
+    JoinedPositionBase::updateToChanges_impl();
+
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
@@ -103,6 +79,25 @@ void JoinedPositionLatency::update()
 
         assert (num_passed_ <= num_distances);
         prob_ = (float)num_passed_/(float)num_distances;
+
+                // add importance
+        if (num_failed_)
+        {
+            for (auto& result_it : results_)
+            {
+                std::shared_ptr<SinglePositionBase> single_result =
+                    std::static_pointer_cast<SinglePositionBase>(result_it);
+                assert (single_result);
+
+                if (!single_result->use())
+                    continue;
+
+                assert (num_failed_ >= single_result->numFailed());
+
+                single_result->setInterestFactor(
+                    (float) single_result->numFailed() / (float)num_failed_);
+            }
+        }
     }
     else
     {
@@ -221,8 +216,7 @@ void JoinedPositionLatency::addDetails(std::shared_ptr<EvaluationResultsReport::
     }
 
     // figure
-    sector_section.addFigure("sector_overview", "Sector Overview",
-                             [this](void) { return this->getErrorsViewable(); });
+    addOverview(sector_section);
 }
 
 bool JoinedPositionLatency::hasViewableData (
@@ -232,44 +226,6 @@ bool JoinedPositionLatency::hasViewableData (
         return true;
     else
         return false;
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionLatency::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-
-    return getErrorsViewable();
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionLatency::getErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-    double lat_min, lat_max, lon_min, lon_max;
-
-    tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
-    tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
-
-    (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-    (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
-
-    double lat_w = lat_max-lat_min;
-    double lon_w = lon_max-lon_min;
-
-    if (lat_w < eval_man_.settings().result_detail_zoom_)
-        lat_w = eval_man_.settings().result_detail_zoom_;
-
-    if (lon_w < eval_man_.settings().result_detail_zoom_)
-        lon_w = eval_man_.settings().result_detail_zoom_;
-
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
-    (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
-
-    addAnnotationsFromSingles(*viewable_ptr);
-
-    return viewable_ptr;
 }
 
 bool JoinedPositionLatency::hasReference (

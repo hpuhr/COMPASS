@@ -41,8 +41,8 @@
 #include "gpsimportcsvtaskdialog.h"
 #include "managesectorstask.h"
 #include "managesectorstaskdialog.h"
-#include "calculatereferencestask.h"
-#include "calculatereferencestaskdialog.h"
+//#include "calculatereferencestask.h"
+//#include "calculatereferencestaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
 #include "fftmanager.h"
@@ -61,8 +61,11 @@
 #include "radarplotpositioncalculatortaskdialog.h"
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskdialog.h"
-#include "createassociationstask.h"
-#include "createassociationstaskdialog.h"
+//#include "createassociationstask.h"
+//#include "createassociationstaskdialog.h"
+#include "reconstructortask.h"
+#include "reconstructortaskdialog.h"
+#include "util/async.h"
 
 #ifdef USE_EXPERIMENTAL_SOURCE
 #include "geometrytreeitem.h"
@@ -418,20 +421,25 @@ void MainWindow::createMenus ()
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
-    QAction* assoc_action = new QAction("Calculate Unique Targets");
-    assoc_action->setToolTip("Create Unique Targets based on all DB Content");
-    connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsSlot);
-    process_menu_->addAction(assoc_action);
+//    QAction* assoc_action = new QAction("(Old) Calculate Unique Targets");
+//    assoc_action->setToolTip("Create Unique Targets based on all DB Content");
+//    connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsOldSlot);
+//    process_menu_->addAction(assoc_action);
+
+//    calculate_references_action_ = new QAction("(Old) Calculate References ");
+//    calculate_references_action_->setToolTip("Calculate References from System Tracker and ADS-B data");
+//    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesOldSlot);
+//    process_menu_->addAction(calculate_references_action_);
 
     QAction* assoc_artas_action = new QAction("Calculate ARTAS Target Report Usage");
     assoc_artas_action->setToolTip("Create target report usage based on ARTAS TRI information");
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
 
-    calculate_references_action_ = new QAction("Calculate References");
-    calculate_references_action_->setToolTip("Calculate References from System Tracker and ADS-B data");
-    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesSlot);
-    process_menu_->addAction(calculate_references_action_);
+    QAction* reconstruct_action = new QAction("Reconstruct References");
+    reconstruct_action->setToolTip("Associate Unique Targets andd reconstruct Reference Trajectories");
+    connect(reconstruct_action, &QAction::triggered, this, &MainWindow::reconstructReferencesSlot);
+    process_menu_->addAction(reconstruct_action);
 
     // ui menu
     ui_menu_ = menuBar()->addMenu("&UI");
@@ -506,8 +514,8 @@ void MainWindow::updateMenus()
     process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
                                || in_live);
 
-    assert (calculate_references_action_);
-    calculate_references_action_->setEnabled(COMPASS::instance().dbContentManager().hasAssociations());
+//    assert (calculate_references_action_);
+//    calculate_references_action_->setEnabled(COMPASS::instance().dbContentManager().hasAssociations());
 
     assert (config_menu_);
     config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
@@ -927,19 +935,26 @@ void MainWindow::calculateAssociationsARTASSlot()
     COMPASS::instance().taskManager().createArtasAssociationsTask().dialog()->show();
 }
 
-void MainWindow::calculateAssociationsSlot()
-{
-    loginf << "MainWindow: calculateAssociationsSlot";
+//void MainWindow::calculateAssociationsOldSlot()
+//{
+//    loginf << "MainWindow: calculateAssociationsSlot";
 
-    COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
+//    COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
+//}
+
+void MainWindow::reconstructReferencesSlot()
+{
+    loginf << "MainWindow: reconstructReferencesSlot";
+
+    COMPASS::instance().taskManager().reconstructReferencesTask().dialog()->show();
 }
 
-void  MainWindow::calculateReferencesSlot()
-{
-    loginf << "MainWindow: calculateReferencesSlot";
+//void MainWindow::calculateReferencesOldSlot()
+//{
+//    loginf << "MainWindow: calculateReferencesOldSlot";
 
-    COMPASS::instance().taskManager().calculateReferencesTask().dialog()->show();
-}
+//    COMPASS::instance().taskManager().calculateReferencesTask().dialog()->show();
+//}
 
 void MainWindow::configureDataSourcesSlot()
 {
@@ -1017,15 +1032,9 @@ void MainWindow::resetViewsMenuSlot()
             msg_box.setWindowModality(Qt::ApplicationModal);
             msg_box.show();
 
-            boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
             setVisible(false);
 
-            while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-            {
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                QThread::msleep(1);
-            }
+            Async::waitAndProcessEventsFor(50);
 
             // reset stuff
             COMPASS::instance().dbContentManager().resetToStartupConfiguration();

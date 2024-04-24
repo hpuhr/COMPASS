@@ -32,6 +32,9 @@ public:
     virtual int columnCount() const = 0;
     virtual QVariant data(int column) const = 0;
     virtual int row() const = 0;
+    virtual bool checkable() const { return false; }
+    virtual bool used() const { return true; }
+    virtual void use(bool ok) {}
     EvaluationStandardTreeItem* parentItem();
 
 protected:

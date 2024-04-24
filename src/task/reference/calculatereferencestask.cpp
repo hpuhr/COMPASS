@@ -34,7 +34,7 @@ const double CalculateReferencesTaskSettings::HighValueDefault            = 1000
 CalculateReferencesTask::CalculateReferencesTask(const std::string& class_id,
                                                  const std::string& instance_id,
                                                  TaskManager& task_manager)
-    : Task("CalculateReferencesTask", "Associate Target Reports", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_references.json")
 {
     tooltip_ =
@@ -321,7 +321,8 @@ void CalculateReferencesTask::run()
             {
                 status_dialog_->setStatusSlot(("Deleting From Data Source " + ds_it->name()).c_str());
 
-                dbcontent_man.dbContent("RefTraj").deleteDBContentData(settings_.ds_sac, settings_.ds_sic, settings_.ds_line);
+                dbcontent_man.dbContent("RefTraj").deleteDBContentData(
+                    settings_.ds_sac, settings_.ds_sic, settings_.ds_line);
 
                 while (dbcontent_man.dbContent("RefTraj").isDeleting())
                 {
@@ -366,7 +367,7 @@ void CalculateReferencesTask::run()
         string custom_clause;
 
         dbContent::Variable& ds_id_var = COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_datasource_id_.name()).getFor(dbo_it.first);
+                    DBContent::meta_var_ds_id_.name()).getFor(dbo_it.first);
 
 
         custom_clause += ds_id_var.dbColumnName() + " IN (";
@@ -485,7 +486,7 @@ void CalculateReferencesTask::createDoneSlot()
 
     //    COMPASS::instance().interface().saveProperties();
 
-    cache_ = nullptr;
+    accessor_ = nullptr;
     data_.clear();
 
     done_ = true;
@@ -494,7 +495,7 @@ void CalculateReferencesTask::createDoneSlot()
 
     QApplication::restoreOverrideCursor();
 
-    emit doneSignal(name_);
+    emit doneSignal();
 }
 void CalculateReferencesTask::createObsoleteSlot()
 {
@@ -519,10 +520,10 @@ void CalculateReferencesTask::loadingDoneSlot()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    if (!cache_)
-        cache_ = std::make_shared<dbContent::Cache> (dbcontent_man);
+    if (!accessor_)
+        accessor_ = std::make_shared<dbContent::DBContentAccessor> ();
 
-    cache_->add(data_);
+    accessor_->add(data_);
 
     disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
                this, &CalculateReferencesTask::loadedDataSlot);
@@ -541,7 +542,7 @@ void CalculateReferencesTask::loadingDoneSlot()
 
     assert(!create_job_);
 
-    create_job_ = std::make_shared<CalculateReferencesJob>(*this, *status_dialog_, cache_);
+    create_job_ = std::make_shared<CalculateReferencesJob>(*this, *status_dialog_, accessor_);
 
     connect(create_job_.get(), &CalculateReferencesJob::doneSignal, this,
             &CalculateReferencesTask::createDoneSlot, Qt::QueuedConnection);
@@ -567,18 +568,18 @@ VariableSet CalculateReferencesTask::getReadSetFor(const std::string& dbcontent_
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ds_id_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_line_id_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_acad_.name()).getFor(dbcontent_name));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_acid_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_acid_.name()).getFor(dbcontent_name));
 
     // flight level
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name));

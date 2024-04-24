@@ -46,7 +46,7 @@ using namespace Utils;
 using namespace dbContent;
 
 const Property DBContent::meta_var_rec_num_ {"Record Number", PropertyDataType::ULONGINT};
-const Property DBContent::meta_var_datasource_id_ {"DS ID", PropertyDataType::UINT};
+const Property DBContent::meta_var_ds_id_ {"DS ID", PropertyDataType::UINT};
 const Property DBContent::meta_var_sac_id_ {"SAC", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_sic_id_ {"SIC", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_line_id_ {"Line ID", PropertyDataType::UINT};
@@ -56,8 +56,8 @@ const Property DBContent::meta_var_m3a_ {"Mode 3/A Code", PropertyDataType::UINT
 const Property DBContent::meta_var_m3a_g_ {"Mode 3/A Garbled", PropertyDataType::BOOL};
 const Property DBContent::meta_var_m3a_v_ {"Mode 3/A Valid", PropertyDataType::BOOL};
 const Property DBContent::meta_var_m3a_smoothed_ {"Mode 3/A Smoothed", PropertyDataType::BOOL};
-const Property DBContent::meta_var_ta_ {"Aircraft Address", PropertyDataType::UINT};
-const Property DBContent::meta_var_ti_ {"Aircraft Identification", PropertyDataType::STRING};
+const Property DBContent::meta_var_acad_ {"Aircraft Address", PropertyDataType::UINT};
+const Property DBContent::meta_var_acid_ {"Aircraft Identification", PropertyDataType::STRING};
 const Property DBContent::meta_var_mc_ {"Mode C Code", PropertyDataType::FLOAT};
 const Property DBContent::meta_var_mc_g_ {"Mode C Garbled", PropertyDataType::BOOL};
 const Property DBContent::meta_var_mc_v_ {"Mode C Valid", PropertyDataType::BOOL};
@@ -82,6 +82,13 @@ const Property DBContent::meta_var_ground_speed_ {"Track Groundspeed", PropertyD
 const Property DBContent::meta_var_track_angle_ {"Track Angle", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_horizontal_man_ {"Track Horizontal Manoeuvre", PropertyDataType::BOOL};
 
+const Property DBContent::meta_var_ax_ {"Ax", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_ay_ {"Ay", PropertyDataType::DOUBLE};
+
+const Property DBContent::meta_var_mom_long_acc_ {"MOM Longitudinal Acc", PropertyDataType::UCHAR};
+const Property DBContent::meta_var_mom_trans_acc_ {"MOM Transversal Acc", PropertyDataType::UCHAR};
+const Property DBContent::meta_var_mom_vert_rate_ {"MOM Vertical Rate", PropertyDataType::UCHAR};
+
 const Property DBContent::meta_var_x_stddev_ {"X StdDev", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_y_stddev_ {"Y StdDev", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_xy_cov_ {"X/Y Covariance", PropertyDataType::DOUBLE};
@@ -90,6 +97,7 @@ const Property DBContent::meta_var_longitude_stddev_ {"Longitude StdDev", Proper
 const Property DBContent::meta_var_latlon_cov_ {"Lat/Lon Cov", PropertyDataType::DOUBLE};
 
 const Property DBContent::meta_var_climb_descent_{"Track Climbing/Descending", PropertyDataType::UCHAR};
+const Property DBContent::meta_var_rocd_ {"Rate Of Climb/Descent", PropertyDataType::FLOAT};
 const Property DBContent::meta_var_spi_{"SPI", PropertyDataType::BOOL};
 
 const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
@@ -139,7 +147,7 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
     logdbg << "DBContent: constructor: created with instance_id " << instanceId() << " name "
            << name_;
 
-    checkStaticVariable(DBContent::meta_var_datasource_id_);
+    checkStaticVariable(DBContent::meta_var_ds_id_);
     checkStaticVariable(DBContent::meta_var_latitude_);
     checkStaticVariable(DBContent::meta_var_longitude_);
 
@@ -313,14 +321,14 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
         vector<unsigned int> ds_ids_to_load = ds_man.unfilteredDS(name_);
         assert (ds_ids_to_load.size());
 
-        assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
+        assert (hasVariable(DBContent::meta_var_ds_id_.name()));
 
-        Variable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
+        Variable& datasource_var = variable(DBContent::meta_var_ds_id_.name());
         assert (datasource_var.dataType() == PropertyDataType::UINT);
 
         if (ds_man.lineSpecificLoadingRequired(name_)) // ds specific line loading
         {
-            loginf << "DBContent " << name_ << ": load: line specific loading wanted";
+            logdbg << "DBContent " << name_ << ": load: line specific loading wanted";
 
             assert (hasVariable(DBContent::meta_var_line_id_.name()));
 
@@ -375,7 +383,7 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
         }
         else // simple ds id in statement
         {
-            loginf << "DBContent " << name_ << ": load: no line specific loading wanted";
+            logdbg << "DBContent " << name_ << ": load: no line specific loading wanted";
 
             filter_clause = datasource_var.dbColumnName() + " IN (";
 
@@ -390,6 +398,8 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
             filter_clause += ")";
         }
     }
+
+    logdbg << "DBContent " << name_ << ": load: use_filters " << use_filters;
 
     if (use_filters)
     {
@@ -412,7 +422,7 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
         filter_clause += custom_filter_clause;
     }
 
-    loginf << "DBContent: load: filter_clause '" << filter_clause << "'";
+    logdbg << "DBContent: load: filter_clause '" << filter_clause << "'";
 
     loadFiltered(read_set, filter_clause);
 }
@@ -430,8 +440,8 @@ void DBContent::loadFiltered(dbContent::VariableSet& read_set, std::string custo
     assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_rec_num_));
     read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_rec_num_));
 
-    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_datasource_id_));
-    read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_datasource_id_));
+    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_ds_id_));
+    read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_ds_id_));
 
     assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_line_id_));
     read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_line_id_));
@@ -493,10 +503,10 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 {
     logdbg << "DBContent " << name_ << ": doDataSourcesBeforeInsert";
 
-    assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
+    assert (hasVariable(DBContent::meta_var_ds_id_.name()));
 
     // ds
-    Variable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
+    Variable& datasource_var = variable(DBContent::meta_var_ds_id_.name());
     assert (datasource_var.dataType() == PropertyDataType::UINT);
 
     string datasource_col_str = datasource_var.dbColumnName();
@@ -633,6 +643,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic)
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
     delete_job_->setSpecificDBContent(name_);
+    delete_job_->setSpecificSacSic(sac, sic);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
             Qt::QueuedConnection);
@@ -652,6 +663,8 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
     delete_job_->setSpecificDBContent(name_);
+    delete_job_->setSpecificSacSic(sac, sic);
+    delete_job_->setSpecificLineId(line_id);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
             Qt::QueuedConnection);
@@ -676,20 +689,23 @@ void DBContent::deleteJobDoneSlot()
 
     delete_job_ = nullptr;
 
-    // remove from inserted count
-    COMPASS::instance().dataSourceManager().clearInsertedCounts(name_);
     COMPASS::instance().dataSourceManager().saveDBDataSources();
+    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+
+    // remove from inserted count
+    //COMPASS::instance().dataSourceManager().clearInsertedCounts(name_);
+    //COMPASS::instance().dataSourceManager().saveDBDataSources();
 
     // remove from targets count
-    dbcont_manager_.removeDBContentFromTargets(name_);
+    //dbcont_manager_.removeDBContentFromTargets(name_);
 
-    count_ = 0;
+    count_ = COMPASS::instance().interface().count(db_table_name_);
 }
 
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
     assert(buffer);
-    loginf << "DBContent: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
+    logdbg << "DBContent: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
 
     DBContentReadDBJob* sender = dynamic_cast<DBContentReadDBJob*>(QObject::sender());
 
@@ -742,7 +758,7 @@ void DBContent::readJobDoneSlot()
 
     if (!isLoading()) // also no more finalize jobs
     {
-        loginf << "DBContent: " << name_ << " readJobDoneSlot: done";
+        logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
         dbcont_manager_.loadingDone(*this);
     }
 }

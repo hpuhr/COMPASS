@@ -28,14 +28,14 @@ ACADFilter::~ACADFilter() {}
 
 bool ACADFilter::filters(const std::string& dbo_type)
 {
-    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_type);
+    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbo_type);
 }
 
 std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "ACADFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
-    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbcontent_name))
         return "";
 
     stringstream ss;
@@ -43,7 +43,7 @@ std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bo
     if (active_ && (values_.size() || null_wanted_))
     {
         dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_ta_.name()).getFor(dbcontent_name);
+                    DBContent::meta_var_acad_.name()).getFor(dbcontent_name);
 
         if (!first)
             ss << " AND";
@@ -147,11 +147,11 @@ std::vector<size_t> ACADFilter::filterBuffer(const std::string& dbcontent_name, 
 {
     std::vector<size_t> to_be_removed;
 
-    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbcontent_name))
         return to_be_removed;
 
     dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
-                DBContent::meta_var_ta_.name()).getFor(dbcontent_name);
+                DBContent::meta_var_acad_.name()).getFor(dbcontent_name);
 
     assert (buffer->has<unsigned int> (var.name()));
 

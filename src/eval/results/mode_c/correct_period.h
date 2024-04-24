@@ -37,7 +37,8 @@ public:
                              const EvaluationDetails& details,
                              int sum_uis, 
                              int missed_uis, 
-                             TimePeriodCollection ref_periods);
+                             TimePeriodCollection ref_periods,
+                             const std::vector<dbContent::TargetPosition>& ref_updates);
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
