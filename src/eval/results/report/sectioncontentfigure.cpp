@@ -25,6 +25,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QApplication>
+#include <QThread>
 
 using namespace Utils;
 
@@ -33,8 +35,10 @@ namespace EvaluationResultsReport
 
     SectionContentFigure::SectionContentFigure(const string& name, const string& caption,
                                                std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
-                                               Section* parent_section, EvaluationManager& eval_man)
-        : SectionContent(name, parent_section, eval_man), caption_(caption), viewable_fnc_(viewable_fnc)
+                                               Section* parent_section, 
+                                               EvaluationManager& eval_man,
+                                               int render_delay_msec)
+        : SectionContent(name, parent_section, eval_man), caption_(caption), render_delay_msec_(render_delay_msec), viewable_fnc_(viewable_fnc)
     {
         //assert (viewable_data_);
     }
@@ -68,9 +72,19 @@ namespace EvaluationResultsReport
         view();
     }
 
-    void SectionContentFigure::view () const
+    void SectionContentFigure::view() const
     {
         eval_man_.setViewableDataConfig(*viewable_fnc_());
+
+        if (render_delay_msec_ > 0)
+        {
+            boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+            while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < render_delay_msec_)
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(10);
+            }
+        }
     }
 
     std::string SectionContentFigure::getSubPath() const

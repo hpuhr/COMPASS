@@ -190,10 +190,8 @@ void JoinedDubiousTarget::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
-//    // figure
-//        sector_section.addFigure("sector_overview", "Sector Overview",
-//                                 [this](void) { return this->getErrorsViewable(); });
-
+    // figure
+    addOverview(sector_section);
 }
 
 bool JoinedDubiousTarget::hasViewableData (
@@ -203,24 +201,6 @@ bool JoinedDubiousTarget::hasViewableData (
         return true;
     else
         return false;
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTarget::viewableDataImpl(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-
-    return getErrorsViewable();
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedDubiousTarget::getErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-    addAnnotationsFromSingles(*viewable_ptr);
-
-    return viewable_ptr;
 }
 
 bool JoinedDubiousTarget::hasReference (

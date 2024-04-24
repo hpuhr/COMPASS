@@ -51,14 +51,8 @@ public:
     void exportAsCSV();
 
 protected:
-
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
 
     virtual void updateToChanges_impl() override;
 

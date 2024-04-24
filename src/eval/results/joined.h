@@ -45,6 +45,7 @@ public:
 
     virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override final;
+    std::unique_ptr<nlohmann::json::object_t> viewableData();
 
     std::vector<std::shared_ptr<Single>>& results();
 
@@ -54,13 +55,16 @@ public:
     unsigned int numUsableResults();
     unsigned int numUnusableResults();
 
+    static const std::string SectorOverviewID;
+    static const int         SectorOverviewRenderDelayMSec;
+
 protected:
     enum class OverviewMode
     {
-        Features = 0,
+        Annotations = 0,
         Grid,
-        GridPlusFeatures,
-        GridOrFeatures
+        GridPlusAnnotations,
+        GridOrAnnotations
     };
 
     std::vector<std::shared_ptr<Single>> results_;
@@ -68,21 +72,20 @@ protected:
     std::unique_ptr<Grid2D> grid_;
 
     void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
+    void addOverview (EvaluationResultsReport::Section& section,
+                      const std::string& name = "Sector Overview");
 
     //virtual void join_impl(std::shared_ptr<Single> other) = 0;
     virtual void updateToChanges_impl() = 0;
 
     std::unique_ptr<nlohmann::json::object_t> createViewable() const;
 
-    virtual OverviewMode overviewMode() const { return OverviewMode::GridOrFeatures; }
-
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) { return {}; }
-
-    void addAnnotationsFromSingles(nlohmann::json::object_t& viewable_ref);
+    virtual OverviewMode overviewMode() const { return OverviewMode::GridOrAnnotations; }
 
     void createGrid(const grid2d::GridResolution& resolution);
     void addGridToViewData(nlohmann::json::object_t& view_data);
+    void addAnnotationsToViewData(nlohmann::json::object_t& view_data);
+    void addAnnotationsFromSingles(nlohmann::json::object_t& viewable_ref);
 };
 
 }

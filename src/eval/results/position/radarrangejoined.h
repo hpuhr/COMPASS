@@ -53,13 +53,8 @@ protected:
 
     void updateToChanges_impl() override;
 
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableDataImpl(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
     void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-
-    std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
 
     vector<double> refRangeValues() const;
     vector<double> tstRangeValues() const;

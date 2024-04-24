@@ -216,8 +216,7 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
     }
 
     // figure
-    sector_section.addFigure("sector_overview", "Sector Overview",
-                             [this](void) { return this->getErrorsViewable(); });
+    addOverview(sector_section);
 }
 
 bool JoinedPositionDistance::hasViewableData (
@@ -227,23 +226,6 @@ bool JoinedPositionDistance::hasViewableData (
         return true;
     else
         return false;
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistance::viewableDataImpl(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-
-    return getErrorsViewable();
-}
-
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistance::getErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr = createViewable();
-
-    addAnnotationsFromSingles(*viewable_ptr);
-
-    return viewable_ptr;
 }
 
 bool JoinedPositionDistance::hasReference (
