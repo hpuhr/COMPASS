@@ -292,7 +292,7 @@ void JoinedDubiousTrack::updateToChanges_impl()
             if (!single_result->use())
                 continue;
 
-            assert (num_tracks_dubious_ >= single_result->numPosInsideDubious());
+            assert (num_pos_inside_dubious_ >= single_result->numPosInsideDubious());
 
             single_result->setInterestFactor(
                 (float) single_result->numPosInsideDubious() / (float)num_pos_inside_dubious_);

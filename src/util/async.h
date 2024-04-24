@@ -38,5 +38,7 @@ extern bool waitDialogAsyncArray(const std::function<bool(int)>& task,
                                  const std::string& task_name,
                                  const std::string& wait_msg = "");
 
+extern void waitAndProcessEventsFor (unsigned int milliseconds);
+
 }
 }

@@ -41,8 +41,8 @@
 #include "gpsimportcsvtaskdialog.h"
 #include "managesectorstask.h"
 #include "managesectorstaskdialog.h"
-#include "calculatereferencestask.h"
-#include "calculatereferencestaskdialog.h"
+//#include "calculatereferencestask.h"
+//#include "calculatereferencestaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
 #include "fftmanager.h"
@@ -61,10 +61,11 @@
 #include "radarplotpositioncalculatortaskdialog.h"
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskdialog.h"
-#include "createassociationstask.h"
-#include "createassociationstaskdialog.h"
+//#include "createassociationstask.h"
+//#include "createassociationstaskdialog.h"
 #include "reconstructortask.h"
 #include "reconstructortaskdialog.h"
+#include "util/async.h"
 
 #ifdef USE_EXPERIMENTAL_SOURCE
 #include "geometrytreeitem.h"
@@ -1031,15 +1032,9 @@ void MainWindow::resetViewsMenuSlot()
             msg_box.setWindowModality(Qt::ApplicationModal);
             msg_box.show();
 
-            boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
             setVisible(false);
 
-            while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-            {
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                QThread::msleep(1);
-            }
+            Async::waitAndProcessEventsFor(50);
 
             // reset stuff
             COMPASS::instance().dbContentManager().resetToStartupConfiguration();
