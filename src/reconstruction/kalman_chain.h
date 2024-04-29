@@ -30,15 +30,23 @@ class KalmanOnlineTracker;
 class KalmanInterface;
 
 /**
-*/
+ * Chain of kalman updates in which new measurements can be inserted and 
+ * a reestimation of kalman states can be triggered.
+ * - Utilizes a KalmanOnlineTracker which is reinitialized to certain chain updates as needed
+ * - The number of states reestimated following the insertion of a new measurement can be specified using multiple criteria
+ */
 class KalmanChain
 {
 public:
     struct Settings
     {
-        boost::posix_time::time_duration max_reestim_duration;
-        int                              max_reestim_updates;
-        double                           reestim_residual;
+        typedef boost::posix_time::time_duration TD;
+
+        TD     max_reestim_duration       = boost::posix_time::seconds(30); // maximum timeframe reestimated after a new mm has been inserted
+        int    max_reestim_updates        = 500;                            // maximum updates reestimated after a new mm has been inserted
+        double reestim_residual_state_sqr = 100;                            // 10  * 10  - reestimation stop criterion based on state change residual
+        double reestim_residual_cov_sqr   = 10000;                          // 100 * 100 - reestimation stop criterion based on cov mat change residual
+        TD     max_prediction_tdiff       = boost::posix_time::seconds(30); // maximum difference in time which can be predicted
 
         int verbosity = 0;
     };
@@ -64,14 +72,15 @@ public:
     void init(std::unique_ptr<KalmanInterface>&& interface);
     void init(kalman::KalmanType ktype);
 
-    bool add(const Measurement& mm, bool reestim = false);
-    void add(const std::vector<Measurement>& mms);
-    void insert(const Measurement& mm);
-    void insert(const std::vector<Measurement>& mms);
+    bool add(const Measurement& mm, bool reestim);
+    bool add(const std::vector<Measurement>& mms, bool reestim);
+    bool insert(const Measurement& mm, bool reestim);
+    bool insert(const std::vector<Measurement>& mms, bool reestim);
 
     bool needsReestimate() const;
     bool reestimate();
 
+    bool canPredict(const boost::posix_time::ptime& ts) const;
     bool predict(Measurement& mm_predicted,
                  const boost::posix_time::ptime& ts) const;
     bool predictFromLastState(Measurement& mm_predicted,
@@ -89,7 +98,7 @@ private:
     void resetReestimationIndices();
     bool reinit(int idx) const;
     bool reestimate(int idx);
-    bool reestimate(int idx, double& dp);
+    bool reestimate(int idx, double& d_state_sqr, double& d_cov_sqr);
 
     int lastIndex() const;
 
@@ -101,8 +110,7 @@ private:
 
     mutable std::unique_ptr<KalmanOnlineTracker> tracker_;
     mutable int                                  tracked_update_ = -1;
-    int                                          reestim_min_    = -1;
-    int                                          reestim_max_    = -1;
+    std::vector<int>                             fresh_indices_;
     std::vector<Update>                          updates_;
 };
 

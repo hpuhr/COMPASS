@@ -37,6 +37,7 @@ KalmanChain::KalmanChain()
 KalmanChain::~KalmanChain() = default;
 
 /**
+ * Resets the chain.
 */
 void KalmanChain::reset()
 {
@@ -49,6 +50,7 @@ void KalmanChain::reset()
 }
 
 /**
+ * Checks if the chain has been initialized.
 */
 bool KalmanChain::isInit() const
 {
@@ -56,6 +58,7 @@ bool KalmanChain::isInit() const
 }
 
 /**
+ * Initializes the chain by passing a kalman interface.
 */
 void KalmanChain::init(std::unique_ptr<KalmanInterface>&& interface)
 {
@@ -63,6 +66,7 @@ void KalmanChain::init(std::unique_ptr<KalmanInterface>&& interface)
 }
 
 /**
+ * Initializes the chain to the given kalman type.
 */
 void KalmanChain::init(kalman::KalmanType ktype)
 {
@@ -70,6 +74,7 @@ void KalmanChain::init(kalman::KalmanType ktype)
 }
 
 /**
+ * Returns the current number of chain elements.
 */
 size_t KalmanChain::size() const
 {
@@ -199,10 +204,10 @@ bool KalmanChain::add(const Measurement& mm, bool reestim)
 /**
  * Adds new measurements to the end of the chain.
 */
-void KalmanChain::add(const std::vector<Measurement>& mms)
+bool KalmanChain::add(const std::vector<Measurement>& mms, bool reestim)
 {
     if (mms.empty())
-        return;
+        return true;
 
     //presort for safety
     std::vector<Measurement> mms_sorted = mms;
@@ -218,6 +223,11 @@ void KalmanChain::add(const std::vector<Measurement>& mms)
 
     addReesimationIndex(idx_min);
     addReesimationIndex(idx_max);
+
+    if (reestim)
+        return reestimate();
+
+    return true;
 }
 
 /**
@@ -228,7 +238,7 @@ void KalmanChain::insert(int idx, const Measurement& mm)
     if (idx < 0)
     {
         //just add to end
-        add(mm);
+        add(mm, false);
         return;
     }
 
@@ -242,19 +252,52 @@ void KalmanChain::insert(int idx, const Measurement& mm)
 /**
  * Inserts a new measurement into the chain.
 */
-void KalmanChain::insert(const Measurement& mm)
+bool KalmanChain::insert(const Measurement& mm, bool reestim)
 {
     int idx = insertionIndex(mm.t);
     insert(idx, mm);
+
+    if (reestim)
+        return reestimate();
+
+    return true;
 }
 
 /**
  * Inserts new measurements into the chain.
 */
-void KalmanChain::insert(const std::vector<Measurement>& mms)
+bool KalmanChain::insert(const std::vector<Measurement>& mms, bool reestim)
 {
     for (const auto& mm : mms)
-        insert(mm);
+        insert(mm, false);
+
+    if (reestim)
+        return reestimate();
+
+    return true;
+}
+
+/**
+ * Checks if a prediction is possible at the given timestamp.
+*/
+bool KalmanChain::canPredict(const boost::posix_time::ptime& ts) const
+{
+    if (updates_.empty())
+        return false;
+
+    //find reference update
+    int idx = predictionRefIndex(ts);
+    assert(idx >= 0);
+
+    //check time diff
+    auto t0 = updates_[ idx ].kalman_update.t;
+
+    boost::posix_time::time_duration diff = (ts >= t0 ? ts - t0 : t0 - ts);
+    
+    if (diff > settings_.max_prediction_tdiff)
+        return false;
+
+    return true;
 }
 
 /**
@@ -327,18 +370,14 @@ void KalmanChain::addReesimationIndex(int idx)
 {
     assert(idx >= 0);
 
-    if (idx < reestim_min_)
-        reestim_min_ = idx;
-    if (idx > reestim_max_)
-        reestim_max_ = idx;
+    fresh_indices_.push_back(idx);
 }
 
 /**
 */
 void KalmanChain::resetReestimationIndices()
 {
-    reestim_min_ = std::numeric_limits<int>::max();
-    reestim_max_ = std::numeric_limits<int>::min();
+    fresh_indices_.clear();
 }
 
 /**
@@ -346,7 +385,7 @@ void KalmanChain::resetReestimationIndices()
 */
 bool KalmanChain::needsReestimate() const
 {
-    return (reestim_min_ <= reestim_max_);
+    return !fresh_indices_.empty();
 }
 
 /**
@@ -370,92 +409,116 @@ bool KalmanChain::reestimate(int idx)
  * Reestimates the kalman state of a measurement based on the current tracker state.
  * Additionally returns a residual as norm of difference in covariance matrices before and after the reestimate.
 */
-bool KalmanChain::reestimate(int idx, double& dp)
+bool KalmanChain::reestimate(int idx, double& d_state_sqr, double& d_cov_sqr)
 {
     assert(idx >= 0 && idx < count());
     assert(updates_[ idx ].init); //!no freshly added measurements!
 
+    auto x0 = updates_[ idx ].kalman_update.state.x;
     auto P0 = updates_[ idx ].kalman_update.state.P;
 
     if (!reestimate(idx))
         return false;
 
+    const auto& x1 = updates_[ idx ].kalman_update.state.x;
     const auto& P1 = updates_[ idx ].kalman_update.state.P;
 
-    dp = (P0 - P1).norm(); // = frobenius norm
+    d_state_sqr = (x0 - x1).squaredNorm();
+    d_cov_sqr   = (P0.diagonal() - P1.diagonal()).squaredNorm(); // = squared frobenius norm
 
     return true;
 }
 
 /**
+ * Reestimates the chain after new measurements have been added, based on various criteria.
 */
 bool KalmanChain::reestimate()
 {
     if (!needsReestimate())
         return true;
 
-    int n = count();
+    int n       = count();
+    int n_fresh = (int)fresh_indices_.size();
 
-    assert(reestim_min_ >= 0 && 
-           reestim_max_ >= 0 && 
-           reestim_min_ < n &&
-           reestim_max_ < n);
+    if (n_fresh > 1)
+        std::sort(fresh_indices_.begin(), fresh_indices_.end());
 
-    int idx_start   = reestim_min_;
-    int idx_end_min = reestim_max_ + 1;
-    int idx_end_max = std::min(n, idx_end_min + settings_.max_reestim_updates); // extended range based on settings
-
-    auto tstart = updates_[ reestim_max_ ].measurement.t;
-
-    //reinit tracker
-    if (idx_start == 0)
+    auto reestimateRange = [ & ] (int idx_start, int idx_end)
     {
-        //first uninit index is start of chain => start from scratch
-        tracker_->reset();
-    }
-    else
-    {
-        //reinit to last valid update
-        if (!reinit(idx_start - 1))
-            return false;
-    }
+        if (idx_end < 0)
+            idx_end = n;
 
-    //iterate over indices and reestimate
-    size_t reestimations = 0;
-    for (int idx = idx_start; idx < idx_end_max; ++idx)
-    {
-        auto& u = updates_[ idx ];
+        int  idx_cutoff = std::min(idx_end, idx_start + 1 + settings_.max_reestim_updates); // cutoff range based on settings
+        auto tstart     = updates_[ idx_start ].measurement.t;
 
-        bool in_extended_range = idx >= idx_end_min;
-
-        //max reestimation duration hit?
-        if (in_extended_range)
+        //reinit tracker
+        if (idx_start == 0)
         {
+            //first uninit index is start of chain => start from scratch
+            tracker_->reset();
+        }
+        else
+        {
+            //reinit to last valid update
+            if (!reinit(idx_start - 1))
+                return -1;
+        }
+
+        //iterate over indices, reestimate, and stop if one of the criteria hits
+        int reestimations = 0;
+        double d_state_sqr, d_cov_sqr;
+        for (int idx = idx_start; idx < idx_cutoff; ++idx)
+        {
+            auto& u = updates_[ idx ];
+
+            //max reestimation duration hit?
             assert(u.measurement.t >= tstart);
             if (u.measurement.t - tstart > settings_.max_reestim_duration)
                 break;
+
+            //we check the norm starting from the extended range
+            bool check_norm = (idx >= idx_start + 1);
+
+            //reestim mm
+            bool ok = check_norm ? reestimate(idx, d_state_sqr, d_cov_sqr) : reestimate(idx);
+            if (!ok)
+                return -1;
+
+            ++reestimations;
+
+            if (settings_.verbosity > 1 && check_norm)
+                loginf << "KalmanChain: reestimate:   " 
+                       << " ds = " << std::sqrt(d_state_sqr) << " / " << std::sqrt(settings_.reestim_residual_state_sqr)
+                       << " dc = " << std::sqrt(d_cov_sqr  ) << " / " << std::sqrt(settings_.reestim_residual_cov_sqr  );
+
+            //check residuals, small changes? => stop reestimation 
+            if (check_norm && 
+                d_state_sqr <= settings_.reestim_residual_state_sqr && 
+                d_cov_sqr   <= settings_.reestim_residual_cov_sqr)
+                break;
         }
 
-        //we check the norm starting from the extended range
-        bool check_norm = in_extended_range;
+        return reestimations;
+    };
 
-        //reestim mm
-        double dp;
-        bool ok = check_norm ? reestimate(idx, dp) : reestimate(idx);
+    int reestimations = 0;
+    
+    //reestimate from each fresh index up to the next one at max
+    for (int i = 0; i < n_fresh; ++i)
+    {
+        int idx      = fresh_indices_[ i ];
+        int idx_next = i < n_fresh - 1 ? fresh_indices_[ i + 1 ] : n;
 
-        ++reestimations;
-
-        if (!ok)
+        int ret = reestimateRange(idx, idx_next);
+        if (ret < 0)
             return false;
 
-        //check residuals, small changes? => stop reestimation 
-        if (check_norm && dp <= settings_.reestim_residual)
-            break;
+        reestimations += ret;
     }
 
     resetReestimationIndices();
 
-    if (settings_.verbosity)
+    if (settings_.verbosity > 0)
         loginf << "KalmanChain: reestimate: Refreshed " << reestimations << " measurement(s)";
 
     return true;

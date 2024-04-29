@@ -19,6 +19,7 @@ class ReconstructorBase;
 namespace reconstruction
 {
     class KalmanOnlineTracker;
+    class KalmanChain;
 }
 
 namespace dbContent {
@@ -89,8 +90,6 @@ class ReconstructorTarget
     float baro_alt_prev_;
 
     mutable Transformation trafo_;
-
-    std::unique_ptr<reconstruction::KalmanOnlineTracker> tracker_;
 
     void addTargetReport (unsigned long rec_num, bool add_to_tracker = true);
     void addTargetReports (std::vector<unsigned long> rec_nums, bool add_to_tracker = true);
@@ -179,7 +178,9 @@ class ReconstructorTarget
     void removeOutdatedTargetReports();
 
     // online reconstructor
+    bool hasTracker() const;
     void reinitTracker();
+    void reinitChain();
     void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr);
     bool canPredict(boost::posix_time::ptime timestamp) const;
     bool predict(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& tr) const;
@@ -187,6 +188,10 @@ class ReconstructorTarget
 
 //    bool hasADSBMOPSVersion();
 //    std::set<unsigned int> getADSBMOPSVersions();
+
+protected:
+    std::unique_ptr<reconstruction::KalmanOnlineTracker> tracker_;
+    std::unique_ptr<reconstruction::KalmanChain>         chain_;
 };
 
 } // namespace dbContent

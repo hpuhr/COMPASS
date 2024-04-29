@@ -9,12 +9,15 @@
 #include "util/timeconv.h"
 #include "global.h"
 #include "kalman_online_tracker.h"
+#include "kalman_chain.h"
 
 #include <boost/optional/optional_io.hpp>
 
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
+
+//#define USE_CHAIN 1
 
 namespace dbContent {
 
@@ -118,7 +121,7 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num, bool add_to_tr
 
     if (add_to_tracker && !tr.do_not_use_position_)
     {
-        if (!tracker_)
+        if (!hasTracker())
             reinitTracker();
 
         if (ts_newer)
@@ -1515,8 +1518,24 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     references_.clear();
 }
 
+bool ReconstructorTarget::hasTracker() const
+{
+#ifdef USE_CHAIN
+    return (chain_ != nullptr);
+#else
+    return (tracker_ != nullptr);
+#endif
+}
+
 void ReconstructorTarget::reinitTracker()
 {
+#ifdef USE_CHAIN
+    chain_.reset(new reconstruction::KalmanChain);
+    chain_->estimatorSettings() = reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings();
+    chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type);
+
+    chain_->settings().verbosity = 1;
+#else
     //reset, reconfigure and initialize tracker
     tracker_.reset(new reconstruction::KalmanOnlineTracker);
     tracker_->settings() = reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings();
@@ -1524,22 +1543,32 @@ void ReconstructorTarget::reinitTracker()
 
     //@TODO: init tracker from last slice's final state (where is it stored?)
     //tracker_->kalmanInit(mm)
+#endif
 }
 
 void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr)
 {
-    assert(tracker_);
-    
     reconstruction::Measurement mm;
     reconstructor_.createMeasurement(mm, tr);
 
+#ifdef USE_CHAIN
+    assert(chain_);
+    chain_->add(mm, true); //add to end and reestimate
+#else
+    assert(tracker_);
     tracker_->track(mm);
+#endif
 }
 
 bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const
 {
+#ifdef USE_CHAIN
+    if (!chain_)
+        return false;
+#else
     if (!tracker_)
         return false;
+#endif
 
     if (!tr_timestamps_.size())
         return false;
@@ -1555,8 +1584,13 @@ bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
                                   const dbContent::targetReport::ReconstructorInfo& tr) const
 {
+#if USE_CHAIN
+    assert(chain_);
+    return chain_->predictFromLastState(mm, tr.timestamp_); 
+#else
     assert(tracker_);
     return tracker_->predict(mm, tr.timestamp_);
+#endif
 }
 
 //bool ReconstructorTarget::hasADSBMOPSVersion()
