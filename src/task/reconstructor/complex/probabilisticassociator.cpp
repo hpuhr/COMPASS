@@ -95,7 +95,7 @@ void ProbabilisticAssociator::associateNewData()
             continue;
         }
 
-        START_TR_ASSOC:
+    START_TR_ASSOC:
 
         utn = -1; // not yet found
 
@@ -120,7 +120,7 @@ void ProbabilisticAssociator::associateNewData()
                 {
                     assert (reconstructor_.targets_.count(utn));
 
-                    // check for position offsets
+                            // check for position offsets
                     std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(
                         tr, reconstructor_.targets_.at(utn), do_debug);
 
@@ -259,8 +259,8 @@ void ProbabilisticAssociator::associateNewData()
                 loginf << "DBG tr " << rec_num << " utn by acad";
         }
 
-//        if (debug_utns.count(utn))
-//            do_debug = true;
+        //        if (debug_utns.count(utn))
+        //            do_debug = true;
 
         if (utn == -1) // not associated by acad
         {
@@ -426,11 +426,11 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
                         acad_2_utn_[acad_it.first] = other_utn;
                 }
 
-                //                if (other_target.hasACAD())
-                //                {
-                //                    assert (other_target.acads_.size() == 1);
-                //                    acad_2_utn_[*other_target.acads_.begin()] = other_utn;
-                //                }
+                        //                if (other_target.hasACAD())
+                        //                {
+                        //                    assert (other_target.acads_.size() == 1);
+                        //                    acad_2_utn_[*other_target.acads_.begin()] = other_utn;
+                        //                }
 
                         //utns_to_remove.insert(utn);
 
@@ -719,8 +719,8 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
 
     bool print_debug_target = false; //debug_utns.count(utn);
 
-//    if (print_debug_target)
-//        loginf << "ProbabilisticAssociator: findUTNForTarget: utn " << utn;
+    //    if (print_debug_target)
+    //        loginf << "ProbabilisticAssociator: findUTNForTarget: utn " << utn;
 
             // dont check by mode s, should never work
 
@@ -740,22 +740,22 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
     unsigned int num_utns = utn_vec_.size();
     results.resize(num_utns);
 
-    const double prob_min_time_overlap_tracker = 0.1;
-    const boost::posix_time::time_duration max_time_diff_tracker = Time::partialSeconds(15.0);
-    const unsigned int min_updates_tracker = 5;
-    const double max_altitude_diff_tracker = 300;
-    const double max_positions_dubious_verified_rate = 0.5;
-    const double max_positions_dubious_unknown_rate = 0.3;
-    const double max_distance_quit_tracker = 10*NM2M;
-    const double max_distance_dubious_tracker = 3*NM2M;
-    const double max_distance_acceptable_tracker = NM2M/2;
+    const double prob_min_time_overlap_tracker = 0.1; // settings new
+    const boost::posix_time::time_duration max_time_diff_tracker = Time::partialSeconds(15.0); // settings max_time_diff_
+    const unsigned int min_updates_tracker = 5; // settings new
+    const double max_altitude_diff_tracker = 300; // settings max_altitude_diff_
+    const double max_positions_dubious_verified_rate = 0.5; // settings new
+    const double max_positions_dubious_unknown_rate = 0.3; // settings new
+    const double max_distance_quit_tracker = 10*NM2M; // change to mahala, into settings
+    const double max_distance_dubious_tracker = 3*NM2M; // change to mahala, into settings
+    const double max_distance_acceptable_tracker = NM2M/2; // change to mahala, into settings
 
     tbb::parallel_for(uint(0), num_utns, [&](unsigned int cnt)
                                                                 //for (unsigned int cnt=0; cnt < utn_cnt_; ++cnt)
                       {
                           unsigned int other_utn = utn_vec_.at(cnt);
 
-                          //bool print_debug_target = debug_utns.count(utn) && debug_utns.count(other_utn);
+                                  //bool print_debug_target = debug_utns.count(utn) && debug_utns.count(other_utn);
 
                                   // only check for previous targets
                           const dbContent::ReconstructorTarget& other = reconstructor_.targets_.at(other_utn);
@@ -851,8 +851,13 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                           assert (tr.position_);
                                           tst_pos = *tr.position_;
 
+                                                  // TODOPHIL switch to mm here
+                                                  // like getPositionOffset, but timestamp + 2 utns
                                           tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
                                               tr.timestamp_, max_time_diff_tracker);
+
+                                                  // get dist, tgt1_est_std_dev, tgt2_est_std_dev
+                                                  // checl both against max_tgt_est_std_dev, see line 601
 
                                           if (!ok)
                                           {
@@ -877,6 +882,15 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                           }
 
                                           distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+                                          // mahal thresold
+
+                                          // like max_mahalanobis_sec_verified_dist_
+                                          //const double max_distance_quit_tracker = 10*NM2M;
+                                          // max_stddevs_quit 12
+                                          //const double max_distance_dubious_tracker = 3*NM2M;
+                                          // max_stddevs_dubious 5
+                                          //const double max_distance_acceptable_tracker = NM2M/2;
+                                          // max_stddevs_acceptable 3
 
                                           if (distance > max_distance_dubious_tracker)
                                               ++pos_dubious_cnt;
@@ -969,6 +983,12 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                       assert (tr.position_);
                                       tst_pos = *tr.position_;
 
+                                              // TODOPHIL switch to mm here
+                                              // like getPositionOffset
+                                      // like max_mahalanobis_sec_unknown_dist_
+                                      // max_stddevs_quit 8
+                                      // max_stddevs_dubious 4
+                                      // max_stddevs_acceptable 2
                                       tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
                                           tr.timestamp_, max_time_diff_tracker);
 
@@ -1013,7 +1033,7 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
 
                                           break;
                                       }
-                                              //loginf << "\tdist " << distance;
+                                         //loginf << "\tdist " << distance;
 
                                       distances.push_back({rn_it, distance});
                                       distances_sum += distance;
@@ -1080,8 +1100,8 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
     double best_distance_avg;
     double best_score;
 
-//    if (print_debug_target)
-//        loginf << "\ttarget " << target.utn_ << " checking results";
+    //    if (print_debug_target)
+    //        loginf << "\ttarget " << target.utn_ << " checking results";
 
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
     {
@@ -1158,14 +1178,14 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
 }
 
 bool ProbabilisticAssociator::canGetPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
-                           const dbContent::ReconstructorTarget& target)
+                                                   const dbContent::ReconstructorTarget& target)
 {
     return tr.position_ && target.canPredict(tr.timestamp_);
 }
 
 // distance, target acc, tr acc
 std::tuple<double, double, double> ProbabilisticAssociator::getPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
-                                             const dbContent::ReconstructorTarget& target, bool do_debug)
+                                                                              const dbContent::ReconstructorTarget& target, bool do_debug)
 {
     reconstruction::Measurement mm;
     bool ret;
@@ -1201,7 +1221,7 @@ std::tuple<double, double, double> ProbabilisticAssociator::getPositionOffset(co
     estimateEllipse(mm_pos_acc, acc_ell);
     tgt_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
-    // distance, target acc, tr acc
+            // distance, target acc, tr acc
     return std::tuple<double, double, double>(distance_m, tgt_est_std_dev, tr_est_std_dev);
 }
 
