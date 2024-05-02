@@ -495,7 +495,7 @@ void SimpleAssociator::createNonTrackerUTNS()
                     reconstructor_.targets_.emplace(
                         std::piecewise_construct,
                         std::forward_as_tuple(new_utn),   // args for key
-                        std::forward_as_tuple(reconstructor_, new_utn, false));  // args for mapped value, new_utn, tmp_utn false
+                        std::forward_as_tuple(reconstructor_, new_utn, false, false, false));  // args for mapped value, new_utn, tmp_utn false
 
                     reconstructor_.targets_.at(new_utn).addTargetReports(trs);
 
@@ -676,7 +676,7 @@ std::map<unsigned int, ReconstructorTarget> SimpleAssociator::createTrackedTarge
                     tracker_targets.emplace(
                         std::piecewise_construct,
                         std::forward_as_tuple(utn),   // args for key
-                        std::forward_as_tuple(reconstructor_, utn, true));  // args for mapped value utn, tmp_utn true
+                        std::forward_as_tuple(reconstructor_, utn, true, false, false));  // args for mapped value utn, tmp_utn true
 
                     tracker_targets_vec.push_back(&tracker_targets.at(utn));
                 }
@@ -814,7 +814,7 @@ void SimpleAssociator::addTrackerUTNs(const std::string& ds_name,
                 to_targets.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(tmp_utn),   // args for key
-                    std::forward_as_tuple(reconstructor_, tmp_utn, false));  // args for mapped value tmp_utn, false
+                    std::forward_as_tuple(reconstructor_, tmp_utn, false, false, false));  // args for mapped value tmp_utn, false
 
                         // add associated target reports
                 to_targets.at(tmp_utn).addTargetReports(tmp_target->second.target_reports_);

@@ -19,17 +19,42 @@ using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
 
-#define USE_CHAIN 1
+namespace dbContent 
+{
 
-namespace dbContent {
-
-ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor, unsigned int utn, bool tmp_utn)
-    : reconstructor_(reconstructor), utn_(utn), tmp_utn_(tmp_utn)
+ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor, 
+                                         unsigned int utn, 
+                                         bool tmp_utn,
+                                         bool multithreaded_predictions,
+                                         bool dynamic_insertions)
+:   reconstructor_(reconstructor)
+,   utn_(utn)
+,   tmp_utn_(tmp_utn)
+,   multithreaded_predictions_(multithreaded_predictions)
+,   dynamic_insertions_(dynamic_insertions)
 {
 }
 
 ReconstructorTarget::~ReconstructorTarget()
 {
+}
+
+void ReconstructorTarget::addTargetReport (unsigned long rec_num,
+                                           bool add_to_tracker)
+{
+    addTargetReport(rec_num, add_to_tracker, true);
+}
+
+void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums, 
+                                            bool add_to_tracker)
+{
+    //add single tr without reestimating
+    for (auto& rn_it : rec_nums)
+        addTargetReport(rn_it, add_to_tracker, false);
+
+    //reestimate chain after adding
+    if (add_to_tracker && chain_)
+        chain_->reestimate();
 }
 
 void ReconstructorTarget::addTargetReport (unsigned long rec_num, 
@@ -131,18 +156,6 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num,
         if (ts_newer)
             addToTracker(tr, reestimate);
     }
-}
-
-void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums, bool add_to_tracker)
-{
-    //add single tr without reestimating
-    for (auto& rn_it : rec_nums)
-        addTargetReport(rn_it, add_to_tracker, false);
-
-    //reestimate chain after adding
-    if (add_to_tracker && chain_)
-        chain_->reestimate();
-        
 }
 
 unsigned int ReconstructorTarget::numAssociated() const
@@ -1530,50 +1543,31 @@ void ReconstructorTarget::removeOutdatedTargetReports()
 
 bool ReconstructorTarget::hasTracker() const
 {
-#ifdef USE_CHAIN
     return (chain_ != nullptr);
-#else
-    return (tracker_ != nullptr);
-#endif
 }
 
 size_t ReconstructorTarget::trackerCount() const
 {
-#ifdef USE_CHAIN
     return chain_->size();
-#else
-    return 0;
-#endif
 }
 
 boost::posix_time::ptime ReconstructorTarget::trackerTime(size_t idx) const
 {
-#ifdef USE_CHAIN
-    return chain_->getUpdate(idx).measurement.t;
-#else
-    return boost::posix_time::ptime();
-#endif
+    return chain_->getMeasurement(idx).t;
 }
 
 void ReconstructorTarget::reinitTracker()
 {
-#ifdef USE_CHAIN
     int num_threads = std::max(1, tbb::this_task_arena::max_concurrency());
 
-    chain_.reset(new reconstruction::KalmanChain(num_threads));
+    chain_.reset(new reconstruction::KalmanChain(multithreaded_predictions_ ? num_threads : 0));
+
     chain_->configureEstimator(reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings());
     chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type);
 
+    chain_->settings().mode = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts : 
+                                                    reconstruction::KalmanChain::Settings::Mode::StaticAdd;
     chain_->settings().verbosity = 0;
-#else
-    //reset, reconfigure and initialize tracker
-    tracker_.reset(new reconstruction::KalmanOnlineTracker);
-    tracker_->settings() = reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings();
-    tracker_->init(reconstructor_.referenceCalculatorSettings().kalman_type);
-
-    //@TODO: init tracker from last slice's final state (where is it stored?)
-    //tracker_->kalmanInit(mm)
-#endif
 }
 
 void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, bool reestimate)
@@ -1581,70 +1575,42 @@ void ReconstructorTarget::addToTracker(const dbContent::targetReport::Reconstruc
     reconstruction::Measurement mm;
     reconstructor_.createMeasurement(mm, tr);
 
-#ifdef USE_CHAIN
     assert(chain_);
+
     bool ok = chain_->insert(mm, reestimate); //add to end and optionally reestimate
     assert(ok);
-#else
-    assert(tracker_);
-    tracker_->track(mm);
-#endif
 }
 
-bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp, 
-                                    int* pred_idx) const
+bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const
 {
-#ifdef USE_CHAIN
     if (!chain_)
         return false;
 
-    return chain_->canPredict(timestamp, pred_idx);
-#else
-    if (!tracker_)
-        return false;
-
-    if (!tr_timestamps_.size())
-        return false;
-
-    assert (timestamp >= tr_timestamps_.rbegin()->first);
-
-    if (Time::partialSeconds(timestamp - tr_timestamps_.rbegin()->first) > 30.0)
-        return false;
-
-    return true;
-#endif
+    return chain_->canPredict(timestamp);
 }
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
                                   const dbContent::targetReport::ReconstructorInfo& tr, 
                                   int thread_id) const
 {
-#if USE_CHAIN
     assert(chain_);
+
     bool ok = chain_->predict(mm, tr.timestamp_, thread_id); 
     assert(ok);
 
     return ok;
-#else
-    assert(tracker_);
-    return tracker_->predict(mm, tr.timestamp_);
-#endif
 }
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
                                   const boost::posix_time::ptime& ts, 
                                   int thread_id) const
 {
-#if USE_CHAIN
     assert(chain_);
-    bool ok = chain_->predict(mm, ts, thread_id); 
+
+    bool ok = chain_->predict(mm, ts, thread_id);
     assert(ok);
 
     return ok;
-#else
-    assert(tracker_);
-    return tracker_->predict(mm, ts);
-#endif
 }
 
 //bool ReconstructorTarget::hasADSBMOPSVersion()
@@ -1658,6 +1624,5 @@ bool ReconstructorTarget::predict(reconstruction::Measurement& mm,
 
 //    return mops_versions_;
 //}
-
 
 } // namespace dbContent

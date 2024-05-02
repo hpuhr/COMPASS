@@ -192,8 +192,8 @@ struct Measurement
     double                   lat;                  // wgs84 latitude
     double                   lon;                  // wgs84 longitude
 
-    double                   x;                    // x position
-    double                   y;                    // y position
+    mutable double           x;                    // x position (hack: mutable because of on-demand projection in KalmanEstimator)
+    mutable double           y;                    // y position (hack: mutable because of on-demand projection in KalmanEstimator)
     boost::optional<double>  z;                    // optional z position
 
     boost::optional<double>  vx;                   // speed vector x

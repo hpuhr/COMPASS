@@ -43,13 +43,22 @@ public:
     {
         typedef boost::posix_time::time_duration TD;
 
-        TD     max_reestim_duration       = boost::posix_time::seconds(30); // maximum timeframe reestimated after a new mm has been inserted
-        int    max_reestim_updates        = 500;                            // maximum updates reestimated after a new mm has been inserted
+        enum class Mode
+        {
+            DynamicInserts = 0,  // allows dynamic inserts and reestimation, but needs to keep track of all states (more memory)
+            StaticAdd            // allows adding to the end of the chain, and predictions at the end, only the current state is kept
+        };
+
+        Mode   mode = Mode::DynamicInserts;
+
+        TD     reestim_max_duration       = boost::posix_time::seconds(30); // maximum timeframe reestimated after a new mm has been inserted
+        int    reestim_max_updates        = 500;                            // maximum updates reestimated after a new mm has been inserted
         double reestim_residual_state_sqr = 100;                            // 10  * 10  - reestimation stop criterion based on state change residual
         double reestim_residual_cov_sqr   = 10000;                          // 100 * 100 - reestimation stop criterion based on cov mat change residual
-        TD     max_prediction_tdiff       = boost::posix_time::seconds(30); // maximum difference in time which can be predicted
 
-        int verbosity = 0;
+        TD     prediction_max_tdiff       = boost::posix_time::seconds(10); // maximum difference in time which can be predicted
+
+        int    verbosity = 0;
     };
 
     struct Update
@@ -76,6 +85,7 @@ public:
     virtual ~KalmanChain();
 
     void reset();
+    bool hasData() const;
 
     bool isInit() const;
     void init(std::unique_ptr<KalmanInterface>&& interface);
@@ -88,12 +98,15 @@ public:
     bool insert(const Measurement& mm, bool reestim);
     bool insert(const std::vector<Measurement>& mms, bool reestim);
 
-    const Update& getUpdate(size_t idx) const;
+    const kalman::KalmanUpdate& lastUpdate() const;
+    const kalman::KalmanUpdate& getUpdate(size_t idx) const;
+    const Measurement& getMeasurement(size_t idx) const;
 
+    bool canReestimate() const;
     bool needsReestimate() const;
     bool reestimate();
 
-    bool canPredict(const boost::posix_time::ptime& ts, int* pred_idx = nullptr) const;
+    bool canPredict(const boost::posix_time::ptime& ts) const;
     bool predict(Measurement& mm_predicted,
                  const boost::posix_time::ptime& ts,
                  int thread_id = 0) const;

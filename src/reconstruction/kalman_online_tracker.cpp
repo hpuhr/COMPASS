@@ -62,7 +62,7 @@ void KalmanOnlineTracker::init(kalman::KalmanType ktype)
 
 /**
 */
-bool KalmanOnlineTracker::track(Measurement& mm)
+bool KalmanOnlineTracker::track(const Measurement& mm)
 {
     assert(isInit());
 
@@ -82,6 +82,22 @@ bool KalmanOnlineTracker::track(const kalman::KalmanUpdate& update)
     assert(isInit());
 
     kalmanInit(update);
+    return true;
+}
+
+/**
+*/
+bool KalmanOnlineTracker::canPredict(const boost::posix_time::ptime& ts,
+                                     const boost::posix_time::time_duration& max_time_diff) const
+{
+    if (!isTracking())
+        return false;
+
+    const auto& ts_cur = estimator_->currentTime();
+    boost::posix_time::time_duration dt = ts >= ts_cur ? ts - ts_cur : ts_cur - ts;
+    if (dt > max_time_diff)
+        return false;
+
     return true;
 }
 
@@ -109,7 +125,7 @@ bool KalmanOnlineTracker::predict(Measurement& mm_predicted,
 
 /**
 */
-void KalmanOnlineTracker::kalmanInit(Measurement& mm)
+void KalmanOnlineTracker::kalmanInit(const Measurement& mm)
 {
     assert(isInit());
 

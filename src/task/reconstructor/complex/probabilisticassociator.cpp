@@ -18,12 +18,11 @@ using namespace std;
 using namespace dbContent;
 using namespace Utils;
 
-//#define FIND_UTN_FOR_TARGET_MT
+#define FIND_UTN_FOR_TARGET_MT
 
 ProbabilisticAssociator::ProbabilisticAssociator(ProbIMMReconstructor& reconstructor)
     : reconstructor_(reconstructor)
 {
-
 }
 
 void ProbabilisticAssociator::associateNewData()
@@ -338,7 +337,7 @@ void ProbabilisticAssociator::associateNewData()
                         //                tr.do_not_use_position_ = not_use_tr_pos;
             }
 
-            reconstructor_.targets_.at(utn).addTargetReport(rec_num, true);
+            reconstructor_.targets_.at(utn).addTargetReport(rec_num);
 
             if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
                 tn2utn_[ds_id][line_id][*tr.track_number_] =
@@ -404,7 +403,7 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
                 dbContent::ReconstructorTarget& other_target = reconstructor_.targets_.at(other_utn);
 
                 // move target reports
-                other_target.addTargetReports(target.target_reports_, true);
+                other_target.addTargetReports(target.target_reports_);
 
                         // reset this target, no data
                 //                reconstructor_.targets_.emplace(
@@ -1097,7 +1096,7 @@ unsigned int ProbabilisticAssociator::createNewTarget(const dbContent::targetRep
     reconstructor_.targets_.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(utn),   // args for key
-        std::forward_as_tuple(reconstructor_, utn, false));  // args for mapped value tmp_utn, false
+        std::forward_as_tuple(reconstructor_, utn, false, true, true));  // args for mapped value tmp_utn, false
 
             // add to lookup
 
@@ -1161,15 +1160,14 @@ bool ProbabilisticAssociator::canGetPositionOffset(const boost::posix_time::ptim
                                                    const dbContent::ReconstructorTarget& target0,
                                                    const dbContent::ReconstructorTarget& target1)
 {
-    int idx0, idx1;
-    bool ok = (target0.canPredict(ts, &idx0) && target1.canPredict(ts, &idx1));
+    bool ok = (target0.canPredict(ts) && target1.canPredict(ts));
 
     // if (ok)
     // {
     //     loginf << "ProbabilisticAssociator: canGetPositionOffset: can get offset: "
     //            << "t = " << Utils::Time::toString(ts) << " "
-    //            << "utn0 = " << target0.utn_ << " idx0 = " << idx0 << "(" << target0.trackerCount() << ") "
-    //            << "utn1 = " << target1.utn_ << " idx1 = " << idx1 << "(" << target1.trackerCount() << ")";
+    //            << "utn0 = " << target0.utn_ << " (" << target0.trackerCount() << ") "
+    //            << "utn1 = " << target1.utn_ << " (" << target1.trackerCount() << ")";
     // }
     
     return ok;

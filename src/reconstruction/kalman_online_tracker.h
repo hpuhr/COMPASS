@@ -47,10 +47,11 @@ public:
     void init(std::unique_ptr<KalmanInterface>&& interface);
     void init(kalman::KalmanType ktype);
 
-    bool track(Measurement& mm);
+    bool track(const Measurement& mm);
     bool track(const kalman::KalmanUpdate& update);
-    bool predict(Measurement& mm_predicted,
-                 double dt) const;
+
+    bool canPredict(const boost::posix_time::ptime& ts,
+                    const boost::posix_time::time_duration& max_time_diff = boost::posix_time::seconds(10)) const;
     bool predict(Measurement& mm_predicted,
                  const boost::posix_time::ptime& ts) const;
 
@@ -61,8 +62,11 @@ public:
     const KalmanEstimator& estimator() const;
 
 private:
-    void kalmanInit(Measurement& mm);
+    void kalmanInit(const Measurement& mm);
     void kalmanInit(const kalman::KalmanUpdate& update);
+
+    bool predict(Measurement& mm_predicted,
+                 double dt) const;
 
     std::unique_ptr<KalmanEstimator>      estimator_;
     boost::optional<kalman::KalmanUpdate> current_update_;

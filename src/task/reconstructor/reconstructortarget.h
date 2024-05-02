@@ -33,7 +33,7 @@ enum class ComparisonResult
 
 class ReconstructorTarget
 {
-  public:
+public:
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,
                       dbContent::targetReport::ReconstructorInfo*> ReconstructorInfoPair; // both can be nullptr
 
@@ -42,7 +42,11 @@ class ReconstructorTarget
 
     typedef std::function<bool(const dbContent::targetReport::ReconstructorInfo& tr_info)> InfoValidFunc;
 
-    ReconstructorTarget(ReconstructorBase& reconstructor, unsigned int utn, bool tmp_utn);
+    ReconstructorTarget(ReconstructorBase& reconstructor, 
+                        unsigned int utn, 
+                        bool tmp_utn,
+                        bool multithreaded_predictions,
+                        bool dynamic_insertions);
     virtual ~ReconstructorTarget();
 
     ReconstructorBase& reconstructor_; // to get the real target reports
@@ -92,8 +96,7 @@ class ReconstructorTarget
     mutable Transformation trafo_;
 
     void addTargetReport (unsigned long rec_num, 
-                          bool add_to_tracker = true,
-                          bool reestimate = true);
+                          bool add_to_tracker = true);
     void addTargetReports (std::vector<unsigned long> rec_nums, 
                            bool add_to_tracker = true);
 
@@ -183,7 +186,7 @@ class ReconstructorTarget
     // online reconstructor
     size_t trackerCount() const;
     boost::posix_time::ptime trackerTime(size_t idx) const;
-    bool canPredict(boost::posix_time::ptime timestamp, int* pred_idx = nullptr) const;
+    bool canPredict(boost::posix_time::ptime timestamp) const;
     bool predict(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& tr, int thread_id = 0) const;
     bool predict(reconstruction::Measurement& mm, const boost::posix_time::ptime& ts, int thread_id = 0) const;
     // hp: plz rework to tr -> posix timestamp, mm to targetreportdefs structs pos, posacc, maybe by return
@@ -197,8 +200,14 @@ protected:
     void reinitChain();
     void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, bool reestimate = true);
 
-    std::unique_ptr<reconstruction::KalmanOnlineTracker> tracker_;
-    std::unique_ptr<reconstruction::KalmanChain>         chain_;
+    void addTargetReport (unsigned long rec_num, 
+                          bool add_to_tracker,
+                          bool reestimate);
+
+    std::unique_ptr<reconstruction::KalmanChain> chain_;
+
+    bool multithreaded_predictions_ = true;
+    bool dynamic_insertions_        = true;
 };
 
 } // namespace dbContent

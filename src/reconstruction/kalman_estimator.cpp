@@ -155,7 +155,7 @@ void KalmanEstimator::storeUpdates(std::vector<Reference>& refs,
  * Inits the measurement and its respective update.
 */
 void KalmanEstimator::initMeasurement(kalman::KalmanUpdate& update,
-                                      Measurement& mm)
+                                      const Measurement& mm)
 {
     //reset update flags
     update.resetFlags();
@@ -164,6 +164,7 @@ void KalmanEstimator::initMeasurement(kalman::KalmanUpdate& update,
     update.t = mm.t;
 
     //project measurement to cartesian
+    //@TODO: slightly hacky: x and y are mutable to do this local projection on-the-fly
     proj_handler_->project(mm.x, mm.y, mm.lat, mm.lon);
 }
 
@@ -171,7 +172,7 @@ void KalmanEstimator::initMeasurement(kalman::KalmanUpdate& update,
  * Init kalman from measurement.
  */
 void KalmanEstimator::kalmanInit(kalman::KalmanUpdate& update,
-                                 Measurement& mm)
+                                 const Measurement& mm)
 {
     assert(isInit());
 
@@ -292,7 +293,7 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
 /**
 */
 KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& update,
-                                                        Measurement& mm)
+                                                        const Measurement& mm)
 {
     assert(isInit());
 

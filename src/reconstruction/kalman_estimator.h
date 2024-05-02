@@ -111,10 +111,10 @@ public:
     void init(kalman::KalmanType ktype);
     
     void kalmanInit(kalman::KalmanUpdate& update,
-                    Measurement& mm);
+                    const Measurement& mm);
     void kalmanInit(const kalman::KalmanUpdate& update);
     StepResult kalmanStep(kalman::KalmanUpdate& update,
-                          Measurement& mm);
+                          const Measurement& mm);
     bool kalmanPrediction(Measurement& mm,
                           double dt) const;
     bool kalmanPrediction(Measurement& mm,
@@ -145,7 +145,7 @@ public:
 
 private:
     void initMeasurement(kalman::KalmanUpdate& update,
-                         Measurement& mm);
+                         const Measurement& mm);
     ReinitState needsReinit(const Measurement& mm) const;
     void reinit(kalman::KalmanUpdate& update,
                 const Measurement& mm);

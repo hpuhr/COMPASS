@@ -85,6 +85,13 @@ void KalmanChain::reset()
 }
 
 /**
+*/
+bool KalmanChain::hasData() const
+{
+    return (canReestimate() ? size() > 0 : tracker_.tracker_ptr->isTracking());
+}
+
+/**
  * Checks if the chain has been initialized.
 */
 bool KalmanChain::isInit() const
@@ -242,13 +249,22 @@ int KalmanChain::predictionRefIndex(const boost::posix_time::ptime& ts) const
 */
 bool KalmanChain::add(const Measurement& mm, bool reestim)
 {
-    assert(updates_.empty() || mm.t >= updates_.rbegin()->measurement.t);
-    
-    addReesimationIndex(count());
-    updates_.emplace_back(mm, mm_ids_++);
+    if (canReestimate())
+    {
+        assert(updates_.empty() || mm.t >= updates_.rbegin()->measurement.t);
+        
+        addReesimationIndex(count());
+        
+        updates_.emplace_back(mm, mm_ids_++);
 
-    if (reestim)
-        return reestimate();
+        if (reestim)
+            return reestimate();
+    }
+    else
+    {
+        //just track measurement
+        return tracker_.tracker_ptr->track(mm);
+    }
 
     return true;
 }
@@ -261,33 +277,42 @@ bool KalmanChain::add(const std::vector<Measurement>& mms, bool reestim)
     if (mms.empty())
         return true;
 
-    //presort for safety
-    std::vector<Measurement> mms_sorted = mms;
-    std::sort(mms_sorted.begin(), mms_sorted.end(), [ & ] (const Measurement& mm0, const Measurement& mm1) { return mm0.t < mm1.t; });
-
-    //check correct time ordering
-    if (!updates_.empty())
-        assert(mms.begin()->t >= updates_.rbegin()->measurement.t);
-
-    int idx_min = count();
-
-    size_t n  = updates_.size();
-    size_t ni = mms_sorted.size();
-
-    updates_.resize(n + ni);
-
-    for (size_t idx = 0, idx0 = n; idx < ni; ++idx, ++idx0)
+    if (canReestimate())
     {
-        updates_[ idx0 ].measurement = mms_sorted[ idx ];
-        updates_[ idx0 ].mm_id = mm_ids_++;
+        //presort for safety
+        std::vector<Measurement> mms_sorted = mms;
+        std::sort(mms_sorted.begin(), mms_sorted.end(), [ & ] (const Measurement& mm0, const Measurement& mm1) { return mm0.t < mm1.t; });
+
+        //check correct time ordering
+        if (!updates_.empty())
+            assert(mms.begin()->t >= updates_.rbegin()->measurement.t);
+
+        int idx_min = count();
+
+        size_t n  = updates_.size();
+        size_t ni = mms_sorted.size();
+
+        updates_.resize(n + ni);
+
+        for (size_t idx = 0, idx0 = n; idx < ni; ++idx, ++idx0)
+        {
+            updates_[ idx0 ].measurement = mms_sorted[ idx ];
+            updates_[ idx0 ].mm_id = mm_ids_++;
+        }
+
+        int idx_max = lastIndex();
+
+        addReesimationIndexRange(idx_min, idx_max);
+
+        if (reestim)
+            return reestimate();
     }
-
-    int idx_max = lastIndex();
-
-    addReesimationIndexRange(idx_min, idx_max);
-
-    if (reestim)
-        return reestimate();
+    else
+    {
+        //just track measurements one after another
+        for (const auto& mm : mms)
+            add(mm, false);
+    }
 
     return true;
 }
@@ -297,6 +322,8 @@ bool KalmanChain::add(const std::vector<Measurement>& mms, bool reestim)
 */
 void KalmanChain::insert(int idx, const Measurement& mm)
 {
+    assert(canReestimate());
+
     // if (settings_.verbosity >= 2 && idx >= 0)
     // {
     //     boost::posix_time::ptime t0, t1;
@@ -334,6 +361,10 @@ void KalmanChain::insert(int idx, const Measurement& mm)
 */
 bool KalmanChain::insert(const Measurement& mm, bool reestim)
 {
+    //mode does not support inserts? => add instead
+    if (!canReestimate())
+        return add(mm, reestim);
+
     int idx = insertionIndex(mm.t);
     insert(idx, mm);
 
@@ -348,6 +379,10 @@ bool KalmanChain::insert(const Measurement& mm, bool reestim)
 */
 bool KalmanChain::insert(const std::vector<Measurement>& mms, bool reestim)
 {
+    //mode does not support inserts? => add instead
+    if (!canReestimate())
+        return add(mms, reestim);
+    
     for (const auto& mm : mms)
         insert(mm, false);
 
@@ -359,16 +394,37 @@ bool KalmanChain::insert(const std::vector<Measurement>& mms, bool reestim)
 
 /**
 */
-const KalmanChain::Update& KalmanChain::getUpdate(size_t idx) const
+const kalman::KalmanUpdate& KalmanChain::getUpdate(size_t idx) const
 {
-    return updates_.at(idx);
+    assert(canReestimate());
+    return updates_.at(idx).kalman_update;
+}
+
+/**
+*/
+const Measurement& KalmanChain::getMeasurement(size_t idx) const
+{
+    assert(canReestimate());
+    return updates_.at(idx).measurement;
+}
+
+/**
+*/
+const kalman::KalmanUpdate& KalmanChain::lastUpdate() const
+{
+    assert(hasData());
+    return (canReestimate() ? updates_.rbegin()->kalman_update : tracker_.tracker_ptr->currentState().value());
 }
 
 /**
  * Checks if a prediction is possible at the given timestamp.
 */
-bool KalmanChain::canPredict(const boost::posix_time::ptime& ts, int* pred_idx) const
+bool KalmanChain::canPredict(const boost::posix_time::ptime& ts) const
 {
+    //static mode? => just ask tracker
+    if (!canReestimate())
+        return tracker_.tracker_ptr->canPredict(ts, settings_.prediction_max_tdiff);
+
     if (updates_.empty())
         return false;
 
@@ -376,15 +432,12 @@ bool KalmanChain::canPredict(const boost::posix_time::ptime& ts, int* pred_idx) 
     int idx = predictionRefIndex(ts);
     assert(idx >= 0);
 
-    if (pred_idx)
-        *pred_idx = idx;
-
     //check time diff
     auto t0 = updates_[ idx ].kalman_update.t;
 
     boost::posix_time::time_duration diff = (ts >= t0 ? ts - t0 : t0 - ts);
     
-    if (diff > settings_.max_prediction_tdiff)
+    if (diff > settings_.prediction_max_tdiff)
         return false;
 
     return true;
@@ -397,6 +450,10 @@ bool KalmanChain::predict(Measurement& mm_predicted,
                           const boost::posix_time::ptime& ts,
                           int thread_id) const
 {
+    //static mode? => just ask tracker
+    if (!canReestimate())
+        return tracker_.tracker_ptr->predict(mm_predicted, ts);
+
     assert(!needsReestimate()); //!no predictions if chain is out of date!
     assert(!updates_.empty());  //!no prediction from empty chains!
     assert(thread_id >= 0);
@@ -431,6 +488,10 @@ bool KalmanChain::predictFromLastState(Measurement& mm_predicted,
                                        const boost::posix_time::ptime& ts,
                                        int thread_id) const
 {
+    //static mode? => just ask tracker
+    if (!canReestimate())
+        return tracker_.tracker_ptr->predict(mm_predicted, ts);
+
     assert(!needsReestimate()); //!no predictions if chain is out of date!
     assert(!updates_.empty());  //!no prediction from empty chains!
 
@@ -455,6 +516,7 @@ bool KalmanChain::predictFromLastState(Measurement& mm_predicted,
 */
 bool KalmanChain::reinit(int idx) const
 {
+    assert(canReestimate());
     assert(idx >= 0 && idx < count());
     assert(updates_[ idx ].init); //!no freshly added measurements!
     assert(updates_[ idx ].mm_id >= 0);
@@ -482,6 +544,7 @@ bool KalmanChain::reinit(int idx) const
 void KalmanChain::addReesimationIndex(int idx)
 {
     assert(idx >= 0);
+    assert(canReestimate());
 
     fresh_indices_.push_back(idx);
 }
@@ -492,6 +555,7 @@ void KalmanChain::addReesimationIndex(int idx)
 void KalmanChain::addReesimationIndexRange(int idx0, int idx1)
 {
     assert(idx0 >= 0 && idx1 >= idx0);
+    assert(canReestimate());
 
     if (idx0 == idx1)
     {
@@ -517,6 +581,13 @@ void KalmanChain::resetReestimationIndices()
 }
 
 /**
+*/
+bool KalmanChain::canReestimate() const
+{
+    return (settings_.mode == Settings::Mode::DynamicInserts);
+}
+
+/**
  * Checks if new measurements have been added and a reestimation is needed.
 */
 bool KalmanChain::needsReestimate() const
@@ -529,6 +600,7 @@ bool KalmanChain::needsReestimate() const
 */
 bool KalmanChain::reestimate(int idx)
 {
+    assert(canReestimate());
     assert(idx >= 0 && idx < count());
     assert(updates_[ idx ].mm_id >= 0);
 
@@ -549,6 +621,7 @@ bool KalmanChain::reestimate(int idx)
 */
 bool KalmanChain::reestimate(int idx, double& d_state_sqr, double& d_cov_sqr)
 {
+    assert(canReestimate());
     assert(idx >= 0 && idx < count());
     assert(updates_[ idx ].mm_id >= 0);
     assert(updates_[ idx ].init); //!no freshly added measurements!
@@ -573,7 +646,7 @@ bool KalmanChain::reestimate(int idx, double& d_state_sqr, double& d_cov_sqr)
 */
 bool KalmanChain::reestimate()
 {
-    if (!needsReestimate())
+    if (!needsReestimate() || !canReestimate())
         return true;
 
     int n       = count();
@@ -589,7 +662,7 @@ bool KalmanChain::reestimate()
         if (idx_end < 0)
             idx_end = n;
 
-        int  idx_cutoff = std::min(idx_end, idx_start + 1 + settings_.max_reestim_updates); // cutoff range based on settings
+        int  idx_cutoff = std::min(idx_end, idx_start + 1 + settings_.reestim_max_updates); // cutoff range based on settings
         auto tstart     = updates_[ idx_start ].measurement.t;
 
         if (!is_last && settings_.verbosity >= 2)
@@ -619,7 +692,7 @@ bool KalmanChain::reestimate()
 
             //max reestimation duration hit?
             assert(u.measurement.t >= tstart);
-            if (u.measurement.t - tstart > settings_.max_reestim_duration)
+            if (u.measurement.t - tstart > settings_.reestim_max_duration)
                 break;
 
             //we check the norm starting from the extended range
