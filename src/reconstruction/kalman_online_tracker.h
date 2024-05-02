@@ -29,6 +29,11 @@ class KalmanInterface;
 class KalmanProjectionHandler;
 
 /**
+ * Online kalman tracker 
+ * - consumes time-ordered measurements
+ * - re-estimates the state on adding a new measurement
+ * - able to make predictions based on the current (last) state
+ * - can be reset to start a new track
 */
 class KalmanOnlineTracker
 {

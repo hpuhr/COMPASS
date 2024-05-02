@@ -24,6 +24,20 @@ class ProbIMMReconstructorSettings
     float max_sum_est_std_dev_ {2000.0};
     float min_sum_est_std_dev_ {50.0};
 
+    // compare targets related
+    double       prob_min_time_overlap_tracker_       {0.1};
+    unsigned int min_updates_tracker_                   {5};
+    const double max_positions_dubious_verified_rate_ {0.5};
+    const double max_positions_dubious_unknown_rate_  {0.3};
+
+    float max_mahalanobis_quit_verified_       {12};
+    float max_mahalanobis_dubious_verified_     {5};
+    float max_mahalanobis_acceptable_verified_  {3};
+
+    float max_mahalanobis_quit_unverified_       {8};
+    float max_mahalanobis_dubious_unverified_    {4};
+    float max_mahalanobis_acceptable_unverified_ {2};
+
     //ref calculation
     SimpleReferenceCalculator::Settings ref_calc_settings_;
 };

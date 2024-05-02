@@ -38,6 +38,8 @@ public:
     KalmanInterfaceUMKalman2D(bool track_velocities);
     virtual ~KalmanInterfaceUMKalman2D() = default;
 
+    KalmanInterface* clone() const override final;
+
     size_t dimX() const override final; 
     size_t dimZ() const override final;
     size_t dimU() const override final;

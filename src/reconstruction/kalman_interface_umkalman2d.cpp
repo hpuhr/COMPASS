@@ -32,6 +32,13 @@ KalmanInterfaceUMKalman2D::KalmanInterfaceUMKalman2D(bool track_velocities)
 
 /**
 */
+KalmanInterface* KalmanInterfaceUMKalman2D::clone() const
+{
+    return new KalmanInterfaceUMKalman2D(track_velocities_);
+}
+
+/**
+*/
 size_t KalmanInterfaceUMKalman2D::dimX() const
 {
     return 4;

@@ -91,8 +91,11 @@ class ReconstructorTarget
 
     mutable Transformation trafo_;
 
-    void addTargetReport (unsigned long rec_num, bool add_to_tracker = true);
-    void addTargetReports (std::vector<unsigned long> rec_nums, bool add_to_tracker = true);
+    void addTargetReport (unsigned long rec_num, 
+                          bool add_to_tracker = true,
+                          bool reestimate = true);
+    void addTargetReports (std::vector<unsigned long> rec_nums, 
+                           bool add_to_tracker = true);
 
     unsigned int numAssociated() const;
     unsigned long lastAssociated() const;
@@ -178,21 +181,24 @@ class ReconstructorTarget
     void removeOutdatedTargetReports();
 
     // online reconstructor
-    bool hasTracker() const;
-    void reinitTracker();
-    void reinitChain();
-    void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr);
-    bool canPredict(boost::posix_time::ptime timestamp) const;
-    bool predict(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& tr) const;
+    size_t trackerCount() const;
+    boost::posix_time::ptime trackerTime(size_t idx) const;
+    bool canPredict(boost::posix_time::ptime timestamp, int* pred_idx = nullptr) const;
+    bool predict(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& tr, int thread_id = 0) const;
+    bool predict(reconstruction::Measurement& mm, const boost::posix_time::ptime& ts, int thread_id = 0) const;
     // hp: plz rework to tr -> posix timestamp, mm to targetreportdefs structs pos, posacc, maybe by return
 
 //    bool hasADSBMOPSVersion();
 //    std::set<unsigned int> getADSBMOPSVersions();
 
 protected:
+    bool hasTracker() const;
+    void reinitTracker();
+    void reinitChain();
+    void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, bool reestimate = true);
+
     std::unique_ptr<reconstruction::KalmanOnlineTracker> tracker_;
     std::unique_ptr<reconstruction::KalmanChain>         chain_;
 };
 
 } // namespace dbContent
-

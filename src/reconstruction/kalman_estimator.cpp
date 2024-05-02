@@ -60,6 +60,8 @@ bool KalmanEstimator::isInit() const
 */
 void KalmanEstimator::init(std::unique_ptr<KalmanInterface>&& interface)
 {
+    assert(interface);
+    
     kalman_interface_ = std::move(interface);
     assert(kalman_interface_);
 
@@ -394,6 +396,24 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
     proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
 
     return true;
+}
+
+bool KalmanEstimator::kalmanPrediction(Measurement& mm,
+                                       const kalman::KalmanUpdate& ref_update,
+                                       double dt)
+{
+    kalmanInit(ref_update);
+    return kalmanPrediction(mm, dt);
+
+
+}
+
+bool KalmanEstimator::kalmanPrediction(Measurement& mm,
+                                       const kalman::KalmanUpdate& ref_update,
+                                       const boost::posix_time::ptime& ts)
+{
+    kalmanInit(ref_update);
+    return kalmanPrediction(mm, ts);
 }
 
 /**

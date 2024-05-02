@@ -18,12 +18,13 @@ using namespace std;
 using namespace dbContent;
 using namespace Utils;
 
+//#define FIND_UTN_FOR_TARGET_MT
+
 ProbabilisticAssociator::ProbabilisticAssociator(ProbIMMReconstructor& reconstructor)
     : reconstructor_(reconstructor)
 {
 
 }
-
 
 void ProbabilisticAssociator::associateNewData()
 {
@@ -337,7 +338,7 @@ void ProbabilisticAssociator::associateNewData()
                         //                tr.do_not_use_position_ = not_use_tr_pos;
             }
 
-            reconstructor_.targets_.at(utn).addTargetReport(rec_num);
+            reconstructor_.targets_.at(utn).addTargetReport(rec_num, true);
 
             if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
                 tn2utn_[ds_id][line_id][*tr.track_number_] =
@@ -350,12 +351,12 @@ void ProbabilisticAssociator::associateNewData()
 
     checkACADLookup();
 
-            // self-associate created utns
+    // self-associate created utns
     selfAccociateNewUTNs();
 
     checkACADLookup();
 
-            // clear new flags
+    // clear new flags
     for (auto utn : utn_vec_)
         reconstructor_.targets_.at(utn).created_in_current_slice_ = false;
 
@@ -402,8 +403,8 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
                 dbContent::ReconstructorTarget& target = reconstructor_.targets_.at(utn);
                 dbContent::ReconstructorTarget& other_target = reconstructor_.targets_.at(other_utn);
 
-                        // move target reports
-                other_target.addTargetReports(target.target_reports_, false);
+                // move target reports
+                other_target.addTargetReports(target.target_reports_, true);
 
                         // reset this target, no data
                 //                reconstructor_.targets_.emplace(
@@ -740,354 +741,284 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
     unsigned int num_utns = utn_vec_.size();
     results.resize(num_utns);
 
-    const double prob_min_time_overlap_tracker = 0.1; // settings new
-    const boost::posix_time::time_duration max_time_diff_tracker = Time::partialSeconds(15.0); // settings max_time_diff_
-    const unsigned int min_updates_tracker = 5; // settings new
-    const double max_altitude_diff_tracker = 300; // settings max_altitude_diff_
-    const double max_positions_dubious_verified_rate = 0.5; // settings new
-    const double max_positions_dubious_unknown_rate = 0.3; // settings new
-    const double max_distance_quit_tracker = 10*NM2M; // change to mahala, into settings
-    const double max_distance_dubious_tracker = 3*NM2M; // change to mahala, into settings
-    const double max_distance_acceptable_tracker = NM2M/2; // change to mahala, into settings
+    const auto& settings = reconstructor_.settings();
 
+    const boost::posix_time::time_duration max_time_diff_tracker = Utils::Time::partialSeconds(settings.max_time_diff_);
+
+    const double       prob_min_time_overlap_tracker       = settings.prob_min_time_overlap_tracker_; 
+    const unsigned int min_updates_tracker                 = settings.min_updates_tracker_;
+    const double       max_altitude_diff_tracker           = settings.max_altitude_diff_; 
+    const double       max_positions_dubious_verified_rate = settings.max_positions_dubious_verified_rate_;
+    const double       max_positions_dubious_unknown_rate  = settings.max_positions_dubious_unknown_rate_;
+
+    const float max_mahalanobis_quit_verified         = settings.max_mahalanobis_quit_verified_;
+    const float max_mahalanobis_dubious_verified      = settings.max_mahalanobis_dubious_verified_;
+    const float max_mahalanobis_acceptable_verified   = settings.max_mahalanobis_acceptable_verified_;
+    const float max_mahalanobis_quit_unverified       = settings.max_mahalanobis_quit_unverified_;
+    const float max_mahalanobis_dubious_unverified    = settings.max_mahalanobis_dubious_unverified_;
+    const float max_mahalanobis_acceptable_unverified = settings.max_mahalanobis_acceptable_unverified_;
+
+    //@TODO: which threshold
+    const float max_mahalanobis_acceptable = max_mahalanobis_acceptable_verified;
+
+    const float max_tgt_est_std_dev = settings.max_tgt_est_std_dev_;
+    const float max_sum_est_std_dev = settings.max_sum_est_std_dev_;
+    const float min_sum_est_std_dev = settings.min_sum_est_std_dev_;
+
+    //computes a match score for the given other target
+    auto scoreUTN = [ & ] (const std::vector<size_t>& rec_nums,
+                           const dbContent::ReconstructorTarget& other,
+                           unsigned int result_idx,
+                           int thread_id,
+                           double max_mahal_dist_accept,
+                           double max_mahal_dist_dub,
+                           double max_mahal_dist_quit,
+                           double max_pos_dubious_rate,
+                           bool print_debug)
+    {
+        vector<pair<unsigned long, double>> distances;
+        double distances_sum {0};
+
+        unsigned int pos_dubious_cnt {0};
+        unsigned int pos_ok_cnt {0};
+        unsigned int pos_skipped_cnt {0};
+
+        double distance_m, stddev_est_target, stddev_est_other;
+
+        for (auto rn_it : rec_nums)
+        {
+            assert (reconstructor_.target_reports_.count(rn_it));
+
+            const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rn_it);
+
+            if (!canGetPositionOffset(tr.timestamp_, target, other))
+            {
+                ++pos_skipped_cnt;
+                continue;
+            }
+
+            //@TODO: debug flag
+            tie(distance_m, stddev_est_target, stddev_est_other) = getPositionOffset(tr.timestamp_, 
+                                                                                        target, 
+                                                                                        other, 
+                                                                                        thread_id,
+                                                                                        false);
+            if (stddev_est_target > max_tgt_est_std_dev ||
+                stddev_est_other > max_tgt_est_std_dev)
+            {
+                ++pos_skipped_cnt;
+                continue;
+            }
+
+            double sum_stddev_est = stddev_est_target + stddev_est_other;
+
+            if (sum_stddev_est > max_sum_est_std_dev)
+                sum_stddev_est = max_sum_est_std_dev;
+
+            if (sum_stddev_est < min_sum_est_std_dev)
+                sum_stddev_est = min_sum_est_std_dev;
+
+            double mahalanobis_dist = distance_m / sum_stddev_est;
+
+            if (mahalanobis_dist > max_mahal_dist_dub)
+                ++pos_dubious_cnt;
+            if (mahalanobis_dist < max_mahal_dist_accept)
+                ++pos_ok_cnt;
+
+            //// too far or dubious => quit
+            if (mahalanobis_dist > max_mahal_dist_quit)
+            {
+                distances.clear();
+                pos_ok_cnt = 0;
+
+                if (print_debug)
+                {
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                            << " max mahalanobis distance failed "
+                            << mahalanobis_dist << " > " << max_mahal_dist_quit;
+                }
+
+                break;
+            }
+
+            //loginf << "\tdist " << distance;
+
+            distances.push_back({rn_it, mahalanobis_dist});
+            distances_sum += mahalanobis_dist;
+        }
+
+        if (pos_ok_cnt
+            && (float) pos_dubious_cnt / (float) pos_ok_cnt < max_pos_dubious_rate
+            && distances.size() >= min_updates_tracker)
+        {
+            double distance_avg = distances_sum / (float) distances.size();
+
+            if (distance_avg < max_mahal_dist_accept)
+            {
+                if (print_debug)
+                {
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                            << " next utn " << num_utns << " dist avg " << distance_avg
+                            << " num " << distances.size();
+                }
+
+                results[result_idx] = tuple<bool, unsigned int, unsigned int, double>(
+                    true, other.utn_, distances.size(), distance_avg);
+            }
+            else
+            {
+                if (print_debug)
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                            << " distance_avg failed "
+                            << distance_avg << " < " << max_mahalanobis_acceptable;
+            }
+        }
+        else
+        {
+            if (print_debug)
+                loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                        << " same distances failed "
+                        << distances.size() << " < " << min_updates_tracker;
+        }
+    };
+
+#ifdef FIND_UTN_FOR_TARGET_MT
     tbb::parallel_for(uint(0), num_utns, [&](unsigned int cnt)
-                                                                //for (unsigned int cnt=0; cnt < utn_cnt_; ++cnt)
-                      {
-                          unsigned int other_utn = utn_vec_.at(cnt);
-
-                                  //bool print_debug_target = debug_utns.count(utn) && debug_utns.count(other_utn);
-
-                                  // only check for previous targets
-                          const dbContent::ReconstructorTarget& other = reconstructor_.targets_.at(other_utn);
-
-                          results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
-
-                          if (utn == other_utn)
-                              return;
-
-                          if (target.hasACAD() && other.hasACAD())
-                              return;
-
-                          Transformation trafo;
-
-                          bool print_debug = debug_utns.count(utn) && debug_utns.count(other_utn);
-
-                          if (print_debug)
-                          {
-                              loginf << "\ttarget " << target.utn_ << " " << target.timeStr()
-                                     << " checking other " << other.utn_ << " " << other.timeStr()
-                                     << " overlaps " << target.timeOverlaps(other) << " prob " << target.probTimeOverlaps(other);
-                          }
-
-                          if (target.timeOverlaps(other)
-                              && target.probTimeOverlaps(other) >= prob_min_time_overlap_tracker)
-                          {
-                              // check based on mode a/c/pos
-
-                              if (print_debug)
-                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " overlap passed";
-
-                              vector<unsigned long> ma_unknown; // record numbers
-                              vector<unsigned long> ma_same;
-                              vector<unsigned long> ma_different;
-
-                              tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other, max_time_diff_tracker);
-
-                              if (print_debug)
-                              {
-                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                         << " ma unknown " << ma_unknown.size()
-                                         << " same " << ma_same.size() << " diff " << ma_different.size();
-                              }
-
-                              if (ma_same.size() > ma_different.size() && ma_same.size() >= min_updates_tracker)
-                              {
-                                  if (print_debug)
-                                      loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode a check passed";
-
-                                          // check mode c codes
-
-                                  vector<unsigned long> mc_unknown;
-                                  vector<unsigned long> mc_same;
-                                  vector<unsigned long> mc_different;
-
-                                  tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(
-                                      other, ma_same, max_time_diff_tracker, max_altitude_diff_tracker, print_debug);
-
-                                  if (print_debug)
-                                  {
-                                      loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                             << " ma same " << ma_same.size() << " diff " << ma_different.size()
-                                             << " mc same " << mc_same.size() << " diff " << mc_different.size();
-                                  }
-
-                                  if (mc_same.size() > mc_different.size() && mc_same.size() >= min_updates_tracker)
-                                  {
-                                      if (print_debug)
-                                          loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check passed";
-                                      // check positions
-
-                                      vector<pair<unsigned long, double>> distances;
-                                      double distances_sum {0};
-
-                                      unsigned int pos_dubious_cnt {0};
-                                      unsigned int pos_ok_cnt {0};
-
-                                      dbContent::targetReport::Position tst_pos;
-
-                                      double x_pos, y_pos;
-                                      double distance;
-
-                                      dbContent::targetReport::Position ref_pos;
-                                      bool ok;
-
-                                      for (auto rn_it : mc_same)
-                                      {
-                                          assert (reconstructor_.target_reports_.count(rn_it));
-
-                                          const dbContent::targetReport::ReconstructorInfo& tr =
-                                              reconstructor_.target_reports_.at(rn_it);
-
-                                          assert (tr.position_);
-                                          tst_pos = *tr.position_;
-
-                                                  // TODOPHIL switch to mm here
-                                                  // like getPositionOffset, but timestamp + 2 utns
-                                          tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
-                                              tr.timestamp_, max_time_diff_tracker);
-
-                                                  // get dist, tgt1_est_std_dev, tgt2_est_std_dev
-                                                  // checl both against max_tgt_est_std_dev, see line 601
-
-                                          if (!ok)
-                                          {
-                                              if (print_debug)
-                                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                         << " pos calc failed ";
-
-                                              continue;
-                                          }
-
-                                          tie(ok, x_pos, y_pos) = trafo.distanceCart(
-                                              ref_pos.latitude_, ref_pos.longitude_,
-                                              tst_pos.latitude_, tst_pos.longitude_);
-
-                                          if (!ok)
-                                          {
-                                              if (print_debug)
-                                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                         << " pos calc distance failed ";
-
-                                              continue;
-                                          }
-
-                                          distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-                                          // mahal thresold
-
-                                          // like max_mahalanobis_sec_verified_dist_
-                                          //const double max_distance_quit_tracker = 10*NM2M;
-                                          // max_stddevs_quit 12
-                                          //const double max_distance_dubious_tracker = 3*NM2M;
-                                          // max_stddevs_dubious 5
-                                          //const double max_distance_acceptable_tracker = NM2M/2;
-                                          // max_stddevs_acceptable 3
-
-                                          if (distance > max_distance_dubious_tracker)
-                                              ++pos_dubious_cnt;
-                                          if (distance < max_distance_acceptable_tracker)
-                                              ++pos_ok_cnt;
-
-                                          if (distance > max_distance_quit_tracker)
-                                                                                     // too far or dubious, quit
-                                          {
-                                              distances.clear();
-                                              pos_ok_cnt = 0;
-
-                                              if (print_debug)
-                                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                         << " max distance failed "
-                                                         << distance << " > " << max_distance_quit_tracker;
-
-                                              break;
-                                          }
-
-                                                  //loginf << "\tdist " << distance;
-
-                                          distances.push_back({rn_it, distance});
-                                          distances_sum += distance;
-                                      }
-
-                                      if (pos_ok_cnt
-                                          && (float) pos_dubious_cnt / (float) pos_ok_cnt < max_positions_dubious_unknown_rate
-                                          && distances.size() >= min_updates_tracker)
-                                      {
-                                          double distance_avg = distances_sum / (float) distances.size();
-
-                                          if (distance_avg < max_distance_acceptable_tracker)
-                                          {
-                                              if (print_debug)
-                                              {
-                                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                         << " next utn " << num_utns << " dist avg " << distance_avg
-                                                         << " num " << distances.size();
-                                              }
-
-                                              results[cnt] = tuple<bool, unsigned int, unsigned int, double>(
-                                                  true, other.utn_, distances.size(), distance_avg);
-                                          }
-                                          else
-                                          {
-                                              if (print_debug)
-                                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                         << " distance_avg failed "
-                                                         << distance_avg << " < " << max_distance_acceptable_tracker;
-                                          }
-                                      }
-                                      else
-                                      {
-                                          if (print_debug)
-                                              loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                     << " same distances failed "
-                                                     << distances.size() << " < " << min_updates_tracker;
-                                      }
-                                  }
-                                  else
-                                  {
-                                      if (print_debug)
-                                          loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check failed";
-                                  }
-                              }
-                              else if (!ma_different.size()) // check based on pos only
-                              {
-                                  vector<pair<unsigned long, double>> distances;
-                                  double distances_sum {0};
-
-                                  unsigned int pos_dubious_cnt {0};
-                                  unsigned int pos_ok_cnt {0};
-
-                                  dbContent::targetReport::Position tst_pos;
-
-                                  double x_pos, y_pos;
-                                  double distance;
-
-                                  dbContent::targetReport::Position ref_pos;
-                                  bool ok;
-
-                                  for (auto rn_it : target.target_reports_)
-                                  {
-                                      assert (reconstructor_.target_reports_.count(rn_it));
-
-                                      const dbContent::targetReport::ReconstructorInfo& tr =
-                                          reconstructor_.target_reports_.at(rn_it);
-
-                                      assert (tr.position_);
-                                      tst_pos = *tr.position_;
-
-                                              // TODOPHIL switch to mm here
-                                              // like getPositionOffset
-                                      // like max_mahalanobis_sec_unknown_dist_
-                                      // max_stddevs_quit 8
-                                      // max_stddevs_dubious 4
-                                      // max_stddevs_acceptable 2
-                                      tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
-                                          tr.timestamp_, max_time_diff_tracker);
-
-                                      if (!ok)
-                                      {
-                                          if (print_debug)
-                                              loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                     << " pos calc failed ";
-
-                                          continue;
-                                      }
-
-                                      tie(ok, x_pos, y_pos) = trafo.distanceCart(
-                                          ref_pos.latitude_, ref_pos.longitude_,
-                                          tst_pos.latitude_, tst_pos.longitude_);
-
-                                      if (!ok)
-                                      {
-                                          if (print_debug)
-                                              loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                     << " pos calc failed ";
-
-                                          continue;
-                                      }
-
-                                      distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-
-                                      if (distance > max_distance_dubious_tracker)
-                                          ++pos_dubious_cnt;
-                                      if (distance < max_distance_acceptable_tracker)
-                                          ++pos_ok_cnt;
-
-                                      if (distance > max_distance_quit_tracker)
-                                                                                 // too far or dubious, quit
-                                      {
-                                          distances.clear();
-
-                                          if (print_debug)
-                                              loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                     << " max distance failed "
-                                                     << distance << " > " << max_distance_quit_tracker;
-
-                                          break;
-                                      }
-                                         //loginf << "\tdist " << distance;
-
-                                      distances.push_back({rn_it, distance});
-                                      distances_sum += distance;
-                                  }
-
-                                  if (pos_ok_cnt
-                                      && (float) pos_dubious_cnt / (float) pos_ok_cnt < max_positions_dubious_verified_rate
-                                      && distances.size() >= min_updates_tracker)
-                                  {
-                                      double distance_avg = distances_sum / (float) distances.size();
-
-                                      if (distance_avg < max_distance_acceptable_tracker)
-                                      {
-                                          if (print_debug)
-                                          {
-                                              loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                     << " next utn " << num_utns << " dist avg " << distance_avg
-                                                     << " num " << distances.size();
-                                          }
-
-                                          results[cnt] = tuple<bool, unsigned int, unsigned int, double>(
-                                              true, other.utn_, distances.size(), distance_avg);
-                                      }
-                                      else
-                                      {
-                                          if (print_debug)
-                                              loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                     << " distance_avg failed "
-                                                     << distance_avg << " < " << max_distance_acceptable_tracker;
-                                      }
-                                  }
-                                  else
-                                  {
-                                      if (print_debug)
-                                          loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                 << " same distances failed "
-                                                 << distances.size() << " < " << min_updates_tracker;
-                                  }
-                              }
-                              else
-                                  if (print_debug)
-                                      loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                             << " mode a check failed";
-
-                          }
-                          else
-                          {
-                              if (print_debug)
-                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " no overlap";
-                          }
-                      });
-    //}
-
-            // find best match
+#else
+    for (unsigned int cnt=0; cnt < num_utns; ++cnt)
+#endif
+    {
+#ifdef FIND_UTN_FOR_TARGET_MT
+        int thread_id = tbb::this_task_arena::current_thread_index();
+#else
+        int thread_id = 0;
+#endif
+        unsigned int other_utn = utn_vec_.at(cnt);
+
+        //bool print_debug_target = debug_utns.count(utn) && debug_utns.count(other_utn);
+
+        // only check for previous targets
+        const dbContent::ReconstructorTarget& other = reconstructor_.targets_.at(other_utn);
+
+        results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
+
+        if (utn == other_utn)
+#ifdef FIND_UTN_FOR_TARGET_MT
+            return;
+#else
+            continue;
+#endif
+        if (target.hasACAD() && other.hasACAD())
+#ifdef FIND_UTN_FOR_TARGET_MT
+            return;
+#else
+            continue;
+#endif
+        Transformation trafo;
+
+        bool print_debug = debug_utns.count(utn) && debug_utns.count(other_utn);
+
+        if (print_debug)
+        {
+            loginf << "\ttarget " << target.utn_ << " " << target.timeStr()
+                    << " checking other " << other.utn_ << " " << other.timeStr()
+                    << " overlaps " << target.timeOverlaps(other) << " prob " << target.probTimeOverlaps(other);
+        }
+
+        if (target.timeOverlaps(other)
+            && target.probTimeOverlaps(other) >= prob_min_time_overlap_tracker)
+        {
+            // check based on mode a/c/pos
+
+            if (print_debug)
+                loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " overlap passed";
+
+            vector<unsigned long> ma_unknown; // record numbers
+            vector<unsigned long> ma_same;
+            vector<unsigned long> ma_different;
+
+            tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other, max_time_diff_tracker);
+
+            if (print_debug)
+            {
+                loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                        << " ma unknown " << ma_unknown.size()
+                        << " same " << ma_same.size() << " diff " << ma_different.size();
+            }
+
+            if (ma_same.size() > ma_different.size() && ma_same.size() >= min_updates_tracker)
+            {
+                if (print_debug)
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode a check passed";
+
+                // check mode c codes
+
+                vector<unsigned long> mc_unknown;
+                vector<unsigned long> mc_same;
+                vector<unsigned long> mc_different;
+
+                tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(
+                    other, ma_same, max_time_diff_tracker, max_altitude_diff_tracker, print_debug);
+
+                if (print_debug)
+                {
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                            << " ma same " << ma_same.size() << " diff " << ma_different.size()
+                            << " mc same " << mc_same.size() << " diff " << mc_different.size();
+                }
+
+                if (mc_same.size() > mc_different.size() && mc_same.size() >= min_updates_tracker)
+                {
+                    if (print_debug)
+                        loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check passed";
+                    
+                    // check positions
+                    scoreUTN(mc_same, 
+                                other, 
+                                cnt, 
+                                thread_id,
+                                max_mahalanobis_acceptable_verified,
+                                max_mahalanobis_dubious_verified,
+                                max_mahalanobis_quit_verified,
+                                max_positions_dubious_verified_rate,
+                                print_debug);
+                }
+                else
+                {
+                    if (print_debug)
+                        loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check failed";
+                }
+            }
+            else if (!ma_different.size()) 
+            {
+                // check based on pos only
+                scoreUTN(target.target_reports_, 
+                            other, 
+                            cnt, 
+                            thread_id,
+                            max_mahalanobis_acceptable_unverified,
+                            max_mahalanobis_dubious_unverified,
+                            max_mahalanobis_quit_unverified,
+                            max_positions_dubious_unknown_rate,
+                            print_debug);
+            }
+            else
+                if (print_debug)
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                            << " mode a check failed";
+        }
+        else
+        {
+            if (print_debug)
+                loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " no overlap";
+        }
+#ifdef FIND_UTN_FOR_TARGET_MT
+    });
+#else
+    }
+#endif
+
+    // find best match
     bool usable;
     unsigned int other_utn;
     unsigned int num_updates;
@@ -1114,7 +1045,7 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
             continue;
         }
 
-        score = (double)num_updates*(max_distance_acceptable_tracker-distance_avg);
+        score = (double)num_updates * (max_mahalanobis_acceptable - distance_avg);
 
         if (first || score > best_score)
         {
@@ -1185,7 +1116,8 @@ bool ProbabilisticAssociator::canGetPositionOffset(const dbContent::targetReport
 
 // distance, target acc, tr acc
 std::tuple<double, double, double> ProbabilisticAssociator::getPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
-                                                                              const dbContent::ReconstructorTarget& target, bool do_debug)
+                                                                              const dbContent::ReconstructorTarget& target, 
+                                                                              bool do_debug)
 {
     reconstruction::Measurement mm;
     bool ret;
@@ -1223,6 +1155,75 @@ std::tuple<double, double, double> ProbabilisticAssociator::getPositionOffset(co
 
             // distance, target acc, tr acc
     return std::tuple<double, double, double>(distance_m, tgt_est_std_dev, tr_est_std_dev);
+}
+
+bool ProbabilisticAssociator::canGetPositionOffset(const boost::posix_time::ptime& ts,
+                                                   const dbContent::ReconstructorTarget& target0,
+                                                   const dbContent::ReconstructorTarget& target1)
+{
+    int idx0, idx1;
+    bool ok = (target0.canPredict(ts, &idx0) && target1.canPredict(ts, &idx1));
+
+    // if (ok)
+    // {
+    //     loginf << "ProbabilisticAssociator: canGetPositionOffset: can get offset: "
+    //            << "t = " << Utils::Time::toString(ts) << " "
+    //            << "utn0 = " << target0.utn_ << " idx0 = " << idx0 << "(" << target0.trackerCount() << ") "
+    //            << "utn1 = " << target1.utn_ << " idx1 = " << idx1 << "(" << target1.trackerCount() << ")";
+    // }
+    
+    return ok;
+}
+
+// distance, target0 acc, target1 acc
+std::tuple<double, double, double> ProbabilisticAssociator::getPositionOffset(const boost::posix_time::ptime& ts,
+                                                                              const dbContent::ReconstructorTarget& target0,
+                                                                              const dbContent::ReconstructorTarget& target1, 
+                                                                              int thread_id,
+                                                                              bool do_debug)
+{
+    reconstruction::Measurement mm0, mm1;
+    bool ret;
+    double distance_m{0}, bearing_rad{0};
+    dbContent::targetReport::PositionAccuracy tr_pos_acc;
+    dbContent::targetReport::PositionAccuracy mm0_pos_acc, mm1_pos_acc;
+    EllipseDef acc_ell;
+    double mm0_est_std_dev{0};
+    double mm1_est_std_dev{0};
+
+    ret = target0.predict(mm0, ts, thread_id) && target1.predict(mm1, ts, thread_id);
+    assert (ret);
+
+    distance_m = osgEarth::GeoMath::distance(mm0.lat * DEG2RAD,
+                                             mm0.lon * DEG2RAD,
+                                             mm1.lat * DEG2RAD, 
+                                             mm1.lon * DEG2RAD);
+
+    bearing_rad = osgEarth::GeoMath::bearing(mm0.lat * DEG2RAD,
+                                             mm0.lon * DEG2RAD,
+                                             mm1.lat * DEG2RAD, 
+                                             mm1.lon * DEG2RAD);
+
+    assert (mm0.hasStdDevPosition());
+    mm0_pos_acc = mm0.positionAccuracy();
+    estimateEllipse(mm0_pos_acc, acc_ell);
+    mm0_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+
+    assert (mm1.hasStdDevPosition());
+    mm1_pos_acc = mm1.positionAccuracy();
+    estimateEllipse(mm1_pos_acc, acc_ell);
+    mm1_est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+
+    if (do_debug)
+    {
+        loginf << "DBG utn0 " << target0.utn_ << " utn1 " << target1.utn_ << ":"
+               << " distance_m " << distance_m 
+               << " stddev0 " << mm0_est_std_dev 
+               << " stddev1 " << mm1_est_std_dev;
+    }
+
+    // distance, target0 acc, target1 acc
+    return std::tuple<double, double, double>(distance_m, mm0_est_std_dev, mm1_est_std_dev);
 }
 
 void ProbabilisticAssociator::checkACADLookup()

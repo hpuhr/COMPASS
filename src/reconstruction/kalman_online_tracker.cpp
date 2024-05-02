@@ -49,6 +49,7 @@ bool KalmanOnlineTracker::isInit() const
 */
 void KalmanOnlineTracker::init(std::unique_ptr<KalmanInterface>&& interface)
 {
+    assert(interface);
     estimator_->init(std::move(interface));
 }
 

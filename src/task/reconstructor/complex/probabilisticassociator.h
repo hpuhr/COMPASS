@@ -54,6 +54,15 @@ class ProbabilisticAssociator
                                const dbContent::ReconstructorTarget& target);
     std::tuple<double, double, double> getPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
                                                          const dbContent::ReconstructorTarget& target, bool do_debug);
+    bool canGetPositionOffset(const boost::posix_time::ptime& ts,
+                              const dbContent::ReconstructorTarget& target0,
+                              const dbContent::ReconstructorTarget& target1);
+    std::tuple<double, double, double> getPositionOffset(const boost::posix_time::ptime& ts,
+                                                         const dbContent::ReconstructorTarget& target0,
+                                                         const dbContent::ReconstructorTarget& target1, 
+                                                         int thread_id,
+                                                         bool do_debug);
+    
 
     void estimateEllipse(dbContent::targetReport::PositionAccuracy& acc, EllipseDef& def) const;
     double estimateAccuracyAt (EllipseDef& def, double bearing_rad) const;

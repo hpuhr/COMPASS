@@ -42,6 +42,7 @@ public:
     virtual ~KalmanInterface() = default;
 
     virtual bool init() = 0;
+    virtual KalmanInterface* clone() const = 0;
 
     void kalmanInit(kalman::KalmanState& init_state,
                     const Measurement& mm,

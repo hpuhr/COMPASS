@@ -28,8 +28,17 @@ class KalmanInterface;
 class KalmanProjectionHandler;
 
 /**
- * Provides needed data structures for kalman and means to retrieve data from kalman state. 
- * Derive for a certain kalman variant.
+ * Kalman-filter-based state estimator.
+ * - operates on a KalmanInterface to interact with a certain kalman variant
+ * - provides kalman features such as
+ *     - initialization of kalman filter
+ *     - integration of measurements into kalman filter
+ *     - smoothing of kalman states
+ *     - interpolation of kalman states
+ *     - predictions based on a certain kalman state
+ *     - handling projection into local map crs
+ *     - etc.
+ * - holds a current state - generally not multithreading safe
  */
 class KalmanEstimator
 {
@@ -110,6 +119,12 @@ public:
                           double dt) const;
     bool kalmanPrediction(Measurement& mm,
                           const boost::posix_time::ptime& ts) const;
+    bool kalmanPrediction(Measurement& mm,
+                          const kalman::KalmanUpdate& ref_update,
+                          double dt);
+    bool kalmanPrediction(Measurement& mm,
+                          const kalman::KalmanUpdate& ref_update,
+                          const boost::posix_time::ptime& ts);
 
     void storeUpdates(std::vector<Reference>& refs,
                       const std::vector<kalman::KalmanUpdate>& updates) const;

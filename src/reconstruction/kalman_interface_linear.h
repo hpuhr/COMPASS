@@ -54,7 +54,6 @@ public:
                                                     const kalman::KalmanState& state1,
                                                     double dt,
                                                     double Q_var) const override final;
-
 protected:
     void kalmanInit_impl(kalman::KalmanState& init_state,
                          const Measurement& mm, 
@@ -67,9 +66,9 @@ protected:
                          const reconstruction::Uncertainty& default_uncert, 
                          double Q_var) override final;
     bool kalmanPrediction_impl(kalman::Vector& x,
-                         kalman::Matrix& P,
-                         double dt,
-                         double Q_var) const override final;
+                               kalman::Matrix& P,
+                               double dt,
+                               double Q_var) const override final;
     bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
                             std::vector<kalman::Matrix>& P_smooth,
                             const std::vector<kalman::KalmanState>& states,

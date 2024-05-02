@@ -96,6 +96,7 @@ void KalmanFilter::predict(const OMatrix& F,
 }
 
 /**
+ * @param external_state If true the current state and covariance used are provided in x and P.
 */
 void KalmanFilter::predictState(Vector& x,
                                 Matrix& P,

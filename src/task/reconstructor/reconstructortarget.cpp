@@ -11,13 +11,15 @@
 #include "kalman_online_tracker.h"
 #include "kalman_chain.h"
 
+#include "tbbhack.h"
+
 #include <boost/optional/optional_io.hpp>
 
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
 
-//#define USE_CHAIN 1
+#define USE_CHAIN 1
 
 namespace dbContent {
 
@@ -30,7 +32,9 @@ ReconstructorTarget::~ReconstructorTarget()
 {
 }
 
-void ReconstructorTarget::addTargetReport (unsigned long rec_num, bool add_to_tracker)
+void ReconstructorTarget::addTargetReport (unsigned long rec_num, 
+                                           bool add_to_tracker,
+                                           bool reestimate)
 {
     assert (reconstructor_.target_reports_.count(rec_num));
 
@@ -125,14 +129,20 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num, bool add_to_tr
             reinitTracker();
 
         if (ts_newer)
-            addToTracker(tr);
+            addToTracker(tr, reestimate);
     }
 }
 
 void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums, bool add_to_tracker)
 {
+    //add single tr without reestimating
     for (auto& rn_it : rec_nums)
-        addTargetReport(rn_it, add_to_tracker);
+        addTargetReport(rn_it, add_to_tracker, false);
+
+    //reestimate chain after adding
+    if (add_to_tracker && chain_)
+        chain_->reestimate();
+        
 }
 
 unsigned int ReconstructorTarget::numAssociated() const
@@ -1512,7 +1522,7 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     for (auto ts_it : tmp_tr_timestamps)
     {
         if (reconstructor_.target_reports_.count(ts_it.second))
-            addTargetReport(ts_it.second, false);
+            addTargetReport(ts_it.second, false, false);
     }
 
     references_.clear();
@@ -1527,14 +1537,34 @@ bool ReconstructorTarget::hasTracker() const
 #endif
 }
 
+size_t ReconstructorTarget::trackerCount() const
+{
+#ifdef USE_CHAIN
+    return chain_->size();
+#else
+    return 0;
+#endif
+}
+
+boost::posix_time::ptime ReconstructorTarget::trackerTime(size_t idx) const
+{
+#ifdef USE_CHAIN
+    return chain_->getUpdate(idx).measurement.t;
+#else
+    return boost::posix_time::ptime();
+#endif
+}
+
 void ReconstructorTarget::reinitTracker()
 {
 #ifdef USE_CHAIN
-    chain_.reset(new reconstruction::KalmanChain);
-    chain_->estimatorSettings() = reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings();
+    int num_threads = std::max(1, tbb::this_task_arena::max_concurrency());
+
+    chain_.reset(new reconstruction::KalmanChain(num_threads));
+    chain_->configureEstimator(reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings());
     chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type);
 
-    chain_->settings().verbosity = 1;
+    chain_->settings().verbosity = 0;
 #else
     //reset, reconfigure and initialize tracker
     tracker_.reset(new reconstruction::KalmanOnlineTracker);
@@ -1546,29 +1576,32 @@ void ReconstructorTarget::reinitTracker()
 #endif
 }
 
-void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr)
+void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, bool reestimate)
 {
     reconstruction::Measurement mm;
     reconstructor_.createMeasurement(mm, tr);
 
 #ifdef USE_CHAIN
     assert(chain_);
-    chain_->add(mm, true); //add to end and reestimate
+    bool ok = chain_->insert(mm, reestimate); //add to end and optionally reestimate
+    assert(ok);
 #else
     assert(tracker_);
     tracker_->track(mm);
 #endif
 }
 
-bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const
+bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp, 
+                                    int* pred_idx) const
 {
 #ifdef USE_CHAIN
     if (!chain_)
         return false;
+
+    return chain_->canPredict(timestamp, pred_idx);
 #else
     if (!tracker_)
         return false;
-#endif
 
     if (!tr_timestamps_.size())
         return false;
@@ -1579,17 +1612,38 @@ bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const
         return false;
 
     return true;
+#endif
 }
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
-                                  const dbContent::targetReport::ReconstructorInfo& tr) const
+                                  const dbContent::targetReport::ReconstructorInfo& tr, 
+                                  int thread_id) const
 {
 #if USE_CHAIN
     assert(chain_);
-    return chain_->predictFromLastState(mm, tr.timestamp_); 
+    bool ok = chain_->predict(mm, tr.timestamp_, thread_id); 
+    assert(ok);
+
+    return ok;
 #else
     assert(tracker_);
     return tracker_->predict(mm, tr.timestamp_);
+#endif
+}
+
+bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
+                                  const boost::posix_time::ptime& ts, 
+                                  int thread_id) const
+{
+#if USE_CHAIN
+    assert(chain_);
+    bool ok = chain_->predict(mm, ts, thread_id); 
+    assert(ok);
+
+    return ok;
+#else
+    assert(tracker_);
+    return tracker_->predict(mm, ts);
 #endif
 }
 

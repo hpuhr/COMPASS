@@ -27,6 +27,7 @@ namespace reconstruction
 {
 
 class KalmanOnlineTracker;
+class KalmanEstimator;
 class KalmanInterface;
 
 /**
@@ -54,16 +55,24 @@ public:
     struct Update
     {
         Update() {}
-        Update(const Measurement& mm, const kalman::KalmanUpdate& update = kalman::KalmanUpdate()) : measurement(mm), kalman_update(update) {}
+        Update(const Measurement& mm, 
+               int id, 
+               const kalman::KalmanUpdate& update = kalman::KalmanUpdate()) 
+        :   measurement  (mm)
+        ,   kalman_update(update)
+        ,   mm_id        (id) {}
 
         Measurement          measurement;
         kalman::KalmanUpdate kalman_update;
-        bool                 init = false;
+        int                  mm_id = -1;
+        bool                 init  = false;
     };
 
-    typedef std::pair<int, int> Interval;
+    typedef std::pair<int, int>                  Interval;
+    typedef std::unique_ptr<KalmanOnlineTracker> TrackerPtr;
+    typedef std::unique_ptr<KalmanEstimator>     EstimatorPtr;
 
-    KalmanChain();
+    KalmanChain(int max_prediction_threads = 1);
     virtual ~KalmanChain();
 
     void reset();
@@ -72,29 +81,53 @@ public:
     void init(std::unique_ptr<KalmanInterface>&& interface);
     void init(kalman::KalmanType ktype);
 
+    void configureEstimator(const KalmanEstimator::Settings& settings);
+
     bool add(const Measurement& mm, bool reestim);
     bool add(const std::vector<Measurement>& mms, bool reestim);
     bool insert(const Measurement& mm, bool reestim);
     bool insert(const std::vector<Measurement>& mms, bool reestim);
 
+    const Update& getUpdate(size_t idx) const;
+
     bool needsReestimate() const;
     bool reestimate();
 
-    bool canPredict(const boost::posix_time::ptime& ts) const;
+    bool canPredict(const boost::posix_time::ptime& ts, int* pred_idx = nullptr) const;
     bool predict(Measurement& mm_predicted,
-                 const boost::posix_time::ptime& ts) const;
+                 const boost::posix_time::ptime& ts,
+                 int thread_id = 0) const;
     bool predictFromLastState(Measurement& mm_predicted,
-                              const boost::posix_time::ptime& ts) const;
+                              const boost::posix_time::ptime& ts,
+                              int thread_id = 0) const;
     
     size_t size() const;
     int count() const;
 
     Settings& settings();
-    KalmanEstimator::Settings& estimatorSettings();
 
 private:
+    struct Tracker
+    {
+        void reset();
+
+        TrackerPtr   tracker_ptr;
+        int tracked_mm_id = -1;
+    };
+
+    struct Predictor
+    {
+        void reset();
+
+        EstimatorPtr estimator_ptr;
+        int ref_mm_id = -1;
+    };
+
+    bool checkIntegrity() const;
+
     void insert(int idx, const Measurement& mm);
     void addReesimationIndex(int idx);
+    void addReesimationIndexRange(int idx0, int idx1);
     void resetReestimationIndices();
     bool reinit(int idx) const;
     bool reestimate(int idx);
@@ -108,10 +141,12 @@ private:
     
     Settings settings_;
 
-    mutable std::unique_ptr<KalmanOnlineTracker> tracker_;
-    mutable int                                  tracked_update_ = -1;
-    std::vector<int>                             fresh_indices_;
-    std::vector<Update>                          updates_;
+    mutable Tracker                tracker_;
+    mutable std::vector<Predictor> predictors_;
+    std::vector<int>               fresh_indices_;
+    std::vector<Update>            updates_;
+
+    int mm_ids_ = 0;
 };
 
 } // reconstruction
