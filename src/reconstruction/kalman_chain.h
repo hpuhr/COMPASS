@@ -98,6 +98,8 @@ public:
     bool insert(const Measurement& mm, bool reestim);
     bool insert(const std::vector<Measurement>& mms, bool reestim);
 
+    void removeUpdatesBefore(const boost::posix_time::ptime& ts);
+
     const kalman::KalmanUpdate& lastUpdate() const;
     const kalman::KalmanUpdate& getUpdate(size_t idx) const;
     const Measurement& getMeasurement(size_t idx) const;

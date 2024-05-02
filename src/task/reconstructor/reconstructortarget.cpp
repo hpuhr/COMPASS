@@ -1532,6 +1532,9 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
+    if (chain_)
+        chain_->removeUpdatesBefore(reconstructor_.currentSlice().remove_before_time_);
+
     for (auto ts_it : tmp_tr_timestamps)
     {
         if (reconstructor_.target_reports_.count(ts_it.second))

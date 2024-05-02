@@ -44,11 +44,13 @@ KalmanChain::KalmanChain(int max_prediction_threads)
 {
     tracker_.tracker_ptr.reset(new KalmanOnlineTracker);
 
-    int nt = std::max(1, max_prediction_threads);
-    predictors_.resize(nt);
+    if (max_prediction_threads > 0)
+    {
+        predictors_.resize(max_prediction_threads);
 
-    for (int i = 0; i < nt; ++i)
-        predictors_[ i ].estimator_ptr.reset(new KalmanEstimator);
+        for (int i = 0; i < max_prediction_threads; ++i)
+            predictors_[ i ].estimator_ptr.reset(new KalmanEstimator);
+    }
 
     reset();
 }
@@ -394,6 +396,23 @@ bool KalmanChain::insert(const std::vector<Measurement>& mms, bool reestim)
 
 /**
 */
+void KalmanChain::removeUpdatesBefore(const boost::posix_time::ptime& ts)
+{
+    if (size() == 0)
+        return;
+
+    auto it = std::remove_if(updates_.begin(), updates_.end(), [ & ] (const Update& u) { return u.measurement.t < ts; });
+    updates_.erase(it, updates_.end());
+    updates_.shrink_to_fit();
+
+    //current mm ids might be outdated now => reset
+    tracker_.tracked_mm_id = -1;
+    for (auto& p : predictors_)
+        p.ref_mm_id = -1;
+}
+
+/**
+*/
 const kalman::KalmanUpdate& KalmanChain::getUpdate(size_t idx) const
 {
     assert(canReestimate());
@@ -454,10 +473,10 @@ bool KalmanChain::predict(Measurement& mm_predicted,
     if (!canReestimate())
         return tracker_.tracker_ptr->predict(mm_predicted, ts);
 
+    assert(thread_id >= 0 && thread_id < (int)predictors_.size());
     assert(!needsReestimate()); //!no predictions if chain is out of date!
     assert(!updates_.empty());  //!no prediction from empty chains!
-    assert(thread_id >= 0);
-
+    
     //find reference update
     int idx = predictionRefIndex(ts);
     assert(idx >= 0);
@@ -492,6 +511,7 @@ bool KalmanChain::predictFromLastState(Measurement& mm_predicted,
     if (!canReestimate())
         return tracker_.tracker_ptr->predict(mm_predicted, ts);
 
+    assert(thread_id >= 0 && thread_id < (int)predictors_.size());
     assert(!needsReestimate()); //!no predictions if chain is out of date!
     assert(!updates_.empty());  //!no prediction from empty chains!
 
