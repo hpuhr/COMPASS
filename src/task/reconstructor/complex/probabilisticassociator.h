@@ -26,6 +26,7 @@ class ProbabilisticAssociator
 
     std::vector<unsigned int> utn_vec_;
     std::map<unsigned int, unsigned int> acad_2_utn_; // acad dec -> utn
+    std::map<std::string, unsigned int> acid_2_utn_; // acid trim -> utn
 
             // ds_id -> line id -> track num -> utn, last tod
     std::map<unsigned int, std::map<unsigned int,
@@ -38,7 +39,7 @@ class ProbabilisticAssociator
     void checkACADLookup();
 
             // tries to find existing utn for target report, based on mode a/c and position, -1 if failed
-    int findUTNForTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
+    int findUTNByModeACPos (const dbContent::targetReport::ReconstructorInfo& tr,
                                const std::vector<unsigned int>& utn_vec,
                                const std::set<unsigned long>& debug_rec_nums,
                                const std::set<unsigned int>& debug_utns);
