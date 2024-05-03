@@ -89,6 +89,23 @@ void ProbabilisticAssociator::associateNewData()
         assert (reconstructor_.targets_.count(utn));
     };
 
+    auto canAssocByACID = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        if (!tr.acid_)
+            return false;
+
+        return (bool) acid_2_utn_.count(*tr.acid_);
+    };
+
+    auto assocByACID = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        assert (tr.acid_);
+        assert (acid_2_utn_.count(*tr.acid_));
+
+        utn = acid_2_utn_.at(*tr.acid_);
+        assert (reconstructor_.targets_.count(utn));
+    };
+
     auto canAssocByTrackNumber = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
     {
         if (!tr.track_number_) // only if track number is set
@@ -188,12 +205,15 @@ void ProbabilisticAssociator::associateNewData()
         // try by mode-s address or trustworthy track number
         // create new if not already existing
         if (tr.acad_
+            || tr.acid_
             || (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255)))
         {
             // find utn
 
             if (canAssocByACAD(tr)) // already exists
                 assocByACAD(tr);
+            else if (canAssocByACID(tr)) // already exists
+                assocByACID(tr);
             else if (canAssocByTrackNumber(tr))
             {
                 assocByTrackNumber(tr);
@@ -204,15 +224,15 @@ void ProbabilisticAssociator::associateNewData()
             else // not yet existing, create & add target
                 findUTNByModeACPosOrCreateNewTarget(tr);
 
+            assert (utn != -1);
+
             if(do_debug)
                 loginf << "DBG tr " << rec_num << " utn by acad";
         }
-
-                //        if (debug_utns.count(utn))
-                //            do_debug = true;
-
-        if (utn == -1) // not associated by trustworty id
+        else // not associated by trustworty id
         {
+            assert (utn == -1);
+
             if(do_debug)
                 loginf << "DBG tr " << rec_num << " no utn by acad, doing mode a/c + pos";
 
@@ -222,7 +242,7 @@ void ProbabilisticAssociator::associateNewData()
                 assert (reconstructor_.targets_.count(utn));
         }
 
-        if (utn != -1) // estimate accuarcy and associate
+        if (utn != -1) // estimate accuracy and associate
         {
             if (!reconstructor_.targets_.count(utn))
                 logerr << "ProbabilisticAssociator: associateNewData: utn " << utn << " missing";
@@ -294,6 +314,9 @@ void ProbabilisticAssociator::associateNewData()
 
             if (tr.acad_)
                 acad_2_utn_[*tr.acad_] = utn;
+
+            if (tr.acid_)
+                acid_2_utn_[*tr.acid_] = utn;
         }
     }
 
@@ -354,18 +377,11 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
                         // move target reports
                 other_target.addTargetReports(target.target_reports_);
 
-                        // reset this target, no data
-                //                reconstructor_.targets_.emplace(
-                //                    std::piecewise_construct,
-                //                    std::forward_as_tuple(utn),   // args for key
-                //                    std::forward_as_tuple(reconstructor_, utn, false));  // args for mapped value tmp_utn, false
-
                         // remove from targets
                 assert (reconstructor_.targets_.count(utn));
                 reconstructor_.targets_.erase(utn);
 
                         // remove from utn list
-
                 utn_it = utn_vec_.erase(utn_it);
 
                         // remove from acad lookup
@@ -375,13 +391,12 @@ void ProbabilisticAssociator::selfAccociateNewUTNs()
                         acad_2_utn_[acad_it.first] = other_utn;
                 }
 
-                        //                if (other_target.hasACAD())
-                        //                {
-                        //                    assert (other_target.acads_.size() == 1);
-                        //                    acad_2_utn_[*other_target.acads_.begin()] = other_utn;
-                        //                }
-
-                        //utns_to_remove.insert(utn);
+                        // remove from acid lookup
+                for (auto& acid_it : acid_2_utn_)
+                {
+                    if (acid_it.second == utn)
+                        acid_2_utn_[acid_it.first] = other_utn;
+                }
 
                         // remove in tn2utn_ lookup
                 // ds_id -> line id -> track num -> utn, last tod
@@ -423,6 +438,7 @@ void ProbabilisticAssociator::reset()
 
     utn_vec_.clear();
     acad_2_utn_.clear();
+    acid_2_utn_.clear();
     tn2utn_.clear();
 
     num_merges_ = 0;
