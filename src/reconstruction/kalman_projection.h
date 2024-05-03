@@ -69,6 +69,11 @@ public:
     bool changeProjectionIfNeeded(kalman::KalmanUpdate& update,
                                   const KalmanInterface& interface);
 
+    void xReprojected(kalman::Vector& x_repr, 
+                      const KalmanInterface& interface,
+                      const kalman::Vector& x,
+                      const Eigen::Vector2d& proj_center,
+                      const Eigen::Vector2d& proj_center_new);
     kalman::XTransferFunc reprojectionTransform(const std::vector<kalman::KalmanUpdate>* updates,
                                                 const KalmanInterface* interface,
                                                 size_t offset = 0);
@@ -82,12 +87,6 @@ private:
                                  const KalmanInterface& interface) const;
     void changeProjection(kalman::KalmanUpdate& update,
                           const KalmanInterface& interface);
-
-    void xReprojected(kalman::Vector& x_repr, 
-                      const KalmanInterface& interface,
-                      const kalman::Vector& x,
-                      const Eigen::Vector2d& proj_center,
-                      const Eigen::Vector2d& proj_center_new);
 
     std::unique_ptr<FrameProjector> proj_;
     Settings                        settings_;

@@ -47,6 +47,16 @@ void KalmanInterface::kalmanInit(const kalman::KalmanState& init_state,
 
 /**
 */
+void KalmanInterface::kalmanInit(const kalman::Vector& x,
+                                 const kalman::Matrix& P,
+                                 const boost::posix_time::ptime& ts)
+{
+    ts_ = ts;
+    kalmanInit_impl(x, P);
+}
+
+/**
+*/
 bool KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
                                  const Measurement& mm, 
                                  const reconstruction::Uncertainty& default_uncert, 
@@ -148,6 +158,13 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
     }
 
     return true;
+}
+
+/**
+*/
+void KalmanInterface::storeState(Measurement& mm, const kalman::KalmanState& state) const
+{
+    storeState(mm, state.x, state.P);
 }
 
 } // reconstruction

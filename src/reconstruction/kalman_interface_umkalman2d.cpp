@@ -247,15 +247,17 @@ void KalmanInterfaceUMKalman2D::stateTransitionMatF(kalman::Matrix& F, double dt
 
 /**
 */
-void KalmanInterfaceUMKalman2D::storeState(Measurement& mm, const kalman::KalmanState& state) const
+void KalmanInterfaceUMKalman2D::storeState(Measurement& mm, 
+                                           const kalman::Vector& x, 
+                                           const kalman::Matrix& P) const
 {
-    mm.x        = state.x[0];
-    mm.y        = state.x[2];
-    mm.vx       = state.x[1];
-    mm.vy       = state.x[3];
-    mm.x_stddev = std::sqrt(state.P(0, 0));
-    mm.y_stddev = std::sqrt(state.P(2, 2));
-    mm.xy_cov   = state.P(2, 0);
+    mm.x        = x[0];
+    mm.y        = x[2];
+    mm.vx       = x[1];
+    mm.vy       = x[3];
+    mm.x_stddev = std::sqrt(P(0, 0));
+    mm.y_stddev = std::sqrt(P(2, 2));
+    mm.xy_cov   = P(2, 0);
 }
 
 /**

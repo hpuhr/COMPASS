@@ -205,6 +205,21 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdate& update)
 }
 
 /**
+ * Init kalman from minimal update.
+ */
+void KalmanEstimator::kalmanInit(const kalman::KalmanUpdateMinimal& update)
+{
+    assert(isInit());
+    assert(update.valid);
+
+    //init projection
+    proj_handler_->initProjection(update.projection_center.x(), update.projection_center.y());
+
+    //reinit kalman from update
+    kalman_interface_->kalmanInit(update.x, update.P, update.t);
+}
+
+/**
  * Checks if the measurement triggers a reinitialization of the kalman filter based on different criteria.
 */
 KalmanEstimator::ReinitState KalmanEstimator::needsReinit(const Measurement& mm) const
@@ -399,22 +414,67 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
     return true;
 }
 
-bool KalmanEstimator::kalmanPrediction(Measurement& mm,
-                                       const kalman::KalmanUpdate& ref_update,
-                                       double dt)
-{
-    kalmanInit(ref_update);
-    return kalmanPrediction(mm, dt);
-
-
-}
-
+/**
+*/
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        const kalman::KalmanUpdate& ref_update,
                                        const boost::posix_time::ptime& ts)
 {
     kalmanInit(ref_update);
     return kalmanPrediction(mm, ts);
+}
+
+/**
+*/
+bool KalmanEstimator::kalmanPrediction(Measurement& mm,
+                                       const kalman::KalmanUpdateMinimal& ref_update,
+                                       const boost::posix_time::ptime& ts)
+{
+    kalmanInit(ref_update);
+    return kalmanPrediction(mm, ts);
+}
+
+/**
+ * Prediction by interpolation of two reference update predictions.
+ */
+bool KalmanEstimator::kalmanPrediction(Measurement& mm,
+                                       const kalman::KalmanUpdate& ref_update0,
+                                       const kalman::KalmanUpdate& ref_update1,
+                                       const boost::posix_time::ptime& ts)
+{
+    return kalmanPrediction(mm, ref_update0.minimalInfo(), ref_update1.minimalInfo(), ts);
+}
+
+/**
+ * Prediction by interpolation of two reference update predictions.
+ */
+bool KalmanEstimator::kalmanPrediction(Measurement& mm,
+                                       const kalman::KalmanUpdateMinimal& ref_update0,
+                                       const kalman::KalmanUpdateMinimal& ref_update1,
+                                       const boost::posix_time::ptime& ts)
+{
+    assert(isInit());
+
+    kalman::KalmanUpdateMinimal update_interp;
+    bool kalman_prediction_ok = interpUpdates(update_interp,
+                                              ref_update0,
+                                              ref_update1,
+                                              ts,
+                                              settings_.min_dt,
+                                              settings_.resample_Q_var,
+                                              settings_.resample_interp_mode,
+                                              *proj_handler_);
+    if (!kalman_prediction_ok)
+    {
+        if (settings_.step_fail_strategy == Settings::StepFailStrategy::Assert)
+            assert(kalman_prediction_ok);
+        return false;
+    }
+
+    kalman_interface_->storeState(mm, update_interp.x, update_interp.P);
+    proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y, &update_interp.projection_center);
+
+    return true;
 }
 
 /**
@@ -489,6 +549,55 @@ void KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
     executeChainFunc(updates, func);
 }
 
+namespace
+{
+    /**
+     * Generates factors for belnding states.
+    */
+    double blendFunc(double dt0, 
+                     double dt1, 
+                     double dt,
+                     const kalman::KalmanState& state0,
+                     const kalman::KalmanState& state1,
+                     StateInterpMode mode,
+                     const KalmanInterface& kalman_interface)
+    {
+        if (mode == StateInterpMode::BlendLinear)
+        {
+            return dt0 / dt;
+        }
+        else if (mode == StateInterpMode::BlendStdDev)
+        {
+            double stddev_x0 = std::sqrt(kalman_interface.xVar(state0.P));
+            double stddev_y0 = std::sqrt(kalman_interface.yVar(state0.P));
+
+            double stddev_x1 = std::sqrt(kalman_interface.xVar(state1.P));
+            double stddev_y1 = std::sqrt(kalman_interface.yVar(state1.P));
+
+            double w0 = std::max(stddev_x0, stddev_y0);
+            double w1 = std::max(stddev_x1, stddev_y1);
+
+            return w0 / (w0 + w1);
+        }
+        else if (mode == StateInterpMode::BlendVar)
+        {
+            double var_x0 = kalman_interface.xVar(state0.P);
+            double var_y0 = kalman_interface.yVar(state0.P);
+
+            double var_x1 = kalman_interface.xVar(state1.P);
+            double var_y1 = kalman_interface.yVar(state1.P);
+
+            double w0 = std::max(var_x0, var_y0);
+            double w1 = std::max(var_x1, var_y1);
+
+            return w0 / (w0 + w1);
+        }
+
+        //StateInterpMode::BlendHalf
+        return 0.5;
+    };
+}
+
 /**
 */
 bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
@@ -544,48 +653,6 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
 
     kalman::KalmanState state1_tr;
 
-    auto blendFunc = [ & ] (double dt0, 
-                            double dt1, 
-                            double dt,
-                            const kalman::KalmanState& state0,
-                            const kalman::KalmanState& state1,
-                            StateInterpMode mode)
-    {
-        if (mode == StateInterpMode::BlendLinear)
-        {
-            return dt0 / dt;
-        }
-        else if (mode == StateInterpMode::BlendStdDev)
-        {
-            double stddev_x0 = std::sqrt(kalman_interface_->xVar(state0.P));
-            double stddev_y0 = std::sqrt(kalman_interface_->yVar(state0.P));
-
-            double stddev_x1 = std::sqrt(kalman_interface_->xVar(state1.P));
-            double stddev_y1 = std::sqrt(kalman_interface_->yVar(state1.P));
-
-            double w0 = std::max(stddev_x0, stddev_y0);
-            double w1 = std::max(stddev_x1, stddev_y1);
-
-            return w0 / (w0 + w1);
-        }
-        else if (mode == StateInterpMode::BlendVar)
-        {
-            double var_x0 = kalman_interface_->xVar(state0.P);
-            double var_y0 = kalman_interface_->yVar(state0.P);
-
-            double var_x1 = kalman_interface_->xVar(state1.P);
-            double var_y1 = kalman_interface_->yVar(state1.P);
-
-            double w0 = std::max(var_x0, var_y0);
-            double w1 = std::max(var_x1, var_y1);
-
-            return w0 / (w0 + w1);
-        }
-
-        //StateInterpMode::BlendHalf
-        return 0.5;
-    };
-
     for (size_t i = idx0 + 1; i <= idx1; ++i)
     {
         const auto& update0       = updates[ i - 1];
@@ -640,7 +707,7 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
             if (!new_state0.has_value() || !new_state1.has_value())
                 return false;
 
-            double interp_factor = blendFunc(dt0, dt1, dt, *new_state0, *new_state1, interp_mode);
+            double interp_factor = blendFunc(dt0, dt1, dt, *new_state0, *new_state1, interp_mode, *kalman_interface_);
 
             //std::cout << interp_factor << std::endl;
 
@@ -673,6 +740,56 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
         interp_updates.pop_back();
         addUpdate(last_update.state, last_update.projection_center, last_update.t);
     }
+
+    return true;
+}
+
+/**
+*/
+bool KalmanEstimator::interpUpdates(kalman::KalmanUpdateMinimal& update_interp,
+                                    const kalman::KalmanUpdateMinimal& update0,
+                                    const kalman::KalmanUpdateMinimal& update1,
+                                    const boost::posix_time::ptime& ts,
+                                    double min_dt_sec,
+                                    double Q_var,
+                                    StateInterpMode interp_mode,
+                                    KalmanProjectionHandler& proj_handler) const
+{
+    assert(isInit());
+    assert(update0.valid);
+    assert(update1.valid);
+    assert(ts >= update0.t && ts <= update1.t);
+    
+    double dt  = Utils::Time::partialSeconds(update1.t - update0.t);
+    double dt0 = Utils::Time::partialSeconds(ts - update0.t);
+    double dt1 = Utils::Time::partialSeconds(update1.t - ts);
+
+    kalman::KalmanState state0;
+    state0.x = update0.x;
+    state0.P = update0.P;
+
+    kalman::KalmanState state1_tr;
+    state1_tr.P = update1.P;
+
+    //reproject update1 into update0's coord system
+    proj_handler.xReprojected(state1_tr.x, *kalman_interface_, update1.x, update1.projection_center, update0.projection_center);
+
+    //predict forth and back to the specified time
+    auto new_state0 = kalman_interface_->interpStep(state0, state1_tr,  dt0, Q_var);
+    auto new_state1 = kalman_interface_->interpStep(state1_tr, state0, -dt1, Q_var);
+
+    if (!new_state0.has_value() || !new_state1.has_value())
+        return false;
+
+    //get interpolation factor
+    double interp_factor = blendFunc(dt0, dt1, dt, *new_state0, *new_state1, interp_mode, *kalman_interface_);
+
+    //interpolate predicted states
+    update_interp.x                 = SplineInterpolator::interpStateVector(new_state0->x, new_state1->x, interp_factor);
+    update_interp.P                 = SplineInterpolator::interpCovarianceMat(new_state0->P, new_state1->P, interp_factor);
+    update_interp.projection_center = update0.projection_center;
+    update_interp.t                 = ts;
+    update_interp.valid             = true;
 
     return true;
 }

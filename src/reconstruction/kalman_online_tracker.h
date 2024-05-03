@@ -49,6 +49,7 @@ public:
 
     bool track(const Measurement& mm);
     bool track(const kalman::KalmanUpdate& update);
+    bool track(const kalman::KalmanUpdateMinimal& update);
 
     bool canPredict(const boost::posix_time::ptime& ts,
                     const boost::posix_time::time_duration& max_time_diff = boost::posix_time::seconds(10)) const;
@@ -64,6 +65,7 @@ public:
 private:
     void kalmanInit(const Measurement& mm);
     void kalmanInit(const kalman::KalmanUpdate& update);
+    void kalmanInit(const kalman::KalmanUpdateMinimal& update);
 
     bool predict(Measurement& mm_predicted,
                  double dt) const;

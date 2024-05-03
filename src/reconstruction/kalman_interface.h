@@ -50,10 +50,15 @@ public:
                     double Q_var);
     void kalmanInit(const kalman::KalmanState& init_state,
                     const boost::posix_time::ptime& ts);
+    void kalmanInit(const kalman::Vector& x,
+                    const kalman::Matrix& P,
+                    const boost::posix_time::ptime& ts);
+    
     bool kalmanStep(kalman::KalmanState& new_state,
                     const Measurement& mm, 
                     const reconstruction::Uncertainty& default_uncert, 
                     double Q_var);
+    
     bool kalmanPrediction(kalman::Vector& x,
                           kalman::Matrix& P,
                           double dt,
@@ -88,7 +93,10 @@ public:
     virtual void stateTransitionMatF(kalman::Matrix& F, double dt) const = 0;
     
     //needed for retrieval from kalman
-    virtual void storeState(Measurement& mm, const kalman::KalmanState& state) const = 0;
+    void storeState(Measurement& mm, const kalman::KalmanState& state) const;
+    virtual void storeState(Measurement& mm, 
+                            const kalman::Vector& x, 
+                            const kalman::Matrix& P) const = 0;
     
     //helpers
     virtual void xPos(double& x, double& y, const kalman::Vector& x_vec) const = 0;
@@ -114,11 +122,15 @@ protected:
                                  const reconstruction::Uncertainty& default_uncert,
                                  double Q_var) = 0;
     virtual void kalmanInit_impl(const kalman::KalmanState& init_state) = 0;
+    virtual void kalmanInit_impl(const kalman::Vector& x,
+                                 const kalman::Matrix& P) = 0;
+
     virtual bool kalmanStep_impl(kalman::KalmanState& new_state,
                                  double dt,
                                  const Measurement& mm,
                                  const reconstruction::Uncertainty& default_uncert, 
                                  double Q_var) = 0;
+        
     virtual bool kalmanPrediction_impl(kalman::Vector& x,
                                        kalman::Matrix& P,
                                        double dt,

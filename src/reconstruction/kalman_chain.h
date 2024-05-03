@@ -49,7 +49,15 @@ public:
             StaticAdd            // allows adding to the end of the chain, and predictions at the end, only the current state is kept
         };
 
-        Mode   mode = Mode::DynamicInserts;
+        enum class PredictionMode
+        {
+            NearestBefore = 0,
+            Interpolate,
+            LastUpdate
+        };
+
+        Mode           mode            = Mode::DynamicInserts;
+        PredictionMode prediction_mode = PredictionMode::NearestBefore;
 
         TD     reestim_max_duration       = boost::posix_time::seconds(30); // maximum timeframe reestimated after a new mm has been inserted
         int    reestim_max_updates        = 500;                            // maximum updates reestimated after a new mm has been inserted
@@ -66,15 +74,15 @@ public:
         Update() {}
         Update(const Measurement& mm, 
                int id, 
-               const kalman::KalmanUpdate& update = kalman::KalmanUpdate()) 
+               const kalman::KalmanUpdateMinimal& update = kalman::KalmanUpdateMinimal()) 
         :   measurement  (mm)
         ,   kalman_update(update)
         ,   mm_id        (id) {}
 
-        Measurement          measurement;
-        kalman::KalmanUpdate kalman_update;
-        int                  mm_id = -1;
-        bool                 init  = false;
+        Measurement                 measurement;
+        kalman::KalmanUpdateMinimal kalman_update;
+        int                         mm_id = -1;
+        bool                        init  = false;
     };
 
     typedef std::pair<int, int>                  Interval;
@@ -100,8 +108,8 @@ public:
 
     void removeUpdatesBefore(const boost::posix_time::ptime& ts);
 
-    const kalman::KalmanUpdate& lastUpdate() const;
-    const kalman::KalmanUpdate& getUpdate(size_t idx) const;
+    kalman::KalmanUpdateMinimal lastUpdate() const;
+    const kalman::KalmanUpdateMinimal& getUpdate(size_t idx) const;
     const Measurement& getMeasurement(size_t idx) const;
 
     bool canReestimate() const;
@@ -112,9 +120,6 @@ public:
     bool predict(Measurement& mm_predicted,
                  const boost::posix_time::ptime& ts,
                  int thread_id = 0) const;
-    bool predictFromLastState(Measurement& mm_predicted,
-                              const boost::posix_time::ptime& ts,
-                              int thread_id = 0) const;
     
     size_t size() const;
     int count() const;
@@ -153,7 +158,8 @@ private:
     Interval interval(const boost::posix_time::ptime& ts) const;
     int insertionIndex(const boost::posix_time::ptime& ts) const;
     int predictionRefIndex(const boost::posix_time::ptime& ts) const;
-    
+    Interval predictionRefInterval(const boost::posix_time::ptime& ts) const;
+
     Settings settings_;
 
     mutable Tracker                tracker_;

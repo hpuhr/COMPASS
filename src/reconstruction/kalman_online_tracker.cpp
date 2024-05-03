@@ -87,6 +87,16 @@ bool KalmanOnlineTracker::track(const kalman::KalmanUpdate& update)
 
 /**
 */
+bool KalmanOnlineTracker::track(const kalman::KalmanUpdateMinimal& update)
+{
+    assert(isInit());
+
+    kalmanInit(update);
+    return true;
+}
+
+/**
+*/
 bool KalmanOnlineTracker::canPredict(const boost::posix_time::ptime& ts,
                                      const boost::posix_time::time_duration& max_time_diff) const
 {
@@ -138,6 +148,17 @@ void KalmanOnlineTracker::kalmanInit(const Measurement& mm)
 /**
 */
 void KalmanOnlineTracker::kalmanInit(const kalman::KalmanUpdate& update)
+{
+    assert(isInit());
+
+    current_update_ = update;
+
+    estimator_->kalmanInit(current_update_.value());
+}
+
+/**
+*/
+void KalmanOnlineTracker::kalmanInit(const kalman::KalmanUpdateMinimal& update)
 {
     assert(isInit());
 

@@ -88,6 +88,17 @@ void KalmanInterfaceLinear::kalmanInit_impl(const kalman::KalmanState& init_stat
 
 /**
 */
+void KalmanInterfaceLinear::kalmanInit_impl(const kalman::Vector& x,
+                                            const kalman::Matrix& P)
+{
+    kalman_filter_->setX(x);
+    kalman_filter_->setP(P);
+
+    measurementMatH(kalman_filter_->getH());
+}
+
+/**
+*/
 bool KalmanInterfaceLinear::kalmanStep_impl(kalman::KalmanState& new_state,
                                             double dt, 
                                             const Measurement& mm, 

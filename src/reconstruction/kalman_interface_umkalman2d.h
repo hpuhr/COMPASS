@@ -54,7 +54,9 @@ public:
                                const reconstruction::Uncertainty& default_uncert) const override final;
     void stateTransitionMatF(kalman::Matrix& F, double dt) const override final;
 
-    void storeState(Measurement& mm, const kalman::KalmanState& state) const override final;
+    void storeState(Measurement& mm, 
+                    const kalman::Vector& x, 
+                    const kalman::Matrix& P) const override final;
 
     void xPos(double& x, double& y, const kalman::Vector& x_vec) const override final;
     void xPos(double& x, double& y) const override final;

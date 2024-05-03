@@ -113,17 +113,28 @@ public:
     void kalmanInit(kalman::KalmanUpdate& update,
                     const Measurement& mm);
     void kalmanInit(const kalman::KalmanUpdate& update);
+    void kalmanInit(const kalman::KalmanUpdateMinimal& update);
+
     StepResult kalmanStep(kalman::KalmanUpdate& update,
                           const Measurement& mm);
+    
     bool kalmanPrediction(Measurement& mm,
                           double dt) const;
     bool kalmanPrediction(Measurement& mm,
                           const boost::posix_time::ptime& ts) const;
     bool kalmanPrediction(Measurement& mm,
                           const kalman::KalmanUpdate& ref_update,
-                          double dt);
+                          const boost::posix_time::ptime& ts);
     bool kalmanPrediction(Measurement& mm,
-                          const kalman::KalmanUpdate& ref_update,
+                          const kalman::KalmanUpdateMinimal& ref_update,
+                          const boost::posix_time::ptime& ts);
+    bool kalmanPrediction(Measurement& mm,
+                          const kalman::KalmanUpdate& ref_update0,
+                          const kalman::KalmanUpdate& ref_update1,
+                          const boost::posix_time::ptime& ts);
+    bool kalmanPrediction(Measurement& mm,
+                          const kalman::KalmanUpdateMinimal& ref_update0,
+                          const kalman::KalmanUpdateMinimal& ref_update1,
                           const boost::posix_time::ptime& ts);
 
     void storeUpdates(std::vector<Reference>& refs,
@@ -160,6 +171,14 @@ private:
                        size_t idx0,
                        size_t idx1,
                        double dt_sec,
+                       double min_dt_sec,
+                       double Q_var,
+                       StateInterpMode interp_mode,
+                       KalmanProjectionHandler& proj_handler) const;
+    bool interpUpdates(kalman::KalmanUpdateMinimal& update_interp,
+                       const kalman::KalmanUpdateMinimal& update0,
+                       const kalman::KalmanUpdateMinimal& update1,
+                       const boost::posix_time::ptime& ts,
                        double min_dt_sec,
                        double Q_var,
                        StateInterpMode interp_mode,

@@ -247,6 +247,26 @@ int KalmanChain::predictionRefIndex(const boost::posix_time::ptime& ts) const
 }
 
 /**
+*/
+KalmanChain::Interval KalmanChain::predictionRefInterval(const boost::posix_time::ptime& ts) const
+{
+    auto iv = interval(ts);
+
+    if (iv.first < 0 && iv.second < 0)
+        return Interval(-1, -1);          // empty
+    else if (iv.first < 0 && iv.second == 0)
+        return Interval(-1, 0);           // begin
+    else if (iv.first >= 0 && iv.second < 0)
+        return Interval(lastIndex(), -1); // end
+    else if (iv.first >= 0 && iv.second >= 0)
+        return iv;                        // mid
+    else
+        assert(false); // should-never-happen-case
+    
+    return Interval(-1, -1);
+}
+
+/**
  * Adds a new measurement to the end of the chain.
 */
 bool KalmanChain::add(const Measurement& mm, bool reestim)
@@ -413,7 +433,7 @@ void KalmanChain::removeUpdatesBefore(const boost::posix_time::ptime& ts)
 
 /**
 */
-const kalman::KalmanUpdate& KalmanChain::getUpdate(size_t idx) const
+const kalman::KalmanUpdateMinimal& KalmanChain::getUpdate(size_t idx) const
 {
     assert(canReestimate());
     return updates_.at(idx).kalman_update;
@@ -429,10 +449,10 @@ const Measurement& KalmanChain::getMeasurement(size_t idx) const
 
 /**
 */
-const kalman::KalmanUpdate& KalmanChain::lastUpdate() const
+kalman::KalmanUpdateMinimal KalmanChain::lastUpdate() const
 {
     assert(hasData());
-    return (canReestimate() ? updates_.rbegin()->kalman_update : tracker_.tracker_ptr->currentState().value());
+    return (canReestimate() ? updates_.rbegin()->kalman_update : tracker_.tracker_ptr->currentState().value().minimalInfo());
 }
 
 /**
@@ -444,22 +464,49 @@ bool KalmanChain::canPredict(const boost::posix_time::ptime& ts) const
     if (!canReestimate())
         return tracker_.tracker_ptr->canPredict(ts, settings_.prediction_max_tdiff);
 
+    //no updates no prediction
     if (updates_.empty())
         return false;
 
-    //find reference update
-    int idx = predictionRefIndex(ts);
-    assert(idx >= 0);
+    if (settings_.prediction_mode == Settings::PredictionMode::LastUpdate ||
+        settings_.prediction_mode == Settings::PredictionMode::NearestBefore)
+    {
+        //find reference update
+        int idx = (settings_.prediction_mode == Settings::PredictionMode::LastUpdate ? lastIndex() : predictionRefIndex(ts));
+        assert(idx >= 0);
 
-    //check time diff
-    auto t0 = updates_[ idx ].kalman_update.t;
+        //check time diff
+        auto t0 = updates_[ idx ].kalman_update.t;
 
-    boost::posix_time::time_duration diff = (ts >= t0 ? ts - t0 : t0 - ts);
-    
-    if (diff > settings_.prediction_max_tdiff)
-        return false;
+        boost::posix_time::time_duration diff = (ts >= t0 ? ts - t0 : t0 - ts);
+        
+        if (diff > settings_.prediction_max_tdiff)
+            return false;
 
-    return true;
+        return true;
+    }
+    else if (settings_.prediction_mode == Settings::PredictionMode::Interpolate)
+    {
+        //find reference interval
+        auto iv = predictionRefInterval(ts);
+        assert(iv.first >= 0 || iv.second >= 0); //!updates not empty => non-empty interval needs to exist!
+
+        bool first_ok  = false;
+        bool second_ok = false;
+
+        if (iv.first >= 0 && (ts - updates_[ iv.first ].measurement.t) <= settings_.prediction_max_tdiff)
+            first_ok = true;
+        if (iv.second >= 0 && (updates_[ iv.second ].measurement.t - ts) <= settings_.prediction_max_tdiff)
+            second_ok = true;
+        
+        //not close enough to at least one interval border?
+        if (!first_ok && !second_ok)
+            return false;
+
+        return true;
+    }
+
+    return false;
 }
 
 /**
@@ -476,59 +523,90 @@ bool KalmanChain::predict(Measurement& mm_predicted,
     assert(thread_id >= 0 && thread_id < (int)predictors_.size());
     assert(!needsReestimate()); //!no predictions if chain is out of date!
     assert(!updates_.empty());  //!no prediction from empty chains!
-    
-    //find reference update
-    int idx = predictionRefIndex(ts);
-    assert(idx >= 0);
-    assert(updates_[ idx ].mm_id >= 0);
 
-    auto& p = predictors_.at(thread_id);
+    //predicts from a single index
+    auto predictFromIndex = [ & ] (int idx)
+    {
+        assert(idx >= 0);
 
-    bool ref_changed = (updates_[ idx ].mm_id != p.ref_mm_id);
+        const auto& update = updates_[ idx ];
 
-    //if (idx != lastIndex())
-    //    logwrn << "KalmanChain: predict: Prediction not at end: idx = " << idx << ", last_index = " 
-    //           << lastIndex() << ", t = " << Utils::Time::toString(ts) << ", t_last = "
-    //           << Utils::Time::toString(updates_.rbegin()->measurement.t);
+        assert(update.mm_id >= 0);
+        assert(update.init);
 
-    //predict
-    bool ok = ref_changed ? p.estimator_ptr->kalmanPrediction(mm_predicted, updates_[ idx ].kalman_update, ts) :
-                            p.estimator_ptr->kalmanPrediction(mm_predicted, ts);
+        auto& p = predictors_.at(thread_id);
+        
+        bool ref_changed = (update.mm_id != p.ref_mm_id);
 
-    p.ref_mm_id = updates_[ idx ].mm_id;
+        //predict
+        bool ok = ref_changed ? p.estimator_ptr->kalmanPrediction(mm_predicted, update.kalman_update, ts) :
+                                p.estimator_ptr->kalmanPrediction(mm_predicted, ts);
 
-    return ok;
-}
+        p.ref_mm_id = update.mm_id;
 
-/**
- * Predicts the given timestamp from the currently tracked update in the chain.
-*/
-bool KalmanChain::predictFromLastState(Measurement& mm_predicted,
-                                       const boost::posix_time::ptime& ts,
-                                       int thread_id) const
-{
-    //static mode? => just ask tracker
-    if (!canReestimate())
-        return tracker_.tracker_ptr->predict(mm_predicted, ts);
+        return ok;
+    };
 
-    assert(thread_id >= 0 && thread_id < (int)predictors_.size());
-    assert(!needsReestimate()); //!no predictions if chain is out of date!
-    assert(!updates_.empty());  //!no prediction from empty chains!
+    //predicts from an interval
+    auto predictFromInterval =  [ & ] (int idx0, int idx1)
+    {
+        assert(idx0 >= 0 && idx1 >= 0);
 
-    int idx = lastIndex();
-    assert(updates_[ idx ].mm_id >= 0);
+        const auto& update0 = updates_[ idx0 ];
+        const auto& update1 = updates_[ idx1 ];
 
-    auto& p = predictors_.at(thread_id);
+        assert(update0.mm_id >= 0);
+        assert(update1.mm_id >= 0);
+        assert(update0.init);
+        assert(update1.init);
 
-    bool ref_changed = (updates_[ idx ].mm_id != p.ref_mm_id);
+        auto& p = predictors_.at(thread_id);
 
-    //predict
-    bool ok = ref_changed ? p.estimator_ptr->kalmanPrediction(mm_predicted, updates_[ idx ].kalman_update, ts) :
-                            p.estimator_ptr->kalmanPrediction(mm_predicted, ts);
+        //@TODO: interpolate
+        bool ok = p.estimator_ptr->kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts);
 
-    p.ref_mm_id = updates_[ idx ].mm_id;
+        p.ref_mm_id = -1;
 
-    return ok;
+        return ok;
+    };
+
+    if (settings_.prediction_mode == Settings::PredictionMode::LastUpdate ||
+        settings_.prediction_mode == Settings::PredictionMode::NearestBefore)
+    {
+        //find reference update
+        int idx =  (settings_.prediction_mode == Settings::PredictionMode::LastUpdate ? lastIndex() : predictionRefIndex(ts));
+
+        //predict
+        return predictFromIndex(idx);
+    }
+    else if (settings_.prediction_mode == Settings::PredictionMode::Interpolate)
+    {
+        //find reference interval
+        auto iv = predictionRefInterval(ts);
+        assert(iv.first >= 0 || iv.second >= 0); //!updates not empty => non-empty interval needs to exist!
+
+        //check distance to interval borders
+        bool first_ok  = false;
+        bool second_ok = false;
+
+        if (iv.first >= 0 && (ts - updates_[ iv.first ].measurement.t) <= settings_.prediction_max_tdiff)
+            first_ok = true;
+        if (iv.second >= 0 && (updates_[ iv.second ].measurement.t - ts) <= settings_.prediction_max_tdiff)
+            second_ok = true;
+
+        //!assured beforehand by canPredict()!
+        assert(first_ok || second_ok);
+
+        //predict
+        if (first_ok && second_ok)
+            return predictFromInterval(iv.first, iv.second);
+        else if (first_ok)
+            return predictFromIndex(iv.first);
+        else if (second_ok)
+            return predictFromIndex(iv.second);
+    }
+
+    return false;
 }
 
 /**
@@ -627,7 +705,7 @@ bool KalmanChain::reestimate(int idx)
     if (!tracker_.tracker_ptr->track(updates_[ idx ].measurement))
         return false;
 
-    updates_[ idx ].kalman_update = tracker_.tracker_ptr->currentState().value();
+    tracker_.tracker_ptr->currentState().value().minimalInfo(updates_[ idx ].kalman_update);
     updates_[ idx ].init = true;
 
     tracker_.tracked_mm_id = updates_[ idx ].mm_id;
@@ -646,14 +724,14 @@ bool KalmanChain::reestimate(int idx, double& d_state_sqr, double& d_cov_sqr)
     assert(updates_[ idx ].mm_id >= 0);
     assert(updates_[ idx ].init); //!no freshly added measurements!
 
-    auto x0 = updates_[ idx ].kalman_update.state.x;
-    auto P0 = updates_[ idx ].kalman_update.state.P;
+    auto x0 = updates_[ idx ].kalman_update.x;
+    auto P0 = updates_[ idx ].kalman_update.P;
 
     if (!reestimate(idx))
         return false;
 
-    const auto& x1 = updates_[ idx ].kalman_update.state.x;
-    const auto& P1 = updates_[ idx ].kalman_update.state.P;
+    const auto& x1 = updates_[ idx ].kalman_update.x;
+    const auto& P1 = updates_[ idx ].kalman_update.P;
 
     d_state_sqr = (x0 - x1).squaredNorm();
     d_cov_sqr   = (P0.diagonal() - P1.diagonal()).squaredNorm(); // = squared frobenius norm

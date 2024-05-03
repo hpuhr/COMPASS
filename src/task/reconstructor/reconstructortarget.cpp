@@ -1568,9 +1568,10 @@ void ReconstructorTarget::reinitTracker()
     chain_->configureEstimator(reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings());
     chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type);
 
-    chain_->settings().mode = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts : 
-                                                    reconstruction::KalmanChain::Settings::Mode::StaticAdd;
-    chain_->settings().verbosity = 0;
+    chain_->settings().mode            = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts : 
+                                                               reconstruction::KalmanChain::Settings::Mode::StaticAdd;
+    chain_->settings().prediction_mode = reconstruction::KalmanChain::Settings::PredictionMode::Interpolate;
+    chain_->settings().verbosity       = 0;
 }
 
 void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, bool reestimate)
