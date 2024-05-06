@@ -33,10 +33,19 @@ class ProbabilisticAssociator
                                     std::map<unsigned int,
                                              std::pair<unsigned int, boost::posix_time::ptime>>>> tn2utn_;
 
+    std::vector<unsigned int> unassoc_rec_nums_;
+
     unsigned int num_merges_ {0};
 
+    void associateTargetReports();
     void selfAccociateNewUTNs();
+    void retryAssociateTargetReports();
     void checkACADLookup();
+
+    int findUTNFor (dbContent::targetReport::ReconstructorInfo& tr,
+                   boost::posix_time::ptime timestamp_prev,
+                   const std::set<unsigned long>& debug_rec_nums,
+                   const std::set<unsigned int>& debug_utns);
 
             // tries to find existing utn for target report, based on mode a/c and position, -1 if failed
     int findUTNByModeACPos (const dbContent::targetReport::ReconstructorInfo& tr,

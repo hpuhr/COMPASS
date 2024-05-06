@@ -29,6 +29,34 @@ void ProbabilisticAssociator::associateNewData()
 {
     loginf << "ProbabilisticAssociator: associateNewData";
 
+    assert (!unassoc_rec_nums_.size());
+
+    associateTargetReports();
+
+    checkACADLookup();
+
+            // self-associate created utns
+    selfAccociateNewUTNs();
+
+    checkACADLookup();
+
+            // clear new flags
+    for (auto utn : utn_vec_)
+        reconstructor_.targets_.at(utn).created_in_current_slice_ = false;
+
+    unassoc_rec_nums_.clear();
+
+    reconstructor_.acc_estimator_->analyzeAssociatedDistances();
+    reconstructor_.acc_estimator_->clearAssociatedDistances();
+
+    if (reconstructor_.currentSlice().is_last_slice_)
+        loginf << "ProbabilisticAssociator: associateNewData: done, num_merges " << num_merges_;
+}
+
+void ProbabilisticAssociator::associateTargetReports()
+{
+    loginf << "ProbabilisticAssociator: associateTargetReports";
+
     const std::set<unsigned int> debug_utns = reconstructor_.task().debugUTNs();
 
     if (debug_utns.size())
@@ -45,135 +73,10 @@ void ProbabilisticAssociator::associateNewData()
     int utn;
     boost::posix_time::ptime timestamp_prev;
 
-    checkACADLookup();
-
-    vector<tuple<bool, unsigned int, double>> results;
-    //    const boost::posix_time::time_duration max_time_diff =
-    //        Time::partialSeconds(reconstructor_.settings().max_time_diff_);
-    const boost::posix_time::time_duration track_max_time_diff =
-        Time::partialSeconds(reconstructor_.settings().track_max_time_diff_);
-    //    const float max_altitude_diff = reconstructor_.settings().max_altitude_diff_;
-
-    const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
-    //const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
-    const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
-
-    const float max_sum_est_std_dev = reconstructor_.settings().max_sum_est_std_dev_;
-    const float min_sum_est_std_dev = reconstructor_.settings().min_sum_est_std_dev_;
-
-    assert (reconstructor_.targets_.size() == utn_vec_.size());
-
     AccuracyEstimatorBase::AssociatedDistance dist;
-
-    double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0}, sum_est_std_dev{0};
-    double mahalanobis_dist{0};
-
-    bool reset_tr_assoc {false};
     bool do_debug;
 
-
-    auto canAssocByACAD = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        if (!tr.acad_)
-            return false;
-
-        return (bool) acad_2_utn_.count(*tr.acad_);
-    };
-
-    auto assocByACAD = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        assert (tr.acad_);
-        assert (acad_2_utn_.count(*tr.acad_));
-
-        utn = acad_2_utn_.at(*tr.acad_);
-        assert (reconstructor_.targets_.count(utn));
-    };
-
-    auto canAssocByACID = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        if (!tr.acid_)
-            return false;
-
-        return (bool) acid_2_utn_.count(*tr.acid_);
-    };
-
-    auto assocByACID = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        assert (tr.acid_);
-        assert (acid_2_utn_.count(*tr.acid_));
-
-        utn = acid_2_utn_.at(*tr.acid_);
-        assert (reconstructor_.targets_.count(utn));
-    };
-
-    auto canAssocByTrackNumber = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        if (!tr.track_number_) // only if track number is set
-            return false;
-
-        if (dbcont_id != 62 && dbcont_id != 255) // only if trustworty track numbers in 62 and reftraj
-            return false;
-
-        return (bool) tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
-    };
-
-    auto assocByTrackNumber = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        assert (tn2utn_.at(tr.ds_id_).at(tr.line_id_).count(*tr.track_number_));
-        std::tie(utn, timestamp_prev) = tn2utn_.at(tr.ds_id_).at(tr.line_id_).at(*tr.track_number_);
-        assert (reconstructor_.targets_.count(utn));
-
-                // check for larger time offset
-        if (timestamp - timestamp_prev > track_max_time_diff) // too old
-        {
-            // create new and add
-            utn = createNewTarget(tr);
-            assert (reconstructor_.targets_.count(utn));
-        }
-        else if (canGetPositionOffset(tr, reconstructor_.targets_.at(utn)))
-        {
-            assert (reconstructor_.targets_.count(utn));
-
-                    // check for position offsets
-            std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(
-                tr, reconstructor_.targets_.at(utn), do_debug);
-
-            if (tgt_est_std_dev < max_tgt_est_std_dev) // target estimate reliable enough to break up
-            {
-                sum_est_std_dev = tgt_est_std_dev + tr_est_std_dev;
-
-                if (sum_est_std_dev > max_sum_est_std_dev)
-                    sum_est_std_dev = max_sum_est_std_dev;
-                if (sum_est_std_dev < min_sum_est_std_dev)
-                    sum_est_std_dev = min_sum_est_std_dev;
-
-                mahalanobis_dist = distance_m / sum_est_std_dev;
-
-                if (mahalanobis_dist > max_mahalanobis_sec_verified_dist)
-                {
-                    // position offset too large
-                    tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
-                    reset_tr_assoc = true;
-                                            // goto START_TR_ASSOC;
-                }
-            }
-        }
-    };
-
-    auto findUTNByModeACPosOrCreateNewTarget = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        // check if position match to other target would exist
-        utn = findUTNByModeACPos (tr, utn_vec_, debug_rec_nums, debug_utns);
-
-        if (utn == -1)
-        {
-           // create new and add
-            utn = createNewTarget(tr);
-            assert (reconstructor_.targets_.count(utn));
-        }
-        else
-            assert (reconstructor_.targets_.count(utn));
-    };
+    checkACADLookup();
 
     for (auto& ts_it : reconstructor_.tr_timestamps_)
     {
@@ -197,55 +100,12 @@ void ProbabilisticAssociator::associateNewData()
             continue;
         }
 
-    START_TR_ASSOC:
-
-        utn = -1; // not yet found
-        reset_tr_assoc = false;
-
-        // try by mode-s address or trustworthy track number
-        // create new if not already existing
-        if (tr.acad_
-            || tr.acid_
-            || (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255)))
-        {
-            // find utn
-
-            if (canAssocByACAD(tr)) // already exists
-                assocByACAD(tr);
-            else if (canAssocByACID(tr)) // already exists
-                assocByACID(tr);
-            else if (canAssocByTrackNumber(tr))
-            {
-                assocByTrackNumber(tr);
-
-                if (reset_tr_assoc)
-                    goto START_TR_ASSOC;
-            }
-            else // not yet existing, create & add target
-                findUTNByModeACPosOrCreateNewTarget(tr);
-
-            assert (utn != -1);
-
-            if(do_debug)
-                loginf << "DBG tr " << rec_num << " utn by acad";
-        }
-        else // not associated by trustworty id
-        {
-            assert (utn == -1);
-
-            if(do_debug)
-                loginf << "DBG tr " << rec_num << " no utn by acad, doing mode a/c + pos";
-
-            utn = findUTNByModeACPos (tr, utn_vec_, debug_rec_nums, debug_utns);
-
-            if (utn != -1)
-                assert (reconstructor_.targets_.count(utn));
-        }
+        utn = findUTNFor(tr, timestamp_prev, debug_rec_nums, debug_utns);
 
         if (utn != -1) // estimate accuracy and associate
         {
             if (!reconstructor_.targets_.count(utn))
-                logerr << "ProbabilisticAssociator: associateNewData: utn " << utn << " missing";
+                logerr << "ProbabilisticAssociator: associateTargetReports: utn " << utn << " missing";
 
                     // add associated target reports
             assert (reconstructor_.targets_.count(utn));
@@ -318,28 +178,16 @@ void ProbabilisticAssociator::associateNewData()
             if (tr.acid_)
                 acid_2_utn_[*tr.acid_] = utn;
         }
+        else // not associated
+            unassoc_rec_nums_.push_back(rec_num);
     }
 
-    checkACADLookup();
-
-            // self-associate created utns
-    selfAccociateNewUTNs();
-
-    checkACADLookup();
-
-            // clear new flags
-    for (auto utn : utn_vec_)
-        reconstructor_.targets_.at(utn).created_in_current_slice_ = false;
-
-    reconstructor_.acc_estimator_->analyzeAssociatedDistances();
-    reconstructor_.acc_estimator_->clearAssociatedDistances();
-
-    if (reconstructor_.currentSlice().is_last_slice_)
-        loginf << "ProbabilisticAssociator: associateNewData: done, num_merges " << num_merges_;
 }
 
 void ProbabilisticAssociator::selfAccociateNewUTNs()
 {
+    loginf << "ProbabilisticAssociator: selfAccociateNewUTNs";
+
     unsigned int run_cnt {0};
     bool do_it_again {true};
 
@@ -442,6 +290,191 @@ void ProbabilisticAssociator::reset()
     tn2utn_.clear();
 
     num_merges_ = 0;
+}
+
+int ProbabilisticAssociator::findUTNFor (dbContent::targetReport::ReconstructorInfo& tr,
+                                        boost::posix_time::ptime timestamp_prev,
+                                        const std::set<unsigned long>& debug_rec_nums,
+                                        const std::set<unsigned int>& debug_utns)
+{
+    int utn {-1};
+
+    bool do_debug = debug_rec_nums.count(tr.record_num_);
+
+    unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
+
+    vector<tuple<bool, unsigned int, double>> results;
+    //    const boost::posix_time::time_duration max_time_diff =
+    //        Time::partialSeconds(reconstructor_.settings().max_time_diff_);
+    const boost::posix_time::time_duration track_max_time_diff =
+        Time::partialSeconds(reconstructor_.settings().track_max_time_diff_);
+    //    const float max_altitude_diff = reconstructor_.settings().max_altitude_diff_;
+
+    const float max_mahalanobis_sec_verified_dist = reconstructor_.settings().max_mahalanobis_sec_verified_dist_;
+    //const float max_mahalanobis_sec_unknown_dist = reconstructor_.settings().max_mahalanobis_sec_unknown_dist_;
+    const float max_tgt_est_std_dev = reconstructor_.settings().max_tgt_est_std_dev_;
+
+    const float max_sum_est_std_dev = reconstructor_.settings().max_sum_est_std_dev_;
+    const float min_sum_est_std_dev = reconstructor_.settings().min_sum_est_std_dev_;
+
+    assert (reconstructor_.targets_.size() == utn_vec_.size());
+
+    AccuracyEstimatorBase::AssociatedDistance dist;
+
+    double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0}, sum_est_std_dev{0};
+    double mahalanobis_dist{0};
+
+    bool reset_tr_assoc {false};
+
+    auto canAssocByACAD = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        if (!tr.acad_)
+            return false;
+
+        return (bool) acad_2_utn_.count(*tr.acad_);
+    };
+
+    auto assocByACAD = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        assert (tr.acad_);
+        assert (acad_2_utn_.count(*tr.acad_));
+
+        utn = acad_2_utn_.at(*tr.acad_);
+        assert (reconstructor_.targets_.count(utn));
+    };
+
+    auto canAssocByACID = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        if (!tr.acid_)
+            return false;
+
+        return (bool) acid_2_utn_.count(*tr.acid_);
+    };
+
+    auto assocByACID = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        assert (tr.acid_);
+        assert (acid_2_utn_.count(*tr.acid_));
+
+        utn = acid_2_utn_.at(*tr.acid_);
+        assert (reconstructor_.targets_.count(utn));
+    };
+
+    auto canAssocByTrackNumber = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        if (!tr.track_number_) // only if track number is set
+            return false;
+
+        if (dbcont_id != 62 && dbcont_id != 255) // only if trustworty track numbers in 62 and reftraj
+            return false;
+
+        return (bool) tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
+    };
+
+    auto assocByTrackNumber = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        assert (tn2utn_.at(tr.ds_id_).at(tr.line_id_).count(*tr.track_number_));
+        std::tie(utn, timestamp_prev) = tn2utn_.at(tr.ds_id_).at(tr.line_id_).at(*tr.track_number_);
+        assert (reconstructor_.targets_.count(utn));
+
+                // check for larger time offset
+        if (tr.timestamp_ - timestamp_prev > track_max_time_diff) // too old
+        {
+            // create new and add
+            utn = createNewTarget(tr);
+            assert (reconstructor_.targets_.count(utn));
+        }
+        else if (canGetPositionOffset(tr, reconstructor_.targets_.at(utn)))
+        {
+            assert (reconstructor_.targets_.count(utn));
+
+                    // check for position offsets
+            std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(
+                tr, reconstructor_.targets_.at(utn), do_debug);
+
+            if (tgt_est_std_dev < max_tgt_est_std_dev) // target estimate reliable enough to break up
+            {
+                sum_est_std_dev = tgt_est_std_dev + tr_est_std_dev;
+
+                if (sum_est_std_dev > max_sum_est_std_dev)
+                    sum_est_std_dev = max_sum_est_std_dev;
+                if (sum_est_std_dev < min_sum_est_std_dev)
+                    sum_est_std_dev = min_sum_est_std_dev;
+
+                mahalanobis_dist = distance_m / sum_est_std_dev;
+
+                if (mahalanobis_dist > max_mahalanobis_sec_verified_dist)
+                {
+                    // position offset too large
+                    tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
+                    reset_tr_assoc = true;
+                                            // goto START_TR_ASSOC;
+                }
+            }
+        }
+    };
+
+    auto findUTNByModeACPosOrCreateNewTarget = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        // check if position match to other target would exist
+        utn = findUTNByModeACPos (tr, utn_vec_, debug_rec_nums, debug_utns);
+
+        if (utn == -1)
+        {
+           // create new and add
+            utn = createNewTarget(tr);
+            assert (reconstructor_.targets_.count(utn));
+        }
+        else
+            assert (reconstructor_.targets_.count(utn));
+    };
+
+START_TR_ASSOC:
+
+    utn = -1; // not yet found
+    reset_tr_assoc = false;
+
+            // try by mode-s address or trustworthy track number
+            // create new if not already existing
+    if (tr.acad_
+        || tr.acid_
+        || (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255)))
+    {
+        // find utn
+
+        if (canAssocByACAD(tr)) // already exists
+            assocByACAD(tr);
+        else if (canAssocByACID(tr)) // already exists
+            assocByACID(tr);
+        else if (canAssocByTrackNumber(tr))
+        {
+            assocByTrackNumber(tr);
+
+            if (reset_tr_assoc)
+                goto START_TR_ASSOC;
+        }
+        else // not yet existing, create & add target
+            findUTNByModeACPosOrCreateNewTarget(tr);
+
+        assert (utn != -1);
+
+        if(do_debug)
+            loginf << "DBG tr " << tr.record_num_ << " utn by acad";
+    }
+    else // not associated by trustworty id
+    {
+        assert (utn == -1);
+
+        if(do_debug)
+            loginf << "DBG tr " << tr.record_num_ << " no utn by acad, doing mode a/c + pos";
+
+        utn = findUTNByModeACPos (tr, utn_vec_, debug_rec_nums, debug_utns);
+
+        if (utn != -1)
+            assert (reconstructor_.targets_.count(utn));
+    }
+
+    return utn;
 }
 
 
@@ -1187,6 +1220,19 @@ std::tuple<double, double, double> ProbabilisticAssociator::getPositionOffset(co
 
             // distance, target0 acc, target1 acc
     return std::tuple<double, double, double>(distance_m, mm0_est_std_dev, mm1_est_std_dev);
+}
+
+void ProbabilisticAssociator::retryAssociateTargetReports()
+{
+    loginf << "ProbabilisticAssociator: retryAssociateTargetReports";
+
+    if (!unassoc_rec_nums_.size())
+        return;
+
+    for (auto riter = unassoc_rec_nums_.rbegin(); riter != unassoc_rec_nums_.rend(); ++riter)
+    {
+
+    }
 }
 
 void ProbabilisticAssociator::checkACADLookup()
