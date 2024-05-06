@@ -40,10 +40,10 @@ class ProbabilisticAssociator
     void associateTargetReports();
     void selfAccociateNewUTNs();
     void retryAssociateTargetReports();
+    void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn);
     void checkACADLookup();
 
     int findUTNFor (dbContent::targetReport::ReconstructorInfo& tr,
-                   boost::posix_time::ptime timestamp_prev,
                    const std::set<unsigned long>& debug_rec_nums,
                    const std::set<unsigned int>& debug_utns);
 

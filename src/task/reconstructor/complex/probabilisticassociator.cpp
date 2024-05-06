@@ -40,6 +40,8 @@ void ProbabilisticAssociator::associateNewData()
 
     checkACADLookup();
 
+    retryAssociateTargetReports();
+
             // clear new flags
     for (auto utn : utn_vec_)
         reconstructor_.targets_.at(utn).created_in_current_slice_ = false;
@@ -68,12 +70,8 @@ void ProbabilisticAssociator::associateTargetReports()
         loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
 
     unsigned long rec_num;
-    unsigned int dbcont_id;
-    boost::posix_time::ptime timestamp;
     int utn;
-    boost::posix_time::ptime timestamp_prev;
 
-    AccuracyEstimatorBase::AssociatedDistance dist;
     bool do_debug;
 
     checkACADLookup();
@@ -81,7 +79,6 @@ void ProbabilisticAssociator::associateTargetReports()
     for (auto& ts_it : reconstructor_.tr_timestamps_)
     {
         rec_num = ts_it.second;
-        dbcont_id = Number::recNumGetDBContId(rec_num);
 
         assert (reconstructor_.target_reports_.count(rec_num));
 
@@ -100,84 +97,10 @@ void ProbabilisticAssociator::associateTargetReports()
             continue;
         }
 
-        utn = findUTNFor(tr, timestamp_prev, debug_rec_nums, debug_utns);
+        utn = findUTNFor(tr, debug_rec_nums, debug_utns);
 
         if (utn != -1) // estimate accuracy and associate
-        {
-            if (!reconstructor_.targets_.count(utn))
-                logerr << "ProbabilisticAssociator: associateTargetReports: utn " << utn << " missing";
-
-                    // add associated target reports
-            assert (reconstructor_.targets_.count(utn));
-
-                    // check if position usable
-            reconstructor_.acc_estimator_->validate(tr, reconstructor_);
-
-                    // only if not newly created
-            if (!tr.do_not_use_position_ && reconstructor_.targets_.at(utn).canPredict(tr.timestamp_))
-            {
-                reconstruction::Measurement mm;
-                bool ret;
-                double distance_m, bearing_rad;
-                dbContent::targetReport::PositionAccuracy tr_pos_acc;
-                dbContent::targetReport::PositionAccuracy mm_pos_acc;
-                EllipseDef acc_ell;
-                double est_std_dev;
-                double mahalanobis_dist;
-
-                        // predict pos from target and estimate accuracies
-                ret = reconstructor_.targets_.at(utn).predict(mm, tr);
-                assert (ret);
-
-                distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
-                                                         tr.position_->longitude_ * DEG2RAD,
-                                                         mm.lat * DEG2RAD, mm.lon * DEG2RAD);
-
-                bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
-                                                         tr.position_->longitude_ * DEG2RAD,
-                                                         mm.lat * DEG2RAD, mm.lon * DEG2RAD);
-
-                tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
-                estimateEllipse(tr_pos_acc, acc_ell);
-                est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
-
-                assert (mm.hasStdDevPosition());
-                mm_pos_acc = mm.positionAccuracy();
-                estimateEllipse(mm_pos_acc, acc_ell);
-                est_std_dev += estimateAccuracyAt(acc_ell, bearing_rad);
-
-                mahalanobis_dist = distance_m / est_std_dev;
-
-                dist.latitude_deg_ = tr.position_->latitude_;
-                dist.longitude_deg_ = tr.position_->longitude_;
-                dist.est_std_dev_ = est_std_dev;
-                dist.distance_m_ = distance_m;
-                dist.mahalanobis_distance_ = mahalanobis_dist;
-
-                reconstructor_.acc_estimator_->addAssociatedDistance(tr, dist);
-
-                        //                not_use_tr_pos = distance_m > 50 && mahalanobis_dist > 10;
-
-                        //                loginf << " dist " << String::doubleToStringPrecision(distance_m, 2)
-                        //                       << " est_std_dev " << String::doubleToStringPrecision(est_std_dev, 2)
-                        //                       << " mahala " << String::doubleToStringPrecision(mahalanobis_dist, 2)
-                        //                       << " use pos " << !not_use_tr_pos;
-
-                        //                tr.do_not_use_position_ = not_use_tr_pos;
-            }
-
-            reconstructor_.targets_.at(utn).addTargetReport(rec_num);
-
-            if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
-                tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
-                    std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
-
-            if (tr.acad_)
-                acad_2_utn_[*tr.acad_] = utn;
-
-            if (tr.acid_)
-                acid_2_utn_[*tr.acid_] = utn;
-        }
+            associate(tr, utn);
         else // not associated
             unassoc_rec_nums_.push_back(rec_num);
     }
@@ -293,7 +216,6 @@ void ProbabilisticAssociator::reset()
 }
 
 int ProbabilisticAssociator::findUTNFor (dbContent::targetReport::ReconstructorInfo& tr,
-                                        boost::posix_time::ptime timestamp_prev,
                                         const std::set<unsigned long>& debug_rec_nums,
                                         const std::set<unsigned int>& debug_utns)
 {
@@ -318,8 +240,6 @@ int ProbabilisticAssociator::findUTNFor (dbContent::targetReport::ReconstructorI
     const float min_sum_est_std_dev = reconstructor_.settings().min_sum_est_std_dev_;
 
     assert (reconstructor_.targets_.size() == utn_vec_.size());
-
-    AccuracyEstimatorBase::AssociatedDistance dist;
 
     double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0}, sum_est_std_dev{0};
     double mahalanobis_dist{0};
@@ -373,6 +293,8 @@ int ProbabilisticAssociator::findUTNFor (dbContent::targetReport::ReconstructorI
 
     auto assocByTrackNumber = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
     {
+        boost::posix_time::ptime timestamp_prev;
+
         assert (tn2utn_.at(tr.ds_id_).at(tr.line_id_).count(*tr.track_number_));
         std::tie(utn, timestamp_prev) = tn2utn_.at(tr.ds_id_).at(tr.line_id_).at(*tr.track_number_);
         assert (reconstructor_.targets_.count(utn));
@@ -969,7 +891,7 @@ int ProbabilisticAssociator::findUTNForTarget (unsigned int utn,
                                       if (print_debug)
                                           loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check passed";
 
-                                      // check positions
+                                              // check positions
                                       scoreUTN(mc_same,
                                                other,
                                                cnt,
@@ -1229,10 +1151,140 @@ void ProbabilisticAssociator::retryAssociateTargetReports()
     if (!unassoc_rec_nums_.size())
         return;
 
-    for (auto riter = unassoc_rec_nums_.rbegin(); riter != unassoc_rec_nums_.rend(); ++riter)
-    {
+    const std::set<unsigned int> debug_utns = reconstructor_.task().debugUTNs();
+    const std::set<unsigned long> debug_rec_nums = reconstructor_.task().debugRecNums();
 
+    unsigned int rec_num;
+    unsigned int dbcont_id;
+    int utn;
+
+    bool do_debug;
+
+    unsigned int assocated_cnt{0};
+
+    for (auto rec_num_it = unassoc_rec_nums_.rbegin(); rec_num_it != unassoc_rec_nums_.rend(); ++rec_num_it)
+    {
+        rec_num = *rec_num_it;
+
+        dbcont_id = Number::recNumGetDBContId(rec_num);
+
+        assert (reconstructor_.target_reports_.count(rec_num));
+
+        do_debug = debug_rec_nums.count(rec_num);
+
+        if (do_debug)
+            loginf << "DBG tr " << rec_num;
+
+        dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
+
+        if (!tr.in_current_slice_)
+        {
+            if(do_debug)
+                loginf << "DBG tr " << rec_num << " not in current slice";
+
+            continue;
+        }
+
+        // check if should have been associated
+        assert (!tr.acad_);
+        assert (!tr.acid_);
+
+        if ((dbcont_id == 62 || dbcont_id == 255))
+            assert (!tr.track_number_);
+
+        utn = findUTNByModeACPos (tr, utn_vec_, debug_rec_nums, debug_utns);
+
+        if (utn != -1) // estimate accuracy and associate
+        {
+            associate(tr, utn);
+
+            ++assocated_cnt;
+        }
     }
+
+    loginf << "ProbabilisticAssociator: retryAssociateTargetReports: done with count " << assocated_cnt;
+}
+
+void ProbabilisticAssociator::associate(dbContent::targetReport::ReconstructorInfo& tr, int utn)
+{
+    assert (utn >= 0);
+
+    unsigned int dbcont_id  = Number::recNumGetDBContId(tr.record_num_);
+    AccuracyEstimatorBase::AssociatedDistance dist;
+
+    if (!reconstructor_.targets_.count(utn))
+        logerr << "ProbabilisticAssociator: associate: utn " << utn << " missing";
+
+            // add associated target reports
+    assert (reconstructor_.targets_.count(utn));
+
+            // check if position usable
+    reconstructor_.acc_estimator_->validate(tr, reconstructor_);
+
+            // only if not newly created
+    if (!tr.do_not_use_position_ && reconstructor_.targets_.at(utn).canPredict(tr.timestamp_))
+    {
+        reconstruction::Measurement mm;
+        bool ret;
+        double distance_m, bearing_rad;
+        dbContent::targetReport::PositionAccuracy tr_pos_acc;
+        dbContent::targetReport::PositionAccuracy mm_pos_acc;
+        EllipseDef acc_ell;
+        double est_std_dev;
+        double mahalanobis_dist;
+
+                // predict pos from target and estimate accuracies
+        ret = reconstructor_.targets_.at(utn).predict(mm, tr);
+        assert (ret);
+
+        distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
+                                                 tr.position_->longitude_ * DEG2RAD,
+                                                 mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+
+        bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
+                                                 tr.position_->longitude_ * DEG2RAD,
+                                                 mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+
+        tr_pos_acc = reconstructor_.acc_estimator_->positionAccuracy(tr);
+        estimateEllipse(tr_pos_acc, acc_ell);
+        est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+
+        assert (mm.hasStdDevPosition());
+        mm_pos_acc = mm.positionAccuracy();
+        estimateEllipse(mm_pos_acc, acc_ell);
+        est_std_dev += estimateAccuracyAt(acc_ell, bearing_rad);
+
+        mahalanobis_dist = distance_m / est_std_dev;
+
+        dist.latitude_deg_ = tr.position_->latitude_;
+        dist.longitude_deg_ = tr.position_->longitude_;
+        dist.est_std_dev_ = est_std_dev;
+        dist.distance_m_ = distance_m;
+        dist.mahalanobis_distance_ = mahalanobis_dist;
+
+        reconstructor_.acc_estimator_->addAssociatedDistance(tr, dist);
+
+                //                not_use_tr_pos = distance_m > 50 && mahalanobis_dist > 10;
+
+                //                loginf << " dist " << String::doubleToStringPrecision(distance_m, 2)
+                //                       << " est_std_dev " << String::doubleToStringPrecision(est_std_dev, 2)
+                //                       << " mahala " << String::doubleToStringPrecision(mahalanobis_dist, 2)
+                //                       << " use pos " << !not_use_tr_pos;
+
+                //                tr.do_not_use_position_ = not_use_tr_pos;
+    }
+
+    reconstructor_.targets_.at(utn).addTargetReport(tr.record_num_);
+
+    if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
+        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
+            std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
+
+    if (tr.acad_)
+        acad_2_utn_[*tr.acad_] = utn;
+
+    if (tr.acid_)
+        acid_2_utn_[*tr.acid_] = utn;
 }
 
 void ProbabilisticAssociator::checkACADLookup()
