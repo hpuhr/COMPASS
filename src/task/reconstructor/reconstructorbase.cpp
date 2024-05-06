@@ -640,6 +640,11 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     mm.ay_stddev = acc_acc.ay_stddev_;
 }
 
+void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 
+                                          unsigned int rec_num)
+{
+    auto it = target_reports_.find(rec_num);
+    assert(it != target_reports_.end());
 
-
-
+    createMeasurement(mm, it->second);
+}
