@@ -198,8 +198,8 @@ std::set<unsigned int> ReconstructorTask::disabledDataSources() const
 {
     std::set<unsigned int> disabled_ds;
 
-    disabled_ds.insert(Number::dsIdFrom(currentReconstructor()->baseSettings().ds_sac,
-                                        currentReconstructor()->baseSettings().ds_sic));
+    disabled_ds.insert(Number::dsIdFrom(currentReconstructor()->settings().ds_sac,
+                                        currentReconstructor()->settings().ds_sic));
 
     for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
     {
@@ -591,18 +591,18 @@ void ReconstructorTask::checkSubConfigurables()
 void ReconstructorTask::deleteCalculatedReferences()
 {
     loginf << "ReconstructorTask: deleteCalculatedReferences: delete_all_calc_reftraj "
-           << currentReconstructor()->baseSettings().delete_all_calc_reftraj;
+           << currentReconstructor()->settings().delete_all_calc_reftraj;
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
-    if (currentReconstructor()->baseSettings().delete_all_calc_reftraj)
+    if (currentReconstructor()->settings().delete_all_calc_reftraj)
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-            currentReconstructor()->baseSettings().ds_sac, currentReconstructor()->baseSettings().ds_sic);
+            currentReconstructor()->settings().ds_sac, currentReconstructor()->settings().ds_sic);
     else
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-            currentReconstructor()->baseSettings().ds_sac, currentReconstructor()->baseSettings().ds_sic,
-            currentReconstructor()->baseSettings().ds_line);
+            currentReconstructor()->settings().ds_sac, currentReconstructor()->settings().ds_sic,
+            currentReconstructor()->settings().ds_line);
 
     while (dbcontent_man.dbContent("RefTraj").isDeleting())
     {
@@ -612,18 +612,18 @@ void ReconstructorTask::deleteCalculatedReferences()
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    unsigned int ds_id = Number::dsIdFrom(currentReconstructor()->baseSettings().ds_sac,
-                                          currentReconstructor()->baseSettings().ds_sic);
+    unsigned int ds_id = Number::dsIdFrom(currentReconstructor()->settings().ds_sac,
+                                          currentReconstructor()->settings().ds_sic);
 
             // clear counts
     if (ds_man.hasDBDataSource(ds_id))
     {
         dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
 
-        if (currentReconstructor()->baseSettings().delete_all_calc_reftraj)
+        if (currentReconstructor()->settings().delete_all_calc_reftraj)
             ds.clearNumInserted("RefTraj");
         else
-            ds.clearNumInserted("RefTraj", currentReconstructor()->baseSettings().ds_line);
+            ds.clearNumInserted("RefTraj", currentReconstructor()->settings().ds_line);
     }
 }
 

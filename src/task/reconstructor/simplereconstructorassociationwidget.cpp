@@ -77,7 +77,7 @@ SimpleReconstructorAssociationWidget::SimpleReconstructorAssociationWidget(
 
     max_time_diff_tracker_edit_ = new QLineEdit();
     connect(max_time_diff_tracker_edit_, &QLineEdit::textEdited,
-            this, &SimpleReconstructorAssociationWidget::maxTimeDiffTrackerEditedSlot);
+            this, &SimpleReconstructorAssociationWidget::maxTimeDiffEditedSlot);
     layout->addWidget(max_time_diff_tracker_edit_, row, 1);
 
             //    QLineEdit* max_distance_quit_tracker_edit_{nullptr};
@@ -253,7 +253,7 @@ void SimpleReconstructorAssociationWidget::updateValues()
             // tracker
             //    QLineEdit* max_time_diff_tracker_edit_{nullptr};
     assert (max_time_diff_tracker_edit_);
-    max_time_diff_tracker_edit_->setText(QString::number(reconstructor_.settings().max_time_diff_tracker_));
+    max_time_diff_tracker_edit_->setText(QString::number(reconstructor_.settings().max_time_diff_));
 
             //    QLineEdit* max_distance_quit_tracker_edit_{nullptr};
     assert (max_distance_quit_tracker_edit_);
@@ -342,20 +342,20 @@ void SimpleReconstructorAssociationWidget::toggleAssociateNonModeSSlot()
 //}
 
 
-void SimpleReconstructorAssociationWidget::maxTimeDiffTrackerEditedSlot (const QString& text)
+void SimpleReconstructorAssociationWidget::maxTimeDiffEditedSlot (const QString& text)
 {
     string value_str = text.toStdString();
 
-    loginf << "SimpleReconstructorAssociationWidget: maxTimeDiffTrackerEditedSlot: value '" << value_str << "'";
+    loginf << "SimpleReconstructorAssociationWidget: maxTimeDiffEditedSlot: value '" << value_str << "'";
 
     bool ok;
 
     double value = text.toDouble(&ok);
 
     if (ok)
-        reconstructor_.settings().max_time_diff_tracker_ = value;
+        reconstructor_.settings().max_time_diff_ = value;
     else
-        logwrn << "SimpleReconstructorAssociationWidget: maxTimeDiffTrackerEditedSlot: unable to parse value '"
+        logwrn << "SimpleReconstructorAssociationWidget: maxTimeDiffEditedSlot: unable to parse value '"
                << value_str << "'";
 }
 

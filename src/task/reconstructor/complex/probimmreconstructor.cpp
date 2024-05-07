@@ -24,11 +24,6 @@ ProbIMMReconstructor::ProbIMMReconstructor(const std::string& class_id,
       , associatior_   (*this)
       , ref_calculator_(*this)
 {
-    registerParameter("max_time_diff", &settings_.max_time_diff_, settings_.max_time_diff_);
-    registerParameter("track_max_time_diff", &settings_.track_max_time_diff_, settings_.track_max_time_diff_);
-
-    registerParameter("max_altitude_diff", &settings_.max_altitude_diff_, settings_.max_altitude_diff_);
-
     registerParameter("max_mahalanobis_sec_verified_dist", &settings_.max_mahalanobis_sec_verified_dist_,
                       settings_.max_mahalanobis_sec_verified_dist_);
     registerParameter("max_mahalanobis_sec_unknown_dist", &settings_.max_mahalanobis_sec_unknown_dist_,
@@ -153,7 +148,7 @@ void ProbIMMReconstructor::processSlice_impl()
 {
     loginf << "ProbIMMReconstructor: processSlice_impl: current_slice_begin "
            << Time::toString(currentSlice().slice_begin_)
-           << " end " << Time::toString(currentSlice().slice_begin_ + baseSettings().sliceDuration())
+           << " end " << Time::toString(currentSlice().slice_begin_ + settings().sliceDuration())
            << " is last " << currentSlice().is_last_slice_;
 
             // remove_before_time_, new data >= current_slice_begin_

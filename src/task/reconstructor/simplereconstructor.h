@@ -10,15 +10,12 @@
 #include "simpleaccuracyestimator.h"
 #include "simplereferencecalculator.h"
 
-class SimpleReconstructorSettings
+class SimpleReconstructorSettings : public ReconstructorBaseSettings
 {
   public:
     SimpleReconstructorSettings() {};
 
     bool associate_non_mode_s_ {true};
-
-    // tracker stuff
-    double max_time_diff_tracker_ {15.0};
 
     double max_distance_quit_tracker_ {10*NM2M}; //10nm in meters // kb 5
     double max_distance_dubious_tracker_ {3*NM2M}; //kb 2.5? 2.5 lowest
@@ -61,7 +58,7 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
 
     virtual void reset() override;
 
-    SimpleReconstructorSettings& settings();
+    virtual SimpleReconstructorSettings& settings() override;
 
     SimpleReconstructorWidget* widget(); // ownage by caller
 

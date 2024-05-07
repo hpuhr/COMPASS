@@ -46,34 +46,74 @@ class ReconstructorTask;
 
 typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow; // min, max
 
+class ReconstructorBaseSettings
+{
+  public:
+    ReconstructorBaseSettings() {};
+
+    boost::posix_time::time_duration sliceDuration() const
+    {
+        return boost::posix_time::minutes(slice_duration_in_minutes);
+    }
+    boost::posix_time::time_duration outdatedDuration() const
+    {
+        return boost::posix_time::minutes(outdated_duration_in_minutes);
+    }
+
+            // output
+    std::string  ds_name {"CalcRef"};
+    unsigned int ds_sac  {255};
+    unsigned int ds_sic  {1};
+    unsigned int ds_line {0};
+
+            // slicing
+    unsigned int slice_duration_in_minutes    {10};
+    unsigned int outdated_duration_in_minutes {2};
+
+    bool delete_all_calc_reftraj {false};
+
+    // maximum time difference in target reports to do comparisons
+    float max_time_diff_ {15}; // sec
+    // maximum altitude difference to consider mode c the "same"
+    float max_altitude_diff_ {300.0};
+    // maximimum time difference between track updates, otherwise considered new track
+    double track_max_time_diff_ {300.0};
+
+    // compare targets related
+    double prob_min_time_overlap_tracker_ {0.1};
+    unsigned int min_updates_tracker_ {5};
+    double max_positions_dubious_verified_rate_ {0.5};
+    double max_positions_dubious_unknown_rate_ {0.3};
+};
+
 /**
  */
 class ReconstructorBase : public Configurable
 {
   public:
-    struct BaseSettings
-    {
-        boost::posix_time::time_duration sliceDuration() const
-        {
-            return boost::posix_time::minutes(slice_duration_in_minutes);
-        }
-        boost::posix_time::time_duration outdatedDuration() const
-        {
-            return boost::posix_time::minutes(outdated_duration_in_minutes);
-        }
+//    struct BaseSettings
+//    {
+//        boost::posix_time::time_duration sliceDuration() const
+//        {
+//            return boost::posix_time::minutes(slice_duration_in_minutes);
+//        }
+//        boost::posix_time::time_duration outdatedDuration() const
+//        {
+//            return boost::posix_time::minutes(outdated_duration_in_minutes);
+//        }
 
-                // output
-        std::string  ds_name {"CalcRef"};
-        unsigned int ds_sac  {255};
-        unsigned int ds_sic  {1};
-        unsigned int ds_line {0};
+//                // output
+//        std::string  ds_name {"CalcRef"};
+//        unsigned int ds_sac  {255};
+//        unsigned int ds_sic  {1};
+//        unsigned int ds_line {0};
 
-                // slicing
-        unsigned int slice_duration_in_minutes    {10};
-        unsigned int outdated_duration_in_minutes {2};
+//                // slicing
+//        unsigned int slice_duration_in_minutes    {10};
+//        unsigned int outdated_duration_in_minutes {2};
 
-        bool delete_all_calc_reftraj {false};
-    };
+//        bool delete_all_calc_reftraj {false};
+//    };
 
     struct DataSlice
     {
@@ -120,8 +160,8 @@ class ReconstructorBase : public Configurable
 
     virtual void reset();
 
-    BaseSettings& baseSettings() { return base_settings_; }
-    const BaseSettings& baseSettings() const { return base_settings_; }
+    virtual ReconstructorBaseSettings& settings() { return base_settings_; };
+    //virtual const  ReconstructorBaseSettings& settings() const { return base_settings_; };
 
     ReferenceCalculatorSettings& referenceCalculatorSettings() { return ref_calc_settings_; }
     const ReferenceCalculatorSettings& referenceCalculatorSettings() const { return ref_calc_settings_; }
@@ -154,11 +194,10 @@ class ReconstructorBase : public Configurable
 
     std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
 
-            //Buffers buffers_;
     std::unique_ptr<DataSlice> current_slice_;
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
-    BaseSettings base_settings_;
+    ReconstructorBaseSettings base_settings_;
 
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual void processSlice_impl() = 0;
