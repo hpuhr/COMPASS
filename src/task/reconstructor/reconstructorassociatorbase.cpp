@@ -422,6 +422,9 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
         if (!tr.acid_)
             return false;
 
+        if (*tr.acid_ == "00000000" || *tr.acid_ == "????????" || *tr.acid_ == "        ")
+            return false;
+
         return (bool) acid_2_utn_.count(*tr.acid_);
     };
 
