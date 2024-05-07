@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 
 #include <memory>
 

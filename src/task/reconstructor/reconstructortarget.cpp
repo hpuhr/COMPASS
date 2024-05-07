@@ -1556,7 +1556,7 @@ size_t ReconstructorTarget::trackerCount() const
 
 boost::posix_time::ptime ReconstructorTarget::trackerTime(size_t idx) const
 {
-    return chain_->getMeasurement(idx).t;
+    return chain_->getUpdate(idx).t;
 }
 
 void ReconstructorTarget::reinitTracker()
@@ -1568,6 +1568,12 @@ void ReconstructorTarget::reinitTracker()
     chain_->configureEstimator(reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings());
     chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type);
 
+    chain_->setMeasurementAssignFunc(
+        [ this ] (reconstruction::Measurement& mm, unsigned long rec_num) 
+        { 
+            this->reconstructor_.createMeasurement(mm, rec_num);
+        });
+
     chain_->settings().mode            = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts : 
                                                                reconstruction::KalmanChain::Settings::Mode::StaticAdd;
     chain_->settings().prediction_mode = reconstruction::KalmanChain::Settings::PredictionMode::Interpolate;
@@ -1576,12 +1582,9 @@ void ReconstructorTarget::reinitTracker()
 
 void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, bool reestimate)
 {
-    reconstruction::Measurement mm;
-    reconstructor_.createMeasurement(mm, tr);
-
     assert(chain_);
 
-    bool ok = chain_->insert(mm, reestimate); //add to end and optionally reestimate
+    bool ok = chain_->insert(tr.record_num_, tr.timestamp_, reestimate);
     assert(ok);
 }
 

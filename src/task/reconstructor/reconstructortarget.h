@@ -3,7 +3,7 @@
 //#include "dbcontent/target/targetposition.h"
 #include "dbcontent/target/targetreportdefs.h"
 #include "projection/transformation.h"
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
 #include "boost/optional.hpp"

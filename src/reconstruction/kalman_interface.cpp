@@ -16,7 +16,7 @@
  */
 
 #include "kalman_interface.h"
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 #include "kalman_projection.h"
 
 #include "timeconv.h"
@@ -95,6 +95,13 @@ bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
 double KalmanInterface::timestep(const Measurement& mm) const
 {
     return Utils::Time::partialSeconds(mm.t - ts_);
+}
+
+/**
+*/
+double KalmanInterface::timestep(const Measurement& mm0, const Measurement& mm1)
+{
+    return Utils::Time::partialSeconds(mm1.t - mm0.t);
 }
 
 /**

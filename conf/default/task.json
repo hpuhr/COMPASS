@@ -9,19 +9,9 @@
             "path": "task_import_asterix.json"
         },
         {
-            "class_id": "CalculateReferencesTask",
-            "instance_id": "CalculateReferencesTask0",
-            "path": "task_calc_assoc.json"
-        },
-        {
             "class_id": "CreateARTASAssociationsTask",
             "instance_id": "CreateARTASAssociationsTask0",
             "path": "task_calc_artas_assoc.json"
-        },
-        {
-            "class_id": "CreateAssociationsTask",
-            "instance_id": "CreateAssociationsTask0",
-            "path": "task_calc_assoc.json"
         },
         {
             "class_id": "GPSImportCSVTask",

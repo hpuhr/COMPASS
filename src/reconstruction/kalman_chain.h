@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 #include "kalman_estimator.h"
 
 #include <memory>
@@ -72,22 +72,24 @@ public:
     struct Update
     {
         Update() {}
-        Update(const Measurement& mm, 
-               int id, 
+        Update(unsigned long id, 
+               const boost::posix_time::ptime& ts, 
                const kalman::KalmanUpdateMinimal& update = kalman::KalmanUpdateMinimal()) 
-        :   measurement  (mm)
-        ,   kalman_update(update)
-        ,   mm_id        (id) {}
+        :   mm_id        (id)
+        ,   t            (ts)
+        ,   kalman_update(update) {}
 
-        Measurement                 measurement;
+        unsigned long               mm_id;
+        boost::posix_time::ptime    t;
         kalman::KalmanUpdateMinimal kalman_update;
-        int                         mm_id = -1;
         bool                        init  = false;
     };
 
-    typedef std::pair<int, int>                  Interval;
-    typedef std::unique_ptr<KalmanOnlineTracker> TrackerPtr;
-    typedef std::unique_ptr<KalmanEstimator>     EstimatorPtr;
+    typedef std::pair<int, int>                              Interval;
+    typedef std::unique_ptr<KalmanOnlineTracker>             TrackerPtr;
+    typedef std::unique_ptr<KalmanEstimator>                 EstimatorPtr;
+    typedef std::function<const Measurement&(unsigned long)> MeasurementGetFunc;
+    typedef std::function<void(Measurement&, unsigned long)> MeasurementAssignFunc;
 
     KalmanChain(int max_prediction_threads = 1);
     virtual ~KalmanChain();
@@ -100,17 +102,25 @@ public:
     void init(kalman::KalmanType ktype);
 
     void configureEstimator(const KalmanEstimator::Settings& settings);
+    void setMeasurementGetFunc(const MeasurementGetFunc& get_func);
+    void setMeasurementAssignFunc(const MeasurementAssignFunc& assign_func);
 
-    bool add(const Measurement& mm, bool reestim);
-    bool add(const std::vector<Measurement>& mms, bool reestim);
-    bool insert(const Measurement& mm, bool reestim);
-    bool insert(const std::vector<Measurement>& mms, bool reestim);
+    bool add(unsigned long mm_id,
+             const boost::posix_time::ptime& ts,
+             bool reestim);
+    bool add(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
+             bool reestim);
+    bool insert(unsigned long mm_id,
+                const boost::posix_time::ptime& ts,
+                bool reestim);
+    bool insert(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
+                bool reestim);
 
     void removeUpdatesBefore(const boost::posix_time::ptime& ts);
 
-    kalman::KalmanUpdateMinimal lastUpdate() const;
-    const kalman::KalmanUpdateMinimal& getUpdate(size_t idx) const;
-    const Measurement& getMeasurement(size_t idx) const;
+    kalman::KalmanUpdateMinimal lastKalmanUpdate() const;
+    const kalman::KalmanUpdateMinimal& getKalmanUpdate(size_t idx) const;
+    const Update& getUpdate(size_t idx);
 
     bool canReestimate() const;
     bool needsReestimate() const;
@@ -131,21 +141,25 @@ private:
     {
         void reset();
 
-        TrackerPtr   tracker_ptr;
-        int tracked_mm_id = -1;
+        TrackerPtr                     tracker_ptr;
+        boost::optional<unsigned long> tracked_mm_id;
     };
 
     struct Predictor
     {
         void reset();
 
-        EstimatorPtr estimator_ptr;
-        int ref_mm_id = -1;
+        EstimatorPtr                   estimator_ptr;
+        boost::optional<unsigned long> ref_mm_id = -1;
     };
 
     bool checkIntegrity() const;
 
-    void insert(int idx, const Measurement& mm);
+    const Measurement& getMeasurement(unsigned long mm_id) const;
+
+    void insert(int idx, 
+                unsigned long mm_id,
+                const boost::posix_time::ptime& ts);
     void addReesimationIndex(int idx);
     void addReesimationIndexRange(int idx0, int idx1);
     void resetReestimationIndices();
@@ -162,12 +176,14 @@ private:
 
     Settings settings_;
 
+    MeasurementGetFunc    get_func_;
+    MeasurementAssignFunc assign_func_;
+    mutable Measurement   mm_tmp_;
+
     mutable Tracker                tracker_;
     mutable std::vector<Predictor> predictors_;
     std::vector<int>               fresh_indices_;
     std::vector<Update>            updates_;
-
-    int mm_ids_ = 0;
 };
 
 } // reconstruction
