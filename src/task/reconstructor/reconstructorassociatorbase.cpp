@@ -1,5 +1,4 @@
 #include "reconstructorassociatorbase.h"
-#include "probimmreconstructor.h"
 #include "logger.h"
 #include "global.h"
 #include "stringconv.h"
@@ -42,8 +41,8 @@ void ReconstructorAssociatorBase::associateNewData()
 
     unassoc_rec_nums_.clear();
 
-    //    reconstructor().acc_estimator_->analyzeAssociatedDistances();
-    //    reconstructor().acc_estimator_->clearAssociatedDistances();
+            //    reconstructor().acc_estimator_->analyzeAssociatedDistances();
+            //    reconstructor().acc_estimator_->clearAssociatedDistances();
 
     if (reconstructor().currentSlice().is_last_slice_)
         loginf << "ReconstructorAssociatorBase: associateNewData: done, num_merges " << num_merges_;
@@ -286,6 +285,19 @@ void ReconstructorAssociatorBase::associate(dbContent::targetReport::Reconstruct
             // check if position usable
     reconstructor().acc_estimator_->validate(tr, reconstructor());
 
+    reconstructor().targets_.at(utn).addTargetReport(tr.record_num_);
+
+    if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
+        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
+            std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
+
+    if (tr.acad_)
+        acad_2_utn_[*tr.acad_] = utn;
+
+    if (tr.acid_)
+        acid_2_utn_[*tr.acid_] = utn;
+
+            // TODO move to post process association or something
             // only if not newly created
     //    if (!tr.do_not_use_position_ && reconstructor().targets_.at(utn).canPredict(tr.timestamp_))
     //    {
@@ -298,58 +310,46 @@ void ReconstructorAssociatorBase::associate(dbContent::targetReport::Reconstruct
     //        double est_std_dev;
     //        double mahalanobis_dist;
 
-    //                // predict pos from target and estimate accuracies
-    //        ret = reconstructor().targets_.at(utn).predict(mm, tr);
-    //        assert (ret);
+            //                // predict pos from target and estimate accuracies
+            //        ret = reconstructor().targets_.at(utn).predict(mm, tr);
+            //        assert (ret);
 
-    //        distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
-    //                                                 tr.position_->longitude_ * DEG2RAD,
-    //                                                 mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+            //        distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
+            //                                                 tr.position_->longitude_ * DEG2RAD,
+            //                                                 mm.lat * DEG2RAD, mm.lon * DEG2RAD);
 
-    //        bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
-    //                                                 tr.position_->longitude_ * DEG2RAD,
-    //                                                 mm.lat * DEG2RAD, mm.lon * DEG2RAD);
+            //        bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
+            //                                                 tr.position_->longitude_ * DEG2RAD,
+            //                                                 mm.lat * DEG2RAD, mm.lon * DEG2RAD);
 
-    //        tr_pos_acc = reconstructor().acc_estimator_->positionAccuracy(tr);
-    //        estimateEllipse(tr_pos_acc, acc_ell);
-    //        est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
+            //        tr_pos_acc = reconstructor().acc_estimator_->positionAccuracy(tr);
+            //        estimateEllipse(tr_pos_acc, acc_ell);
+            //        est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
 
-    //        assert (mm.hasStdDevPosition());
-    //        mm_pos_acc = mm.positionAccuracy();
-    //        estimateEllipse(mm_pos_acc, acc_ell);
-    //        est_std_dev += estimateAccuracyAt(acc_ell, bearing_rad);
+            //        assert (mm.hasStdDevPosition());
+            //        mm_pos_acc = mm.positionAccuracy();
+            //        estimateEllipse(mm_pos_acc, acc_ell);
+            //        est_std_dev += estimateAccuracyAt(acc_ell, bearing_rad);
 
-    //        mahalanobis_dist = distance_m / est_std_dev;
+            //        mahalanobis_dist = distance_m / est_std_dev;
 
-    //        dist.latitude_deg_ = tr.position_->latitude_;
-    //        dist.longitude_deg_ = tr.position_->longitude_;
-    //        dist.est_std_dev_ = est_std_dev;
-    //        dist.distance_m_ = distance_m;
-    //        dist.mahalanobis_distance_ = mahalanobis_dist;
+            //        dist.latitude_deg_ = tr.position_->latitude_;
+            //        dist.longitude_deg_ = tr.position_->longitude_;
+            //        dist.est_std_dev_ = est_std_dev;
+            //        dist.distance_m_ = distance_m;
+            //        dist.mahalanobis_distance_ = mahalanobis_dist;
 
-    //        reconstructor().acc_estimator_->addAssociatedDistance(tr, dist);
+            //        reconstructor().acc_estimator_->addAssociatedDistance(tr, dist);
 
-    //                //                not_use_tr_pos = distance_m > 50 && mahalanobis_dist > 10;
+            //                //                not_use_tr_pos = distance_m > 50 && mahalanobis_dist > 10;
 
-    //                //                loginf << " dist " << String::doubleToStringPrecision(distance_m, 2)
-    //                //                       << " est_std_dev " << String::doubleToStringPrecision(est_std_dev, 2)
-    //                //                       << " mahala " << String::doubleToStringPrecision(mahalanobis_dist, 2)
-    //                //                       << " use pos " << !not_use_tr_pos;
+            //                //                loginf << " dist " << String::doubleToStringPrecision(distance_m, 2)
+            //                //                       << " est_std_dev " << String::doubleToStringPrecision(est_std_dev, 2)
+            //                //                       << " mahala " << String::doubleToStringPrecision(mahalanobis_dist, 2)
+            //                //                       << " use pos " << !not_use_tr_pos;
 
-    //                //                tr.do_not_use_position_ = not_use_tr_pos;
-    //    }
-
-    reconstructor().targets_.at(utn).addTargetReport(tr.record_num_);
-
-    if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
-        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
-            std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
-
-    if (tr.acad_)
-        acad_2_utn_[*tr.acad_] = utn;
-
-    if (tr.acid_)
-        acid_2_utn_[*tr.acid_] = utn;
+            //                //                tr.do_not_use_position_ = not_use_tr_pos;
+            //    }
 }
 
 void ReconstructorAssociatorBase::checkACADLookup()
@@ -394,16 +394,9 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
     const boost::posix_time::time_duration track_max_time_diff =
         Time::partialSeconds(reconstructor().settings().track_max_time_diff_);
 
-    //    const float max_mahalanobis_sec_verified_dist = reconstructor().settings().max_mahalanobis_sec_verified_dist_;
-    //    const float max_tgt_est_std_dev = reconstructor().settings().max_tgt_est_std_dev_;
-
-    //    const float max_sum_est_std_dev = reconstructor().settings().max_sum_est_std_dev_;
-    //    const float min_sum_est_std_dev = reconstructor().settings().min_sum_est_std_dev_;
-
     assert (reconstructor().targets_.size() == utn_vec_.size());
 
-    double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0}; //, sum_est_std_dev{0};
-    //double mahalanobis_dist{0};
+    double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0};
 
     bool reset_tr_assoc {false};
 
@@ -474,26 +467,6 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
                     // check for position offsets
             std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(
                 tr, reconstructor().targets_.at(utn), do_debug);
-
-            //            if (tgt_est_std_dev < max_tgt_est_std_dev) // target estimate reliable enough to break up
-            //            {
-            //                sum_est_std_dev = tgt_est_std_dev + tr_est_std_dev;
-
-            //                if (sum_est_std_dev > max_sum_est_std_dev)
-            //                    sum_est_std_dev = max_sum_est_std_dev;
-            //                if (sum_est_std_dev < min_sum_est_std_dev)
-            //                    sum_est_std_dev = min_sum_est_std_dev;
-
-            //                mahalanobis_dist = distance_m / sum_est_std_dev;
-
-            //                if (mahalanobis_dist > max_mahalanobis_sec_verified_dist)
-            //                {
-            //                    // position offset too large
-            //                    tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
-            //                    reset_tr_assoc = true;
-            //                                            // goto START_TR_ASSOC;
-            //                }
-            //            }
 
             boost::optional<bool> check_result = checkPositionOffsetAcceptable(
                 tr, distance_m, tgt_est_std_dev, tr_est_std_dev, true, do_debug);
@@ -586,13 +559,6 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     const boost::posix_time::time_duration max_time_diff =
         Time::partialSeconds(reconstructor().settings().max_time_diff_);
     const float max_altitude_diff = reconstructor().settings().max_altitude_diff_;
-
-            //    const float max_mahalanobis_sec_verified_dist = reconstructor().settings().max_mahalanobis_sec_verified_dist_;
-            //    const float max_mahalanobis_sec_unknown_dist = reconstructor().settings().max_mahalanobis_sec_unknown_dist_;
-            //    const float max_tgt_est_std_dev = reconstructor().settings().max_tgt_est_std_dev_;
-
-            //    const float max_sum_est_std_dev = reconstructor().settings().max_sum_est_std_dev_;
-            //    const float min_sum_est_std_dev = reconstructor().settings().min_sum_est_std_dev_;
 
     bool do_debug = debug_rec_nums.count(tr.record_num_);
 
@@ -694,74 +660,6 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                               results[target_cnt] = tuple<bool, unsigned int, double> (
                                   true, other.utn_, check_ret->second);
                           }
-
-                                  //                          if (tgt_est_std_dev > max_tgt_est_std_dev)
-                                  //                          {
-                                  //                              if (do_debug)
-                                  //                                  loginf << "DBG tr " << tr.record_num_ << " other_utn "
-                                  //                                         << other_utn << " tgt_est_std_dev hit maximum";
-                                  //                              return;
-                                  //                          }
-
-                                  //                          sum_est_std_dev = tgt_est_std_dev + tr_est_std_dev;
-
-                                  //                          if (sum_est_std_dev > max_sum_est_std_dev)
-                                  //                          {
-                                  //                              if (do_debug)
-                                  //                                  loginf << "DBG tr " << tr.record_num_ << " other_utn "
-                                  //                                         << other_utn << " sum_est_std_dev hit maximum";
-
-                                  //                              sum_est_std_dev = max_sum_est_std_dev;
-                                  //                          }
-
-                                  //                          if (sum_est_std_dev < min_sum_est_std_dev)
-                                  //                              sum_est_std_dev = min_sum_est_std_dev;
-
-                                  //                          if (do_debug)
-                                  //                              loginf << "DBG tr " << tr.record_num_ << " other_utn "
-                                  //                                     << other_utn << ": distance_m " << distance_m
-                                  //                                     << " sum_est_std_dev " << sum_est_std_dev;
-
-                                  //                          mahalanobis_dist = distance_m / sum_est_std_dev;
-
-                                  //                                  //loginf << "DBG3 distance " << distance;
-
-                                  //                          if (mode_a_verified)
-                                  //                          {
-                                  //                              if (do_debug || do_other_debug)
-                                  //                              {
-                                  //                                  loginf << "DBG tr " << tr.record_num_ << " other_utn "
-                                  //                                         << other_utn << ": distance_m " << distance_m
-                                  //                                         << " sum_est_std_dev sum " << sum_est_std_dev
-                                  //                                         << " mahalanobis_dist " << mahalanobis_dist
-                                  //                                         << " ver ok " << (mahalanobis_dist < max_mahalanobis_sec_verified_dist);
-                                  //                              }
-
-                                  //                              if (mahalanobis_dist < max_mahalanobis_sec_verified_dist)
-                                  //                              {
-                                  //                                  results[target_cnt] = tuple<bool, unsigned int, double>
-                                  //                                      (true, other.utn_, mahalanobis_dist);
-                                  //                                  assert (distance_m <= max_mahalanobis_sec_verified_dist * max_sum_est_std_dev);
-                                  //                              }
-                                  //                          }
-                                  //                          else
-                                  //                          {
-                                  //                              if (do_debug || do_other_debug)
-                                  //                              {
-                                  //                                  loginf << "DBG tr " << tr.record_num_ << " other_utn "
-                                  //                                         << other_utn << ": distance_m " << distance_m
-                                  //                                         << " sum_est_std_dev sum " << sum_est_std_dev
-                                  //                                         << " mahalanobis_dist " << mahalanobis_dist
-                                  //                                         << " nver ok " << (mahalanobis_dist < max_mahalanobis_sec_unknown_dist);
-                                  //                              }
-
-                                  //                              if (mahalanobis_dist < max_mahalanobis_sec_unknown_dist)
-                                  //                              {
-                                  //                                  results[target_cnt] = tuple<bool, unsigned int, double>
-                                  //                                      (true, other.utn_, mahalanobis_dist);
-                                  //                                  assert (distance_m <= max_mahalanobis_sec_unknown_dist * max_sum_est_std_dev);
-                                  //                              }
-                                  //                          }
                       });
 
             // find best match
@@ -842,42 +740,17 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 
     const boost::posix_time::time_duration max_time_diff_tracker = Utils::Time::partialSeconds(settings.max_time_diff_);
 
-    //    const double       prob_min_time_overlap_tracker       = settings.prob_min_time_overlap_tracker_;
-    //    const unsigned int min_updates_tracker                 = settings.min_updates_tracker_;
-    //    const double       max_altitude_diff_tracker           = settings.max_altitude_diff_;
-    //    const double       max_positions_dubious_verified_rate = settings.max_positions_dubious_verified_rate_;
-    //    const double       max_positions_dubious_unknown_rate  = settings.max_positions_dubious_unknown_rate_;
-
-    //    const float max_mahalanobis_quit_verified         = settings.max_mahalanobis_quit_verified_;
-    //    const float max_mahalanobis_dubious_verified      = settings.max_mahalanobis_dubious_verified_;
-    //    const float max_mahalanobis_acceptable_verified   = settings.max_mahalanobis_acceptable_verified_;
-    //    const float max_mahalanobis_quit_unverified       = settings.max_mahalanobis_quit_unverified_;
-    //    const float max_mahalanobis_dubious_unverified    = settings.max_mahalanobis_dubious_unverified_;
-    //    const float max_mahalanobis_acceptable_unverified = settings.max_mahalanobis_acceptable_unverified_;
-
-    //            //@TODO: which threshold
-    //    const float max_mahalanobis_acceptable = max_mahalanobis_acceptable_verified;
-
-    //    const float max_tgt_est_std_dev = settings.max_tgt_est_std_dev_;
-    //    const float max_sum_est_std_dev = settings.max_sum_est_std_dev_;
-    //    const float min_sum_est_std_dev = settings.min_sum_est_std_dev_;
-
-    //    max_mahalanobis_acceptable_verified,
-    //        max_mahalanobis_dubious_verified,
-    //        max_mahalanobis_quit_verified,
-    //        max_positions_dubious_verified_rate,
-
-        //computes a match score for the given other target
-        auto scoreUTN = [ & ] (const std::vector<size_t>& rec_nums,
-                            const dbContent::ReconstructorTarget& other,
-                            unsigned int result_idx,
-                            int thread_id,
-                            bool secondary_verified,
-                            //                        double max_mahal_dist_accept,
-                            //                        double max_mahal_dist_dub,
-                            //                        double max_mahal_dist_quit,
-                            //double max_pos_dubious_rate,
-                            bool print_debug)
+            //computes a match score for the given other target
+    auto scoreUTN = [ & ] (const std::vector<size_t>& rec_nums,
+                        const dbContent::ReconstructorTarget& other,
+                        unsigned int result_idx,
+                        int thread_id,
+                        bool secondary_verified,
+                        //                        double max_mahal_dist_accept,
+                        //                        double max_mahal_dist_dub,
+                        //                        double max_mahal_dist_quit,
+                        //double max_pos_dubious_rate,
+                        bool print_debug)
     {
         vector<pair<unsigned long, double>> distance_scores;
         double distance_scores_sum {0};
@@ -937,36 +810,6 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 
                 break;
             }
-
-
-            //            if (sum_stddev_est > max_sum_est_std_dev)
-            //                sum_stddev_est = max_sum_est_std_dev;
-
-            //            if (sum_stddev_est < min_sum_est_std_dev)
-            //                sum_stddev_est = min_sum_est_std_dev;
-
-            //            double mahalanobis_dist = distance_m / sum_stddev_est;
-
-            //            if (mahalanobis_dist > max_mahal_dist_dub)
-            //                ++pos_dubious_cnt;
-            //            if (mahalanobis_dist < max_mahal_dist_accept)
-            //                ++pos_ok_cnt;
-
-            //                    //// too far or dubious => quit
-            //            if (mahalanobis_dist > max_mahal_dist_quit)
-            //            {
-            //                distances.clear();
-            //                pos_ok_cnt = 0;
-
-            //                if (print_debug)
-            //                {
-            //                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-            //                           << " max mahalanobis distance failed "
-            //                           << mahalanobis_dist << " > " << max_mahal_dist_quit;
-            //                }
-
-            //                break;
-            //            }
 
                     //loginf << "\tdist " << distance;
 
@@ -1148,7 +991,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
     double score;
 
     bool first = true;
-    unsigned int best_other_utn;
+    unsigned int best_other_utn {0};
     unsigned int best_num_updates;
     double best_distance_score_avg;
     double best_score;
@@ -1196,7 +1039,8 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
        //if (print_debug_target)
         loginf << "ReconstructorAssociatorBase: findUTNForTarget: target " << target.utn_
                << " match found best other " << best_other_utn
-               << " best score " << fixed << best_score << " dist avg " << best_distance_score_avg
+               << " best score " << fixed << best_score
+               << " dist score avg " << best_distance_score_avg
                << " num " << best_num_updates;
 
         return best_other_utn;
