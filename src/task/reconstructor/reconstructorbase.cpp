@@ -26,7 +26,7 @@
 
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
-#include "dbinterface.h"
+//#include "dbinterface.h"
 #include "number.h"
 
 using namespace std;
@@ -39,21 +39,38 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                                      ReconstructorTask& task, 
                                      std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator,
                                      unsigned int default_line_id)
-    : Configurable (class_id, instance_id, &task), task_(task), acc_estimator_(std::move(acc_estimator))
+    : Configurable (class_id, instance_id, &task), acc_estimator_(std::move(acc_estimator)), task_(task)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
-    //base settings
+    // base settings
     {
         registerParameter("ds_line", &base_settings_.ds_line, default_line_id);
 
-        registerParameter("slice_duration_in_minutes", &base_settings_.slice_duration_in_minutes, BaseSettings().slice_duration_in_minutes);
-        registerParameter("outdated_duration_in_minutes", &base_settings_.outdated_duration_in_minutes, BaseSettings().outdated_duration_in_minutes);
+        registerParameter("slice_duration_in_minutes", &base_settings_.slice_duration_in_minutes,
+                          base_settings_.slice_duration_in_minutes);
+        registerParameter("outdated_duration_in_minutes", &base_settings_.outdated_duration_in_minutes,
+                          base_settings_.outdated_duration_in_minutes);
 
-        registerParameter("delete_all_calc_reftraj", &base_settings_.delete_all_calc_reftraj, BaseSettings().delete_all_calc_reftraj);
+        registerParameter("delete_all_calc_reftraj", &base_settings_.delete_all_calc_reftraj,
+                          base_settings_.delete_all_calc_reftraj);
     }
 
-    //reference computation
+    // association stuff
+    registerParameter("max_time_diff", &base_settings_.max_time_diff_, base_settings_.max_time_diff_);
+    registerParameter("track_max_time_diff", &base_settings_.track_max_time_diff_, base_settings_.track_max_time_diff_);
+
+    registerParameter("max_altitude_diff", &base_settings_.max_altitude_diff_, base_settings_.max_altitude_diff_);
+
+    registerParameter("prob_min_time_overlap_tracker", &base_settings_.prob_min_time_overlap_tracker_,
+                      base_settings_.prob_min_time_overlap_tracker_);
+    registerParameter("min_updates_tracker", &base_settings_.min_updates_tracker_, base_settings_.min_updates_tracker_);
+    registerParameter("max_positions_dubious_verified_rate", &base_settings_.max_positions_dubious_verified_rate_,
+                      base_settings_.max_positions_dubious_verified_rate_);
+    registerParameter("max_positions_dubious_unknown_rate", &base_settings_.max_positions_dubious_unknown_rate_,
+                      base_settings_.max_positions_dubious_unknown_rate_);
+
+    // reference computation
     {
         registerParameter("ref_rec_type", (int*)&ref_calc_settings_.kalman_type, (int)ReferenceCalculatorSettings().kalman_type);
 

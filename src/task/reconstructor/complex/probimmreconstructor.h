@@ -7,15 +7,16 @@
 #include "accuracyestimatorbase.h"
 #include "simplereferencecalculator.h"
 
-class ProbIMMReconstructorSettings
+class ProbIMMReconstructorSettings : public ReconstructorBaseSettings
 {
   public:
     ProbIMMReconstructorSettings() {};
 
-    float max_time_diff_ {15}; // sec
-    float track_max_time_diff_ {300.0}; // sec
+    // moved to base
+    //float max_time_diff_ {15}; // sec
+    //float track_max_time_diff_ {300.0}; // sec
 
-    float max_altitude_diff_ {300.0};
+    //float max_altitude_diff_ {300.0};
 
     float max_mahalanobis_sec_verified_dist_ {10.0};
     float max_mahalanobis_sec_unknown_dist_ {5.0};
@@ -25,10 +26,10 @@ class ProbIMMReconstructorSettings
     float min_sum_est_std_dev_ {50.0};
 
     // compare targets related
-    double       prob_min_time_overlap_tracker_       {0.1};
-    unsigned int min_updates_tracker_                   {5};
-    const double max_positions_dubious_verified_rate_ {0.5};
-    const double max_positions_dubious_unknown_rate_  {0.3};
+//    double       prob_min_time_overlap_tracker_       {0.1};
+//    unsigned int min_updates_tracker_                   {5};
+//    const double max_positions_dubious_verified_rate_ {0.5};
+//    const double max_positions_dubious_unknown_rate_  {0.3};
 
     float max_mahalanobis_quit_verified_       {12};
     float max_mahalanobis_dubious_verified_     {5};
@@ -61,7 +62,7 @@ class ProbIMMReconstructor : public QObject, public ReconstructorBase
 
     virtual void reset() override;
 
-    ProbIMMReconstructorSettings& settings();
+    virtual ProbIMMReconstructorSettings& settings() override;
 
     ProbIMMReconstructorWidget* widget(); // ownage by caller
 

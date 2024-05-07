@@ -64,8 +64,8 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
     ds_line_combo_->addItem("3", QVariant(2));
     ds_line_combo_->addItem("4", QVariant(3));
 
-    connect(ds_line_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), 
-        [ = ] (int idx) { this->reconstructor_.baseSettings().ds_line = ds_line_combo_->itemData(idx).toInt(); });
+    connect(ds_line_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [ = ] (int idx) { this->reconstructor_.settings().ds_line = ds_line_combo_->itemData(idx).toInt(); });
 
     layout->addRow("Line ID", ds_line_combo_);
     
@@ -77,7 +77,7 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
     slice_length_box_->setMaximum(120);
 
     connect(slice_length_box_, QOverload<int>::of(&QSpinBox::valueChanged), 
-        [ & ] (int v) { this->reconstructor_.baseSettings().slice_duration_in_minutes = v; });
+        [ & ] (int v) { this->reconstructor_.settings().slice_duration_in_minutes = v; });
 
     layout->addRow("Slice Length", slice_length_box_);
 
@@ -87,7 +87,7 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
     slice_overlap_box_->setMaximum(20);
 
     connect(slice_overlap_box_, QOverload<int>::of(&QSpinBox::valueChanged), 
-        [ & ] (int v) { this->reconstructor_.baseSettings().outdated_duration_in_minutes = v; });
+        [ & ] (int v) { this->reconstructor_.settings().outdated_duration_in_minutes = v; });
 
     layout->addRow("Slice Overlap Length", slice_overlap_box_);
 
@@ -96,7 +96,7 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
     delete_refs_box_ = new QCheckBox("Delete All Calculated Reference Trajectories");
 
     connect(delete_refs_box_, &QCheckBox::toggled, 
-        [ = ] (bool ok) { this->reconstructor_.baseSettings().delete_all_calc_reftraj = ok; });
+        [ = ] (bool ok) { this->reconstructor_.settings().delete_all_calc_reftraj = ok; });
 
     layout->addRow("", delete_refs_box_);
 
@@ -113,7 +113,7 @@ void ReconstructorMainWidget::updateValues()
 {
     loginf << "ReconstructorMainWidget: updateValues";
 
-    const auto& settings = reconstructor_.baseSettings();
+    const auto& settings = reconstructor_.settings();
 
     assert(ds_name_edit_);
     ds_name_edit_->setText(QString::fromStdString(settings.ds_name));

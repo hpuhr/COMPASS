@@ -18,7 +18,7 @@ class SimpleReconstructorAssociationWidget : public QWidget
 //    void toggleMarkDubiousUtnsUnusedSlot();
 //    void toggleCommentDubiousUtnsSlot();
 
-    void maxTimeDiffTrackerEditedSlot (const QString& text);
+    void maxTimeDiffEditedSlot (const QString& text);
 
     void maxTimeDiffSensorEditedSlot (const QString& text);
     void maxDistanceQuitTrackerEditedSlot (const QString& text);

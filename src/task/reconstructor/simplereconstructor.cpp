@@ -27,7 +27,7 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id,
         registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);
 
         // tracker stuff
-        registerParameter("max_time_diff_tracker", &settings_.max_time_diff_tracker_, 15.0);
+        registerParameter("track_max_time_diff_", &settings_.track_max_time_diff_, 15.0);
 
         registerParameter("max_distance_quit_tracker", &settings_.max_distance_quit_tracker_, 10*NM2M); // kb 5nm
         registerParameter("max_distance_dubious_tracker", &settings_.max_distance_dubious_tracker_, 3*NM2M);
@@ -169,7 +169,7 @@ void SimpleReconstructor::processSlice_impl()
 {
     loginf << "SimpleReconstructor: processSlice_impl: current_slice_begin "
            << Time::toString(currentSlice().slice_begin_)
-           << " end " << Time::toString(currentSlice().slice_begin_ + baseSettings().sliceDuration())
+           << " end " << Time::toString(currentSlice().slice_begin_ + settings().sliceDuration())
            << " is last " << currentSlice().is_last_slice_;
 
             // remove_before_time_, new data >= current_slice_begin_

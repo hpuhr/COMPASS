@@ -1269,10 +1269,10 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).name());
 
-    unsigned int sac = reconstructor_.baseSettings().ds_sac;
-    unsigned int sic = reconstructor_.baseSettings().ds_sic;
+    unsigned int sac = reconstructor_.settings().ds_sac;
+    unsigned int sic = reconstructor_.settings().ds_sic;
     unsigned int ds_id = Number::dsIdFrom(sac, sic);
-    assert (reconstructor_.baseSettings().ds_line >= 0 && reconstructor_.baseSettings().ds_line <= 3);
+    assert (reconstructor_.settings().ds_line >= 0 && reconstructor_.settings().ds_line <= 3);
     //std::vector<unsigned int> assoc_val ({utn_});
 
     double speed_ms, bearing_rad, xy_cov;
@@ -1304,7 +1304,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         ds_id_vec.set(buffer_cnt, ds_id);
         sac_vec.set(buffer_cnt, sac);
         sic_vec.set(buffer_cnt, sic);
-        line_vec.set(buffer_cnt, reconstructor_.baseSettings().ds_line);
+        line_vec.set(buffer_cnt, reconstructor_.settings().ds_line);
 
         ts_vec.set(buffer_cnt, ref_it.second.t);
         tod_vec.set(buffer_cnt, ref_it.second.t.time_of_day().total_milliseconds() / 1000.0);
