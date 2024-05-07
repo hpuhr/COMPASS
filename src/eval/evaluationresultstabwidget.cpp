@@ -84,10 +84,12 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     scroll_area->setWidget(results_widget_);
     splitter_->addWidget(scroll_area);
 
-    splitter_->setStretchFactor(1, 1);
+    //qt hack: very big screen size x stretch 
+    splitter_->setSizes({ 10000, 30000 });
 
     QSettings settings("COMPASS", "EvalManagerResultsWidget");
-    splitter_->restoreState(settings.value("splitterSizes").toByteArray());
+    if (settings.value("splitterSizes").isValid())
+        splitter_->restoreState(settings.value("splitterSizes").toByteArray());
 
     main_layout->addWidget(splitter_);
 

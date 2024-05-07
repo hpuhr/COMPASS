@@ -65,12 +65,14 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
     scroll_area->setWidget(requirements_widget_);
 
     splitter_->addWidget(scroll_area);
-
-    splitter_->setStretchFactor(1, 1);
     //req_layout->addWidget(scroll_area, 1);
 
+    //qt hack: very big screen size x stretch 
+    splitter_->setSizes({ 10000, 30000 });
+
     QSettings settings("COMPASS", ("EvalStandardWidget"+standard_.name()).c_str());
-    splitter_->restoreState(settings.value("splitterSizes").toByteArray());
+    if (settings.value("splitterSizes").isValid())
+        splitter_->restoreState(settings.value("splitterSizes").toByteArray());
 
     //main_layout->addLayout(req_layout);
     main_layout->addWidget(splitter_);
