@@ -332,7 +332,10 @@ private:
 
         NullableVector<T>& data = buffer.get<T>(current_var_name);
         
-        return histogram_init_.scan(data);
+        if (!histogram_init_.scan(data))
+            return false;
+
+        return true;
     }
 
     /**

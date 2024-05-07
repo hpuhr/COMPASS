@@ -35,7 +35,8 @@ int main(int argc, char** argv)
         if (client.quitRequested())
             return 0;
 
-        client.run();
+        if (!client.run())
+            return -1;
 
 //        if (COMPASS::instance().mainWindow().automaticTasksDefined())
 //        {

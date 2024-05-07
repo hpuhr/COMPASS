@@ -97,7 +97,17 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     JobManager::instance().start();
     RTCommandManager::instance().start();
 
-    createSubConfigurables();
+    try
+    {
+        createSubConfigurables();
+    }
+    catch(const std::exception& e)
+    {
+        JobManager::instance().shutdown();
+        RTCommandManager::instance().shutdown();
+        
+        throw std::runtime_error(e.what());
+    }
 
     assert(db_interface_);
     assert(dbcontent_manager_);
