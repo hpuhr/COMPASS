@@ -14,14 +14,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/kalman_estimator.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_online_tracker.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_chain.h"
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_defs.h"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstruction_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/spline_interpolator.h"
-
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor.h"
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_kalman.h"
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_kalman_projection.h"
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_umkalman2d.h"
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_interp.h"
         
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/kalman.cpp"
@@ -33,10 +27,4 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/kalman_online_tracker.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_chain.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/spline_interpolator.cpp"
-
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_kalman.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_kalman_projection.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_umkalman2d.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/reconstructor_interp.cpp"     
 )

@@ -74,6 +74,7 @@ public:
                        KalmanProjectionHandler& proj_handler) const;
 
     double timestep(const Measurement& mm) const;
+    static double timestep(const Measurement& mm0, const Measurement& mm1);
     double distanceSqr(const Measurement& mm) const;
 
     const boost::posix_time::ptime& currrentTime() const { return ts_; }

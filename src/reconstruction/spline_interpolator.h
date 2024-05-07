@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 
 #include <vector>
 
@@ -75,6 +75,10 @@ public:
     static size_t estimatedSamples(const Measurement& mm0, 
                                    const Measurement& mm1,
                                    double dt);
+    
+    static std::vector<std::vector<Measurement>> splitMeasurements(const std::vector<Measurement>& measurements,
+                                                                   double max_dt);
+
 protected:
     std::vector<MeasurementInterp> interpolatePart(const std::vector<Measurement>& measurements) const;
     bool isFishySegment(const Measurement& mm0, 

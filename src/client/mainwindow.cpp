@@ -41,8 +41,6 @@
 #include "gpsimportcsvtaskdialog.h"
 #include "managesectorstask.h"
 #include "managesectorstaskdialog.h"
-//#include "calculatereferencestask.h"
-//#include "calculatereferencestaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
 #include "fftmanager.h"
@@ -61,8 +59,6 @@
 #include "radarplotpositioncalculatortaskdialog.h"
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskdialog.h"
-//#include "createassociationstask.h"
-//#include "createassociationstaskdialog.h"
 #include "reconstructortask.h"
 #include "reconstructortaskdialog.h"
 #include "util/async.h"
@@ -165,7 +161,6 @@ MainWindow::MainWindow()
     main_layout->addWidget(tab_widget_);
 
     // bottom widget
-
     QWidget* bottom_widget = new QWidget();
     bottom_widget->setMaximumHeight(40);
 
@@ -178,7 +173,6 @@ MainWindow::MainWindow()
     bottom_layout->addStretch();
 
     // add status & button
-
     status_label_ = new QLabel();
     bottom_layout->addWidget(status_label_);
 
@@ -198,7 +192,6 @@ MainWindow::MainWindow()
     bottom_layout->addStretch();
 
     // load button
-
     load_button_ = new QPushButton("Load");
     connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
     bottom_layout->addWidget(load_button_);
@@ -214,7 +207,6 @@ MainWindow::MainWindow()
     setCentralWidget(main_widget);
 
     // do menus
-
     createMenus ();
     updateMenus ();
 
@@ -421,16 +413,6 @@ void MainWindow::createMenus ()
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
-//    QAction* assoc_action = new QAction("(Old) Calculate Unique Targets");
-//    assoc_action->setToolTip("Create Unique Targets based on all DB Content");
-//    connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsOldSlot);
-//    process_menu_->addAction(assoc_action);
-
-//    calculate_references_action_ = new QAction("(Old) Calculate References ");
-//    calculate_references_action_->setToolTip("Calculate References from System Tracker and ADS-B data");
-//    connect(calculate_references_action_, &QAction::triggered, this, &MainWindow::calculateReferencesOldSlot);
-//    process_menu_->addAction(calculate_references_action_);
-
     QAction* assoc_artas_action = new QAction("Calculate ARTAS Target Report Usage");
     assoc_artas_action->setToolTip("Create target report usage based on ARTAS TRI information");
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
@@ -513,9 +495,6 @@ void MainWindow::updateMenus()
                               || in_live);
     process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
                                || in_live);
-
-//    assert (calculate_references_action_);
-//    calculate_references_action_->setEnabled(COMPASS::instance().dbContentManager().hasAssociations());
 
     assert (config_menu_);
     config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
@@ -935,26 +914,12 @@ void MainWindow::calculateAssociationsARTASSlot()
     COMPASS::instance().taskManager().createArtasAssociationsTask().dialog()->show();
 }
 
-//void MainWindow::calculateAssociationsOldSlot()
-//{
-//    loginf << "MainWindow: calculateAssociationsSlot";
-
-//    COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
-//}
-
 void MainWindow::reconstructReferencesSlot()
 {
     loginf << "MainWindow: reconstructReferencesSlot";
 
     COMPASS::instance().taskManager().reconstructReferencesTask().dialog()->show();
 }
-
-//void MainWindow::calculateReferencesOldSlot()
-//{
-//    loginf << "MainWindow: calculateReferencesOldSlot";
-
-//    COMPASS::instance().taskManager().calculateReferencesTask().dialog()->show();
-//}
 
 void MainWindow::configureDataSourcesSlot()
 {

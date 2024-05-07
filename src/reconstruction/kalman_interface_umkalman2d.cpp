@@ -18,7 +18,7 @@
 #include "kalman_interface_umkalman2d.h"
 
 #include "kalman.h"
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 
 namespace reconstruction
 {
