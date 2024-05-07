@@ -121,8 +121,8 @@ void SectionContentTable::addToLayout (QVBoxLayout* layout)
         connect(table_view_, &QTableView::customContextMenuRequested,
                 this, &SectionContentTable::customContextMenuSlot);
 
-        //connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
-        //        this, &SectionContentTable::currentRowChangedSlot);
+        connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+                this, &SectionContentTable::clickedSlot);
         connect(table_view_, &QTableView::pressed,
                 this, &SectionContentTable::clickedSlot);
         connect(table_view_, &QTableView::doubleClicked,
