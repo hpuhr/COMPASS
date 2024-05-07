@@ -1418,8 +1418,8 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         sort(series.begin(), series.end(),
              [&](const SymbolLineSeries& a, const SymbolLineSeries& b) {return a.scatter_series > b.scatter_series; });
 
-        //the biggest pointer is thus the one for the selection, so the selection will be rendered on top
-        QScatterSeries* selected_symbol_series = series.back().scatter_series;
+        //the smallest pointer is the one for the selection, so the selection will be rendered on top
+        QScatterSeries* selected_symbol_series = series.front().scatter_series;
         selected_symbol_series->setMarkerSize(MarkerSizeSelected);
         selected_symbol_series->setColor(Qt::yellow);
 
@@ -1434,7 +1434,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         //distribute sorted pointers to dbcontent types
         std::map<std::string, SymbolLineSeries> series_map;
         {
-            int cnt = 0;
+            int cnt = 1;
             for (auto it = x_values_.begin(); it != x_values_.end(); ++it)
                 series_map[ it->first ] = series[ cnt++ ];
         }
