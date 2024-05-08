@@ -4,6 +4,7 @@
 #include "simplereconstructorwidget.h"
 #include "probimmreconstructor.h"
 #include "probimmreconstructorwidget.h"
+#include "global.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -52,7 +53,10 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     reconstructor_widget_stack_ = new QStackedWidget();
 
     reconstructor_widget_stack_->addWidget(task_.simpleReconstructor()->widget());
+
+#if USE_EXPERIMENTAL_SOURCE == true
     reconstructor_widget_stack_->addWidget(task_.probIMMReconstructor()->widget());
+#endif
 
     showCurrentReconstructorWidget();
 

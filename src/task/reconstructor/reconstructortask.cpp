@@ -73,6 +73,8 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "ProbIMMReconstructor")
     {
+#if USE_EXPERIMENTAL_SOURCE == true
+
         assert(!probimm_reconstructor_);
 
         std::unique_ptr<AccuracyEstimatorBase> acc_estimator;
@@ -80,6 +82,8 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
 
         probimm_reconstructor_.reset(new ProbIMMReconstructor(class_id, instance_id, *this, std::move(acc_estimator)));
         assert(probimm_reconstructor_);
+
+#endif
     }
     else
         throw std::runtime_error("ReconstructorTask: generateSubConfigurable: unknown class_id " + class_id);
@@ -189,10 +193,14 @@ SimpleReconstructor* ReconstructorTask::simpleReconstructor() const
     return simple_reconstructor_.get();
 }
 
+#if USE_EXPERIMENTAL_SOURCE == true
+
 ProbIMMReconstructor* ReconstructorTask::probIMMReconstructor() const
 {
     return probimm_reconstructor_.get();
 }
+
+#endif
 
 std::set<unsigned int> ReconstructorTask::disabledDataSources() const
 {
@@ -581,11 +589,13 @@ void ReconstructorTask::checkSubConfigurables()
         assert (simple_reconstructor_);
     }
 
+#if USE_EXPERIMENTAL_SOURCE == true
     if (!probimm_reconstructor_)
     {
         generateSubConfigurable("ProbIMMReconstructor", "ProbIMMReconstructor0");
         assert (probimm_reconstructor_);
     }
+#endif
 }
 
 void ReconstructorTask::deleteCalculatedReferences()

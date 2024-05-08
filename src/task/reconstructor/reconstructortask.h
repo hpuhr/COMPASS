@@ -22,7 +22,10 @@ class DBContent;
 class Buffer;
 class ReconstructorBase;
 class SimpleReconstructor;
+
+#if USE_EXPERIMENTAL_SOURCE == true
 class ProbIMMReconstructor;
+#endif
 
 namespace dbContent
 {
@@ -77,7 +80,10 @@ class ReconstructorTask : public Task, public Configurable
 
     ReconstructorBase* currentReconstructor() const;
     SimpleReconstructor* simpleReconstructor() const;
+
+#if USE_EXPERIMENTAL_SOURCE == true
     ProbIMMReconstructor* probIMMReconstructor() const;
+#endif
 
     std::set<unsigned int> disabledDataSources() const;
 
@@ -97,7 +103,10 @@ class ReconstructorTask : public Task, public Configurable
     std::unique_ptr<ReconstructorTaskDialog> dialog_;
 
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
+
+#if USE_EXPERIMENTAL_SOURCE == true
     std::unique_ptr<ProbIMMReconstructor> probimm_reconstructor_; // has to be reset after each calculation
+#endif
 
     std::unique_ptr<QProgressDialog> progress_dialog_;
     boost::posix_time::ptime run_start_time_;
