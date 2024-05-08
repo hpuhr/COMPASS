@@ -80,10 +80,10 @@ class ReconstructorBaseSettings
     double track_max_time_diff_ {300.0};
 
     // compare targets related
-    double prob_min_time_overlap_tracker_ {0.1};
-    unsigned int min_updates_tracker_ {5};
-    double max_positions_dubious_verified_rate_ {0.5};
-    double max_positions_dubious_unknown_rate_ {0.3};
+    double target_prob_min_time_overlap_ {0.1};
+    unsigned int target_min_updates_ {5};
+    double target_max_positions_dubious_verified_rate_ {0.5};
+    double target_max_positions_dubious_unknown_rate_ {0.3};
 };
 
 /**

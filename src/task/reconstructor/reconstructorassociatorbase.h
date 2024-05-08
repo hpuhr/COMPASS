@@ -19,8 +19,8 @@ class ReconstructorAssociatorBase
 
     ReconstructorAssociatorBase();
 
-    void associateNewData();
-    void reset();
+    virtual void associateNewData();
+    virtual void reset();
 
   protected:
 
@@ -38,6 +38,8 @@ class ReconstructorAssociatorBase
     unsigned int num_merges_ {0};
 
     void associateTargetReports();
+    void associateTargetReports(std::set<unsigned int> dbcont_ids);
+
     void selfAccociateNewUTNs();
     void retryAssociateTargetReports();
     void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn);

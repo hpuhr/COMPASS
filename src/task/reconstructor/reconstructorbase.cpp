@@ -62,13 +62,13 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
 
     registerParameter("max_altitude_diff", &base_settings_.max_altitude_diff_, base_settings_.max_altitude_diff_);
 
-    registerParameter("prob_min_time_overlap_tracker", &base_settings_.prob_min_time_overlap_tracker_,
-                      base_settings_.prob_min_time_overlap_tracker_);
-    registerParameter("min_updates_tracker", &base_settings_.min_updates_tracker_, base_settings_.min_updates_tracker_);
-    registerParameter("max_positions_dubious_verified_rate", &base_settings_.max_positions_dubious_verified_rate_,
-                      base_settings_.max_positions_dubious_verified_rate_);
-    registerParameter("max_positions_dubious_unknown_rate", &base_settings_.max_positions_dubious_unknown_rate_,
-                      base_settings_.max_positions_dubious_unknown_rate_);
+    registerParameter("target_prob_min_time_overlap", &base_settings_.target_prob_min_time_overlap_,
+                      base_settings_.target_prob_min_time_overlap_);
+    registerParameter("target_min_updates", &base_settings_.target_min_updates_, base_settings_.target_min_updates_);
+    registerParameter("target_max_positions_dubious_verified_rate", &base_settings_.target_max_positions_dubious_verified_rate_,
+                      base_settings_.target_max_positions_dubious_verified_rate_);
+    registerParameter("target_max_positions_dubious_unknown_rate", &base_settings_.target_max_positions_dubious_unknown_rate_,
+                      base_settings_.target_max_positions_dubious_unknown_rate_);
 
     // reference computation
     {

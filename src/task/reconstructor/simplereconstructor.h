@@ -15,29 +15,30 @@ class SimpleReconstructorSettings : public ReconstructorBaseSettings
   public:
     SimpleReconstructorSettings() {};
 
-    bool associate_non_mode_s_ {true};
+    //bool associate_non_mode_s_ {true};
 
-    double max_distance_quit_tracker_ {10*NM2M}; //10nm in meters // kb 5
-    double max_distance_dubious_tracker_ {3*NM2M}; //kb 2.5? 2.5 lowest
-    unsigned int max_positions_dubious_tracker_ {5};
+    double max_distance_quit_ {10*NM2M}; //10nm in meters // kb 5
+    double max_distance_dubious_ {3*NM2M}; //kb 2.5? 2.5 lowest
+    double max_distance_acceptable_ {1*NM2M};
 
-    double max_distance_acceptable_tracker_ {NM2M/2.0};
-    double max_altitude_diff_tracker_ {300.0};
+    //unsigned int max_positions_dubious_ {5};
 
-    unsigned int min_updates_tracker_ {2}; // kb 3!!!
+    //double max_altitude_diff_ {300.0};
 
-    double prob_min_time_overlap_tracker_ {0.5}; //kb 0.7
+    //unsigned int min_updates_ {3}; // kb 3!!!
 
-    double cont_max_time_diff_tracker_ {30.0};
-    double cont_max_distance_acceptable_tracker_ {1852.0};
+    //double prob_min_time_overlap_ {0.5}; //kb 0.7
+
+//    double cont_max_time_diff_ {30.0};
+//    double cont_max_distance_acceptable_ {1*NM2M};
 
     // sensor
-    double max_time_diff_sensor_ {15.0};
-    double max_distance_acceptable_sensor_ {2*NM2M};
-    double max_altitude_diff_sensor_ {300.0};
+//    double max_time_diff_sensor_ {15.0};
+//    double max_distance_acceptable_sensor_ {2*NM2M};
+//    double max_altitude_diff_sensor_ {300.0};
 
     // other, not registered
-    std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal, oct 1000, 2000
+   // std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal, oct 1000, 2000
 };
 
 class SimpleReconstructorWidget;

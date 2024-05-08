@@ -112,6 +112,61 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
 }
 
+void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> dbcont_ids)
+{
+    loginf << "ReconstructorAssociatorBase: associateTargetReports: dbcont_ids " << String::compress(dbcont_ids, ',');
+
+    const std::set<unsigned int> debug_utns = reconstructor().task().debugUTNs();
+
+    if (debug_utns.size())
+        loginf << "DBG tns '" << String::compress(debug_utns, ',') << "'";
+
+    const std::set<unsigned long> debug_rec_nums = reconstructor().task().debugRecNums();
+
+    if (debug_rec_nums.size())
+        loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+
+    unsigned long rec_num;
+    int utn;
+
+    bool do_debug;
+
+    checkACADLookup();
+
+    for (auto& ts_it : reconstructor().tr_timestamps_)
+    {
+        rec_num = ts_it.second;
+
+        assert (reconstructor().target_reports_.count(rec_num));
+
+        do_debug = debug_rec_nums.count(rec_num);
+
+        if (do_debug)
+            loginf << "DBG tr " << rec_num;
+
+        dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
+
+        if (!dbcont_ids.count(tr.dbcont_id_))
+            continue;
+
+        if (!tr.in_current_slice_)
+        {
+            if(do_debug)
+                loginf << "DBG tr " << rec_num << " not in current slice";
+
+            continue;
+        }
+
+        utn = findUTNFor(tr, debug_rec_nums, debug_utns);
+
+        if (utn != -1) // estimate accuracy and associate
+            associate(tr, utn);
+        else // not associated
+            unassoc_rec_nums_.push_back(rec_num);
+    }
+
+}
+
 void ReconstructorAssociatorBase::selfAccociateNewUTNs()
 {
     loginf << "ReconstructorAssociatorBase: selfAccociateNewUTNs";
@@ -823,12 +878,12 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
         pos_dubious_rate = (float) pos_dubious_cnt / (float) pos_good_cnt;
 
         pos_dubious_rate_acceptable =
-            secondary_verified ? pos_dubious_rate < settings.max_positions_dubious_verified_rate_
-                               : pos_dubious_rate < settings.max_positions_dubious_unknown_rate_;
+            secondary_verified ? pos_dubious_rate < settings.target_max_positions_dubious_verified_rate_
+                               : pos_dubious_rate < settings.target_max_positions_dubious_unknown_rate_;
 
         if (pos_good_cnt
             && pos_dubious_rate_acceptable
-            && distance_scores.size() >= settings.min_updates_tracker_)
+            && distance_scores.size() >= settings.target_min_updates_)
         {
             double distance_score_avg = distance_scores_sum / (float) distance_scores.size();
 
@@ -856,7 +911,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
             if (print_debug)
                 loginf << "\ttarget " << target.utn_ << " other " << other.utn_
                        << " same distances failed "
-                       << distance_scores.size() << " < " << settings.min_updates_tracker_;
+                       << distance_scores.size() << " < " << settings.target_min_updates_;
         }
     };
 
@@ -905,7 +960,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                           }
 
                           if (target.timeOverlaps(other)
-                              && target.probTimeOverlaps(other) >= settings.prob_min_time_overlap_tracker_)
+                              && target.probTimeOverlaps(other) >= settings.target_prob_min_time_overlap_)
                           {
                               // check based on mode a/c/pos
 
@@ -927,7 +982,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                               }
 
                               if (ma_same.size() > ma_different.size()
-                                  && ma_same.size() >= settings.min_updates_tracker_)
+                                  && ma_same.size() >= settings.target_min_updates_)
                               {
                                   if (print_debug)
                                       loginf << "\ttarget " << target.utn_ << " other " << other.utn_
@@ -950,7 +1005,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                                   }
 
                                   if (mc_same.size() > mc_different.size()
-                                      && mc_same.size() >= settings.min_updates_tracker_)
+                                      && mc_same.size() >= settings.target_min_updates_)
                                   {
                                       if (print_debug)
                                           loginf << "\ttarget " << target.utn_ << " other " << other.utn_
