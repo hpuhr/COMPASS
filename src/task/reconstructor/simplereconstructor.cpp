@@ -21,37 +21,9 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id,
     , associatior_   (*this)
     , ref_calculator_(*this)
 {
-    //association
-    {
-        // common
-        //registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);
-
-        // tracker stuff
-        //registerParameter("max_time_diff", &settings_.max_time_diff_, 15.0);
-
-        registerParameter("max_distance_quit", &settings_.max_distance_quit_, 10*NM2M); // kb 5nm
-        registerParameter("max_distance_dubious", &settings_.max_distance_dubious_, 3*NM2M);
-        //kb 2.5? 2.5 lowest
-        //registerParameter("max_positions_dubious", &settings_.max_positions_dubious_, 5u);
-
-        registerParameter("max_distance_acceptable", &settings_.max_distance_acceptable_, 1*NM2M);
-        //registerParameter("max_altitude_diff", &settings_.max_altitude_diff_, 300.0);
-        //registerParameter("track_max_time_diff", &settings_.track_max_time_diff_, 300.0);
-
-        //registerParameter("min_updates", &settings_.min_updates_, 3u); // kb 3!!!
-        //registerParameter("prob_min_time_overlap", &settings_.prob_min_time_overlap_, 0.5); //kb 0.7
-
-        //registerParameter("cont_max_time_diff_tracker", &settings_.cont_max_time_diff_, 30.0);
-        //registerParameter("cont_max_distance_acceptable_tracker", &settings_.cont_max_distance_acceptable_, 1852.0);
-
-                // sensor
-        //registerParameter("max_time_diff_sensor", &settings_.max_time_diff_sensor_, 15.0);
-        //registerParameter("max_distance_acceptable_sensor", &settings_.max_distance_acceptable_sensor_, 2*NM2M);
-        //registerParameter("max_altitude_diff_sensor", &settings_.max_altitude_diff_sensor_, 300.0);
-
-        // target id? kb: nope
-        // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
-    }
+    registerParameter("max_distance_quit", &settings_.max_distance_quit_, 5*NM2M); // kb 5nm
+    registerParameter("max_distance_dubious", &settings_.max_distance_dubious_, 2*NM2M);
+    registerParameter("max_distance_acceptable", &settings_.max_distance_acceptable_, 1*NM2M);
 }
 
 SimpleReconstructor::~SimpleReconstructor() {}
