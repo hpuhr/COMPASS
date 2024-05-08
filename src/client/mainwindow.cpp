@@ -63,7 +63,7 @@
 #include "reconstructortaskdialog.h"
 #include "util/async.h"
 
-#ifdef USE_EXPERIMENTAL_SOURCE
+#if USE_EXPERIMENTAL_SOURCE == true
 #include "geometrytreeitem.h"
 #include "test_lab.h"
 #endif
