@@ -39,7 +39,11 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     reconstructor_box_ = new QComboBox();
     reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ScoringUMReconstructorName));
+
+#if USE_EXPERIMENTAL_SOURCE == true
     reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ProbImmReconstructorName));
+#endif
+
     int idx = reconstructor_box_->findText(QString::fromStdString(task_.currentReconstructorStr()));
     reconstructor_box_->setCurrentIndex(idx);
 

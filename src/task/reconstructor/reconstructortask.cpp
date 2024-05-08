@@ -11,13 +11,16 @@
 #include "viewmanager.h"
 #include "buffer.h"
 #include "simplereconstructor.h"
-#include "probimmreconstructor.h"
 #include "simpleaccuracyestimator.h"
-#include "complexaccuracyestimator.h"
 #include "timeconv.h"
 #include "number.h"
 #include "dbinterface.h"
 #include "metavariable.h"
+
+#if USE_EXPERIMENTAL_SOURCE == true
+#include "probimmreconstructor.h"
+#include "complexaccuracyestimator.h"
+#endif
 
 #include <QApplication>
 #include <QMessageBox>
@@ -31,7 +34,10 @@ using namespace Utils;
 using namespace dbContent;
 
 const std::string ReconstructorTask::ScoringUMReconstructorName {"Scoring + UMKalman"};
+
+#if USE_EXPERIMENTAL_SOURCE == true
 const std::string ReconstructorTask::ProbImmReconstructorName {"Probabilistic + IMM"};
+#endif
 
 ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
@@ -48,7 +54,10 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 
     if (!current_reconstructor_str_.size()
         || (current_reconstructor_str_ != ScoringUMReconstructorName
-            && current_reconstructor_str_ != ProbImmReconstructorName))
+#if USE_EXPERIMENTAL_SOURCE == true
+            && current_reconstructor_str_ != ProbImmReconstructorName
+#endif
+                                               ))
         current_reconstructor_str_ = ScoringUMReconstructorName;
 
     createSubConfigurables();
@@ -179,6 +188,7 @@ void ReconstructorTask::currentReconstructorStr(const std::string& value)
 
 ReconstructorBase* ReconstructorTask::currentReconstructor() const
 {
+#if USE_EXPERIMENTAL_SOURCE == true
     assert (current_reconstructor_str_ == ReconstructorTask::ScoringUMReconstructorName
            || current_reconstructor_str_ == ReconstructorTask::ProbImmReconstructorName);
 
@@ -186,6 +196,11 @@ ReconstructorBase* ReconstructorTask::currentReconstructor() const
         return dynamic_cast<ReconstructorBase*> (simple_reconstructor_.get());
     else
         return dynamic_cast<ReconstructorBase*> (probimm_reconstructor_.get());
+#else
+    assert (current_reconstructor_str_ == ReconstructorTask::ScoringUMReconstructorName);
+
+    return dynamic_cast<ReconstructorBase*> (simple_reconstructor_.get());
+#endif
 }
 
 SimpleReconstructor* ReconstructorTask::simpleReconstructor() const
