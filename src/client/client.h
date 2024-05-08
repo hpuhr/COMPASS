@@ -32,7 +32,7 @@ public:
 
     bool quitRequested() const;
 
-    void run ();
+    bool run ();
 
 private:
 
