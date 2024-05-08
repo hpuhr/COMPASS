@@ -41,9 +41,9 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "viewmanager.h"
 #include "files.h"
-#include "ViewerWidget.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
+#include "ViewerWidget.h"
 #include "geographicview.h"
 #include "geographicviewdatawidget.h"
 #endif
