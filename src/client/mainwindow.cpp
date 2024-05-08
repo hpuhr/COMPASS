@@ -120,7 +120,7 @@ MainWindow::MainWindow()
 
     main_widget->setLayout(main_layout);
 
-    // initialize tabs
+            // initialize tabs
 
     tab_widget_ = new QTabWidget();
     tab_widget_->setObjectName("container0");
@@ -143,7 +143,7 @@ MainWindow::MainWindow()
 
     QApplication::restoreOverrideCursor();
 
-    //tab_widget_->setCurrentIndex(0);
+            //tab_widget_->setCurrentIndex(0);
 
     const QString tool_tip = "Add view";
 
@@ -160,7 +160,7 @@ MainWindow::MainWindow()
 
     main_layout->addWidget(tab_widget_);
 
-    // bottom widget
+            // bottom widget
     QWidget* bottom_widget = new QWidget();
     bottom_widget->setMaximumHeight(40);
 
@@ -172,7 +172,7 @@ MainWindow::MainWindow()
 
     bottom_layout->addStretch();
 
-    // add status & button
+            // add status & button
     status_label_ = new QLabel();
     bottom_layout->addWidget(status_label_);
 
@@ -191,7 +191,7 @@ MainWindow::MainWindow()
 
     bottom_layout->addStretch();
 
-    // load button
+            // load button
     load_button_ = new QPushButton("Load");
     connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
     bottom_layout->addWidget(load_button_);
@@ -206,20 +206,20 @@ MainWindow::MainWindow()
 
     setCentralWidget(main_widget);
 
-    // do menus
+            // do menus
     createMenus ();
     updateMenus ();
 
-    // do signal slots
+            // do signal slots
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
-             this, &MainWindow::appModeSwitchSlot);
+            this, &MainWindow::appModeSwitchSlot);
 
     connect(&COMPASS::instance().dbContentManager(), &DBContentManager::loadingDoneSignal,
-                     this, &MainWindow::loadingDoneSlot);
+            this, &MainWindow::loadingDoneSlot);
     connect (&COMPASS::instance().dbContentManager(), &DBContentManager::associationStatusChangedSignal,
-             this, &MainWindow::updateMenus);
+            this, &MainWindow::updateMenus);
 
-    //init ui related commands
+            //init ui related commands
     ui_test::initUITestCommands();
 
     main_window::init_commands();
@@ -229,7 +229,7 @@ MainWindow::~MainWindow()
 {
     logdbg << "MainWindow: destructor";
 
-    // remember: this not called! insert deletes into closeEvent function
+            // remember: this not called! insert deletes into closeEvent function
 }
 
 void MainWindow::createMenus ()
@@ -238,12 +238,12 @@ void MainWindow::createMenus ()
 
     menuBar()->setObjectName("mainmenu");
 
-    // file menu
+            // file menu
     QMenu* file_menu = menuBar()->addMenu("&File");
     file_menu->setObjectName("main_window_file_menu");
     file_menu->setToolTipsVisible(true);
 
-    // db operations
+            // db operations
     new_db_action_ = new QAction("&New");
     new_db_action_->setShortcuts(QKeySequence::New);
     new_db_action_->setToolTip("Create a new database");
@@ -278,7 +278,7 @@ void MainWindow::createMenus ()
 
     file_menu->addSeparator();
 
-    // config operations
+            // config operations
 
     if (!COMPASS::instance().disableMenuConfigSave())
     {
@@ -290,7 +290,7 @@ void MainWindow::createMenus ()
         file_menu->addSeparator();
     }
 
-    // quit operations
+            // quit operations
     quit_wo_cfg_sav_action_ = new QAction("Quit &Without Saving Config");
     quit_wo_cfg_sav_action_->setShortcut(tr("Ctrl+W"));
     quit_wo_cfg_sav_action_->setToolTip("Quit the application withour saving the configuration");
@@ -304,7 +304,7 @@ void MainWindow::createMenus ()
     connect(quit_act, &QAction::triggered, this, &MainWindow::quitSlot);
     file_menu->addAction(quit_act);
 
-    // import menu
+            // import menu
 
     import_menu_ = menuBar()->addMenu("&Import");
     import_menu_->setToolTipsVisible(true);
@@ -321,14 +321,14 @@ void MainWindow::createMenus ()
     connect(import_pcap_file_action, &QAction::triggered, this, &MainWindow::importAsterixFromPCAPSlot);
     import_menu_->addAction(import_pcap_file_action);
 
-    // if (!COMPASS::instance().isAppImage())
-    // {
-    //     QAction* import_ast_json_action = new QAction("ASTERIX From JSON Recording");
-    //     //import_ast_json_action->setShortcut(tr("Ctrl+P"));
-    //     import_ast_json_action->setToolTip("Import ASTERIX data from JSON recording file");
-    //     connect(import_ast_json_action, &QAction::triggered, this, &MainWindow::importAsterixFromJSONSlot);
-    //     import_menu_->addAction(import_ast_json_action);
-    // }
+            // if (!COMPASS::instance().isAppImage())
+            // {
+            //     QAction* import_ast_json_action = new QAction("ASTERIX From JSON Recording");
+            //     //import_ast_json_action->setShortcut(tr("Ctrl+P"));
+            //     import_ast_json_action->setToolTip("Import ASTERIX data from JSON recording file");
+            //     connect(import_ast_json_action, &QAction::triggered, this, &MainWindow::importAsterixFromJSONSlot);
+            //     import_menu_->addAction(import_ast_json_action);
+            // }
 
     QAction* import_ast_net_action = new QAction("ASTERIX From Network");
     import_ast_net_action->setToolTip("Import ASTERIX From Network");
@@ -347,11 +347,11 @@ void MainWindow::createMenus ()
     connect(import_gps_nmea_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
     import_menu_->addAction(import_gps_nmea_action);
 
-    // deactivated, just for porto?
-//    QAction* import_gps_csv_action = new QAction("&GPS Trail CSV");
-//    import_gps_csv_action->setToolTip("Import GPS Trail CSV File");
-//    connect(import_gps_csv_action, &QAction::triggered, this, &MainWindow::importGPSCSVSlot);
-//    import_menu_->addAction(import_gps_csv_action);
+            // deactivated, just for porto?
+    //    QAction* import_gps_csv_action = new QAction("&GPS Trail CSV");
+    //    import_gps_csv_action->setToolTip("Import GPS Trail CSV File");
+    //    connect(import_gps_csv_action, &QAction::triggered, this, &MainWindow::importGPSCSVSlot);
+    //    import_menu_->addAction(import_gps_csv_action);
 
     if (!COMPASS::instance().hideViewpoints())
     {
@@ -362,11 +362,11 @@ void MainWindow::createMenus ()
         import_menu_->addAction(import_vp_file_action);
     }
 
-    // configuration menu
+            // configuration menu
     config_menu_ = menuBar()->addMenu("&Configuration");
     config_menu_->setToolTipsVisible(true);
 
-    // configure operations
+            // configure operations
     QAction* ds_action = new QAction("Data Sources");
     ds_action->setToolTip("Configure Data Sources");
     connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
@@ -403,13 +403,13 @@ void MainWindow::createMenus ()
     connect(auto_refresh_views_action, &QAction::toggled, &view_manager, &ViewManager::enableAutomaticReload);
     config_menu_->addAction(auto_refresh_views_action);
 
-    // process menu
+            // process menu
     process_menu_ = menuBar()->addMenu("&Process");
     process_menu_->setToolTipsVisible(true);
 
     QAction* calc_radar_plpos_action = new QAction("Calculate Radar Plot Positions");
     calc_radar_plpos_action->setToolTip("Calculate Radar Plot Positions, only needed if Radar Position information"
-                                           " was changed");
+        " was changed");
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
@@ -423,18 +423,18 @@ void MainWindow::createMenus ()
     connect(reconstruct_action, &QAction::triggered, this, &MainWindow::reconstructReferencesSlot);
     process_menu_->addAction(reconstruct_action);
 
-    // ui menu
+            // ui menu
     ui_menu_ = menuBar()->addMenu("&UI");
     ui_menu_->setToolTipsVisible(true);
 
     QAction* reset_views_action = new QAction("Reset Views");
     reset_views_action->setToolTip(
-                "Enable all data sources, reset labels,\n"
-                "disable all filters and reset Views to startup configuration");
+        "Enable all data sources, reset labels,\n"
+        "disable all filters and reset Views to startup configuration");
     connect(reset_views_action, &QAction::triggered, this, &MainWindow::resetViewsMenuSlot);
     ui_menu_->addAction(reset_views_action);
 
-    //debug menu (internal)
+            //debug menu (internal)
     createDebugMenu();
 }
 
@@ -456,7 +456,7 @@ void MainWindow::updateMenus()
 
     open_recent_db_menu_->clear();
 
-    // recent db files
+            // recent db files
     vector<string> recent_file_list = COMPASS::instance().dbFileList();
 
     for (auto& fn_it : recent_file_list)
@@ -621,7 +621,7 @@ void MainWindow::newDBSlot()
     loginf << "MainWindow: newDBSlot";
 
     string filename = QFileDialog::getSaveFileName(
-                this, "New SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
+                          this, "New SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         createDB(filename);
@@ -632,7 +632,7 @@ void MainWindow::openExistingDBSlot()
     loginf << "MainWindow: openExistingDBSlot";
 
     string filename = QFileDialog::getOpenFileName(
-                this, "Open SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
+                          this, "Open SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         openExistingDB(filename);
@@ -657,7 +657,7 @@ void MainWindow::exportDBSlot()
     loginf << "MainWindow: exportDBSlot";
 
     string filename = QFileDialog::getSaveFileName(
-                this, "Export DB SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
+                          this, "Export DB SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
     {
@@ -742,24 +742,24 @@ void MainWindow::importAsterixRecordingSlot()
 
         task.source().addFiles(filenames_vec);//, file_line);
 
-        //task.addImportFileNames(filenames_vec);
+                //task.addImportFileNames(filenames_vec);
 
         updateMenus();
 
         task.runDialog(this);
     }
 
-//    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
+    //    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
 
-//    if (filename.size() > 0)
-//    {
-//        //COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
+    //    if (filename.size() > 0)
+    //    {
+    //        //COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
 
-//        updateMenus();
+    //        updateMenus();
 
-//        COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
-//        COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
-//    }
+    //        COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
+    //        COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+    //    }
 }
 
 void MainWindow::importRecentAsterixRecordingSlot()
@@ -835,8 +835,8 @@ void MainWindow::importAsterixFromNetworkSlot()
 void MainWindow::importJSONRecordingSlot()
 {
     string filename = QFileDialog::getOpenFileName(
-                this, "Import JSON File", COMPASS::instance().lastUsedPath().c_str(),
-                "JSON Files (*.json *.zip)").toStdString();
+                          this, "Import JSON File", COMPASS::instance().lastUsedPath().c_str(),
+                          "JSON Files (*.json *.zip)").toStdString();
 
     if (filename.size() > 0)
     {
@@ -976,10 +976,10 @@ void MainWindow::resetViewsMenuSlot()
     {
 
         reply = QMessageBox::question(
-                    this, "Reset Views",
-                    "Confirm to enable all data sources, reset labels,\n"
-                    "disable all filters and reset Views to startup configuration?",
-                    QMessageBox::Yes|QMessageBox::No);
+            this, "Reset Views",
+            "Confirm to enable all data sources, reset labels,\n"
+            "disable all filters and reset Views to startup configuration?",
+            QMessageBox::Yes|QMessageBox::No);
     }
 
     if (reply == QMessageBox::Yes)
@@ -1001,26 +1001,26 @@ void MainWindow::resetViewsMenuSlot()
 
             Async::waitAndProcessEventsFor(50);
 
-            // reset stuff
+                    // reset stuff
             COMPASS::instance().dbContentManager().resetToStartupConfiguration();
 
             COMPASS::instance().dataSourceManager().resetToStartupConfiguration();
 
             COMPASS::instance().filterManager().resetToStartupConfiguration();
 
-    #ifdef USE_EXPERIMENTAL_SOURCE
+#if USE_EXPERIMENTAL_SOURCE == true
             GeometryTreeItem::clearHiddenIdentifierStrs(); // clears hidden layers
-    #endif
+#endif
 
             COMPASS::instance().viewManager().resetToStartupConfiguration();
 
-            // set AppMode
+                    // set AppMode
             if (COMPASS::instance().appMode() == AppMode::LivePaused)
                 COMPASS::instance().appMode(AppMode::LiveRunning);
             else
             {
                 COMPASS::instance().viewManager().appModeSwitchSlot(
-                            COMPASS::instance().appMode(), COMPASS::instance().appMode());
+                    COMPASS::instance().appMode(), COMPASS::instance().appMode());
             }
 
             msg_box.hide();
@@ -1043,7 +1043,7 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
 
     if (COMPASS::instance().hideEvaluation() && COMPASS::instance().hideViewpoints())
     {
-        // nothing
+       // nothing
     }
     else if (!COMPASS::instance().hideEvaluation() && !COMPASS::instance().hideViewpoints())
     {
@@ -1094,7 +1094,7 @@ void MainWindow::autoResumeTimerSlot()
 
     auto_resume_dialog_.reset(new AutoResumeDialog(COMPASS::instance().autoLiveRunningResumeAskWaitTime() * 60));
 
-    // min to s
+            // min to s
     connect (auto_resume_dialog_.get(), &AutoResumeDialog::resumeSignal, this, &MainWindow::autoResumeResumeSlot);
     connect (auto_resume_dialog_.get(), &AutoResumeDialog::stayPausedSignal, this, &MainWindow::autoResumeStaySlot);
 
@@ -1121,7 +1121,7 @@ void MainWindow::autoResumeStaySlot()
 
     auto_resume_dialog_ = nullptr;
 
-    // restart timer
+            // restart timer
     auto_resume_timer_->start(COMPASS::instance().autoLiveRunningResumeAskTime() * 60 * 1000); // min -> ms
 }
 
@@ -1229,14 +1229,14 @@ void MainWindow::createDebugMenu()
     //add debug menu entry
     auto debug_menu = menuBar()->addMenu("Debug");
 
-    //add test lab entries
-    #ifdef USE_EXPERIMENTAL_SOURCE
+        //add test lab entries
+#if USE_EXPERIMENTAL_SOURCE == true
     {
         TestLabCollection().appendTestLabs(debug_menu);
     }
-    #endif
+#endif
 
-    //add command shell
+            //add command shell
     {
         auto action = debug_menu->addAction("Command Shell");
         connect(action, &QAction::triggered, [ this ] () { this->showCommandShell(); });
