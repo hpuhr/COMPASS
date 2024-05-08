@@ -76,12 +76,13 @@ class ReconstructorTask : public Task, public Configurable
     void currentReconstructorStr(const std::string& value);
 
     static const std::string ScoringUMReconstructorName;
-    static const std::string ProbImmReconstructorName;
 
     ReconstructorBase* currentReconstructor() const;
     SimpleReconstructor* simpleReconstructor() const;
 
 #if USE_EXPERIMENTAL_SOURCE == true
+    static const std::string ProbImmReconstructorName;
+
     ProbIMMReconstructor* probIMMReconstructor() const;
 #endif
 

@@ -180,8 +180,13 @@ std::string ReconstructorTask::currentReconstructorStr() const
 
 void ReconstructorTask::currentReconstructorStr(const std::string& value)
 {
+
+#if USE_EXPERIMENTAL_SOURCE == true
     assert (value == ReconstructorTask::ScoringUMReconstructorName
            || value == ReconstructorTask::ProbImmReconstructorName);
+#else
+    assert (value == ReconstructorTask::ScoringUMReconstructorName);
+#endif
 
     current_reconstructor_str_ = value;
 }
