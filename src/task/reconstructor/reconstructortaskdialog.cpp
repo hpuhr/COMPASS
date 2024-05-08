@@ -2,9 +2,12 @@
 #include "reconstructortask.h"
 #include "simplereconstructor.h"
 #include "simplereconstructorwidget.h"
+#include "global.h"
+
+#if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
 #include "probimmreconstructorwidget.h"
-#include "global.h"
+#endif
 
 #include <QGridLayout>
 #include <QHBoxLayout>
