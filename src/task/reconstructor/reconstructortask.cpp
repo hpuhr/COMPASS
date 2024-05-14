@@ -288,7 +288,11 @@ void ReconstructorTask::run()
 {
     assert(canRun());
 
+    loading_slice_ = nullptr;
+    processing_slice_ = nullptr;
     processing_data_slice_ = false;
+    writing_slice_ = nullptr;
+
     cancelled_ = false;
 
     current_slice_idx_ = 0;
@@ -442,6 +446,9 @@ void ReconstructorTask::processDataSlice()
 {
     loginf << "ReconstructorTask: processDataSlice";
 
+    if (cancelled_)
+        return;
+
     assert (loading_slice_);
     assert (!processing_slice_);
 
@@ -545,9 +552,15 @@ void ReconstructorTask::loadingDoneSlot()
             // check if not already processing
     while (currentReconstructor()->processing() || processing_data_slice_)
     {
+        if (cancelled_)
+            return;
+
         QCoreApplication::processEvents();
         QThread::msleep(1);
     }
+
+    if (cancelled_)
+        return;
 
     loginf << "ReconstructorTask: loadingDoneSlot: calling process";
 
