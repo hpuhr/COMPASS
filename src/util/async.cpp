@@ -240,7 +240,7 @@ void waitAndProcessEventsFor (unsigned int milliseconds)
 
     while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < milliseconds)
     {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QCoreApplication::processEvents(); // QEventLoop::ExcludeUserInputEvents
         QThread::msleep(1);
     }
 }

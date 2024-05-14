@@ -177,7 +177,7 @@ public:
     //void removeNonModeSTRs();
 
     void updateCounts();
-    std::map <std::string, unsigned int> getDBContentCounts();
+    std::map <std::string, unsigned int> getDBContentCounts() const;
 
     std::shared_ptr<Buffer> getReferenceBuffer();
 

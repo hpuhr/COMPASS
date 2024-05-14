@@ -16,6 +16,7 @@
 #include "number.h"
 #include "dbinterface.h"
 #include "metavariable.h"
+#include "util/async.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
@@ -28,6 +29,8 @@
 #include <QThread>
 
 #include <malloc.h>
+
+#include <future>
 
 using namespace std;
 using namespace Utils;
@@ -57,7 +60,7 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 #if USE_EXPERIMENTAL_SOURCE == true
             && current_reconstructor_str_ != ProbImmReconstructorName
 #endif
-                                               ))
+            ))
         current_reconstructor_str_ = ScoringUMReconstructorName;
 
     createSubConfigurables();
@@ -285,37 +288,95 @@ void ReconstructorTask::run()
 {
     assert(canRun());
 
+    processing_data_slice_ = false;
+    cancelled_ = false;
+
     current_slice_idx_ = 0;
 
     loginf << "ReconstructorTask: run: started";
 
     run_start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    progress_dialog_.reset(new QProgressDialog);
-    progress_dialog_->setCancelButton(nullptr);
-    progress_dialog_->setMinimum(0);
-    progress_dialog_->setMaximum(100);
+    progress_dialog_.reset(new QProgressDialog("Reconstructing...", "Cancel", 0, 100));
     progress_dialog_->setAutoClose(false);
-    progress_dialog_->setWindowTitle("Reconstructing...");
+    connect(progress_dialog_.get(), &QProgressDialog::canceled,
+            this, &ReconstructorTask::runCancelSlot, Qt::QueuedConnection);
 
     progress_dialog_->show();
 
+    if (cancelled_)
+        return;
+
     updateProgress("Deleting Previous References", false);
 
-    deleteCalculatedReferences();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    dbcontent_man.clearData();
+
+    delcalcref_future_ = std::async(std::launch::async, [&] {
+        {
+            deleteCalculatedReferences();
+
+            if (cancelled_)
+                return;
+
+            QMetaObject::invokeMethod(this, "deleteCalculatedReferencesDoneSlot", Qt::QueuedConnection);
+        }});
+}
+
+void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
+{
+    loginf << "ReconstructorTask: deleteCalculatedReferencesDoneSlot";
+
+    if (cancelled_)
+        return;
 
     updateProgress("Deleting Previous Targets", false);
 
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
-    cont_man.clearTargetsInfo();
+
+    deltgts_future_ = std::async(std::launch::async, [&] {
+        {
+            cont_man.clearTargetsInfo();
+
+            if (cancelled_)
+                return;
+
+            QMetaObject::invokeMethod(this, "deleteTargetsDoneSlot", Qt::QueuedConnection);
+        }});
+}
+
+void ReconstructorTask::deleteTargetsDoneSlot()
+{
+    loginf << "ReconstructorTask: deleteTargetsDoneSlot";
+
+    if (cancelled_)
+        return;
 
     updateProgress("Deleting Previous Associations", false);
 
-    for (auto& dbcont_it : cont_man)
-    {
-        if (dbcont_it.second->existsInDB())
-            COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
-    }
+    DBContentManager& cont_man = COMPASS::instance().dbContentManager();
+
+    delassocs_future_ = std::async(std::launch::async, [&] {
+        {
+            for (auto& dbcont_it : cont_man)
+            {
+                if (dbcont_it.second->existsInDB())
+                    COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
+            }
+
+            if (cancelled_)
+                return;
+
+            QMetaObject::invokeMethod(this, "deleteAssociationsDoneSlot", Qt::QueuedConnection);
+        }});
+}
+
+void ReconstructorTask::deleteAssociationsDoneSlot()
+{
+    loginf << "ReconstructorTask: deleteAssociationsDoneSlot";
+
+    if (cancelled_)
+        return;
 
     updateProgress("Initializing", false);
 
@@ -330,6 +391,9 @@ void ReconstructorTask::run()
     connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
             this, &ReconstructorTask::loadingDoneSlot);
 
+    if (cancelled_)
+        return;
+
     loadDataSlice();
 }
 
@@ -339,14 +403,11 @@ void ReconstructorTask::loadDataSlice()
     assert (currentReconstructor()->hasNextTimeSlice());
     assert (!loading_slice_);
 
-    //updateProgress("Loading slice", true);
-
-    //boost::posix_time::ptime min_ts, max_ts;
+    loginf << "ReconstructorTask: loadDataSlice";
 
     loading_slice_ = currentReconstructor()->getNextTimeSlice();
-    //assert (min_ts <= max_ts);
 
-    //bool last_slice = !currentReconstructor()->hasNextTimeSlice();
+    assert (loading_slice_);
 
     loginf << "ReconstructorTask: loadDataSlice: min " << Time::toString(loading_slice_->slice_begin_)
            << " max " << Time::toString(loading_slice_->next_slice_begin_)
@@ -376,6 +437,54 @@ void ReconstructorTask::loadDataSlice()
         dbcont_it.second->load(read_set, false, false, timestamp_filter);
     }
 }
+
+void ReconstructorTask::processDataSlice()
+{
+    loginf << "ReconstructorTask: processDataSlice";
+
+    assert (loading_slice_);
+    assert (!processing_slice_);
+
+    processing_slice_ = std::move(loading_slice_);
+
+    assert (!processing_data_slice_);
+
+    processing_data_slice_ = true;
+
+    logdbg << "ReconstructorTask: processDataSlice: processing1 first slice "
+           << !processing_slice_->first_slice_
+           << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
+
+    assert (processing_slice_);
+
+    logdbg << "ReconstructorTask: processDataSlice: processing2 first slice "
+           << !processing_slice_->first_slice_
+           << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
+
+    process_future_ = std::async(std::launch::async, [&] {
+
+        logdbg << "ReconstructorTask: processDataSlice: async process";
+
+        if (cancelled_)
+            return;
+
+        logdbg << "ReconstructorTask: processDataSlice: async processing first slice "
+               << !processing_slice_->first_slice_
+               << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
+
+        assert (!currentReconstructor()->processing());
+        currentReconstructor()->processSlice();
+
+                // wait for previous writing done
+        while (writing_slice_)
+            QThread::msleep(1);
+
+        logdbg << "ReconstructorTask: processDataSlice: done";
+
+        QMetaObject::invokeMethod(this, "processingDoneSlot", Qt::QueuedConnection);
+    });
+}
+
 
 void ReconstructorTask::writeDataSlice()
 {
@@ -411,37 +520,52 @@ void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_p
 
 void ReconstructorTask::loadingDoneSlot()
 {
+    loginf << "ReconstructorTask: loadingDoneSlot";
+
+    if (cancelled_)
+        return;
+
     assert (currentReconstructor());
     assert (loading_slice_);
 
     bool last_slice = loading_slice_->is_last_slice_;
 
-    loginf << "ReconstructorTask: loadingDoneSlot: is_last_slice " << last_slice;
+    loginf << "ReconstructorTask: loadingDoneSlot: is_last_slice " << last_slice
+           << " current_slice_idx " << current_slice_idx_;
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     loading_slice_->data_ = dbcontent_man.data();
+    assert (loading_slice_->data_.size());
 
     dbcontent_man.clearData(); // clear previous
 
-    // check if not already processing
-    while (currentReconstructor()->hasCurrentSlice())
+    if (cancelled_)
+        return;
+
+            // check if not already processing
+    while (currentReconstructor()->processing() || processing_data_slice_)
     {
         QCoreApplication::processEvents();
         QThread::msleep(1);
     }
 
+    loginf << "ReconstructorTask: loadingDoneSlot: calling process";
+
     updateProgress("Processing slice", true);
     ++current_slice_idx_;
 
-    std::unique_ptr<ReconstructorBase::DataSlice> tmp_slice = std::move(loading_slice_);
+    assert (!processing_data_slice_);
 
-    assert (!currentReconstructor()->hasCurrentSlice());
-    std::future<void> pending_future = std::async(std::launch::async, [&] {
+    loginf << "ReconstructorTask: loadingDoneSlot: processing first slice "
+           << !loading_slice_->first_slice_
+           << " remove ts " << Time::toString(loading_slice_->remove_before_time_);
 
-        currentReconstructor()->processSlice(std::move(tmp_slice));
+    processDataSlice();
+    assert (!loading_slice_);
+    assert (processing_data_slice_);
 
-        QMetaObject::invokeMethod(this, "processingDoneSlot", Qt::QueuedConnection);
-    });
+    if (cancelled_)
+        return;
 
     if (last_slice) // disconnect everything
     {
@@ -455,6 +579,10 @@ void ReconstructorTask::loadingDoneSlot()
     else // do next load
     {
         loginf << "ReconstructorTask: loadingDoneSlot: next slice";
+
+        if (cancelled_)
+            return;
+
         loadDataSlice();
     }
 }
@@ -463,18 +591,19 @@ void ReconstructorTask::processingDoneSlot()
 {
     loginf << "ReconstructorTask: processingDoneSlot";
 
-    // processing done
+            // processing done
     assert(currentReconstructor()->currentSlice().processing_done_);
+    assert (processing_data_slice_);
+    assert (processing_slice_);
+    assert (!writing_slice_);
 
-    // do write
-    while (writing_slice_)
-    {
-        QCoreApplication::processEvents();
-        QThread::msleep(1);
-    }
+    processing_data_slice_ = false;
+
+    if (cancelled_)
+        return;
 
     assert (!writing_slice_);
-    writing_slice_ = currentReconstructor()->moveCurrentSlice();
+    writing_slice_ = std::move(processing_slice_);
     writeDataSlice(); // starts the async jobs
 }
 
@@ -483,8 +612,18 @@ void ReconstructorTask::writeDoneSlot()
     loginf << "ReconstructorTask: writeDoneSlot: last " << writing_slice_->is_last_slice_;
 
     assert (writing_slice_);
-
     writing_slice_->write_done_ = true;
+
+    if (cancelled_)
+    {
+        writing_slice_ = nullptr;
+
+        malloc_trim(0); // release unused memory
+
+        done_ = true;
+
+        return;
+    }
 
     if (writing_slice_->is_last_slice_)
     {
@@ -508,13 +647,56 @@ void ReconstructorTask::writeDoneSlot()
 
         done_ = true;
 
-        //close progress dialog
+                //close progress dialog
         progress_dialog_.reset();
 
         emit doneSignal();
     }
 
     writing_slice_ = nullptr;
+}
+
+void ReconstructorTask::runCancelSlot()
+{
+    loginf << "ReconstructorTask: runCancelSlot";
+
+    assert (progress_dialog_);
+
+    progress_dialog_->setLabelText("Cancelling");
+    progress_dialog_->setCancelButton(nullptr);
+
+    cancelled_ = true;
+
+    Async::waitAndProcessEventsFor(50);
+
+    currentReconstructor()->cancel();
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+               this, &ReconstructorTask::loadedDataSlot);
+    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+               this, &ReconstructorTask::loadingDoneSlot);
+
+    COMPASS::instance().viewManager().disableDataDistribution(false);
+
+    disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+               this, &ReconstructorTask::writeDoneSlot);
+
+    while (currentReconstructor()->processing())
+        Async::waitAndProcessEventsFor(10);
+
+    currentReconstructor()->reset();
+    loading_slice_ = nullptr;
+
+    done_ = true;
+
+            //close progress dialog
+    progress_dialog_.reset();
+
+    emit doneSignal();
+
+    loginf << "ReconstructorTask: runCancelSlot: done";
 }
 
 bool ReconstructorTask::useDStype(const std::string& ds_type) const
@@ -601,6 +783,12 @@ std::map<unsigned int, std::set<unsigned int>> ReconstructorTask::unusedDSIDLine
     return unused_lines;
 }
 
+ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
+{
+    assert (processing_slice_);
+    return *processing_slice_;
+}
+
 void ReconstructorTask::checkSubConfigurables()
 {
     if (!simple_reconstructor_)
@@ -624,7 +812,8 @@ void ReconstructorTask::deleteCalculatedReferences()
            << currentReconstructor()->settings().delete_all_calc_reftraj;
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-    dbcontent_man.clearData();
+
+    loginf << "ReconstructorTask: deleteCalculatedReferences: deleting";
 
     if (currentReconstructor()->settings().delete_all_calc_reftraj)
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
@@ -636,8 +825,8 @@ void ReconstructorTask::deleteCalculatedReferences()
 
     while (dbcontent_man.dbContent("RefTraj").isDeleting())
     {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(10);
+        loginf << "ReconstructorTask: deleteCalculatedReferences: waiting on delete done";
+        QThread::msleep(1000);
     }
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
@@ -655,5 +844,9 @@ void ReconstructorTask::deleteCalculatedReferences()
         else
             ds.clearNumInserted("RefTraj", currentReconstructor()->settings().ds_line);
     }
+
+            // emit done in run
+
+    loginf << "ReconstructorTask: deleteCalculatedReferences: done";
 }
 

@@ -1296,9 +1296,12 @@ bool DBContentManager::existsTarget(unsigned int utn)
     return target_model_->existsTarget(utn);
 }
 
-void DBContentManager::createNewTarget(unsigned int utn)
+void DBContentManager::createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets)
 {
-    target_model_->createNewTarget(utn);
+    target_model_->createNewTargets(targets);
+
+    if (target_list_widget_)
+        target_list_widget_->resizeColumnsToContents();
 }
 
 dbContent::Target& DBContentManager::target(unsigned int utn)

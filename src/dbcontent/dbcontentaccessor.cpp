@@ -45,6 +45,8 @@ bool DBContentAccessor::add(std::map<std::string, std::shared_ptr<Buffer>> buffe
 
     for (auto& buf_it : buffers)
     {
+        assert (buf_it.second);
+
         if (!buf_it.second->size()) // empty buffer
             continue;
 

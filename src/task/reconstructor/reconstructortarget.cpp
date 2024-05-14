@@ -1113,7 +1113,7 @@ void ReconstructorTarget::updateCounts()
     }
 }
 
-std::map <std::string, unsigned int> ReconstructorTarget::getDBContentCounts()
+std::map <std::string, unsigned int> ReconstructorTarget::getDBContentCounts() const
 {
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 

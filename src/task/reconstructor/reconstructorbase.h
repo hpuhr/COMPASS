@@ -91,29 +91,6 @@ class ReconstructorBaseSettings
 class ReconstructorBase : public Configurable
 {
   public:
-//    struct BaseSettings
-//    {
-//        boost::posix_time::time_duration sliceDuration() const
-//        {
-//            return boost::posix_time::minutes(slice_duration_in_minutes);
-//        }
-//        boost::posix_time::time_duration outdatedDuration() const
-//        {
-//            return boost::posix_time::minutes(outdated_duration_in_minutes);
-//        }
-
-//                // output
-//        std::string  ds_name {"CalcRef"};
-//        unsigned int ds_sac  {255};
-//        unsigned int ds_sic  {1};
-//        unsigned int ds_line {0};
-
-//                // slicing
-//        unsigned int slice_duration_in_minutes    {10};
-//        unsigned int outdated_duration_in_minutes {2};
-
-//        bool delete_all_calc_reftraj {false};
-//    };
 
     struct DataSlice
     {
@@ -151,10 +128,8 @@ class ReconstructorBase : public Configurable
 
     int numSlices() const;
 
-    void processSlice(std::unique_ptr<ReconstructorBase::DataSlice> data_slice);
-    bool hasCurrentSlice() const;
+    void processSlice();
     ReconstructorBase::DataSlice& currentSlice();
-    std::unique_ptr<ReconstructorBase::DataSlice> moveCurrentSlice();
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 
@@ -175,6 +150,8 @@ class ReconstructorBase : public Configurable
 
     ReconstructorTask& task() const;
 
+    void cancel();
+
     void saveTargets();
 
     // our data structures
@@ -189,13 +166,14 @@ class ReconstructorBase : public Configurable
 
     std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
 
+    bool processing() const;
+
   protected:
 
     ReconstructorTask& task_;
 
     std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
 
-    std::unique_ptr<DataSlice> current_slice_;
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     ReconstructorBaseSettings base_settings_;
@@ -211,6 +189,8 @@ class ReconstructorBase : public Configurable
         std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
 
+    bool cancelled_ {false};
+
   private:
     ReferenceCalculatorSettings ref_calc_settings_;
 
@@ -222,4 +202,6 @@ class ReconstructorBase : public Configurable
 
     boost::posix_time::ptime remove_before_time_;
     boost::posix_time::ptime write_before_time_;
+
+    bool processing_ {false};
 };

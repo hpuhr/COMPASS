@@ -147,20 +147,41 @@ void SimpleReconstructor::processSlice_impl()
 
             // remove_before_time_, new data >= current_slice_begin_
 
+    if (cancelled_)
+        return;
+
     clearOldTargetReports();
+
+    if (cancelled_)
+        return;
 
     ref_calculator_.settings() = referenceCalculatorSettings();
     ref_calculator_.prepareForNextSlice();
 
+    if (cancelled_)
+        return;
+
     createTargetReports();
 
+    if (cancelled_)
+        return;
+
     associatior_.associateNewData();
+
+    if (cancelled_)
+        return;
 
     std::map<unsigned int, std::map<unsigned long, unsigned int>> associations = createAssociations();
     // only for ts < write_before_time, also updates target counts
     currentSlice().assoc_data_ = createAssociationBuffers(associations);
 
+    if (cancelled_)
+        return;
+
     ref_calculator_.computeReferences();
+
+    if (cancelled_)
+        return;
 
     currentSlice().reftraj_data_ = createReferenceBuffers(); // only for ts < write_before_time
 

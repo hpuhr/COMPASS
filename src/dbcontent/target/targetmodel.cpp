@@ -1,11 +1,11 @@
 #include "targetmodel.h"
 #include "compass.h"
-//#include "mainwindow.h"
 #include "dbinterface.h"
 #include "dbcontentmanager.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "logger.h"
+#include "reconstructortarget.h"
 
 #include <QApplication>
 #include <QThread>
@@ -578,18 +578,68 @@ bool TargetModel::existsTarget(unsigned int utn) const
     return tr_tag_it != target_data_.get<target_tag>().end();
 }
 
-void TargetModel::createNewTarget(unsigned int utn)
+void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets)
 {
     beginResetModel();
 
-    assert (!existsTarget(utn));
+    assert (!target_data_.size());
 
-    target_data_.push_back({utn, nlohmann::json::object()});
+    unsigned int utn = 0;
 
-    assert (existsTarget(utn));
+    for (auto& tgt_it : targets)
+    {
+        //cont_man.createNewTarget(tgt_it.first);
+
+        target_data_.push_back({utn, nlohmann::json::object()});
+
+        assert (existsTarget(utn));
+
+        dbContent::Target& tgt = target(utn);
+
+                //target.useInEval(tgt_it.second.use_in_eval_);
+
+                //if (tgt_it.second.comment_.size())
+                //    target.comment(tgt_it.second.comment_);
+
+        tgt.aircraftAddresses(tgt_it.second.acads_);
+        tgt.aircraftIdentifications(tgt_it.second.acids_);
+        tgt.modeACodes(tgt_it.second.mode_as_);
+
+        if (tgt_it.second.hasTimestamps())
+        {
+            tgt.timeBegin(tgt_it.second.timestamp_min_);
+            tgt.timeEnd(tgt_it.second.timestamp_max_);
+        }
+
+        if (tgt_it.second.hasModeC())
+            tgt.modeCMinMax(*tgt_it.second.mode_c_min_, *tgt_it.second.mode_c_max_);
+
+                // set counts
+        for (auto& count_it : tgt_it.second.getDBContentCounts())
+            tgt.dbContentCount(count_it.first, count_it.second);
+
+                // set adsb stuff
+        //        if (tgt_it.second.hasADSBMOPSVersion() && tgt_it.second.getADSBMOPSVersions().size())
+        //            target.adsbMOPSVersions(tgt_it.second.getADSBMOPSVersions());
+
+        ++utn;
+    }
 
     endResetModel();
 }
+
+//void TargetModel::createNewTarget(unsigned int utn)
+//{
+//    beginResetModel();
+
+//    assert (!existsTarget(utn));
+
+//    target_data_.push_back({utn, nlohmann::json::object()});
+
+//    assert (existsTarget(utn));
+
+//    endResetModel();
+//}
 
 dbContent::Target& TargetModel::target(unsigned int utn)
 {
