@@ -28,6 +28,7 @@
 #include <QProgressDialog>
 #include <QThread>
 #include <QPushButton>
+#include <QLabel>
 
 #include <malloc.h>
 
@@ -137,23 +138,32 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
     int ns   = currentReconstructor()->numSlices();
     int sidx = std::max(0, std::min((int)current_slice_idx_, ns - 1));
 
+    if (done_)
+        sidx = ns - 1;
+
     QString slice_p;
     if (ns >= 0)
         slice_p = " " + QString::number(sidx + 1) + "/" + QString::number(ns);
 
-    QString pmsg = msg;
+    QString pmsg = "<b>"+msg+"</b>";
+
     if (add_slice_progress)
-        pmsg += slice_p;
+        pmsg += "<b>"+slice_p+"</b>";
 
     double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
 
     double progress = 0.0;
+
     if (ns >= 1)
     {
-        progress = (double) sidx / (double) ns;
+        if (done_)
+            progress = 1.0;
+        else
+            progress = (double) sidx / (double) ns;
     }
 
-    pmsg += ("\n\nElapsed: "+String::timeStringFromDouble(time_elapsed_s, false)).c_str();
+    pmsg += ("<br><br><div align='left'>Elapsed: "
+             + String::timeStringFromDouble(time_elapsed_s, false)+ " </div>").c_str();
 
     if (ns && sidx) // do remaining time estimate if possible
     {
@@ -166,10 +176,85 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
                << " ns " << ns << " num_slices_remaining " << num_slices_remaining
                << " time_remaining_s " << time_remaining_s;
 
-        pmsg += ("\tRemaining: " + String::timeStringFromDouble(time_remaining_s, false)).c_str();
+        if (done_)
+            pmsg += ("<div align='right'>Remaining: "
+                     + String::timeStringFromDouble(0, false)+ " </div>").c_str();
+        else
+            pmsg += ("<div align='right'>Remaining: "
+                     + String::timeStringFromDouble(time_remaining_s, false)+ " </div>").c_str();
+
+
+        const auto& counts = currentReconstructor()->assocAounts();
+
+        DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+        DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+        if (counts.size())
+        {
+            // ds_id -> dbcont id -> cnt
+
+            map<string, string> tmp_rows;
+
+            for (auto& ds_it : counts)
+            {
+                for (auto& dbcont_it : ds_it.second)
+                {
+                    unsigned int assoc_cnt = dbcont_it.second.first;
+                    unsigned int unassoc_cnt = dbcont_it.second.second;
+
+                    std::string ds_name = ds_man.dbDataSource(ds_it.first).name();
+                    std::string dbcont_name = dbcont_man.dbContentWithId(dbcont_it.first);
+
+                    string row_str;
+
+                    row_str += "<tr>";
+
+                    row_str += ("<td>"+ds_name+"</td>").c_str();
+                    row_str += ("<td>"+dbcont_name+"</td>").c_str();
+
+                    row_str += ("<td align='right'>"+to_string(assoc_cnt)+"</td>").c_str();
+
+                    std::string assoc_perc_str;
+
+                    if (assoc_cnt + unassoc_cnt)
+                        assoc_perc_str += String::percentToString(
+                                              (100.0*assoc_cnt/(float)(assoc_cnt+unassoc_cnt)))+"%";
+                    else
+                        assoc_perc_str += String::percentToString(0)+"%";
+
+                    row_str += ("<td align='right'>"+assoc_perc_str+"</td>").c_str();
+
+                    row_str += "</tr>";
+
+                    tmp_rows[ds_name] = row_str;
+                }
+            }
+
+            pmsg += "<br><br><table width=\"100%\">"
+                "<tr> <td><b>Data Source</b></td> <td><b>DBContent</b></td>"
+                " <td align='right'><b>Associated</b></td> <td></td> </tr>";
+
+            for (auto& row_it : tmp_rows)
+                pmsg += row_it.second.c_str();
+
+            pmsg += "</table>";
+                                 //<table>
+                                 //  <tr>
+                                 //    <th>Company</th>
+                                 //    <th>Contact</th>
+                                 //    <th>Country</th>
+                                 //  </tr>
+                                 //  <tr>
+                                 //    <td>Alfreds Futterkiste</td>
+                                 //    <td>Maria Anders</td>
+                                 //    <td>Germany</td>
+                                 //  </tr>
+                                 //</table>
+        }
+
     }
 
-    progress_dialog_->setLabelText(pmsg);
+    progress_dialog_->setLabelText("<html>"+pmsg+"</html>");
     progress_dialog_->setValue(progress_dialog_->maximum() * progress);
     
     Async::waitAndProcessEventsFor(50);
@@ -300,9 +385,16 @@ void ReconstructorTask::run()
 
     run_start_time_ = boost::posix_time::microsec_clock::local_time();
 
+    QLabel* tmp_label = new QLabel();
+    tmp_label->setTextFormat(Qt::RichText);
+
     progress_dialog_.reset(new QProgressDialog("Reconstructing...", "Cancel", 0, 100));
+    progress_dialog_->setWindowTitle("Reconstructing References");
+    progress_dialog_->setMinimumWidth(600);
+    progress_dialog_->setLabel(tmp_label);
     progress_dialog_->setAutoClose(false);
     progress_dialog_->setCancelButton(nullptr);
+    progress_dialog_->setModal(true);
 
     progress_dialog_->show();
 
@@ -372,13 +464,13 @@ void ReconstructorTask::deleteAssociationsDoneSlot()
     loginf << "ReconstructorTask: deleteAssociationsDoneSlot";
 
 
-    // enable cancelling
+            // enable cancelling
 
     assert (progress_dialog_);
     progress_dialog_->setCancelButton(new QPushButton("Cancel"));
 
     connect(progress_dialog_.get(), &QProgressDialog::canceled,
-            this, &ReconstructorTask::runCancelSlot);
+            this, &ReconstructorTask::runDoneSlot);
 
     updateProgress("Initializing", false);
 
@@ -570,7 +662,7 @@ void ReconstructorTask::loadingDoneSlot()
 
     loginf << "ReconstructorTask: loadingDoneSlot: calling process";
 
-    updateProgress("Processing slice", true);
+    updateProgress("Processing Slice", true);
     ++current_slice_idx_;
 
     assert (!processing_data_slice_);
@@ -653,6 +745,14 @@ void ReconstructorTask::writeDoneSlot()
                    this, &ReconstructorTask::writeDoneSlot);
 
         currentReconstructor()->saveTargets();
+
+        done_ = true;
+
+        assert (progress_dialog_);
+        progress_dialog_->setCancelButtonText("OK");
+
+        updateProgress("Reference Calculation Done", true);
+
         currentReconstructor()->reset();
 
         double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
@@ -660,27 +760,30 @@ void ReconstructorTask::writeDoneSlot()
         loginf << "ReconstructorTask: writeDoneSlot: done after "
                << String::timeStringFromDouble(time_elapsed_s, false);
 
-
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
         malloc_trim(0); // release unused memory
 
-        done_ = true;
-
-                //close progress dialog
-        progress_dialog_.reset();
-
-        emit doneSignal();
     }
 
     writing_slice_ = nullptr;
 }
 
-void ReconstructorTask::runCancelSlot()
+void ReconstructorTask::runDoneSlot()
 {
-    loginf << "ReconstructorTask: runCancelSlot";
+    loginf << "ReconstructorTask: runDoneSlot";
 
     assert (progress_dialog_);
+
+    if (done_) // already done, cancel only to close
+    {
+       //close progress dialog
+        progress_dialog_.reset();
+
+        emit doneSignal();
+
+        return;
+    }
 
     progress_dialog_->setLabelText("Cancelling");
     progress_dialog_->setCancelButton(nullptr);
@@ -713,7 +816,7 @@ void ReconstructorTask::runCancelSlot()
            || processing_data_slice_ || currentReconstructor()->processing()
            || dbcontent_man.insertInProgress())
     {
-        loginf << "ReconstructorTask: runCancelSlot: waiting, load "
+        loginf << "ReconstructorTask: runDoneSlot: waiting, load "
                << (loading_data_ || dbcontent_man.loadInProgress())
                << " proc " << (processing_data_slice_ || currentReconstructor()->processing())
                << " insert " << dbcontent_man.insertInProgress();
@@ -721,7 +824,7 @@ void ReconstructorTask::runCancelSlot()
         Async::waitAndProcessEventsFor(500);
     }
 
-    loginf << "ReconstructorTask: runCancelSlot: all done";
+    loginf << "ReconstructorTask: runDoneSlot: all done";
 
     disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
                this, &ReconstructorTask::loadedDataSlot);
@@ -744,7 +847,7 @@ void ReconstructorTask::runCancelSlot()
 
     emit doneSignal();
 
-    loginf << "ReconstructorTask: runCancelSlot: done";
+    loginf << "ReconstructorTask: runDoneSlot: done";
 }
 
 bool ReconstructorTask::useDStype(const std::string& ds_type) const

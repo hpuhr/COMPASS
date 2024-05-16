@@ -50,6 +50,8 @@ void ReconstructorAssociatorBase::associateNewData()
 
     retryAssociateTargetReports();
 
+    countUnAssociated();
+
     if (reconstructor().isCancelled())
         return;
 
@@ -76,6 +78,7 @@ void ReconstructorAssociatorBase::reset()
     tn2utn_.clear();
 
     unassoc_rec_nums_.clear();
+    assoc_counts_.clear();
 
     num_merges_ = 0;
 }
@@ -381,6 +384,8 @@ void ReconstructorAssociatorBase::associate(dbContent::targetReport::Reconstruct
     if (tr.acid_)
         acid_2_utn_[*tr.acid_] = utn;
 
+    assoc_counts_[tr.ds_id_][dbcont_id].first++;
+
             // TODO move to post process association or something
             // only if not newly created
     //    if (!tr.do_not_use_position_ && reconstructor().targets_.at(utn).canPredict(tr.timestamp_))
@@ -462,6 +467,28 @@ void ReconstructorAssociatorBase::checkACADLookup()
     }
 
     assert (acad_2_utn_.size() == count);
+}
+
+void ReconstructorAssociatorBase::countUnAssociated()
+{
+    for (auto rn_it : unassoc_rec_nums_)
+    {
+        if (reconstructor().isCancelled())
+            return;
+
+        unsigned int rec_num;
+        unsigned int dbcont_id;
+
+        rec_num = rn_it;
+
+        dbcont_id = Number::recNumGetDBContId(rec_num);
+
+        assert (reconstructor().target_reports_.count(rec_num));
+
+        dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
+
+        assoc_counts_[tr.ds_id_][dbcont_id].second++;
+    }
 }
 
 int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::ReconstructorInfo& tr,
@@ -1159,4 +1186,10 @@ unsigned int ReconstructorAssociatorBase::createNewTarget(const dbContent::targe
     utn_vec_.push_back(utn);
 
     return utn;
+}
+
+const std::map<unsigned int, std::map<unsigned int,
+                                      std::pair<unsigned int, unsigned int>>>& ReconstructorAssociatorBase::assocAounts() const
+{
+    return assoc_counts_;
 }

@@ -42,6 +42,10 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
 
     virtual void updateWidgets() override;
 
+    virtual const std::map<unsigned int, std::map<unsigned int,
+                                                  std::pair<unsigned int, unsigned int>>>& assocAounts() const override
+        { return associatior_.assocAounts(); };
+
   protected:
   
     friend class dbContent::ReconstructorTarget;

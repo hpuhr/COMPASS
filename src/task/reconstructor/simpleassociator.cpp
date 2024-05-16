@@ -118,6 +118,8 @@ void SimpleAssociator::associateNewData()
 
     retryAssociateTargetReports();
 
+    countUnAssociated();
+
 
     if (reconstructor().isCancelled())
         return;

@@ -67,10 +67,10 @@ class ReconstructorBaseSettings
     unsigned int ds_line {0};
 
             // slicing
-    unsigned int slice_duration_in_minutes    {10};
+    unsigned int slice_duration_in_minutes    {15};
     unsigned int outdated_duration_in_minutes {2};
 
-    bool delete_all_calc_reftraj {false};
+    bool delete_all_calc_reftraj {true};
 
     // maximum time difference in target reports to do comparisons
     float max_time_diff_ {15}; // sec
@@ -168,6 +168,10 @@ class ReconstructorBase : public Configurable
     std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
 
     bool processing() const;
+
+    virtual const std::map<unsigned int, std::map<unsigned int,
+                                                  std::pair<unsigned int, unsigned int>>>& assocAounts() const = 0;
+    // ds_id -> dbcont id -> (assoc, not assoc cnt)
 
   protected:
 

@@ -22,6 +22,9 @@ class ReconstructorAssociatorBase
     virtual void associateNewData();
     virtual void reset();
 
+    const std::map<unsigned int, std::map<unsigned int,
+                                          std::pair<unsigned int, unsigned int>>>& assocAounts() const;
+
   protected:
 
     std::vector<unsigned int> utn_vec_;
@@ -44,6 +47,7 @@ class ReconstructorAssociatorBase
     void retryAssociateTargetReports();
     void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn);
     void checkACADLookup();
+    void countUnAssociated();
 
     int findUTNFor (dbContent::targetReport::ReconstructorInfo& tr,
                    const std::set<unsigned long>& debug_rec_nums,
@@ -97,5 +101,7 @@ class ReconstructorAssociatorBase
 
     virtual ReconstructorBase& reconstructor() = 0;
 
+    std::map<unsigned int, std::map<unsigned int, std::pair<unsigned int, unsigned int>>> assoc_counts_;
+    // ds_id -> dbcont id -> (assoc, unassoc cnt)
 };
 

@@ -53,7 +53,7 @@ class ReconstructorTask : public Task, public Configurable
     void processingDoneSlot();
     void writeDoneSlot();
 
-    void runCancelSlot();
+    void runDoneSlot();
 
   public:
     ReconstructorTask(const std::string& class_id, const std::string& instance_id,
