@@ -27,6 +27,7 @@
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QThread>
+#include <QPushButton>
 
 #include <malloc.h>
 
@@ -171,9 +172,7 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
     progress_dialog_->setLabelText(pmsg);
     progress_dialog_->setValue(progress_dialog_->maximum() * progress);
     
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-    while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    Async::waitAndProcessEventsFor(50);
 }
 
 std::string ReconstructorTask::currentReconstructorStr() const
@@ -303,8 +302,7 @@ void ReconstructorTask::run()
 
     progress_dialog_.reset(new QProgressDialog("Reconstructing...", "Cancel", 0, 100));
     progress_dialog_->setAutoClose(false);
-    connect(progress_dialog_.get(), &QProgressDialog::canceled,
-            this, &ReconstructorTask::runCancelSlot, Qt::QueuedConnection);
+    progress_dialog_->setCancelButton(nullptr);
 
     progress_dialog_->show();
 
@@ -331,9 +329,6 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
 {
     loginf << "ReconstructorTask: deleteCalculatedReferencesDoneSlot";
 
-    if (cancelled_)
-        return;
-
     updateProgress("Deleting Previous Targets", false);
 
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
@@ -352,9 +347,6 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
 void ReconstructorTask::deleteTargetsDoneSlot()
 {
     loginf << "ReconstructorTask: deleteTargetsDoneSlot";
-
-    if (cancelled_)
-        return;
 
     updateProgress("Deleting Previous Associations", false);
 
@@ -379,8 +371,14 @@ void ReconstructorTask::deleteAssociationsDoneSlot()
 {
     loginf << "ReconstructorTask: deleteAssociationsDoneSlot";
 
-    if (cancelled_)
-        return;
+
+    // enable cancelling
+
+    assert (progress_dialog_);
+    progress_dialog_->setCancelButton(new QPushButton("Cancel"));
+
+    connect(progress_dialog_.get(), &QProgressDialog::canceled,
+            this, &ReconstructorTask::runCancelSlot);
 
     updateProgress("Initializing", false);
 
@@ -412,6 +410,7 @@ void ReconstructorTask::loadDataSlice()
     loading_slice_ = currentReconstructor()->getNextTimeSlice();
 
     assert (loading_slice_);
+    loading_data_ = true;
 
     loginf << "ReconstructorTask: loadDataSlice: min " << Time::toString(loading_slice_->slice_begin_)
            << " max " << Time::toString(loading_slice_->next_slice_begin_)
@@ -472,9 +471,6 @@ void ReconstructorTask::processDataSlice()
 
         logdbg << "ReconstructorTask: processDataSlice: async process";
 
-        if (cancelled_)
-            return;
-
         logdbg << "ReconstructorTask: processDataSlice: async processing first slice "
                << !processing_slice_->first_slice_
                << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
@@ -483,7 +479,7 @@ void ReconstructorTask::processDataSlice()
         currentReconstructor()->processSlice();
 
                 // wait for previous writing done
-        while (writing_slice_)
+        while (writing_slice_ && !cancelled_)
             QThread::msleep(1);
 
         logdbg << "ReconstructorTask: processDataSlice: done";
@@ -529,18 +525,28 @@ void ReconstructorTask::loadingDoneSlot()
 {
     loginf << "ReconstructorTask: loadingDoneSlot";
 
-    if (cancelled_)
-        return;
+    assert (loading_data_);
+
+    if (loading_data_)
+        loading_data_ = false;
 
     assert (currentReconstructor());
     assert (loading_slice_);
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    if (cancelled_)
+    {
+        loading_slice_ = nullptr;
+        dbcontent_man.clearData(); // clear previous
+        return;
+    }
 
     bool last_slice = loading_slice_->is_last_slice_;
 
     loginf << "ReconstructorTask: loadingDoneSlot: is_last_slice " << last_slice
            << " current_slice_idx " << current_slice_idx_;
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     loading_slice_->data_ = dbcontent_man.data();
     assert (loading_slice_->data_.size());
 
@@ -604,6 +610,14 @@ void ReconstructorTask::processingDoneSlot()
 {
     loginf << "ReconstructorTask: processingDoneSlot";
 
+    if (cancelled_)
+    {
+        processing_data_slice_ = false;
+        processing_slice_ = nullptr;
+
+        return;
+    }
+
             // processing done
     assert(currentReconstructor()->currentSlice().processing_done_);
     assert (processing_data_slice_);
@@ -611,9 +625,6 @@ void ReconstructorTask::processingDoneSlot()
     assert (!writing_slice_);
 
     processing_data_slice_ = false;
-
-    if (cancelled_)
-        return;
 
     assert (!writing_slice_);
     writing_slice_ = std::move(processing_slice_);
@@ -630,10 +641,6 @@ void ReconstructorTask::writeDoneSlot()
     if (cancelled_)
     {
         writing_slice_ = nullptr;
-
-        malloc_trim(0); // release unused memory
-
-        done_ = true;
 
         return;
     }
@@ -677,14 +684,44 @@ void ReconstructorTask::runCancelSlot()
 
     progress_dialog_->setLabelText("Cancelling");
     progress_dialog_->setCancelButton(nullptr);
-
-    cancelled_ = true;
-
-    Async::waitAndProcessEventsFor(50);
+                                                 //close progress dialog
+    progress_dialog_.reset();
 
     currentReconstructor()->cancel();
 
+    cancelled_ = true;
+
+    QMessageBox* msg_box = new QMessageBox;
+
+    msg_box->setWindowTitle("Cancelling Reconstruction");
+    msg_box->setText("Please wait ...");
+    msg_box->setStandardButtons(QMessageBox::NoButton);
+    msg_box->setWindowModality(Qt::ApplicationModal);
+    msg_box->show();
+
+    Async::waitAndProcessEventsFor(50);
+
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    if (dbcontent_man.loadInProgress())
+        dbcontent_man.quitLoading();
+
+    disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+               this, &ReconstructorTask::writeDoneSlot);
+
+    while (loading_data_ || dbcontent_man.loadInProgress()
+           || processing_data_slice_ || currentReconstructor()->processing()
+           || dbcontent_man.insertInProgress())
+    {
+        loginf << "ReconstructorTask: runCancelSlot: waiting, load "
+               << (loading_data_ || dbcontent_man.loadInProgress())
+               << " proc " << (processing_data_slice_ || currentReconstructor()->processing())
+               << " insert " << dbcontent_man.insertInProgress();
+
+        Async::waitAndProcessEventsFor(500);
+    }
+
+    loginf << "ReconstructorTask: runCancelSlot: all done";
 
     disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
                this, &ReconstructorTask::loadedDataSlot);
@@ -693,19 +730,17 @@ void ReconstructorTask::runCancelSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
-               this, &ReconstructorTask::writeDoneSlot);
-
-    while (currentReconstructor()->processing())
-        Async::waitAndProcessEventsFor(10);
-
     currentReconstructor()->reset();
+
     loading_slice_ = nullptr;
+    processing_slice_ = nullptr;
+    writing_slice_ = nullptr;
 
     done_ = true;
+    malloc_trim(0); // release unused memory
 
-            //close progress dialog
-    progress_dialog_.reset();
+    msg_box->close();
+    delete msg_box;
 
     emit doneSignal();
 

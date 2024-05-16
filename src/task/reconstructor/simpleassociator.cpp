@@ -35,7 +35,13 @@ void SimpleAssociator::associateNewData()
 
     loginf << "SimpleAssociator: associateNewData: associating RefTraj data";
 
+    if (reconstructor().isCancelled())
+        return;
+
     associateTargetReports({255});
+
+    if (reconstructor().isCancelled())
+        return;
 
             // create tracker targets
 
@@ -54,6 +60,9 @@ void SimpleAssociator::associateNewData()
             ++single_associated;
     }
 
+    if (reconstructor().isCancelled())
+        return;
+
     loginf << "SimpleAssociator: associateNewData: tracker targets " << reconstructor_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 
@@ -66,9 +75,17 @@ void SimpleAssociator::associateNewData()
             sensor_dbcont_ids.insert(dbcont_it.second->id());
     }
 
+
+    if (reconstructor().isCancelled())
+        return;
+
     loginf << "SimpleAssociator: associateNewData: associating remaining sensor data";
 
     associateTargetReports(sensor_dbcont_ids);
+
+
+    if (reconstructor().isCancelled())
+        return;
 
     multiple_associated = 0;
     single_associated = 0;
@@ -83,11 +100,27 @@ void SimpleAssociator::associateNewData()
 
     checkACADLookup();
 
+
+    if (reconstructor().isCancelled())
+        return;
+
     selfAccociateNewUTNs();
+
+
+    if (reconstructor().isCancelled())
+        return;
 
     checkACADLookup();
 
+
+    if (reconstructor().isCancelled())
+        return;
+
     retryAssociateTargetReports();
+
+
+    if (reconstructor().isCancelled())
+        return;
 
     for (auto& tgt_it : reconstructor().targets_)
         tgt_it.second.created_in_current_slice_ = false;

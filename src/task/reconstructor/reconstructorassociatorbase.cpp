@@ -24,16 +24,34 @@ void ReconstructorAssociatorBase::associateNewData()
 
     assert (!unassoc_rec_nums_.size());
 
+    if (reconstructor().isCancelled())
+        return;
+
     associateTargetReports();
 
+    if (reconstructor().isCancelled())
+        return;
+
     checkACADLookup();
+
+    if (reconstructor().isCancelled())
+        return;
 
             // self-associate created utns
     selfAccociateNewUTNs();
 
+    if (reconstructor().isCancelled())
+        return;
+
     checkACADLookup();
 
+    if (reconstructor().isCancelled())
+        return;
+
     retryAssociateTargetReports();
+
+    if (reconstructor().isCancelled())
+        return;
 
             // clear new flags
     for (auto& tgt_it : reconstructor().targets_)
@@ -56,6 +74,8 @@ void ReconstructorAssociatorBase::reset()
     acad_2_utn_.clear();
     acid_2_utn_.clear();
     tn2utn_.clear();
+
+    unassoc_rec_nums_.clear();
 
     num_merges_ = 0;
 }
@@ -83,6 +103,9 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
     for (auto& ts_it : reconstructor().tr_timestamps_)
     {
+        if (reconstructor().isCancelled())
+            return;
+
         rec_num = ts_it.second;
 
         assert (reconstructor().target_reports_.count(rec_num));
@@ -135,6 +158,9 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
     for (auto& ts_it : reconstructor().tr_timestamps_)
     {
+        if (reconstructor().isCancelled())
+            return;
+
         rec_num = ts_it.second;
 
         assert (reconstructor().target_reports_.count(rec_num));
@@ -180,7 +206,7 @@ void ReconstructorAssociatorBase::selfAccociateNewUTNs()
 
     int other_utn;
 
-    while (do_it_again)
+    while (do_it_again && !reconstructor().isCancelled())
     {
         loginf << "ReconstructorAssociatorBase: selfAccociateNewUTNs: run " << run_cnt;
 
@@ -283,6 +309,9 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
     for (auto rec_num_it = unassoc_rec_nums_.rbegin(); rec_num_it != unassoc_rec_nums_.rend(); ++rec_num_it)
     {
+        if (reconstructor().isCancelled())
+            return;
+
         rec_num = *rec_num_it;
 
         dbcont_id = Number::recNumGetDBContId(rec_num);

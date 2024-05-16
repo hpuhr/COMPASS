@@ -524,9 +524,7 @@ void DBContentManager::loadingDone(DBContent& object)
     }
 
     if (done)
-    {
         finishLoading();
-    }
     else
         logdbg << "DBContentManager: loadingDoneSlot: not done";
 }

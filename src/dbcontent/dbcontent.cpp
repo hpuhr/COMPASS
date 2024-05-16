@@ -748,7 +748,9 @@ void DBContent::readJobObsoleteSlot()
 {
     logdbg << "DBContent: " << name_ << " readJobObsoleteSlot";
     read_job_ = nullptr;
-    //read_job_data_.clear();
+
+    logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
+    dbcont_manager_.loadingDone(*this);
 }
 
 void DBContent::readJobDoneSlot()
@@ -756,11 +758,8 @@ void DBContent::readJobDoneSlot()
     logdbg << "DBContent: " << name_ << " readJobDoneSlot";
     read_job_ = nullptr;
 
-    if (!isLoading()) // also no more finalize jobs
-    {
-        logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
-        dbcont_manager_.loadingDone(*this);
-    }
+    logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
+    dbcont_manager_.loadingDone(*this);
 }
 
 void DBContent::databaseOpenedSlot()

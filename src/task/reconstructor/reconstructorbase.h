@@ -151,6 +151,7 @@ class ReconstructorBase : public Configurable
     ReconstructorTask& task() const;
 
     void cancel();
+    bool isCancelled() { return cancelled_; };
 
     void saveTargets();
 

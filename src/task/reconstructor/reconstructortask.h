@@ -123,6 +123,7 @@ class ReconstructorTask : public Task, public Configurable
     size_t current_slice_idx_ = 0;
 
     std::unique_ptr<ReconstructorBase::DataSlice> loading_slice_;
+    bool loading_data_ {false};
     std::unique_ptr<ReconstructorBase::DataSlice> processing_slice_;
     std::unique_ptr<ReconstructorBase::DataSlice> writing_slice_;
 
