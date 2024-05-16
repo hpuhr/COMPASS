@@ -18,66 +18,57 @@
 #pragma once
 
 #include "variableview.h"
+#include "grid2d_defs.h"
 
-class HistogramViewWidget;
-class HistogramViewDataSource;
-class HistogramViewDataWidget;
-
-namespace dbContent 
-{
-    class Variable;
-    class MetaVariable;
-}
+class GridViewWidget;
+class GridViewDataSource;
+class GridViewDataWidget;
 
 /**
 */
-class HistogramView : public VariableView
+class GridView : public VariableView
 {
-    Q_OBJECT
 public:
     struct Settings
     {
         Settings();
 
-        bool use_log_scale;
+        int               value_type;
+
+        unsigned int      grid_resolution;
+
+        unsigned int      render_pixels_per_cell;
+        std::string       render_color_min;
+        std::string       render_color_max;
+        unsigned int      render_color_num_steps;
     };
 
     enum class Variable
     {
-        DataVar = 0,
+        DataVarX = 0,
+        DataVarY,
+        DataVarZ
     };
 
-    /// @brief Constructor
-    HistogramView(const std::string& class_id, 
-                  const std::string& instance_id, 
-                  ViewContainer* w,
-                  ViewManager& view_manager);
-    /// @brief Destructor
-    virtual ~HistogramView() override;
+    GridView(const std::string& class_id, 
+             const std::string& instance_id, 
+             ViewContainer* w,
+             ViewManager& view_manager);
+    virtual ~GridView() override;
+
+    void setValueType(grid2d::ValueType type, bool notify_changes);
+    void setGridResolution(unsigned int n, bool notify_changes);
+    void setPixelsPerCell(unsigned int n, bool notify_changes);
+    void setColorSteps(unsigned int n, bool notify_changes);
+    void setColorMin(const QColor& color, bool notify_changes);
+    void setColorMax(const QColor& color, bool notify_changes);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
-    /// @brief Returns the used data source
-    HistogramViewDataSource* getDataSource()
-    {
-        assert(data_source_);
-        return data_source_;
-    }
-
     virtual void accept(LatexVisitor& v) override;
 
-    virtual bool canShowResults() const override final { return true; }
-
-    bool useLogScale() const;
-    void useLogScale(bool value, bool notify_changes);
-
-    static const std::string ParamUseLogScale;
-
-signals:
-    void showOnlySelectedSignal(bool value);
-    void usePresentationSignal(bool value);
-    void showAssociationsSignal(bool value);
+    const Settings& settings() const { return settings_; }
 
 protected:
     friend class LatexVisitor;
@@ -86,19 +77,13 @@ protected:
     virtual void updateSelection() override;
 
     virtual bool init_impl() override;
-
-    virtual bool refreshScreenOnNeededReload() const override { return true; }
-
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) override;
 
-    HistogramViewDataWidget* getDataWidget();
+    GridViewDataWidget* getDataWidget();
 
-    /// For data display
-    HistogramViewWidget* widget_{nullptr};
-    /// For data loading
-    HistogramViewDataSource* data_source_{nullptr};
+    GridViewWidget* widget_ = nullptr;
 
     Settings settings_;
 };

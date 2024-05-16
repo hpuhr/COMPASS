@@ -19,36 +19,37 @@
 
 #include "variableviewconfigwidget.h"
 
-class ScatterPlotViewWidget;
-class ScatterPlotView;
+class GridViewWidget;
+class GridView;
 
 class QCheckBox;
 class QLineEdit;
+class QComboBox;
+class QSpinBox;
 
 /**
  * @brief Widget with configuration elements for a ScatterPlotView
  *
  */
-class ScatterPlotViewConfigWidget : public VariableViewConfigWidget
+class GridViewConfigWidget : public VariableViewConfigWidget
 {
-    Q_OBJECT
-
-public slots:
-    void useConnectionLinesSlot();
-
 public:
-    ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, 
-                                QWidget* parent = nullptr);
-    virtual ~ScatterPlotViewConfigWidget();
+    GridViewConfigWidget(GridViewWidget* view_widget, 
+                         QWidget* parent = nullptr);
+    virtual ~GridViewConfigWidget();
 
 protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
-    virtual void onDisplayChange_impl() override;
+    void valueTypeChanged();
+    void gridResolutionChanged();
+    void colorStepsChanged();
 
-    ScatterPlotView* view_ = nullptr;
+    void updateConfig();
 
-    QCheckBox* use_connection_lines_ {nullptr};
+    GridView* view_ = nullptr;
 
-    
+    QComboBox* value_type_combo_    = nullptr;
+    QSpinBox*  grid_resolution_box_ = nullptr;
+    QSpinBox*  color_steps_box_     = nullptr;
 };

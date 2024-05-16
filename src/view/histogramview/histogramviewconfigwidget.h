@@ -15,12 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HISTOGRAMVIEWCONFIGWIDGET_H_
-#define HISTOGRAMVIEWCONFIGWIDGET_H_
+#pragma once
 
-#include "viewconfigwidget.h"
-//#include "dbcontent/variable/variable.h"
-//#include "appmode.h"
+#include "variableviewconfigwidget.h"
 
 class HistogramView;
 class HistogramViewWidget;
@@ -41,48 +38,24 @@ class GroupBox;
  * @brief Widget with configuration elements for a HistogramView
  *
  */
-class HistogramViewConfigWidget : public TabStyleViewConfigWidget
+class HistogramViewConfigWidget : public VariableViewConfigWidget
 {
-    Q_OBJECT
-
-public slots:
-    void dataSourceToggled();
-    void selectedVariableChangedSlot();
-
-    void toggleLogScale();
-
-//    void exportSlot();
-//    void exportDoneSlot(bool cancelled);
-
 public:
     HistogramViewConfigWidget(HistogramViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~HistogramViewConfigWidget();
 
-    void updateConfig();
-
-    virtual void configChanged() override;
-
 protected:
-    void updateEvalConfig();
     void updateInfo();
-    void updateSelectedVar();
     void updateLogScale();
+
+    void toggleLogScale();
 
     virtual void onDisplayChange_impl() override;
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
+    virtual void configChanged_impl() override;
+
     HistogramView* view_ = nullptr;
-
-    // data variable
-    QRadioButton*                       selected_var_check_ {nullptr}; // active if variable data is shown
-    QWidget*                            selected_var_widget_{nullptr};
-    dbContent::VariableSelectionWidget* select_var_         {nullptr};
-
-    // eval
-    QRadioButton* eval_results_check_       {nullptr}; // active if eval data is shown
-    QWidget*      eval_results_widget_      {nullptr};
-    QLabel*       eval_results_grpreq_label_{nullptr};
-    QLabel*       eval_results_id_label_    {nullptr};
 
     // histogram info
     GroupBox*     info_widget_          = nullptr;
@@ -94,5 +67,3 @@ protected:
     // general
     QCheckBox*    log_check_{nullptr};
 };
-
-#endif /* HISTOGRAMVIEWCONFIGWIDGET_H_ */

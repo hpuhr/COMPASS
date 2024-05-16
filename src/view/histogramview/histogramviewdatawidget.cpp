@@ -31,6 +31,8 @@
 #include "histogramgenerator.h"
 #include "histogramgeneratorbuffer.h"
 #include "histogramgeneratorresults.h"
+#include "viewvariable.h"
+#include "property_templates.h"
 
 //#include "eval/results/extra/datasingle.h"
 //#include "eval/results/extra/datajoined.h"
@@ -94,14 +96,7 @@ QT_CHARTS_USE_NAMESPACE
 
 using namespace EvaluationRequirementResult;
 
-const QColor HistogramViewDataWidget::ColorSelected = Qt::yellow; // darker than yellow #808000
-const QColor HistogramViewDataWidget::ColorCAT001   = QColor("#00FF00");
-const QColor HistogramViewDataWidget::ColorCAT010   = QColor("#FFCC00");
-const QColor HistogramViewDataWidget::ColorCAT020   = QColor("#FF0000");
-const QColor HistogramViewDataWidget::ColorCAT021   = QColor("#6666FF");
-const QColor HistogramViewDataWidget::ColorCAT048   = QColor("#00FF00");
-const QColor HistogramViewDataWidget::ColorCAT062   = QColor("#CCCCCC");
-const QColor HistogramViewDataWidget::ColorRefTraj  = QColor("#FFA500");
+
 
 using namespace std;
 
@@ -110,7 +105,7 @@ using namespace std;
 HistogramViewDataWidget::HistogramViewDataWidget(HistogramViewWidget* view_widget, 
                                                  QWidget* parent, 
                                                  Qt::WindowFlags f)
-:   ViewDataWidget(view_widget, parent, f)
+:   VariableViewDataWidget(view_widget, view_widget->getView(), parent, f)
 {
     view_ = view_widget->getView();
     assert(view_);
@@ -123,15 +118,6 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramViewWidget* view_widge
 
     setLayout(main_layout_);
 
-    //@TODO: these strings should be defined globally
-    colors_["CAT001" ] = ColorCAT001;
-    colors_["CAT010" ] = ColorCAT010;
-    colors_["CAT020" ] = ColorCAT020;
-    colors_["CAT021" ] = ColorCAT021;
-    colors_["CAT048" ] = ColorCAT048;
-    colors_["CAT062" ] = ColorCAT062;
-    colors_["RefTraj"] = ColorRefTraj;
-
     updateChart();
 }
 
@@ -141,73 +127,126 @@ HistogramViewDataWidget::~HistogramViewDataWidget() = default;
 
 /**
  */
-void HistogramViewDataWidget::clearData_impl()
+void HistogramViewDataWidget::updateDataEvent(bool requires_reset)
 {
-    logdbg << "HistogramViewDataWidget: clearData_impl: start";
+    histogram_generator_.reset(); //current generator makes no sense any more
+}
 
+/**
+ */
+void HistogramViewDataWidget::resetVariableData()
+{
+    histogram_generator_.reset();
+}
+
+/**
+ */
+void HistogramViewDataWidget::resetVariableDisplay()
+{
     chart_view_.reset();
+}
+
+/**
+ */
+void HistogramViewDataWidget::preUpdateVariableDataEvent()
+{
+    //nothing to do
+}
+
+/**
+ */
+void HistogramViewDataWidget::postUpdateVariableDataEvent()
+{
+    //nothing to do
+}
+
+/**
+ */
+bool HistogramViewDataWidget::updateVariableDisplay()
+{
+    return updateChart();
+}
+
+/**
+ */
+void HistogramViewDataWidget::updateFromResults()
+{
+    updateGeneratorFromResults();
+}
+
+/**
+ * Override default workflow, since all dbcontents are handled inside the histogram generator.
+ */
+void HistogramViewDataWidget::updateFromVariables()
+{
+    loginf << "HistogramViewDataWidget: updateVariableData";
+
     histogram_generator_.reset();
 
-    data_not_in_buffer_ = false;
+    if (viewData().empty())
+        return;
 
-    logdbg << "HistogramViewDataWidget: clearData_impl: end";
-}
+    assert(view_->numVariables() == 1);
+    assert(view_->variable(0).hasVariable());
 
-/**
- */
-void HistogramViewDataWidget::loadingStarted_impl()
-{
-    logdbg << "HistogramViewDataWidget: loadingStarted_impl: start";
+    auto& variable = view_->variable(0);
 
-    //nothing to do yet
+    dbContent::Variable*     data_var = variable.variablePtr();
+    dbContent::MetaVariable* meta_var = variable.metaVariablePtr();
 
-    logdbg << "HistogramViewDataWidget: loadingStarted_impl: end";
-}
+    assert (meta_var || data_var);
 
-/**
- */
-void HistogramViewDataWidget::updateData_impl(bool requires_reset)
-{
-    logdbg << "HistogramViewDataWidget: updateData_impl: start";
+    auto data_type = meta_var ? meta_var->dataType() : data_var->dataType();
 
-    histogram_generator_.reset(); //current generator makes no sense any more
+    #define UpdateFunc(PDType, DType) \
+        histogram_generator_.reset(new HistogramGeneratorBufferT<DType>(&viewData(), data_var, meta_var));
 
-    logdbg << "HistogramViewDataWidget: updateData_impl: end";
-}
+    #define NotFoundFunc                                                                                                                      \
+        const std::string msg = "HistogramViewDataWidget: updateVariableData: impossible for property type " + Property::asString(data_type); \
+        logerr << msg;                                                                                                                        \
+        throw std::runtime_error(msg);
 
-/**
- */
-void HistogramViewDataWidget::loadingDone_impl()
-{
-    logdbg << "HistogramViewDataWidget: loadingDone_impl: start";
+    #define UnsupportedFunc(PDType, DType) assert(true);
 
-    //default behavior
-    ViewDataWidget::loadingDone_impl();
+    SwitchPropertyDataTypeNumeric(data_type, UpdateFunc, UnsupportedFunc, UnsupportedFunc, NotFoundFunc)
 
-    logdbg << "HistogramViewDataWidget: loadingDone_impl: end";
-}
-
-/**
- */
-void HistogramViewDataWidget::liveReload_impl()
-{
-    //implement live reload behavior here
-}
-
-/**
- */
-bool HistogramViewDataWidget::redrawData_impl(bool recompute)
-{
-    logdbg << "HistogramViewDataWidget: redrawData_impl: start - recompute = " << recompute;
-
-    if (recompute)
-        updateGenerator();
+    assert (histogram_generator_);
     
-    bool drawn = updateChart();
+    histogram_generator_->update();
+    //histogram_generator_->print();
 
-    logdbg << "HistogramViewDataWidget: redrawData_impl: end";
+    HistogramGeneratorBuffer* generator = dynamic_cast<HistogramGeneratorBuffer*>(histogram_generator_.get());
+    assert(generator);
+    
+    //variable missing from buffer?
+    if (generator->dataNotInBuffer())
+        setVariableState(0, VariableState::MissingFromBuffer);
 
-    return drawn;
+    loginf << "HistogramViewDataWidget: updateVariableData: done";
+}
+
+/**
+ */
+void HistogramViewDataWidget::updateGeneratorFromResults()
+{
+    loginf << "HistogramViewDataWidget: updateGeneratorFromResults";
+
+    histogram_generator_.reset();
+
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+    if (eval_man.hasResults() && view_->showResults())
+    {
+        string eval_grpreq = view_->resultID().eval_results_grpreq;
+        string eval_id     = view_->resultID().eval_results_id;
+
+        histogram_generator_.reset(new HistogramGeneratorResults(eval_grpreq, eval_id));
+    }
+
+    if (histogram_generator_)
+        histogram_generator_->update();
+
+    loginf << "HistogramViewDataWidget: updateGeneratorFromResults: done";
 }
 
 /**
@@ -254,168 +293,6 @@ QPixmap HistogramViewDataWidget::renderPixmap()
 
 /**
  */
-bool HistogramViewDataWidget::dataNotInBuffer() const
-{
-    return data_not_in_buffer_;
-}
-
-
-/**
- */
-void HistogramViewDataWidget::updateGenerator()
-{
-    if (view_->showResults())
-        updateGeneratorFromResults();
-    else
-        updateGeneratorFromData();
-}
-
-/**
- */
-void HistogramViewDataWidget::updateGeneratorFromData()
-{
-    loginf << "HistogramViewDataWidget: updateGeneratorFromData";
-
-    histogram_generator_.reset();
-
-    if (viewData().empty())
-        return;
-
-    data_not_in_buffer_ = false;
-
-    //get variable
-    dbContent::Variable*     data_var = nullptr;
-    dbContent::MetaVariable* meta_var = nullptr;
-
-    if (!view_->hasDataVar())
-    {
-        logwrn << "HistogramViewDataWidget: updateGeneratorFromData: no data var";
-        return;
-    }
-
-    if (view_->isDataVarMeta())
-        meta_var = &view_->metaDataVar();
-    else
-        data_var = &view_->dataVar();
-
-    assert (meta_var || data_var);
-
-    auto data_type = meta_var ? meta_var->dataType() : data_var->dataType();
-
-    //create histogram generator of conrete data type matching the variable's
-    switch (data_type)
-    {
-        case PropertyDataType::BOOL:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<bool>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::CHAR:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<char>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::UCHAR:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned char>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::INT:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<int>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::UINT:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned int>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::LONGINT:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<long int>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::ULONGINT:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned long int>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::FLOAT:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<float>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::DOUBLE:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<double>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::STRING:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<std::string>(&viewData(), data_var, meta_var));
-            break;
-        }
-        case PropertyDataType::JSON:
-        {
-            //@TODO
-            break;
-        }
-        case PropertyDataType::TIMESTAMP:
-        {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<boost::posix_time::ptime>(&viewData(), data_var, meta_var));
-            break;
-        }
-        default:
-        {
-            const std::string msg = "HistogramViewDataWidget: updateGeneratorFromData: impossible for property type " + Property::asString(data_type);
-
-            logerr << msg;
-            throw std::runtime_error(msg);
-        }
-    }
-
-    if (histogram_generator_)
-    {
-        histogram_generator_->update();
-        //histogram_generator_->print();
-
-        HistogramGeneratorBuffer* generator = dynamic_cast<HistogramGeneratorBuffer*>(histogram_generator_.get());
-        assert(generator);
-
-        data_not_in_buffer_ = generator->dataNotInBuffer();
-    }
-
-    loginf << "HistogramViewDataWidget: updateFromAllData: done";
-}
-
-/**
- */
-void HistogramViewDataWidget::updateGeneratorFromResults()
-{
-    loginf << "HistogramViewDataWidget: updateGeneratorFromResults";
-
-    histogram_generator_.reset();
-
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
-
-    if (eval_man.hasResults() && view_->showResults())
-    {
-        data_not_in_buffer_ = false;
-
-        string eval_grpreq = view_->evalResultGrpReq();
-        string eval_id     = view_->evalResultsID();
-
-        histogram_generator_.reset(new HistogramGeneratorResults(eval_grpreq, eval_id));
-    }
-
-    if (histogram_generator_)
-        histogram_generator_->update();
-
-    loginf << "HistogramViewDataWidget: updateGeneratorFromResults: done";
-}
-
-/**
- */
 bool HistogramViewDataWidget::updateChart()
 {
     loginf << "HistogramViewDataWidget: updateChart";
@@ -432,9 +309,9 @@ bool HistogramViewDataWidget::updateChart()
 
     QString x_axis_name;
     if (show_results)
-        x_axis_name = QString((view_->evalResultGrpReq() + ":" + view_->evalResultsID()).c_str());
+        x_axis_name = QString(view_->resultID().description().c_str());
     else
-        x_axis_name = QString((view_->dataVarDBO() + ": " + view_->dataVarName()).c_str());
+        x_axis_name = QString(view_->variable(0).description().c_str());
 
     QString y_axis_name = "Count";
 
@@ -482,7 +359,7 @@ bool HistogramViewDataWidget::updateChart()
     };
 
     //we obtain valid data if a generator has been created and if the needed data is in the buffer
-    bool has_data = (histogram_generator_ != nullptr && !dataNotInBuffer());
+    bool has_data = (histogram_generator_ != nullptr && variablesOk());
 
     if (has_data)
     {
@@ -523,7 +400,7 @@ bool HistogramViewDataWidget::updateChart()
             if (add_null)
                 addCount(set, r.null_count);
             
-            set->setColor(colors_[elem.first]);
+            set->setColor(colorForDBContent(elem.first));
             chart_series->append(set);
         }
 

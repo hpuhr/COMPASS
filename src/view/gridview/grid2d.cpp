@@ -116,6 +116,16 @@ void Grid2D::reset()
 
 /**
 */
+QRectF Grid2D::gridBounds() const
+{
+    if (!valid())
+        return QRectF();
+
+    return QRectF(x0_, y0_, x1_ - x0_, y1_ - y0_);
+}
+
+/**
+*/
 Grid2D::IndexError Grid2D::index(size_t& idx_x, size_t& idx_y, double x, double y) const
 {
     if (!std::isfinite(x) || !std::isfinite(y))

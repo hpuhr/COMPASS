@@ -23,6 +23,7 @@
 #include "tableview.h"
 #include "histogramview.h"
 #include "scatterplotview.h"
+#include "gridview.h"
 #include "logger.h"
 //#include "mainloadwidget.h"
 //#include "stringconv.h"
@@ -249,6 +250,13 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "ScatterPlotView")
     {
         views_.emplace_back(new ScatterPlotView(class_id, instance_id, this, view_manager_));
+
+        (*views_.rbegin())->init();
+        addView(views_.rbegin()->get());
+    }
+    else if (class_id == "GridView")
+    {
+        views_.emplace_back(new GridView(class_id, instance_id, this, view_manager_));
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());

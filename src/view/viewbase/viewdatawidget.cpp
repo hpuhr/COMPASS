@@ -29,6 +29,19 @@
 
 #include <iostream>
 
+const double      ViewDataWidget::MarkerSizePx         = 8.0;
+const double      ViewDataWidget::MarkerSizeSelectedPx = 6.0;
+
+const std::string ViewDataWidget::Color_CAT001  = "#00FF00";
+const std::string ViewDataWidget::Color_CAT010  = "#FFCC00";
+const std::string ViewDataWidget::Color_CAT020  = "#FF0000";
+const std::string ViewDataWidget::Color_CAT021  = "#6666FF";
+const std::string ViewDataWidget::Color_CAT048  = "#00FF00";
+const std::string ViewDataWidget::Color_RefTraj = "#FFA500";
+const std::string ViewDataWidget::Color_CAT062  = "#CCCCCC";
+
+const QColor ViewDataWidget::ColorSelected = Qt::yellow; // darker than yellow #808000
+
 /**
  */
 ViewDataWidget::ViewDataWidget(ViewWidget* view_widget, QWidget* parent, Qt::WindowFlags f)
@@ -38,6 +51,14 @@ ViewDataWidget::ViewDataWidget(ViewWidget* view_widget, QWidget* parent, Qt::Win
     assert(view_widget_);
 
     setObjectName("datawidget");
+
+    dbc_colors_["CAT001" ] = QColor(QString::fromStdString(Color_CAT001 ));
+    dbc_colors_["CAT010" ] = QColor(QString::fromStdString(Color_CAT010 ));
+    dbc_colors_["CAT020" ] = QColor(QString::fromStdString(Color_CAT020 ));
+    dbc_colors_["CAT021" ] = QColor(QString::fromStdString(Color_CAT021 ));
+    dbc_colors_["CAT048" ] = QColor(QString::fromStdString(Color_CAT048 ));
+    dbc_colors_["RefTraj"] = QColor(QString::fromStdString(Color_RefTraj));
+    dbc_colors_["CAT062" ] = QColor(QString::fromStdString(Color_CAT062 ));
 }
 
 /**
@@ -65,6 +86,13 @@ bool ViewDataWidget::showsData() const
 {
     //the view needs to obtain data, and the last redraw needs to be a valid one.
     return (hasData() && drawn_);
+}
+
+/**
+*/
+QColor ViewDataWidget::colorForDBContent(const std::string& dbcontent_name) const
+{
+    return dbc_colors_.at(dbcontent_name);
 }
 
 /**

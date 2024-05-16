@@ -17,38 +17,31 @@
 
 #pragma once
 
-#include "variableviewconfigwidget.h"
+#include "viewwidget.h"
 
-class ScatterPlotViewWidget;
-class ScatterPlotView;
-
-class QCheckBox;
-class QLineEdit;
+class GridView;
+class GridViewConfigWidget;
+class GridViewDataWidget;
 
 /**
- * @brief Widget with configuration elements for a ScatterPlotView
- *
- */
-class ScatterPlotViewConfigWidget : public VariableViewConfigWidget
+*/
+class GridViewWidget : public ViewWidget
 {
-    Q_OBJECT
-
-public slots:
-    void useConnectionLinesSlot();
-
 public:
-    ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, 
-                                QWidget* parent = nullptr);
-    virtual ~ScatterPlotViewConfigWidget();
+    GridViewWidget(const std::string& class_id, 
+                   const std::string& instance_id,
+                   Configurable* config_parent, 
+                   GridView* view, 
+                   QWidget* parent = NULL);
+    virtual ~GridViewWidget();
+
+    GridViewDataWidget* getViewDataWidget();
+    const GridViewDataWidget* getViewDataWidget() const;
+    GridViewConfigWidget* getViewConfigWidget();
+    const GridViewConfigWidget* getViewConfigWidget() const;
+
+    GridView* getView();
 
 protected:
-    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
-
-    virtual void onDisplayChange_impl() override;
-
-    ScatterPlotView* view_ = nullptr;
-
-    QCheckBox* use_connection_lines_ {nullptr};
-
-    
+    virtual std::string loadedMessage_impl() const override;
 };

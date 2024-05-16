@@ -181,6 +181,9 @@ public slots:
     void loadingDoneSlot();
 
 public:
+    typedef std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> ResultMap;
+    typedef ResultMap::const_iterator ResultIterator;
+
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~EvaluationManager();
 
@@ -286,15 +289,11 @@ public:
                        bool select_tab = false,
                        bool show_figure = false);
 
-    typedef std::map<std::string,
-      std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
-
     ResultIterator begin();
     ResultIterator end();
 
     bool hasResults();
-    const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
-    const;
+    const ResultMap& results() const;
 
     void updateResultsToChanges ();
     void showFullUTN (unsigned int utn);

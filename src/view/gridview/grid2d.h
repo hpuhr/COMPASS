@@ -72,6 +72,8 @@ public:
     Eigen::MatrixXd getValues(grid2d::ValueType vtype) const;
     const RasterReference& getReference() const;
 
+    QRectF gridBounds() const;
+
     size_t numAdded() const { return num_added_; }
     size_t numOutOfRange() const { return num_oor_; }
     size_t numInf() const { return num_inf_; }

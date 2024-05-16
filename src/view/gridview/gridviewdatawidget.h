@@ -17,71 +17,66 @@
 
 #pragma once
 
-//#include "global.h"
-#include "nullablevector.h"
-//#include "dbcontent/variable/variable.h"
-#include "scatterplotviewchartview.h"
 #include "variableviewdatawidget.h"
-#include "util/timeconv.h"
 
-#include <QWidget>
-#include <QVariant>
+#include "nullablevector.h"
+#include "timeconv.h"
 
 #include <memory>
 #include <limits>
 
-class ScatterPlotView;
-class ScatterPlotViewWidget;
-class ScatterPlotViewDataSource;
+#include <boost/optional.hpp>
 
-//class QTabWidget;
-class QHBoxLayout;
-class Buffer;
-class DBContent;
+#include <QImage>
+#include <QRectF>
 
-namespace QtCharts {
+class GridView;
+class GridViewWidget;
+class Grid2D;
+
+namespace QtCharts
+{
+    class GridViewChart;
     class QChart;
-    class QScatterSeries;
-    //class ScatterPlotViewChartView;
-    class QChartView;
-    class QBarCategoryAxis;
-    class QValueAxis;
 }
 
-enum ScatterPlotViewDataTool
+class Buffer;
+
+class QHBoxLayout;
+class QPixmap;
+
+enum GridViewDataTool
 {
-    SP_NAVIGATE_TOOL = 0,
-    SP_ZOOM_RECT_TOOL,
-    SP_SELECT_TOOL
+    GV_NAVIGATE_TOOL = 0,
+    GV_ZOOM_RECT_TOOL,
+    GV_SELECT_TOOL
 };
 
 /**
  * @brief Widget with tab containing BufferTableWidgets in ScatterPlotView
  *
  */
-class ScatterPlotViewDataWidget : public VariableViewDataWidget
+class GridViewDataWidget : public VariableViewDataWidget
 {
     Q_OBJECT
 public:
     /// @brief Constructor
-    ScatterPlotViewDataWidget(ScatterPlotViewWidget* view_widget,
-                              QWidget* parent = nullptr, 
-                              Qt::WindowFlags f = 0);
+    GridViewDataWidget(GridViewWidget* view_widget,
+                       QWidget* parent = nullptr, 
+                       Qt::WindowFlags f = 0);
     /// @brief Destructor
-    virtual ~ScatterPlotViewDataWidget();
+    virtual ~GridViewDataWidget();
 
-    ScatterPlotViewDataTool selectedTool() const;
+    GridViewDataTool selectedTool() const;
 
-    QRectF getDataBounds() const;
+    QRectF getXYBounds() const;
+    boost::optional<std::pair<double, double>> getZBounds() const;
+
     QPixmap renderPixmap();
     unsigned int nullValueCount() const;
 
-    static const int ConnectLinesDataCountMax = 100000;
-
-signals:
-//    void showOnlySelectedSignal(bool value);
-//    void usePresentationSignal(bool use_presentation);
-//    void showAssociationsSignal(bool value);
+    const QImage& gridRendering() const { return grid_rendering_; }
+    const QRectF& gridBounds() const { return grid_roi_; }
 
 public slots:
     void rectangleSelectedSlot(QPointF p1, QPointF p2);
@@ -89,15 +84,9 @@ public slots:
     void invertSelectionSlot();
     void clearSelectionSlot();
 
-//    void showOnlySelectedSlot(bool value);
-//    void usePresentationSlot(bool use_presentation);
-//    void showAssociationsSlot(bool value);
-
     void resetZoomSlot();
 
 protected:
-    typedef std::unique_ptr<QtCharts::ScatterPlotViewChartView> ChartViewPtr;
-
     virtual void mouseMoveEvent(QMouseEvent* event) override;
 
     virtual void toolChanged_impl(int mode) override;
@@ -115,10 +104,12 @@ protected:
 
 private:
     void resetCounts();
+    void resetGrid();
 
     void updateMinMax();
     bool updateChart();
-    void updateDataSeries(QtCharts::QChart* chart);
+    void updateChart(QtCharts::QChart* chart, bool has_data);
+    void updateGrid();
 
     void selectData (double x_min, double x_max, double y_min, double y_max);
 
@@ -141,13 +132,16 @@ private:
         }
     }
 
-    ScatterPlotView*           view_       {nullptr};
-    ScatterPlotViewDataSource* data_source_{nullptr};
+    GridView* view_ = nullptr;
 
     std::map<std::string, unsigned int>               buffer_x_counts_;
     std::map<std::string, unsigned int>               buffer_y_counts_;
+    std::map<std::string, unsigned int>               buffer_z_counts_;
+
     std::map<std::string, std::vector<double>>        x_values_;
     std::map<std::string, std::vector<double>>        y_values_;
+    std::map<std::string, std::vector<double>>        z_values_;
+
     std::map<std::string, std::vector<bool>>          selected_values_;
     std::map<std::string, std::vector<unsigned long>> rec_num_values_;
     std::map<std::string, unsigned int>               dbo_valid_counts_;
@@ -162,19 +156,28 @@ private:
     bool has_y_min_max_ {false};
     double y_min_ {0}, y_max_ {0};
 
-    ScatterPlotViewDataTool selected_tool_{SP_NAVIGATE_TOOL};
+    bool has_z_min_max_ {false};
+    double z_min_ {0}, z_max_ {0};
 
-    QHBoxLayout* main_layout_ {nullptr};
-    ChartViewPtr chart_view_  {nullptr};
+    GridViewDataTool selected_tool_ = GV_NAVIGATE_TOOL;
+
+    QHBoxLayout*         main_layout_ = nullptr;
+    //SimpleGridViewChart* grid_chart_  = nullptr;
+
+    std::unique_ptr<QtCharts::GridViewChart> grid_chart_;
+
+    std::unique_ptr<Grid2D> grid_;
+    QImage                  grid_rendering_;
+    QRectF                  grid_roi_;
 };
 
 /**
 */
 template<>
-inline void ScatterPlotViewDataWidget::appendData<boost::posix_time::ptime>(NullableVector<boost::posix_time::ptime>& data, 
-                                                                            std::vector<double>& target, 
-                                                                            unsigned int last_size,
-                                                                            unsigned int current_size)
+inline void GridViewDataWidget::appendData<boost::posix_time::ptime>(NullableVector<boost::posix_time::ptime>& data, 
+                                                                     std::vector<double>& target, 
+                                                                     unsigned int last_size,
+                                                                     unsigned int current_size)
 {
     for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
     {
@@ -193,10 +196,10 @@ inline void ScatterPlotViewDataWidget::appendData<boost::posix_time::ptime>(Null
 /**
 */
 template<>
-inline void ScatterPlotViewDataWidget::appendData<std::string>(NullableVector<std::string>& data, 
-                                                               std::vector<double>& target, 
-                                                               unsigned int last_size,
-                                                               unsigned int current_size)
+inline void GridViewDataWidget::appendData<std::string>(NullableVector<std::string>& data, 
+                                                        std::vector<double>& target, 
+                                                        unsigned int last_size,
+                                                        unsigned int current_size)
 {
-    throw std::runtime_error("ScatterPlotViewDataWidget: appendData: string not supported");
+    throw std::runtime_error("GridViewDataWidget: appendData: string not supported");
 }

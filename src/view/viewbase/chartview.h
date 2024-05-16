@@ -64,7 +64,7 @@ public slots:
     virtual void seriesReleasedSlot(const QPointF& point);
 
 protected:
-    virtual void paintEvent(QPaintEvent *e) override final;
+    virtual void paintEvent(QPaintEvent* e) override final;
     virtual void mousePressEvent(QMouseEvent* event) override final;
     virtual void mouseMoveEvent(QMouseEvent* event) override final;
     virtual void mouseReleaseEvent(QMouseEvent* event) override final;
@@ -72,6 +72,8 @@ protected:
     virtual bool handleMousePress(Qt::MouseButtons buttons, const QPointF& widget_pos) = 0;
     virtual bool handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos, bool update_pos) = 0;
     virtual bool handleMouseMove(Qt::MouseButtons buttons, const QPointF& widget_pos) = 0;
+
+    virtual void paintCustomItems(QPaintEvent* e, QPainter& painter) {}
 
     QPointF widgetToChart(const QPointF& pos) const;
     QPointF widgetFromChart(const QPointF& pos) const;

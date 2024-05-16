@@ -33,28 +33,37 @@
 
 using namespace dbContent;
 
-const std::string HistogramView::ParamDataVarDBO  = "data_var_dbo";
-const std::string HistogramView::ParamDataVarName = "data_var_name";
 const std::string HistogramView::ParamUseLogScale = "use_log_scale";
 
 /**
  */
 HistogramView::Settings::Settings()
-:   data_var_dbo (META_OBJECT_NAME)
-,   data_var_name(DBContent::meta_var_timestamp_.name())
-,   use_log_scale(false)
+:   use_log_scale(false)
 {
 }
 
 /**
  */
-HistogramView::HistogramView(const std::string& class_id, const std::string& instance_id,
-                             ViewContainer* w, ViewManager& view_manager)
-    : View(class_id, instance_id, w, view_manager)
+HistogramView::HistogramView(const std::string& 
+                             class_id, 
+                             const std::string& instance_id,
+                             ViewContainer* w, 
+                             ViewManager& view_manager)
+:   VariableView(class_id, instance_id, w, view_manager)
 {
-    registerParameter(ParamDataVarDBO, &settings_.data_var_dbo, Settings().data_var_dbo);
-    registerParameter(ParamDataVarName, &settings_.data_var_name, Settings().data_var_name);
     registerParameter(ParamUseLogScale, &settings_.use_log_scale, Settings().use_log_scale);
+
+    const std::vector<PropertyDataType> valid_types = { PropertyDataType::BOOL,
+                                                        PropertyDataType::CHAR,
+                                                        PropertyDataType::UCHAR,
+                                                        PropertyDataType::INT,
+                                                        PropertyDataType::UINT,
+                                                        PropertyDataType::LONGINT,
+                                                        PropertyDataType::ULONGINT,
+                                                        PropertyDataType::FLOAT,
+                                                        PropertyDataType::DOUBLE };
+
+    addVariable("data_var", "", "data_var", META_OBJECT_NAME, DBContent::meta_var_timestamp_.name(), true, true, valid_types);
 
     // create sub done in init
 }
@@ -108,9 +117,6 @@ bool HistogramView::init_impl()
     //    widget_->getDataWidget()->usePresentationSlot(use_presentation_);
     //    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
 
-    // eval
-    connect(&COMPASS::instance().evaluationManager(), &EvaluationManager::resultsChangedSignal,
-            this, &HistogramView::resultsChangedSlot);
 
     return true;
 }
@@ -162,29 +168,10 @@ HistogramViewDataWidget* HistogramView::getDataWidget()
 
 /**
  */
-VariableSet HistogramView::getSet(const std::string& dbcontent_name)
+VariableSet HistogramView::getBaseSet(const std::string& dbcontent_name)
 {
     assert(data_source_);
-
-    VariableSet set = data_source_->getSet()->getFor(dbcontent_name);
-
-    if (hasDataVar())
-    {
-        if (isDataVarMeta())
-        {
-            MetaVariable& meta_var = metaDataVar();
-
-            if (meta_var.existsIn(dbcontent_name) && !set.hasVariable(meta_var.getFor(dbcontent_name)))
-                set.add(meta_var.getFor(dbcontent_name));
-        }
-        else
-        {
-            if (dataVar().dbContentName() == dbcontent_name && !set.hasVariable(dataVar()))
-                set.add(dataVar());
-        }
-    }
-
-    return set;
+    return data_source_->getSet()->getFor(dbcontent_name);
 }
 
 /**
@@ -218,105 +205,6 @@ void HistogramView::useLogScale(bool use_log_scale, bool notify_changes)
 
 /**
  */
-bool HistogramView::hasDataVar ()
-{
-    if (settings_.data_var_dbo.empty() || settings_.data_var_name.empty())
-        return false;
-
-    if (settings_.data_var_dbo == META_OBJECT_NAME)
-        return COMPASS::instance().dbContentManager().existsMetaVariable(settings_.data_var_name);
-    else
-        return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).hasVariable(settings_.data_var_name);
-}
-
-/**
- */
-bool HistogramView::isDataVarMeta ()
-{
-    return (settings_.data_var_dbo == META_OBJECT_NAME);
-}
-
-/**
- */
-Variable& HistogramView::dataVar()
-{
-    assert (hasDataVar());
-    assert (!isDataVarMeta());
-    assert (COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).hasVariable(settings_.data_var_name));
-
-    return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).variable(settings_.data_var_name);
-}
-
-/**
- */
-void HistogramView::dataVar (Variable& var, bool notify_changes)
-{
-    if (settings_.data_var_dbo == var.dbContentName() && 
-        settings_.data_var_name == var.name())
-        return;
-
-    loginf << "HistogramView: dataVar: dbo " << var.dbContentName() << " name " << var.name();
-
-    setParameter(settings_.data_var_dbo, var.dbContentName());
-    setParameter(settings_.data_var_name, var.name());
-
-    assert (hasDataVar());
-    assert (!isDataVarMeta());
-
-    if (notify_changes)
-    {
-        notifyRefreshNeeded();
-    }
-}
-
-/**
- */
-MetaVariable& HistogramView::metaDataVar()
-{
-    assert (hasDataVar());
-    assert (isDataVarMeta());
-
-    return COMPASS::instance().dbContentManager().metaVariable(settings_.data_var_name);
-}
-
-/**
- */
-void HistogramView::metaDataVar (MetaVariable& var, bool notify_changes)
-{
-    if (settings_.data_var_dbo == META_OBJECT_NAME && 
-        settings_.data_var_name == var.name())
-        return;
-    
-    loginf << "HistogramView: metaDataVar: name " << var.name();
-
-    setParameter(settings_.data_var_dbo, META_OBJECT_NAME);
-    setParameter(settings_.data_var_name, var.name());
-
-    assert (hasDataVar());
-    assert (isDataVarMeta());
-
-    if (notify_changes)
-    {
-        notifyRefreshNeeded();
-    }
-}
-
-/**
- */
-std::string HistogramView::dataVarDBO() const
-{
-    return settings_.data_var_dbo;
-}
-
-/**
- */
-std::string HistogramView::dataVarName() const
-{
-    return settings_.data_var_name;
-}
-
-/**
- */
 void HistogramView::updateSelection()
 {
     loginf << "HistogramView: updateSelection";
@@ -330,201 +218,13 @@ void HistogramView::updateSelection()
     //        widget_->getDataWidget()->resetModels();  // just updates the checkboxes
 }
 
-/**
- */
-void HistogramView::unshowViewPointSlot (const ViewableDataConfig* vp)
-{
-    loginf << "HistogramView: unshowViewPoint";
-
-//    assert (vp);
-//    assert (data_source_);
-//    data_source_->unshowViewPoint(vp);
-
-    current_view_point_ = nullptr;
-}
-
-/**
- */
-bool HistogramView::showResults() const
-{
-    return show_results_;
-}
-
-/**
- */
-void HistogramView::showResults(bool value)
-{
-    show_results_ = value;
-
-    onShowResultsChanged();
-}
-
-/**
- */
-std::string HistogramView::evalResultGrpReq() const
-{
-    return eval_results_grpreq_;
-}
-
-/**
- */
-void HistogramView::evalResultGrpReq(const std::string& value)
-{
-    if (eval_results_grpreq_ == value)
-        return;
-
-    loginf << "HistogramView: evalResultGrpReq: value " << value;
-
-    eval_results_grpreq_ = value;
-
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
-}
-
-/**
- */
-std::string HistogramView::evalResultsID() const
-{
-    return eval_results_id_;
-}
-
-/**
- */
-void HistogramView::evalResultsID(const std::string& value)
-{
-    if (eval_results_id_ == value)
-        return;
-
-    loginf << "HistogramView: evalResultsID: value " << value;
-
-    eval_results_id_ = value;
-
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
-}
-
-/**
- */
-bool HistogramView::hasResultID() const
-{
-    return (!evalResultGrpReq().empty() && !evalResultsID().empty());
-}
-
-/**
- */
-void HistogramView::showViewPointSlot (const ViewableDataConfig* vp)
-{
-    loginf << "HistogramView: showViewPoint";
-
-    assert (vp);
-//    assert (data_source_);
-//    data_source_->showViewPoint(vp);
-//    assert (widget_);
-
-    current_view_point_ = vp;
-
-    //widget_->getDataWidget()->resetViewPointZoomed(); // TODO
-}
-
-/**
- */
-void HistogramView::onShowResultsChanged()
-{
-    widget_->getViewConfigWidget()->updateConfig();
-    widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateComponents();
-}
-
-/**
- */
-void HistogramView::resultsChangedSlot()
-{
-    loginf << "HistogramView: resultsChangedSlot";
-
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
-
-    const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results =
-            eval_man.results();
-
-    // check if result ids are still valid
-    if (!results.size())
-    {
-        eval_results_grpreq_ = "";
-        eval_results_id_ = "";
-    }
-    else
-    {
-        if (!results.count(eval_results_grpreq_))
-        {
-            eval_results_grpreq_ = "";
-            eval_results_id_ = "";
-        }
-        else if (!results.at(eval_results_grpreq_).count(eval_results_id_))
-        {
-            eval_results_id_ = "";
-        }
-    }
-
-    //reset result visualization if result id is bad
-    if (show_results_ && !hasResultID())
-    {
-        show_results_ = false;
-    }
-
-    //update on result change
-    onShowResultsChanged();
-}
-
-/**
- */
-void HistogramView::loadingDone()
-{
-    //finish loading procedures first by calling base
-    View::loadingDone();
-
-    //now update view to any existing results
-    if (current_view_point_ && current_view_point_->data().contains("evaluation_results"))
-    {
-        //infer result visualization from view point
-        const nlohmann::json& data = current_view_point_->data();
-        assert (data.at("evaluation_results").contains("show_results"));
-        assert (data.at("evaluation_results").contains("req_grp_id"));
-        assert (data.at("evaluation_results").contains("result_id"));
-
-        show_results_        = data.at("evaluation_results").at("show_results");
-        eval_results_grpreq_ = data.at("evaluation_results").at("req_grp_id");
-        eval_results_id_     = data.at("evaluation_results").at("result_id");
-
-        //show_results_ = true;
-
-        //eval_highlight_details_.clear();
-
-        //if (data.at("evaluation_results").contains("highlight_details"))
-        //{
-        //    loginf << "GeographicView: loadingDoneSlot: highlight_details "
-        //           << data.at("evaluation_results").at("highlight_details").dump();
-
-        //    vector<unsigned int> highlight_details = data.at("evaluation_results").at("highlight_details");
-        //    eval_highlight_details_ = move(highlight_details);
-        //}
-
-        resultsChangedSlot();
-    }
-    else
-    {
-        //do not show results
-        showResults(false);
-    }
-}
 
 /**
  */
 void HistogramView::viewInfoJSON_impl(nlohmann::json& info) const
 {
-    info[ "use_log_scale"       ] = settings_.use_log_scale;
-    info[ "data_var_dbo"        ] = settings_.data_var_dbo;
-    info[ "data_var_name"       ] = settings_.data_var_name;
-    info[ "show_results"        ] = show_results_;
-    info[ "eval_results_grpreq" ] = eval_results_grpreq_;
-    info[ "eval_results_id_"    ] = eval_results_id_;
+    //!call base!
+    VariableView::viewInfoJSON_impl(info);
+
+    info[ "use_log_scale"] = settings_.use_log_scale;
 }

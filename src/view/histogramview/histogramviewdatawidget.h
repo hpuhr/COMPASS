@@ -15,14 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HISTOGRAMVIEWDATAWIDGET_H_
-#define HISTOGRAMVIEWDATAWIDGET_H_
+#pragma once
 
 //#include "global.h"
 //#include "nullablevector.h"
 //#include "dbcontent/variable/variable.h"
 #include "histogramviewchartview.h"
-#include "viewdatawidget.h"
+#include "variableviewdatawidget.h"
 //#include "histogram.h"
 //#include "results/base.h"
 
@@ -50,7 +49,7 @@ enum HistogramViewDataTool
  * @brief Widget with tab containing BufferTableWidgets in HistogramView
  *
  */
-class HistogramViewDataWidget : public ViewDataWidget
+class HistogramViewDataWidget : public VariableViewDataWidget
 {
     Q_OBJECT
 public:
@@ -65,8 +64,6 @@ public:
 
     HistogramViewDataTool selectedTool() const;
     QCursor currentCursor() const;
-
-    bool dataNotInBuffer() const;
 
     QPixmap renderPixmap();
 
@@ -96,20 +93,20 @@ public slots:
     void clearSelectionSlot();
 
 protected:
-    virtual void toolChanged_impl(int mode) override;
-    virtual void loadingStarted_impl() override;
-    virtual void loadingDone_impl() override;
-    virtual void updateData_impl(bool requires_reset) override;
-    virtual void clearData_impl() override;
-    virtual bool redrawData_impl(bool recompute) override;
-    virtual void liveReload_impl() override;
+    virtual void updateDataEvent(bool requires_reset) override final;
+    virtual void resetVariableData() override final;
+    virtual void resetVariableDisplay() override final;
+    virtual void preUpdateVariableDataEvent() override final;
+    virtual void postUpdateVariableDataEvent() override final;
+    virtual bool updateVariableDisplay() override final;
+    virtual void updateFromVariables() override final;
+    virtual void updateFromResults() override final;
 
+    void toolChanged_impl(int mode) override;
     void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     void resetCounts();
 
-    void updateGenerator();
-    void updateGeneratorFromData();
     void updateGeneratorFromResults();
 
     bool updateChart();
@@ -120,27 +117,13 @@ protected:
     static const unsigned int NumBins     = 20;
     static const int          LabelAngleX = 85;
 
-    static const QColor       ColorSelected;
-    static const QColor       ColorCAT001;
-    static const QColor       ColorCAT010;
-    static const QColor       ColorCAT020;
-    static const QColor       ColorCAT021;
-    static const QColor       ColorCAT048;
-    static const QColor       ColorCAT062;
-    static const QColor       ColorRefTraj;
-
     QHBoxLayout*             main_layout_{nullptr};
     HistogramView*           view_       {nullptr};
     HistogramViewDataSource* data_source_{nullptr};
 
-    std::map<std::string, QColor>                  colors_;
-    QCursor                                        current_cursor_{Qt::CrossCursor};
-    HistogramViewDataTool                          selected_tool_ {HG_DEFAULT_TOOL};
+    QCursor               current_cursor_{Qt::CrossCursor};
+    HistogramViewDataTool selected_tool_ {HG_DEFAULT_TOOL};
 
     std::unique_ptr<QtCharts::HistogramViewChartView> chart_view_;
     std::unique_ptr<HistogramGenerator>               histogram_generator_;
-
-    bool data_not_in_buffer_ {false};
 };
-
-#endif /* HISTOGRAMVIEWDATAWIDGET_H_ */

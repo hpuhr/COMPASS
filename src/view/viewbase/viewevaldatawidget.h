@@ -17,38 +17,35 @@
 
 #pragma once
 
-#include "variableviewconfigwidget.h"
+#include "viewevaldata.h"
 
-class ScatterPlotViewWidget;
-class ScatterPlotView;
+#include <QWidget>
 
-class QCheckBox;
-class QLineEdit;
+class QLabel;
 
 /**
- * @brief Widget with configuration elements for a ScatterPlotView
- *
- */
-class ScatterPlotViewConfigWidget : public VariableViewConfigWidget
+*/
+class ViewEvalDataIDWidget : public QWidget
 {
     Q_OBJECT
-
-public slots:
-    void useConnectionLinesSlot();
-
 public:
-    ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, 
-                                QWidget* parent = nullptr);
-    virtual ~ScatterPlotViewConfigWidget();
+    ViewEvalDataIDWidget(QWidget* parent = nullptr);
+    virtual ~ViewEvalDataIDWidget();
 
-protected:
-    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
+    void setID(const ViewEvalDataID& id,
+               bool notify_changes = true);
 
-    virtual void onDisplayChange_impl() override;
+    ViewEvalDataID getID() const;
 
-    ScatterPlotView* view_ = nullptr;
+signals:
+    void idChanged();
 
-    QCheckBox* use_connection_lines_ {nullptr};
+private:
+    void createUI();
+    void updateContent();
 
-    
+    QLabel* eval_results_grpreq_label_ = nullptr;
+    QLabel* eval_results_id_label_     = nullptr;
+
+    ViewEvalDataID id_;
 };
