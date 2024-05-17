@@ -73,6 +73,11 @@ public:
     const RasterReference& getReference() const;
 
     QRectF gridBounds() const;
+    void cropGrid(QRectF& roi, 
+                  QRect& region, 
+                  const QRectF& crop_rect,
+                  bool region_in_image_space,
+                  int pixels_per_cell = 1) const;
 
     size_t numAdded() const { return num_added_; }
     size_t numOutOfRange() const { return num_oor_; }

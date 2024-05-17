@@ -257,9 +257,8 @@ void GridViewDataWidget::toolChanged_impl(int mode)
 {
     selected_tool_ = (GridViewDataTool)mode;
 
-    //@TODO
-    //if (chart_view_)
-    //    chart_view_->onToolChanged();
+    if (grid_chart_)
+        grid_chart_->onToolChanged();
 }
 
 /**
@@ -310,30 +309,26 @@ void GridViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
 {
     loginf << "GridViewDataWidget: rectangleSelectedSlot";
 
-    //@TODO
-    // if (chart_view_ && chart_view_->chart())
-    // {
-    //     if (selected_tool_ == SP_ZOOM_RECT_TOOL)
-    //     {
-    //         loginf << "GridViewDataWidget: rectangleSelectedSlot: zoom";
+    if (grid_chart_ && grid_chart_->chart())
+    {
+        if (selected_tool_ == GV_ZOOM_RECT_TOOL)
+        {
+            loginf << "GridViewDataWidget: rectangleSelectedSlot: zoom";
 
-    //         //TODO: prevent from going nuts when zero rect is passed!
+            //TODO: prevent from going nuts when zero rect is passed!
+            grid_chart_->zoom(p1, p2);
+        }
+        else if (selected_tool_ == GV_SELECT_TOOL)
+        {
+            loginf << "GridViewDataWidget: rectangleSelectedSlot: select";
 
-    //         if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
-    //         {
-    //             chart_view_->chart()->axisX()->setRange(std::min(p1.x(), p2.x()), std::max(p1.x(), p2.x()));
-    //             chart_view_->chart()->axisY()->setRange(std::min(p1.y(), p2.y()), std::max(p1.y(), p2.y()));
-    //         }
-    //     }
-    //     else if (selected_tool_ == SP_SELECT_TOOL)
-    //     {
-    //         loginf << "GridViewDataWidget: rectangleSelectedSlot: select";
-
-    //         selectData(std::min(p1.x(), p2.x()), std::max(p1.x(), p2.x()), std::min(p1.y(), p2.y()), std::max(p1.y(), p2.y()));
-    //     }
-    //     else
-    //         throw std::runtime_error("GridViewDataWidget: rectangleSelectedSlot: unknown tool " + std::to_string((unsigned int)selected_tool_));
-    // }
+            selectData(std::min(p1.x(), p2.x()), std::max(p1.x(), p2.x()), std::min(p1.y(), p2.y()), std::max(p1.y(), p2.y()));
+        }
+        else
+        {
+            throw std::runtime_error("GridViewDataWidget: rectangleSelectedSlot: unknown tool " + std::to_string((unsigned int)selected_tool_));
+        }
+    }
 
     endTool();
 }
@@ -385,20 +380,8 @@ void GridViewDataWidget::resetZoomSlot()
 {
     loginf << "GridViewDataWidget: resetZoomSlot";
 
-    //@TODO
-    // if (chart_view_ && chart_view_->chart())
-    // {
-    //     //chart_view_->chart()->createDefaultAxes();
-
-    //     if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY()
-    //             && has_x_min_max_ && has_y_min_max_)
-    //     {
-    //         chart_view_->chart()->axisX()->setRange(x_min_, x_max_);
-    //         chart_view_->chart()->axisY()->setRange(y_min_, y_max_);
-    //     }
-
-    //     //chart_->zoomReset();
-    // }
+    if (grid_chart_)
+        grid_chart_->resetZoom();
 }
 
 /**
@@ -435,7 +418,7 @@ void GridViewDataWidget::updateMinMax()
     calcMinMax(has_y_min_max_, y_min_, y_max_, y_values_);
     calcMinMax(has_z_min_max_, z_min_, z_max_, z_values_);
 
-    logdbg << "ScatterPlotViewDataWidget: updateMinMax: "
+    logdbg << "GridViewDataWidget: updateMinMax: "
            << "has_x_min_max " << has_x_min_max_ << " x_min " << x_min_ << " x_max " << x_max_ << " "
            << "has_y_min_max " << has_y_min_max_ << " y_min " << y_min_ << " y_max " << y_max_ << " "
            << "has_z_min_max " << has_z_min_max_ << " z_min " << z_min_ << " z_max " << z_max_;
@@ -490,13 +473,13 @@ void GridViewDataWidget::updateChart(QtCharts::QChart* chart, bool has_data)
         chart->createDefaultAxes();
 
         //config x axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title x ' "
+        loginf << "GridViewDataWidget: updateDataSeries: title x ' "
                << view_->variable(0).description() << "'";
         assert (chart->axes(Qt::Horizontal).size() == 1);
         chart->axes(Qt::Horizontal).at(0)->setTitleText(view_->variable(0).description().c_str());
 
         //config y axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title y ' "
+        loginf << "GridViewDataWidget: updateDataSeries: title y ' "
                << view_->variable(1).description() << "'";
         assert (chart->axes(Qt::Vertical).size() == 1);
         chart->axes(Qt::Vertical).at(0)->setTitleText(view_->variable(1).description().c_str());
@@ -639,7 +622,7 @@ void GridViewDataWidget::selectData (double x_min, double x_max, double y_min, d
 {
     bool ctrl_pressed = QApplication::keyboardModifiers() & Qt::ControlModifier;
 
-    loginf << "ScatterPlotViewDataWidget: selectData: x_min " << x_min << " x_max " << x_max
+    loginf << "GridViewDataWidget: selectData: x_min " << x_min << " x_max " << x_max
            << " y_min " << y_min << " y_max " << y_max << " ctrl pressed " << ctrl_pressed;
 
     unsigned int sel_cnt = 0;
@@ -694,7 +677,7 @@ void GridViewDataWidget::selectData (double x_min, double x_max, double y_min, d
         }
     }
 
-    loginf << "ScatterPlotViewDataWidget: selectData: sel_cnt " << sel_cnt;
+    loginf << "GridViewDataWidget: selectData: sel_cnt " << sel_cnt;
 
     emit view_->selectionChangedSignal();
 }

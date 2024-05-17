@@ -126,6 +126,107 @@ QRectF Grid2D::gridBounds() const
 
 /**
 */
+void Grid2D::cropGrid(QRectF& roi, 
+                      QRect& region, 
+                      const QRectF& crop_rect,
+                      bool region_in_image_space,
+                      int pixels_per_cell) const
+{
+    roi    = QRectF();
+    region = QRect();
+
+    if (x1_ < crop_rect.x() ||
+        y1_ < crop_rect.x() ||
+        x0_ > crop_rect.x() + crop_rect.width() ||
+        y0_ > crop_rect.y() + crop_rect.height())
+        return;
+
+    double x0 = x0_;
+    double y0 = y0_;
+    double x1 = x1_;
+    double y1 = y1_;
+
+    int img_x0 = 0;
+    int img_y0 = 0;
+    int img_x1 = n_cells_x_;
+    int img_y1 = n_cells_y_;
+
+    int h = n_cells_y_;
+
+    double cell_size_x = cell_size_x_;
+    double cell_size_y = cell_size_y_;
+
+    //scale values to multiple pixels per cell
+    if (region_in_image_space && pixels_per_cell > 0)
+    {
+        img_x1 *= pixels_per_cell;
+        img_y1 *= pixels_per_cell;
+
+        h *= pixels_per_cell;
+
+        cell_size_x /= pixels_per_cell;
+        cell_size_y /= pixels_per_cell;
+    }
+
+    double cell_size_x_inv = 1.0 / cell_size_x;
+    double cell_size_y_inv = 1.0 / cell_size_y;
+
+    //apply crop rect
+    if (x0 < crop_rect.x())
+    {
+        int nx = std::floor((crop_rect.x() - x0) * cell_size_x_inv);
+        if (nx >= 2)
+        {
+            x0     += nx * cell_size_x;
+            img_x0 += nx;
+        }
+    }
+    if (y0 < crop_rect.y())
+    {
+        int ny = std::floor((crop_rect.y() - y0) * cell_size_y_inv);
+        if (ny >= 2)
+        {
+            y0     += ny * cell_size_y;
+            img_y0 += ny;
+        }
+    }
+    if (x1 > crop_rect.right())
+    {
+        int nx = std::floor((x1 - crop_rect.right()) * cell_size_x_inv);
+        if (nx >= 2)
+        {
+            x1     -= nx * cell_size_x;
+            img_x1 -= nx;
+        }
+    }
+    if (y1 > crop_rect.bottom())
+    {
+        int ny = std::floor((y1 - crop_rect.bottom()) * cell_size_y_inv);
+        if (ny >= 2)
+        {
+            y1     -= ny * cell_size_y;
+            img_y1 -= ny;
+        }
+    }
+
+    if (x0 > x1 || y0 > y1)
+        return;
+
+    roi    = QRectF(x0, y0, x1 - x0, y1 - y0);
+    region = QRect(img_x0, img_y0, img_x1 - img_x0, img_y1 - img_y0);
+
+    //invert region depending on coord system
+    if (region_in_image_space && ref_.is_north_up)
+    {
+        region = QRect(region.x(),
+                        h - img_y1,
+                        region.width(),
+                        region.height());
+    }
+}
+
+/**
+*/
 Grid2D::IndexError Grid2D::index(size_t& idx_x, size_t& idx_y, double x, double y) const
 {
     if (!std::isfinite(x) || !std::isfinite(y))

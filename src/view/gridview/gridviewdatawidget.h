@@ -75,8 +75,11 @@ public:
     QPixmap renderPixmap();
     unsigned int nullValueCount() const;
 
+    const Grid2D* grid() const { return grid_.get(); }
     const QImage& gridRendering() const { return grid_rendering_; }
     const QRectF& gridBounds() const { return grid_roi_; }
+
+    const GridView* getView() const { return view_; }
 
 public slots:
     void rectangleSelectedSlot(QPointF p1, QPointF p2);

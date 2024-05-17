@@ -59,6 +59,9 @@ public:
 
     virtual void onToolChanged() override;
 
+    void resetZoom();
+    void zoom(const QPointF& p1, const QPointF& p2);
+
 signals:
     void rectangleSelectedSignal (QPointF p1, QPointF p2);
 

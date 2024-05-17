@@ -17,6 +17,8 @@
 
 #include "gridviewchart.h"
 #include "gridviewdatawidget.h"
+#include "grid2d.h"
+#include "gridview.h"
 
 /**
 */
@@ -247,31 +249,113 @@ void GridViewChart::wheelEvent(QWheelEvent* event)
     QChartView::wheelEvent(event);
 }
 
+namespace
+{
+    QRectF mapBounds(QtCharts::QChart* chart, const QRectF& roi, bool is_value)
+    {
+        auto tl_mapped = is_value ? chart->mapToPosition(roi.topLeft()    ) : chart->mapToValue(roi.topLeft()    );
+        auto br_mapped = is_value ? chart->mapToPosition(roi.bottomRight()) : chart->mapToValue(roi.bottomRight());
+
+        double xmin = std::min(tl_mapped.x(), br_mapped.x());
+        double xmax = std::max(tl_mapped.x(), br_mapped.x());
+        double ymin = std::min(tl_mapped.y(), br_mapped.y());
+        double ymax = std::max(tl_mapped.y(), br_mapped.y());
+
+        return QRectF(xmin, ymin, xmax - xmin, ymax - ymin);
+    };
+
+    QRectF mapBoundsToValue(QtCharts::QChart* chart, const QRectF& roi_pos)
+    {
+        return mapBounds(chart, roi_pos, false);
+    }
+
+    QRectF mapBoundsToPosition(QtCharts::QChart* chart, const QRectF& roi_value)
+    {
+        return mapBounds(chart, roi_value, true);
+    }
+
+    void printRect(const std::string& name, const QRectF& r)
+    {
+        loginf << name << ": (" << r.x() << "," << r.y() << ") " << r.width() << "x" << r.height();
+    }
+
+    void printRect(const std::string& name, const QRect& r)
+    {
+        loginf << name << ": (" << r.x() << "," << r.y() << ") " << r.width() << "x" << r.height();
+    }
+}
+
 /**
  */
 void GridViewChart::paintCustomItems(QPaintEvent* event, QPainter& painter)
 {
-    const auto& grid_bounds    = data_widget_->gridBounds();
-    const auto& grid_rendering = data_widget_->gridRendering();
+    const Grid2D* grid           = data_widget_->grid();
+    const auto&   grid_bounds    = data_widget_->gridBounds();
+    const auto&   grid_rendering = data_widget_->gridRendering();
 
-    if (grid_bounds.isEmpty() || grid_rendering.isNull())
+    auto ppc = data_widget_->getView()->settings().render_pixels_per_cell;
+
+    if (!grid || grid_bounds.isEmpty() || grid_rendering.isNull())
         return;
 
-    auto tl_mapped = this->chart()->mapToPosition(QPointF(grid_bounds.topLeft()));
-    auto br_mapped = this->chart()->mapToPosition(QPointF(grid_bounds.bottomRight()));
+    auto plot_area = chart()->plotArea();
 
-    double xmin = std::min(tl_mapped.x(), br_mapped.x());
-    double xmax = std::max(tl_mapped.x(), br_mapped.x());
-    double ymin = std::min(tl_mapped.y(), br_mapped.y());
-    double ymax = std::max(tl_mapped.y(), br_mapped.y());
+    QRectF grid_bounds_cropped;
+    QRect  grid_region_cropped;
+    {
+        QRectF plot_area_mapped = mapBoundsToValue(chart(), plot_area);
 
-    QRectF r_paint(xmin, ymin, xmax - xmin, ymax - ymin);
+        //loginf << "image area: (full): " << grid_rendering.width() << "x" << grid_rendering.height();
+
+        //printRect("plot area (mapped): ", plot_area_mapped);
+        //printRect("grid area (full): ", grid_bounds);
+
+        grid->cropGrid(grid_bounds_cropped, grid_region_cropped, plot_area_mapped, true, ppc);
+
+        //printRect("grid area (cropped): ", grid_bounds_cropped);
+        //printRect("image area (cropped): ", grid_region_cropped);
+    }
+
+    //in this case the image region should be outside the plot region => do not draw
+    if (grid_region_cropped.isEmpty())
+        return;
+
+    QRectF r_paint = mapBoundsToPosition(chart(), grid_bounds_cropped);
 
     int w = r_paint.width();
     int h = r_paint.height();
 
-    painter.setClipRect(chart()->plotArea());
-    painter.drawImage(QPointF(xmin, ymin), grid_rendering.scaled(w, h, Qt::IgnoreAspectRatio, Qt::FastTransformation));
+    auto img = grid_rendering.copy(grid_region_cropped).scaled(w, h, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+
+    painter.setClipRect(plot_area);
+    painter.drawImage(QPointF(r_paint.x(), r_paint.y()), img);
+}
+
+/**
+ */
+void GridViewChart::resetZoom()
+{
+    if (chart() && chart()->axisX() && chart()->axisY())
+    {
+        const auto& bounds = data_widget_->gridBounds();
+
+        if (!bounds.isEmpty())
+        {
+            chart()->axisX()->setRange(bounds.x(), bounds.x() + bounds.width());
+            chart()->axisY()->setRange(bounds.y(), bounds.y() + bounds.height());
+        }
+    }
+}
+
+/**
+ */
+void GridViewChart::zoom(const QPointF& p1, const QPointF& p2)
+{
+    if (chart() && chart()->axisX() && chart()->axisY())
+    {
+        chart()->axisX()->setRange(std::min(p1.x(), p2.x()), std::max(p1.x(), p2.x()));
+        chart()->axisY()->setRange(std::min(p1.y(), p2.y()), std::max(p1.y(), p2.y()));
+    }
 }
 
 }
