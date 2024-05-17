@@ -378,6 +378,7 @@ void ReconstructorTask::run()
     writing_slice_ = nullptr;
 
     cancelled_ = false;
+    done_ = false;
 
     current_slice_idx_ = 0;
 
