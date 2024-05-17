@@ -107,12 +107,12 @@ protected:
 
 private:
     void resetCounts();
-    void resetGrid();
+    void resetGridChart();
 
     void updateMinMax();
-    bool updateChart();
-    void updateChart(QtCharts::QChart* chart, bool has_data);
+    bool updateGridChart();
     void updateGrid();
+    void updateChart(QtCharts::QChart* chart, bool has_data);
 
     void selectData (double x_min, double x_max, double y_min, double y_max);
 

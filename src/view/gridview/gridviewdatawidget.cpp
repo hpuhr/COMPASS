@@ -66,7 +66,7 @@ GridViewDataWidget::GridViewDataWidget(GridViewWidget* view_widget,
 
     setLayout(main_layout_);
 
-    updateChart();
+    updateGridChart();
 }
 
 /**
@@ -95,7 +95,7 @@ void GridViewDataWidget::resetVariableData()
 */
 void GridViewDataWidget::resetVariableDisplay() 
 {
-    resetGrid();
+    resetGridChart();
 }
 
 /**
@@ -116,7 +116,7 @@ void GridViewDataWidget::postUpdateVariableDataEvent()
 */
 bool GridViewDataWidget::updateVariableDisplay() 
 {
-    return updateChart();
+    return updateGridChart();
 }
 
 /**
@@ -227,6 +227,16 @@ void GridViewDataWidget::updateVariableData(int var_idx, std::string dbcontent_n
 
 /**
 */
+void GridViewDataWidget::mouseMoveEvent(QMouseEvent* event)
+{
+    //setCursor(current_cursor_);
+    //osgEarth::QtGui::ViewerWidget::mouseMoveEvent(event);
+
+    QWidget::mouseMoveEvent(event);
+}
+
+/**
+*/
 void GridViewDataWidget::resetCounts()
 {
     buffer_x_counts_.clear();
@@ -272,8 +282,8 @@ GridViewDataTool GridViewDataWidget::selectedTool() const
 */
 QPixmap GridViewDataWidget::renderPixmap()
 {
-    //@TODO
-    return QPixmap();
+    assert (grid_chart_);
+    return grid_chart_->grab();
 }
 
 /**
@@ -331,6 +341,72 @@ void GridViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
     }
 
     endTool();
+}
+
+/**
+*/
+void GridViewDataWidget::selectData (double x_min, double x_max, double y_min, double y_max)
+{
+    bool ctrl_pressed = QApplication::keyboardModifiers() & Qt::ControlModifier;
+
+    loginf << "GridViewDataWidget: selectData: x_min " << x_min << " x_max " << x_max
+           << " y_min " << y_min << " y_max " << y_max << " ctrl pressed " << ctrl_pressed;
+
+    unsigned int sel_cnt = 0;
+    for (auto& buf_it : viewData())
+    {
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
+
+        assert (buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
+        NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
+                    DBContent::meta_var_rec_num_.name());
+
+        std::map<unsigned long, std::vector<unsigned int>> rec_num_indexes =
+                rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
+        // rec_num -> index
+
+        std::vector<double>&        x_values       = x_values_.at(buf_it.first);
+        std::vector<double>&        y_values       = y_values_.at(buf_it.first);
+        std::vector<unsigned long>& rec_num_values = rec_num_values_.at(buf_it.first);
+
+        assert (x_values.size() == y_values.size());
+        assert (x_values.size() == rec_num_values.size());
+
+        double x, y;
+        bool in_range;
+        unsigned long rec_num, index;
+
+        for (unsigned int cnt=0; cnt < x_values.size(); ++cnt)
+        {
+            x = x_values.at(cnt);
+            y = y_values.at(cnt);
+            rec_num = rec_num_values.at(cnt);
+
+            in_range = false;
+
+            if (!std::isnan(x) && !std::isnan(y))
+                in_range =  x >= x_min && x <= x_max && y >= y_min && y <= y_max;
+
+            assert (rec_num_indexes.count(rec_num));
+            std::vector<unsigned int>& indexes = rec_num_indexes.at(rec_num);
+            assert (indexes.size() == 1);
+
+            index = indexes.at(0);
+
+            if (ctrl_pressed && !selected_vec.isNull(index) && selected_vec.get(index))
+                in_range = true; // add selection to existing
+
+            selected_vec.set(index, in_range);
+
+            if (in_range)
+                ++sel_cnt;
+        }
+    }
+
+    loginf << "GridViewDataWidget: selectData: sel_cnt " << sel_cnt;
+
+    emit view_->selectionChangedSignal();
 }
 
 /**
@@ -426,7 +502,17 @@ void GridViewDataWidget::updateMinMax()
 
 /**
 */
-bool GridViewDataWidget::updateChart()
+void GridViewDataWidget::resetGridChart()
+{
+    grid_chart_.reset();
+    grid_.reset();
+    grid_rendering_ = QImage();
+    grid_roi_ = QRectF();
+}
+
+/**
+*/
+bool GridViewDataWidget::updateGridChart()
 {
     bool has_data = (hasData() && 
                      !x_values_.empty() && 
@@ -434,8 +520,9 @@ bool GridViewDataWidget::updateChart()
                      has_x_min_max_ && 
                      has_y_min_max_ && 
                      has_z_min_max_);
-#if 1
-    resetGrid();
+
+    resetGridChart();
+
     updateGrid();
 
     QtCharts::QChart* chart = new QtCharts::QChart();
@@ -449,87 +536,7 @@ bool GridViewDataWidget::updateChart()
 
     main_layout_->addWidget(grid_chart_.get());
 
-#else
-    QImage grid_rendering;
-    renderGrid(grid_rendering);
-
-    grid_chart_->setGrid(grid_rendering);
-#endif
-
     return has_data;
-}
-
-/**
-*/
-void GridViewDataWidget::updateChart(QtCharts::QChart* chart, bool has_data)
-{
-    chart->layout()->setContentsMargins(0, 0, 0, 0);
-    chart->setBackgroundRoundness(0);
-    chart->setDropShadowEnabled(false);
-    chart->legend()->setAlignment(Qt::AlignBottom);
-
-    auto createAxes = [ & ] ()
-    {
-        chart->createDefaultAxes();
-
-        //config x axis
-        loginf << "GridViewDataWidget: updateDataSeries: title x ' "
-               << view_->variable(0).description() << "'";
-        assert (chart->axes(Qt::Horizontal).size() == 1);
-        chart->axes(Qt::Horizontal).at(0)->setTitleText(view_->variable(0).description().c_str());
-
-        //config y axis
-        loginf << "GridViewDataWidget: updateDataSeries: title y ' "
-               << view_->variable(1).description() << "'";
-        assert (chart->axes(Qt::Vertical).size() == 1);
-        chart->axes(Qt::Vertical).at(0)->setTitleText(view_->variable(1).description().c_str());
-    };
-
-    if (has_data)
-    {
-        chart->legend()->setVisible(false);
-
-        QtCharts::QScatterSeries* series = new QtCharts::QScatterSeries;
-
-        series->append(grid_roi_.topLeft());
-        series->append(grid_roi_.topRight());
-        series->append(grid_roi_.bottomRight());
-        series->append(grid_roi_.bottomLeft());
-
-        chart->addSeries(series);
-
-        createAxes();
-    }
-    else
-    {
-        //no data -> generate default empty layout
-        chart->legend()->setVisible(false);
-
-        QtCharts::QScatterSeries* series = new QtCharts::QScatterSeries;
-        chart->addSeries(series);
-
-        createAxes();
-
-        chart->axes(Qt::Horizontal).at(0)->setLabelsVisible(false);
-        chart->axes(Qt::Horizontal).at(0)->setGridLineVisible(false);
-        chart->axes(Qt::Horizontal).at(0)->setMinorGridLineVisible(false);
-
-        chart->axes(Qt::Vertical).at(0)->setLabelsVisible(false);
-        chart->axes(Qt::Vertical).at(0)->setGridLineVisible(false);
-        chart->axes(Qt::Vertical).at(0)->setMinorGridLineVisible(false);
-    }
-
-    chart->update();
-}
-
-/**
-*/
-void GridViewDataWidget::resetGrid()
-{
-    grid_chart_.reset();
-    grid_.reset();
-    grid_rendering_ = QImage();
-    grid_roi_ = QRectF();
 }
 
 /**
@@ -593,7 +600,7 @@ void GridViewDataWidget::updateGrid()
     loginf << "GridViewDataWidget: renderGrid: rendering";
 
     Grid2DRenderSettings render_settings;
-    render_settings.pixels_per_cell = 10;
+    render_settings.pixels_per_cell = settings.render_pixels_per_cell;
     render_settings.color_map.set(QColor(settings.render_color_min.c_str()), 
                                   QColor(settings.render_color_max.c_str()), 
                                   settings.render_color_num_steps);
@@ -608,78 +615,65 @@ void GridViewDataWidget::updateGrid()
 
 /**
 */
-void GridViewDataWidget::mouseMoveEvent(QMouseEvent* event)
+void GridViewDataWidget::updateChart(QtCharts::QChart* chart, bool has_data)
 {
-    //setCursor(current_cursor_);
-    //osgEarth::QtGui::ViewerWidget::mouseMoveEvent(event);
+    chart->layout()->setContentsMargins(0, 0, 0, 0);
+    chart->setBackgroundRoundness(0);
+    chart->setDropShadowEnabled(false);
+    chart->legend()->setAlignment(Qt::AlignBottom);
 
-    QWidget::mouseMoveEvent(event);
-}
-
-/**
-*/
-void GridViewDataWidget::selectData (double x_min, double x_max, double y_min, double y_max)
-{
-    bool ctrl_pressed = QApplication::keyboardModifiers() & Qt::ControlModifier;
-
-    loginf << "GridViewDataWidget: selectData: x_min " << x_min << " x_max " << x_max
-           << " y_min " << y_min << " y_max " << y_max << " ctrl pressed " << ctrl_pressed;
-
-    unsigned int sel_cnt = 0;
-    for (auto& buf_it : viewData())
+    auto createAxes = [ & ] ()
     {
-        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
+        chart->createDefaultAxes();
 
-        assert (buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-        NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
-                    DBContent::meta_var_rec_num_.name());
+        //config x axis
+        loginf << "GridViewDataWidget: updateDataSeries: title x ' "
+               << view_->variable(0).description() << "'";
+        assert (chart->axes(Qt::Horizontal).size() == 1);
+        chart->axes(Qt::Horizontal).at(0)->setTitleText(view_->variable(0).description().c_str());
 
-        std::map<unsigned long, std::vector<unsigned int>> rec_num_indexes =
-                rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
-        // rec_num -> index
+        //config y axis
+        loginf << "GridViewDataWidget: updateDataSeries: title y ' "
+               << view_->variable(1).description() << "'";
+        assert (chart->axes(Qt::Vertical).size() == 1);
+        chart->axes(Qt::Vertical).at(0)->setTitleText(view_->variable(1).description().c_str());
+    };
 
-        std::vector<double>&        x_values       = x_values_.at(buf_it.first);
-        std::vector<double>&        y_values       = y_values_.at(buf_it.first);
-        std::vector<unsigned long>& rec_num_values = rec_num_values_.at(buf_it.first);
+    if (has_data)
+    {
+        chart->legend()->setVisible(false);
 
-        assert (x_values.size() == y_values.size());
-        assert (x_values.size() == rec_num_values.size());
+        QtCharts::QScatterSeries* series = new QtCharts::QScatterSeries;
 
-        double x, y;
-        bool in_range;
-        unsigned long rec_num, index;
+        series->append(grid_roi_.topLeft());
+        series->append(grid_roi_.topRight());
+        series->append(grid_roi_.bottomRight());
+        series->append(grid_roi_.bottomLeft());
 
-        for (unsigned int cnt=0; cnt < x_values.size(); ++cnt)
-        {
-            x = x_values.at(cnt);
-            y = y_values.at(cnt);
-            rec_num = rec_num_values.at(cnt);
+        chart->addSeries(series);
 
-            in_range = false;
+        createAxes();
+    }
+    else
+    {
+        //no data -> generate default empty layout
+        chart->legend()->setVisible(false);
 
-            if (!std::isnan(x) && !std::isnan(y))
-                in_range =  x >= x_min && x <= x_max && y >= y_min && y <= y_max;
+        QtCharts::QScatterSeries* series = new QtCharts::QScatterSeries;
+        chart->addSeries(series);
 
-            assert (rec_num_indexes.count(rec_num));
-            std::vector<unsigned int>& indexes = rec_num_indexes.at(rec_num);
-            assert (indexes.size() == 1);
+        createAxes();
 
-            index = indexes.at(0);
+        chart->axes(Qt::Horizontal).at(0)->setLabelsVisible(false);
+        chart->axes(Qt::Horizontal).at(0)->setGridLineVisible(false);
+        chart->axes(Qt::Horizontal).at(0)->setMinorGridLineVisible(false);
 
-            if (ctrl_pressed && !selected_vec.isNull(index) && selected_vec.get(index))
-                in_range = true; // add selection to existing
-
-            selected_vec.set(index, in_range);
-
-            if (in_range)
-                ++sel_cnt;
-        }
+        chart->axes(Qt::Vertical).at(0)->setLabelsVisible(false);
+        chart->axes(Qt::Vertical).at(0)->setGridLineVisible(false);
+        chart->axes(Qt::Vertical).at(0)->setMinorGridLineVisible(false);
     }
 
-    loginf << "GridViewDataWidget: selectData: sel_cnt " << sel_cnt;
-
-    emit view_->selectionChangedSignal();
+    chart->update();
 }
 
 /**
