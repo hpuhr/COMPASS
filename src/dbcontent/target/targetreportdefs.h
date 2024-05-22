@@ -34,7 +34,7 @@ namespace targetReport
 {
 
 /**
-*/
+ */
 struct Position
 {
     Position() {}
@@ -45,7 +45,7 @@ struct Position
 };
 
 /**
-*/
+ */
 class BarometricAltitude
 {
   public:
@@ -59,13 +59,13 @@ class BarometricAltitude
 
     BarometricAltitude() {}
     BarometricAltitude(Source source,
-                    float alt, 
-                    const boost::optional<bool>& v,
-                    const boost::optional<bool>& g)
-    :   source_  (source)
-    ,   altitude_(alt   )
-    ,   valid_   (v     )
-    ,   garbled_ (g     ) {}
+                       float alt,
+                       const boost::optional<bool>& v,
+                       const boost::optional<bool>& g)
+        :   source_  (source)
+          ,   altitude_(alt   )
+          ,   valid_   (v     )
+          ,   garbled_ (g     ) {}
 
     Source                source_   = Source::Barometric_ModeC;
     float                 altitude_ = 0.0f;
@@ -85,17 +85,29 @@ class BarometricAltitude
 };
 
 /**
-*/
+ */
 class PositionAccuracy
 {
   public:
     PositionAccuracy() = default;
     PositionAccuracy(double x_stddev,
-                       double y_stddev, 
-                       double xy_cov)
-    :   x_stddev_(x_stddev), 
-        y_stddev_(y_stddev), 
-        xy_cov_  (xy_cov  ) {}
+                     double y_stddev,
+                     double xy_cov)
+        :   x_stddev_(x_stddev),
+          y_stddev_(y_stddev),
+          xy_cov_  (xy_cov  ) {}
+
+    PositionAccuracy operator* (double scale) const
+    { return PositionAccuracy(x_stddev_ * scale, y_stddev_ * scale, xy_cov_ * scale); }
+
+    PositionAccuracy& operator* (double scale)
+    {
+        x_stddev_ *= scale;
+        y_stddev_ *= scale;
+        xy_cov_ *= scale;
+
+        return *this;
+    }
 
     double x_stddev_ {0}; // m
     double y_stddev_ {0}; // m
@@ -115,7 +127,7 @@ struct AccuracyTables
 
 
 /**
-*/
+ */
 struct Velocity
 {
     Velocity() {}
@@ -126,7 +138,7 @@ struct Velocity
 };
 
 /**
-*/
+ */
 struct VelocityAccuracy
 {
     VelocityAccuracy() = default;
@@ -262,3 +274,4 @@ struct ReconstructorInfo : public BaseInfo
 } // namespace targetReport
 
 } // namespace dbContent
+
