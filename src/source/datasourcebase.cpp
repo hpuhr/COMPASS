@@ -240,7 +240,7 @@ void DataSourceBase::addRadarAccuracies()
 
 std::map<std::string, double> DataSourceBase::radarAccuracies() const
 {
-    assert (hasRadarRanges());
+    assert (hasRadarAccuracies());
     return info_.at(radar_accuracy_key).get<std::map<std::string, double>>();
 }
 

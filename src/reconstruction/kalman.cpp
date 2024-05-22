@@ -17,6 +17,7 @@
  */
 
 #include "kalman.h"
+#include "logger.h"
 
 #include <Eigen/Dense>
 
@@ -143,6 +144,16 @@ bool KalmanFilter::update(const Vector& z,
 
     if (!Eigen::FullPivLU<Eigen::MatrixXd>(S_).isInvertible())
     {
+        logwrn << "KalmanFilter: update: matrix S_ not invertible";
+        loginf << "R__:";
+        loginf << R__;
+        loginf << "P_:";
+        loginf << P_;
+        loginf << "S_:";
+        loginf << S_;
+        loginf << "PivLU(S_):";
+        loginf << Eigen::FullPivLU<Eigen::MatrixXd>(S_).matrixLU();
+
         x_post_ = x_;
         P_post_ = P_;
         y_.setZero(dim_z_);

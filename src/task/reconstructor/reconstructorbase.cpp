@@ -344,8 +344,8 @@ void ReconstructorBase::createTargetReports()
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
 
-                info.do_not_use_position_ =
-                    (unused_ds_ids.count(info.ds_id_)
+                info.do_not_use_position_ = !info.position_.has_value()
+                    || (unused_ds_ids.count(info.ds_id_)
                      || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
 
                 info.barometric_altitude_ = tgt_acc.barometricAltitude(cnt);
