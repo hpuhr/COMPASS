@@ -101,7 +101,7 @@ class PositionAccuracy
     double y_stddev_ {0}; // m
     double xy_cov_   {0}; // m^2
 
-    double maxStdDev() { return std::max(x_stddev_, y_stddev_); }
+    double maxStdDev() const { return std::max(x_stddev_, y_stddev_); }
 };
 
 /**
@@ -132,6 +132,8 @@ struct VelocityAccuracy
     VelocityAccuracy() = default;
     VelocityAccuracy(double vx_stddev, double vy_stddev) : vx_stddev_(vx_stddev), vy_stddev_(vy_stddev) {}
 
+    double maxStdDev() const { return std::max(vx_stddev_, vy_stddev_); }
+
     double vx_stddev_ {0}; // m/s
     double vy_stddev_ {0}; // m/s
 };
@@ -140,6 +142,8 @@ struct AccelerationAccuracy
 {
     AccelerationAccuracy() = default;
     AccelerationAccuracy(double ax_stddev, double ay_stddev) : ax_stddev_(ax_stddev), ay_stddev_(ay_stddev) {}
+
+    double maxStdDev() const { return std::max(ax_stddev_, ay_stddev_); }
 
     double ax_stddev_ {0}; // m/s^2
     double ay_stddev_ {0}; // m/s^2

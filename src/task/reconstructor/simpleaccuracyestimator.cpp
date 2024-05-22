@@ -52,7 +52,12 @@ dbContent::targetReport::PositionAccuracy SimpleAccuracyEstimator::positionAccur
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
     if (tr.position_accuracy_)
+    {
+        if (tr.position_accuracy_->maxStdDev() < 10E-6)
+            return AccuracyEstimatorBase::PosAccStdMin;
+
         return *tr.position_accuracy_;
+    }
 
     return PosAccStdDefault;
 }
@@ -61,7 +66,12 @@ dbContent::targetReport::VelocityAccuracy SimpleAccuracyEstimator::velocityAccur
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
     if (tr.velocity_accuracy_)
+    {
+        if (tr.velocity_accuracy_->maxStdDev() < 10E-6)
+            return AccuracyEstimatorBase::VelAccStdMin;
+
         return *tr.velocity_accuracy_;
+    }
 
     unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
 

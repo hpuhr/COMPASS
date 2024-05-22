@@ -608,6 +608,14 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     auto vel = ri.velocity_;
 
     auto pos_acc = acc_estimator_->positionAccuracy(ri);
+
+    if (pos_acc.x_stddev_ == 0 || pos_acc.y_stddev_ == 0)
+    {
+        logerr << "ReconstructorBase: createMeasurement: stddevs 0,  x " << pos_acc.x_stddev_
+               << " y " << pos_acc.y_stddev_ << " ds_id " << ri.ds_id_ << " dbcont_id " << ri.dbcont_id_;
+        assert (false);
+    }
+
     auto vel_acc = acc_estimator_->velocityAccuracy(ri);
     auto acc_acc = acc_estimator_->accelerationAccuracy(ri);
 

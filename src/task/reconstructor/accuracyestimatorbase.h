@@ -47,6 +47,16 @@ class AccuracyEstimatorBase
     virtual void estimateAccuracies() = 0; // when targets with calculated references are done
 
   protected:
+
+    static const double PosAccStdDevMin;
+    static const dbContent::targetReport::PositionAccuracy PosAccStdMin;
+
+    static const double VelAccStdDevMin;
+    static const dbContent::targetReport::VelocityAccuracy VelAccStdMin;
+
+    static const double AccAccStdDevMin;
+    static const dbContent::targetReport::AccelerationAccuracy AccAccStdMin;
+
     static const double PosAccStdDevFallback;
     static const dbContent::targetReport::PositionAccuracy PosAccStdFallback;
 

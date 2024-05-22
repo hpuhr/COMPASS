@@ -8,6 +8,18 @@
 
 using namespace Utils;
 
+const double AccuracyEstimatorBase::PosAccStdDevMin = 1.0;
+const dbContent::targetReport::PositionAccuracy AccuracyEstimatorBase::PosAccStdMin
+    { AccuracyEstimatorBase::PosAccStdDevMin, AccuracyEstimatorBase::PosAccStdDevMin, 0};
+
+const double AccuracyEstimatorBase::VelAccStdDevMin = 2.0;
+const dbContent::targetReport::VelocityAccuracy AccuracyEstimatorBase::VelAccStdMin
+    { AccuracyEstimatorBase::VelAccStdDevMin, AccuracyEstimatorBase::VelAccStdDevMin};
+
+const double AccuracyEstimatorBase::AccAccStdDevMin = 3.0;
+const dbContent::targetReport::AccelerationAccuracy AccuracyEstimatorBase::AccAccStdMin
+    { AccuracyEstimatorBase::AccAccStdDevMin, AccuracyEstimatorBase::AccAccStdDevMin};
+
 const double AccuracyEstimatorBase::PosAccStdDevFallback = 1000.0;
 const dbContent::targetReport::PositionAccuracy AccuracyEstimatorBase::PosAccStdFallback
     { AccuracyEstimatorBase::PosAccStdDevFallback, AccuracyEstimatorBase::PosAccStdDevFallback, 0};
