@@ -341,19 +341,27 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
         {
             logwrn << "KalmanEstimator: kalmanStep: step failed";
 
+            //print kalman state
+            kalman_interface_->printState();
+
+            //print mm
+            loginf << "KalmanEstimator: kalmanStep: could not integrate measurement:\n" << mm.toString();
+
+            //!note: the interface should always revert to the old state if a step fails!
+            //!we thus assume that the last state is fully intact!
             if (settings_.step_fail_strategy == Settings::StepFailStrategy::Reinit)
             {
-                //reinit
+                //reinit to new measurement
                 reinit(update, mm);
             }
             else if (settings_.step_fail_strategy == Settings::StepFailStrategy::ReturnInvalid)
             {
-                //return error
+                //keep old state and return error
                 return KalmanEstimator::StepResult::FailKalmanError;
             }
             else
             {
-                //assert
+                //assert on error
                 assert(kalman_step_ok);
                 return KalmanEstimator::StepResult::FailKalmanError;
             }
@@ -380,6 +388,7 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 
     if (!kalman_prediction_ok)
     {
+        //debatable: should the step fail strategy apply here?
         if (settings_.step_fail_strategy == Settings::StepFailStrategy::Assert)
             assert(kalman_prediction_ok);
         return false;
@@ -403,6 +412,7 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
     
     if (!kalman_prediction_ok)
     {
+        //debatable: should the step fail strategy apply here?
         if (settings_.step_fail_strategy == Settings::StepFailStrategy::Assert)
             assert(kalman_prediction_ok);
         return false;
@@ -466,6 +476,7 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                               *proj_handler_);
     if (!kalman_prediction_ok)
     {
+        //debatable: should the step fail strategy apply here?
         if (settings_.step_fail_strategy == Settings::StepFailStrategy::Assert)
             assert(kalman_prediction_ok);
         return false;

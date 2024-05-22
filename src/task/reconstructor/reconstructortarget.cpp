@@ -54,7 +54,12 @@ void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums,
 
     //reestimate chain after adding
     if (add_to_tracker && chain_)
-        chain_->reestimate();
+    {
+        bool ok = chain_->reestimate();
+
+        if (!ok)
+            logwrn << "ReconstructorTarget: addTargetReports: chain reestimation failed";
+    }
 }
 
 void ReconstructorTarget::addTargetReport (unsigned long rec_num, 
@@ -1585,7 +1590,9 @@ void ReconstructorTarget::addToTracker(const dbContent::targetReport::Reconstruc
     assert(chain_);
 
     bool ok = chain_->insert(tr.record_num_, tr.timestamp_, reestimate);
-    assert(ok);
+    
+    if (!ok)
+        logwrn << "ReconstructorTarget: addToTracker: could not add target report to chain:\n" << tr.asStr();
 }
 
 bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const

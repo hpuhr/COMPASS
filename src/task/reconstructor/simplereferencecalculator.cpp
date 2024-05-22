@@ -448,6 +448,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     {
         estimator.kalmanStep(update, refs.measurements[ i ]);
 
+        //!only add update if valid!
         if (update.valid)
             refs.updates.push_back(update);
     }

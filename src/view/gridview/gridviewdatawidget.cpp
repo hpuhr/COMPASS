@@ -590,22 +590,19 @@ void GridViewDataWidget::updateGrid()
 
     loginf << "GridViewDataWidget: renderGrid: getting layer";
 
-    auto V = grid_->getValues((grid2d::ValueType)settings.value_type);
     auto layer_name = grid2d::valueTypeToString((grid2d::ValueType)settings.value_type);
 
-    loginf << "GridViewDataWidget: renderGrid: layer = "<< V.cols() << "x" << V.rows();
-
-    layers.addLayer(layer_name, grid_->getReference(), V);
+    grid_->addToLayers(layers, layer_name, (grid2d::ValueType)settings.value_type);
 
     loginf << "GridViewDataWidget: renderGrid: rendering";
 
     Grid2DRenderSettings render_settings;
     render_settings.pixels_per_cell = settings.render_pixels_per_cell;
-    render_settings.color_map.set(QColor(settings.render_color_min.c_str()), 
-                                  QColor(settings.render_color_max.c_str()), 
-                                  settings.render_color_num_steps);
+    render_settings.color_map.create(QColor(settings.render_color_min.c_str()), 
+                                     QColor(settings.render_color_max.c_str()), 
+                                     settings.render_color_num_steps);
 
-    auto rendering = Grid2DLayerRenderer::render(layers.layers().at(layer_name), render_settings);
+    auto rendering = Grid2DLayerRenderer::render(layers.layer(layer_name), render_settings);
 
     loginf << "GridViewDataWidget: renderGrid: finished";
 

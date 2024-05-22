@@ -85,7 +85,7 @@ struct ReferenceCalculatorSettings
     double resample_systracks_max_dt = 30.0; // maximum timestep to interpolate in seconds
 
     bool multithreading        = true;
-    bool allow_invalid_updates = false;
+    bool allow_invalid_updates = true;
 
     //debug options
     bool compat_mode     = false;

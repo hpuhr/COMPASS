@@ -184,6 +184,14 @@ struct Measurement
         strm << "acc stddev y:  " << (ay_stddev.has_value() ? std::to_string(ay_stddev.value()) : "-") << std::endl;
     }
 
+    std::string toString() const
+    {
+        std::stringstream sstrm;
+        print(sstrm);
+
+        return sstrm.str();
+    }
+
     uint32_t                 source_id;            // source of the measurement
     boost::posix_time::ptime t;                    // timestamp
 

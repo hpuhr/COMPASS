@@ -48,6 +48,9 @@ KalmanFilter::KalmanFilter(size_t dim_x,
 
     I_.setIdentity(dim_x, dim_x);
 
+    x_backup_ = x_;
+    P_backup_ = P_;
+
     x_prior_ = x_;
     P_prior_ = P_;
 
@@ -74,6 +77,14 @@ kalman::KalmanState KalmanFilter::state() const
 
 /**
 */
+void KalmanFilter::revert()
+{
+    x_ = x_backup_;
+    P_ = P_backup_;
+}
+
+/**
+*/
 void KalmanFilter::predict(const OMatrix& F,
                            const OMatrix& Q,
                            const OMatrix& B,
@@ -82,6 +93,10 @@ void KalmanFilter::predict(const OMatrix& F,
     const OMatrix& B__ = B.has_value() ? B         : B_;
     const Matrix&  F__ = F.has_value() ? F.value() : F_;
     const Matrix&  Q__ = Q.has_value() ? Q.value() : Q_;
+
+    // save backup state
+    x_backup_ = x_;
+    P_backup_ = P_;
 
     // x = Fx + Bu
     x_ = F__ * x_;
@@ -144,16 +159,6 @@ bool KalmanFilter::update(const Vector& z,
 
     if (!Eigen::FullPivLU<Eigen::MatrixXd>(S_).isInvertible())
     {
-        logwrn << "KalmanFilter: update: matrix S_ not invertible";
-        loginf << "R__:";
-        loginf << R__;
-        loginf << "P_:";
-        loginf << P_;
-        loginf << "S_:";
-        loginf << S_;
-        loginf << "PivLU(S_):";
-        loginf << Eigen::FullPivLU<Eigen::MatrixXd>(S_).matrixLU();
-
         x_post_ = x_;
         P_post_ = P_;
         y_.setZero(dim_z_);
@@ -184,6 +189,25 @@ bool KalmanFilter::update(const Vector& z,
     P_post_ = P_;
 
     return true;
+}
+
+/**
+*/
+void KalmanFilter::printState() const
+{
+    loginf << "x_:";
+    loginf << x_;
+    loginf << "P_:";
+    loginf << P_;
+    loginf << "S_:";
+    loginf << S_;
+    loginf << "PivLU(S_):";
+    loginf << Eigen::FullPivLU<Eigen::MatrixXd>(S_).matrixLU();
+    if (z_.has_value())
+    {
+        loginf << "z_:";
+        loginf << z_.value();
+    }
 }
 
 /**

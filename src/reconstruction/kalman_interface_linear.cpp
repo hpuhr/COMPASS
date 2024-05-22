@@ -127,8 +127,12 @@ bool KalmanInterfaceLinear::kalmanStep_impl(kalman::KalmanState& new_state,
 
     //use internal kalman matrices if possible
     kalman_filter_->predict({}, {});
+
     if (!kalman_filter_->update(z, {}))
+    {
+        kalman_filter_->revert();
         return false;
+    }
 
     new_state.x  = kalman_filter_->getX();
     new_state.P  = kalman_filter_->getP();
@@ -228,6 +232,13 @@ boost::optional<kalman::KalmanState> KalmanInterfaceLinear::interpStep(const kal
 
     return new_state;
 #endif
+}
+
+/**
+*/
+void KalmanInterfaceLinear::printState() const
+{
+    kalman_filter_->printState();
 }
 
 } // reconstruction

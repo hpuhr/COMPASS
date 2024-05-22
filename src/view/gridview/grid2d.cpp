@@ -15,6 +15,7 @@
  */
 
 #include "grid2d.h"
+#include "grid2dlayer.h"
 
 #include "logger.h"
 
@@ -77,6 +78,9 @@ bool Grid2D::create(const QRectF& roi,
 
     layers_.resize(NumLayers, Eigen::MatrixXd(n_cells_y_, n_cells_x_));
 
+    flags_.resize(n_cells_y_, n_cells_x_);
+    flags_.setConstant(0);
+
     ref_.set(srs, roi_adj, n_cells_x_, n_cells_y_, srs_is_north_up);
 
     reset();
@@ -89,6 +93,7 @@ bool Grid2D::create(const QRectF& roi,
 void Grid2D::clear()
 {
     layers_.resize(0);
+    flags_ = {};
 
     n_cells_x_ = 0;
     n_cells_y_ = 0;
@@ -108,10 +113,54 @@ void Grid2D::reset()
     layers_[ IndexMean2 ].setConstant(0);
     layers_[ IndexMin   ].setConstant(std::numeric_limits<double>::max());
     layers_[ IndexMax   ].setConstant(std::numeric_limits<double>::min());
+
+    flags_.setConstant(0);
  
     num_added_ = 0;
     num_oor_   = 0;
     num_inf_   = 0;
+}
+
+/**
+*/
+void Grid2D::setFlags(size_t x, size_t y, unsigned char flags, bool ok)
+{
+    if (ok)
+        flags_(y, x) |= flags;
+    else
+        flags_(y, x) &= ~flags;
+}
+
+/**
+*/
+void Grid2D::setFlags(const QRectF& roi, unsigned char flags, bool ok)
+{
+    std::vector<std::pair<size_t, size_t>> idxs;
+    indices(idxs, roi);
+
+    for (auto idx : idxs)
+        setFlags(idx.first, idx.second, flags, ok);
+}
+
+/**
+*/
+void Grid2D::resetFlags()
+{
+    flags_.setConstant(0);
+}
+
+/**
+*/
+void Grid2D::select(size_t x, size_t y, bool ok)
+{
+    setFlags(x, y, grid2d::CellFlags::CellSelected, ok);
+}
+
+/**
+*/
+void Grid2D::select(const QRectF& roi, bool ok)
+{
+    setFlags(roi, grid2d::CellFlags::CellSelected, ok);
 }
 
 /**
@@ -227,18 +276,71 @@ void Grid2D::cropGrid(QRectF& roi,
 
 /**
 */
-Grid2D::IndexError Grid2D::index(size_t& idx_x, size_t& idx_y, double x, double y) const
+Grid2D::IndexError Grid2D::index(size_t& idx_x, size_t& idx_y, double x, double y, bool clamp) const
 {
     if (!std::isfinite(x) || !std::isfinite(y))
         return IndexError::Inf;
     
-    if (x < x0_ || x > x1_ || y < y0_ || y > y1_)
+    //out of range?
+    if (!clamp && (x < x0_ || x > x1_ || y < y0_ || y > y1_))
         return IndexError::OOR;
 
+    //clamp to grid bounds?
+    if (clamp && x < x0_)
+        x = x0_;
+    if (clamp && y < y0_)
+        y = y0_;
+    if (clamp && x > x1_)
+        x = x1_;
+    if (clamp && y > y1_)
+        y = y1_;
+    
     idx_x = std::min(n_cells_x_ - 1, static_cast<size_t>((x - x0_) * cell_size_x_inv_));
     idx_y = std::min(n_cells_y_ - 1, static_cast<size_t>((y - y0_) * cell_size_y_inv_));
     
     return IndexError::NoError;
+}
+
+/**
+*/
+void Grid2D::indices(std::vector<std::pair<size_t, size_t>>& indices, const QRectF& roi) const
+{
+    indices.clear();
+
+    auto grid_bounds = gridBounds();
+    if (!grid_bounds.contains(roi) &&
+        !roi.contains(grid_bounds) &&
+        !roi.intersects(grid_bounds))
+        return;
+
+    size_t x00, y00,
+           x10, y10,
+           x11, y11,
+           x01, y01;
+
+    auto err0 = index(x00, y00, roi.left() , roi.top()   , true);
+    auto err1 = index(x10, y10, roi.right(), roi.top()   , true);
+    auto err2 = index(x11, y11, roi.right(), roi.bottom(), true);
+    auto err3 = index(x01, y01, roi.left() , roi.bottom(), true);
+
+    assert(err0 == IndexError::NoError &&
+           err1 == IndexError::NoError &&
+           err2 == IndexError::NoError &&
+           err3 == IndexError::NoError);
+
+    size_t x0 = std::min(x00, std::min(x10, std::min(x11, x01)));
+    size_t y0 = std::min(y00, std::min(y10, std::min(y11, y01)));
+    size_t x1 = std::max(x00, std::max(x10, std::max(x11, x01)));
+    size_t y1 = std::max(y00, std::max(y10, std::max(y11, y01)));
+
+    assert(x0 <= x1);
+    assert(y0 <= y1);
+
+    indices.reserve((x1 - x0 + 1) * (y1 - y0 + 1));
+
+    for (size_t y = y0; y <= y1; ++y)
+        for (size_t x = x0; x <= x1; ++x)
+            indices.emplace_back(x, y);
 }
 
 /**
@@ -455,4 +557,36 @@ Eigen::MatrixXd Grid2D::getValues(grid2d::ValueType vtype) const
 const RasterReference& Grid2D::getReference() const
 {
     return ref_;
+}
+
+/**
+*/
+const Eigen::MatrixX<unsigned char>& Grid2D::getFlags() const
+{
+    return flags_;
+}
+
+/**
+*/
+std::unique_ptr<Grid2DLayer> Grid2D::createLayer(const std::string& layer_name,
+                                                 grid2d::ValueType vtype) const
+{
+    assert(!layer_name.empty());
+
+    std::unique_ptr<Grid2DLayer> layer(new Grid2DLayer);
+    layer->name  = layer_name;
+    layer->data  = getValues(vtype);
+    layer->flags = getFlags();
+    layer->ref   = getReference();
+
+    return layer;
+}
+
+/**
+*/
+void Grid2D::addToLayers(Grid2DLayers& layers, 
+                         const std::string& layer_name,
+                         grid2d::ValueType vtype) const
+{
+    layers.addLayer(createLayer(layer_name, vtype));
 }

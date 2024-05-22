@@ -82,7 +82,7 @@ public:
         unsigned long               mm_id;
         boost::posix_time::ptime    t;
         kalman::KalmanUpdateMinimal kalman_update;
-        bool                        init  = false;
+        bool                        init = false;
     };
 
     typedef std::pair<int, int>                              Interval;

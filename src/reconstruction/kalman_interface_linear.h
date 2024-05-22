@@ -54,6 +54,8 @@ public:
                                                     const kalman::KalmanState& state1,
                                                     double dt,
                                                     double Q_var) const override final;
+    void printState() const override final;
+
 protected:
     void kalmanInit_impl(kalman::KalmanState& init_state,
                          const Measurement& mm, 

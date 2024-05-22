@@ -31,6 +31,9 @@
 
 #include <Eigen/Core>
 
+struct Grid2DLayer;
+class  Grid2DLayers;
+
 /**
 */
 class Grid2D
@@ -69,8 +72,18 @@ public:
     bool setValue(double x, double y, double v);
     bool setCount(double x, double y, size_t count);
 
+    void select(size_t x, size_t y, bool ok);
+    void select(const QRectF& roi, bool ok);
+
     Eigen::MatrixXd getValues(grid2d::ValueType vtype) const;
     const RasterReference& getReference() const;
+    const Eigen::MatrixX<unsigned char>& getFlags() const;
+
+    std::unique_ptr<Grid2DLayer> createLayer(const std::string& layer_name,
+                                             grid2d::ValueType vtype) const;
+    void addToLayers(Grid2DLayers& layers, 
+                     const std::string& layer_name,
+                     grid2d::ValueType vtype) const;
 
     QRectF gridBounds() const;
     void cropGrid(QRectF& roi, 
@@ -106,8 +119,10 @@ private:
         NumLayers     = 5
     };
 
-    IndexError index(size_t& idx_x, size_t& idx_y, double x, double y) const;
+    IndexError index(size_t& idx_x, size_t& idx_y, double x, double y, bool clamp = false) const;
     IndexError checkAdd(size_t& idx_x, size_t& idx_y, double x, double y, double v);
+
+    void indices(std::vector<std::pair<size_t, size_t>>& indices, const QRectF& roi) const;
 
     size_t addLineInternal(double x0, 
                            double y0, 
@@ -116,6 +131,10 @@ private:
                            double v,
                            std::set<std::pair<size_t, size_t>>& visited,
                            int subsampling = 10);
+
+    void setFlags(size_t x, size_t y, unsigned char flags, bool ok);
+    void setFlags(const QRectF& roi, unsigned char flags, bool ok);
+    void resetFlags();
 
     size_t n_cells_x_       = 0;
     size_t n_cells_y_       = 0;
@@ -136,6 +155,7 @@ private:
 
     RasterReference ref_;
 
-    std::vector<Eigen::MatrixXd> layers_;
-    std::vector<ValueIndex>      vtype_indices_;
+    std::vector<Eigen::MatrixXd>  layers_;
+    Eigen::MatrixX<unsigned char> flags_; 
+    std::vector<ValueIndex>       vtype_indices_;
 };

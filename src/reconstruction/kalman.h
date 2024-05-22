@@ -57,6 +57,8 @@ public:
                 const OMatrix& R = OMatrix(), 
                 const OMatrix& H = OMatrix());
 
+    void revert();
+
     static Matrix continuousWhiteNoise(size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
     static void continuousWhiteNoise(Matrix& Q_noise, size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
 
@@ -100,6 +102,8 @@ public:
     const Matrix& getM() const { return M_; }
     Matrix& getM() { return M_; }
 
+    void printState() const;
+
 private:
     size_t dim_x_;
     size_t dim_z_;
@@ -124,6 +128,10 @@ private:
     Matrix SI_; // inverse system uncertainty
 
     Matrix I_;  // identity matrix
+
+    //before predict()
+    Vector  x_backup_;
+    Matrix  P_backup_;
 
     //after predict()
     Vector x_prior_;

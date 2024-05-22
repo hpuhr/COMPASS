@@ -115,6 +115,8 @@ public:
                                                             const kalman::KalmanState& state1,
                                                             double dt,
                                                             double Q_var) const = 0;
+    virtual void printState() const = 0;
+
     void setVerbosity(int v) { verbosity_ = v; }
 
 protected:

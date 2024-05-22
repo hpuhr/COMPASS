@@ -673,7 +673,7 @@ bool KalmanChain::reinit(int idx) const
     //reinit tracker
     tracker_.tracker_ptr->reset();
     if (!tracker_.tracker_ptr->track(updates_[ idx ].kalman_update))
-        return false;
+        return false; //should not happen
 
     tracker_.tracked_mm_id = updates_[ idx ].mm_id;
 
@@ -801,6 +801,8 @@ bool KalmanChain::reestimate()
 
     bool is_last = (n_fresh == 1 && fresh_indices_[ 0 ] == lastIndex());
 
+    std::vector<int> tbr;
+
     auto reestimateRange = [ & ] (int idx_start, int idx_end)
     {
         if (idx_end < 0)
@@ -822,8 +824,8 @@ bool KalmanChain::reestimate()
         else
         {
             //reinit to last valid update
-            if (!reinit(idx_start - 1))
-                return -1;
+            bool ok = reinit(idx_start - 1);
+            assert(ok); // !reinit should always succeed! 
         }
 
         //iterate over indices, reestimate, and stop if one of the criteria hits
@@ -844,7 +846,11 @@ bool KalmanChain::reestimate()
             //reestim mm
             bool ok = check_norm ? reestimate(idx, d_state_sqr, d_cov_sqr) : reestimate(idx);
             if (!ok)
-                return -1;
+            {
+                //reestimate (=kalman step) failed => collect update for removal
+                tbr.push_back(idx);
+                continue;
+            }
 
             ++reestimations;
 
@@ -873,18 +879,27 @@ bool KalmanChain::reestimate()
         int idx_next = i < n_fresh - 1 ? fresh_indices_[ i + 1 ] : n;
 
         int ret = reestimateRange(idx, idx_next);
-        if (ret < 0)
-            return false;
+        assert(ret >= 0);
 
         reestimations += ret;
     }
 
     resetReestimationIndices();
 
+    //remove any failed (=skipped) updates
+    for (auto itr = tbr.rbegin(); itr != tbr.rend(); ++itr)
+    {
+        logwrn << "KalmanChain: reestimate: removing update " << *itr;
+        updates_.erase(updates_.begin() + *itr);
+    }
+
     if (settings_.verbosity >= 2 && !is_last)
         loginf << "KalmanChain: reestimate: Refreshed " << reestimations << " measurement(s)";
 
-    return true;
+    //had to remove error-step updates?
+    bool ok = tbr.empty();
+
+    return ok;
 }
 
 } // reconstruction
