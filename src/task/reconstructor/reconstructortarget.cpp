@@ -22,6 +22,8 @@ using namespace boost::posix_time;
 namespace dbContent 
 {
 
+ReconstructorTarget::GlobalStats ReconstructorTarget::global_stats_ = ReconstructorTarget::GlobalStats();
+
 ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor, 
                                          unsigned int utn, 
                                          bool tmp_utn,
@@ -55,7 +57,10 @@ void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums,
     //reestimate chain after adding
     if (add_to_tracker && chain_)
     {
-        bool ok = chain_->reestimate();
+        size_t num_updates_failed;
+        bool ok = chain_->reestimate(&num_updates_failed);
+
+        global_stats_.num_failed_chain_updates_ += num_updates_failed;
 
         if (!ok)
             logwrn << "ReconstructorTarget: addTargetReports: chain reestimation failed";
@@ -159,7 +164,12 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num,
             reinitTracker();
 
         if (ts_newer)
-            addToTracker(tr, reestimate);
+        {
+            size_t num_updates_failed;
+            addToTracker(tr, reestimate, &num_updates_failed);
+
+            global_stats_.num_failed_chain_updates_ += num_updates_failed;
+        }
     }
 }
 
@@ -1585,11 +1595,13 @@ void ReconstructorTarget::reinitTracker()
     chain_->settings().verbosity       = 0;
 }
 
-void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, bool reestimate)
+void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
+                                       bool reestimate, 
+                                       size_t* num_updates_failed)
 {
     assert(chain_);
 
-    bool ok = chain_->insert(tr.record_num_, tr.timestamp_, reestimate);
+    bool ok = chain_->insert(tr.record_num_, tr.timestamp_, reestimate, num_updates_failed);
     
     if (!ok)
         logwrn << "ReconstructorTarget: addToTracker: could not add target report to chain:\n" << tr.asStr();

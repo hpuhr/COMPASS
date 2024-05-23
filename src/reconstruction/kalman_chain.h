@@ -51,9 +51,9 @@ public:
 
         enum class PredictionMode
         {
-            NearestBefore = 0,
-            Interpolate,
-            LastUpdate
+            NearestBefore = 0,   // predict from nearest previous update
+            Interpolate,         // predict by interpolating previous and next update
+            LastUpdate           // predict from last update in the chain
         };
 
         Mode           mode            = Mode::DynamicInserts;
@@ -107,14 +107,18 @@ public:
 
     bool add(unsigned long mm_id,
              const boost::posix_time::ptime& ts,
-             bool reestim);
+             bool reestim,
+             size_t* num_updates_failed = nullptr);
     bool add(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
-             bool reestim);
+             bool reestim,
+             size_t* num_updates_failed = nullptr);
     bool insert(unsigned long mm_id,
                 const boost::posix_time::ptime& ts,
-                bool reestim);
+                bool reestim,
+                size_t* num_updates_failed = nullptr);
     bool insert(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
-                bool reestim);
+                bool reestim,
+                size_t* num_updates_failed = nullptr);
 
     void removeUpdatesBefore(const boost::posix_time::ptime& ts);
 
@@ -124,7 +128,7 @@ public:
 
     bool canReestimate() const;
     bool needsReestimate() const;
-    bool reestimate();
+    bool reestimate(size_t* num_updates_failed = nullptr);
 
     bool canPredict(const boost::posix_time::ptime& ts) const;
     bool predict(Measurement& mm_predicted,
@@ -157,9 +161,14 @@ private:
 
     const Measurement& getMeasurement(unsigned long mm_id) const;
 
-    void insert(int idx, 
-                unsigned long mm_id,
-                const boost::posix_time::ptime& ts);
+    bool addToTracker(unsigned long mm_id,
+                      const boost::posix_time::ptime& ts,
+                      size_t* num_updates_failed = nullptr);
+    void addToEnd(unsigned long mm_id,
+                  const boost::posix_time::ptime& ts);
+    void insertAt(int idx, 
+                  unsigned long mm_id,
+                  const boost::posix_time::ptime& ts);
     void addReesimationIndex(int idx);
     void addReesimationIndexRange(int idx0, int idx1);
     void resetReestimationIndices();

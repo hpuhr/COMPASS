@@ -185,6 +185,8 @@ void ReconstructorBase::reset()
 {
     loginf << "ReconstructorBase: reset/init";
 
+    dbContent::ReconstructorTarget::globalStats().reset();
+
     accessor_->clear();
 
     slice_cnt_ = 0;
@@ -239,6 +241,12 @@ void ReconstructorBase::processSlice()
     logdbg << "ReconstructorBase: processSlice: done";
 
     currentSlice().processing_done_ = true;
+
+    if (currentSlice().is_last_slice_)
+    {
+        loginf << "ReconstructorBase: processSlice: last slice finished, #failed updates: " 
+               << dbContent::ReconstructorTarget::globalStats().num_failed_chain_updates_;
+    }
 }
 
 void ReconstructorBase::clearOldTargetReports()

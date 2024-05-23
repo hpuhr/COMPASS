@@ -34,6 +34,16 @@ enum class ComparisonResult
 class ReconstructorTarget
 {
 public:
+    struct GlobalStats
+    {
+        void reset()
+        {
+            num_failed_chain_updates_ = 0;
+        }
+
+        size_t num_failed_chain_updates_ = 0;
+    };
+
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,
                       dbContent::targetReport::ReconstructorInfo*> ReconstructorInfoPair; // both can be nullptr
 
@@ -194,11 +204,15 @@ public:
 //    bool hasADSBMOPSVersion();
 //    std::set<unsigned int> getADSBMOPSVersions();
 
+    static GlobalStats& globalStats() { return global_stats_; }
+
 protected:
     bool hasTracker() const;
     void reinitTracker();
     void reinitChain();
-    void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, bool reestimate = true);
+    void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
+                      bool reestimate = true,
+                      size_t* num_updates_failed = nullptr);
 
     void addTargetReport (unsigned long rec_num, 
                           bool add_to_tracker,
@@ -208,6 +222,8 @@ protected:
 
     bool multithreaded_predictions_ = true;
     bool dynamic_insertions_        = true;
+
+    static GlobalStats global_stats_;
 };
 
 } // namespace dbContent
