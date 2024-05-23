@@ -54,6 +54,8 @@ public:
 private:
     struct TargetReferences
     {
+        void reset();
+
         unsigned int utn;
 
         std::vector<reconstruction::Measurement> measurements;
@@ -64,7 +66,8 @@ private:
         boost::optional<kalman::KalmanUpdate> init_update;
         boost::optional<size_t>               start_index;
 
-        size_t num_updates_failed = 0;
+        size_t num_updates_failed      = 0;
+        size_t num_interp_steps_failed = 0;
     };
 
     enum class InitRecResult

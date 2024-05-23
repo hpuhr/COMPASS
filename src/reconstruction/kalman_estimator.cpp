@@ -519,45 +519,61 @@ void KalmanEstimator::executeChainFunc(Updates& updates, const ChainFunc& func) 
 
 /**
 */
-void KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const
+bool KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const
 {
     assert(isInit());
 
     KalmanProjectionHandler phandler;
 
+    bool ok = true;
+
     auto func = [ & ] (std::vector<kalman::KalmanUpdate>& updates, size_t idx0, size_t idx1)
     {
-        kalman_interface_->smoothUpdates(updates, idx0, idx1, phandler);
+        //@TODO: what happens if smoothing fails? => assert for the moment
+        ok = ok && kalman_interface_->smoothUpdates(updates, idx0, idx1, phandler);
+        assert(ok);
     };
 
     executeChainFunc(updates, func);
+
+    return ok;
 }
 
 /**
 */
-void KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
-                                    std::vector<kalman::KalmanUpdate>& updates) const
+bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
+                                    std::vector<kalman::KalmanUpdate>& updates,
+                                    size_t* num_steps_failed) const
 {
+    if (num_steps_failed)
+        *num_steps_failed = 0;
+
     KalmanProjectionHandler phandler;
 
     interp_updates.clear();
 
+    bool ok = true;
+
     auto func = [ & ] (std::vector<kalman::KalmanUpdate>& updates, size_t idx0, size_t idx1)
     {
         std::vector<kalman::KalmanUpdate> interp_updates_chain;
-        this->interpUpdates(interp_updates_chain,
-                            updates, 
-                            idx0, 
-                            idx1, 
-                            settings_.resample_dt,
-                            settings_.min_dt,
-                            settings_.resample_Q_var,
-                            settings_.resample_interp_mode,
-                            phandler);
+        ok = ok && this->interpUpdates(interp_updates_chain,
+                                       updates, 
+                                       idx0, 
+                                       idx1, 
+                                       settings_.resample_dt,
+                                       settings_.min_dt,
+                                       settings_.resample_Q_var,
+                                       settings_.resample_interp_mode,
+                                       phandler,
+                                       num_steps_failed);
+        
         interp_updates.insert(interp_updates.end(), interp_updates_chain.begin(), interp_updates_chain.end());
     };
 
     executeChainFunc(updates, func);
+
+    return ok;
 }
 
 namespace
@@ -619,7 +635,8 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
                                     double min_dt_sec,
                                     double Q_var,
                                     StateInterpMode interp_mode,
-                                    KalmanProjectionHandler& proj_handler) const
+                                    KalmanProjectionHandler& proj_handler,
+                                    size_t* num_steps_failed) const
 {
     assert(isInit());
 
@@ -663,6 +680,8 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
     auto x_tr_func = proj_handler.reprojectionTransform(&updates, kalman_interface_.get(), 0);
 
     kalman::KalmanState state1_tr;
+
+    size_t failed_steps = 0;
 
     for (size_t i = idx0 + 1; i <= idx1; ++i)
     {
@@ -715,33 +734,40 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
             auto new_state0 = kalman_interface_->interpStep(state0, state1_ref,  dt0, Q_var);
             auto new_state1 = kalman_interface_->interpStep(state1_ref, state0, -dt1, Q_var);
 
-            if (!new_state0.has_value() || !new_state1.has_value())
-                return false;
+            if (new_state0.has_value() && new_state1.has_value())
+            {
+                const double interp_factor = blendFunc(dt0, dt1, dt, *new_state0, *new_state1, interp_mode, *kalman_interface_);
 
-            double interp_factor = blendFunc(dt0, dt1, dt, *new_state0, *new_state1, interp_mode, *kalman_interface_);
+                //std::cout << interp_factor << std::endl;
 
-            //std::cout << interp_factor << std::endl;
+                kalman::KalmanState new_state;
+                new_state.x = SplineInterpolator::interpStateVector(new_state0->x, new_state1->x, interp_factor);
+                new_state.P = SplineInterpolator::interpCovarianceMat(new_state0->P, new_state1->P, interp_factor);
 
-            kalman::KalmanState new_state;
-            new_state.x = SplineInterpolator::interpStateVector(new_state0->x, new_state1->x, interp_factor);
-            new_state.P = SplineInterpolator::interpCovarianceMat(new_state0->P, new_state1->P, interp_factor);
+                // Reference ref;
+                // ref.t              = tcur;
+                // ref.source_id      = ref0.source_id;
+                // ref.noaccel_pos    = ref0.noaccel_pos || ref1.noaccel_pos;
+                // ref.nospeed_pos    = ref0.nospeed_pos || ref1.nospeed_pos;
+                // ref.nostddev_pos   = ref0.nostddev_pos || ref1.nostddev_pos;
+                // ref.mm_interp      = ref0.mm_interp || ref1.mm_interp;
+                // ref.projchange_pos = ref1.projchange_pos; //if a change in map projection happened between the two reference states, 
+                //                                           //this should be logged in the second reference
+                // ref.ref_interp     = true;
 
-            // Reference ref;
-            // ref.t              = tcur;
-            // ref.source_id      = ref0.source_id;
-            // ref.noaccel_pos    = ref0.noaccel_pos || ref1.noaccel_pos;
-            // ref.nospeed_pos    = ref0.nospeed_pos || ref1.nospeed_pos;
-            // ref.nostddev_pos   = ref0.nostddev_pos || ref1.nostddev_pos;
-            // ref.mm_interp      = ref0.mm_interp || ref1.mm_interp;
-            // ref.projchange_pos = ref1.projchange_pos; //if a change in map projection happened between the two reference states, 
-            //                                           //this should be logged in the second reference
-            // ref.ref_interp     = true;
-
-            addUpdate(new_state, proj_center0, tcur);
+                addUpdate(new_state, proj_center0, tcur);
+            }
+            else
+            {
+                ++failed_steps;
+            }
 
             tcur += time_incr;
         }
     }
+
+    if (num_steps_failed)
+        *num_steps_failed += failed_steps;
 
     if (settings_.verbosity >= 1 && small_intervals > 0)
         logdbg << "KalmanEstimator: interpUpdates: Encountered " << small_intervals << " small interval(s) during resampling";
@@ -752,7 +778,7 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
         addUpdate(last_update.state, last_update.projection_center, last_update.t);
     }
 
-    return true;
+    return (failed_steps == 0);
 }
 
 /**

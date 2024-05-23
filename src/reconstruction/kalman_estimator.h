@@ -140,9 +140,10 @@ public:
     void storeUpdates(std::vector<Reference>& refs,
                       const std::vector<kalman::KalmanUpdate>& updates) const;
     
-    void smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const;
-    void interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
-                       std::vector<kalman::KalmanUpdate>& updates) const;
+    bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const;
+    bool interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
+                       std::vector<kalman::KalmanUpdate>& updates,
+                       size_t* num_steps_failed = nullptr) const;
 
     const boost::posix_time::ptime& currentTime() const;
 
@@ -174,7 +175,8 @@ private:
                        double min_dt_sec,
                        double Q_var,
                        StateInterpMode interp_mode,
-                       KalmanProjectionHandler& proj_handler) const;
+                       KalmanProjectionHandler& proj_handler,
+                       size_t* num_steps_failed = nullptr) const;
     bool interpUpdates(kalman::KalmanUpdateMinimal& update_interp,
                        const kalman::KalmanUpdateMinimal& update0,
                        const kalman::KalmanUpdateMinimal& update1,

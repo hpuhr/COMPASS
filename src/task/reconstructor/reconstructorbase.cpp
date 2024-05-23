@@ -244,8 +244,9 @@ void ReconstructorBase::processSlice()
 
     if (currentSlice().is_last_slice_)
     {
-        loginf << "ReconstructorBase: processSlice: last slice finished, #failed updates: " 
-               << dbContent::ReconstructorTarget::globalStats().num_failed_chain_updates_;
+        loginf << "ReconstructorBase: processSlice: last slice finished,"
+               << " #failed updates: " << dbContent::ReconstructorTarget::globalStats().num_failed_chain_updates
+               << " #failed interp steps: " << dbContent::ReconstructorTarget::globalStats().num_failed_interp_steps;
     }
 }
 

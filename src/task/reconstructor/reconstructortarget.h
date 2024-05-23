@@ -38,10 +38,12 @@ public:
     {
         void reset()
         {
-            num_failed_chain_updates_ = 0;
+            num_failed_chain_updates = 0;
+            num_failed_interp_steps  = 0;
         }
 
-        size_t num_failed_chain_updates_ = 0;
+        size_t num_failed_chain_updates = 0;
+        size_t num_failed_interp_steps  = 0;
     };
 
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,

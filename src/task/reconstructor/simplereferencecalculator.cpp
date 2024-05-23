@@ -32,6 +32,19 @@
 
 /**
  */
+void SimpleReferenceCalculator::TargetReferences::reset()
+{
+    measurements.resize(0);
+    references.resize(0);
+    init_update.reset();
+    start_index.reset();
+
+    num_updates_failed      = 0;
+    num_interp_steps_failed = 0;
+}
+
+/**
+ */
 SimpleReferenceCalculator::SimpleReferenceCalculator(ReconstructorBase& reconstructor)
     :   reconstructor_(reconstructor)
 {
@@ -94,14 +107,7 @@ void SimpleReferenceCalculator::reset()
 void SimpleReferenceCalculator::resetDataStructs()
 {
     for (auto& ref : references_)
-    {
-        ref.second.measurements.resize(0);
-        ref.second.references.resize(0);
-        ref.second.init_update.reset();
-        ref.second.start_index.reset();
-
-        ref.second.num_updates_failed = 0;
-    }
+        ref.second.reset();
 
     updateInterpOptions();
 }
@@ -491,8 +497,11 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     if (settings_.resample_result)
     {
         //interpolate measurements
+        size_t num_failed_steps;
         std::vector<kalman::KalmanUpdate> updates_interp;
-        estimator.interpUpdates(updates_interp, updates);
+        estimator.interpUpdates(updates_interp, updates, &num_failed_steps);
+
+        refs.num_interp_steps_failed += num_failed_steps;
 
         updates = updates_interp;
 
@@ -524,7 +533,8 @@ void SimpleReferenceCalculator::updateReferences()
 
         ref.second.references.clear();
 
-        dbContent::ReconstructorTarget::globalStats().num_failed_chain_updates_ += ref.second.num_updates_failed;
+        dbContent::ReconstructorTarget::globalStats().num_failed_chain_updates += ref.second.num_updates_failed;
+        dbContent::ReconstructorTarget::globalStats().num_failed_interp_steps  += ref.second.num_interp_steps_failed;  
     }
 }
 

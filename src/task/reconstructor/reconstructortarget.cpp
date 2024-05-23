@@ -60,7 +60,7 @@ void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums,
         size_t num_updates_failed;
         bool ok = chain_->reestimate(&num_updates_failed);
 
-        global_stats_.num_failed_chain_updates_ += num_updates_failed;
+        global_stats_.num_failed_chain_updates += num_updates_failed;
 
         if (!ok)
             logwrn << "ReconstructorTarget: addTargetReports: chain reestimation failed";
@@ -168,7 +168,7 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num,
             size_t num_updates_failed;
             addToTracker(tr, reestimate, &num_updates_failed);
 
-            global_stats_.num_failed_chain_updates_ += num_updates_failed;
+            global_stats_.num_failed_chain_updates += num_updates_failed;
         }
     }
 }
