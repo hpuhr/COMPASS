@@ -68,20 +68,19 @@ class ReconstructorAssociatorBase
     virtual bool canGetPositionOffset(
         const dbContent::targetReport::ReconstructorInfo& tr,
         const dbContent::ReconstructorTarget& target) = 0;
-    virtual std::tuple<double, double, double> getPositionOffset(
+    virtual boost::optional<std::tuple<double, double, double>> getPositionOffset(
         const dbContent::targetReport::ReconstructorInfo& tr,
         const dbContent::ReconstructorTarget& target, bool do_debug) = 0;
     virtual bool canGetPositionOffset(
         const boost::posix_time::ptime& ts,
         const dbContent::ReconstructorTarget& target0,
         const dbContent::ReconstructorTarget& target1) = 0;
-    virtual std::tuple<double, double, double> getPositionOffset(
+    virtual boost::optional<std::tuple<double, double, double>> getPositionOffset(
         const boost::posix_time::ptime& ts,
         const dbContent::ReconstructorTarget& target0,
         const dbContent::ReconstructorTarget& target1,
         int thread_id,
         bool do_debug) = 0;
-
 
     virtual boost::optional<bool> checkPositionOffsetAcceptable (
         const dbContent::targetReport::ReconstructorInfo& tr,

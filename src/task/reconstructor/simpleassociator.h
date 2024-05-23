@@ -22,14 +22,14 @@ class SimpleAssociator : public ReconstructorAssociatorBase
     virtual bool canGetPositionOffset(
         const dbContent::targetReport::ReconstructorInfo& tr,
         const dbContent::ReconstructorTarget& target) override;
-    virtual std::tuple<double, double, double> getPositionOffset(
+    virtual boost::optional<std::tuple<double, double, double>> getPositionOffset(
         const dbContent::targetReport::ReconstructorInfo& tr,
         const dbContent::ReconstructorTarget& target, bool do_debug) override;
     virtual bool canGetPositionOffset(
         const boost::posix_time::ptime& ts,
         const dbContent::ReconstructorTarget& target0,
         const dbContent::ReconstructorTarget& target1)  override;
-    virtual std::tuple<double, double, double> getPositionOffset(
+    virtual boost::optional<std::tuple<double, double, double>> getPositionOffset(
         const boost::posix_time::ptime& ts,
         const dbContent::ReconstructorTarget& target0,
         const dbContent::ReconstructorTarget& target1,

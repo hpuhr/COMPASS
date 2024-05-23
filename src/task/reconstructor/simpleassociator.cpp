@@ -19,13 +19,10 @@ using namespace Utils;
 using namespace dbContent;
 using namespace boost::posix_time;
 
-
 SimpleAssociator::SimpleAssociator(SimpleReconstructor& reconstructor)
     : reconstructor_(reconstructor)
 {
-
 }
-
 
 void SimpleAssociator::associateNewData()
 {
@@ -43,7 +40,7 @@ void SimpleAssociator::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
-            // create tracker targets
+    // create tracker targets
 
     loginf << "SimpleAssociator: associateNewData: associating CAT062 data";
 
@@ -75,14 +72,12 @@ void SimpleAssociator::associateNewData()
             sensor_dbcont_ids.insert(dbcont_it.second->id());
     }
 
-
     if (reconstructor().isCancelled())
         return;
 
     loginf << "SimpleAssociator: associateNewData: associating remaining sensor data";
 
     associateTargetReports(sensor_dbcont_ids);
-
 
     if (reconstructor().isCancelled())
         return;
@@ -100,18 +95,15 @@ void SimpleAssociator::associateNewData()
 
     checkACADLookup();
 
-
     if (reconstructor().isCancelled())
         return;
 
     selfAccociateNewUTNs();
 
-
     if (reconstructor().isCancelled())
         return;
 
     checkACADLookup();
-
 
     if (reconstructor().isCancelled())
         return;
@@ -119,7 +111,6 @@ void SimpleAssociator::associateNewData()
     retryAssociateTargetReports();
 
     countUnAssociated();
-
 
     if (reconstructor().isCancelled())
         return;
@@ -145,7 +136,7 @@ bool SimpleAssociator::canGetPositionOffset(const dbContent::targetReport::Recon
 }
 
 // distance, target acc, tr acc
-std::tuple<double, double, double> SimpleAssociator::getPositionOffset(
+boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositionOffset(
     const dbContent::targetReport::ReconstructorInfo& tr,
     const dbContent::ReconstructorTarget& target, bool do_debug)
 {
@@ -169,7 +160,6 @@ bool SimpleAssociator::canGetPositionOffset(const boost::posix_time::ptime& ts,
                                                    const dbContent::ReconstructorTarget& target0,
                                                    const dbContent::ReconstructorTarget& target1)
 {
-
     dbContent::targetReport::Position ref_pos;
     bool ok;
 
@@ -184,13 +174,12 @@ bool SimpleAssociator::canGetPositionOffset(const boost::posix_time::ptime& ts,
 }
 
 // distance, target0 acc, target1 acc
-std::tuple<double, double, double> SimpleAssociator::getPositionOffset(
+boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositionOffset(
     const boost::posix_time::ptime& ts,
     const dbContent::ReconstructorTarget& target0,
     const dbContent::ReconstructorTarget& target1,
     int thread_id, bool do_debug)
 {
-
     dbContent::targetReport::Position target0_pos;
     bool ok;
 
@@ -221,7 +210,6 @@ boost::optional<std::pair<bool, double>> SimpleAssociator::calculatePositionOffs
     double distance_m, double tgt_est_std_dev, double tr_est_std_dev, bool secondary_verified,
     bool do_debug)
 {
-
     return std::pair<bool, double> (distance_m < reconstructor_.settings().max_distance_acceptable_,
                                    distance_m - reconstructor_.settings().max_distance_acceptable_);
 }
