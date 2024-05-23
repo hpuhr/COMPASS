@@ -114,6 +114,7 @@ class PositionAccuracy
     double xy_cov_   {0}; // m^2
 
     double maxStdDev() const { return std::max(x_stddev_, y_stddev_); }
+    std::string asStr() const;
 };
 
 /**

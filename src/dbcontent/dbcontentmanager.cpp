@@ -1561,6 +1561,10 @@ void DBContentManager::restoreSelectedRecNums()
 bool DBContentManager::utnUseEval (unsigned int utn)
 {
     assert (target_model_);
+
+    if (!target_model_->existsTarget(utn))
+        logerr << "DBContentManager: utnUseEval: utn " << utn << " does not exist";
+
     assert (target_model_->existsTarget(utn));
     return target_model_->target(utn).useInEval();
 }

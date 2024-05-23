@@ -51,11 +51,11 @@ namespace targetReport
 //4 	<0.3 m/s 	<0.46 m/s (1.5 fps)
 
 const std::map<int, float> AccuracyTables::adsb_nucr_nacv_accuracies =
-{
-    {1, 5   },
-    {2, 1.5 },
-    {3, 0.5 },
-    {4, 0.15}
+    {
+        {1, 5   },
+        {2, 1.5 },
+        {3, 0.5 },
+        {4, 0.15}
 };
 
 // NUCp | HPL                | RCu                 |
@@ -70,18 +70,18 @@ const std::map<int, float> AccuracyTables::adsb_nucr_nacv_accuracies =
 // 1   & < 20 NM (37040 m)  & < 10 NM (18520 m) & 9260  \\ \hline
 // 0   & > 20 NM (37040 m)  & > 10 NM (18520 m) & -  \\ \hline
 
-const std::map<int, float> AccuracyTables::adsb_v0_accuracies = 
-{
-    {0, 92600},
-    {1, 9260 },
-    {2, 4630 },
-    {3, 926  },
-    {4, 463  },
-    {5, 231.5},
-    {6, 92.5 },
-    {7, 46.5 },
-    {8, 5    },
-    {9, 1.5  }
+const std::map<int, float> AccuracyTables::adsb_v0_accuracies =
+    {
+        {0, 92600},
+        {1, 9260 },
+        {2, 4630 },
+        {3, 926  },
+        {4, 463  },
+        {5, 231.5},
+        {6, 92.5 },
+        {7, 46.5 },
+        {8, 5    },
+        {9, 1.5  }
 };
 
 //    NACp | EPU (HFOM)         | VEPU (VFOM) |
@@ -99,19 +99,19 @@ const std::map<int, float> AccuracyTables::adsb_v0_accuracies =
 //    0   & > 10 NM or Unknown & & - \\ \hline|
 
 const std::map<int, float> AccuracyTables::adsb_v12_accuracies =
-{
-    { 0, 92600},
-    { 1, 9260 },
-    { 2, 3704 },
-    { 3, 1852 },
-    { 4, 926  },
-    { 5, 463  },
-    { 6, 278  },
-    { 7, 92.5 },
-    { 8, 46.5 },
-    { 9, 15   },
-    {10, 5    },
-    {11, 1.5  }
+    {
+        { 0, 92600},
+        { 1, 9260 },
+        { 2, 3704 },
+        { 3, 1852 },
+        { 4, 926  },
+        { 5, 463  },
+        { 6, 278  },
+        { 7, 92.5 },
+        { 8, 46.5 },
+        { 9, 15   },
+        {10, 5    },
+        {11, 1.5  }
 };
 
 std::string BaseInfo::asStr() const
@@ -167,7 +167,12 @@ std::string ModeACode::asStr() const
     return ss.str();
 }
 
-
+std::string PositionAccuracy::asStr() const
+{
+    return "x " + String::doubleToStringPrecision(x_stddev_, 2)
+           +" y " + String::doubleToStringPrecision(y_stddev_, 2)
+           +" cov " + String::doubleToStringPrecision(xy_cov_, 2);
+}
 
 } // namespace TargetReport
 
