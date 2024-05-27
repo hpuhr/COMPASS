@@ -32,6 +32,19 @@
 
 /**
  */
+void SimpleReferenceCalculator::TargetReferences::reset()
+{
+    measurements.resize(0);
+    references.resize(0);
+    init_update.reset();
+    start_index.reset();
+
+    num_updates_failed      = 0;
+    num_interp_steps_failed = 0;
+}
+
+/**
+ */
 SimpleReferenceCalculator::SimpleReferenceCalculator(ReconstructorBase& reconstructor)
     :   reconstructor_(reconstructor)
 {
@@ -50,7 +63,7 @@ void SimpleReferenceCalculator::prepareForNextSlice()
         auto ThresRemove = reconstructor_.currentSlice().remove_before_time_;
         auto ThresJoin   = getJoinThreshold();
 
-                //remove previous updates which are no longer needed (either too old or above the join threshold)
+        //remove previous updates which are no longer needed (either too old or above the join threshold)
         for (auto& ref : references_)
         {
             auto it = std::remove_if(ref.second.updates.begin(),
@@ -73,7 +86,7 @@ void SimpleReferenceCalculator::prepareForNextSlice()
         slice_idx_ = 0;
     }
 
-            //reset data structs
+    //reset data structs
     resetDataStructs();
 }
 
@@ -94,12 +107,7 @@ void SimpleReferenceCalculator::reset()
 void SimpleReferenceCalculator::resetDataStructs()
 {
     for (auto& ref : references_)
-    {
-        ref.second.measurements.resize(0);
-        ref.second.references.resize(0);
-        ref.second.init_update.reset();
-        ref.second.start_index.reset();
-    }
+        ref.second.reset();
 
     updateInterpOptions();
 }
@@ -127,7 +135,7 @@ bool SimpleReferenceCalculator::computeReferences()
 
     resetDataStructs();
 
-            //skip slice? (debug)
+    //skip slice? (debug)
     if (settings_.max_slice_index >= 0 && slice_idx_ > settings_.max_slice_index)
         return true;
 
@@ -187,11 +195,11 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
         reconstruction::Measurement mm;
         reconstructor_.createMeasurement(mm, tr_info);
 
-                // if (tr_info.track_number_.value() == 69 || target.utn_ == 69)
-                // {
-                //     loginf << "POS (" << mm.lat << "," << mm.lon << ") " << "(" << (mm.vx.has_value() ? mm.vx.value() : 666) << "," << (mm.vy.has_value() ? mm.vy.value() : 666) << ")";
-                //     loginf << "ACC (" << mm.x_stddev.value() << "," << mm.y_stddev.value() << "," << mm.xy_cov.value() << ") " << "(" << mm.vx_stddev.value() << "," << mm.vy_stddev.value() << ")";
-                // }
+        // if (tr_info.track_number_.value() == 69 || target.utn_ == 69)
+        // {
+        //     loginf << "POS (" << mm.lat << "," << mm.lon << ") " << "(" << (mm.vx.has_value() ? mm.vx.value() : 666) << "," << (mm.vy.has_value() ? mm.vy.value() : 666) << ")";
+        //     loginf << "ACC (" << mm.x_stddev.value() << "," << mm.y_stddev.value() << "," << mm.xy_cov.value() << ") " << "(" << mm.vx_stddev.value() << "," << mm.vy_stddev.value() << ")";
+        // }
 
         line_measurements.push_back(mm);
     }
@@ -208,7 +216,7 @@ void SimpleReferenceCalculator::addMeasurements(unsigned int utn,
     //preprocess
     preprocessMeasurements(dbcontent_id, measurements);
 
-            //add to utn measurements
+    //add to utn measurements
     auto& utn_ref = references_[ utn ];
     utn_ref.utn = utn;
 
@@ -235,7 +243,7 @@ bool mmSortPred(const reconstruction::Measurement& mm0,
     if (mm0.t != mm1.t)
         return mm0.t < mm1.t;
 
-            //otherwise sort by source at least
+    //otherwise sort by source at least
     return mm0.source_id < mm1.source_id;
 }
 }
@@ -254,14 +262,14 @@ void SimpleReferenceCalculator::interpolateMeasurements(Measurements& measuremen
     interp.config().sample_dt            = options.sample_dt;
     interp.config().max_dt               = options.max_dt;
 
-            //interpolate using desired timestep
+    //interpolate using desired timestep
     auto mms_interp = interp.interpolate(measurements);
     
     size_t ni = mms_interp.size();
     if (ni < 1)
         return;
 
-            //assign new measurements
+    //assign new measurements
     measurements.resize(ni);
 
     for (size_t i = 0; i < ni; ++i)
@@ -277,7 +285,7 @@ void SimpleReferenceCalculator::reconstructMeasurements()
 
     std::vector<TargetReferences*> refs;
 
-            //collect jobs
+    //collect jobs
     for (auto& ref : references_)
         refs.push_back(&ref.second);
 
@@ -285,7 +293,7 @@ void SimpleReferenceCalculator::reconstructMeasurements()
 
     loginf << "SimpleReferenceCalculator: reconstructMeasurements: reconstructing " << num_targets << " target(s) " << (settings_.multithreading ? "multithreaded" : "") << "...";
 
-            //compute references in parallel
+    //compute references in parallel
     if (settings_.multithreading)
     {
         tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
@@ -322,7 +330,7 @@ SimpleReferenceCalculator::InitRecResult SimpleReferenceCalculator::initReconstr
     if (refs.measurements.size() < 1)
         return InitRecResult::NoMeasurements;
 
-            //sort measurements by timestamp
+    //sort measurements by timestamp
     std::sort(refs.measurements.begin(), refs.measurements.end(), mmSortPred);
 
     if (reconstructor_.currentSlice().first_slice_)
@@ -331,10 +339,10 @@ SimpleReferenceCalculator::InitRecResult SimpleReferenceCalculator::initReconstr
         return InitRecResult::Success;
     }
 
-            //join old and new updates in the mid of the overlap timeframe
+    //join old and new updates in the mid of the overlap timeframe
     const auto ThresJoin = getJoinThreshold();
 
-            //get start index of new measurements (first measurement above join threshold)
+    //get start index of new measurements (first measurement above join threshold)
     for (size_t i = 0; i < refs.measurements.size(); ++i)
     {
         if (refs.measurements[ i ].t >= ThresJoin)
@@ -344,13 +352,13 @@ SimpleReferenceCalculator::InitRecResult SimpleReferenceCalculator::initReconstr
         }
     }
 
-            //no new measurements to add?
+    //no new measurements to add?
     if (!refs.start_index.has_value())
     {
         return InitRecResult::NoStartIndex;
     }
 
-            //get last slice's last update for init
+    //get last slice's last update for init
     if (!refs.updates.empty())
         refs.init_update = *refs.updates.rbegin();
 
@@ -366,11 +374,13 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         loginf << "SimpleReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
     }
 
-            //try to init
+    refs.num_updates_failed = 0;
+
+    //try to init
     auto res = initReconstruction(refs);
     if (res != InitRecResult::Success)
     {
-        //int failed
+        //init failed
         if (settings_.activeVerbosity() > 0)
         {
             if (res == InitRecResult::NoMeasurements)
@@ -391,7 +401,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     assert(refs.start_index.has_value());
 
-            //configure and init estimator
+    //configure and init estimator
     reconstruction::KalmanEstimator estimator;
     estimator.settings() = settings_.kalmanEstimatorSettings();
     estimator.init(settings_.kalman_type);
@@ -403,13 +413,13 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     refs.updates.reserve(n_before + n_mm);
 
-            // auto ThresRemove = reconstructor_.remove_before_time_;
-            // auto ThresJoin   = getJoinThreshold();
+    // auto ThresRemove = reconstructor_.remove_before_time_;
+    // auto ThresJoin   = getJoinThreshold();
 
-            // loginf << "update_end: " << (refs.updates.empty() ? "-" : Utils::Time::toString(refs.updates.rbegin()->t)) << ", "
-            //        << "mm_begin: " << Utils::Time::toString(refs.measurements[ refs.start_index.value() ].t) << ", "
-            //        << "thres_rem: " << Utils::Time::toString(ThresRemove) << ", thres_join: " << Utils::Time::toString(ThresJoin) << ", "
-            //        << "idx: " << refs.start_index.value();
+    // loginf << "update_end: " << (refs.updates.empty() ? "-" : Utils::Time::toString(refs.updates.rbegin()->t)) << ", "
+    //        << "mm_begin: " << Utils::Time::toString(refs.measurements[ refs.start_index.value() ].t) << ", "
+    //        << "thres_rem: " << Utils::Time::toString(ThresRemove) << ", thres_join: " << Utils::Time::toString(ThresJoin) << ", "
+    //        << "idx: " << refs.start_index.value();
 
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
@@ -420,10 +430,10 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
             loginf << "    initializing to update t=" << Utils::Time::toString(refs.init_update.value().t) << ", mm0 t=" << Utils::Time::toString(mm0.t);
         }
 
-                //init kalman from last slice's update
+        //init kalman from last slice's update
         estimator.kalmanInit(refs.init_update.value());
 
-                //continue with first measurement
+        //continue with first measurement
     }
     else
     {
@@ -434,7 +444,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
             loginf << "    initializing to mm t=" << Utils::Time::toString(mm0.t);
         }
 
-                //reinit kalman with first measurement
+        //reinit kalman with first measurement
         estimator.kalmanInit(update, mm0);
         assert(update.valid);
 
@@ -443,7 +453,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         ++offs; //continue with second measurement
     }
 
-            //add new measurements to kalman and collect updates
+    //add new measurements to kalman and collect updates
     for (size_t i = refs.start_index.value() + offs; i < refs.measurements.size(); ++i)
     {
         estimator.kalmanStep(update, refs.measurements[ i ]);
@@ -451,6 +461,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         //!only add update if valid!
         if (update.valid)
             refs.updates.push_back(update);
+        else
+            ++refs.num_updates_failed;
     }
 
     if (settings_.activeVerbosity() > 0)
@@ -459,16 +471,16 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         loginf << "    #updates: " << refs.updates.size();
     }
 
-            //start with joined kalman updates
+    //start with joined kalman updates
     std::vector<kalman::KalmanUpdate> updates = refs.updates;
 
-            //run rts smoothing?
+    //run rts smoothing?
     if (settings_.smooth_rts)
     {
         //jointly smooth old + new kalman updates RTS
         estimator.smoothUpdates(updates);
 
-                //combine old rts updates with new rts updates
+        //combine old rts updates with new rts updates
         refs.updates_smooth.insert(refs.updates_smooth.end(),
                                    updates.begin() + n_before,
                                    updates.end());
@@ -481,12 +493,15 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         }
     }
 
-            //resample?
+    //resample?
     if (settings_.resample_result)
     {
         //interpolate measurements
+        size_t num_failed_steps;
         std::vector<kalman::KalmanUpdate> updates_interp;
-        estimator.interpUpdates(updates_interp, updates);
+        estimator.interpUpdates(updates_interp, updates, &num_failed_steps);
+
+        refs.num_interp_steps_failed += num_failed_steps;
 
         updates = updates_interp;
 
@@ -496,7 +511,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         }
     }
 
-            //generate references
+    //generate references
     estimator.storeUpdates(refs.references, updates);
 }
 
@@ -517,6 +532,9 @@ void SimpleReferenceCalculator::updateReferences()
             target.references_[ref_it.t] = ref_it;
 
         ref.second.references.clear();
+
+        dbContent::ReconstructorTarget::globalStats().num_failed_chain_updates += ref.second.num_updates_failed;
+        dbContent::ReconstructorTarget::globalStats().num_failed_interp_steps  += ref.second.num_interp_steps_failed;  
     }
 }
 

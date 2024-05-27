@@ -578,17 +578,20 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
         {
             assert (reconstructor().targets_.count(utn));
 
-                    // check for position offsets
-            std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(
-                tr, reconstructor().targets_.at(utn), do_debug);
-
-            boost::optional<bool> check_result = checkPositionOffsetAcceptable(
-                tr, distance_m, tgt_est_std_dev, tr_est_std_dev, true, do_debug);
-
-            if (check_result && !*check_result)
+            // check for position offsets
+            auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
+            if (pos_offs.has_value())
             {
-                tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
-                reset_tr_assoc = true;
+                std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
+
+                boost::optional<bool> check_result = checkPositionOffsetAcceptable(
+                    tr, distance_m, tgt_est_std_dev, tr_est_std_dev, true, do_debug);
+
+                if (check_result && !*check_result)
+                {
+                    tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
+                    reset_tr_assoc = true;
+                }
             }
         }
     };
@@ -764,7 +767,11 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           if (!canGetPositionOffset(tr, other))
                               return;
 
-                          std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = getPositionOffset(tr, other, do_debug);
+                          auto pos_offs = getPositionOffset(tr, other, do_debug);
+                          if (!pos_offs.has_value())
+                              return;
+
+                          std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
 
                           boost::optional<std::pair<bool, double>> check_ret = calculatePositionOffsetScore(
                               tr, other_utn, distance_m, tgt_est_std_dev, tr_est_std_dev, mode_a_verified, do_debug);
@@ -889,9 +896,15 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                 continue;
             }
 
-                    //@TODO: debug flag
-            tie(distance_m, stddev_est_target, stddev_est_other) = getPositionOffset(
-                tr.timestamp_, target, other, thread_id, false);
+            //@TODO: debug flag
+            auto pos_offs = getPositionOffset(tr.timestamp_, target, other, thread_id, false);
+            if (!pos_offs.has_value())
+            {
+                ++pos_skipped_cnt;
+                continue;
+            }
+
+            tie(distance_m, stddev_est_target, stddev_est_other) = pos_offs.value();
 
             if (!isTargetAccuracyAcceptable(stddev_est_target)
                 || !isTargetAccuracyAcceptable(stddev_est_other))

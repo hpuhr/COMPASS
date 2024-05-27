@@ -300,27 +300,60 @@ KalmanChain::Interval KalmanChain::predictionRefInterval(const boost::posix_time
 }
 
 /**
+ * Internally used.
+*/
+bool KalmanChain::addToTracker(unsigned long mm_id,
+                               const boost::posix_time::ptime& ts,
+                               size_t* num_updates_failed)
+{
+    assert (!canReestimate());
+
+    //just track measurement
+    bool ok = tracker_.tracker_ptr->track(getMeasurement(mm_id));
+
+    if (!ok && num_updates_failed)
+        *num_updates_failed += 1;
+
+    return ok;
+}
+
+/**
+ * Internally used.
+*/
+void KalmanChain::addToEnd(unsigned long mm_id,
+                           const boost::posix_time::ptime& ts)
+{
+    assert (canReestimate());
+
+    assert(updates_.empty() || ts >= updates_.rbegin()->t);
+        
+    addReesimationIndex(count());
+    
+    updates_.emplace_back(mm_id, ts);
+}
+
+/**
  * Adds a new measurement to the end of the chain.
 */
 bool KalmanChain::add(unsigned long mm_id,
                       const boost::posix_time::ptime& ts,
-                      bool reestim)
+                      bool reestim,
+                      size_t* num_updates_failed)
 {
+    if (num_updates_failed)
+        *num_updates_failed = 0;
+
     if (canReestimate())
     {
-        assert(updates_.empty() || ts >= updates_.rbegin()->t);
-        
-        addReesimationIndex(count());
-        
-        updates_.emplace_back(mm_id, ts);
+        addToEnd(mm_id, ts);
 
-        if (reestim)
-            return reestimate();
+        if (reestim && !reestimate(num_updates_failed))
+            return false;
     }
     else
     {
-        //just track measurement
-        return tracker_.tracker_ptr->track(getMeasurement(mm_id));
+        if (!addToTracker(mm_id, ts, num_updates_failed))
+            return false;
     }
 
     return true;
@@ -330,8 +363,12 @@ bool KalmanChain::add(unsigned long mm_id,
  * Adds new measurements to the end of the chain.
 */
 bool KalmanChain::add(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
-                      bool reestim)
+                      bool reestim,
+                      size_t* num_updates_failed)
 {
+    if (num_updates_failed)
+        *num_updates_failed = 0;
+
     if (mms.empty())
         return true;
 
@@ -363,14 +400,19 @@ bool KalmanChain::add(const std::vector<std::pair<unsigned long, boost::posix_ti
 
         addReesimationIndexRange(idx_min, idx_max);
 
-        if (reestim)
-            return reestimate();
+        if (reestim && !reestimate(num_updates_failed))
+            return false;
     }
     else
     {
         //just track measurements one after another
+        bool has_failed_updates = false;
         for (const auto& mm : mms)
-            add(mm.first, mm.second, false);
+            if (!addToTracker(mm.first, mm.second, num_updates_failed))
+                has_failed_updates = true;
+
+        if (has_failed_updates)
+            return false;
     }
 
     return true;
@@ -379,9 +421,9 @@ bool KalmanChain::add(const std::vector<std::pair<unsigned long, boost::posix_ti
 /**
  * Inserts a new measurement at the given index.
 */
-void KalmanChain::insert(int idx, 
-                         unsigned long mm_id,
-                         const boost::posix_time::ptime& ts)
+void KalmanChain::insertAt(int idx, 
+                           unsigned long mm_id,
+                           const boost::posix_time::ptime& ts)
 {
     assert(canReestimate());
 
@@ -403,7 +445,7 @@ void KalmanChain::insert(int idx,
     if (idx < 0)
     {
         //just add to end
-        add(mm_id, ts, false);
+        addToEnd(mm_id, ts);
     }
     else
     {
@@ -422,17 +464,18 @@ void KalmanChain::insert(int idx,
 */
 bool KalmanChain::insert(unsigned long mm_id,
                          const boost::posix_time::ptime& ts, 
-                         bool reestim)
+                         bool reestim,
+                         size_t* num_updates_failed)
 {
     //mode does not support inserts? => add instead
     if (!canReestimate())
-        return add(mm_id, ts, reestim);
+        return add(mm_id, ts, reestim, num_updates_failed);
 
     int idx = insertionIndex(ts);
-    insert(idx, mm_id, ts);
+    insertAt(idx, mm_id, ts);
 
     if (reestim)
-        return reestimate();
+        return reestimate(num_updates_failed);
 
     return true;
 }
@@ -441,17 +484,21 @@ bool KalmanChain::insert(unsigned long mm_id,
  * Inserts new measurements into the chain.
 */
 bool KalmanChain::insert(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
-                         bool reestim)
+                         bool reestim,
+                         size_t* num_updates_failed)
 {
     //mode does not support inserts? => add instead
     if (!canReestimate())
-        return add(mms, reestim);
+        return add(mms, reestim, num_updates_failed);
     
     for (const auto& mm : mms)
-        insert(mm.first, mm.second, false);
+    {
+        int idx = insertionIndex(mm.second);
+        insertAt(idx, mm.first, mm.second);
+    }
 
     if (reestim)
-        return reestimate();
+        return reestimate(num_updates_failed);
 
     return true;
 }
@@ -788,8 +835,11 @@ bool KalmanChain::reestimate(int idx, double& d_state_sqr, double& d_cov_sqr)
 /**
  * Reestimates the chain after new measurements have been added, based on various criteria.
 */
-bool KalmanChain::reestimate()
+bool KalmanChain::reestimate(size_t* num_updates_failed)
 {
+    if (num_updates_failed)
+        *num_updates_failed = 0;
+
     if (!needsReestimate() || !canReestimate())
         return true;
 
@@ -898,6 +948,9 @@ bool KalmanChain::reestimate()
 
     //had to remove error-step updates?
     bool ok = tbr.empty();
+
+    if (num_updates_failed)
+        *num_updates_failed += tbr.size();
 
     return ok;
 }
