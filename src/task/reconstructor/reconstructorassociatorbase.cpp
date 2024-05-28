@@ -104,6 +104,8 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
     checkACADLookup();
 
+    bool is_unreliable_primary_only;
+
     for (auto& ts_it : reconstructor().tr_timestamps_)
     {
         if (reconstructor().isCancelled())
@@ -128,7 +130,12 @@ void ReconstructorAssociatorBase::associateTargetReports()
             continue;
         }
 
-        utn = findUTNFor(tr, debug_rec_nums, debug_utns);
+        utn = -1;
+
+        is_unreliable_primary_only = tr.dbcont_id_ != 62 && tr.dbcont_id_  != 255 && tr.isPrimaryOnlyDetection();
+
+        if (!is_unreliable_primary_only) // if unreliable primary only, delay association until retry
+            utn = findUTNFor(tr, debug_rec_nums, debug_utns);
 
         if (utn != -1) // estimate accuracy and associate
             associate(tr, utn);
@@ -340,7 +347,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
         assert (!tr.acad_);
         assert (!tr.acid_);
 
-        if ((dbcont_id == 62 || dbcont_id == 255))
+        if (dbcont_id == 62 || dbcont_id == 255)
             assert (!tr.track_number_);
 
         utn = findUTNByModeACPos (tr, utn_vec_, debug_rec_nums, debug_utns);
