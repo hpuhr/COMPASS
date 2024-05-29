@@ -381,6 +381,9 @@ void ReconstructorAssociatorBase::associate(dbContent::targetReport::Reconstruct
             // check if position usable
     reconstructor().acc_estimator_->validate(tr, reconstructor());
 
+    if (reconstructor().acc_estimator_->canCorrectPosition(tr))
+        reconstructor().acc_estimator_->correctPosition(tr);
+
     reconstructor().targets_.at(utn).addTargetReport(tr.record_num_);
 
     if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))

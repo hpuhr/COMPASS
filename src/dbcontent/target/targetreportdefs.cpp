@@ -126,6 +126,21 @@ std::string BaseInfo::asStr() const
 }
 
 
+boost::optional<targetReport::Position>& ReconstructorInfo::position()
+{
+    if (position_corrected_)
+        return position_corrected_;
+
+    return position_;
+}
+
+const boost::optional<targetReport::Position>& ReconstructorInfo::position() const
+{
+    if (position_corrected_)
+        return position_corrected_;
+
+    return position_;
+}
 
 std::string ReconstructorInfo::asStr() const
 {

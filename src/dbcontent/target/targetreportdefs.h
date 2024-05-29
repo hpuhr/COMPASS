@@ -222,6 +222,7 @@ struct ReconstructorInfo : public BaseInfo
     boost::optional<bool> track_end_;
 
     boost::optional<targetReport::Position> position_;
+    boost::optional<targetReport::Position> position_corrected_;
     boost::optional<targetReport::PositionAccuracy> position_accuracy_;
     bool do_not_use_position_ {false};
 
@@ -232,6 +233,9 @@ struct ReconstructorInfo : public BaseInfo
 
     boost::optional<double> track_angle_;
     boost::optional<bool> ground_bit_;
+
+    boost::optional<targetReport::Position>& position();
+    const boost::optional<targetReport::Position>& position() const;
 
     virtual std::string asStr() const;
 

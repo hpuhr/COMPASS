@@ -604,17 +604,17 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     if (lower && !upper) // exact time
     {
-        if (lower->position_)
-            return {*lower->position_, true};
+        if (lower->position())
+            return {*lower->position(), true};
         else
             return {{}, false};
     }
 
-    if (!lower || !lower->position_ || !upper || !upper->position_)
+    if (!lower || !lower->position() || !upper || !upper->position())
         return {{}, false};
 
-    dbContent::targetReport::Position pos1 = *lower->position_;
-    dbContent::targetReport::Position pos2 = *upper->position_;
+    dbContent::targetReport::Position& pos1 = *lower->position();
+    dbContent::targetReport::Position& pos2 = *upper->position();
     float d_t = Time::partialSeconds(upper->timestamp_ - lower->timestamp_);
 
     logdbg << "Target: interpolatedPosForTime: d_t " << d_t;
@@ -722,17 +722,17 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     if (lower_rec_num && !upper_rec_num) // exact time
     {
-        if (lower_rec_num->position_)
-            return {*lower_rec_num->position_, true};
+        if (lower_rec_num->position())
+            return {*lower_rec_num->position(), true};
         else
             return {{}, false};
     }
 
-    if (!lower_rec_num || !lower_rec_num->position_ || !upper_rec_num || !upper_rec_num->position_)
+    if (!lower_rec_num || !lower_rec_num->position() || !upper_rec_num || !upper_rec_num->position())
         return {{}, false};
 
-    dbContent::targetReport::Position pos1 = *lower_rec_num->position_;
-    dbContent::targetReport::Position pos2 = *upper_rec_num->position_;
+    dbContent::targetReport::Position& pos1 = *lower_rec_num->position();
+    dbContent::targetReport::Position& pos2 = *upper_rec_num->position();
     float d_t = Time::partialSeconds(upper_rec_num->timestamp_ - lower_rec_num->timestamp_);
 
     logdbg << "Target: interpolatedPosForTimeFast: d_t " << d_t;
@@ -883,13 +883,13 @@ dbContent::targetReport::ReconstructorInfo& ReconstructorTarget::dataFor (unsign
 
 bool ReconstructorTarget::hasPositionFor (unsigned long rec_num) const
 {
-    return dataFor(rec_num).position_.has_value();
+    return dataFor(rec_num).position().has_value();
 }
 
 dbContent::targetReport::Position ReconstructorTarget::positionFor (unsigned long rec_num) const
 {
     assert (hasPositionFor(rec_num));
-    return *dataFor(rec_num).position_;
+    return *dataFor(rec_num).position();
 }
 
 

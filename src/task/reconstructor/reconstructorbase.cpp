@@ -353,7 +353,7 @@ void ReconstructorBase::createTargetReports()
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
 
-                info.do_not_use_position_ = !info.position_.has_value()
+                info.do_not_use_position_ = !info.position().has_value()
                     || (unused_ds_ids.count(info.ds_id_)
                      || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
 
@@ -611,7 +611,7 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     mm.source_id = ri.record_num_;
     mm.t         = ri.timestamp_;
     
-    auto pos = ri.position_;
+    auto pos = ri.position();
     assert(pos.has_value());
 
     auto vel = ri.velocity_;
