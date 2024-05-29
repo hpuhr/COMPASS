@@ -18,8 +18,8 @@ class ReconstructorBase;
 
 namespace reconstruction
 {
-    class KalmanOnlineTracker;
-    class KalmanChain;
+class KalmanOnlineTracker;
+class KalmanChain;
 }
 
 namespace dbContent {
@@ -33,7 +33,7 @@ enum class ComparisonResult
 
 class ReconstructorTarget
 {
-public:
+  public:
     struct GlobalStats
     {
         void reset()
@@ -71,7 +71,7 @@ public:
     bool associations_written_ {false}; // set after the utn was used in db at least once
     bool track_begin_ {true}; // unset after first target report written
 
-    // target report aggregation & search structures, by record numbers
+            // target report aggregation & search structures, by record numbers
     std::vector<unsigned long> target_reports_;
     std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
     // all sources sorted by time, ts -> record_num
@@ -107,10 +107,10 @@ public:
 
     mutable Transformation trafo_;
 
-    void addTargetReport (unsigned long rec_num, 
+    void addTargetReport (unsigned long rec_num,
+                         bool add_to_tracker = true);
+    void addTargetReports (std::vector<unsigned long> rec_nums,
                           bool add_to_tracker = true);
-    void addTargetReports (std::vector<unsigned long> rec_nums, 
-                           bool add_to_tracker = true);
 
     unsigned int numAssociated() const;
     unsigned long lastAssociated() const;
@@ -133,17 +133,17 @@ public:
     bool isTimeInside (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     bool hasDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
-    // TODO lambda for selective data
-    ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp, 
-                                   boost::posix_time::time_duration d_max,
-                                   const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
+            // TODO lambda for selective data
+    ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp,
+                                  boost::posix_time::time_duration d_max,
+                                  const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
     ReferencePair refDataFor (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
-//    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timesFor (
-//        boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+    //    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timesFor (
+    //        boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     // lower/upper times, -1 if not existing
 
-    // TODO lambda for selective data without do not use pos
+            // TODO lambda for selective data without do not use pos
     std::pair<dbContent::targetReport::Position, bool> interpolatedPosForTime (
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     std::pair<dbContent::targetReport::Position, bool> interpolatedPosForTimeFast (
@@ -152,9 +152,9 @@ public:
     boost::optional<dbContent::targetReport::Position> interpolatedRefPosForTimeFast (
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
-//    bool hasDataForExactTime (boost::posix_time::ptime timestamp) const;
-//    unsigned long dataForExactTime (boost::posix_time::ptime timestamp) const; // TargetReport& ???
-//    dbContent::targetReport::Position posForExactTime (boost::posix_time::ptime timestamp) const;
+    //    bool hasDataForExactTime (boost::posix_time::ptime timestamp) const;
+    //    unsigned long dataForExactTime (boost::posix_time::ptime timestamp) const; // TargetReport& ???
+    //    dbContent::targetReport::Position posForExactTime (boost::posix_time::ptime timestamp) const;
 
     bool hasDataFor (unsigned long rec_num) const;
     dbContent::targetReport::ReconstructorInfo& dataFor (unsigned long rec_num) const;
@@ -180,13 +180,20 @@ public:
         const ReconstructorTarget& other, const std::vector<unsigned long>& rec_nums,
         boost::posix_time::time_duration max_time_diff, float max_alt_diff, bool debug) const;
 
+    boost::optional<float> modeCCodeAt (boost::posix_time::ptime timestamp,
+                                       boost::posix_time::time_duration max_time_diff) const;
+    boost::optional<bool> groundBitAt (boost::posix_time::ptime timestamp,
+                                      boost::posix_time::time_duration max_time_diff) const;
+    boost::optional<double> groundSpeedAt (boost::posix_time::ptime timestamp,
+                                          boost::posix_time::time_duration max_time_diff) const; // m/s
+
     ComparisonResult compareModeCCode (const dbContent::targetReport::ReconstructorInfo& tr,
-                                   boost::posix_time::time_duration max_time_diff, float max_alt_diff,
-                                   bool debug) const;
+                                      boost::posix_time::time_duration max_time_diff, float max_alt_diff,
+                                      bool debug) const;
     // unknown, same, different timestamps from this
 
-    //void calculateSpeeds();
-    //void removeNonModeSTRs();
+            //void calculateSpeeds();
+            //void removeNonModeSTRs();
 
     void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts() const;
@@ -195,7 +202,7 @@ public:
 
     void removeOutdatedTargetReports();
 
-    // online reconstructor
+            // online reconstructor
     size_t trackerCount() const;
     boost::posix_time::ptime trackerTime(size_t idx) const;
     bool canPredict(boost::posix_time::ptime timestamp) const;
@@ -203,12 +210,12 @@ public:
     bool predict(reconstruction::Measurement& mm, const boost::posix_time::ptime& ts, int thread_id = 0) const;
     // hp: plz rework to tr -> posix timestamp, mm to targetreportdefs structs pos, posacc, maybe by return
 
-//    bool hasADSBMOPSVersion();
-//    std::set<unsigned int> getADSBMOPSVersions();
+    //    bool hasADSBMOPSVersion();
+    //    std::set<unsigned int> getADSBMOPSVersions();
 
     static GlobalStats& globalStats() { return global_stats_; }
 
-protected:
+  protected:
     bool hasTracker() const;
     void reinitTracker();
     void reinitChain();
@@ -216,9 +223,9 @@ protected:
                       bool reestimate = true,
                       size_t* num_updates_failed = nullptr);
 
-    void addTargetReport (unsigned long rec_num, 
-                          bool add_to_tracker,
-                          bool reestimate);
+    void addTargetReport (unsigned long rec_num,
+                         bool add_to_tracker,
+                         bool reestimate);
 
     std::unique_ptr<reconstruction::KalmanChain> chain_;
 

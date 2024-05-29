@@ -342,10 +342,10 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
             logwrn << "KalmanEstimator: kalmanStep: step failed";
 
             //print kalman state
-            kalman_interface_->printState();
+            //kalman_interface_->printState();
 
             //print mm
-            loginf << "KalmanEstimator: kalmanStep: could not integrate measurement:\n" << mm.toString();
+            //loginf << "KalmanEstimator: kalmanStep: could not integrate measurement:\n" << mm.toString();
 
             //!note: the interface should always revert to the old state if a step fails!
             //!we thus assume that the last state is fully intact!

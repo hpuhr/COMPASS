@@ -29,11 +29,11 @@ ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor,
                                          bool tmp_utn,
                                          bool multithreaded_predictions,
                                          bool dynamic_insertions)
-:   reconstructor_(reconstructor)
-,   utn_(utn)
-,   tmp_utn_(tmp_utn)
-,   multithreaded_predictions_(multithreaded_predictions)
-,   dynamic_insertions_(dynamic_insertions)
+    :   reconstructor_(reconstructor)
+      ,   utn_(utn)
+      ,   tmp_utn_(tmp_utn)
+      ,   multithreaded_predictions_(multithreaded_predictions)
+      ,   dynamic_insertions_(dynamic_insertions)
 {
 }
 
@@ -42,19 +42,19 @@ ReconstructorTarget::~ReconstructorTarget()
 }
 
 void ReconstructorTarget::addTargetReport (unsigned long rec_num,
-                                           bool add_to_tracker)
+                                          bool add_to_tracker)
 {
     addTargetReport(rec_num, add_to_tracker, true);
 }
 
-void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums, 
-                                            bool add_to_tracker)
+void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums,
+                                           bool add_to_tracker)
 {
     //add single tr without reestimating
     for (auto& rn_it : rec_nums)
         addTargetReport(rn_it, add_to_tracker, false);
 
-    //reestimate chain after adding
+            //reestimate chain after adding
     if (add_to_tracker && chain_)
     {
         size_t num_updates_failed;
@@ -67,22 +67,22 @@ void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums,
     }
 }
 
-void ReconstructorTarget::addTargetReport (unsigned long rec_num, 
-                                           bool add_to_tracker,
-                                           bool reestimate)
+void ReconstructorTarget::addTargetReport (unsigned long rec_num,
+                                          bool add_to_tracker,
+                                          bool reestimate)
 {
     assert (reconstructor_.target_reports_.count(rec_num));
 
     const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
-//    if (!timestamp_max_.is_not_a_date_time()) // there is time
-//    {
-//        if (tr.timestamp_ < timestamp_max_)
-//            logerr << "ReconstructorTarget: addTargetReport: old max " << Time::toString(timestamp_max_)
-//                   << " tr ts " << Time::toString(tr.timestamp_);
+            //    if (!timestamp_max_.is_not_a_date_time()) // there is time
+            //    {
+            //        if (tr.timestamp_ < timestamp_max_)
+            //            logerr << "ReconstructorTarget: addTargetReport: old max " << Time::toString(timestamp_max_)
+            //                   << " tr ts " << Time::toString(tr.timestamp_);
 
-//        assert (tr.timestamp_ >= timestamp_max_);
-//    }
+            //        assert (tr.timestamp_ >= timestamp_max_);
+            //    }
 
     bool ts_newer = true;
 
@@ -397,9 +397,9 @@ bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) 
     return true;
 }
 
-ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime timestamp, 
-                                                                         time_duration d_max,
-                                                                         const InfoValidFunc& tr_valid_func) const
+ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime timestamp,
+                                                                        time_duration d_max,
+                                                                        const InfoValidFunc& tr_valid_func) const
 // lower/upper times, invalid ts if not existing
 {
     std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_lower, it_upper;
@@ -420,17 +420,17 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         //get lower bound
         it_upper = tr_timestamps_.lower_bound(timestamp);
 
-        //lower bound not found => stop
+                //lower bound not found => stop
         if (it_upper == tr_timestamps_.end())
             return {nullptr, nullptr};
 
         assert (it_upper->first >= timestamp);
 
-        //too much time difference?
+                //too much time difference?
         if (it_upper->first - timestamp <= d_max)
             has_upper = true;
 
-        //our upper element is the first element => no lower element
+                //our upper element is the first element => no lower element
         if (it_upper != tr_timestamps_.begin())
         {
             //set lower iterator to last elem
@@ -439,7 +439,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
 
             assert (it_lower->first < timestamp);
 
-            //lower item too far away?
+                    //lower item too far away?
             if (timestamp - it_lower->first <= d_max)
                 has_lower = true;
         }
@@ -598,7 +598,9 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 {
     dbContent::targetReport::ReconstructorInfo* lower, *upper;
 
-    tie(lower, upper) = dataFor(timestamp, d_max);
+    tie(lower, upper) = dataFor(
+        timestamp, d_max,
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return !tr.do_not_use_position_; });
 
     if (lower && !upper) // exact time
     {
@@ -714,7 +716,9 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 {
     dbContent::targetReport::ReconstructorInfo* lower_rec_num, *upper_rec_num;
 
-    tie(lower_rec_num, upper_rec_num) = dataFor(timestamp, d_max, [ & ] (const dbContent::targetReport::ReconstructorInfo& ti) { return !ti.do_not_use_position_; });
+    tie(lower_rec_num, upper_rec_num) = dataFor(
+        timestamp, d_max,
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return !tr.do_not_use_position_; });
 
     if (lower_rec_num && !upper_rec_num) // exact time
     {
@@ -971,8 +975,10 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
     tie(lower_tr, upper_tr) = dataFor(tr.timestamp_, max_time_diff);
+    // [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.mode_a_code_.has_value(); }
+    // no lambda because missing value important, TODO set data source if available
 
-    bool lower_no_m3a = lower_tr && !lower_tr->mode_a_code_.has_value();
+    bool lower_no_m3a = lower_tr && !lower_tr->mode_a_code_.has_value();  // TODO check
     bool upper_no_m3a = upper_tr && !upper_tr->mode_a_code_.has_value();
 
             // no mode a, and one missing in one of the others
@@ -1049,6 +1055,126 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
     return std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>>(unknown, same, different);
 }
 
+boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptime timestamp,
+                                                        boost::posix_time::time_duration max_time_diff) const
+{
+    if (!hasDataForTime(timestamp, max_time_diff))
+        return {};
+
+    dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
+
+    tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff);
+    // [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); }
+    // no lambda because missing value important, TODO set data source if available
+
+    bool lower_mc_usable = lower_tr && lower_tr->barometric_altitude_.has_value()
+                           && lower_tr->barometric_altitude_->hasReliableValue();
+
+    bool upper_mc_usable = upper_tr && upper_tr->barometric_altitude_.has_value()
+                           && upper_tr->barometric_altitude_->hasReliableValue();
+
+            // nothing reliable
+    if (!lower_mc_usable && !upper_mc_usable)
+        return {};
+
+    if ((lower_mc_usable && !upper_mc_usable)
+        || (!lower_mc_usable && upper_mc_usable)) // only 1 usable
+    {
+        dbContent::targetReport::ReconstructorInfo& ref1 = lower_mc_usable ? *lower_tr : *upper_tr;
+        assert (ref1.barometric_altitude_);
+
+        return ref1.barometric_altitude_->altitude_;
+    }
+
+            // both set & reliable
+    dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
+    dbContent::targetReport::ReconstructorInfo& ref2 = *upper_tr;
+
+    if ((ref1.timestamp_ - timestamp).total_milliseconds() <=  (ref2.timestamp_ - timestamp).total_milliseconds())
+        return ref1.barometric_altitude_->altitude_;
+    else
+        return ref2.barometric_altitude_->altitude_;
+}
+
+boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime timestamp,
+                                                       boost::posix_time::time_duration max_time_diff) const
+{
+    if (!hasDataForTime(timestamp, max_time_diff))
+        return {};
+
+    dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
+
+    tie(lower_tr, upper_tr) = dataFor(
+        timestamp, max_time_diff,
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.ground_bit_.has_value(); });
+
+    bool lower_has_val = lower_tr && lower_tr->ground_bit_.has_value();
+    bool upper_has_val = upper_tr && upper_tr->ground_bit_.has_value();
+
+            // no value
+    if (!lower_has_val && !upper_has_val) // TODO check if data sources m3a capable
+        return {};
+
+    if ((lower_has_val && !upper_has_val)
+        || (!lower_has_val && upper_has_val)) // only 1 usable
+    {
+        dbContent::targetReport::ReconstructorInfo& ref1 = lower_has_val ? *lower_tr : *upper_tr;
+        assert (ref1.ground_bit_);
+
+        return *ref1.ground_bit_;
+    }
+
+            // both set & reliable
+    dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
+    dbContent::targetReport::ReconstructorInfo& ref2 = *upper_tr;
+
+    if ((ref1.timestamp_ - timestamp).total_milliseconds() <=  (ref2.timestamp_ - timestamp).total_milliseconds())
+        return *ref1.ground_bit_;
+    else
+        return *ref2.ground_bit_;
+}
+
+boost::optional<double> ReconstructorTarget::groundSpeedAt (boost::posix_time::ptime timestamp,
+                                      boost::posix_time::time_duration max_time_diff) const
+{
+    if (!hasDataForTime(timestamp, max_time_diff))
+        return {};
+
+    dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
+
+    tie(lower_tr, upper_tr) = dataFor(
+        timestamp, max_time_diff,
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.ground_bit_.has_value(); });
+
+    bool lower_has_val = lower_tr && lower_tr->velocity_.has_value();
+    bool upper_has_val = upper_tr && upper_tr->velocity_.has_value();
+
+            // no value
+    if (!lower_has_val && !upper_has_val) // TODO check if data sources m3a capable
+        return {};
+
+    if ((lower_has_val && !upper_has_val)
+        || (!lower_has_val && upper_has_val)) // only 1 usable
+    {
+        dbContent::targetReport::ReconstructorInfo& ref1 = lower_has_val ? *lower_tr : *upper_tr;
+        assert (ref1.velocity_);
+
+        return ref1.velocity_->speed_;
+    }
+
+            // both set & reliable
+    dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
+    dbContent::targetReport::ReconstructorInfo& ref2 = *upper_tr;
+
+    assert (ref1.velocity_.has_value());
+    assert (ref2.velocity_.has_value());
+
+    if ((ref1.timestamp_ - timestamp).total_milliseconds() <= (ref2.timestamp_ - timestamp).total_milliseconds())
+        return ref1.velocity_->speed_;
+    else
+        return ref2.velocity_->speed_;
+}
+
 ComparisonResult ReconstructorTarget::compareModeCCode (
     const dbContent::targetReport::ReconstructorInfo& tr,
     time_duration max_time_diff, float max_alt_diff, bool debug) const
@@ -1061,13 +1187,16 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    tie(lower_tr, upper_tr) = dataFor(tr.timestamp_, max_time_diff);
+    tie(lower_tr, upper_tr) = dataFor(
+        tr.timestamp_, max_time_diff,
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
+            return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); });
 
     bool lower_no_mc = lower_tr && !lower_tr->barometric_altitude_.has_value();
     bool upper_no_mc = upper_tr && !upper_tr->barometric_altitude_.has_value();
 
-            // no mode a, and one missing in one of the others
-    if (!tr.barometric_altitude_.has_value() && (lower_no_mc || upper_no_mc)) // TODO check if data sources m3a capable
+            // no mode c, and one missing in one of the others
+    if (!tr.barometric_altitude_.has_value() && (lower_no_mc || upper_no_mc)) // TODO check if data sources mc capable
         return ComparisonResult::SAME;
 
     bool lower_mc_usable = lower_tr && lower_tr->barometric_altitude_.has_value()
@@ -1169,7 +1298,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_bit_));
 
-    // track num begin, end
+            // track num begin, end
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_begin_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_end_));
@@ -1182,7 +1311,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rocd_));
 
-    // accs
+            // accs
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ax_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ay_));
 
@@ -1198,7 +1327,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
 
-    // yo mom so acc
+            // yo mom so acc
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_long_acc_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_trans_acc_));
     buffer_list.addProperty(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_vert_rate_));
@@ -1226,7 +1355,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<float>& mc_vec = buffer->get<float> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
 
-    // track num begin, end
+            // track num begin, end
     NullableVector<bool>& track_begin_vec = buffer->get<bool> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_begin_).name());
     NullableVector<bool>& track_end_vec = buffer->get<bool> (
@@ -1248,7 +1377,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<float>& rocd_vec = buffer->get<float> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rocd_).name());
 
-    // accs
+            // accs
     NullableVector<double>& ax_vec = buffer->get<double> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ax_).name());
     NullableVector<double>& ay_vec = buffer->get<double> (
@@ -1273,7 +1402,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<string>& acid_vec = buffer->get<string> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_).name());
 
-    // mom
+            // mom
     NullableVector<unsigned char>& mom_long_acc_vec = buffer->get<unsigned char> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mom_long_acc_).name());
     NullableVector<unsigned char>& mom_trans_acc_vec = buffer->get<unsigned char> (
@@ -1300,15 +1429,15 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     boost::posix_time::time_duration d_max = Time::partialSeconds(10);
     boost::posix_time::time_duration track_end_time = Time::partialSeconds(30);
 
-    //boost::posix_time::ptime ts_prev;
+            //boost::posix_time::ptime ts_prev;
 
     for (auto& ref_it : references_)
     {
         //const reconstruction::Reference& ref = references_.at(i);
 
-//        loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref ts " << Time::toString(ref.t)
-//               << " wbt " << Time::toString(reconstructor_.write_before_time_) <<
-//            " skip " << (ref.t >= reconstructor_.write_before_time_);
+                //        loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref ts " << Time::toString(ref.t)
+                //               << " wbt " << Time::toString(reconstructor_.write_before_time_) <<
+                //            " skip " << (ref.t >= reconstructor_.write_before_time_);
 
         if (ref_it.second.t >= reconstructor_.currentSlice().write_before_time_)
             continue;
@@ -1331,7 +1460,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
         track_num_vec.set(buffer_cnt, utn_);
 
-        // track end
+                // track end
         if (!ts_prev_.is_not_a_date_time()
             && ref_it.second.t - ts_prev_ > track_end_time) // have time before and dt > track end time
         {
@@ -1362,7 +1491,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
             speed_vec.set(buffer_cnt, speed_ms * M_S2KNOTS);
             track_angle_vec.set(buffer_cnt, bearing_rad * RAD2DEG);
 
-            // set ax, ay
+                    // set ax, ay
             if (has_prev_v_)
             {
                 ax = *ref_it.second.vx - v_x_prev_;
@@ -1385,7 +1514,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
                 turnrate_rad = bearing_new_rad - bearing_rad;
 
-                //loginf << " turnrate_rad " << turnrate_rad;
+                        //loginf << " turnrate_rad " << turnrate_rad;
 
                 while (turnrate_rad > M_PI)
                     turnrate_rad -= 2*M_PI;
@@ -1394,7 +1523,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
                 assert (fabs(turnrate_rad) <= M_PI);
 
-                // TRANS ACC
+                        // TRANS ACC
                 if (fabs(turnrate_rad) < M_PI/20) // like 0
                     mom_trans_acc_vec.set(buffer_cnt, (unsigned char) MOM_TRANS_ACC::ConstantCourse);
                 else if (turnrate_rad > 0)
@@ -1440,81 +1569,94 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
                 // set other data
                 // TODO crappy
-
-        ReconstructorInfoPair info = dataFor(ref_it.second.t, d_max);
-
-        if (info.first && info.first->barometric_altitude_
-            && info.first->barometric_altitude_->hasReliableValue())
         {
-            if (mc_vec.isNull(buffer_cnt))
-                mc_vec.set(buffer_cnt, info.first->barometric_altitude_->altitude_);
-        }
+            ReconstructorInfoPair info = dataFor(
+                ref_it.second.t, d_max,
+                [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
+                    return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); });
 
-        if (info.second && info.second->barometric_altitude_
-            && info.second->barometric_altitude_->hasReliableValue())
-        {
-            if (mc_vec.isNull(buffer_cnt))
-                mc_vec.set(buffer_cnt, info.second->barometric_altitude_->altitude_);
-            else
-                mc_vec.set(buffer_cnt,
-                           (info.second->barometric_altitude_->altitude_ + mc_vec.get(buffer_cnt))/2.0);
-        }
-
-        if (!mc_vec.isNull(buffer_cnt)) // has current alt
-        {
-            if (has_prev_baro_alt_)
+            if (info.first && info.first->barometric_altitude_
+                && info.first->barometric_altitude_->hasReliableValue())
             {
-                dt = (ts_vec.get(buffer_cnt) - ts_prev_).total_milliseconds() / 1000.0;
-
-                rocd_ft_s = (mc_vec.get(buffer_cnt) - baro_alt_prev_) / dt;
-                rocd_vec.set(buffer_cnt, rocd_ft_s * 60); // ft per minute
-
-                // MOM Vertical Rate
-                if (rocd_ft_s == 0)
-                    mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Level);
-                else if (rocd_ft_s > 0)
-                    mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Climb);
-                else if (rocd_ft_s < 0)
-                    mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Descent);
+                if (mc_vec.isNull(buffer_cnt))
+                    mc_vec.set(buffer_cnt, info.first->barometric_altitude_->altitude_);
             }
 
-            has_prev_baro_alt_ = true;
-            baro_alt_prev_ = mc_vec.get(buffer_cnt);
+            if (info.second && info.second->barometric_altitude_
+                && info.second->barometric_altitude_->hasReliableValue())
+            {
+                if (mc_vec.isNull(buffer_cnt))
+                    mc_vec.set(buffer_cnt, info.second->barometric_altitude_->altitude_);
+                else
+                    mc_vec.set(buffer_cnt,
+                               (info.second->barometric_altitude_->altitude_ + mc_vec.get(buffer_cnt))/2.0);
+            }
+
+            if (!mc_vec.isNull(buffer_cnt)) // has current alt
+            {
+                if (has_prev_baro_alt_)
+                {
+                    dt = (ts_vec.get(buffer_cnt) - ts_prev_).total_milliseconds() / 1000.0;
+
+                    rocd_ft_s = (mc_vec.get(buffer_cnt) - baro_alt_prev_) / dt;
+                    rocd_vec.set(buffer_cnt, rocd_ft_s * 60); // ft per minute
+
+                            // MOM Vertical Rate
+                    if (rocd_ft_s == 0)
+                        mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Level);
+                    else if (rocd_ft_s > 0)
+                        mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Climb);
+                    else if (rocd_ft_s < 0)
+                        mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Descent);
+                }
+
+                has_prev_baro_alt_ = true;
+                baro_alt_prev_ = mc_vec.get(buffer_cnt);
+            }
+            else
+                has_prev_baro_alt_ = false;
+
         }
-        else
-            has_prev_baro_alt_ = false;
 
         if (mom_vert_rate_vec.isNull(buffer_cnt))
             mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Undetermined);
 
-        if (info.first)
         {
-            if (info.first->mode_a_code_ && info.first->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
-                m3a_vec.set(buffer_cnt, info.first->mode_a_code_->code_);
+            ReconstructorInfoPair info = dataFor(
+                ref_it.second.t, d_max,
+                [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
+                    return tr.mode_a_code_.has_value() && tr.mode_a_code_->hasReliableValue(); });
 
-            if (info.first->acad_ && acad_vec.isNull(buffer_cnt))
-                acad_vec.set(buffer_cnt, *info.first->acad_);
+            if (info.first)
+            {
+                if (info.first->mode_a_code_ && info.first->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
+                    m3a_vec.set(buffer_cnt, info.first->mode_a_code_->code_);
 
-            if (info.first->acid_ && acid_vec.isNull(buffer_cnt))
-                acid_vec.set(buffer_cnt, *info.first->acid_);
+                if (info.first->acad_ && acad_vec.isNull(buffer_cnt))
+                    acad_vec.set(buffer_cnt, *info.first->acad_);
 
-            if (info.first->ground_bit_ && gb_vec.isNull(buffer_cnt))
-                gb_vec.set(buffer_cnt, *info.first->ground_bit_);
-        }
+                if (info.first->acid_ && acid_vec.isNull(buffer_cnt))
+                    acid_vec.set(buffer_cnt, *info.first->acid_);
 
-        if (info.second)
-        {
-            if (info.second->mode_a_code_ && info.second->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
-                m3a_vec.set(buffer_cnt, info.second->mode_a_code_->code_);
+                if (info.first->ground_bit_ && gb_vec.isNull(buffer_cnt))
+                    gb_vec.set(buffer_cnt, *info.first->ground_bit_);
+            }
 
-            if (info.second->acad_ && acad_vec.isNull(buffer_cnt))
-                acad_vec.set(buffer_cnt, *info.second->acad_);
+            if (info.second)
+            {
+                if (info.second->mode_a_code_ && info.second->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
+                    m3a_vec.set(buffer_cnt, info.second->mode_a_code_->code_);
 
-            if (info.second->acid_ && acid_vec.isNull(buffer_cnt))
-                acid_vec.set(buffer_cnt, *info.second->acid_);
+                if (info.second->acad_ && acad_vec.isNull(buffer_cnt))
+                    acad_vec.set(buffer_cnt, *info.second->acad_);
 
-            if (info.second->ground_bit_ && gb_vec.isNull(buffer_cnt))
-                gb_vec.set(buffer_cnt, *info.second->ground_bit_);
+                if (info.second->acid_ && acid_vec.isNull(buffer_cnt))
+                    acid_vec.set(buffer_cnt, *info.second->acid_);
+
+                if (info.second->ground_bit_ && gb_vec.isNull(buffer_cnt))
+                    gb_vec.set(buffer_cnt, *info.second->ground_bit_);
+            }
+
         }
 
         ++buffer_cnt;
@@ -1522,7 +1664,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         ts_prev_ = ref_it.second.t;
     }
 
-    // check last update for track end
+            // check last update for track end
     if (buffer->size())
     {
         unsigned int last_index = buffer_cnt - 1;
@@ -1589,8 +1731,8 @@ void ReconstructorTarget::reinitTracker()
             this->reconstructor_.createMeasurement(mm, rec_num);
         });
 
-    chain_->settings().mode            = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts : 
-                                                               reconstruction::KalmanChain::Settings::Mode::StaticAdd;
+    chain_->settings().mode            = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts :
+                                  reconstruction::KalmanChain::Settings::Mode::StaticAdd;
     chain_->settings().prediction_mode = reconstruction::KalmanChain::Settings::PredictionMode::Interpolate;
     chain_->settings().verbosity       = 0;
 }

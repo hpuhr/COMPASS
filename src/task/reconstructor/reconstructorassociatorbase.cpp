@@ -22,6 +22,8 @@ void ReconstructorAssociatorBase::associateNewData()
 {
     loginf << "ReconstructorAssociatorBase: associateNewData";
 
+    max_time_diff_ = Time::partialSeconds(reconstructor().settings().max_time_diff_);
+
     assert (!unassoc_rec_nums_.size());
 
     if (reconstructor().isCancelled())
@@ -393,59 +395,9 @@ void ReconstructorAssociatorBase::associate(dbContent::targetReport::Reconstruct
 
     assoc_counts_[tr.ds_id_][dbcont_id].first++;
 
-            // TODO move to post process association or something
-            // only if not newly created
-    //    if (!tr.do_not_use_position_ && reconstructor().targets_.at(utn).canPredict(tr.timestamp_))
-    //    {
-    //        reconstruction::Measurement mm;
-    //        bool ret;
-    //        double distance_m, bearing_rad;
-    //        dbContent::targetReport::PositionAccuracy tr_pos_acc;
-    //        dbContent::targetReport::PositionAccuracy mm_pos_acc;
-    //        EllipseDef acc_ell;
-    //        double est_std_dev;
-    //        double mahalanobis_dist;
+    postAssociate (tr, utn);
 
-            //                // predict pos from target and estimate accuracies
-            //        ret = reconstructor().targets_.at(utn).predict(mm, tr);
-            //        assert (ret);
 
-            //        distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
-            //                                                 tr.position_->longitude_ * DEG2RAD,
-            //                                                 mm.lat * DEG2RAD, mm.lon * DEG2RAD);
-
-            //        bearing_rad = osgEarth::GeoMath::bearing(tr.position_->latitude_ * DEG2RAD,
-            //                                                 tr.position_->longitude_ * DEG2RAD,
-            //                                                 mm.lat * DEG2RAD, mm.lon * DEG2RAD);
-
-            //        tr_pos_acc = reconstructor().acc_estimator_->positionAccuracy(tr);
-            //        estimateEllipse(tr_pos_acc, acc_ell);
-            //        est_std_dev = estimateAccuracyAt(acc_ell, bearing_rad);
-
-            //        assert (mm.hasStdDevPosition());
-            //        mm_pos_acc = mm.positionAccuracy();
-            //        estimateEllipse(mm_pos_acc, acc_ell);
-            //        est_std_dev += estimateAccuracyAt(acc_ell, bearing_rad);
-
-            //        mahalanobis_dist = distance_m / est_std_dev;
-
-            //        dist.latitude_deg_ = tr.position_->latitude_;
-            //        dist.longitude_deg_ = tr.position_->longitude_;
-            //        dist.est_std_dev_ = est_std_dev;
-            //        dist.distance_m_ = distance_m;
-            //        dist.mahalanobis_distance_ = mahalanobis_dist;
-
-            //        reconstructor().acc_estimator_->addAssociatedDistance(tr, dist);
-
-            //                //                not_use_tr_pos = distance_m > 50 && mahalanobis_dist > 10;
-
-            //                //                loginf << " dist " << String::doubleToStringPrecision(distance_m, 2)
-            //                //                       << " est_std_dev " << String::doubleToStringPrecision(est_std_dev, 2)
-            //                //                       << " mahala " << String::doubleToStringPrecision(mahalanobis_dist, 2)
-            //                //                       << " use pos " << !not_use_tr_pos;
-
-            //                //                tr.do_not_use_position_ = not_use_tr_pos;
-            //    }
 }
 
 void ReconstructorAssociatorBase::checkACADLookup()
@@ -586,20 +538,21 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
             assert (reconstructor().targets_.count(utn));
 
             // check for position offsets
-            auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
-            if (pos_offs.has_value())
-            {
-                std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
+//            auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
+
+//            if (pos_offs.has_value())
+//            {
+//                std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
 
                 boost::optional<bool> check_result = checkPositionOffsetAcceptable(
-                    tr, distance_m, tgt_est_std_dev, tr_est_std_dev, true, do_debug);
+                    tr, utn, true, do_debug);
 
                 if (check_result && !*check_result)
                 {
                     tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
                     reset_tr_assoc = true;
                 }
-            }
+//            }
         }
     };
 
@@ -680,8 +633,6 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     results.resize(num_targets);
     boost::posix_time::ptime timestamp = tr.timestamp_;
 
-    const boost::posix_time::time_duration max_time_diff =
-        Time::partialSeconds(reconstructor().settings().max_time_diff_);
     const float max_altitude_diff = reconstructor().settings().max_altitude_diff_;
 
     bool do_debug = debug_rec_nums.count(tr.record_num_);
@@ -701,7 +652,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           if (tr.acad_ && other.hasACAD()) // has to be covered outside
                               return;
 
-                          if (!other.isTimeInside(timestamp, max_time_diff))
+                          if (!other.isTimeInside(timestamp, max_time_diff_))
                           {
                               return;
                           }
@@ -719,7 +670,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
                               if (tr.mode_a_code_)
                               {
-                                  ComparisonResult ma_res = other.compareModeACode(tr, max_time_diff);
+                                  ComparisonResult ma_res = other.compareModeACode(tr, max_time_diff_);
 
                                   if (ma_res == ComparisonResult::DIFFERENT)
                                   {
@@ -741,7 +692,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                               if (tr.barometric_altitude_)
                               {
                                   ComparisonResult mc_res = other.compareModeCCode(
-                                      tr, max_time_diff, max_altitude_diff, false);
+                                      tr, max_time_diff_, max_altitude_diff, false);
 
                                   if (mc_res == ComparisonResult::DIFFERENT)
                                   {
@@ -866,7 +817,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 
     const auto& settings = reconstructor().settings();
 
-    const boost::posix_time::time_duration max_time_diff_tracker = Utils::Time::partialSeconds(settings.max_time_diff_);
+    //const boost::posix_time::time_duration max_time_diff_tracker = Utils::Time::partialSeconds(settings.max_time_diff_);
 
             //computes a match score for the given other target
     auto scoreUTN = [ & ] (const std::vector<size_t>& rec_nums,
@@ -913,8 +864,8 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 
             tie(distance_m, stddev_est_target, stddev_est_other) = pos_offs.value();
 
-            if (!isTargetAccuracyAcceptable(stddev_est_target)
-                || !isTargetAccuracyAcceptable(stddev_est_other))
+            if (!*isTargetAccuracyAcceptable(stddev_est_target, utn, tr.timestamp_)
+                || !*isTargetAccuracyAcceptable(stddev_est_other, other.utn_, tr.timestamp_))
             {
                 ++pos_skipped_cnt;
                 continue;
@@ -1048,7 +999,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                               vector<unsigned long> ma_different;
 
                               tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(
-                                  other, max_time_diff_tracker);
+                                  other, max_time_diff_);
 
                               if (print_debug)
                               {
@@ -1071,7 +1022,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                                   vector<unsigned long> mc_different;
 
                                   tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(
-                                      other, ma_same, max_time_diff_tracker, settings.max_altitude_diff_, print_debug);
+                                      other, ma_same, max_time_diff_, settings.max_altitude_diff_, print_debug);
 
                                   if (print_debug)
                                   {

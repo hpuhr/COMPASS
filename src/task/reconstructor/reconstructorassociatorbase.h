@@ -27,6 +27,8 @@ class ReconstructorAssociatorBase
 
   protected:
 
+    boost::posix_time::time_duration max_time_diff_;
+
     std::vector<unsigned int> utn_vec_;
     std::map<unsigned int, unsigned int> acad_2_utn_; // acad dec -> utn
     std::map<std::string, unsigned int> acid_2_utn_; // acid trim -> utn
@@ -46,6 +48,7 @@ class ReconstructorAssociatorBase
     void selfAccociateNewUTNs();
     void retryAssociateTargetReports();
     void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn);
+    virtual void postAssociate(dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn) {};
     void checkACADLookup();
     void countUnAssociated();
 
@@ -83,9 +86,8 @@ class ReconstructorAssociatorBase
         bool do_debug) = 0;
 
     virtual boost::optional<bool> checkPositionOffsetAcceptable (
-        const dbContent::targetReport::ReconstructorInfo& tr,
-        double distance_m, double tgt_est_std_dev, double tr_est_std_dev, bool secondary_verified,
-        bool do_debug) = 0;
+        const dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn,
+        bool secondary_verified, bool do_debug) = 0;
     // empty if not possible, else check passed or failed returned
     virtual boost::optional<std::pair<bool, double>> calculatePositionOffsetScore (
         const dbContent::targetReport::ReconstructorInfo& tr, unsigned int other_utn,
@@ -95,7 +97,8 @@ class ReconstructorAssociatorBase
     virtual std::tuple<DistanceClassification, double> checkPositionOffsetScore
         (double distance_m, double sum_stddev_est, bool secondary_verified) = 0;
 
-    virtual bool isTargetAccuracyAcceptable(double tgt_est_std_dev) = 0;
+    virtual boost::optional<bool> isTargetAccuracyAcceptable(
+        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts) = 0;
     virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) = 0;
 
     virtual ReconstructorBase& reconstructor() = 0;

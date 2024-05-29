@@ -26,7 +26,7 @@ SimpleAssociator::SimpleAssociator(SimpleReconstructor& reconstructor)
 
 void SimpleAssociator::associateNewData()
 {
-    max_time_diff_ = Time::partialSeconds(reconstructor_.settings_.max_time_diff_);
+
 
     assert (!unassoc_rec_nums_.size());
 
@@ -199,9 +199,17 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
 
 boost::optional<bool> SimpleAssociator::checkPositionOffsetAcceptable (
     const dbContent::targetReport::ReconstructorInfo& tr,
-    double distance_m, double tgt_est_std_dev, double tr_est_std_dev, bool secondary_verified,
-    bool do_debug)
+    unsigned int utn, bool secondary_verified, bool do_debug)
 {
+    auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
+
+    if (!pos_offs.has_value())
+        return {};
+
+    double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0};
+
+    std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
+
     return distance_m < reconstructor_.settings().max_distance_acceptable_;
 }
 
@@ -237,7 +245,8 @@ SimpleAssociator::checkPositionOffsetScore (double distance_m, double sum_stddev
         distance_m - settings.max_distance_acceptable_);
 }
 
-bool SimpleAssociator::isTargetAccuracyAcceptable(double tgt_est_std_dev)
+boost::optional<bool> SimpleAssociator::isTargetAccuracyAcceptable(
+    double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts)
 {
     return true;
 }

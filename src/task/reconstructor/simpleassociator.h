@@ -16,8 +16,6 @@ class SimpleAssociator : public ReconstructorAssociatorBase
   private:
     SimpleReconstructor& reconstructor_;
 
-    boost::posix_time::time_duration max_time_diff_;
-
             // distance, target acc, tr acc
     virtual bool canGetPositionOffset(
         const dbContent::targetReport::ReconstructorInfo& tr,
@@ -37,9 +35,9 @@ class SimpleAssociator : public ReconstructorAssociatorBase
 
 
     virtual boost::optional<bool> checkPositionOffsetAcceptable (
-        const dbContent::targetReport::ReconstructorInfo& tr,
-        double distance_m, double tgt_est_std_dev, double tr_est_std_dev, bool secondary_verified,
-        bool do_debug) override;
+        const dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn,
+        bool secondary_verified,bool do_debug) override;
+
     // empty if not possible, else check passed or failed returned
     virtual boost::optional<std::pair<bool, double>> calculatePositionOffsetScore (
         const dbContent::targetReport::ReconstructorInfo& tr, unsigned int other_utn,
@@ -49,7 +47,8 @@ class SimpleAssociator : public ReconstructorAssociatorBase
     virtual std::tuple<DistanceClassification, double> checkPositionOffsetScore
         (double distance_m, double sum_stddev_est, bool secondary_verified) override;
 
-    virtual bool isTargetAccuracyAcceptable(double tgt_est_std_dev) override;
+    virtual boost::optional<bool> isTargetAccuracyAcceptable(
+        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts) override;
     virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) override;
 
     virtual ReconstructorBase& reconstructor() override;
