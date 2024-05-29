@@ -116,7 +116,8 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     resample_systracks_dt_box_->setDecimals(3);
     resample_systracks_dt_box_->setMinimum(1.0);
     resample_systracks_dt_box_->setMaximum(DBL_MAX);
-    connect(resample_systracks_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_systracks_dt = v; });
+    connect(resample_systracks_dt_box_,
+            QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_systracks_dt = v; });
     layout->addRow("Resample Interval [s]", resample_systracks_dt_box_);
 
     resample_systracks_maxdt_box_ = new QDoubleSpinBox;
