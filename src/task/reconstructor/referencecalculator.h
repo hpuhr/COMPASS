@@ -73,7 +73,7 @@ struct ReferenceCalculatorSettings
     //result resampling related
     bool                            resample_result     = true;
     double                          resample_Q_std      = 10.0;
-    double                          resample_dt         = 1.0;
+    double                          resample_dt         = 2.0;
     reconstruction::StateInterpMode resample_blend_mode = reconstruction::StateInterpMode::BlendVar;
 
     //dynamic projection change

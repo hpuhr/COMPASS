@@ -132,6 +132,9 @@ void ReconstructorAssociatorBase::associateTargetReports()
             continue;
         }
 
+        if (reconstructor().acc_estimator_->canCorrectPosition(tr))
+            reconstructor().acc_estimator_->correctPosition(tr);
+
         utn = -1;
 
         is_unreliable_primary_only = tr.dbcont_id_ != 62 && tr.dbcont_id_  != 255 && tr.isPrimaryOnlyDetection();
@@ -380,9 +383,6 @@ void ReconstructorAssociatorBase::associate(dbContent::targetReport::Reconstruct
 
             // check if position usable
     reconstructor().acc_estimator_->validate(tr, reconstructor());
-
-    if (reconstructor().acc_estimator_->canCorrectPosition(tr))
-        reconstructor().acc_estimator_->correctPosition(tr);
 
     reconstructor().targets_.at(utn).addTargetReport(tr.record_num_);
 

@@ -198,7 +198,7 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
 }
 
 boost::optional<bool> SimpleAssociator::checkPositionOffsetAcceptable (
-    const dbContent::targetReport::ReconstructorInfo& tr,
+    dbContent::targetReport::ReconstructorInfo& tr,
     unsigned int utn, bool secondary_verified, bool do_debug)
 {
     auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);

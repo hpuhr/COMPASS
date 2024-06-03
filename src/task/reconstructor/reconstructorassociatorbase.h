@@ -86,7 +86,7 @@ class ReconstructorAssociatorBase
         bool do_debug) = 0;
 
     virtual boost::optional<bool> checkPositionOffsetAcceptable (
-        const dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn,
+        dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn,
         bool secondary_verified, bool do_debug) = 0;
     // empty if not possible, else check passed or failed returned
     virtual boost::optional<std::pair<bool, double>> calculatePositionOffsetScore (

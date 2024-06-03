@@ -316,10 +316,13 @@ std::set<unsigned int> ReconstructorTask::disabledDataSources() const
     disabled_ds.insert(Number::dsIdFrom(currentReconstructor()->settings().ds_sac,
                                         currentReconstructor()->settings().ds_sic));
 
-    for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+    if (current_reconstructor_str_ == ScoringUMReconstructorName)
     {
-        if (ds_it->dsType() == "Radar")
-            disabled_ds.insert(ds_it->id());
+        for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+        {
+            if (ds_it->dsType() == "Radar")
+                disabled_ds.insert(ds_it->id());
+        }
     }
 
     return disabled_ds;

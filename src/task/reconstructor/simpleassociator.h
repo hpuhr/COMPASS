@@ -35,7 +35,7 @@ class SimpleAssociator : public ReconstructorAssociatorBase
 
 
     virtual boost::optional<bool> checkPositionOffsetAcceptable (
-        const dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn,
+        dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn,
         bool secondary_verified,bool do_debug) override;
 
     // empty if not possible, else check passed or failed returned
