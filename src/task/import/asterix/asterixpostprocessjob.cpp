@@ -441,7 +441,8 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
 
     dbcontent_name = "CAT021";
 
-    unsigned int spd_already_set {0}, sgv_spd_no_val {0}, sgv_hgt_no_value {0}, sgv_hdg_or_mag {0}, sgv_usable {0};
+    unsigned int spd_already_set {0}, sgv_spd_no_val {0}, sgv_hgt_no_value {0},
+        sgv_is_heading {0}, sgv_is_magnetic {0}, sgv_usable {0};
 
     logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: got ads-b "
            << (buffers_.count(dbcontent_name) && buffers_.at(dbcontent_name)->size());
@@ -506,10 +507,16 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
                 continue;
             }
 
-            if (sgv_htt_vec.get(index) == 0 || sgv_hrd_vec.get(index) == 1)
+            if (sgv_htt_vec.get(index) == 0)
             {
-                ++sgv_hdg_or_mag;
-                continue; // heading or magnetic north
+                ++sgv_is_heading;
+                continue;
+            }
+
+            if (sgv_hrd_vec.get(index) == 1)
+            {
+                ++sgv_is_magnetic;
+                continue;
             }
 
             track_angle_vec.set(index, sgv_hgt_vec.get(index));
@@ -519,7 +526,8 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
 
         loginf << "ASTERIXPostprocessJob: doGroundSpeedCalculations: CAT021 spd_already_set " << spd_already_set
                << " sgv_spd_no_val " << sgv_spd_no_val << " sgv_hgt_no_value " << sgv_hgt_no_value
-               << " sgv_hdg_or_mag " << sgv_hdg_or_mag << " sgv_usable " << sgv_usable;
+               << " sgv_is_heading " << sgv_is_heading << " sgv_is_magnetic " << sgv_is_magnetic
+               << " sgv_usable " << sgv_usable;
     }
 }
 
