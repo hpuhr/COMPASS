@@ -78,6 +78,8 @@ public:
     double distanceSqr(const Measurement& mm) const;
 
     const boost::posix_time::ptime& currrentTime() const { return ts_; }
+
+    Measurement currentStateAsMeasurement() const;
     
     //needed for feeding kalman
     virtual void stateVecXFromMM(kalman::Vector& x, const Measurement& mm) const = 0;
@@ -98,7 +100,6 @@ public:
     virtual void storeState(Measurement& mm, 
                             const kalman::Vector& x, 
                             const kalman::Matrix& P) const = 0;
-    
     //helpers
     virtual void xPos(double& x, double& y, const kalman::Vector& x_vec) const = 0;
     virtual void xPos(double& x, double& y) const = 0;
@@ -107,6 +108,7 @@ public:
     virtual double yVar(const kalman::Matrix& P) const = 0;
     virtual double xyCov(const kalman::Matrix& P) const = 0;
     virtual void stateVecXInv(kalman::Vector& x_inv, const kalman::Vector& x) const = 0;
+    virtual kalman::KalmanState currentState() const = 0;
 
     kalman::Vector stateVecXInv(const kalman::Vector& x) const;
 
@@ -115,7 +117,8 @@ public:
                                                             const kalman::KalmanState& state1,
                                                             double dt,
                                                             double Q_var) const = 0;
-    virtual void printState() const = 0;
+                                           
+    virtual std::string asString(const std::string& prefix = "") const = 0;
 
     void setVerbosity(int v) { verbosity_ = v; }
 

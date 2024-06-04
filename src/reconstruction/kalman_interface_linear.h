@@ -48,13 +48,16 @@ public:
 
     virtual bool init() override;
 
+    virtual kalman::KalmanState currentState() const override final;
+
     void stateVecX(const kalman::Vector& x) override final;
 
     boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
                                                     const kalman::KalmanState& state1,
                                                     double dt,
                                                     double Q_var) const override final;
-    void printState() const override final;
+
+    std::string asString(const std::string& prefix = "") const override final;
 
 protected:
     void kalmanInit_impl(kalman::KalmanState& init_state,

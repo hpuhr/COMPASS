@@ -24,8 +24,12 @@ class ReconstructorTaskDebugWidget : public QWidget
     void updateValues();
 
   protected:
+    void timestampsChanged();
+
     ReconstructorTask& task_;
 
     QLineEdit* utns_edit_{nullptr};
     QLineEdit* rec_nums_edit_{nullptr};
+    QLineEdit* timestamp_min_edit_{nullptr};
+    QLineEdit* timestamp_max_edit_{nullptr};
 };

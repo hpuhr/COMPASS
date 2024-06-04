@@ -174,4 +174,14 @@ void KalmanInterface::storeState(Measurement& mm, const kalman::KalmanState& sta
     storeState(mm, state.x, state.P);
 }
 
+/**
+*/
+Measurement KalmanInterface::currentStateAsMeasurement() const
+{
+    Measurement mm;
+    storeState(mm, currentState());
+
+    return mm;
+}
+
 } // reconstruction

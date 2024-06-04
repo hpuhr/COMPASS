@@ -352,6 +352,30 @@ void ReconstructorTask::debugRecNums(const std::set<unsigned long>& rec_nums)
     debug_rec_nums_ = rec_nums;
 }
 
+const boost::posix_time::ptime& ReconstructorTask::debugTimestampMin() const
+{
+    return debug_timestamp_min_;
+}
+
+void ReconstructorTask::debugTimestampMin(const boost::posix_time::ptime& ts)
+{
+    loginf << "ReconstructorTask: debugTimestampMin: value '" << Utils::Time::toString(ts) << "'";
+
+    debug_timestamp_min_ = ts;
+}
+
+const boost::posix_time::ptime& ReconstructorTask::debugTimestampMax() const
+{
+    return debug_timestamp_max_;
+}
+
+void ReconstructorTask::debugTimestampMax(const boost::posix_time::ptime& ts)
+{
+    loginf << "ReconstructorTask: debugTimestampMax: value '" << Utils::Time::toString(ts) << "'";
+
+    debug_timestamp_max_ = ts;
+}
+
 void ReconstructorTask::dialogRunSlot()
 {
     loginf << "ReconstructorTask: dialogRunSlot";
@@ -1004,4 +1028,3 @@ void ReconstructorTask::deleteCalculatedReferences()
 
     loginf << "ReconstructorTask: deleteCalculatedReferences: done";
 }
-
