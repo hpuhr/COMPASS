@@ -314,7 +314,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
     const std::set<unsigned int> debug_utns = reconstructor().task().debugUTNs();
     const std::set<unsigned long> debug_rec_nums = reconstructor().task().debugRecNums();
 
-    unsigned int rec_num;
+    unsigned long rec_num;
     unsigned int dbcont_id;
     int utn;
 
@@ -438,7 +438,7 @@ void ReconstructorAssociatorBase::countUnAssociated()
         if (reconstructor().isCancelled())
             return;
 
-        unsigned int rec_num;
+        unsigned long rec_num;
         unsigned int dbcont_id;
 
         rec_num = rn_it;
@@ -525,6 +525,8 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
     {
         boost::posix_time::ptime timestamp_prev;
 
+        assert (tr.track_number_);
+
         assert (tn2utn_.at(tr.ds_id_).at(tr.line_id_).count(*tr.track_number_));
         std::tie(utn, timestamp_prev) = tn2utn_.at(tr.ds_id_).at(tr.line_id_).at(*tr.track_number_);
         assert (reconstructor().targets_.count(utn));
@@ -532,6 +534,10 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
                 // check for larger time offset
         if (tr.timestamp_ - timestamp_prev > track_max_time_diff) // too old
         {
+            // remove previous track number assoc
+            assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
+            tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
+
             // create new and add
             utn = createNewTarget(tr);
             assert (reconstructor().targets_.count(utn));

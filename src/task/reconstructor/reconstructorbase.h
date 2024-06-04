@@ -142,7 +142,7 @@ class ReconstructorBase : public Configurable
     const ReferenceCalculatorSettings& referenceCalculatorSettings() const { return ref_calc_settings_; }
 
     void createMeasurement(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& ri);
-    void createMeasurement(reconstruction::Measurement& mm, unsigned int rec_num);
+    void createMeasurement(reconstruction::Measurement& mm, unsigned long rec_num);
 
     const dbContent::TargetReportAccessor& accessor(dbContent::targetReport::ReconstructorInfo& tr) const;
 
