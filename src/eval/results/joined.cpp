@@ -37,7 +37,7 @@ namespace EvaluationRequirementResult
 {
 
 const std::string Joined::SectorOverviewID              = "sector_overview";
-const int         Joined::SectorOverviewRenderDelayMSec = 2000;
+const int         Joined::SectorOverviewRenderDelayMSec = 5000;
 
 Joined::Joined(const std::string& type, 
                 const std::string& result_id,

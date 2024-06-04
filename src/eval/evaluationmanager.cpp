@@ -346,7 +346,7 @@ void EvaluationManager::loadData ()
         loginf << "EvaluationManager: loadData: ref ds_id '" << ds_it.first << "' uint " << ds_id;
 
         for (auto& line_it : line_ref_set)
-               loginf << " line " << line_it;
+               loginf << "EvaluationManager: loadData: ref line " << line_it;
 
         assert (ds_man.hasDBDataSource(ds_id));
 
@@ -364,7 +364,7 @@ void EvaluationManager::loadData ()
         loginf << "EvaluationManager: loadData: tst ds_id '" << ds_it.first << "' uint " << ds_id;
 
         for (auto& line_it : line_tst_set)
-            loginf << " line " << line_it;
+            loginf << "EvaluationManager: loadData: tst line " << line_it;
 
         assert (ds_man.hasDBDataSource(ds_id));
 

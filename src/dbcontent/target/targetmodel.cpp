@@ -589,6 +589,7 @@ void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::Recon
     for (auto& tgt_it : targets)
     {
         //cont_man.createNewTarget(tgt_it.first);
+        utn = tgt_it.first;
 
         target_data_.push_back({utn, nlohmann::json::object()});
 
@@ -622,7 +623,7 @@ void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::Recon
         //        if (tgt_it.second.hasADSBMOPSVersion() && tgt_it.second.getADSBMOPSVersions().size())
         //            target.adsbMOPSVersions(tgt_it.second.getADSBMOPSVersions());
 
-        ++utn;
+        //++utn;
     }
 
     endResetModel();
@@ -754,6 +755,9 @@ void TargetModel::loadFromDB()
     {
         target_data_.push_back({target->utn_, target->info()});
     }
+
+    for (auto& target : target_data_)
+        assert (existsTarget(target.utn_));
 
     endResetModel();
 
