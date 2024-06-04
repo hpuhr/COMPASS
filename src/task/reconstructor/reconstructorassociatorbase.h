@@ -89,6 +89,10 @@ class ReconstructorAssociatorBase
         dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn,
         bool secondary_verified, bool do_debug) = 0;
     // empty if not possible, else check passed or failed returned
+    virtual void doOutlierDetection (
+        dbContent::targetReport::ReconstructorInfo& tr,
+        unsigned int utn, bool do_debug) {};
+
     virtual boost::optional<std::pair<bool, double>> calculatePositionOffsetScore (
         const dbContent::targetReport::ReconstructorInfo& tr, unsigned int other_utn,
         double distance_m, double tgt_est_std_dev, double tr_est_std_dev, bool secondary_verified,

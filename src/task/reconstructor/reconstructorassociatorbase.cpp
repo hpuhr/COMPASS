@@ -383,6 +383,7 @@ void ReconstructorAssociatorBase::associate(dbContent::targetReport::Reconstruct
 
             // check if position usable
     reconstructor().acc_estimator_->validate(tr, reconstructor());
+    doOutlierDetection(tr, utn, false);
 
     reconstructor().targets_.at(utn).addTargetReport(tr.record_num_);
 
