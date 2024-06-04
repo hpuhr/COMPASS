@@ -57,6 +57,7 @@ public:
                 const OMatrix& R = OMatrix(), 
                 const OMatrix& H = OMatrix());
 
+    bool checkState() const;
     void revert();
 
     static Matrix continuousWhiteNoise(size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
@@ -102,7 +103,7 @@ public:
     const Matrix& getM() const { return M_; }
     Matrix& getM() { return M_; }
 
-    void printState() const;
+    std::string asString(const std::string prefix = "") const;
 
 private:
     size_t dim_x_;

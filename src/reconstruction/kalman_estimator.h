@@ -145,7 +145,11 @@ public:
                        std::vector<kalman::KalmanUpdate>& updates,
                        size_t* num_steps_failed = nullptr) const;
 
+    kalman::KalmanState currentState() const;
     const boost::posix_time::ptime& currentTime() const;
+    Measurement currentStateAsMeasurement() const;
+
+    std::string asString(const std::string& prefix = "") const;
 
     static std::unique_ptr<KalmanInterface> createInterface(kalman::KalmanType ktype, 
                                                             bool track_velocity = true, 

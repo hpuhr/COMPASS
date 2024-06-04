@@ -163,6 +163,13 @@ bool KalmanInterfaceLinear::kalmanPrediction_impl(kalman::Vector& x,
 
 /**
 */
+kalman::KalmanState KalmanInterfaceLinear::currentState() const
+{
+    return kalman_filter_->state();
+}
+
+/**
+*/
 void KalmanInterfaceLinear::stateVecX(const kalman::Vector& x)
 {
     kalman_filter_->setX(x);
@@ -236,9 +243,9 @@ boost::optional<kalman::KalmanState> KalmanInterfaceLinear::interpStep(const kal
 
 /**
 */
-void KalmanInterfaceLinear::printState() const
+std::string KalmanInterfaceLinear::asString(const std::string& prefix) const
 {
-    kalman_filter_->printState();
+    return kalman_filter_->asString(prefix);
 }
 
 } // reconstruction

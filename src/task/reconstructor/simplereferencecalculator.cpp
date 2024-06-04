@@ -18,6 +18,7 @@
 #include "simplereferencecalculator.h"
 #include "spline_interpolator.h"
 #include "reconstructorbase.h"
+#include "reconstructortask.h"
 #include "targetreportdefs.h"
 
 #include "kalman_estimator.h"
@@ -369,6 +370,13 @@ SimpleReferenceCalculator::InitRecResult SimpleReferenceCalculator::initReconstr
  */
 void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 {
+    const auto& debug_utns    = reconstructor_.task().debugUTNs();
+    const auto& debug_recnums = reconstructor_.task().debugRecNums();
+    const auto& debug_ts_min  = reconstructor_.task().debugTimestampMin();
+    const auto& debug_ts_max  = reconstructor_.task().debugTimestampMax();
+
+    bool debug_target = debug_utns.count(refs.utn) > 0; 
+
     if(settings_.activeVerbosity() > 0) 
     {
         loginf << "SimpleReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
@@ -456,6 +464,22 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //add new measurements to kalman and collect updates
     for (size_t i = refs.start_index.value() + offs; i < refs.measurements.size(); ++i)
     {
+        const auto& mm = refs.measurements[ i ];
+
+        bool debug_mm = debug_target || (debug_recnums.count(mm.source_id) > 0);
+        if (debug_mm && !debug_ts_min.is_not_a_date_time() && mm.t < debug_ts_min)
+            debug_mm = false;
+        if (debug_mm && !debug_ts_max.is_not_a_date_time() && mm.t > debug_ts_max)
+            debug_mm = false;
+
+        if (debug_mm)
+        {
+            loginf << "[ Debugging UTN " << refs.utn << " ID " << mm.source_id << " TS " << Utils::Time::toString(mm.t) << " ]\n\n"
+                   << " * State:               \n\n" << estimator.asString()                             << "\n\n"
+                   << " * State as Measurement:\n\n" << estimator.currentStateAsMeasurement().asString() << "\n\n"
+                   << " * Measurement:         \n\n" << mm.asString()                                    << "\n";
+        }
+
         estimator.kalmanStep(update, refs.measurements[ i ]);
 
         //!only add update if valid!

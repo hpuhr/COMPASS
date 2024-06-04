@@ -151,48 +151,41 @@ struct Measurement
         return (ax_stddev.has_value() && ay_stddev.has_value());
     }
 
-    void print(std::ostream& strm) const
+    std::string asString(const std::string& prefix = "") const
     {
-        strm << "source_id: " << source_id << std::endl;
-        //strm << "t:         " << Utils::Time::toString(t) << std::endl;
+        std::stringstream ss;
 
-        strm << "interp:    " << mm_interp << std::endl;
+        std::string alt_str = (z.has_value() ? std::to_string(z.value()) : "-");
 
-        strm << "lat:       " << lat << std::endl;
-        strm << "lon:       " << lon << std::endl;
+        std::string vx_str  = (vx.has_value() ? std::to_string(vx.value()) : "-");
+        std::string vy_str  = (vy.has_value() ? std::to_string(vy.value()) : "-");
+        std::string vz_str  = (vz.has_value() ? std::to_string(vz.value()) : "-");
 
-        strm << "x:         " << x << std::endl;
-        strm << "y:         " << y << std::endl;
-        strm << "z:         " << (z.has_value() ? std::to_string(z.value()) : "-") << std::endl;
+        std::string ax_str  = (ax.has_value() ? std::to_string(ax.value()) : "-");
+        std::string ay_str  = (ay.has_value() ? std::to_string(ay.value()) : "-");
+        std::string az_str  = (az.has_value() ? std::to_string(az.value()) : "-");
 
-        strm << "vx:        " << (vx.has_value() ? std::to_string(vx.value()) : "-") << std::endl;
-        strm << "vy:        " << (vy.has_value() ? std::to_string(vy.value()) : "-") << std::endl;
-        strm << "vz:        " << (vz.has_value() ? std::to_string(vz.value()) : "-") << std::endl;
+        std::string x_stddev_str = (x_stddev.has_value() ? std::to_string(x_stddev.value()) : "-");
+        std::string y_stddev_str = (y_stddev.has_value() ? std::to_string(y_stddev.value()) : "-");
+        std::string xy_cov_str   = (  xy_cov.has_value() ? std::to_string(xy_cov.value())   : "-");
 
-        strm << "ax:        " << (ax.has_value() ? std::to_string(ax.value()) : "-") << std::endl;
-        strm << "ay:        " << (ay.has_value() ? std::to_string(ay.value()) : "-") << std::endl;
-        strm << "az:        " << (az.has_value() ? std::to_string(az.value()) : "-") << std::endl;
+        std::string vx_stddev_str = (vx_stddev.has_value() ? std::to_string(vx_stddev.value()) : "-");
+        std::string vy_stddev_str = (vy_stddev.has_value() ? std::to_string(vy_stddev.value()) : "-");
 
-        strm << "pos stddev x:  " << (x_stddev.has_value() ? std::to_string(x_stddev.value()) : "-") << std::endl;
-        strm << "pos stddev y:  " << (y_stddev.has_value() ? std::to_string(y_stddev.value()) : "-") << std::endl;
-        strm << "pos cov xy:    " << (xy_cov.has_value() ? std::to_string(xy_cov.value()) : "-") << std::endl;
+        std::string ax_stddev_str = (ax_stddev.has_value() ? std::to_string(ax_stddev.value()) : "-");
+        std::string ay_stddev_str = (ay_stddev.has_value() ? std::to_string(ay_stddev.value()) : "-");
 
-        strm << "vel stddev x:  " << (vx_stddev.has_value() ? std::to_string(vx_stddev.value()) : "-") << std::endl;
-        strm << "vel stddev y:  " << (vy_stddev.has_value() ? std::to_string(vy_stddev.value()) : "-") << std::endl;
+        ss << prefix << "source_id: " << source_id << std::endl;
+        ss << prefix << "interp:    " << mm_interp << std::endl;
+        ss << prefix << "pos wgs84: " << lat << ", " << lon << std::endl;
+        ss << prefix << "pos cart:  " << x << ", " << y << ", " << alt_str << " (" << x_stddev_str << ", " << y_stddev_str << ", " << xy_cov_str << ")" << std::endl;
+        ss << prefix << "velocity:  " << vx_str << ", " << vy_str << " (" << vx_stddev_str << ", " << vy_stddev_str << ")" << std::endl;
+        ss << prefix << "accel:     " << ax_str << ", " << ay_str << " (" << ax_stddev_str << ", " << ay_stddev_str << ")";
 
-        strm << "acc stddev x:  " << (ax_stddev.has_value() ? std::to_string(ax_stddev.value()) : "-") << std::endl;
-        strm << "acc stddev y:  " << (ay_stddev.has_value() ? std::to_string(ay_stddev.value()) : "-") << std::endl;
+        return ss.str();
     }
 
-    std::string toString() const
-    {
-        std::stringstream sstrm;
-        print(sstrm);
-
-        return sstrm.str();
-    }
-
-    uint32_t                 source_id;            // source of the measurement
+    unsigned long            source_id;            // source of the measurement
     boost::posix_time::ptime t;                    // timestamp
 
     bool                     mm_interp = false;    // measurement has been interpolated (e.g. by spline interpolator)

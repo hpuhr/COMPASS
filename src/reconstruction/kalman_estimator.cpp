@@ -110,10 +110,26 @@ void KalmanEstimator::init(kalman::KalmanType ktype)
 
 /**
 */
+kalman::KalmanState KalmanEstimator::currentState() const
+{
+    assert(isInit());
+    return kalman_interface_->currentState();
+}
+
+/**
+*/
 const boost::posix_time::ptime& KalmanEstimator::currentTime() const
 {
     assert(isInit());
     return kalman_interface_->currrentTime();
+}
+
+/**
+*/
+Measurement KalmanEstimator::currentStateAsMeasurement() const
+{
+    assert(isInit());
+    return kalman_interface_->currentStateAsMeasurement();
 }
 
 /**
@@ -829,6 +845,16 @@ bool KalmanEstimator::interpUpdates(kalman::KalmanUpdateMinimal& update_interp,
     update_interp.valid             = true;
 
     return true;
+}
+
+/**
+*/
+std::string KalmanEstimator::asString(const std::string& prefix) const
+{
+    if (kalman_interface_)
+        return kalman_interface_->asString(prefix);
+
+    return "";
 }
 
 } // reconstruction

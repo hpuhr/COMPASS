@@ -90,6 +90,12 @@ class ReconstructorTask : public Task, public Configurable
     const std::set<unsigned long>& debugRecNums() const;
     void debugRecNums(const std::set<unsigned long>& rec_nums);
 
+    const boost::posix_time::ptime& debugTimestampMin() const;
+    void debugTimestampMin(const boost::posix_time::ptime& ts);
+
+    const boost::posix_time::ptime& debugTimestampMax() const;
+    void debugTimestampMax(const boost::posix_time::ptime& ts);
+
     bool useDStype(const std::string& ds_type) const;
     void useDSType(const std::string& ds_type, bool value);
     bool useDataSource(unsigned int ds_id) const;
@@ -129,6 +135,8 @@ class ReconstructorTask : public Task, public Configurable
 
     std::set<unsigned int> debug_utns_;
     std::set<unsigned long> debug_rec_nums_;
+    boost::posix_time::ptime debug_timestamp_min_;
+    boost::posix_time::ptime debug_timestamp_max_;
 
     std::future<void> delcalcref_future_;
     std::future<void> deltgts_future_;

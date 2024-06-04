@@ -77,6 +77,17 @@ kalman::KalmanState KalmanFilter::state() const
 
 /**
 */
+bool KalmanFilter::checkState() const
+{
+    for (size_t i = 0; i < dim_x_; ++i)
+        if (P_(i, i) < 0)
+            return false;
+
+    return true;
+}
+
+/**
+*/
 void KalmanFilter::revert()
 {
     x_ = x_backup_;
@@ -188,26 +199,23 @@ bool KalmanFilter::update(const Vector& z,
     x_post_ = x_;
     P_post_ = P_;
 
-    return true;
+    return checkState();
 }
 
 /**
 */
-void KalmanFilter::printState() const
+std::string KalmanFilter::asString(const std::string prefix) const
 {
-    loginf << "x_:";
-    loginf << x_;
-    loginf << "P_:";
-    loginf << P_;
-    loginf << "S_:";
-    loginf << S_;
-    loginf << "PivLU(S_):";
-    loginf << Eigen::FullPivLU<Eigen::MatrixXd>(S_).matrixLU();
+    std::stringstream ss;
+    ss << prefix << "x_:\n" << x_ << "\n";
+    ss << prefix << "P_prior:\n" << P_prior_ << "\n";
+    ss << prefix << "P_:\n" << P_ << "\n";
+    ss << prefix << "S_:\n" << S_ << "\n";
+    ss << prefix << "PivLU(S_):\n" << Eigen::FullPivLU<Eigen::MatrixXd>(S_).matrixLU();
     if (z_.has_value())
-    {
-        loginf << "z_:";
-        loginf << z_.value();
-    }
+        ss << "\n" << prefix << "z_:\n" << z_.value();
+
+    return ss.str();
 }
 
 /**
