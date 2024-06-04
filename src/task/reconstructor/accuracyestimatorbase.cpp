@@ -28,7 +28,7 @@ const double AccuracyEstimatorBase::PosAccStdDevMax = 5000.0;
 const dbContent::targetReport::PositionAccuracy AccuracyEstimatorBase::PosAccStdMax
     { AccuracyEstimatorBase::PosAccStdDevMax, AccuracyEstimatorBase::PosAccStdDevMax, 0};
 
-const double AccuracyEstimatorBase::VelAccStdDevFallback = 1000.0;
+const double AccuracyEstimatorBase::VelAccStdDevFallback = 10.0;
 
 const dbContent::targetReport::VelocityAccuracy AccuracyEstimatorBase::VelAccStdFallback
     { AccuracyEstimatorBase::VelAccStdDevFallback, AccuracyEstimatorBase::VelAccStdDevFallback};

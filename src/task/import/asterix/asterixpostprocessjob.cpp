@@ -340,6 +340,8 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
 void ASTERIXPostprocessJob::doGroundSpeedCalculations()
 {
+    // general vx/vy to ground speed/track angle conversion
+
     string dbcontent_name;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
@@ -432,6 +434,100 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
 
         logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: "
                << dbcontent_name << " speed and track angle calc " << cnt << " / " << buffer_size;
+    }
+
+
+    // cat021 sgv conversion
+
+    dbcontent_name = "CAT021";
+
+    unsigned int spd_already_set {0}, sgv_spd_no_val {0}, sgv_hgt_no_value {0},
+        sgv_is_heading {0}, sgv_is_magnetic {0}, sgv_usable {0};
+
+    logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: got ads-b "
+           << (buffers_.count(dbcontent_name) && buffers_.at(dbcontent_name)->size());
+
+    if (buffers_.count(dbcontent_name) && buffers_.at(dbcontent_name)->size())
+    {
+        auto& buffer = buffers_.at(dbcontent_name);
+
+        unsigned int buffer_size = buffer->size();
+        assert(buffer_size);
+
+        loginf << "ASTERIXPostprocessJob: doGroundSpeedCalculations: got ads-b sgv gss "
+               << buffer->has<float>(DBContent::var_cat021_sgv_gss_.name())
+               << " hgt " << buffer->has<double>(DBContent::var_cat021_sgv_hgt_.name())
+               << " htt " << buffer->has<bool>(DBContent::var_cat021_sgv_htt_.name())
+               << " hrd " << buffer->has<bool>(DBContent::var_cat021_sgv_hrd_.name());
+
+        if (!buffer->has<float>(DBContent::var_cat021_sgv_gss_.name())
+            || !buffer->has<double>(DBContent::var_cat021_sgv_hgt_.name())
+            || !buffer->has<bool>(DBContent::var_cat021_sgv_htt_.name())
+            || !buffer->has<bool>(DBContent::var_cat021_sgv_hrd_.name()))
+            return;
+
+        dbContent::Variable& speed_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_);
+        dbContent::Variable& track_angle_var =
+            dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_);
+
+        speed_var_name = speed_var.name();
+        track_angle_var_name = track_angle_var.name();
+
+        assert (speed_var.dataType() == PropertyDataType::DOUBLE);
+        assert (track_angle_var.dataType() == PropertyDataType::DOUBLE);
+
+        NullableVector<double>& speed_vec = buffer->get<double>(speed_var_name);
+        NullableVector<double>& track_angle_vec = buffer->get<double>(track_angle_var_name);
+
+        NullableVector<float>& sgv_gss_vec = buffer->get<float>(DBContent::var_cat021_sgv_gss_.name());
+        NullableVector<double>& sgv_hgt_vec = buffer->get<double>(DBContent::var_cat021_sgv_hgt_.name());
+        NullableVector<bool>& sgv_htt_vec = buffer->get<bool>(DBContent::var_cat021_sgv_htt_.name());
+        NullableVector<bool>& sgv_hrd_vec = buffer->get<bool>(DBContent::var_cat021_sgv_hrd_.name());
+
+        for (unsigned int index=0; index < buffer_size; index++)
+        {
+            if (!speed_vec.isNull(index) && !track_angle_vec.isNull(index)) // already set
+            {
+                spd_already_set++;
+                continue;
+            }
+
+            if (sgv_gss_vec.isNull(index)) // speed not set
+            {
+                ++sgv_spd_no_val;
+                continue;
+            }
+
+            speed_vec.set(index, sgv_gss_vec.get(index));
+
+            if (sgv_hgt_vec.isNull(index) // heading/track not set or cannot distingush
+                || sgv_htt_vec.isNull(index) || sgv_hrd_vec.isNull(index))
+            {
+                ++sgv_hgt_no_value;
+                continue;
+            }
+
+            if (sgv_htt_vec.get(index) == 0)
+            {
+                ++sgv_is_heading;
+                continue;
+            }
+
+            if (sgv_hrd_vec.get(index) == 1)
+            {
+                ++sgv_is_magnetic;
+                continue;
+            }
+
+            track_angle_vec.set(index, sgv_hgt_vec.get(index));
+
+            sgv_usable++; // there
+        }
+
+        loginf << "ASTERIXPostprocessJob: doGroundSpeedCalculations: CAT021 spd_already_set " << spd_already_set
+               << " sgv_spd_no_val " << sgv_spd_no_val << " sgv_hgt_no_value " << sgv_hgt_no_value
+               << " sgv_is_heading " << sgv_is_heading << " sgv_is_magnetic " << sgv_is_magnetic
+               << " sgv_usable " << sgv_usable;
     }
 }
 

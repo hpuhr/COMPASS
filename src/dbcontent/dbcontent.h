@@ -187,6 +187,11 @@ public:
     static const Property var_cat021_nucv_nacv_;
     static const Property var_cat021_sil_;
 
+    static const Property var_cat021_sgv_gss_; // ground speed, kts
+    static const Property var_cat021_sgv_hgt_; // heading / ground track, deg, based on htt
+    static const Property var_cat021_sgv_htt_; // heading 0 / ground track 1
+    static const Property var_cat021_sgv_hrd_; // true north 0 / magnetic north 1
+
     static const Property var_cat062_tris_;
     static const Property var_cat062_tri_recnums_;
     static const Property var_cat062_track_begin_;

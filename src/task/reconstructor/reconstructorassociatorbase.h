@@ -38,7 +38,7 @@ class ReconstructorAssociatorBase
                                     std::map<unsigned int,
                                              std::pair<unsigned int, boost::posix_time::ptime>>>> tn2utn_;
 
-    std::vector<unsigned int> unassoc_rec_nums_;
+    std::vector<unsigned long> unassoc_rec_nums_;
 
     unsigned int num_merges_ {0};
 
