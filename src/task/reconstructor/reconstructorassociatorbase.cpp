@@ -143,7 +143,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
             utn = findUTNFor(tr, debug_rec_nums, debug_utns);
 
         if (utn != -1) // estimate accuracy and associate
-            associate(tr, utn);
+            associate(tr, utn, debug_rec_nums, debug_utns);
         else // not associated
             unassoc_rec_nums_.push_back(rec_num);
     }
@@ -201,7 +201,7 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
         utn = findUTNFor(tr, debug_rec_nums, debug_utns);
 
         if (utn != -1) // estimate accuracy and associate
-            associate(tr, utn);
+            associate(tr, utn, debug_rec_nums, debug_utns);
         else // not associated
             unassoc_rec_nums_.push_back(rec_num);
     }
@@ -359,7 +359,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
         if (utn != -1) // estimate accuracy and associate
         {
-            associate(tr, utn);
+            associate(tr, utn, debug_rec_nums, debug_utns);
 
             ++assocated_cnt;
         }
@@ -368,9 +368,13 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
     loginf << "ReconstructorAssociatorBase: retryAssociateTargetReports: done with count " << assocated_cnt;
 }
 
-void ReconstructorAssociatorBase::associate(dbContent::targetReport::ReconstructorInfo& tr, int utn)
+void ReconstructorAssociatorBase::associate(
+    dbContent::targetReport::ReconstructorInfo& tr, int utn,
+    const std::set<unsigned long>& debug_rec_nums, const std::set<unsigned int>& debug_utns)
 {
     assert (utn >= 0);
+
+    bool do_debug = debug_rec_nums.count(tr.record_num_) || debug_utns.count(utn);
 
     unsigned int dbcont_id  = Number::recNumGetDBContId(tr.record_num_);
     //AccuracyEstimatorBase::AssociatedDistance dist;
@@ -383,7 +387,7 @@ void ReconstructorAssociatorBase::associate(dbContent::targetReport::Reconstruct
 
             // check if position usable
     reconstructor().acc_estimator_->validate(tr, reconstructor());
-    doOutlierDetection(tr, utn, false);
+    doOutlierDetection(tr, utn, do_debug); //124976,129072
 
     reconstructor().targets_.at(utn).addTargetReport(tr.record_num_);
 
