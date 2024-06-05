@@ -75,6 +75,7 @@ public:
 
     double timestep(const Measurement& mm) const;
     static double timestep(const Measurement& mm0, const Measurement& mm1);
+    static double timestep(const boost::posix_time::ptime& ts0, const boost::posix_time::ptime& ts1);
     double distanceSqr(const Measurement& mm) const;
 
     const boost::posix_time::ptime& currrentTime() const { return ts_; }

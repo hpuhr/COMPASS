@@ -70,6 +70,8 @@ public:
 
     kalman::KalmanState state() const;
 
+    void init(const Vector& x, const Matrix& P);
+
     void setX(const Vector& x) { x_ = x; }
     void setP(const Matrix& P) { P_ = P; }
     void setQ(const Matrix& Q) { Q_ = Q; }

@@ -78,8 +78,8 @@ void KalmanInterfaceLinear::kalmanInit_impl(kalman::KalmanState& init_state,
 */
 void KalmanInterfaceLinear::kalmanInit_impl(const kalman::KalmanState& init_state)
 {
-    kalman_filter_->setX(init_state.x);
-    kalman_filter_->setP(init_state.P);
+    kalman_filter_->init(init_state.x, init_state.P);
+    
     kalman_filter_->setQ(init_state.Q);
     kalman_filter_->setF(init_state.F);
 
@@ -91,8 +91,7 @@ void KalmanInterfaceLinear::kalmanInit_impl(const kalman::KalmanState& init_stat
 void KalmanInterfaceLinear::kalmanInit_impl(const kalman::Vector& x,
                                             const kalman::Matrix& P)
 {
-    kalman_filter_->setX(x);
-    kalman_filter_->setP(P);
+    kalman_filter_->init(x, P);
 
     measurementMatH(kalman_filter_->getH());
 }
@@ -152,11 +151,37 @@ bool KalmanInterfaceLinear::kalmanPrediction_impl(kalman::Vector& x,
 {
     assert(kalman_filter_);
 
-    kalman::Matrix F, Q;
-    stateTransitionMatF(F, dt);
-    processUncertMatQ(Q, dt, Q_var);
+    if (dt < 0.0)
+    {
+        //extra treatment for negative steps
 
-    kalman_filter_->predictState(x, P, F, Q);
+        //backup current state
+        kalman::Vector x_backup = kalman_filter_->getX();
+
+        //invert state...
+        stateVecXInv(kalman_filter_->getX(), x_backup);
+
+        //...and use positive timestep
+        dt = std::fabs(dt);
+
+        //predict
+        kalman::Matrix F, Q;
+        stateTransitionMatF(F, dt);
+        processUncertMatQ(Q, dt, Q_var);
+
+        kalman_filter_->predictState(x, P, F, Q);
+
+        //revert state
+        kalman_filter_->setX(x_backup);
+    }
+    else
+    {
+        kalman::Matrix F, Q;
+        stateTransitionMatF(F, dt);
+        processUncertMatQ(Q, dt, Q_var);
+
+        kalman_filter_->predictState(x, P, F, Q);
+    }
 
     return true;
 }

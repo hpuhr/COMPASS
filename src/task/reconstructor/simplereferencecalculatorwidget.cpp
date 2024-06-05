@@ -72,7 +72,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     connect(min_chain_size_box_, QOverload<int>::of(&QSpinBox::valueChanged), [ = ] (int v) { settings->min_chain_size = v; });
     layout->addRow("Minimum Chain Size", min_chain_size_box_);
 
-    if (is_appimage)
+    if (!is_appimage)
     {
         min_dt_box_ = new QDoubleSpinBox;
         min_dt_box_->setDecimals(8);
@@ -89,7 +89,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     connect(max_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_dt = v; });
     layout->addRow("Maximum Time Step [s]", max_dt_box_);
 
-    if (is_appimage)
+    if (!is_appimage)
     {
         max_distance_box_ = new QDoubleSpinBox;
         max_distance_box_->setDecimals(3);

@@ -394,6 +394,28 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
 
 /**
 */
+bool KalmanEstimator::checkPrediction(const Measurement& mm) const
+{
+    if (mm.x_stddev.has_value() && std::isnan(mm.x_stddev.value()))
+        return false;
+    if (mm.y_stddev.has_value() && std::isnan(mm.y_stddev.value()))
+        return false;
+    if (mm.xy_cov.has_value() && std::isnan(mm.xy_cov.value()))
+        return false;
+    if (mm.vx_stddev.has_value() && std::isnan(mm.vx_stddev.value()))
+        return false;
+    if (mm.vy_stddev.has_value() && std::isnan(mm.vy_stddev.value()))
+        return false;
+    if (mm.ax_stddev.has_value() && std::isnan(mm.ax_stddev.value()))
+        return false;
+    if (mm.ay_stddev.has_value() && std::isnan(mm.ay_stddev.value()))
+        return false;
+
+    return true;
+}
+
+/**
+*/
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        double dt) const
 {
@@ -412,6 +434,14 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 
     kalman_interface_->storeState(mm, state);
     proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
+
+    bool kalman_prediction_check = checkPrediction(mm);
+    if (!kalman_prediction_check)
+    {
+        logerr << "KalmanEstimator: kalmanPrediction: prediction yielded nan for dt = " << dt << "\n\n"
+               << kalman_interface_->asString() << "\n";
+        assert(kalman_prediction_check);
+    }
 
     return true;
 }
@@ -436,6 +466,17 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 
     kalman_interface_->storeState(mm, state);
     proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
+
+    bool kalman_prediction_check = checkPrediction(mm);
+    if (!kalman_prediction_check)
+    {
+        logerr << "KalmanEstimator: kalmanPrediction: prediction yielded nan\n\n"
+               << "ts_cur: " << Utils::Time::toString(kalman_interface_->currrentTime()) << "\n"
+               << "ts:     " << Utils::Time::toString(ts) << "\n"
+               << "dt:     " << KalmanInterface::timestep(kalman_interface_->currrentTime(), ts) << "\n"
+               << kalman_interface_->asString() << "\n";
+        assert(kalman_prediction_check);
+    }
 
     return true;
 }
@@ -486,7 +527,7 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                               ref_update0,
                                               ref_update1,
                                               ts,
-                                              settings_.min_dt,
+                                              settings_.min_pred_dt,
                                               settings_.resample_Q_var,
                                               settings_.resample_interp_mode,
                                               *proj_handler_);
@@ -500,6 +541,20 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 
     kalman_interface_->storeState(mm, update_interp.x, update_interp.P);
     proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y, &update_interp.projection_center);
+
+    bool kalman_prediction_check = checkPrediction(mm);
+    if (!kalman_prediction_check)
+    {
+        logerr << "KalmanEstimator: kalmanPrediction: prediction yielded nan in interval\n\n"
+               << "t0: " << Utils::Time::toString(ref_update0.t) << "\n"
+               << "t1: " << Utils::Time::toString(ref_update1.t) << "\n"
+               << "ts: " << Utils::Time::toString(ts)            << "\n"
+               << "x0:\n" << ref_update0.x << "\n"
+               << "P0:\n" << ref_update0.P << "\n"
+               << "x1:\n" << ref_update0.x << "\n"
+               << "P1:\n" << ref_update0.P << "\n";
+        assert(kalman_prediction_check);
+    }
 
     return true;
 }
@@ -578,7 +633,7 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
                                        idx0, 
                                        idx1, 
                                        settings_.resample_dt,
-                                       settings_.min_dt,
+                                       settings_.min_pred_dt,
                                        settings_.resample_Q_var,
                                        settings_.resample_interp_mode,
                                        phandler,

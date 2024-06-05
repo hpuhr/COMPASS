@@ -86,22 +86,29 @@ bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
                                        const boost::posix_time::ptime& ts,
                                        double Q_var) const
 {
-    double dt = Utils::Time::partialSeconds(ts - ts_);
+    double dt = KalmanInterface::timestep(ts_, ts);
     return kalmanPrediction_impl(x, P, dt, Q_var);
+}
+
+/**
+*/
+double KalmanInterface::timestep(const boost::posix_time::ptime& ts0, const boost::posix_time::ptime& ts1)
+{
+    return (ts1 >= ts0 ? Utils::Time::partialSeconds(ts1 - ts0) : -Utils::Time::partialSeconds(ts0 - ts1));
 }
 
 /**
 */
 double KalmanInterface::timestep(const Measurement& mm) const
 {
-    return Utils::Time::partialSeconds(mm.t - ts_);
+    return KalmanInterface::timestep(ts_, mm.t);
 }
 
 /**
 */
 double KalmanInterface::timestep(const Measurement& mm0, const Measurement& mm1)
 {
-    return Utils::Time::partialSeconds(mm1.t - mm0.t);
+    return KalmanInterface::timestep(mm0.t, mm1.t);
 }
 
 /**

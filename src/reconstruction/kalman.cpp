@@ -64,6 +64,17 @@ KalmanFilter::~KalmanFilter() = default;
 
 /**
 */
+void KalmanFilter::init(const Vector& x, const Matrix& P)
+{
+    x_ = x;
+    P_ = P;
+
+    x_backup_ = x;
+    P_backup_ = P;
+}
+
+/**
+*/
 kalman::KalmanState KalmanFilter::state() const
 {
     kalman::KalmanState state;

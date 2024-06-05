@@ -64,7 +64,7 @@ struct ReferenceCalculatorSettings
 
     //reinit related
     int    min_chain_size = 2;
-    double min_dt         = 0.0;
+    double min_dt         = 0.01;
     double max_dt         = 11.0;
     double max_distance   = 50000.0;
 

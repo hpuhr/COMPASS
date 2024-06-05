@@ -63,8 +63,10 @@ public:
 
         size_t min_chain_size = 2;       // minimum number of consecutive kalman updates without reinit            (0 = do not check)
         double max_distance   = 50000.0; // maximum allowed distance of consecutive measurements in meters         (0 = do not check)
-        double min_dt         = 0;       // minimum allowed time difference of consecutive measurements in seconds (0 = do not check)
+        double min_dt         = 0.0;     // minimum allowed time difference of consecutive measurements in seconds (0 = do not check)
         double max_dt         = 11.0;    // maximum allowed time difference of consecutive measurements in seconds (0 = do not check)
+
+        double min_pred_dt = 0.0;
 
         int reinit_check_flags = ReinitCheckTime; // checks used for reinitialization of kalman
 
@@ -195,6 +197,8 @@ private:
                      KalmanProjectionHandler& phandler) const;
 
     reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
+
+    bool checkPrediction(const Measurement& mm) const;
 
     std::unique_ptr<KalmanInterface>         kalman_interface_;
     std::unique_ptr<KalmanProjectionHandler> proj_handler_;
