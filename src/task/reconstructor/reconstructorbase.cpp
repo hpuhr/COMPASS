@@ -246,14 +246,29 @@ void ReconstructorBase::processSlice()
     {
         auto& stats = dbContent::ReconstructorTarget::globalStats();
 
+        const int Decimals = 3;
+
+        auto perc = [ & ] (size_t num, size_t num_total)
+        {
+            return QString::number((double)num / (double)num_total * 100.0, 'f', Decimals).toStdString();
+        };
+
+        std::string num_chain_updates_valid_p   = perc(stats.num_chain_updates_valid  , stats.num_chain_updates);
+        std::string num_chain_updates_failed_p  = perc(stats.num_chain_updates_failed , stats.num_chain_updates);
+        std::string num_chain_updates_skipped_p = perc(stats.num_chain_updates_skipped, stats.num_chain_updates);
+
+        std::string num_rec_updates_valid_p   = perc(stats.num_rec_updates_valid  , stats.num_rec_updates);
+        std::string num_rec_updates_failed_p  = perc(stats.num_rec_updates_failed , stats.num_rec_updates);
+        std::string num_rec_updates_skipped_p = perc(stats.num_rec_updates_skipped, stats.num_rec_updates);
+
         loginf << "ReconstructorBase: processSlice: last slice finished\n"
-               << "   chain updates:    " << stats.num_chain_updates_valid   << " valid, " 
-                                          << stats.num_chain_updates_failed  << " failed, "
-                                          << stats.num_chain_updates_skipped << " skipped, "
+               << "   chain updates:    " << stats.num_chain_updates_valid   << " valid ("   << num_chain_updates_valid_p   << "%), "
+                                          << stats.num_chain_updates_failed  << " failed ("  << num_chain_updates_failed_p  << "%), "
+                                          << stats.num_chain_updates_skipped << " skipped (" << num_chain_updates_skipped_p << "%), "
                                           << stats.num_chain_updates         << " total\n"
-               << "   rec updates:      " << stats.num_rec_updates_valid     << " valid, " 
-                                          << stats.num_rec_updates_failed    << " failed, "
-                                          << stats.num_rec_updates_skipped   << " skipped, "
+               << "   rec updates:      " << stats.num_rec_updates_valid     << " valid ("   << num_rec_updates_valid_p     << "%), "
+                                          << stats.num_rec_updates_failed    << " failed ("  << num_rec_updates_failed_p    << "%), "
+                                          << stats.num_rec_updates_skipped   << " skipped (" << num_rec_updates_skipped_p   << "%), "
                                           << stats.num_rec_updates           << " total\n"
                << "   rec interp steps: " << stats.num_rec_interp_failed     << " failed";
     }
