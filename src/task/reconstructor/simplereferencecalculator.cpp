@@ -40,7 +40,17 @@ void SimpleReferenceCalculator::TargetReferences::reset()
     init_update.reset();
     start_index.reset();
 
+    resetCounts();
+}
+
+/**
+ */
+void SimpleReferenceCalculator::TargetReferences::resetCounts()
+{
+    num_updates             = 0;
+    num_updates_valid       = 0;
     num_updates_failed      = 0;
+    num_updates_skipped     = 0;
     num_interp_steps_failed = 0;
 }
 
@@ -370,6 +380,8 @@ SimpleReferenceCalculator::InitRecResult SimpleReferenceCalculator::initReconstr
  */
 void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 {
+    refs.resetCounts();
+
     const auto& debug_utns    = reconstructor_.task().debugUTNs();
     const auto& debug_recnums = reconstructor_.task().debugRecNums();
     const auto& debug_ts_min  = reconstructor_.task().debugTimestampMin();
@@ -381,8 +393,6 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     {
         loginf << "SimpleReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
     }
-
-    refs.num_updates_failed = 0;
 
     //try to init
     auto res = initReconstruction(refs);
@@ -480,13 +490,24 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                    << " * Measurement:         \n\n" << mm.asString()                                    << "\n";
         }
 
-        estimator.kalmanStep(update, refs.measurements[ i ]);
+        auto res = estimator.kalmanStep(update, refs.measurements[ i ]);
+
+        ++refs.num_updates;
 
         //!only add update if valid!
         if (update.valid)
+        {
             refs.updates.push_back(update);
+            ++refs.num_updates_valid;
+        }
+        else if (res == reconstruction::KalmanEstimator::StepResult::FailStepTooSmall)
+        {
+            ++refs.num_updates_skipped;
+        }
         else
+        {
             ++refs.num_updates_failed;
+        }
     }
 
     if (settings_.activeVerbosity() > 0)
@@ -557,8 +578,11 @@ void SimpleReferenceCalculator::updateReferences()
 
         ref.second.references.clear();
 
-        dbContent::ReconstructorTarget::globalStats().num_failed_chain_updates += ref.second.num_updates_failed;
-        dbContent::ReconstructorTarget::globalStats().num_failed_interp_steps  += ref.second.num_interp_steps_failed;  
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates         += ref.second.num_updates;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_valid   += ref.second.num_updates_valid;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed  += ref.second.num_updates_failed;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_skipped += ref.second.num_updates_skipped;
+        dbContent::ReconstructorTarget::globalStats().num_rec_interp_failed   += ref.second.num_interp_steps_failed;
     }
 }
 

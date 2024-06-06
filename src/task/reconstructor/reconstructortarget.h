@@ -38,12 +38,32 @@ class ReconstructorTarget
     {
         void reset()
         {
-            num_failed_chain_updates = 0;
-            num_failed_interp_steps  = 0;
+            num_chain_added              = 0;
+            num_chain_updates            = 0;
+            num_chain_updates_valid      = 0;
+            num_chain_updates_failed     = 0;
+            num_chain_updates_skipped    = 0;
+            num_chain_predictions_failed = 0;
+
+            num_rec_updates              = 0;
+            num_rec_updates_valid        = 0;
+            num_rec_updates_failed       = 0;
+            num_rec_updates_skipped      = 0;
+            num_rec_interp_failed        = 0;
         }
 
-        size_t num_failed_chain_updates = 0;
-        size_t num_failed_interp_steps  = 0;
+        size_t num_chain_added              = 0;
+        size_t num_chain_updates            = 0;
+        size_t num_chain_updates_valid      = 0;
+        size_t num_chain_updates_failed     = 0;
+        size_t num_chain_updates_skipped    = 0;
+        size_t num_chain_predictions_failed = 0;
+
+        size_t num_rec_updates              = 0;
+        size_t num_rec_updates_valid        = 0;
+        size_t num_rec_updates_failed       = 0;
+        size_t num_rec_updates_skipped      = 0;
+        size_t num_rec_interp_failed        = 0;
     };
 
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,
@@ -219,13 +239,15 @@ class ReconstructorTarget
     bool hasTracker() const;
     void reinitTracker();
     void reinitChain();
-    void addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
+    bool addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
                       bool reestimate = true,
-                      size_t* num_updates_failed = nullptr);
+                      reconstruction::UpdateStats* stats = nullptr);
 
     void addTargetReport (unsigned long rec_num,
                          bool add_to_tracker,
                          bool reestimate);
+
+    static void addToGlobalStats(const reconstruction::UpdateStats& s);
 
     std::unique_ptr<reconstruction::KalmanChain> chain_;
 

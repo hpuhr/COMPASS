@@ -295,7 +295,8 @@ bool KalmanEstimator::step(kalman::KalmanUpdate& update,
 {
     if (!kalman_interface_->kalmanStep(update.state, mm, defaultUncert(mm), settings_.Q_var))
     {
-        logwrn << "KalmanEstimator: step: Kalman step failed @ t=" << mm.t;
+        if (settings_.verbosity > 0)
+            logwrn << "KalmanEstimator: step: Kalman step failed @ t=" << mm.t;
         return false;
     }
 
@@ -337,7 +338,8 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
 
     if (tstep < settings_.min_dt)
     {
-        logwrn << "KalmanEstimator: kalmanStep: step " << kalman_interface_->timestep(mm) << " too small (<" << settings_.min_dt << "), skipping...";
+        if (settings_.verbosity > 0)
+            logwrn << "KalmanEstimator: kalmanStep: step " << kalman_interface_->timestep(mm) << " too small (<" << settings_.min_dt << "), skipping...";
         return KalmanEstimator::StepResult::FailStepTooSmall;
     }
 
@@ -355,7 +357,8 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
         //handle failed step?
         if (!kalman_step_ok)
         {
-            logwrn << "KalmanEstimator: kalmanStep: step failed";
+            if (settings_.verbosity > 0)
+                logwrn << "KalmanEstimator: kalmanStep: step failed";
 
             //print kalman state
             //kalman_interface_->printState();

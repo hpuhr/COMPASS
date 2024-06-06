@@ -41,6 +41,16 @@ ReconstructorTarget::~ReconstructorTarget()
 {
 }
 
+void ReconstructorTarget::addToGlobalStats(const reconstruction::UpdateStats& s)
+{
+    global_stats_.num_chain_added           += s.num_fresh;
+    global_stats_.num_chain_updates         += s.num_updated;
+    global_stats_.num_chain_updates_valid   += s.num_valid;
+    global_stats_.num_chain_updates_failed  += s.num_failed;
+    global_stats_.num_chain_updates_skipped += s.num_skipped;
+
+}
+
 void ReconstructorTarget::addTargetReport (unsigned long rec_num,
                                           bool add_to_tracker)
 {
@@ -57,10 +67,10 @@ void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums,
             //reestimate chain after adding
     if (add_to_tracker && chain_)
     {
-        size_t num_updates_failed;
-        bool ok = chain_->reestimate(&num_updates_failed);
+        reconstruction::UpdateStats stats;
+        bool ok = chain_->reestimate(&stats);
 
-        global_stats_.num_failed_chain_updates += num_updates_failed;
+        addToGlobalStats(stats);
 
         if (!ok)
             logwrn << "ReconstructorTarget: addTargetReports: chain reestimation failed";
@@ -165,10 +175,10 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num,
 
         if (ts_newer)
         {
-            size_t num_updates_failed;
-            addToTracker(tr, reestimate, &num_updates_failed);
+            reconstruction::UpdateStats stats;
 
-            global_stats_.num_failed_chain_updates += num_updates_failed;
+            addToTracker(tr, reestimate, &stats);
+            addToGlobalStats(stats);
         }
     }
 }
@@ -1737,16 +1747,13 @@ void ReconstructorTarget::reinitTracker()
     chain_->settings().verbosity       = 0;
 }
 
-void ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
+bool ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
                                        bool reestimate, 
-                                       size_t* num_updates_failed)
+                                       reconstruction::UpdateStats* stats)
 {
     assert(chain_);
 
-    bool ok = chain_->insert(tr.record_num_, tr.timestamp_, reestimate, num_updates_failed);
-    
-    if (!ok)
-        logwrn << "ReconstructorTarget: addToTracker: could not add target report to chain:\n" << tr.asStr();
+    return chain_->insert(tr.record_num_, tr.timestamp_, reestimate, stats);
 }
 
 bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const

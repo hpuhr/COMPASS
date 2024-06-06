@@ -108,17 +108,17 @@ public:
     bool add(unsigned long mm_id,
              const boost::posix_time::ptime& ts,
              bool reestim,
-             size_t* num_updates_failed = nullptr);
+             UpdateStats* stats = nullptr);
     bool add(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
              bool reestim,
-             size_t* num_updates_failed = nullptr);
+             UpdateStats* stats = nullptr);
     bool insert(unsigned long mm_id,
                 const boost::posix_time::ptime& ts,
                 bool reestim,
-                size_t* num_updates_failed = nullptr);
+                UpdateStats* stats = nullptr);
     bool insert(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
                 bool reestim,
-                size_t* num_updates_failed = nullptr);
+                UpdateStats* stats = nullptr);
 
     void removeUpdatesBefore(const boost::posix_time::ptime& ts);
 
@@ -128,7 +128,7 @@ public:
 
     bool canReestimate() const;
     bool needsReestimate() const;
-    bool reestimate(size_t* num_updates_failed = nullptr);
+    bool reestimate(UpdateStats* stats = nullptr);
 
     bool canPredict(const boost::posix_time::ptime& ts) const;
     bool predict(Measurement& mm_predicted,
@@ -163,7 +163,7 @@ private:
 
     bool addToTracker(unsigned long mm_id,
                       const boost::posix_time::ptime& ts,
-                      size_t* num_updates_failed = nullptr);
+                      UpdateStats* stats = nullptr);
     void addToEnd(unsigned long mm_id,
                   const boost::posix_time::ptime& ts);
     void insertAt(int idx, 
@@ -173,8 +173,12 @@ private:
     void addReesimationIndexRange(int idx0, int idx1);
     void resetReestimationIndices();
     bool reinit(int idx) const;
-    bool reestimate(int idx);
-    bool reestimate(int idx, double& d_state_sqr, double& d_cov_sqr);
+    bool reestimate(int idx, 
+                    KalmanEstimator::StepResult* res = nullptr);
+    bool reestimate(int idx, 
+                    double& d_state_sqr, 
+                    double& d_cov_sqr, 
+                    KalmanEstimator::StepResult* res = nullptr);
 
     int lastIndex() const;
 

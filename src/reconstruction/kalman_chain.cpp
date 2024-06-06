@@ -304,15 +304,28 @@ KalmanChain::Interval KalmanChain::predictionRefInterval(const boost::posix_time
 */
 bool KalmanChain::addToTracker(unsigned long mm_id,
                                const boost::posix_time::ptime& ts,
-                               size_t* num_updates_failed)
+                               UpdateStats* stats)
 {
     assert (!canReestimate());
 
     //just track measurement
-    bool ok = tracker_.tracker_ptr->track(getMeasurement(mm_id));
+    KalmanEstimator::StepResult res;
+    bool ok = tracker_.tracker_ptr->track(getMeasurement(mm_id), &res);
 
-    if (!ok && num_updates_failed)
-        *num_updates_failed += 1;
+    if (stats)
+    {
+        stats->set = true;
+
+        ++stats->num_fresh;
+        ++stats->num_updated;
+
+        if (ok)
+            ++stats->num_valid;
+        else if (res == KalmanEstimator::StepResult::FailStepTooSmall)
+            ++stats->num_skipped;
+        else
+            ++stats->num_failed;
+    }
 
     return ok;
 }
@@ -338,21 +351,21 @@ void KalmanChain::addToEnd(unsigned long mm_id,
 bool KalmanChain::add(unsigned long mm_id,
                       const boost::posix_time::ptime& ts,
                       bool reestim,
-                      size_t* num_updates_failed)
+                      UpdateStats* stats)
 {
-    if (num_updates_failed)
-        *num_updates_failed = 0;
+    if (stats)
+        *stats = {};
 
     if (canReestimate())
     {
         addToEnd(mm_id, ts);
 
-        if (reestim && !reestimate(num_updates_failed))
+        if (reestim && !reestimate(stats))
             return false;
     }
     else
     {
-        if (!addToTracker(mm_id, ts, num_updates_failed))
+        if (!addToTracker(mm_id, ts, stats))
             return false;
     }
 
@@ -364,10 +377,10 @@ bool KalmanChain::add(unsigned long mm_id,
 */
 bool KalmanChain::add(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
                       bool reestim,
-                      size_t* num_updates_failed)
+                      UpdateStats* stats)
 {
-    if (num_updates_failed)
-        *num_updates_failed = 0;
+    if (stats)
+        *stats = {};
 
     if (mms.empty())
         return true;
@@ -400,7 +413,7 @@ bool KalmanChain::add(const std::vector<std::pair<unsigned long, boost::posix_ti
 
         addReesimationIndexRange(idx_min, idx_max);
 
-        if (reestim && !reestimate(num_updates_failed))
+        if (reestim && !reestimate(stats))
             return false;
     }
     else
@@ -408,7 +421,7 @@ bool KalmanChain::add(const std::vector<std::pair<unsigned long, boost::posix_ti
         //just track measurements one after another
         bool has_failed_updates = false;
         for (const auto& mm : mms)
-            if (!addToTracker(mm.first, mm.second, num_updates_failed))
+            if (!addToTracker(mm.first, mm.second, stats))
                 has_failed_updates = true;
 
         if (has_failed_updates)
@@ -465,17 +478,17 @@ void KalmanChain::insertAt(int idx,
 bool KalmanChain::insert(unsigned long mm_id,
                          const boost::posix_time::ptime& ts, 
                          bool reestim,
-                         size_t* num_updates_failed)
+                         UpdateStats* stats)
 {
     //mode does not support inserts? => add instead
     if (!canReestimate())
-        return add(mm_id, ts, reestim, num_updates_failed);
+        return add(mm_id, ts, reestim, stats);
 
     int idx = insertionIndex(ts);
     insertAt(idx, mm_id, ts);
 
     if (reestim)
-        return reestimate(num_updates_failed);
+        return reestimate(stats);
 
     return true;
 }
@@ -485,11 +498,11 @@ bool KalmanChain::insert(unsigned long mm_id,
 */
 bool KalmanChain::insert(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
                          bool reestim,
-                         size_t* num_updates_failed)
+                         UpdateStats* stats)
 {
     //mode does not support inserts? => add instead
     if (!canReestimate())
-        return add(mms, reestim, num_updates_failed);
+        return add(mms, reestim, stats);
     
     for (const auto& mm : mms)
     {
@@ -498,7 +511,7 @@ bool KalmanChain::insert(const std::vector<std::pair<unsigned long, boost::posix
     }
 
     if (reestim)
-        return reestimate(num_updates_failed);
+        return reestimate(stats);
 
     return true;
 }
@@ -787,7 +800,8 @@ bool KalmanChain::needsReestimate() const
 /**
  * Reestimates the kalman state of a measurement based on the current tracker state.
 */
-bool KalmanChain::reestimate(int idx)
+bool KalmanChain::reestimate(int idx, 
+                             KalmanEstimator::StepResult* res)
 {
     assert(canReestimate());
     assert(idx >= 0 && idx < count());
@@ -795,7 +809,7 @@ bool KalmanChain::reestimate(int idx)
 
     auto& update = updates_[ idx ];
 
-    if (!tracker_.tracker_ptr->track(getMeasurement(update.mm_id)))
+    if (!tracker_.tracker_ptr->track(getMeasurement(update.mm_id), res))
         return false;
 
     tracker_.tracker_ptr->currentState().value().minimalInfo(update.kalman_update);
@@ -810,7 +824,10 @@ bool KalmanChain::reestimate(int idx)
  * Reestimates the kalman state of a measurement based on the current tracker state.
  * Additionally returns a residual as norm of difference in covariance matrices before and after the reestimate.
 */
-bool KalmanChain::reestimate(int idx, double& d_state_sqr, double& d_cov_sqr)
+bool KalmanChain::reestimate(int idx, 
+                             double& d_state_sqr, 
+                             double& d_cov_sqr, 
+                             KalmanEstimator::StepResult* res)
 {
     assert(canReestimate());
     assert(idx >= 0 && idx < count());
@@ -820,7 +837,7 @@ bool KalmanChain::reestimate(int idx, double& d_state_sqr, double& d_cov_sqr)
     auto x0 = updates_[ idx ].kalman_update.x;
     auto P0 = updates_[ idx ].kalman_update.P;
 
-    if (!reestimate(idx))
+    if (!reestimate(idx, res))
         return false;
 
     const auto& x1 = updates_[ idx ].kalman_update.x;
@@ -835,10 +852,13 @@ bool KalmanChain::reestimate(int idx, double& d_state_sqr, double& d_cov_sqr)
 /**
  * Reestimates the chain after new measurements have been added, based on various criteria.
 */
-bool KalmanChain::reestimate(size_t* num_updates_failed)
+bool KalmanChain::reestimate(UpdateStats* stats)
 {
-    if (num_updates_failed)
-        *num_updates_failed = 0;
+    if (stats)
+    {
+        *stats = {};
+        stats->set = true;
+    }
 
     if (!needsReestimate() || !canReestimate())
         return true;
@@ -855,6 +875,9 @@ bool KalmanChain::reestimate(size_t* num_updates_failed)
 
     auto reestimateRange = [ & ] (int idx_start, int idx_end)
     {
+        if (stats)
+            ++stats->num_fresh;
+
         if (idx_end < 0)
             idx_end = n;
 
@@ -893,10 +916,28 @@ bool KalmanChain::reestimate(size_t* num_updates_failed)
             //we check the norm starting from the extended range
             bool check_norm = (idx > idx_start);
 
+            KalmanEstimator::StepResult res;
+
+            if (stats)
+                ++stats->num_updated;
+
             //reestim mm
-            bool ok = check_norm ? reestimate(idx, d_state_sqr, d_cov_sqr) : reestimate(idx);
-            if (!ok)
+            bool ok = check_norm ? reestimate(idx, d_state_sqr, d_cov_sqr, &res) : reestimate(idx, &res);
+            if (ok)
             {
+                if (stats)
+                    ++stats->num_valid;
+            }
+            else
+            {
+                if (stats)
+                {
+                    if (res == KalmanEstimator::StepResult::FailStepTooSmall)
+                        ++stats->num_skipped;
+                    else
+                        ++stats->num_failed;
+                }
+
                 //reestimate (=kalman step) failed => collect update for removal
                 tbr.push_back(idx);
                 continue;
@@ -939,7 +980,9 @@ bool KalmanChain::reestimate(size_t* num_updates_failed)
     //remove any failed (=skipped) updates
     for (auto itr = tbr.rbegin(); itr != tbr.rend(); ++itr)
     {
-        logwrn << "KalmanChain: reestimate: removing update " << *itr;
+        if (settings_.verbosity >= 2)
+            logwrn << "KalmanChain: reestimate: removing update " << *itr;
+        
         updates_.erase(updates_.begin() + *itr);
     }
 
@@ -948,9 +991,6 @@ bool KalmanChain::reestimate(size_t* num_updates_failed)
 
     //had to remove error-step updates?
     bool ok = tbr.empty();
-
-    if (num_updates_failed)
-        *num_updates_failed += tbr.size();
 
     return ok;
 }

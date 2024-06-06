@@ -47,7 +47,7 @@ public:
     void init(std::unique_ptr<KalmanInterface>&& interface);
     void init(kalman::KalmanType ktype);
 
-    bool track(const Measurement& mm);
+    bool track(const Measurement& mm, KalmanEstimator::StepResult* res = nullptr);
     bool track(const kalman::KalmanUpdate& update);
     bool track(const kalman::KalmanUpdateMinimal& update);
 

@@ -187,5 +187,3 @@ void SimpleReconstructor::processSlice_impl()
 
     return;
 }
-
-
