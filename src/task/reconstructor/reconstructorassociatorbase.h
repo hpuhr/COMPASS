@@ -47,7 +47,8 @@ class ReconstructorAssociatorBase
 
     void selfAccociateNewUTNs();
     void retryAssociateTargetReports();
-    void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn);
+    void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn,
+                   const std::set<unsigned long>& debug_rec_nums, const std::set<unsigned int>& debug_utns);
     virtual void postAssociate(dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn) {};
     void checkACADLookup();
     void countUnAssociated();
