@@ -78,6 +78,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
+    assert (eval_man_.sectorsLoaded());
     std::vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man_.sectorsLayers();
 
     unsigned int num_req_evals = 0;

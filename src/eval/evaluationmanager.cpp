@@ -387,7 +387,8 @@ void EvaluationManager::loadData ()
     fil_man.disableAllFilters();
 
     // position data
-    if (settings_.load_only_sector_data_ && hasCurrentStandard() && sectorsLayers().size())
+    if (settings_.load_only_sector_data_ && hasCurrentStandard()
+        && sectorsLoaded() && sectorsLayers().size())
     {
         assert (fil_man.hasFilter("Position"));
         DBFilter* pos_fil = fil_man.getFilter("Position");
@@ -577,6 +578,9 @@ bool EvaluationManager::canEvaluate ()
         return false;
 
     bool has_anything_to_eval = false;
+
+    if (!sectorsLoaded())
+        return false;
 
     for (auto& sec_it : sectorsLayers())
     {
@@ -1049,7 +1053,7 @@ void EvaluationManager::clearLoadedDataAndResults()
 
 void EvaluationManager::updateSectorLayers()
 {
-    if (use_fast_sector_inside_check_)
+    if (use_fast_sector_inside_check_ && sectors_loaded_)
     {
         for (const auto& layer : sectorsLayers())
             for (const auto& s : layer->sectors())

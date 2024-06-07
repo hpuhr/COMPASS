@@ -200,14 +200,24 @@ void ManageSectorsTaskWidget::updateSectorTableSlot()
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
+    sector_table_->setDisabled(true); // otherwise first element is edited after
+    sector_table_->clearContents();
+
+    if (!eval_man.sectorsLoaded())
+    {
+        sector_table_->blockSignals(false);
+        sector_table_->setDisabled(false);
+
+        return;
+    }
+
+    assert (eval_man.sectorsLoaded());
     vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man.sectorsLayers();
 
     unsigned int num_layers=0;
     for (auto& sec_lay_it : sector_layers)
         num_layers += sec_lay_it->sectors().size();
 
-    sector_table_->setDisabled(true); // otherwise first element is edited after
-    sector_table_->clearContents();
     sector_table_->setRowCount(num_layers);
 
     int row = 0;

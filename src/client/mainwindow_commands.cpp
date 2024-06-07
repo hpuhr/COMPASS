@@ -1157,6 +1157,7 @@ bool RTCommandImportSectorsJSON::run_impl()
 
     size_t num_sectors = 0;
 
+    assert (COMPASS::instance().evaluationManager().sectorsLoaded());
     const auto& sector_layers = COMPASS::instance().evaluationManager().sectorsLayers();
 
     for (const auto& sl : sector_layers)
