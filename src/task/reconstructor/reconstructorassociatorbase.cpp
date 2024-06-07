@@ -643,8 +643,10 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     assert (utn_vec.size() == num_targets);
 
     vector<tuple<bool, unsigned int, double>> results;
+    vector<reconstruction::PredictionStats> prediction_stats;
 
     results.resize(num_targets);
+    prediction_stats.resize(num_targets);
     boost::posix_time::ptime timestamp = tr.timestamp_;
 
     const float max_altitude_diff = reconstructor().settings().max_altitude_diff_;
@@ -739,7 +741,8 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           if (!canGetPositionOffset(tr, other))
                               return;
 
-                          auto pos_offs = getPositionOffset(tr, other, do_debug);
+                          auto pos_offs = getPositionOffset(tr, other, do_debug, &prediction_stats[ target_cnt ]);
+
                           if (!pos_offs.has_value())
                               return;
 
@@ -755,7 +758,11 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           }
                       });
 
-            // find best match
+    //log failed predictions
+    for (const auto& s : prediction_stats)
+        ReconstructorTarget::addPredictionToGlobalStats(s);
+
+    // find best match
     bool usable;
     unsigned int other_utn;
 
@@ -826,8 +833,11 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
     vector<tuple<bool, unsigned int, unsigned int, double>> results;
     // usable, other utn, num updates, avg distance
 
+    vector<reconstruction::PredictionStats> prediction_stats;
+
     unsigned int num_utns = utn_vec_.size();
     results.resize(num_utns);
+    prediction_stats.resize(num_utns);
 
     const auto& settings = reconstructor().settings();
 
@@ -869,7 +879,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
             }
 
             //@TODO: debug flag
-            auto pos_offs = getPositionOffset(tr.timestamp_, target, other, thread_id, false);
+            auto pos_offs = getPositionOffset(tr.timestamp_, target, other, thread_id, false, &prediction_stats[ result_idx ]);
             if (!pos_offs.has_value())
             {
                 ++pos_skipped_cnt;
@@ -910,7 +920,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                 break;
             }
 
-                    //loginf << "\tdist " << distance;
+            //loginf << "\tdist " << distance;
 
             distance_scores.push_back({rn_it, distance_score});
             distance_scores_sum += distance_score;
@@ -1082,7 +1092,11 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
         }
 #endif
 
-            // find best match
+    //log failed predictions
+    for (const auto& s : prediction_stats)
+        ReconstructorTarget::addPredictionToGlobalStats(s);
+
+    // find best match
     bool usable;
     unsigned int other_utn;
     unsigned int num_updates;

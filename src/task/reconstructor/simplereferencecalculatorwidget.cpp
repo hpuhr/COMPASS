@@ -146,7 +146,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
 
     resample_dt_box_ = new QDoubleSpinBox;
     resample_dt_box_->setDecimals(3);
-    resample_dt_box_->setMinimum(0.1);
+    resample_dt_box_->setMinimum(0.01);
     resample_dt_box_->setMaximum(DBL_MAX);
     connect(resample_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_dt = v; });
     layout->addRow("Resample Interval [s]", resample_dt_box_);

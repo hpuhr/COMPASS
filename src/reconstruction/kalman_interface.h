@@ -62,11 +62,15 @@ public:
     bool kalmanPrediction(kalman::Vector& x,
                           kalman::Matrix& P,
                           double dt,
-                          double Q_var) const;
+                          double Q_var,
+                          bool fix_estimate,
+                          bool* fixed = nullptr) const;
     bool kalmanPrediction(kalman::Vector& x,
                           kalman::Matrix& P,
                           const boost::posix_time::ptime& ts,
-                          double Q_var) const;
+                          double Q_var,
+                          bool fix_estimate,
+                          bool* fixed = nullptr) const;
                           
     bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                        size_t idx0,
@@ -117,7 +121,9 @@ public:
     virtual boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
                                                             const kalman::KalmanState& state1,
                                                             double dt,
-                                                            double Q_var) const = 0;
+                                                            double Q_var,
+                                                            bool fix_estimate,
+                                                            bool* fixed = nullptr) const = 0;
                                            
     virtual std::string asString(const std::string& prefix = "") const = 0;
 
@@ -141,7 +147,9 @@ protected:
     virtual bool kalmanPrediction_impl(kalman::Vector& x,
                                        kalman::Matrix& P,
                                        double dt,
-                                       double Q_var) const = 0;
+                                       double Q_var,
+                                       bool fix_estimate,
+                                       bool* fixed) const = 0;
     virtual bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
                                     std::vector<kalman::Matrix>& P_smooth,
                                     const std::vector<kalman::KalmanState>& states,

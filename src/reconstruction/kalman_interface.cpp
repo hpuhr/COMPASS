@@ -62,11 +62,12 @@ bool KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
                                  const reconstruction::Uncertainty& default_uncert, 
                                  double Q_var)
 {
-    bool ok = kalmanStep_impl(new_state, timestep(mm), mm, default_uncert, Q_var);
+    if (!kalmanStep_impl(new_state, timestep(mm), mm, default_uncert, Q_var))
+        return false;
 
     ts_ = mm.t;
 
-    return ok;
+    return true;
 }
 
 /**
@@ -74,9 +75,11 @@ bool KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
 bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
                                        kalman::Matrix& P,
                                        double dt,
-                                       double Q_var) const
+                                       double Q_var,
+                                       bool fix_estimate,
+                                       bool* fixed) const
 {
-    return kalmanPrediction_impl(x, P, dt, Q_var);
+    return kalmanPrediction_impl(x, P, dt, Q_var, fix_estimate, fixed);
 }
 
 /**
@@ -84,10 +87,12 @@ bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
 bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
                                        kalman::Matrix& P,
                                        const boost::posix_time::ptime& ts,
-                                       double Q_var) const
+                                       double Q_var,
+                                       bool fix_estimate,
+                                       bool* fixed) const
 {
     double dt = KalmanInterface::timestep(ts_, ts);
-    return kalmanPrediction_impl(x, P, dt, Q_var);
+    return kalmanPrediction_impl(x, P, dt, Q_var, fix_estimate, fixed);
 }
 
 /**

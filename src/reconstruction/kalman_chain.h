@@ -133,7 +133,8 @@ public:
     bool canPredict(const boost::posix_time::ptime& ts) const;
     bool predict(Measurement& mm_predicted,
                  const boost::posix_time::ptime& ts,
-                 int thread_id = 0) const;
+                 int thread_id = 0,
+                 PredictionStats* stats = nullptr) const;
     
     size_t size() const;
     int count() const;
@@ -179,6 +180,7 @@ private:
                     double& d_state_sqr, 
                     double& d_cov_sqr, 
                     KalmanEstimator::StepResult* res = nullptr);
+    void removeUpdate(int idx);
 
     int lastIndex() const;
 

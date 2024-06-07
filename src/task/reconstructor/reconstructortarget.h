@@ -5,8 +5,8 @@
 #include "projection/transformation.h"
 #include "reconstruction_defs.h"
 
-#include "boost/date_time/posix_time/ptime.hpp"
-#include "boost/optional.hpp"
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/optional.hpp>
 
 #include <vector>
 #include <string>
@@ -43,7 +43,10 @@ class ReconstructorTarget
             num_chain_updates_valid      = 0;
             num_chain_updates_failed     = 0;
             num_chain_updates_skipped    = 0;
+
+            num_chain_predictions        = 0;
             num_chain_predictions_failed = 0;
+            num_chain_predictions_fixed  = 0;
 
             num_rec_updates              = 0;
             num_rec_updates_valid        = 0;
@@ -57,7 +60,10 @@ class ReconstructorTarget
         size_t num_chain_updates_valid      = 0;
         size_t num_chain_updates_failed     = 0;
         size_t num_chain_updates_skipped    = 0;
+
+        size_t num_chain_predictions        = 0;
         size_t num_chain_predictions_failed = 0;
+        size_t num_chain_predictions_fixed  = 0;
 
         size_t num_rec_updates              = 0;
         size_t num_rec_updates_valid        = 0;
@@ -97,7 +103,7 @@ class ReconstructorTarget
     // all sources sorted by time, ts -> record_num
     std::map<unsigned int, std::map<unsigned int,
                                     std::map<unsigned int,
-                                             std::multimap<boost::posix_time::ptime, unsigned long>>>> tr_ds_timestamps_;
+                                    std::multimap<boost::posix_time::ptime, unsigned long>>>> tr_ds_timestamps_;
     // dbcontent id -> ds_id -> line_id -> ts -> record_num
 
     std::set<unsigned int> acads_;
@@ -226,14 +232,22 @@ class ReconstructorTarget
     size_t trackerCount() const;
     boost::posix_time::ptime trackerTime(size_t idx) const;
     bool canPredict(boost::posix_time::ptime timestamp) const;
-    bool predict(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& tr, int thread_id = 0) const;
-    bool predict(reconstruction::Measurement& mm, const boost::posix_time::ptime& ts, int thread_id = 0) const;
+    bool predict(reconstruction::Measurement& mm, 
+                 const dbContent::targetReport::ReconstructorInfo& tr, 
+                 int thread_id = 0,
+                 reconstruction::PredictionStats* stats = nullptr) const;
+    bool predict(reconstruction::Measurement& mm, 
+                 const boost::posix_time::ptime& ts, 
+                 int thread_id = 0,
+                 reconstruction::PredictionStats* stats = nullptr) const;
     // hp: plz rework to tr -> posix timestamp, mm to targetreportdefs structs pos, posacc, maybe by return
 
     //    bool hasADSBMOPSVersion();
     //    std::set<unsigned int> getADSBMOPSVersions();
 
     static GlobalStats& globalStats() { return global_stats_; }
+    static void addUpdateToGlobalStats(const reconstruction::UpdateStats& s);
+    static void addPredictionToGlobalStats(const reconstruction::PredictionStats& s);
 
   protected:
     bool hasTracker() const;
@@ -243,11 +257,11 @@ class ReconstructorTarget
                       bool reestimate = true,
                       reconstruction::UpdateStats* stats = nullptr);
 
-    void addTargetReport (unsigned long rec_num,
+    bool addTargetReport (unsigned long rec_num,
                          bool add_to_tracker,
                          bool reestimate);
 
-    static void addToGlobalStats(const reconstruction::UpdateStats& s);
+    
 
     std::unique_ptr<reconstruction::KalmanChain> chain_;
 

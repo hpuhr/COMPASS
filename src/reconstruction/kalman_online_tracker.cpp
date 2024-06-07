@@ -76,11 +76,15 @@ bool KalmanOnlineTracker::track(const Measurement& mm, KalmanEstimator::StepResu
     }
     else
     {
-        r = estimator_->kalmanStep(current_update_.value(), mm);
+        r = estimator_->kalmanStep(tmp_update_, mm);
+        if (r == KalmanEstimator::StepResult::Success)
+            current_update_ = tmp_update_;
     }
 
     if (res)
         *res = r;
+
+    assert(current_update_.has_value() && current_update_->t == estimator_->currentTime());
 
     return (r == KalmanEstimator::StepResult::Success);
 }
@@ -92,6 +96,9 @@ bool KalmanOnlineTracker::track(const kalman::KalmanUpdate& update)
     assert(isInit());
 
     kalmanInit(update);
+
+    assert(current_update_.has_value() && current_update_->t == estimator_->currentTime());
+
     return true;
 }
 
@@ -102,6 +109,9 @@ bool KalmanOnlineTracker::track(const kalman::KalmanUpdateMinimal& update)
     assert(isInit());
 
     kalmanInit(update);
+
+    assert(current_update_.has_value() && current_update_->t == estimator_->currentTime());
+
     return true;
 }
 
@@ -124,23 +134,13 @@ bool KalmanOnlineTracker::canPredict(const boost::posix_time::ptime& ts,
 /**
 */
 bool KalmanOnlineTracker::predict(Measurement& mm_predicted,
-                                  double dt) const
+                                  const boost::posix_time::ptime& ts,
+                                  bool* fixed) const
 {
     assert(isInit());
     assert(isTracking());
 
-    return estimator_->kalmanPrediction(mm_predicted, dt);
-}
-
-/**
-*/
-bool KalmanOnlineTracker::predict(Measurement& mm_predicted,
-                                  const boost::posix_time::ptime& ts) const
-{
-    assert(isInit());
-    assert(isTracking());
-
-    return estimator_->kalmanPrediction(mm_predicted, ts);
+    return estimator_->kalmanPrediction(mm_predicted, ts, fixed);
 }
 
 /**
@@ -172,7 +172,7 @@ void KalmanOnlineTracker::kalmanInit(const kalman::KalmanUpdateMinimal& update)
 {
     assert(isInit());
 
-    current_update_ = update;
+    current_update_ = kalman::KalmanUpdate(update);
 
     estimator_->kalmanInit(current_update_.value());
 }
@@ -196,6 +196,13 @@ KalmanEstimator::Settings& KalmanOnlineTracker::settings()
 const boost::optional<kalman::KalmanUpdate>& KalmanOnlineTracker::currentState() const
 {
     return current_update_;
+}
+
+/**
+*/
+const boost::posix_time::ptime& KalmanOnlineTracker::currentTime() const
+{
+    return estimator_->currentTime();
 }
 
 /**

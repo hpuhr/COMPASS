@@ -46,6 +46,10 @@ struct ReferenceCalculatorSettings
 
         settings.step_fail_strategy = allow_invalid_updates ? reconstruction::KalmanEstimator::Settings::StepFailStrategy::ReturnInvalid :
                                                               reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
+
+        settings.fix_predictions        = fix_predictions;
+        settings.fix_predictions_interp = fix_predictions_interp;
+
         return settings;
     }
 
@@ -86,6 +90,9 @@ struct ReferenceCalculatorSettings
 
     bool multithreading        = true;
     bool allow_invalid_updates = true;
+
+    bool fix_predictions        = true;
+    bool fix_predictions_interp = true;
 
     //debug options
     bool compat_mode     = false;

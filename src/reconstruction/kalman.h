@@ -42,16 +42,20 @@ public:
     size_t dimZ() const { return dim_z_; }
     size_t dimU() const { return dim_u_; }
 
-    void predict(const OMatrix& F = OMatrix(),
+    bool predict(const OMatrix& F = OMatrix(),
                  const OMatrix& Q = OMatrix(),
                  const OMatrix& B = OMatrix(),
-                 const OVector& u = OVector());
-    void predictState(Vector& x,
+                 const OVector& u = OVector(),
+                 bool fix_estimate = false,
+                 bool* fixed = nullptr);
+    bool predictState(Vector& x,
                       Matrix& P,
                       const Matrix& F,
                       const Matrix& Q,
                       const OMatrix& B = OMatrix(),
-                      const OVector& u = OVector()) const;
+                      const OVector& u = OVector(),
+                      bool fix_estimate = false,
+                      bool* fixed = nullptr) const;
 
     bool update(const Vector& z,
                 const OMatrix& R = OMatrix(), 
@@ -108,6 +112,9 @@ public:
     std::string asString(const std::string prefix = "") const;
 
 private:
+    bool checkState(const Vector& x, const Matrix& P) const;
+    void postConditionP(Matrix& P) const;
+
     size_t dim_x_;
     size_t dim_z_;
     size_t dim_u_;

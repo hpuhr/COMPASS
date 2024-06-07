@@ -88,13 +88,20 @@ kalman::KalmanState KalmanFilter::state() const
 
 /**
 */
-bool KalmanFilter::checkState() const
+bool KalmanFilter::checkState(const Vector& x, const Matrix& P) const
 {
     for (size_t i = 0; i < dim_x_; ++i)
-        if (P_(i, i) < 0)
+        if (P(i, i) < 0)
             return false;
 
     return true;
+}
+
+/**
+*/
+bool KalmanFilter::checkState() const
+{
+    return checkState(x_, P_);
 }
 
 /**
@@ -107,11 +114,25 @@ void KalmanFilter::revert()
 
 /**
 */
-void KalmanFilter::predict(const OMatrix& F,
+void KalmanFilter::postConditionP(Matrix& P) const
+{
+    for (size_t i = 0; i < dim_x_; ++i)
+        if (P(i, i) < 0.1)
+            P(i, i) = 0.1;
+}
+
+/**
+*/
+bool KalmanFilter::predict(const OMatrix& F,
                            const OMatrix& Q,
                            const OMatrix& B,
-                           const OVector& u)
+                           const OVector& u,
+                           bool fix_estimate,
+                           bool* fixed)
 {
+    if (fixed)
+        *fixed = false;
+
     const OMatrix& B__ = B.has_value() ? B         : B_;
     const Matrix&  F__ = F.has_value() ? F.value() : F_;
     const Matrix&  Q__ = Q.has_value() ? Q.value() : Q_;
@@ -128,21 +149,38 @@ void KalmanFilter::predict(const OMatrix& F,
     // P = FPF' + Q
     P_ = alpha_sq_ * (F__ * P_ * F__.transpose()) + Q__;
 
+    if (fix_estimate)
+    {
+        if (!checkState())
+        {
+            postConditionP(P_);
+            if (fixed)
+                *fixed = true;
+        }
+    }
+
     // save prior
     x_prior_ = x_;
     P_prior_ = P_;
+
+    return checkState();
 }
 
 /**
  * @param external_state If true the current state and covariance used are provided in x and P.
 */
-void KalmanFilter::predictState(Vector& x,
+bool KalmanFilter::predictState(Vector& x,
                                 Matrix& P,
                                 const Matrix& F,
                                 const Matrix& Q,
                                 const OMatrix& B,
-                                const OVector& u) const
+                                const OVector& u,
+                                bool fix_estimate,
+                                bool* fixed) const
 {
+    if (fixed)
+        *fixed = false;
+
     // x = Fx + Bu
     x = F * x_;
     if (B.has_value() && u.has_value())
@@ -150,6 +188,28 @@ void KalmanFilter::predictState(Vector& x,
 
     // P = FPF' + Q
     P = alpha_sq_ * (F * P_ * F.transpose()) + Q;
+
+    if (fix_estimate)
+    {
+        if (!checkState(x, P))
+        {
+            postConditionP(P);
+            if (fixed)
+                *fixed = true;
+        }
+    }
+
+    // if (!checkState(x, P))
+    // {
+    //     logerr << "KalmanFilter: predictState: prediction failed\n"
+    //            << "F:\n" << F << "\n"
+    //            << "FPF':\n" << (F * P_ * F.transpose()) << "\n"
+    //            << "Q:\n" << Q << "\n"
+    //            << "xnew:\n" << x << "\n"
+    //            << "Pnew:\n" << P << "\n";
+    // }
+
+    return checkState(x, P);
 }
 
 /**
@@ -241,6 +301,9 @@ void KalmanFilter::continuousWhiteNoise(Matrix& Q_noise,
         throw std::runtime_error("KalmanFilter::continuousWhiteNoise(): dim must be between 2 and 4");
     if (block_size < 1)
         throw std::runtime_error("KalmanFilter::continuousWhiteNoise(): block size must be > 0");
+
+    //@TODO CHECK
+    //dt = std::max(1.0, dt);
 
     size_t full_size = dim * block_size;
 

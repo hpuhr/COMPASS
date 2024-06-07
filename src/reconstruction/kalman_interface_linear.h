@@ -55,7 +55,9 @@ public:
     boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
                                                     const kalman::KalmanState& state1,
                                                     double dt,
-                                                    double Q_var) const override final;
+                                                    double Q_var,
+                                                    bool fix_estimate,
+                                                    bool* fixed) const override final;
 
     std::string asString(const std::string& prefix = "") const override final;
 
@@ -77,7 +79,9 @@ protected:
     bool kalmanPrediction_impl(kalman::Vector& x,
                                kalman::Matrix& P,
                                double dt,
-                               double Q_var) const override final;
+                               double Q_var,
+                               bool fix_estimate,
+                               bool* fixed) const override final;
     bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
                             std::vector<kalman::Matrix>& P_smooth,
                             const std::vector<kalman::KalmanState>& states,

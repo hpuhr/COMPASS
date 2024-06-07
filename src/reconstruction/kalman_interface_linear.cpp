@@ -125,7 +125,11 @@ bool KalmanInterfaceLinear::kalmanStep_impl(kalman::KalmanState& new_state,
     }
 
     //use internal kalman matrices if possible
-    kalman_filter_->predict({}, {});
+    if (!kalman_filter_->predict({}, {}))
+    {
+        kalman_filter_->revert();
+        return false;
+    }
 
     if (!kalman_filter_->update(z, {}))
     {
@@ -147,7 +151,9 @@ bool KalmanInterfaceLinear::kalmanStep_impl(kalman::KalmanState& new_state,
 bool KalmanInterfaceLinear::kalmanPrediction_impl(kalman::Vector& x,
                                                   kalman::Matrix& P,
                                                   double dt,
-                                                  double Q_var) const
+                                                  double Q_var,
+                                                  bool fix_estimate,
+                                                  bool* fixed) const
 {
     assert(kalman_filter_);
 
@@ -169,10 +175,13 @@ bool KalmanInterfaceLinear::kalmanPrediction_impl(kalman::Vector& x,
         stateTransitionMatF(F, dt);
         processUncertMatQ(Q, dt, Q_var);
 
-        kalman_filter_->predictState(x, P, F, Q);
+        bool ok = kalman_filter_->predictState(x, P, F, Q, {}, {}, fix_estimate, fixed);
 
         //revert state
         kalman_filter_->setX(x_backup);
+
+        if (!ok)
+            return false;
     }
     else
     {
@@ -180,7 +189,8 @@ bool KalmanInterfaceLinear::kalmanPrediction_impl(kalman::Vector& x,
         stateTransitionMatF(F, dt);
         processUncertMatQ(Q, dt, Q_var);
 
-        kalman_filter_->predictState(x, P, F, Q);
+        if (!kalman_filter_->predictState(x, P, F, Q, {}, {}, fix_estimate, fixed))
+            return false;
     }
 
     return true;
@@ -215,7 +225,9 @@ bool KalmanInterfaceLinear::smoothUpdates_impl(std::vector<kalman::Vector>& x_sm
 boost::optional<kalman::KalmanState> KalmanInterfaceLinear::interpStep(const kalman::KalmanState& state0,
                                                                        const kalman::KalmanState& state1,
                                                                        double dt,
-                                                                       double Q_var) const
+                                                                       double Q_var,
+                                                                       bool fix_estimate,
+                                                                       bool* fixed) const
 {
 #if 0
     kalman_filter_->setX(state0.x);
@@ -224,7 +236,8 @@ boost::optional<kalman::KalmanState> KalmanInterfaceLinear::interpStep(const kal
     stateTransitionMatF(kalman_filter_->getF(), dt);
     processUncertMatQ(kalman_filter_->getQ(), dt, Q_var);
 
-    kalman_filter_->predict({}, {});
+    if (!kalman_filter_->predict({}, {}, {}, {}, fix_estimate, fixed))
+        return {};
 
     kalman::KalmanState new_state;
     new_state.x = kalman_filter_->getX();
@@ -249,7 +262,8 @@ boost::optional<kalman::KalmanState> KalmanInterfaceLinear::interpStep(const kal
     stateTransitionMatF(kalman_filter_->getF(), dt);
     processUncertMatQ(kalman_filter_->getQ(), dt, Q_var);
 
-    kalman_filter_->predict({}, {});
+    if (!kalman_filter_->predict({}, {}, {}, {}, fix_estimate, fixed))
+        return {};
 
     kalman::KalmanState new_state;
 

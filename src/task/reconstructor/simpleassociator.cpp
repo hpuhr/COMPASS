@@ -138,7 +138,9 @@ bool SimpleAssociator::canGetPositionOffset(const dbContent::targetReport::Recon
 // distance, target acc, tr acc
 boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositionOffset(
     const dbContent::targetReport::ReconstructorInfo& tr,
-    const dbContent::ReconstructorTarget& target, bool do_debug)
+    const dbContent::ReconstructorTarget& target, 
+    bool do_debug,
+    reconstruction::PredictionStats* stats)
 {
     dbContent::targetReport::Position ref_pos;
     bool ok;
@@ -178,7 +180,9 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
     const boost::posix_time::ptime& ts,
     const dbContent::ReconstructorTarget& target0,
     const dbContent::ReconstructorTarget& target1,
-    int thread_id, bool do_debug)
+    int thread_id, 
+    bool do_debug,
+    reconstruction::PredictionStats* stats)
 {
     dbContent::targetReport::Position target0_pos;
     bool ok;
@@ -202,9 +206,8 @@ boost::optional<bool> SimpleAssociator::checkPositionOffsetAcceptable (
     unsigned int utn, bool secondary_verified, bool do_debug)
 {
     auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
-
     if (!pos_offs.has_value())
-        return {};
+        return false;
 
     double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0};
 
@@ -219,7 +222,7 @@ boost::optional<std::pair<bool, double>> SimpleAssociator::calculatePositionOffs
     bool do_debug)
 {
     return std::pair<bool, double> (distance_m < reconstructor_.settings().max_distance_acceptable_,
-                                   distance_m - reconstructor_.settings().max_distance_acceptable_);
+                                    distance_m - reconstructor_.settings().max_distance_acceptable_);
 }
 
 std::tuple<ReconstructorAssociatorBase::DistanceClassification, double>
@@ -260,4 +263,3 @@ ReconstructorBase& SimpleAssociator::reconstructor()
 {
     return reconstructor_;
 }
-

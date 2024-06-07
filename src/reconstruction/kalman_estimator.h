@@ -82,6 +82,9 @@ public:
         bool track_velocities      = true;
         bool track_accelerations   = true;
 
+        bool fix_predictions        = true;
+        bool fix_predictions_interp = true;
+        
         int verbosity = 0;
 
         reconstruction::Uncertainty default_uncert; //default uncertainties used if none are provided in the measurement
@@ -121,23 +124,29 @@ public:
                           const Measurement& mm);
     
     bool kalmanPrediction(Measurement& mm,
-                          double dt) const;
+                          double dt,
+                          bool* fixed = nullptr) const;
     bool kalmanPrediction(Measurement& mm,
-                          const boost::posix_time::ptime& ts) const;
+                          const boost::posix_time::ptime& ts,
+                          bool* fixed = nullptr) const;
     bool kalmanPrediction(Measurement& mm,
                           const kalman::KalmanUpdate& ref_update,
-                          const boost::posix_time::ptime& ts);
+                          const boost::posix_time::ptime& ts,
+                          bool* fixed = nullptr);
     bool kalmanPrediction(Measurement& mm,
                           const kalman::KalmanUpdateMinimal& ref_update,
-                          const boost::posix_time::ptime& ts);
+                          const boost::posix_time::ptime& ts,
+                          bool* fixed = nullptr);
     bool kalmanPrediction(Measurement& mm,
                           const kalman::KalmanUpdate& ref_update0,
                           const kalman::KalmanUpdate& ref_update1,
-                          const boost::posix_time::ptime& ts);
+                          const boost::posix_time::ptime& ts,
+                          size_t* num_fixed = nullptr);
     bool kalmanPrediction(Measurement& mm,
                           const kalman::KalmanUpdateMinimal& ref_update0,
                           const kalman::KalmanUpdateMinimal& ref_update1,
-                          const boost::posix_time::ptime& ts);
+                          const boost::posix_time::ptime& ts,
+                          size_t* num_fixed = nullptr);
 
     void storeUpdates(std::vector<Reference>& refs,
                       const std::vector<kalman::KalmanUpdate>& updates) const;
@@ -183,14 +192,15 @@ private:
                        StateInterpMode interp_mode,
                        KalmanProjectionHandler& proj_handler,
                        size_t* num_steps_failed = nullptr) const;
-    bool interpUpdates(kalman::KalmanUpdateMinimal& update_interp,
-                       const kalman::KalmanUpdateMinimal& update0,
-                       const kalman::KalmanUpdateMinimal& update1,
-                       const boost::posix_time::ptime& ts,
-                       double min_dt_sec,
-                       double Q_var,
-                       StateInterpMode interp_mode,
-                       KalmanProjectionHandler& proj_handler) const;
+    bool predictBetween(kalman::KalmanUpdateMinimal& update_interp,
+                        const kalman::KalmanUpdateMinimal& update0,
+                        const kalman::KalmanUpdateMinimal& update1,
+                        const boost::posix_time::ptime& ts,
+                        double min_dt_sec,
+                        double Q_var,
+                        StateInterpMode interp_mode,
+                        KalmanProjectionHandler& proj_handler,
+                        size_t* num_fixed) const;
     
     void storeUpdate(Reference& ref, 
                      const kalman::KalmanUpdate& update,

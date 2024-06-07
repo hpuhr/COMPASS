@@ -54,12 +54,14 @@ public:
     bool canPredict(const boost::posix_time::ptime& ts,
                     const boost::posix_time::time_duration& max_time_diff = boost::posix_time::seconds(10)) const;
     bool predict(Measurement& mm_predicted,
-                 const boost::posix_time::ptime& ts) const;
+                 const boost::posix_time::ptime& ts,
+                 bool* fixed = nullptr) const;
 
     bool isTracking() const;
 
     KalmanEstimator::Settings& settings();
     const boost::optional<kalman::KalmanUpdate>& currentState() const;
+    const boost::posix_time::ptime& currentTime() const;
     const KalmanEstimator& estimator() const;
 
 private:
@@ -67,11 +69,9 @@ private:
     void kalmanInit(const kalman::KalmanUpdate& update);
     void kalmanInit(const kalman::KalmanUpdateMinimal& update);
 
-    bool predict(Measurement& mm_predicted,
-                 double dt) const;
-
     std::unique_ptr<KalmanEstimator>      estimator_;
     boost::optional<kalman::KalmanUpdate> current_update_;
+    kalman::KalmanUpdate                  tmp_update_;
 };
 
 } // reconstruction

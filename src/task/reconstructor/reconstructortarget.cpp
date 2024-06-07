@@ -15,6 +15,8 @@
 
 #include <boost/optional/optional_io.hpp>
 
+//#define SEQUENTIAL_ONLY
+
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
@@ -41,28 +43,37 @@ ReconstructorTarget::~ReconstructorTarget()
 {
 }
 
-void ReconstructorTarget::addToGlobalStats(const reconstruction::UpdateStats& s)
+void ReconstructorTarget::addUpdateToGlobalStats(const reconstruction::UpdateStats& s)
 {
     global_stats_.num_chain_added           += s.num_fresh;
     global_stats_.num_chain_updates         += s.num_updated;
     global_stats_.num_chain_updates_valid   += s.num_valid;
     global_stats_.num_chain_updates_failed  += s.num_failed;
     global_stats_.num_chain_updates_skipped += s.num_skipped;
+}
 
+void ReconstructorTarget::addPredictionToGlobalStats(const reconstruction::PredictionStats& s)
+{
+    global_stats_.num_chain_predictions        += s.num_predictions;
+    global_stats_.num_chain_predictions_failed += s.num_failed;
+    global_stats_.num_chain_predictions_fixed  += s.num_fixed;
 }
 
 void ReconstructorTarget::addTargetReport (unsigned long rec_num,
-                                          bool add_to_tracker)
+                                           bool add_to_tracker)
 {
     addTargetReport(rec_num, add_to_tracker, true);
 }
 
 void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums,
-                                           bool add_to_tracker)
+                                            bool add_to_tracker)
 {
     //add single tr without reestimating
+    size_t num_added = 0;
+
     for (auto& rn_it : rec_nums)
-        addTargetReport(rn_it, add_to_tracker, false);
+        if (addTargetReport(rn_it, add_to_tracker, false))
+            ++num_added;
 
             //reestimate chain after adding
     if (add_to_tracker && chain_)
@@ -70,14 +81,18 @@ void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums,
         reconstruction::UpdateStats stats;
         bool ok = chain_->reestimate(&stats);
 
-        addToGlobalStats(stats);
+        assert(stats.num_fresh == num_added);
+        assert(stats.num_updated >= num_added);
+        assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
+
+        addUpdateToGlobalStats(stats);
 
         if (!ok)
             logwrn << "ReconstructorTarget: addTargetReports: chain reestimation failed";
     }
 }
 
-void ReconstructorTarget::addTargetReport (unsigned long rec_num,
+bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
                                           bool add_to_tracker,
                                           bool reestimate)
 {
@@ -94,7 +109,9 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num,
             //        assert (tr.timestamp_ >= timestamp_max_);
             //    }
 
+#ifdef SEQUENTIAL_ONLY
     bool ts_newer = true;
+#endif
 
             // update min/max
     if (!target_reports_.size())
@@ -104,7 +121,9 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num,
     }
     else
     {
+#ifdef SEQUENTIAL_ONLY
         ts_newer = tr.timestamp_ >= timestamp_max_;
+#endif
 
         timestamp_min_ = min(timestamp_min_, tr.timestamp_);
         timestamp_max_ = max(timestamp_max_, tr.timestamp_);
@@ -168,19 +187,35 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num,
             //    if (!tmp_)
             //        tr.addAssociated(this);
 
+    bool added = false;
+
     if (add_to_tracker && !tr.do_not_use_position_)
     {
         if (!hasTracker())
             reinitTracker();
 
+#ifdef SEQUENTIAL_ONLY
         if (ts_newer)
+#endif
         {
             reconstruction::UpdateStats stats;
 
             addToTracker(tr, reestimate, &stats);
-            addToGlobalStats(stats);
+
+            added = true;
+
+            if (reestimate)
+            {
+                assert(stats.num_fresh == 1);
+                assert(stats.num_updated >= 1);
+                assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
+            }
+
+            addUpdateToGlobalStats(stats);
         }
     }
+
+    return added;
 }
 
 unsigned int ReconstructorTarget::numAssociated() const
@@ -1766,23 +1801,34 @@ bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
                                   const dbContent::targetReport::ReconstructorInfo& tr, 
-                                  int thread_id) const
+                                  int thread_id,
+                                  reconstruction::PredictionStats* stats) const
 {
-    assert(chain_);
-
-    bool ok = chain_->predict(mm, tr.timestamp_, thread_id); 
-    assert(ok);
-
-    return ok;
+    return predict(mm, tr.timestamp_, thread_id, stats);
 }
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
                                   const boost::posix_time::ptime& ts, 
-                                  int thread_id) const
+                                  int thread_id,
+                                  reconstruction::PredictionStats* stats) const
 {
     assert(chain_);
 
-    bool ok = chain_->predict(mm, ts, thread_id);
+    bool ok = false;
+
+    if (stats)
+    {
+        ok = chain_->predict(mm, ts, thread_id, stats); 
+    }
+    else
+    {
+        reconstruction::PredictionStats pstats;
+        ok = chain_->predict(mm, ts, thread_id, &pstats); 
+
+        //log immediately (!take care when using this method in a multithreaded context!)
+        ReconstructorTarget::addPredictionToGlobalStats(pstats);
+    }
+    
     assert(ok);
 
     return ok;

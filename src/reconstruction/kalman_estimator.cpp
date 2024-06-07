@@ -420,13 +420,18 @@ bool KalmanEstimator::checkPrediction(const Measurement& mm) const
 /**
 */
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
-                                       double dt) const
+                                       double dt,
+                                       bool* fixed) const
 {
     assert(isInit());
 
     kalman::KalmanState state;
-    bool kalman_prediction_ok = kalman_interface_->kalmanPrediction(state.x, state.P, dt, settings_.Q_var);
-
+    bool kalman_prediction_ok = kalman_interface_->kalmanPrediction(state.x, 
+                                                                    state.P, 
+                                                                    dt, 
+                                                                    settings_.Q_var, 
+                                                                    settings_.fix_predictions, 
+                                                                    fixed);
     if (!kalman_prediction_ok)
     {
         //debatable: should the step fail strategy apply here?
@@ -452,13 +457,18 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 /**
 */
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
-                                       const boost::posix_time::ptime& ts) const
+                                       const boost::posix_time::ptime& ts,
+                                       bool* fixed) const
 {
     assert(isInit());
 
     kalman::KalmanState state;
-    bool kalman_prediction_ok = kalman_interface_->kalmanPrediction(state.x, state.P, ts, settings_.Q_var);
-    
+    bool kalman_prediction_ok = kalman_interface_->kalmanPrediction(state.x, 
+                                                                    state.P, 
+                                                                    ts, 
+                                                                    settings_.Q_var, 
+                                                                    settings_.fix_predictions, 
+                                                                    fixed);
     if (!kalman_prediction_ok)
     {
         //debatable: should the step fail strategy apply here?
@@ -477,7 +487,8 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                << "ts_cur: " << Utils::Time::toString(kalman_interface_->currrentTime()) << "\n"
                << "ts:     " << Utils::Time::toString(ts) << "\n"
                << "dt:     " << KalmanInterface::timestep(kalman_interface_->currrentTime(), ts) << "\n"
-               << kalman_interface_->asString() << "\n";
+               << kalman_interface_->asString() << "\n"
+               << mm.asString() << "\n";
         assert(kalman_prediction_check);
     }
 
@@ -488,20 +499,22 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 */
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        const kalman::KalmanUpdate& ref_update,
-                                       const boost::posix_time::ptime& ts)
+                                       const boost::posix_time::ptime& ts,
+                                       bool* fixed)
 {
     kalmanInit(ref_update);
-    return kalmanPrediction(mm, ts);
+    return kalmanPrediction(mm, ts, fixed);
 }
 
 /**
 */
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        const kalman::KalmanUpdateMinimal& ref_update,
-                                       const boost::posix_time::ptime& ts)
+                                       const boost::posix_time::ptime& ts,
+                                       bool* fixed)
 {
     kalmanInit(ref_update);
-    return kalmanPrediction(mm, ts);
+    return kalmanPrediction(mm, ts, fixed);
 }
 
 /**
@@ -510,9 +523,10 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        const kalman::KalmanUpdate& ref_update0,
                                        const kalman::KalmanUpdate& ref_update1,
-                                       const boost::posix_time::ptime& ts)
+                                       const boost::posix_time::ptime& ts,
+                                       size_t* num_fixed)
 {
-    return kalmanPrediction(mm, ref_update0.minimalInfo(), ref_update1.minimalInfo(), ts);
+    return kalmanPrediction(mm, ref_update0.minimalInfo(), ref_update1.minimalInfo(), ts, num_fixed);
 }
 
 /**
@@ -521,19 +535,21 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        const kalman::KalmanUpdateMinimal& ref_update0,
                                        const kalman::KalmanUpdateMinimal& ref_update1,
-                                       const boost::posix_time::ptime& ts)
+                                       const boost::posix_time::ptime& ts,
+                                       size_t* num_fixed)
 {
     assert(isInit());
 
     kalman::KalmanUpdateMinimal update_interp;
-    bool kalman_prediction_ok = interpUpdates(update_interp,
-                                              ref_update0,
-                                              ref_update1,
-                                              ts,
-                                              settings_.min_pred_dt,
-                                              settings_.resample_Q_var,
-                                              settings_.resample_interp_mode,
-                                              *proj_handler_);
+    bool kalman_prediction_ok = predictBetween(update_interp,
+                                               ref_update0,
+                                               ref_update1,
+                                               ts,
+                                               settings_.min_pred_dt,
+                                               settings_.resample_Q_var,
+                                               settings_.resample_interp_mode,
+                                               *proj_handler_,
+                                               num_fixed);
     if (!kalman_prediction_ok)
     {
         //debatable: should the step fail strategy apply here?
@@ -805,8 +821,8 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
                 continue;
             }
 
-            auto new_state0 = kalman_interface_->interpStep(state0, state1_ref,  dt0, Q_var);
-            auto new_state1 = kalman_interface_->interpStep(state1_ref, state0, -dt1, Q_var);
+            auto new_state0 = kalman_interface_->interpStep(state0, state1_ref,  dt0, Q_var, settings_.fix_predictions_interp);
+            auto new_state1 = kalman_interface_->interpStep(state1_ref, state0, -dt1, Q_var, settings_.fix_predictions_interp);
 
             if (new_state0.has_value() && new_state1.has_value())
             {
@@ -857,14 +873,15 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
 
 /**
 */
-bool KalmanEstimator::interpUpdates(kalman::KalmanUpdateMinimal& update_interp,
-                                    const kalman::KalmanUpdateMinimal& update0,
-                                    const kalman::KalmanUpdateMinimal& update1,
-                                    const boost::posix_time::ptime& ts,
-                                    double min_dt_sec,
-                                    double Q_var,
-                                    StateInterpMode interp_mode,
-                                    KalmanProjectionHandler& proj_handler) const
+bool KalmanEstimator::predictBetween(kalman::KalmanUpdateMinimal& update_interp,
+                                     const kalman::KalmanUpdateMinimal& update0,
+                                     const kalman::KalmanUpdateMinimal& update1,
+                                     const boost::posix_time::ptime& ts,
+                                     double min_dt_sec,
+                                     double Q_var,
+                                     StateInterpMode interp_mode,
+                                     KalmanProjectionHandler& proj_handler,
+                                     size_t* num_fixed) const
 {
     assert(isInit());
     assert(update0.valid);
@@ -885,9 +902,18 @@ bool KalmanEstimator::interpUpdates(kalman::KalmanUpdateMinimal& update_interp,
     //reproject update1 into update0's coord system
     proj_handler.xReprojected(state1_tr.x, *kalman_interface_, update1.x, update1.projection_center, update0.projection_center);
 
+    bool fixed0, fixed1;
+
     //predict forth and back to the specified time
-    auto new_state0 = kalman_interface_->interpStep(state0, state1_tr,  dt0, Q_var);
-    auto new_state1 = kalman_interface_->interpStep(state1_tr, state0, -dt1, Q_var);
+    auto new_state0 = kalman_interface_->interpStep(state0, state1_tr,  dt0, Q_var, settings_.fix_predictions, &fixed0);
+    auto new_state1 = kalman_interface_->interpStep(state1_tr, state0, -dt1, Q_var, settings_.fix_predictions, &fixed1);
+
+    if (num_fixed)
+    {
+        *num_fixed = 0;
+        if (fixed0) *num_fixed += 1;
+        if (fixed1) *num_fixed += 1;
+    }
 
     if (!new_state0.has_value() || !new_state1.has_value())
         return false;

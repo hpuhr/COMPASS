@@ -308,9 +308,9 @@ void SimpleReferenceCalculator::reconstructMeasurements()
     if (settings_.multithreading)
     {
         tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
-                          {
-                              reconstructMeasurements(*refs[ tgt_cnt ]);
-                          });
+        {
+            reconstructMeasurements(*refs[ tgt_cnt ]);
+        });
     }
     else
     {
@@ -490,24 +490,21 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                    << " * Measurement:         \n\n" << mm.asString()                                    << "\n";
         }
 
-        auto res = estimator.kalmanStep(update, refs.measurements[ i ]);
-
-        ++refs.num_updates;
+        auto res = estimator.kalmanStep(update, mm);
 
         //!only add update if valid!
         if (update.valid)
-        {
             refs.updates.push_back(update);
+
+        ++refs.num_updates;
+
+        if (update.valid)
             ++refs.num_updates_valid;
-        }
         else if (res == reconstruction::KalmanEstimator::StepResult::FailStepTooSmall)
-        {
             ++refs.num_updates_skipped;
-        }
         else
-        {
             ++refs.num_updates_failed;
-        }
+        
     }
 
     if (settings_.activeVerbosity() > 0)
@@ -523,7 +520,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     if (settings_.smooth_rts)
     {
         //jointly smooth old + new kalman updates RTS
-        estimator.smoothUpdates(updates);
+        bool ok = estimator.smoothUpdates(updates);
+        assert(ok);
 
         //combine old rts updates with new rts updates
         refs.updates_smooth.insert(refs.updates_smooth.end(),

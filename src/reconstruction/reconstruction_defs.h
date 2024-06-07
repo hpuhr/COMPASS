@@ -274,4 +274,13 @@ struct UpdateStats
     size_t num_skipped = 0;
 };
 
+/**
+*/
+struct PredictionStats
+{
+    size_t num_predictions = 0;
+    size_t num_failed      = 0;
+    size_t num_fixed       = 0;
+};
+
 } // namespace reconstruction

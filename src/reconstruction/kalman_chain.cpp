@@ -618,11 +618,24 @@ bool KalmanChain::canPredict(const boost::posix_time::ptime& ts) const
 */
 bool KalmanChain::predict(Measurement& mm_predicted,
                           const boost::posix_time::ptime& ts,
-                          int thread_id) const
+                          int thread_id,
+                          PredictionStats* stats) const
 {
     //static mode? => just ask tracker
     if (!canReestimate())
-        return tracker_.tracker_ptr->predict(mm_predicted, ts);
+    {
+        bool fixed;
+        bool ok = tracker_.tracker_ptr->predict(mm_predicted, ts, &fixed);
+
+        if (stats)
+        {
+            stats->num_predictions = 1;
+            stats->num_failed      = !ok   ? 1 : 0;
+            stats->num_fixed       = fixed ? 1 : 0;
+        }
+        
+        return ok;
+    }
 
     assert(thread_id >= 0 && thread_id < (int)predictors_.size());
     assert(!needsReestimate()); //!no predictions if chain is out of date!
@@ -643,8 +656,16 @@ bool KalmanChain::predict(Measurement& mm_predicted,
         bool ref_changed = (!p.ref_mm_id.has_value() || update.mm_id != p.ref_mm_id.value());
 
         //predict
-        bool ok = ref_changed ? p.estimator_ptr->kalmanPrediction(mm_predicted, update.kalman_update, ts) :
-                                p.estimator_ptr->kalmanPrediction(mm_predicted, ts);
+        bool fixed;
+        bool ok = ref_changed ? p.estimator_ptr->kalmanPrediction(mm_predicted, update.kalman_update, ts, &fixed) :
+                                p.estimator_ptr->kalmanPrediction(mm_predicted, ts, &fixed);
+
+        if (stats)
+        {
+            stats->num_predictions = 1;
+            stats->num_failed      = !ok   ? 1 : 0;
+            stats->num_fixed       = fixed ? 1 : 0;
+        }
 
         p.ref_mm_id = update.mm_id;
 
@@ -667,7 +688,15 @@ bool KalmanChain::predict(Measurement& mm_predicted,
         auto& p = predictors_.at(thread_id);
 
         //@TODO: interpolate
-        bool ok = p.estimator_ptr->kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts);
+        size_t num_fixed;
+        bool ok = p.estimator_ptr->kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts, &num_fixed);
+
+        if (stats)
+        {
+            stats->num_predictions = 2;
+            stats->num_failed      = !ok ? 2 : 0;
+            stats->num_fixed       = num_fixed;
+        }
 
         p.ref_mm_id.reset();
 
@@ -723,21 +752,46 @@ bool KalmanChain::reinit(int idx) const
     assert(updates_[ idx ].init); //!no freshly added measurements!
     assert(updates_[ idx ].mm_id >= 0);
 
+    const auto& update = updates_[ idx ];
+
     //update is the currently tracked update => nothing to do
-    if (tracker_.tracked_mm_id.has_value() && updates_[ idx ].mm_id == tracker_.tracked_mm_id)
-        return true;
+    if (!tracker_.tracked_mm_id.has_value() || update.mm_id != tracker_.tracked_mm_id.value())
+    {
+        //if (settings_.verbosity > 0)
+        //    loginf << "KalmanChain: reinit: Reinit at idx=" << idx << " t=" << Utils::Time::toString(updates_[ idx ].kalman_update.t);
 
-    //if (settings_.verbosity > 0)
-    //    loginf << "KalmanChain: reinit: Reinit at idx=" << idx << " t=" << Utils::Time::toString(updates_[ idx ].kalman_update.t);
+        //reinit tracker
+        tracker_.tracker_ptr->reset();
+        if (!tracker_.tracker_ptr->track(update.kalman_update))
+            return false; //should not happen
 
-    //reinit tracker
-    tracker_.tracker_ptr->reset();
-    if (!tracker_.tracker_ptr->track(updates_[ idx ].kalman_update))
-        return false; //should not happen
+        tracker_.tracked_mm_id = update.mm_id;
 
-    tracker_.tracked_mm_id = updates_[ idx ].mm_id;
+        assert(tracker_.tracker_ptr->currentTime() == update.t);
+    }
+
+    assert(tracker_.tracker_ptr->currentTime() == update.t);
 
     return true;
+}
+
+/**
+ * Removes the update.
+*/
+void KalmanChain::removeUpdate(int idx)
+{
+    const auto& update_tbr = updates_.at(idx);
+
+    //reset nay now outdated measurement id
+    if (tracker_.tracked_mm_id.has_value() && update_tbr.mm_id == tracker_.tracked_mm_id.value())
+        tracker_.tracked_mm_id.reset();
+
+    for (auto& p : predictors_)
+        if (p.ref_mm_id.has_value() && update_tbr.mm_id == p.ref_mm_id.value())
+            p.ref_mm_id.reset();
+
+    //erase update
+    updates_.erase(updates_.begin() + idx);
 }
 
 /**
@@ -807,15 +861,21 @@ bool KalmanChain::reestimate(int idx,
     assert(idx >= 0 && idx < count());
     assert(updates_[ idx ].mm_id >= 0);
 
-    auto& update = updates_[ idx ];
+    auto&       update = updates_[ idx ];
+    const auto& mm     = getMeasurement(update.mm_id);
 
-    if (!tracker_.tracker_ptr->track(getMeasurement(update.mm_id), res))
+    //check fetched mm's time against update
+    assert(update.t == mm.t);
+
+    if (!tracker_.tracker_ptr->track(mm, res))
         return false;
 
     tracker_.tracker_ptr->currentState().value().minimalInfo(update.kalman_update);
     update.init = true;
 
     tracker_.tracked_mm_id = update.mm_id;
+
+    assert(tracker_.tracker_ptr->currentTime() == update.t);
 
     return true;
 }
@@ -916,28 +976,24 @@ bool KalmanChain::reestimate(UpdateStats* stats)
             //we check the norm starting from the extended range
             bool check_norm = (idx > idx_start);
 
+            //reestim mm
             KalmanEstimator::StepResult res;
+            bool ok = check_norm ? reestimate(idx, d_state_sqr, d_cov_sqr, &res) : reestimate(idx, &res);
 
             if (stats)
+            {
                 ++stats->num_updated;
 
-            //reestim mm
-            bool ok = check_norm ? reestimate(idx, d_state_sqr, d_cov_sqr, &res) : reestimate(idx, &res);
-            if (ok)
-            {
-                if (stats)
+                if (ok)
                     ++stats->num_valid;
+                else if (res == KalmanEstimator::StepResult::FailStepTooSmall)
+                    ++stats->num_skipped;
+                else
+                    ++stats->num_failed;
             }
-            else
-            {
-                if (stats)
-                {
-                    if (res == KalmanEstimator::StepResult::FailStepTooSmall)
-                        ++stats->num_skipped;
-                    else
-                        ++stats->num_failed;
-                }
 
+            if (!ok)
+            {
                 //reestimate (=kalman step) failed => collect update for removal
                 tbr.push_back(idx);
                 continue;
@@ -982,8 +1038,8 @@ bool KalmanChain::reestimate(UpdateStats* stats)
     {
         if (settings_.verbosity >= 2)
             logwrn << "KalmanChain: reestimate: removing update " << *itr;
-        
-        updates_.erase(updates_.begin() + *itr);
+
+        removeUpdate(*itr);
     }
 
     if (settings_.verbosity >= 2 && !is_last)
@@ -994,5 +1050,6 @@ bool KalmanChain::reestimate(UpdateStats* stats)
 
     return ok;
 }
+
 
 } // reconstruction
