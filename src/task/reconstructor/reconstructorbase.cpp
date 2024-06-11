@@ -422,11 +422,12 @@ void ReconstructorBase::createTargetReports()
                     logerr << "ReconstructorBase: createTargetReports: missing prev ts " << Time::toString(ts);
 
                 assert (target_reports_.count(record_num));
+                assert (target_reports_.at(record_num).record_num_ == record_num); // be sure
 
                 target_reports_.at(record_num).buffer_index_ = cnt;
                 target_reports_.at(record_num).in_current_slice_ = false;
 
-                assert (target_reports_.at(record_num).timestamp_ == ts); // just to be sure
+                assert (target_reports_.at(record_num).timestamp_ == ts); // be very sure
             }
         }
     }
