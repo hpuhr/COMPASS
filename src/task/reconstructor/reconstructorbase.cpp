@@ -35,8 +35,12 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                                      const std::string& instance_id,
                                      ReconstructorTask& task, 
                                      std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator,
+                                     ReconstructorBaseSettings& base_settings,
                                      unsigned int default_line_id)
-    : Configurable (class_id, instance_id, &task), acc_estimator_(std::move(acc_estimator)), task_(task)
+:   Configurable (class_id, instance_id, &task)
+,   task_(task)
+,   acc_estimator_(std::move(acc_estimator))
+,   base_settings_(base_settings)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
@@ -188,6 +192,7 @@ void ReconstructorBase::reset()
     dbContent::ReconstructorTarget::globalStats().reset();
 
     accessor_->clear();
+    accessors_.clear();
 
     slice_cnt_ = 0;
     current_slice_begin_ = {};
@@ -334,10 +339,12 @@ void ReconstructorBase::createTargetReports()
 
     accessors_.clear();
 
-            //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+    //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     std::set<unsigned int> unused_ds_ids = task_.unusedDSIDs();
     std::map<unsigned int, std::set<unsigned int>> unused_lines = task_.unusedDSIDLines();
+
+    auto& ds_man = COMPASS::instance().dataSourceManager();
 
     for (auto& buf_it : *accessor_)
     {
@@ -354,7 +361,7 @@ void ReconstructorBase::createTargetReports()
             record_num = tgt_acc.recordNumber(cnt);
             ts = tgt_acc.timestamp(cnt);
 
-                    //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
+            //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
 
             if (!tgt_acc.position(cnt))
                 continue;
@@ -369,8 +376,13 @@ void ReconstructorBase::createTargetReports()
                 info.line_id_ = tgt_acc.lineID(cnt);
                 info.timestamp_ = ts;
 
-                        // reconstructor info
+                // reconstructor info
                 info.in_current_slice_ = true;
+
+                info.is_calculated_reference_ = ds_man.hasDBDataSource(info.ds_id_) && 
+                                                ds_man.dbDataSource(info.ds_id_).sac() == ReconstructorBaseSettings::REC_DS_SAC &&
+                                                ds_man.dbDataSource(info.ds_id_).sic() == ReconstructorBaseSettings::REC_DS_SIC;
+
                 info.acad_ = tgt_acc.acad(cnt);
                 info.acid_ = tgt_acc.acid(cnt);
 
@@ -385,7 +397,7 @@ void ReconstructorBase::createTargetReports()
 
                 info.do_not_use_position_ = !info.position().has_value()
                     || (unused_ds_ids.count(info.ds_id_)
-                     || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
+                    || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
 
                 info.barometric_altitude_ = tgt_acc.barometricAltitude(cnt);
 
@@ -395,11 +407,11 @@ void ReconstructorBase::createTargetReports()
                 info.track_angle_ = tgt_acc.trackAngle(cnt);
                 info.ground_bit_ = tgt_acc.groundBit(cnt);
 
-                        // insert info
+                // insert info
                 assert (!target_reports_.count(record_num));
                 target_reports_[record_num] = info;
 
-                        // insert into lookups
+                // insert into lookups
                 tr_timestamps_.insert({ts, record_num});
                 // dbcontent id -> ds_id -> ts ->  record_num
 

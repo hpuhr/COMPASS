@@ -17,7 +17,7 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id,
                                          const std::string& instance_id,
                                          ReconstructorTask& task, 
                                          std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
-    : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator), 0)
+    : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator), settings_, 0)
     , associatior_   (*this)
     , ref_calculator_(*this)
 {

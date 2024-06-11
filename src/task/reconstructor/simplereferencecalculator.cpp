@@ -157,7 +157,6 @@ bool SimpleReferenceCalculator::computeReferences()
     return true;
 }
 
-
 /**
  */
 void SimpleReferenceCalculator::generateMeasurements()
@@ -438,6 +437,20 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //        << "mm_begin: " << Utils::Time::toString(refs.measurements[ refs.start_index.value() ].t) << ", "
     //        << "thres_rem: " << Utils::Time::toString(ThresRemove) << ", thres_join: " << Utils::Time::toString(ThresJoin) << ", "
     //        << "idx: " << refs.start_index.value();
+
+#if 0
+    for (size_t i = refs.start_index.value(); i < refs.measurements.size(); ++i)
+    {
+        const auto& mm = refs.measurements[ i ];
+
+        reconstruction::Reference ref;
+        (reconstruction::Measurement&)ref = mm;
+
+        refs.references.push_back(ref);
+    }
+
+    return;
+#endif
 
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())

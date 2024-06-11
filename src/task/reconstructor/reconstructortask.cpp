@@ -400,6 +400,7 @@ void ReconstructorTask::run()
     assert(canRun());
 
     loading_slice_ = nullptr;
+    loading_data_ = false;
     processing_slice_ = nullptr;
     processing_data_slice_ = false;
     writing_slice_ = nullptr;
@@ -408,6 +409,11 @@ void ReconstructorTask::run()
     done_ = false;
 
     current_slice_idx_ = 0;
+
+    delcalcref_future_ = {};
+    deltgts_future_ = {};
+    delassocs_future_ = {};
+    process_future_ = {};
 
     loginf << "ReconstructorTask: run: started";
 
@@ -491,8 +497,7 @@ void ReconstructorTask::deleteAssociationsDoneSlot()
 {
     loginf << "ReconstructorTask: deleteAssociationsDoneSlot";
 
-
-            // enable cancelling
+    // enable cancelling
 
     assert (progress_dialog_);
     progress_dialog_->setCancelButton(new QPushButton("Cancel"));

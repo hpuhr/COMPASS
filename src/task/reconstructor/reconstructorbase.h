@@ -60,17 +60,18 @@ class ReconstructorBaseSettings
         return boost::posix_time::minutes(outdated_duration_in_minutes);
     }
 
-            // output
+    // output
     std::string  ds_name {"CalcRef"};
-    unsigned int ds_sac  {255};
-    unsigned int ds_sic  {1};
+    unsigned int ds_sac  {REC_DS_SAC};
+    unsigned int ds_sic  {REC_DS_SIC};
     unsigned int ds_line {0};
 
-            // slicing
+    // slicing
     unsigned int slice_duration_in_minutes    {15};
     unsigned int outdated_duration_in_minutes {2};
 
     bool delete_all_calc_reftraj {true};
+    bool ignore_calculated_references {true};
 
     // maximum time difference in target reports to do comparisons
     float max_time_diff_ {5}; // sec
@@ -84,6 +85,9 @@ class ReconstructorBaseSettings
     unsigned int target_min_updates_ {5};
     double target_max_positions_dubious_verified_rate_ {0.5};
     double target_max_positions_dubious_unknown_rate_ {0.3};
+
+    static const unsigned int REC_DS_SAC = 255;
+    static const unsigned int REC_DS_SIC = 1;
 };
 
 /**
@@ -120,6 +124,7 @@ class ReconstructorBase : public Configurable
                       const std::string& instance_id,
                       ReconstructorTask& task, 
                       std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator,
+                      ReconstructorBaseSettings& base_settings,
                       unsigned int default_line_id = 0);
     virtual ~ReconstructorBase();
 
@@ -136,7 +141,6 @@ class ReconstructorBase : public Configurable
     virtual void reset();
 
     virtual ReconstructorBaseSettings& settings() { return base_settings_; };
-    //virtual const  ReconstructorBaseSettings& settings() const { return base_settings_; };
 
     ReferenceCalculatorSettings& referenceCalculatorSettings() { return ref_calc_settings_; }
     const ReferenceCalculatorSettings& referenceCalculatorSettings() const { return ref_calc_settings_; }
@@ -181,7 +185,7 @@ class ReconstructorBase : public Configurable
 
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
-    ReconstructorBaseSettings base_settings_;
+    ReconstructorBaseSettings& base_settings_;
 
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual void processSlice_impl() = 0;

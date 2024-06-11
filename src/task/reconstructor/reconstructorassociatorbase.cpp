@@ -8,6 +8,7 @@
 #include "number.h"
 
 #define FIND_UTN_FOR_TARGET_MT
+#define FIND_UTN_FOR_TARGET_REPORT_MT
 
 using namespace std;
 using namespace dbContent;
@@ -404,8 +405,6 @@ void ReconstructorAssociatorBase::associate(
     assoc_counts_[tr.ds_id_][dbcont_id].first++;
 
     postAssociate (tr, utn);
-
-
 }
 
 void ReconstructorAssociatorBase::checkACADLookup()
@@ -656,7 +655,11 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     if (do_debug)
         loginf << "ReconstructorAssociatorBase: findUTNByModeACPos: rn " << tr.record_num_;
 
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
     tbb::parallel_for(uint(0), num_targets, [&](unsigned int target_cnt)
+#else
+    for (unsigned int target_cnt = 0; target_cnt < num_targets; ++target_cnt)
+#endif
                       {
                           unsigned int other_utn = utn_vec.at(target_cnt);
                           bool do_other_debug = false; //debug_utns.count(other_utn);
@@ -666,15 +669,27 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
                           if (tr.acad_ && other.hasACAD()) // has to be covered outside
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
+#else
+                              continue;
+#endif
 
                           if (!other.isTimeInside(timestamp, max_time_diff_))
                           {
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
+#else
+                              continue;
+#endif
                           }
 
                           if (!other.canPredict(timestamp))
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
+#else
+                              continue;
+#endif
 
                           bool mode_a_checked = false;
                           bool mode_a_verified = false;
@@ -691,7 +706,11 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                                   if (ma_res == ComparisonResult::DIFFERENT)
                                   {
                                       //target_cnt++;
-                                      return;
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
+                                     return;
+#else
+                                     continue;
+#endif
                                   }
 
                                   mode_a_checked = true;
@@ -713,7 +732,11 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                                   if (mc_res == ComparisonResult::DIFFERENT)
                                   {
                                       //target_cnt++;
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                                       return;
+#else
+                                      continue;
+#endif
                                   }
 
                                   mode_c_checked = true;
@@ -739,12 +762,20 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           //double mahalanobis_dist{0};
 
                           if (!canGetPositionOffset(tr, other))
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
+#else
+                              continue;
+#endif
 
                           auto pos_offs = getPositionOffset(tr, other, do_debug, &prediction_stats[ target_cnt ]);
 
-                          if (!pos_offs.has_value())
+                          if (!pos_offs.has_value()) 
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
+#else
+                              continue;
+#endif
 
                           std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
 
@@ -756,7 +787,10 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                               results[target_cnt] = tuple<bool, unsigned int, double> (
                                   true, other.utn_, check_ret->second);
                           }
-                      });
+                      }
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
+    );
+#endif
 
     //log failed predictions
     for (const auto& s : prediction_stats)
@@ -800,7 +834,6 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
     return -1;
 }
-
 
 int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                                                   const std::set<unsigned long>& debug_rec_nums,

@@ -211,7 +211,8 @@ struct BaseInfo
 
 struct ReconstructorInfo : public BaseInfo
 {
-    bool in_current_slice_ {false}; // true in current, false if from old slice (glue data)
+    bool in_current_slice_ {false};        // true in current, false if from old slice (glue data)
+    bool is_calculated_reference_ {false}; // the target report stems from a previous reconstructor run
 
     boost::optional<unsigned int> acad_;
     boost::optional<std::string> acid_;

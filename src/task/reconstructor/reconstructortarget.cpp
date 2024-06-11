@@ -15,8 +15,6 @@
 
 #include <boost/optional/optional_io.hpp>
 
-//#define SEQUENTIAL_ONLY
-
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
@@ -100,20 +98,16 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
 
     const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
-            //    if (!timestamp_max_.is_not_a_date_time()) // there is time
-            //    {
-            //        if (tr.timestamp_ < timestamp_max_)
-            //            logerr << "ReconstructorTarget: addTargetReport: old max " << Time::toString(timestamp_max_)
-            //                   << " tr ts " << Time::toString(tr.timestamp_);
+    //    if (!timestamp_max_.is_not_a_date_time()) // there is time
+    //    {
+    //        if (tr.timestamp_ < timestamp_max_)
+    //            logerr << "ReconstructorTarget: addTargetReport: old max " << Time::toString(timestamp_max_)
+    //                   << " tr ts " << Time::toString(tr.timestamp_);
 
-            //        assert (tr.timestamp_ >= timestamp_max_);
-            //    }
+    //        assert (tr.timestamp_ >= timestamp_max_);
+    //    }
 
-#ifdef SEQUENTIAL_ONLY
-    bool ts_newer = true;
-#endif
-
-            // update min/max
+    // update min/max
     if (!target_reports_.size())
     {
         timestamp_min_ = tr.timestamp_;
@@ -121,10 +115,6 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
     }
     else
     {
-#ifdef SEQUENTIAL_ONLY
-        ts_newer = tr.timestamp_ >= timestamp_max_;
-#endif
-
         timestamp_min_ = min(timestamp_min_, tr.timestamp_);
         timestamp_max_ = max(timestamp_max_, tr.timestamp_);
     }
@@ -146,8 +136,8 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
     if (!ds_ids_.count(tr.ds_id_))
         ds_ids_.insert(tr.ds_id_);
 
-            //    if (tr.track_number_ && !track_nums_.count({tr.ds_id_, *tr.track_number_}))
-            //        track_nums_.insert({tr.ds_id_, *tr.track_number_});
+    //    if (tr.track_number_ && !track_nums_.count({tr.ds_id_, *tr.track_number_}))
+    //        track_nums_.insert({tr.ds_id_, *tr.track_number_});
 
     if (tr.mode_a_code_ && !mode_as_.count(tr.mode_a_code_->code_))
         mode_as_.insert(tr.mode_a_code_->code_);
@@ -178,14 +168,14 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
             acids_.insert(acid);
     }
 
-            //    if (tr.has_adsb_info_ && tr.has_mops_version_)
-            //    {
-            //        if (!mops_versions_.count(tr.mops_version_))
-            //            mops_versions_.insert(tr.mops_version_);
-            //    }
+    //    if (tr.has_adsb_info_ && tr.has_mops_version_)
+    //    {
+    //        if (!mops_versions_.count(tr.mops_version_))
+    //            mops_versions_.insert(tr.mops_version_);
+    //    }
 
-            //    if (!tmp_)
-            //        tr.addAssociated(this);
+    //    if (!tmp_)
+    //        tr.addAssociated(this);
 
     bool added = false;
 
@@ -194,25 +184,20 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
         if (!hasTracker())
             reinitTracker();
 
-#ifdef SEQUENTIAL_ONLY
-        if (ts_newer)
-#endif
+        reconstruction::UpdateStats stats;
+
+        addToTracker(tr, reestimate, &stats);
+
+        added = true;
+
+        if (reestimate)
         {
-            reconstruction::UpdateStats stats;
-
-            addToTracker(tr, reestimate, &stats);
-
-            added = true;
-
-            if (reestimate)
-            {
-                assert(stats.num_fresh == 1);
-                assert(stats.num_updated >= 1);
-                assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
-            }
-
-            addUpdateToGlobalStats(stats);
+            assert(stats.num_fresh == 1);
+            assert(stats.num_updated >= 1);
+            assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
         }
+
+        addUpdateToGlobalStats(stats);
     }
 
     return added;
@@ -442,9 +427,24 @@ bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) 
     return true;
 }
 
+bool ReconstructorTarget::skipTargetReport(const dbContent::targetReport::ReconstructorInfo& tr,
+                                           const InfoValidFunc& tr_valid_func) const
+{
+    //run base checks first
+    if (reconstructor_.settings().ignore_calculated_references && tr.is_calculated_reference_)
+        return true;
+
+    //then external check
+    if (tr_valid_func && !tr_valid_func(tr))
+        return true;
+
+    return false;
+}
+
 ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime timestamp,
-                                                                        time_duration d_max,
-                                                                        const InfoValidFunc& tr_valid_func) const
+                                                                         time_duration d_max,
+                                                                         const InfoValidFunc& tr_valid_func,
+                                                                         bool debug) const
 // lower/upper times, invalid ts if not existing
 {
     std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_lower, it_upper;
@@ -490,18 +490,23 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         }
     }
 
-    if (!tr_valid_func)
+    //lower and upper entries already valid?
+    bool ok_lower = !has_lower || !skipTargetReport(dataFor(it_lower->second), tr_valid_func);
+    bool ok_upper = !has_upper || !skipTargetReport(dataFor(it_upper->second), tr_valid_func);
+
+    if (ok_lower && ok_upper)
         return {has_lower ? &dataFor(it_lower->second) : nullptr, has_upper ? &dataFor(it_upper->second) : nullptr};
 
+    //broaden interval until valid or out of range
     if (has_upper)
     {
         has_upper = false;
         for (auto it = it_upper; it != tr_timestamps_.end(); ++it)
         {
-            if (has_upper || it->first - timestamp > d_max)
+            if (it->first - timestamp > d_max)
                 break;
 
-            if (tr_valid_func(dataFor(it->second)))
+            if (!skipTargetReport(dataFor(it->second), tr_valid_func))
             {
                 it_upper  = it;
                 has_upper = true;
@@ -519,7 +524,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             if (timestamp - it->first > d_max)
                 break;
 
-            if (tr_valid_func(dataFor(it->second)))
+            if (!skipTargetReport(dataFor(it->second), tr_valid_func))
             {
                 it_lower  = it;
                 has_lower = true;
@@ -1101,14 +1106,17 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
 }
 
 boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptime timestamp,
-                                                        boost::posix_time::time_duration max_time_diff) const
+                                                         boost::posix_time::time_duration max_time_diff,
+                                                         bool debug) const
 {
     if (!hasDataForTime(timestamp, max_time_diff))
         return {};
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff);
+    if (debug) loginf << "ReconstructorTarget: modeCCodeAt: t = " << Utils::Time::toString(timestamp);
+
+    tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff, {}, debug);
     // [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); }
     // no lambda because missing value important, TODO set data source if available
 
@@ -1118,7 +1126,7 @@ boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptim
     bool upper_mc_usable = upper_tr && upper_tr->barometric_altitude_.has_value()
                            && upper_tr->barometric_altitude_->hasReliableValue();
 
-            // nothing reliable
+    // nothing reliable
     if (!lower_mc_usable && !upper_mc_usable)
         return {};
 
@@ -1131,7 +1139,7 @@ boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptim
         return ref1.barometric_altitude_->altitude_;
     }
 
-            // both set & reliable
+    // both set & reliable
     dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
     dbContent::targetReport::ReconstructorInfo& ref2 = *upper_tr;
 
@@ -1142,16 +1150,20 @@ boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptim
 }
 
 boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime timestamp,
-                                                       boost::posix_time::time_duration max_time_diff) const
+                                                        boost::posix_time::time_duration max_time_diff,
+                                                        bool debug) const
 {
     if (!hasDataForTime(timestamp, max_time_diff))
         return {};
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
+    if (debug) loginf << "ReconstructorTarget: groundBitAt: t = " << Utils::Time::toString(timestamp);
+
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
-        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.ground_bit_.has_value(); });
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.ground_bit_.has_value(); },
+        debug);
 
     bool lower_has_val = lower_tr && lower_tr->ground_bit_.has_value();
     bool upper_has_val = upper_tr && upper_tr->ground_bit_.has_value();
@@ -1180,21 +1192,25 @@ boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime
 }
 
 boost::optional<double> ReconstructorTarget::groundSpeedAt (boost::posix_time::ptime timestamp,
-                                      boost::posix_time::time_duration max_time_diff) const
+                                                            boost::posix_time::time_duration max_time_diff,
+                                                            bool debug) const
 {
     if (!hasDataForTime(timestamp, max_time_diff))
         return {};
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
+    if (debug) loginf << "ReconstructorTarget: groundSpeedAt: t = " << Utils::Time::toString(timestamp);
+
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
-        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.ground_bit_.has_value(); });
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.velocity_.has_value(); },
+        debug);
 
     bool lower_has_val = lower_tr && lower_tr->velocity_.has_value();
     bool upper_has_val = upper_tr && upper_tr->velocity_.has_value();
 
-            // no value
+    // no value
     if (!lower_has_val && !upper_has_val) // TODO check if data sources m3a capable
         return {};
 
@@ -1207,7 +1223,7 @@ boost::optional<double> ReconstructorTarget::groundSpeedAt (boost::posix_time::p
         return ref1.velocity_->speed_;
     }
 
-            // both set & reliable
+    // both set & reliable
     dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
     dbContent::targetReport::ReconstructorInfo& ref2 = *upper_tr;
 
