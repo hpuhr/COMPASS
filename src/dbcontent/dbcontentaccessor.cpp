@@ -103,7 +103,7 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
         NullableVector<boost::posix_time::ptime>& ts_vec = buf_it.second->get<boost::posix_time::ptime>(ts_var.name());
 
         unsigned int index=0;
-        bool cutoff_found = false;
+        //bool cutoff_found = false;
 
         for (; index < buffer_size; ++index)
         {
@@ -113,23 +113,21 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
                        << " cutoff tod index " << index
                        << " ts " << Time::toString(ts_vec.get(index));
 
-                cutoff_found = true;
+                //cutoff_found = true;
                 break;
             }
         }
         // index == buffer_size if none bigger than min_ts
 
-        if (cutoff_found && index) // index found and has data before
-        {
+        if (index) // index found and has data before
             index--; // cut at previous
 
-            logdbg << "DBContentAccessor: removeContentBeforeTimestamp: cutting " << buf_it.first
-                   << " up to index " << index
-                   << " total size " << buffer_size
-                   << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
-            assert (index < buffer_size);
-            buf_it.second->cutUpToIndex(index);
-        }
+        logdbg << "DBContentAccessor: removeContentBeforeTimestamp: cutting " << buf_it.first
+               << " up to index " << index
+               << " total size " << buffer_size
+               << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
+        assert (index < buffer_size);
+        buf_it.second->cutUpToIndex(index);
     }
 
     removeEmptyBuffers();

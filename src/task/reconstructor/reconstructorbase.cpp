@@ -407,6 +407,15 @@ void ReconstructorBase::createTargetReports()
             }
             else // update buffer_index_
             {
+                if (ts < currentSlice().remove_before_time_)
+                {
+                    logerr << "ReconstructorBase: createTargetReports: old data not removed ts "
+                           << Time::toString(ts)
+                           << " dbcont " << buf_it.first
+                           << " buffer_size " << buffer_size
+                           << " remove before " << Time::toString(currentSlice().remove_before_time_);
+                }
+
                 assert (ts >= currentSlice().remove_before_time_);
 
                 if (!target_reports_.count(record_num))
