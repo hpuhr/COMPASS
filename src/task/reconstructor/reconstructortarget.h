@@ -162,7 +162,8 @@ class ReconstructorTarget
             // TODO lambda for selective data
     ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp,
                                   boost::posix_time::time_duration d_max,
-                                  const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
+                                  const InfoValidFunc& tr_valid_func = InfoValidFunc(),
+                                  bool debug = false) const;
     ReferencePair refDataFor (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
     //    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timesFor (
@@ -207,11 +208,14 @@ class ReconstructorTarget
         boost::posix_time::time_duration max_time_diff, float max_alt_diff, bool debug) const;
 
     boost::optional<float> modeCCodeAt (boost::posix_time::ptime timestamp,
-                                       boost::posix_time::time_duration max_time_diff) const;
+                                        boost::posix_time::time_duration max_time_diff,
+                                        bool debug = false) const;
     boost::optional<bool> groundBitAt (boost::posix_time::ptime timestamp,
-                                      boost::posix_time::time_duration max_time_diff) const;
+                                       boost::posix_time::time_duration max_time_diff,
+                                       bool debug = false) const;
     boost::optional<double> groundSpeedAt (boost::posix_time::ptime timestamp,
-                                          boost::posix_time::time_duration max_time_diff) const; // m/s
+                                           boost::posix_time::time_duration max_time_diff,
+                                           bool debug = false) const; // m/s
 
     ComparisonResult compareModeCCode (const dbContent::targetReport::ReconstructorInfo& tr,
                                       boost::posix_time::time_duration max_time_diff, float max_alt_diff,
@@ -261,7 +265,8 @@ class ReconstructorTarget
                          bool add_to_tracker,
                          bool reestimate);
 
-    
+    bool skipTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
+                           const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
 
     std::unique_ptr<reconstruction::KalmanChain> chain_;
 
