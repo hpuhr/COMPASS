@@ -427,38 +427,116 @@ bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) 
     return true;
 }
 
-bool ReconstructorTarget::skipTargetReport(const dbContent::targetReport::ReconstructorInfo& tr,
-                                           const InfoValidFunc& tr_valid_func) const
+ReconstructorTarget::TargetReportSkipResult ReconstructorTarget::skipTargetReport(const dbContent::targetReport::ReconstructorInfo& tr,
+                                                                                  const InfoValidFunc& tr_valid_func) const
 {
     //run base checks first
     if (reconstructor_.settings().ignore_calculated_references && tr.is_calculated_reference_)
-        return true;
+        return TargetReportSkipResult::SkipReference;
 
     //then external check
     if (tr_valid_func && !tr_valid_func(tr))
-        return true;
+        return TargetReportSkipResult::SkipFunc;
 
-    return false;
+    return TargetReportSkipResult::Valid;
+}
+
+namespace
+{
+    std::string tr2String(const dbContent::targetReport::ReconstructorInfo& tr)
+    {
+        std::stringstream ss;
+        ss << "(" << tr.record_num_ << "," << tr.dbcont_id_ << "," << tr.ds_id_ << "," << Utils::Time::toString(tr.timestamp_);
+        return ss.str();
+    }
 }
 
 ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime timestamp,
                                                                          time_duration d_max,
                                                                          const InfoValidFunc& tr_valid_func,
-                                                                         bool debug) const
+                                                                         const InterpOptions& interp_options) const
 // lower/upper times, invalid ts if not existing
 {
+    bool debug = interp_options.debug();
+
     std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_lower, it_upper;
     bool has_lower = false;
     bool has_upper = false;
 
-    auto it_available = tr_timestamps_.find(timestamp);
-    if (it_available != tr_timestamps_.end())
+    auto num_ts_existing = tr_timestamps_.count(timestamp);
+    auto range = tr_timestamps_.equal_range(timestamp);
+
+    //look for initial upper and lower datum
+    if (num_ts_existing == 1)
     {
-        //timestamp in map => start from timestamp
-        it_lower  = it_available;
-        it_upper  = it_available;
+        assert(range.first != tr_timestamps_.end());
+        
+        //unique timestamp in map => start from this timestamp
+        it_lower  = range.first;
+        it_upper  = range.first;
         has_lower = true;
         has_upper = true;
+
+        if (debug) loginf << "ReconstructorTarget: dataFor: found timestamp in target";
+    }
+    else if (num_ts_existing > 1)
+    {
+        assert(range.first != tr_timestamps_.end());
+
+        //multiple timestamps in map => choose one depending on init mode
+        std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_start = tr_timestamps_.end();
+
+        auto init_mode = interp_options.initMode();
+
+        if (init_mode == InterpOptions::InitMode::First)
+        {
+            //choose first
+            it_start = range.first;
+        }
+        else if (init_mode == InterpOptions::InitMode::Last)
+        {
+            //choose last
+            it_start = range.second == tr_timestamps_.end() ? range.first : --range.second;
+        }
+        else
+        {
+            //choose a valid datum or a datum with a certain record number
+            bool look_for_recnum = init_mode == InterpOptions::InitMode::RecNum;
+            auto rec_num         = interp_options.initRecNum();
+
+            for (auto it = range.first; it != range.second; ++it)
+            {
+                const auto& d = dataFor(it->second);
+
+                //if recnum has been found break immediately
+                if (look_for_recnum && d.record_num_ == rec_num)
+                {
+                    it_start = it;
+                    break;
+                }
+
+                //if valid break immediately if no recnum is specified, otherwise remember as fallback and continue search
+                if (skipTargetReport(d, tr_valid_func) == TargetReportSkipResult::Valid)
+                {
+                    it_start = it;
+                    if (!look_for_recnum)
+                        break;
+                }
+            }
+        }
+
+        //fallback: use first
+        if (it_start == tr_timestamps_.end())
+            it_start = range.first;
+
+        assert(it_start != tr_timestamps_.end());
+
+        it_lower  = it_start;
+        it_upper  = it_start;
+        has_lower = true;
+        has_upper = true;
+
+        if (debug) loginf << "ReconstructorTarget: dataFor: found multiple timestamps in target, chose:\n" << tr2String(dataFor(it_start->second));
     }
     else
     {
@@ -488,14 +566,26 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             if (timestamp - it_lower->first <= d_max)
                 has_lower = true;
         }
+
+        if (debug) 
+        {
+            loginf << "ReconstructorTarget: dataFor: initial interval:\n" 
+                   << "   " << (has_lower ? tr2String(dataFor(it_lower->second)) : "") << "\n"
+                   << "   " << (has_upper ? tr2String(dataFor(it_upper->second)) : "");
+        }
     }
 
     //lower and upper entries already valid?
-    bool ok_lower = !has_lower || !skipTargetReport(dataFor(it_lower->second), tr_valid_func);
-    bool ok_upper = !has_upper || !skipTargetReport(dataFor(it_upper->second), tr_valid_func);
+    bool ok_lower = !has_lower || skipTargetReport(dataFor(it_lower->second), tr_valid_func) == TargetReportSkipResult::Valid;
+    bool ok_upper = !has_upper || skipTargetReport(dataFor(it_upper->second), tr_valid_func) == TargetReportSkipResult::Valid;
 
     if (ok_lower && ok_upper)
+    {
+        if (debug)
+            loginf << "ReconstructorTarget: dataFor: initial interval valid";
+
         return {has_lower ? &dataFor(it_lower->second) : nullptr, has_upper ? &dataFor(it_upper->second) : nullptr};
+    }
 
     //broaden interval until valid or out of range
     if (has_upper)
@@ -506,11 +596,17 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             if (it->first - timestamp > d_max)
                 break;
 
-            if (!skipTargetReport(dataFor(it->second), tr_valid_func))
+            auto skip_result = skipTargetReport(dataFor(it->second), tr_valid_func);
+
+            if (skip_result == TargetReportSkipResult::Valid)
             {
                 it_upper  = it;
                 has_upper = true;
                 break;
+            }
+            else if (debug)
+            {
+                loginf << "ReconstructorTarget: dataFor: skipping upper tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
             }
         }
     }
@@ -524,11 +620,17 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             if (timestamp - it->first > d_max)
                 break;
 
-            if (!skipTargetReport(dataFor(it->second), tr_valid_func))
+            auto skip_result = skipTargetReport(dataFor(it->second), tr_valid_func);
+
+            if (skip_result == TargetReportSkipResult::Valid)
             {
                 it_lower  = it;
                 has_lower = true;
                 break;
+            }
+            else if (debug)
+            {
+                loginf << "ReconstructorTarget: dataFor: skipping lower tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
             }
 
             if (it == tr_timestamps_.begin())
@@ -536,6 +638,13 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             
             --it;
         }
+    }
+
+    if (debug) 
+    {
+        loginf << "ReconstructorTarget: dataFor: final interval:\n" 
+                << "   " << (has_lower ? tr2String(dataFor(it_lower->second)) : "") << "\n"
+                << "   " << (has_upper ? tr2String(dataFor(it_upper->second)) : "");
     }
 
     return {has_lower ? &dataFor(it_lower->second) : nullptr,
@@ -1107,16 +1216,16 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
 
 boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptime timestamp,
                                                          boost::posix_time::time_duration max_time_diff,
-                                                         bool debug) const
+                                                         const InterpOptions& interp_options) const
 {
     if (!hasDataForTime(timestamp, max_time_diff))
         return {};
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (debug) loginf << "ReconstructorTarget: modeCCodeAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "ReconstructorTarget: modeCCodeAt: t = " << Utils::Time::toString(timestamp);
 
-    tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff, {}, debug);
+    tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff, {}, interp_options);
     // [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); }
     // no lambda because missing value important, TODO set data source if available
 
@@ -1151,19 +1260,19 @@ boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptim
 
 boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime timestamp,
                                                         boost::posix_time::time_duration max_time_diff,
-                                                        bool debug) const
+                                                        const InterpOptions& interp_options) const
 {
     if (!hasDataForTime(timestamp, max_time_diff))
         return {};
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (debug) loginf << "ReconstructorTarget: groundBitAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "ReconstructorTarget: groundBitAt: t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
         [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.ground_bit_.has_value(); },
-        debug);
+        interp_options);
 
     bool lower_has_val = lower_tr && lower_tr->ground_bit_.has_value();
     bool upper_has_val = upper_tr && upper_tr->ground_bit_.has_value();
@@ -1193,19 +1302,19 @@ boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime
 
 boost::optional<double> ReconstructorTarget::groundSpeedAt (boost::posix_time::ptime timestamp,
                                                             boost::posix_time::time_duration max_time_diff,
-                                                            bool debug) const
+                                                            const InterpOptions& interp_options) const
 {
     if (!hasDataForTime(timestamp, max_time_diff))
         return {};
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (debug) loginf << "ReconstructorTarget: groundSpeedAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "ReconstructorTarget: groundSpeedAt: t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
         [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.velocity_.has_value(); },
-        debug);
+        interp_options);
 
     bool lower_has_val = lower_tr && lower_tr->velocity_.has_value();
     bool upper_has_val = upper_tr && upper_tr->velocity_.has_value();

@@ -72,6 +72,37 @@ class ReconstructorTarget
         size_t num_rec_interp_failed        = 0;
     };
 
+    struct InterpOptions
+    {
+        enum class InitMode
+        {
+            First = 0,
+            Last,
+            FirstValid,
+            RecNum
+        };
+
+        InterpOptions() {}
+
+        InterpOptions& initFirst() { init_mode_ = InitMode::First; return *this; }
+        InterpOptions& initLast() { init_mode_ = InitMode::Last; return *this; }
+        InterpOptions& initFirstValid() { init_mode_ = InitMode::FirstValid; return *this; }
+        InterpOptions& initRecNum(unsigned long rec_num) { init_mode_ = InitMode::RecNum; init_rec_num_ = rec_num; return *this; }
+
+        InterpOptions& enableDebug(bool ok) { debug_ = ok; return *this; }
+
+        InitMode initMode() const { return init_mode_; }
+        unsigned long initRecNum() const { return init_rec_num_; }
+
+        bool debug() const { return debug_; }
+
+    private:
+        InitMode      init_mode_    = InitMode::FirstValid;
+        unsigned long init_rec_num_ = 0;
+
+        bool debug_ = false;
+    };
+
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,
                       dbContent::targetReport::ReconstructorInfo*> ReconstructorInfoPair; // both can be nullptr
 
@@ -159,11 +190,11 @@ class ReconstructorTarget
     bool isTimeInside (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     bool hasDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
-            // TODO lambda for selective data
+    // TODO lambda for selective data
     ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp,
-                                  boost::posix_time::time_duration d_max,
-                                  const InfoValidFunc& tr_valid_func = InfoValidFunc(),
-                                  bool debug = false) const;
+                                   boost::posix_time::time_duration d_max,
+                                   const InfoValidFunc& tr_valid_func = InfoValidFunc(),
+                                   const InterpOptions& interp_options = InterpOptions()) const;
     ReferencePair refDataFor (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
     //    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timesFor (
@@ -209,13 +240,13 @@ class ReconstructorTarget
 
     boost::optional<float> modeCCodeAt (boost::posix_time::ptime timestamp,
                                         boost::posix_time::time_duration max_time_diff,
-                                        bool debug = false) const;
+                                        const InterpOptions& interp_options = InterpOptions()) const;
     boost::optional<bool> groundBitAt (boost::posix_time::ptime timestamp,
                                        boost::posix_time::time_duration max_time_diff,
-                                       bool debug = false) const;
+                                       const InterpOptions& interp_options = InterpOptions()) const;
     boost::optional<double> groundSpeedAt (boost::posix_time::ptime timestamp,
                                            boost::posix_time::time_duration max_time_diff,
-                                           bool debug = false) const; // m/s
+                                           const InterpOptions& interp_options = InterpOptions()) const; // m/s
 
     ComparisonResult compareModeCCode (const dbContent::targetReport::ReconstructorInfo& tr,
                                       boost::posix_time::time_duration max_time_diff, float max_alt_diff,
@@ -254,6 +285,13 @@ class ReconstructorTarget
     static void addPredictionToGlobalStats(const reconstruction::PredictionStats& s);
 
   protected:
+    enum class TargetReportSkipResult
+    {
+        Valid = 0,
+        SkipReference,
+        SkipFunc
+    };
+
     bool hasTracker() const;
     void reinitTracker();
     void reinitChain();
@@ -265,8 +303,8 @@ class ReconstructorTarget
                          bool add_to_tracker,
                          bool reestimate);
 
-    bool skipTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
-                           const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
+    TargetReportSkipResult skipTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
+                                             const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
 
     std::unique_ptr<reconstruction::KalmanChain> chain_;
 
