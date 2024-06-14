@@ -19,13 +19,13 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/variableview.h"
         "${CMAKE_CURRENT_LIST_DIR}/variableviewconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/variableviewdatawidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/variableviewannotationwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/chartview.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewscreenshotdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/colorscales.h"
         "${CMAKE_CURRENT_LIST_DIR}/colormap_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/colormap.h"
-        "${CMAKE_CURRENT_LIST_DIR}/viewevaldata.h"
-        "${CMAKE_CURRENT_LIST_DIR}/viewevaldatawidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/colormapwidget.h"
         
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/view.cpp"
@@ -42,9 +42,9 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/variableview.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/variableviewconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/variableviewdatawidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/variableviewannotationwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/chartview.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewscreenshotdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/colormap.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/viewevaldata.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/viewevaldatawidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/colormapwidget.cpp"
 )

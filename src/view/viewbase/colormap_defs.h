@@ -17,27 +17,54 @@
 
 #pragma once
 
+#include <vector>
+
 namespace colorscale
 {
     enum class ColorScale
     {
         Parula = 0, 
+        Parula_Cut,
         Heat, 
         Jet, 
         Turbo, 
         Hot, 
         Gray, 
         Magma, 
+        Magma_Cut,
         Inferno, 
+        Inferno_Cut,
         Plasma, 
+        Plasma_Cut,
         Viridis, 
+        Viridis_Cut,
         Cividis, 
         Github, 
+        Red,
+        Green,
+        Blue,
         Cubehelix, 
         HSV, 
         Green2Red,
 
+        Custom,
         NumColorScales
     };
+
+    static const std::vector<ColorScale> UsedColorScales = 
+    {
+        ColorScale::Parula_Cut,
+        ColorScale::Gray,
+        ColorScale::Magma_Cut,
+        ColorScale::Inferno_Cut,
+        ColorScale::Plasma_Cut,
+        ColorScale::Viridis_Cut,
+        ColorScale::Cividis,
+        ColorScale::Red,
+        ColorScale::Green,
+        ColorScale::Blue,
+        ColorScale::Cubehelix,
+        ColorScale::Green2Red
+    }; 
 
 } // namespace colorscale

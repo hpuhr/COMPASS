@@ -30,6 +30,7 @@
 #include "logger.h"
 #include "latexvisitor.h"
 #include "evaluationmanager.h"
+#include "viewpointgenerator.h"
 
 using namespace dbContent;
 
@@ -183,6 +184,16 @@ void HistogramView::accept(LatexVisitor& v)
 
 /**
  */
+std::set<std::string> HistogramView::acceptedAnnotationFeatureTypes() const
+{
+    std::set<std::string> types;
+    types.insert(ViewPointGenFeatureHistogram::FeatureName);
+
+    return types;
+}
+
+/**
+ */
 bool HistogramView::useLogScale() const
 {
     return settings_.use_log_scale;
@@ -217,7 +228,6 @@ void HistogramView::updateSelection()
     //    else
     //        widget_->getDataWidget()->resetModels();  // just updates the checkboxes
 }
-
 
 /**
  */

@@ -461,6 +461,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistanceRMS::getTargetEr
 
     //addAnnotationFeatures(*viewable_ptr, false, add_highlight);
     addAnnotations(*viewable_ptr, false, true);
+    addCustomAnnotationsToViewable(*viewable_ptr);
 
     return viewable_ptr;
 }

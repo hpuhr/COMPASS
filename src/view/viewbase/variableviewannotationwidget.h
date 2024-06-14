@@ -17,35 +17,32 @@
 
 #pragma once
 
-#include "viewevaldata.h"
-
 #include <QWidget>
 
-class QLabel;
+class VariableView;
+
+class QComboBox;
 
 /**
 */
-class ViewEvalDataIDWidget : public QWidget
+class VariableViewAnnotationWidget : public QWidget
 {
     Q_OBJECT
 public:
-    ViewEvalDataIDWidget(QWidget* parent = nullptr);
-    virtual ~ViewEvalDataIDWidget();
+    VariableViewAnnotationWidget(const VariableView* view, QWidget* parent = nullptr);
+    virtual ~VariableViewAnnotationWidget();
 
-    void setID(const ViewEvalDataID& id,
-               bool notify_changes = true);
+    void updateContent();
 
-    ViewEvalDataID getID() const;
+    std::string currentID() const;
 
 signals:
     void idChanged();
 
 private:
     void createUI();
-    void updateContent();
 
-    QLabel* eval_results_grpreq_label_ = nullptr;
-    QLabel* eval_results_id_label_     = nullptr;
+    const VariableView* view_ = nullptr;
 
-    ViewEvalDataID id_;
+    QComboBox* combo_ = nullptr;
 };

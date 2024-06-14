@@ -45,20 +45,29 @@ GridView::GridView(const std::string& class_id,
                    ViewManager& view_manager)
 :   VariableView(class_id, instance_id, w, view_manager)
 {
-    const std::vector<PropertyDataType> valid_types = { PropertyDataType::BOOL,
-                                                        PropertyDataType::CHAR,
-                                                        PropertyDataType::UCHAR,
-                                                        PropertyDataType::INT,
-                                                        PropertyDataType::UINT,
-                                                        PropertyDataType::LONGINT,
-                                                        PropertyDataType::ULONGINT,
-                                                        PropertyDataType::FLOAT,
-                                                        PropertyDataType::DOUBLE,
-                                                        PropertyDataType::TIMESTAMP };
+    const std::vector<PropertyDataType> valid_types_xy = { PropertyDataType::BOOL,
+                                                           PropertyDataType::CHAR,
+                                                           PropertyDataType::UCHAR,
+                                                           PropertyDataType::INT,
+                                                           PropertyDataType::UINT,
+                                                           PropertyDataType::LONGINT,
+                                                           PropertyDataType::ULONGINT,
+                                                           PropertyDataType::FLOAT,
+                                                           PropertyDataType::DOUBLE,
+                                                           PropertyDataType::TIMESTAMP };
+    const std::vector<PropertyDataType> valid_types_z =  { PropertyDataType::BOOL,
+                                                           PropertyDataType::CHAR,
+                                                           PropertyDataType::UCHAR,
+                                                           PropertyDataType::INT,
+                                                           PropertyDataType::UINT,
+                                                           PropertyDataType::LONGINT,
+                                                           PropertyDataType::ULONGINT,
+                                                           PropertyDataType::FLOAT,
+                                                           PropertyDataType::DOUBLE };
 
-    addVariable("data_var_x", "X"          , "x", META_OBJECT_NAME, DBContent::meta_var_longitude_.name(), true, false, valid_types);
-    addVariable("data_var_y", "Y"          , "y", META_OBJECT_NAME, DBContent::meta_var_latitude_.name() , true, false, valid_types);
-    addVariable("data_var_z", "Distributed", "z", META_OBJECT_NAME, DBContent::meta_var_mc_.name()       , true, false, valid_types);
+    addVariable("data_var_x", "X"          , "x", META_OBJECT_NAME, DBContent::meta_var_longitude_.name(), true, false, valid_types_xy);
+    addVariable("data_var_y", "Y"          , "y", META_OBJECT_NAME, DBContent::meta_var_latitude_.name() , true, false, valid_types_xy);
+    addVariable("data_var_z", "Distributed", "z", META_OBJECT_NAME, DBContent::meta_var_mc_.name()       , true, false, valid_types_z);
 
     // create sub done in init
 }

@@ -22,6 +22,7 @@
 //#include "dbcontent/variable/variable.h"
 #include "histogramviewchartview.h"
 #include "variableviewdatawidget.h"
+#include "histogram_raw.h"
 //#include "histogram.h"
 //#include "results/base.h"
 
@@ -100,16 +101,16 @@ protected:
     virtual void postUpdateVariableDataEvent() override final;
     virtual bool updateVariableDisplay() override final;
     virtual void updateFromVariables() override final;
-    virtual void updateFromResults() override final;
+    virtual void updateFromAnnotations() override final;
 
     void toolChanged_impl(int mode) override;
     void viewInfoJSON_impl(nlohmann::json& info) const override;
 
-    void resetCounts();
-
-    void updateGeneratorFromResults();
+    void resetHistogram();
+    void compileRawDataFromGenerator();
 
     bool updateChart();
+    bool updateChartFromVariable();
 
     void selectData(unsigned int index1, unsigned int index2);
     void zoomToSubrange(unsigned int index1, unsigned int index2);
@@ -126,4 +127,6 @@ protected:
 
     std::unique_ptr<QtCharts::HistogramViewChartView> chart_view_;
     std::unique_ptr<HistogramGenerator>               histogram_generator_;
+    RawHistogramCollection                            histogram_raw_;
+    std::string                                       x_axis_name_;
 };

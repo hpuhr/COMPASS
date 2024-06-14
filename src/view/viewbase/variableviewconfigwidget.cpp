@@ -19,7 +19,7 @@
 #include "variableview.h"
 #include "viewvariable.h"
 
-#include "viewevaldatawidget.h"
+#include "variableviewannotationwidget.h"
 
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableselectionwidget.h"
@@ -67,7 +67,7 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
         layout->addWidget(sel_widget);
     };
 
-    bool show_result = var_view_->showResults() && var_view_->hasResultID();
+    bool show_annotation = var_view_->showsAnnotation() && !var_view_->currentAnnotationID().empty();
 
     QWidget*     cfg_widget = new QWidget();
     QVBoxLayout* cfg_layout = new QVBoxLayout();
@@ -75,7 +75,7 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
     // variables
     {
         show_variables_box_ = new QRadioButton("Show Variable Data");
-        show_variables_box_->setChecked(!show_result);
+        show_variables_box_->setChecked(!show_annotation);
         UI_TEST_OBJ_NAME(show_variables_box_, show_variables_box_->text())
 
         connect(show_variables_box_, &QRadioButton::toggled, this, &VariableViewConfigWidget::dataSourceToggled);
@@ -95,23 +95,25 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
 
     //eval results
     {
-        show_eval_results_box_ = new QRadioButton("Show Evaluation Result Data");
-        show_eval_results_box_->setChecked(!show_result);
-        UI_TEST_OBJ_NAME(show_eval_results_box_, show_eval_results_box_->text())
+        show_annotations_box_ = new QRadioButton("Show Annotations");
+        show_annotations_box_->setChecked(!show_annotation);
+        UI_TEST_OBJ_NAME(show_annotations_box_, show_annotations_box_->text())
 
-        connect(show_eval_results_box_, &QRadioButton::toggled, this, &VariableViewConfigWidget::dataSourceToggled);
+        connect(show_annotations_box_, &QRadioButton::toggled, this, &VariableViewConfigWidget::dataSourceToggled);
 
-        cfg_layout->addWidget(show_eval_results_box_);
+        cfg_layout->addWidget(show_annotations_box_);
 
-        eval_id_widget_ = new ViewEvalDataIDWidget;
+        annotation_widget_ = new VariableViewAnnotationWidget(var_view_);
 
-        cfg_layout->addWidget(eval_id_widget_);
+        connect(annotation_widget_, &VariableViewAnnotationWidget::idChanged, this, &VariableViewConfigWidget::annotationIDChanged);
+
+        cfg_layout->addWidget(annotation_widget_);
     }
 
-    //deactivate eval result related ui if not supported by view
-    show_variables_box_->setVisible(var_view_->canShowResults());
-    show_eval_results_box_->setVisible(var_view_->canShowResults());
-    eval_id_widget_->setVisible(var_view_->canShowResults());
+    //deactivate annotations related ui if not supported by view
+    show_variables_box_->setVisible(var_view_->canShowAnnotations());
+    show_annotations_box_->setVisible(var_view_->canShowAnnotations());
+    annotation_widget_->setVisible(var_view_->canShowAnnotations());
 
     config_layout_ = new QVBoxLayout;
 
@@ -192,41 +194,32 @@ void VariableViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
     }
 
     //eval result related
-    info[ "eval_result_active" ] = show_eval_results_box_->isChecked();
-    info[ "eval_result_id"     ] = eval_id_widget_->getID().toString();
-}
-
-/**
-*/
-void VariableViewConfigWidget::updateEvalConfig()
-{
-    loginf << "VariableViewConfigWidget: updateEvalConfig";
-
-    assert(eval_id_widget_);
-    eval_id_widget_->setID(var_view_->resultID());
+    info[ "annotations_active" ] = show_annotations_box_->isChecked();
+    info[ "annotation_id"      ] = annotation_widget_->currentID();
 }
 
 /**
  */
 void VariableViewConfigWidget::updateConfig()
 {
-    bool has_result  = var_view_->hasResultID();
-    bool show_result = var_view_->showResults() && has_result;
+    bool has_annotations  = var_view_->hasAnnotations();
+    bool show_annotations = var_view_->showsAnnotation() && has_annotations;
 
-    show_eval_results_box_->blockSignals(true);
-    show_eval_results_box_->setChecked(show_result);
-    show_eval_results_box_->blockSignals(false);
+    show_annotations_box_->blockSignals(true);
+    show_annotations_box_->setChecked(show_annotations);
+    show_annotations_box_->blockSignals(false);
 
     show_variables_box_->blockSignals(true);
-    show_variables_box_->setChecked(!show_result);
+    show_variables_box_->setChecked(!show_annotations);
     show_variables_box_->blockSignals(false);
 
-    updateEvalConfig();
+    assert(annotation_widget_);
+    annotation_widget_->updateContent();
 
-    show_eval_results_box_->setEnabled(has_result);
+    show_annotations_box_->setEnabled(has_annotations);
 
-    eval_id_widget_->setEnabled(show_result);
-    variables_widget_->setEnabled(!show_result);
+    annotation_widget_->setEnabled(show_annotations);
+    variables_widget_->setEnabled(!show_annotations);
 }
 
 /**
@@ -234,9 +227,20 @@ void VariableViewConfigWidget::updateConfig()
 void VariableViewConfigWidget::dataSourceToggled()
 {
     //modify state in view based on selected radio button
-    bool show_results  = show_eval_results_box_->isChecked();
-    var_view_->showResults(show_results);
+    bool show_anno = show_annotations_box_->isChecked();
 
-    //then update config
+    if (show_anno)
+        var_view_->showAnnotation();
+    else
+        var_view_->showVariables();
+
+    //update ui
     updateConfig();
+}
+
+/**
+ */
+void VariableViewConfigWidget::annotationIDChanged()
+{
+    var_view_->setCurrentAnnotation(annotation_widget_->currentID());
 }

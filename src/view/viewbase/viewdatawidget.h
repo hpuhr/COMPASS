@@ -71,6 +71,9 @@ public:
 
     virtual QImage renderData();
 
+    QColor colorForDBContent(const std::string& dbcontent_name) const;
+    const std::map<std::string, QColor>& dbContentColors() const;
+
     static const double      MarkerSizePx;
     static const double      MarkerSizeSelectedPx;
 
@@ -105,8 +108,6 @@ protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
     void endTool();
-
-    QColor colorForDBContent(const std::string& dbcontent_name) const;
 
     const BufferData& viewData() const { return data_; }
     BufferData& viewData() { return data_; } //exposed because of selection

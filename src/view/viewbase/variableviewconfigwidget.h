@@ -27,7 +27,7 @@ namespace dbContent
 class ViewWidget;
 class VariableView;
 
-class ViewEvalDataIDWidget;
+class VariableViewAnnotationWidget;
 
 class QVBoxLayout;
 class QRadioButton;
@@ -63,17 +63,17 @@ protected:
     QVBoxLayout* configLayout() { return config_layout_; }
 
 private:
-    void updateEvalConfig();
     void dataSourceToggled();
+    void annotationIDChanged();
 
     VariableView* var_view_      = nullptr;
     QVBoxLayout*  config_layout_ = nullptr;
 
-    QRadioButton* show_variables_box_    = nullptr;
-    QRadioButton* show_eval_results_box_ = nullptr;
+    QRadioButton* show_variables_box_   = nullptr;
+    QRadioButton* show_annotations_box_ = nullptr;
 
-    QWidget*              variables_widget_ = nullptr;
-    ViewEvalDataIDWidget* eval_id_widget_   = nullptr;
+    QWidget*                      variables_widget_ = nullptr;
+    VariableViewAnnotationWidget* annotation_widget_   = nullptr;
 
     std::vector<dbContent::VariableSelectionWidget*> var_selection_widgets_;
 };

@@ -33,6 +33,7 @@
 #include "histogramgeneratorresults.h"
 #include "viewvariable.h"
 #include "property_templates.h"
+#include "viewpointgenerator.h"
 
 //#include "eval/results/extra/datasingle.h"
 //#include "eval/results/extra/datajoined.h"
@@ -95,9 +96,6 @@ QT_CHARTS_USE_NAMESPACE
 #define USE_NEW_SHIT
 
 using namespace EvaluationRequirementResult;
-
-
-
 using namespace std;
 
 /**
@@ -118,6 +116,8 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramViewWidget* view_widge
 
     setLayout(main_layout_);
 
+    x_axis_name_ = view_->variable(0).description();
+
     updateChart();
 }
 
@@ -127,16 +127,28 @@ HistogramViewDataWidget::~HistogramViewDataWidget() = default;
 
 /**
  */
+void HistogramViewDataWidget::resetHistogram()
+{
+    histogram_generator_.reset(); 
+    histogram_raw_.clear();
+
+    x_axis_name_ = "";
+}
+
+/**
+ */
 void HistogramViewDataWidget::updateDataEvent(bool requires_reset)
 {
-    histogram_generator_.reset(); //current generator makes no sense any more
+    //current generator makes no sense any more
+    resetHistogram();
 }
 
 /**
  */
 void HistogramViewDataWidget::resetVariableData()
 {
-    histogram_generator_.reset();
+    resetHistogram();
+
 }
 
 /**
@@ -169,9 +181,33 @@ bool HistogramViewDataWidget::updateVariableDisplay()
 
 /**
  */
-void HistogramViewDataWidget::updateFromResults()
+void HistogramViewDataWidget::updateFromAnnotations()
 {
-    updateGeneratorFromResults();
+    loginf << "HistogramViewDataWidget: updateFromAnnotations";
+
+    resetHistogram();
+
+    if (!view_->hasCurrentAnnotation())
+        return;
+
+    x_axis_name_ = view_->currentAnnotationID();
+
+    const auto& anno = view_->currentAnnotation();
+    if (anno.size() == 0)
+        return;
+
+    const auto& feature = anno[ 0 ];
+
+    if (!feature.is_object() || !feature.contains(ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram))
+        return;
+    
+    if (!histogram_raw_.fromJSON(feature[ ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram ]))
+    {
+        histogram_raw_.clear();
+        return;
+    }
+
+    loginf << "HistogramViewDataWidget: updateFromAnnotations: done";
 }
 
 /**
@@ -181,15 +217,17 @@ void HistogramViewDataWidget::updateFromVariables()
 {
     loginf << "HistogramViewDataWidget: updateVariableData";
 
-    histogram_generator_.reset();
-
-    if (viewData().empty())
-        return;
+    resetHistogram();
 
     assert(view_->numVariables() == 1);
     assert(view_->variable(0).hasVariable());
 
     auto& variable = view_->variable(0);
+
+    x_axis_name_ = variable.description();
+
+    if (viewData().empty())
+        return;
 
     dbContent::Variable*     data_var = variable.variablePtr();
     dbContent::MetaVariable* meta_var = variable.metaVariablePtr();
@@ -222,31 +260,23 @@ void HistogramViewDataWidget::updateFromVariables()
     if (generator->dataNotInBuffer())
         setVariableState(0, VariableState::MissingFromBuffer);
 
+    compileRawDataFromGenerator();
+
     loginf << "HistogramViewDataWidget: updateVariableData: done";
 }
 
 /**
+ * Creates raw histogram data from the current generator's results.
  */
-void HistogramViewDataWidget::updateGeneratorFromResults()
+void HistogramViewDataWidget::compileRawDataFromGenerator()
 {
-    loginf << "HistogramViewDataWidget: updateGeneratorFromResults";
+    histogram_raw_.clear();
 
-    histogram_generator_.reset();
+    if (!histogram_generator_ || !variablesOk() || !histogram_generator_->hasValidResult())
+        return;
 
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
-
-    if (eval_man.hasResults() && view_->showResults())
-    {
-        string eval_grpreq = view_->resultID().eval_results_grpreq;
-        string eval_id     = view_->resultID().eval_results_id;
-
-        histogram_generator_.reset(new HistogramGeneratorResults(eval_grpreq, eval_id));
-    }
-
-    if (histogram_generator_)
-        histogram_generator_->update();
-
-    loginf << "HistogramViewDataWidget: updateGeneratorFromResults: done";
+    //convert results to raw data
+    histogram_generator_->getResults().toRaw(histogram_raw_, dbContentColors(), ColorSelected);
 }
 
 /**
@@ -304,15 +334,9 @@ bool HistogramViewDataWidget::updateChart()
     chart->setBackgroundRoundness(0);
     chart->layout()->setContentsMargins(0, 0, 0, 0);
 
-    bool show_results  = view_->showResults();
     bool use_log_scale = view_->useLogScale();
 
-    QString x_axis_name;
-    if (show_results)
-        x_axis_name = QString(view_->resultID().description().c_str());
-    else
-        x_axis_name = QString(view_->variable(0).description().c_str());
-
+    QString x_axis_name = QString::fromStdString(x_axis_name_);
     QString y_axis_name = "Count";
 
     chart->legend()->setAlignment(Qt::AlignBottom);
@@ -358,19 +382,13 @@ bool HistogramViewDataWidget::updateChart()
         chart_series->attachAxis(chart_y_axis);
     };
 
-    //we obtain valid data if a generator has been created and if the needed data is in the buffer
-    bool has_data = (histogram_generator_ != nullptr && variablesOk());
+    //check if data is present/valid
+    bool has_data = histogram_raw_.hasData() && variablesOk();
 
     if (has_data)
     {
         //data available
-        
         chart->legend()->setVisible(true);
-        
-        const auto& results = histogram_generator_->getResults();
-
-        bool add_null      = results.hasNullValues();
-        bool has_selected  = results.hasSelectedValues();
 
         unsigned int max_count = 0;
 
@@ -386,52 +404,26 @@ bool HistogramViewDataWidget::updateChart()
         };
 
         //generate a bar set for each DBContent
-        for (const auto& elem : results.content_results)
-        {
-            const auto& r = elem.second;
 
-            const QString bar_legend_name = QString::fromStdString(elem.first) + " (" + QString::number(r.valid_count) + ")";
+        for (const auto& layer : histogram_raw_.layers())
+        {
+            const auto& histogram = layer.histogram;
+
+            const QString bar_legend_name = QString::fromStdString(layer.name);
 
             QBarSet* set = new QBarSet(bar_legend_name);
 
-            for (const auto& bin : r.bins)
+            for (const auto& bin : histogram.getBins())
                 addCount(set, bin.count);
             
-            if (add_null)
-                addCount(set, r.null_count);
-            
-            set->setColor(colorForDBContent(elem.first));
-            chart_series->append(set);
-        }
-
-        //generate selected bar set
-        if (has_selected)
-        {
-            const QString bar_legend_name = "Selected (" + QString::number(results.selected_count + results.null_selected_count) + ")";
-
-            QBarSet* set = new QBarSet(bar_legend_name);
-
-            for (auto bin : results.selected_counts)
-                addCount(set, bin);
-
-            if (add_null)
-                addCount(set, results.null_selected_count);
-
-            set->setColor(ColorSelected); 
+            set->setColor(layer.color);
             chart_series->append(set);
         }
 
         //create categories
         QStringList categories;
-        if (!results.content_results.empty())
-        {
-            const auto& r = results.content_results.begin()->second;
-            for (const auto& b : r.bins)
-                categories << QString::fromStdString(b.labels.label);
-        }
-
-        if (add_null)
-            categories << "NULL";
+        for (const auto& l : histogram_raw_.labels())
+            categories << QString::fromStdString(l);
 
         chart_x_axis->append(categories);
 
@@ -439,18 +431,6 @@ bool HistogramViewDataWidget::updateChart()
         max_count = std::max(max_count, (unsigned)1);
 
         generateYAxis(use_log_scale, max_count);
-
-        #if 0
-        //add outliers to legend
-        if (results.hasOutOfRangeValues())
-        {
-            auto outlier_count = results.not_inserted_count;
-
-            const QString name = "Out of range: " + QString::number(outlier_count);
-
-            chart_view_->addLegendOnlyItem(name, QColor(255, 255, 0));
-        }
-        #endif
     }
     else 
     {
@@ -532,6 +512,8 @@ void HistogramViewDataWidget::zoomToSubrange(unsigned int index1, unsigned int i
         //zoom to bin range and refill with data
         histogram_generator_->zoom(index1, index2);
 
+        //update raw data and chart
+        compileRawDataFromGenerator();
         updateChart();
     } 
 }

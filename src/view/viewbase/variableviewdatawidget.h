@@ -71,7 +71,7 @@ protected:
     virtual void postUpdateVariableDataEvent() = 0;
     virtual bool updateVariableDisplay() = 0;
     virtual void updateFromVariables();
-    virtual void updateFromResults() {}
+    virtual void updateFromAnnotations() {}
     virtual void updateVariableData(const std::string& dbcontent_name, Buffer& buffer) {}
 
 private:

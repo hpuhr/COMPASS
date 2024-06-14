@@ -396,7 +396,7 @@ void LatexVisitor::visit(HistogramView* e)
         return;
 
     // normal screenshot
-    QPixmap pmap = data_widget->renderPixmap();;
+    QPixmap pmap = data_widget->renderPixmap();
 
     QImage screenshot = pmap.toImage();
 

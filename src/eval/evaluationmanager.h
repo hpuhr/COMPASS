@@ -146,6 +146,9 @@ struct EvaluationManagerSettings
     unsigned int grid_num_cells_y     = 512;
     unsigned int grid_pixels_per_cell = 5;
 
+    //histogram generation
+    unsigned int histogram_num_bins = 20;
+
     //not written to config
     bool load_only_sector_data_ {true};
 

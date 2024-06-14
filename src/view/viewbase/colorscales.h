@@ -20,6 +20,7 @@
 #include "colormap_defs.h"
 
 #include <cmath>
+#include <vector>
 
 #include <Eigen/Core>
 
@@ -27,6 +28,8 @@ namespace colorscale
 {
     /***********************************************************************************************
      * Scale samples
+     * 
+     * See: https://github.com/yuki-koyama/tinycolormap
      ***********************************************************************************************/
 
     static const double ScaleParula[][3] =
@@ -44,7 +47,7 @@ namespace colorscale
         { 0.2111, 0.2253, 0.6505 },
         { 0.2099, 0.2315, 0.6629 },
         { 0.2084, 0.2377, 0.6753 },
-        { 0.2063, 0.244, 0.6878  },
+        { 0.2063, 0.244,  0.6878 },
         { 0.2038, 0.2503, 0.7003 },
         { 0.2006, 0.2568, 0.7129 },
         { 0.1968, 0.2632, 0.7255 },
@@ -74,14 +77,14 @@ namespace colorscale
         { 0.0148, 0.4246, 0.8793 },
         { 0.0184, 0.4288, 0.8779 },
         { 0.0223, 0.4329, 0.8763 },
-        { 0.0264, 0.437, 0.8747  },
-        { 0.0306, 0.441, 0.8729  },
+        { 0.0264, 0.437 , 0.8747 },
+        { 0.0306, 0.441 , 0.8729 },
         { 0.0349, 0.4449, 0.8711 },
         { 0.0394, 0.4488, 0.8692 },
         { 0.0437, 0.4526, 0.8672 },
         { 0.0477, 0.4564, 0.8652 },
         { 0.0514, 0.4602, 0.8632 },
-        { 0.0549, 0.464, 0.8611  },
+        { 0.0549, 0.464,  0.8611 },
         { 0.0582, 0.4677, 0.8589 },
         { 0.0612, 0.4714, 0.8568 },
         { 0.064,  0.4751, 0.8546 },
@@ -96,7 +99,7 @@ namespace colorscale
         { 0.0789, 0.5089, 0.8359 },
         { 0.0794, 0.5129, 0.8341 },
         { 0.0795, 0.5169, 0.8324 },
-        { 0.0793, 0.521, 0.8308  },
+        { 0.0793, 0.521,  0.8308 },
         { 0.0788, 0.5251, 0.8293 },
         { 0.0778, 0.5295, 0.828  },
         { 0.0764, 0.5339, 0.827  },
@@ -119,7 +122,7 @@ namespace colorscale
         { 0.0265, 0.6137, 0.8135 },
         { 0.0255, 0.6176, 0.8114 },
         { 0.0248, 0.6214, 0.8091 },
-        { 0.0243, 0.625, 0.8066  },
+        { 0.0243, 0.625,  0.8066 },
         { 0.0239, 0.6285, 0.8039 },
         { 0.0237, 0.6319, 0.801  },
         { 0.0235, 0.6352, 0.798  },
@@ -190,7 +193,7 @@ namespace colorscale
         { 0.5106, 0.7492, 0.4741 },
         { 0.5212, 0.7492, 0.4698 },
         { 0.5315, 0.7491, 0.4655 },
-        { 0.5418, 0.749, 0.4613  },
+        { 0.5418, 0.749,  0.4613 },
         { 0.5519, 0.7489, 0.4571 },
         { 0.5619, 0.7487, 0.4531 },
         { 0.5718, 0.7485, 0.449  },
@@ -200,13 +203,13 @@ namespace colorscale
         { 0.6103, 0.7473, 0.4335 },
         { 0.6197, 0.7469, 0.4298 },
         { 0.629,  0.7465, 0.4261 },
-        { 0.6382, 0.746, 0.4224  },
+        { 0.6382, 0.746,  0.4224 },
         { 0.6473, 0.7456, 0.4188 },
         { 0.6564, 0.7451, 0.4152 },
         { 0.6653, 0.7446, 0.4116 },
         { 0.6742, 0.7441, 0.4081 },
         { 0.683,  0.7435, 0.4046 },
-        { 0.6918, 0.743, 0.4011  },
+        { 0.6918, 0.743,  0.4011 },
         { 0.7004, 0.7424, 0.3976 },
         { 0.7091, 0.7418, 0.3942 },
         { 0.7176, 0.7412, 0.3908 },
@@ -218,7 +221,7 @@ namespace colorscale
         { 0.7679, 0.7372, 0.3706 },
         { 0.7761, 0.7364, 0.3673 },
         { 0.7843, 0.7357, 0.3639 },
-        { 0.7924, 0.735, 0.3606  },
+        { 0.7924, 0.735,  0.3606 },
         { 0.8005, 0.7343, 0.3573 },
         { 0.8085, 0.7336, 0.3539 },
         { 0.8166, 0.7329, 0.3506 },
@@ -244,7 +247,7 @@ namespace colorscale
         { 0.9708, 0.7303, 0.2696 },
         { 0.9773, 0.7326, 0.2634 },
         { 0.9831, 0.7355, 0.257  },
-        { 0.9882, 0.739, 0.2504  },
+        { 0.9882, 0.739,  0.2504 },
         { 0.9922, 0.7431, 0.2437 },
         { 0.9952, 0.7476, 0.2373 },
         { 0.9973, 0.7524, 0.231  },
@@ -254,7 +257,7 @@ namespace colorscale
         { 0.9985, 0.7726, 0.209  },
         { 0.9976, 0.7778, 0.2042 },
         { 0.9964, 0.7829, 0.1995 },
-        { 0.995,  0.788, 0.1949  },
+        { 0.995,  0.788,  0.1949 },
         { 0.9933, 0.7931, 0.1905 },
         { 0.9914, 0.7981, 0.1863 },
         { 0.9894, 0.8032, 0.1821 },
@@ -289,7 +292,7 @@ namespace colorscale
         { 0.9763, 0.9831, 0.0538 }
     };
 
-    extern const double ScaleHeat[][3] =
+    static const double ScaleHeat[][3] =
     {
         { 0.0, 0.0, 1.0 },
         { 0.0, 1.0, 1.0 },
@@ -298,7 +301,7 @@ namespace colorscale
         { 1.0, 0.0, 0.0 }
     };
 
-    extern const double ScaleJet[][3] = 
+    static const double ScaleJet[][3] = 
     {
         { 0.0, 0.0, 0.5 },
         { 0.0, 0.0, 1.0 },
@@ -311,7 +314,7 @@ namespace colorscale
         { 0.5, 0.0, 0.0 }
     };
 
-    extern const double ScaleTurbo[][3] = 
+    static const double ScaleTurbo[][3] = 
     {
         { 0.18995, 0.07176, 0.23217 },
         { 0.19483, 0.08339, 0.26149 },
@@ -571,7 +574,7 @@ namespace colorscale
         { 0.47960, 0.01583, 0.01055 }
     };
 
-    extern const double ScaleMagma[][3] = 
+    static const double ScaleMagma[][3] = 
     {
         { 0.001462, 0.000466, 0.013866 },
         { 0.002258, 0.001295, 0.018331 },
@@ -831,7 +834,7 @@ namespace colorscale
         { 0.987053, 0.991438, 0.749504 }
     };
 
-    extern const double ScaleInferno[][3] = 
+    static const double ScaleInferno[][3] = 
     {
         { 0.001462, 0.000466, 0.013866 },
         { 0.002267, 0.001270, 0.018570 },
@@ -1091,7 +1094,7 @@ namespace colorscale
         { 0.988362, 0.998364, 0.644924 }
     };
 
-    extern const double ScalePlasma[][3] = 
+    static const double ScalePlasma[][3] = 
     {
         { 0.050383, 0.029803, 0.527975 },
         { 0.063536, 0.028426, 0.533124 },
@@ -1351,7 +1354,7 @@ namespace colorscale
         { 0.940015, 0.975158, 0.131326 }
     };
 
-    extern const double ScaleViridis[][3] = 
+    static const double ScaleViridis[][3] = 
     {
         { 0.267004, 0.004874, 0.329415 },
         { 0.268510, 0.009605, 0.335427 },
@@ -1611,7 +1614,7 @@ namespace colorscale
         { 0.993248, 0.906157, 0.143936 }
     };
 
-    extern const double ScaleCividis[][3] = 
+    static const double ScaleCividis[][3] = 
     {
         { 0.0000, 0.1262, 0.3015 },
         { 0.0000, 0.1292, 0.3077 },
@@ -1871,7 +1874,7 @@ namespace colorscale
         { 1.0000, 0.9169, 0.2731 }
     };
 
-    extern const double ScaleGithub[][3] = 
+    static const double ScaleGithub[][3] = 
     {
         { 0.933333, 0.933333, 0.933333 },
         { 0.776470, 0.894117, 0.545098 },
@@ -1880,7 +1883,34 @@ namespace colorscale
         { 0.098039, 0.380392, 0.152941 }
     };
 
-    extern const double ScaleCubehelix[][3] = 
+    static const double ScaleRed[][3] = 
+    {
+        { 0.925490, 0.901961, 0.858824 },
+        { 0.894117, 0.776470, 0.545098 },
+        { 0.788235, 0.482352, 0.435294 },
+        { 0.603921, 0.137254, 0.231372 },
+        { 0.380392, 0.098039, 0.152941 }
+    };
+
+    static const double ScaleGreen[][3] = 
+    {
+        { 0.901961, 0.925490, 0.858824 },
+        { 0.776470, 0.894117, 0.545098 },
+        { 0.482352, 0.788235, 0.435294 },
+        { 0.137254, 0.603921, 0.231372 },
+        { 0.098039, 0.380392, 0.152941 }
+    };
+
+    static const double ScaleBlue[][3] = 
+    {
+        { 0.858824, 0.901961, 0.925490 },
+        { 0.545098, 0.776470, 0.894117 },
+        { 0.435294, 0.482352, 0.788235 },
+        { 0.231372, 0.137254, 0.603921 },
+        { 0.152941, 0.098039, 0.380392 }
+    };
+
+    static const double ScaleCubehelix[][3] = 
     {
         { 0.000000, 0.000000, 0.000000 },
         { 0.006716, 0.002119, 0.005970 },
@@ -2140,7 +2170,7 @@ namespace colorscale
         { 1.000000, 1.000000, 1.000000 }
     };
 
-    extern const double ScaleHSV[][3] = 
+    static const double ScaleHSV[][3] = 
     {
         {1.0000,0.0000,0.0000},
         {1.0000,0.0234,0.0000},
@@ -2400,10 +2430,10 @@ namespace colorscale
         {1.0000,0.0000,0.0234},
     };
 
-    extern const double ScaleGreen2Red[][3] = 
+    static const double ScaleGreen2Red[][3] = 
     {
         { 0.0, 1.0, 0.0 },
-        { 1.0, 1.0, 0.0 },
+        { 1.0, 0.8, 0.0 },
         { 1.0, 0.0, 0.0 }
     };
 
@@ -2424,10 +2454,11 @@ namespace colorscale
                              double& t1, 
                              size_t& idx0,
                              size_t& idx1,
-                             double t, size_t N)
+                             double t, 
+                             size_t N)
     {
-        const double  a  = clamp(t) * (N - 1);
-        const double  i  = std::floor(a);
+        const double a = clamp(t) * (N - 1);
+        const double i = std::floor(a);
 
         t1   = a - i;
         t0   = 1.0 - t1;
@@ -2438,7 +2469,8 @@ namespace colorscale
     /**
     */
     template <std::size_t N>
-    inline Eigen::Vector3d interpColor(double t, const double (&arr)[N][3])
+    inline Eigen::Vector3d interpColor(double t, 
+                                       const double (&arr)[N][3])
     {
         const double  a  = clamp(t) * (N - 1);
         const double  i  = std::floor(a);
@@ -2454,7 +2486,35 @@ namespace colorscale
 
     /**
     */
-    inline Eigen::Vector3d interpColor(double t, const std::vector<Eigen::Vector3d>& arr)
+    template <std::size_t N>
+    inline Eigen::Vector3d interpColor(double t, 
+                                       const double (&arr)[N][3],
+                                       size_t offs0,
+                                       size_t offs1)
+    {
+        if (offs0 == 0 && offs1 == 0)
+            return interpColor<N>(t, arr);
+
+        assert(N > offs0 + offs1);
+
+        const std::size_t n = N - offs0 - offs1;
+
+        const double  a  = clamp(t) * (n - 1);
+        const double  i  = std::floor(a);
+        const double  t1 = a - i;
+        const double  t0 = 1.0 - t1;
+        const double* c0 = arr[offs0 + static_cast<std::size_t>(i)];
+        const double* c1 = arr[offs0 + static_cast<std::size_t>(std::ceil(a))];
+
+        return Eigen::Vector3d(t0 * c0[ 0 ] + t1 * c1[ 0 ],
+                               t0 * c0[ 1 ] + t1 * c1[ 1 ],
+                               t0 * c0[ 2 ] + t1 * c1[ 2 ]);
+    }
+
+    /**
+    */
+    inline Eigen::Vector3d interpColor(double t, 
+                                       const std::vector<Eigen::Vector3d>& arr)
     {
         const size_t N = arr.size();
 
@@ -2474,29 +2534,38 @@ namespace colorscale
      * Sample functions
      ***********************************************************************************************/
 
-    inline Eigen::Vector3d sampleCustom(double t, const std::vector<Eigen::Vector3d>& samples)
+    inline Eigen::Vector3d sampleCustom(double t, 
+                                        const std::vector<Eigen::Vector3d>& samples)
     {
         return interpColor(t, samples);
     }
 
-    inline Eigen::Vector3d sampleParula(double t)
+    inline Eigen::Vector3d sampleParula(double t,
+                                        size_t offs0 = 0,
+                                        size_t offs1 = 0)
     {
-        return interpColor(t, ScaleParula);
-    }  
-
-    inline Eigen::Vector3d sampleHeat(double t)
-    {
-        return interpColor(t, ScaleHeat);
+        return interpColor(t, ScaleParula, offs0, offs1);
     }
 
-    inline Eigen::Vector3d sampleJet(double t)
+    inline Eigen::Vector3d sampleHeat(double t,
+                                      size_t offs0 = 0,
+                                      size_t offs1 = 0)
     {
-        return interpColor(t, ScaleJet);
+        return interpColor(t, ScaleHeat, offs0, offs1);
     }
 
-    inline Eigen::Vector3d sampleTurbo(double t)
+    inline Eigen::Vector3d sampleJet(double t,
+                                     size_t offs0 = 0,
+                                     size_t offs1 = 0)
     {
-        return interpColor(t, ScaleTurbo);
+        return interpColor(t, ScaleJet, offs0, offs1);
+    }
+
+    inline Eigen::Vector3d sampleTurbo(double t,
+                                       size_t offs0 = 0,
+                                       size_t offs1 = 0)
+    {
+        return interpColor(t, ScaleTurbo, offs0, offs1);
     }
 
     inline Eigen::Vector3d sampleHot(double t)
@@ -2522,49 +2591,86 @@ namespace colorscale
 
     inline Eigen::Vector3d sampleGray(double t)
     {
-        const double f = 1.0 - clamp(t);
+        const double f = 0.9 - 0.9 * clamp(t);
 
         return Eigen::Vector3d(f, f, f);
     }
 
-    inline Eigen::Vector3d sampleMagma(double t)
+    inline Eigen::Vector3d sampleMagma(double t,
+                                       size_t offs0 = 0,
+                                       size_t offs1 = 0)
     {
-        return interpColor(t, ScaleMagma);
+        return interpColor(t, ScaleMagma, offs0, offs1);
     }
     
-    inline Eigen::Vector3d sampleInferno(double t)
+    inline Eigen::Vector3d sampleInferno(double t,
+                                         size_t offs0 = 0,
+                                         size_t offs1 = 0)
     {
-        return interpColor(t, ScaleInferno);
+        return interpColor(t, ScaleInferno, offs0, offs1);
     }
     
-    inline Eigen::Vector3d samplePlasma(double t)
+    inline Eigen::Vector3d samplePlasma(double t,
+                                        size_t offs0 = 0,
+                                        size_t offs1 = 0)
     {
-        return interpColor(t, ScalePlasma);
+        return interpColor(t, ScalePlasma, offs0, offs1);
     }
     
-    inline Eigen::Vector3d sampleViridis(double t)
+    inline Eigen::Vector3d sampleViridis(double t,
+                                         size_t offs0 = 0,
+                                         size_t offs1 = 0)
     {
-        return interpColor(t, ScaleViridis);
+        return interpColor(t, ScaleViridis, offs0, offs1);
     }
     
-    inline Eigen::Vector3d sampleCividis(double t)
+    inline Eigen::Vector3d sampleCividis(double t,
+                                         size_t offs0 = 0,
+                                         size_t offs1 = 0)
     {
-        return interpColor(t, ScaleCividis);
+        return interpColor(t, ScaleCividis, offs0, offs1);
     }
     
-    inline Eigen::Vector3d sampleGithub(double t)
+    inline Eigen::Vector3d sampleGithub(double t,
+                                        size_t offs0 = 0,
+                                        size_t offs1 = 0)
     {
-        return interpColor(t, ScaleGithub);
+        return interpColor(t, ScaleGithub, offs0, offs1);
+    }
+
+    inline Eigen::Vector3d sampleRed(double t,
+                                     size_t offs0 = 0,
+                                     size_t offs1 = 0)
+    {
+        return interpColor(t, ScaleRed, offs0, offs1);
+    }
+
+    inline Eigen::Vector3d sampleGreen(double t,
+                                       size_t offs0 = 0,
+                                       size_t offs1 = 0)
+    {
+        return interpColor(t, ScaleGreen, offs0, offs1);
+    }
+
+    inline Eigen::Vector3d sampleBlue(double t,
+                                      size_t offs0 = 0,
+                                      size_t offs1 = 0)
+    {
+        return interpColor(t, ScaleBlue, offs0, offs1);
     }
     
-    inline Eigen::Vector3d sampleCubehelix(double t)
+    inline Eigen::Vector3d sampleCubehelix(double t,
+                                           size_t offs0 = 0,
+                                           size_t offs1 = 0)
     {
-        return interpColor(t, ScaleCubehelix);
+        return interpColor(t, ScaleCubehelix, offs0, offs1);
     }
     
-    inline Eigen::Vector3d sampleHSV(double t)
+    inline Eigen::Vector3d sampleHSV(double t,
+                                     size_t offs0 = 0,
+                                     size_t offs1 = 0)
     {
-        return interpColor(t, ScaleHSV);
+        return interpColor(t, ScaleHSV, offs0, offs1);
     }
 
     inline Eigen::Vector3d sampleGreen2Red(double t)
@@ -2580,6 +2686,8 @@ namespace colorscale
         {
             case ColorScale::Parula:
                 return sampleParula(t);
+            case ColorScale::Parula_Cut:
+                return sampleParula(t, 0, 20);
             case ColorScale::Heat:
                 return sampleHeat(t);
             case ColorScale::Jet:
@@ -2592,16 +2700,30 @@ namespace colorscale
                 return sampleGray(t);
             case ColorScale::Magma:
                 return sampleMagma(t);
+            case ColorScale::Magma_Cut:
+                return sampleMagma(t, 0, 20);
             case ColorScale::Inferno:
                 return sampleInferno(t);
+            case ColorScale::Inferno_Cut:
+                return sampleInferno(t, 0, 25);
             case ColorScale::Plasma:
                 return samplePlasma(t);
+            case ColorScale::Plasma_Cut:
+                return samplePlasma(t, 0, 20);
             case ColorScale::Viridis:
                 return sampleViridis(t);
+            case ColorScale::Viridis_Cut:
+                return sampleViridis(t, 0, 20);
             case ColorScale::Cividis:
                 return sampleCividis(t);
             case ColorScale::Github:
                 return sampleGithub(t);
+            case ColorScale::Red:
+                return sampleRed(t);
+            case ColorScale::Green:
+                return sampleGreen(t);
+            case ColorScale::Blue:
+                return sampleBlue(t);
             case ColorScale::Cubehelix:
                 return sampleCubehelix(t);
             case ColorScale::HSV:
@@ -2622,6 +2744,8 @@ namespace colorscale
         {
             case ColorScale::Parula:
                 return "Parula";
+            case ColorScale::Parula_Cut:
+                return "Parula";
             case ColorScale::Heat:
                 return "Heat";
             case ColorScale::Jet:
@@ -2631,25 +2755,41 @@ namespace colorscale
             case ColorScale::Hot:
                 return "Hot";
             case ColorScale::Gray:
-                return "Gray";
+                return "Monochrome Gray";
             case ColorScale::Magma:
+                return "Magma";
+            case ColorScale::Magma_Cut:
                 return "Magma";
             case ColorScale::Inferno:
                 return "Inferno";
+            case ColorScale::Inferno_Cut:
+                return "Inferno";
             case ColorScale::Plasma:
                 return "Plasma";
+            case ColorScale::Plasma_Cut:
+                return "Plasma";
             case ColorScale::Viridis:
+                return "Viridis";
+            case ColorScale::Viridis_Cut:
                 return "Viridis";
             case ColorScale::Cividis:
                 return "Cividis";
             case ColorScale::Github:
                 return "Github";
+            case ColorScale::Red:
+                return "Monochrome Red";
+            case ColorScale::Green:
+                return "Monochrome Green";
+            case ColorScale::Blue:
+                return "Monochrome Blue";
             case ColorScale::Cubehelix:
                 return "Cubehelix";
             case ColorScale::HSV:
                 return "HSV";
             case ColorScale::Green2Red:
                 return "Green2Red";
+            case ColorScale::Custom:
+                return "Custom";
             default:
                 break;
         }

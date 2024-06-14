@@ -16,6 +16,13 @@
  */
 
 #include "eval/results/position/positionbase.h"
+#include "eval/requirement/base/base.h"
+#include "evaluationmanager.h"
+
+#include "histograminitializer.h"
+#include "histogram.h"
+#include "viewpointgenerator.h"
+
 #include "logger.h"
 
 using namespace std;
@@ -105,6 +112,43 @@ const vector<double>& SinglePositionBase::values() const
     return values_;
 }
 
+/**
+*/
+void SinglePositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
+{
+    if (!json_annotations.is_array())
+        return;
+
+    HistogramT<double> histogram;
+
+    HistogramConfig config;
+    config.num_bins = eval_man_.settings().histogram_num_bins;
+    config.type     = HistogramConfig::Type::Range;
+
+    HistogramInitializer<double> init;
+    init.scan(values_);
+    init.initHistogram(histogram, config);
+
+    histogram.add(values_);
+
+    auto hraw = histogram.toRaw();
+
+    ViewPointGenAnnotation annotation("", true);
+
+    std::string name = reqGrpId() + ":" + resultId();
+
+    std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
+    feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
+    feat_h->setName(name);
+
+    annotation.addFeature(std::move(feat_h));
+
+    nlohmann::json feat_json;
+    annotation.toJSON(feat_json);
+
+    json_annotations.push_back(feat_json);
+}
+
 /****************************************************************************
  * JoinedPositionBase
  ****************************************************************************/
@@ -168,6 +212,45 @@ void JoinedPositionBase::updateToChanges_impl()
         num_failed_      += single_result->numFailed();
     }
 
+}
+
+/**
+*/
+void JoinedPositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
+{
+    if (!json_annotations.is_array())
+        return;
+
+    HistogramT<double> histogram;
+
+    HistogramConfig config;
+    config.num_bins = eval_man_.settings().histogram_num_bins;
+    config.type     = HistogramConfig::Type::Range;
+
+    auto v = values();
+
+    HistogramInitializer<double> init;
+    init.scan(v);
+    init.initHistogram(histogram, config);
+
+    histogram.add(v);
+
+    auto hraw = histogram.toRaw();
+
+    ViewPointGenAnnotation annotation("", true);
+
+    std::string name = reqGrpId() + ":" + resultId();
+
+    std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
+    feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
+    feat_h->setName(name);
+
+    annotation.addFeature(std::move(feat_h));
+
+    nlohmann::json feat_json;
+    annotation.toJSON(feat_json);
+
+    json_annotations.push_back(feat_json);
 }
 
 }

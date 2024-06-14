@@ -107,8 +107,8 @@ bool VariableViewDataWidget::redrawData_impl(bool recompute)
 
         resetVariableStates();
 
-        if (variable_view_->showResults())
-            updateFromResults();
+        if (variable_view_->showsAnnotation())
+            updateFromAnnotations();
         else
             updateFromVariables();
         

@@ -18,7 +18,11 @@
 #include "colormap.h"
 #include "colorscales.h"
 
+#include "logger.h"
+
 #include <QComboBox>
+#include <QLabel>
+#include <QGridLayout>
 
 namespace
 {
@@ -110,13 +114,44 @@ ColorMap::ColorMap()
     //init special colors
     special_colors_.resize(NumSpecialColors);
 
-    special_colors_[ SpecialColorSelected ] = Qt::darkYellow;
-    special_colors_[ SpecialColorNull     ] = Qt::darkMagenta;
+    special_colors_[ SpecialColorSelected ] = Qt::yellow;
+    special_colors_[ SpecialColorNull     ] = Qt::magenta;
+
+    //init to valid map
+    create(ColorScale::Green2Red, 5, ColorMap::Type::Linear);
 }
 
 /**
 */
 ColorMap::~ColorMap() = default;
+
+/**
+*/
+bool ColorMap::valid() const
+{
+    return (n_colors_ >= 1);
+}
+
+/**
+*/
+bool ColorMap::canSampleValues() const
+{
+    return value_range_.has_value();
+}
+
+/**
+*/
+ColorMap::ColorScale ColorMap::colorScale() const
+{
+    return scale_;
+}
+
+/**
+*/
+size_t ColorMap::colorSteps() const
+{
+    return steps_;
+}
 
 /**
 */
@@ -231,10 +266,9 @@ QComboBox* ColorMap::generateScaleSelection(ColorScale scale_default)
 
     std::map<QString, std::pair<QImage, ColorScale>> entries;
 
-    for (int i = 0; i < (int)ColorScale::NumColorScales; ++i)
+    for (auto scale : colorscale::UsedColorScales)
     {
-        ColorScale scale = (ColorScale)i;
-        QString    name  = QString::fromStdString(colorscale::colorScale2String(scale));
+        QString name = QString::fromStdString(colorscale::colorScale2String(scale));
 
         QImage img;
         generateScaleImage(img, scale, IconW, IconH);
@@ -260,14 +294,22 @@ QComboBox* ColorMap::generateScaleSelection(ColorScale scale_default)
 /**
 */
 void ColorMap::create(const std::vector<QColor>& colors,
-                      Type type)
+                      Type type,
+                      ColorScale scale,
+                      size_t steps,
+                      const OValueRange& value_range)
 {
-    
     assert(type != Type::Binary   || colors.size() == 2);
     assert(type != Type::Discrete || colors.size() >= 1);
     assert(type != Type::Linear   || colors.size() >= 3);
 
-    type_ = type;
+    assert(!value_range.has_value() || value_range.value().first <= value_range.value().second);
+
+    type_          = type;
+    scale_         = scale;
+    steps_         = steps;
+
+    value_range_   = value_range;
 
     colors_        = colors;
     value_factors_ = valueFactors(colors_.size());
@@ -276,15 +318,25 @@ void ColorMap::create(const std::vector<QColor>& colors,
 
 /**
 */
+void ColorMap::create(const std::vector<QColor>& colors,
+                      Type type,
+                      const OValueRange& value_range)
+{
+    create(colors, type, ColorScale::Custom, colors.size(), value_range);
+}
+
+/**
+*/
 void ColorMap::create(const QColor& color_min, 
                       const QColor& color_max, 
                       size_t n,
-                      Type type)
+                      Type type,
+                      const OValueRange& value_range)
 {
     assert(n >= 1);
 
     auto colors = ColorMap::sample(color_min, color_max, numColorsFromType(type, n));
-    create(colors, type);
+    create(colors, type, ColorScale::Custom, n, value_range);
 }
 
 /**
@@ -293,24 +345,26 @@ void ColorMap::create(const QColor& color_min,
                       const QColor& color_mid, 
                       const QColor& color_max, 
                       size_t n,
-                      Type type)
+                      Type type,
+                      const OValueRange& value_range)
 {
     assert(n >= 1);
     
     auto colors = ColorMap::sample(color_min, color_mid, color_max, numColorsFromType(type, n));
-    create(colors, type);
+    create(colors, type, ColorScale::Custom, n, value_range);
 }
 
 /**
 */
 void ColorMap::create(ColorScale scale,
                       size_t n,
-                      Type type)
+                      Type type,
+                      const OValueRange& value_range)
 {
     assert(n >= 1);
 
     auto colors = ColorMap::sample(scale, numColorsFromType(type, n));
-    create(colors, type);
+    create(colors, type, scale, n, value_range);
 }
 
 /**
@@ -392,49 +446,78 @@ QColor ColorMap::sample(double t) const
 
 /**
 */
-QColor ColorMap::sampleValue(double v, 
-                             double vmin, 
-                             double vmax) const
+QColor ColorMap::sampleValue(double v) const
 {
-    assert(vmin <= vmax);
+    assert(canSampleValues());
 
-    const double vrange = vmax - vmin;
+    auto range = activeRange();
+
+    const double vrange = range.second - range.first;
     if (vrange < 1e-12)
         return colors_.front();
     
-    const double t = (v - vmin) / vrange;
+    const double t = (v - range.first) / vrange;
     
     return sample(t);
 }
 
 /**
 */
-QColor ColorMap::sampleValueSymm(double v, 
-                                 double vmax) const
+ColorMap::ValueRange ColorMap::activeRange() const
 {
-    const double vmax_abs = std::fabs(vmax);
-    return sampleValue(v, -vmax_abs, vmax_abs);
+    assert(canSampleValues());
+
+    double vmin = value_range_.value().first;
+    double vmax = value_range_.value().second;
+
+    if (smaple_values_symm_)
+    {
+        const double vmax_abs = std::max(std::fabs(vmin), std::fabs(vmax));
+
+        vmin = -vmax_abs;
+        vmax =  vmax_abs;
+    }
+
+    return std::make_pair(vmin, vmax);
 }
 
 /**
 */
-std::vector<std::pair<QColor, std::string>> ColorMap::getDescription(double vmin, 
-                                                                     double vmax) const
+std::vector<std::pair<QColor, std::string>> ColorMap::getDescription(bool add_sel_color,
+                                                                     bool add_null_color) const
 {
+    if (!valid() || !canSampleValues())
+        return std::vector<std::pair<QColor, std::string>>();
+
     std::vector<std::pair<QColor, std::string>> descr;
 
-    descr.emplace_back(colors_.front(), "< " + std::to_string(vmin));
+    auto range = activeRange();
 
-    const double vrange = vmax - vmin;
-
-    for (size_t i = 1; i < n_colors_ - 1; ++i)
+    const double vrange = range.second - range.first;
+    if (vrange < 1e-12 || numColors() == 1)
     {
-        const double v0 = vmin + value_factors_[ i     ] * vrange;
-        const double v1 = vmin + value_factors_[ i + 1 ] * vrange;
-        descr.emplace_back(colors_[ i ], ">= " + std::to_string(v0) + " < " + std::to_string(v1));
+        descr.emplace_back(colors_.front(), " = " + std::to_string(range.first));
+    }
+    else
+    {
+        descr.emplace_back(colors_.front(), "< " + std::to_string(range.first));
+
+        for (size_t i = 1; i < n_colors_ - 1; ++i)
+        {
+            const double v0 = range.first + value_factors_[ i     ] * vrange;
+            const double v1 = range.first + value_factors_[ i + 1 ] * vrange;
+
+            descr.emplace_back(colors_[ i ], std::to_string(v0) + " - " + std::to_string(v1));
+        }
+
+        descr.emplace_back(colors_.back(), ">= " + std::to_string(range.second));
     }
 
-    descr.emplace_back(colors_.back(), ">= " + std::to_string(vmax));
+    if (add_sel_color)
+        descr.emplace_back(specialColor(SpecialColor::SpecialColorSelected), "Selected");
+
+    if (add_null_color)
+        descr.emplace_back(specialColor(SpecialColor::SpecialColorNull), "NULL");
 
     return descr;
 }

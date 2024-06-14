@@ -256,6 +256,9 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("grid_num_cells_y", &settings_.grid_num_cells_y, Settings().grid_num_cells_y);
     registerParameter("grid_pixels_per_cell", &settings_.grid_pixels_per_cell, Settings().grid_pixels_per_cell);
 
+    //histogram generation
+    registerParameter("histogram_num_bins", &settings_.histogram_num_bins, Settings().histogram_num_bins);
+    
     registerParameter("warning_shown", &settings_.warning_shown_, Settings().warning_shown_);
 
     createSubConfigurables();

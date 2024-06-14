@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "histogram_raw.h"
+
 #include <vector>
 #include <map>
 #include <memory>
@@ -112,6 +114,10 @@ public:
         {
             return (not_inserted_count > 0);
         }
+
+        void toRaw(RawHistogramCollection& collection, 
+                   const std::map<std::string, QColor>& color_map = std::map<std::string, QColor>(),
+                   const QColor& selection_color = QColor()) const;
         
         ContentResults            content_results;         //results per content type
         std::vector<unsigned int> valid_counts;            //valid data per bin (over multiple content types)

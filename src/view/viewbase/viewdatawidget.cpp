@@ -85,7 +85,7 @@ unsigned int ViewDataWidget::loadedDataCount()
 bool ViewDataWidget::showsData() const
 {
     //the view needs to obtain data, and the last redraw needs to be a valid one.
-    return (hasData() && drawn_);
+    return drawn_;
 }
 
 /**
@@ -93,6 +93,13 @@ bool ViewDataWidget::showsData() const
 QColor ViewDataWidget::colorForDBContent(const std::string& dbcontent_name) const
 {
     return dbc_colors_.at(dbcontent_name);
+}
+
+/**
+*/
+const std::map<std::string, QColor>& ViewDataWidget::dbContentColors() const
+{
+    return dbc_colors_;
 }
 
 /**

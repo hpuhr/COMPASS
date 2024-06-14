@@ -19,7 +19,6 @@
 
 #include "view.h"
 #include "property.h"
-#include "viewevaldata.h"
 
 #include <memory>
 #include <vector>
@@ -34,6 +33,8 @@ class ViewableDataConfig;
 class VariableView : public View
 {
 public:
+    typedef std::map<std::string, std::vector<nlohmann::json>> AnnotationMap;
+
     VariableView(const std::string& class_id, 
                  const std::string& instance_id,
                  ViewContainer* w,
@@ -47,14 +48,20 @@ public:
 
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override final;
 
-    virtual bool canShowResults() const { return false; }
+    virtual bool canShowAnnotations() const { return false; }
 
-    bool showResults() const;
-    void showResults(bool value);
+    void showVariables();
+    bool showsVariables() const;
 
-    bool hasResultID() const;
-    const ViewEvalDataID& resultID() const;
-    void resultID(const ViewEvalDataID& id);
+    void showAnnotation();
+    bool showsAnnotation() const;
+    void setCurrentAnnotation(const std::string& id);
+    bool hasAnnotations() const;
+
+    const AnnotationMap& annotations() const;
+    const std::string& currentAnnotationID() const;
+    const std::vector<nlohmann::json>& currentAnnotation() const;
+    bool hasCurrentAnnotation() const;
 
     bool hasViewPoint () { return current_view_point_ != nullptr; }
     const ViewableDataConfig& viewPoint() { assert (hasViewPoint()); return *current_view_point_; }
@@ -77,6 +84,8 @@ protected:
 
     virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) = 0;
 
+    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const { return {}; }
+
     virtual void unshowViewPoint(const ViewableDataConfig* vp) {}
     virtual void showViewPoint(const ViewableDataConfig* vp) {}
 
@@ -85,16 +94,22 @@ protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
 private:
-    void resultsChanged();
-    void onShowResultsChanged(bool update_config_widget);
-
     VariableViewDataWidget* getDataWidget();
     VariableViewConfigWidget* getConfigWidget();
 
+    void clearAnnotations();
+    void scanViewPointForAnnotations();
+    void onShowAnnotationChanged(bool update_config_widget);
+    void onEvalResultsChanged();
+
+    void showVariables(bool force, bool update_config);
+    void showAnnotation(bool force, bool update_config);
+
     std::vector<std::unique_ptr<ViewVariable>> variables_;
 
-    ViewEvalDataID eval_result_id_;
-    bool           show_results_ = false;
+    AnnotationMap annotations_;
+    std::string   current_annotation_id_;
+    bool          show_annotation_ = false;
 
     const ViewableDataConfig* current_view_point_ {nullptr};
 };

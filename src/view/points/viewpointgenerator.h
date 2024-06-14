@@ -18,10 +18,12 @@
 #pragma once
 
 #include "rasterreference.h"
+#include "histogram_raw.h"
 
 #include <memory>
 #include <vector>
 #include <map>
+#include <set>
 
 #include <Eigen/Core>
 
@@ -84,23 +86,22 @@ private:
 class ViewPointGenFeature
 {
 public:
-    ViewPointGenFeature(const std::string& type = FeatureTypeNameFeat);
+    ViewPointGenFeature(const std::string& type);
     virtual ~ViewPointGenFeature() = default;
 
+    void setName(const std::string& name) { name_ = name; }
     void setColor(const QColor& c) { color_ = c; }
 
     void toJSON(nlohmann::json& j) const;
     void print(std::ostream& strm, const std::string& prefix = "") const;
 
-    virtual size_t size() const = 0;
-    virtual std::string name() const = 0;
+    const std::string& name() const { return name_; } 
+    const std::string& type() const { return type_; }
 
+    virtual size_t size() const = 0;
+    
     static const std::string FeatureTypeFieldName;
-    static const std::string FeatureTypeNameFeat;
-    static const std::string FeatureFieldNameGeom;
-    static const std::string FeatureFieldNameGeomType;
-    static const std::string FeatureFieldNameCoords;
-    static const std::string FeatureFieldNameColors;
+    static const std::string FeatureTypeFieldType;
     static const std::string FeatureFieldNameProps;
     static const std::string FeatureFieldNamePropColor;
 
@@ -110,6 +111,7 @@ protected:
     QColor color_;
 
 private:
+    std::string name_;
     std::string type_;
 };
 
@@ -118,19 +120,22 @@ private:
 class ViewPointGenFeaturePointGeometry : public ViewPointGenFeature
 {
 public:
-    ViewPointGenFeaturePointGeometry(const std::string& geom_type,
+    ViewPointGenFeaturePointGeometry(const std::string& type,
                                      const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
                                      const std::vector<QColor>& colors = std::vector<QColor>());
     virtual ~ViewPointGenFeaturePointGeometry() = default;
 
     virtual void reserve(size_t n, bool reserve_cols);
     virtual size_t size() const override { return positions_.size(); }
-    virtual std::string name() const override { return geom_type_; }
 
     void addPoint(const Eigen::Vector2d& pos, 
                   const boost::optional<QColor>& color = boost::optional<QColor>());
     void addPoints(const std::vector<Eigen::Vector2d>& positions,
                    const boost::optional<std::vector<QColor>>& colors = boost::optional<std::vector<QColor>>());
+
+    static const std::string FeatureFieldNameGeom;
+    static const std::string FeatureFieldNameCoords;
+    static const std::string FeatureFieldNameColors;
 
 protected:
     virtual void toJSON_impl(nlohmann::json& j) const override;
@@ -139,7 +144,6 @@ protected:
     virtual void writeProperties(nlohmann::json& j) const {};
 
 private:
-    std::string                  geom_type_;
     std::vector<Eigen::Vector2d> positions_;
     std::vector<QColor>          colors_;
 };
@@ -163,7 +167,7 @@ public:
                               const std::vector<QColor>& colors = std::vector<QColor>());
     virtual ~ViewPointGenFeaturePoints() = default;
 
-    static const std::string FeaturePointsTypeName;
+    static const std::string FeatureName;
     static const std::string FeaturePointsFieldNameSymbol;
     static const std::string FeaturePointsFieldNameSymbolSize;
 
@@ -193,8 +197,8 @@ public:
                                   const std::vector<QColor>& colors = std::vector<QColor>());
     virtual ~ViewPointGenFeatureLineString() = default;
 
-    static const std::string FeatureLineStringTypeName;
-    static const std::string FeatureLineStringInterpTypeName;
+    static const std::string FeatureName;
+    static const std::string FeatureNameInterp;
     static const std::string FeatureLineStringFieldNameLineWidth;
 
 protected:
@@ -214,7 +218,7 @@ public:
                              const std::vector<QColor>& colors = std::vector<QColor>());
     virtual ~ViewPointGenFeatureLines() = default;
 
-    static const std::string FeatureLinesTypeName;
+    static const std::string FeatureName;
     static const std::string FeatureLinesFieldNameLineWidth;
 
 protected:
@@ -241,7 +245,7 @@ public:
     void addSize(const Eigen::Vector3d& size);
     void addSizes(const std::vector<Eigen::Vector3d>& sizes);
 
-    static const std::string FeatureErrEllipsesTypeName;
+    static const std::string FeatureName;
     static const std::string FeatureErrEllipsesFieldNameLineWidth;
     static const std::string FeatureErrEllipsesFieldNameNumPoints;
     static const std::string FeatureErrEllipsesFieldNameSizes;
@@ -278,9 +282,8 @@ public:
     virtual ~ViewPointGenFeatureText() = default;
 
     virtual size_t size() const { return 1; }
-    virtual std::string name() const override { return "text"; }
 
-    static const std::string FeatureTypeNameText;
+    static const std::string FeatureName;
     static const std::string FeatureTextFieldNameText;
     static const std::string FeatureTextFieldNamePos;
     static const std::string FeatureTextFieldNameDir;
@@ -319,9 +322,8 @@ public:
     static QImage byteStringToImage(const std::string& str);
 
     virtual size_t size() const { return 1; }
-    virtual std::string name() const override { return "geoimage"; }
 
-    static const std::string FeatureTypeNameGeoImage;
+    static const std::string FeatureName;
     static const std::string FeatureGeoImageFieldNameSource;
     static const std::string FeatureGeoImageFieldNameFn;
     static const std::string FeatureGeoImageFieldNameData;
@@ -334,6 +336,29 @@ private:
     std::string     fn_;
     QImage          data_;
     RasterReference ref_;
+};
+
+/**
+*/
+class ViewPointGenFeatureHistogram : public ViewPointGenFeature
+{
+public:
+    ViewPointGenFeatureHistogram(const RawHistogram& histogram,
+                                 const std::string& layer_name = "",
+                                 const QColor& layer_color = QColor());
+    ViewPointGenFeatureHistogram(const RawHistogramCollection& histogram_collection);
+    virtual ~ViewPointGenFeatureHistogram() = default;
+
+    virtual size_t size() const { return histogram_.numLayers(); }
+
+    static const std::string FeatureName;
+    static const std::string FeatureHistogramFieldNameHistogram;
+
+protected:
+    virtual void toJSON_impl(nlohmann::json& j) const override;
+
+private:
+    RawHistogramCollection histogram_;
 };
 
 /**
@@ -435,6 +460,11 @@ public:
     void print(std::ostream& strm, const std::string& prefix = "") const;
 
     std::string statusString() const;
+
+    static std::map<std::string, std::vector<nlohmann::json>> scanForFeatures(const nlohmann::json& vp_json,
+                                                                              const std::set<std::string>& feature_types = std::set<std::string>(),
+                                                                              bool assure_unique_ids = false,
+                                                                              const std::string& id_separator = ":");
 
     static const std::string ViewPointFieldName;
     static const std::string ViewPointFieldID;

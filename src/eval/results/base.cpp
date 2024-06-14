@@ -25,6 +25,8 @@
 //#include "logger.h"
 #include "evaluationmanager.h"
 
+#include "viewpoint.h"
+
 #include <sstream>
 #include <cassert>
 
@@ -189,6 +191,19 @@ void Base::setDetails(const EvaluationDetails& details)
 void Base::addDetails(const EvaluationDetails& details)
 {
     details_.insert(details_.end(), details.begin(), details.end());
+}
+
+/**
+*/
+void Base::addCustomAnnotationsToViewable(nlohmann::json::object_t& viewable)
+{
+    if (viewable.count(ViewPoint::VP_ANNOTATION_KEY) > 0)
+    {
+        auto& annos_json = viewable.at(ViewPoint::VP_ANNOTATION_KEY);
+        assert (annos_json.is_array());
+
+        addCustomAnnotations(annos_json);
+    }
 }
 
 }

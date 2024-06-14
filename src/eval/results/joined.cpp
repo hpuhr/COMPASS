@@ -194,6 +194,11 @@ std::unique_ptr<nlohmann::json::object_t> Joined::viewableData()
         }
     }
 
+    //add custom annotations
+    {
+        addCustomAnnotationsToViewable(*vdata);
+    }
+
     return vdata;
 }
 

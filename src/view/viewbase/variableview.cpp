@@ -20,6 +20,7 @@
 #include "viewwidget.h"
 #include "variableviewdatawidget.h"
 #include "variableviewconfigwidget.h"
+#include "viewpointgenerator.h"
 
 #include "compass.h"
 #include "evaluationmanager.h"
@@ -35,7 +36,7 @@ VariableView::VariableView(const std::string& class_id,
 :   View(class_id, instance_id, w, view_manager)
 {
     // eval
-    connect(&COMPASS::instance().evaluationManager(), &EvaluationManager::resultsChangedSignal, this, &VariableView::resultsChanged);
+    connect(&COMPASS::instance().evaluationManager(), &EvaluationManager::resultsChangedSignal, this, &VariableView::onEvalResultsChanged);
 }
 
 /**
@@ -147,68 +148,124 @@ void VariableView::viewInfoJSON_impl(nlohmann::json& info) const
     }
 
     //result related
-    info[ "show_results"     ] = show_results_;
-    info[ "eval_results_id_" ] = eval_result_id_.toString();
+    info[ "show_annotation"       ] = show_annotation_;
+    info[ "current_annotation_id" ] = current_annotation_id_;
+    info[ "num_annotations"       ] = annotations_.size();
 }
 
 /**
  */
-bool VariableView::showResults() const
+void VariableView::showVariables(bool force, bool update_config)
 {
-    return (canShowResults() && show_results_);
-}
-
-/**
- */
-void VariableView::showResults(bool value)
-{
-    if (!canShowResults())
+    if (!force && show_annotation_ == false)
         return;
 
-    if (show_results_ == value)
+    show_annotation_ = false;
+
+    onShowAnnotationChanged(update_config);
+}
+
+/**
+ */
+void VariableView::showVariables()
+{
+    showVariables(false, false);
+}
+
+/**
+ */
+bool VariableView::showsVariables() const
+{
+    return !show_annotation_;
+}
+
+/**
+*/
+void VariableView::showAnnotation(bool force, bool update_config)
+{
+    if (!canShowAnnotations() || !hasAnnotations())
         return;
 
-    show_results_ = value;
-
-    onShowResultsChanged(true);
-}
-
-/**
- */
-const ViewEvalDataID& VariableView::resultID() const
-{
-    return eval_result_id_;
-}
-
-/**
- */
-void VariableView::resultID(const ViewEvalDataID& id)
-{
-    if (!canShowResults())
+    if (!force && show_annotation_ == true)
         return;
 
-    if (eval_result_id_.eval_results_grpreq == id.eval_results_grpreq &&
-        eval_result_id_.eval_results_id     == id.eval_results_id)
+    show_annotation_ = true;
+    
+    onShowAnnotationChanged(update_config);
+}
+
+/**
+ */
+void VariableView::showAnnotation()
+{
+    showAnnotation(false, false);
+}
+
+/**
+ */
+void VariableView::setCurrentAnnotation(const std::string& id)
+{
+    if (!canShowAnnotations())
         return;
 
-    eval_result_id_ = id;
+    if (current_annotation_id_ == id)
+        return;
 
-    loginf << "VariableView: evalResultsID: " << eval_result_id_.toString();
+    current_annotation_id_ = id;
 
-    onShowResultsChanged(false);
+    onShowAnnotationChanged(false);
 }
 
 /**
  */
-bool VariableView::hasResultID() const
+bool VariableView::showsAnnotation() const
 {
-    return eval_result_id_.valid();
+    return show_annotation_;
 }
 
 /**
  */
-void VariableView::onShowResultsChanged(bool update_config_widget)
+bool VariableView::hasAnnotations() const
 {
+    return !annotations_.empty();
+}
+
+/**
+ */
+const VariableView::AnnotationMap& VariableView::annotations() const
+{
+    return annotations_;
+}
+
+/**
+ */
+const std::string& VariableView::currentAnnotationID() const
+{
+    return current_annotation_id_;
+}
+
+/**
+ */
+const std::vector<nlohmann::json>& VariableView::currentAnnotation() const
+{
+    assert(annotations_.count(current_annotation_id_) != 0);
+    return annotations_.at(current_annotation_id_);
+}
+
+/**
+ */
+bool VariableView::hasCurrentAnnotation() const
+{
+    return (annotations_.count(current_annotation_id_) > 0);
+}
+
+/**
+ */
+void VariableView::onShowAnnotationChanged(bool update_config_widget)
+{
+    if (!canShowAnnotations())
+        return;
+
     if (update_config_widget)
         getConfigWidget()->updateConfig();
     
@@ -218,95 +275,84 @@ void VariableView::onShowResultsChanged(bool update_config_widget)
 
 /**
  */
-void VariableView::resultsChanged()
+void VariableView::onEvalResultsChanged()
 {
-    if (!canShowResults())
-        return;
-
-    loginf << "VariableView: resultsChanged";
-
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
-
-    const EvaluationManager::ResultMap& results = eval_man.results();
-
-    // check if result ids are still valid
-    if (!results.size() || !eval_result_id_.inResults(eval_man))
-    {
-        eval_result_id_.reset();
-    }
-
-    //reset result visualization if result id is bad
-    if (show_results_ && !hasResultID())
-        show_results_ = false;
-
-    //update on result change
-    onShowResultsChanged(true);
+    //nothing to do, handled via view points
 }
 
 /**
  */
 void VariableView::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "HistogramView: unshowViewPoint";
+    loginf << "VariableView: unshowViewPoint";
 
     unshowViewPoint(vp);
 
     current_view_point_ = nullptr;
+
+    if (canShowAnnotations())
+    {
+        clearAnnotations();
+
+        //switch back to variables
+        showVariables(true, true);
+    }
 }
 
 /**
  */
 void VariableView::showViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "HistogramView: showViewPoint";
+    loginf << "VariableView: showViewPoint";
 
     showViewPoint(vp);
 
     current_view_point_ = vp;
+
+    if (canShowAnnotations())
+    {
+        //scan annotations contained in view point
+        scanViewPointForAnnotations();
+
+        //switch to annotation if available, else switch back to variables
+        if (hasAnnotations() && hasCurrentAnnotation())
+            showAnnotation(true, true);
+        else
+            showVariables(true, true);
+    }
+}
+
+/**
+ */
+void VariableView::clearAnnotations()
+{
+    annotations_.clear();
+    current_annotation_id_ = "";
+}
+
+/**
+ */
+void VariableView::scanViewPointForAnnotations()
+{
+    clearAnnotations();
+
+    if (!current_view_point_)
+        return;
+
+    const auto& j = current_view_point_->data();
+
+    //scan view point for annotation features
+    annotations_ = ViewPointGenVP::scanForFeatures(j, acceptedAnnotationFeatureTypes());
+
+    //set current id
+    if (!annotations_.empty())
+        current_annotation_id_ = annotations_.begin()->first;
 }
 
 /**
  */
 void VariableView::loadingDone()
 {
-    //finish loading procedures first by calling base
+    //call base
     View::loadingDone();
-
-    if (!canShowResults())
-        return;
-
-    //now update view to any existing results
-    if (current_view_point_ && current_view_point_->data().contains("evaluation_results"))
-    {
-        //infer result visualization from view point
-        const nlohmann::json& data = current_view_point_->data();
-        assert (data.at("evaluation_results").contains("show_results"));
-        assert (data.at("evaluation_results").contains("req_grp_id"));
-        assert (data.at("evaluation_results").contains("result_id"));
-
-        show_results_= data.at("evaluation_results").at("show_results");
-
-        eval_result_id_.eval_results_grpreq = data.at("evaluation_results").at("req_grp_id");
-        eval_result_id_.eval_results_id     = data.at("evaluation_results").at("result_id");
-
-        //show_results_ = true;
-
-        //eval_highlight_details_.clear();
-
-        //if (data.at("evaluation_results").contains("highlight_details"))
-        //{
-        //    loginf << "GeographicView: loadingDoneSlot: highlight_details "
-        //           << data.at("evaluation_results").at("highlight_details").dump();
-
-        //    vector<unsigned int> highlight_details = data.at("evaluation_results").at("highlight_details");
-        //    eval_highlight_details_ = move(highlight_details);
-        //}
-
-        resultsChanged();
-    }
-    else
-    {
-        //do not show results
-        showResults(false);
-    }
 }
