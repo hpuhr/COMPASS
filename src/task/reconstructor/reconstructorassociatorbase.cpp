@@ -1006,7 +1006,13 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 #endif
                       {
 #ifdef FIND_UTN_FOR_TARGET_MT
+
+#if TBB_VERSION_MAJOR <= 4
+                          int thread_id = pthread_self(); // TODO PHIL
+#else
                           int thread_id = tbb::this_task_arena::current_thread_index();
+#endif
+
 #else
         int thread_id = 0;
 #endif

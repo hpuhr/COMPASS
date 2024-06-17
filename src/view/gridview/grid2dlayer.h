@@ -22,6 +22,7 @@
 #include <map>
 
 #include <Eigen/Core>
+#include <Eigen/Dense>
 
 #include <boost/optional.hpp>
 
@@ -37,7 +38,7 @@ struct Grid2DLayer
 
     std::string                   name;
     Eigen::MatrixXd               data;
-    Eigen::MatrixX<unsigned char> flags;
+    Eigen::MatrixXi               flags;
     RasterReference               ref;
 };
 
@@ -56,7 +57,7 @@ public:
     void addLayer(const std::string& name, 
                   const RasterReference& ref,
                   const Eigen::MatrixXd& data,
-                  const Eigen::MatrixX<unsigned char>& flags);
+                  const Eigen::MatrixXi& flags);
     void addLayer(LayerPtr&& layer);
 
     const Layers& layers() const;

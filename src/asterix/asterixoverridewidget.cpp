@@ -194,7 +194,7 @@ void ASTERIXOverrideWidget::updateSlot()
     assert(override_active_check_);
     override_active_check_->setChecked(task_.settings().override_tod_active_);
     assert(tod_offset_edit_);
-    tod_offset_edit_->setText(QString::number(task_.settings().override_tod_offset_));
+    tod_offset_edit_->setText(QString::number(task_.settings().override_tod_offset_, 'g', 5));
 
     // tod filter
     assert(filter_tod_active_check_);
@@ -249,7 +249,7 @@ void ASTERIXOverrideWidget::todOffsetEditedSlot(const QString& value)
     TextFieldDoubleValidator::displayValidityAsColor(tod_offset_edit_);
 
     if (tod_offset_edit_->hasAcceptableInput())
-        task_.settings().override_tod_offset_ = tod_offset_edit_->text().toFloat();
+        task_.settings().override_tod_offset_ = tod_offset_edit_->text().toDouble();
 }
 
 void ASTERIXOverrideWidget::filterTimeOfDayActiveCheckedSlot()

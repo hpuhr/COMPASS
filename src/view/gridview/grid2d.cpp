@@ -561,7 +561,7 @@ const RasterReference& Grid2D::getReference() const
 
 /**
 */
-const Eigen::MatrixX<unsigned char>& Grid2D::getFlags() const
+const Eigen::MatrixXi& Grid2D::getFlags() const
 {
     return flags_;
 }

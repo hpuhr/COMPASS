@@ -79,7 +79,7 @@ void Grid2DLayers::clear()
 void Grid2DLayers::addLayer(const std::string& name, 
                             const RasterReference& ref,
                             const Eigen::MatrixXd& data,
-                            const Eigen::MatrixX<unsigned char>& flags)
+                            const Eigen::MatrixXi& flags)
 {
     assert(layers_.count(name) == 0);
 

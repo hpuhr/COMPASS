@@ -30,6 +30,7 @@
 #include <QImage>
 
 #include <Eigen/Core>
+#include <Eigen/Dense>
 
 struct Grid2DLayer;
 class  Grid2DLayers;
@@ -77,7 +78,7 @@ public:
 
     Eigen::MatrixXd getValues(grid2d::ValueType vtype) const;
     const RasterReference& getReference() const;
-    const Eigen::MatrixX<unsigned char>& getFlags() const;
+    const Eigen::MatrixXi& getFlags() const;
 
     std::unique_ptr<Grid2DLayer> createLayer(const std::string& layer_name,
                                              grid2d::ValueType vtype) const;
@@ -156,6 +157,6 @@ private:
     RasterReference ref_;
 
     std::vector<Eigen::MatrixXd>  layers_;
-    Eigen::MatrixX<unsigned char> flags_; 
+    Eigen::MatrixXi flags_;
     std::vector<ValueIndex>       vtype_indices_;
 };
