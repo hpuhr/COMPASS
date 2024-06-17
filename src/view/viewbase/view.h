@@ -184,6 +184,8 @@ protected:
     QWidget* central_widget_ {nullptr};
 
 private:
+    friend class ViewVariable;
+
     std::string name_;
     unsigned int getInstanceKey();
 

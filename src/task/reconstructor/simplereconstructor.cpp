@@ -17,40 +17,13 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id,
                                          const std::string& instance_id,
                                          ReconstructorTask& task, 
                                          std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator)
-    : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator), 0)
+    : ReconstructorBase(class_id, instance_id, task, std::move(acc_estimator), settings_, 0)
     , associatior_   (*this)
     , ref_calculator_(*this)
 {
-    //association
-    {
-        // common
-        registerParameter("associate_non_mode_s", &settings_.associate_non_mode_s_, true);
-
-        // tracker stuff
-        registerParameter("max_time_diff_tracker", &settings_.max_time_diff_tracker_, 15.0);
-
-        registerParameter("max_distance_quit_tracker", &settings_.max_distance_quit_tracker_, 10*NM2M); // kb 5nm
-        registerParameter("max_distance_dubious_tracker", &settings_.max_distance_dubious_tracker_, 3*NM2M);
-        //kb 2.5? 2.5 lowest
-        registerParameter("max_positions_dubious_tracker", &settings_.max_positions_dubious_tracker_, 5u);
-
-        registerParameter("max_distance_acceptable_tracker", &settings_.max_distance_acceptable_tracker_, NM2M/2.0);
-        registerParameter("max_altitude_diff_tracker", &settings_.max_altitude_diff_tracker_, 300.0);
-
-        registerParameter("min_updates_tracker", &settings_.min_updates_tracker_, 2u); // kb 3!!!
-        registerParameter("prob_min_time_overlap_tracker", &settings_.prob_min_time_overlap_tracker_, 0.5); //kb 0.7
-
-        registerParameter("cont_max_time_diff_tracker", &settings_.cont_max_time_diff_tracker_, 30.0);
-        registerParameter("cont_max_distance_acceptable_tracker", &settings_.cont_max_distance_acceptable_tracker_, 1852.0);
-
-                // sensor
-        registerParameter("max_time_diff_sensor", &settings_.max_time_diff_sensor_, 15.0);
-        registerParameter("max_distance_acceptable_sensor", &settings_.max_distance_acceptable_sensor_, 2*NM2M);
-        registerParameter("max_altitude_diff_sensor", &settings_.max_altitude_diff_sensor_, 300.0);
-
-        // target id? kb: nope
-        // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
-    }
+    registerParameter("max_distance_quit", &settings_.max_distance_quit_, 5*NM2M); // kb 5nm
+    registerParameter("max_distance_dubious", &settings_.max_distance_dubious_, 2*NM2M);
+    registerParameter("max_distance_acceptable", &settings_.max_distance_acceptable_, 1*NM2M);
 }
 
 SimpleReconstructor::~SimpleReconstructor() {}
@@ -169,29 +142,48 @@ void SimpleReconstructor::processSlice_impl()
 {
     loginf << "SimpleReconstructor: processSlice_impl: current_slice_begin "
            << Time::toString(currentSlice().slice_begin_)
-           << " end " << Time::toString(currentSlice().slice_begin_ + baseSettings().sliceDuration())
+           << " end " << Time::toString(currentSlice().slice_begin_ + settings().sliceDuration())
            << " is last " << currentSlice().is_last_slice_;
 
             // remove_before_time_, new data >= current_slice_begin_
 
+    if (cancelled_)
+        return;
+
     clearOldTargetReports();
+
+    if (cancelled_)
+        return;
 
     ref_calculator_.settings() = referenceCalculatorSettings();
     ref_calculator_.prepareForNextSlice();
 
+    if (cancelled_)
+        return;
+
     createTargetReports();
 
+    if (cancelled_)
+        return;
+
     associatior_.associateNewData();
+
+    if (cancelled_)
+        return;
 
     std::map<unsigned int, std::map<unsigned long, unsigned int>> associations = createAssociations();
     // only for ts < write_before_time, also updates target counts
     currentSlice().assoc_data_ = createAssociationBuffers(associations);
 
+    if (cancelled_)
+        return;
+
     ref_calculator_.computeReferences();
+
+    if (cancelled_)
+        return;
 
     currentSlice().reftraj_data_ = createReferenceBuffers(); // only for ts < write_before_time
 
     return;
 }
-
-

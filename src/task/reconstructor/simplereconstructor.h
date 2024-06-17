@@ -3,44 +3,19 @@
 #include <QObject>
 
 #include "reconstructorbase.h"
-#include "targetreportdefs.h"
 #include "global.h"
 #include "reconstructortarget.h"
 #include "simpleassociator.h"
-#include "simpleaccuracyestimator.h"
 #include "simplereferencecalculator.h"
 
-class SimpleReconstructorSettings
+class SimpleReconstructorSettings : public ReconstructorBaseSettings
 {
   public:
     SimpleReconstructorSettings() {};
 
-    bool associate_non_mode_s_ {true};
-
-    // tracker stuff
-    double max_time_diff_tracker_ {15.0};
-
-    double max_distance_quit_tracker_ {10*NM2M}; //10nm in meters // kb 5
-    double max_distance_dubious_tracker_ {3*NM2M}; //kb 2.5? 2.5 lowest
-    unsigned int max_positions_dubious_tracker_ {5};
-
-    double max_distance_acceptable_tracker_ {NM2M/2.0};
-    double max_altitude_diff_tracker_ {300.0};
-
-    unsigned int min_updates_tracker_ {2}; // kb 3!!!
-
-    double prob_min_time_overlap_tracker_ {0.5}; //kb 0.7
-
-    double cont_max_time_diff_tracker_ {30.0};
-    double cont_max_distance_acceptable_tracker_ {1852.0};
-
-    // sensor
-    double max_time_diff_sensor_ {15.0};
-    double max_distance_acceptable_sensor_ {2*NM2M};
-    double max_altitude_diff_sensor_ {300.0};
-
-    // other, not registered
-    std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal, oct 1000, 2000
+    double max_distance_quit_ {5*NM2M};
+    double max_distance_dubious_ {2*NM2M};
+    double max_distance_acceptable_ {1*NM2M};
 };
 
 class SimpleReconstructorWidget;
@@ -61,11 +36,15 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
 
     virtual void reset() override;
 
-    SimpleReconstructorSettings& settings();
+    virtual SimpleReconstructorSettings& settings() override;
 
     SimpleReconstructorWidget* widget(); // ownage by caller
 
     virtual void updateWidgets() override;
+
+    virtual const std::map<unsigned int, std::map<unsigned int,
+                                                  std::pair<unsigned int, unsigned int>>>& assocAounts() const override
+        { return associatior_.assocAounts(); };
 
   protected:
   

@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 #include "kalman_estimator.h"
 
 /**
@@ -46,6 +46,10 @@ struct ReferenceCalculatorSettings
 
         settings.step_fail_strategy = allow_invalid_updates ? reconstruction::KalmanEstimator::Settings::StepFailStrategy::ReturnInvalid :
                                                               reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
+
+        settings.fix_predictions        = fix_predictions;
+        settings.fix_predictions_interp = fix_predictions_interp;
+
         return settings;
     }
 
@@ -64,7 +68,7 @@ struct ReferenceCalculatorSettings
 
     //reinit related
     int    min_chain_size = 2;
-    double min_dt         = 0.0;
+    double min_dt         = 0.01;
     double max_dt         = 11.0;
     double max_distance   = 50000.0;
 
@@ -85,7 +89,10 @@ struct ReferenceCalculatorSettings
     double resample_systracks_max_dt = 30.0; // maximum timestep to interpolate in seconds
 
     bool multithreading        = true;
-    bool allow_invalid_updates = false;
+    bool allow_invalid_updates = true;
+
+    bool fix_predictions        = true;
+    bool fix_predictions_interp = true;
 
     //debug options
     bool compat_mode     = false;

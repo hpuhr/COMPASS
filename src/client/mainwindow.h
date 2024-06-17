@@ -81,9 +81,7 @@ public slots:
 
     void calculateRadarPlotPositionsSlot();
     void calculateAssociationsARTASSlot();
-    //void calculateAssociationsOldSlot();
     void reconstructReferencesSlot();
-    //void calculateReferencesOldSlot();
 
     void quitRequestedSlot();
     void showAddViewMenuSlot();

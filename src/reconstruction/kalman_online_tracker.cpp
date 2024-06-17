@@ -49,6 +49,7 @@ bool KalmanOnlineTracker::isInit() const
 */
 void KalmanOnlineTracker::init(std::unique_ptr<KalmanInterface>&& interface)
 {
+    assert(interface);
     estimator_->init(std::move(interface));
 }
 
@@ -61,17 +62,31 @@ void KalmanOnlineTracker::init(kalman::KalmanType ktype)
 
 /**
 */
-bool KalmanOnlineTracker::track(Measurement& mm)
+bool KalmanOnlineTracker::track(const Measurement& mm, KalmanEstimator::StepResult* res)
 {
     assert(isInit());
+
+    KalmanEstimator::StepResult r;
 
     if (!isTracking())
     {
         kalmanInit(mm);
-        return true;
+        
+        r = KalmanEstimator::StepResult::Success;
+    }
+    else
+    {
+        r = estimator_->kalmanStep(tmp_update_, mm);
+        if (r == KalmanEstimator::StepResult::Success)
+            current_update_ = tmp_update_;
     }
 
-    return (estimator_->kalmanStep(current_update_.value(), mm) == KalmanEstimator::StepResult::Success);
+    if (res)
+        *res = r;
+
+    assert(current_update_.has_value() && current_update_->t == estimator_->currentTime());
+
+    return (r == KalmanEstimator::StepResult::Success);
 }
 
 /**
@@ -81,34 +96,56 @@ bool KalmanOnlineTracker::track(const kalman::KalmanUpdate& update)
     assert(isInit());
 
     kalmanInit(update);
+
+    assert(current_update_.has_value() && current_update_->t == estimator_->currentTime());
+
+    return true;
+}
+
+/**
+*/
+bool KalmanOnlineTracker::track(const kalman::KalmanUpdateMinimal& update)
+{
+    assert(isInit());
+
+    kalmanInit(update);
+
+    assert(current_update_.has_value() && current_update_->t == estimator_->currentTime());
+
+    return true;
+}
+
+/**
+*/
+bool KalmanOnlineTracker::canPredict(const boost::posix_time::ptime& ts,
+                                     const boost::posix_time::time_duration& max_time_diff) const
+{
+    if (!isTracking())
+        return false;
+
+    const auto& ts_cur = estimator_->currentTime();
+    boost::posix_time::time_duration dt = ts >= ts_cur ? ts - ts_cur : ts_cur - ts;
+    if (dt > max_time_diff)
+        return false;
+
     return true;
 }
 
 /**
 */
 bool KalmanOnlineTracker::predict(Measurement& mm_predicted,
-                                  double dt) const
+                                  const boost::posix_time::ptime& ts,
+                                  bool* fixed) const
 {
     assert(isInit());
     assert(isTracking());
 
-    return estimator_->kalmanPrediction(mm_predicted, dt);
+    return estimator_->kalmanPrediction(mm_predicted, ts, fixed);
 }
 
 /**
 */
-bool KalmanOnlineTracker::predict(Measurement& mm_predicted,
-                                  const boost::posix_time::ptime& ts) const
-{
-    assert(isInit());
-    assert(isTracking());
-
-    return estimator_->kalmanPrediction(mm_predicted, ts);
-}
-
-/**
-*/
-void KalmanOnlineTracker::kalmanInit(Measurement& mm)
+void KalmanOnlineTracker::kalmanInit(const Measurement& mm)
 {
     assert(isInit());
 
@@ -125,6 +162,17 @@ void KalmanOnlineTracker::kalmanInit(const kalman::KalmanUpdate& update)
     assert(isInit());
 
     current_update_ = update;
+
+    estimator_->kalmanInit(current_update_.value());
+}
+
+/**
+*/
+void KalmanOnlineTracker::kalmanInit(const kalman::KalmanUpdateMinimal& update)
+{
+    assert(isInit());
+
+    current_update_ = kalman::KalmanUpdate(update);
 
     estimator_->kalmanInit(current_update_.value());
 }
@@ -148,6 +196,13 @@ KalmanEstimator::Settings& KalmanOnlineTracker::settings()
 const boost::optional<kalman::KalmanUpdate>& KalmanOnlineTracker::currentState() const
 {
     return current_update_;
+}
+
+/**
+*/
+const boost::posix_time::ptime& KalmanOnlineTracker::currentTime() const
+{
+    return estimator_->currentTime();
 }
 
 /**

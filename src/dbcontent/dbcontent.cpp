@@ -110,6 +110,11 @@ const Property DBContent::var_cat021_nucp_nic_ {"NUCp or NIC", PropertyDataType:
 const Property DBContent::var_cat021_nucv_nacv_ {"NUCr or NACv", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_sil_ {"SIL", PropertyDataType::UCHAR};
 
+const Property DBContent::var_cat021_sgv_gss_ {"SGV GSS", PropertyDataType::FLOAT};
+const Property DBContent::var_cat021_sgv_hgt_ {"SGV HGT", PropertyDataType::DOUBLE};
+const Property DBContent::var_cat021_sgv_htt_ {"SGV HTT", PropertyDataType::BOOL};
+const Property DBContent::var_cat021_sgv_hrd_ {"SGV HRD", PropertyDataType::BOOL};
+
 const Property DBContent::var_cat062_tris_ {"Target Report Identifiers", PropertyDataType::STRING};
 const Property DBContent::var_cat062_tri_recnums_ {"TRI Record Numbers", PropertyDataType::JSON};
 const Property DBContent::var_cat062_track_begin_ {"Track Begin", PropertyDataType::BOOL};
@@ -748,7 +753,9 @@ void DBContent::readJobObsoleteSlot()
 {
     logdbg << "DBContent: " << name_ << " readJobObsoleteSlot";
     read_job_ = nullptr;
-    //read_job_data_.clear();
+
+    logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
+    dbcont_manager_.loadingDone(*this);
 }
 
 void DBContent::readJobDoneSlot()
@@ -756,11 +763,8 @@ void DBContent::readJobDoneSlot()
     logdbg << "DBContent: " << name_ << " readJobDoneSlot";
     read_job_ = nullptr;
 
-    if (!isLoading()) // also no more finalize jobs
-    {
-        logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
-        dbcont_manager_.loadingDone(*this);
-    }
+    logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
+    dbcont_manager_.loadingDone(*this);
 }
 
 void DBContent::databaseOpenedSlot()

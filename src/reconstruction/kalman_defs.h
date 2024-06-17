@@ -61,15 +61,65 @@ struct KalmanState
 };
 
 /**
+ * Minimal information about a kalman update's state, coord system and validity.
+ */
+struct KalmanUpdateMinimal
+{
+    void resetFlags()
+    {
+        valid = false;
+    }
+
+    Vector                   x;                 // state vector
+    Matrix                   P;                 // covariance matrix
+    boost::posix_time::ptime t;                 // time of update
+    Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
+
+    bool valid  = false; // kalman update is valid
+};
+
+/**
  * Low-level struct for a kalman update.
  * Contains everything needed for postprocessing and extraction of a final reference.
  */
 struct KalmanUpdate
 {
+    KalmanUpdate() {}
+    KalmanUpdate(const KalmanUpdateMinimal& update_min)
+    {
+        state.x  = update_min.x;
+        state.P  = update_min.P;
+        state.F  = kalman::Matrix();
+        state.Q  = kalman::Matrix();
+        state.dt = 0.0; // not defined by min update
+
+        projection_center = update_min.projection_center;
+        t                 = update_min.t;
+        valid             = update_min.valid;
+        reinit            = false; // not defined by min update
+    }
+
     void resetFlags()
     {
         valid  = false;
         reinit = false;
+    }
+
+    void minimalInfo(KalmanUpdateMinimal& info) const
+    {
+        info.x                 = state.x;
+        info.P                 = state.P;
+        info.t                 = t;
+        info.projection_center = projection_center;
+        info.valid             = valid;
+    };
+
+    KalmanUpdateMinimal minimalInfo() const
+    {
+        KalmanUpdateMinimal info;
+        minimalInfo(info);
+
+        return info;
     }
 
     KalmanState              state;             // kalman internal state, can be used for rts smooting, state interpolation, etc.

@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 
 #include <memory>
 
@@ -28,8 +28,17 @@ class KalmanInterface;
 class KalmanProjectionHandler;
 
 /**
- * Provides needed data structures for kalman and means to retrieve data from kalman state. 
- * Derive for a certain kalman variant.
+ * Kalman-filter-based state estimator.
+ * - operates on a KalmanInterface to interact with a certain kalman variant
+ * - provides kalman features such as
+ *     - initialization of kalman filter
+ *     - integration of measurements into kalman filter
+ *     - smoothing of kalman states
+ *     - interpolation of kalman states
+ *     - predictions based on a certain kalman state
+ *     - handling projection into local map crs
+ *     - etc.
+ * - holds a current state - generally not multithreading safe
  */
 class KalmanEstimator
 {
@@ -54,8 +63,10 @@ public:
 
         size_t min_chain_size = 2;       // minimum number of consecutive kalman updates without reinit            (0 = do not check)
         double max_distance   = 50000.0; // maximum allowed distance of consecutive measurements in meters         (0 = do not check)
-        double min_dt         = 0;       // minimum allowed time difference of consecutive measurements in seconds (0 = do not check)
+        double min_dt         = 0.0;     // minimum allowed time difference of consecutive measurements in seconds (0 = do not check)
         double max_dt         = 11.0;    // maximum allowed time difference of consecutive measurements in seconds (0 = do not check)
+
+        double min_pred_dt = 0.0;
 
         int reinit_check_flags = ReinitCheckTime; // checks used for reinitialization of kalman
 
@@ -71,6 +82,9 @@ public:
         bool track_velocities      = true;
         bool track_accelerations   = true;
 
+        bool fix_predictions        = true;
+        bool fix_predictions_interp = true;
+        
         int verbosity = 0;
 
         reconstruction::Uncertainty default_uncert; //default uncertainties used if none are provided in the measurement
@@ -102,23 +116,51 @@ public:
     void init(kalman::KalmanType ktype);
     
     void kalmanInit(kalman::KalmanUpdate& update,
-                    Measurement& mm);
+                    const Measurement& mm);
     void kalmanInit(const kalman::KalmanUpdate& update);
+    void kalmanInit(const kalman::KalmanUpdateMinimal& update);
+
     StepResult kalmanStep(kalman::KalmanUpdate& update,
-                          Measurement& mm);
+                          const Measurement& mm);
+    
     bool kalmanPrediction(Measurement& mm,
-                          double dt) const;
+                          double dt,
+                          bool* fixed = nullptr) const;
     bool kalmanPrediction(Measurement& mm,
-                          const boost::posix_time::ptime& ts) const;
+                          const boost::posix_time::ptime& ts,
+                          bool* fixed = nullptr) const;
+    bool kalmanPrediction(Measurement& mm,
+                          const kalman::KalmanUpdate& ref_update,
+                          const boost::posix_time::ptime& ts,
+                          bool* fixed = nullptr);
+    bool kalmanPrediction(Measurement& mm,
+                          const kalman::KalmanUpdateMinimal& ref_update,
+                          const boost::posix_time::ptime& ts,
+                          bool* fixed = nullptr);
+    bool kalmanPrediction(Measurement& mm,
+                          const kalman::KalmanUpdate& ref_update0,
+                          const kalman::KalmanUpdate& ref_update1,
+                          const boost::posix_time::ptime& ts,
+                          size_t* num_fixed = nullptr);
+    bool kalmanPrediction(Measurement& mm,
+                          const kalman::KalmanUpdateMinimal& ref_update0,
+                          const kalman::KalmanUpdateMinimal& ref_update1,
+                          const boost::posix_time::ptime& ts,
+                          size_t* num_fixed = nullptr);
 
     void storeUpdates(std::vector<Reference>& refs,
                       const std::vector<kalman::KalmanUpdate>& updates) const;
     
-    void smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const;
-    void interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
-                       std::vector<kalman::KalmanUpdate>& updates) const;
+    bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const;
+    bool interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
+                       std::vector<kalman::KalmanUpdate>& updates,
+                       size_t* num_steps_failed = nullptr) const;
 
+    kalman::KalmanState currentState() const;
     const boost::posix_time::ptime& currentTime() const;
+    Measurement currentStateAsMeasurement() const;
+
+    std::string asString(const std::string& prefix = "") const;
 
     static std::unique_ptr<KalmanInterface> createInterface(kalman::KalmanType ktype, 
                                                             bool track_velocity = true, 
@@ -130,7 +172,7 @@ public:
 
 private:
     void initMeasurement(kalman::KalmanUpdate& update,
-                         Measurement& mm);
+                         const Measurement& mm);
     ReinitState needsReinit(const Measurement& mm) const;
     void reinit(kalman::KalmanUpdate& update,
                 const Measurement& mm);
@@ -148,13 +190,25 @@ private:
                        double min_dt_sec,
                        double Q_var,
                        StateInterpMode interp_mode,
-                       KalmanProjectionHandler& proj_handler) const;
+                       KalmanProjectionHandler& proj_handler,
+                       size_t* num_steps_failed = nullptr) const;
+    bool predictBetween(kalman::KalmanUpdateMinimal& update_interp,
+                        const kalman::KalmanUpdateMinimal& update0,
+                        const kalman::KalmanUpdateMinimal& update1,
+                        const boost::posix_time::ptime& ts,
+                        double min_dt_sec,
+                        double Q_var,
+                        StateInterpMode interp_mode,
+                        KalmanProjectionHandler& proj_handler,
+                        size_t* num_fixed) const;
     
     void storeUpdate(Reference& ref, 
                      const kalman::KalmanUpdate& update,
                      KalmanProjectionHandler& phandler) const;
 
     reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
+
+    bool checkPrediction(const Measurement& mm) const;
 
     std::unique_ptr<KalmanInterface>         kalman_interface_;
     std::unique_ptr<KalmanProjectionHandler> proj_handler_;

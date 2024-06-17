@@ -1142,6 +1142,8 @@ void EvaluationTargetData::computeSectorInsideInfo() const
     inside_map_           = {};
     inside_sector_layers_ = {};
 
+    assert (eval_man_.sectorsLoaded());
+
     auto sector_layers = eval_man_.sectorsLayers();
 
     //store sector layers

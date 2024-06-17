@@ -31,9 +31,7 @@ class GPSImportCSVTask;
 class ASTERIXImportTask;
 class ViewPointsImportTask;
 class RadarPlotPositionCalculatorTask;
-class CalculateReferencesTask;
 class ManageSectorsTask;
-class CreateAssociationsTask;
 class ReconstructorTask;
 class MainWindow;
 
@@ -72,8 +70,6 @@ class TaskManager : public QObject, public Configurable
     ManageSectorsTask& manageSectorsTask() const;
     RadarPlotPositionCalculatorTask& radarPlotPositionCalculatorTask() const;
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
-    CreateAssociationsTask& createAssociationsTask() const;
-    CalculateReferencesTask& calculateReferencesTask() const;
     ReconstructorTask& reconstructReferencesTask() const;
 
 protected:
@@ -86,8 +82,6 @@ protected:
     std::unique_ptr<ManageSectorsTask> manage_sectors_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
-    std::unique_ptr<CreateAssociationsTask> create_associations_task_;
-    std::unique_ptr<CalculateReferencesTask> calculate_references_task_;
     std::unique_ptr<ReconstructorTask> reconstruct_references_task_;
 
     virtual void checkSubConfigurables() override;

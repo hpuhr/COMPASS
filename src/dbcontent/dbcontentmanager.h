@@ -44,6 +44,7 @@ namespace dbContent
     class Target;
     class TargetListWidget;
     class VariableSet;
+    class ReconstructorTarget;
 }
 
 class DBContentManager : public QObject, public Configurable
@@ -153,7 +154,7 @@ public:
     bool hasTargetsInfo() const;
     void clearTargetsInfo();
     bool existsTarget(unsigned int utn);
-    void createNewTarget(unsigned int utn);
+    void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     dbContent::Target& target(unsigned int utn);
     void removeDBContentFromTargets(const std::string& dbcont_name);
     void loadTargets();

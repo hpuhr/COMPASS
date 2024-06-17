@@ -2,8 +2,12 @@
 #include "reconstructortask.h"
 #include "simplereconstructor.h"
 #include "simplereconstructorwidget.h"
+#include "global.h"
+
+#if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
 #include "probimmreconstructorwidget.h"
+#endif
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -38,7 +42,11 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     reconstructor_box_ = new QComboBox();
     reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ScoringUMReconstructorName));
+
+#if USE_EXPERIMENTAL_SOURCE == true
     reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ProbImmReconstructorName));
+#endif
+
     int idx = reconstructor_box_->findText(QString::fromStdString(task_.currentReconstructorStr()));
     reconstructor_box_->setCurrentIndex(idx);
 
@@ -52,7 +60,10 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     reconstructor_widget_stack_ = new QStackedWidget();
 
     reconstructor_widget_stack_->addWidget(task_.simpleReconstructor()->widget());
+
+#if USE_EXPERIMENTAL_SOURCE == true
     reconstructor_widget_stack_->addWidget(task_.probIMMReconstructor()->widget());
+#endif
 
     showCurrentReconstructorWidget();
 

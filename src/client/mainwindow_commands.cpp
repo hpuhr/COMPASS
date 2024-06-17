@@ -10,9 +10,7 @@
 #include "evaluationmanager.h"
 #include "dbcontentmanager.h"
 #include "radarplotpositioncalculatortask.h"
-#include "createassociationstask.h"
 #include "createartasassociationstask.h"
-#include "calculatereferencestask.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 //#include "viewpointsimporttaskdialog.h"
@@ -1159,6 +1157,7 @@ bool RTCommandImportSectorsJSON::run_impl()
 
     size_t num_sectors = 0;
 
+    assert (COMPASS::instance().evaluationManager().sectorsLoaded());
     const auto& sector_layers = COMPASS::instance().evaluationManager().sectorsLayers();
 
     for (const auto& sl : sector_layers)
@@ -1245,19 +1244,20 @@ bool RTCommandCalculateAssociations::run_impl()
         return false;
     }
 
-    CreateAssociationsTask& task = COMPASS::instance().taskManager().createAssociationsTask();
+    //@TODO_RECONSTRUCTOR
+    // CreateAssociationsTask& task = COMPASS::instance().taskManager().createAssociationsTask();
 
-    if(!task.canRun())
-    {
-        setResultMessage("Calculate associations task can not be run");
-        return false;
-    }
+    // if(!task.canRun())
+    // {
+    //     setResultMessage("Calculate associations task can not be run");
+    //     return false;
+    // }
 
-    task.allowUserInteractions(false);
-    task.run();
+    // task.allowUserInteractions(false);
+    // task.run();
 
     // if ok
-    return true;
+    return false;
 }
 
 
@@ -1318,19 +1318,20 @@ bool RTCommandCalculateReferences::run_impl()
         return false;
     }
 
-    CalculateReferencesTask& task = COMPASS::instance().taskManager().calculateReferencesTask();
+    //@TODO_RECONSTRUCTOR
+    // CalculateReferencesTask& task = COMPASS::instance().taskManager().calculateReferencesTask();
 
-    if(!task.canRun())
-    {
-        setResultMessage("Calculate references task can not be run");
-        return false;
-    }
+    // if(!task.canRun())
+    // {
+    //     setResultMessage("Calculate references task can not be run");
+    //     return false;
+    // }
 
-    task.allowUserInteractions(false);
-    task.run();
+    // task.allowUserInteractions(false);
+    // task.run();
 
     // if ok
-    return true;
+    return false;
 }
 
 // load data

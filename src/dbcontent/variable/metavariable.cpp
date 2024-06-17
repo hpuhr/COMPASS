@@ -357,9 +357,13 @@ void MetaVariable::checkSubVariables()
         for (auto variable_it : variables_)
         {
             if (variable_it.second.dataType() != data_type)
+            {
                 logerr << "MetaVariable: checkSubVariables: meta var " << name_
                        << " has different data types in sub variables ("
                        << Property::asString(data_type) << ", " << variable_it.second.dataTypeString() << ")";
+                throw std::runtime_error("Conflicting data types in metavariable '" + name_ + "' (" +
+                                         Property::asString(data_type) + " =/= " + variable_it.second.dataTypeString() + ")");
+            }
         }
 
         string rep_str = variables_.begin()->second.representationString();
@@ -367,9 +371,13 @@ void MetaVariable::checkSubVariables()
         for (auto variable_it : variables_)
         {
             if (variable_it.second.representationString() != rep_str)
+            {
                 logerr << "MetaVariable: checkSubVariables: meta var " << name_
                        << " has different representations in sub variables ("
                        << rep_str << ", " << variable_it.second.representationString() << ")";
+                throw std::runtime_error("Conflicting representations in metavariable '" + name_ + "' (" +
+                                         rep_str + " =/= " + variable_it.second.representationString() + ")");
+            }
         }
     }
 }

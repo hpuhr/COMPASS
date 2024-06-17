@@ -20,6 +20,8 @@
 #include "eval/results/single.h"
 #include "eval/results/joined.h"
 
+#include "json.h"
+
 #include <boost/optional.hpp>
 
 namespace EvaluationRequirementResult
@@ -69,6 +71,8 @@ public:
     };
 
 protected:
+    virtual void addCustomAnnotations(nlohmann::json& json_annotations) override;
+
     unsigned int num_pos_         {0};
     unsigned int num_no_ref_      {0};
     unsigned int num_pos_outside_ {0};
@@ -114,6 +118,8 @@ protected:
     boost::optional<float> prob_;
 
     virtual void updateToChanges_impl() override;
+
+    virtual void addCustomAnnotations(nlohmann::json& json_annotations) override;
 
     vector<double> values() const;
 };

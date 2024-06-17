@@ -22,7 +22,10 @@ class DBContent;
 class Buffer;
 class ReconstructorBase;
 class SimpleReconstructor;
+
+#if USE_EXPERIMENTAL_SOURCE == true
 class ProbIMMReconstructor;
+#endif
 
 namespace dbContent
 {
@@ -40,21 +43,17 @@ class ReconstructorTask : public Task, public Configurable
     void dialogRunSlot();
     void dialogCancelSlot();
 
+    void deleteCalculatedReferencesDoneSlot();
+    void deleteTargetsDoneSlot();
+    void deleteAssociationsDoneSlot();
+
     void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
     void processingDoneSlot();
     void writeDoneSlot();
 
-    bool useDStype(const std::string& ds_type) const;
-    void useDSType(const std::string& ds_type, bool value);
-    bool useDataSource(unsigned int ds_id) const;
-    void useDataSource(unsigned int ds_id, bool value);
-    bool useDataSourceLine(unsigned int ds_id, unsigned int line_id) const;
-    void useDataSourceLine(unsigned int ds_id, unsigned int line_id, bool value);
-
-    std::set<unsigned int> unusedDSIDs() const;
-    std::map<unsigned int, std::set<unsigned int>> unusedDSIDLines() const;
+    void runDoneSlot();
 
   public:
     ReconstructorTask(const std::string& class_id, const std::string& instance_id,
@@ -73,11 +72,15 @@ class ReconstructorTask : public Task, public Configurable
     void currentReconstructorStr(const std::string& value);
 
     static const std::string ScoringUMReconstructorName;
-    static const std::string ProbImmReconstructorName;
 
     ReconstructorBase* currentReconstructor() const;
     SimpleReconstructor* simpleReconstructor() const;
+
+#if USE_EXPERIMENTAL_SOURCE == true
+    static const std::string ProbImmReconstructorName;
+
     ProbIMMReconstructor* probIMMReconstructor() const;
+#endif
 
     std::set<unsigned int> disabledDataSources() const;
 
@@ -86,6 +89,24 @@ class ReconstructorTask : public Task, public Configurable
 
     const std::set<unsigned long>& debugRecNums() const;
     void debugRecNums(const std::set<unsigned long>& rec_nums);
+
+    const boost::posix_time::ptime& debugTimestampMin() const;
+    void debugTimestampMin(const boost::posix_time::ptime& ts);
+
+    const boost::posix_time::ptime& debugTimestampMax() const;
+    void debugTimestampMax(const boost::posix_time::ptime& ts);
+
+    bool useDStype(const std::string& ds_type) const;
+    void useDSType(const std::string& ds_type, bool value);
+    bool useDataSource(unsigned int ds_id) const;
+    void useDataSource(unsigned int ds_id, bool value);
+    bool useDataSourceLine(unsigned int ds_id, unsigned int line_id) const;
+    void useDataSourceLine(unsigned int ds_id, unsigned int line_id, bool value);
+
+    std::set<unsigned int> unusedDSIDs() const;
+    std::map<unsigned int, std::set<unsigned int>> unusedDSIDLines() const;
+
+    ReconstructorBase::DataSlice& processingSlice();
 
   protected:
     std::string current_reconstructor_str_;
@@ -97,7 +118,10 @@ class ReconstructorTask : public Task, public Configurable
     std::unique_ptr<ReconstructorTaskDialog> dialog_;
 
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
+
+#if USE_EXPERIMENTAL_SOURCE == true
     std::unique_ptr<ProbIMMReconstructor> probimm_reconstructor_; // has to be reset after each calculation
+#endif
 
     std::unique_ptr<QProgressDialog> progress_dialog_;
     boost::posix_time::ptime run_start_time_;
@@ -105,17 +129,27 @@ class ReconstructorTask : public Task, public Configurable
     size_t current_slice_idx_ = 0;
 
     std::unique_ptr<ReconstructorBase::DataSlice> loading_slice_;
-    //std::unique_ptr<ReconstructorBase::DataSlice> processing_slice_; // not required, moved into reconstructor
-    std::future<void> processing_future_;
+    bool loading_data_ {false};
+    std::unique_ptr<ReconstructorBase::DataSlice> processing_slice_;
     std::unique_ptr<ReconstructorBase::DataSlice> writing_slice_;
 
     std::set<unsigned int> debug_utns_;
     std::set<unsigned long> debug_rec_nums_;
+    boost::posix_time::ptime debug_timestamp_min_;
+    boost::posix_time::ptime debug_timestamp_max_;
+
+    std::future<void> delcalcref_future_;
+    std::future<void> deltgts_future_;
+    std::future<void> delassocs_future_;
+    std::future<void> process_future_;
+    bool processing_data_slice_ {false};
+    bool cancelled_ {false};
 
     virtual void checkSubConfigurables() override;
     void deleteCalculatedReferences();
 
     void loadDataSlice();
+    void processDataSlice();
     void writeDataSlice();
 
     void updateProgress(const QString& msg, bool add_slice_progress);

@@ -128,6 +128,9 @@ protected:
     void addDetails(const EvaluationDetails& details);
     void clearDetails();
 
+    virtual void addCustomAnnotations(nlohmann::json& json_annotations) {}
+    void addCustomAnnotationsToViewable(nlohmann::json::object_t& viewable);
+
     std::string type_;
     std::string result_id_;
     std::string req_grp_id_;

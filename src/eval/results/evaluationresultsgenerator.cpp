@@ -27,6 +27,7 @@
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "dbcontentmanager.h"
 
 #include "compass.h"
 #include "logger.h"
@@ -77,6 +78,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
+    assert (eval_man_.sectorsLoaded());
     std::vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man_.sectorsLayers();
 
     unsigned int num_req_evals = 0;
@@ -116,10 +118,18 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     vector<unsigned int> utns;
 
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
     for (auto& target_data_it : data)
     {
+        if (!dbcont_man.existsTarget(target_data_it.utn_))
+            logerr << "EvaluationResultsGenerator: evaluate: unknown utn " << target_data_it.utn_;
+
+        assert (dbcont_man.existsTarget(target_data_it.utn_));
+        assert (data.hasTargetData(target_data_it.utn_));
+
         //if (target_data_it.use())
-            utns.push_back(target_data_it.utn_);
+        utns.push_back(target_data_it.utn_);
     }
 
     unsigned int num_utns = utns.size();

@@ -46,34 +46,55 @@ class ReconstructorTask;
 
 typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow; // min, max
 
+class ReconstructorBaseSettings
+{
+  public:
+    ReconstructorBaseSettings() {};
+
+    boost::posix_time::time_duration sliceDuration() const
+    {
+        return boost::posix_time::minutes(slice_duration_in_minutes);
+    }
+    boost::posix_time::time_duration outdatedDuration() const
+    {
+        return boost::posix_time::minutes(outdated_duration_in_minutes);
+    }
+
+    // output
+    std::string  ds_name {"CalcRef"};
+    unsigned int ds_sac  {REC_DS_SAC};
+    unsigned int ds_sic  {REC_DS_SIC};
+    unsigned int ds_line {0};
+
+    // slicing
+    unsigned int slice_duration_in_minutes    {15};
+    unsigned int outdated_duration_in_minutes {2};
+
+    bool delete_all_calc_reftraj {true};
+    bool ignore_calculated_references {true};
+
+    // maximum time difference in target reports to do comparisons
+    float max_time_diff_ {5}; // sec
+    // maximum altitude difference to consider mode c the "same"
+    float max_altitude_diff_ {300.0};
+    // maximimum time difference between track updates, otherwise considered new track
+    double track_max_time_diff_ {300.0};
+
+    // compare targets related
+    double target_prob_min_time_overlap_ {0.1};
+    unsigned int target_min_updates_ {5};
+    double target_max_positions_dubious_verified_rate_ {0.5};
+    double target_max_positions_dubious_unknown_rate_ {0.3};
+
+    static const unsigned int REC_DS_SAC = 255;
+    static const unsigned int REC_DS_SIC = 1;
+};
+
 /**
  */
 class ReconstructorBase : public Configurable
 {
   public:
-    struct BaseSettings
-    {
-        boost::posix_time::time_duration sliceDuration() const
-        {
-            return boost::posix_time::minutes(slice_duration_in_minutes);
-        }
-        boost::posix_time::time_duration outdatedDuration() const
-        {
-            return boost::posix_time::minutes(outdated_duration_in_minutes);
-        }
-
-                // output
-        std::string  ds_name {"CalcRef"};
-        unsigned int ds_sac  {255};
-        unsigned int ds_sic  {1};
-        unsigned int ds_line {0};
-
-                // slicing
-        unsigned int slice_duration_in_minutes    {10};
-        unsigned int outdated_duration_in_minutes {2};
-
-        bool delete_all_calc_reftraj {false};
-    };
 
     struct DataSlice
     {
@@ -103,6 +124,7 @@ class ReconstructorBase : public Configurable
                       const std::string& instance_id,
                       ReconstructorTask& task, 
                       std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator,
+                      ReconstructorBaseSettings& base_settings,
                       unsigned int default_line_id = 0);
     virtual ~ReconstructorBase();
 
@@ -111,28 +133,29 @@ class ReconstructorBase : public Configurable
 
     int numSlices() const;
 
-    void processSlice(std::unique_ptr<ReconstructorBase::DataSlice> data_slice);
-    bool hasCurrentSlice() const;
+    void processSlice();
     ReconstructorBase::DataSlice& currentSlice();
-    std::unique_ptr<ReconstructorBase::DataSlice> moveCurrentSlice();
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 
     virtual void reset();
 
-    BaseSettings& baseSettings() { return base_settings_; }
-    const BaseSettings& baseSettings() const { return base_settings_; }
+    virtual ReconstructorBaseSettings& settings() { return base_settings_; };
 
     ReferenceCalculatorSettings& referenceCalculatorSettings() { return ref_calc_settings_; }
     const ReferenceCalculatorSettings& referenceCalculatorSettings() const { return ref_calc_settings_; }
 
     void createMeasurement(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& ri);
+    void createMeasurement(reconstruction::Measurement& mm, unsigned long rec_num);
 
     const dbContent::TargetReportAccessor& accessor(dbContent::targetReport::ReconstructorInfo& tr) const;
 
     virtual void updateWidgets() = 0;
 
     ReconstructorTask& task() const;
+
+    void cancel();
+    bool isCancelled() { return cancelled_; };
 
     void saveTargets();
 
@@ -148,17 +171,21 @@ class ReconstructorBase : public Configurable
 
     std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
 
+    bool processing() const;
+
+    virtual const std::map<unsigned int, std::map<unsigned int,
+                                                  std::pair<unsigned int, unsigned int>>>& assocAounts() const = 0;
+    // ds_id -> dbcont id -> (assoc, not assoc cnt)
+
   protected:
 
     ReconstructorTask& task_;
 
     std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
 
-            //Buffers buffers_;
-    std::unique_ptr<DataSlice> current_slice_;
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
-    BaseSettings base_settings_;
+    ReconstructorBaseSettings& base_settings_;
 
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual void processSlice_impl() = 0;
@@ -171,6 +198,8 @@ class ReconstructorBase : public Configurable
         std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
 
+    bool cancelled_ {false};
+
   private:
     ReferenceCalculatorSettings ref_calc_settings_;
 
@@ -182,4 +211,6 @@ class ReconstructorBase : public Configurable
 
     boost::posix_time::ptime remove_before_time_;
     boost::posix_time::ptime write_before_time_;
+
+    bool processing_ {false};
 };

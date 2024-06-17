@@ -102,6 +102,7 @@ void ViewManager::init(QTabWidget* tab_widget)
 #endif
 
     view_class_list_.insert({"ScatterPlotView", "Scatterplot View"});
+    view_class_list_.insert({"GridView", "Grid View"});
 
 #ifdef SCAN_PRESETS
     //scan view presets

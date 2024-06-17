@@ -28,6 +28,8 @@
 #include "histogramviewdatawidget.h"
 #include "scatterplotview.h"
 #include "scatterplotviewdatawidget.h"
+#include "gridview.h"
+#include "gridviewdatawidget.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "json.h"
@@ -41,9 +43,9 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "viewmanager.h"
 #include "files.h"
-#include "ViewerWidget.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
+#include "ViewerWidget.h"
 #include "geographicview.h"
 #include "geographicviewdatawidget.h"
 #endif
@@ -394,7 +396,7 @@ void LatexVisitor::visit(HistogramView* e)
         return;
 
     // normal screenshot
-    QPixmap pmap = data_widget->renderPixmap();;
+    QPixmap pmap = data_widget->renderPixmap();
 
     QImage screenshot = pmap.toImage();
 
@@ -533,6 +535,59 @@ void LatexVisitor::visit(ScatterPlotView* e)
 
     if (!ret)
         throw runtime_error("LatexVisitor: visit: ScatterPlotView: unable to create directories for '"
+                            +image_path+"'");
+
+    ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    assert (ret);
+
+    LatexSection& sec = report_.getSection(current_section_name_);
+
+    // add normal screenshot after overview
+    sec.addImage(image_path, e->instanceId());
+}
+
+void LatexVisitor::visit(GridView* e)
+{
+    assert (e);
+
+    loginf << "LatexVisitor: visit: GridView " << e->instanceId();
+
+    std::string screenshot_path = report_.path()+"/screenshots";
+
+    loginf << "LatexVisitor: visit: path '" << screenshot_path << "'";
+
+    if (!screenshot_folder_created_)
+    {
+        bool ret = Files::createMissingDirectories(screenshot_path);
+
+        if (!ret)
+            throw runtime_error("LatexVisitor: visit: GridView: unable to create directories for '"
+                                +screenshot_path+"'");
+
+        screenshot_folder_created_ = true;
+    }
+
+    e->showInTabWidget();
+
+    GridViewDataWidget* data_widget = e->getDataWidget();
+    assert (data_widget);
+
+    if (!data_widget->showsData())
+        return;
+
+    // normal screenshot
+    QPixmap pmap = data_widget->renderPixmap();
+
+    QImage screenshot = pmap.toImage();
+
+    std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
+    assert (!screenshot.isNull());
+
+    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
+
+    if (!ret)
+        throw runtime_error("LatexVisitor: visit: GridView: unable to create directories for '"
                             +image_path+"'");
 
     ret = screenshot.save(image_path.c_str(), "JPG"); // , 50

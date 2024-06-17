@@ -147,6 +147,11 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
         }
 
         utn = utn_vec.get(cnt);
+        if (!dbcont_man_.existsTarget(utn))
+        {
+            logerr << "EvaluationData: addReferenceData: ignoring unknown utn " << utn;
+            continue;
+        }
 
         if (!hasTargetData(utn))
             target_data_.emplace_back(utn, *this, accessor_, eval_man_, dbcont_man_);
@@ -203,14 +208,15 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
 
     boost::posix_time::ptime timestamp;
     //vector<unsigned int> utn_vec;
+
     unsigned int utn;
 
     loginf << "EvaluationData: addTestData: adding target data";
 
-    loginf << "EvaluationData: addReferenceData: use_active_srcs " << use_active_srcs;
+    loginf << "EvaluationData: addTestData: use_active_srcs " << use_active_srcs;
 
     for (auto ds_id : active_srcs)
-        loginf << "EvaluationData: addReferenceData: " << ds_id;
+        loginf << "EvaluationData: addTestData: " << ds_id;
 
     for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
     {
@@ -245,6 +251,11 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
         }
 
         utn = utn_vec.get(cnt);
+        if (!dbcont_man_.existsTarget(utn))
+        {
+            logerr << "EvaluationData: addTestData: ignoring unknown utn " << utn;
+            continue;
+        }
 
         if (!hasTargetData(utn))
             target_data_.emplace_back(utn, *this, accessor_, eval_man_, dbcont_man_);
@@ -287,7 +298,7 @@ void EvaluationData::finalize ()
     {
         auto task = [&] (int cnt) { target_data_[cnt].finalize(); return true; };
 
-        Utils::Async::waitDialogAsyncArray(task, (int)num_targets, "Finalizing data");
+        Utils::Async::waitDialogAsyncArray(task, (int) num_targets, "Finalizing data");
     }
 
     finalized_ = true;

@@ -194,6 +194,11 @@ std::unique_ptr<nlohmann::json::object_t> Joined::viewableData()
         }
     }
 
+    //add custom annotations
+    {
+        addCustomAnnotationsToViewable(*vdata);
+    }
+
     return vdata;
 }
 
@@ -300,8 +305,7 @@ void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
 
             //loginf << "Generating render layer " << lname;
 
-            auto ldata = grid_->getValues(layer_def.value_type);
-            layers.addLayer(lname, grid_->getReference(), ldata);
+            grid_->addToLayers(layers, lname, layer_def.value_type);
 
             render_settings[ lname ] = layer_def.render_settings;
         }
@@ -321,7 +325,7 @@ void Joined::addGridToViewData(nlohmann::json::object_t& view_data)
 
         //loginf << "value map size: " << l.second.data.cols() << "x" << l.second.data.rows();
 
-        auto render_result = Grid2DLayerRenderer::render(l.second, rs);
+        auto render_result = Grid2DLayerRenderer::render(*l.second, rs);
 
         //loginf << "rendered image size: " << render_result.first.width() << "x" << render_result.first.height();
         //render_result.first.save(QString::fromStdString("/home/mcphatty/layer_" + l.first + ".png"));

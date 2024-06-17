@@ -42,6 +42,7 @@ public:
     virtual ~KalmanInterface() = default;
 
     virtual bool init() = 0;
+    virtual KalmanInterface* clone() const = 0;
 
     void kalmanInit(kalman::KalmanState& init_state,
                     const Measurement& mm,
@@ -49,18 +50,27 @@ public:
                     double Q_var);
     void kalmanInit(const kalman::KalmanState& init_state,
                     const boost::posix_time::ptime& ts);
+    void kalmanInit(const kalman::Vector& x,
+                    const kalman::Matrix& P,
+                    const boost::posix_time::ptime& ts);
+    
     bool kalmanStep(kalman::KalmanState& new_state,
                     const Measurement& mm, 
                     const reconstruction::Uncertainty& default_uncert, 
                     double Q_var);
+    
     bool kalmanPrediction(kalman::Vector& x,
                           kalman::Matrix& P,
                           double dt,
-                          double Q_var) const;
+                          double Q_var,
+                          bool fix_estimate,
+                          bool* fixed = nullptr) const;
     bool kalmanPrediction(kalman::Vector& x,
                           kalman::Matrix& P,
                           const boost::posix_time::ptime& ts,
-                          double Q_var) const;
+                          double Q_var,
+                          bool fix_estimate,
+                          bool* fixed = nullptr) const;
                           
     bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                        size_t idx0,
@@ -68,9 +78,13 @@ public:
                        KalmanProjectionHandler& proj_handler) const;
 
     double timestep(const Measurement& mm) const;
+    static double timestep(const Measurement& mm0, const Measurement& mm1);
+    static double timestep(const boost::posix_time::ptime& ts0, const boost::posix_time::ptime& ts1);
     double distanceSqr(const Measurement& mm) const;
 
     const boost::posix_time::ptime& currrentTime() const { return ts_; }
+
+    Measurement currentStateAsMeasurement() const;
     
     //needed for feeding kalman
     virtual void stateVecXFromMM(kalman::Vector& x, const Measurement& mm) const = 0;
@@ -87,8 +101,10 @@ public:
     virtual void stateTransitionMatF(kalman::Matrix& F, double dt) const = 0;
     
     //needed for retrieval from kalman
-    virtual void storeState(Measurement& mm, const kalman::KalmanState& state) const = 0;
-    
+    void storeState(Measurement& mm, const kalman::KalmanState& state) const;
+    virtual void storeState(Measurement& mm, 
+                            const kalman::Vector& x, 
+                            const kalman::Matrix& P) const = 0;
     //helpers
     virtual void xPos(double& x, double& y, const kalman::Vector& x_vec) const = 0;
     virtual void xPos(double& x, double& y) const = 0;
@@ -97,6 +113,7 @@ public:
     virtual double yVar(const kalman::Matrix& P) const = 0;
     virtual double xyCov(const kalman::Matrix& P) const = 0;
     virtual void stateVecXInv(kalman::Vector& x_inv, const kalman::Vector& x) const = 0;
+    virtual kalman::KalmanState currentState() const = 0;
 
     kalman::Vector stateVecXInv(const kalman::Vector& x) const;
 
@@ -104,7 +121,12 @@ public:
     virtual boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
                                                             const kalman::KalmanState& state1,
                                                             double dt,
-                                                            double Q_var) const = 0;
+                                                            double Q_var,
+                                                            bool fix_estimate,
+                                                            bool* fixed = nullptr) const = 0;
+                                           
+    virtual std::string asString(const std::string& prefix = "") const = 0;
+
     void setVerbosity(int v) { verbosity_ = v; }
 
 protected:
@@ -113,15 +135,21 @@ protected:
                                  const reconstruction::Uncertainty& default_uncert,
                                  double Q_var) = 0;
     virtual void kalmanInit_impl(const kalman::KalmanState& init_state) = 0;
+    virtual void kalmanInit_impl(const kalman::Vector& x,
+                                 const kalman::Matrix& P) = 0;
+
     virtual bool kalmanStep_impl(kalman::KalmanState& new_state,
                                  double dt,
                                  const Measurement& mm,
                                  const reconstruction::Uncertainty& default_uncert, 
                                  double Q_var) = 0;
+        
     virtual bool kalmanPrediction_impl(kalman::Vector& x,
                                        kalman::Matrix& P,
                                        double dt,
-                                       double Q_var) const = 0;
+                                       double Q_var,
+                                       bool fix_estimate,
+                                       bool* fixed) const = 0;
     virtual bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
                                     std::vector<kalman::Matrix>& P_smooth,
                                     const std::vector<kalman::KalmanState>& states,

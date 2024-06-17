@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 #include "kalman_estimator.h"
 
 #include <memory>
@@ -29,6 +29,11 @@ class KalmanInterface;
 class KalmanProjectionHandler;
 
 /**
+ * Online kalman tracker 
+ * - consumes time-ordered measurements
+ * - re-estimates the state on adding a new measurement
+ * - able to make predictions based on the current (last) state
+ * - can be reset to start a new track
 */
 class KalmanOnlineTracker
 {
@@ -42,25 +47,31 @@ public:
     void init(std::unique_ptr<KalmanInterface>&& interface);
     void init(kalman::KalmanType ktype);
 
-    bool track(Measurement& mm);
+    bool track(const Measurement& mm, KalmanEstimator::StepResult* res = nullptr);
     bool track(const kalman::KalmanUpdate& update);
+    bool track(const kalman::KalmanUpdateMinimal& update);
+
+    bool canPredict(const boost::posix_time::ptime& ts,
+                    const boost::posix_time::time_duration& max_time_diff = boost::posix_time::seconds(10)) const;
     bool predict(Measurement& mm_predicted,
-                 double dt) const;
-    bool predict(Measurement& mm_predicted,
-                 const boost::posix_time::ptime& ts) const;
+                 const boost::posix_time::ptime& ts,
+                 bool* fixed = nullptr) const;
 
     bool isTracking() const;
 
     KalmanEstimator::Settings& settings();
     const boost::optional<kalman::KalmanUpdate>& currentState() const;
+    const boost::posix_time::ptime& currentTime() const;
     const KalmanEstimator& estimator() const;
 
 private:
-    void kalmanInit(Measurement& mm);
+    void kalmanInit(const Measurement& mm);
     void kalmanInit(const kalman::KalmanUpdate& update);
+    void kalmanInit(const kalman::KalmanUpdateMinimal& update);
 
     std::unique_ptr<KalmanEstimator>      estimator_;
     boost::optional<kalman::KalmanUpdate> current_update_;
+    kalman::KalmanUpdate                  tmp_update_;
 };
 
 } // reconstruction

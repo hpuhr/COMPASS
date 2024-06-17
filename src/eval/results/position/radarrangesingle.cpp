@@ -454,6 +454,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionRadarRange::getTargetErr
     }
 
     addAnnotations(*viewable_ptr, false, true);
+    addCustomAnnotationsToViewable(*viewable_ptr);
 
     return viewable_ptr;
 }

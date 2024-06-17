@@ -16,7 +16,7 @@
  */
 
 #include "kalman_interface.h"
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 #include "kalman_projection.h"
 
 #include "timeconv.h"
@@ -47,16 +47,27 @@ void KalmanInterface::kalmanInit(const kalman::KalmanState& init_state,
 
 /**
 */
+void KalmanInterface::kalmanInit(const kalman::Vector& x,
+                                 const kalman::Matrix& P,
+                                 const boost::posix_time::ptime& ts)
+{
+    ts_ = ts;
+    kalmanInit_impl(x, P);
+}
+
+/**
+*/
 bool KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
                                  const Measurement& mm, 
                                  const reconstruction::Uncertainty& default_uncert, 
                                  double Q_var)
 {
-    bool ok = kalmanStep_impl(new_state, timestep(mm), mm, default_uncert, Q_var);
+    if (!kalmanStep_impl(new_state, timestep(mm), mm, default_uncert, Q_var))
+        return false;
 
     ts_ = mm.t;
 
-    return ok;
+    return true;
 }
 
 /**
@@ -64,9 +75,11 @@ bool KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
 bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
                                        kalman::Matrix& P,
                                        double dt,
-                                       double Q_var) const
+                                       double Q_var,
+                                       bool fix_estimate,
+                                       bool* fixed) const
 {
-    return kalmanPrediction_impl(x, P, dt, Q_var);
+    return kalmanPrediction_impl(x, P, dt, Q_var, fix_estimate, fixed);
 }
 
 /**
@@ -74,17 +87,33 @@ bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
 bool KalmanInterface::kalmanPrediction(kalman::Vector& x,
                                        kalman::Matrix& P,
                                        const boost::posix_time::ptime& ts,
-                                       double Q_var) const
+                                       double Q_var,
+                                       bool fix_estimate,
+                                       bool* fixed) const
 {
-    double dt = Utils::Time::partialSeconds(ts - ts_);
-    return kalmanPrediction_impl(x, P, dt, Q_var);
+    double dt = KalmanInterface::timestep(ts_, ts);
+    return kalmanPrediction_impl(x, P, dt, Q_var, fix_estimate, fixed);
+}
+
+/**
+*/
+double KalmanInterface::timestep(const boost::posix_time::ptime& ts0, const boost::posix_time::ptime& ts1)
+{
+    return (ts1 >= ts0 ? Utils::Time::partialSeconds(ts1 - ts0) : -Utils::Time::partialSeconds(ts0 - ts1));
 }
 
 /**
 */
 double KalmanInterface::timestep(const Measurement& mm) const
 {
-    return Utils::Time::partialSeconds(mm.t - ts_);
+    return KalmanInterface::timestep(ts_, mm.t);
+}
+
+/**
+*/
+double KalmanInterface::timestep(const Measurement& mm0, const Measurement& mm1)
+{
+    return KalmanInterface::timestep(mm0.t, mm1.t);
 }
 
 /**
@@ -148,6 +177,23 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
     }
 
     return true;
+}
+
+/**
+*/
+void KalmanInterface::storeState(Measurement& mm, const kalman::KalmanState& state) const
+{
+    storeState(mm, state.x, state.P);
+}
+
+/**
+*/
+Measurement KalmanInterface::currentStateAsMeasurement() const
+{
+    Measurement mm;
+    storeState(mm, currentState());
+
+    return mm;
 }
 
 } // reconstruction

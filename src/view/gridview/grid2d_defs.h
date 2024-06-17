@@ -79,6 +79,11 @@ enum ValueType
     NumValueTypes
 };
 
+enum CellFlags
+{
+    CellSelected = 1 << 0
+};
+
 /**
 */
 inline std::string valueTypeToString(ValueType vtype)

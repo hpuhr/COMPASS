@@ -78,15 +78,44 @@ void Grid2DLayers::clear()
 */
 void Grid2DLayers::addLayer(const std::string& name, 
                             const RasterReference& ref,
-                            const Eigen::MatrixXd& data)
+                            const Eigen::MatrixXd& data,
+                            const Eigen::MatrixXi& flags)
 {
     assert(layers_.count(name) == 0);
 
     auto& l = layers_[ name ];
 
-    l.name = name;
-    l.ref  = ref;
-    l.data = data;
+    l.reset(new Grid2DLayer);
+
+    l->name  = name;
+    l->ref   = ref;
+    l->data  = data;
+    l->flags = flags;
+}
+
+/**
+*/
+void Grid2DLayers::addLayer(LayerPtr&& layer)
+{
+    assert(layer && layers_.count(layer->name) == 0);
+
+    layers_[ layer->name ] = std::move(layer);
+}
+
+/**
+*/
+const Grid2DLayers::Layers& Grid2DLayers::layers() const
+{
+    return layers_;
+}
+
+/**
+*/
+const Grid2DLayer& Grid2DLayers::layer(const std::string& name) const
+{
+    const auto& l = layers_.at(name);
+    assert(l);
+    return *l;
 }
 
 /*********************************************************************************
@@ -98,7 +127,8 @@ void Grid2DLayers::addLayer(const std::string& name,
 std::pair<QImage,RasterReference> Grid2DLayerRenderer::render(const Grid2DLayer& layer,
                                                               const Grid2DRenderSettings& settings)
 {
-    const auto& data = layer.data;
+    const auto& data  = layer.data;
+    const auto& flags = layer.flags;
 
     if (data.size() == 0)
         return {};
@@ -148,6 +178,10 @@ std::pair<QImage,RasterReference> Grid2DLayerRenderer::render(const Grid2DLayer&
     
     auto getColor = [ & ] (size_t cx, size_t cy)
     {
+        //handle cell selection
+        if (settings.show_selected && (flags(cy, cx) & grid2d::CellFlags::CellSelected))
+            return settings.color_map.specialColor(ColorMap::SpecialColorSelected);
+
         //flip y-index if north is up
         if (layer.ref.is_north_up)
             cy = nrows - 1 - cy;

@@ -63,9 +63,10 @@ void TableViewDataSource::generateSubConfigurable(const std::string& class_id,
 
         connect(set_.get(), &VariableOrderedSet::setChangedSignal, this,
                 &TableViewDataSource::setChangedSignal, Qt::UniqueConnection);
-        connect(set_.get(), &VariableOrderedSet::setChangedSignal, this,
-                &TableViewDataSource::reloadNeeded, Qt::UniqueConnection);
 
+        //some variable modifications result in a reload
+        connect(set_.get(), &VariableOrderedSet::variableAddedChangedSignal, this,
+                &TableViewDataSource::reloadNeeded, Qt::UniqueConnection);
     }
     else
     {

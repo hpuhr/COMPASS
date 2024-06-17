@@ -72,7 +72,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     connect(min_chain_size_box_, QOverload<int>::of(&QSpinBox::valueChanged), [ = ] (int v) { settings->min_chain_size = v; });
     layout->addRow("Minimum Chain Size", min_chain_size_box_);
 
-    if (is_appimage)
+    if (!is_appimage)
     {
         min_dt_box_ = new QDoubleSpinBox;
         min_dt_box_->setDecimals(8);
@@ -89,7 +89,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     connect(max_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_dt = v; });
     layout->addRow("Maximum Time Step [s]", max_dt_box_);
 
-    if (is_appimage)
+    if (!is_appimage)
     {
         max_distance_box_ = new QDoubleSpinBox;
         max_distance_box_->setDecimals(3);
@@ -114,9 +114,10 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
 
     resample_systracks_dt_box_ = new QDoubleSpinBox;
     resample_systracks_dt_box_->setDecimals(3);
-    resample_systracks_dt_box_->setMinimum(1.0);
+    resample_systracks_dt_box_->setMinimum(0.1);
     resample_systracks_dt_box_->setMaximum(DBL_MAX);
-    connect(resample_systracks_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_systracks_dt = v; });
+    connect(resample_systracks_dt_box_,
+            QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_systracks_dt = v; });
     layout->addRow("Resample Interval [s]", resample_systracks_dt_box_);
 
     resample_systracks_maxdt_box_ = new QDoubleSpinBox;
@@ -145,7 +146,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
 
     resample_dt_box_ = new QDoubleSpinBox;
     resample_dt_box_->setDecimals(3);
-    resample_dt_box_->setMinimum(1.0);
+    resample_dt_box_->setMinimum(0.01);
     resample_dt_box_->setMaximum(DBL_MAX);
     connect(resample_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_dt = v; });
     layout->addRow("Resample Interval [s]", resample_dt_box_);

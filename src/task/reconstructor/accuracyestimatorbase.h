@@ -33,6 +33,9 @@ class AccuracyEstimatorBase
     virtual void validate (dbContent::targetReport::ReconstructorInfo& tr,
                           ReconstructorBase& reconstructor) = 0; // can set do not use position flag
 
+    virtual bool canCorrectPosition(const dbContent::targetReport::ReconstructorInfo& tr) { return false; }
+    virtual void correctPosition(dbContent::targetReport::ReconstructorInfo& tr) {} // save in position_corrected_
+
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) = 0;
     virtual dbContent::targetReport::VelocityAccuracy velocityAccuracy (
@@ -47,6 +50,16 @@ class AccuracyEstimatorBase
     virtual void estimateAccuracies() = 0; // when targets with calculated references are done
 
   protected:
+
+    static const double PosAccStdDevMin;
+    static const dbContent::targetReport::PositionAccuracy PosAccStdMin;
+
+    static const double VelAccStdDevMin;
+    static const dbContent::targetReport::VelocityAccuracy VelAccStdMin;
+
+    static const double AccAccStdDevMin;
+    static const dbContent::targetReport::AccelerationAccuracy AccAccStdMin;
+
     static const double PosAccStdDevFallback;
     static const dbContent::targetReport::PositionAccuracy PosAccStdFallback;
 

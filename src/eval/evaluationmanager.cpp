@@ -256,6 +256,9 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("grid_num_cells_y", &settings_.grid_num_cells_y, Settings().grid_num_cells_y);
     registerParameter("grid_pixels_per_cell", &settings_.grid_pixels_per_cell, Settings().grid_pixels_per_cell);
 
+    //histogram generation
+    registerParameter("histogram_num_bins", &settings_.histogram_num_bins, Settings().histogram_num_bins);
+    
     registerParameter("warning_shown", &settings_.warning_shown_, Settings().warning_shown_);
 
     createSubConfigurables();
@@ -346,7 +349,7 @@ void EvaluationManager::loadData ()
         loginf << "EvaluationManager: loadData: ref ds_id '" << ds_it.first << "' uint " << ds_id;
 
         for (auto& line_it : line_ref_set)
-               loginf << " line " << line_it;
+               loginf << "EvaluationManager: loadData: ref line " << line_it;
 
         assert (ds_man.hasDBDataSource(ds_id));
 
@@ -364,7 +367,7 @@ void EvaluationManager::loadData ()
         loginf << "EvaluationManager: loadData: tst ds_id '" << ds_it.first << "' uint " << ds_id;
 
         for (auto& line_it : line_tst_set)
-            loginf << " line " << line_it;
+            loginf << "EvaluationManager: loadData: tst line " << line_it;
 
         assert (ds_man.hasDBDataSource(ds_id));
 
@@ -387,7 +390,8 @@ void EvaluationManager::loadData ()
     fil_man.disableAllFilters();
 
     // position data
-    if (settings_.load_only_sector_data_ && hasCurrentStandard() && sectorsLayers().size())
+    if (settings_.load_only_sector_data_ && hasCurrentStandard()
+        && sectorsLoaded() && sectorsLayers().size())
     {
         assert (fil_man.hasFilter("Position"));
         DBFilter* pos_fil = fil_man.getFilter("Position");
@@ -577,6 +581,9 @@ bool EvaluationManager::canEvaluate ()
         return false;
 
     bool has_anything_to_eval = false;
+
+    if (!sectorsLoaded())
+        return false;
 
     for (auto& sec_it : sectorsLayers())
     {
@@ -1049,7 +1056,7 @@ void EvaluationManager::clearLoadedDataAndResults()
 
 void EvaluationManager::updateSectorLayers()
 {
-    if (use_fast_sector_inside_check_)
+    if (use_fast_sector_inside_check_ && sectors_loaded_)
     {
         for (const auto& layer : sectorsLayers())
             for (const auto& s : layer->sectors())

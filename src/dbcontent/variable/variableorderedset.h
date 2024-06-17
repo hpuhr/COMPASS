@@ -38,6 +38,8 @@ class VariableOrderedSet : public QObject, public Configurable
   signals:
     void setChangedSignal();
     void variableAddedChangedSignal();
+    void variableRemovedSignal();
+    void variableMovedSignal();
 
   public:
     VariableOrderedSet(const std::string& class_id, 
@@ -84,6 +86,8 @@ class VariableOrderedSet : public QObject, public Configurable
 
     virtual void checkSubConfigurables() override;
     virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
+
+    void removeVariableAt(unsigned int index, bool signal_changes);
 };
 
 }

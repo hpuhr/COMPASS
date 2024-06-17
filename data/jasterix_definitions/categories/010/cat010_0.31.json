@@ -558,7 +558,7 @@
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"int",
-                    "lsb":6.103515625E-5
+                    "lsb":0.22607421875
                 },
                 {
                     "name":"Track Angle",

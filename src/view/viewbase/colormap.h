@@ -15,35 +15,122 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <vector>
-#include <map>
+#pragma once
 
-#include <QColor>
+#include "colormap_defs.h"
+
+#include <vector>
 
 #include <boost/optional.hpp>
 
+#include <QColor>
+
+class QComboBox;
+class QImage;
+
 /**
 */
-class ColorMap
+class ColorMap 
 {
 public:
+    typedef colorscale::ColorScale      ColorScale;
+    typedef std::pair<double, double>   ValueRange;
+    typedef boost::optional<ValueRange> OValueRange;
+
+    enum class Type
+    {
+        Linear = 0,
+        Discrete,
+        Binary
+    };
+
+    enum SpecialColor
+    {
+        SpecialColorSelected = 0,
+        SpecialColorNull,
+
+        NumSpecialColors
+    };
+
     ColorMap();
     virtual ~ColorMap();
 
-    void set(const std::vector<QColor>& colors);
-    void set(const QColor& color_min, 
-             const QColor& color_max, 
-             size_t steps);
-    void set(const QColor& color_min, 
-             const QColor& color_mid, 
-             const QColor& color_max, 
-             size_t steps);
+    static QColor sample(double t, ColorScale scale);
+    static std::vector<QColor> sample(ColorScale scale, 
+                                      size_t n);
+    static std::vector<QColor> sample(const std::vector<QColor>& samples, 
+                                      size_t n);
+    static std::vector<QColor> sample(const QColor& color_min, 
+                                      const QColor& color_max, 
+                                      size_t n);
+    static std::vector<QColor> sample(const QColor& color_min, 
+                                      const QColor& color_mid, 
+                                      const QColor& color_max,
+                                      size_t n);
+
+    static void generateScaleImage(QImage& img, 
+                                   ColorScale scale, 
+                                   int w, 
+                                   int h);
+    static QComboBox* generateScaleSelection(ColorScale scale_default = ColorScale::Green2Red);
+
+    bool valid() const;
+    bool canSampleValues() const;
+
+    ColorScale colorScale() const;
+    size_t colorSteps() const;
+
+    size_t numColors() const;
+    const QColor& getColor(size_t idx) const;
+    const std::vector<QColor>& getColors() const { return colors_; }
+
+    void create(const std::vector<QColor>& colors,
+                Type type = Type::Linear,
+                const OValueRange& value_range = OValueRange());
+    void create(const QColor& color_min,
+                const QColor& color_max,
+                size_t n,
+                Type type = Type::Linear,
+                const OValueRange& value_range = OValueRange());
+    void create(const QColor& color_min,
+                const QColor& color_mid,
+                const QColor& color_max,
+                size_t n,
+                Type type = Type::Linear,
+                const OValueRange& value_range = OValueRange());
+    void create(ColorScale scale, 
+                size_t n,
+                Type type = Type::Linear,
+                const OValueRange& value_range = OValueRange());
+
+    void setSpecialColor(SpecialColor type, const QColor& color);
+    const QColor& specialColor(SpecialColor type) const;
     
     QColor sample(double t) const;
     QColor sampleValue(double v) const;
 
+    std::vector<std::pair<QColor, std::string>> getDescription(bool add_sel_color = true,
+                                                               bool add_null_color = true) const;
+
 private:
-    void reset();
+    void create(const std::vector<QColor>& colors,
+                Type type,
+                ColorScale scale,
+                size_t steps,
+                const OValueRange& value_range);
+
+    size_t indexFromFactor(double t) const;
+    ValueRange activeRange() const;
+
+    Type       type_  = Type::Linear;
+    ColorScale scale_ = ColorScale::Custom;
+    size_t     steps_ = 0;
 
     std::vector<QColor> colors_;
+    std::vector<double> value_factors_;
+    size_t              n_colors_ = 0;
+
+    std::vector<QColor> special_colors_;
+    OValueRange         value_range_;
+    bool                smaple_values_symm_ = false;
 };

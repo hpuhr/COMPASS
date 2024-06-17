@@ -201,7 +201,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
 }
 
-void Client::run ()
+bool Client::run ()
 {
     // #define TBB_VERSION_MAJOR 4
 
@@ -246,6 +246,28 @@ void Client::run ()
     if (open_rt_cmd_port_)
         RTCommandManager::open_port_ = true; // has to be done before COMPASS ctor is called
 
+    loginf << "COMPASSClient: creating COMPASS instance...";
+
+    //!this should be the first call to COMPASS instance!
+    try
+    {
+        COMPASS::instance();
+    }
+    catch(const std::exception& e)
+    {
+        logerr << "COMPASSClient: creating COMPASS instance failed: " << e.what();
+        quit_requested_ = true;
+        return false;
+    }
+    catch(...)
+    {
+        logerr << "COMPASSClient: creating COMPASS instance failed: unknown error";
+        quit_requested_ = true;
+        return false;
+    }
+    
+    loginf << "COMPASSClient: created COMPASS instance";
+
     if (expert_mode_)
         COMPASS::instance().expertMode(true);
 
@@ -288,7 +310,7 @@ void Client::run ()
     {
         logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
         quit_requested_ = true;
-        return;
+        return false;
     }
 
     if (import_asterix_filename_.size())
@@ -409,6 +431,8 @@ void Client::run ()
 
     //finally => set compass as running
     COMPASS::instance().setAppState(AppState::Running);
+
+    return true;
 }
 
 Client::~Client()

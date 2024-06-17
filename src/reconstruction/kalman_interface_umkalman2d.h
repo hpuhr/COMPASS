@@ -38,6 +38,8 @@ public:
     KalmanInterfaceUMKalman2D(bool track_velocities);
     virtual ~KalmanInterfaceUMKalman2D() = default;
 
+    KalmanInterface* clone() const override final;
+
     size_t dimX() const override final; 
     size_t dimZ() const override final;
     size_t dimU() const override final;
@@ -52,7 +54,9 @@ public:
                                const reconstruction::Uncertainty& default_uncert) const override final;
     void stateTransitionMatF(kalman::Matrix& F, double dt) const override final;
 
-    void storeState(Measurement& mm, const kalman::KalmanState& state) const override final;
+    void storeState(Measurement& mm, 
+                    const kalman::Vector& x, 
+                    const kalman::Matrix& P) const override final;
 
     void xPos(double& x, double& y, const kalman::Vector& x_vec) const override final;
     void xPos(double& x, double& y) const override final;

@@ -406,6 +406,14 @@ void ChartView::paintEvent(QPaintEvent *e)
     //call base
     QChartView::paintEvent(e);
 
+    {
+        QPainter painter(this->viewport());
+
+        //paint any other items
+        paintCustomItems(e, painter);
+    }
+
+    //paint selection items
     if (sel_style_ == SelectionStyle::SeriesArea)
         updateSelectionBox(selected_region_chart_);
     else if (sel_style_ == SelectionStyle::SeriesLines)

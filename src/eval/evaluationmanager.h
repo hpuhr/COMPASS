@@ -146,6 +146,9 @@ struct EvaluationManagerSettings
     unsigned int grid_num_cells_y     = 512;
     unsigned int grid_pixels_per_cell = 5;
 
+    //histogram generation
+    unsigned int histogram_num_bins = 20;
+
     //not written to config
     bool load_only_sector_data_ {true};
 
@@ -181,6 +184,9 @@ public slots:
     void loadingDoneSlot();
 
 public:
+    typedef std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> ResultMap;
+    typedef ResultMap::const_iterator ResultIterator;
+
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~EvaluationManager();
 
@@ -286,15 +292,11 @@ public:
                        bool select_tab = false,
                        bool show_figure = false);
 
-    typedef std::map<std::string,
-      std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
-
     ResultIterator begin();
     ResultIterator end();
 
     bool hasResults();
-    const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
-    const;
+    const ResultMap& results() const;
 
     void updateResultsToChanges ();
     void showFullUTN (unsigned int utn);

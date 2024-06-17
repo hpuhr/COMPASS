@@ -22,6 +22,7 @@
 #include <map>
 
 #include <Eigen/Core>
+#include <Eigen/Dense>
 
 #include <boost/optional.hpp>
 
@@ -35,9 +36,10 @@ struct Grid2DLayer
 {
     boost::optional<std::pair<double, double>> range() const; 
 
-    std::string     name;
-    Eigen::MatrixXd data;
-    RasterReference ref;
+    std::string                   name;
+    Eigen::MatrixXd               data;
+    Eigen::MatrixXi               flags;
+    RasterReference               ref;
 };
 
 /**
@@ -45,18 +47,24 @@ struct Grid2DLayer
 class Grid2DLayers
 {
 public:
+    typedef std::unique_ptr<Grid2DLayer>    LayerPtr;
+    typedef std::map<std::string, LayerPtr> Layers;
+
     Grid2DLayers();
     virtual ~Grid2DLayers();
 
     void clear();
     void addLayer(const std::string& name, 
                   const RasterReference& ref,
-                  const Eigen::MatrixXd& data);
+                  const Eigen::MatrixXd& data,
+                  const Eigen::MatrixXi& flags);
+    void addLayer(LayerPtr&& layer);
 
-    const std::map<std::string, Grid2DLayer>& layers() const { return layers_; }
+    const Layers& layers() const;
+    const Grid2DLayer& layer(const std::string& name) const;
 
 private:
-    std::map<std::string, Grid2DLayer> layers_;
+    Layers layers_;
 };
 
 /**
@@ -67,6 +75,8 @@ struct Grid2DRenderSettings
     boost::optional<double> min_value;
     boost::optional<double> max_value;
     int                     pixels_per_cell = 1;
+
+    bool show_selected = true;
 };
 
 /**

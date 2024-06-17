@@ -1,4 +1,3 @@
-include("${CMAKE_CURRENT_LIST_DIR}/complex/CMakeLists.txt")
 
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
@@ -10,6 +9,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortarget.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructorbase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructorassociatorbase.h"
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructor.h"
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructorwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructorassociationwidget.h"
@@ -27,6 +27,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortarget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructorbase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructorassociatorbase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructor.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructorwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/simplereconstructorassociationwidget.cpp"

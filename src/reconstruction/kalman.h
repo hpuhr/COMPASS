@@ -42,20 +42,27 @@ public:
     size_t dimZ() const { return dim_z_; }
     size_t dimU() const { return dim_u_; }
 
-    void predict(const OMatrix& F = OMatrix(),
+    bool predict(const OMatrix& F = OMatrix(),
                  const OMatrix& Q = OMatrix(),
                  const OMatrix& B = OMatrix(),
-                 const OVector& u = OVector());
-    void predictState(Vector& x,
+                 const OVector& u = OVector(),
+                 bool fix_estimate = false,
+                 bool* fixed = nullptr);
+    bool predictState(Vector& x,
                       Matrix& P,
                       const Matrix& F,
                       const Matrix& Q,
                       const OMatrix& B = OMatrix(),
-                      const OVector& u = OVector()) const;
+                      const OVector& u = OVector(),
+                      bool fix_estimate = false,
+                      bool* fixed = nullptr) const;
 
     bool update(const Vector& z,
                 const OMatrix& R = OMatrix(), 
                 const OMatrix& H = OMatrix());
+
+    bool checkState() const;
+    void revert();
 
     static Matrix continuousWhiteNoise(size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
     static void continuousWhiteNoise(Matrix& Q_noise, size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
@@ -66,6 +73,8 @@ public:
                             const XTransferFunc& x_tr = XTransferFunc());
 
     kalman::KalmanState state() const;
+
+    void init(const Vector& x, const Matrix& P);
 
     void setX(const Vector& x) { x_ = x; }
     void setP(const Matrix& P) { P_ = P; }
@@ -100,7 +109,12 @@ public:
     const Matrix& getM() const { return M_; }
     Matrix& getM() { return M_; }
 
+    std::string asString(const std::string prefix = "") const;
+
 private:
+    bool checkState(const Vector& x, const Matrix& P) const;
+    void postConditionP(Matrix& P) const;
+
     size_t dim_x_;
     size_t dim_z_;
     size_t dim_u_;
@@ -124,6 +138,10 @@ private:
     Matrix SI_; // inverse system uncertainty
 
     Matrix I_;  // identity matrix
+
+    //before predict()
+    Vector  x_backup_;
+    Matrix  P_backup_;
 
     //after predict()
     Vector x_prior_;

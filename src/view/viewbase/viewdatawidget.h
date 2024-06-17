@@ -71,6 +71,22 @@ public:
 
     virtual QImage renderData();
 
+    QColor colorForDBContent(const std::string& dbcontent_name) const;
+    const std::map<std::string, QColor>& dbContentColors() const;
+
+    static const double      MarkerSizePx;
+    static const double      MarkerSizeSelectedPx;
+
+    static const std::string Color_CAT001;
+    static const std::string Color_CAT010;
+    static const std::string Color_CAT020;
+    static const std::string Color_CAT021;
+    static const std::string Color_CAT048;
+    static const std::string Color_RefTraj;
+    static const std::string Color_CAT062;
+
+    static const QColor      ColorSelected;
+
 signals:
     void displayChanged();
     void dataLoaded();
@@ -108,4 +124,6 @@ private:
 
     BufferData data_;
     bool       drawn_ = false;
+
+    std::map<std::string, QColor> dbc_colors_;
 };

@@ -26,34 +26,52 @@
 
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
-#include "dbinterface.h"
 #include "number.h"
 
 using namespace std;
 using namespace Utils;
 
-/**
- */
 ReconstructorBase::ReconstructorBase(const std::string& class_id, 
                                      const std::string& instance_id,
                                      ReconstructorTask& task, 
                                      std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator,
+                                     ReconstructorBaseSettings& base_settings,
                                      unsigned int default_line_id)
-    : Configurable (class_id, instance_id, &task), task_(task), acc_estimator_(std::move(acc_estimator))
+:   Configurable (class_id, instance_id, &task)
+,   task_(task)
+,   acc_estimator_(std::move(acc_estimator))
+,   base_settings_(base_settings)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
-    //base settings
+            // base settings
     {
         registerParameter("ds_line", &base_settings_.ds_line, default_line_id);
 
-        registerParameter("slice_duration_in_minutes", &base_settings_.slice_duration_in_minutes, BaseSettings().slice_duration_in_minutes);
-        registerParameter("outdated_duration_in_minutes", &base_settings_.outdated_duration_in_minutes, BaseSettings().outdated_duration_in_minutes);
+        registerParameter("slice_duration_in_minutes", &base_settings_.slice_duration_in_minutes,
+                          base_settings_.slice_duration_in_minutes);
+        registerParameter("outdated_duration_in_minutes", &base_settings_.outdated_duration_in_minutes,
+                          base_settings_.outdated_duration_in_minutes);
 
-        registerParameter("delete_all_calc_reftraj", &base_settings_.delete_all_calc_reftraj, BaseSettings().delete_all_calc_reftraj);
+        registerParameter("delete_all_calc_reftraj", &base_settings_.delete_all_calc_reftraj,
+                          base_settings_.delete_all_calc_reftraj);
     }
 
-    //reference computation
+            // association stuff
+    registerParameter("max_time_diff", &base_settings_.max_time_diff_, base_settings_.max_time_diff_);
+    registerParameter("track_max_time_diff", &base_settings_.track_max_time_diff_, base_settings_.track_max_time_diff_);
+
+    registerParameter("max_altitude_diff", &base_settings_.max_altitude_diff_, base_settings_.max_altitude_diff_);
+
+    registerParameter("target_prob_min_time_overlap", &base_settings_.target_prob_min_time_overlap_,
+                      base_settings_.target_prob_min_time_overlap_);
+    registerParameter("target_min_updates", &base_settings_.target_min_updates_, base_settings_.target_min_updates_);
+    registerParameter("target_max_positions_dubious_verified_rate", &base_settings_.target_max_positions_dubious_verified_rate_,
+                      base_settings_.target_max_positions_dubious_verified_rate_);
+    registerParameter("target_max_positions_dubious_unknown_rate", &base_settings_.target_max_positions_dubious_unknown_rate_,
+                      base_settings_.target_max_positions_dubious_unknown_rate_);
+
+            // reference computation
     {
         registerParameter("ref_rec_type", (int*)&ref_calc_settings_.kalman_type, (int)ReferenceCalculatorSettings().kalman_type);
 
@@ -171,9 +189,10 @@ void ReconstructorBase::reset()
 {
     loginf << "ReconstructorBase: reset/init";
 
-            //buffers_.clear();
-    current_slice_ = nullptr;
+    dbContent::ReconstructorTarget::globalStats().reset();
+
     accessor_->clear();
+    accessors_.clear();
 
     slice_cnt_ = 0;
     current_slice_begin_ = {};
@@ -192,30 +211,83 @@ void ReconstructorBase::reset()
 
     assert (acc_estimator_);
     acc_estimator_->init(this);
+
+    cancelled_ = false;
 }
 
 /**
  */
-void ReconstructorBase::processSlice(std::unique_ptr<ReconstructorBase::DataSlice> data_slice)
+void ReconstructorBase::processSlice()
 {
-    assert (!current_slice_);
-    current_slice_ = std::move(data_slice);
+    assert (!currentSlice().remove_before_time_.is_not_a_date_time());
 
-    loginf << "ReconstructorBase: processSlice: first_slice " << currentSlice().first_slice_;
+    logdbg << "ReconstructorBase: processSlice: first_slice " << currentSlice().first_slice_;
+
+    processing_ = true;
 
     if (!currentSlice().first_slice_)
+    {
+        logdbg << "ReconstructorBase: processSlice: removing data before "
+               << Time::toString(currentSlice().remove_before_time_);
+
         accessor_->removeContentBeforeTimestamp(currentSlice().remove_before_time_);
+    }
+
+    logdbg << "ReconstructorBase: processSlice: adding";
 
     accessor_->add(currentSlice().data_);
 
+    logdbg << "ReconstructorBase: processSlice: processing slice";
+
     processSlice_impl();
 
+    processing_ = false;
+
+    logdbg << "ReconstructorBase: processSlice: done";
+
     currentSlice().processing_done_ = true;
+
+    if (currentSlice().is_last_slice_)
+    {
+        auto& stats = dbContent::ReconstructorTarget::globalStats();
+
+        const int Decimals = 3;
+
+        auto perc = [ & ] (size_t num, size_t num_total)
+        {
+            return QString::number((double)num / (double)num_total * 100.0, 'f', Decimals).toStdString();
+        };
+
+        std::string num_chain_updates_valid_p      = perc(stats.num_chain_updates_valid  , stats.num_chain_updates);
+        std::string num_chain_updates_failed_p     = perc(stats.num_chain_updates_failed , stats.num_chain_updates);
+        std::string num_chain_updates_skipped_p    = perc(stats.num_chain_updates_skipped, stats.num_chain_updates);
+
+        std::string num_chain_predictions_failed_p = perc(stats.num_chain_predictions_failed, stats.num_chain_predictions);
+        std::string num_chain_predictions_fixed_p  = perc(stats.num_chain_predictions_fixed , stats.num_chain_predictions);
+
+        std::string num_rec_updates_valid_p        = perc(stats.num_rec_updates_valid  , stats.num_rec_updates);
+        std::string num_rec_updates_failed_p       = perc(stats.num_rec_updates_failed , stats.num_rec_updates);
+        std::string num_rec_updates_skipped_p      = perc(stats.num_rec_updates_skipped, stats.num_rec_updates);
+
+        loginf << "ReconstructorBase: processSlice: last slice finished\n"
+               << "   chain updates:     " << stats.num_chain_updates_valid      << " valid ("   << num_chain_updates_valid_p      << "%), "
+                                           << stats.num_chain_updates_failed     << " failed ("  << num_chain_updates_failed_p     << "%), "
+                                           << stats.num_chain_updates_skipped    << " skipped (" << num_chain_updates_skipped_p    << "%), "
+                                           << stats.num_chain_updates            << " total\n"
+               << "   chain predictions: " << stats.num_chain_predictions_failed << " failed ("  << num_chain_predictions_failed_p << "%), "
+                                           << stats.num_chain_predictions_fixed  << " fixed ("   << num_chain_predictions_fixed_p  << "%), "
+                                           << stats.num_chain_predictions        << " total\n"
+               << "   rec updates:       " << stats.num_rec_updates_valid        << " valid ("   << num_rec_updates_valid_p        << "%), "
+                                           << stats.num_rec_updates_failed       << " failed ("  << num_rec_updates_failed_p       << "%), "
+                                           << stats.num_rec_updates_skipped      << " skipped (" << num_rec_updates_skipped_p      << "%), "
+                                           << stats.num_rec_updates              << " total\n"
+               << "   rec interp steps:  " << stats.num_rec_interp_failed        << " failed";
+    }
 }
 
 void ReconstructorBase::clearOldTargetReports()
 {
-    loginf << "ReconstructorBase: clearOldTargetReports: remove_before_time "
+    logdbg << "ReconstructorBase: clearOldTargetReports: remove_before_time "
            << Time::toString(currentSlice().remove_before_time_)
            << " size " << target_reports_.size();
 
@@ -272,6 +344,8 @@ void ReconstructorBase::createTargetReports()
     std::set<unsigned int> unused_ds_ids = task_.unusedDSIDs();
     std::map<unsigned int, std::set<unsigned int>> unused_lines = task_.unusedDSIDLines();
 
+    auto& ds_man = COMPASS::instance().dataSourceManager();
+
     for (auto& buf_it : *accessor_)
     {
         assert (dbcont_man.existsDBContent(buf_it.first));
@@ -287,7 +361,7 @@ void ReconstructorBase::createTargetReports()
             record_num = tgt_acc.recordNumber(cnt);
             ts = tgt_acc.timestamp(cnt);
 
-                    //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
+            //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
 
             if (!tgt_acc.position(cnt))
                 continue;
@@ -302,8 +376,13 @@ void ReconstructorBase::createTargetReports()
                 info.line_id_ = tgt_acc.lineID(cnt);
                 info.timestamp_ = ts;
 
-                        // reconstructor info
+                // reconstructor info
                 info.in_current_slice_ = true;
+
+                info.is_calculated_reference_ = ds_man.hasDBDataSource(info.ds_id_) && 
+                                                ds_man.dbDataSource(info.ds_id_).sac() == ReconstructorBaseSettings::REC_DS_SAC &&
+                                                ds_man.dbDataSource(info.ds_id_).sic() == ReconstructorBaseSettings::REC_DS_SIC;
+
                 info.acad_ = tgt_acc.acad(cnt);
                 info.acid_ = tgt_acc.acid(cnt);
 
@@ -316,9 +395,9 @@ void ReconstructorBase::createTargetReports()
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
 
-                info.do_not_use_position_ =
-                    (unused_ds_ids.count(info.ds_id_)
-                     || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
+                info.do_not_use_position_ = !info.position().has_value()
+                    || (unused_ds_ids.count(info.ds_id_)
+                    || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
 
                 info.barometric_altitude_ = tgt_acc.barometricAltitude(cnt);
 
@@ -328,11 +407,11 @@ void ReconstructorBase::createTargetReports()
                 info.track_angle_ = tgt_acc.trackAngle(cnt);
                 info.ground_bit_ = tgt_acc.groundBit(cnt);
 
-                        // insert info
+                // insert info
                 assert (!target_reports_.count(record_num));
                 target_reports_[record_num] = info;
 
-                        // insert into lookups
+                // insert into lookups
                 tr_timestamps_.insert({ts, record_num});
                 // dbcontent id -> ds_id -> ts ->  record_num
 
@@ -340,17 +419,27 @@ void ReconstructorBase::createTargetReports()
             }
             else // update buffer_index_
             {
+                if (ts < currentSlice().remove_before_time_)
+                {
+                    logerr << "ReconstructorBase: createTargetReports: old data not removed ts "
+                           << Time::toString(ts)
+                           << " dbcont " << buf_it.first
+                           << " buffer_size " << buffer_size
+                           << " remove before " << Time::toString(currentSlice().remove_before_time_);
+                }
+
                 assert (ts >= currentSlice().remove_before_time_);
 
                 if (!target_reports_.count(record_num))
                     logerr << "ReconstructorBase: createTargetReports: missing prev ts " << Time::toString(ts);
 
                 assert (target_reports_.count(record_num));
+                assert (target_reports_.at(record_num).record_num_ == record_num); // be sure
 
                 target_reports_.at(record_num).buffer_index_ = cnt;
                 target_reports_.at(record_num).in_current_slice_ = false;
 
-                assert (target_reports_.at(record_num).timestamp_ == ts); // just to be sure
+                assert (target_reports_.at(record_num).timestamp_ == ts); // be very sure
             }
         }
     }
@@ -523,46 +612,29 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
     }
 }
 
+bool ReconstructorBase::processing() const
+{
+    return processing_;
+}
+
+void ReconstructorBase::cancel()
+{
+    cancelled_ = true;
+}
+
 void ReconstructorBase::saveTargets()
 {
     loginf << "ReconstructorBase: saveTargets: num " << targets_.size();
 
+    processing_ = true;
+
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
 
-    for (auto& tgt_it : targets_)
-    {
-        cont_man.createNewTarget(tgt_it.first);
-
-        dbContent::Target& target = cont_man.target(tgt_it.first);
-
-                //target.useInEval(tgt_it.second.use_in_eval_);
-
-                //if (tgt_it.second.comment_.size())
-                //    target.comment(tgt_it.second.comment_);
-
-        target.aircraftAddresses(tgt_it.second.acads_);
-        target.aircraftIdentifications(tgt_it.second.acids_);
-        target.modeACodes(tgt_it.second.mode_as_);
-
-        if (tgt_it.second.hasTimestamps())
-        {
-            target.timeBegin(tgt_it.second.timestamp_min_);
-            target.timeEnd(tgt_it.second.timestamp_max_);
-        }
-
-        if (tgt_it.second.hasModeC())
-            target.modeCMinMax(*tgt_it.second.mode_c_min_, *tgt_it.second.mode_c_max_);
-
-                // set counts
-        for (auto& count_it : tgt_it.second.getDBContentCounts())
-            target.dbContentCount(count_it.first, count_it.second);
-
-                // set adsb stuff
-        //        if (tgt_it.second.hasADSBMOPSVersion() && tgt_it.second.getADSBMOPSVersions().size())
-        //            target.adsbMOPSVersions(tgt_it.second.getADSBMOPSVersions());
-    }
+    cont_man.createNewTargets(targets_);
 
     cont_man.saveTargets();
+
+    processing_ = false;
 
     logdbg << "ReconstructorBase: saveTargets: done";
 }
@@ -578,21 +650,9 @@ ReconstructorTask& ReconstructorBase::task() const
     return task_;
 }
 
-bool ReconstructorBase::hasCurrentSlice() const
-{
-    return current_slice_ != nullptr;
-}
-
 ReconstructorBase::DataSlice& ReconstructorBase::currentSlice()
 {
-    assert (current_slice_);
-    return *current_slice_;
-}
-
-std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::moveCurrentSlice()
-{
-    assert (current_slice_);
-    return std::move(current_slice_);
+    return task_.processingSlice();
 }
 
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 
@@ -603,20 +663,28 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     mm.source_id = ri.record_num_;
     mm.t         = ri.timestamp_;
     
-    auto pos = ri.position_;
+    auto pos = ri.position();
     assert(pos.has_value());
 
     auto vel = ri.velocity_;
 
     auto pos_acc = acc_estimator_->positionAccuracy(ri);
+
+    if (pos_acc.x_stddev_ == 0 || pos_acc.y_stddev_ == 0)
+    {
+        logerr << "ReconstructorBase: createMeasurement: stddevs 0,  x " << pos_acc.x_stddev_
+               << " y " << pos_acc.y_stddev_ << " ds_id " << ri.ds_id_ << " dbcont_id " << ri.dbcont_id_;
+        assert (false);
+    }
+
     auto vel_acc = acc_estimator_->velocityAccuracy(ri);
     auto acc_acc = acc_estimator_->accelerationAccuracy(ri);
 
-    //position
+            //position
     mm.lat = pos.value().latitude_;
     mm.lon = pos.value().longitude_;
 
-    //velocity
+            //velocity
     if (vel.has_value())
     {
         auto speed_vec = Utils::Number::speedAngle2SpeedVec(vel->speed_, vel->track_angle_);
@@ -626,9 +694,9 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
         //@TODO: vz?
     }
 
-    //@TODO: acceleration?
+            //@TODO: acceleration?
 
-    //accuracies
+            //accuracies
     mm.x_stddev = pos_acc.x_stddev_;
     mm.y_stddev = pos_acc.y_stddev_;
     mm.xy_cov   = pos_acc.xy_cov_;
@@ -640,6 +708,11 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     mm.ay_stddev = acc_acc.ay_stddev_;
 }
 
+void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
+                                          unsigned long rec_num)
+{
+    auto it = target_reports_.find(rec_num);
+    assert(it != target_reports_.end());
 
-
-
+    createMeasurement(mm, it->second);
+}

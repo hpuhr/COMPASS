@@ -213,7 +213,8 @@ protected:
     std::set<T> distinctValues(const std::vector<T>& data) const
     {
         std::vector<T> data_cpy = data;
-        std::remove_if(data_cpy.begin(), data_cpy.end(), [] (const T& v) { return !histogram_helpers::checkFinite<T>(v); });
+        auto it = std::remove_if(data_cpy.begin(), data_cpy.end(), [] (const T& v) { return !histogram_helpers::checkFinite<T>(v); });
+        data_cpy.erase(it, data_cpy.end());
         return std::set<T>(data_cpy.begin(), data_cpy.end());
     }
 

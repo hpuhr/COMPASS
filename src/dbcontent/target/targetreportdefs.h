@@ -34,7 +34,7 @@ namespace targetReport
 {
 
 /**
-*/
+ */
 struct Position
 {
     Position() {}
@@ -45,7 +45,7 @@ struct Position
 };
 
 /**
-*/
+ */
 class BarometricAltitude
 {
   public:
@@ -59,13 +59,13 @@ class BarometricAltitude
 
     BarometricAltitude() {}
     BarometricAltitude(Source source,
-                    float alt, 
-                    const boost::optional<bool>& v,
-                    const boost::optional<bool>& g)
-    :   source_  (source)
-    ,   altitude_(alt   )
-    ,   valid_   (v     )
-    ,   garbled_ (g     ) {}
+                       float alt,
+                       const boost::optional<bool>& v,
+                       const boost::optional<bool>& g)
+        :   source_  (source)
+          ,   altitude_(alt   )
+          ,   valid_   (v     )
+          ,   garbled_ (g     ) {}
 
     Source                source_   = Source::Barometric_ModeC;
     float                 altitude_ = 0.0f;
@@ -85,23 +85,36 @@ class BarometricAltitude
 };
 
 /**
-*/
+ */
 class PositionAccuracy
 {
   public:
     PositionAccuracy() = default;
     PositionAccuracy(double x_stddev,
-                       double y_stddev, 
-                       double xy_cov)
-    :   x_stddev_(x_stddev), 
-        y_stddev_(y_stddev), 
-        xy_cov_  (xy_cov  ) {}
+                     double y_stddev,
+                     double xy_cov)
+        :   x_stddev_(x_stddev),
+          y_stddev_(y_stddev),
+          xy_cov_  (xy_cov  ) {}
+
+    PositionAccuracy operator* (double scale) const
+    { return PositionAccuracy(x_stddev_ * scale, y_stddev_ * scale, xy_cov_ * scale); }
+
+    PositionAccuracy& operator* (double scale)
+    {
+        x_stddev_ *= scale;
+        y_stddev_ *= scale;
+        xy_cov_ *= scale;
+
+        return *this;
+    }
 
     double x_stddev_ {0}; // m
     double y_stddev_ {0}; // m
     double xy_cov_   {0}; // m^2
 
-    double maxStdDev() { return std::max(x_stddev_, y_stddev_); }
+    double maxStdDev() const { return std::max(x_stddev_, y_stddev_); }
+    std::string asStr() const;
 };
 
 /**
@@ -115,7 +128,7 @@ struct AccuracyTables
 
 
 /**
-*/
+ */
 struct Velocity
 {
     Velocity() {}
@@ -126,11 +139,13 @@ struct Velocity
 };
 
 /**
-*/
+ */
 struct VelocityAccuracy
 {
     VelocityAccuracy() = default;
     VelocityAccuracy(double vx_stddev, double vy_stddev) : vx_stddev_(vx_stddev), vy_stddev_(vy_stddev) {}
+
+    double maxStdDev() const { return std::max(vx_stddev_, vy_stddev_); }
 
     double vx_stddev_ {0}; // m/s
     double vy_stddev_ {0}; // m/s
@@ -140,6 +155,8 @@ struct AccelerationAccuracy
 {
     AccelerationAccuracy() = default;
     AccelerationAccuracy(double ax_stddev, double ay_stddev) : ax_stddev_(ax_stddev), ay_stddev_(ay_stddev) {}
+
+    double maxStdDev() const { return std::max(ax_stddev_, ay_stddev_); }
 
     double ax_stddev_ {0}; // m/s^2
     double ay_stddev_ {0}; // m/s^2
@@ -194,7 +211,8 @@ struct BaseInfo
 
 struct ReconstructorInfo : public BaseInfo
 {
-    bool in_current_slice_ {false}; // true in current, false if from old slice (glue data)
+    bool in_current_slice_ {false};        // true in current, false if from old slice (glue data)
+    bool is_calculated_reference_ {false}; // the target report stems from a previous reconstructor run
 
     boost::optional<unsigned int> acad_;
     boost::optional<std::string> acid_;
@@ -205,6 +223,7 @@ struct ReconstructorInfo : public BaseInfo
     boost::optional<bool> track_end_;
 
     boost::optional<targetReport::Position> position_;
+    boost::optional<targetReport::Position> position_corrected_;
     boost::optional<targetReport::PositionAccuracy> position_accuracy_;
     bool do_not_use_position_ {false};
 
@@ -215,6 +234,9 @@ struct ReconstructorInfo : public BaseInfo
 
     boost::optional<double> track_angle_;
     boost::optional<bool> ground_bit_;
+
+    boost::optional<targetReport::Position>& position();
+    const boost::optional<targetReport::Position>& position() const;
 
     virtual std::string asStr() const;
 
@@ -258,3 +280,4 @@ struct ReconstructorInfo : public BaseInfo
 } // namespace targetReport
 
 } // namespace dbContent
+

@@ -48,12 +48,18 @@ public:
 
     virtual bool init() override;
 
+    virtual kalman::KalmanState currentState() const override final;
+
     void stateVecX(const kalman::Vector& x) override final;
 
     boost::optional<kalman::KalmanState> interpStep(const kalman::KalmanState& state0,
                                                     const kalman::KalmanState& state1,
                                                     double dt,
-                                                    double Q_var) const override final;
+                                                    double Q_var,
+                                                    bool fix_estimate,
+                                                    bool* fixed) const override final;
+
+    std::string asString(const std::string& prefix = "") const override final;
 
 protected:
     void kalmanInit_impl(kalman::KalmanState& init_state,
@@ -61,15 +67,21 @@ protected:
                          const reconstruction::Uncertainty& default_uncert,
                          double Q_var) override final;
     void kalmanInit_impl(const kalman::KalmanState& init_state) override final;
+    void kalmanInit_impl(const kalman::Vector& x,
+                         const kalman::Matrix& P) override final;
+
     bool kalmanStep_impl(kalman::KalmanState& new_state,
                          double dt, 
                          const Measurement& mm, 
                          const reconstruction::Uncertainty& default_uncert, 
                          double Q_var) override final;
+        
     bool kalmanPrediction_impl(kalman::Vector& x,
-                         kalman::Matrix& P,
-                         double dt,
-                         double Q_var) const override final;
+                               kalman::Matrix& P,
+                               double dt,
+                               double Q_var,
+                               bool fix_estimate,
+                               bool* fixed) const override final;
     bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
                             std::vector<kalman::Matrix>& P_smooth,
                             const std::vector<kalman::KalmanState>& states,

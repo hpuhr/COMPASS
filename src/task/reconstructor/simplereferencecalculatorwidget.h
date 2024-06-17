@@ -13,17 +13,13 @@ class QCheckBox;
 */
 class SimpleReferenceCalculatorWidget : public QWidget
 {
-    Q_OBJECT
-
-  signals:
-
-  public:
+public:
     explicit SimpleReferenceCalculatorWidget(ReconstructorBase& reconstructor);
     virtual ~SimpleReferenceCalculatorWidget();
 
     void update();
 
-  private:
+private:
     ReconstructorBase& reconstructor_;
 
     QComboBox*      rec_type_combo_               = nullptr;
@@ -41,4 +37,3 @@ class SimpleReferenceCalculatorWidget : public QWidget
     QDoubleSpinBox* resample_Q_std_box_           = nullptr;
     QDoubleSpinBox* resample_dt_box_              = nullptr;
 };
-

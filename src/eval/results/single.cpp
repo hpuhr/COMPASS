@@ -296,9 +296,8 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
 
         json& feature_lines = annotation.at("features").back();
 
-        feature_lines["type"] = "feature";
+        feature_lines["type"] = "lines";
         feature_lines["geometry"] = json::object();
-        feature_lines.at("geometry")["type"] = "lines";
         feature_lines.at("geometry")["coordinates"] = json::array();
 
         feature_lines["properties"] = json::object();
@@ -311,9 +310,8 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
 
         json& feature_points = annotation.at("features").back();
 
-        feature_points["type"] = "feature";
+        feature_points["type"] = "points";
         feature_points["geometry"] = json::object();
-        feature_points.at("geometry")["type"] = "points";
         feature_points.at("geometry")["coordinates"] = json::array();
 
         feature_points["properties"] = json::object();
@@ -513,7 +511,8 @@ Single::LayerDefinition Single::getGridLayerDefBinary() const
 {
     Single::LayerDefinition def;
     def.value_type = grid2d::ValueType::ValueTypeMax;
-    def.render_settings.color_map.set(QColor(0, 255, 0), QColor(255, 0, 0), 1);
+    def.render_settings.color_map.create(QColor(0, 255, 0), QColor(255, 0, 0), 2, ColorMap::Type::Binary);
+
     def.render_settings.pixels_per_cell = eval_man_.settings().grid_pixels_per_cell;
     def.render_settings.min_value = 0.0;
     def.render_settings.max_value = 1.0;
