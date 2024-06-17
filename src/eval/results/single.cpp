@@ -296,9 +296,8 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
 
         json& feature_lines = annotation.at("features").back();
 
-        feature_lines["type"] = "feature";
+        feature_lines["type"] = "lines";
         feature_lines["geometry"] = json::object();
-        feature_lines.at("geometry")["type"] = "lines";
         feature_lines.at("geometry")["coordinates"] = json::array();
 
         feature_lines["properties"] = json::object();
@@ -311,9 +310,8 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
 
         json& feature_points = annotation.at("features").back();
 
-        feature_points["type"] = "feature";
+        feature_points["type"] = "points";
         feature_points["geometry"] = json::object();
-        feature_points.at("geometry")["type"] = "points";
         feature_points.at("geometry")["coordinates"] = json::array();
 
         feature_points["properties"] = json::object();
