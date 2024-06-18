@@ -327,11 +327,12 @@ public:
 
     const dbContent::DataSourceCompoundCoverage& tstSrcsCoverage() const;
 
+    void clearLoadedDataAndResults();
+
 protected:
     virtual void checkSubConfigurables() override;
 
     void loadSectors();
-    void clearLoadedDataAndResults();
 
     void checkReferenceDataSources();
     void checkTestDataSources();

@@ -17,6 +17,7 @@
 #include "dbinterface.h"
 #include "metavariable.h"
 #include "util/async.h"
+#include "evaluationmanager.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
@@ -162,6 +163,9 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
             progress = (double) sidx / (double) ns;
     }
 
+    logdbg << "ReconstructorTask: updateProgress: slice " << add_slice_progress
+           << " dialog " << (progress_dialog_ != nullptr) << " progress " << progress << " done " << done_ ;
+
     pmsg += ("<br><br><div align='left'>Elapsed: "
              + String::timeStringFromDouble(time_elapsed_s, false)+ " </div>").c_str();
 
@@ -255,7 +259,11 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
     }
 
     progress_dialog_->setLabelText("<html>"+pmsg+"</html>");
-    progress_dialog_->setValue(progress_dialog_->maximum() * progress);
+
+    if (done_)
+        progress_dialog_->setValue(progress_dialog_->maximum());
+    else
+        progress_dialog_->setValue(progress_dialog_->maximum() * progress);
     
     Async::waitAndProcessEventsFor(50);
 }
@@ -427,6 +435,7 @@ void ReconstructorTask::run()
     progress_dialog_->setMinimumWidth(600);
     progress_dialog_->setLabel(tmp_label);
     progress_dialog_->setAutoClose(false);
+    progress_dialog_->setAutoReset(false);
     progress_dialog_->setCancelButton(nullptr);
     progress_dialog_->setModal(true);
 
@@ -439,6 +448,8 @@ void ReconstructorTask::run()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
+
+    COMPASS::instance().evaluationManager().clearLoadedDataAndResults(); // in case there are previous results
 
     delcalcref_future_ = std::async(std::launch::async, [&] {
         {

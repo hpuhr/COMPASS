@@ -12,6 +12,8 @@
 #include <QSpinBox>
 #include <QLabel>
 
+#include <limits>
+
 /**
 */
 SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBase& reconstructor)
@@ -51,7 +53,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     repr_distance_box_ = new QDoubleSpinBox;
     repr_distance_box_->setDecimals(3);
     repr_distance_box_->setMinimum(1.0);
-    repr_distance_box_->setMaximum(DBL_MAX);
+    repr_distance_box_->setMaximum(std::numeric_limits<double>::max());
     connect(repr_distance_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_proj_distance_cart = v; });
     layout->addRow("Maximum projection distance [m]", repr_distance_box_);
 
@@ -60,7 +62,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     Q_std_edit_ = new QDoubleSpinBox;
     Q_std_edit_->setDecimals(3);
     Q_std_edit_->setMinimum(0.0);
-    Q_std_edit_->setMaximum(DBL_MAX);
+    Q_std_edit_->setMaximum(std::numeric_limits<double>::max());
     connect(Q_std_edit_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->Q_std = v; });
     layout->addRow("Process Stddev [m]", Q_std_edit_);
 
@@ -68,7 +70,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
 
     min_chain_size_box_ = new QSpinBox;
     min_chain_size_box_->setMinimum(1);
-    min_chain_size_box_->setMaximum(INT_MAX);
+    min_chain_size_box_->setMaximum(std::numeric_limits<int>::max());
     connect(min_chain_size_box_, QOverload<int>::of(&QSpinBox::valueChanged), [ = ] (int v) { settings->min_chain_size = v; });
     layout->addRow("Minimum Chain Size", min_chain_size_box_);
 
@@ -77,7 +79,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
         min_dt_box_ = new QDoubleSpinBox;
         min_dt_box_->setDecimals(8);
         min_dt_box_->setMinimum(0.0);
-        min_dt_box_->setMaximum(DBL_MAX);
+        min_dt_box_->setMaximum(std::numeric_limits<double>::max());
         connect(min_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->min_dt = v; });
         layout->addRow("Minimum Time Step [s]", min_dt_box_);
     }
@@ -85,7 +87,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     max_dt_box_ = new QDoubleSpinBox;
     max_dt_box_->setDecimals(3);
     max_dt_box_->setMinimum(0.0);
-    max_dt_box_->setMaximum(DBL_MAX);
+    max_dt_box_->setMaximum(std::numeric_limits<double>::max());
     connect(max_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_dt = v; });
     layout->addRow("Maximum Time Step [s]", max_dt_box_);
 
@@ -94,7 +96,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
         max_distance_box_ = new QDoubleSpinBox;
         max_distance_box_->setDecimals(3);
         max_distance_box_->setMinimum(0.0);
-        max_distance_box_->setMaximum(DBL_MAX);
+        max_distance_box_->setMaximum(std::numeric_limits<double>::max());
         connect(max_distance_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_distance = v; });
         layout->addRow("Maximum Distance [m]", max_distance_box_);
     }
@@ -115,7 +117,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     resample_systracks_dt_box_ = new QDoubleSpinBox;
     resample_systracks_dt_box_->setDecimals(3);
     resample_systracks_dt_box_->setMinimum(0.1);
-    resample_systracks_dt_box_->setMaximum(DBL_MAX);
+    resample_systracks_dt_box_->setMaximum(std::numeric_limits<double>::max());
     connect(resample_systracks_dt_box_,
             QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_systracks_dt = v; });
     layout->addRow("Resample Interval [s]", resample_systracks_dt_box_);
@@ -123,7 +125,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     resample_systracks_maxdt_box_ = new QDoubleSpinBox;
     resample_systracks_maxdt_box_->setDecimals(3);
     resample_systracks_maxdt_box_->setMinimum(0.0);
-    resample_systracks_maxdt_box_->setMaximum(DBL_MAX);
+    resample_systracks_maxdt_box_->setMaximum(std::numeric_limits<double>::max());
     connect(resample_systracks_maxdt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_systracks_max_dt = v; });
     layout->addRow("Maximum Time Step [s]", resample_systracks_maxdt_box_);
 
@@ -147,14 +149,14 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     resample_dt_box_ = new QDoubleSpinBox;
     resample_dt_box_->setDecimals(3);
     resample_dt_box_->setMinimum(0.01);
-    resample_dt_box_->setMaximum(DBL_MAX);
+    resample_dt_box_->setMaximum(std::numeric_limits<double>::max());
     connect(resample_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_dt = v; });
     layout->addRow("Resample Interval [s]", resample_dt_box_);
 
     resample_Q_std_box_ = new QDoubleSpinBox;
     resample_Q_std_box_->setDecimals(3);
     resample_Q_std_box_->setMinimum(0.0);
-    resample_Q_std_box_->setMaximum(DBL_MAX);
+    resample_Q_std_box_->setMaximum(std::numeric_limits<double>::max());
     connect(resample_Q_std_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_Q_std = v; });
     layout->addRow("Resample Process Stddev [m]", resample_Q_std_box_);
 
