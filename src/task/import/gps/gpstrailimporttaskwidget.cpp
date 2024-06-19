@@ -260,7 +260,7 @@ void GPSTrailImportTaskWidget::todOffsetEditedSlot(const QString& value)
     TextFieldDoubleValidator::displayValidityAsColor(tod_offset_edit_);
 
     if (tod_offset_edit_->hasAcceptableInput())
-        task_.todOffset(value.toFloat());
+        task_.todOffset(value.toDouble());
     else
         logwrn << "GPSTrailImportTaskWidget: todOffsetEditedSlot: non-acceptable value '"
                << tod_offset_edit_->text().toStdString() << "'";
