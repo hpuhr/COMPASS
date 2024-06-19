@@ -51,7 +51,7 @@ public:
         unsigned int ds_sic;
 
         bool         use_tod_offset;
-        float        tod_offset;
+        double       tod_offset;
 
         bool         use_override_date;
         std::string  override_date_str;
@@ -100,8 +100,8 @@ public:
     bool useTodOffset() const;
     void useTodOffset(bool value);
 
-    float todOffset() const;
-    void todOffset(float value);
+    double todOffset() const;
+    void todOffset(double value);
 
     bool useOverrideDate() const;
     void useOverrideDate(bool value);

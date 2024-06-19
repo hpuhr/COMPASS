@@ -261,6 +261,9 @@ void GPSTrailImportTaskWidget::todOffsetEditedSlot(const QString& value)
 
     if (tod_offset_edit_->hasAcceptableInput())
         task_.todOffset(value.toFloat());
+    else
+        logwrn << "GPSTrailImportTaskWidget: todOffsetEditedSlot: non-acceptable value '"
+               << tod_offset_edit_->text().toStdString() << "'";
 }
 
 void GPSTrailImportTaskWidget::overrideDateCheckedSlot()
@@ -365,7 +368,7 @@ void GPSTrailImportTaskWidget::updateConfig ()
     use_tod_offset_check_->setChecked(task_.useTodOffset());
 
     assert (tod_offset_edit_);
-    tod_offset_edit_->setText(QString::number(task_.todOffset()));
+    tod_offset_edit_->setText(String::doubleToStringPrecision(task_.todOffset(), 3).c_str());
 
     assert (use_override_date_check_);
     use_override_date_check_->setChecked(task_.useOverrideDate());
