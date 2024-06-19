@@ -150,7 +150,7 @@ private:
     std::map<std::string, std::vector<double>>        y_values_;
     std::map<std::string, std::vector<bool>>          selected_values_;
     std::map<std::string, std::vector<unsigned long>> rec_num_values_;
-    std::map<std::string, unsigned int>               dbo_valid_counts_;
+    std::map<std::string, unsigned int>               dbcont_valid_counts_;
 
     unsigned int nan_value_cnt_ {0};
     unsigned int valid_cnt_     {0};

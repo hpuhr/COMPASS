@@ -33,7 +33,7 @@ const double      ViewDataWidget::MarkerSizePx         = 8.0;
 const double      ViewDataWidget::MarkerSizeSelectedPx = 6.0;
 
 const std::string ViewDataWidget::Color_CAT001  = "#00FF00";
-const std::string ViewDataWidget::Color_CAT010  = "#FFCC00";
+const std::string ViewDataWidget::Color_CAT010  = "#AAAA66";
 const std::string ViewDataWidget::Color_CAT020  = "#FF0000";
 const std::string ViewDataWidget::Color_CAT021  = "#6666FF";
 const std::string ViewDataWidget::Color_CAT048  = "#00FF00";

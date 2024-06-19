@@ -255,7 +255,7 @@ void ScatterPlotViewDataWidget::resetCounts()
     valid_cnt_     = 0;
     selected_cnt_  = 0;
 
-    dbo_valid_counts_.clear();
+    dbcont_valid_counts_.clear();
 }
 
 /**
@@ -515,13 +515,13 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         chart->createDefaultAxes();
 
         //config x axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title x ' "
+        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title x '"
                << view_->variable(0).description() << "'";
         assert (chart->axes(Qt::Horizontal).size() == 1);
         chart->axes(Qt::Horizontal).at(0)->setTitleText(view_->variable(0).description().c_str());
 
         //config y axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title y ' "
+        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title y '"
                << view_->variable(1).description() << "'";
         assert (chart->axes(Qt::Vertical).size() == 1);
         chart->axes(Qt::Vertical).at(0)->setTitleText(view_->variable(1).description().c_str());
@@ -537,7 +537,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         valid_cnt_     = 0;
         selected_cnt_  = 0;
 
-        dbo_valid_counts_.clear();
+        dbcont_valid_counts_.clear();
 
         bool use_connection_lines = view_->useConnectionLines();
 
@@ -549,7 +549,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         //we exploit this behavior to obtain the correct render order for our data
 
         //generate pointers
-        std::vector<SymbolLineSeries> series(x_values_.size() + 1);
+        std::vector<SymbolLineSeries> series (x_values_.size() + 1); // last one selected
         for (size_t i = 0; i < series.size(); ++i)
         {
             series[ i ].scatter_series = new QScatterSeries;
@@ -584,7 +584,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
         if (use_connection_lines)
         {
-            selected_line_series = series.back().line_series;
+            selected_line_series = series.front().line_series;
             selected_line_series->setColor(Qt::yellow);
         }
 
@@ -599,8 +599,8 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         //now add data to series
         for (auto& data : x_values_)
         {
-            auto& dbo_value_cnt = dbo_valid_counts_[ data.first ];
-            dbo_value_cnt = 0;
+            auto& dbcont_value_cnt = dbcont_valid_counts_[ data.first ];
+            dbcont_value_cnt = 0;
 
             vector<double>& x_values        = data.second;
             vector<double>& y_values        = y_values_[data.first];
@@ -627,7 +627,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
                 if (!std::isnan(x_values.at(cnt)) && !std::isnan(y_values.at(cnt)))
                 {
                     ++valid_cnt_;
-                    ++dbo_value_cnt;
+                    ++dbcont_value_cnt;
 
                     if (selected_values.at(cnt))
                     {
@@ -660,7 +660,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
                 }
             }
 
-            if (!dbo_value_cnt)
+            if (!dbcont_value_cnt)
                 continue;
 
             if (sum_cnt)
@@ -674,10 +674,15 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
                 {
                     assert (chart_line_series);
                     chart->addSeries(chart_line_series);
+
+                    logdbg << "ScatterPlotViewDataWidget: updateDataSeries: connection lines "
+                           << chart_line_series->count();
                 }
             }
             else
             {
+                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: removing empty " << data.first;
+
                 delete chart_symbol_series;
 
                 if (use_connection_lines)
@@ -708,6 +713,8 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
             }
             else
             {
+                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: deleting not needed selected";
+
                 //series for selection not needed
                 delete selected_symbol_series;
                 selected_symbol_series = nullptr;
@@ -726,13 +733,13 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         {
             //no valid values at all
             has_data = false;
-            loginf << "ScatterPlotViewDataWidget: updateDataSeries: no valid data";
+            logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no valid data";
         }
     }
     else
     {
         //bad data range or vars not in buffer
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: no data, size x "
+        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no data, size x "
                << x_values_.size() << " y " << y_values_.size();
     }
 
@@ -859,7 +866,7 @@ void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
         nlohmann::json dbo_info;
 
         const auto& y_values    = y_values_.at(it.first);
-        const auto& valid_count = dbo_valid_counts_.at(it.first);
+        const auto& valid_count = dbcont_valid_counts_.at(it.first);
 
         dbo_info[ "dbo_type"       ] = it.first;
         dbo_info[ "num_input_x"    ] = it.second.size();
