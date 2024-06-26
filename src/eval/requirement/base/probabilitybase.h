@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENT_PROBABILITYBASE_H
-#define EVALUATIONREQUIREMENT_PROBABILITYBASE_H
+#pragma once
 
 #include "eval/requirement/base/comparisontype.h"
 #include "eval/requirement/base/base.h"
@@ -29,33 +28,36 @@ class EvaluationManager;
 namespace EvaluationRequirement 
 {
 
+/**
+*/
 class ProbabilityBase : public Base
 {
 public:
     ProbabilityBase(const std::string& name, 
                     const std::string& short_name, 
                     const std::string& group_name,
-                    float prob, 
+                    double prob_threshold, 
                     COMPARISON_TYPE prob_check_type, 
-                    EvaluationManager& eval_man);
+                    bool invert_prob,
+                    EvaluationManager& eval_man,
+                    const boost::optional<bool>& must_hold_for_any_target = boost::optional<bool>());
     virtual ~ProbabilityBase();
 
-    float prob() const;
-    unsigned int getNumProbDecimals() const;
+    bool invertProb() const;
 
-    COMPARISON_TYPE probCheckType() const;
+    std::string getConditionResultNameShort() const override final;
+    std::string getConditionResultName() const override final;
+    std::string getThresholdString(double thres) const final;
 
-    std::string getConditionStr () const override;
-    bool getConditionResult (float prob) const; //  true if passed
-    std::string getConditionResultStr (float prob) const;
+    virtual std::string probabilityName() const = 0;
+    virtual std::string probabilityNameShort() const = 0;
+
+    static const unsigned int NumThresholdDecimalsMax = 6;
 
 protected:
-    float prob_ {0};
-    COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EQUAL};
+    unsigned int getNumThresholdDecimals() const;
 
-    bool compareValue (double val, double threshold, COMPARISON_TYPE check_type);
+    bool invert_prob_ = false;
 };
 
 } // namespace EvaluationRequirement
-
-#endif // EVALUATIONREQUIREMENT_PROBABILITYBASE_H

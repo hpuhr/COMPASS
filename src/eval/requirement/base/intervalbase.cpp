@@ -47,7 +47,7 @@ double Event::dtSeconds() const
 IntervalBase::IntervalBase(const std::string& name, 
                            const std::string& short_name, 
                            const std::string& group_name,
-                           float prob, 
+                           double prob, 
                            COMPARISON_TYPE prob_check_type, 
                            EvaluationManager& eval_man,
                            float update_interval_s, 
@@ -56,13 +56,12 @@ IntervalBase::IntervalBase(const std::string& name,
                            const boost::optional<float>& miss_tolerance_s,
                            const boost::optional<float>& min_ref_period_s,
                            const boost::optional<bool>& must_hold_for_any_target)
-:   ProbabilityBase          (name, short_name, group_name, prob, prob_check_type, eval_man)
+:   ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man, must_hold_for_any_target)
 ,   update_interval_s_       (update_interval_s       )
 ,   min_gap_length_s_        (min_gap_length_s        )
 ,   max_gap_length_s_        (max_gap_length_s        )
 ,   miss_tolerance_s_        (miss_tolerance_s        )
 ,   min_ref_period_s_        (min_ref_period_s        )
-,   must_hold_for_any_target_(must_hold_for_any_target)
 {
 }
 

@@ -17,18 +17,19 @@
 
 #include "eval/results/dubious/dubioustargetsingle.h"
 #include "eval/results/dubious/dubioustargetjoined.h"
-#include "eval/requirement/base/base.h"
-#include "eval/requirement/dubious/dubioustarget.h"
-#include "evaluationtargetdata.h"
-#include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+
+#include "eval/requirement/base/base.h"
+#include "eval/requirement/dubious/dubioustarget.h"
+
+#include "evaluationtargetdata.h"
+#include "evaluationmanager.h"
+
 #include "logger.h"
-//#include "util/stringconv.h"
 #include "util/timeconv.h"
-//#include "util/number.h"
 #include "viewpoint.h"
 
 #include <cassert>
@@ -41,6 +42,8 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
+/**
+*/
 SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id,
                                          std::shared_ptr<EvaluationRequirement::Base> requirement,
                                          const SectorLayer& sector_layer,
@@ -52,372 +55,20 @@ SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id,
                                          unsigned int num_pos_outside,
                                          unsigned int num_pos_inside,
                                          unsigned int num_pos_inside_dubious)
-    :   SingleDubiousBase("SingleDubiousTarget", result_id, requirement, sector_layer, utn, target, eval_man, details, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
+:   SingleDubiousBase("SingleDubiousTarget", result_id, requirement, sector_layer, utn, target, eval_man, details, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
 {
-    update();
+    updateResult();
 }
 
-void SingleDubiousTarget::update()
-{
-    p_dubious_target_.reset();
-    p_dubious_update_.reset();
-
-    assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
-
-    //assert (values_.size() == num_comp_failed_+num_comp_passed_);
-
-    //unsigned int num_speeds = values_.size();
-
-    assert (numDetails() == 1);
-
-    const auto& detail = getDetail(0);
-
-    p_dubious_target_ = (float)detail.getValue(DetailKey::IsDubious).toBool();
-
-    result_usable_ = true;
-
-    if (num_pos_inside_)
-    {
-        p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
-    }
-
-    logdbg << "SingleDubiousTarget "      << requirement_->name() << " " << target_->utn_
-           << " has_p_dubious_update_ "   << p_dubious_update_.has_value()
-           << " num_pos_inside_dubious_ " << num_pos_inside_dubious_
-           << " num_pos_inside_ "         << num_pos_inside_
-           << " p_dubious_update_ "       << (p_dubious_update_.has_value() ? p_dubious_update_.value() : 0);
-
-    updateUseFromTarget();
-}
-
-void SingleDubiousTarget::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    logdbg << "SingleDubiousTarget " <<  requirement_->name() <<": addToReport";
-
-    // add target to requirements->group->req
-    addTargetToOverviewTable(root_item);
-
-    // add requirement results to targets->utn->requirements->group->req
-    addTargetDetailsToReport(root_item);
-
-    // TODO add requirement description, methods
-}
-
-void SingleDubiousTarget::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
-
-    if (eval_man_.settings().report_show_adsb_info_)
-        addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
-    else
-        addTargetDetailsToTable(tgt_overview_section, target_table_name_);
-
-    if (eval_man_.settings().report_split_results_by_mops_
-            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
-    {
-        EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
-
-        if (eval_man_.settings().report_show_adsb_info_)
-            addTargetDetailsToTableADSB(sum_section, target_table_name_);
-        else
-            addTargetDetailsToTable(sum_section, target_table_name_);
-    }
-}
-
-void SingleDubiousTarget::addTargetDetailsToTable (EvaluationResultsReport::Section& section,
-                                                   const std::string& table_name)
-{
-    if (!section.hasTable(table_name))
-    {
-        Qt::SortOrder order = Qt::AscendingOrder;
-
-        if(req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN
-                || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-            order = Qt::DescendingOrder;
-
-        section.addTable(table_name, 13,
-                         {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "#PosInside", "#DU", "PDU", "Reasons", "PDT"}, true, 12, order);
-    }
-
-    EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
-
-    QVariant p_dubious_up_var;
-
-    if (p_dubious_update_.has_value())
-        p_dubious_up_var = roundf(p_dubious_update_.value() * 10000.0) / 100.0;
-
-    QVariant p_dubious_target_var;
-
-    if (p_dubious_target_.has_value())
-        p_dubious_target_var = roundf(p_dubious_target_.value() * 10000.0) / 100.0;
-
-    assert(numDetails() > 0);
-    std::string dub_string = dubiousReasonsString(getDetail(0).comments());
-
-    target_table.addRow(
-                {utn_,
-                 target_->timeBeginStr().c_str(),
-                 target_->timeEndStr().c_str(),
-                 target_->acidsStr().c_str(),
-                 target_->acadsStr().c_str(),
-                 target_->modeACodesStr().c_str(),
-                 target_->modeCMinStr().c_str(),
-                 target_->modeCMaxStr().c_str(),
-                 num_pos_inside_, // "#PosInside"
-                 num_pos_inside_dubious_, // "#DU"
-                 p_dubious_up_var, // "PDU"
-                 dub_string.c_str(),  // "Reasons"
-                 p_dubious_target_var}, // "PDT"
-                this, {utn_});
-}
-
-void SingleDubiousTarget::addTargetDetailsToTableADSB (
-        EvaluationResultsReport::Section& section, const std::string& table_name)
-{
-    if (!section.hasTable(table_name))
-    {
-        Qt::SortOrder order = Qt::AscendingOrder;
-
-        if(req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN
-                || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-            order = Qt::DescendingOrder;
-
-        section.addTable(table_name, 14,
-                         {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "#PosInside", "#DU", "PDU", "Reasons", "PDT",
-                          "MOPS"}, true, 12, order);
-    }
-
-    EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
-
-    QVariant p_dubious_up_var;
-
-    if (p_dubious_update_.has_value())
-        p_dubious_up_var = roundf(p_dubious_update_.value() * 10000.0) / 100.0;
-
-    QVariant p_dubious_var;
-
-    if (p_dubious_target_.has_value())
-        p_dubious_var = roundf(p_dubious_target_.value() * 10000.0) / 100.0;
-
-    assert(numDetails() > 0);
-    std::string dub_string = dubiousReasonsString(getDetail(0).comments());
-
-    target_table.addRow(
-                {utn_,
-                 target_->timeBeginStr().c_str(),
-                 target_->timeEndStr().c_str(),
-                 target_->acidsStr().c_str(),
-                 target_->acadsStr().c_str(),
-                 target_->modeACodesStr().c_str(),
-                 target_->modeCMinStr().c_str(),
-                 target_->modeCMaxStr().c_str(),
-                 num_pos_inside_, // "#PosInside"
-                 num_pos_inside_dubious_, // "#DU"
-                 p_dubious_up_var, // "PDU"
-                 dub_string.c_str(),  // "Reasons"
-                 p_dubious_var, // "PDT"
-                 target_->mopsVersionStr().c_str()}, // "MOPS"
-                this, {utn_});
-
-}
-
-void SingleDubiousTarget::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
-    EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
-
-    if (!utn_req_section.hasTable("details_overview_table"))
-        utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
-
-    std::shared_ptr<EvaluationRequirement::DubiousTarget> req =
-            std::static_pointer_cast<EvaluationRequirement::DubiousTarget>(requirement_);
-    assert (req);
-
-    EvaluationResultsReport::SectionContentTable& utn_req_table =
-            utn_req_section.getTable("details_overview_table");
-
-    addCommonDetails(root_item);
-
-    assert(numDetails() > 0);
-    const auto& detail = getDetail(0);
-
-    auto duration = detail.getValueAs<boost::posix_time::time_duration>(DetailKey::Duration);
-    assert(duration.has_value());
-
-    // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-    // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK"
-
-    utn_req_table.addRow({"Use", "To be used in results", use_}, this);
-    utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
-    utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
-    utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-    utn_req_table.addRow({"#DU [1]", "Number of dubious updates inside sector", num_pos_inside_dubious_}, this);
-
-    QVariant p_dubious_up_var;
-
-    if (p_dubious_update_.has_value())
-        p_dubious_up_var = roundf(p_dubious_update_.value() * 10000.0) / 100.0;
-
-    utn_req_table.addRow({"PDU [%]", "Probability of dubious update", p_dubious_up_var}, this);
-
-    utn_req_table.addRow({"Duration [s]", "Duration",
-                          Time::toString(duration.value(),2).c_str()}, this);
-
-    // condition
-    {
-        QVariant p_dubious_var;
-
-        if (p_dubious_target_.has_value())
-            p_dubious_target_ = roundf(p_dubious_target_.value() * 10000.0) / 100.0;
-
-        utn_req_table.addRow({"PDT [%]", "Probability of dubious target", p_dubious_var}, this);
-
-        utn_req_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
-
-        string result {"Unknown"};
-
-        if (p_dubious_target_.has_value())
-            result = req->getConditionResultStr(p_dubious_target_.value());
-
-        utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
-
-        if (result == "Failed")
-        {
-            root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
-            utn_req_section.perTargetWithIssues(true);
-        }
-
-    }
-
-    if (p_dubious_target_.has_value() && p_dubious_target_.value() != 0.0) // TODO
-    {
-        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  [this](void) { return this->getTargetErrorsViewable(); });
-    }
-    else
-    {
-        utn_req_section.addText("target_errors_overview_no_figure");
-        utn_req_section.getText("target_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
-
-    // add further details
-    reportDetails(utn_req_section);
-}
-
-void SingleDubiousTarget::reportDetails(EvaluationResultsReport::Section& utn_req_section)
-{
-    if (!utn_req_section.hasTable(tr_details_table_name_))
-        utn_req_section.addTable(tr_details_table_name_, 3,
-                                 {"ToD", "UTN", "Dubious Comment"});
-
-    EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-            utn_req_section.getTable(tr_details_table_name_);
-
-    utn_req_details_table.setCreateOnDemand(
-                [this, &utn_req_details_table](void)
-    {
-
-        assert(numDetails() > 0);
-        const auto& detail = getDetail(0);
-
-        std::string dub_string = dubiousReasonsString(detail.comments());
-
-        if (detail.hasDetails())
-        {
-            unsigned int detail_cnt = 0;
-            for (auto& update : detail.details())
-            {
-                utn_req_details_table.addRow(
-                            { Time::toString(update.timestamp()).c_str(),
-                              detail.getValue(DetailKey::UTNOrTrackNum),
-                              dub_string.c_str() }, // "Comment"
-                            this, {detail_cnt});
-                ++detail_cnt;
-            }
-        }});
-}
-
-bool SingleDubiousTarget::hasViewableData (const EvaluationResultsReport::SectionContentTable& table,
-                                           const QVariant& annotation)
-{
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
-        return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid()) //  && annotation.toUInt() < details_.size()
-        return true;
-    else
-        return false;
-}
-
-std::unique_ptr<nlohmann::json::object_t> SingleDubiousTarget::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-
-    if (table.name() == target_table_name_)
-    {
-        return getTargetErrorsViewable();
-    }
-    else if (table.name() == tr_details_table_name_ && annotation.isValid())
-    {
-        unsigned int detail_update_cnt = annotation.toUInt();
-
-        logdbg << "SingleDubiousTarget: viewableData: detail_update_cnt " << detail_update_cnt;
-
-        std::unique_ptr<nlohmann::json::object_t> viewable_ptr
-                = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
-        assert (viewable_ptr);
-
-        assert (numDetails() > 0);
-        const auto& detail = getDetail(0);
-
-        unsigned int per_detail_update_cnt = detail_update_cnt;
-
-        assert (per_detail_update_cnt < detail.numDetails());
-
-        const auto& update_detail = detail.details().at(per_detail_update_cnt);
-
-        assert (update_detail.numPositions() >= 1);
-
-        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
-        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
-        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
-
-        //if (update_detail.comments().hasComments(DetailCommentGroupDubious))
-        //    (*viewable_ptr)[ViewPoint::VP_EVAL_KEY][ViewPoint::VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
-
-        return viewable_ptr;
-    }
-    else
-        return nullptr;
-}
-
-bool SingleDubiousTarget::hasReference (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
-        return true;
-    else
-        return false;;
-}
-
-std::string SingleDubiousTarget::reference(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasReference(table, annotation));
-
-    return "Report:Results:"+getTargetRequirementSectionID();
-}
-
+/**
+*/
 std::shared_ptr<Joined> SingleDubiousTarget::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedDubiousTarget> (result_id, requirement_, sector_layer_, eval_man_);
 }
 
+/**
+*/
 EvaluationRequirement::DubiousTarget* SingleDubiousTarget::req ()
 {
     EvaluationRequirement::DubiousTarget* req =
@@ -426,33 +77,132 @@ EvaluationRequirement::DubiousTarget* SingleDubiousTarget::req ()
     return req;
 }
 
-void SingleDubiousTarget::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+/**
+*/
+boost::optional<double> SingleDubiousTarget::computeResult_impl() const
 {
-    //addAnnotationFeatures(viewable, overview); // TODO rework
+    assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
+    //assert (values_.size() == num_comp_failed_ + num_comp_passed_);
+    assert (numDetails() == 1);
 
-    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
-    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+    p_dubious_update_.reset();
 
-    assert(numDetails() > 0);
     const auto& detail = getDetail(0);
 
-    if (detail.hasDetails())
+    boost::optional<double> result = (double)detail.getValue(DetailKey::IsDubious).toBool();
+
+    if (num_pos_inside_)
+        p_dubious_update_ = (double)num_pos_inside_dubious_ / (double)num_pos_inside_;
+
+    logdbg << "SingleDubiousTarget "      << requirement_->name() << " " << target_->utn_
+           << " has_p_dubious_update_ "   << p_dubious_update_.has_value()
+           << " num_pos_inside_dubious_ " << num_pos_inside_dubious_
+           << " num_pos_inside_ "         << num_pos_inside_
+           << " p_dubious_update_ "       << (p_dubious_update_.has_value() ? p_dubious_update_.value() : 0);
+
+    return result;
+}
+
+/**
+*/
+bool SingleDubiousTarget::hasIssues_impl() const
+{
+    assert (numDetails() == 1);
+
+    return getDetail(0).getValue(DetailKey::IsDubious).toBool();
+}
+
+/**
+*/
+std::vector<std::string> SingleDubiousTarget::targetTableHeadersCustom() const
+{
+    return { "#PosInside", "#DU", "PDU", "Reasons" };
+}
+
+/**
+*/
+std::vector<QVariant> SingleDubiousTarget::targetTableValuesCustom() const
+{
+    assert(numDetails() > 0);
+    std::string dub_string = dubiousReasonsString(getDetail(0).comments());
+
+    return { num_pos_inside_,                        // "#PosInside"
+             num_pos_inside_dubious_,                // "#DU"
+             resultValueOptional(p_dubious_update_), // "PDU"
+             dub_string.c_str() };                   // "Reasons"
+}
+
+/**
+*/
+std::vector<Single::TargetInfo> SingleDubiousTarget::targetInfos() const
+{
+    assert(numDetails() > 0);
+
+    auto duration = getDetail(0).getValueAs<boost::posix_time::time_duration>(DetailKey::Duration);
+    assert(duration.has_value());
+
+    auto duration_var = Utils::Time::toString(duration.value(),2).c_str();
+
+    return { TargetInfo("#Up [1]"        , "Number of updates"                      , num_updates_                          ),
+             TargetInfo("#PosInside [1]" , "Number of updates inside sector"        , num_pos_inside_                       ),
+             TargetInfo("#PosOutside [1]", "Number of updates outside sector"       , num_pos_outside_                      ),
+             TargetInfo("#DU [1]"        , "Number of dubious updates inside sector", num_pos_inside_dubious_               ),
+             TargetInfo("PDU [%]"        , "Probability of dubious update"          , resultValueOptional(p_dubious_update_)),
+             TargetInfo("Duration [s]"   , "Duration"                               , duration_var                          ) };
+}
+
+/**
+*/
+std::vector<std::string> SingleDubiousTarget::detailHeaders() const
+{
+    return { "ToD", "UTN", "Dubious Comment" };
+}
+
+/**
+*/
+std::vector<QVariant> SingleDubiousTarget::detailValues(const EvaluationDetail& detail,
+                                                        const EvaluationDetail* parent_detail) const
+{
+    assert(parent_detail);
+
+    const std::string dub_string = dubiousReasonsString(parent_detail->comments());
+
+    return { Time::toString(detail.timestamp()).c_str(),
+             parent_detail->getValue(DetailKey::UTNOrTrackNum),
+             dub_string.c_str() };
+}
+
+/**
+*/
+bool SingleDubiousTarget::detailIsOk(const EvaluationDetail& detail) const
+{
+    auto comments = detail.comments().group(DetailCommentGroupDubious);
+    bool is_dub   = (comments.has_value() && !comments->empty());
+
+    return !is_dub;
+}
+
+/**
+*/
+void SingleDubiousTarget::addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                                 const EvaluationDetail& detail, 
+                                                 TargetAnnotationType type,
+                                                 bool is_ok) const
+{
+    assert (detail.numPositions() >= 1);
+
+    if (type == TargetAnnotationType::Highlight)
     {
-        for (auto& update : detail.details())
-        {
-            assert(update.numPositions() >= 1);
-
-            auto comments = update.comments().group(DetailCommentGroupDubious);
-            bool is_dub = (comments.has_value() && !comments->empty());
-
-            if (is_dub)
-                error_point_coordinates.push_back(update.position(0).asVector());
-            else if (add_ok)
-                ok_point_coordinates.push_back(update.position(0).asVector());
-        }
+        addAnnotationPos(annotations_json, detail.position(0), AnnotationType::TypeHighlight);
+    }
+    else if (type == TargetAnnotationType::TargetOverview)
+    {
+        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
     }
 }
 
+/**
+*/
 std::map<std::string, std::vector<Single::LayerDefinition>> SingleDubiousTarget::gridLayers() const
 {
     std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
@@ -462,6 +212,8 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SingleDubiousTarget:
     return layer_defs;
 }
 
+/**
+*/
 void SingleDubiousTarget::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
     assert(numDetails() > 0);

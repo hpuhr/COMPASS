@@ -17,16 +17,18 @@
 
 #include "eval/results/extra/tracksingle.h"
 #include "eval/results/extra/trackjoined.h"
-#include "eval/requirement/base/base.h"
-#include "eval/requirement/extra/track.h"
-#include "evaluationtargetdata.h"
-#include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+
+#include "eval/requirement/base/base.h"
+#include "eval/requirement/extra/track.h"
+
+#include "evaluationtargetdata.h"
+#include "evaluationmanager.h"
+
 #include "logger.h"
-//#include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "viewpoint.h"
 
@@ -39,6 +41,8 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
+/**
+*/
 SingleExtraTrack::SingleExtraTrack(const std::string& result_id, 
                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
                                    const SectorLayer& sector_layer,
@@ -50,344 +54,144 @@ SingleExtraTrack::SingleExtraTrack(const std::string& result_id,
                                    unsigned int num_inside,
                                    unsigned int num_extra,
                                    unsigned int num_ok)
-    :   Single("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, eval_man, details)
-    ,   ignore_    (ignore)
-    ,   num_inside_(num_inside)
-    ,   num_extra_ (num_extra)
-    ,   num_ok_    (num_ok)
+:   SingleProbabilityBase("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   num_inside_(num_inside)
+,   num_extra_ (num_extra)
+,   num_ok_    (num_ok)
 {
-    //loginf << "SingleTrack: ctor: result_id " << result_id_ << " ignore " << ignore_;
+    if (ignore)
+        setIgnored();
 
-    updateProb();
+    updateResult();
 }
 
-void SingleExtraTrack::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    logdbg << "Track " <<  requirement_->name() <<": addToReport";
-
-    // add target to requirements->group->req
-    addTargetToOverviewTable(root_item);
-
-    // add requirement results to targets->utn->requirements->group->req
-    addTargetDetailsToReport(root_item);
-
-    // TODO add requirement description, methods
-}
-
-void SingleExtraTrack::updateProb()
-{
-    assert (num_inside_ >= num_extra_ + num_ok_);
-
-    prob_.reset();
-
-    if (num_extra_ + num_ok_)
-    {
-        logdbg << "SingleTrack: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
-               << " num_ok " << num_ok_;
-
-        prob_          = (float)num_extra_/(float)(num_extra_ + num_ok_);
-        result_usable_ = !ignore_;
-    }
-
-    if (!prob_.has_value())
-        result_usable_ = false;
-
-    updateUseFromTarget();
-}
-
-void SingleExtraTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
-
-    if (eval_man_.settings().report_split_results_by_mops_
-            || eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
-        addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
-}
-
-void SingleExtraTrack::addTargetDetailsToTable (
-        EvaluationResultsReport::Section& section, const std::string& table_name)
-{
-    QVariant prob_var;
-
-    if (prob_.has_value())
-        prob_var = roundf(prob_.value() * 10000.0) / 100.0;
-
-    if (!section.hasTable(table_name))
-        section.addTable(table_name, 14,
-                         {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "#Tst", "Ign.", "#Check", "#OK", "#Extra", "PEx"}, true, 13, Qt::DescendingOrder);
-
-    EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
-
-    target_table.addRow(
-                {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-                 target_->acidsStr().c_str(), target_->acadsStr().c_str(),
-                 target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-                 target_->modeCMaxStr().c_str(), target_->numTstUpdates(),
-                 ignore_, num_extra_+num_ok_, num_ok_, num_extra_, prob_var}, this, {utn_});
-}
-
-void SingleExtraTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
-    EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
-
-    if (!utn_req_section.hasTable("details_overview_table"))
-        utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
-
-    std::shared_ptr<EvaluationRequirement::ExtraTrack> req =
-            std::static_pointer_cast<EvaluationRequirement::ExtraTrack>(requirement_);
-    assert (req);
-
-    EvaluationResultsReport::SectionContentTable& utn_req_table =
-            utn_req_section.getTable("details_overview_table");
-
-    addCommonDetails(root_item);
-
-    utn_req_table.addRow({"Use", "To be used in results", use_}, this);
-    utn_req_table.addRow({"#Tst [1]", "Number of test updates",  target_->numTstUpdates()}, this);
-    utn_req_table.addRow({"Ign.", "Ignore target", ignore_}, this);
-    utn_req_table.addRow({"#Check.", "Number of checked test track updates", num_extra_+num_ok_}, this);
-    utn_req_table.addRow({"#OK.", "Number of OK test track updates", num_ok_}, this);
-    utn_req_table.addRow({"#Extra", "Number of extra test track updates", num_extra_}, this);
-
-    // condition
-    {
-        QVariant prob_var;
-
-        if (prob_.has_value())
-            prob_var = roundf(prob_.value() * 10000.0) / 100.0;
-
-        utn_req_table.addRow({"PEx [%]", "Probability of update with extra track", prob_var}, this);
-
-        utn_req_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
-
-        string result {"Unknown"};
-
-        if (prob_.has_value())
-            result = req->getConditionResultStr(prob_.value());
-
-        utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
-
-        if (result == "Failed")
-        {
-            root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
-            utn_req_section.perTargetWithIssues(true);
-        }
-    }
-
-    // add figure
-    if (!ignore_ && num_extra_)
-    {
-        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  [this](void) { return this->getTargetErrorsViewable(); });
-    }
-    else
-    {
-        utn_req_section.addText("target_errors_overview_no_figure");
-        utn_req_section.getText("target_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
-
-    // add further details
-    reportDetails(utn_req_section);
-}
-
-void SingleExtraTrack::reportDetails(EvaluationResultsReport::Section& utn_req_section)
-{
-    if (!utn_req_section.hasTable(tr_details_table_name_))
-        utn_req_section.addTable(tr_details_table_name_, 5,
-                                 {"ToD", "Inside", "TN", "Extra", "Comment"});
-
-    EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-            utn_req_section.getTable(tr_details_table_name_);
-
-    utn_req_details_table.setCreateOnDemand(
-                [this, &utn_req_details_table](void)
-    {
-
-        unsigned int detail_cnt = 0;
-
-        for (auto& rq_det_it : getDetails())
-        {
-            utn_req_details_table.addRow(
-                        { Time::toString(rq_det_it.timestamp()).c_str(),
-                          rq_det_it.getValue(DetailKey::Inside),
-                          rq_det_it.getValue(DetailKey::TrackNum),
-                          rq_det_it.getValue(DetailKey::Extra),
-                          rq_det_it.comments().generalComment().c_str() },
-                        this, detail_cnt);
-
-            ++detail_cnt;
-        }});
-}
-
-bool SingleExtraTrack::hasViewableData (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
-        return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
-        return true;
-    else
-        return false;
-}
-
-std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasViewableData(table, annotation));
-
-    if (table.name() == target_table_name_)
-    {
-        return getTargetErrorsViewable();
-    }
-    else if (table.name() == tr_details_table_name_ && annotation.isValid())
-    {
-        unsigned int detail_cnt = annotation.toUInt();
-
-        std::unique_ptr<nlohmann::json::object_t> viewable_ptr
-                = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
-        assert (viewable_ptr);
-
-        const auto& detail = getDetail(detail_cnt);
-
-        assert(detail.numPositions() >= 1);
-
-        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
-        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = detail.position(0).longitude_;
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
-        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
-
-        return viewable_ptr;
-    }
-
-    return nullptr;
-}
-
-std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::getTargetErrorsViewable (bool add_highlight)
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
-                utn_, req_grp_id_, result_id_);
-
-    bool has_pos = false;
-    double lat_min, lat_max, lon_min, lon_max;
-
-    for (auto& detail_it : getDetails())
-    {
-        assert(detail_it.numPositions() >= 1);
-
-        auto is_extra = detail_it.getValueAs<bool>(DetailKey::Extra);
-        assert(is_extra.has_value());
-
-        if (!is_extra.value())
-            continue;
-
-        if (has_pos)
-        {
-            lat_min = min(lat_min, detail_it.position(0).latitude_);
-            lat_max = max(lat_max, detail_it.position(0).latitude_);
-
-            lon_min = min(lon_min, detail_it.position(0).longitude_);
-            lon_max = max(lon_max, detail_it.position(0).longitude_);
-        }
-        else // tst pos always set
-        {
-            lat_min = detail_it.position(0).latitude_;
-            lat_max = detail_it.position(0).latitude_;
-
-            lon_min = detail_it.position(0).longitude_;
-            lon_max = detail_it.position(0).longitude_;
-
-            has_pos = true;
-        }
-    }
-
-    if (has_pos)
-    {
-        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
-
-        double lat_w = lat_max-lat_min;
-        double lon_w = lon_max-lon_min;
-
-        if (lat_w < eval_man_.settings().result_detail_zoom_)
-            lat_w = eval_man_.settings().result_detail_zoom_;
-
-        if (lon_w < eval_man_.settings().result_detail_zoom_)
-            lon_w = eval_man_.settings().result_detail_zoom_;
-
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
-    }
-
-    addAnnotations(*viewable_ptr, false, true);
-
-    return viewable_ptr;
-}
-
-bool SingleExtraTrack::hasReference (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
-        return true;
-    else
-        return false;
-}
-
-std::string SingleExtraTrack::reference(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasReference(table, annotation));
-
-    return "Report:Results:"+getTargetRequirementSectionID();
-}
-
-std::shared_ptr<Joined> SingleExtraTrack::createEmptyJoined(const std::string& result_id)
-{
-    return make_shared<JoinedExtraTrack> (result_id, requirement_, sector_layer_, eval_man_);
-}
-
-bool SingleExtraTrack::ignore() const
-{
-    return ignore_;
-}
-
+/**
+*/
 unsigned int SingleExtraTrack::numInside() const
 {
     return num_inside_;
 }
 
+/**
+*/
 unsigned int SingleExtraTrack::numExtra() const
 {
     return num_extra_;
 }
 
+/**
+*/
 unsigned int SingleExtraTrack::numOK() const
 {
     return num_ok_;
 }
 
-void SingleExtraTrack::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
+/**
+*/
+std::shared_ptr<Joined> SingleExtraTrack::createEmptyJoined(const std::string& result_id)
 {
-    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
-    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
+    return make_shared<JoinedExtraTrack> (result_id, requirement_, sector_layer_, eval_man_);
+}
 
-    for (auto& detail_it : getDetails())
+
+/**
+*/
+boost::optional<double> SingleExtraTrack::computeResult_impl() const
+{
+    assert (num_inside_ >= num_extra_ + num_ok_);
+
+    unsigned int num_total = num_extra_ + num_ok_;
+
+    if (num_total == 0)
+        return {};
+
+    boost::optional<double> result = (double)num_extra_ / (double)num_total;
+
+    logdbg << "SingleTrack: updateProb: result_id " << result_id_ << " num_extra " << num_extra_ << " num_ok " << num_ok_;
+}
+
+/**
+*/
+bool SingleExtraTrack::hasIssues_impl() const
+{
+    return num_extra_ > 0;
+}
+
+/**
+*/
+std::vector<std::string> SingleExtraTrack::targetTableHeadersCustom() const
+{
+    return { "#Tst", "Ign.", "#Check", "#OK", "#Extra" };
+}
+
+/**
+*/
+std::vector<QVariant> SingleExtraTrack::targetTableValuesCustom() const
+{
+    return { target_->numTstUpdates(), isIgnored(), num_extra_ + num_ok_, num_ok_, num_extra_ };
+}
+
+/**
+*/
+std::vector<Single::TargetInfo> SingleExtraTrack::targetInfos() const
+{
+    return { TargetInfo("#Tst [1]", "Number of test updates"              , target_->numTstUpdates()),
+             TargetInfo("Ign."    , "Ignore target"                       , isIgnored()             ),
+             TargetInfo("#Check." , "Number of checked test track updates", num_extra_ + num_ok_    ),
+             TargetInfo("#OK."    , "Number of OK test track updates"     , num_ok_                 ),
+             TargetInfo("#Extra"  , "Number of extra test track updates"  , num_extra_              ) };
+}
+
+/**
+*/
+std::vector<std::string> SingleExtraTrack::detailHeaders() const
+{
+    return {"ToD", "Inside", "TN", "Extra", "Comment"};
+}
+
+/**
+*/
+std::vector<QVariant> SingleExtraTrack::detailValues(const EvaluationDetail& detail,
+                                                     const EvaluationDetail* parent_detail) const
+{
+    return { Utils::Time::toString(detail.timestamp()).c_str(),
+             detail.getValue(DetailKey::Inside),
+             detail.getValue(DetailKey::TrackNum),
+             detail.getValue(DetailKey::Extra),
+             detail.comments().generalComment().c_str() };
+}
+
+/**
+*/
+bool SingleExtraTrack::detailIsOk(const EvaluationDetail& detail) const
+{
+    auto is_extra = detail.getValueAs<bool>(DetailKey::Extra);
+    assert(is_extra.has_value());
+
+    return !is_extra.value();
+}
+
+/**
+*/
+void SingleExtraTrack::addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                              const EvaluationDetail& detail, 
+                                              TargetAnnotationType type,
+                                              bool is_ok) const
+{
+    assert (detail.numPositions() >= 1);
+
+    if (type == TargetAnnotationType::Highlight)
     {
-        auto is_extra = detail_it.getValueAsOrAssert<bool>(
-                    EvaluationRequirementResult::SingleExtraTrack::DetailKey::Extra);
-
-        assert (detail_it.numPositions() >= 1);
-
-        if (is_extra)
-            error_point_coordinates.push_back(detail_it.position(0).asVector());
-        else if (add_ok)
-            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+        addAnnotationPos(annotations_json, detail.position(0), AnnotationType::TypeHighlight);
+    }
+    else if (type == TargetAnnotationType::TargetOverview)
+    {
+        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
     }
 }
 
+/**
+*/
 std::map<std::string, std::vector<Single::LayerDefinition>> SingleExtraTrack::gridLayers() const
 {
     std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
@@ -397,6 +201,8 @@ std::map<std::string, std::vector<Single::LayerDefinition>> SingleExtraTrack::gr
     return layer_defs;
 }
 
+/**
+*/
 void SingleExtraTrack::addValuesToGrid(Grid2D& grid, const std::string& layer) const
 {
     if (layer == requirement_->name())

@@ -19,21 +19,40 @@
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
+#include "eval/results/report/section_id.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "eval/results/report/sectioncontenttext.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 //#include "evaluationresultsgenerator.h"
 #include "sectorlayer.h"
 #include "viewpoint.h"
+#include "viewpointgenerator.h"
 
 using namespace std;
 using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
+
 const std::string Single::tr_details_table_name_ {"Target Reports Details"};
 const std::string Single::target_table_name_     {"Targets"};
 
+const int Single::AnnotationPointSizeOverview  = 8;
+const int Single::AnnotationPointSizeHighlight = 12;
+const int Single::AnnotationPointSizeError     = 16;
+const int Single::AnnotationPointSizeOk        = 10;
+
+const int Single::AnnotationLineWidthHighlight = 4;
+const int Single::AnnotationLineWidthError     = 4;
+const int Single::AnnotationLineWidthOk        = 2;
+
+const QColor Single::AnnotationColorHighlight = Qt::yellow;
+const QColor Single::AnnotationColorError     = QColor("#FF6666");
+const QColor Single::AnnotationColorOk        = QColor("#66FF66");
+
+/**
+*/
 Single::Single(const std::string& type, 
                const std::string& result_id,
                std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -42,29 +61,38 @@ Single::Single(const std::string& type,
                const EvaluationTargetData* target,
                EvaluationManager& eval_man,
                const EvaluationDetails& details)
-    : Base (type, result_id, requirement, sector_layer, eval_man),
-      utn_ (utn), target_(target)
+:   Base   (type, result_id, requirement, sector_layer, eval_man)
+,   utn_   (utn   )
+,   target_(target)
 {
     setDetails(details);
 
     annotation_type_names_[AnnotationType::TypeHighlight] = "Selected";
-    annotation_type_names_[AnnotationType::TypeError] = "Errors";
-    annotation_type_names_[AnnotationType::TypeOk] =  "OK";
+    annotation_type_names_[AnnotationType::TypeError    ] = "Errors";
+    annotation_type_names_[AnnotationType::TypeOk       ] = "OK";
 }
 
-Single::~Single() = default;
+/**
+*/
+Single::~Single() {}
 
+/**
+*/
 unsigned int Single::utn() const
 {
     return utn_;
 }
 
+/**
+*/
 const EvaluationTargetData* Single::target() const
 {
     assert (target_);
     return target_;
 }
 
+/**
+*/
 void Single::setInterestFactor(double factor)
 {
     interest_factor_ = factor;
@@ -74,22 +102,39 @@ void Single::setInterestFactor(double factor)
     target_->addInterestFactor(getRequirementSectionID(), factor);
 }
 
-void Single::updateUseFromTarget ()
+/**
+*/
+void Single::updateUseFromTarget()
 {
-    use_ = result_usable_ && target_->use();
+    use_ = (resultUsable() && target_->use());
 }
 
+/**
+*/
+void Single::updateResult()
+{
+    Base::updateResult();
+
+    updateUseFromTarget();
+}
+
+/**
+*/
 std::string Single::getTargetSectionID()
 {
-    return "Targets:UTN "+to_string(utn_);
+    return EvaluationResultsReport::SectionID::targetID(utn_);
 }
 
+/**
+*/
 std::string Single::getTargetRequirementSectionID ()
 {
-    return getTargetSectionID()+":"+sector_layer_.name()+":"+requirement_->groupName()+":"+requirement_->name();
+    return EvaluationResultsReport::SectionID::targetResultID(utn_, *this);
 }
 
-std::string Single::getRequirementSectionID () // TODO hack
+/**
+*/
+std::string Single::getRequirementSectionID () const // TODO hack
 {
     if (eval_man_.settings().report_split_results_by_mops_)
     {
@@ -119,251 +164,476 @@ std::string Single::getRequirementSectionID () // TODO hack
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":Sum:"+requirement_->name();
 }
 
-void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item)
+/**
+*/
+void Single::addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    EvaluationResultsReport::Section& utn_section = root_item->getSection(getTargetSectionID());
+    logdbg << "Single: addToReport: " <<  requirement_->name();
 
-    if (!utn_section.hasTable("details_overview_table")) // only set once, called from many
+    // add target to requirements->group->req
+    addTargetToOverviewTable(root_item);
+
+    // add requirement results to targets->utn->requirements->group->req
+    addTargetDetailsToReport(root_item);
+
+    // TODO add requirement description, methods
+}
+
+/**
+*/
+void Single::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
+
+    addTargetToOverviewTable(tgt_overview_section, target_table_name_);
+
+    if (eval_man_.settings().report_split_results_by_mops_ || 
+        eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
-        utn_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
+        EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-        EvaluationResultsReport::SectionContentTable& utn_table =
-                utn_section.getTable("details_overview_table");
-
-        utn_table.addRow({"UTN", "Unique Target Number", utn_}, this);
-        utn_table.addRow({"Begin", "Begin time of target", target_->timeBeginStr().c_str()}, this);
-        utn_table.addRow({"End", "End time of target", target_->timeEndStr().c_str()}, this);
-        utn_table.addRow({"Callsign", "Mode S target identification(s)", target_->acidsStr().c_str()}, this);
-        utn_table.addRow({"Target Addr.", "Mode S target address(es)", target_->acadsStr().c_str()}, this);
-        utn_table.addRow({"Mode 3/A", "Mode 3/A code(s)", target_->modeACodesStr().c_str()}, this);
-        utn_table.addRow({"Mode C Min", "Minimum Mode C code [ft]", target_->modeCMinStr().c_str()}, this);
-        utn_table.addRow({"Mode C Max", "Maximum Mode C code [ft]", target_->modeCMaxStr().c_str()}, this);
+        addTargetToOverviewTable(sum_section, target_table_name_);
     }
 }
 
-//void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable,
-//                                   bool overview,
-//                                   bool add_highlight)  const
-//{
-//    if (!viewable.count("annotations"))
-//        viewable["annotations"] = json::array();
-
-//    auto addAnnotation = [ & ] (const std::string& name,
-//            const std::string& symbol_color,
-//            const std::string& symbol,
-//            const std::string& point_color,
-//            int point_size,
-//            const std::string& line_color,
-//            int line_width)
-//    {
-//        viewable.at("annotations").push_back(json::object()); // errors
-
-//        nlohmann::json& annotation = viewable.at("annotations").back();
-
-//        annotation["name"        ] = name;
-//        annotation["symbol_color"] = symbol_color;
-//        annotation["features"    ] = json::array();
-
-//        // lines
-//        annotation.at("features").push_back(json::object());
-
-//        json& feature_lines = annotation.at("features").back();
-
-//        feature_lines["type"] = "feature";
-//        feature_lines["geometry"] = json::object();
-//        feature_lines.at("geometry")["type"] = "lines";
-//        feature_lines.at("geometry")["coordinates"] = json::array();
-
-//        feature_lines["properties"] = json::object();
-//        feature_lines.at("properties")["color"] = line_color;
-//        feature_lines.at("properties")["line_width"] = line_width;
-
-//        // symbols
-
-//        annotation.at("features").push_back(json::object());
-
-//        json& feature_points = annotation.at("features").back();
-
-//        feature_points["type"] = "feature";
-//        feature_points["geometry"] = json::object();
-//        feature_points.at("geometry")["type"] = "points";
-//        feature_points.at("geometry")["coordinates"] = json::array();
-
-//        feature_points["properties"] = json::object();
-//        feature_points.at("properties")["color"] = point_color;
-
-//        feature_points.at("properties")["symbol"] = symbol;
-//        feature_points.at("properties")["symbol_size"] = point_size;
-//    };
-
-//    if (!viewable.at("annotations").size()) // not yet initialized
-//    {
-//        //ATTENTION: !ORDER IMPORTANT!
-
-//        // highlight
-//        if (add_highlight)
-//        {
-//            addAnnotation(result_id_+" Selected",
-//                          "#FFFF00",
-//                          overview ? "circle" : "border",
-//                          "#FFFF00",
-//                          overview ? 8 : 10,
-//                          "#FFFF00",
-//                          4);
-//        }
-
-//        // errors
-//        addAnnotation(result_id_+" Errors",
-//                      "#FF6666",
-//                      overview ? "circle" : "border",
-//                      "#FF6666",
-//                      overview ? 8 : 10,
-//                      "#FF6666",
-//                      2);
-//        // ok
-//        addAnnotation(result_id_+" OK",
-//                      "#66FF66",
-//                      overview ? "circle" : "border",
-//                      "#66FF66",
-//                      overview ? 8 : 10,
-//                      "#66FF66",
-//                      2);
-
-        
-//    }
-//}
-
-nlohmann::json& Single::annotationPointCoords(nlohmann::json::object_t& viewable, AnnotationType type, bool overview) const
+/**
+*/
+void Single::addTargetToOverviewTable(EvaluationResultsReport::Section& section, 
+                                      const std::string& table_name)
 {
-    nlohmann::json& annotation = getOrCreateAnnotation(viewable, type, overview);
+    if (!section.hasTable(table_name))
+    {
+        unsigned int sort_column;
+        auto headers = targetTableHeaders(&sort_column);
 
-    assert (annotation.contains("features")
-            && annotation.at("features").size() >= 2
-            && annotation.at("features").at( 1 ).count("geometry"));
+        auto sort_order = targetTableSortOrder();
 
-    return annotation.at("features").at( 1 ).at("geometry")["coordinates"];
+        section.addTable(table_name, headers.size(), headers, true, sort_column, sort_order);
+    }
+
+    EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
+
+    auto values = targetTableValues();
+
+    assert((int)values.size() == target_table.columnCount());
+
+    target_table.addRow(values, this, { utn_ });
 }
 
-nlohmann::json& Single::annotationLineCoords(nlohmann::json::object_t& viewable, AnnotationType type, bool overview) const
+/**
+*/
+void Single::addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    nlohmann::json& annotation = getOrCreateAnnotation(viewable, type, overview);
+    root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
+    EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
-    assert (annotation.contains("features")
-            && annotation.at("features").size() >= 1
-            && annotation.at("features").at( 0 ).count("geometry"));
+    //generate details overview table
+    if (!utn_req_section.hasTable("details_overview_table"))
+        utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
 
-    return annotation.at("features").at( 0 ).at("geometry")["coordinates"];
+    EvaluationResultsReport::SectionContentTable& utn_req_table = utn_req_section.getTable("details_overview_table");
+
+    //add common infos
+    auto common_infos = targetInfosCommon();
+
+    for (const auto& info : common_infos)
+        utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value }, this);
+
+    //add custom infos
+    auto infos = targetInfos();
+
+    for (const auto& info : infos)
+        utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value }, this);
+
+    //add condition result
+    bool failed;
+    auto infos_condition = targetConditionInfos(failed);
+
+    for (const auto& info : infos_condition)
+        utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value }, this);
+
+    if (failed)
+    {
+        // mark utn section as with issue
+        root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); 
+        utn_req_section.perTargetWithIssues(true);
+    }
+
+    //generate overview figure?
+    if (hasIssues())
+    {
+        utn_req_section.addFigure("target_errors_overview", 
+                                  "Target Errors Overview",
+                                  [this](void) { return this->viewableData(); });
+    }
+    else
+    {
+        utn_req_section.addText("target_errors_overview_no_figure");
+        utn_req_section.getText("target_errors_overview_no_figure").addText(
+                    "No target errors found, therefore no figure was generated.");
+    }
+
+    //generate details table
+    generateDetails(utn_req_section);
 }
 
-nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable, AnnotationType type, bool overview) const
+/**
+*/
+void Single::generateDetails(EvaluationResultsReport::Section& utn_req_section)
 {
+    //init table if needed
+    if (!utn_req_section.hasTable(tr_details_table_name_))
+    {
+        auto headers = detailHeaders();
+
+        utn_req_section.addTable(tr_details_table_name_, headers.size(), headers);
+    }
+
+    EvaluationResultsReport::SectionContentTable& utn_req_details_table =
+            utn_req_section.getTable(tr_details_table_name_);
+
+    //setup on-demand callback
+    utn_req_details_table.setCreateOnDemand(
+        [this, &utn_req_details_table](void)
+        {
+            auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+            {
+                auto values = detailValues(detail, parent_detail);
+
+                assert((int)values.size() == utn_req_details_table.columnCount());
+
+                utn_req_details_table.addRow(values, this, QPoint(didx0, didx1));
+            };
+
+            this->iterateDetails(func);
+        } );
+}
+
+/**
+*/
+std::vector<std::string> Single::targetTableHeadersCommon() const
+{
+    return { "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max" };
+}
+
+/**
+*/
+std::vector<std::string> Single::targetTableHeadersOptional() const
+{
+    return {};
+}
+
+/**
+*/
+std::vector<std::string> Single::targetTableHeaders(unsigned int* sort_column) const
+{
+    auto headers          = targetTableHeadersCommon();
+    auto headers_custom   = targetTableHeadersCustom();
+    auto headers_optional = targetTableHeadersOptional();
+
+    size_t result_value_idx = headers.size() + headers_custom.size();
+
+    //add custom headers
+    headers.insert(headers.end(), headers_custom.begin(), headers_custom.end());
+
+    //add result value name
+    headers.push_back(requirement_->getConditionResultNameShort());
+
+    //add optional headers
+    headers.insert(headers.end(), headers_optional.begin(), headers_optional.end());
+
+    //set sort column
+    if (sort_column)
+    {
+        const int sort_column_custom = targetTableCustomSortColumn();
+        *sort_column = (sort_column_custom >= 0 ? (unsigned int)sort_column_custom : result_value_idx);
+    }
+
+    return headers;
+}
+
+/**
+*/
+Qt::SortOrder Single::targetTableSortOrder() const
+{
+    //per default infer sort order from requirement
+    return requirement_->resultSortOrder();
+}
+
+/**
+*/
+std::vector<QVariant> Single::targetTableValuesCommon() const
+{
+    return { utn_, 
+             target_->timeBeginStr().c_str(), 
+             target_->timeEndStr().c_str(),
+             target_->acidsStr().c_str(), 
+             target_->acadsStr().c_str(),
+             target_->modeACodesStr().c_str(), 
+             target_->modeCMinStr().c_str(), 
+             target_->modeCMaxStr().c_str() };
+}
+
+/**
+*/
+std::vector<QVariant> Single::targetTableValuesOptional() const
+{
+    return {};
+}
+
+/**
+*/
+std::vector<QVariant> Single::targetTableValues() const
+{
+    auto values          = targetTableValuesCommon();
+    auto values_custom   = targetTableValuesCustom();
+    auto values_optional = targetTableValuesOptional();
+
+    //add custom values
+    values.insert(values.end(), values_custom.begin(), values_custom.end());
+
+    //add result value
+    values.push_back(resultValue());
+
+    //add optional values
+    values.insert(values.end(), values_optional.begin(), values_optional.end());
+
+    return values;
+}
+
+/**
+*/
+std::vector<Single::TargetInfo> Single::targetInfosCommon() const
+{
+    return { { "UTN"         , "Unique Target Number"           , utn_                             },
+             { "Begin"       , "Begin time of target"           , target_->timeBeginStr().c_str()  },
+             { "End"         , "End time of target"             , target_->timeEndStr().c_str()    },
+             { "Callsign"    , "Mode S target identification(s)", target_->acidsStr().c_str()      }, 
+             { "Target Addr.", "Mode S target address(es)"      , target_->acadsStr().c_str()      },
+             { "Mode 3/A"    , "Mode 3/A code(s)"               , target_->modeACodesStr().c_str() }, 
+             { "Mode C Min"  , "Minimum Mode C code [ft]"       , target_->modeCMinStr().c_str()   },
+             { "Mode C Max"  , "Maximum Mode C code [ft]"       , target_->modeCMaxStr().c_str()   },
+             { "Use"         , "To be used in results"          , use_                             } };
+}
+
+/**
+*/
+std::vector<Single::TargetInfo> Single::targetConditionInfos(bool& failed) const
+{
+    std::vector<TargetInfo> infos;
+
+    QVariant result_val = resultValue();
+
+    infos.push_back({ requirement_->getConditionResultNameShort().c_str(), 
+                       requirement_->getConditionResultName().c_str(), 
+                       result_val });
+
+    infos.push_back({"Condition", "", requirement_->getConditionStr().c_str() });
+
+    string result {"Unknown"};
+
+    if (result_val.isValid())
+        result = conditionResultString();
+
+    infos.push_back({"Condition Fulfilled", "", result.c_str()});
+
+    failed = (result == "Failed");
+
+    return infos;
+}
+
+/**
+*/
+bool Single::hasReference (const EvaluationResultsReport::SectionContentTable& table, 
+                           const QVariant& annotation) const
+{
+    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
+        return true;
+    else
+        return false;
+}
+
+/**
+*/
+std::string Single::reference(const EvaluationResultsReport::SectionContentTable& table, 
+                              const QVariant& annotation) const
+{
+    assert (hasReference(table, annotation));
+    return EvaluationResultsReport::SectionID::createForRequirementResult(*this);
+}
+
+/**
+*/
+bool Single::hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+                              const QVariant& annotation) const
+{
+    //check validity of annotation index
+    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
+        return true;
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && detailKey(annotation).has_value())
+        return true;
+    
+    return false;
+}
+
+/**
+*/
+std::unique_ptr<nlohmann::json::object_t> Single::viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+                                                               const QVariant& annotation) const
+{
+    assert (hasViewableData(table, annotation));
+
+    if (table.name() == target_table_name_)
+    {
+        //return target overview viewable
+        return createViewable(AnnotationOptions().overview());
+    }
+    else if (table.name() == tr_details_table_name_ && annotation.isValid())
+    {
+        //obtain detail key from annotation
+        auto detail_key = detailKey(annotation);
+        assert(detail_key.has_value());
+
+        //return target detail viewable
+        return createViewable(AnnotationOptions().highlight(detail_key.value()));
+    }
+
+    return nullptr;
+}
+
+/**
+*/
+std::unique_ptr<nlohmann::json::object_t> Single::viewableData() const
+{
+    //per default return target overview annotations
+    return createViewable(AnnotationOptions().overview());
+}
+
+/**
+ * Retrieves (and possibly creates) a json point coordinate array for the given annotation type.
+*/
+nlohmann::json& Single::annotationPointCoords(nlohmann::json& annotations_json, AnnotationType type, bool overview) const
+{
+    nlohmann::json& annotation = getOrCreateAnnotation(annotations_json, type, overview);
+
+    auto& feat_json = ViewPointGenAnnotation::getFeatureJSON(annotation, 1);
+
+    return ViewPointGenFeaturePointGeometry::getCoordinatesJSON(feat_json);
+}
+
+/**
+ * Retrieves (and possibly creates) a json line coordinate array for the given annotation type.
+*/
+nlohmann::json& Single::annotationLineCoords(nlohmann::json& annotations_json, AnnotationType type, bool overview) const
+{
+    nlohmann::json& annotation = getOrCreateAnnotation(annotations_json, type, overview);
+    
+    auto& feat_json = ViewPointGenAnnotation::getFeatureJSON(annotation, 0);
+
+    return ViewPointGenFeaturePointGeometry::getCoordinatesJSON(feat_json);
+}
+
+/**
+ * Retrieves (and possibly creates) a json annotation for the given annotation type.
+*/
+nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, AnnotationType type, bool overview) const
+{
+    assert (annotations_json.is_array());
+
     string anno_name = annotation_type_names_.at(type);
 
     logdbg << "Single: getOrCreateAnnotation: anno_name '" << anno_name << "' overview " << overview;
-
-    if (!viewable.count(ViewPoint::VP_ANNOTATION_KEY))
-        viewable[ViewPoint::VP_ANNOTATION_KEY] = json::array();
-
-    auto& annos = viewable.at(ViewPoint::VP_ANNOTATION_KEY);
-    assert (annos.is_array());
-
+    
     auto insertAnnotation = [ & ] (const std::string& name,
-            unsigned int position,
-            const std::string& symbol_color,
-            const std::string& symbol,
-            const std::string& point_color,
-            int point_size,
-            const std::string& line_color,
-            int line_width)
+                                   unsigned int position,
+                                   const QColor& symbol_color,
+                                   const ViewPointGenFeaturePoints::Symbol& point_symbol,
+                                   const QColor& point_color,
+                                   int point_size,
+                                   const QColor& line_color,
+                                   int line_width)
     {
-        logdbg << "Single: getOrCreateAnnotation: size " << annos.size()
+        logdbg << "Single: getOrCreateAnnotation: size " << annotations_json.size()
                << " creating '" << name << "' at pos " << position;
 
-        for (unsigned int cnt=0; cnt < annos.size(); ++cnt)
-            logdbg << "Single: getOrCreateAnnotation: start: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
+        for (unsigned int cnt=0; cnt < annotations_json.size(); ++cnt)
+            logdbg << "Single: getOrCreateAnnotation: start: index " << cnt <<" '" << annotations_json.at(cnt).at("name") << "'";
 
-        annos.insert(annos.begin() + position, json::object()); // errors
-        assert (position < annos.size());
+        annotations_json.insert(annotations_json.begin() + position, json::object()); // errors
+        assert (position < annotations_json.size());
 
-        nlohmann::json& annotation = annos.at(position);
+        nlohmann::json& annotation_json = annotations_json.at(position);
 
-        annotation["name"        ] = name;
-        annotation["symbol_color"] = symbol_color;
-        annotation["features"    ] = json::array();
+        ViewPointGenAnnotation annotation(name);
+        annotation.setSymbolColor(symbol_color);
+
+        //ATTENTION: !ORDER IMPORTANT!
 
         // lines
-        annotation.at("features").push_back(json::object());
+        std::unique_ptr<ViewPointGenFeatureLines> feature_lines;
+        feature_lines.reset(new ViewPointGenFeatureLines(line_width, {}, {}));
+        feature_lines->setColor(line_color);
 
-        json& feature_lines = annotation.at("features").back();
-
-        feature_lines["type"] = "lines";
-        feature_lines["geometry"] = json::object();
-        feature_lines.at("geometry")["coordinates"] = json::array();
-
-        feature_lines["properties"] = json::object();
-        feature_lines.at("properties")["color"] = line_color;
-        feature_lines.at("properties")["line_width"] = line_width;
+        annotation.addFeature(std::move(feature_lines));
 
         // symbols
+        std::unique_ptr<ViewPointGenFeaturePoints> feature_points;
+        feature_points.reset(new ViewPointGenFeaturePoints(point_symbol, point_size, {}, {}));
+        feature_points->setColor(point_color);
 
-        annotation.at("features").push_back(json::object());
+        annotation.addFeature(std::move(feature_points));
 
-        json& feature_points = annotation.at("features").back();
+        //convert to json
+        annotation.toJSON(annotation_json);
 
-        feature_points["type"] = "points";
-        feature_points["geometry"] = json::object();
-        feature_points.at("geometry")["coordinates"] = json::array();
-
-        feature_points["properties"] = json::object();
-        feature_points.at("properties")["color"] = point_color;
-
-        feature_points.at("properties")["symbol"] = symbol;
-        feature_points.at("properties")["symbol_size"] = point_size;
-
-        for (unsigned int cnt=0; cnt < annos.size(); ++cnt)
-            logdbg << "Single: getOrCreateAnnotation: end: index " << cnt <<" '" << annos.at(cnt).at("name") << "'";
+        for (unsigned int cnt=0; cnt < annotations_json.size(); ++cnt)
+            logdbg << "Single: getOrCreateAnnotation: end: index " << cnt <<" '" << annotations_json.at(cnt).at("name") << "'";
     };
 
     //ATTENTION: !ORDER IMPORTANT!
+
+    const std::string FieldName = ViewPointGenAnnotation::AnnotationFieldName;
 
     if (type == AnnotationType::TypeHighlight)
     {
         // should be first
 
-        if (!annos.size() || annos.at(0).at("name") != anno_name)
-        { // empty or not selected, add at first position
-            insertAnnotation(anno_name, 0,
-                             "#FFFF00",
-                             overview ? "circle" : "border",
-                             "#FFFF00",
-                             overview ? 8 : 12,
-                             "#FFFF00",
-                             4);
+        if (!annotations_json.size() || annotations_json.at(0).at(FieldName) != anno_name)
+        { 
+            // empty or not selected, add at first position
+            insertAnnotation(anno_name, 
+                             0,
+                             AnnotationColorHighlight,
+                             overview ? ViewPointGenFeaturePoints::Symbol::Circle : ViewPointGenFeaturePoints::Symbol::Border,
+                             AnnotationColorHighlight,
+                             overview ? AnnotationPointSizeOverview : AnnotationPointSizeHighlight,
+                             AnnotationColorHighlight,
+                             AnnotationLineWidthHighlight);
         }
 
-        assert (annos.at(0).at("name") == anno_name);
-        return annos.at(0);
+        assert (annotations_json.at(0).at(FieldName) == anno_name);
+        return annotations_json.at(0);
     }
     else if (type == AnnotationType::TypeError)
     {
         // should be first or second
 
-        bool insert_needed = false;
-        unsigned int anno_pos = 0;
+        bool         insert_needed = false;
+        unsigned int anno_pos      = 0;
 
-        if (!annos.size()) // empty, add at first pos
+        if (!annotations_json.size()) // empty, add at first pos
         {
             insert_needed = true;
             anno_pos = 0;
         }
-        else if (annos.at(0).at("name") != anno_name)
+        else if (annotations_json.at(0).at(FieldName) != anno_name)
         {
-            if (annos.size() > 1 && annos.at(1).at("name") == anno_name)
+            if (annotations_json.size() > 1 && annotations_json.at(1).at(FieldName) == anno_name)
             {
                 // found at second pos
                 anno_pos = 1;
             }
-            else if (annos.at(0).at("name") == annotation_type_names_.at(AnnotationType::TypeHighlight))
+            else if (annotations_json.at(0).at(FieldName) == annotation_type_names_.at(AnnotationType::TypeHighlight))
             {
                 // insert after
                 insert_needed = true;
@@ -371,71 +641,98 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json::object_t& viewable
             }
             else
             {
-                assert (annos.at(0).at("name") == annotation_type_names_.at(AnnotationType::TypeOk));
+                assert (annotations_json.at(0).at(FieldName) == annotation_type_names_.at(AnnotationType::TypeOk));
                 // insert before
                 insert_needed = true;
                 anno_pos = 0;
             }
         }
         else
+        {
             anno_pos = 0; // only for you
+        }
 
         if (insert_needed)
         {
-            insertAnnotation(anno_name, anno_pos,
-                             "#FF6666",
-                             overview ? "circle" : "border_thick",
-                             "#FF6666",
-                             overview ? 8 : 16,
-                             "#FF6666",
-                             4);
+            insertAnnotation(anno_name, 
+                             anno_pos,
+                             AnnotationColorError,
+                             overview ? ViewPointGenFeaturePoints::Symbol::Circle : ViewPointGenFeaturePoints::Symbol::BorderThick,
+                             AnnotationColorError,
+                             overview ? AnnotationPointSizeOverview : AnnotationPointSizeError,
+                             AnnotationColorError,
+                             AnnotationLineWidthError);
         }
 
-        assert (annos.at(anno_pos).at("name") == anno_name);
-        return annos.at(anno_pos);
+        assert (annotations_json.at(anno_pos).at(FieldName) == anno_name);
+        return annotations_json.at(anno_pos);
     }
     else
     {
         assert (type == AnnotationType::TypeOk);
         // should be last
 
-        if (!annos.size() || annos.back().at("name") != anno_name)
+        if (!annotations_json.size() || annotations_json.back().at(FieldName) != anno_name)
         {
-            //unsigned int anno_pos = annos.size() ? annos.size()-1 : 0;
+            //unsigned int anno_pos = annotations_json.size() ? annotations_json.size() - 1 : 0;
 
             // insert at last
-            insertAnnotation(anno_name, annos.size(),
-                             "#66FF66",
-                             overview ? "circle" : "border",
-                             "#66FF66",
-                             overview ? 8 : 10,
-                             "#66FF66",
-                             2);
+            insertAnnotation(anno_name, annotations_json.size(),
+                             AnnotationColorOk,
+                             overview ? ViewPointGenFeaturePoints::Symbol::Circle : ViewPointGenFeaturePoints::Symbol::Border,
+                             AnnotationColorOk,
+                             overview ? AnnotationPointSizeOverview : AnnotationPointSizeOk,
+                             AnnotationColorOk,
+                             AnnotationLineWidthOk);
         }
 
-        assert (annos.back().at("name") == anno_name);
-        return annos.back();
+        assert (annotations_json.back().at(FieldName) == anno_name);
+        return annotations_json.back();
     }
 }
 
-void Single::addAnnotationPos(nlohmann::json::object_t& viewable, 
+/**
+ * Adds a new position to the position annotation.
+*/
+void Single::addAnnotationPos(nlohmann::json& annotations_json, 
                               const EvaluationDetail::Position& pos,
                               AnnotationType type) const
 {
-    auto& coords = annotationPointCoords(viewable, type);
+    auto& coords = annotationPointCoords(annotations_json, type);
     coords.push_back(pos.asVector());
 }
 
-void Single::addAnnotationLine(nlohmann::json::object_t& viewable,
+/**
+ * Adds a new line to the line annotation.
+*/
+void Single::addAnnotationLine(nlohmann::json& annotations_json,
                                const EvaluationDetail::Position& pos0,
                                const EvaluationDetail::Position& pos1,
                                AnnotationType type) const
 {
-    auto& coords = annotationLineCoords(viewable, type);
+    auto& coords = annotationLineCoords(annotations_json, type);
     coords.push_back(pos0.asVector());
     coords.push_back(pos1.asVector());
 }
 
+/**
+*/
+void Single::addAnnotationDistance(nlohmann::json& annotations_json,
+                                   const EvaluationDetail& detail,
+                                   AnnotationType type,
+                                   bool add_line,
+                                   bool add_ref) const
+{
+    assert(detail.numPositions() >= 1);
+
+    addAnnotationPos(annotations_json, detail.position(0), type);
+
+    if (add_ref  && detail.numPositions() >= 2) addAnnotationPos(annotations_json, detail.position(1), type);
+    if (add_line && detail.numPositions() >= 2) addAnnotationLine(annotations_json, detail.position(0), detail.position(1), type);
+}
+
+/**
+*/
 std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
 {
     if (!requirement_)
@@ -518,6 +815,229 @@ Single::LayerDefinition Single::getGridLayerDefBinary() const
     def.render_settings.max_value = 1.0;
     
     return def;
+}
+
+/**
+ * Returns a detail key given an annotation id.
+ * Default behaviour will return a first level detail index.
+*/
+boost::optional<Base::DetailKey> Single::detailKey(const QVariant& annotation) const
+{
+    if (!annotation.isValid())
+        return {};
+
+    QPoint index = annotation.toPoint();
+    if (index.isNull())
+        return {};
+
+    DetailKey dkey = { index.x(), index.y() };
+    if (!detailKeyValid(dkey))
+        return {};
+
+    return dkey;
+}
+
+/**
+ * Iterates over all details for which skip_func does not return true, and applies the given functor func.
+ * Default behaviour will iterate over all first level details.
+*/
+void Single::iterateDetails(const DetailFunc& func,
+                            const DetailSkipFunc& skip_func) const
+{
+    assert(func);
+
+    auto nesting_mode = detailNestingMode();
+
+    const auto& details0 = getDetails();
+
+    if (nesting_mode == DetailNestingMode::Vector)
+    {
+        for (size_t i = 0; i < details0.size(); ++i)
+            if (!skip_func || !skip_func(details0[ i ]))
+                func(details0[ i ], nullptr, (int)i, -1);
+    }
+    else if (nesting_mode == DetailNestingMode::Nested)
+    {
+        for (size_t i = 0; i < details0.size(); ++i)
+        {
+            if (!details0[ i ].hasDetails())
+                continue;
+
+            const auto& details1 = details0[ i ].details();
+
+            for (size_t j = 0; j < details1.size(); ++j)
+                if (!skip_func || !skip_func(details1[ j ]))
+                    func(details1[ j ], &details0[ i ], (int)i, (int)j);
+        }
+    }
+    else if (nesting_mode == DetailNestingMode::SingleNested)
+    {
+        assert(details0.size() == 1);
+
+        if (details0[ 0 ].hasDetails())
+        {
+            const auto& details1 = details0[ 0 ].details();
+
+            for (size_t i = 0; i < details1.size(); ++i)
+                if (!skip_func || !skip_func(details1[ i ]))
+                    func(details1[ i ], &details0[ 0 ], 0, (int)i);
+        }
+    }
+}
+
+/**
+*/
+std::unique_ptr<nlohmann::json::object_t> Single::createBaseViewable() const
+{
+    return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+}
+
+/**
+*/
+Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options) const
+{
+    assert(options.valid());
+
+    Base::ViewableInfo info;
+    info.viewable_type = options.viewable_type;
+
+    if (options.viewable_type == ViewableType::Overview)
+    {
+        //overview => iterate over failed details and compute bounds
+        auto skip_func = [ this ] (const EvaluationDetail& detail)
+        {
+            return this->detailIsOk(detail);
+        };
+
+        bool has_pos = false;
+        double lat_min, lat_max, lon_min, lon_max;
+
+        auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+        {
+            assert(detail.numPositions() >= 1);
+
+            if (has_pos)
+            {
+                lat_min = min(lat_min, detail.position(0).latitude_);
+                lat_max = max(lat_max, detail.position(0).latitude_);
+
+                lon_min = min(lon_min, detail.position(0).longitude_);
+                lon_max = max(lon_max, detail.position(0).longitude_);
+            }
+            else // tst pos always set
+            {
+                lat_min = detail.position(0).latitude_;
+                lat_max = detail.position(0).latitude_;
+
+                lon_min = detail.position(0).longitude_;
+                lon_max = detail.position(0).longitude_;
+
+                has_pos = true;
+            }
+        };
+
+        iterateDetails(func, skip_func);
+
+        if (has_pos)
+            info.bounds = QRectF(lat_min, lon_min, lat_max - lat_min, lon_max - lon_min);
+    }
+    else if (options.viewable_type == ViewableType::Highlight)
+    {
+        //highlight single detail
+        const auto& d = getDetail(options.detail_key.value());
+
+        assert(d.numPositions() >= 1);
+
+        info.bounds    = QRectF(d.position(0).latitude_, d.position(0).longitude_, 1, 1);
+        info.timestamp = d.timestamp();
+    }
+    else
+    {
+        bool valid_viewable_type = false;
+        assert(valid_viewable_type);
+    }
+
+    return info;
+}
+
+/**
+*/
+void Single::createSumOverviewAnnotations(nlohmann::json& annotations_json,
+                                          bool add_ok_details_to_overview) const
+{
+    createTargetAnnotations(annotations_json, TargetAnnotationType::SumOverview, {}, add_ok_details_to_overview);
+}
+
+/**
+*/
+void Single::createTargetAnnotations(nlohmann::json& annotations_json,
+                                     TargetAnnotationType type,
+                                     const boost::optional<DetailKey>& detail_key,
+                                     bool add_ok_details_to_overview) const
+{
+    if (type == TargetAnnotationType::SumOverview)
+    {
+        //add sum overview annotations
+        auto skip_func = [ & ] (const EvaluationDetail& detail)
+        {
+            //skip none?
+            if (add_ok_details_to_overview)
+                return false;
+
+            //skip ok details
+            return detailIsOk(detail);
+        };
+
+        auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+        {
+            addAnnotationForDetail(annotations_json, detail, TargetAnnotationType::SumOverview, detailIsOk(detail));
+        };
+
+        iterateDetails(func, skip_func);
+
+        return;
+    }
+    else if (type == TargetAnnotationType::TargetOverview)
+    {
+        //add target overview annotations
+        auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+        {
+            addAnnotationForDetail(annotations_json, detail, TargetAnnotationType::TargetOverview, detailIsOk(detail));
+        };
+
+        iterateDetails(func);
+    }
+    else if (type == TargetAnnotationType::Highlight)
+    {
+        assert(detail_key.has_value());
+
+        //add target overview annotations?
+        if (addOverviewAnnotationsToDetail())
+        {
+            auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+            {
+                addAnnotationForDetail(annotations_json, detail, TargetAnnotationType::TargetOverview, detailIsOk(detail));
+            };
+
+            iterateDetails(func);
+        }
+
+        //add detail annotation
+        const auto& d = getDetail(detail_key.value());
+        addAnnotationForDetail(annotations_json, d, TargetAnnotationType::Highlight, detailIsOk(d));
+    }
+}
+
+/**
+*/
+void Single::createAnnotations(nlohmann::json& annotations_json, const AnnotationOptions& options) const
+{
+    assert (options.valid());
+
+    if (options.viewable_type == ViewableType::Overview)
+        createTargetAnnotations(annotations_json, TargetAnnotationType::TargetOverview);
+    else if (options.viewable_type == ViewableType::Highlight)
+        createTargetAnnotations(annotations_json, TargetAnnotationType::Highlight, options.detail_key);
 }
 
 }

@@ -20,6 +20,8 @@
 #include "eval/results/base.h"
 #include "view/gridview/grid2d_defs.h"
 
+#include <fstream>
+
 class Grid2D;
 
 namespace EvaluationRequirementResult
@@ -27,9 +29,15 @@ namespace EvaluationRequirementResult
 
 class Single;
 
+/**
+*/
 class Joined : public Base
 {
 public:
+    typedef Info SectorInfo;
+
+    typedef std::function<void(const std::shared_ptr<Single>&)> SingleResultFunc;
+
     Joined(const std::string& type, 
            const std::string& result_id,
            std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -39,21 +47,30 @@ public:
 
     virtual BaseType baseType() const override { return BaseType::Joined; }
 
-    void add(std::shared_ptr<Single> other);
+    void clearResults();
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override = 0 ;
+    void addSingleResult(std::shared_ptr<Single> other);
 
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override final;
-    std::unique_ptr<nlohmann::json::object_t> viewableData();
+    void addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
 
-    std::vector<std::shared_ptr<Single>>& results();
+    bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+                          const QVariant& annotation) const override final;
+    std::unique_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+                                                           const QVariant& annotation) const override final;
+    std::unique_ptr<nlohmann::json::object_t> viewableData() const override final;
+
+    bool hasReference (const EvaluationResultsReport::SectionContentTable& table, 
+                       const QVariant& annotation) const override final;
+    std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
+                          const QVariant& annotation) const override final;
+
+    std::vector<std::shared_ptr<Single>>& singleResults();
 
     void updateToChanges();
 
-    unsigned int numResults();
-    unsigned int numUsableResults();
-    unsigned int numUnusableResults();
+    unsigned int numSingleResults() const;
+    unsigned int numUsableSingleResults() const;
+    unsigned int numUnusableSingleResults() const;
 
     static const std::string SectorOverviewID;
     static const int         SectorOverviewRenderDelayMSec;
@@ -67,25 +84,51 @@ protected:
         GridOrAnnotations
     };
 
-    std::vector<std::shared_ptr<Single>> results_;
-
-    std::unique_ptr<Grid2D> grid_;
-
-    void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
-    void addOverview (EvaluationResultsReport::Section& section,
-                      const std::string& name = "Sector Overview");
-
     //virtual void join_impl(std::shared_ptr<Single> other) = 0;
-    virtual void updateToChanges_impl() = 0;
+    virtual void clearResults_impl() = 0;
+    virtual void accumulateSingleResult(const std::shared_ptr<Single>& single_result, 
+                                        bool first,
+                                        bool last) = 0;
+    virtual unsigned int numUpdates() const = 0;
 
-    std::unique_ptr<nlohmann::json::object_t> createViewable() const;
+    bool exportAsCSV() const;
+    virtual bool canExportCSV() const { return false; }
+    virtual bool exportAsCSV(std::ofstream& strm) const { return false; }
+
+    std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
+    ViewableInfo createViewableInfo(const AnnotationOptions& options) const override final;
+    void createAnnotations(nlohmann::json& annotations, 
+                           const AnnotationOptions& options) const override final;
 
     virtual OverviewMode overviewMode() const { return OverviewMode::GridOrAnnotations; }
 
-    void createGrid(const grid2d::GridResolution& resolution);
-    void addGridToViewData(nlohmann::json::object_t& view_data);
-    void addAnnotationsToViewData(nlohmann::json::object_t& view_data);
-    void addAnnotationsFromSingles(nlohmann::json::object_t& viewable_ref);
+    virtual std::vector<SectorInfo> sectorInfosCommon() const;
+    std::vector<SectorInfo> sectorConditionInfos() const;
+
+    virtual std::vector<SectorInfo> sectorInfos() const = 0;
+
+    bool resultUsed(const std::shared_ptr<Single>& result) const;
+    void iterateSingleResults(const SingleResultFunc& func,
+                              const SingleResultFunc& func_used,
+                              const SingleResultFunc& func_unused) const;
+
+    std::vector<std::shared_ptr<Single>> results_;
+
+private:
+    void addOverview (EvaluationResultsReport::Section& section,
+                      const std::string& name = "Sector Overview");
+
+    void addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addSectorDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
+    void createGrid(const grid2d::GridResolution& resolution) const;
+    void addOverviewGrid(nlohmann::json& annotations_json) const;
+    void addOverviewAnnotations(nlohmann::json& annotations_json) const;
+
+    unsigned int num_targets_        = 0;
+    unsigned int num_failed_targets_ = 0;
+
+    mutable std::unique_ptr<Grid2D> grid_;
 };
 
 }

@@ -16,7 +16,6 @@
  */
 
 #include "correct_period.h"
-#include "eval/requirement/mode_c/correct_period.h"
 
 namespace EvaluationRequirementResult
 {
@@ -41,27 +40,14 @@ SingleModeCCorrectPeriod::SingleModeCCorrectPeriod(const std::string& result_typ
                                                    const std::vector<dbContent::TargetPosition>& ref_updates)
 :   SingleIntervalBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details, sum_uis, missed_uis, ref_periods, ref_updates)
 {
+    updateResult();
 }
 
 /**
 */
 std::shared_ptr<Joined> SingleModeCCorrectPeriod::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedModeCCorrectPeriod> ("JoinedModeCCorrectPeriod", result_id, requirement_, sector_layer_, eval_man_);
-}
-
-/**
-*/
-std::string SingleModeCCorrectPeriod::probabilityName() const
-{
-    return EvaluationRequirement::ModeCCorrectPeriod::probabilityName();
-}
-
-/**
-*/
-std::string SingleModeCCorrectPeriod::probabilityDescription() const
-{
-    return EvaluationRequirement::ModeCCorrectPeriod::probabilityDescription();
+    return std::make_shared<JoinedModeCCorrectPeriod> ("JoinedModeCCorrectPeriod", result_id, requirement_, sector_layer_, eval_man_);
 }
 
 /********************************************************************************
@@ -77,20 +63,6 @@ JoinedModeCCorrectPeriod::JoinedModeCCorrectPeriod(const std::string& result_typ
                                                    EvaluationManager& eval_man)
 :   JoinedIntervalBase(result_type, result_id, requirement, sector_layer, eval_man)
 {
-}
-
-/**
-*/
-std::string JoinedModeCCorrectPeriod::probabilityName() const
-{
-    return EvaluationRequirement::ModeCCorrectPeriod::probabilityName();
-}
-
-/**
-*/
-std::string JoinedModeCCorrectPeriod::probabilityDescription() const
-{
-    return EvaluationRequirement::ModeCCorrectPeriod::probabilityDescription();
 }
 
 } // namespace EvaluationRequirementResult

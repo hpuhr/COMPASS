@@ -33,7 +33,7 @@ namespace EvaluationRequirement
 
 GenericBase::GenericBase(const std::string& name, const std::string& short_name, const std::string& group_name,
                                float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man)
 {
 }
 
@@ -42,24 +42,14 @@ std::string GenericBase::valueName() const
     return value_name_;
 }
 
-std::string GenericBase::valueNamePlural() const
-{
-    return value_name_plural_;
-}
-
-std::string GenericBase::probabilityName() const
-{
-    return probability_name_;
-}
-
-std::string GenericBase::probabilityNameShort() const
-{
-    return probability_name_short_;
-}
-
 std::string GenericBase::valueNameShort() const
 {
     return value_name_short_;
+}
+
+std::string GenericBase::valueNamePlural() const
+{
+    return value_name_plural_;
 }
 
 //------------------------------------------------
@@ -438,7 +428,5 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericDouble::evaluate (
         eval_man_, details, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
         num_unknown, num_correct, num_false);
 }
-
-
 
 }

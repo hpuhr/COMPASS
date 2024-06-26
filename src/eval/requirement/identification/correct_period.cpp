@@ -133,23 +133,23 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrectPeriod
 
 /**
  */
-std::string IdentificationCorrectPeriod::probabilityName(IdentificationType identification_type)
+std::string IdentificationCorrectPeriod::probabilityNameShort(IdentificationType identification_type)
 {
     switch(identification_type)
     {
         case IdentificationType::AircraftAddress:
-            return "PCAAD [%]";
+            return "PCAAD";
         case IdentificationType::AircraftID:
-            return "PCAIDD [%]";
+            return "PCAIDD";
         case IdentificationType::ModeA:
-            return "PCMAD [%]";
+            return "PCMAD";
     }
     return "";
 }
 
 /**
  */
-std::string IdentificationCorrectPeriod::probabilityDescription(IdentificationType identification_type)
+std::string IdentificationCorrectPeriod::probabilityName(IdentificationType identification_type)
 {
     return "Probability of Correct " + identificationName(identification_type) + " Detection";
 }
@@ -168,6 +168,20 @@ std::string IdentificationCorrectPeriod::identificationName(IdentificationType i
             return "Mode3A";
     }
     return "";
+}
+
+/**
+ */
+std::string IdentificationCorrectPeriod::probabilityNameShort() const
+{
+    return IdentificationCorrectPeriod::probabilityNameShort(identification_type_);
+}
+
+/**
+ */
+std::string IdentificationCorrectPeriod::probabilityName() const
+{
+    return IdentificationCorrectPeriod::probabilityName(identification_type_);
 }
 
 /********************************************************************************************************
@@ -217,7 +231,7 @@ BaseConfigWidget* IdentificationCorrectPeriodConfig::createWidget_impl()
 */
 std::string IdentificationCorrectPeriodConfig::probabilityDescription() const
 {
-    return IdentificationCorrectPeriod::probabilityDescription(identification_type_);
+    return IdentificationCorrectPeriod::probabilityName(identification_type_);
 }
 
 /********************************************************************************************************
@@ -229,7 +243,7 @@ std::string IdentificationCorrectPeriodConfig::probabilityDescription() const
 IdentificationCorrectPeriodConfigWidget::IdentificationCorrectPeriodConfigWidget(IdentificationCorrectPeriodConfig& cfg)
 :   IntervalBaseConfigWidget(cfg)
 {
-    prob_edit_->setToolTip(QString::fromStdString(IdentificationCorrectPeriod::probabilityDescription(config().identificationType())));
+    prob_edit_->setToolTip(QString::fromStdString(IdentificationCorrectPeriod::probabilityName(config().identificationType())));
 
     identification_type_combo_ = new QComboBox;
     identification_type_combo_->addItem("Aircraft Address", QVariant((int)IdentificationCorrectPeriodConfig::IdentificationType::AircraftAddress));
@@ -262,7 +276,7 @@ void IdentificationCorrectPeriodConfigWidget::identificationTypeChanged()
 
     config().identificationType(id_type);
 
-    prob_edit_->setToolTip(QString::fromStdString(IdentificationCorrectPeriod::probabilityDescription(config().identificationType())));
+    prob_edit_->setToolTip(QString::fromStdString(IdentificationCorrectPeriod::probabilityName(config().identificationType())));
 }
 
 } // namespace EvaluationRequirement

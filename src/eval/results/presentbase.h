@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "eval/results/single.h"
+#include "eval/results/probabilitybase.h"
 #include "eval/results/joined.h"
 
 #include <memory>
@@ -37,7 +37,43 @@ namespace EvaluationRequirementResult
 
 /**
 */
-class SinglePresentBase : public Single
+class PresentBase
+{
+public:
+    PresentBase(const std::string& no_ref_value_name);
+    PresentBase(int num_updates, 
+                int num_no_ref_pos, 
+                int num_pos_outside, 
+                int num_pos_inside,
+                int num_no_ref_val, 
+                int num_present, 
+                int num_missing,
+                const std::string& no_ref_value_name);
+    virtual ~PresentBase() = default;
+
+    int numUpdates() const;
+    int numNoRefPos() const;
+    int numPosOutside() const;
+    int numPosInside() const;
+    int numNoRefValue() const;
+    int numPresent() const;
+    int numMissing() const;
+
+protected:
+    int num_updates_     {0};
+    int num_no_ref_pos_  {0};
+    int num_pos_outside_ {0};
+    int num_pos_inside_  {0};
+    int num_no_ref_val_  {0}; // !ref
+    int num_present_     {0}; // ref + tst
+    int num_missing_     {0}; // ref + !tst
+
+    std::string no_ref_value_name_;
+};
+
+/**
+*/
+class SinglePresentBase : public PresentBase, public SingleProbabilityBase
 {
 public:
     SinglePresentBase(const std::string& result_type,
@@ -54,15 +90,11 @@ public:
                       int num_pos_inside,
                       int num_no_ref_val, 
                       int num_present, 
-                      int num_missing);
+                      int num_missing,
+                      const std::string& no_ref_value_name);
 
-    int numUpdates() const;
-    int numNoRefPos() const;
-    int numPosOutside() const;
-    int numPosInside() const;
-    int numNoRefValue() const;
-    int numPresent() const;
-    int numMissing() const;
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     enum DetailKey
     {
@@ -79,37 +111,46 @@ public:
     };
 
 protected:
-    int num_updates_     {0};
-    int num_no_ref_pos_  {0};
-    int num_pos_outside_ {0};
-    int num_pos_inside_  {0};
-    int num_no_ref_val_  {0}; // !ref
-    int num_present_     {0}; // ref + tst
-    int num_missing_     {0}; // ref + !tst
+    virtual boost::optional<double> computeResult_impl() const override;
+    virtual unsigned int numIssues() const override;
 
-    boost::optional<float> p_present_;
+    virtual std::vector<std::string> targetTableHeadersCustom() const override;
+    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual std::vector<TargetInfo> targetInfos() const override;
+    virtual std::vector<std::string> detailHeaders() const override;
+    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
+                                               const EvaluationDetail* parent_detail) const override;
+
+    virtual bool detailIsOk(const EvaluationDetail& detail) const override;
+    virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                        const EvaluationDetail& detail, 
+                                        TargetAnnotationType type,
+                                        bool is_ok) const override;
+private:
+    std::string no_ref_value_name_;
 };
 
 /**
 */
-class JoinedPresentBase : public Joined
+class JoinedPresentBase : public PresentBase, public JoinedProbabilityBase
 {
 public:
     JoinedPresentBase(const std::string& result_type,
                       const std::string& result_id, 
                       std::shared_ptr<EvaluationRequirement::Base> requirement,
                       const SectorLayer& sector_layer, 
-                      EvaluationManager& eval_man);
-protected:
-    int num_updates_     {0};
-    int num_no_ref_pos_  {0};
-    int num_pos_outside_ {0};
-    int num_pos_inside_  {0};
-    int num_no_ref_val_  {0}; // !ref
-    int num_present_     {0}; // ref + tst
-    int num_missing_     {0}; // ref + !tst
+                      EvaluationManager& eval_man,
+                      const std::string& no_ref_value_name);
 
-    boost::optional<float> p_present_;
+protected:
+    virtual unsigned int numIssues() const override;
+    virtual unsigned int numUpdates() const override;
+
+    virtual void clearResults_impl() override;
+    virtual void accumulateSingleResult(const std::shared_ptr<Single>& single_result) override;
+    virtual boost::optional<double> computeResult_impl() const override;
+
+    virtual std::vector<SectorInfo> sectorInfos() const override;
 };
 
 }

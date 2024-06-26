@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "eval/results/single.h"
+#include "eval/results/probabilitybase.h"
 #include "eval/results/joined.h"
 #include "timeperiod.h"
 
@@ -30,7 +30,28 @@ namespace EvaluationRequirementResult
 
 /**
 */
-class SingleIntervalBase : public Single
+class IntervalBase
+{
+public:
+    IntervalBase() = default;
+    IntervalBase(int sum_uis, 
+                 int missed_uis)
+    :   sum_uis_   (sum_uis)
+    ,   missed_uis_(missed_uis)
+    {}
+    virtual ~IntervalBase() = default;
+
+    int sumUIs() const { return sum_uis_; }
+    int missedUIs() const { return missed_uis_; }
+
+protected:
+    int sum_uis_    {0};
+    int missed_uis_ {0};
+};
+
+/**
+*/
+class SingleIntervalBase : public IntervalBase, public SingleProbabilityBase
 {
 public:
     SingleIntervalBase(const std::string& result_type, 
@@ -46,20 +67,8 @@ public:
                        TimePeriodCollection ref_periods,
                        const std::vector<dbContent::TargetPosition>& ref_updates);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
-
-    int sumUIs() const;
-    int missedUIs() const;
-
-    virtual bool hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    virtual bool hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::string reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     enum DetailKey
     {
@@ -71,50 +80,31 @@ public:
         RefUpdateEndIndex    //unsigned int
     };
 
-    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
-
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
-
-    bool hasFailed() const;
-
 protected:
-    virtual std::vector<std::string> targetTableColumns() const;
-    virtual std::vector<QVariant> targetTableValues() const;
-    virtual std::vector<ReportParam> detailsOverviewDescriptions() const;
-    virtual std::vector<std::string> detailsTableColumns() const;
-    virtual std::vector<QVariant> detailsTableValues(const EvaluationDetail& detail) const;
+    virtual boost::optional<double> computeResult_impl() const override;
+    virtual unsigned int numIssues() const override;
 
-    virtual std::string probabilityName() const = 0;
-    virtual std::string probabilityDescription() const = 0;
+    virtual std::vector<std::string> targetTableHeadersCustom() const override;
+    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual std::vector<TargetInfo> targetInfos() const override;
+    virtual std::vector<std::string> detailHeaders() const override;
+    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
+                                               const EvaluationDetail* parent_detail) const override;
 
-    virtual unsigned int sortColumn() const;
-
-    void updateProbability();
-
-    void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
-    void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void reportDetails(EvaluationResultsReport::Section& utn_req_section);
-
-    void addAnnotations(nlohmann::json::object_t& viewable, const EvaluationDetail& detail);
-
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (const EvaluationDetail* detail = nullptr);
-
-    QVariant probabilityVar() const;
-
-    int sum_uis_    {0};
-    int missed_uis_ {0};
+    virtual bool detailIsOk(const EvaluationDetail& detail) const override;
+    virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                        const EvaluationDetail& detail, 
+                                        TargetAnnotationType type,
+                                        bool is_ok) const override;
+    
 
     TimePeriodCollection                   ref_periods_;
     std::vector<dbContent::TargetPosition> ref_updates_;
-
-    boost::optional<float> probability_;
 };
 
 /**
 */
-class JoinedIntervalBase : public Joined
+class JoinedIntervalBase : public IntervalBase, public JoinedProbabilityBase
 {
 public:
     JoinedIntervalBase(const std::string& result_type, 
@@ -122,35 +112,15 @@ public:
                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                        const SectorLayer& sector_layer, 
                        EvaluationManager& eval_man);
-
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
-
-    virtual bool hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    virtual bool hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::string reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
 protected:
-    void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual unsigned int numIssues() const override;
+    virtual unsigned int numUpdates() const override;
 
-    virtual void updateToChanges_impl() override;
+    virtual void clearResults_impl() override;
+    virtual void accumulateSingleResult(const std::shared_ptr<Single>& single_result) override;
+    virtual boost::optional<double> computeResult_impl() const override;
 
-    virtual std::vector<ReportParam> detailsOverviewDescriptions() const;
-
-    virtual std::string probabilityName() const = 0;
-    virtual std::string probabilityDescription() const = 0;
-
-    unsigned int sum_uis_    {0};
-    unsigned int missed_uis_ {0};
-
-    unsigned int num_single_targets_ {0};
-    unsigned int num_failed_single_targets_ {0};
-
-    boost::optional<float> probability_;
+    virtual std::vector<SectorInfo> sectorInfos() const override;
 };
 
 } // EvaluationRequirementResult

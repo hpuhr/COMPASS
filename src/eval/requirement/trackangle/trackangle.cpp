@@ -43,14 +43,14 @@ TrackAngle::TrackAngle(
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
                     float threshold, bool use_minimum_speed, float minimum_speed,
         COMPARISON_TYPE threshold_value_check_type, bool failed_values_of_interest)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
       threshold_(threshold),
       use_minimum_speed_(use_minimum_speed), minimum_speed_(minimum_speed),
       threshold_value_check_type_(threshold_value_check_type),
       failed_values_of_interest_(failed_values_of_interest)
 {
-
 }
+
 float TrackAngle::threshold() const
 {
     return threshold_;
@@ -374,7 +374,6 @@ dbContent::TargetPosition TrackAngle::getPositionAtAngle(
 
     tie (ok, new_pos.latitude_, new_pos.longitude_) = trafo_.wgsAddCartOffset(org.latitude_, org.longitude_, x, y);
     assert (ok);
-
 
     return new_pos;
 }

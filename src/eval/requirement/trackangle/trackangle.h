@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTRACKANGLE_H
-#define EVALUATIONREQUIREMENTRACKANGLE_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 #include "transformation.h"
@@ -45,6 +44,9 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PCP"; }
+    std::string probabilityName() const override final { return "Probability of passed comparison"; }
+
 protected:
     float threshold_ {15.0};
 
@@ -62,5 +64,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTRACKANGLE_H

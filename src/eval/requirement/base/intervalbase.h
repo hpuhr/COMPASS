@@ -110,7 +110,7 @@ public:
     IntervalBase(const std::string& name, 
                  const std::string& short_name, 
                  const std::string& group_name,
-                 float prob, 
+                 double prob, 
                  COMPARISON_TYPE prob_check_type, 
                  EvaluationManager& eval_man,
                  float update_interval_s, 
@@ -131,8 +131,6 @@ public:
     const boost::optional<float>& minGapLength() const { return min_gap_length_s_; }
     const boost::optional<float>& maxGapLength() const { return max_gap_length_s_; }
     const boost::optional<float>& missTolerance() const { return miss_tolerance_s_; }
-
-    const boost::optional<bool>& mustHoldForAnyTarget() const { return must_hold_for_any_target_; }
 
     float missThreshold() const;
 
@@ -170,7 +168,6 @@ private:
     boost::optional<float> max_gap_length_s_;
     boost::optional<float> miss_tolerance_s_;
     boost::optional<float> min_ref_period_s_;
-    boost::optional<bool>  must_hold_for_any_target_;
 };
 
 } // namespace EvaluationRequirement

@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "eval/results/single.h"
+#include "eval/results/probabilitybase.h"
 #include "eval/results/joined.h"
 #include "dbcontent/target/targetposition.h"
 
@@ -40,7 +40,7 @@ namespace EvaluationRequirementResult
 
 /**
 */
-class SingleDubiousBase : public Single
+class SingleDubiousBase : public SingleProbabilityBase
 {
 public:
     /**
@@ -65,8 +65,8 @@ public:
         bool                               has_mode_s             = false;
         bool                               left_sector            = false;
         bool                               is_dubious             = false;
-        dbContent::TargetPosition           pos_begin;
-        dbContent::TargetPosition           pos_last;
+        dbContent::TargetPosition          pos_begin;
+        dbContent::TargetPosition          pos_last;
         EvaluationDetails                  details;
         std::map<std::string, std::string> dubious_reasons;
     };
@@ -113,8 +113,6 @@ public:
     static EvaluationDetails generateDetails(const std::vector<DetailData>& detail_data);
 
 protected:
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
-
     static std::string dubiousReasonsString(const EvaluationDetailComments& comments);
 
     unsigned int num_updates_            {0};
@@ -122,7 +120,7 @@ protected:
     unsigned int num_pos_inside_         {0};
     unsigned int num_pos_inside_dubious_ {0};
 
-    boost::optional<float> p_dubious_update_;
+    mutable boost::optional<double> p_dubious_update_;
 };
 
 /**

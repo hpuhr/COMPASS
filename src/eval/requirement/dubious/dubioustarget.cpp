@@ -37,33 +37,58 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-DubiousTarget::DubiousTarget(
-        const std::string& name, const std::string& short_name, const std::string& group_name,
-        float minimum_comparison_time, float maximum_comparison_time,
-        bool mark_primary_only, bool use_min_updates, unsigned int min_updates,
-        bool use_min_duration, float min_duration,
-        bool use_max_groundspeed, float max_groundspeed_kts,
-        bool use_max_acceleration, float max_acceleration,
-        bool use_max_turnrate, float max_turnrate,
-        bool use_rocd, float max_rocd, float dubious_prob,
-        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
-      minimum_comparison_time_(minimum_comparison_time), maximum_comparison_time_(maximum_comparison_time),
-      mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
-      use_min_duration_(use_min_duration), min_duration_(Time::partialSeconds(min_duration)),
-      use_max_groundspeed_(use_max_groundspeed), max_groundspeed_kts_(max_groundspeed_kts),
-      use_max_acceleration_(use_max_acceleration), max_acceleration_(max_acceleration),
-      use_max_turnrate_(use_max_turnrate), max_turnrate_(max_turnrate),
-      use_rocd_(use_rocd), max_rocd_(max_rocd), dubious_prob_(dubious_prob)
+/**
+*/
+DubiousTarget::DubiousTarget(const std::string& name, 
+                             const std::string& short_name, 
+                             const std::string& group_name,
+                             float minimum_comparison_time, 
+                             float maximum_comparison_time,
+                             bool mark_primary_only, 
+                             bool use_min_updates, 
+                             unsigned int min_updates,
+                             bool use_min_duration, 
+                             float min_duration,
+                             bool use_max_groundspeed, 
+                             float max_groundspeed_kts,
+                             bool use_max_acceleration, 
+                             float max_acceleration,
+                             bool use_max_turnrate, 
+                             float max_turnrate,
+                             bool use_rocd, 
+                             float max_rocd, 
+                             float dubious_prob,
+                             float prob, 
+                             COMPARISON_TYPE prob_check_type, 
+                             EvaluationManager& eval_man)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
+      minimum_comparison_time_(minimum_comparison_time), 
+      maximum_comparison_time_(maximum_comparison_time),
+      mark_primary_only_(mark_primary_only), 
+      use_min_updates_(use_min_updates), 
+      min_updates_(min_updates),
+      use_min_duration_(use_min_duration), 
+      min_duration_(Time::partialSeconds(min_duration)),
+      use_max_groundspeed_(use_max_groundspeed), 
+      max_groundspeed_kts_(max_groundspeed_kts),
+      use_max_acceleration_(use_max_acceleration), 
+      max_acceleration_(max_acceleration),
+      use_max_turnrate_(use_max_turnrate), 
+      max_turnrate_(max_turnrate),
+      use_rocd_(use_rocd), 
+      max_rocd_(max_rocd), 
+      dubious_prob_(dubious_prob)
 {
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
-        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
-        const SectorLayer& sector_layer)
+/**
+*/
+std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (const EvaluationTargetData& target_data, 
+                                                                              std::shared_ptr<Base> instance,
+                                                                              const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementDubiousTarget '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " mark_primary_only " << mark_primary_only_ << " prob " << prob_
+           << " mark_primary_only " << mark_primary_only_ << " prob " << threshold()
            << " use_min_updates " << use_min_updates_ << " min_updates " << min_updates_
            << " use_min_duration " << use_min_duration_ << " min_duration " << min_duration_;
 
@@ -376,53 +401,78 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
                 eval_man_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious);
 }
 
+/**
+*/
 bool DubiousTarget::markPrimaryOnly() const
 {
     return mark_primary_only_;
 }
 
+/**
+*/
 bool DubiousTarget::useMinUpdates() const
 {
     return use_min_updates_;
 }
 
+/**
+*/
 unsigned int DubiousTarget::minUpdates() const
 {
     return min_updates_;
 }
 
+/**
+*/
 bool DubiousTarget::useMinDuration() const
 {
     return use_min_duration_;
 }
 
+/**
+*/
 float DubiousTarget::minDuration() const
 {
     return Time::partialSeconds(min_duration_);
 }
 
+/**
+*/
 bool DubiousTarget::useMaxAcceleration() const
 {
     return use_max_acceleration_;
 }
+
+/**
+*/
 float DubiousTarget::maxAcceleration() const
 {
     return max_acceleration_;
 }
 
+/**
+*/
 bool DubiousTarget::useMaxTurnrate() const
 {
     return use_max_turnrate_;
 }
+
+/**
+*/
 float DubiousTarget::maxTurnrate() const
 {
     return max_turnrate_;
 }
 
+/**
+*/
 bool DubiousTarget::useROCD() const
 {
     return use_rocd_;
 }
+
+/**
+*/
 float DubiousTarget::maxROCD() const
 {
     return max_rocd_;

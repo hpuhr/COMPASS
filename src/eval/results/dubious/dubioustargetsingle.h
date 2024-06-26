@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENSINGLEDUBIOSTARGET_H
-#define EVALUATIONREQUIREMENSINGLEDUBIOSTARGET_H
+#pragma once
 
 #include "eval/results/dubious/dubiousbase.h"
 
@@ -28,6 +27,8 @@ namespace EvaluationRequirement
 namespace EvaluationRequirementResult
 {
 
+/**
+*/
 class SingleDubiousTarget : public SingleDubiousBase
 {
 public:
@@ -43,39 +44,31 @@ public:
                         unsigned int num_pos_inside, 
                         unsigned int num_pos_inside_dubious);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
-
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
-
-    virtual bool hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    virtual bool hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::string reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    EvaluationRequirement::DubiousTarget* req ();
-
-    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
 
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
     virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
 protected:
-    void update();
+    EvaluationRequirement::DubiousTarget* req ();
 
-    void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
-    void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
-    void reportDetails(EvaluationResultsReport::Section& utn_req_section);
+    virtual boost::optional<double> computeResult_impl() const override;
+    virtual bool hasIssues_impl() const override;
 
-    boost::optional<float> p_dubious_target_;
+    virtual std::vector<std::string> targetTableHeadersCustom() const override;
+    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual std::vector<TargetInfo> targetInfos() const override;
+    virtual std::vector<std::string> detailHeaders() const override;
+    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
+                                               const EvaluationDetail* parent_detail) const override;
+
+    virtual bool detailIsOk(const EvaluationDetail& detail) const override;
+    virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                        const EvaluationDetail& detail, 
+                                        TargetAnnotationType type,
+                                        bool is_ok) const override;
+
+    virtual DetailNestingMode detailNestingMode() const { return DetailNestingMode::SingleNested; } 
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENSINGLEDUBIOSTARGET_H

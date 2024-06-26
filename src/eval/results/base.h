@@ -15,13 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTRESULTBASE_H
-#define EVALUATIONREQUIREMENTRESULTBASE_H
+#pragma once
 
 #include "evaluationdetail.h"
 #include "eval/results/evaluationdetail.h"
 
 #include <QVariant>
+#include <QRectF>
 
 #include "json.hpp"
 
@@ -45,15 +45,36 @@ namespace EvaluationResultsReport {
 namespace EvaluationRequirementResult
 {
 
+/**
+*/
 class Base
 {
 public:
     typedef std::vector<EvaluationDetail> EvaluationDetails;
+    typedef std::array<int, 2>            DetailKey;
 
     enum class BaseType
     {
-        Single = 0,
-        Joined
+        Single = 0,    // target results (for specific utn)
+        Joined         // sum results (for specific requirement in specific sector)
+    };
+
+    /**
+    */
+    struct Info
+    {
+        Info() {}
+        Info(const QString& name,
+             const QString& comment,
+             const QVariant& value)
+        :   info_name   (name   )
+        ,   info_comment(comment)
+        ,   info_value  (value  )
+        {}
+
+        QString  info_name;
+        QString  info_comment;
+        QVariant info_value;
     };
 
     Base(const std::string& type, 
@@ -79,19 +100,38 @@ public:
     bool use() const;
     void use(bool use);
 
-    virtual bool hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
+    const boost::optional<double>& result() const;
 
-    virtual bool hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
-    virtual std::string reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
+    virtual void updateResult();
+    bool resultUsable() const;
+    bool hasFailed() const;
+    bool hasIssues() const;
+    bool isIgnored() const;
+
+    virtual unsigned int numIssues() const = 0;
+
+    QVariant resultValue() const;
+    QVariant resultValueOptional(const boost::optional<double>& value) const;
+    virtual QVariant resultValue(double value) const;
+
+    /// checks if the result can generate viewable data for the given table and annotation index
+    virtual bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+                                  const QVariant& annotation) const = 0;
+    /// creates suitable viewable data for the given table and annotation index
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+                                                                   const QVariant& annotation) const = 0;
+    /// creates overview viewable data
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableData() const = 0;
+
+    virtual bool hasReference(const EvaluationResultsReport::SectionContentTable& table, 
+                              const QVariant& annotation) const = 0;
+    virtual std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
+                                  const QVariant& annotation) const = 0;
 
     size_t numDetails() const;
     const EvaluationDetails& getDetails() const;
     const EvaluationDetail& getDetail(int idx) const;
+    const EvaluationDetail& getDetail(const DetailKey& key) const;
 
     const SectorLayer& sectorLayer() const { return sector_layer_; } 
 
@@ -115,21 +155,86 @@ protected:
         QVariant    value;
     };
 
+    enum class ViewableType
+    {
+        Overview = 0,  // viewable represents an overview over the result data
+        Highlight      // viewable represents a highlighted result detail
+    };
+
+    /**
+     * Options for creating result annotations.
+    */
+    struct AnnotationOptions
+    {
+        /// configure as result overview
+        AnnotationOptions& overview() 
+        { 
+            viewable_type = ViewableType::Overview; 
+            return *this; 
+        }
+        /// configure as highlighted result detail
+        AnnotationOptions& highlight(DetailKey dkey) 
+        { 
+            viewable_type = ViewableType::Highlight; 
+            detail_key    = dkey;
+            return *this; 
+        }
+
+        bool valid() const
+        {
+            if (viewable_type == ViewableType::Highlight)
+                return detail_key.has_value();
+            return true;
+        }
+
+        ViewableType               viewable_type = ViewableType::Overview;
+        boost::optional<DetailKey> detail_key;
+    };
+
+    /**
+    */
+    struct ViewableInfo
+    {
+        ViewableType             viewable_type; // viewable type
+        QRectF                   bounds;        // viewable bounds (e.g. for viewpoint region of interest)
+        boost::posix_time::ptime timestamp;     // viewable timestamp (e.g. for single occurances)
+    };
+
+    /// compute final result value
+    virtual boost::optional<double> computeResult() const;
+    virtual boost::optional<double> computeResult_impl() const = 0;
+    
+    std::string conditionResultString() const;
+
+    void setIgnored();
+
+    std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options) const;
+
+    /// creates a basic viewable
+    virtual std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const = 0;
+    /// creates additional viewable information (region of interest etc.)
+    virtual ViewableInfo createViewableInfo(const AnnotationOptions& options) const = 0;
+    /// creates annotations for the given options
+    virtual void createAnnotations(nlohmann::json& annotations_json, 
+                                   const AnnotationOptions& options) const = 0;
+
+    virtual void addCustomAnnotations(nlohmann::json& annotations_json) const {}
+
     EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    virtual std::string getRequirementSectionID ();
-    virtual std::string getRequirementSumSectionID ();
+    virtual std::string getRequirementSectionID() const;
+    virtual std::string getRequirementSumSectionID() const;
 
-    EvaluationResultsReport::Section& getRequirementSection (
-            std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    EvaluationResultsReport::Section& getRequirementSection(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
     void setDetails(const EvaluationDetails& details);
     void addDetails(const EvaluationDetails& details);
     void clearDetails();
 
-    virtual void addCustomAnnotations(nlohmann::json& json_annotations) {}
-    void addCustomAnnotationsToViewable(nlohmann::json::object_t& viewable);
+    bool detailKeyValid(const DetailKey& dkey) const; 
+
+    QString formatValue(double v, int precision = 2) const;
 
     std::string type_;
     std::string result_id_;
@@ -144,8 +249,9 @@ protected:
 
 private:
     EvaluationDetails details_;
+
+    boost::optional<double> result_;
+    bool                    ignore_ = false;
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTRESULTBASE_H

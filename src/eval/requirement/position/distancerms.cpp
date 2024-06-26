@@ -38,15 +38,8 @@ namespace EvaluationRequirement
 PositionDistanceRMS::PositionDistanceRMS(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man, float threshold_value)
-    : Base(name, short_name, group_name, eval_man),
-      threshold_value_(threshold_value)
+    : Base(name, short_name, group_name, threshold_value, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man)
 {
-
-}
-
-float PositionDistanceRMS::thresholdValue() const
-{
-    return threshold_value_;
 }
 
 std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evaluate (
@@ -54,7 +47,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
         const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementPositionDistanceRMS '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " threshold_value " << threshold_value_;
+           << " threshold_value " << threshold();
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
@@ -222,7 +215,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
 
         ++num_distances;
 
-        if (fabs(distance) <= threshold_value_) // for single value
+        if (fabs(distance) <= threshold()) // for single value
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -270,16 +263,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
                 values);
-}
-
-std::string PositionDistanceRMS::getConditionStr () const
-{
-    return "<= "+ to_string(threshold_value_);
-}
-
-std::string PositionDistanceRMS::getConditionResultStr (float rms_value) const
-{
-    return rms_value <= threshold_value_ ?  "Passed" : "Failed";
 }
 
 }

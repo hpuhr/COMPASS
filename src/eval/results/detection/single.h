@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTDETECTIONRESULT_H
-#define EVALUATIONREQUIREMENTDETECTIONRESULT_H
+#pragma once
 
-#include "eval/results/single.h"
+#include "eval/results/probabilitybase.h"
+
 #include "timeperiod.h"
 
 #include <boost/optional.hpp>
@@ -26,7 +26,9 @@
 namespace EvaluationRequirementResult
 {
 
-class SingleDetection : public Single
+/**
+*/
+class SingleDetection : public SingleProbabilityBase
 {
 public:
     SingleDetection(const std::string& result_id, 
@@ -41,22 +43,10 @@ public:
                     TimePeriodCollection ref_periods,
                     const std::vector<dbContent::TargetPosition>& ref_updates);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
-
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
     unsigned int sumUIs() const;
     unsigned int missedUIs() const;
-
-    virtual bool hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    virtual bool hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::string reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     enum DetailKey
     {
@@ -70,32 +60,30 @@ public:
         RefUpdateEndIndex    //unsigned int
     };
 
-    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
-
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
     virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
-    bool hasFailed() const;
-
 protected:
-    void updatePD();
+    virtual boost::optional<double> computeResult_impl() const override;
+    virtual bool hasIssues_impl() const override;
 
-    void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
-    void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void reportDetails(EvaluationResultsReport::Section& utn_req_section);
+    virtual std::vector<std::string> targetTableHeadersCustom() const override;
+    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual std::vector<TargetInfo> targetInfos() const override;
+    virtual std::vector<std::string> detailHeaders() const override;
+    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
+                                               const EvaluationDetail* parent_detail) const override;
 
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
-
+    virtual bool detailIsOk(const EvaluationDetail& detail) const override;
+    virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                        const EvaluationDetail& detail, 
+                                        TargetAnnotationType type,
+                                        bool is_ok) const override;
     unsigned int sum_uis_    {0};
     unsigned int missed_uis_ {0};
 
-    TimePeriodCollection ref_periods_;
+    TimePeriodCollection                   ref_periods_;
     std::vector<dbContent::TargetPosition> ref_updates_;
-
-    boost::optional<float> pd_;
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTDETECTIONRESULT_H

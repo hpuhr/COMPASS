@@ -37,6 +37,8 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PALOK"; }
+    std::string probabilityName() const override final { return "Probability of acceptable along-track error"; }
 
 protected:
     float max_abs_value_ {0};

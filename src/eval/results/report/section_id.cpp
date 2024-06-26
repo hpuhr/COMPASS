@@ -45,9 +45,71 @@ std::string SectionID::prependReportResultID(const std::string& id)
 
 /**
 */
+std::vector<std::string> SectionID::subSections(const std::string& section_id) 
+{
+    return Utils::String::split(section_id, Sep[ 0 ]);
+}
+
+/**
+*/
+std::string SectionID::sectionID(const std::vector<std::string>& sub_sections)
+{
+    return Utils::String::compress(sub_sections, Sep[ 0 ]);
+}
+
+/**
+*/
+std::string SectionID::sectionID(const std::string& section0, const std::string& section1)
+{
+    assert(!section0.empty() && !section1.empty());
+
+    return (section0 + Sep + section1);
+}
+
+/**
+*/
+std::string SectionID::sectionIDWithoutResults(const std::string& section_id)
+{
+    //root?
+    if (section_id == SectionResults)
+        return "";
+
+    const std::string ResultsHeader = SectionResults + Sep;
+
+    //valid?
+    assert (section_id.rfind(ResultsHeader, 0) == 0);
+
+    //chop result header
+    std::string ret = section_id;
+    ret.erase(0,ResultsHeader.size());
+
+    return ret;
+}
+
+/**
+*/
+std::string SectionID::sectionID2Path(const std::string& section_id)
+{
+    std::string p = section_id;
+
+    boost::replace_all(p, ":", "/");
+    boost::replace_all(p, " ", "_");
+
+    return (p + "/");
+}
+
+/**
+*/
 std::string SectionID::reportResultID()
 {
     return SectionReport + Sep + SectionResults;
+}
+
+/**
+*/
+std::string SectionID::targetResultsID()
+{
+    return SectionResults + Sep + SectionTargets;
 }
 
 /**
@@ -64,6 +126,8 @@ std::string SectionID::targetID(unsigned int utn)
     return targetID() + std::to_string(utn);
 }
 
+/**
+*/
 std::string SectionID::sectorLayerID(const SectorLayer& sector_layer)
 {
     return sector_layer.name();
@@ -81,6 +145,15 @@ std::string SectionID::requirementID(const EvaluationRequirement::Base& requirem
 std::string SectionID::requirementGroupID(const EvaluationRequirement::Base& requirement)
 {
     return requirement.groupName();
+}
+
+/**
+*/
+std::string SectionID::requirementGroupResultID(const EvaluationRequirementResult::Base& result)
+{
+    return sectorLayerID(result.sectorLayer()) + Sep + 
+           requirementGroupID(*result.requirement()) + Sep + 
+           requirementID(*result.requirement());
 }
 
 /**
@@ -103,10 +176,7 @@ std::string SectionID::resultID(const EvaluationRequirementResult::Base& result)
 std::string SectionID::targetResultID(unsigned int utn, const EvaluationRequirementResult::Base& result)
 {
     assert(result.requirement());
-    return targetID(utn) + Sep + 
-           sectorLayerID(result.sectorLayer()) + Sep + 
-           requirementGroupID(*result.requirement()) + Sep + 
-           requirementID(*result.requirement());
+    return targetID(utn) + Sep + requirementGroupResultID(result);
 }
 
 /**

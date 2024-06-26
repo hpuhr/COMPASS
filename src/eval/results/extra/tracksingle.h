@@ -15,17 +15,18 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTEXTRATRACKRESULT_H
-#define EVALUATIONREQUIREMENTEXTRATRACKRESULT_H
+#pragma once
 
-#include "eval/results/single.h"
+#include "eval/results/probabilitybase.h"
 
 #include <boost/optional.hpp>
 
 namespace EvaluationRequirementResult
 {
 
-class SingleExtraTrack : public Single
+/**
+*/
+class SingleExtraTrack : public SingleProbabilityBase
 {
 public:
     SingleExtraTrack(const std::string& result_id, 
@@ -40,21 +41,10 @@ public:
                      unsigned int num_extra,  
                      unsigned int num_ok);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
-
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    virtual bool hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    virtual bool hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::string reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    bool ignore() const;
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     unsigned int numInside() const;
     unsigned int numExtra() const;
@@ -67,28 +57,25 @@ public:
         Extra    //bool
     };
 
-    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
-
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
-
 protected:
-    bool         ignore_     {false};
+    virtual boost::optional<double> computeResult_impl() const override;
+    virtual bool hasIssues_impl() const override;
+
+    virtual std::vector<std::string> targetTableHeadersCustom() const override;
+    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual std::vector<TargetInfo> targetInfos() const override;
+    virtual std::vector<std::string> detailHeaders() const override;
+    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
+                                               const EvaluationDetail* parent_detail) const override;
+
+    virtual bool detailIsOk(const EvaluationDetail& detail) const override;
+    virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                        const EvaluationDetail& detail, 
+                                        TargetAnnotationType type,
+                                        bool is_ok) const override;
     unsigned int num_inside_ {0};
     unsigned int num_extra_  {0};
     unsigned int num_ok_     {0};
-
-    boost::optional<float> prob_;
-
-    void updateProb();
-    void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
-    void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void reportDetails(EvaluationResultsReport::Section& utn_req_section);
-
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTEXTRATRACKRESULT_H

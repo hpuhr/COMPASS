@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENSINGLEDUBIOSTRACK_H
-#define EVALUATIONREQUIREMENSINGLEDUBIOSTRACK_H
+#pragma once
 
 #include "eval/results/dubious/dubiousbase.h"
 
@@ -48,9 +47,10 @@ public:
                        unsigned int num_tracks_dubious);
     virtual ~SingleDubiousTrack();
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
-
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
+
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     unsigned int numTracks() const;
     unsigned int numTracksDubious() const;
@@ -59,42 +59,33 @@ public:
     float trackDurationNondub() const;
     float trackDurationDubious() const;
 
-    virtual bool hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    virtual bool hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::string reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
+protected:
     EvaluationRequirement::DubiousTrack* req ();
 
-    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
+    virtual boost::optional<double> computeResult_impl() const override;
+    virtual bool hasIssues_impl() const override;
 
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
+    virtual std::vector<std::string> targetTableHeadersCustom() const override;
+    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual std::vector<TargetInfo> targetInfos() const override;
+    virtual std::vector<std::string> detailHeaders() const override;
+    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
+                                               const EvaluationDetail* parent_detail) const override;
 
-protected:
-    void update();
+    virtual bool detailIsOk(const EvaluationDetail& detail) const override;
+    virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                        const EvaluationDetail& detail, 
+                                        TargetAnnotationType type,
+                                        bool is_ok) const override;
 
-    void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
-    void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
-    void reportDetails(EvaluationResultsReport::Section& utn_req_section);
+    virtual DetailNestingMode detailNestingMode() const { return DetailNestingMode::Nested; } 
 
-    boost::optional<float> p_dubious_track_;
+    unsigned int num_tracks_        {0};
+    unsigned int num_tracks_dubious_{0};
 
-    unsigned int num_tracks_             {0};
-    unsigned int num_tracks_dubious_     {0};
-
-    float track_duration_all_     {0};
-    float track_duration_nondub_  {0};
-    float track_duration_dubious_ {0};
+    mutable float track_duration_all_     {0};
+    mutable float track_duration_nondub_  {0};
+    mutable float track_duration_dubious_ {0};
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENSINGLEDUBIOSTRACK_H

@@ -15,20 +15,16 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRADARRANGE_H
-#define EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRADARRANGE_H
+#pragma once
 
 #include "eval/results/position/positionbase.h"
-
-namespace EvaluationRequirement
-{
-    class PositionRadarRange;
-}
 
 namespace EvaluationRequirementResult
 {
 
-class SinglePositionRadarRange : public SinglePositionBase
+/**
+*/
+class SinglePositionRadarRange : public SinglePositionValueBase
 {
 public:
     SinglePositionRadarRange(const std::string& result_id,
@@ -44,53 +40,30 @@ public:
                              unsigned int num_pos_inside,
                              unsigned int num_comp_passed,
                              unsigned int num_comp_failed,
-                             vector<double> values,
-                             vector<double> ref_range_values, vector<double> tst_range_values);
-
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+                             const std::vector<double>& values,
+                             const std::vector<double>& ref_range_values, 
+                             const std::vector<double>& tst_range_values);
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
-
-    virtual bool hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    virtual bool hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-    virtual std::string reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-
-    EvaluationRequirement::PositionRadarRange* req ();
-
-    void addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok) override;
-
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     const vector<double>& refRangeValues() const;
     const vector<double>& tstRangeValues() const;
 
 protected:
+    virtual boost::optional<double> computeFinalResultValue() const override;
 
-    vector<double> ref_range_values_;
-    vector<double> tst_range_values_;
+    virtual std::vector<std::string> targetTableHeadersCustom() const override;
+    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual std::vector<TargetInfo> targetInfos() const override;
+    virtual std::vector<std::string> detailHeaders() const override;
+    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
+                                               const EvaluationDetail* parent_detail) const override;
 
-    QVariant range_bias_;
-    QVariant range_gain_;
+    std::vector<double> ref_range_values_;
+    std::vector<double> tst_range_values_;
 
-    void update();
-
-    void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
-    void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
-    void reportDetails(EvaluationResultsReport::Section& utn_req_section);
-
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable (bool add_highlight=false);
-
+    mutable QVariant range_bias_;
+    mutable QVariant range_gain_;
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONRADARRANGE_H

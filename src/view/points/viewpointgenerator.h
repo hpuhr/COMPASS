@@ -133,6 +133,8 @@ public:
     void addPoints(const std::vector<Eigen::Vector2d>& positions,
                    const boost::optional<std::vector<QColor>>& colors = boost::optional<std::vector<QColor>>());
 
+    static nlohmann::json& getCoordinatesJSON(nlohmann::json& feature_json);
+
     static const std::string FeatureFieldNameGeom;
     static const std::string FeatureFieldNameCoords;
     static const std::string FeatureFieldNameColors;
@@ -158,7 +160,9 @@ public:
         Circle = 0,
         Triangle,
         Square,
-        Cross
+        Cross,
+        Border,
+        BorderThick
     };
 
     ViewPointGenFeaturePoints(Symbol symbol = Symbol::Square,
@@ -175,6 +179,8 @@ public:
     static const std::string SymbolNameTriangle;
     static const std::string SymbolNameSquare;
     static const std::string SymbolNameCross;
+    static const std::string SymbolNameBorder;
+    static const std::string SymbolNameBorderThick;
 
 protected:
     virtual void writeProperties(nlohmann::json& j) const override;
@@ -396,6 +402,9 @@ public:
     static const std::string AnnotationFieldSymbolColor;
     static const std::string AnnotationFieldFeatures;
     static const std::string AnnotationFieldAnnotations;
+
+    static nlohmann::json& getFeaturesJSON(nlohmann::json& annotation_json);
+    static nlohmann::json& getFeatureJSON(nlohmann::json& annotation_json, size_t idx);
 
 private:
     std::string             name_;

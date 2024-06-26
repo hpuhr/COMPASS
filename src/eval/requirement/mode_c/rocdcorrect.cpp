@@ -12,9 +12,6 @@ ROCDCorrect::ROCDCorrect(const std::string& name, const std::string& short_name,
     value_name_short_ = "ROCD";
     value_name_plural_ = "Rate of Climb/Descent";
 
-    probability_name_ = "Probability of Correct ROCD";
-    probability_name_short_ = "PCROCD";
-
     value_compare_func_ = [this] (const dbContent::TargetReport::Chain::DataID& id,
                                  const EvaluationTargetData& target_data,
                                  boost::posix_time::time_duration max_ref_time_diff, double threshold)

@@ -17,17 +17,16 @@
 
 #include "eval/results/intervalbase.h"
 #include "eval/results/evaluationdetail.h"
+#include "eval/results/report/rootitem.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
 
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/base/intervalbase.h"
 
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
-
-#include "eval/results/report/rootitem.h"
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
 
 #include "logger.h"
 #include "stringconv.h"
@@ -61,184 +60,54 @@ SingleIntervalBase::SingleIntervalBase(const std::string& result_type,
                                        int missed_uis,
                                        TimePeriodCollection ref_periods,
                                        const std::vector<dbContent::TargetPosition>& ref_updates)
-    :   Single      (result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
-    ,   sum_uis_    (sum_uis    )
-    ,   missed_uis_ (missed_uis )
+    :   IntervalBase(sum_uis, missed_uis)
+    ,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
     ,   ref_periods_(ref_periods)
     ,   ref_updates_(ref_updates)
 {
-    updateProbability();
 }
 
 /**
 */
-void SingleIntervalBase::updateProbability()
+boost::optional<double> SingleIntervalBase::computeResult_impl() const
 {
-    probability_.reset();
+    assert (missed_uis_ <= sum_uis_);
 
-    if (sum_uis_)
-    {
-        logdbg << type() << ": updatePD: utn " << utn_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
+    if (sum_uis_ == 0)
+        return {};
 
-        assert (missed_uis_ <= sum_uis_);
+    logdbg << type() << ": updatePD: utn " << utn_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
 
-        std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
-        assert (req);
-
-        probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
-    }
-
-    result_usable_ = probability_.has_value();
-
-    updateUseFromTarget();
+    return (1.0 - (double)missed_uis_ / (double)sum_uis_);
 }
 
 /**
 */
-QVariant SingleIntervalBase::probabilityVar() const
+unsigned int SingleIntervalBase::numIssues() const
 {
-    QVariant pcd_var;
-    if (probability_.has_value())
-        pcd_var = roundf(probability_.value() * 10000.0) / 100.0;
-
-    return pcd_var;
+    return missed_uis_;
 }
 
 /**
 */
-std::vector<std::string> SingleIntervalBase::targetTableColumns() const
+std::vector<std::string> SingleIntervalBase::targetTableHeadersCustom() const
 {
-    return { "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max", "#EUIs", "#MUIs", probabilityName() };
+    return { "#EUIs", "#MUIs" };
 }
 
 /**
 */
-std::vector<QVariant> SingleIntervalBase::targetTableValues() const
+std::vector<QVariant> SingleIntervalBase::targetTableValuesCustom() const
 {
-    return { utn_, 
-             target_->timeBeginStr().c_str(), 
-             target_->timeEndStr().c_str(),
-             target_->acidsStr().c_str(), 
-             target_->acadsStr().c_str(),
-             target_->modeACodesStr().c_str(),
-             target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(),
-             sum_uis_,
-             missed_uis_,
-             probabilityVar() };
+    return { sum_uis_, missed_uis_ };
 }
 
 /**
 */
-std::vector<Base::ReportParam> SingleIntervalBase::detailsOverviewDescriptions() const
+std::vector<Single::TargetInfo> SingleIntervalBase::targetInfos() const
 {
-    std::vector<Base::ReportParam> descr;
-
-    return { { "Use"            , "To be used in results"         , use_             },
-             { "#EUIs [1]"      , "Expected Update Intervals"     , sum_uis_         },
-             { "#MUIs [1]"      , "Missed Update Intervals"       , missed_uis_      },
-             { probabilityName(), probabilityDescription()        , probabilityVar() } };
-}
-
-/**
-*/
-std::vector<std::string> SingleIntervalBase::detailsTableColumns() const
-{
-    return {"ToD", "DToD", "Ref.", "#MUIs", "Comment"};
-}
-
-/**
-*/
-std::vector<QVariant> SingleIntervalBase::detailsTableValues(const EvaluationDetail& detail) const
-{
-    auto d_tod = detail.getValue(DetailKey::DiffTOD);
-    QVariant d_tod_str = d_tod.isValid() ? QVariant(String::timeStringFromDouble(d_tod.toFloat()).c_str()) : QVariant();
-
-    return { Time::toString(detail.timestamp()).c_str(),
-             d_tod_str,
-             detail.getValue(DetailKey::RefExists),
-             detail.getValue(DetailKey::MissedUIs),
-             detail.comments().generalComment().c_str() };
-}
-
-/**
-*/
-unsigned int SingleIntervalBase::sortColumn() const
-{
-    return 10;
-}
-
-/**
-*/
-void SingleIntervalBase::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    logdbg << type() << " " <<  requirement_->name() <<": addToReport";
-
-    // add target to requirements->group->req
-    addTargetToOverviewTable(root_item);
-
-    // add requirement results to targets->utn->requirements->group->req
-    addTargetDetailsToReport(root_item);
-
-    // TODO add requirement description, methods
-}
-
-/**
-*/
-void SingleIntervalBase::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
-
-    // add to general sum table
-    if (eval_man_.settings().report_split_results_by_mops_ || 
-        eval_man_.settings().report_split_results_by_aconly_ms_) 
-        addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
-}
-
-/**
-*/
-void SingleIntervalBase::addTargetDetailsToTable (EvaluationResultsReport::Section& section, 
-                                                  const std::string& table_name)
-{
-    if (!section.hasTable(table_name))
-    {
-        std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
-        assert (req);
-
-        Qt::SortOrder order;
-        order = Qt::AscendingOrder;
-
-        std::vector<std::string> columns = targetTableColumns();
-
-        section.addTable(table_name, columns.size(), columns, true, sortColumn(), order);
-    }
-
-    EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
-
-    std::vector<QVariant> values = targetTableValues();
-
-    target_table.addRow(values, this, {utn_});
-}
-
-/**
-*/
-void SingleIntervalBase::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
-    EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
-
-    if (!utn_req_section.hasTable("details_overview_table"))
-        utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& utn_req_table = utn_req_section.getTable("details_overview_table");
-
-    addCommonDetails(root_item);
-
-    auto descr = detailsOverviewDescriptions();
-
-    for (const auto& d : descr)
-        utn_req_table.addRow({ d.name.c_str(), d.descr.c_str(), d.value }, this);
-
+    std::vector<Single::TargetInfo> infos = { { "#EUIs [1]", "Expected Update Intervals", sum_uis_   },
+                                              { "#MUIs [1]", "Missed Update Intervals"  , missed_uis_} };
     size_t inside_sectors = 0;
 
     for (unsigned int cnt=0; cnt < ref_periods_.size(); ++cnt)
@@ -249,331 +118,77 @@ void SingleIntervalBase::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
 
         ++inside_sectors;
 
-        utn_req_table.addRow({("Reference Period "+to_string(cnt)).c_str(), "Time inside sector", ref_periods_.period(cnt).str().c_str()}, this);
+        infos.emplace_back(("Reference Period " + std::to_string(cnt)).c_str(), "Time inside sector", ref_periods_.period(cnt).str().c_str());
     }
 
     if (inside_sectors == 0)
-        utn_req_table.addRow({"Reference Period", "Time inside sector", "None"}, this);
+        infos.emplace_back("Reference Period", "Time inside sector", "None");
 
-    // condition
-    std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
-    assert (req);
-
-    utn_req_table.addRow({"Condition", "", req->getConditionStr().c_str()}, this);
-
-    if (req->getConditionStr() == "Failed")
-    {
-        root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
-        utn_req_section.perTargetWithIssues(true);
-    }
-
-    string result {"Unknown"};
-
-    if (probability_.has_value())
-        result = req->getConditionResultStr(probability_.value());
-
-    utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
-
-    if (req->mustHoldForAnyTarget().has_value())
-        utn_req_table.addRow({"Must hold for any target ", "", req->mustHoldForAnyTarget().value()}, this);
-
-    // add figure
-    if (probability_.has_value())
-    {
-        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  [this](void) { return this->getTargetErrorsViewable(); });
-    }
-    else
-    {
-        utn_req_section.addText("target_errors_overview_no_figure");
-        utn_req_section.getText("target_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
-    }
-
-    // add further details
-    reportDetails(utn_req_section);
+    return infos;
 }
 
 /**
 */
-void SingleIntervalBase::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+std::vector<std::string> SingleIntervalBase::detailHeaders() const
 {
-    if (!utn_req_section.hasTable(tr_details_table_name_))
-    {
-        auto columns = detailsTableColumns();
-
-        utn_req_section.addTable(tr_details_table_name_, 5, columns);
-    }
-
-    EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-            utn_req_section.getTable(tr_details_table_name_);
-
-    utn_req_details_table.setCreateOnDemand(
-            [this, &utn_req_details_table](void)
-            {
-                unsigned int detail_cnt = 0;
-
-                for (auto& rq_det_it : getDetails())
-                {
-                    auto values = detailsTableValues(rq_det_it);
-
-                    utn_req_details_table.addRow(values, this, detail_cnt++);
-                }
-            }
-        );
+    return {"ToD", "DToD", "Ref.", "#MUIs", "Comment"};
 }
 
 /**
 */
-bool SingleIntervalBase::hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
-                                          const QVariant& annotation)
+std::vector<QVariant> SingleIntervalBase::detailValues(const EvaluationDetail& detail,
+                                                       const EvaluationDetail* parent_detail) const
 {
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
-        return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < getDetails().size())
-        return true;
-    
-    return false;
+    auto     d_tod     = detail.getValue(DetailKey::DiffTOD);
+    QVariant d_tod_str = d_tod.isValid() ? QVariant(String::timeStringFromDouble(d_tod.toFloat()).c_str()) : QVariant();
+
+    return { Utils::Time::toString(detail.timestamp()).c_str(),
+             d_tod_str,
+             detail.getValue(DetailKey::RefExists),
+             detail.getValue(DetailKey::MissedUIs),
+             detail.comments().generalComment().c_str() };
 }
 
 /**
 */
-std::unique_ptr<nlohmann::json::object_t> SingleIntervalBase::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, 
-        const QVariant& annotation)
+bool SingleIntervalBase::detailIsOk(const EvaluationDetail& detail) const
 {
-    assert (hasViewableData(table, annotation));
-    if (table.name() == target_table_name_)
-    {
-        return getTargetErrorsViewable();
-    }
-    else if (table.name() == tr_details_table_name_ && annotation.isValid())
-    {
-        unsigned int detail_cnt = annotation.toUInt();
-
-        loginf << "SinglePositionMaxDistance: viewableData: detail_cnt " << detail_cnt;
-
-        const auto& detail = getDetail(detail_cnt);
-
-        return getTargetErrorsViewable(&detail);
-    }
-    else
-        return nullptr;
+    auto check_failed = detail.getValueAsOrAssert<bool>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::MissOccurred);
+    return !check_failed;
 }
 
 /**
 */
-std::unique_ptr<nlohmann::json::object_t> SingleIntervalBase::getTargetErrorsViewable (const EvaluationDetail* detail)
+void SingleIntervalBase::addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                           const EvaluationDetail& detail, 
+                                           TargetAnnotationType type,
+                                           bool is_ok) const
 {
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
-                utn_, req_grp_id_, result_id_);
+    if (detail.numPositions() == 1)
+        return;
 
-    bool has_pos = false;
-    double lat_min, lat_max, lon_min, lon_max;
+    assert (detail.numPositions() >= 2);
 
-    if (detail)
+    if (type == TargetAnnotationType::Highlight)
     {
-        assert (detail->numPositions() >= 1);
-
-        double lat  = detail->position(0).latitude_;
-        double lon  = detail->position(0).longitude_;
-        double zoom = eval_man_.settings().result_detail_zoom_;
-
-        lat_min = lat - zoom;
-        lat_max = lat + zoom;
-        lon_min = lon - zoom;
-        lon_max = lon + zoom;
-
-        has_pos = true;
+        addAnnotationDistance(annotations_json, detail, TypeHighlight);
     }
-    else
+    // else if (type == TargetAnnotationType::Overview)
+    // {
+    //     auto idx0 = detail.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex);
+    //     auto idx1 = detail.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex);
+
+    //     assert(idx0.has_value() && idx1.has_value());
+
+    //     for (unsigned int idx = idx0.value(); idx <= idx1.value(); ++idx)
+    //         addAnnotationPos(annotations_json, detail.position(idx), ok ? TypeOk : TypeError);
+
+    //     for (unsigned int idx = idx0.value() + 1; idx <= idx1.value(); ++idx)
+    //         addAnnotationLine(annotations_json, detail.position(idx - 1), detail.position(idx), ok ? TypeOk : TypeError);
+    // }
+    else if (type == TargetAnnotationType::TargetOverview)
     {
-        for (auto& detail_it : getDetails())
-        {
-            if (!detail_it.getValue(DetailKey::MissOccurred).toBool())
-                continue;
-
-            assert(detail_it.numPositions() >= 1);
-
-            const auto& pos = detail_it.position(0);
-
-            bool has_last_pos = detail_it.numPositions() >= 2;
-
-            if (has_pos)
-            {
-                lat_min = min(lat_min, pos.latitude_);
-                lat_max = max(lat_max, pos.latitude_);
-
-                lon_min = min(lon_min, pos.longitude_);
-                lon_max = max(lon_max, pos.longitude_);
-            }
-            else // tst pos always set
-            {
-                lat_min = pos.latitude_;
-                lat_max = pos.latitude_;
-
-                lon_min = pos.longitude_;
-                lon_max = pos.longitude_;
-
-                has_pos = true;
-            }
-
-            if (has_last_pos)
-            {
-                const auto& pos_last = detail_it.position(1);
-
-                lat_min = min(lat_min, pos_last.latitude_);
-                lat_max = max(lat_max, pos_last.latitude_);
-
-                lon_min = min(lon_min, pos_last.longitude_);
-                lon_max = max(lon_max, pos_last.longitude_);
-            }
-        }
-    }
-
-    if (has_pos)
-    {
-        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = (lat_max + lat_min) / 2.0;
-        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = (lon_max + lon_min) / 2.0;
-
-        double lat_w = OSGVIEW_POS_WINDOW_SCALE * (lat_max - lat_min) / 2.0;
-        double lon_w = OSGVIEW_POS_WINDOW_SCALE * (lon_max - lon_min) / 2.0;
-
-        if (lat_w < eval_man_.settings().result_detail_zoom_)
-            lat_w = eval_man_.settings().result_detail_zoom_;
-
-        if (lon_w < eval_man_.settings().result_detail_zoom_)
-            lon_w = eval_man_.settings().result_detail_zoom_;
-
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
-    }
-
-    //add track annotations
-    addAnnotations(*viewable_ptr, false, true);
-
-    if (detail)
-    {
-        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Time::toString(detail->timestamp());
-
-        //highlight detail
-        addAnnotations(*viewable_ptr, *detail);
-    }
-
-    return viewable_ptr;
-}
-
-/**
-*/
-bool SingleIntervalBase::hasReference (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
-        return true;
-    else
-        return false;;
-}
-
-/**
-*/
-std::string SingleIntervalBase::reference(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasReference(table, annotation));
-
-    return "Report:Results:"+getTargetRequirementSectionID();
-}
-
-/**
-*/
-bool SingleIntervalBase::hasFailed() const
-{
-    std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
-    assert (req);
-
-    if (probability_.has_value())
-        return !req->getConditionResult(probability_.value());
-    else
-        return false;
-}
-
-/**
-*/
-void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable, bool overview, bool add_ok)
-{
-    //addAnnotationFeatures(viewable, overview, true);
-
-    json& error_line_coordinates  = annotationLineCoords(viewable, TypeError, overview);
-    json& error_point_coordinates = annotationPointCoords(viewable, TypeError, overview);
-    json& ok_line_coordinates     = annotationLineCoords(viewable, TypeOk, overview);
-    json& ok_point_coordinates    = annotationPointCoords(viewable, TypeOk, overview);
-
-    for (auto& detail_it : getDetails())
-    {
-        auto check_failed = detail_it.getValueAsOrAssert<bool>(
-                    EvaluationRequirementResult::SingleIntervalBase::DetailKey::MissOccurred);
-
-        if (detail_it.numPositions() == 1)
-            continue;
-
-        assert (detail_it.numPositions() >= 2);
-
-        auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex);
-        auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex);
-
-        //loginf << "SingleIntervalBase: addAnnotations: " << idx0.value() << " - " << idx1.value();
-
-        if (check_failed)
-        {
-            if (overview)
-            {
-                assert(idx0.has_value() && idx1.has_value());
-
-                for (unsigned int idx = idx0.value(); idx <= idx1.value(); ++idx)
-                    error_point_coordinates.push_back(ref_updates_[ idx ].asVector());
-
-                for (unsigned int idx = idx0.value() + 1; idx <= idx1.value(); ++idx)
-                {
-                    error_line_coordinates.push_back(ref_updates_[ idx - 1 ].asVector());
-                    error_line_coordinates.push_back(ref_updates_[ idx     ].asVector());
-                }
-            }
-            else
-            {
-                error_point_coordinates.push_back(detail_it.position(0).asVector());
-                error_point_coordinates.push_back(detail_it.position(1).asVector());
-
-                error_line_coordinates.push_back(detail_it.position(0).asVector());
-                error_line_coordinates.push_back(detail_it.position(1).asVector());
-            }
-        }
-        else if (add_ok)
-        {
-            if (overview)
-            {
-                assert(idx0.has_value() && idx1.has_value());
-
-                for (unsigned int idx = idx0.value(); idx <= idx1.value(); ++idx)
-                    ok_point_coordinates.push_back(ref_updates_[ idx ].asVector());
-
-                for (unsigned int idx = idx0.value() + 1; idx <= idx1.value(); ++idx)
-                {
-                    ok_line_coordinates.push_back(ref_updates_[ idx - 1 ].asVector());
-                    ok_line_coordinates.push_back(ref_updates_[ idx     ].asVector());
-                }
-            }
-            else
-            {
-                ok_point_coordinates.push_back(detail_it.position(0).asVector());
-                ok_point_coordinates.push_back(detail_it.position(1).asVector());
-
-                if (!overview)
-                {
-                    ok_line_coordinates.push_back(detail_it.position(0).asVector());
-                    ok_line_coordinates.push_back(detail_it.position(1).asVector());
-                }
-            }
-        }
+        addAnnotationDistance(annotations_json, detail, is_ok ? TypeOk : TypeError);
     }
 }
 
@@ -620,35 +235,6 @@ void SingleIntervalBase::addValuesToGrid(Grid2D& grid, const std::string& layer)
     }
 }
 
-/**
-*/
-void SingleIntervalBase::addAnnotations(nlohmann::json::object_t& viewable,
-                                        const EvaluationDetail& detail)
-{
-    if (detail.numPositions() == 1)
-        return;
-
-    assert (detail.numPositions() >= 2);
-
-    addAnnotationPos(viewable, detail.position(0), TypeHighlight);
-    addAnnotationPos(viewable, detail.position(1), TypeHighlight);
-    addAnnotationLine(viewable, detail.position(0), detail.position(1), TypeHighlight);
-}
-
-/**
-*/
-int SingleIntervalBase::sumUIs() const
-{
-    return sum_uis_;
-}
-
-/**
-*/
-int SingleIntervalBase::missedUIs() const
-{
-    return missed_uis_;
-}
-
 /***********************************************************************************************
  * JoinedIntervalBase
  ***********************************************************************************************/
@@ -660,220 +246,64 @@ JoinedIntervalBase::JoinedIntervalBase(const std::string& result_type,
                                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                                        const SectorLayer& sector_layer, 
                                        EvaluationManager& eval_man)
-:   Joined(result_type, result_id, requirement, sector_layer, eval_man)
+:   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
 {
 }
 
 /**
 */
-void JoinedIntervalBase::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+unsigned int JoinedIntervalBase::numIssues() const
 {
-    logdbg << type() << " " <<  requirement_->name() <<": addToReport";
-
-    if (!results_.size()) // some data must exist
-    {
-        logerr << type() << " " <<  requirement_->name() <<": addToReport: no data";
-        return;
-    }
-
-    logdbg << type() << " " <<  requirement_->name() << ": addToReport: adding joined result";
-
-    addToOverviewTable(root_item);
-    addDetails(root_item);
+    return missed_uis_;
 }
 
 /**
 */
-void JoinedIntervalBase::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+unsigned int JoinedIntervalBase::numUpdates() const
 {
-    EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
-
-    // condition
-    std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
-    assert (req);
-
-    if (req->mustHoldForAnyTarget().has_value() && req->mustHoldForAnyTarget().value()) // for any target
-    {
-        string result = num_failed_single_targets_ == 0 ? "Passed" : "Failed";
-
-        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
-        ov_table.addRow({ sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                          requirement_->shortname().c_str(),
-                          result_id_.c_str(), {num_single_targets_},
-                          num_failed_single_targets_, "= 0", result.c_str()}, this, {} );
-    }
-    else // pd
-    {
-        QVariant pd_var;
-
-        string result {"Unknown"};
-
-        if (probability_.has_value())
-        {
-            pd_var = String::percentToString(probability_.value() * 100.0, req->getNumProbDecimals()).c_str();
-
-            //loginf << "UGA '" << pd_var.toString().toStdString() << "' dec " << req->getNumProbDecimals();
-
-            result = req->getConditionResultStr(probability_.value());
-        }
-
-        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
-        ov_table.addRow({ sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                          requirement_->shortname().c_str(),
-                          result_id_.c_str(), {sum_uis_},
-                          pd_var, req->getConditionStr().c_str(), result.c_str()}, this, {} );
-    }
+    return sum_uis_;
 }
 
 /**
 */
-std::vector<Base::ReportParam> JoinedIntervalBase::detailsOverviewDescriptions() const
+void JoinedIntervalBase::clearResults_impl() 
 {
-    // condition
-    std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
-    assert (req);
-
-    // pd
-    QVariant p_var;
-    std::string result {"Unknown"};
-
-    if (probability_.has_value())
-    {
-        p_var = String::percentToString(probability_.value() * 100.0, req->getNumProbDecimals()).c_str();
-        result = req->getConditionResultStr(probability_.value());
-    }
-
-    std::vector<Base::ReportParam> params;
-
-    params.emplace_back("#Updates/#EUIs [1]", "Total number update intervals", sum_uis_);
-    params.emplace_back("#MUIs [1]", "Number of missed update intervals", missed_uis_);
-    params.emplace_back(probabilityName(), probabilityDescription(), p_var);
-
-    params.emplace_back("Condition", "", req->getConditionStr().c_str());
-    params.emplace_back("Condition Fulfilled", "", result.c_str());
-
-    if (req->mustHoldForAnyTarget().has_value())
-        params.emplace_back("Must hold for any target ", "", req->mustHoldForAnyTarget().value());
-
-    params.emplace_back("#Single Targets", "", num_single_targets_);
-    params.emplace_back("#Failed Single Targets", "", num_failed_single_targets_);
-
-    return params;
-}
-
-/**
-*/
-void JoinedIntervalBase::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
-{
-    EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
-
-    if (!sector_section.hasTable("sector_details_table"))
-        sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& sec_det_table =
-            sector_section.getTable("sector_details_table");
-
-    addCommonDetails(sec_det_table);
-
-    auto descriptions = detailsOverviewDescriptions();
-
-    for (const auto& d : descriptions)
-        sec_det_table.addRow({d.name.c_str(), d.descr.c_str(), d.value}, this);
-
-    // figure
-    addOverview(sector_section);
-}
-
-/**
-*/
-bool JoinedIntervalBase::hasViewableData (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    //loginf << "UGA2 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
-
-    if (table.name() == req_overview_table_name_)
-        return true;
-    else
-        return false;;
-}
-
-/**
-*/
-bool JoinedIntervalBase::hasReference (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    //loginf << "UGA3 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
-
-    if (table.name() == req_overview_table_name_)
-        return true;
-    else
-        return false;
-}
-
-/**
-*/
-std::string JoinedIntervalBase::reference(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    assert (hasReference(table, annotation));
-    return "Report:Results:"+getRequirementSectionID();
-}
-
-/**
-*/
-void JoinedIntervalBase::updateToChanges_impl()
-{
-    loginf << type() << ": updateToChanges_impl: prev sum_uis " << sum_uis_
-            << " missed_uis " << missed_uis_;
-
-    if (probability_.has_value())
-        loginf << type() << ": updateToChanges_impl: prev result " << result_id_
-                << " pcd " << 100.0 * probability_.value();
-    else
-        loginf << type() << ": updateToChanges_impl: prev result " << result_id_ << " has no data";
-
     sum_uis_    = 0;
     missed_uis_ = 0;
+}
 
-    for (auto& result_it : results_)
-    {
-        std::shared_ptr<SingleIntervalBase> single_result = std::static_pointer_cast<SingleIntervalBase>(result_it);
-        assert (single_result);
+/**
+*/
+void JoinedIntervalBase::accumulateSingleResult(const std::shared_ptr<Single>& single_result)
+{
+    std::shared_ptr<SingleIntervalBase> single_interval = std::static_pointer_cast<SingleIntervalBase>(single_result);
 
-        if (!single_result->use())
-            continue;
+    sum_uis_    += single_interval->sumUIs();
+    missed_uis_ += single_interval->missedUIs();
+}
 
-        sum_uis_    += single_result->sumUIs();
-        missed_uis_ += single_result->missedUIs();
+/**
+*/
+boost::optional<double> JoinedIntervalBase::computeResult_impl() const
+{
+    loginf << "JoinedIntervalBase: computeResult_impl:" << type()
+            << " sum_uis_ " << sum_uis_
+            << " missed_uis_ " << missed_uis_;
 
-        ++num_single_targets_;
+    assert (missed_uis_ <= sum_uis_);
 
-        if (single_result->hasFailed())
-            ++num_failed_single_targets_;
-    }
+    if (sum_uis_ == 0)
+        return {};
 
-    loginf << type() << ": updatesToUseChanges: updt sum_uis " << sum_uis_
-            << " missed_uis " << missed_uis_;
+    return 1.0 - (double)missed_uis_ / (double)(sum_uis_);
+}
 
-
-    if (sum_uis_)
-    {
-        logdbg << type() << ": updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
-
-        assert (missed_uis_ <= sum_uis_);
-
-        std::shared_ptr<EvaluationRequirement::IntervalBase> req = std::static_pointer_cast<EvaluationRequirement::IntervalBase>(requirement_);
-        assert (req);
-
-        probability_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
-    }
-
-    if (probability_.has_value())
-        loginf << type() << ": updatesToUseChanges: updt result " << result_id_
-                << " pcd " << 100.0 * probability_.value();
-    else
-        loginf << type() << ": updatesToUseChanges: updt result " << result_id_ << " has no data";
-
+/**
+*/
+std::vector<Joined::SectorInfo> JoinedIntervalBase::sectorInfos() const
+{
+    return { { "#Updates/#EUIs [1]", "Total number update intervals"     , sum_uis_    },
+             { "#MUIs [1]"         , "Number of missed update intervals" , missed_uis_ } };
 }
 
 }

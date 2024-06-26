@@ -205,6 +205,17 @@ void ViewPointGenFeaturePointGeometry::toJSON_impl(nlohmann::json& j) const
     j[FeatureFieldNameProps] = props; 
 }
 
+/**
+*/
+nlohmann::json& ViewPointGenFeaturePointGeometry::getCoordinatesJSON(nlohmann::json& feature_json)
+{
+    //check validity first
+    assert (feature_json.count(FeatureFieldNameGeom));
+    assert (feature_json[ FeatureFieldNameGeom ].count(FeatureFieldNameCoords));
+
+    return feature_json.at(FeatureFieldNameGeom).at(FeatureFieldNameCoords);
+}
+
 /********************************************************************************
  * ViewPointGenFeaturePoints
  ********************************************************************************/
@@ -213,10 +224,12 @@ const std::string ViewPointGenFeaturePoints::FeatureName                      = 
 const std::string ViewPointGenFeaturePoints::FeaturePointsFieldNameSymbol     = "symbol";
 const std::string ViewPointGenFeaturePoints::FeaturePointsFieldNameSymbolSize = "symbol_size";
 
-const std::string ViewPointGenFeaturePoints::SymbolNameCircle   = "circle";
-const std::string ViewPointGenFeaturePoints::SymbolNameTriangle = "triangle";
-const std::string ViewPointGenFeaturePoints::SymbolNameSquare   = "square";
-const std::string ViewPointGenFeaturePoints::SymbolNameCross    = "cross";
+const std::string ViewPointGenFeaturePoints::SymbolNameCircle      = "circle";
+const std::string ViewPointGenFeaturePoints::SymbolNameTriangle    = "triangle";
+const std::string ViewPointGenFeaturePoints::SymbolNameSquare      = "square";
+const std::string ViewPointGenFeaturePoints::SymbolNameCross       = "cross";
+const std::string ViewPointGenFeaturePoints::SymbolNameBorder      = "border";
+const std::string ViewPointGenFeaturePoints::SymbolNameBorderThick = "border_thick";
 
 /**
 */
@@ -242,6 +255,10 @@ std::string ViewPointGenFeaturePoints::symbolString() const
         return SymbolNameSquare;
     if (symbol_ == Symbol::Cross)
         return SymbolNameCross;
+    if (symbol_ == Symbol::Border)
+        return SymbolNameBorder;
+    if (symbol_ == Symbol::BorderThick)
+        return SymbolNameBorderThick;
     return "";
 }
 
@@ -668,6 +685,29 @@ void ViewPointGenAnnotation::print(std::ostream& strm, const std::string& prefix
 
     for (const auto& a : annotations_)
         a->print(strm, p2);
+}
+
+/**
+*/
+nlohmann::json& ViewPointGenAnnotation::getFeaturesJSON(nlohmann::json& annotation_json)
+{
+    assert (annotation_json.contains(AnnotationFieldFeatures));
+    assert (annotation_json.at(AnnotationFieldFeatures).is_array());
+
+    return annotation_json.at(AnnotationFieldFeatures);
+}
+
+/**
+*/
+nlohmann::json& ViewPointGenAnnotation::getFeatureJSON(nlohmann::json& annotation_json, size_t idx)
+{
+    auto& feat_arr = ViewPointGenAnnotation::getFeaturesJSON(annotation_json);
+
+    assert (feat_arr.is_array());
+    assert (idx < feat_arr.size());
+    assert (feat_arr.at(idx).is_object());
+
+    return feat_arr.at(idx);
 }
 
 /********************************************************************************

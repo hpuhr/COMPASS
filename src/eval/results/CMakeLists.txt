@@ -1,3 +1,4 @@
+
 include("${CMAKE_CURRENT_LIST_DIR}/report/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/detection/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/position/CMakeLists.txt")
@@ -24,7 +25,10 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.h"
         "${CMAKE_CURRENT_LIST_DIR}/presentbase.h"
         "${CMAKE_CURRENT_LIST_DIR}/falsebase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/correctbase.h"
         "${CMAKE_CURRENT_LIST_DIR}/intervalbase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/probabilitybase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/valueaccumulator.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgeneratorwidget.cpp"
@@ -34,5 +38,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/presentbase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/falsebase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/correctbase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/intervalbase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/probabilitybase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/valueaccumulator.cpp"
     )

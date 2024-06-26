@@ -21,6 +21,7 @@
 #include "eval/results/report/section.h"
 //#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "eval/results/report/section_id.h"
 #include "sectorlayer.h"
 //#include "logger.h"
 #include "evaluationmanager.h"
@@ -37,11 +38,13 @@ namespace EvaluationRequirementResult
 
 const std::string Base::req_overview_table_name_ {"Results Overview"};
 
+/**
+*/
 Base::Base(const std::string& type, 
-            const std::string& result_id,
-            std::shared_ptr<EvaluationRequirement::Base> requirement, 
-            const SectorLayer& sector_layer,
-            EvaluationManager& eval_man)
+           const std::string& result_id,
+           std::shared_ptr<EvaluationRequirement::Base> requirement, 
+           const SectorLayer& sector_layer,
+           EvaluationManager& eval_man)
 :   type_        (type)
 ,   result_id_   (result_id)
 ,   requirement_ (requirement)
@@ -50,76 +53,165 @@ Base::Base(const std::string& type,
 {
     assert (requirement_);
 
-    req_grp_id_ = sector_layer_.name() + ":" + requirement_->groupName() + ":" + requirement_->name();
+    req_grp_id_ = EvaluationResultsReport::SectionID::requirementGroupResultID(*this);
 }
 
+/**
+*/
 Base::~Base() = default;
 
+/**
+*/
 bool Base::isSingle() const
 {
     return (baseType() == BaseType::Single);
 }
 
+/**
+*/
 bool Base::isJoined() const
 {
     return (baseType() == BaseType::Joined);
 }
 
+/**
+*/
 std::shared_ptr<EvaluationRequirement::Base> Base::requirement() const
 {
     return requirement_;
 }
 
+/**
+*/
 std::string Base::type() const
 {
     return type_;
 }
 
+/**
+*/
 std::string Base::resultId() const
 {
     return result_id_;
 }
 
+/**
+*/
 std::string Base::reqGrpId() const
 {
     return req_grp_id_;
 }
 
+/**
+*/
 bool Base::use() const
 {
     return use_;
 }
 
+/**
+*/
 void Base::use(bool use)
 {
     use_ = use;
 }
 
-bool Base::hasViewableData (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+/**
+*/
+const boost::optional<double>& Base::result() const
 {
-    return false;
+    return result_;
 }
 
-std::unique_ptr<nlohmann::json::object_t> Base::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+/**
+*/
+void Base::updateResult()
 {
-    return {};
+    result_.reset();
+
+    auto result = computeResult();
+    if (result.has_value())
+        result_ = result.value();
 }
 
-
-bool Base::hasReference (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+/**
+*/
+bool Base::resultUsable() const
 {
-    return false;
+    return (result_.has_value() && !ignore_);
 }
 
-std::string Base::reference(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+/**
+*/
+bool Base::hasFailed() const
 {
-    assert (false);
+    return (resultUsable() && !requirement_->conditionPassed(result_.value()));
 }
 
+/**
+*/
+bool Base::hasIssues() const
+{
+    return (resultUsable() && numIssues() > 0);
+}
+
+/**
+*/
+QVariant Base::resultValue() const
+{
+    return resultValueOptional(result_);
+}
+
+/**
+*/
+QVariant Base::resultValueOptional(const boost::optional<double>& value) const
+{
+    if (!value.has_value())
+        return QVariant();
+
+    return resultValue(value.value());
+}
+
+/**
+*/
+QVariant Base::resultValue(double value) const
+{
+    return value;
+}
+
+/**
+*/
+std::string Base::conditionResultString() const
+{
+    if (!resultUsable())
+        return "";
+
+    return requirement_->getConditionResultStr(result_.value());
+}
+
+/**
+*/
+void Base::setIgnored()
+{
+    ignore_ = true;
+}
+
+/**
+*/
+bool Base::isIgnored() const
+{
+    return ignore_;
+}
+
+/**
+*/
+boost::optional<double> Base::computeResult() const
+{
+    return computeResult_impl();
+}
+
+/**
+*/
 EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -129,22 +221,25 @@ EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
         ov_sec.addTable(req_overview_table_name_, 8,
         {"Sector Layer", "Group", "Req.", "Id", "#Updates", "Value", "Condition", "Result"});
 
-    //loginf << "UGA '" << req_overview_table_name_ << "'";
-
     return ov_sec.getTable(req_overview_table_name_);
 }
 
-std::string Base::getRequirementSectionID ()
+/**
+*/
+std::string Base::getRequirementSectionID() const
 {
-    return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+result_id_+":"+requirement_->name();
+    return EvaluationResultsReport::SectionID::requirementResultID(*this);
 }
 
-std::string Base::getRequirementSumSectionID ()
+/**
+*/
+std::string Base::getRequirementSumSectionID() const
 {
-    // hacky
-    return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+"Sum"+":"+requirement_->name();
+    return EvaluationResultsReport::SectionID::requirementResultSumID(*this);
 }
 
+/**
+*/
 EvaluationResultsReport::Section& Base::getRequirementSection (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -174,6 +269,30 @@ const EvaluationDetail& Base::getDetail(int idx) const
 
 /**
 */
+const EvaluationDetail& Base::getDetail(const DetailKey& key) const
+{
+    const auto& d = getDetail(key[ 0 ]);
+
+    if (key[ 1 ] < 0)
+        return d;
+
+    return d.details().at(key[ 1 ]);
+}
+
+/**
+*/
+bool Base::detailKeyValid(const DetailKey& dkey) const
+{
+    if (dkey[ 0 ] < 0 || dkey[ 0 ] >= (int)details_.size())
+        return false;
+    if (dkey[ 1 ] >= 0 && dkey[ 1 ] >= (int)details_[ dkey[ 0 ] ].numDetails())
+        return false;
+
+    return true;
+}
+
+/**
+*/
 void Base::clearDetails()
 {
     details_ = {};
@@ -195,15 +314,57 @@ void Base::addDetails(const EvaluationDetails& details)
 
 /**
 */
-void Base::addCustomAnnotationsToViewable(nlohmann::json::object_t& viewable)
+std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationOptions& options) const
 {
-    if (viewable.count(ViewPoint::VP_ANNOTATION_KEY) > 0)
-    {
-        auto& annos_json = viewable.at(ViewPoint::VP_ANNOTATION_KEY);
-        assert (annos_json.is_array());
+    auto viewable_ptr = createBaseViewable();        // create basic viewable
+    auto info         = createViewableInfo(options); // create viewable info (data bounds etc.)
 
-        addCustomAnnotations(annos_json);
+    //configure viewable depending on type
+    if (info.viewable_type == ViewableType::Overview)
+    {
+        //overview => set region of interest
+        if (!info.bounds.isEmpty())
+        {
+            (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY] = info.bounds.center().x();
+            (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY] = info.bounds.center().y();
+
+            double lat_w = info.bounds.width();
+            double lon_w = info.bounds.height();
+
+            if (lat_w < eval_man_.settings().result_detail_zoom_)
+                lat_w = eval_man_.settings().result_detail_zoom_;
+
+            if (lon_w < eval_man_.settings().result_detail_zoom_)
+                lon_w = eval_man_.settings().result_detail_zoom_;
+
+            (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
+            (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
+        }
     }
+    else
+    {
+        //detail => set position of interest
+        (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = info.bounds.x();
+        (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = info.bounds.y();
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Utils::Time::toString(info.timestamp);
+    }
+
+    //init annotation array
+    (*viewable_ptr)[ViewPoint::VP_ANNOTATION_KEY] = nlohmann::json::array();
+
+    //add annotations
+    createAnnotations((*viewable_ptr)[ViewPoint::VP_ANNOTATION_KEY], options);
+
+    return viewable_ptr;
+}
+
+/**
+*/
+QString Base::formatValue(double v, int precision = 2) const
+{
+    return QString::fromStdString(Utils::String::doubleToStringPrecision(v, precision));
 }
 
 }

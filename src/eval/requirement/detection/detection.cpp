@@ -17,7 +17,7 @@
 
 #include "eval/requirement/detection/detection.h"
 #include "eval/results/detection/single.h"
-//#include "evaluationdata.h"
+
 #include "evaluationmanager.h"
 #include "evaluationdetail.h"
 #include "logger.h"
@@ -34,6 +34,8 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
+/**
+*/
 Detection::Detection(const std::string& name, 
                      const std::string& short_name, 
                      const std::string& group_name,
@@ -49,64 +51,82 @@ Detection::Detection(const std::string& name,
                      bool use_miss_tolerance, 
                      float miss_tolerance_s, 
                      bool hold_for_any_target)
-    : ProbabilityBase     (name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase     (name, short_name, group_name, prob, prob_check_type, invert_prob, eval_man),
       update_interval_s_  (update_interval_s), 
       use_min_gap_length_ (use_min_gap_length), 
       min_gap_length_s_   (min_gap_length_s),
       use_max_gap_length_ (use_max_gap_length), 
       max_gap_length_s_   (max_gap_length_s), 
-      invert_prob_        (invert_prob),
       use_miss_tolerance_ (use_miss_tolerance),
       miss_tolerance_s_   (miss_tolerance_s),
       hold_for_any_target_(hold_for_any_target)
 {
 }
 
+/**
+*/
 float Detection::updateInterval() const
 {
     return update_interval_s_;
 }
+
+/**
+*/
 bool Detection::useMinGapLength() const
 {
     return use_min_gap_length_;
 }
 
+/**
+*/
 float Detection::minGapLength() const
 {
     return min_gap_length_s_;
 }
 
+/**
+*/
 bool Detection::useMaxGapLength() const
 {
     return use_max_gap_length_;
 }
 
+/**
+*/
 float Detection::maxGapLength() const
 {
     return max_gap_length_s_;
 }
 
+/**
+*/
 bool Detection::useMissTolerance() const
 {
     return use_miss_tolerance_;
 }
 
+/**
+*/
 float Detection::missTolerance() const
 {
     return miss_tolerance_s_;
 }
 
+/**
+*/
 float Detection::missThreshold() const
 {
     return use_miss_tolerance_ ? update_interval_s_+miss_tolerance_s_ : update_interval_s_;
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
-        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
-        const SectorLayer& sector_layer)
+/**
+*/
+std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const EvaluationTargetData& target_data, 
+                                                                          std::shared_ptr<Base> instance,
+                                                                          const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " update_interval " << update_interval_s_ << " prob " << prob_
+           << " update_interval " << update_interval_s_ << " prob " << threshold()
            << " use_miss_tolerance " << use_miss_tolerance_ << " miss_tolerance " << miss_tolerance_s_;
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
@@ -118,7 +138,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     ptime timestamp, last_ts;
 
     bool inside, was_inside;
-
     {
         const auto& ref_data = target_data.refChain().timestampIndexes();
         bool first {true};
@@ -163,7 +182,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
            << " periods '" << ref_periods.print() << "'";
 
     timestamp = {};
-    last_ts = {};
+    last_ts   = {};
 
     // evaluate test data
     const auto& tst_data = target_data.tstChain().timestampIndexes();
@@ -171,9 +190,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     int sum_uis = ref_periods.getUIs(update_interval_s_);
 
     float t_diff;
-
     int sum_missed_uis {0};
-
     bool is_inside {false}, was_outside {false};
     //bool ok;
 
@@ -620,17 +637,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                 eval_man_, details, sum_uis, sum_missed_uis, ref_periods, ref_updates);
 }
 
+/**
+*/
 bool Detection::holdForAnyTarget() const
 {
     return hold_for_any_target_;
 }
 
-bool Detection::invertProb() const
-{
-    return invert_prob_;
-}
-
-bool Detection::isMiss (float d_tod)
+/**
+*/
+bool Detection::isMiss (float d_tod) const
 {
     if (use_miss_tolerance_)
         d_tod -= miss_tolerance_s_;
@@ -644,7 +660,9 @@ bool Detection::isMiss (float d_tod)
     return d_tod > update_interval_s_;
 }
 
-unsigned int Detection::getNumMisses(float d_tod)
+/**
+*/
+unsigned int Detection::getNumMisses(float d_tod) const
 {
     assert (isMiss(d_tod));
 

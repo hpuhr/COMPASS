@@ -33,6 +33,9 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PP"; }
+    std::string probabilityName() const override final { return "Probability of Mode C present"; }
+
 protected:
 
 };

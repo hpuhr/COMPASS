@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODEARESENT_H
-#define EVALUATIONREQUIREMENTMODEARESENT_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
@@ -33,9 +32,11 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PP"; }
+    std::string probabilityName() const override final { return "Probability of Mode 3/A present"; }
+
 protected:
 
 };
 
 }
-#endif // EVALUATIONREQUIREMENTMODEARESENT_H

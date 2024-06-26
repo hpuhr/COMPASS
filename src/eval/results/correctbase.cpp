@@ -1,0 +1,397 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "eval/results/correctbase.h"
+#include "eval/results/report/rootitem.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
+
+#include "eval/requirement/base/base.h"
+
+#include "evaluationtargetdata.h"
+#include "evaluationmanager.h"
+
+#include "logger.h"
+#include "util/timeconv.h"
+#include "viewpoint.h"
+
+#include <cassert>
+
+using namespace std;
+using namespace Utils;
+using namespace nlohmann;
+
+namespace EvaluationRequirementResult
+{
+
+/********************************************************************************************************
+ * CorrectBase
+ ********************************************************************************************************/
+
+/**
+*/
+CorrectBase::CorrectBase(const std::string& correct_value_name,
+                const std::string& correct_short_name,
+                const std::string& not_correct_short_name)
+:   correct_value_name_    (correct_value_name)
+,   correct_short_name_    (correct_short_name)
+,   not_correct_short_name_(not_correct_short_name)
+{
+}
+
+/**
+*/
+CorrectBase::CorrectBase(unsigned int num_updates, 
+                         unsigned int num_no_ref_pos, 
+                         unsigned int num_no_ref_id,
+                         unsigned int num_pos_outside, 
+                         unsigned int num_pos_inside,
+                         unsigned int num_correct, 
+                         unsigned int num_not_correct,
+                         const std::string& correct_value_name,
+                         const std::string& correct_short_name,
+                         const std::string& not_correct_short_name)
+:   num_updates_           (num_updates)
+,   num_no_ref_pos_        (num_no_ref_pos)
+,   num_no_ref_id_         (num_no_ref_id)
+,   num_pos_outside_       (num_pos_outside)
+,   num_pos_inside_        (num_pos_inside)
+,   num_correct_           (num_correct)
+,   num_not_correct_       (num_not_correct)
+,   correct_value_name_    (correct_value_name)
+,   correct_short_name_    (correct_short_name)
+,   not_correct_short_name_(not_correct_short_name)
+{
+}
+
+/**
+*/
+unsigned int CorrectBase::numNoRefPos() const
+{
+    return num_no_ref_pos_;
+}
+
+/**
+*/
+unsigned int CorrectBase::numNoRefId() const
+{
+    return num_no_ref_id_;
+}
+
+/**
+*/
+unsigned int CorrectBase::numPosOutside() const
+{
+    return num_pos_outside_;
+}
+
+/**
+*/
+unsigned int CorrectBase::numPosInside() const
+{
+    return num_pos_inside_;
+}
+
+/**
+*/
+unsigned int CorrectBase::numUpdates() const
+{
+    return num_updates_;
+}
+
+/**
+*/
+unsigned int CorrectBase::numCorrect() const
+{
+    return num_correct_;
+}
+
+/**
+*/
+unsigned int CorrectBase::numNotCorrect() const
+{
+    return num_not_correct_;
+}
+
+/********************************************************************************************************
+ * SingleCorrectBase
+ ********************************************************************************************************/
+
+/**
+*/
+SingleCorrectBase::SingleCorrectBase(const std::string& result_type,
+                                     const std::string& result_id, 
+                                     std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                     const SectorLayer& sector_layer,
+                                     unsigned int utn,
+                                     const EvaluationTargetData* target,
+                                     EvaluationManager& eval_man,
+                                     const EvaluationDetails& details,
+                                     unsigned int num_updates,
+                                     unsigned int num_no_ref_pos,
+                                     unsigned int num_no_ref_id,
+                                     unsigned int num_pos_outside,
+                                     unsigned int num_pos_inside,
+                                     unsigned int num_correct,
+                                     unsigned int num_not_correct,
+                                     const std::string& correct_value_name,
+                                     const std::string& correct_short_name,
+                                     const std::string& not_correct_short_name)
+:   CorrectBase(num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside, num_correct, num_not_correct,
+                correct_value_name, correct_short_name, not_correct_short_name)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+{
+}
+
+/**
+*/
+boost::optional<double> SingleCorrectBase::computeResult_impl() const
+{
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_id_ + num_correct_ + num_not_correct_);
+
+    unsigned int num_total = num_correct_ + num_not_correct_;
+
+    if (num_total == 0)
+        return {};
+    
+    return (double)num_correct_ / (double)num_total;
+}
+
+/**
+*/
+unsigned int SingleCorrectBase::numIssues() const
+{
+    return num_not_correct_;
+}
+
+/**
+*/
+std::vector<std::string> SingleCorrectBase::targetTableHeadersCustom() const
+{
+    return { "#Up", "#NoRef", correct_short_name_, not_correct_short_name_ };
+}
+
+/**
+*/
+std::vector<QVariant> SingleCorrectBase::targetTableValuesCustom() const
+{
+    return { num_updates_, num_no_ref_pos_ + num_no_ref_id_, num_correct_, num_not_correct_ };
+}
+
+/**
+*/
+std::vector<Single::TargetInfo> SingleCorrectBase::targetInfos() const
+{
+    QString sn_c  = QString::fromStdString(correct_short_name_);
+    QString sn_nc = QString::fromStdString(not_correct_short_name_);
+    QString cvn   = QString::fromStdString(correct_value_name_);
+
+    std::vector<Single::TargetInfo> infos = 
+        { { "#Up [1]"        , "Number of updates"                                 , num_updates_                     },
+          { "#NoRef [1]"     , "Number of updates w/o reference position or " + cvn, num_no_ref_pos_ + num_no_ref_id_ },
+          { "#NoRefPos [1]"  , "Number of updates w/o reference position "         , num_no_ref_pos_                  },
+          { "#NoRef [1]"     , "Number of updates w/o reference " + cvn            , num_no_ref_id_                   },
+          { "#PosInside [1]" , "Number of updates inside sector"                   , num_pos_inside_                  },
+          { "#PosOutside [1]", "Number of updates outside sector"                  , num_pos_outside_                 },
+          { sn_c + " [1]"    , "Number of updates with correct " + cvn             , num_correct_                     },
+          { sn_nc + " [1]"   , "Number of updates with no correct " + cvn          , num_not_correct_                 } };
+
+    auto additional = additionalTargetInfos();
+
+    infos.insert(infos.end(), additional.begin(), additional.end());
+
+    return infos;
+}
+
+/**
+*/
+std::vector<std::string> SingleCorrectBase::detailHeaders() const
+{
+    return { "ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", correct_short_name_, not_correct_short_name_, "Comment" };
+}
+
+/**
+*/
+std::vector<QVariant> SingleCorrectBase::detailValues(const EvaluationDetail& detail,
+                                                      const EvaluationDetail* parent_detail) const
+{
+    return { Utils::Time::toString(detail.timestamp()).c_str(),
+             detail.getValue(DetailKey::RefExists),
+            !detail.getValue(DetailKey::IsNotCorrect).toBool(),
+             detail.getValue(DetailKey::NumUpdates),
+             detail.getValue(DetailKey::NumNoRef),
+             detail.getValue(DetailKey::NumInside),
+             detail.getValue(DetailKey::NumOutside),
+             detail.getValue(DetailKey::NumCorrect),
+             detail.getValue(DetailKey::NumNotCorrect),
+             detail.comments().generalComment().c_str() };
+}
+
+/**
+*/
+bool SingleCorrectBase::detailIsOk(const EvaluationDetail& detail) const
+{
+    auto is_not_correct = detail.getValueAs<bool>(DetailKey::IsNotCorrect);
+    assert(is_not_correct.has_value());
+
+    return !is_not_correct.value();
+}
+
+/**
+*/
+void SingleCorrectBase::addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                               const EvaluationDetail& detail, 
+                                               TargetAnnotationType type,
+                                               bool is_ok) const
+{
+    assert (detail.numPositions() >= 1);
+
+    if (type == TargetAnnotationType::Highlight)
+    {
+        addAnnotationPos(annotations_json, detail.position(0), AnnotationType::TypeHighlight);
+    }
+    else if (type == TargetAnnotationType::TargetOverview)
+    {
+        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
+    }
+}
+
+/**
+*/
+std::map<std::string, std::vector<Single::LayerDefinition>> SingleCorrectBase::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+/**
+*/
+void SingleCorrectBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        addValuesToGridBinary(grid, DetailKey::IsNotCorrect, true);
+    }
+}
+
+/***************************************************************************
+ * JoinedFalseBase
+ ***************************************************************************/
+
+/**
+*/
+JoinedCorrectBase::JoinedCorrectBase(const std::string& result_type,
+                                     const std::string& result_id, 
+                                     std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                     const SectorLayer& sector_layer, 
+                                     EvaluationManager& eval_man,
+                                     const std::string& correct_value_name,
+                                     const std::string& correct_short_name,
+                                     const std::string& not_correct_short_name)
+:   CorrectBase(correct_value_name, correct_short_name, not_correct_short_name)
+,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+{
+}
+
+/**
+*/
+unsigned int JoinedCorrectBase::numIssues() const
+{
+    return num_not_correct_;
+}
+
+/**
+*/
+unsigned int JoinedCorrectBase::numUpdates() const
+{
+    return num_correct_ + num_not_correct_;
+}
+
+/**
+*/
+void JoinedCorrectBase::clearResults_impl() 
+{
+    num_updates_     = 0;
+    num_no_ref_pos_  = 0;
+    num_no_ref_id_   = 0;
+    num_pos_outside_ = 0;
+    num_pos_inside_  = 0;
+    num_correct_     = 0;
+    num_not_correct_ = 0;
+}
+
+/**
+*/
+void JoinedCorrectBase::accumulateSingleResult(const std::shared_ptr<Single>& single_result)
+{
+    std::shared_ptr<SingleCorrectBase> single_correct = std::static_pointer_cast<SingleCorrectBase>(single_result);
+
+    num_updates_     += single_correct->numUpdates();
+    num_no_ref_pos_  += single_correct->numNoRefPos();
+    num_no_ref_id_   += single_correct->numNoRefId();
+    num_pos_outside_ += single_correct->numPosOutside();
+    num_pos_inside_  += single_correct->numPosInside();
+    num_correct_     += single_correct->numCorrect();
+    num_not_correct_ += single_correct->numNotCorrect();
+}
+
+/**
+*/
+boost::optional<double> JoinedCorrectBase::computeResult_impl() const
+{
+    loginf << "JoinedCorrectBase: computeResult_impl: " << type()
+            << " num_updates " << num_updates_
+            << " num_no_ref_pos " << num_no_ref_pos_
+            << " num_no_ref_id " << num_no_ref_id_
+            << " num_correct " << num_correct_
+            << " num_not_correct " << num_not_correct_;
+
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_id_+ num_correct_ + num_not_correct_);
+
+    unsigned int total = num_correct_ + num_not_correct_;
+
+    if (total == 0)
+        return {};
+
+    return (double)num_correct_ / (double)total;
+}
+
+/**
+*/
+std::vector<Joined::SectorInfo> JoinedCorrectBase::sectorInfos() const
+{
+    QString sn_c  = QString::fromStdString(correct_short_name_);
+    QString sn_nc = QString::fromStdString(not_correct_short_name_);
+    QString cvn   = QString::fromStdString(correct_value_name_);
+
+    return { { "#Updates [1]"   , "Total number target reports"                       , num_updates_                     },
+             { "#NoRef [1]"     , "Number of updates w/o reference position or " + cvn, num_no_ref_pos_ + num_no_ref_id_ },
+             { "#NoRefPos [1]"  , "Number of updates w/o reference position "         , num_no_ref_pos_                  },
+             { "#NoRef [1]"     , "Number of updates w/o reference " + cvn            , num_no_ref_id_                   },
+             { "#PosInside [1]" , "Number of updates inside sector"                   , num_pos_inside_                  },
+             { "#PosOutside [1]", "Number of updates outside sector"                  , num_pos_outside_                 },
+             { sn_c + " [1]"    , "Number of updates with correct " + cvn             , num_correct_                     },
+             { sn_nc + " [1]"   , "Number of updates with no correct " + cvn          , num_not_correct_                 } };
+}
+
+}

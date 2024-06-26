@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "eval/results/single.h"
+#include "eval/results/probabilitybase.h"
 #include "eval/results/joined.h"
 
 #include <memory>
@@ -37,7 +37,46 @@ namespace EvaluationRequirementResult
 
 /**
 */
-class SingleFalseBase : public Single
+class FalseBase
+{
+public:
+    FalseBase(const std::string& false_value_name);
+    FalseBase(int num_updates, 
+              int num_no_ref_pos, 
+              int num_no_ref, 
+              int num_pos_outside, 
+              int num_pos_inside,
+              int num_unknown, 
+              int num_correct, 
+              int num_false,
+              const std::string& false_value_name);
+    virtual ~FalseBase() = default;
+
+    int numUpdates() const;
+    int numNoRefPos() const;
+    int numNoRefValue() const;
+    int numPosOutside() const;
+    int numPosInside() const;
+    int numUnknown() const;
+    int numCorrect() const;
+    int numFalse() const;
+
+protected:
+    int num_updates_     {0};
+    int num_no_ref_pos_  {0};
+    int num_no_ref_val_  {0};
+    int num_pos_outside_ {0};
+    int num_pos_inside_  {0};
+    int num_unknown_     {0};
+    int num_correct_     {0};
+    int num_false_       {0};
+
+    std::string false_value_name_;
+};
+
+/**
+*/
+class SingleFalseBase : public FalseBase, public SingleProbabilityBase
 {
 public:
     SingleFalseBase(const std::string& result_type,
@@ -55,7 +94,11 @@ public:
                     int num_pos_inside,
                     int num_unknown, 
                     int num_correct, 
-                    int num_false);
+                    int num_false,
+                    const std::string& false_value_name);
+
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
     int numUpdates() const;
     int numNoRefPos() const;
@@ -81,39 +124,43 @@ public:
     };
 
 protected:
-    int num_updates_     {0};
-    int num_no_ref_pos_  {0};
-    int num_no_ref_val_  {0};
-    int num_pos_outside_ {0};
-    int num_pos_inside_  {0};
-    int num_unknown_     {0};
-    int num_correct_     {0};
-    int num_false_       {0};
+    virtual boost::optional<double> computeResult_impl() const override;
+    virtual unsigned int numIssues() const override;
 
-    boost::optional<float> p_false_;
+    virtual std::vector<std::string> targetTableHeadersCustom() const override;
+    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual std::vector<TargetInfo> targetInfos() const override;
+    virtual std::vector<std::string> detailHeaders() const override;
+    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
+                                               const EvaluationDetail* parent_detail) const override;
+
+    virtual bool detailIsOk(const EvaluationDetail& detail) const override;
+    virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                        const EvaluationDetail& detail, 
+                                        TargetAnnotationType type,
+                                        bool is_ok) const override;
 };
 
 /**
 */
-class JoinedFalseBase : public Joined
+class JoinedFalseBase : public FalseBase, public JoinedProbabilityBase
 {
 public:
     JoinedFalseBase(const std::string& result_type,
                     const std::string& result_id, 
                     std::shared_ptr<EvaluationRequirement::Base> requirement,
                     const SectorLayer& sector_layer, 
-                    EvaluationManager& eval_man);
+                    EvaluationManager& eval_man,
+                    const std::string& false_value_name);
 protected:
-    int num_updates_     {0};
-    int num_no_ref_pos_  {0};
-    int num_no_ref_val_  {0};
-    int num_pos_outside_ {0};
-    int num_pos_inside_  {0};
-    int num_unknown_     {0};
-    int num_correct_     {0};
-    int num_false_       {0};
+    virtual unsigned int numIssues() const override;
+    virtual unsigned int numUpdates() const override;
 
-    boost::optional<float> p_false_;
+    virtual void clearResults_impl() override;
+    virtual void accumulateSingleResult(const std::shared_ptr<Single>& single_result) override;
+    virtual boost::optional<double> computeResult_impl() const override;
+
+    virtual std::vector<SectorInfo> sectorInfos() const override;
 };
 
 }

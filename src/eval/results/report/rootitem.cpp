@@ -17,6 +17,8 @@
 
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
+#include "eval/results/report/section_id.h"
+
 #include "logger.h"
 #include "stringconv.h"
 
@@ -77,7 +79,8 @@ namespace EvaluationResultsReport
         logdbg << "RootItem: getSection: id '" << id << "'";
 
         assert (id.size());
-        std::vector<std::string> parts = String::split(id, ':');
+
+        std::vector<std::string> parts = SectionID::subSections(id);
         assert (parts.size());
 
         Section* tmp;

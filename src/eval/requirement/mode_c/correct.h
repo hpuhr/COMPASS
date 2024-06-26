@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODECCORRECT_H
-#define EVALUATIONREQUIREMENTMODECCORRECT_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
@@ -34,6 +33,9 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PC"; }
+    std::string probabilityName() const override final { return "Probability of correct Mode C"; }
+
     float maxDistanceFt() const;
 
 protected:
@@ -41,4 +43,3 @@ protected:
 };
 
 }
-#endif // EVALUATIONREQUIREMENTDETECTIONCORRECT_H

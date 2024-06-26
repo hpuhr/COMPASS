@@ -18,6 +18,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 class SectorLayer;
 
@@ -57,14 +58,22 @@ public:
                                         const EvaluationManager& eval_manager);
     //tools
     static std::string prependReportResultID(const std::string& id);
+    static std::vector<std::string> subSections(const std::string& section_id);
+    static std::string sectionID(const std::vector<std::string>& sub_sections);
+    static std::string sectionID(const std::string& section0, const std::string& section1);
+    static std::string sectionIDWithoutResults(const std::string& section_id);
+    static std::string sectionID2Path(const std::string& section_id);
 
     //needed section id parts
     static std::string reportResultID();
+    static std::string targetResultsID();
     static std::string targetID();
     static std::string targetID(unsigned int utn);
     static std::string sectorLayerID(const SectorLayer& sector_layer);
     static std::string requirementID(const EvaluationRequirement::Base& requirement);
     static std::string requirementGroupID(const EvaluationRequirement::Base& requirement);
+    static std::string requirementGroupResultID(const EvaluationRequirementResult::Base& result);
+
     static std::string requirementGroupSectorID(const EvaluationRequirement::Base& requirement,
                                                 const SectorLayer& sector_layer);
     static std::string resultID(const EvaluationRequirementResult::Base& result);

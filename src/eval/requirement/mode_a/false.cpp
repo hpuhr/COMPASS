@@ -33,7 +33,7 @@ namespace EvaluationRequirement
 
 ModeAFalse::ModeAFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
                        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man)
 {
 }
 

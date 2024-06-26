@@ -18,7 +18,6 @@
 #include "eval/results/dubious/dubiousbase.h"
 #include "evaluationmanager.h"
 
-
 namespace EvaluationRequirementResult
 {
 
@@ -30,10 +29,11 @@ const std::string SingleDubiousBase::DetailCommentGroupDubious = "CommentsDubiou
 
 /**
 */
-SingleDubiousBase::DetailData::DetailData(unsigned int utn_or_track_number, boost::posix_time::ptime ts_begin)
+SingleDubiousBase::DetailData::DetailData(unsigned int utn_or_track_number, 
+                                          boost::posix_time::ptime ts_begin)
 :   utn_or_tracknum(utn_or_track_number)
-,   tod_begin      (ts_begin)
-,   tod_end        (ts_begin)
+,   tod_begin      (ts_begin           )
+,   tod_end        (ts_begin           )
 {
 }
 
@@ -86,7 +86,7 @@ SingleDubiousBase::SingleDubiousBase(const std::string& result_type,
                                      unsigned int num_pos_outside, 
                                      unsigned int num_pos_inside, 
                                      unsigned int num_pos_inside_dubious)
-:   Single(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+:   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
 ,   num_updates_           (num_updates)
 ,   num_pos_outside_       (num_pos_outside)
 ,   num_pos_inside_        (num_pos_inside)
@@ -148,18 +148,6 @@ std::string SingleDubiousBase::dubiousReasonsString(const EvaluationDetailCommen
     }
     
     return str;
-}
-
-/**
-*/
-std::unique_ptr<nlohmann::json::object_t> SingleDubiousBase::getTargetErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr = 
-        eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
-
-    addAnnotations(*viewable_ptr, false, true);
-
-    return viewable_ptr;
 }
 
 /**
