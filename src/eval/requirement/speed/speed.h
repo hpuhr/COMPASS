@@ -15,14 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENSPEED_H
-#define EVALUATIONREQUIREMENSPEED_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class Speed : public ProbabilityBase
 {
 public:
@@ -57,5 +58,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENSPEED_H

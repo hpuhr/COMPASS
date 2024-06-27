@@ -20,7 +20,7 @@
 #include "evaluationmanager.h"
 #include "timeconv.h"
 
-#include "eval/results/intervalbase.h"
+#include "eval/results/base/intervalbase.h"
 
 #include "util/timeconv.h"
 

@@ -17,7 +17,7 @@
 
 #include "eval/requirement/dubious/dubioustargetconfigwidget.h"
 #include "eval/requirement/dubious/dubioustargetconfig.h"
-//#include "textfielddoublevalidator.h"
+
 #include "logger.h"
 
 #include <QLineEdit>

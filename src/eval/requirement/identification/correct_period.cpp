@@ -16,15 +16,14 @@
  */
 
 #include "eval/requirement/identification/correct_period.h"
-#include "eval/results/identification/correct_period.h"
 #include "eval/requirement/group.h"
 
-//#include "evaluationdata.h"
+#include "eval/results/identification/correct_period.h"
+
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "util/stringconv.h"
-//#include "util/timeconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
 
 #include <QLineEdit>
 #include <QComboBox>

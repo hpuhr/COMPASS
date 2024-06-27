@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/trackangle/trackangle.h"
-#include "eval/results/trackangle/trackanglesingle.h"
+#include "eval/results/trackangle/trackangle.h"
 //#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -127,8 +127,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     unsigned int num_trackangle_comp {0};
     string comment;
 
-    vector<double> values; // track angle diff percentage
-
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -151,6 +149,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
                                              .setValue(Result::DetailKey::Offset, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::OffsetValid, offset.isValid())
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::ValueRef, value_ref)
                                              .setValue(Result::DetailKey::ValueTst, value_tst)
@@ -323,8 +322,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                   num_comp_failed, num_comp_passed,
                   comment);
-
-        values.push_back(trackangle_min_diff);
     }
 
     //        logdbg << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -348,15 +345,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                << " num_comp_failed " <<  num_comp_failed << " num_comp_passed " << num_comp_passed;
 
     assert (num_trackangle_comp == num_comp_failed + num_comp_passed);
-    assert (num_trackangle_comp == values.size());
-
-    //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SingleTrackAngle>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value,
-                num_comp_failed, num_comp_passed,
-                values);
+                num_comp_failed, num_comp_passed);
 }
 
 // deg, m/s

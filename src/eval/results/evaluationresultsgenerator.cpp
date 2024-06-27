@@ -19,11 +19,13 @@
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
 #include "evaluationstandard.h"
+
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/single.h"
-#include "eval/results/joined.h"
+
+#include "eval/results/base/single.h"
+#include "eval/results/base/joined.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
@@ -287,7 +289,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     if (!result_sum)
                         result_sum = result_it->createEmptyJoined("Sum");
 
-                    result_sum->add(result_it);
+                    result_sum->addSingleResult(result_it);
 
                     if (eval_man_.settings().report_split_results_by_mops_)
                     {
@@ -302,7 +304,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                             extra_results_sums[subresult_str+" Sum"] =
                                     result_it->createEmptyJoined(subresult_str+" Sum");
 
-                        extra_results_sums.at(subresult_str+" Sum")->add(result_it);
+                        extra_results_sums.at(subresult_str+" Sum")->addSingleResult(result_it);
                     }
 
                     if (eval_man_.settings().report_split_results_by_aconly_ms_)
@@ -320,7 +322,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                             extra_results_sums[subresult_str+" Sum"] =
                                     result_it->createEmptyJoined(subresult_str+" Sum");
 
-                        extra_results_sums.at(subresult_str+" Sum")->add(result_it);
+                        extra_results_sums.at(subresult_str+" Sum")->addSingleResult(result_it);
                     }
                 }
 

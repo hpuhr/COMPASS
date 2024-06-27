@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "eval/results/correctbase.h"
+#include "eval/results/base/correctbase.h"
 
 namespace EvaluationRequirementResult
 {

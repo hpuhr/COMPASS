@@ -15,15 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONDISTANCE_H
-#define EVALUATIONREQUIREMENPOSITIONDISTANCE_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
-//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class PositionDistance : public ProbabilityBase
 {
 public:
@@ -51,5 +51,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONDISTANCE_H

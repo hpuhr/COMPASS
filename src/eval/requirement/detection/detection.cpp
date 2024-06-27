@@ -16,10 +16,12 @@
  */
 
 #include "eval/requirement/detection/detection.h"
-#include "eval/results/detection/single.h"
+
+#include "eval/results/detection/detection.h"
 
 #include "evaluationmanager.h"
 #include "evaluationdetail.h"
+
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"

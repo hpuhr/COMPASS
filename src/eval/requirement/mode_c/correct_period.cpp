@@ -16,16 +16,15 @@
  */
 
 #include "eval/requirement/mode_c/correct_period.h"
-#include "eval/results/mode_c/correct_period.h"
 #include "eval/requirement/group.h"
+
+#include "eval/results/mode_c/correct_period.h"
 #include "eval/results/report/sectioncontenttable.h"
 
-//#include "evaluationdata.h"
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "util/stringconv.h"
-//#include "util/timeconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
 
 #include <QLineEdit>
 #include <QDoubleValidator>

@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/position/radarrange.h"
-#include "eval/results/position/radarrangesingle.h"
+#include "eval/results/position/radarrange.h"
 //#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -79,7 +79,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     unsigned int num_distances {0};
     string comment;
 
-    vector<double> values;
     vector<double> ref_range_values;
     vector<double> tst_range_values;
 
@@ -101,6 +100,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
                                              .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::ValueValid, offset.isValid())
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -255,7 +255,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
                     num_comp_passed, num_comp_failed,
                     comment);
 
-        values.push_back(range_m_diff);
         ref_range_values.push_back(ref_range_m);
         tst_range_values.push_back(tst_range_m);
     }
@@ -278,16 +277,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
     assert (num_distances == num_comp_failed + num_comp_passed);
-    assert (num_distances == values.size());
-    assert (values.size() == ref_range_values.size());
-    assert (values.size() == tst_range_values.size());
-
-    //assert (details.size() == num_pos);
+    assert (tst_range_values.size() == ref_range_values.size());
 
     return make_shared<EvaluationRequirementResult::SinglePositionRadarRange>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
-                values, ref_range_values, tst_range_values);
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, 
+                ref_range_values, tst_range_values);
 }
 
 }

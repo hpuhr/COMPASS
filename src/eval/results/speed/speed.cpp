@@ -177,6 +177,8 @@ std::vector<double> SingleSpeed::getValues() const
     iterateDetails(func);
 
     values.shrink_to_fit();
+
+    return values;
 }
 
 /**

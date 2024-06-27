@@ -17,9 +17,9 @@
 
 #pragma once
 
-#include "eval/results/single.h"
-#include "eval/results/joined.h"
-#include "eval/results/probabilitybase.h"
+#include "eval/results/base/single.h"
+#include "eval/results/base/joined.h"
+#include "eval/results/base/probabilitybase.h"
 
 #include "valueaccumulator.h"
 
@@ -144,7 +144,7 @@ protected:
 /**
  * Single position results with a final general value.
 */
-class SinglePositionValueBase : public SingleProbabilityBase, public SinglePositionBaseCommon
+class SinglePositionValueBase : public Single, public SinglePositionBaseCommon
 {
 public:
     SinglePositionValueBase(const std::string& result_type,

@@ -22,6 +22,8 @@
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class IdentificationCorrect : public ProbabilityBase
 {
 public:

@@ -16,8 +16,8 @@
  */
 
 #include "eval/results/report/sectioncontenttable.h"
-#include "eval/results/base.h"
-#include "eval/results/single.h"
+#include "eval/results/base/base.h"
+#include "eval/results/base/single.h"
 #include "evaluationmanager.h"
 #include "compass.h"
 #include "dbcontentmanager.h"

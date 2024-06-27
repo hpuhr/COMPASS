@@ -18,7 +18,6 @@
 #include "evaluationresultsgeneratorwidget.h"
 #include "evaluationresultsgenerator.h"
 #include "evaluationmanager.h"
-//#include "textfielddoublevalidator.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

@@ -15,15 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H
-#define EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H
+#pragma once
 
 #include "eval/requirement/base/base.h"
-//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class PositionRadarAzimuth : public Base
 {
 public:
@@ -35,11 +35,9 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
-    //@TODO_EVAL
+    //@TODO_EVAL: what is the name of the final value?
     std::string getConditionResultNameShort() const override final { return "TODO"; }
     std::string getConditionResultName() const override final { return "TODO"; }
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H

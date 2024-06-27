@@ -22,6 +22,8 @@
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class IdentificationFalse : public ProbabilityBase
 {
 public:
@@ -43,8 +45,6 @@ public:
     bool useMsTi() const;
 
 protected:
-    
-
     // true: all must be false, false: at least one must be false
     bool require_all_false_ {true};
 

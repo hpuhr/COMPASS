@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "eval/results/probabilitybase.h"
+#include "eval/results/base/probabilitybase.h"
 
 #include <memory>
 #include <string>
@@ -147,7 +147,7 @@ protected:
     virtual unsigned int numUpdates() const override;
 
     virtual void clearResults_impl() override;
-    virtual void accumulateSingleResult(const std::shared_ptr<Single>& single_result) override;
+    virtual void accumulateSingleResult(const std::shared_ptr<Single>& single_result, bool first, bool last) override;
     virtual boost::optional<double> computeResult_impl() const override;
 
     virtual std::vector<SectorInfo> sectorInfos() const override;

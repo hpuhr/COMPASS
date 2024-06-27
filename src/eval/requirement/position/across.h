@@ -15,15 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONACROSS_H
-#define EVALUATIONREQUIREMENPOSITIONACROSS_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
-//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class PositionAcross : public ProbabilityBase
 {
 public:
@@ -46,5 +46,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONACROSS_H

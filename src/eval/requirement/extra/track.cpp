@@ -16,12 +16,13 @@
  */
 
 #include "eval/requirement/extra/track.h"
-#include "eval/results/extra/tracksingle.h"
-//#include "evaluationdata.h"
+
+#include "eval/results/extra/track.h"
+
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "stringconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
 #include "timeperiod.h"
 
 #include <boost/algorithm/string/join.hpp>

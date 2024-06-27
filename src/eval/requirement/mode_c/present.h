@@ -15,14 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODECPRESENT_H
-#define EVALUATIONREQUIREMENTMODECPRESENT_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class ModeCPresent : public ProbabilityBase
 {
 public:
@@ -41,4 +42,3 @@ protected:
 };
 
 }
-#endif // EVALUATIONREQUIREMENTMODECPRESENT_H

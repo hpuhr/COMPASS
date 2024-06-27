@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSGENERATORWIDGET_H
-#define EVALUATIONRESULTSGENERATORWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -64,5 +63,3 @@ protected:
     QSpinBox*  grid_num_cells_y_box_  = nullptr;
     QSpinBox*  grid_pix_per_cell_box_ = nullptr;
 };
-
-#endif // EVALUATIONRESULTSGENERATORWIDGET_H

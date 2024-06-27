@@ -20,7 +20,6 @@
 #include "logger.h"
 
 #include <cassert>
-#include <algorithm>
 
 namespace EvaluationRequirementResult
 {

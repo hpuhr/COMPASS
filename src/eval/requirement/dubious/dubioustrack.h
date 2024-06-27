@@ -19,15 +19,13 @@
 
 #include "eval/requirement/base/probabilitybase.h"
 
-#include <QVariant>
-
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
-
-#include <cassert>
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class DubiousTrack : public ProbabilityBase
 {
 public:

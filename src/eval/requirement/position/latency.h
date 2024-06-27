@@ -15,15 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONLATENCY_H
-#define EVALUATIONREQUIREMENPOSITIONLATENCY_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
-//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class PositionLatency : public ProbabilityBase
 {
 public:
@@ -45,5 +45,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONLATENCY_H

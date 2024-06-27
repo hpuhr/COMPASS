@@ -151,6 +151,7 @@ SingleGeneric::SingleGeneric(const std::string& result_type, const std::string& 
                 num_pos_inside, num_unknown, num_correct, num_false)
 ,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
 {
+    updateResult();
 }
 
 /**
@@ -365,7 +366,7 @@ void JoinedGeneric::clearResults_impl()
 
 /**
 */
-void JoinedGeneric::accumulateSingleResult(const std::shared_ptr<Single>& single_result)
+void JoinedGeneric::accumulateSingleResult(const std::shared_ptr<Single>& single_result, bool first, bool last)
 {
     std::shared_ptr<SingleGeneric> single = std::static_pointer_cast<SingleGeneric>(single_result);
 

@@ -15,15 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONDISTANCERMS_H
-#define EVALUATIONREQUIREMENPOSITIONDISTANCERMS_H
+#pragma once
 
 #include "eval/requirement/base/base.h"
-//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class PositionDistanceRMS : public Base
 {
 public:
@@ -40,5 +40,3 @@ public:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONDISTANCERMS_H

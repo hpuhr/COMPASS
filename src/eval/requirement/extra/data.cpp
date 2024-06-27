@@ -16,12 +16,13 @@
  */
 
 #include "eval/requirement/extra/data.h"
-#include "eval/results/extra/datasingle.h"
-//#include "evaluationdata.h"
+
+#include "eval/results/extra/data.h"
+
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "stringconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
 #include "timeperiod.h"
 
 using namespace std;

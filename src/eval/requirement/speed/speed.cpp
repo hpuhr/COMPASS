@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/speed/speed.h"
-#include "eval/results/speed/speedsingle.h"
+#include "eval/results/speed/speed.h"
 //#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -123,8 +123,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     unsigned int num_speeds {0};
     string comment;
 
-    vector<double> values;
-
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -143,6 +141,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
                                              .setValue(Result::DetailKey::Offset, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::OffsetValid, offset.isValid())
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -270,8 +269,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_comp_failed, num_comp_passed,
                     comment);
-
-        values.push_back(spd_diff);
     }
 
     //        logdbg << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -295,15 +292,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
                << " num_comp_passed " << num_comp_passed;
 
     assert (num_speeds == num_comp_failed + num_comp_passed);
-    assert (num_speeds == values.size());
-
-    //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SingleSpeed>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value,
-                num_comp_failed, num_comp_passed,
-                values);
+                num_comp_failed, num_comp_passed);
 }
 
 }

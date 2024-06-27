@@ -22,6 +22,8 @@
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class ModeCCorrect : public ProbabilityBase
 {
 public:

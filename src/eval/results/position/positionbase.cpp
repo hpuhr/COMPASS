@@ -341,14 +341,14 @@ SinglePositionValueBase::SinglePositionValueBase(const std::string& result_type,
                                                  unsigned int num_pos_inside,
                                                  unsigned int num_passed, 
                                                  unsigned int num_failed)
-:   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+:   Single(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
 ,   SinglePositionBaseCommon(num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_passed, num_failed)
 {
 }
 
 /**
 */
-std::vector<double> SinglePositionProbabilityBase::getValues() const
+std::vector<double> SinglePositionValueBase::getValues() const
 {
     std::vector<double> values;
     values.reserve(getDetails().size());
@@ -554,7 +554,7 @@ std::vector<double> JoinedPositionProbabilityBase::getValues() const
 /**
  * Result value for all probability based position requirement results.
  */
-boost::optional<double> SinglePositionProbabilityBase::computeFinalResultValue() const
+boost::optional<double> JoinedPositionProbabilityBase::computeFinalResultValue() const
 {
     auto total = num_passed_ + num_failed_;
 

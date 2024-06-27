@@ -1,5 +1,21 @@
-#ifndef EVALUATIONREQUIREMENT_PROBABILITYBASECONFIG_H
-#define EVALUATIONREQUIREMENT_PROBABILITYBASECONFIG_H
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#pragma once
 
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/base/comparisontype.h"
@@ -9,8 +25,10 @@ namespace EvaluationRequirement {
 class ProbabilityBaseConfig : public BaseConfig
 {
 public:
-    ProbabilityBaseConfig(const std::string& class_id, const std::string& instance_id,
-                          Group& group, EvaluationStandard& standard,
+    ProbabilityBaseConfig(const std::string& class_id, 
+                          const std::string& instance_id,
+                          Group& group, 
+                          EvaluationStandard& standard,
                           EvaluationManager& eval_man);
     virtual ~ProbabilityBaseConfig() {}
 
@@ -27,5 +45,3 @@ protected:
 };
 
 } // namespace EvaluationRequirement
-
-#endif // EVALUATIONREQUIREMENT_PROBABILITYBASECONFIG_H

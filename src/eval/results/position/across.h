@@ -55,14 +55,14 @@ protected:
 /**
 */
 class JoinedPositionAcross : public JoinedPositionProbabilityBase
-    {
-    public:
-        JoinedPositionAcross(const std::string& result_id, 
-                             std::shared_ptr<EvaluationRequirement::Base> requirement,
-                             const SectorLayer& sector_layer, 
-                             EvaluationManager& eval_man);
-    protected:
-        virtual std::vector<SectorInfo> sectorInfos() const override;
-    };
+{
+public:
+    JoinedPositionAcross(const std::string& result_id, 
+                         std::shared_ptr<EvaluationRequirement::Base> requirement,
+                         const SectorLayer& sector_layer, 
+                         EvaluationManager& eval_man);
+protected:
+    virtual std::vector<SectorInfo> sectorInfos() const override;
+};
 
 }

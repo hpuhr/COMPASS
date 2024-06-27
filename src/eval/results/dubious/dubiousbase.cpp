@@ -22,10 +22,57 @@ namespace EvaluationRequirementResult
 {
 
 /************************************************************************************
- * SingleDubiousBase
+ * DubiousBase
  ************************************************************************************/
 
-const std::string SingleDubiousBase::DetailCommentGroupDubious = "CommentsDubious";
+/**
+*/
+DubiousBase::DubiousBase() = default;
+
+/**
+*/
+DubiousBase::DubiousBase(unsigned int num_updates,
+                         unsigned int num_pos_outside,
+                         unsigned int num_pos_inside,
+                         unsigned int num_pos_inside_dubious)
+:   num_updates_           (num_updates)
+,   num_pos_outside_       (num_pos_outside)
+,   num_pos_inside_        (num_pos_inside)
+,   num_pos_inside_dubious_(num_pos_inside_dubious)
+{
+}
+
+/**
+*/
+unsigned int DubiousBase::numPosOutside() const
+{
+    return num_pos_outside_;
+}
+
+/**
+*/
+unsigned int DubiousBase::numPosInside() const
+{
+    return num_pos_inside_;
+}
+
+/**
+*/
+unsigned int DubiousBase::numPosInsideDubious() const
+{
+    return num_pos_inside_dubious_;
+}
+
+/**
+*/
+unsigned int DubiousBase::numUpdates() const
+{
+    return num_updates_;
+}
+
+/************************************************************************************
+ * SingleDubiousBase::DetailData
+ ************************************************************************************/
 
 /**
 */
@@ -72,6 +119,12 @@ unsigned int SingleDubiousBase::DetailData::numDubious() const
     return cnt;
 }
 
+/************************************************************************************
+ * SingleDubiousBase
+ ************************************************************************************/
+
+const std::string SingleDubiousBase::DetailCommentGroupDubious = "CommentsDubious";
+
 /**
 */
 SingleDubiousBase::SingleDubiousBase(const std::string& result_type,
@@ -86,45 +139,14 @@ SingleDubiousBase::SingleDubiousBase(const std::string& result_type,
                                      unsigned int num_pos_outside, 
                                      unsigned int num_pos_inside, 
                                      unsigned int num_pos_inside_dubious)
-:   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
-,   num_updates_           (num_updates)
-,   num_pos_outside_       (num_pos_outside)
-,   num_pos_inside_        (num_pos_inside)
-,   num_pos_inside_dubious_(num_pos_inside_dubious)
+:   DubiousBase(num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
 {
 }
 
 /**
 */
 SingleDubiousBase::~SingleDubiousBase() = default;
-
-/**
-*/
-unsigned int SingleDubiousBase::numPosOutside() const
-{
-    return num_pos_outside_;
-}
-
-/**
-*/
-unsigned int SingleDubiousBase::numPosInside() const
-{
-    return num_pos_inside_;
-}
-
-/**
-*/
-unsigned int SingleDubiousBase::numPosInsideDubious() const
-{
-    return num_pos_inside_dubious_;
-}
-
-/**
-*/
-unsigned int SingleDubiousBase::numUpdates() const
-{
-    return num_updates_;
-}
 
 /**
 */
@@ -192,7 +214,8 @@ JoinedDubiousBase::JoinedDubiousBase(const std::string& result_type,
                                      std::shared_ptr<EvaluationRequirement::Base> requirement,
                                      const SectorLayer& sector_layer, 
                                      EvaluationManager& eval_man)
-:   Joined(result_type, result_id, requirement, sector_layer, eval_man)
+:   DubiousBase()
+,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
 {
 }
 

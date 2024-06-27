@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/position/radarazimuth.h"
-#include "eval/results/position/radarazimuthsingle.h"
+#include "eval/results/position/radarazimuth.h"
 #include "evaluationmanager.h"
 #include "logger.h"
 #include "util/number.h"
@@ -80,8 +80,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
     unsigned int num_distances {0};
     string comment;
 
-    vector<double> values;
-
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -100,6 +98,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
                                              .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::ValueValid, offset.isValid())
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -253,8 +252,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_comp_passed, num_comp_failed,
                     comment);
-
-        values.push_back(azm_deg_diff);
     }
 
     //        logdbg << "EvaluationRequirementPositionRadarAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -273,16 +270,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
                << " num_distances " << num_distances;
 
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
-
     assert (num_distances == num_comp_failed + num_comp_passed);
-    assert (num_distances == values.size());
-
-    //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionRadarAzimuth>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
-                values);
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed);
 }
 
 }

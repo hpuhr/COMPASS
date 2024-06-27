@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONMANAGER_H
-#define EVALUATIONMANAGER_H
+#pragma once
 
 #include "configurable.h"
 #include "evaluationdata.h"
@@ -395,5 +394,3 @@ protected:
 
     dbContent::DataSourceCompoundCoverage tst_srcs_coverage_;
 };
-
-#endif // EVALUATIONMANAGER_H

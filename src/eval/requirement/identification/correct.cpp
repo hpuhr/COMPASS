@@ -16,13 +16,14 @@
  */
 
 #include "eval/requirement/identification/correct.h"
-#include "eval/results/identification/correctsingle.h"
-//#include "evaluationdata.h"
+
+#include "eval/results/identification/correct.h"
+
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "util/stringconv.h"
-#include "util/timeconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
+#include "util/timeconv.h"
 
 using namespace std;
 using namespace Utils;

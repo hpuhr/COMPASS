@@ -16,13 +16,14 @@
  */
 
 #include "eval/requirement/mode_c/false.h"
-#include "eval/results/mode_c/falsesingle.h"
-//#include "evaluationdata.h"
+
+#include "eval/results/mode_c/false.h"
+
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "util/stringconv.h"
-#include "util/timeconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
+#include "util/timeconv.h"
 
 using namespace std;
 using namespace Utils;

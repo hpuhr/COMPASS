@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "eval/results/intervalbase.h"
+#include "eval/results/base/intervalbase.h"
 
 namespace EvaluationRequirementResult
 {

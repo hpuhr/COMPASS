@@ -23,6 +23,8 @@
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class TrackAngle : public ProbabilityBase
 {
 public:

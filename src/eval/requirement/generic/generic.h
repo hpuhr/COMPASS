@@ -49,7 +49,7 @@ class GenericBase : public ProbabilityBase
 */
 class GenericInteger : public GenericBase
 {
-  public:
+public:
     GenericInteger(const std::string& name, 
                    const std::string& short_name, 
                    const std::string& group_name,
@@ -61,8 +61,7 @@ class GenericInteger : public GenericBase
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer) override;
 
-  protected:
-
+protected:
     std::function <std::pair<ValueComparisonResult,std::string> (
         const dbContent::TargetReport::Chain::DataID& id,
         const EvaluationTargetData& target_data,
@@ -73,7 +72,7 @@ class GenericInteger : public GenericBase
 */
 class GenericDouble : public GenericBase
 {
-  public:
+public:
     GenericDouble(const std::string& name, 
                   const std::string& short_name, 
                   const std::string& group_name,
@@ -86,8 +85,7 @@ class GenericDouble : public GenericBase
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer) override;
 
-  protected:
-
+protected:
     double threshold_ {0};
 
     std::function <std::pair<ValueComparisonResult,std::string> (

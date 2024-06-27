@@ -20,7 +20,7 @@
 #include "sectorlayer.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/base.h"
+#include "eval/results/base/base.h"
 #include "evaluationmanager.h"
 
 #include <QString>

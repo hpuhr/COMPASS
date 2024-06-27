@@ -18,9 +18,6 @@
 #pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
-//#include "dbcontent/target/targetposition.h"
-
-#include <QVariant>
 
 namespace EvaluationRequirement
 {
