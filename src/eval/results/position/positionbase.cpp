@@ -204,6 +204,8 @@ std::vector<double> SinglePositionProbabilityBase::getValues() const
     iterateDetails(func);
 
     values.shrink_to_fit();
+
+    return values;
 }
 
 /**
@@ -366,6 +368,8 @@ std::vector<double> SinglePositionValueBase::getValues() const
     iterateDetails(func);
 
     values.shrink_to_fit();
+
+    return values;
 }
 
 /**

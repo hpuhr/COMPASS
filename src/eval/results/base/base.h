@@ -32,11 +32,13 @@ class EvaluationTargetData;
 class EvaluationManager;
 class SectorLayer;
 
-namespace EvaluationRequirement {
+namespace EvaluationRequirement 
+{
     class Base;
 }
 
-namespace EvaluationResultsReport {
+namespace EvaluationResultsReport 
+{
     class Section;
     class RootItem;
     class SectionContentTable;
@@ -50,17 +52,18 @@ namespace EvaluationRequirementResult
 class Base
 {
 public:
-    typedef std::vector<EvaluationDetail> EvaluationDetails;
-    typedef std::array<int, 2>            DetailIndex;
+    typedef std::vector<EvaluationDetail> EvaluationDetails;  // details vector
+    typedef std::array<int, 2>            DetailIndex;        // index for a nested detail struct
 
     enum class BaseType
     {
-        Single = 0,    // target results (for specific utn)
-        Joined         // sum results (for specific requirement in specific sector)
+        Single = 0, // target results (for specific utn)
+        Joined      // sum results (for specific requirement in specific sector)
     };
 
     /**
-    */
+     * Info table entry struct.
+     */
     struct Info
     {
         Info() {}
@@ -84,15 +87,14 @@ public:
          EvaluationManager& eval_man);
     virtual ~Base();
 
-    std::shared_ptr<EvaluationRequirement::Base> requirement() const;
-
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
+    /// returns the base type of the result (either single or joined)
+    virtual BaseType baseType() const = 0;
 
     std::string type() const;
     std::string resultId() const;
     std::string reqGrpId() const;
 
-    virtual BaseType baseType() const = 0;
+    std::shared_ptr<EvaluationRequirement::Base> requirement() const;
 
     bool isSingle() const;
     bool isJoined() const;
@@ -108,11 +110,19 @@ public:
     bool hasIssues() const;
     bool isIgnored() const;
 
+    /// returns the number of issues detected for this result
     virtual unsigned int numIssues() const = 0;
 
     QVariant resultValue() const;
     QVariant resultValueOptional(const boost::optional<double>& value) const;
     virtual QVariant resultValue(double value) const;
+
+    /// checks if the result references a specific section of the report
+    virtual bool hasReference(const EvaluationResultsReport::SectionContentTable& table, 
+                              const QVariant& annotation) const = 0;
+    /// returns a report reference link
+    virtual std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
+                                  const QVariant& annotation) const = 0;
 
     /// checks if the result can generate viewable data for the given table and annotation index
     virtual bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
@@ -123,10 +133,8 @@ public:
     /// creates overview viewable data
     virtual std::unique_ptr<nlohmann::json::object_t> viewableData() const = 0;
 
-    virtual bool hasReference(const EvaluationResultsReport::SectionContentTable& table, 
-                              const QVariant& annotation) const = 0;
-    virtual std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
-                                  const QVariant& annotation) const = 0;
+    /// adds the result to the report root item
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
     size_t numDetails() const;
     const EvaluationDetails& getDetails() const;
@@ -173,7 +181,7 @@ protected:
             return *this; 
         }
         /// configure as highlighted result detail
-        AnnotationOptions& highlight(const DetailIndex& index) 
+        AnnotationOptions& highlight(const DetailIndex& index)
         { 
             viewable_type = ViewableType::Highlight; 
             detail_index  = index;
@@ -192,21 +200,29 @@ protected:
     };
 
     /**
+     * Information about a viewable.
     */
     struct ViewableInfo
     {
         ViewableType             viewable_type; // viewable type
         QRectF                   bounds;        // viewable bounds (e.g. for viewpoint region of interest)
-        boost::posix_time::ptime timestamp;     // viewable timestamp (e.g. for single occurances)
+        boost::posix_time::ptime timestamp;     // viewable timestamp (e.g. for single occurrences)
     };
 
-    /// compute final result value
+    void setIgnored();
+
+    QString formatValue(double v, int precision = 2) const;
+
+    void setDetails(const EvaluationDetails& details);
+    void addDetails(const EvaluationDetails& details);
+    void clearDetails();
+    bool detailIndexValid(const DetailIndex& index) const; 
+
+    /// compute result value
     virtual boost::optional<double> computeResult() const;
     virtual boost::optional<double> computeResult_impl() const = 0;
     
     std::string conditionResultString() const;
-
-    void setIgnored();
 
     std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options) const;
 
@@ -227,14 +243,6 @@ protected:
     virtual std::string getRequirementSumSectionID() const;
 
     EvaluationResultsReport::Section& getRequirementSection(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-
-    void setDetails(const EvaluationDetails& details);
-    void addDetails(const EvaluationDetails& details);
-    void clearDetails();
-
-    bool detailIndexValid(const DetailIndex& index) const; 
-
-    QString formatValue(double v, int precision = 2) const;
 
     std::string type_;
     std::string result_id_;

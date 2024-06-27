@@ -92,7 +92,10 @@ public:
            const EvaluationDetails& details);
     virtual ~Single();
 
-    virtual BaseType baseType() const override { return BaseType::Single; }
+    BaseType baseType() const override final { return BaseType::Single; }
+
+    void updateResult() override final;
+    void updateUseFromTarget();
 
     bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
@@ -110,20 +113,18 @@ public:
 
     unsigned int utn() const;
     const EvaluationTargetData* target() const;
-    void setInterestFactor(double factor);
 
-    void updateUseFromTarget ();
+    void setInterestFactor(double factor);
 
     //wip - on demand detail creation
     std::unique_ptr<EvaluationDetails> generateDetails() const;
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
 
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const = 0;
     virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const = 0;
-
-    void updateResult() override final;
 
     const static std::string tr_details_table_name_;
     const static std::string target_table_name_;

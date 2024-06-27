@@ -94,8 +94,6 @@ protected:
 
     virtual DetailNestingMode detailNestingMode() const { return DetailNestingMode::Nested; } 
 
-    
-
     mutable float track_duration_all_     {0};
     mutable float track_duration_nondub_  {0};
     mutable float track_duration_dubious_ {0};

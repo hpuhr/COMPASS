@@ -46,7 +46,7 @@ public:
            EvaluationManager& eval_man);
     virtual ~Joined();
 
-    virtual BaseType baseType() const override { return BaseType::Joined; }
+    BaseType baseType() const override final { return BaseType::Joined; }
 
     void clearResults();
     void addSingleResult(std::shared_ptr<Single> other);
@@ -84,15 +84,25 @@ protected:
         GridOrAnnotations
     };
 
-    //virtual void join_impl(std::shared_ptr<Single> other) = 0;
+    bool resultUsed(const std::shared_ptr<Single>& result) const;
+    void iterateSingleResults(const SingleResultFunc& func,
+                              const SingleResultFunc& func_used,
+                              const SingleResultFunc& func_unused) const;
+
+    /// clears result data before accumulating single results
     virtual void clearResults_impl() = 0;
+    /// accumulates a single result
     virtual void accumulateSingleResult(const std::shared_ptr<Single>& single_result, 
                                         bool first,
                                         bool last) = 0;
+    /// total number of updates
     virtual unsigned int numUpdates() const = 0;
 
     bool exportAsCSV() const;
+
+    /// if true an export callback is added to the table
     virtual bool canExportCSV() const { return false; }
+    /// implements csv export 
     virtual bool exportAsCSV(std::ofstream& strm) const { return false; }
 
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
@@ -100,17 +110,14 @@ protected:
     void createAnnotations(nlohmann::json& annotations, 
                            const AnnotationOptions& options) const override final;
 
+    //types of overview annotations to create
     virtual OverviewMode overviewMode() const { return OverviewMode::GridOrAnnotations; }
 
     virtual std::vector<SectorInfo> sectorInfosCommon() const;
     std::vector<SectorInfo> sectorConditionInfos() const;
 
+    /// returns infos for the sector overview table
     virtual std::vector<SectorInfo> sectorInfos() const = 0;
-
-    bool resultUsed(const std::shared_ptr<Single>& result) const;
-    void iterateSingleResults(const SingleResultFunc& func,
-                              const SingleResultFunc& func_used,
-                              const SingleResultFunc& func_unused) const;
 
     std::vector<std::shared_ptr<Single>> results_;
 
