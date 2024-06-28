@@ -61,7 +61,7 @@ double ValueAccumulator::var() const
 */
 double ValueAccumulator::stddev() const
 {
-    return std::sqrt(value_var_);
+    return value_stddev_;
 }
 
 /**

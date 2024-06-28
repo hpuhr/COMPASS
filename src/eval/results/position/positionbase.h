@@ -168,6 +168,8 @@ public:
 
     virtual std::vector<double> getValues() const override final;
 
+    QVariant resultValue(double value) const override final;
+
 protected:
     virtual boost::optional<double> computeResult_impl() const override;
     virtual unsigned int numIssues() const override;
@@ -196,7 +198,8 @@ protected:
 
     void common_clearResults();
     void common_accumulateSingleResult(const PositionBase& single_result, 
-                                       const std::vector<double>& values);
+                                       const std::vector<double>& values,
+                                       bool last);
 
     boost::optional<double> common_computeResult() const;
     virtual boost::optional<double> computeFinalResultValue() const = 0;
@@ -217,7 +220,7 @@ public:
                                   EvaluationManager& eval_man,
                                   const std::string& csv_header);
 
-    virtual std::vector<double> getValues() const override final;
+    std::vector<double> getValues() const override final;
 
 protected:
     boost::optional<double> computeFinalResultValue() const override final;
@@ -245,7 +248,9 @@ public:
                             EvaluationManager& eval_man,
                             const std::string& csv_header);
 
-    virtual std::vector<double> getValues() const override final;
+    std::vector<double> getValues() const override final;
+
+    QVariant resultValue(double value) const override final;
 
 protected:
     virtual unsigned int numIssues() const override;

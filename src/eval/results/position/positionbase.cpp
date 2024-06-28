@@ -128,6 +128,8 @@ boost::optional<double> SinglePositionBaseCommon::common_computeResult() const
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
+    accumulator_.reset();
+
     auto values = getValues();
 
     assert (values.size() == num_passed_ + num_failed_);
@@ -146,7 +148,7 @@ boost::optional<double> SinglePositionBaseCommon::common_computeResult() const
 */
 unsigned int SinglePositionBaseCommon::common_numIssues() const
 {
-    return num_failed_ > 0;
+    return num_failed_;
 }
 
 /**
@@ -197,7 +199,7 @@ std::vector<double> SinglePositionProbabilityBase::getValues() const
         if (!offset_valid.has_value() || !offset_valid.value())
             return;
 
-        auto offset = detail.getValueAsOrAssert<float>(Value);
+        auto offset = detail.getValueAsOrAssert<double>(Value);
         values.push_back(offset);
     };
 
@@ -361,7 +363,7 @@ std::vector<double> SinglePositionValueBase::getValues() const
         if (!offset_valid.has_value() || !offset_valid.value())
             return;
 
-        auto offset = detail.getValueAsOrAssert<float>(Value);
+        auto offset = detail.getValueAsOrAssert<double>(Value);
         values.push_back(offset);
     };
 
@@ -370,6 +372,14 @@ std::vector<double> SinglePositionValueBase::getValues() const
     values.shrink_to_fit();
 
     return values;
+}
+
+/**
+*/
+QVariant SinglePositionValueBase::resultValue(double value) const
+{
+    //by default reformat result value to 2 decimals
+    return formatValue(value);
 }
 
 /**
@@ -478,7 +488,8 @@ void JoinedPositionBase::common_clearResults()
 /**
 */
 void JoinedPositionBase::common_accumulateSingleResult(const PositionBase& single_result,
-                                                       const std::vector<double>& values)
+                                                       const std::vector<double>& values,
+                                                       bool last)
 {
     num_pos_         += single_result.numPos();
     num_no_ref_      += single_result.numNoRef();
@@ -487,7 +498,7 @@ void JoinedPositionBase::common_accumulateSingleResult(const PositionBase& singl
     num_passed_      += single_result.numPassed();
     num_failed_      += single_result.numFailed();
 
-    accumulator_.accumulate(values);
+    accumulator_.accumulate(values, last);
 }
 
 /**
@@ -595,7 +606,7 @@ void JoinedPositionProbabilityBase::accumulateSingleResult(const std::shared_ptr
 {
     std::shared_ptr<SinglePositionProbabilityBase> single = std::static_pointer_cast<SinglePositionProbabilityBase>(single_result);
 
-    common_accumulateSingleResult(*single, single->getValues());
+    common_accumulateSingleResult(*single, single->getValues(), last);
 }
 
 /**
@@ -695,6 +706,14 @@ std::vector<double> JoinedPositionValueBase::getValues() const
 
 /**
 */
+QVariant JoinedPositionValueBase::resultValue(double value) const
+{
+    //by default reformat result value to 2 decimals
+    return formatValue(value);
+}
+
+/**
+*/
 unsigned int JoinedPositionValueBase::numIssues() const
 {
     return common_numIssues();
@@ -720,7 +739,7 @@ void JoinedPositionValueBase::accumulateSingleResult(const std::shared_ptr<Singl
 {
     std::shared_ptr<SinglePositionValueBase> single = std::static_pointer_cast<SinglePositionValueBase>(single_result);
 
-    common_accumulateSingleResult(*single, single->getValues());
+    common_accumulateSingleResult(*single, single->getValues(), last);
 }
 
 /**

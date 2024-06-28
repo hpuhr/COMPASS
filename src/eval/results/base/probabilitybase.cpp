@@ -148,7 +148,7 @@ boost::optional<double> JoinedProbabilityBase::computeResult() const
     auto result = computeResult_impl();
 
     //invert probability?
-    if (result.has_value())
+    if (result.has_value() && probRequirement().invertProb())
         result = invertProb(result.value());
 
     return result;

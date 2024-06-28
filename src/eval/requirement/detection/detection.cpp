@@ -53,15 +53,14 @@ Detection::Detection(const std::string& name,
                      bool use_miss_tolerance, 
                      float miss_tolerance_s, 
                      bool hold_for_any_target)
-    : ProbabilityBase     (name, short_name, group_name, prob, prob_check_type, invert_prob, eval_man),
+    : ProbabilityBase     (name, short_name, group_name, prob, prob_check_type, invert_prob, eval_man, hold_for_any_target),
       update_interval_s_  (update_interval_s), 
       use_min_gap_length_ (use_min_gap_length), 
       min_gap_length_s_   (min_gap_length_s),
       use_max_gap_length_ (use_max_gap_length), 
       max_gap_length_s_   (max_gap_length_s), 
       use_miss_tolerance_ (use_miss_tolerance),
-      miss_tolerance_s_   (miss_tolerance_s),
-      hold_for_any_target_(hold_for_any_target)
+      miss_tolerance_s_   (miss_tolerance_s)
 {
 }
 
@@ -637,13 +636,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
     return make_shared<EvaluationRequirementResult::SingleDetection>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, sum_uis, sum_missed_uis, ref_periods, ref_updates);
-}
-
-/**
-*/
-bool Detection::holdForAnyTarget() const
-{
-    return hold_for_any_target_;
 }
 
 /**

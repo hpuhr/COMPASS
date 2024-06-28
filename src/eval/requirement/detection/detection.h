@@ -60,8 +60,6 @@ public:
     std::string probabilityNameShort() const override final { return "PD"; }
     std::string probabilityName() const override final { return "Probability of Detection"; }
 
-    bool holdForAnyTarget() const;
-
 protected:
     bool isMiss (float d_tod) const;
     unsigned int getNumMisses(float d_tod) const;
@@ -76,10 +74,6 @@ protected:
 
     bool  use_miss_tolerance_{false};
     float miss_tolerance_s_  {0};
-
-    bool  hold_for_any_target_{false}; // if requirement must hold for any target (all single targets)
-
-    
 };
 
 }

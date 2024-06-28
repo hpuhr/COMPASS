@@ -370,23 +370,35 @@ void Joined::updateToChanges()
     clearResults();
 
     //accumulate single results
-    size_t num_single_results = results_.size();
+    size_t nr = results_.size();
 
-    for (size_t i = 0; i < num_single_results; ++i)
+    std::vector<size_t> used;
+
+    //collect used results
+    for (size_t i = 0; i < nr; ++i)
     {
         auto& single = results_[ i ];
 
+        //reset interest
         single->setInterestFactor(0);
 
-        if (!resultUsed(single))
-            continue;
+        if (resultUsed(single))
+            used.push_back(i);
+    }
+
+    size_t nu = used.size();
+
+    //accumulate all used results
+    for (size_t i = 0; i < nu; ++i)
+    {
+        auto& single = results_[ used[ i ] ];
 
         ++num_targets_;
 
         if (single->hasFailed())
             ++num_failed_targets_;
 
-        accumulateSingleResult(single, i == 0, i == num_single_results - 1);
+        accumulateSingleResult(single, i == 0, i == nu - 1);
     }
 
     //update result
