@@ -122,7 +122,8 @@ class ViewPointGenFeaturePointGeometry : public ViewPointGenFeature
 public:
     ViewPointGenFeaturePointGeometry(const std::string& type,
                                      const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                                     const std::vector<QColor>& colors = std::vector<QColor>());
+                                     const std::vector<QColor>& colors = std::vector<QColor>(),
+                                     bool enable_color_vector = true);
     virtual ~ViewPointGenFeaturePointGeometry() = default;
 
     virtual void reserve(size_t n, bool reserve_cols);
@@ -148,6 +149,7 @@ protected:
 private:
     std::vector<Eigen::Vector2d> positions_;
     std::vector<QColor>          colors_;
+    bool                         enable_color_vector_ = true;
 };
 
 /**
@@ -168,7 +170,8 @@ public:
     ViewPointGenFeaturePoints(Symbol symbol = Symbol::Square,
                               float symbol_size = 6.0f,
                               const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                              const std::vector<QColor>& colors = std::vector<QColor>());
+                              const std::vector<QColor>& colors = std::vector<QColor>(),
+                              bool enable_color_vector = true);
     virtual ~ViewPointGenFeaturePoints() = default;
 
     static const std::string FeatureName;
@@ -200,7 +203,8 @@ public:
     ViewPointGenFeatureLineString(bool interpolated,
                                   float line_width = 1.0f,
                                   const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                                  const std::vector<QColor>& colors = std::vector<QColor>());
+                                  const std::vector<QColor>& colors = std::vector<QColor>(),
+                                  bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureLineString() = default;
 
     static const std::string FeatureName;
@@ -221,7 +225,8 @@ class ViewPointGenFeatureLines : public ViewPointGenFeaturePointGeometry
 public:
     ViewPointGenFeatureLines(float line_width = 1.0f,
                              const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                             const std::vector<QColor>& colors = std::vector<QColor>());
+                             const std::vector<QColor>& colors = std::vector<QColor>(),
+                             bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureLines() = default;
 
     static const std::string FeatureName;
@@ -243,7 +248,8 @@ public:
                                    size_t num_points = 32,
                                    const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
                                    const std::vector<QColor>& colors = std::vector<QColor>(),
-                                   const std::vector<Eigen::Vector3d>& sizes = std::vector<Eigen::Vector3d>());
+                                   const std::vector<Eigen::Vector3d>& sizes = std::vector<Eigen::Vector3d>(),
+                                   bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureErrEllipses() = default;
 
     virtual void reserve(size_t n, bool reserve_cols) override;

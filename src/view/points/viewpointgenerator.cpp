@@ -124,10 +124,12 @@ const std::string ViewPointGenFeaturePointGeometry::FeatureFieldNameColors    = 
 */
 ViewPointGenFeaturePointGeometry::ViewPointGenFeaturePointGeometry(const std::string& type,
                                                                    const std::vector<Eigen::Vector2d>& positions,
-                                                                   const std::vector<QColor>& colors)
-:   ViewPointGenFeature(type     )
-,   positions_         (positions)
-,   colors_            (colors   )
+                                                                   const std::vector<QColor>& colors,
+                                                                   bool enable_color_vector)
+:   ViewPointGenFeature (type               )
+,   positions_          (positions          )
+,   colors_             (colors             )
+,   enable_color_vector_(enable_color_vector)
 {
 }
 
@@ -136,7 +138,7 @@ ViewPointGenFeaturePointGeometry::ViewPointGenFeaturePointGeometry(const std::st
 void ViewPointGenFeaturePointGeometry::reserve(size_t n, bool reserve_cols)
 {
     positions_.reserve(n);
-    if (reserve_cols)
+    if (enable_color_vector_ && reserve_cols)
         colors_.reserve(n);
 }
 
@@ -146,7 +148,8 @@ void ViewPointGenFeaturePointGeometry::addPoint(const Eigen::Vector2d& pos,
                                                 const boost::optional<QColor>& color)
 {
     positions_.push_back(pos);
-    if (color.has_value())
+
+    if (enable_color_vector_ && color.has_value())
         colors_.push_back(color.value());
 }
 
@@ -157,7 +160,7 @@ void ViewPointGenFeaturePointGeometry::addPoints(const std::vector<Eigen::Vector
 {
     positions_.insert(positions_.end(), positions.begin(), positions.end());
 
-    if (colors.has_value())
+    if (enable_color_vector_ && colors.has_value())
         colors_.insert(colors_.end(), colors->begin(), colors->end());
 }
 
@@ -181,7 +184,7 @@ void ViewPointGenFeaturePointGeometry::toJSON_impl(nlohmann::json& j) const
 
     geom[FeatureFieldNameCoords] = coords; 
     
-    if (positions_.size() == colors_.size())
+    if (enable_color_vector_ && positions_.size() == colors_.size())
     {
         auto colors = nlohmann::json::array();
 
@@ -236,8 +239,9 @@ const std::string ViewPointGenFeaturePoints::SymbolNameBorderThick = "border_thi
 ViewPointGenFeaturePoints::ViewPointGenFeaturePoints(Symbol symbol,
                                                      float symbol_size,
                                                      const std::vector<Eigen::Vector2d>& positions,
-                                                     const std::vector<QColor>& colors)
-:   ViewPointGenFeaturePointGeometry(FeatureName, positions, colors)
+                                                     const std::vector<QColor>& colors,
+                                                     bool enable_color_vector)
+:   ViewPointGenFeaturePointGeometry(FeatureName, positions, colors, enable_color_vector)
 ,   symbol_     (symbol     )
 ,   symbol_size_(symbol_size)
 {
@@ -283,8 +287,9 @@ const std::string ViewPointGenFeatureLineString::FeatureLineStringFieldNameLineW
 ViewPointGenFeatureLineString::ViewPointGenFeatureLineString(bool interpolated,
                                                              float line_width,
                                                              const std::vector<Eigen::Vector2d>& positions,
-                                                             const std::vector<QColor>& colors)
-:   ViewPointGenFeaturePointGeometry(interpolated ? FeatureNameInterp : FeatureName, positions, colors)
+                                                             const std::vector<QColor>& colors,
+                                                             bool enable_color_vector)
+:   ViewPointGenFeaturePointGeometry(interpolated ? FeatureNameInterp : FeatureName, positions, colors, enable_color_vector)
 ,   line_width_(line_width)
 {
 }
@@ -307,8 +312,9 @@ const std::string ViewPointGenFeatureLines::FeatureLinesFieldNameLineWidth = "li
 */
 ViewPointGenFeatureLines::ViewPointGenFeatureLines(float line_width,
                                                    const std::vector<Eigen::Vector2d>& positions,
-                                                   const std::vector<QColor>& colors)
-:   ViewPointGenFeaturePointGeometry(FeatureName, positions, colors)
+                                                   const std::vector<QColor>& colors,
+                                                   bool enable_color_vector)
+:   ViewPointGenFeaturePointGeometry(FeatureName, positions, colors, enable_color_vector)
 ,   line_width_(line_width)
 {
 }
@@ -335,8 +341,9 @@ ViewPointGenFeatureErrEllipses::ViewPointGenFeatureErrEllipses(float line_width,
                                                                size_t num_points,
                                                                const std::vector<Eigen::Vector2d>& positions,
                                                                const std::vector<QColor>& colors,
-                                                               const std::vector<Eigen::Vector3d>& sizes)
-:   ViewPointGenFeaturePointGeometry(FeatureName, positions, colors)
+                                                               const std::vector<Eigen::Vector3d>& sizes,
+                                                               bool enable_color_vector)
+:   ViewPointGenFeaturePointGeometry(FeatureName, positions, colors, enable_color_vector)
 ,   line_width_(line_width)
 ,   num_points_(num_points)
 ,   sizes_     (sizes     )

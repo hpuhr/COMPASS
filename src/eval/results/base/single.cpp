@@ -577,14 +577,14 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
 
         // lines
         std::unique_ptr<ViewPointGenFeatureLines> feature_lines;
-        feature_lines.reset(new ViewPointGenFeatureLines(line_width, {}, {}));
+        feature_lines.reset(new ViewPointGenFeatureLines(line_width, {}, {}, false));
         feature_lines->setColor(line_color);
 
         annotation.addFeature(std::move(feature_lines));
 
         // symbols
         std::unique_ptr<ViewPointGenFeaturePoints> feature_points;
-        feature_points.reset(new ViewPointGenFeaturePoints(point_symbol, point_size, {}, {}));
+        feature_points.reset(new ViewPointGenFeaturePoints(point_symbol, point_size, {}, {}, false));
         feature_points->setColor(point_color);
 
         annotation.addFeature(std::move(feature_points));
