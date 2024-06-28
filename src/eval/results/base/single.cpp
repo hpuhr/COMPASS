@@ -165,7 +165,9 @@ std::string Single::getRequirementSectionID () const // TODO hack
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+" Sum"+":"+requirement_->name();
     }
     else
+    {
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":Sum:"+requirement_->name();
+    }
 }
 
 /**
@@ -463,7 +465,7 @@ std::string Single::reference(const EvaluationResultsReport::SectionContentTable
                               const QVariant& annotation) const
 {
     assert (hasReference(table, annotation));
-    return EvaluationResultsReport::SectionID::createForRequirementResult(*this);
+    return EvaluationResultsReport::SectionID::createForTargetResult(utn_, *this);
 }
 
 /**
