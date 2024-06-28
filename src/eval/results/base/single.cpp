@@ -907,6 +907,8 @@ Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options) 
     Base::ViewableInfo info;
     info.viewable_type = options.viewable_type;
 
+    const double BoundsEps = 1e-12;
+
     if (options.viewable_type == ViewableType::Overview)
     {
         //overview => iterate over failed details and compute bounds
@@ -915,37 +917,18 @@ Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options) 
             return this->detailIsOk(detail);
         };
 
-        bool has_pos = false;
-        double lat_min, lat_max, lon_min, lon_max;
+        QRectF bounds;
 
         auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
         {
             assert(detail.numPositions() >= 1);
 
-            if (has_pos)
-            {
-                lat_min = min(lat_min, detail.position(0).latitude_);
-                lat_max = max(lat_max, detail.position(0).latitude_);
-
-                lon_min = min(lon_min, detail.position(0).longitude_);
-                lon_max = max(lon_max, detail.position(0).longitude_);
-            }
-            else // tst pos always set
-            {
-                lat_min = detail.position(0).latitude_;
-                lat_max = detail.position(0).latitude_;
-
-                lon_min = detail.position(0).longitude_;
-                lon_max = detail.position(0).longitude_;
-
-                has_pos = true;
-            }
+            bounds |= detail.bounds(BoundsEps);
         };
 
         iterateDetails(func, skip_func);
 
-        if (has_pos)
-            info.bounds = QRectF(lat_min, lon_min, lat_max - lat_min, lon_max - lon_min);
+        info.bounds = bounds;
     }
     else if (options.viewable_type == ViewableType::Highlight)
     {
@@ -954,7 +937,7 @@ Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options) 
 
         assert(d.numPositions() >= 1);
 
-        info.bounds    = QRectF(d.position(0).latitude_, d.position(0).longitude_, 1, 1);
+        info.bounds    = d.bounds(BoundsEps);
         info.timestamp = d.timestamp();
     }
     else

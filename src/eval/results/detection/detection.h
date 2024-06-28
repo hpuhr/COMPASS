@@ -95,7 +95,6 @@ protected:
                                         const EvaluationDetail& detail, 
                                         TargetAnnotationType type,
                                         bool is_ok) const override;
-    
 
     TimePeriodCollection                   ref_periods_;
     std::vector<dbContent::TargetPosition> ref_updates_;

@@ -255,6 +255,33 @@ const EvaluationDetail::Position& EvaluationDetail::position(size_t idx) const
 
 /**
 */
+QRectF EvaluationDetail::bounds(double eps) const
+{
+    size_t n = numPositions();
+
+    if (n == 0)
+        return QRectF();
+
+    double lat_min =  DBL_MAX;
+    double lon_min =  DBL_MAX;
+    double lat_max = -DBL_MAX;
+    double lon_max = -DBL_MAX;
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        const auto& pos = positions_[ i ];
+
+        if (pos.latitude_  < lat_min) lat_min = pos.latitude_;
+        if (pos.longitude_ < lon_min) lon_min = pos.longitude_;
+        if (pos.latitude_  > lat_max) lat_max = pos.latitude_;
+        if (pos.longitude_ > lon_max) lon_max = pos.longitude_;
+    }
+
+    return QRectF(lat_min - eps, lon_min - eps, lat_max - lat_min + 2 * eps, lon_max - lon_min + 2 * eps);
+}
+
+/**
+*/
 EvaluationDetail::Details& EvaluationDetail::genDetails() const
 {
     if (!details_.has_value())
