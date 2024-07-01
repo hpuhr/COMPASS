@@ -76,7 +76,14 @@ unsigned int ProbabilityBase::getNumThresholdDecimals() const
 */
 std::string ProbabilityBase::getConditionResultNameShort() const
 {
-    return probabilityNameShort() + " [%]";
+    return probabilityNameShort();
+}
+
+/**
+*/
+std::string ProbabilityBase::getConditionUnits() const
+{
+    return "%";
 }
 
 /**

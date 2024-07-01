@@ -212,7 +212,7 @@ std::vector<Joined::SectorInfo> Joined::sectorConditionInfos() const
 
     QVariant result_val = resultValue();
 
-    infos.push_back({ requirement_->getConditionResultNameShort().c_str(), 
+    infos.push_back({ requirement_->getConditionResultNameShort(true).c_str(), 
                       requirement_->getConditionResultName().c_str(), 
                       result_val });
 

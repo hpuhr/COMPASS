@@ -48,7 +48,7 @@ public:
             const SectorLayer& sector_layer) override;
 
     std::string probabilityNameShort() const override final { return "PEx"; }
-    std::string probabilityName() const override final { return "Probability of update with extra data"; }
+    std::string probabilityName() const override final { return "Probability of extra test update"; }
 
 protected:
     boost::posix_time::time_duration min_duration_;

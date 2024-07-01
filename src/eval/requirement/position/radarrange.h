@@ -38,6 +38,7 @@ public:
     //@TODO_EVAL: what is the name of the final value?
     std::string getConditionResultNameShort() const override final { return "TODO"; }
     std::string getConditionResultName() const override final { return "TODO"; }
+    std::string getConditionUnits() const override final { return ""; }
 };
 
 }

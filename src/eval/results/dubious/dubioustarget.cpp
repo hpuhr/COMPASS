@@ -144,15 +144,15 @@ std::vector<Single::TargetInfo> SingleDubiousTarget::targetInfos() const
     auto duration = getDetail(0).getValueAs<boost::posix_time::time_duration>(DetailKey::Duration);
     assert(duration.has_value());
 
-    auto duration_var         = Utils::Time::toString(duration.value(),2).c_str();
+    auto duration_var         = formatValue(Time::partialSeconds(duration.value()));
     auto p_dubious_update_var = SingleProbabilityBase::formatProbabilityOptional(p_dubious_update_);
 
-    return { TargetInfo("#Up [1]"        , "Number of updates"                      , num_updates_            ),
-             TargetInfo("#PosInside [1]" , "Number of updates inside sector"        , num_pos_inside_         ),
-             TargetInfo("#PosOutside [1]", "Number of updates outside sector"       , num_pos_outside_        ),
-             TargetInfo("#DU [1]"        , "Number of dubious updates inside sector", num_pos_inside_dubious_ ),
-             TargetInfo("PDU [%]"        , "Probability of dubious update"          , p_dubious_update_var    ),
-             TargetInfo("Duration [s]"   , "Duration"                               , duration_var            ) };
+    return { TargetInfo("#Up [1]"        , "Number of updates"                      , num_updates_              ),
+             TargetInfo("#PosInside [1]" , "Number of updates inside sector"        , num_pos_inside_           ),
+             TargetInfo("#PosOutside [1]", "Number of updates outside sector"       , num_pos_outside_          ),
+             TargetInfo("#DU [1]"        , "Number of dubious updates inside sector", num_pos_inside_dubious_   ),
+             TargetInfo("PDU [%]"        , "Probability of dubious update"          , p_dubious_update_var      ),
+             TargetInfo("Duration [s]"   , "Duration"                               , duration_var              ) };
 }
 
 /**

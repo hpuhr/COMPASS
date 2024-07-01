@@ -47,6 +47,7 @@ public:
 
     std::string getConditionResultNameShort() const override final;
     std::string getConditionResultName() const override final;
+    std::string getConditionUnits() const override final;
     std::string getThresholdString(double thres) const final;
 
     virtual std::string probabilityName() const = 0;

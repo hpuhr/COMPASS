@@ -89,6 +89,9 @@ public:
 
     virtual std::string getConditionResultNameShort() const = 0;
     virtual std::string getConditionResultName() const = 0;
+    virtual std::string getConditionUnits() const = 0;
+
+    std::string getConditionResultNameShort(bool with_units) const;
 
     static const int NumResultDecimalsMax = 6;
     

@@ -281,6 +281,19 @@ std::string Base::getConditionStr() const
 
 /**
 */
+std::string Base::getConditionResultNameShort(bool with_units) const
+{
+    std::string name  = getConditionResultNameShort();
+    std::string units = getConditionUnits();
+
+    if (with_units && !units.empty())
+        name += " [" + units + "]";
+
+    return name;
+}
+
+/**
+*/
 bool Base::conditionPassed(double value) const
 {
     return compareValue(value, threshold_, check_type_);

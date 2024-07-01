@@ -170,7 +170,7 @@ std::vector<double> SingleSpeed::getValues() const
         if (!offset_valid.has_value() || !offset_valid.value())
             return;
 
-        auto offset = detail.getValueAsOrAssert<float>(OffsetValid);
+        auto offset = detail.getValueAsOrAssert<float>(Offset);
         values.push_back(offset);
     };
 

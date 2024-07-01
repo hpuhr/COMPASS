@@ -343,7 +343,7 @@ std::vector<std::string> Single::targetTableHeaders(unsigned int* sort_column) c
     headers.insert(headers.end(), headers_custom.begin(), headers_custom.end());
 
     //add result value name
-    headers.push_back(requirement_->getConditionResultNameShort());
+    headers.push_back(requirement_->getConditionResultNameShort(false));
 
     //add optional headers
     headers.insert(headers.end(), headers_optional.begin(), headers_optional.end());
@@ -430,7 +430,7 @@ std::vector<Single::TargetInfo> Single::targetConditionInfos(bool& failed) const
 
     QVariant result_val = resultValue();
 
-    infos.push_back({ requirement_->getConditionResultNameShort().c_str(), 
+    infos.push_back({ requirement_->getConditionResultNameShort(true).c_str(), 
                        requirement_->getConditionResultName().c_str(), 
                        result_val });
 

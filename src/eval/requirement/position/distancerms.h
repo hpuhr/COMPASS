@@ -37,6 +37,7 @@ public:
 
     std::string getConditionResultNameShort() const override final { return "RMS"; }
     std::string getConditionResultName() const override final { return "Root mean square"; }
+    std::string getConditionUnits() const override final { return ""; }
 };
 
 }
