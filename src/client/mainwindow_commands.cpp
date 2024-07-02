@@ -153,7 +153,7 @@ void RTCommandOpenDB::collectOptions_impl(OptionsDescription& options,
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.db’")
         ("assure_open", "Only opens the file if it is not already opened");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandOpenDB::assignVariables_impl(const VariablesMap& variables)
@@ -243,7 +243,7 @@ void RTCommandOpenRecentDB::collectOptions_impl(OptionsDescription& options,
         ("filename,f", po::value<std::string>()->default_value(""), "filename listed in the recent file history, e.g. ’file1.db’")
         ("index,i", po::value<int>()->default_value(-1), "index in the recent file history");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandOpenRecentDB::assignVariables_impl(const VariablesMap& variables)
@@ -295,7 +295,7 @@ void RTCommandCreateDB::collectOptions_impl(OptionsDescription& options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.db’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandCreateDB::assignVariables_impl(const VariablesMap& variables)
@@ -350,7 +350,7 @@ void RTCommandImportDataSourcesFile::collectOptions_impl(OptionsDescription& opt
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportDataSourcesFile::assignVariables_impl(const VariablesMap& variables)
@@ -427,7 +427,7 @@ void RTCommandImportViewPointsFile::collectOptions_impl(OptionsDescription& opti
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportViewPointsFile::assignVariables_impl(const VariablesMap& variables)
@@ -599,7 +599,7 @@ void RTCommandImportASTERIXFile::collectOptions_impl(OptionsDescription& options
          "imports ASTERIX file with given Time of Day override, in HH:MM:SS.ZZZ’");
     ADD_RTCOMMAND_OPTIONS(options)("ignore_time_jumps,i", "ignore 24h time jumps");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variables)
@@ -788,7 +788,7 @@ void RTCommandImportASTERIXFiles::collectOptions_impl(OptionsDescription& option
          "imports ASTERIX file with given Time of Day override, in HH:MM:SS.ZZZ’");
     ADD_RTCOMMAND_OPTIONS(options)("ignore_time_jumps,i", "ignore 24h time jumps");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filenames", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filenames") // give position
 }
 
 void RTCommandImportASTERIXFiles::assignVariables_impl(const VariablesMap& variables)
@@ -1025,7 +1025,7 @@ void RTCommandImportJSONFile::collectOptions_impl(OptionsDescription& options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportJSONFile::assignVariables_impl(const VariablesMap& variables)
@@ -1097,7 +1097,7 @@ void RTCommandImportGPSTrail::collectOptions_impl(OptionsDescription& options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportGPSTrail::assignVariables_impl(const VariablesMap& variables)
@@ -1179,7 +1179,7 @@ void RTCommandImportSectorsJSON::collectOptions_impl(OptionsDescription& options
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportSectorsJSON::assignVariables_impl(const VariablesMap& variables)
@@ -1418,7 +1418,7 @@ void RTCommandExportViewPointsReport::collectOptions_impl(OptionsDescription& op
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/db2/report.tex'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandExportViewPointsReport::assignVariables_impl(const VariablesMap& variables)
@@ -1551,7 +1551,7 @@ void RTCommandExportEvaluationReport::collectOptions_impl(OptionsDescription& op
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/db2/report.tex'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandExportEvaluationReport::assignVariables_impl(const VariablesMap& variables)
@@ -1647,8 +1647,8 @@ void RTCommandReconfigure::collectOptions_impl(OptionsDescription& options,
         ("path", po::value<std::string>()->required(), "configurable to reconfigure")
         ("config", po::value<std::string>()->required(), "json configuration to apply");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "path", 1)
-    ADD_RTCOMMAND_POS_OPTION(positional, "config", 2)
+    ADD_RTCOMMAND_POS_OPTION(positional, "path")
+    ADD_RTCOMMAND_POS_OPTION(positional, "config")
 }
 
 void RTCommandReconfigure::assignVariables_impl(const VariablesMap& variables)

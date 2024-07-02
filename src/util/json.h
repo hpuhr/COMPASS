@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JSON_H
-#define JSON_H
+#pragma once
 
 #include "json.hpp"
 
@@ -24,6 +23,7 @@ namespace Utils
 {
 namespace JSON
 {
+
 inline std::string toString(const nlohmann::json& j)
 {
     if (j.type() == nlohmann::json::value_t::string)
@@ -42,7 +42,6 @@ extern const nlohmann::json& findParentKey(const nlohmann::json& j,
 extern void applyFunctionToValues(nlohmann::json& j, const std::vector<std::string>& keys,
                                   std::vector<std::string>::const_iterator current_key_it,
                                   std::function<void(nlohmann::json&)> function, bool required);
+
 }  // namespace JSON
 }  // namespace Utils
-
-#endif  // JSON_H

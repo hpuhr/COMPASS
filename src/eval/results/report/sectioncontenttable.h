@@ -15,10 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSREPORTSECTIONCONTENTTABLE_H
-#define EVALUATIONRESULTSREPORTSECTIONCONTENTTABLE_H
+#pragma once
 
 #include "eval/results/report/sectioncontent.h"
+
+#include "json.hpp"
 
 #include <QVariant>
 #include <QAbstractItemModel>
@@ -34,6 +35,11 @@
 #include <boost/optional.hpp>
 
 class ViewableDataConfig;
+
+namespace Utils
+{
+    class StringTable;
+}
 
 class QPushButton;
 class QTableView;
@@ -147,6 +153,10 @@ public:
 
     void setCreateOnDemand(std::function<void(void)> create_on_demand_fnc);
 
+    Utils::StringTable toStringTable() const;
+    nlohmann::json toJSON(bool rowwise = true,
+                          const std::vector<int>& cols = std::vector<int>()) const;
+
     static const int DoubleClickCheckIntervalMSecs;
 
 protected:
@@ -188,4 +198,3 @@ protected:
 };
 
 }
-#endif // EVALUATIONRESULTSREPORTSECTIONCONTENTTABLE_H

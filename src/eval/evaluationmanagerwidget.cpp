@@ -216,7 +216,15 @@ void EvaluationManagerWidget::generateReportSlot()
     eval_man_.generateReport();
 }
 
-boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std::string& result_id, const std::string& table_id) const
+boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std::string& result_id, 
+                                                                      const std::string& table_id,
+                                                                      bool rowwise,
+                                                                      const std::vector<int>& cols) const
 {
-    return results_tab_widget_->getTableData(result_id, table_id);
+    //retrieve special tables
+    if (table_id == "Targets")
+        return eval_man_.getData().getTableData(rowwise, cols);
+
+    //retrieve result table
+    return results_tab_widget_->getTableData(result_id, table_id, rowwise, cols);
 }
