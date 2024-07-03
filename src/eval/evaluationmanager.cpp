@@ -103,7 +103,6 @@ EvaluationManagerSettings::EvaluationManagerSettings()
 ,   report_skip_no_data_details_      (true)
 ,   report_split_results_by_mops_     (false)
 ,   report_split_results_by_aconly_ms_(false)
-,   report_show_adsb_info_            (false)
 ,   report_author_                    ("")
 ,   report_abstract_                  ("")
 ,   report_include_target_details_    (false)
@@ -217,7 +216,6 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("report_skip_no_data_details", &settings_.report_skip_no_data_details_, Settings().report_skip_no_data_details_);
     registerParameter("report_split_results_by_mops", &settings_.report_split_results_by_mops_, Settings().report_split_results_by_mops_);
     registerParameter("report_split_results_by_aconly_ms", &settings_.report_split_results_by_aconly_ms_, Settings().report_split_results_by_aconly_ms_);
-    registerParameter("report_show_adsb_info", &settings_.report_show_adsb_info_, Settings().report_show_adsb_info_);
 
     registerParameter("report_author", &settings_.report_author_, Settings().report_author_);
 

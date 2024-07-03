@@ -72,8 +72,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details "
            << eval_settings_.report_skip_no_data_details_
            << " split_results_by_mops " << eval_settings_.report_split_results_by_mops_
-           << " report_split_results_by_aconly_ms " << eval_settings_.report_split_results_by_aconly_ms_
-           << " show_adsb_info " << eval_settings_.report_show_adsb_info_;
+           << " report_split_results_by_aconly_ms " << eval_settings_.report_split_results_by_aconly_ms_;
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;

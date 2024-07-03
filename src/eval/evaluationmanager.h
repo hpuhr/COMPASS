@@ -119,7 +119,6 @@ struct EvaluationManagerSettings
     bool report_skip_no_data_details_ {true};
     bool report_split_results_by_mops_ {false};
     bool report_split_results_by_aconly_ms_ {false};
-    bool report_show_adsb_info_ {false};
 
     std::string report_author_;
     std::string report_abstract_;
