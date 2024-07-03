@@ -64,6 +64,8 @@ public:
     std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
 
+    std::vector<double> getValues(int value_id, const boost::optional<int>& check_value_id = boost::optional<int>()) const;
+
     std::vector<std::shared_ptr<Single>>& singleResults();
 
     void updateToChanges();

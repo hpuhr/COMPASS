@@ -129,6 +129,24 @@ std::string Joined::reference(const EvaluationResultsReport::SectionContentTable
 
 /**
 */
+std::vector<double> Joined::getValues(int value_id, const boost::optional<int>& check_value_id) const
+{
+    std::vector<double> values;
+
+    auto func = [ & ] (const std::shared_ptr<Single>& result)
+    {
+        auto v = result->getValues(value_id, check_value_id);
+
+        values.insert(values.end(), v.begin(), v.end());
+    };
+
+    iterateSingleResults({}, func, {});
+
+    return values;
+}
+
+/**
+*/
 void Joined::addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     logdbg << "Joined: addToReport: " <<  requirement_->name();

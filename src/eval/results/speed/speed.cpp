@@ -159,30 +159,6 @@ std::shared_ptr<Joined> SingleSpeed::createEmptyJoined(const std::string& result
 
 /**
 */
-std::vector<double> SingleSpeed::getValues() const
-{
-    std::vector<double> values;
-    values.reserve(getDetails().size());
-
-    auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
-    {
-        auto offset_valid = detail.getValueAs<bool>(OffsetValid);
-        if (!offset_valid.has_value() || !offset_valid.value())
-            return;
-
-        auto offset = detail.getValueAsOrAssert<float>(Offset);
-        values.push_back(offset);
-    };
-
-    iterateDetails(func);
-
-    values.shrink_to_fit();
-
-    return values;
-}
-
-/**
-*/
 boost::optional<double> SingleSpeed::computeResult_impl() const
 {
     assert (num_no_ref_ <= num_pos_);
@@ -190,7 +166,7 @@ boost::optional<double> SingleSpeed::computeResult_impl() const
 
     accumulator_.reset();
 
-    auto values = getValues();
+    auto values = getValues(DetailKey::Offset);
 
     assert (values.size() == num_comp_failed_ + num_comp_passed_);
 
@@ -347,25 +323,6 @@ JoinedSpeed::JoinedSpeed(const std::string& result_id,
 
 /**
 */
-std::vector<double> JoinedSpeed::getValues() const
-{
-    std::vector<double> values;
-
-    auto func = [ & ] (const std::shared_ptr<Single>& result)
-    {
-        std::shared_ptr<SingleSpeed> res = std::static_pointer_cast<SingleSpeed>(result);
-        auto v = res->getValues();
-
-        values.insert(values.end(), v.begin(), v.end());
-    };
-
-    iterateSingleResults({}, func, {});
-
-    return values;
-}
-
-/**
-*/
 unsigned int JoinedSpeed::numIssues() const
 {
     return num_comp_failed_;
@@ -407,7 +364,7 @@ void JoinedSpeed::accumulateSingleResult(const std::shared_ptr<Single>& single_r
     num_comp_failed_  += single->numCompFailed();
     num_comp_passed_  += single->numCompPassed();
 
-    auto values = single->getValues();
+    auto values = single->getValues(SingleSpeed::DetailKey::Offset);
     assert(values.size() == single->numCompFailed() + single->numCompPassed());
 
     accumulator_.accumulate(values, last);
@@ -461,7 +418,7 @@ bool JoinedSpeed::exportAsCSV(std::ofstream& strm) const
 
     strm << "speed_offset\n";
     
-    auto values = getValues();
+    auto values = getValues(SingleSpeed::DetailKey::Offset);
 
     for (auto v : values)
         strm << v << "\n";

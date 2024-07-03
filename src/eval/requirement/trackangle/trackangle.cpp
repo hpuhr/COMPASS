@@ -148,8 +148,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Offset, offset.isValid() ? offset : 0.0f)
-                                             .setValue(Result::DetailKey::OffsetValid, offset.isValid())
+                                             .setValue(Result::DetailKey::Offset, offset)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::ValueRef, value_ref)
                                              .setValue(Result::DetailKey::ValueTst, value_tst)

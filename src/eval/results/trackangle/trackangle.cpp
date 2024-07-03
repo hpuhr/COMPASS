@@ -159,30 +159,6 @@ std::shared_ptr<Joined> SingleTrackAngle::createEmptyJoined(const std::string& r
 
 /**
 */
-std::vector<double> SingleTrackAngle::getValues() const
-{
-    std::vector<double> values;
-    values.reserve(getDetails().size());
-
-    auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
-    {
-        auto offset_valid = detail.getValueAs<bool>(OffsetValid);
-        if (!offset_valid.has_value() || !offset_valid.value())
-            return;
-
-        auto offset = detail.getValueAsOrAssert<float>(Offset);
-        values.push_back(offset);
-    };
-
-    iterateDetails(func);
-
-    values.shrink_to_fit();
-
-    return values;
-}
-
-/**
-*/
 boost::optional<double> SingleTrackAngle::computeResult_impl() const
 {
     assert (num_no_ref_ <= num_pos_);
@@ -190,7 +166,7 @@ boost::optional<double> SingleTrackAngle::computeResult_impl() const
 
     accumulator_.reset();
 
-    auto values = getValues();
+    auto values = getValues(DetailKey::Offset);
 
     assert (values.size() == num_comp_failed_ + num_comp_passed_);
 
@@ -358,25 +334,6 @@ JoinedTrackAngle::JoinedTrackAngle(const std::string& result_id,
 
 /**
 */
-std::vector<double> JoinedTrackAngle::getValues() const
-{
-    std::vector<double> values;
-
-    auto func = [ & ] (const std::shared_ptr<Single>& result)
-    {
-        std::shared_ptr<SingleTrackAngle> res = std::static_pointer_cast<SingleTrackAngle>(result);
-        auto v = res->getValues();
-
-        values.insert(values.end(), v.begin(), v.end());
-    };
-
-    iterateSingleResults({}, func, {});
-
-    return values;
-}
-
-/**
-*/
 unsigned int JoinedTrackAngle::numIssues() const
 {
     return num_comp_failed_;
@@ -418,7 +375,7 @@ void JoinedTrackAngle::accumulateSingleResult(const std::shared_ptr<Single>& sin
     num_comp_failed_  += single_ta->numCompFailed();
     num_comp_passed_  += single_ta->numCompPassed();
 
-    auto values = single_ta->getValues();
+    auto values = single_ta->getValues(SingleTrackAngle::DetailKey::Offset);
     assert(values.size() == single_ta->numCompFailed() + single_ta->numCompPassed());
 
     accumulator_.accumulate(values, last);
@@ -472,7 +429,7 @@ bool JoinedTrackAngle::exportAsCSV(std::ofstream& strm) const
 
     strm << "trackangle_offset\n";
 
-    auto values = getValues();
+    auto values = getValues(SingleTrackAngle::DetailKey::Offset);
 
     for (auto v : values)
         strm << v << "\n";

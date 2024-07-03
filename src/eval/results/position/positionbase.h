@@ -80,7 +80,6 @@ public:
     enum DetailKey
     {
         Value,          //float
-        ValueValid,     //bool
         CheckPassed,    //bool
         PosInside,      //bool
         NumPos,         //unsigned int
@@ -88,13 +87,12 @@ public:
         NumInside,      //unsigned int
         NumOutside,     //unsigned int
         NumCheckPassed, //unsigned int
-        NumCheckFailed  //unsigned int
+        NumCheckFailed, //unsigned int
+        PositionBaseMax
     };
 
-    virtual std::vector<double> getValues() const = 0;
-
 protected:
-    boost::optional<double> common_computeResult() const;
+    boost::optional<double> common_computeResult(const Single* single_result) const;
     unsigned int common_numIssues() const;
     bool common_detailIsOk(const EvaluationDetail& detail) const;
 
@@ -125,8 +123,6 @@ public:
 
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override final;
     virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override final;
-
-    virtual std::vector<double> getValues() const override final;
 
 protected:
     boost::optional<double> computeFinalResultValue() const override final;
@@ -166,8 +162,6 @@ public:
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override final;
     virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override final;
 
-    virtual std::vector<double> getValues() const override final;
-
     QVariant resultValue(double value) const override final;
 
 protected:
@@ -188,13 +182,12 @@ class JoinedPositionBase : public PositionBase
 public:
     JoinedPositionBase(const std::string& csv_header);
 
-    virtual std::vector<double> getValues() const = 0;
-
 protected:
     unsigned int common_numIssues() const;
     unsigned int common_numUpdates() const;
 
-    bool common_exportAsCSV(std::ofstream& strm) const;
+    bool common_exportAsCSV(std::ofstream& strm,
+                            const Joined* result) const;
 
     void common_clearResults();
     void common_accumulateSingleResult(const PositionBase& single_result, 
@@ -219,9 +212,6 @@ public:
                                   const SectorLayer& sector_layer,
                                   EvaluationManager& eval_man,
                                   const std::string& csv_header);
-
-    std::vector<double> getValues() const override final;
-
 protected:
     boost::optional<double> computeFinalResultValue() const override final;
 
@@ -247,8 +237,6 @@ public:
                             const SectorLayer& sector_layer,
                             EvaluationManager& eval_man,
                             const std::string& csv_header);
-
-    std::vector<double> getValues() const override final;
 
     QVariant resultValue(double value) const override final;
 

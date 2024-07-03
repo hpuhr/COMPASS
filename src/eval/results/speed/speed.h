@@ -91,12 +91,9 @@ public:
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
     virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
 
-    std::vector<double> getValues() const;
-
     enum DetailKey
     {
         Offset,         //float
-        OffsetValid,    //bool
         CheckPassed,    //bool
         PosInside,      //bool
         NumPos,         //unsigned int
@@ -134,9 +131,6 @@ public:
                 std::shared_ptr<EvaluationRequirement::Base> requirement,
                 const SectorLayer& sector_layer, 
                 EvaluationManager& eval_man);
-
-    std::vector<double> getValues() const;
-
 protected:
     virtual unsigned int numIssues() const override;
     virtual unsigned int numUpdates() const override;

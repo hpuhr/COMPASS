@@ -44,29 +44,11 @@ SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
                                                    unsigned int num_pos_outside,
                                                    unsigned int num_pos_inside,
                                                    unsigned int num_comp_passed,
-                                                   unsigned int num_comp_failed,
-                                                   const std::vector<double>& ref_range_values, 
-                                                   const std::vector<double>& tst_range_values)
+                                                   unsigned int num_comp_failed)
 :   SinglePositionValueBase("SinglePositionRadarRange", result_id, requirement, sector_layer, utn, target, eval_man, details,
                             num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed)
-,   ref_range_values_(ref_range_values)
-,   tst_range_values_(tst_range_values)
 {
     updateResult();
-}
-
-/**
-*/
-const std::vector<double>& SinglePositionRadarRange::refRangeValues() const
-{
-    return ref_range_values_;
-}
-
-/**
-*/
-const std::vector<double>& SinglePositionRadarRange::tstRangeValues() const
-{
-    return tst_range_values_;
 }
 
 /**
@@ -152,7 +134,7 @@ std::vector<QVariant> SinglePositionRadarRange::detailValues(const EvaluationDet
 */
 boost::optional<double> SinglePositionRadarRange::computeFinalResultValue() const
 {
-    assert (accumulator_.numValues() == ref_range_values_.size() && ref_range_values_.size() == tst_range_values_.size());
+    //assert (accumulator_.numValues() == ref_range_values_.size() && ref_range_values_.size() == tst_range_values_.size());
 
     range_gain_ = QVariant();
     range_bias_ = QVariant();
@@ -162,15 +144,22 @@ boost::optional<double> SinglePositionRadarRange::computeFinalResultValue() cons
 
     // linear regression
 
+    auto ref_range_values = getValues(SinglePositionRadarRange::DetailKeyAdditional::RangeRef);
+    auto tst_range_values = getValues(SinglePositionRadarRange::DetailKeyAdditional::RangeTst);
+
+    assert (ref_range_values.size() == tst_range_values.size());
+
     size_t num_distances = accumulator_.numValues();
+
+    assert (num_distances == ref_range_values.size());
 
     Eigen::MatrixXd x_mat = Eigen::MatrixXd::Ones(num_distances, 2);
     Eigen::MatrixXd y_mat = Eigen::MatrixXd::Ones(num_distances, 1);
 
     for (unsigned int cnt=0; cnt < num_distances; ++cnt)
     {
-        x_mat(cnt, 0) = tst_range_values_.at(cnt);
-        y_mat(cnt, 0) = ref_range_values_.at(cnt);
+        x_mat(cnt, 0) = tst_range_values.at(cnt);
+        y_mat(cnt, 0) = ref_range_values.at(cnt);
     }
 
     Eigen::JacobiSVD<Eigen::MatrixXd> svd;
@@ -235,8 +224,8 @@ boost::optional<double> JoinedPositionRadarRange::computeFinalResultValue() cons
     if (accumulator_.numValues() == 0)
         return {};
 
-    auto ref_range_values = refRangeValues();
-    auto tst_range_values = tstRangeValues();
+    auto ref_range_values = getValues(SinglePositionRadarRange::DetailKeyAdditional::RangeRef);
+    auto tst_range_values = getValues(SinglePositionRadarRange::DetailKeyAdditional::RangeTst);
 
     unsigned int num_distances = accumulator_.numValues();
 
@@ -260,42 +249,6 @@ boost::optional<double> JoinedPositionRadarRange::computeFinalResultValue() cons
     range_bias_ = x(1, 0);
 
     return accumulator_.mean();
-}
-
-/**
-*/
-std::vector<double> JoinedPositionRadarRange::refRangeValues() const
-{
-    std::vector<double> values;
-
-    auto func = [ & ] (const std::shared_ptr<Single>& result)
-    {
-        SinglePositionRadarRange* single_result = dynamic_cast<SinglePositionRadarRange*>(result.get());
-        assert (single_result);
-
-        values.insert(values.end(), single_result->refRangeValues().begin(), single_result->refRangeValues().end());
-    };
-    iterateSingleResults({}, func, {});
-
-    return values;
-}
-
-/**
-*/
-std::vector<double> JoinedPositionRadarRange::tstRangeValues() const
-{
-    std::vector<double> values;
-
-    auto func = [ & ] (const std::shared_ptr<Single>& result)
-    {
-        SinglePositionRadarRange* single_result = dynamic_cast<SinglePositionRadarRange*>(result.get());
-        assert (single_result);
-
-        values.insert(values.end(), single_result->tstRangeValues().begin(), single_result->tstRangeValues().end());
-    };
-    iterateSingleResults({}, func, {});
-
-    return values;
 }
 
 }

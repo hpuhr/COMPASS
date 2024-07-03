@@ -424,7 +424,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -434,7 +434,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionDistance, SinglePositionDistance, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionDistance, SinglePositionDistance, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -443,7 +443,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -452,7 +452,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionDistanceRMS, SinglePositionDistanceRMS, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionDistanceRMS, SinglePositionDistanceRMS, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -462,7 +462,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -472,7 +472,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionAlong, SinglePositionAlong, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionAlong, SinglePositionAlong, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -482,7 +482,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -492,7 +492,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionAcross, SinglePositionAcross, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionAcross, SinglePositionAcross, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -502,7 +502,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -512,7 +512,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionLatency, SinglePositionLatency, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionLatency, SinglePositionLatency, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 void HistogramGeneratorResults::updateCountResult (
@@ -520,28 +520,28 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 void HistogramGeneratorResults::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarAzimuth> result)
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionRadarAzimuth, SinglePositionRadarAzimuth, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionRadarAzimuth, SinglePositionRadarAzimuth, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 void HistogramGeneratorResults::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionRadarRange> result)
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 void HistogramGeneratorResults::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarRange> result)
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionRadarRange, SinglePositionRadarRange, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionRadarRange, SinglePositionRadarRange, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -551,7 +551,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SingleSpeed::DetailKey::Offset);
 }
 
 /**
@@ -561,7 +561,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedSpeed, SingleSpeed, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedSpeed, SingleSpeed, Single>(dbcontent_name, result, SingleSpeed::DetailKey::Offset);
 }
 
 void HistogramGeneratorResults::updateCountResult (
@@ -569,7 +569,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SingleTrackAngle::DetailKey::Offset);
 }
 
 /**
@@ -579,7 +579,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedTrackAngle, SingleTrackAngle, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedTrackAngle, SingleTrackAngle, Single>(dbcontent_name, result, SingleTrackAngle::DetailKey::Offset);
 }
 
 

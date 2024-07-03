@@ -115,8 +115,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Value, value.isValid() ? value : 0.0f)
-                                             .setValue(Result::DetailKey::ValueValid, value.isValid())
+                                             .setValue(Result::DetailKey::Value, value)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)

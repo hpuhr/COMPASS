@@ -123,14 +123,15 @@ SinglePositionBaseCommon::SinglePositionBaseCommon(unsigned int num_pos,
 
 /**
 */
-boost::optional<double> SinglePositionBaseCommon::common_computeResult() const
+boost::optional<double> SinglePositionBaseCommon::common_computeResult(const Single* single_result) const
 {
+    assert (single_result);
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
     accumulator_.reset();
 
-    auto values = getValues();
+    auto values = single_result->getValues(DetailKey::Value);
 
     assert (values.size() == num_passed_ + num_failed_);
 
@@ -187,30 +188,6 @@ SinglePositionProbabilityBase::SinglePositionProbabilityBase(const std::string& 
 }
 
 /**
-*/
-std::vector<double> SinglePositionProbabilityBase::getValues() const
-{
-    std::vector<double> values;
-    values.reserve(getDetails().size());
-
-    auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
-    {
-        auto offset_valid = detail.getValueAs<bool>(ValueValid);
-        if (!offset_valid.has_value() || !offset_valid.value())
-            return;
-
-        auto offset = detail.getValueAsOrAssert<double>(Value);
-        values.push_back(offset);
-    };
-
-    iterateDetails(func);
-
-    values.shrink_to_fit();
-
-    return values;
-}
-
-/**
  * Result value for all probability based position requirement results.
  */
 boost::optional<double> SinglePositionProbabilityBase::computeFinalResultValue() const
@@ -227,7 +204,7 @@ boost::optional<double> SinglePositionProbabilityBase::computeFinalResultValue()
 */
 boost::optional<double> SinglePositionProbabilityBase::computeResult_impl() const
 {
-    return common_computeResult();
+    return common_computeResult(this);
 }
 
 /**
@@ -352,30 +329,6 @@ SinglePositionValueBase::SinglePositionValueBase(const std::string& result_type,
 
 /**
 */
-std::vector<double> SinglePositionValueBase::getValues() const
-{
-    std::vector<double> values;
-    values.reserve(getDetails().size());
-
-    auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
-    {
-        auto offset_valid = detail.getValueAs<bool>(ValueValid);
-        if (!offset_valid.has_value() || !offset_valid.value())
-            return;
-
-        auto offset = detail.getValueAsOrAssert<double>(Value);
-        values.push_back(offset);
-    };
-
-    iterateDetails(func);
-
-    values.shrink_to_fit();
-
-    return values;
-}
-
-/**
-*/
 QVariant SinglePositionValueBase::resultValue(double value) const
 {
     //by default reformat result value to 2 decimals
@@ -386,7 +339,7 @@ QVariant SinglePositionValueBase::resultValue(double value) const
 */
 boost::optional<double> SinglePositionValueBase::computeResult_impl() const
 {
-    return common_computeResult();
+    return common_computeResult(this);
 }
 
 /**
@@ -515,11 +468,14 @@ boost::optional<double> JoinedPositionBase::common_computeResult() const
 
 /**
 */
-bool JoinedPositionBase::common_exportAsCSV(std::ofstream& strm) const
+bool JoinedPositionBase::common_exportAsCSV(std::ofstream& strm,
+                                            const Joined* result) const
 {
+    assert(result);
+
     strm << csv_header_ << "\n";
 
-    auto values = getValues();
+    auto values = result->getValues(SinglePositionBaseCommon::DetailKey::Value);
 
     for (auto v : values)
         strm << v << "\n";
@@ -545,25 +501,6 @@ JoinedPositionProbabilityBase::JoinedPositionProbabilityBase(const std::string& 
 :   JoinedPositionBase(csv_header)
 ,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
 {
-}
-
-/**
-*/
-std::vector<double> JoinedPositionProbabilityBase::getValues() const
-{
-    std::vector<double> values;
-
-    auto func = [ & ] (const std::shared_ptr<Single>& result)
-    {
-        std::shared_ptr<SinglePositionProbabilityBase> res = std::static_pointer_cast<SinglePositionProbabilityBase>(result);
-        auto v = res->getValues();
-
-        values.insert(values.end(), v.begin(), v.end());
-    };
-
-    iterateSingleResults({}, func, {});
-
-    return values;
 }
 
 /**
@@ -606,7 +543,7 @@ void JoinedPositionProbabilityBase::accumulateSingleResult(const std::shared_ptr
 {
     std::shared_ptr<SinglePositionProbabilityBase> single = std::static_pointer_cast<SinglePositionProbabilityBase>(single_result);
 
-    common_accumulateSingleResult(*single, single->getValues(), last);
+    common_accumulateSingleResult(*single, single->getValues(SinglePositionBaseCommon::DetailKey::Value), last);
 }
 
 /**
@@ -626,7 +563,7 @@ boost::optional<double> JoinedPositionProbabilityBase::computeResult_impl() cons
 */
 bool JoinedPositionProbabilityBase::exportAsCSV(std::ofstream& strm) const
 {
-    return common_exportAsCSV(strm);
+    return common_exportAsCSV(strm, this);
 }
 
 /**
@@ -687,25 +624,6 @@ JoinedPositionValueBase::JoinedPositionValueBase(const std::string& result_type,
 
 /**
 */
-std::vector<double> JoinedPositionValueBase::getValues() const
-{
-    std::vector<double> values;
-
-    auto func = [ & ] (const std::shared_ptr<Single>& result)
-    {
-        std::shared_ptr<SinglePositionValueBase> res = std::static_pointer_cast<SinglePositionValueBase>(result);
-        auto v = res->getValues();
-
-        values.insert(values.end(), v.begin(), v.end());
-    };
-
-    iterateSingleResults({}, func, {});
-
-    return values;
-}
-
-/**
-*/
 QVariant JoinedPositionValueBase::resultValue(double value) const
 {
     //by default reformat result value to 2 decimals
@@ -739,7 +657,7 @@ void JoinedPositionValueBase::accumulateSingleResult(const std::shared_ptr<Singl
 {
     std::shared_ptr<SinglePositionValueBase> single = std::static_pointer_cast<SinglePositionValueBase>(single_result);
 
-    common_accumulateSingleResult(*single, single->getValues(), last);
+    common_accumulateSingleResult(*single, single->getValues(SinglePositionBaseCommon::DetailKey::Value), last);
 }
 
 /**
@@ -759,7 +677,7 @@ boost::optional<double> JoinedPositionValueBase::computeResult_impl() const
 */
 bool JoinedPositionValueBase::exportAsCSV(std::ofstream& strm) const
 {
-    return common_exportAsCSV(strm);
+    return common_exportAsCSV(strm, this);
 }
 
 /**

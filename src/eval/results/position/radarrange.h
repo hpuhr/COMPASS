@@ -39,14 +39,15 @@ public:
                              unsigned int num_pos_outside,
                              unsigned int num_pos_inside,
                              unsigned int num_comp_passed,
-                             unsigned int num_comp_failed,
-                             const std::vector<double>& ref_range_values, 
-                             const std::vector<double>& tst_range_values);
+                             unsigned int num_comp_failed);
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    const std::vector<double>& refRangeValues() const;
-    const std::vector<double>& tstRangeValues() const;
+    enum DetailKeyAdditional
+    {
+        RangeRef = DetailKey::PositionBaseMax + 0,
+        RangeTst = DetailKey::PositionBaseMax + 1
+    };
 
 protected:
     virtual boost::optional<double> computeFinalResultValue() const override;
@@ -59,9 +60,6 @@ protected:
                                                const EvaluationDetail* parent_detail) const override;
 
 private:
-    std::vector<double> ref_range_values_;
-    std::vector<double> tst_range_values_;
-
     mutable QVariant range_bias_;
     mutable QVariant range_gain_;
 };
@@ -76,9 +74,6 @@ public:
                              const SectorLayer& sector_layer,
                              EvaluationManager& eval_man);
 protected:
-    std::vector<double> refRangeValues() const;
-    std::vector<double> tstRangeValues() const;
-
     virtual boost::optional<double> computeFinalResultValue() const override;
 
     virtual std::vector<SectorInfo> sectorInfos() const override;

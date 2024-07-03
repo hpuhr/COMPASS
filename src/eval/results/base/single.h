@@ -119,6 +119,8 @@ public:
     //wip - on demand detail creation
     std::unique_ptr<EvaluationDetails> generateDetails() const;
 
+    std::vector<double> getValues(int value_id, const boost::optional<int>& check_value_id = boost::optional<int>()) const;
+
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
@@ -189,6 +191,7 @@ protected:
     boost::optional<DetailIndex> detailIndex(const QVariant& annotation) const;
     void iterateDetails(const DetailFunc& func,
                         const DetailSkipFunc& skip_func = DetailSkipFunc()) const;
+    size_t totalNumDetails() const;
 
     /*viewable + annotation related*/
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;

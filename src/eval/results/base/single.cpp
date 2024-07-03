@@ -765,6 +765,46 @@ std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
 }
 
 /**
+*/
+std::vector<double> Single::getValues(int value_id, const boost::optional<int>& check_value_id) const
+{
+    std::vector<double> values;
+    values.reserve(totalNumDetails());
+
+    auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
+    {
+        //if provided, the check value must be an existing bool value
+        if (check_value_id.has_value())
+        {
+            auto value_valid = detail.getValueAsOrAssert<bool>(check_value_id.value());
+
+            //value not valid => skip
+            if (!value_valid)
+                return;
+        }
+
+        auto value = detail.getValue(value_id);
+
+        //value might not be set => skip
+        if (!value.isValid())
+            return;
+
+        //value must be convertable to double
+        bool ok;
+        double v = value.toDouble(&ok);
+        assert(ok);
+
+        values.push_back(v);
+    };
+
+    iterateDetails(func);
+
+    values.shrink_to_fit();
+
+    return values;
+}
+
+/**
  * Generates binary grid values from a certain bool detail param.
  */
 void Single::addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert, bool use_ref_pos) const
@@ -894,6 +934,42 @@ void Single::iterateDetails(const DetailFunc& func,
                     func(details1[ i ], &details0[ 0 ], 0, (int)i);
         }
     }
+}
+
+/**
+*/
+size_t Single::totalNumDetails() const
+{
+    auto nesting_mode = detailNestingMode();
+
+    const auto& details0 = getDetails();
+
+    if (nesting_mode == DetailNestingMode::Vector)
+    {
+        return details0.size();
+    }
+    else if (nesting_mode == DetailNestingMode::Nested)
+    {
+        size_t n = 0;
+
+        for (size_t i = 0; i < details0.size(); ++i)
+        {
+            if (!details0[ i ].hasDetails())
+                continue;
+
+            const auto& details1 = details0[ i ].details();
+
+            n += details1.size();
+        }
+    }
+    else if (nesting_mode == DetailNestingMode::SingleNested)
+    {
+        assert(details0.size() == 1);
+
+        return details0[ 0 ].hasDetails() ? details0[ 0 ].details().size() : 0;
+    }
+
+    return 0;
 }
 
 /**

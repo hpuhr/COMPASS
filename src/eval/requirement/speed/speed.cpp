@@ -140,8 +140,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Offset, offset.isValid() ? offset : 0.0f)
-                                             .setValue(Result::DetailKey::OffsetValid, offset.isValid())
+                                             .setValue(Result::DetailKey::Offset, offset)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
