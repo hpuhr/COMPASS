@@ -35,10 +35,9 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
-    //@TODO_EVAL: what is the name of the final value?
-    std::string getConditionResultNameShort() const override final { return "TODO"; }
-    std::string getConditionResultName() const override final { return "TODO"; }
-    std::string getConditionUnits() const override final { return ""; }
+    std::string getConditionResultNameShort() const override final { return "PosRngMean"; }
+    std::string getConditionResultName() const override final { return "Position Range Mean"; }
+    std::string getConditionUnits() const override final { return "m"; }
 };
 
 }

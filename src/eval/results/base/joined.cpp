@@ -158,7 +158,7 @@ void Joined::addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::R
         //just check if any target failed
         std::string result = num_failed_targets_ == 0 ? "Passed" : "Failed";
 
-        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result Value", "Condition", "Condition Result"
         ov_table.addRow({ sector_layer_.name().c_str(), 
                           requirement_->groupName().c_str(),
                           requirement_->shortname().c_str(),
@@ -177,7 +177,7 @@ void Joined::addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::R
         if (result_val.isValid())
             result = conditionResultString();
 
-        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result Value", "Condition", "Condition Result"
         ov_table.addRow({ sector_layer_.name().c_str(), 
                         requirement_->groupName().c_str(),
                         requirement_->shortname().c_str(),
@@ -209,23 +209,35 @@ std::vector<Joined::SectorInfo> Joined::sectorConditionInfos() const
     std::vector<SectorInfo> infos;
 
     auto must_hold_for_any_target = requirement_->mustHoldForAnyTarget();
+    bool show_target_condition = must_hold_for_any_target.has_value() &&
+                                 must_hold_for_any_target.value();
 
     QVariant result_val = resultValue();
 
-    infos.push_back({ requirement_->getConditionResultNameShort(true).c_str(), 
-                      requirement_->getConditionResultName().c_str(), 
-                      result_val });
+    if (!show_target_condition)
+    {
+        infos.push_back({ requirement_->getConditionResultNameShort(true).c_str(), 
+                          requirement_->getConditionResultName().c_str(), 
+                          result_val });
+    }
 
-    //@TODO_EVAL: change condition if must_hold_for_any_target is true?
+    QString result_name   = QString::fromStdString(requirement_->getConditionResultNameShort(false));
+    QString condition_str = QString::fromStdString(requirement_->getConditionStr());
 
-    infos.push_back({"Condition", "", requirement_->getConditionStr().c_str() });
+    QString condition_name   = show_target_condition ? "Single Target Condition" : "Condition";
+    QString confition_string = show_target_condition ? result_name + " " + condition_str : condition_str;
 
-    std::string result {"Unknown"};
+    infos.push_back({condition_name, "", confition_string });
 
-    if (result_val.isValid())
-        result = conditionResultString();
+    if (!show_target_condition)
+    {
+        std::string result {"Unknown"};
 
-    infos.push_back({"Condition Fulfilled", "", result.c_str()});
+        if (result_val.isValid())
+            result = conditionResultString();
+
+        infos.push_back({condition_name + " Fulfilled", "", result.c_str()});
+    }
 
     if (must_hold_for_any_target.has_value())
     {
@@ -235,6 +247,12 @@ std::vector<Joined::SectorInfo> Joined::sectorConditionInfos() const
         {
             infos.emplace_back("#Single Targets"       , "", num_targets_       );
             infos.emplace_back("#Failed Single Targets", "", num_failed_targets_);
+
+            infos.push_back({"Sum Condition", "", "= 0" });
+
+            std::string result = num_failed_targets_ == 0 ? "Passed" : "Failed";
+
+            infos.push_back({"Sum Condition Fulfilled", "", result.c_str()});
         }
     }
 
@@ -248,7 +266,7 @@ void Joined::addSectorDetailsToReport(std::shared_ptr<EvaluationResultsReport::R
     EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
 
     if (!sector_section.hasTable("sector_details_table"))
-        sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
+        sector_section.addTable("sector_details_table", 3, {"Name", "Comment", "Value"}, false);
 
     EvaluationResultsReport::SectionContentTable& sec_det_table = sector_section.getTable("sector_details_table");
 
@@ -305,9 +323,6 @@ bool Joined::exportAsCSV() const
     std::string filename = file_names.at(0).toStdString();
 
     std::ofstream output_file;
-
-    bool written = false;
-
     output_file.open(filename, std::ios_base::out);
 
     if (!output_file || !output_file.is_open() || !exportAsCSV(output_file))

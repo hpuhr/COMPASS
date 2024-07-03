@@ -121,7 +121,6 @@ boost::optional<double> SinglePositionRadarAzimuth::computeFinalResultValue() co
     if (accumulator_.numValues() == 0)
         return {};
 
-    //@TODO_EVAL
     return accumulator_.mean();
 }
 
@@ -163,7 +162,6 @@ boost::optional<double> JoinedPositionRadarAzimuth::computeFinalResultValue() co
     if (accumulator_.numValues() == 0)
         return {};
 
-    //@TODO_EVAL
     return accumulator_.mean();
 }
 

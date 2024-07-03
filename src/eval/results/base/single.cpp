@@ -235,7 +235,7 @@ void Single::addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::R
 
     //generate details overview table
     if (!utn_req_section.hasTable("details_overview_table"))
-        utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
+        utn_req_section.addTable("details_overview_table", 3, {"Name", "Comment", "Value"}, false);
 
     EvaluationResultsReport::SectionContentTable& utn_req_table = utn_req_section.getTable("details_overview_table");
 
@@ -302,6 +302,8 @@ void Single::generateDetailsTable(EvaluationResultsReport::Section& utn_req_sect
     utn_req_details_table.setCreateOnDemand(
         [this, &utn_req_details_table](void)
         {
+            //create details on demand
+
             auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
             {
                 auto values = detailValues(detail, parent_detail);
@@ -442,6 +444,9 @@ std::vector<Single::TargetInfo> Single::targetConditionInfos(bool& failed) const
         result = conditionResultString();
 
     infos.push_back({"Condition Fulfilled", "", result.c_str()});
+
+    if (requirement_->mustHoldForAnyTarget().has_value())
+        infos.emplace_back("Must hold for any target ", "", requirement_->mustHoldForAnyTarget().value());
 
     failed = (result == "Failed");
 

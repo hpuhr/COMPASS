@@ -178,12 +178,9 @@ boost::optional<double> SinglePositionRadarRange::computeFinalResultValue() cons
     svd.compute(x_mat, Eigen::ComputeThinV | Eigen::ComputeThinU);
     Eigen::MatrixXd x = svd.solve(y_mat);
 
-    //loginf << "x " << x;
-
     range_gain_ = x(0, 0);
     range_bias_ = x(1, 0);
 
-    //@TODO_EVAL
     return accumulator_.mean();
 }
 
@@ -259,12 +256,9 @@ boost::optional<double> JoinedPositionRadarRange::computeFinalResultValue() cons
     svd.compute(x_mat, Eigen::ComputeThinV | Eigen::ComputeThinU);
     Eigen::MatrixXd x = svd.solve(y_mat);
 
-    //loginf << "x " << x;
-
     range_gain_ = x(0, 0);
     range_bias_ = x(1, 0);
 
-    //@TODO_EVAL
     return accumulator_.mean();
 }
 

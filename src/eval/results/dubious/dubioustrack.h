@@ -117,9 +117,6 @@ protected:
     virtual boost::optional<double> computeResult_impl() const override;
 
     virtual std::vector<SectorInfo> sectorInfos() const override;
-
-    virtual bool exportAsCSV(std::ofstream& strm) const override;
-    virtual bool canExportCSV() const override { return false; }
 };
 
 }

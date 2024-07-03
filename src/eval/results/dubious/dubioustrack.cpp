@@ -408,9 +408,6 @@ void JoinedDubiousTrack::accumulateSingleResult(const std::shared_ptr<Single>& s
     duration_all_     += single->trackDurationAll();
     duration_nondub_  += single->trackDurationNondub();
     duration_dubious_ += single->trackDurationDubious();
-
-    //@TODO_EVAL: why?
-    Base::addDetails(single_result->getDetails());
 }
 
 /**
@@ -474,15 +471,6 @@ std::vector<Joined::SectorInfo> JoinedDubiousTrack::sectorInfos() const
     infos.push_back({ "Duration Ratio Non-Dubious [%]", "Duration ratio of non-dubious tracks", p_nondub_t_var });
 
     return infos;
-}
-
-/**
-*/
-bool JoinedDubiousTrack::exportAsCSV(std::ofstream& strm) const
-{
-    //@TODO_EVAL: was commented out in original code
-
-    return false;
 }
 
 }

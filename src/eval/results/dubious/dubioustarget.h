@@ -90,9 +90,6 @@ protected:
 
     virtual std::vector<SectorInfo> sectorInfos() const override;
 
-    virtual bool exportAsCSV(std::ofstream& strm) const override;
-    virtual bool canExportCSV() const override { return false; }
-
 private:
     unsigned int num_utns_        {0};
     unsigned int num_utns_dubious_{0};

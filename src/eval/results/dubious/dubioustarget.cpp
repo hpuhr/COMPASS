@@ -263,7 +263,6 @@ JoinedDubiousTarget::JoinedDubiousTarget(const std::string& result_id,
 */
 unsigned int JoinedDubiousTarget::numIssues() const
 {
-    //@TODO_EVAL: interest originally is always 1 / num_utns_dubious_?
     return num_pos_inside_dubious_;
 }
 
@@ -323,9 +322,6 @@ void JoinedDubiousTarget::accumulateSingleResult(const std::shared_ptr<Single>& 
         duration_dubious_ += Time::partialSeconds(duration.value());
     else
         duration_nondub_ += Time::partialSeconds(duration.value());
-
-    //@TODO_EVAL: why?
-    Base::addDetails(single_result->getDetails());
 }
 
 /**
@@ -390,15 +386,6 @@ std::vector<Joined::SectorInfo> JoinedDubiousTarget::sectorInfos() const
     infos.push_back({"Duration Ratio Non-Dubious [%]", "Duration ratio of non-dubious targets", p_nondub_t_var});
 
     return infos;
-}
-
-/**
-*/
-bool JoinedDubiousTarget::exportAsCSV(std::ofstream& strm) const
-{
-    //@TODO_EVAL: was commented out in original code
-
-    return false;
 }
 
 }
