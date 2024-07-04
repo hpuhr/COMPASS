@@ -55,6 +55,8 @@ class ReconstructorTask : public Task, public Configurable
 
     void runDoneSlot();
 
+    void updateProgressSlot(const QString& msg, bool add_slice_progress);
+
   public:
     ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                       TaskManager& task_manager);
@@ -125,6 +127,7 @@ class ReconstructorTask : public Task, public Configurable
 
     std::unique_ptr<QProgressDialog> progress_dialog_;
     boost::posix_time::ptime run_start_time_;
+    boost::posix_time::ptime run_start_time_after_del_;
 
     size_t current_slice_idx_ = 0;
 
@@ -152,5 +155,4 @@ class ReconstructorTask : public Task, public Configurable
     void processDataSlice();
     void writeDataSlice();
 
-    void updateProgress(const QString& msg, bool add_slice_progress);
 };

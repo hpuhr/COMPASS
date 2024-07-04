@@ -128,7 +128,7 @@ bool ReconstructorTask::canRun()
     return COMPASS::instance().dbContentManager().hasData() && currentReconstructor()->hasNextTimeSlice();
 }
 
-void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progress)
+void ReconstructorTask::updateProgressSlot(const QString& msg, bool add_slice_progress)
 {
     logdbg << "ReconstructorTask: updateProgress: slice " << add_slice_progress
            << " dialog " << (progress_dialog_ != nullptr);
@@ -151,7 +151,7 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
     if (add_slice_progress)
         pmsg += "<b>"+slice_p+"</b>";
 
-    double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
+    double time_elapsed_s = Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
 
     double progress = 0.0;
 
@@ -169,9 +169,12 @@ void ReconstructorTask::updateProgress(const QString& msg, bool add_slice_progre
     pmsg += ("<br><br><div align='left'>Elapsed: "
              + String::timeStringFromDouble(time_elapsed_s, false)+ " </div>").c_str();
 
-    if (ns && sidx) // do remaining time estimate if possible
+    if (ns && sidx && !run_start_time_after_del_.is_not_a_date_time()) // do remaining time estimate if possible
     {
-        double seconds_per_slice = time_elapsed_s / (float) (sidx + 1);
+        double time_elapsed_after_del_s = Time::partialSeconds(boost::posix_time::microsec_clock::local_time()
+                                                               - run_start_time_after_del_);
+
+        double seconds_per_slice = time_elapsed_after_del_s / (float) (sidx + 1);
 
         int num_slices_remaining = ns - sidx; // not -1, since will display and async run
         double time_remaining_s = num_slices_remaining * seconds_per_slice;
@@ -426,6 +429,7 @@ void ReconstructorTask::run()
     loginf << "ReconstructorTask: run: started";
 
     run_start_time_ = boost::posix_time::microsec_clock::local_time();
+    run_start_time_after_del_ = {};
 
     QLabel* tmp_label = new QLabel();
     tmp_label->setTextFormat(Qt::RichText);
@@ -444,7 +448,7 @@ void ReconstructorTask::run()
     if (cancelled_)
         return;
 
-    updateProgress("Deleting Previous References", false);
+    updateProgressSlot("Deleting Previous References", false);
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
@@ -466,7 +470,7 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
 {
     loginf << "ReconstructorTask: deleteCalculatedReferencesDoneSlot";
 
-    updateProgress("Deleting Previous Targets", false);
+    updateProgressSlot("Deleting Previous Targets", false);
 
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
 
@@ -485,7 +489,7 @@ void ReconstructorTask::deleteTargetsDoneSlot()
 {
     loginf << "ReconstructorTask: deleteTargetsDoneSlot";
 
-    updateProgress("Deleting Previous Associations", false);
+    updateProgressSlot("Deleting Previous Associations", false);
 
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
 
@@ -494,7 +498,13 @@ void ReconstructorTask::deleteTargetsDoneSlot()
             for (auto& dbcont_it : cont_man)
             {
                 if (dbcont_it.second->existsInDB())
+                {
+                    QMetaObject::invokeMethod(this, "updateProgressSlot", Qt::QueuedConnection,
+                                              Q_ARG(const QString&, "Deleting Previous Associations"),
+                                              Q_ARG(bool, false));
+
                     COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
+                }
             }
 
             if (cancelled_)
@@ -516,7 +526,9 @@ void ReconstructorTask::deleteAssociationsDoneSlot()
     connect(progress_dialog_.get(), &QProgressDialog::canceled,
             this, &ReconstructorTask::runDoneSlot);
 
-    updateProgress("Initializing", false);
+    updateProgressSlot("Initializing", false);
+
+    run_start_time_after_del_ = boost::posix_time::microsec_clock::local_time();
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
@@ -706,7 +718,7 @@ void ReconstructorTask::loadingDoneSlot()
 
     loginf << "ReconstructorTask: loadingDoneSlot: calling process";
 
-    updateProgress("Processing Slice", true);
+    updateProgressSlot("Processing Slice", true);
     ++current_slice_idx_;
 
     assert (!processing_data_slice_);
@@ -795,7 +807,7 @@ void ReconstructorTask::writeDoneSlot()
         assert (progress_dialog_);
         progress_dialog_->setCancelButtonText("OK");
 
-        updateProgress("Reference Calculation Done", true);
+        updateProgressSlot("Reference Calculation Done", true);
 
         currentReconstructor()->reset();
 
@@ -1001,7 +1013,7 @@ void ReconstructorTask::checkSubConfigurables()
 #endif
 }
 
-void ReconstructorTask::deleteCalculatedReferences()
+void ReconstructorTask::deleteCalculatedReferences() // called in async
 {
     loginf << "ReconstructorTask: deleteCalculatedReferences: delete_all_calc_reftraj "
            << currentReconstructor()->settings().delete_all_calc_reftraj;
@@ -1018,9 +1030,13 @@ void ReconstructorTask::deleteCalculatedReferences()
             currentReconstructor()->settings().ds_sac, currentReconstructor()->settings().ds_sic,
             currentReconstructor()->settings().ds_line);
 
+    loginf << "ReconstructorTask: deleteCalculatedReferences: waiting on delete";
+
     while (dbcontent_man.dbContent("RefTraj").isDeleting())
     {
-        loginf << "ReconstructorTask: deleteCalculatedReferences: waiting on delete done";
+        QMetaObject::invokeMethod(this, "updateProgressSlot", Qt::QueuedConnection,
+                                  Q_ARG(const QString&, "Deleting Previous References"),
+                                  Q_ARG(bool, false));
         QThread::msleep(1000);
     }
 
