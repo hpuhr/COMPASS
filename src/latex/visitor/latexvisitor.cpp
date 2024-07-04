@@ -34,7 +34,7 @@
 #include "stringconv.h"
 #include "json.h"
 #include "files.h"
-#include "eval/results/single.h"
+#include "eval/results/base/single.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "eval/results/report/sectioncontenttext.h"

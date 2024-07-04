@@ -15,14 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTIDENTIFICATIONFALSE_H
-#define EVALUATIONREQUIREMENTIDENTIFICATIONFALSE_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class IdentificationFalse : public ProbabilityBase
 {
 public:
@@ -34,12 +35,13 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PF"; }
+    std::string probabilityName() const override final { return "Probability of Mode 3/A false"; }
+
     bool requireAllFalse() const;
 
     bool useModeA() const;
-
     bool useMsTa() const;
-
     bool useMsTi() const;
 
 protected:
@@ -55,4 +57,3 @@ protected:
 };
 
 }
-#endif // EVALUATIONREQUIREMENTIDENTIFICATIONFALSE_H

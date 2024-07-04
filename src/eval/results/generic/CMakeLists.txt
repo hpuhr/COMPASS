@@ -5,11 +5,9 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/genericsingle.h"
-        "${CMAKE_CURRENT_LIST_DIR}/genericjoined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/generic.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/genericsingle.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/genericjoined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/generic.cpp"
     )
 
 

@@ -48,6 +48,9 @@ std::string parameterFromStrings(const std::vector<std::string>& strings);
 QStringList parameterToStrings(const QString& string_param);
 QString parameterFromStrings(const QStringList& strings);
 
+boost::optional<std::vector<int>> parameterToIntVector(const std::string& string_param);
+boost::optional<std::vector<int>> parameterToIntVector(const QString& string_param);
+
 QString getObjectPath(const QObject* obj);
 
 QString getTooltip(const QObject* rtcmd_object = nullptr,

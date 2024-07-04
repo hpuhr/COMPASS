@@ -122,7 +122,8 @@ class ViewPointGenFeaturePointGeometry : public ViewPointGenFeature
 public:
     ViewPointGenFeaturePointGeometry(const std::string& type,
                                      const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                                     const std::vector<QColor>& colors = std::vector<QColor>());
+                                     const std::vector<QColor>& colors = std::vector<QColor>(),
+                                     bool enable_color_vector = true);
     virtual ~ViewPointGenFeaturePointGeometry() = default;
 
     virtual void reserve(size_t n, bool reserve_cols);
@@ -132,6 +133,8 @@ public:
                   const boost::optional<QColor>& color = boost::optional<QColor>());
     void addPoints(const std::vector<Eigen::Vector2d>& positions,
                    const boost::optional<std::vector<QColor>>& colors = boost::optional<std::vector<QColor>>());
+
+    static nlohmann::json& getCoordinatesJSON(nlohmann::json& feature_json);
 
     static const std::string FeatureFieldNameGeom;
     static const std::string FeatureFieldNameCoords;
@@ -146,6 +149,7 @@ protected:
 private:
     std::vector<Eigen::Vector2d> positions_;
     std::vector<QColor>          colors_;
+    bool                         enable_color_vector_ = true;
 };
 
 /**
@@ -158,13 +162,16 @@ public:
         Circle = 0,
         Triangle,
         Square,
-        Cross
+        Cross,
+        Border,
+        BorderThick
     };
 
     ViewPointGenFeaturePoints(Symbol symbol = Symbol::Square,
                               float symbol_size = 6.0f,
                               const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                              const std::vector<QColor>& colors = std::vector<QColor>());
+                              const std::vector<QColor>& colors = std::vector<QColor>(),
+                              bool enable_color_vector = true);
     virtual ~ViewPointGenFeaturePoints() = default;
 
     static const std::string FeatureName;
@@ -175,6 +182,8 @@ public:
     static const std::string SymbolNameTriangle;
     static const std::string SymbolNameSquare;
     static const std::string SymbolNameCross;
+    static const std::string SymbolNameBorder;
+    static const std::string SymbolNameBorderThick;
 
 protected:
     virtual void writeProperties(nlohmann::json& j) const override;
@@ -194,7 +203,8 @@ public:
     ViewPointGenFeatureLineString(bool interpolated,
                                   float line_width = 1.0f,
                                   const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                                  const std::vector<QColor>& colors = std::vector<QColor>());
+                                  const std::vector<QColor>& colors = std::vector<QColor>(),
+                                  bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureLineString() = default;
 
     static const std::string FeatureName;
@@ -215,7 +225,8 @@ class ViewPointGenFeatureLines : public ViewPointGenFeaturePointGeometry
 public:
     ViewPointGenFeatureLines(float line_width = 1.0f,
                              const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                             const std::vector<QColor>& colors = std::vector<QColor>());
+                             const std::vector<QColor>& colors = std::vector<QColor>(),
+                             bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureLines() = default;
 
     static const std::string FeatureName;
@@ -237,7 +248,8 @@ public:
                                    size_t num_points = 32,
                                    const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
                                    const std::vector<QColor>& colors = std::vector<QColor>(),
-                                   const std::vector<Eigen::Vector3d>& sizes = std::vector<Eigen::Vector3d>());
+                                   const std::vector<Eigen::Vector3d>& sizes = std::vector<Eigen::Vector3d>(),
+                                   bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureErrEllipses() = default;
 
     virtual void reserve(size_t n, bool reserve_cols) override;
@@ -396,6 +408,9 @@ public:
     static const std::string AnnotationFieldSymbolColor;
     static const std::string AnnotationFieldFeatures;
     static const std::string AnnotationFieldAnnotations;
+
+    static nlohmann::json& getFeaturesJSON(nlohmann::json& annotation_json);
+    static nlohmann::json& getFeatureJSON(nlohmann::json& annotation_json, size_t idx);
 
 private:
     std::string             name_;

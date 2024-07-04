@@ -132,6 +132,16 @@ protected:                                                                      
         Var = rtcommand::parameterToStrings(QString::fromStdString(_##Var)); \
     }
 
+#define RTCOMMAND_GET_INTVECTOR_OR_THROW(Variables, Name, Var)               \
+    {                                                                        \
+        std::string _##Var;                                                  \
+        RTCOMMAND_GET_VAR_OR_THROW(Variables, Name, std::string, _##Var)     \
+        auto _vec_##Var = rtcommand::parameterToIntVector(_##Var);           \
+        if (!_vec_##Var.has_value())                                         \
+            throw std::runtime_error(std::string("Not a valid integer vector '") + Name + "'"); \
+        Var = _vec_##Var.value();                                            \
+    }
+
 /**
  * Can be used when deriving RTCommand::collectOptions_impl() to add options and positional option mappings.
  */
@@ -139,8 +149,8 @@ protected:                                                                      
     namespace po = boost::program_options; \
     Options.add_options()
 
-#define ADD_RTCOMMAND_POS_OPTION(PosOptions, Name, PosInt) \
-    PosOptions.add(Name, PosInt);
+#define ADD_RTCOMMAND_POS_OPTION(PosOptions, Name) \
+    PosOptions.add(Name, 1);
 
 /**
  * Can be used when overriding RTCommand::valid() to check for certain conditions.

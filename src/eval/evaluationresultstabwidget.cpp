@@ -272,10 +272,14 @@ void EvaluationResultsTabWidget::updateBackButton ()
     back_button_->setEnabled(id_history_.size() > 1);
 }
 
-boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const std::string& result_id, const std::string& table_id) const
+boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const std::string& result_id, 
+                                                                         const std::string& table_id,
+                                                                         bool rowwise,
+                                                                         const std::vector<int>& cols) const
 {
     QString result_id_corr = QString::fromStdString(result_id);
 
+    //this is just for convenience
     if (!result_id_corr.startsWith("Report:Results:"))
     {
         if (result_id_corr.startsWith("Results:"))
@@ -284,6 +288,7 @@ boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const s
             result_id_corr = "Report:Results:" + result_id_corr;
     }
 
+    //get result section
     QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(result_id_corr.toStdString());
 
     if (!index.isValid())
@@ -306,33 +311,12 @@ boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const s
         return {};
     }
 
+    //check if table is available
     if (!section->hasTable(table_id))
     {
         logerr << "EvaluationResultsTabWidget: getTableData: no table found";
         return {};
     }
 
-    const auto& table = section->getTable(table_id);
-
-    nlohmann::json json_data;
-
-    nlohmann::json header = nlohmann::json::array();
-    for (int col = 0; col < table.columnCount(); ++col)
-        header.push_back(table.headerData(col, Qt::Horizontal, Qt::DisplayRole).toString().toStdString());
-
-    nlohmann::json data = nlohmann::json::array();
-    for (int row = 0; row < table.rowCount(); ++row)
-    {
-        nlohmann::json table_row = nlohmann::json::array();
-
-        for (int col = 0; col < table.columnCount(); ++col)
-            table_row.push_back(table.data(table.index(row, col), Qt::DisplayRole).toString().toStdString());
-        
-        data.push_back(table_row);
-    }
-
-    json_data["header"] = header;
-    json_data["data"  ] = data;
-
-    return json_data;
+    return section->getTable(table_id).toJSON(rowwise, cols);
 }

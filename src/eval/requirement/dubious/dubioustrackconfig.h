@@ -15,13 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DUBIOUSTRACKCONFIG_H
-#define DUBIOUSTRACKCONFIG_H
+#pragma once
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/dubious/dubioustrackconfigwidget.h"
-//#include "eval/requirement/dubious/dubioustrack.h"
 
 class Group;
 class EvaluationStandard;
@@ -128,5 +124,3 @@ protected:
 };
 
 }
-
-#endif // DUBIOUSTRACKCONFIG_H

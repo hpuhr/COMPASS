@@ -15,15 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONDISTANCERMS_H
-#define EVALUATIONREQUIREMENPOSITIONDISTANCERMS_H
+#pragma once
 
 #include "eval/requirement/base/base.h"
-//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class PositionDistanceRMS : public Base
 {
 public:
@@ -31,19 +31,13 @@ public:
             const std::string& name, const std::string& short_name, const std::string& group_name,
             EvaluationManager& eval_man, float threshold_value);
 
-    float thresholdValue() const;
-
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
-    std::string getConditionStr () const override;
-    std::string getConditionResultStr (float rms_value) const;
-
-protected:
-    float threshold_value_ {0};
+    std::string getConditionResultNameShort() const override final { return "RMS"; }
+    std::string getConditionResultName() const override final { return "Root mean square"; }
+    std::string getConditionUnits() const override final { return "m"; }
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONDISTANCERMS_H

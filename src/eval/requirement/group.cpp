@@ -83,7 +83,6 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementCoastingCorrectConfig", "Track Coasting Correct"}
 };
 
-
 Group::Group(const std::string& class_id, const std::string& instance_id,
                                                        EvaluationStandard& standard, EvaluationManager& eval_man)
     : Configurable(class_id, instance_id, &standard), EvaluationStandardTreeItem(&standard), standard_(standard),

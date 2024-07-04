@@ -15,15 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONACROSS_H
-#define EVALUATIONREQUIREMENPOSITIONACROSS_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
-//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class PositionAcross : public ProbabilityBase
 {
 public:
@@ -38,11 +38,11 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PACOK"; }
+    std::string probabilityName() const override final { return "Probability of acceptable across-track error"; }
 
 protected:
     float max_abs_value_ {0};
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONACROSS_H

@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "eval/results/intervalbase.h"
+#include "eval/results/base/intervalbase.h"
 
 namespace EvaluationRequirementResult
 {
@@ -41,10 +41,6 @@ public:
                                       const std::vector<dbContent::TargetPosition>& ref_updates);
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
-
-protected:
-    virtual std::string probabilityName() const override;
-    virtual std::string probabilityDescription() const override;
 };
 
 /**
@@ -57,9 +53,6 @@ public:
                                       std::shared_ptr<EvaluationRequirement::Base> requirement,
                                       const SectorLayer& sector_layer, 
                                       EvaluationManager& eval_man);
-protected:
-    virtual std::string probabilityName() const override;
-    virtual std::string probabilityDescription() const override;
 };
 
 } // namespace EvaluationRequirementResult

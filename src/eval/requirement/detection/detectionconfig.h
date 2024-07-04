@@ -15,13 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTDETECTIONCONFIG_H
-#define EVALUATIONREQUIREMENTDETECTIONCONFIG_H
+#pragma once
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/detection/detectionconfigwidget.h"
-//#include "eval/requirement/detection/detection.h"
 
 #include <memory>
 
@@ -90,5 +86,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTDETECTIONCONFIG_H

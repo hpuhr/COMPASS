@@ -26,6 +26,7 @@
 
 #include <QVariant>
 #include <QColor>
+#include <QRectF>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/optional.hpp>
@@ -116,6 +117,8 @@ public:
     size_t numPositions() const;
     const std::vector<Position>& positions() const;
     const Position& position(size_t idx) const;
+
+    QRectF bounds(double eps = 0.0) const;
 
     EvaluationDetailComments& comments() { return comments_; }
     const EvaluationDetailComments& comments() const { return comments_; }

@@ -17,8 +17,11 @@
 
 #pragma once
 
-#include "eval/results/single.h"
-#include "eval/results/joined.h"
+#include "eval/results/base/single.h"
+#include "eval/results/base/joined.h"
+#include "eval/results/base/probabilitybase.h"
+
+#include "valueaccumulator.h"
 
 #include "json.h"
 
@@ -28,11 +31,119 @@ namespace EvaluationRequirementResult
 {
 
 /**
+ * Common contents for position results.
 */
-class SinglePositionBase : public Single
+class PositionBase
 {
 public:
-    SinglePositionBase(const std::string& result_type,
+    PositionBase();
+    PositionBase(unsigned int num_pos,
+                 unsigned int num_no_ref,
+                 unsigned int num_pos_outside,
+                 unsigned int num_pos_inside,
+                 unsigned int num_passed,
+                 unsigned int num_failed);
+
+    unsigned int numPos() const;
+    unsigned int numNoRef() const;
+    unsigned int numPosOutside() const;
+    unsigned int numPosInside() const;
+    unsigned int numPassed() const;
+    unsigned int numFailed() const;
+
+    const ValueAccumulator& accumulator() const;
+
+protected:
+    unsigned int num_pos_         {0};
+    unsigned int num_no_ref_      {0};
+    unsigned int num_pos_outside_ {0};
+    unsigned int num_pos_inside_  {0};
+    unsigned int num_passed_      {0};
+    unsigned int num_failed_      {0};
+
+    mutable ValueAccumulator accumulator_;
+};
+
+/**
+ * Common functionality for single position results.
+*/
+class SinglePositionBaseCommon : public PositionBase
+{
+public:
+    SinglePositionBaseCommon(unsigned int num_pos,
+                             unsigned int num_no_ref,
+                             unsigned int num_pos_outside,
+                             unsigned int num_pos_inside,
+                             unsigned int num_passed,
+                             unsigned int num_failed);
+
+    enum DetailKey
+    {
+        Value,          //float
+        CheckPassed,    //bool
+        PosInside,      //bool
+        NumPos,         //unsigned int
+        NumNoRef,       //unsigned int
+        NumInside,      //unsigned int
+        NumOutside,     //unsigned int
+        NumCheckPassed, //unsigned int
+        NumCheckFailed, //unsigned int
+        PositionBaseMax
+    };
+
+protected:
+    boost::optional<double> common_computeResult(const Single* single_result) const;
+    unsigned int common_numIssues() const;
+    bool common_detailIsOk(const EvaluationDetail& detail) const;
+
+    virtual boost::optional<double> computeFinalResultValue() const = 0;
+};
+
+/**
+ * Single position results with a final probabilistic value.
+*/
+class SinglePositionProbabilityBase : public SingleProbabilityBase, public SinglePositionBaseCommon
+{
+public:
+    SinglePositionProbabilityBase(const std::string& result_type,
+                                  const std::string& result_id,
+                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                  const SectorLayer& sector_layer,
+                                  unsigned int utn,
+                                  const EvaluationTargetData* target,
+                                  EvaluationManager& eval_man,
+                                  const EvaluationDetails& details,
+                                  unsigned int num_pos,
+                                  unsigned int num_no_ref,
+                                  unsigned int num_pos_outside,
+                                  unsigned int num_pos_inside,
+                                  unsigned int num_passed,
+                                  unsigned int num_failed);
+    virtual ~SinglePositionProbabilityBase() = default;
+
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override final;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override final;
+
+protected:
+    boost::optional<double> computeFinalResultValue() const override final;
+
+    boost::optional<double> computeResult_impl() const override final;
+    unsigned int numIssues() const override final;
+
+    bool detailIsOk(const EvaluationDetail& detail) const override final;
+    void addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                const EvaluationDetail& detail, 
+                                TargetAnnotationType type,
+                                bool is_ok) const override final;
+};
+
+/**
+ * Single position results with a final general value.
+*/
+class SinglePositionValueBase : public Single, public SinglePositionBaseCommon
+{
+public:
+    SinglePositionValueBase(const std::string& result_type,
                        const std::string& result_id,
                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                        const SectorLayer& sector_layer,
@@ -45,83 +156,100 @@ public:
                        unsigned int num_pos_outside,
                        unsigned int num_pos_inside,
                        unsigned int num_passed,
-                       unsigned int num_failed,
-                       vector<double> values);
+                       unsigned int num_failed);
+    virtual ~SinglePositionValueBase() = default;
+    
+    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override final;
+    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override final;
 
-    unsigned int numPos() const;
-    unsigned int numNoRef() const;
-    unsigned int numPosOutside() const;
-    unsigned int numPosInside() const;
-    unsigned int numPassed() const;
-    unsigned int numFailed() const;
-
-    const vector<double>& values() const;
-
-    enum DetailKey
-    {
-        Value,          //float
-        CheckPassed,     //bool
-        PosInside,       //bool
-        NumPos,          //unsigned int
-        NumNoRef,        //unsigned int
-        NumInside,       //unsigned int
-        NumOutside,      //unsigned int
-        NumCheckPassed,  //unsigned int
-        NumCheckFailed  //unsigned int
-    };
+    QVariant resultValue(double value) const override final;
 
 protected:
-    virtual void addCustomAnnotations(nlohmann::json& json_annotations) override;
+    virtual boost::optional<double> computeResult_impl() const override;
+    virtual unsigned int numIssues() const override;
 
-    unsigned int num_pos_         {0};
-    unsigned int num_no_ref_      {0};
-    unsigned int num_pos_outside_ {0};
-    unsigned int num_pos_inside_  {0};
-    unsigned int num_passed_      {0};
-    unsigned int num_failed_      {0};
-
-    vector<double> values_;
-
-    double value_min_ {0};
-    double value_max_ {0};
-    double value_avg_ {0};
-    double value_var_ {0};
-    double value_rms_ {0};
-
-    boost::optional<float> prob_;
+    virtual bool detailIsOk(const EvaluationDetail& detail) const override;
+    virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                        const EvaluationDetail& detail, 
+                                        TargetAnnotationType type,
+                                        bool is_ok) const override;
 };
 
 /**
 */
-class JoinedPositionBase : public Joined
+class JoinedPositionBase : public PositionBase
 {
 public:
-    JoinedPositionBase(const std::string& result_type,
-                       const std::string& result_id,
-                       std::shared_ptr<EvaluationRequirement::Base> requirement,
-                       const SectorLayer& sector_layer,
-                       EvaluationManager& eval_man);
+    JoinedPositionBase(const std::string& csv_header);
+
 protected:
-    unsigned int num_pos_         {0};
-    unsigned int num_no_ref_      {0};
-    unsigned int num_pos_outside_ {0};
-    unsigned int num_pos_inside_  {0};
-    unsigned int num_passed_      {0};
-    unsigned int num_failed_      {0};
+    unsigned int common_numIssues() const;
+    unsigned int common_numUpdates() const;
 
-    double value_min_ {0};
-    double value_max_ {0};
-    double value_avg_ {0};
-    double value_var_ {0};
-    double value_rms_ {0};
+    bool common_exportAsCSV(std::ofstream& strm,
+                            const Joined* result) const;
 
-    boost::optional<float> prob_;
+    void common_clearResults();
+    void common_accumulateSingleResult(const PositionBase& single_result, 
+                                       const std::vector<double>& values,
+                                       bool last);
 
-    virtual void updateToChanges_impl() override;
+    boost::optional<double> common_computeResult() const;
+    virtual boost::optional<double> computeFinalResultValue() const = 0;
 
-    virtual void addCustomAnnotations(nlohmann::json& json_annotations) override;
+private:
+    std::string csv_header_;
+};
 
-    vector<double> values() const;
+/**
+*/
+class JoinedPositionProbabilityBase : public JoinedPositionBase, public JoinedProbabilityBase
+{
+public:
+    JoinedPositionProbabilityBase(const std::string& result_type,
+                                  const std::string& result_id,
+                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                  const SectorLayer& sector_layer,
+                                  EvaluationManager& eval_man,
+                                  const std::string& csv_header);
+protected:
+    boost::optional<double> computeFinalResultValue() const override final;
+
+    virtual unsigned int numIssues() const override;
+    virtual unsigned int numUpdates() const override;
+
+    virtual void clearResults_impl() override;
+    virtual void accumulateSingleResult(const std::shared_ptr<Single>& single_result, bool first, bool last) override;
+    virtual boost::optional<double> computeResult_impl() const override;
+
+    virtual bool exportAsCSV(std::ofstream& strm) const override;
+    virtual bool canExportCSV() const override { return true; }
+};
+
+/**
+*/
+class JoinedPositionValueBase : public JoinedPositionBase, public Joined
+{
+public:
+    JoinedPositionValueBase(const std::string& result_type,
+                            const std::string& result_id,
+                            std::shared_ptr<EvaluationRequirement::Base> requirement,
+                            const SectorLayer& sector_layer,
+                            EvaluationManager& eval_man,
+                            const std::string& csv_header);
+
+    QVariant resultValue(double value) const override final;
+
+protected:
+    virtual unsigned int numIssues() const override;
+    virtual unsigned int numUpdates() const override;
+
+    virtual void clearResults_impl() override;
+    virtual void accumulateSingleResult(const std::shared_ptr<Single>& single_result, bool first, bool last) override;
+    virtual boost::optional<double> computeResult_impl() const override;
+
+    virtual bool exportAsCSV(std::ofstream& strm) const override;
+    virtual bool canExportCSV() const override { return true; }
 };
 
 }

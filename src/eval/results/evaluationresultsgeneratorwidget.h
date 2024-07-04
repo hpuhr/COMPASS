@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSGENERATORWIDGET_H
-#define EVALUATIONRESULTSGENERATORWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -34,7 +33,6 @@ class EvaluationResultsGeneratorWidget : public QWidget
 private slots:
     void toggleSplitResultsByMOPSSlot();
     void toggleSplitResultsByMACMSSlot();
-    void toggleShowAdsbInfoSlot();
     void toggleShowOKJoinedSlot();
     void toggleSkipNoDataDetailsSlot();
 
@@ -55,7 +53,6 @@ protected:
     QCheckBox* skip_no_data_details_check_ {nullptr};
     QCheckBox* split_results_by_mops_check_ {nullptr};
     QCheckBox* split_results_by_mac_ms_check_ {nullptr};
-    QCheckBox* show_adsb_info_check_ {nullptr};
     QCheckBox* show_ok_joined_target_reports_check_ {nullptr};
 
     QLineEdit* result_detail_zoom_edit_{nullptr};
@@ -64,5 +61,3 @@ protected:
     QSpinBox*  grid_num_cells_y_box_  = nullptr;
     QSpinBox*  grid_pix_per_cell_box_ = nullptr;
 };
-
-#endif // EVALUATIONRESULTSGENERATORWIDGET_H

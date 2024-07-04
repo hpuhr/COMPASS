@@ -225,9 +225,9 @@ private:
     /**
      */
     template<typename T>
-    void addFloatingPointResult(const std::string& dbcontent_name, std::shared_ptr<T> result)
+    void addFloatingPointResult(const std::string& dbcontent_name, std::shared_ptr<T> result, int value_id)
     {
-        const std::vector<double>& values = result->values();
+        const std::vector<double>& values = result->getValues(value_id);
 
         //note: histograms are created on-the-fly if they do not exist, otherwise they are reused
         bool init_histogram = histograms_fp_.empty();
@@ -258,9 +258,9 @@ private:
     /**
      */
     template<typename T, typename Tsub, typename Tbase>
-    void addFloatingPointResults(const std::string& dbcontent_name, std::shared_ptr<T> result)
+    void addFloatingPointResults(const std::string& dbcontent_name, std::shared_ptr<T> result, int value_id)
     {
-        std::vector<std::shared_ptr<Tbase>>& results = result->results();
+        std::vector<std::shared_ptr<Tbase>>& results = result->singleResults();
 
         //note: histograms are created on-the-fly if they do not exist, otherwise they are reused
         bool init_histogram = histograms_fp_.empty();
@@ -279,7 +279,7 @@ private:
                 std::shared_ptr<Tsub> single_result = std::static_pointer_cast<Tsub>(result_it);
 
                 if (single_result->use())
-                    init.scan(single_result->values());
+                    init.scan(single_result->getValues(value_id));
             }
 
             auto config = init.currentConfiguration();
@@ -295,7 +295,7 @@ private:
 
             if (single_result->use())
             {
-                h.add(single_result->values());
+                h.add(single_result->getValues(value_id));
 
                 //for (auto v : single_result->values())
                 //    loginf << "   " << v;

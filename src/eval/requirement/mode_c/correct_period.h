@@ -43,8 +43,11 @@ public:
             float miss_tolerance_s,
             float max_distance_ft);
 
-    static std::string probabilityName();
-    static std::string probabilityDescription();
+    static std::string probabilityNameShortStatic();
+    static std::string probabilityNameStatic();
+
+    std::string probabilityNameShort() const override final;
+    std::string probabilityName() const override final;
 
 protected:
     virtual Validity isValid(const dbContent::TargetReport::DataID& data_id,

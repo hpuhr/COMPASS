@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONMANAGER_H
-#define EVALUATIONMANAGER_H
+#pragma once
 
 #include "configurable.h"
 #include "evaluationdata.h"
@@ -120,7 +119,6 @@ struct EvaluationManagerSettings
     bool report_skip_no_data_details_ {true};
     bool report_split_results_by_mops_ {false};
     bool report_split_results_by_aconly_ms_ {false};
-    bool report_show_adsb_info_ {false};
 
     std::string report_author_;
     std::string report_abstract_;
@@ -395,5 +393,3 @@ protected:
 
     dbContent::DataSourceCompoundCoverage tst_srcs_coverage_;
 };
-
-#endif // EVALUATIONMANAGER_H

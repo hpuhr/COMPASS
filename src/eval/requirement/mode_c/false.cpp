@@ -16,13 +16,14 @@
  */
 
 #include "eval/requirement/mode_c/false.h"
-#include "eval/results/mode_c/falsesingle.h"
-//#include "evaluationdata.h"
+
+#include "eval/results/mode_c/false.h"
+
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "util/stringconv.h"
-#include "util/timeconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
+#include "util/timeconv.h"
 
 using namespace std;
 using namespace Utils;
@@ -33,7 +34,7 @@ namespace EvaluationRequirement
 
 ModeCFalse::ModeCFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
                        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
       maximum_probability_false_(maximum_probability_false), maximum_difference_(maximum_difference)
 {
 }

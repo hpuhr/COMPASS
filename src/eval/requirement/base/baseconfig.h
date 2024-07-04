@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTBASECONFIG_H
-#define EVALUATIONREQUIREMENTBASECONFIG_H
+#pragma once
 
 #include "configurable.h"
 #include "evaluationstandardtreeitem.h"
@@ -95,5 +94,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTBASECONFIG_H

@@ -14,10 +14,7 @@ CoastingCorrect::CoastingCorrect(const std::string& name, const std::string& sho
     value_name_short_ = "Coast";
     value_name_plural_ = "Track Coasting";
 
-    probability_name_ = "Probability of Correct Track Coasting";
-    probability_name_short_ = "PCCoast";
-
-     value_compare_func_ = [this] (const dbContent::TargetReport::Chain::DataID& id,
+    value_compare_func_ = [this] (const dbContent::TargetReport::Chain::DataID& id,
                              const EvaluationTargetData& target_data,
                              boost::posix_time::time_duration max_ref_time_diff)
     { return compareCoasting(id, target_data, max_ref_time_diff); };

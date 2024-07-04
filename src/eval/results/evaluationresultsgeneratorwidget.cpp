@@ -18,7 +18,6 @@
 #include "evaluationresultsgeneratorwidget.h"
 #include "evaluationresultsgenerator.h"
 #include "evaluationmanager.h"
-//#include "textfielddoublevalidator.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -66,15 +65,6 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     connect(split_results_by_mac_ms_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleSplitResultsByMACMSSlot);
     layout->addRow("Split Results by Mode A/C Only and Mode S", split_results_by_mac_ms_check_);
-
-    // show adsb info
-    //++row;
-
-    show_adsb_info_check_ = new QCheckBox ();
-    show_adsb_info_check_->setChecked(eval_settings_.report_show_adsb_info_);
-    connect(show_adsb_info_check_, &QCheckBox::clicked,
-            this, &EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot);
-    layout->addRow("Show ADS-B Info", show_adsb_info_check_);
 
     // show ok
 
@@ -127,7 +117,6 @@ void EvaluationResultsGeneratorWidget::updateFromSettings()
     skip_no_data_details_check_->setChecked(eval_settings_.report_skip_no_data_details_);
     split_results_by_mops_check_->setChecked(eval_settings_.report_split_results_by_mops_);
     split_results_by_mac_ms_check_->setChecked(eval_settings_.report_split_results_by_aconly_ms_);
-    show_adsb_info_check_->setChecked(eval_settings_.report_show_adsb_info_);
     show_ok_joined_target_reports_check_->setChecked(eval_settings_.show_ok_joined_target_reports_);
     result_detail_zoom_edit_->setText(QString::number(eval_settings_.result_detail_zoom_));
 
@@ -146,12 +135,6 @@ void EvaluationResultsGeneratorWidget::toggleSplitResultsByMACMSSlot()
 {
     assert (split_results_by_mac_ms_check_);
     eval_settings_.report_split_results_by_aconly_ms_ = split_results_by_mac_ms_check_->checkState() == Qt::Checked;
-}
-
-void EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot()
-{
-    assert (show_adsb_info_check_);
-    eval_settings_.report_show_adsb_info_ = show_adsb_info_check_->checkState() == Qt::Checked;
 }
 
 void EvaluationResultsGeneratorWidget::toggleShowOKJoinedSlot()

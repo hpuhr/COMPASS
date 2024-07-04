@@ -15,17 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTDETECTION_H
-#define EVALUATIONREQUIREMENTDETECTION_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
-//#include "dbcontent/target/targetposition.h"
-
-#include <QVariant>
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class Detection : public ProbabilityBase
 {
 public:
@@ -47,48 +45,35 @@ public:
             bool hold_for_any_target);
 
     float updateInterval() const;
-
     bool useMinGapLength() const;
-
     float minGapLength() const;
-
     bool useMaxGapLength() const;
-
     float maxGapLength() const;
-
-    bool invertProb() const;
-
     bool useMissTolerance() const;
-
     float missTolerance() const;
-
     float missThreshold() const;
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
-    bool holdForAnyTarget() const;
+    std::string probabilityNameShort() const override final { return "PD"; }
+    std::string probabilityName() const override final { return "Probability of Detection"; }
 
 protected:
+    bool isMiss (float d_tod) const;
+    unsigned int getNumMisses(float d_tod) const;
+
     float update_interval_s_{0};
 
-    bool use_min_gap_length_ {false};
-    float min_gap_length_s_{0};
+    bool  use_min_gap_length_{false};
+    float min_gap_length_s_  {0};
 
-    bool use_max_gap_length_ {false};
-    float max_gap_length_s_{0};
+    bool  use_max_gap_length_{false};
+    float max_gap_length_s_  {0};
 
-    bool invert_prob_ {false};
-
-    bool use_miss_tolerance_{false};
-    float miss_tolerance_s_{0};
-
-    bool hold_for_any_target_ {false}; // if requirement must hold for any target (all single targets)
-
-    bool isMiss (float d_tod);
-    unsigned int getNumMisses(float d_tod);
+    bool  use_miss_tolerance_{false};
+    float miss_tolerance_s_  {0};
 };
 
 }
-#endif // EVALUATIONREQUIREMENTDETECTION_H

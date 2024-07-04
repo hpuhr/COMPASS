@@ -19,59 +19,41 @@
 #include "evaluationmanager.h"
 #include "compass.h"
 
-#include "eval/results/base.h"
-#include "eval/results/single.h"
-#include "eval/results/joined.h"
+#include "eval/results/base/base.h"
+#include "eval/results/base/single.h"
+#include "eval/results/base/joined.h"
 
-#include "eval/results/extra/datasingle.h"
-#include "eval/results/extra/datajoined.h"
-#include "eval/results/extra/tracksingle.h"
-#include "eval/results/extra/trackjoined.h"
+#include "eval/results/extra/data.h"
+#include "eval/results/extra/track.h"
 
-#include "eval/results/dubious/dubioustracksingle.h"
-#include "eval/results/dubious/dubioustrackjoined.h"
-#include "eval/results/dubious/dubioustargetsingle.h"
-#include "eval/results/dubious/dubioustargetjoined.h"
+#include "eval/results/dubious/dubioustrack.h"
+#include "eval/results/dubious/dubioustarget.h"
 
-#include "eval/results/detection/joined.h"
-#include "eval/results/detection/single.h"
-#include "eval/results/position/distancejoined.h"
-#include "eval/results/position/distancesingle.h"
-#include "eval/results/position/distancermsjoined.h"
-#include "eval/results/position/distancermssingle.h"
-#include "eval/results/position/alongsingle.h"
-#include "eval/results/position/alongjoined.h"
-#include "eval/results/position/acrosssingle.h"
-#include "eval/results/position/acrossjoined.h"
-#include "eval/results/position/latencysingle.h"
-#include "eval/results/position/latencyjoined.h"
+#include "eval/results/detection/detection.h"
 
-#include "eval/results/position/radarazimuthjoined.h"
-#include "eval/results/position/radarazimuthsingle.h"
-#include "eval/results/position/radarrangejoined.h"
-#include "eval/results/position/radarrangesingle.h"
+#include "eval/results/position/distance.h"
+#include "eval/results/position/distancerms.h"
+#include "eval/results/position/along.h"
+#include "eval/results/position/across.h"
+#include "eval/results/position/latency.h"
 
-#include "eval/results/speed/speedjoined.h"
-#include "eval/results/speed/speedsingle.h"
-#include "eval/results/trackangle/trackanglejoined.h"
-#include "eval/results/trackangle/trackanglesingle.h"
+#include "eval/results/position/radarazimuth.h"
+#include "eval/results/position/radarrange.h"
 
-#include "eval/results/identification/correctsingle.h"
-#include "eval/results/identification/correctjoined.h"
-#include "eval/results/identification/falsesingle.h"
-#include "eval/results/identification/falsejoined.h"
+#include "eval/results/speed/speed.h"
+
+#include "eval/results/trackangle/trackangle.h"
+
+#include "eval/results/identification/correct.h"
+#include "eval/results/identification/false.h"
 #include "eval/results/identification/correct_period.h"
 
-#include "eval/results/mode_a/presentsingle.h"
-#include "eval/results/mode_a/presentjoined.h"
-#include "eval/results/mode_a/falsesingle.h"
-#include "eval/results/mode_a/falsejoined.h"
-#include "eval/results/mode_c/presentsingle.h"
-#include "eval/results/mode_c/presentjoined.h"
-#include "eval/results/mode_c/falsesingle.h"
-#include "eval/results/mode_c/falsejoined.h"
-#include "eval/results/mode_c/correctsingle.h"
-#include "eval/results/mode_c/correctjoined.h"
+#include "eval/results/mode_a/present.h"
+#include "eval/results/mode_a/false.h"
+
+#include "eval/results/mode_c/present.h"
+#include "eval/results/mode_c/false.h"
+#include "eval/results/mode_c/correct.h"
 #include "eval/results/mode_c/correct_period.h"
 
 using namespace EvaluationRequirementResult;
@@ -198,7 +180,7 @@ void HistogramGeneratorResults::addStaticResult(const std::vector<std::string>& 
 
     assert(ids.size() == counts.size());
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     //note: histograms are created on-the-fly if they do not exist, otherwise they are reused
     bool init_histogram = histograms_static_.empty();
@@ -230,106 +212,106 @@ void HistogramGeneratorResults::updateFromResult(std::shared_ptr<EvaluationRequi
     loginf << "HistogramGeneratorResults: updateFromResult";
 
     if (result->type() == "SingleExtraData")
-        updateCountResult(static_pointer_cast<SingleExtraData>(result));
+        updateCountResult(std::static_pointer_cast<SingleExtraData>(result));
     else if (result->type() == "JoinedExtraData")
-        updateCountResult(static_pointer_cast<JoinedExtraData>(result));
+        updateCountResult(std::static_pointer_cast<JoinedExtraData>(result));
     else if (result->type() == "SingleExtraTrack")
-        updateCountResult(static_pointer_cast<SingleExtraTrack>(result));
+        updateCountResult(std::static_pointer_cast<SingleExtraTrack>(result));
     else if (result->type() == "JoinedExtraTrack")
-        updateCountResult(static_pointer_cast<JoinedExtraTrack>(result));
+        updateCountResult(std::static_pointer_cast<JoinedExtraTrack>(result));
 
     else if (result->type() == "SingleDubiousTrack")
-        loginf << "SingleDubiousTrack not yet implemented in histogram view"; //updateCountResult(static_pointer_cast<SingleExtraTrack>(result)); TODO
+        loginf << "SingleDubiousTrack not yet implemented in histogram view"; //updateCountResult(std::static_pointer_cast<SingleExtraTrack>(result)); TODO
     else if (result->type() == "JoinedDubiousTrack")
-        loginf << "JoinedDubiousTrack not yet implemented in histogram view"; //updateCountResult(static_pointer_cast<JoinedExtraTrack>(result));
+        loginf << "JoinedDubiousTrack not yet implemented in histogram view"; //updateCountResult(std::static_pointer_cast<JoinedExtraTrack>(result));
     else if (result->type() == "SingleDubiousTarget")
-        loginf << "SingleDubiousTarget not yet implemented in histogram view"; //updateCountResult(static_pointer_cast<SingleExtraTrack>(result)); TODO
+        loginf << "SingleDubiousTarget not yet implemented in histogram view"; //updateCountResult(std::static_pointer_cast<SingleExtraTrack>(result)); TODO
     else if (result->type() == "JoinedDubiousTarget")
-        loginf << "JoinedDubiousTarget not yet implemented in histogram view"; //updateCountResult(static_pointer_cast<JoinedExtraTrack>(result));
+        loginf << "JoinedDubiousTarget not yet implemented in histogram view"; //updateCountResult(std::static_pointer_cast<JoinedExtraTrack>(result));
     
     else if (result->type() == "SingleDetection")
-        updateCountResult(static_pointer_cast<SingleDetection>(result));
+        updateCountResult(std::static_pointer_cast<SingleDetection>(result));
     else if (result->type() == "JoinedDetection")
-        updateCountResult(static_pointer_cast<JoinedDetection>(result));
+        updateCountResult(std::static_pointer_cast<JoinedDetection>(result));
     else if (result->type() == "SinglePositionDistance")
-        updateCountResult(static_pointer_cast<SinglePositionDistance>(result));
+        updateCountResult(std::static_pointer_cast<SinglePositionDistance>(result));
     else if (result->type() == "JoinedPositionDistance")
-        updateCountResult(static_pointer_cast<JoinedPositionDistance>(result));
+        updateCountResult(std::static_pointer_cast<JoinedPositionDistance>(result));
     else if (result->type() == "SinglePositionDistanceRMS")
-        updateCountResult(static_pointer_cast<SinglePositionDistanceRMS>(result));
+        updateCountResult(std::static_pointer_cast<SinglePositionDistanceRMS>(result));
     else if (result->type() == "JoinedPositionDistanceRMS")
-        updateCountResult(static_pointer_cast<JoinedPositionDistanceRMS>(result));
+        updateCountResult(std::static_pointer_cast<JoinedPositionDistanceRMS>(result));
     else if (result->type() == "SinglePositionAlong")
-        updateCountResult(static_pointer_cast<SinglePositionAlong>(result));
+        updateCountResult(std::static_pointer_cast<SinglePositionAlong>(result));
     else if (result->type() == "JoinedPositionAlong")
-        updateCountResult(static_pointer_cast<JoinedPositionAlong>(result));
+        updateCountResult(std::static_pointer_cast<JoinedPositionAlong>(result));
     else if (result->type() == "SinglePositionAcross")
-        updateCountResult(static_pointer_cast<SinglePositionAcross>(result));
+        updateCountResult(std::static_pointer_cast<SinglePositionAcross>(result));
     else if (result->type() == "JoinedPositionAcross")
-        updateCountResult(static_pointer_cast<JoinedPositionAcross>(result));
+        updateCountResult(std::static_pointer_cast<JoinedPositionAcross>(result));
     else if (result->type() == "SinglePositionLatency")
-        updateCountResult(static_pointer_cast<SinglePositionLatency>(result));
+        updateCountResult(std::static_pointer_cast<SinglePositionLatency>(result));
     else if (result->type() == "JoinedPositionLatency")
-        updateCountResult(static_pointer_cast<JoinedPositionLatency>(result));
+        updateCountResult(std::static_pointer_cast<JoinedPositionLatency>(result));
 
     else if (result->type() == "SinglePositionRadarAzimuth")
-        updateCountResult(static_pointer_cast<SinglePositionRadarAzimuth>(result));
+        updateCountResult(std::static_pointer_cast<SinglePositionRadarAzimuth>(result));
     else if (result->type() == "JoinedPositionRadarAzimuth")
-        updateCountResult(static_pointer_cast<JoinedPositionRadarAzimuth>(result));
+        updateCountResult(std::static_pointer_cast<JoinedPositionRadarAzimuth>(result));
     else if (result->type() == "SinglePositionRadarRange")
-        updateCountResult(static_pointer_cast<SinglePositionRadarRange>(result));
+        updateCountResult(std::static_pointer_cast<SinglePositionRadarRange>(result));
     else if (result->type() == "JoinedPositionRadarRange")
-        updateCountResult(static_pointer_cast<JoinedPositionRadarRange>(result));
+        updateCountResult(std::static_pointer_cast<JoinedPositionRadarRange>(result));
 
     else if (result->type() == "SingleSpeed")
-        updateCountResult(static_pointer_cast<SingleSpeed>(result));
+        updateCountResult(std::static_pointer_cast<SingleSpeed>(result));
     else if (result->type() == "JoinedSpeed")
-        updateCountResult(static_pointer_cast<JoinedSpeed>(result));
+        updateCountResult(std::static_pointer_cast<JoinedSpeed>(result));
     else if (result->type() == "SingleTrackAngle")
-        updateCountResult(static_pointer_cast<SingleTrackAngle>(result));
+        updateCountResult(std::static_pointer_cast<SingleTrackAngle>(result));
     else if (result->type() == "JoinedTrackAngle")
-        updateCountResult(static_pointer_cast<JoinedTrackAngle>(result));
+        updateCountResult(std::static_pointer_cast<JoinedTrackAngle>(result));
 
     else if (result->type() == "SingleIdentificationCorrect")
-        updateCountResult(static_pointer_cast<SingleIdentificationCorrect>(result));
+        updateCountResult(std::static_pointer_cast<SingleIdentificationCorrect>(result));
     else if (result->type() == "JoinedIdentificationCorrect")
-        updateCountResult(static_pointer_cast<JoinedIdentificationCorrect>(result));
+        updateCountResult(std::static_pointer_cast<JoinedIdentificationCorrect>(result));
     else if (result->type() == "SingleIdentificationFalse")
-        updateCountResult(static_pointer_cast<SingleIdentificationFalse>(result));
+        updateCountResult(std::static_pointer_cast<SingleIdentificationFalse>(result));
     else if (result->type() == "JoinedIdentificationFalse")
-        updateCountResult(static_pointer_cast<JoinedIdentificationFalse>(result));
+        updateCountResult(std::static_pointer_cast<JoinedIdentificationFalse>(result));
     else if (result->type() == "SingleIdentificationCorrectPeriod")
-        updateCountResult(static_pointer_cast<SingleIdentificationCorrectPeriod>(result));
+        updateCountResult(std::static_pointer_cast<SingleIdentificationCorrectPeriod>(result));
     else if (result->type() == "JoinedIdentificationCorrectPeriod")
-        updateCountResult(static_pointer_cast<JoinedIdentificationCorrectPeriod>(result));
+        updateCountResult(std::static_pointer_cast<JoinedIdentificationCorrectPeriod>(result));
 
     else if (result->type() == "SingleModeAPresent")
-        updateCountResult(static_pointer_cast<SingleModeAPresent>(result));
+        updateCountResult(std::static_pointer_cast<SingleModeAPresent>(result));
     else if (result->type() == "JoinedModeAPresent")
-        updateCountResult(static_pointer_cast<JoinedModeAPresent>(result));
+        updateCountResult(std::static_pointer_cast<JoinedModeAPresent>(result));
     else if (result->type() == "SingleModeAFalse")
-        updateCountResult(static_pointer_cast<SingleModeAFalse>(result));
+        updateCountResult(std::static_pointer_cast<SingleModeAFalse>(result));
     else if (result->type() == "JoinedModeAFalse")
-        updateCountResult(static_pointer_cast<JoinedModeAFalse>(result));
+        updateCountResult(std::static_pointer_cast<JoinedModeAFalse>(result));
 
     else if (result->type() == "SingleModeCPresent")
-        updateCountResult(static_pointer_cast<SingleModeCPresent>(result));
+        updateCountResult(std::static_pointer_cast<SingleModeCPresent>(result));
     else if (result->type() == "JoinedModeCPresent")
-        updateCountResult(static_pointer_cast<JoinedModeCPresent>(result));
+        updateCountResult(std::static_pointer_cast<JoinedModeCPresent>(result));
     else if (result->type() == "SingleModeCFalse")
-        updateCountResult(static_pointer_cast<SingleModeCFalse>(result));
+        updateCountResult(std::static_pointer_cast<SingleModeCFalse>(result));
     else if (result->type() == "JoinedModeCFalse")
-        updateCountResult(static_pointer_cast<JoinedModeCFalse>(result));
+        updateCountResult(std::static_pointer_cast<JoinedModeCFalse>(result));
     else if (result->type() == "SingleModeCCorrect")
-        updateCountResult(static_pointer_cast<SingleModeCCorrect>(result));
+        updateCountResult(std::static_pointer_cast<SingleModeCCorrect>(result));
     else if (result->type() == "JoinedModeCCorrect")
-        updateCountResult(static_pointer_cast<JoinedModeCCorrect>(result));
+        updateCountResult(std::static_pointer_cast<JoinedModeCCorrect>(result));
     else if (result->type() == "SingleModeCCorrectPeriod")
-        updateCountResult(static_pointer_cast<SingleModeCCorrectPeriod>(result));
+        updateCountResult(std::static_pointer_cast<SingleModeCCorrectPeriod>(result));
     else if (result->type() == "JoinedModeCCorrectPeriod")
-        updateCountResult(static_pointer_cast<JoinedModeCCorrectPeriod>(result));
+        updateCountResult(std::static_pointer_cast<JoinedModeCCorrectPeriod>(result));
     else
-        throw runtime_error("HistogramGeneratorResults: updateFromResult: unknown result type '"+result->type()+"'");
+        throw std::runtime_error("HistogramGeneratorResults: updateFromResult: unknown result type '"+result->type()+"'");
 }
 
 /**
@@ -356,14 +338,14 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleExtraData>(result_it));
+        assert (std::static_pointer_cast<SingleExtraData>(result_it));
 
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleExtraData>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleExtraData>(result_it));
     }
 }
 
@@ -391,14 +373,14 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleExtraTrack>(result_it));
+        assert (std::static_pointer_cast<SingleExtraTrack>(result_it));
 
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleExtraTrack>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleExtraTrack>(result_it));
     }
 }
 
@@ -424,14 +406,14 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleDetection>(result_it));
+        assert (std::static_pointer_cast<SingleDetection>(result_it));
 
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleDetection>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleDetection>(result_it));
     }
 }
 
@@ -442,7 +424,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -452,7 +434,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionDistance, SinglePositionDistance, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionDistance, SinglePositionDistance, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -461,7 +443,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -470,7 +452,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionDistanceRMS, SinglePositionDistanceRMS, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionDistanceRMS, SinglePositionDistanceRMS, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -480,7 +462,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -490,7 +472,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionAlong, SinglePositionAlong, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionAlong, SinglePositionAlong, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -500,7 +482,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -510,7 +492,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionAcross, SinglePositionAcross, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionAcross, SinglePositionAcross, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -520,7 +502,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -530,7 +512,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionLatency, SinglePositionLatency, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionLatency, SinglePositionLatency, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 void HistogramGeneratorResults::updateCountResult (
@@ -538,28 +520,28 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 void HistogramGeneratorResults::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarAzimuth> result)
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionRadarAzimuth, SinglePositionRadarAzimuth, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionRadarAzimuth, SinglePositionRadarAzimuth, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 void HistogramGeneratorResults::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionRadarRange> result)
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 void HistogramGeneratorResults::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionRadarRange> result)
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionRadarRange, SinglePositionRadarRange, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionRadarRange, SinglePositionRadarRange, Single>(dbcontent_name, result, SinglePositionBaseCommon::DetailKey::Value);
 }
 
 /**
@@ -569,7 +551,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SingleSpeed::DetailKey::Offset);
 }
 
 /**
@@ -579,7 +561,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedSpeed, SingleSpeed, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedSpeed, SingleSpeed, Single>(dbcontent_name, result, SingleSpeed::DetailKey::Offset);
 }
 
 void HistogramGeneratorResults::updateCountResult (
@@ -587,7 +569,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResult(dbcontent_name, result);
+    addFloatingPointResult(dbcontent_name, result, SingleTrackAngle::DetailKey::Offset);
 }
 
 /**
@@ -597,7 +579,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedTrackAngle, SingleTrackAngle, Single>(dbcontent_name, result);
+    addFloatingPointResults<JoinedTrackAngle, SingleTrackAngle, Single>(dbcontent_name, result, SingleTrackAngle::DetailKey::Offset);
 }
 
 
@@ -627,13 +609,13 @@ void HistogramGeneratorResults::updateCountResult (
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleIdentificationCorrect>(result_it));
+        assert (std::static_pointer_cast<SingleIdentificationCorrect>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleIdentificationCorrect>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleIdentificationCorrect>(result_it));
     }
 }
 
@@ -665,13 +647,13 @@ void HistogramGeneratorResults::updateCountResult (
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleIdentificationFalse>(result_it));
+        assert (std::static_pointer_cast<SingleIdentificationFalse>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleIdentificationFalse>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleIdentificationFalse>(result_it));
     }
 }
 
@@ -697,13 +679,13 @@ void HistogramGeneratorResults::updateCountResult(std::shared_ptr<EvaluationRequ
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleIdentificationCorrectPeriod>(result_it));
+        assert (std::static_pointer_cast<SingleIdentificationCorrectPeriod>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleIdentificationCorrectPeriod>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleIdentificationCorrectPeriod>(result_it));
     }
 }
 
@@ -731,13 +713,13 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleModeAPresent>(result_it));
+        assert (std::static_pointer_cast<SingleModeAPresent>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleModeAPresent>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleModeAPresent>(result_it));
     }
 }
 
@@ -767,13 +749,13 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleModeAFalse>(result_it));
+        assert (std::static_pointer_cast<SingleModeAFalse>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleModeAFalse>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleModeAFalse>(result_it));
     }
 }
 
@@ -801,13 +783,13 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleModeCPresent>(result_it));
+        assert (std::static_pointer_cast<SingleModeCPresent>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleModeCPresent>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleModeCPresent>(result_it));
     }
 }
 
@@ -837,13 +819,13 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleModeCFalse>(result_it));
+        assert (std::static_pointer_cast<SingleModeCFalse>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleModeCFalse>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleModeCFalse>(result_it));
     }
 }
 
@@ -871,13 +853,13 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleModeCCorrect>(result_it));
+        assert (std::static_pointer_cast<SingleModeCCorrect>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleModeCCorrect>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleModeCCorrect>(result_it));
     }
 }
 
@@ -903,12 +885,12 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Single>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->singleResults();
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleModeCCorrectPeriod>(result_it));
+        assert (std::static_pointer_cast<SingleModeCCorrectPeriod>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleModeCCorrectPeriod>(result_it));
+            updateCountResult (std::static_pointer_cast<SingleModeCCorrectPeriod>(result_it));
     }
 }

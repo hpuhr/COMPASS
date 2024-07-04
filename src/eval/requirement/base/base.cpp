@@ -168,13 +168,6 @@ std::function<bool(const double&, const double&, const double&)> Base::cmpAccele
 std::function<std::string(const double&)> Base::printAcceleration =
     [] (const unsigned int& val) { return String::doubleToStringPrecision(val, 2); };
 
-Base::Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-           EvaluationManager& eval_man)
-    : name_(name), short_name_(short_name), group_name_(group_name),
-      eval_man_(eval_man)
-{
-}
-
 // coasting
 
 std::function<boost::optional<unsigned char>(const dbContent::TargetReport::Chain&,
@@ -188,28 +181,149 @@ std::function<bool(const unsigned char&, const unsigned char&)> Base::cmpCoastin
 std::function<std::string(const unsigned char&)> Base::printCoasting =
     [] (const unsigned int& val) { return to_string((unsigned int) val); };
 
-Base::~Base()
+/**
+*/
+Base::Base(const std::string& name, 
+           const std::string& short_name, 
+           const std::string& group_name,
+           double threshold,
+           COMPARISON_TYPE check_type, 
+           EvaluationManager& eval_man,
+           const boost::optional<bool>& must_hold_for_any_target)
+:   name_                    (name      )
+,   short_name_              (short_name)
+,   group_name_              (group_name)
+,   threshold_               (threshold )
+,   check_type_              (check_type)
+,   eval_man_                (eval_man  )
+,   must_hold_for_any_target_(must_hold_for_any_target)
 {
-
 }
 
+/**
+*/
+Base::~Base() = default;
+
+/**
+*/
 std::string Base::name() const
 {
     return name_;
 }
 
+/**
+*/
 std::string Base::shortname() const
 {
     return short_name_;
 }
 
+/**
+*/
 std::string Base::groupName() const
 {
     return group_name_;
 }
 
+/**
+*/
+double Base::threshold() const
+{
+    return threshold_;
+}
 
+/**
+*/
+COMPARISON_TYPE Base::conditionCheckType() const
+{
+    return check_type_;
+}
 
+/**
+*/
+const boost::optional<bool>& Base::mustHoldForAnyTarget() const
+{
+    return must_hold_for_any_target_;
+}
+
+/**
+*/
+Qt::SortOrder Base::resultSortOrder() const
+{
+    bool lt = check_type_ == COMPARISON_TYPE::LESS_THAN ||
+              check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL;
+
+    return (lt ? Qt::DescendingOrder : Qt::AscendingOrder);
+}
+
+/**
+*/
+std::string Base::getThresholdString(double thres) const
+{
+    return std::to_string(thres);
+}
+
+/**
+*/
+std::string Base::getConditionStr() const
+{
+    if (check_type_ == COMPARISON_TYPE::LESS_THAN)
+        return comparisonTypeString(COMPARISON_TYPE::LESS_THAN) + " " + getThresholdString(threshold_);
+    else if (check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
+        return comparisonTypeString(COMPARISON_TYPE::LESS_THAN_OR_EQUAL) + " " + getThresholdString(threshold_);
+    else if (check_type_ == COMPARISON_TYPE::GREATER_THAN)
+        return comparisonTypeString(COMPARISON_TYPE::GREATER_THAN) + " " + getThresholdString(threshold_);
+    else if (check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EQUAL)
+        return comparisonTypeString(COMPARISON_TYPE::GREATER_THAN_OR_EQUAL) + " " + getThresholdString(threshold_);
+    else
+        throw std::runtime_error("Base: getConditionStr: unknown type '" + to_string(check_type_) + "'");
+}
+
+/**
+*/
+std::string Base::getConditionResultNameShort(bool with_units) const
+{
+    std::string name  = getConditionResultNameShort();
+    std::string units = getConditionUnits();
+
+    if (with_units && !units.empty())
+        name += " [" + units + "]";
+
+    return name;
+}
+
+/**
+*/
+bool Base::conditionPassed(double value) const
+{
+    return compareValue(value, threshold_, check_type_);
+}
+
+/**
+*/
+std::string Base::getConditionResultStr(double value) const
+{
+    return conditionPassed(value) ? "Passed" : "Failed";
+}
+
+/**
+*/
+bool Base::compareValue(double val, double threshold, COMPARISON_TYPE check_type) const
+{
+    if (check_type == COMPARISON_TYPE::LESS_THAN)
+        return val < threshold;
+    else if (check_type == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
+        return val <= threshold;
+    else if (check_type == COMPARISON_TYPE::GREATER_THAN)
+        return val > threshold;
+    else if (check_type == COMPARISON_TYPE::GREATER_THAN_OR_EQUAL)
+        return val >= threshold;
+    else
+        throw std::runtime_error("Base: compareValue: unknown type '" + to_string(check_type) + "'");
+}
+
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareTi (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     time_duration max_ref_time_diff) const
@@ -217,6 +331,8 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
     return compare<std::string>(id, target_data, max_ref_time_diff, getACID, cmpACID, printACID);
 }
 
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareTa (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     time_duration max_ref_time_diff) const
@@ -224,6 +340,8 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
     return compare<unsigned int>(id, target_data, max_ref_time_diff, getACAD, cmpACAD, printACAD);
 }
 
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareModeA (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     time_duration max_ref_time_diff) const
@@ -231,6 +349,8 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeA (
     return compare<unsigned int>(id, target_data, max_ref_time_diff, getModeA, cmpModeA, printModeA);
 }
 
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareModeC (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     time_duration max_ref_time_diff, float max_val_diff) const
@@ -242,6 +362,8 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeC (
     return compare<float>(id, target_data, max_ref_time_diff, getModeC, tmp_cmpModeC, printModeC);
 }
 
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareMomLongAcc (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     boost::posix_time::time_duration max_ref_time_diff) const
@@ -249,6 +371,8 @@ std::pair<ValueComparisonResult, std::string> Base::compareMomLongAcc (
     return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomLongAcc, cmpMomAny, printMomLongAcc);
 }
 
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareMomTransAcc (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     boost::posix_time::time_duration max_ref_time_diff) const
@@ -256,6 +380,8 @@ std::pair<ValueComparisonResult, std::string> Base::compareMomTransAcc (
     return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomTransAcc, cmpMomAny, printMomTransAcc);
 }
 
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareMomVertRate (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     boost::posix_time::time_duration max_ref_time_diff) const
@@ -263,6 +389,8 @@ std::pair<ValueComparisonResult, std::string> Base::compareMomVertRate (
     return compare<unsigned char>(id, target_data, max_ref_time_diff, getMomVertRate, cmpMomAny, printMomVertRate);
 }
 
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareROCD (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     time_duration max_ref_time_diff, float max_val_diff) const
@@ -274,6 +402,8 @@ std::pair<ValueComparisonResult, std::string> Base::compareROCD (
     return compare<float>(id, target_data, max_ref_time_diff, getROCD, tmp_cmpROCD, printROCD);
 }
 
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareAcceleration (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     time_duration max_ref_time_diff, float max_val_diff) const
@@ -285,12 +415,13 @@ std::pair<ValueComparisonResult, std::string> Base::compareAcceleration (
     return compare<double>(id, target_data, max_ref_time_diff, getAcceleration, tmp_cmpAcceleration, printAcceleration);
 }
 
+/**
+*/
 std::pair<ValueComparisonResult, std::string> Base::compareCoasting (
     const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
     boost::posix_time::time_duration max_ref_time_diff) const
 {
     return compare<unsigned char>(id, target_data, max_ref_time_diff, getCoasting, cmpCoasting, printCoasting);
 }
-
 
 }

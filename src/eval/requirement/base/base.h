@@ -15,12 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENT_H
-#define EVALUATIONREQUIREMENT_H
+#pragma once
 
 #include "dbcontent/target/targetreportchain.h"
 #include "evaluationdata.h"
 #include "util/timeconv.h"
+#include "eval/requirement/base/comparisontype.h"
 
 #include "boost/optional.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -55,9 +55,14 @@ enum ValueComparisonResult
 
 class Base
 {
-  public:
-    Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-         EvaluationManager& eval_man);
+public:
+    Base(const std::string& name, 
+         const std::string& short_name, 
+         const std::string& group_name,
+         double threshold,
+         COMPARISON_TYPE check_type, 
+         EvaluationManager& eval_man,
+         const boost::optional<bool>& must_hold_for_any_target = boost::optional<bool>());
     virtual ~Base();
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -70,15 +75,34 @@ class Base
     std::string shortname() const;
     std::string groupName() const;
 
-    virtual std::string getConditionStr () const = 0;
+    double threshold() const;
+    COMPARISON_TYPE conditionCheckType() const;
+    const boost::optional<bool>& mustHoldForAnyTarget() const;
 
-  protected:
+    Qt::SortOrder resultSortOrder() const;
 
+    bool conditionPassed(double value) const;
+    std::string getConditionStr() const;
+    std::string getConditionResultStr(double value) const;
+
+    virtual std::string getThresholdString(double thres) const;
+
+    virtual std::string getConditionResultNameShort() const = 0;
+    virtual std::string getConditionResultName() const = 0;
+    virtual std::string getConditionUnits() const = 0;
+
+    std::string getConditionResultNameShort(bool with_units) const;
+
+    static const int NumResultDecimalsMax = 6;
+    
+protected:
     std::string name_;
     std::string short_name_;
     std::string group_name_;
 
     EvaluationManager& eval_man_;
+
+    bool compareValue (double val, double threshold, COMPARISON_TYPE check_type) const;
 
     static std::function<boost::optional<std::string>(const dbContent::TargetReport::Chain&,
                                                       const dbContent::TargetReport::Chain::DataID&)> getACID;
@@ -180,6 +204,11 @@ class Base
     std::pair<ValueComparisonResult, std::string> compareCoasting (
         const dbContent::TargetReport::Chain::DataID& id, const EvaluationTargetData& target_data,
         boost::posix_time::time_duration max_ref_time_diff) const;
+
+private:
+    double                threshold_;
+    COMPARISON_TYPE       check_type_ = COMPARISON_TYPE::GREATER_THAN_OR_EQUAL;
+    boost::optional<bool> must_hold_for_any_target_;
 };
 
 template <typename T>
@@ -269,5 +298,3 @@ std::pair<ValueComparisonResult, std::string> Base::compare (
 }
 
 }
-
-#endif // EVALUATIONREQUIREMENT_H

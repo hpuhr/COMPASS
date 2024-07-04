@@ -32,121 +32,371 @@ namespace EvaluationRequirementResult
 {
 
 /****************************************************************************
- * SinglePositionBase
+ * PositionBase
  ****************************************************************************/
 
 /**
 */
-SinglePositionBase::SinglePositionBase(const std::string& result_type,
-                                       const std::string& result_id, 
-                                       std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                       const SectorLayer& sector_layer,
-                                       unsigned int utn, 
-                                       const EvaluationTargetData* target, 
-                                       EvaluationManager& eval_man,
-                                       const EvaluationDetails& details,
-                                       unsigned int num_pos, 
-                                       unsigned int num_no_ref,
-                                       unsigned int num_pos_outside, 
-                                       unsigned int num_pos_inside,
-                                       unsigned int num_passed, 
-                                       unsigned int num_failed,
-                                       vector<double> values)
-:   Single("SinglePositionAcross", result_id, requirement, sector_layer, utn, target, eval_man, details)
-,   num_pos_        (num_pos)
+PositionBase::PositionBase() = default;
+
+/**
+*/
+PositionBase::PositionBase(unsigned int num_pos,
+                           unsigned int num_no_ref,
+                           unsigned int num_pos_outside,
+                           unsigned int num_pos_inside,
+                           unsigned int num_passed,
+                           unsigned int num_failed)
+:   num_pos_        (num_pos)
 ,   num_no_ref_     (num_no_ref)
 ,   num_pos_outside_(num_pos_outside)
 ,   num_pos_inside_ (num_pos_inside)
 ,   num_passed_     (num_passed)
 ,   num_failed_     (num_failed)
-,   values_         (values)
 {
 }
 
 /**
 */
-unsigned int SinglePositionBase::numPassed() const
+unsigned int PositionBase::numPassed() const
 {
     return num_passed_;
 }
 
 /**
 */
-unsigned int SinglePositionBase::numFailed() const
+unsigned int PositionBase::numFailed() const
 {
     return num_failed_;
 }
 
 /**
 */
-unsigned int SinglePositionBase::numPosOutside() const
+unsigned int PositionBase::numPosOutside() const
 {
     return num_pos_outside_;
 }
 
 /**
 */
-unsigned int SinglePositionBase::numPosInside() const
+unsigned int PositionBase::numPosInside() const
 {
     return num_pos_inside_;
 }
 
 /**
 */
-unsigned int SinglePositionBase::numPos() const
+unsigned int PositionBase::numPos() const
 {
     return num_pos_;
 }
 
 /**
 */
-unsigned int SinglePositionBase::numNoRef() const
+unsigned int PositionBase::numNoRef() const
 {
     return num_no_ref_;
 }
 
 /**
 */
-const vector<double>& SinglePositionBase::values() const
+const ValueAccumulator& PositionBase::accumulator() const
 {
-    return values_;
+    return accumulator_;
+}
+
+/****************************************************************************
+ * SinglePositionBaseCommon
+ ****************************************************************************/
+
+/**
+*/
+SinglePositionBaseCommon::SinglePositionBaseCommon(unsigned int num_pos,
+                                                   unsigned int num_no_ref,
+                                                   unsigned int num_pos_outside,
+                                                   unsigned int num_pos_inside,
+                                                   unsigned int num_passed,
+                                                   unsigned int num_failed)
+:   PositionBase(num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_passed, num_failed)
+{
 }
 
 /**
 */
-void SinglePositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
+boost::optional<double> SinglePositionBaseCommon::common_computeResult(const Single* single_result) const
 {
-    if (!json_annotations.is_array())
+    assert (single_result);
+    assert (num_no_ref_ <= num_pos_);
+    assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+
+    accumulator_.reset();
+
+    auto values = single_result->getValues(DetailKey::Value);
+
+    assert (values.size() == num_passed_ + num_failed_);
+
+    unsigned int num_distances = values.size();
+
+    assert (num_passed_ <= num_distances);
+
+    if (num_distances > 0)
+        accumulator_.accumulate(values, true);
+
+    return computeFinalResultValue();
+}
+
+/**
+*/
+unsigned int SinglePositionBaseCommon::common_numIssues() const
+{
+    return num_failed_;
+}
+
+/**
+*/
+bool SinglePositionBaseCommon::common_detailIsOk(const EvaluationDetail& detail) const
+{
+    auto check_passed = detail.getValueAs<bool>(DetailKey::CheckPassed);
+    assert(check_passed.has_value());
+
+    return check_passed.value();
+}
+
+/****************************************************************************
+ * SinglePositionProbabilityBase
+ ****************************************************************************/
+
+/**
+*/
+SinglePositionProbabilityBase::SinglePositionProbabilityBase(const std::string& result_type,
+                                                             const std::string& result_id, 
+                                                             std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                             const SectorLayer& sector_layer,
+                                                             unsigned int utn, 
+                                                             const EvaluationTargetData* target, 
+                                                             EvaluationManager& eval_man,
+                                                             const EvaluationDetails& details,
+                                                             unsigned int num_pos, 
+                                                             unsigned int num_no_ref,
+                                                             unsigned int num_pos_outside, 
+                                                             unsigned int num_pos_inside,
+                                                             unsigned int num_passed, 
+                                                             unsigned int num_failed)
+:   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SinglePositionBaseCommon(num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_passed, num_failed)
+{
+}
+
+/**
+ * Result value for all probability based position requirement results.
+ */
+boost::optional<double> SinglePositionProbabilityBase::computeFinalResultValue() const
+{
+    auto total = num_passed_ + num_failed_;
+
+    if (total == 0)
+        return {};
+
+    return (double)num_passed_ / (double)total;
+}
+
+/**
+*/
+boost::optional<double> SinglePositionProbabilityBase::computeResult_impl() const
+{
+    return common_computeResult(this);
+}
+
+/**
+*/
+unsigned int SinglePositionProbabilityBase::numIssues() const
+{
+    return common_numIssues();
+}
+
+/**
+*/
+bool SinglePositionProbabilityBase::detailIsOk(const EvaluationDetail& detail) const
+{
+    return common_detailIsOk(detail);
+}
+
+/**
+*/
+void SinglePositionProbabilityBase::addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                                           const EvaluationDetail& detail, 
+                                                           TargetAnnotationType type,
+                                                           bool is_ok) const
+{
+    assert (detail.numPositions() >= 1);
+
+    if (detail.numPositions() == 1) // no ref pos
         return;
 
-    HistogramT<double> histogram;
+    if (type == TargetAnnotationType::Highlight)
+    {
+        addAnnotationDistance(annotations_json, detail, AnnotationType::TypeHighlight, true, false);
+    }
+    else if (type == TargetAnnotationType::TargetOverview)
+    {
+        addAnnotationDistance(annotations_json, detail, is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError, true, false);
+    }
+}
 
-    HistogramConfig config;
-    config.num_bins = eval_man_.settings().histogram_num_bins;
-    config.type     = HistogramConfig::Type::Range;
+/**
+*/
+std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionProbabilityBase::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
 
-    HistogramInitializer<double> init;
-    init.scan(values_);
-    init.initHistogram(histogram, config);
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
 
-    histogram.add(values_);
+    return layer_defs;
+}
 
-    auto hraw = histogram.toRaw();
+/**
+*/
+void SinglePositionProbabilityBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        addValuesToGridBinary(grid, SinglePositionBaseCommon::DetailKey::CheckPassed);
+    }
+}
 
-    ViewPointGenAnnotation annotation("", true);
+/**
+*/
+// void SinglePositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
+// {
+//     if (!json_annotations.is_array())
+//         return;
 
-    std::string name = reqGrpId() + ":" + resultId();
+//     HistogramT<double> histogram;
 
-    std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
-    feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
-    feat_h->setName(name);
+//     HistogramConfig config;
+//     config.num_bins = eval_man_.settings().histogram_num_bins;
+//     config.type     = HistogramConfig::Type::Range;
 
-    annotation.addFeature(std::move(feat_h));
+//     HistogramInitializer<double> init;
+//     init.scan(values_);
+//     init.initHistogram(histogram, config);
 
-    nlohmann::json feat_json;
-    annotation.toJSON(feat_json);
+//     histogram.add(values_);
 
-    json_annotations.push_back(feat_json);
+//     auto hraw = histogram.toRaw();
+
+//     ViewPointGenAnnotation annotation("", true);
+
+//     std::string name = reqGrpId() + ":" + resultId();
+
+//     std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
+//     feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
+//     feat_h->setName(name);
+
+//     annotation.addFeature(std::move(feat_h));
+
+//     nlohmann::json feat_json;
+//     annotation.toJSON(feat_json);
+
+//     json_annotations.push_back(feat_json);
+// }
+
+
+/****************************************************************************
+ * SinglePositionValueBase
+ ****************************************************************************/
+
+/**
+*/
+SinglePositionValueBase::SinglePositionValueBase(const std::string& result_type,
+                                                 const std::string& result_id, 
+                                                 std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                 const SectorLayer& sector_layer,
+                                                 unsigned int utn, 
+                                                 const EvaluationTargetData* target, 
+                                                 EvaluationManager& eval_man,
+                                                 const EvaluationDetails& details,
+                                                 unsigned int num_pos, 
+                                                 unsigned int num_no_ref,
+                                                 unsigned int num_pos_outside, 
+                                                 unsigned int num_pos_inside,
+                                                 unsigned int num_passed, 
+                                                 unsigned int num_failed)
+:   Single(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SinglePositionBaseCommon(num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_passed, num_failed)
+{
+}
+
+/**
+*/
+QVariant SinglePositionValueBase::resultValue(double value) const
+{
+    //by default reformat result value to 2 decimals
+    return formatValue(value);
+}
+
+/**
+*/
+boost::optional<double> SinglePositionValueBase::computeResult_impl() const
+{
+    return common_computeResult(this);
+}
+
+/**
+*/
+unsigned int SinglePositionValueBase::numIssues() const
+{
+    return common_numIssues();
+}
+
+/**
+*/
+bool SinglePositionValueBase::detailIsOk(const EvaluationDetail& detail) const
+{
+    return common_detailIsOk(detail);
+}
+
+/**
+*/
+void SinglePositionValueBase::addAnnotationForDetail(nlohmann::json& annotations_json, 
+                                                     const EvaluationDetail& detail, 
+                                                     TargetAnnotationType type,
+                                                     bool is_ok) const
+{
+    assert (detail.numPositions() >= 1);
+
+    if (detail.numPositions() == 1) // no ref pos
+        return;
+
+    if (type == TargetAnnotationType::Highlight)
+    {
+        addAnnotationDistance(annotations_json, detail, AnnotationType::TypeHighlight, true, false);
+    }
+    else if (type == TargetAnnotationType::TargetOverview)
+    {
+        addAnnotationDistance(annotations_json, detail, is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError, true, false);
+    }
+}
+
+/**
+*/
+std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionValueBase::gridLayers() const
+{
+    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
+
+    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
+
+    return layer_defs;
+}
+
+/**
+*/
+void SinglePositionValueBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
+{
+    if (layer == requirement_->name())
+    {
+        addValuesToGridBinary(grid, SinglePositionBaseCommon::DetailKey::CheckPassed);
+    }
 }
 
 /****************************************************************************
@@ -155,37 +405,29 @@ void SinglePositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
 
 /**
 */
-JoinedPositionBase::JoinedPositionBase(const std::string& result_type,
-                                       const std::string& result_id, 
-                                       std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                       const SectorLayer& sector_layer, 
-                                       EvaluationManager& eval_man)
-: Joined(result_type, result_id, requirement, sector_layer, eval_man)
+JoinedPositionBase::JoinedPositionBase(const std::string& csv_header)
+:   csv_header_(csv_header)
 {
 }
 
-vector<double> JoinedPositionBase::values() const
+/**
+*/
+unsigned int JoinedPositionBase::common_numIssues() const
 {
-    vector<double> values;
-
-    for (auto& result_it : results_)
-    {
-        SinglePositionBase* single_result = dynamic_cast<SinglePositionBase*>(result_it.get());
-        assert (single_result);
-
-        if (!single_result->use())
-            continue;
-
-        values.insert(values.end(), single_result->values().begin(), single_result->values().end());
-    }
-
-    return values;
+    return num_failed_;
 }
 
-void JoinedPositionBase::updateToChanges_impl()
+/**
+*/
+unsigned int JoinedPositionBase::common_numUpdates() const
 {
-    loginf << "JoinedPositionBase: updateToChanges_impl";
+    return num_passed_ + num_failed_;
+}
 
+/**
+*/
+void JoinedPositionBase::common_clearResults()
+{
     num_pos_         = 0;
     num_no_ref_      = 0;
     num_pos_outside_ = 0;
@@ -193,64 +435,288 @@ void JoinedPositionBase::updateToChanges_impl()
     num_failed_      = 0;
     num_passed_      = 0;
 
-    for (auto& result_it : results_)
-    {
-        std::shared_ptr<SinglePositionBase> single_result =
-                std::static_pointer_cast<SinglePositionBase>(result_it);
-        assert (single_result);
-
-        single_result->setInterestFactor(0);
-
-        if (!single_result->use())
-            continue;
-
-        num_pos_         += single_result->numPos();
-        num_no_ref_      += single_result->numNoRef();
-        num_pos_outside_ += single_result->numPosOutside();
-        num_pos_inside_  += single_result->numPosInside();
-        num_passed_      += single_result->numPassed();
-        num_failed_      += single_result->numFailed();
-    }
-
+    accumulator_.reset();
 }
 
 /**
 */
-void JoinedPositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
+void JoinedPositionBase::common_accumulateSingleResult(const PositionBase& single_result,
+                                                       const std::vector<double>& values,
+                                                       bool last)
 {
-    if (!json_annotations.is_array())
-        return;
+    num_pos_         += single_result.numPos();
+    num_no_ref_      += single_result.numNoRef();
+    num_pos_outside_ += single_result.numPosOutside();
+    num_pos_inside_  += single_result.numPosInside();
+    num_passed_      += single_result.numPassed();
+    num_failed_      += single_result.numFailed();
 
-    HistogramT<double> histogram;
-
-    HistogramConfig config;
-    config.num_bins = eval_man_.settings().histogram_num_bins;
-    config.type     = HistogramConfig::Type::Range;
-
-    auto v = values();
-
-    HistogramInitializer<double> init;
-    init.scan(v);
-    init.initHistogram(histogram, config);
-
-    histogram.add(v);
-
-    auto hraw = histogram.toRaw();
-
-    ViewPointGenAnnotation annotation("", true);
-
-    std::string name = reqGrpId() + ":" + resultId();
-
-    std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
-    feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
-    feat_h->setName(name);
-
-    annotation.addFeature(std::move(feat_h));
-
-    nlohmann::json feat_json;
-    annotation.toJSON(feat_json);
-
-    json_annotations.push_back(feat_json);
+    accumulator_.accumulate(values, last);
 }
+
+/**
+*/
+boost::optional<double> JoinedPositionBase::common_computeResult() const
+{
+    assert (num_no_ref_ <= num_pos_);
+    assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+
+    // nothing to do
+
+    return computeFinalResultValue();
+}
+
+/**
+*/
+bool JoinedPositionBase::common_exportAsCSV(std::ofstream& strm,
+                                            const Joined* result) const
+{
+    assert(result);
+
+    strm << csv_header_ << "\n";
+
+    auto values = result->getValues(SinglePositionBaseCommon::DetailKey::Value);
+
+    for (auto v : values)
+        strm << v << "\n";
+
+    if (!strm)
+        return false;
+
+    return true;
+}
+
+/****************************************************************************
+ * JoinedPositionProbabilityBase
+ ****************************************************************************/
+
+/**
+*/
+JoinedPositionProbabilityBase::JoinedPositionProbabilityBase(const std::string& result_type,
+                                                             const std::string& result_id, 
+                                                             std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                             const SectorLayer& sector_layer, 
+                                                             EvaluationManager& eval_man,
+                                                             const std::string& csv_header)
+:   JoinedPositionBase(csv_header)
+,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+{
+}
+
+/**
+ * Result value for all probability based position requirement results.
+ */
+boost::optional<double> JoinedPositionProbabilityBase::computeFinalResultValue() const
+{
+    auto total = num_passed_ + num_failed_;
+
+    if (total == 0)
+        return {};
+
+    return (double)num_passed_ / (double)total;
+}
+
+/**
+*/
+unsigned int JoinedPositionProbabilityBase::numIssues() const
+{
+    return common_numIssues();
+}
+
+/**
+*/
+unsigned int JoinedPositionProbabilityBase::numUpdates() const
+{
+    return common_numUpdates();
+}
+
+/**
+*/
+void JoinedPositionProbabilityBase::clearResults_impl() 
+{
+    common_clearResults();
+}
+
+/**
+*/
+void JoinedPositionProbabilityBase::accumulateSingleResult(const std::shared_ptr<Single>& single_result, bool first, bool last)
+{
+    std::shared_ptr<SinglePositionProbabilityBase> single = std::static_pointer_cast<SinglePositionProbabilityBase>(single_result);
+
+    common_accumulateSingleResult(*single, single->getValues(SinglePositionBaseCommon::DetailKey::Value), last);
+}
+
+/**
+*/
+boost::optional<double> JoinedPositionProbabilityBase::computeResult_impl() const
+{
+    loginf << "JoinedPositionProbabilityBase: computeResult_impl:" << type()
+            << " num_pos " << num_pos_
+            << " num_no_ref " << num_no_ref_
+            << " num_failed " << num_failed_
+            << " num_passed " << num_passed_;
+
+    return common_computeResult();
+}
+
+/**
+*/
+bool JoinedPositionProbabilityBase::exportAsCSV(std::ofstream& strm) const
+{
+    return common_exportAsCSV(strm, this);
+}
+
+/**
+*/
+// void JoinedPositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
+// {
+//     if (!json_annotations.is_array())
+//         return;
+
+//     HistogramT<double> histogram;
+
+//     HistogramConfig config;
+//     config.num_bins = eval_man_.settings().histogram_num_bins;
+//     config.type     = HistogramConfig::Type::Range;
+
+//     auto v = values();
+
+//     HistogramInitializer<double> init;
+//     init.scan(v);
+//     init.initHistogram(histogram, config);
+
+//     histogram.add(v);
+
+//     auto hraw = histogram.toRaw();
+
+//     ViewPointGenAnnotation annotation("", true);
+
+//     std::string name = reqGrpId() + ":" + resultId();
+
+//     std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
+//     feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
+//     feat_h->setName(name);
+
+//     annotation.addFeature(std::move(feat_h));
+
+//     nlohmann::json feat_json;
+//     annotation.toJSON(feat_json);
+
+//     json_annotations.push_back(feat_json);
+// }
+
+/****************************************************************************
+ * JoinedPositionValueBase
+ ****************************************************************************/
+
+/**
+*/
+JoinedPositionValueBase::JoinedPositionValueBase(const std::string& result_type,
+                                                 const std::string& result_id, 
+                                                 std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                 const SectorLayer& sector_layer, 
+                                                 EvaluationManager& eval_man,
+                                                 const std::string& csv_header)
+:   JoinedPositionBase(csv_header)
+,   Joined(result_type, result_id, requirement, sector_layer, eval_man)
+{
+}
+
+/**
+*/
+QVariant JoinedPositionValueBase::resultValue(double value) const
+{
+    //by default reformat result value to 2 decimals
+    return formatValue(value);
+}
+
+/**
+*/
+unsigned int JoinedPositionValueBase::numIssues() const
+{
+    return common_numIssues();
+}
+
+/**
+*/
+unsigned int JoinedPositionValueBase::numUpdates() const
+{
+    return common_numUpdates();
+}
+
+/**
+*/
+void JoinedPositionValueBase::clearResults_impl() 
+{
+    common_clearResults();
+}
+
+/**
+*/
+void JoinedPositionValueBase::accumulateSingleResult(const std::shared_ptr<Single>& single_result, bool first, bool last)
+{
+    std::shared_ptr<SinglePositionValueBase> single = std::static_pointer_cast<SinglePositionValueBase>(single_result);
+
+    common_accumulateSingleResult(*single, single->getValues(SinglePositionBaseCommon::DetailKey::Value), last);
+}
+
+/**
+*/
+boost::optional<double> JoinedPositionValueBase::computeResult_impl() const
+{
+    loginf << "JoinedPositionValueBase: computeResult_impl:" << type()
+            << " num_pos " << num_pos_
+            << " num_no_ref " << num_no_ref_
+            << " num_failed " << num_failed_
+            << " num_passed " << num_passed_;
+
+    return common_computeResult();
+}
+
+/**
+*/
+bool JoinedPositionValueBase::exportAsCSV(std::ofstream& strm) const
+{
+    return common_exportAsCSV(strm, this);
+}
+
+/**
+*/
+// void JoinedPositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
+// {
+//     if (!json_annotations.is_array())
+//         return;
+
+//     HistogramT<double> histogram;
+
+//     HistogramConfig config;
+//     config.num_bins = eval_man_.settings().histogram_num_bins;
+//     config.type     = HistogramConfig::Type::Range;
+
+//     auto v = values();
+
+//     HistogramInitializer<double> init;
+//     init.scan(v);
+//     init.initHistogram(histogram, config);
+
+//     histogram.add(v);
+
+//     auto hraw = histogram.toRaw();
+
+//     ViewPointGenAnnotation annotation("", true);
+
+//     std::string name = reqGrpId() + ":" + resultId();
+
+//     std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
+//     feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
+//     feat_h->setName(name);
+
+//     annotation.addFeature(std::move(feat_h));
+
+//     nlohmann::json feat_json;
+//     annotation.toJSON(feat_json);
+
+//     json_annotations.push_back(feat_json);
+// }
 
 }

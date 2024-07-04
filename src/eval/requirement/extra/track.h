@@ -15,36 +15,40 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTEXTRATRACK_H
-#define EVALUATIONREQUIREMENTEXTRATRACK_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
-//#include "dbcontent/target/targetposition.h"
 
 #include <QVariant>
-
-//#include "boost/date_time/posix_time/ptime.hpp"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class ExtraTrack : public ProbabilityBase
 {
 public:
-    ExtraTrack(
-            const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-            float min_duration, unsigned int min_num_updates, bool ignore_primary_only);
+    ExtraTrack(const std::string& name, 
+               const std::string& short_name, 
+               const std::string& group_name,
+               float prob, 
+               COMPARISON_TYPE prob_check_type, 
+               EvaluationManager& eval_man,
+               float min_duration, 
+               unsigned int min_num_updates, 
+               bool ignore_primary_only);
 
     float minDuration() const;
-
     unsigned int minNumUpdates() const;
-
     bool ignorePrimaryOnly() const;
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
+
+    std::string probabilityNameShort() const override final { return "PEx"; }
+    std::string probabilityName() const override final { return "Probability of update with extra track"; }
 
 protected:
     boost::posix_time::time_duration min_duration_;
@@ -53,4 +57,3 @@ protected:
 };
 
 }
-#endif // EVALUATIONREQUIREMENTEXTRATRACK_H

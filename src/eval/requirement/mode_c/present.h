@@ -15,14 +15,15 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODECPRESENT_H
-#define EVALUATIONREQUIREMENTMODECPRESENT_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class ModeCPresent : public ProbabilityBase
 {
 public:
@@ -33,9 +34,11 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PP"; }
+    std::string probabilityName() const override final { return "Probability of Mode C present"; }
+
 protected:
 
 };
 
 }
-#endif // EVALUATIONREQUIREMENTMODECPRESENT_H

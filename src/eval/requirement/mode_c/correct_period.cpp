@@ -16,16 +16,15 @@
  */
 
 #include "eval/requirement/mode_c/correct_period.h"
-#include "eval/results/mode_c/correct_period.h"
 #include "eval/requirement/group.h"
+
+#include "eval/results/mode_c/correct_period.h"
 #include "eval/results/report/sectioncontenttable.h"
 
-//#include "evaluationdata.h"
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "util/stringconv.h"
-//#include "util/timeconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
 
 #include <QLineEdit>
 #include <QDoubleValidator>
@@ -119,16 +118,30 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrectPeriod::createR
 
 /**
  */
-std::string ModeCCorrectPeriod::probabilityName()
+std::string ModeCCorrectPeriod::probabilityNameShortStatic()
 {
     return "PCMCD [%]";
 }
 
 /**
  */
-std::string ModeCCorrectPeriod::probabilityDescription()
+std::string ModeCCorrectPeriod::probabilityNameStatic()
 {
     return "Probability of Correct Mode C Detection";
+}
+
+/**
+ */
+std::string ModeCCorrectPeriod::probabilityNameShort() const
+{
+    return ModeCCorrectPeriod::probabilityNameShortStatic();
+}
+
+/**
+ */
+std::string ModeCCorrectPeriod::probabilityName() const
+{
+    return ModeCCorrectPeriod::probabilityNameStatic();
 }
 
 /********************************************************************************************************
@@ -201,7 +214,7 @@ void ModeCCorrectPeriodConfig::addCustomTableEntries(EvaluationResultsReport::Se
 */
 std::string ModeCCorrectPeriodConfig::probabilityDescription() const
 {
-    return ModeCCorrectPeriod::probabilityDescription();
+    return ModeCCorrectPeriod::probabilityNameStatic();
 }
 
 /********************************************************************************************************
@@ -220,7 +233,7 @@ ModeCCorrectPeriodConfigWidget::ModeCCorrectPeriodConfigWidget(ModeCCorrectPerio
 
     form_layout_->addRow("Maximum Offset [ft]", distance_value_edit_);
 
-    prob_edit_->setToolTip(QString::fromStdString(ModeCCorrectPeriod::probabilityDescription()));
+    prob_edit_->setToolTip(QString::fromStdString(ModeCCorrectPeriod::probabilityNameStatic()));
 }
 
 /**
