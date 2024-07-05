@@ -16,7 +16,6 @@ using namespace Utils;
 
 ReconstructorAssociatorBase::ReconstructorAssociatorBase()
 {
-
 }
 
 void ReconstructorAssociatorBase::associateNewData()
@@ -30,7 +29,11 @@ void ReconstructorAssociatorBase::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
     associateTargetReports();
+
+    time_assoc_trs_ += boost::posix_time::microsec_clock::local_time() - start_time;
 
     if (reconstructor().isCancelled())
         return;
@@ -39,10 +42,14 @@ void ReconstructorAssociatorBase::associateNewData()
 
     if (reconstructor().isCancelled())
         return;
+
+    start_time = boost::posix_time::microsec_clock::local_time();
 
             // self-associate created utns
     selfAccociateNewUTNs();
 
+    time_assoc_new_utns_ += boost::posix_time::microsec_clock::local_time() - start_time;
+
     if (reconstructor().isCancelled())
         return;
 
@@ -51,7 +58,11 @@ void ReconstructorAssociatorBase::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
+    start_time = boost::posix_time::microsec_clock::local_time();
+
     retryAssociateTargetReports();
+
+    time_retry_assoc_trs_ += boost::posix_time::microsec_clock::local_time() - start_time;
 
     countUnAssociated();
 
@@ -66,6 +77,10 @@ void ReconstructorAssociatorBase::associateNewData()
 
             //    reconstructor().acc_estimator_->analyzeAssociatedDistances();
             //    reconstructor().acc_estimator_->clearAssociatedDistances();
+
+    loginf << "ReconstructorAssociatorBase: associateNewData: time_assoc_trs " << Time::toString(time_assoc_trs_)
+           << " time_assoc_new_utns " << Time::toString(time_assoc_new_utns_)
+           << " time_retry_assoc_trs " << Time::toString(time_retry_assoc_trs_);
 
     if (reconstructor().currentSlice().is_last_slice_)
         loginf << "ReconstructorAssociatorBase: associateNewData: done, num_merges " << num_merges_;
@@ -84,6 +99,10 @@ void ReconstructorAssociatorBase::reset()
     assoc_counts_.clear();
 
     num_merges_ = 0;
+
+    time_assoc_trs_ = {};
+    time_assoc_new_utns_ = {};
+    time_retry_assoc_trs_ = {};
 }
 
 void ReconstructorAssociatorBase::associateTargetReports()
@@ -134,7 +153,10 @@ void ReconstructorAssociatorBase::associateTargetReports()
         }
 
         if (reconstructor().acc_estimator_->canCorrectPosition(tr))
+        {
+            //loginf << "ReconstructorAssociatorBase: associateTargetReports: correct pos";
             reconstructor().acc_estimator_->correctPosition(tr);
+        }
 
         utn = -1;
 
