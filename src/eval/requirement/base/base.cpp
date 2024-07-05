@@ -18,6 +18,7 @@
 #include "eval/requirement/base/base.h"
 #include "evaluationdata.h"
 #include "stringconv.h"
+#include "number.h"
 #include "compass.h"
 #include "util/timeconv.h"
 
@@ -258,9 +259,19 @@ Qt::SortOrder Base::resultSortOrder() const
 
 /**
 */
-std::string Base::getThresholdString(double thres) const
+double Base::convertValueToResult(double value) const
 {
-    return std::to_string(thres);
+    return value;
+}
+
+/**
+*/
+std::string Base::getResultValueString(double value, int dec) const
+{
+    const double value_conv = convertValueToResult(value);
+
+    //by default use one more digit than the threshold value needs
+    return String::doubleToStringPrecision(value_conv, dec < 0 ? getNumThresholdDecimals() : (unsigned)dec);
 }
 
 /**
@@ -268,13 +279,13 @@ std::string Base::getThresholdString(double thres) const
 std::string Base::getConditionStr() const
 {
     if (check_type_ == COMPARISON_TYPE::LESS_THAN)
-        return comparisonTypeString(COMPARISON_TYPE::LESS_THAN) + " " + getThresholdString(threshold_);
+        return comparisonTypeString(COMPARISON_TYPE::LESS_THAN) + " " + getResultValueString(threshold_);
     else if (check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-        return comparisonTypeString(COMPARISON_TYPE::LESS_THAN_OR_EQUAL) + " " + getThresholdString(threshold_);
+        return comparisonTypeString(COMPARISON_TYPE::LESS_THAN_OR_EQUAL) + " " + getResultValueString(threshold_);
     else if (check_type_ == COMPARISON_TYPE::GREATER_THAN)
-        return comparisonTypeString(COMPARISON_TYPE::GREATER_THAN) + " " + getThresholdString(threshold_);
+        return comparisonTypeString(COMPARISON_TYPE::GREATER_THAN) + " " + getResultValueString(threshold_);
     else if (check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EQUAL)
-        return comparisonTypeString(COMPARISON_TYPE::GREATER_THAN_OR_EQUAL) + " " + getThresholdString(threshold_);
+        return comparisonTypeString(COMPARISON_TYPE::GREATER_THAN_OR_EQUAL) + " " + getResultValueString(threshold_);
     else
         throw std::runtime_error("Base: getConditionStr: unknown type '" + to_string(check_type_) + "'");
 }
@@ -304,6 +315,17 @@ bool Base::conditionPassed(double value) const
 std::string Base::getConditionResultStr(double value) const
 {
     return conditionPassed(value) ? "Passed" : "Failed";
+}
+
+/**
+*/
+unsigned int Base::getNumThresholdDecimals() const
+{
+    const auto thres_conv     = convertValueToResult(threshold_);
+    const auto num_dec_needed = Utils::Number::numDecimals(thres_conv, NumThresholdDecimalsMax);
+
+    // use one more than needed and at least dec min
+    return std::max(NumThresholdDecimalsMin, num_dec_needed + 1); 
 }
 
 /**

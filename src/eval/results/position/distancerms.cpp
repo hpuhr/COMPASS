@@ -94,7 +94,7 @@ std::vector<Single::TargetInfo> SinglePositionDistanceRMS::targetInfos() const
 */
 std::vector<std::string> SinglePositionDistanceRMS::detailHeaders() const
 {
-    return { "ToD", "NoRef", "PosInside", "DistanceRMS", "CP", "#CF", "#CP", "Comment" };
+    return { "ToD", "NoRef", "PosInside", "Distance", "CP", "#CF", "#CP", "Comment" };
 }
 
 /**

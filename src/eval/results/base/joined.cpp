@@ -197,13 +197,13 @@ void Joined::addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::R
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result Value", "Condition", "Condition Result"
         ov_table.addRow({ sector_layer_.name().c_str(), 
-                        requirement_->groupName().c_str(),
-                        requirement_->shortname().c_str(),
-                        result_id_.c_str(), 
-                        numUpdates(),
-                        result_val, 
-                        requirement_->getConditionStr().c_str(), 
-                        result.c_str() }, this, {});
+                          requirement_->groupName().c_str(),
+                          requirement_->shortname().c_str(),
+                          result_id_.c_str(), 
+                          numUpdates(),
+                          result_val, 
+                          requirement_->getConditionStr().c_str(), 
+                          result.c_str() }, this, {});
     }
 }
 

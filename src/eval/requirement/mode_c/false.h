@@ -28,7 +28,7 @@ class ModeCFalse : public ProbabilityBase
 {
 public:
     ModeCFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-               float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference);
+               double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,

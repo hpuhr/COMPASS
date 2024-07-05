@@ -177,7 +177,7 @@ QVariant Base::resultValueOptional(const boost::optional<double>& value) const
 */
 QVariant Base::resultValue(double value) const
 {
-    return value;
+    return requirement_->getResultValueString(value).c_str();
 }
 
 /**

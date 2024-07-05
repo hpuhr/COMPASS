@@ -60,7 +60,7 @@ DubiousTarget::DubiousTarget(const std::string& name,
                              bool use_rocd, 
                              float max_rocd, 
                              float dubious_prob,
-                             float prob, 
+                             double prob, 
                              COMPARISON_TYPE prob_check_type, 
                              EvaluationManager& eval_man)
     : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),

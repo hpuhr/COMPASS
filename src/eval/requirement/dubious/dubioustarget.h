@@ -48,7 +48,7 @@ public:
                   bool use_rocd, 
                   float max_rocd, 
                   float dubious_prob,
-                  float prob, 
+                  double prob, 
                   COMPARISON_TYPE prob_check_type, 
                   EvaluationManager& eval_man);
 

@@ -28,7 +28,7 @@ class IdentificationFalse : public ProbabilityBase
 {
 public:
     IdentificationFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-                        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+                        double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
                         bool require_all_false, bool use_mode_a, bool use_ms_ta, bool use_ms_ti);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (

@@ -25,18 +25,17 @@ ProbabilityBaseConfig::ProbabilityBaseConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("prob", &prob_, 0.9f);
+    registerParameter("prob", &prob_, 0.9);
     registerParameter("prob_check_type", (unsigned int*)&prob_check_type_,
                       (unsigned int)COMPARISON_TYPE::GREATER_THAN_OR_EQUAL);
-
 }
 
-float ProbabilityBaseConfig::prob() const
+double ProbabilityBaseConfig::prob() const
 {
     return prob_;
 }
 
-void ProbabilityBaseConfig::prob(float value)
+void ProbabilityBaseConfig::prob(double value)
 {
     prob_ = value;
 }

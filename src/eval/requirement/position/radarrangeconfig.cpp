@@ -37,7 +37,7 @@ PositionRadarRangeConfig::PositionRadarRangeConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0f);
+    registerParameter("threshold_value", &threshold_value_, 50.0);
 }
 
 PositionRadarRangeConfig::~PositionRadarRangeConfig()
@@ -52,12 +52,12 @@ std::shared_ptr<Base> PositionRadarRangeConfig::createRequirement()
     return req;
 }
 
-float PositionRadarRangeConfig::thresholdValue() const
+double PositionRadarRangeConfig::thresholdValue() const
 {
     return threshold_value_;
 }
 
-void PositionRadarRangeConfig::thresholdValue(float value)
+void PositionRadarRangeConfig::thresholdValue(double value)
 {
     threshold_value_ = value;
 }

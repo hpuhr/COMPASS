@@ -86,13 +86,6 @@ boost::optional<double> SingleProbabilityBase::computeResult() const
 
 /**
 */
-QVariant SingleProbabilityBase::resultValue(double value) const
-{
-    return SingleProbabilityBase::formatProbability(value);
-}
-
-/**
-*/
 double SingleProbabilityBase::invertProb(double prob) const
 {
     return common::invertProbability(prob);
@@ -102,7 +95,7 @@ double SingleProbabilityBase::invertProb(double prob) const
 */
 QVariant SingleProbabilityBase::formatProbability(double prob)
 {
-    return std::round(prob * 10000.0) / 100.0;
+    return Utils::String::percentToString(std::round(prob * 10000.0) / 100.0, 2).c_str();
 }
 
 /**
@@ -152,13 +145,6 @@ boost::optional<double> JoinedProbabilityBase::computeResult() const
         result = invertProb(result.value());
 
     return result;
-}
-
-/**
-*/
-QVariant JoinedProbabilityBase::resultValue(double value) const
-{
-    return SingleProbabilityBase::formatProbability(value);
 }
 
 /**

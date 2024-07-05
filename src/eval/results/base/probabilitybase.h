@@ -40,8 +40,6 @@ public:
                           const EvaluationDetails& details);
     virtual ~SingleProbabilityBase();
 
-    QVariant resultValue(double value) const override final;
-
     static QVariant formatProbability(double prob);
     static QVariant formatProbabilityOptional(const boost::optional<double>& prob);
 
@@ -65,8 +63,6 @@ public:
                           const SectorLayer& sector_layer,
                           EvaluationManager& eval_man);
     virtual ~JoinedProbabilityBase();
-
-    QVariant resultValue(double value) const override final;
 
 protected:
     EvaluationRequirement::ProbabilityBase& probRequirement() const;
