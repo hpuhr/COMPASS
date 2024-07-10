@@ -738,8 +738,8 @@ void Single::addAnnotationDistance(nlohmann::json& annotations_json,
 
     addAnnotationPos(annotations_json, detail.position(0), type);
 
-    if (add_ref  && detail.numPositions() >= 2) addAnnotationPos(annotations_json, detail.position(1), type);
-    if (add_line && detail.numPositions() >= 2) addAnnotationLine(annotations_json, detail.position(0), detail.position(1), type);
+    if (add_ref  && detail.numPositions() >= 2) addAnnotationPos(annotations_json, detail.lastPos(), type);
+    if (add_line && detail.numPositions() >= 2) addAnnotationLine(annotations_json, detail.position(0), detail.lastPos(), type);
 }
 
 /**
@@ -766,35 +766,20 @@ std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
 
 /**
 */
-std::vector<double> Single::getValues(int value_id, const boost::optional<int>& check_value_id) const
+std::vector<double> Single::getValues(const DetailValueSource& source) const
 {
     std::vector<double> values;
     values.reserve(totalNumDetails());
 
     auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
     {
-        //if provided, the check value must be an existing bool value
-        if (check_value_id.has_value())
-        {
-            auto value_valid = detail.getValueAsOrAssert<bool>(check_value_id.value());
-
-            //value not valid => skip
-            if (!value_valid)
-                return;
-        }
-
-        auto value = detail.getValue(value_id);
+        auto value = source.getValue(detail);
 
         //value might not be set => skip
-        if (!value.isValid())
+        if (!value.has_value())
             return;
 
-        //value must be convertable to double
-        bool ok;
-        double v = value.toDouble(&ok);
-        assert(ok);
-
-        values.push_back(v);
+        values.push_back(value.value());
     };
 
     iterateDetails(func);
@@ -802,6 +787,104 @@ std::vector<double> Single::getValues(int value_id, const boost::optional<int>& 
     values.shrink_to_fit();
 
     return values;
+}
+
+/**
+*/
+std::vector<Eigen::Vector3d> Single::getValuesPlusPos(const DetailValueSource& source, 
+                                                      DetailValuePositionMode detail_pos_mode,
+                                                      std::vector<std::pair<size_t,size_t>>* detail_ranges) const
+{
+    if (detail_ranges)
+        detail_ranges->clear();
+
+    //scan initial num values
+    size_t n_total   = 0;
+    size_t n_details = totalNumDetails();
+
+    if (detail_pos_mode == DetailValuePositionMode::EventPosition || 
+        detail_pos_mode == DetailValuePositionMode::EventRefPosition)
+    {
+        n_total = n_details;
+    }
+    else
+    {
+        auto funcScan = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
+        {
+            n_total += detail.numPositions();
+        };
+        iterateDetails(funcScan);
+    }
+
+    if (n_total == 0)
+        return {};
+
+    //collect positions + values
+    std::vector<Eigen::Vector3d> pos_values;
+    pos_values.reserve(n_total);
+
+    if (detail_ranges)
+        detail_ranges->reserve(n_details);
+
+    int evt_pos_idx     = eventPositionIndex();
+    int evt_ref_pos_idx = eventRefPositionIndex();
+
+    auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
+    {
+        int num_pos = (int)detail.numPositions();
+        assert(num_pos >= 1);
+
+        auto value = source.getValue(detail);
+
+        //value might not be set => skip
+        if (!value.has_value())
+            return;
+
+        double v = value.value();
+
+        if (detail_pos_mode == DetailValuePositionMode::EventPosition)
+        {
+            if (detail_ranges)
+                detail_ranges->emplace_back(pos_values.size(), 1);
+
+            //!event position always needs to be available!
+            assert (evt_pos_idx <= num_pos);
+
+            const auto& pos = evt_pos_idx >= 0 ? detail.position(evt_pos_idx) : detail.lastPos();
+            
+            pos_values.emplace_back(pos.longitude_, pos.latitude_, v);
+        }
+        else if (detail_pos_mode == DetailValuePositionMode::EventRefPosition)
+        {
+            if (detail_ranges)
+                detail_ranges->emplace_back(pos_values.size(), 1);
+
+            //no ref pos available => skip
+            if (evt_ref_pos_idx >= num_pos)
+                return;
+
+            const auto& pos = evt_ref_pos_idx >= 0 ? detail.position(evt_ref_pos_idx) : detail.lastPos();
+            
+            pos_values.emplace_back(pos.longitude_, pos.latitude_, v);
+        }
+        else if (detail_pos_mode == DetailValuePositionMode::AllPositions)
+        {
+            if (detail_ranges)
+                detail_ranges->emplace_back(pos_values.size(), detail.numPositions());
+
+            for (const auto& pos : detail.positions())
+                pos_values.emplace_back(pos.longitude_, pos.latitude_, v);
+        }
+    };
+
+    iterateDetails(func);
+
+    pos_values.shrink_to_fit();
+
+    if (detail_ranges)
+        detail_ranges->shrink_to_fit();
+
+    return pos_values;
 }
 
 /**
@@ -1105,9 +1188,17 @@ void Single::createAnnotations(nlohmann::json& annotations_json, const Annotatio
     assert (options.valid());
 
     if (options.viewable_type == ViewableType::Overview)
+    {
+        //create target overview annotations
         createTargetAnnotations(annotations_json, TargetAnnotationType::TargetOverview);
+
+        //add custom annotations to target overview
+        addCustomAnnotations(annotations_json);
+    }
     else if (options.viewable_type == ViewableType::Highlight)
+    {
         createTargetAnnotations(annotations_json, TargetAnnotationType::Highlight, options.detail_index);
+    }
 }
 
 }

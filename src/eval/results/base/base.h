@@ -19,6 +19,8 @@
 
 #include "evaluationdetail.h"
 #include "eval/results/evaluationdetail.h"
+#include "eval/results/base/annotations.h"
+#include "eval/results/base/result_defs.h"
 
 #include <QVariant>
 #include <QRectF>
@@ -27,6 +29,8 @@
 
 #include <memory>
 #include <vector>
+
+#include <QColor>
 
 class EvaluationTargetData;
 class EvaluationManager;
@@ -110,12 +114,19 @@ public:
     bool hasIssues() const;
     bool isIgnored() const;
 
-    /// returns the number of issues detected for this result
-    virtual unsigned int numIssues() const = 0;
+    size_t numDetails() const;
+    const EvaluationDetails& getDetails() const;
+    const EvaluationDetail& getDetail(int idx) const;
+    const EvaluationDetail& getDetail(const DetailIndex& index) const;
+
+    const SectorLayer& sectorLayer() const { return sector_layer_; } 
 
     QVariant resultValue() const;
     QVariant resultValueOptional(const boost::optional<double>& value) const;
     virtual QVariant resultValue(double value) const;
+
+    /// returns the number of issues detected for this result
+    virtual unsigned int numIssues() const = 0;
 
     /// checks if the result references a specific section of the report
     virtual bool hasReference(const EvaluationResultsReport::SectionContentTable& table, 
@@ -136,14 +147,18 @@ public:
     /// adds the result to the report root item
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
-    size_t numDetails() const;
-    const EvaluationDetails& getDetails() const;
-    const EvaluationDetail& getDetail(int idx) const;
-    const EvaluationDetail& getDetail(const DetailIndex& index) const;
+    /// get detail values stored under a specific id as double vector
+    virtual std::vector<double> getValues(const DetailValueSource& source) const = 0;
+    virtual std::vector<Eigen::Vector3d> getValuesPlusPos(const DetailValueSource& source, 
+                                                          DetailValuePositionMode detail_pos_mode = DetailValuePositionMode::EventPosition,
+                                                          std::vector<std::pair<size_t,size_t>>* detail_ranges = nullptr) const = 0;
 
-    const SectorLayer& sectorLayer() const { return sector_layer_; } 
+    /// generate definitions for the automatic generation of custom annotations (grids, histograms, etc.)
+    virtual AnnotationDefinitions getCustomAnnotationDefinitions() const;
 
     const static std::string req_overview_table_name_;
+
+    static const QColor HistogramColorDefault;
 
 protected:
     /**
@@ -226,6 +241,8 @@ protected:
 
     std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options) const;
 
+    void addCustomAnnotations(nlohmann::json& annotations_json) const;
+
     /// creates a basic viewable
     virtual std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const = 0;
     /// creates additional viewable information (region of interest etc.)
@@ -233,8 +250,6 @@ protected:
     /// creates annotations for the given options
     virtual void createAnnotations(nlohmann::json& annotations_json, 
                                    const AnnotationOptions& options) const = 0;
-
-    virtual void addCustomAnnotations(nlohmann::json& annotations_json) const {}
 
     EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -256,6 +271,13 @@ protected:
     EvaluationManager& eval_man_;
 
 private:
+    void addGrids(nlohmann::json& annotations_json, 
+                  const std::string& annotation_name, 
+                  const std::vector<AnnotationDefinitions::GridDefinition>& defs) const;
+    void addHistograms(nlohmann::json& annotations_json, 
+                       const std::string& annotation_name, 
+                       const std::vector<AnnotationDefinitions::HistogramDefinition>& defs) const;
+
     EvaluationDetails details_;
 
     boost::optional<double> result_;

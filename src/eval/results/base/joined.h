@@ -51,6 +51,8 @@ public:
     void clearResults();
     void addSingleResult(std::shared_ptr<Single> other);
 
+    std::vector<std::shared_ptr<Single>>& singleResults();
+
     void addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
 
     bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
@@ -64,9 +66,10 @@ public:
     std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
 
-    std::vector<double> getValues(int value_id, const boost::optional<int>& check_value_id = boost::optional<int>()) const;
-
-    std::vector<std::shared_ptr<Single>>& singleResults();
+    std::vector<double> getValues(const DetailValueSource& source) const override final;
+    std::vector<Eigen::Vector3d> getValuesPlusPos(const DetailValueSource& source, 
+                                                  DetailValuePositionMode detail_pos_mode = DetailValuePositionMode::EventPosition,
+                                                  std::vector<std::pair<size_t,size_t>>* detail_ranges = nullptr) const override final;
 
     void updateToChanges();
 
@@ -78,14 +81,6 @@ public:
     static const int         SectorOverviewRenderDelayMSec;
 
 protected:
-    enum class OverviewMode
-    {
-        Annotations = 0,
-        Grid,
-        GridPlusAnnotations,
-        GridOrAnnotations
-    };
-
     bool resultUsed(const std::shared_ptr<Single>& result) const;
     void iterateSingleResults(const SingleResultFunc& func,
                               const SingleResultFunc& func_used,
@@ -111,9 +106,6 @@ protected:
     ViewableInfo createViewableInfo(const AnnotationOptions& options) const override final;
     void createAnnotations(nlohmann::json& annotations, 
                            const AnnotationOptions& options) const override final;
-
-    //types of overview annotations to create
-    virtual OverviewMode overviewMode() const { return OverviewMode::GridOrAnnotations; }
 
     virtual std::vector<SectorInfo> sectorInfosCommon() const;
     std::vector<SectorInfo> sectorConditionInfos() const;

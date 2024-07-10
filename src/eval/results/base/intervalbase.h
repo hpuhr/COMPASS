@@ -64,8 +64,7 @@ public:
                        const EvaluationDetails& details,
                        int sum_uis, 
                        int missed_uis, 
-                       TimePeriodCollection ref_periods,
-                       const std::vector<dbContent::TargetPosition>& ref_updates);
+                       TimePeriodCollection ref_periods);
 
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
     virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
@@ -98,8 +97,7 @@ protected:
                                         bool is_ok) const override;
     
 
-    TimePeriodCollection                   ref_periods_;
-    std::vector<dbContent::TargetPosition> ref_updates_;
+    TimePeriodCollection ref_periods_;
 };
 
 /**

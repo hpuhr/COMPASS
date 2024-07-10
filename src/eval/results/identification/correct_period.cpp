@@ -36,9 +36,8 @@ SingleIdentificationCorrectPeriod::SingleIdentificationCorrectPeriod(const std::
                                                                      const EvaluationDetails& details,
                                                                      int sum_uis, 
                                                                      int missed_uis, 
-                                                                     TimePeriodCollection ref_periods,
-                                                                     const std::vector<dbContent::TargetPosition>& ref_updates)
-:   SingleIntervalBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details, sum_uis, missed_uis, ref_periods, ref_updates)
+                                                                     TimePeriodCollection ref_periods)
+:   SingleIntervalBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details, sum_uis, missed_uis, ref_periods)
 {
     updateResult();
 }

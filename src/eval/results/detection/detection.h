@@ -57,8 +57,7 @@ public:
                     const EvaluationDetails& details,
                     int sum_uis, 
                     int missed_uis, 
-                    TimePeriodCollection ref_periods,
-                    const std::vector<dbContent::TargetPosition>& ref_updates);
+                    TimePeriodCollection ref_periods);
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
@@ -72,8 +71,6 @@ public:
         MissedUIs,           //unsigned int
         MaxGapUIs,           //unsigned int
         NoRefUIs,            //unsigned int
-        RefUpdateStartIndex, //unsigned int
-        RefUpdateEndIndex    //unsigned int
     };
 
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
@@ -96,8 +93,7 @@ protected:
                                         TargetAnnotationType type,
                                         bool is_ok) const override;
 
-    TimePeriodCollection                   ref_periods_;
-    std::vector<dbContent::TargetPosition> ref_updates_;
+    TimePeriodCollection ref_periods_;
 };
 
 /**
@@ -118,6 +114,8 @@ protected:
     virtual boost::optional<double> computeResult_impl() const override;
 
     virtual std::vector<SectorInfo> sectorInfos() const override;
+
+    virtual AnnotationDefinitions getCustomAnnotationDefinitions() const override;
 };
 
 }

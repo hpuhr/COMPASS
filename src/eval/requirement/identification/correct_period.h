@@ -96,7 +96,6 @@ protected:
                                                                               const SectorLayer& sector_layer, 
                                                                               const std::vector<EvaluationDetail>& details,
                                                                               const TimePeriodCollection& periods,
-                                                                              const std::vector<dbContent::TargetPosition>& ref_updates,
                                                                               unsigned int sum_uis,
                                                                               unsigned int misses_total) override;
     IdentificationType identification_type_ = IdentificationType::AircraftAddress;

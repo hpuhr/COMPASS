@@ -117,6 +117,8 @@ public:
     size_t numPositions() const;
     const std::vector<Position>& positions() const;
     const Position& position(size_t idx) const;
+    const Position& firstPos() const;
+    const Position& lastPos() const;
 
     QRectF bounds(double eps = 0.0) const;
 

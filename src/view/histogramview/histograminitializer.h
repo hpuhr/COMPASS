@@ -34,7 +34,9 @@ class HistogramInitializer
 public:
     typedef std::map<std::string, HistogramT<T>> Histograms;
 
-    HistogramInitializer() = default;
+    HistogramInitializer(const boost::optional<unsigned int>& default_num_bins = boost::optional<unsigned int>()) 
+    :   default_num_bins_(default_num_bins) {}
+
     virtual ~HistogramInitializer() = default;
 
     /**
@@ -143,18 +145,22 @@ public:
      */
     HistogramConfig currentConfiguration() const
     {
+        HistogramConfig config;
+
+        //set custom num bins?
+        if (default_num_bins_.has_value())
+            config.num_bins = default_num_bins_.value();
+
         //no data range or no distinct values stored -> return default config
         if (!valid() || 
             !distinct_values_.has_value() || 
              distinct_values_.value().empty())
-            return HistogramConfig();
+            return config;
 
         //default config also for floating point numbers and timestamps
         if (std::is_floating_point<T>::value ||
             std::is_same<boost::posix_time::ptime, T>::value)
-            return HistogramConfig();
-
-        HistogramConfig config;
+            return config;
 
         unsigned int num_distinct_values = distinct_values_.value().size();
 
@@ -221,6 +227,8 @@ protected:
     boost::optional<T>           data_min_;
     boost::optional<T>           data_max_;
     boost::optional<std::set<T>> distinct_values_;
+
+    boost::optional<unsigned int> default_num_bins_;
 };
 
 /**

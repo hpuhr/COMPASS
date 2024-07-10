@@ -14,6 +14,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/intervalbase.h"
         "${CMAKE_CURRENT_LIST_DIR}/probabilitybase.h"
         "${CMAKE_CURRENT_LIST_DIR}/valueaccumulator.h"
+        "${CMAKE_CURRENT_LIST_DIR}/annotations.h"
+        "${CMAKE_CURRENT_LIST_DIR}/result_defs.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/base.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/single.cpp"
@@ -24,4 +26,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/intervalbase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/probabilitybase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/valueaccumulator.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/annotations.cpp"
     )

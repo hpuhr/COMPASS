@@ -244,7 +244,7 @@ std::vector<QVariant> SingleSpeed::detailValues(const EvaluationDetail& detail,
             !has_ref_pos,
              detail.getValue(DetailKey::PosInside),
              detail.getValue(DetailKey::Offset),           // "Distance"
-             detail.getValue(DetailKey::CheckPassed),      // CP"
+             detail.getValue(DetailKey::CheckPassed),      // "CP"
              detail.getValue(DetailKey::NumCheckFailed),   // "#CF",
              detail.getValue(DetailKey::NumCheckPassed),   // "#CP"
              detail.comments().generalComment().c_str() }; // "Comment"

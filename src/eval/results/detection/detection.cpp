@@ -88,12 +88,10 @@ SingleDetection::SingleDetection(const std::string& result_id,
                                  const EvaluationDetails& details,
                                  int sum_uis,
                                  int missed_uis,
-                                 TimePeriodCollection ref_periods,
-                                 const std::vector<dbContent::TargetPosition>& ref_updates)
+                                 TimePeriodCollection ref_periods)
 :   DetectionBase(sum_uis, missed_uis)
 ,   SingleProbabilityBase("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man, details)
 ,   ref_periods_(ref_periods)
-,   ref_updates_(ref_updates)
 {
     updateResult();
 }
@@ -168,7 +166,7 @@ std::vector<Single::TargetInfo> SingleDetection::targetInfos() const
 */
 std::vector<std::string> SingleDetection::detailHeaders() const
 {
-    return { "ToD", "DToD", "Ref.", "MUI", "Comment" };
+    return { "ToD", "DToD", "MUI", "Comment" };
 }
 
 /**
@@ -180,7 +178,6 @@ std::vector<QVariant> SingleDetection::detailValues(const EvaluationDetail& deta
 
     return { Utils::Time::toString(detail.timestamp()).c_str(),
              d_tod.isValid() ? QVariant(Utils::String::timeStringFromDouble(d_tod.toFloat()).c_str()) : QVariant(),
-             detail.getValue(DetailKey::RefExists),
              detail.getValue(DetailKey::MissedUIs),
              detail.comments().generalComment().c_str() };
 }
@@ -201,14 +198,17 @@ void SingleDetection::addAnnotationForDetail(nlohmann::json& annotations_json,
 {
     assert (detail.numPositions() >= 1);
 
+    auto anno_type = is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError;
+
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationDistance(annotations_json, detail, AnnotationType::TypeHighlight, true, false);
+        addAnnotationPos(annotations_json, detail.firstPos(), AnnotationType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.lastPos() , AnnotationType::TypeHighlight);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        if (detail.numPositions() >= 2)
-            addAnnotationDistance(annotations_json, detail, is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
+        for (const auto& pos : detail.positions())
+            addAnnotationPos(annotations_json, pos, anno_type);
     }
 }
 
@@ -239,15 +239,14 @@ void SingleDetection::addValuesToGrid(Grid2D& grid, const std::string& layer) co
 
             assert (detail_it.numPositions() >= 2);
 
-            auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleDetection::DetailKey::RefUpdateStartIndex).value();
-            auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleDetection::DetailKey::RefUpdateEndIndex).value();
-
-            size_t n = idx1 - idx0 + 1;
+            size_t n = detail_it.numPositions();
 
             auto pos_getter = [ & ] (double& x, double& y, size_t idx) 
             { 
-                x =  ref_updates_[ idx0 + idx ].longitude_;
-                y =  ref_updates_[ idx0 + idx ].latitude_;
+                const auto& pos = detail_it.position(idx);
+
+                x =  pos.longitude_;
+                y =  pos.latitude_;
             };
 
             grid.addPoly(pos_getter, n, check_failed ? 1.0 : 0.0);
@@ -324,6 +323,18 @@ std::vector<Joined::SectorInfo> JoinedDetection::sectorInfos() const
 {
     return { { "#EUIs [1]", "Expected Update Intervals", sum_uis_    },
              { "#MUIs [1]", "Missed Update Intervals"  , missed_uis_ } };
+}
+
+/**
+*/
+AnnotationDefinitions JoinedDetection::getCustomAnnotationDefinitions() const
+{
+    return AnnotationDefinitions().addBinaryGrid("", 
+                                                 "Result", 
+                                                 DetailValueSource(EvaluationRequirementResult::SingleDetection::DetailKey::MissOccurred),
+                                                 AnnotationDefinitions::GridDefinition::AddDetailMode::AddPositionsAsPolygon,
+                                                 Qt::green,
+                                                 Qt::red);
 }
 
 }

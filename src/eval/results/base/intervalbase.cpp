@@ -58,12 +58,10 @@ SingleIntervalBase::SingleIntervalBase(const std::string& result_type,
                                        const EvaluationDetails& details,
                                        int sum_uis,
                                        int missed_uis,
-                                       TimePeriodCollection ref_periods,
-                                       const std::vector<dbContent::TargetPosition>& ref_updates)
-    :   IntervalBase(sum_uis, missed_uis)
-    ,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
-    ,   ref_periods_(ref_periods)
-    ,   ref_updates_(ref_updates)
+                                       TimePeriodCollection ref_periods)
+:   IntervalBase         (sum_uis, missed_uis)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   ref_periods_         (ref_periods)
 {
 }
 
@@ -131,7 +129,7 @@ std::vector<Single::TargetInfo> SingleIntervalBase::targetInfos() const
 */
 std::vector<std::string> SingleIntervalBase::detailHeaders() const
 {
-    return {"ToD", "DToD", "Ref.", "#MUIs", "Comment"};
+    return {"ToD", "DToD", "#MUIs", "Comment"};
 }
 
 /**
@@ -144,7 +142,6 @@ std::vector<QVariant> SingleIntervalBase::detailValues(const EvaluationDetail& d
 
     return { Utils::Time::toString(detail.timestamp()).c_str(),
              d_tod_str,
-             detail.getValue(DetailKey::RefExists),
              detail.getValue(DetailKey::MissedUIs),
              detail.comments().generalComment().c_str() };
 }
@@ -169,26 +166,17 @@ void SingleIntervalBase::addAnnotationForDetail(nlohmann::json& annotations_json
 
     assert (detail.numPositions() >= 2);
 
+    auto anno_type = is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError;
+
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationDistance(annotations_json, detail, TypeHighlight);
+        addAnnotationPos(annotations_json, detail.firstPos(), AnnotationType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.lastPos() , AnnotationType::TypeHighlight);
     }
-    // else if (type == TargetAnnotationType::Overview)
-    // {
-    //     auto idx0 = detail.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex);
-    //     auto idx1 = detail.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex);
-
-    //     assert(idx0.has_value() && idx1.has_value());
-
-    //     for (unsigned int idx = idx0.value(); idx <= idx1.value(); ++idx)
-    //         addAnnotationPos(annotations_json, detail.position(idx), ok ? TypeOk : TypeError);
-
-    //     for (unsigned int idx = idx0.value() + 1; idx <= idx1.value(); ++idx)
-    //         addAnnotationLine(annotations_json, detail.position(idx - 1), detail.position(idx), ok ? TypeOk : TypeError);
-    // }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationDistance(annotations_json, detail, is_ok ? TypeOk : TypeError);
+        for (const auto& pos : detail.positions())
+            addAnnotationPos(annotations_json, pos, anno_type);
     }
 }
 
@@ -219,15 +207,14 @@ void SingleIntervalBase::addValuesToGrid(Grid2D& grid, const std::string& layer)
 
             assert (detail_it.numPositions() >= 2);
 
-            auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex).value();
-            auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex).value();
-
-            size_t n = idx1 - idx0 + 1;
+            size_t n = detail_it.numPositions();
 
             auto pos_getter = [ & ] (double& x, double& y, size_t idx) 
             { 
-                x =  ref_updates_[ idx0 + idx ].longitude_;
-                y =  ref_updates_[ idx0 + idx ].latitude_;
+                const auto& pos = detail_it.position(idx);
+
+                x = pos.longitude_;
+                y = pos.latitude_;
             };
 
             grid.addPoly(pos_getter, n, check_failed ? 1.0 : 0.0);

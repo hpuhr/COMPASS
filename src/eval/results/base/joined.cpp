@@ -129,15 +129,48 @@ std::string Joined::reference(const EvaluationResultsReport::SectionContentTable
 
 /**
 */
-std::vector<double> Joined::getValues(int value_id, const boost::optional<int>& check_value_id) const
+std::vector<double> Joined::getValues(const DetailValueSource& source) const
 {
     std::vector<double> values;
 
     auto func = [ & ] (const std::shared_ptr<Single>& result)
     {
-        auto v = result->getValues(value_id, check_value_id);
+        auto v = result->getValues(source);
 
         values.insert(values.end(), v.begin(), v.end());
+    };
+
+    iterateSingleResults({}, func, {});
+
+    return values;
+}
+
+/**
+*/
+std::vector<Eigen::Vector3d> Joined::getValuesPlusPos(const DetailValueSource& source, 
+                                                      DetailValuePositionMode detail_pos_mode,
+                                                      std::vector<std::pair<size_t,size_t>>* detail_ranges) const
+{
+    std::vector<Eigen::Vector3d> values;
+
+    std::vector<std::pair<size_t,size_t>> detail_ranges_track;
+
+    auto func = [ & ] (const std::shared_ptr<Single>& result)
+    {
+        size_t ncur = values.size();
+
+        auto v = result->getValuesPlusPos(source, detail_pos_mode, detail_ranges ? &detail_ranges_track : nullptr);
+
+        values.insert(values.end(), v.begin(), v.end());
+
+        if (detail_ranges)
+        {
+            //adapt range begin indices to sector-wide array
+            for (auto& range : detail_ranges_track)
+                range.first += ncur;
+
+            detail_ranges->insert(detail_ranges->begin(), detail_ranges_track.begin(), detail_ranges_track.end());
+        }
     };
 
     iterateSingleResults({}, func, {});
@@ -498,43 +531,8 @@ Base::ViewableInfo Joined::createViewableInfo(const AnnotationOptions& options) 
 void Joined::createAnnotations(nlohmann::json& annotations, 
                                const AnnotationOptions& options) const
 {
-    auto overview_mode = overviewMode();
-
-    bool has_grid_info = !results_[ 0 ]->gridLayers().empty();
-
-    //create features?
-    bool added_annotations = false;
-
-    if (overview_mode == OverviewMode::Annotations ||
-        overview_mode == OverviewMode::GridPlusAnnotations ||
-        overview_mode == OverviewMode::GridOrAnnotations)
-    {
-        if (overview_mode != OverviewMode::GridOrAnnotations || !has_grid_info)
-        {
-            addOverviewAnnotations(annotations);
-            added_annotations = true;
-        }
-    }
-
-    //create grid?
-    if (overview_mode == OverviewMode::Grid ||
-        overview_mode == OverviewMode::GridPlusAnnotations ||
-        overview_mode == OverviewMode::GridOrAnnotations)
-    {
-        if (overview_mode != OverviewMode::GridOrAnnotations || !added_annotations)
-        {
-            if (has_grid_info)
-            {
-                //add grid data if grid layers are specified
-                addOverviewGrid(annotations);
-            }
-        }
-    }
-
-    //add custom annotations
-    {
-        addCustomAnnotations(annotations);
-    }
+    //everything handled via custom annotations
+    addCustomAnnotations(annotations);
 }
 
 /**
@@ -568,7 +566,7 @@ std::unique_ptr<nlohmann::json::object_t> Joined::viewableData() const
 }
 
 /**
- * Default behaviour for creating viewable annotations.
+ * Legacy code for creating annotations for every single target report in the sector.
 */
 void Joined::addOverviewAnnotations(nlohmann::json& annotations_json) const
 {

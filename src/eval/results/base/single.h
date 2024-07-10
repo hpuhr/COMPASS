@@ -94,6 +94,14 @@ public:
 
     BaseType baseType() const override final { return BaseType::Single; }
 
+    unsigned int utn() const;
+    const EvaluationTargetData* target() const;
+
+    void setInterestFactor(double factor);
+
+    //wip - on demand detail creation
+    std::unique_ptr<EvaluationDetails> generateDetails() const;
+
     void updateResult() override final;
     void updateUseFromTarget();
 
@@ -111,18 +119,13 @@ public:
     std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
 
-    unsigned int utn() const;
-    const EvaluationTargetData* target() const;
+    void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
 
-    void setInterestFactor(double factor);
-
-    //wip - on demand detail creation
-    std::unique_ptr<EvaluationDetails> generateDetails() const;
-
-    std::vector<double> getValues(int value_id, const boost::optional<int>& check_value_id = boost::optional<int>()) const;
-
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-
+    std::vector<double> getValues(const DetailValueSource& source) const override final;
+    std::vector<Eigen::Vector3d> getValuesPlusPos(const DetailValueSource& source, 
+                                                  DetailValuePositionMode detail_pos_mode = DetailValuePositionMode::EventPosition,
+                                                  std::vector<std::pair<size_t,size_t>>* detail_ranges = nullptr) const override final;
+    /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
 
     virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const = 0;
@@ -151,6 +154,7 @@ protected:
     virtual std::string getRequirementSectionID () const override;
 
     /*report contents related*/
+
     virtual std::vector<std::string> targetTableHeadersCommon() const;
     virtual std::vector<std::string> targetTableHeadersOptional() const;
     std::vector<std::string> targetTableHeaders(unsigned int* sort_column = nullptr) const;
@@ -208,6 +212,11 @@ protected:
                                         const EvaluationDetail& detail, 
                                         TargetAnnotationType type,
                                         bool is_ok) const = 0;
+    /// returns the index of the event position (where the event occurs)
+    virtual int eventPositionIndex() const { return 0; }
+    /// returns the index of the event reference position (e.g. the position the event is measured against, a ref trajectory, the interval begin, etc.)
+    /// -1 means the last position
+    virtual int eventRefPositionIndex() const { return -1; }
 
     void createTargetAnnotations(nlohmann::json& annotations_json,
                                  TargetAnnotationType type,
