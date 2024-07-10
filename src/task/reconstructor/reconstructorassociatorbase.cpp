@@ -564,7 +564,7 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
             assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
             tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
 
-            // create new and add
+                    // create new and add
             utn = createNewTarget(tr);
             assert (reconstructor().targets_.count(utn));
         }
@@ -572,22 +572,22 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
         {
             assert (reconstructor().targets_.count(utn));
 
-            // check for position offsets
-//            auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
+                    // check for position offsets
+            //            auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
 
-//            if (pos_offs.has_value())
-//            {
-//                std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
+            //            if (pos_offs.has_value())
+            //            {
+            //                std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
 
-                boost::optional<bool> check_result = checkPositionOffsetAcceptable(
-                    tr, utn, true, do_debug);
+            boost::optional<bool> check_result = checkPositionOffsetAcceptable(
+                tr, utn, true, do_debug);
 
-                if (check_result && !*check_result)
-                {
-                    tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
-                    reset_tr_assoc = true;
-                }
-//            }
+            if (check_result && !*check_result)
+            {
+                tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
+                reset_tr_assoc = true;
+            }
+            //            }
         }
     };
 
@@ -694,7 +694,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
 #else
-                              continue;
+            continue;
 #endif
 
                           if (!other.isTimeInside(timestamp, max_time_diff_))
@@ -702,7 +702,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
 #else
-                              continue;
+            continue;
 #endif
                           }
 
@@ -710,7 +710,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
 #else
-                              continue;
+            continue;
 #endif
 
                           bool mode_a_checked = false;
@@ -727,11 +727,11 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
                                   if (ma_res == ComparisonResult::DIFFERENT)
                                   {
-                                      //target_cnt++;
+                                     //target_cnt++;
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
-                                     return;
+                                      return;
 #else
-                                     continue;
+                    continue;
 #endif
                                   }
 
@@ -753,11 +753,11 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
                                   if (mc_res == ComparisonResult::DIFFERENT)
                                   {
-                                      //target_cnt++;
+                                     //target_cnt++;
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                                       return;
 #else
-                                      continue;
+                    continue;
 #endif
                                   }
 
@@ -787,7 +787,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
 #else
-                              continue;
+            continue;
 #endif
 
                           auto pos_offs = getPositionOffset(tr, other, do_debug, &prediction_stats[ target_cnt ]);
@@ -796,7 +796,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
 #else
-                              continue;
+            continue;
 #endif
 
                           std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
@@ -811,14 +811,14 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           }
                       }
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
-    );
+                      );
 #endif
 
-    //log failed predictions
+            //log failed predictions
     for (const auto& s : prediction_stats)
         ReconstructorTarget::addPredictionToGlobalStats(s);
 
-    // find best match
+            // find best match
     bool usable;
     unsigned int other_utn;
 
@@ -896,7 +896,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 
     const auto& settings = reconstructor().settings();
 
-    //const boost::posix_time::time_duration max_time_diff_tracker = Utils::Time::partialSeconds(settings.max_time_diff_);
+            //const boost::posix_time::time_duration max_time_diff_tracker = Utils::Time::partialSeconds(settings.max_time_diff_);
 
             //computes a match score for the given other target
     auto scoreUTN = [ & ] (const std::vector<size_t>& rec_nums,
@@ -933,7 +933,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                 continue;
             }
 
-            //@TODO: debug flag
+                    //@TODO: debug flag
             auto pos_offs = getPositionOffset(tr.timestamp_, target, other, thread_id, false, &prediction_stats[ result_idx ]);
             if (!pos_offs.has_value())
             {
@@ -975,7 +975,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                 break;
             }
 
-            //loginf << "\tdist " << distance;
+                    //loginf << "\tdist " << distance;
 
             distance_scores.push_back({rn_it, distance_score});
             distance_scores_sum += distance_score;
@@ -1032,8 +1032,11 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 #if TBB_VERSION_MAJOR <= 4
                           int thread_id = pthread_self(); // TODO PHIL
 #else
-                          int thread_id = tbb::this_task_arena::current_thread_index();
+            int thread_id = tbb::this_task_arena::current_thread_index();
 #endif
+
+                          if (thread_id < 0)
+                              thread_id = 0; // can be task_arena_base::not_initialized = -1
 
 #else
         int thread_id = 0;
@@ -1153,11 +1156,11 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
         }
 #endif
 
-    //log failed predictions
+            //log failed predictions
     for (const auto& s : prediction_stats)
         ReconstructorTarget::addPredictionToGlobalStats(s);
 
-    // find best match
+            // find best match
     bool usable;
     unsigned int other_utn;
     unsigned int num_updates;

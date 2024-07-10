@@ -614,6 +614,14 @@ bool KalmanChain::canPredict(const boost::posix_time::ptime& ts) const
 }
 
 /**
+ * Guesses if prediction will be somewhat close, as in smaller than max_lat_lon_dist.
+ */
+bool KalmanChain::predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const
+{
+
+}
+
+/**
  * Predicts the given timestamp from the nearest existing update in the chain.
 */
 bool KalmanChain::predict(Measurement& mm_predicted,
@@ -636,6 +644,9 @@ bool KalmanChain::predict(Measurement& mm_predicted,
         
         return ok;
     }
+
+//    if (thread_id < 0 || thread_id >= (int)predictors_.size())
+//        logerr << "UGA thread_id " << thread_id << " predictors_.size() " << predictors_.size();
 
     assert(thread_id >= 0 && thread_id < (int)predictors_.size());
     assert(!needsReestimate()); //!no predictions if chain is out of date!

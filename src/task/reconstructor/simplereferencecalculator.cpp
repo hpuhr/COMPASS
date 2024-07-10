@@ -230,7 +230,7 @@ void SimpleReferenceCalculator::addMeasurements(unsigned int utn,
     auto& utn_ref = references_[ utn ];
     utn_ref.utn = utn;
 
-    if (!measurements.empty())
+    if (!measurements.empty()) // TODO UGA
         utn_ref.measurements.insert(utn_ref.measurements.end(), measurements.begin(), measurements.end());
 }
 

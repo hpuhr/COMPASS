@@ -1948,6 +1948,14 @@ bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const
     return chain_->canPredict(timestamp);
 }
 
+bool ReconstructorTarget::predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const
+{
+    if (!chain_)
+        return false;
+
+    return chain_->predictPosClose(timestamp, max_lat_lon_dist);
+}
+
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
                                   const dbContent::targetReport::ReconstructorInfo& tr, 
                                   int thread_id,
