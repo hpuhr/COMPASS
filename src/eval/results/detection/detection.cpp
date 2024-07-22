@@ -17,6 +17,7 @@
 
 #include "eval/results/detection/detection.h"
 #include "eval/results/evaluationdetail.h"
+#include "eval/results/base/featuredefinitions.h"
 
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
@@ -198,59 +199,17 @@ void SingleDetection::addAnnotationForDetail(nlohmann::json& annotations_json,
 {
     assert (detail.numPositions() >= 1);
 
-    auto anno_type = is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError;
+    auto anno_type = is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError;
 
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationPos(annotations_json, detail.firstPos(), AnnotationType::TypeHighlight);
-        addAnnotationPos(annotations_json, detail.lastPos() , AnnotationType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.firstPos(), AnnotationArrayType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.lastPos() , AnnotationArrayType::TypeHighlight);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
         for (const auto& pos : detail.positions())
             addAnnotationPos(annotations_json, pos, anno_type);
-    }
-}
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SingleDetection::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SingleDetection::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    if (layer == requirement_->name())
-    {
-        for (auto& detail_it : getDetails())
-        {
-            auto check_failed = detail_it.getValueAsOrAssert<bool>(
-                        EvaluationRequirementResult::SingleDetection::DetailKey::MissOccurred);
-
-            if (detail_it.numPositions() == 1)
-                continue;
-
-            assert (detail_it.numPositions() >= 2);
-
-            size_t n = detail_it.numPositions();
-
-            auto pos_getter = [ & ] (double& x, double& y, size_t idx) 
-            { 
-                const auto& pos = detail_it.position(idx);
-
-                x =  pos.longitude_;
-                y =  pos.latitude_;
-            };
-
-            grid.addPoly(pos_getter, n, check_failed ? 1.0 : 0.0);
-        }
     }
 }
 
@@ -327,14 +286,14 @@ std::vector<Joined::SectorInfo> JoinedDetection::sectorInfos() const
 
 /**
 */
-AnnotationDefinitions JoinedDetection::getCustomAnnotationDefinitions() const
+FeatureDefinitions JoinedDetection::getCustomAnnotationDefinitions() const
 {
-    return AnnotationDefinitions().addBinaryGrid("", 
-                                                 "Result", 
-                                                 DetailValueSource(EvaluationRequirementResult::SingleDetection::DetailKey::MissOccurred),
-                                                 AnnotationDefinitions::GridDefinition::AddDetailMode::AddPositionsAsPolygon,
-                                                 Qt::green,
-                                                 Qt::red);
+    FeatureDefinitions defs;
+
+    defs.addDefinition<FeatureDefinitionBinaryGrid>("Missed Update Intervals", eval_man_, "Miss Occurred").
+            addDataSeries(SingleDetection::DetailKey::MissOccurred, GridAddDetailMode::AddPositionsAsPolyLine, true);
+
+    return defs;
 }
 
 }

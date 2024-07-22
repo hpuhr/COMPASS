@@ -73,9 +73,6 @@ public:
         NoRefUIs,            //unsigned int
     };
 
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
-
 protected:
     virtual boost::optional<double> computeResult_impl() const override;
     virtual unsigned int numIssues() const override;
@@ -115,7 +112,7 @@ protected:
 
     virtual std::vector<SectorInfo> sectorInfos() const override;
 
-    virtual AnnotationDefinitions getCustomAnnotationDefinitions() const override;
+    virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };
 
 }

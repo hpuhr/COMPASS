@@ -186,10 +186,10 @@ nlohmann::json RawHistogram::toJSON() const
  * RawHistogramCollection
  *******************************************************************************************/
 
-const std::string RawHistogramCollection::TagLayers    = "layers";
-const std::string RawHistogramCollection::TagHistogram = "histogram";
-const std::string RawHistogramCollection::TagName      = "name";
-const std::string RawHistogramCollection::TagColor     = "color";
+const std::string RawHistogramCollection::TagDataSeries = "dataseries";
+const std::string RawHistogramCollection::TagHistogram  = "histogram";
+const std::string RawHistogramCollection::TagName       = "name";
+const std::string RawHistogramCollection::TagColor      = "color";
 
 /**
 */
@@ -203,56 +203,56 @@ RawHistogramCollection::~RawHistogramCollection() = default;
 */
 bool RawHistogramCollection::hasData() const
 {
-    return (numLayers() > 0 && layers_.begin()->histogram.numBins() > 0);
+    return (numDataSeries() > 0 && data_series_.begin()->histogram.numBins() > 0);
 }
 
 /**
 */
 void RawHistogramCollection::clear()
 {
-    layers_.clear();
+    data_series_.clear();
 }
 
 /**
 */
-bool RawHistogramCollection::addLayer(const RawHistogram& histogram,
-                                      const std::string& name,
-                                      const QColor& color)
+bool RawHistogramCollection::addDataSeries(const RawHistogram& histogram,
+                                           const std::string& name,
+                                           const QColor& color)
 {
-    Layer l;
-    l.histogram = histogram;
-    l.name      = name;
-    l.color     = color;
+    DataSeries ds;
+    ds.histogram = histogram;
+    ds.name      = name;
+    ds.color     = color;
 
-    return addLayer(l);
+    return addDataSeries(ds);
 }
 
 /**
 */
-bool RawHistogramCollection::addLayer(const Layer& layer)
+bool RawHistogramCollection::addDataSeries(const DataSeries& data_series)
 {
-    bool bin_count_ok = (layers_.empty() || layers_.rbegin()->histogram.numBins() == layer.histogram.numBins());
+    bool bin_count_ok = (data_series_.empty() || data_series_.rbegin()->histogram.numBins() == data_series.histogram.numBins());
 
     assert(bin_count_ok);
 
     if (bin_count_ok)
-        layers_.push_back(layer);
+        data_series_.push_back(data_series);
 
     return bin_count_ok;
 }
 
 /**
 */
-const std::vector<RawHistogramCollection::Layer>& RawHistogramCollection::layers() const
+const std::vector<RawHistogramCollection::DataSeries>& RawHistogramCollection::dataSeries() const
 {
-    return layers_;
+    return data_series_;
 }
 
 /**
 */
-size_t RawHistogramCollection::numLayers() const
+size_t RawHistogramCollection::numDataSeries() const
 {
-    return layers_.size();
+    return data_series_.size();
 }
 
 /**
@@ -262,7 +262,7 @@ size_t RawHistogramCollection::numBins() const
     if (!hasData())
         return 0;
 
-    return (layers_.begin()->histogram.numBins());
+    return (data_series_.begin()->histogram.numBins());
 }
 
 /**
@@ -274,7 +274,7 @@ std::vector<std::string> RawHistogramCollection::labels() const
 
     size_t nbins = numBins();
 
-    const auto& bins = layers_.begin()->histogram.getBins();
+    const auto& bins = data_series_.begin()->histogram.getBins();
 
     std::vector<std::string> l(nbins);
 
@@ -290,12 +290,12 @@ bool RawHistogramCollection::fromJSON(const nlohmann::json& data)
 {
     clear();
 
-    if (!data.is_object() || !data.contains(TagLayers))
+    if (!data.is_object() || !data.contains(TagDataSeries))
         return false;
 
     try
     {
-        const auto& jlayers = data[ TagLayers ];
+        const auto& jlayers = data[ TagDataSeries ];
         if (!jlayers.is_array())
             return false;
 
@@ -304,7 +304,7 @@ bool RawHistogramCollection::fromJSON(const nlohmann::json& data)
             if (!jlayer.is_object() || !jlayer.contains(TagHistogram))
                 return false;
 
-            Layer l;
+            DataSeries l;
 
             if (!l.histogram.fromJSON(jlayer[ TagHistogram ]))
                 return false;
@@ -318,7 +318,7 @@ bool RawHistogramCollection::fromJSON(const nlohmann::json& data)
                 l.color = QColor(QString::fromStdString(cname));
             }
 
-            if (!addLayer(l))
+            if (!addDataSeries(l))
                 return false;
         }
     }
@@ -338,7 +338,7 @@ nlohmann::json RawHistogramCollection::toJSON() const
 
     nlohmann::json jlayers = nlohmann::json::array();
 
-    for (const auto& l : layers_)
+    for (const auto& l : data_series_)
     {
         nlohmann::json jlayer = nlohmann::json::object();
 
@@ -349,7 +349,7 @@ nlohmann::json RawHistogramCollection::toJSON() const
         jlayers.push_back(jlayer);
     }
 
-    j[ TagLayers ] = jlayers;
+    j[ TagDataSeries ] = jlayers;
 
     return j;
 }

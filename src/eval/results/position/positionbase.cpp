@@ -16,6 +16,9 @@
  */
 
 #include "eval/results/position/positionbase.h"
+
+#include "eval/results/base/featuredefinitions.h"
+
 #include "eval/requirement/base/base.h"
 #include "evaluationmanager.h"
 
@@ -235,72 +238,13 @@ void SinglePositionProbabilityBase::addAnnotationForDetail(nlohmann::json& annot
 
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationDistance(annotations_json, detail, AnnotationType::TypeHighlight, true, false);
+        addAnnotationDistance(annotations_json, detail, AnnotationArrayType::TypeHighlight, true, false);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationDistance(annotations_json, detail, is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError, true, false);
+        addAnnotationDistance(annotations_json, detail, is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError, true, false);
     }
 }
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionProbabilityBase::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SinglePositionProbabilityBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    if (layer == requirement_->name())
-    {
-        addValuesToGridBinary(grid, SinglePositionBaseCommon::DetailKey::CheckPassed);
-    }
-}
-
-/**
-*/
-// void SinglePositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
-// {
-//     if (!json_annotations.is_array())
-//         return;
-
-//     HistogramT<double> histogram;
-
-//     HistogramConfig config;
-//     config.num_bins = eval_man_.settings().histogram_num_bins;
-//     config.type     = HistogramConfig::Type::Range;
-
-//     HistogramInitializer<double> init;
-//     init.scan(values_);
-//     init.initHistogram(histogram, config);
-
-//     histogram.add(values_);
-
-//     auto hraw = histogram.toRaw();
-
-//     ViewPointGenAnnotation annotation("", true);
-
-//     std::string name = reqGrpId() + ":" + resultId();
-
-//     std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
-//     feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
-//     feat_h->setName(name);
-
-//     annotation.addFeature(std::move(feat_h));
-
-//     nlohmann::json feat_json;
-//     annotation.toJSON(feat_json);
-
-//     json_annotations.push_back(feat_json);
-// }
-
 
 /****************************************************************************
  * SinglePositionValueBase
@@ -370,32 +314,11 @@ void SinglePositionValueBase::addAnnotationForDetail(nlohmann::json& annotations
 
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationDistance(annotations_json, detail, AnnotationType::TypeHighlight, true, false);
+        addAnnotationDistance(annotations_json, detail, AnnotationArrayType::TypeHighlight, true, false);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationDistance(annotations_json, detail, is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError, true, false);
-    }
-}
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SinglePositionValueBase::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SinglePositionValueBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    if (layer == requirement_->name())
-    {
-        addValuesToGridBinary(grid, SinglePositionBaseCommon::DetailKey::CheckPassed);
+        addAnnotationDistance(annotations_json, detail, is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError, true, false);
     }
 }
 
@@ -486,6 +409,49 @@ bool JoinedPositionBase::common_exportAsCSV(std::ofstream& strm,
     return true;
 }
 
+FeatureDefinitions JoinedPositionBase::common_getCustomAnnotationDefinitions(const Joined& joined,
+                                                                             const EvaluationManager& eval_man) const
+{
+    FeatureDefinitions defs;
+
+    //grids (as geoimages)
+    defs.addDefinition<FeatureDefinitionBinaryGrid>("Position Error", eval_man, "Comparison Passed")
+        .addDataSeries(SinglePositionBaseCommon::DetailKey::CheckPassed, 
+                       GridAddDetailMode::AddEvtRefPosition, 
+                       false);
+    defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Mean", true)
+        .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
+                       grid2d::ValueType::ValueTypeMean, 
+                       GridAddDetailMode::AddEvtRefPosition);
+    defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Stddev", true)
+        .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
+                       grid2d::ValueType::ValueTypeStddev, 
+                       GridAddDetailMode::AddEvtRefPosition);
+    defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Max", true)
+        .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
+                       grid2d::ValueType::ValueTypeMax, 
+                       GridAddDetailMode::AddEvtRefPosition);
+    //histograms
+    defs.addDefinition<FeatureDefinitionStringCategoryHistogram>("Position Error", eval_man, "Error Count", "Error Count")
+        .addDataSeries("", { "#CF", "#CP" }, { numFailed(), numPassed() });
+    defs.addDefinition<FeatureDefinitionHistogram<double>>("Position Error", eval_man, "Full distribution", "Full distribution [m]")
+        .addDataSeries("", SinglePositionBaseCommon::DetailKey::Value);
+
+    //scatterplot
+    defs.addDefinition<FeatureDefinitionCustomScatterSeries>("My Scatter Series", eval_man, "Just Some Points", "X", "Y")
+        .addDataSeries("pointset1", { {0,0}, {1,1}, {2,2}, {3,3} }, Qt::red)
+        .addDataSeries("pointset2", { {1,0}, {2,1}, {3,2}, {4,3} }, Qt::green)
+        .addDataSeries("pointset3", { {2,0}, {3,1}, {4,2}, {5,3} }, Qt::blue);
+
+    //grids (as raw grids)
+    defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Mean", false)
+        .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
+                       grid2d::ValueType::ValueTypeMean, 
+                       GridAddDetailMode::AddEvtRefPosition);
+
+    return defs;
+}
+
 /****************************************************************************
  * JoinedPositionProbabilityBase
  ****************************************************************************/
@@ -568,42 +534,10 @@ bool JoinedPositionProbabilityBase::exportAsCSV(std::ofstream& strm) const
 
 /**
 */
-// void JoinedPositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
-// {
-//     if (!json_annotations.is_array())
-//         return;
-
-//     HistogramT<double> histogram;
-
-//     HistogramConfig config;
-//     config.num_bins = eval_man_.settings().histogram_num_bins;
-//     config.type     = HistogramConfig::Type::Range;
-
-//     auto v = values();
-
-//     HistogramInitializer<double> init;
-//     init.scan(v);
-//     init.initHistogram(histogram, config);
-
-//     histogram.add(v);
-
-//     auto hraw = histogram.toRaw();
-
-//     ViewPointGenAnnotation annotation("", true);
-
-//     std::string name = reqGrpId() + ":" + resultId();
-
-//     std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
-//     feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
-//     feat_h->setName(name);
-
-//     annotation.addFeature(std::move(feat_h));
-
-//     nlohmann::json feat_json;
-//     annotation.toJSON(feat_json);
-
-//     json_annotations.push_back(feat_json);
-// }
+FeatureDefinitions JoinedPositionProbabilityBase::getCustomAnnotationDefinitions() const
+{
+    return common_getCustomAnnotationDefinitions(*this, eval_man_);
+}
 
 /****************************************************************************
  * JoinedPositionValueBase
@@ -682,41 +616,9 @@ bool JoinedPositionValueBase::exportAsCSV(std::ofstream& strm) const
 
 /**
 */
-// void JoinedPositionBase::addCustomAnnotations(nlohmann::json& json_annotations)
-// {
-//     if (!json_annotations.is_array())
-//         return;
-
-//     HistogramT<double> histogram;
-
-//     HistogramConfig config;
-//     config.num_bins = eval_man_.settings().histogram_num_bins;
-//     config.type     = HistogramConfig::Type::Range;
-
-//     auto v = values();
-
-//     HistogramInitializer<double> init;
-//     init.scan(v);
-//     init.initHistogram(histogram, config);
-
-//     histogram.add(v);
-
-//     auto hraw = histogram.toRaw();
-
-//     ViewPointGenAnnotation annotation("", true);
-
-//     std::string name = reqGrpId() + ":" + resultId();
-
-//     std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
-//     feat_h.reset(new ViewPointGenFeatureHistogram(hraw, name, QColor(0, 0, 255)));
-//     feat_h->setName(name);
-
-//     annotation.addFeature(std::move(feat_h));
-
-//     nlohmann::json feat_json;
-//     annotation.toJSON(feat_json);
-
-//     json_annotations.push_back(feat_json);
-// }
+FeatureDefinitions JoinedPositionValueBase::getCustomAnnotationDefinitions() const
+{
+    return common_getCustomAnnotationDefinitions(*this, eval_man_);
+}
 
 }

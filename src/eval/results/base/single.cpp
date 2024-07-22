@@ -71,9 +71,9 @@ Single::Single(const std::string& type,
 {
     setDetails(details);
 
-    annotation_type_names_[AnnotationType::TypeHighlight] = "Selected";
-    annotation_type_names_[AnnotationType::TypeError    ] = "Errors";
-    annotation_type_names_[AnnotationType::TypeOk       ] = "OK";
+    annotation_type_names_[AnnotationArrayType::TypeHighlight] = "Selected";
+    annotation_type_names_[AnnotationArrayType::TypeError    ] = "Errors";
+    annotation_type_names_[AnnotationArrayType::TypeOk       ] = "OK";
 }
 
 /**
@@ -168,6 +168,13 @@ std::string Single::getRequirementSectionID () const // TODO hack
     {
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":Sum:"+requirement_->name();
     }
+}
+
+/**
+*/
+std::string Single::getRequirementAnnotationID_impl() const
+{
+    return (requirement_->name() + ":UTN" + std::to_string(utn_));
 }
 
 /**
@@ -304,7 +311,12 @@ void Single::generateDetailsTable(EvaluationResultsReport::Section& utn_req_sect
         {
             //create details on demand
 
-            auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+            auto func = [ & ] (const EvaluationDetail& detail, 
+                               const EvaluationDetail* parent_detail, 
+                               int didx0, 
+                               int didx1,
+                               int evt_pos_idx, 
+                               int evt_ref_pos_idx)
             {
                 auto values = detailValues(detail, parent_detail);
 
@@ -523,7 +535,7 @@ std::unique_ptr<nlohmann::json::object_t> Single::viewableData() const
 /**
  * Retrieves (and possibly creates) a json point coordinate array for the given annotation type.
 */
-nlohmann::json& Single::annotationPointCoords(nlohmann::json& annotations_json, AnnotationType type, bool overview) const
+nlohmann::json& Single::annotationPointCoords(nlohmann::json& annotations_json, AnnotationArrayType type, bool overview) const
 {
     nlohmann::json& annotation = getOrCreateAnnotation(annotations_json, type, overview);
 
@@ -535,7 +547,7 @@ nlohmann::json& Single::annotationPointCoords(nlohmann::json& annotations_json, 
 /**
  * Retrieves (and possibly creates) a json line coordinate array for the given annotation type.
 */
-nlohmann::json& Single::annotationLineCoords(nlohmann::json& annotations_json, AnnotationType type, bool overview) const
+nlohmann::json& Single::annotationLineCoords(nlohmann::json& annotations_json, AnnotationArrayType type, bool overview) const
 {
     nlohmann::json& annotation = getOrCreateAnnotation(annotations_json, type, overview);
     
@@ -547,7 +559,7 @@ nlohmann::json& Single::annotationLineCoords(nlohmann::json& annotations_json, A
 /**
  * Retrieves (and possibly creates) a json annotation for the given annotation type.
 */
-nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, AnnotationType type, bool overview) const
+nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, AnnotationArrayType type, bool overview) const
 {
     assert (annotations_json.is_array());
 
@@ -605,7 +617,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
 
     const std::string FieldName = ViewPointGenAnnotation::AnnotationFieldName;
 
-    if (type == AnnotationType::TypeHighlight)
+    if (type == AnnotationArrayType::TypeHighlight)
     {
         // should be first
 
@@ -625,7 +637,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
         assert (annotations_json.at(0).at(FieldName) == anno_name);
         return annotations_json.at(0);
     }
-    else if (type == AnnotationType::TypeError)
+    else if (type == AnnotationArrayType::TypeError)
     {
         // should be first or second
 
@@ -644,7 +656,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
                 // found at second pos
                 anno_pos = 1;
             }
-            else if (annotations_json.at(0).at(FieldName) == annotation_type_names_.at(AnnotationType::TypeHighlight))
+            else if (annotations_json.at(0).at(FieldName) == annotation_type_names_.at(AnnotationArrayType::TypeHighlight))
             {
                 // insert after
                 insert_needed = true;
@@ -652,7 +664,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
             }
             else
             {
-                assert (annotations_json.at(0).at(FieldName) == annotation_type_names_.at(AnnotationType::TypeOk));
+                assert (annotations_json.at(0).at(FieldName) == annotation_type_names_.at(AnnotationArrayType::TypeOk));
                 // insert before
                 insert_needed = true;
                 anno_pos = 0;
@@ -680,7 +692,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
     }
     else
     {
-        assert (type == AnnotationType::TypeOk);
+        assert (type == AnnotationArrayType::TypeOk);
         // should be last
 
         if (!annotations_json.size() || annotations_json.back().at(FieldName) != anno_name)
@@ -707,7 +719,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
 */
 void Single::addAnnotationPos(nlohmann::json& annotations_json, 
                               const EvaluationDetail::Position& pos,
-                              AnnotationType type) const
+                              AnnotationArrayType type) const
 {
     auto& coords = annotationPointCoords(annotations_json, type);
     coords.push_back(pos.asVector());
@@ -719,7 +731,7 @@ void Single::addAnnotationPos(nlohmann::json& annotations_json,
 void Single::addAnnotationLine(nlohmann::json& annotations_json,
                                const EvaluationDetail::Position& pos0,
                                const EvaluationDetail::Position& pos1,
-                               AnnotationType type) const
+                               AnnotationArrayType type) const
 {
     auto& coords = annotationLineCoords(annotations_json, type);
     coords.push_back(pos0.asVector());
@@ -730,7 +742,7 @@ void Single::addAnnotationLine(nlohmann::json& annotations_json,
 */
 void Single::addAnnotationDistance(nlohmann::json& annotations_json,
                                    const EvaluationDetail& detail,
-                                   AnnotationType type,
+                                   AnnotationArrayType type,
                                    bool add_line,
                                    bool add_ref) const
 {
@@ -762,193 +774,6 @@ std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
     *eval_details = result->getDetails();
 
     return std::unique_ptr<EvaluationDetails>(eval_details);
-}
-
-/**
-*/
-std::vector<double> Single::getValues(const DetailValueSource& source) const
-{
-    std::vector<double> values;
-    values.reserve(totalNumDetails());
-
-    auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
-    {
-        auto value = source.getValue(detail);
-
-        //value might not be set => skip
-        if (!value.has_value())
-            return;
-
-        values.push_back(value.value());
-    };
-
-    iterateDetails(func);
-
-    values.shrink_to_fit();
-
-    return values;
-}
-
-/**
-*/
-std::vector<Eigen::Vector3d> Single::getValuesPlusPos(const DetailValueSource& source, 
-                                                      DetailValuePositionMode detail_pos_mode,
-                                                      std::vector<std::pair<size_t,size_t>>* detail_ranges) const
-{
-    if (detail_ranges)
-        detail_ranges->clear();
-
-    //scan initial num values
-    size_t n_total   = 0;
-    size_t n_details = totalNumDetails();
-
-    if (detail_pos_mode == DetailValuePositionMode::EventPosition || 
-        detail_pos_mode == DetailValuePositionMode::EventRefPosition)
-    {
-        n_total = n_details;
-    }
-    else
-    {
-        auto funcScan = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
-        {
-            n_total += detail.numPositions();
-        };
-        iterateDetails(funcScan);
-    }
-
-    if (n_total == 0)
-        return {};
-
-    //collect positions + values
-    std::vector<Eigen::Vector3d> pos_values;
-    pos_values.reserve(n_total);
-
-    if (detail_ranges)
-        detail_ranges->reserve(n_details);
-
-    int evt_pos_idx     = eventPositionIndex();
-    int evt_ref_pos_idx = eventRefPositionIndex();
-
-    auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int idx0, int idx1)
-    {
-        int num_pos = (int)detail.numPositions();
-        assert(num_pos >= 1);
-
-        auto value = source.getValue(detail);
-
-        //value might not be set => skip
-        if (!value.has_value())
-            return;
-
-        double v = value.value();
-
-        if (detail_pos_mode == DetailValuePositionMode::EventPosition)
-        {
-            if (detail_ranges)
-                detail_ranges->emplace_back(pos_values.size(), 1);
-
-            //!event position always needs to be available!
-            assert (evt_pos_idx <= num_pos);
-
-            const auto& pos = evt_pos_idx >= 0 ? detail.position(evt_pos_idx) : detail.lastPos();
-            
-            pos_values.emplace_back(pos.longitude_, pos.latitude_, v);
-        }
-        else if (detail_pos_mode == DetailValuePositionMode::EventRefPosition)
-        {
-            if (detail_ranges)
-                detail_ranges->emplace_back(pos_values.size(), 1);
-
-            //no ref pos available => skip
-            if (evt_ref_pos_idx >= num_pos)
-                return;
-
-            const auto& pos = evt_ref_pos_idx >= 0 ? detail.position(evt_ref_pos_idx) : detail.lastPos();
-            
-            pos_values.emplace_back(pos.longitude_, pos.latitude_, v);
-        }
-        else if (detail_pos_mode == DetailValuePositionMode::AllPositions)
-        {
-            if (detail_ranges)
-                detail_ranges->emplace_back(pos_values.size(), detail.numPositions());
-
-            for (const auto& pos : detail.positions())
-                pos_values.emplace_back(pos.longitude_, pos.latitude_, v);
-        }
-    };
-
-    iterateDetails(func);
-
-    pos_values.shrink_to_fit();
-
-    if (detail_ranges)
-        detail_ranges->shrink_to_fit();
-
-    return pos_values;
-}
-
-/**
- * Generates binary grid values from a certain bool detail param.
- */
-void Single::addValuesToGridBinary(Grid2D& grid, int detail_key, bool invert, bool use_ref_pos) const
-{
-    const auto& details = getDetails();
-
-    auto is_ok = [ & ] (size_t idx)
-    {
-        auto check_passed = details[ idx ].getValueAs<bool>(detail_key);
-        assert(check_passed.has_value());
-
-        bool ok = ((!invert &&  check_passed.value()) ||
-                   ( invert && !check_passed.value()));
-        
-        return ok;
-    };
-
-    addValuesToGridBinary(grid, details, is_ok, use_ref_pos);
-}
-
-/**
-*/
-void Single::addValuesToGridBinary(Grid2D& grid, 
-                                   const EvaluationDetails& details, 
-                                   const std::function<bool(size_t)>& is_ok, 
-                                   bool use_ref_pos) const
-{
-    assert(is_ok);
-
-    for (size_t i = 0; i < details.size(); ++i)
-    {
-        const auto& d = details[ i ];
-
-        if (use_ref_pos && d.numPositions() == 1) // no ref pos
-            continue;
-
-        assert (d.numPositions() >= 1 && d.numPositions() <= 2);
-
-        bool ok = is_ok(i);
-
-        //interpolate between 0 = green and 1 = red
-        grid.addValue(d.position(use_ref_pos ? 1 : 0).longitude_,
-                      d.position(use_ref_pos ? 1 : 0).latitude_,
-                      ok ? 0.0 : 1.0);
-    }
-}
-
-/**
- * Grid layer definition suitable for getGridValuesBinary().
- */
-Single::LayerDefinition Single::getGridLayerDefBinary() const
-{
-    Single::LayerDefinition def;
-    def.value_type = grid2d::ValueType::ValueTypeMax;
-    def.render_settings.color_map.create(QColor(0, 255, 0), QColor(255, 0, 0), 2, ColorMap::Type::Binary);
-
-    def.render_settings.pixels_per_cell = eval_man_.settings().grid_pixels_per_cell;
-    def.render_settings.min_value = 0.0;
-    def.render_settings.max_value = 1.0;
-    
-    return def;
 }
 
 /**
@@ -984,11 +809,14 @@ void Single::iterateDetails(const DetailFunc& func,
 
     const auto& details0 = getDetails();
 
+    int evt_pos_idx     = eventPositionIndex();
+    int evt_ref_pos_idx = eventRefPositionIndex();
+
     if (nesting_mode == DetailNestingMode::Vector)
     {
         for (size_t i = 0; i < details0.size(); ++i)
             if (!skip_func || !skip_func(details0[ i ]))
-                func(details0[ i ], nullptr, (int)i, -1);
+                func(details0[ i ], nullptr, (int)i, -1, evt_pos_idx, evt_ref_pos_idx);
     }
     else if (nesting_mode == DetailNestingMode::Nested)
     {
@@ -1001,7 +829,7 @@ void Single::iterateDetails(const DetailFunc& func,
 
             for (size_t j = 0; j < details1.size(); ++j)
                 if (!skip_func || !skip_func(details1[ j ]))
-                    func(details1[ j ], &details0[ i ], (int)i, (int)j);
+                    func(details1[ j ], &details0[ i ], (int)i, (int)j, evt_pos_idx, evt_ref_pos_idx);
         }
     }
     else if (nesting_mode == DetailNestingMode::SingleNested)
@@ -1014,45 +842,9 @@ void Single::iterateDetails(const DetailFunc& func,
 
             for (size_t i = 0; i < details1.size(); ++i)
                 if (!skip_func || !skip_func(details1[ i ]))
-                    func(details1[ i ], &details0[ 0 ], 0, (int)i);
+                    func(details1[ i ], &details0[ 0 ], 0, (int)i, evt_pos_idx, evt_ref_pos_idx);
         }
     }
-}
-
-/**
-*/
-size_t Single::totalNumDetails() const
-{
-    auto nesting_mode = detailNestingMode();
-
-    const auto& details0 = getDetails();
-
-    if (nesting_mode == DetailNestingMode::Vector)
-    {
-        return details0.size();
-    }
-    else if (nesting_mode == DetailNestingMode::Nested)
-    {
-        size_t n = 0;
-
-        for (size_t i = 0; i < details0.size(); ++i)
-        {
-            if (!details0[ i ].hasDetails())
-                continue;
-
-            const auto& details1 = details0[ i ].details();
-
-            n += details1.size();
-        }
-    }
-    else if (nesting_mode == DetailNestingMode::SingleNested)
-    {
-        assert(details0.size() == 1);
-
-        return details0[ 0 ].hasDetails() ? details0[ 0 ].details().size() : 0;
-    }
-
-    return 0;
 }
 
 /**
@@ -1083,7 +875,12 @@ Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options) 
 
         QRectF bounds;
 
-        auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+        auto func = [ & ] (const EvaluationDetail& detail, 
+                           const EvaluationDetail* parent_detail, 
+                           int didx0, 
+                           int didx1,
+                           int evt_pos_idx, 
+                           int evt_ref_pos_idx)
         {
             assert(detail.numPositions() >= 1);
 
@@ -1141,7 +938,12 @@ void Single::createTargetAnnotations(nlohmann::json& annotations_json,
             return detailIsOk(detail);
         };
 
-        auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+        auto func = [ & ] (const EvaluationDetail& detail, 
+                           const EvaluationDetail* parent_detail, 
+                           int didx0, 
+                           int didx1,
+                           int evt_pos_idx, 
+                           int evt_ref_pos_idx)
         {
             addAnnotationForDetail(annotations_json, detail, TargetAnnotationType::SumOverview, detailIsOk(detail));
         };
@@ -1153,7 +955,12 @@ void Single::createTargetAnnotations(nlohmann::json& annotations_json,
     else if (type == TargetAnnotationType::TargetOverview)
     {
         //add target overview annotations
-        auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+        auto func = [ & ] (const EvaluationDetail& detail, 
+                           const EvaluationDetail* parent_detail, 
+                           int didx0, 
+                           int didx1,
+                           int evt_pos_idx, 
+                           int evt_ref_pos_idx)
         {
             addAnnotationForDetail(annotations_json, detail, TargetAnnotationType::TargetOverview, detailIsOk(detail));
         };
@@ -1167,7 +974,12 @@ void Single::createTargetAnnotations(nlohmann::json& annotations_json,
         //add target overview annotations?
         if (addOverviewAnnotationsToDetail())
         {
-            auto func = [ & ] (const EvaluationDetail& detail, const EvaluationDetail* parent_detail, int didx0, int didx1)
+            auto func = [ & ] (const EvaluationDetail& detail, 
+                               const EvaluationDetail* parent_detail, 
+                               int didx0, 
+                               int didx1,
+                               int evt_pos_idx, 
+                               int evt_ref_pos_idx)
             {
                 addAnnotationForDetail(annotations_json, detail, TargetAnnotationType::TargetOverview, detailIsOk(detail));
             };

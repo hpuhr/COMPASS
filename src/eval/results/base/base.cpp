@@ -16,6 +16,8 @@
  */
 
 #include "eval/results/base/base.h"
+#include "eval/results/base/result_t.h"
+#include "eval/results/base/featuredefinition.h"
 
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
@@ -249,6 +251,13 @@ std::string Base::getRequirementSumSectionID() const
 
 /**
 */
+std::string Base::getRequirementAnnotationID() const
+{
+    return "Evaluation:" + getRequirementAnnotationID_impl();
+}
+
+/**
+*/
 EvaluationResultsReport::Section& Base::getRequirementSection (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -362,9 +371,23 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
 
     //init annotation array
     (*viewable_ptr)[ViewPoint::VP_ANNOTATION_KEY] = nlohmann::json::array();
+    auto& vp_anno_array = (*viewable_ptr)[ViewPoint::VP_ANNOTATION_KEY];
+
+    //add root annotation and retrieve its annotation array
+    std::string root_anno_name = getRequirementAnnotationID();
+    assert(!root_anno_name.empty());
+
+    ViewPointGenAnnotation root_anno(root_anno_name);
+
+    nlohmann::json root_anno_json;
+    root_anno.toJSON(root_anno_json);
+
+    vp_anno_array.push_back(root_anno_json);
+
+    auto& result_anno_array = ViewPointGenAnnotation::getChildrenJSON(vp_anno_array.at(0));
 
     //add annotations
-    createAnnotations((*viewable_ptr)[ViewPoint::VP_ANNOTATION_KEY], options);
+    createAnnotations(result_anno_array, options);
 
     return viewable_ptr;
 }
@@ -378,231 +401,121 @@ QString Base::formatValue(double v, int precision) const
 
 /**
 */
-AnnotationDefinitions Base::getCustomAnnotationDefinitions() const
+FeatureDefinitions Base::getCustomAnnotationDefinitions() const
 {
     //by default return empty definitions => no custom annotations will be generated
-    return AnnotationDefinitions();
+    return FeatureDefinitions();
 }
 
 /**
+ * Called by Single and Joined to add custom annotations to the viewable.
 */
 void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
 {
+    assert(annotations_json.is_array());
+
+    //get custom annotations
     auto defs = getCustomAnnotationDefinitions();
 
-    //add all grids
-    for (const auto& grids : defs.grids())
-        addGrids(annotations_json, grids.first, grids.second);
+    std::string group_name = getRequirementAnnotationID();
 
-    //add all histograms
-    for (const auto& histograms : defs.histograms())
-        addHistograms(annotations_json, histograms.first, histograms.second);
+    for (const auto& value_defs : defs.definitions())
+    {
+        loginf << "Base: addCustomAnnotations: Adding annotation for value '" << value_defs.first << "'";
+
+        //create annotation for value features
+        ViewPointGenAnnotation value_annotation(value_defs.first);
+
+        for (const auto& def : value_defs.second)
+        {
+            //create feature and add to annotation
+            auto f = def->createFeature(this);
+            assert(f);
+
+            loginf << "Base: addCustomAnnotations: Adding feature '" << f->name() << "'";
+
+            PlotMetadata metadata;
+            metadata.plot_group_   = group_name;
+            metadata.title_        = value_defs.first;
+            metadata.subtitle_     = def->featureDescription();
+            metadata.x_axis_label_ = def->xAxisLabel();
+            metadata.y_axis_label_ = def->yAxisLabel();
+
+            f->setPlotMetadata(metadata);
+            f->writeBinaryIfPossible(true);
+
+            ViewPointGenAnnotation* feat_annotation = new ViewPointGenAnnotation(def->featureDescription());
+            feat_annotation->addFeature(std::move(f));
+
+            value_annotation.addAnnotation(std::unique_ptr<ViewPointGenAnnotation>(feat_annotation));
+        }
+
+        loginf << "Base: addCustomAnnotations: Added " << value_annotation.numFeatures() << " feature(s) to annotation";
+
+        //convert to json and collect
+        nlohmann::json anno_json;
+        value_annotation.toJSON(anno_json);
+
+        annotations_json.push_back(anno_json);
+    }
 }
 
-namespace
+/**
+*/
+size_t Base::totalNumDetails() const
 {
-    QRectF gridBounds(const SectorLayer& sector_layer, double border_factor)
+    size_t num_details = 0;
+
+    //scan for estimated max num values
+    auto funcScan = [ & ] (const EvaluationDetail& detail, 
+                            const EvaluationDetail* parent_detail, 
+                            int idx0, 
+                            int idx1,
+                            int evt_pos_idx, 
+                            int evt_ref_pos_idx)
     {
-        auto lat_range = sector_layer.getMinMaxLatitude();
-        auto lon_range = sector_layer.getMinMaxLongitude();
-
-        QRectF roi(lon_range.first, lat_range.first, lon_range.second - lon_range.first, lat_range.second - lat_range.first);
-
-        return grid2d::GridResolution::addBorder(roi, border_factor, -180.0, 180.0, -90.0, 90.0);
+        ++num_details;
     };
+
+    iterateDetails(funcScan);
+
+    return num_details;
 }
 
 /**
 */
-void Base::addGrids(nlohmann::json& annotations_json, 
-                    const std::string& annotation_name, 
-                    const std::vector<AnnotationDefinitions::GridDefinition>& defs) const
+size_t Base::totalNumPositions() const
 {
-    loginf << "Base: addGrids: creating grid...";
+    size_t num_positions = 0;
 
-    //create suitably sized grid
-    QRectF roi = gridBounds(sector_layer_, 0.01);
-
-    auto resolution = grid2d::GridResolution().setCellCount(eval_man_.settings().grid_num_cells_x,
-                                                            eval_man_.settings().grid_num_cells_y);
-    Grid2D grid;
-    bool grid_ok = grid.create(roi, resolution, "wgs84", true);
-
-    //!shall not fail! (otherwise sector bounds might be strange)
-    assert(grid_ok);
-
-    loginf << "Base: addGrids: filling grid...";
-
-    //generate grid layers
-    Grid2DLayers layers;
-    std::map<std::string, Grid2DRenderSettings> render_settings_map;
-
-    for (const auto& def : defs)
+    //scan for estimated max num values
+    auto funcScan = [ & ] (const EvaluationDetail& detail, 
+                            const EvaluationDetail* parent_detail, 
+                            int idx0, 
+                            int idx1,
+                            int evt_pos_idx, 
+                            int evt_ref_pos_idx)
     {
-        if (!def.isValid())
-            continue;
+        num_positions += detail.numPositions();
+    };
 
-        //reset grid for new data layer
-        grid.reset();
+    iterateDetails(funcScan);
 
-        bool add_as_polys = def.add_detail_mode == AnnotationDefinitions::GridDefinition::AddDetailMode::AddPositionsAsPolygon;
-
-        //obtain positions + values
-        std::vector<std::pair<size_t, size_t>> detail_ranges;
-        auto values = getValuesPlusPos(def.value_source, 
-                                       def.pos_mode,
-                                       add_as_polys ? &detail_ranges : nullptr);
-        if (values.empty())
-            continue;
-
-        if (add_as_polys)
-        {
-            //add as per detail polygons
-            for (const auto& r : detail_ranges)
-            {
-                //skip single positions
-                if (r.second < 2)
-                    continue;
-
-                auto pos_getter = [ & ] (double& x, double& y, size_t idx) 
-                { 
-                    x =  values[ r.first + idx ].x();
-                    y =  values[ r.first + idx ].y();
-                };
-
-                grid.addPoly(pos_getter, r.second, values[ r.first ].z());
-            }
-        }
-        else
-        {
-            //just add as single values
-            for (const auto& pos : values)
-                grid.addValue(pos.x(), pos.y(), pos.z());
-        }
-
-        assert(grid.numOutOfRange() == 0);
-
-        //get render settings and override some values
-        Grid2DRenderSettings render_settings = def.render_settings;
-        render_settings.pixels_per_cell = eval_man_.settings().grid_pixels_per_cell;
-
-        //obtain all layer values
-        for (auto value_type : def.value_types)
-        {
-            //create layer name which incorporates the desired value type
-            std::string lname = def.name + (def.value_types.size() > 1 ? "_" + grid2d::valueTypeToString(value_type) : "");
-
-            //store layer
-            grid.addToLayers(layers, lname, value_type);
-
-            //store render settings
-            render_settings_map[ lname ] = render_settings;
-        }
-    }
-
-    loginf << "Base: addGrids: creating features...";
-
-    ViewPointGenAnnotations annotations;
-    
-    //render layers and add them as annotation features
-    for(const auto& l : layers.layers())
-    {
-        //get render settings
-        assert(render_settings_map.count(l.first));
-        const auto& rs = render_settings_map.at(l.first);
-
-        //render layer
-        auto render_result = Grid2DLayerRenderer::render(*l.second, rs);
-
-        //loginf << "rendered image size: " << render_result.first.width() << "x" << render_result.first.height();
-        //render_result.first.save(QString::fromStdString("/home/mcphatty/layer_" + l.first + ".png"));
-
-        //create geo image annotation
-        std::unique_ptr<ViewPointGenFeatureGeoImage> geo_image(new ViewPointGenFeatureGeoImage(render_result.first,
-                                                                                               render_result.second));
-        geo_image->setName(l.first);
-
-        std::string anno_name = annotation_name;
-        anno_name += (annotation_name.empty() ? "" : "_") + l.first;
-
-        std::unique_ptr<ViewPointGenAnnotation> a(new ViewPointGenAnnotation(anno_name, false));
-        a->addFeature(std::move(geo_image));
-
-        annotations.addAnnotation(std::move(a));
-    }
-
-    loginf << "Base: addGrids: created " << annotations.size() << " feature(s)";
-
-    //add created annotations as JSON 
-    for (size_t i = 0; i < annotations.size(); ++i)
-    {
-        nlohmann::json a_info;
-        annotations.annotation(i).toJSON(a_info);
-
-        annotations_json.push_back(a_info);
-    }
+    return num_positions;
 }
 
 /**
 */
-void Base::addHistograms(nlohmann::json& annotations_json, 
-                         const std::string& annotation_name, 
-                         const std::vector<AnnotationDefinitions::HistogramDefinition>& defs) const
+std::vector<double> Base::getValues(const ValueSource<double>& source) const
 {
-    if (!annotations_json.is_array())
-        return;
+    return EvaluationResultTemplates(this).getValues<double>(source);
+}
 
-    RawHistogramCollection hcollection;
-
-    for (const auto& def : defs)
-    {
-        if (!def.isValid())
-            continue;
-
-        auto values = getValues(def.value_source);
-        if (values.empty())
-            return;
-
-        //@TODO: integrate other value types (e.g. bool and int)
-        HistogramInitializer<double> init(eval_man_.settings().histogram_num_bins);
-        init.scan(values);
-
-        auto config = init.currentConfiguration();
-
-        //override initializer auto config?
-        if (def.force_range_histogram)
-        {
-            config          = HistogramConfig();
-            config.type     = HistogramConfig::Type::Range;
-            config.num_bins = eval_man_.settings().histogram_num_bins;
-        }
-
-        //init histogram using config
-        HistogramT<double> histogram;
-        if (!init.initHistogram(histogram, config))
-            continue;
-
-        //add values
-        histogram.add(values);
-
-        hcollection.addLayer(histogram.toRaw(), def.name, HistogramColorDefault);
-    }
-
-    if (hcollection.numLayers() == 0)
-        return;
-
-    ViewPointGenAnnotation annotation(annotation_name, true);
-
-    std::unique_ptr<ViewPointGenFeatureHistogram> feat_h;
-    feat_h.reset(new ViewPointGenFeatureHistogram(hcollection));
-    feat_h->setName(annotation_name);
-
-    annotation.addFeature(std::move(feat_h));
-
-    nlohmann::json feat_json;
-    annotation.toJSON(feat_json);
-
-    annotations_json.push_back(feat_json);
+/**
+*/
+std::vector<double> Base::getValues(int value_id) const
+{
+    return getValues(ValueSource<double>(value_id));
 }
 
 }

@@ -237,6 +237,10 @@ bool ViewDataWidget::redrawData(bool recompute, bool notify)
         emit redrawStarted();
         QApplication::processEvents(); //process any ui reactions on this signal before ui is blocked by redraw
     }
+
+    //clear computed data before a recompute
+    if (recompute)
+        clearIntermediateRedrawData_impl();
     
     //invoke derived: redraw and remember if data has been redrawn correctly
     drawn_ = redrawData_impl(recompute);

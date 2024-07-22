@@ -87,11 +87,15 @@ public:
                      grid2d::ValueType vtype) const;
 
     QRectF gridBounds() const;
-    void cropGrid(QRectF& roi, 
-                  QRect& region, 
-                  const QRectF& crop_rect,
-                  bool region_in_image_space,
-                  int pixels_per_cell = 1) const;
+    static void cropGrid(QRectF& roi, 
+                         QRect& region, 
+                         const QRectF& crop_rect,
+                         const QRectF& grid_roi,
+                         int grid_cells_x,
+                         int grid_cells_y,
+                         bool grid_north_up,
+                         bool region_in_image_space,
+                         int pixels_per_cell = 1);
 
     size_t numAdded() const { return num_added_; }
     size_t numOutOfRange() const { return num_oor_; }

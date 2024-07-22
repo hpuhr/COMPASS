@@ -19,7 +19,6 @@
 
 #include "evaluationdetail.h"
 #include "eval/results/evaluationdetail.h"
-#include "eval/results/base/annotations.h"
 #include "eval/results/base/result_defs.h"
 
 #include <QVariant>
@@ -31,6 +30,8 @@
 #include <vector>
 
 #include <QColor>
+
+#include <Eigen/Core>
 
 class EvaluationTargetData;
 class EvaluationManager;
@@ -51,6 +52,11 @@ namespace EvaluationResultsReport
 namespace EvaluationRequirementResult
 {
 
+class FeatureDefinitions;
+
+template <typename T>
+struct ValueSource;
+
 /**
 */
 class Base
@@ -58,6 +64,9 @@ class Base
 public:
     typedef std::vector<EvaluationDetail> EvaluationDetails;  // details vector
     typedef std::array<int, 2>            DetailIndex;        // index for a nested detail struct
+
+    typedef std::function<bool(const EvaluationDetail&)> DetailSkipFunc;
+    typedef std::function<void(const EvaluationDetail&, const EvaluationDetail*, int, int, int, int)> DetailFunc;
 
     enum class BaseType
     {
@@ -147,14 +156,15 @@ public:
     /// adds the result to the report root item
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
-    /// get detail values stored under a specific id as double vector
-    virtual std::vector<double> getValues(const DetailValueSource& source) const = 0;
-    virtual std::vector<Eigen::Vector3d> getValuesPlusPos(const DetailValueSource& source, 
-                                                          DetailValuePositionMode detail_pos_mode = DetailValuePositionMode::EventPosition,
-                                                          std::vector<std::pair<size_t,size_t>>* detail_ranges = nullptr) const = 0;
+    /// iterate over details
+    virtual void iterateDetails(const DetailFunc& func,
+                                const DetailSkipFunc& skip_func = DetailSkipFunc()) const = 0;
 
-    /// generate definitions for the automatic generation of custom annotations (grids, histograms, etc.)
-    virtual AnnotationDefinitions getCustomAnnotationDefinitions() const;
+    std::vector<double> getValues(const ValueSource<double>& source) const;
+    std::vector<double> getValues(int value_id) const;
+
+    size_t totalNumDetails() const;
+    size_t totalNumPositions() const;
 
     const static std::string req_overview_table_name_;
 
@@ -251,12 +261,19 @@ protected:
     virtual void createAnnotations(nlohmann::json& annotations_json, 
                                    const AnnotationOptions& options) const = 0;
 
+    /// generate definitions for the automatic generation of custom annotations (grids, histograms, etc.)
+    virtual FeatureDefinitions getCustomAnnotationDefinitions() const;
+
     EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
+    /// section and annotation id strings
     virtual std::string getRequirementSectionID() const;
     virtual std::string getRequirementSumSectionID() const;
+    virtual std::string getRequirementAnnotationID_impl() const = 0;
 
+    std::string getRequirementAnnotationID() const;
+    
     EvaluationResultsReport::Section& getRequirementSection(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
     std::string type_;
@@ -271,13 +288,6 @@ protected:
     EvaluationManager& eval_man_;
 
 private:
-    void addGrids(nlohmann::json& annotations_json, 
-                  const std::string& annotation_name, 
-                  const std::vector<AnnotationDefinitions::GridDefinition>& defs) const;
-    void addHistograms(nlohmann::json& annotations_json, 
-                       const std::string& annotation_name, 
-                       const std::vector<AnnotationDefinitions::HistogramDefinition>& defs) const;
-
     EvaluationDetails details_;
 
     boost::optional<double> result_;

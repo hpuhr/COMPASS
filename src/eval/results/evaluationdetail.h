@@ -71,7 +71,7 @@ class EvaluationDetail
 public:
     typedef unsigned char                 Key;
     typedef boost::posix_time::ptime      Timestamp;
-    typedef dbContent::TargetPosition      Position;
+    typedef dbContent::TargetPosition     Position;
     typedef std::vector<EvaluationDetail> Details;
 
     EvaluationDetail() = default;
@@ -137,7 +137,9 @@ private:
     Details& genDetails() const;
 
     Timestamp                        timestamp_;
-    std::vector<Position>            positions_;
+    std::vector<Position>            positions_;  // by design the first value shall refer to the position the detail is assigned to,
+                                                  // the last position shall refer to the position the detail is measured against,
+                                                  // e.g. a reference trajectory position, an interval begin, etc.
     std::vector<QVariant>            values_;
     EvaluationDetailComments         comments_;
     mutable boost::optional<Details> details_;

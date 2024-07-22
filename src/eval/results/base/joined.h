@@ -66,10 +66,8 @@ public:
     std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
 
-    std::vector<double> getValues(const DetailValueSource& source) const override final;
-    std::vector<Eigen::Vector3d> getValuesPlusPos(const DetailValueSource& source, 
-                                                  DetailValuePositionMode detail_pos_mode = DetailValuePositionMode::EventPosition,
-                                                  std::vector<std::pair<size_t,size_t>>* detail_ranges = nullptr) const override final;
+    void iterateDetails(const DetailFunc& func,
+                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
 
     void updateToChanges();
 
@@ -101,6 +99,8 @@ protected:
     virtual bool canExportCSV() const { return false; }
     /// implements csv export 
     virtual bool exportAsCSV(std::ofstream& strm) const { return false; }
+
+    virtual std::string getRequirementAnnotationID_impl() const override;
 
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
     ViewableInfo createViewableInfo(const AnnotationOptions& options) const override final;

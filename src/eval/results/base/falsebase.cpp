@@ -16,6 +16,7 @@
  */
 
 #include "eval/results/base/falsebase.h"
+#include "eval/results/base/featuredefinitions.h"
 
 namespace EvaluationRequirementResult
 {
@@ -237,32 +238,11 @@ void SingleFalseBase::addAnnotationForDetail(nlohmann::json& annotations_json,
 
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationPos(annotations_json, detail.position(0), AnnotationType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.position(0), AnnotationArrayType::TypeHighlight);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
-    }
-}
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SingleFalseBase::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SingleFalseBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    if (layer == requirement_->name())
-    {
-        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleFalseBase::DetailKey::IsNotOk, true);
+        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError);
     }
 }
 
@@ -365,6 +345,23 @@ std::vector<Joined::SectorInfo> JoinedFalseBase::sectorInfos() const
              { "#Unknown [1]"   , "Number of updates unknown " + name                  , num_unknown_                    }, 
              { "#Correct [1]"   , "Number of updates with correct " + name             , num_correct_                    }, 
              { "#False [1]"     , "Number of updates with false " + name               , num_false_                      } };
+}
+
+/**
+*/
+FeatureDefinitions JoinedFalseBase::getCustomAnnotationDefinitions() const
+{
+    FeatureDefinitions defs; 
+
+    // return AnnotationDefinitions().addBinaryGrid("", 
+    //                                              requirement_->name(), 
+    //                                              DetailValueSource(SingleFalseBase::DetailKey::IsNotOk),
+    //                                              GridAddDetailMode::AddEvtRefPosition,
+    //                                              true,
+    //                                              Qt::green,
+    //                                              Qt::red);
+
+    return defs;
 }
 
 }

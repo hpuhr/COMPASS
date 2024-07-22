@@ -17,6 +17,8 @@
 
 #include "eval/results/generic/generic.h"
 
+#include "eval/results/base/featuredefinitions.h"
+
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
@@ -280,32 +282,11 @@ void SingleGeneric::addAnnotationForDetail(nlohmann::json& annotations_json,
 
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationPos(annotations_json, detail.position(0), AnnotationType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.position(0), AnnotationArrayType::TypeHighlight);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
-    }
-}
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SingleGeneric::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SingleGeneric::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    if (layer == requirement_->name())
-    {
-        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleGeneric::DetailKey::IsNotOk, true);
+        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError);
     }
 }
 
@@ -422,6 +403,23 @@ std::vector<Joined::SectorInfo> JoinedGeneric::sectorInfos() const
              { "#Unknown [1]"   , "Number of updates unknown " + name                , num_unknown_     },
              { "#Correct [1]"   , "Number of updates with correct " + name           , num_correct_     }, 
              { "#False [1]"     , "Number of updates with incorrect " + name         , num_false_       } };
+}
+
+/**
+*/
+FeatureDefinitions JoinedGeneric::getCustomAnnotationDefinitions() const
+{
+    FeatureDefinitions defs;
+
+    // return AnnotationDefinitions().addBinaryGrid("", 
+    //                                              requirement_->name(), 
+    //                                              DetailValueSource(SingleGeneric::DetailKey::IsNotOk),
+    //                                              GridAddDetailMode::AddEvtRefPosition,
+    //                                              true,
+    //                                              Qt::green,
+    //                                              Qt::red);
+
+    return defs;
 }
 
 }

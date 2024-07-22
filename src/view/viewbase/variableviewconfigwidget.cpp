@@ -67,7 +67,8 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
         layout->addWidget(sel_widget);
     };
 
-    bool show_annotation = var_view_->showsAnnotation() && !var_view_->currentAnnotationID().empty();
+    bool show_annotation = var_view_->showsAnnotation() && 
+                           var_view_->hasCurrentAnnotation();
 
     QWidget*     cfg_widget = new QWidget();
     QVBoxLayout* cfg_layout = new QVBoxLayout();
@@ -105,7 +106,7 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
 
         annotation_widget_ = new VariableViewAnnotationWidget(var_view_);
 
-        connect(annotation_widget_, &VariableViewAnnotationWidget::idChanged, this, &VariableViewConfigWidget::annotationIDChanged);
+        connect(annotation_widget_, &VariableViewAnnotationWidget::currentAnnotationChanged, this, &VariableViewConfigWidget::annotationChanged);
 
         cfg_layout->addWidget(annotation_widget_);
     }
@@ -194,8 +195,9 @@ void VariableViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
     }
 
     //eval result related
-    info[ "annotations_active" ] = show_annotations_box_->isChecked();
-    info[ "annotation_id"      ] = annotation_widget_->currentID();
+    info[ "annotations_active"   ] = show_annotations_box_->isChecked();
+    info[ "annotation_group_idx" ] = annotation_widget_->currentGroupIdx();
+    info[ "annotation_idx"       ] = annotation_widget_->currentAnnotationIdx();
 }
 
 /**
@@ -240,7 +242,8 @@ void VariableViewConfigWidget::dataSourceToggled()
 
 /**
  */
-void VariableViewConfigWidget::annotationIDChanged()
+void VariableViewConfigWidget::annotationChanged()
 {
-    var_view_->setCurrentAnnotation(annotation_widget_->currentID());
+    var_view_->setCurrentAnnotation(annotation_widget_->currentGroupIdx(),
+                                    annotation_widget_->currentAnnotationIdx());
 }

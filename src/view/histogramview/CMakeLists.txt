@@ -15,7 +15,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/histogram_raw.h"
         "${CMAKE_CURRENT_LIST_DIR}/histogramgenerator.h"
         "${CMAKE_CURRENT_LIST_DIR}/histogramgeneratorbuffer.h"
-        "${CMAKE_CURRENT_LIST_DIR}/histogramgeneratorresults.h"
         "${CMAKE_CURRENT_LIST_DIR}/histograminitializer.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/histogramview.cpp"
@@ -27,5 +26,4 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/histogram_raw.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/histogramgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/histogramgeneratorbuffer.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/histogramgeneratorresults.cpp"
 )

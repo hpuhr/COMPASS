@@ -92,11 +92,11 @@ private:
 class RawHistogramCollection
 {
 public:
-    struct Layer
+    struct DataSeries
     {
-        RawHistogram histogram;
-        std::string  name;
-        QColor       color;
+        RawHistogram histogram; // raw histogram
+        std::string  name;      // series name (used in plot legend)
+        QColor       color;     // series color
     };
 
     RawHistogramCollection();
@@ -105,26 +105,26 @@ public:
     bool hasData() const;
     void clear();
 
-    bool addLayer(const RawHistogram& histogram,
-                  const std::string& name = "",
-                  const QColor& color = Qt::black);
-    bool addLayer(const Layer& layer);
+    bool addDataSeries(const RawHistogram& histogram,
+                       const std::string& name = "",
+                       const QColor& color = Qt::blue);
+    bool addDataSeries(const DataSeries& data_series);
 
-    const std::vector<Layer>& layers() const;
+    const std::vector<DataSeries>& dataSeries() const;
 
     size_t numBins() const;
-    size_t numLayers() const;
+    size_t numDataSeries() const;
 
     std::vector<std::string> labels() const;
 
     bool fromJSON(const nlohmann::json& data);
     nlohmann::json toJSON() const;
 
-    static const std::string TagLayers;
+    static const std::string TagDataSeries;
     static const std::string TagHistogram;
     static const std::string TagName;
     static const std::string TagColor;
 
 private:
-    std::vector<Layer> layers_;
+    std::vector<DataSeries> data_series_;
 };

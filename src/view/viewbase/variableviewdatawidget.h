@@ -27,6 +27,8 @@ class VariableView;
 class Buffer;
 
 /**
+ * Base view data class for variable-based views.
+ * Implements default load and update behavior for such a view.
  */
 class VariableViewDataWidget : public ViewDataWidget
 {
@@ -55,6 +57,7 @@ protected:
     virtual void loadingDone_impl() override final;
     virtual void updateData_impl(bool requires_reset) override final;
     virtual void clearData_impl() override final;
+    virtual void clearIntermediateRedrawData_impl() override final;
     virtual bool redrawData_impl(bool recompute) override final;
     virtual void liveReload_impl() override final;
 
@@ -62,17 +65,33 @@ protected:
 
     void setVariableState(int var_idx, VariableState state);
 
-    //to be implemented in derived classes
-    virtual bool postLoadTrigger() { return false; }
+    /*to be implemented in derived classes*/
+
+    /// called on buffer data update (updateData_impl)
     virtual void updateDataEvent(bool requires_reset) {}
+    /// called after loading buffers, should return true if it already triggered a redraw (e.g. by reconfiguring the view)
+    virtual bool postLoadTrigger() { return false; }
+    /// resets all variable related data collected during load (e.g. collected buffer data)
     virtual void resetVariableData() = 0;
+    /// reset intermediate data collected during redraw (e.g. intermediate datastructures used for display purpose)
+    virtual void resetIntermediateVariableData() = 0;
+    /// resets all display related data (e.g. a chart)
     virtual void resetVariableDisplay() = 0;
+    /// called before updating from the variables
     virtual void preUpdateVariableDataEvent() = 0;
-    virtual void postUpdateVariableDataEvent() = 0;
-    virtual bool updateVariableDisplay() = 0;
+    /// creates view data from the chosen variables (only needs override if the data is not updated on a per dbcontent-basis)
     virtual void updateFromVariables();
-    virtual void updateFromAnnotations() {}
+    /// creates view data from the chosen variables for a specific dbcontent and its respective buffer
     virtual void updateVariableData(const std::string& dbcontent_name, Buffer& buffer) {}
+    /// creates view data from annotations collected in View
+    virtual void updateFromAnnotations() {}
+    /// called after updating from the variables
+    virtual void postUpdateVariableDataEvent() = 0;
+    /// updates the display (e.g. by updating a chart showing the data)
+    virtual bool updateVariableDisplay() = 0;
+
+    const VariableView* variableView() const { return variable_view_; }
+    VariableView* variableView() { return variable_view_; }
 
 private:
     void resetVariableStates();

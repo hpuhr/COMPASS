@@ -17,6 +17,8 @@
 
 #include "eval/results/extra/track.h"
 
+#include "eval/results/base/featuredefinitions.h"
+
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
@@ -203,32 +205,11 @@ void SingleExtraTrack::addAnnotationForDetail(nlohmann::json& annotations_json,
 
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationPos(annotations_json, detail.position(0), AnnotationType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.position(0), AnnotationArrayType::TypeHighlight);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
-    }
-}
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SingleExtraTrack::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SingleExtraTrack::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    if (layer == requirement_->name())
-    {
-        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleExtraTrack::DetailKey::Extra, true, false);
+        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError);
     }
 }
 
@@ -307,6 +288,23 @@ std::vector<Joined::SectorInfo> JoinedExtraTrack::sectorInfos() const
     return { { "#Check." , "Number of checked test track updates", num_extra_ + num_ok_ },
              { "#OK."    , "Number of OK test track updates"     , num_ok_              },
              { "#Extra"  , "Number of extra test track updates"  , num_extra_           } };
+}
+
+/**
+*/
+FeatureDefinitions JoinedExtraTrack::getCustomAnnotationDefinitions() const
+{
+    FeatureDefinitions defs;
+
+    // return AnnotationDefinitions().addBinaryGrid("", 
+    //                                              requirement_->name(), 
+    //                                              DetailValueSource(SingleExtraTrack::DetailKey::Extra),
+    //                                              GridAddDetailMode::AddEvtPosition,
+    //                                              true,
+    //                                              Qt::green,
+    //                                              Qt::red);
+
+    return defs;
 }
 
 }

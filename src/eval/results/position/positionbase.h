@@ -121,9 +121,6 @@ public:
                                   unsigned int num_failed);
     virtual ~SinglePositionProbabilityBase() = default;
 
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override final;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override final;
-
 protected:
     boost::optional<double> computeFinalResultValue() const override final;
 
@@ -158,9 +155,6 @@ public:
                        unsigned int num_passed,
                        unsigned int num_failed);
     virtual ~SinglePositionValueBase() = default;
-    
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override final;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override final;
 
     QVariant resultValue(double value) const override final;
 
@@ -197,6 +191,9 @@ protected:
     boost::optional<double> common_computeResult() const;
     virtual boost::optional<double> computeFinalResultValue() const = 0;
 
+    FeatureDefinitions common_getCustomAnnotationDefinitions(const Joined& joined,
+                                                             const EvaluationManager& eval_man) const;
+
 private:
     std::string csv_header_;
 };
@@ -224,6 +221,8 @@ protected:
 
     virtual bool exportAsCSV(std::ofstream& strm) const override;
     virtual bool canExportCSV() const override { return true; }
+
+    virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };
 
 /**
@@ -250,6 +249,8 @@ protected:
 
     virtual bool exportAsCSV(std::ofstream& strm) const override;
     virtual bool canExportCSV() const override { return true; }
+
+    virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };
 
 }

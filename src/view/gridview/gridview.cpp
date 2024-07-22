@@ -19,6 +19,8 @@
 #include "gridviewdatawidget.h"
 #include "gridviewwidget.h"
 
+#include "viewpointgenerator.h"
+
 #include "dbcontent.h"
 
 #include "compass.h"
@@ -241,4 +243,14 @@ void GridView::setColorMax(const QColor& color, bool notify_changes)
 
     if (notify_changes)
         notifyRefreshNeeded();
+}
+
+/**
+ */
+std::set<std::string> GridView::acceptedAnnotationFeatureTypes() const
+{
+    std::set<std::string> types;
+    types.insert(ViewPointGenFeatureGrid::FeatureName);
+
+    return types;
 }

@@ -274,28 +274,26 @@ namespace
         return mapBounds(chart, roi_value, true);
     }
 
-    void printRect(const std::string& name, const QRectF& r)
-    {
-        loginf << name << ": (" << r.x() << "," << r.y() << ") " << r.width() << "x" << r.height();
-    }
+    // void printRect(const std::string& name, const QRectF& r)
+    // {
+    //     loginf << name << ": (" << r.x() << "," << r.y() << ") " << r.width() << "x" << r.height();
+    // }
 
-    void printRect(const std::string& name, const QRect& r)
-    {
-        loginf << name << ": (" << r.x() << "," << r.y() << ") " << r.width() << "x" << r.height();
-    }
+    // void printRect(const std::string& name, const QRect& r)
+    // {
+    //     loginf << name << ": (" << r.x() << "," << r.y() << ") " << r.width() << "x" << r.height();
+    // }
 }
 
 /**
  */
 void GridViewChart::paintCustomItems(QPaintEvent* event, QPainter& painter)
 {
-    const Grid2D* grid           = data_widget_->grid();
-    const auto&   grid_bounds    = data_widget_->gridBounds();
-    const auto&   grid_rendering = data_widget_->gridRendering();
+    const auto& grid_bounds    = data_widget_->gridBounds();
+    const auto& grid_rendering = data_widget_->gridRendering();
+    bool        grid_north_up  = data_widget_->gridIsNorthUp();
 
-    auto ppc = data_widget_->getView()->settings().render_pixels_per_cell;
-
-    if (!grid || grid_bounds.isEmpty() || grid_rendering.isNull())
+    if (grid_bounds.isEmpty() || grid_rendering.isNull())
         return;
 
     auto plot_area = chart()->plotArea();
@@ -310,7 +308,15 @@ void GridViewChart::paintCustomItems(QPaintEvent* event, QPainter& painter)
         //printRect("plot area (mapped): ", plot_area_mapped);
         //printRect("grid area (full): ", grid_bounds);
 
-        grid->cropGrid(grid_bounds_cropped, grid_region_cropped, plot_area_mapped, true, ppc);
+        Grid2D::cropGrid(grid_bounds_cropped, 
+                         grid_region_cropped, 
+                         plot_area_mapped, 
+                         grid_bounds,
+                         grid_rendering.width(),
+                         grid_rendering.height(),
+                         grid_north_up,
+                         true, 
+                         1);
 
         //printRect("grid area (cropped): ", grid_bounds_cropped);
         //printRect("image area (cropped): ", grid_region_cropped);

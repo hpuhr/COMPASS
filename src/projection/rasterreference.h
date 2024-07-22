@@ -44,6 +44,16 @@ struct RasterReference
         is_north_up      = srs_is_north_up;
     }
 
+    QRectF getROI(int w, int h) const
+    {
+        double roi_w = w * img_pixel_size_x;
+        double roi_h = h * img_pixel_size_y;
+        double roi_x = img_origin_x;
+        double roi_y = is_north_up ? img_origin_y - roi_h : img_origin_y;
+
+        return QRectF(roi_x, roi_y, roi_w, roi_h);
+    }
+
     std::vector<double> geoTransform(int offsx = 0, int offsy = 0) const
     {
         const double dy = is_north_up ? -img_pixel_size_y : img_pixel_size_y;

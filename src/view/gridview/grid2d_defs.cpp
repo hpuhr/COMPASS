@@ -26,6 +26,8 @@
 namespace grid2d
 {
 
+const double GridResolution::DefaultBorderFactor = 0.01; //1 % border by default
+
 /**
 */
 GridResolution& GridResolution::setCellCount(size_t nx,
@@ -81,7 +83,7 @@ bool GridResolution::valid() const
 /**
 */
 QRectF GridResolution::addBorder(const QRectF& roi,
-                                 double border,
+                                 const boost::optional<double>& border,
                                  const boost::optional<double>& xmin,
                                  const boost::optional<double>& xmax,
                                  const boost::optional<double>& ymin,
@@ -90,14 +92,16 @@ QRectF GridResolution::addBorder(const QRectF& roi,
     if (roi.isEmpty())
         return QRectF();
 
-    if (border <= 0.0)
+    double b = border.has_value() ? border.value() : DefaultBorderFactor;
+
+    if (b <= 0.0)
         return roi;
 
     double w = roi.width();
     double h = roi.height();
 
-    double x_border = w * border * 0.5;
-    double y_border = h * border * 0.5;
+    double x_border = w * b * 0.5;
+    double y_border = h * b * 0.5;
 
     double roi_x_min = std::max(xmin.has_value() ? xmin.value() : std::numeric_limits<double>::min(), roi.left()   - x_border);
     double roi_x_max = std::min(xmax.has_value() ? xmax.value() : std::numeric_limits<double>::max(), roi.right()  + x_border);

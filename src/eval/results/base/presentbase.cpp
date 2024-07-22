@@ -16,6 +16,7 @@
  */
 
 #include "eval/results/base/presentbase.h"
+#include "eval/results/base/featuredefinitions.h"
 
 namespace EvaluationRequirementResult
 {
@@ -227,32 +228,11 @@ void SinglePresentBase::addAnnotationForDetail(nlohmann::json& annotations_json,
 
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationPos(annotations_json, detail.position(0), AnnotationType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.position(0), AnnotationArrayType::TypeHighlight);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
-    }
-}
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SinglePresentBase::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SinglePresentBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    if (layer == requirement_->name())
-    {
-        addValuesToGridBinary(grid, DetailKey::IsNotOk, true);
+        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError);
     }
 }
 
@@ -351,6 +331,23 @@ std::vector<Joined::SectorInfo> JoinedPresentBase::sectorInfos() const
              { nrvn + " [1]"    , "Number of updates without reference code" , num_no_ref_val_ },
              { "#Present [1]"   , "Number of updates with present tst code"  , num_present_    },
              { "#Missing [1]"   , "Number of updates with missing tst code"  , num_missing_    } };
+}
+
+/**
+*/
+FeatureDefinitions JoinedPresentBase::getCustomAnnotationDefinitions() const
+{
+    FeatureDefinitions defs;
+
+    // return AnnotationDefinitions().addBinaryGrid("", 
+    //                                              requirement_->name(), 
+    //                                              DetailValueSource(SinglePresentBase::DetailKey::IsNotOk),
+    //                                              GridAddDetailMode::AddEvtRefPosition,
+    //                                              true,
+    //                                              Qt::green,
+    //                                              Qt::red);
+
+    return defs;
 }
 
 }

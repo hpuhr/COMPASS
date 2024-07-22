@@ -17,6 +17,8 @@
 
 #include "eval/results/dubious/dubioustarget.h"
 
+#include "eval/results/base/featuredefinitions.h"
+
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
@@ -178,12 +180,19 @@ std::vector<QVariant> SingleDubiousTarget::detailValues(const EvaluationDetail& 
 
 /**
 */
-bool SingleDubiousTarget::detailIsOk(const EvaluationDetail& detail) const
+bool SingleDubiousTarget::detailIsOkStatic(const EvaluationDetail& detail)
 {
     auto comments = detail.comments().group(DetailCommentGroupDubious);
     bool is_dub   = (comments.has_value() && !comments->empty());
 
     return !is_dub;
+}
+
+/**
+*/
+bool SingleDubiousTarget::detailIsOk(const EvaluationDetail& detail) const
+{
+    return SingleDubiousTarget::detailIsOkStatic(detail);
 }
 
 /**
@@ -197,51 +206,11 @@ void SingleDubiousTarget::addAnnotationForDetail(nlohmann::json& annotations_jso
 
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationPos(annotations_json, detail.position(0), AnnotationType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.position(0), AnnotationArrayType::TypeHighlight);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
-    }
-}
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SingleDubiousTarget::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SingleDubiousTarget::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    assert(numDetails() > 0);
-    const auto& detail = getDetail(0);
-
-    if (!detail.hasDetails())
-        return;
-
-    const auto& details = detail.details();
-
-    if (layer == requirement_->name())
-    {
-        if (detail.hasDetails())
-        {
-            auto is_ok = [ & ] (size_t idx)
-            {
-                auto comments = details[ idx ].comments().group(DetailCommentGroupDubious);
-                bool is_dub = (comments.has_value() && !comments->empty());
-
-                return !is_dub;
-            };
-        
-            addValuesToGridBinary(grid, details, is_ok, false);
-        }
+        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError);
     }
 }
 
@@ -386,6 +355,30 @@ std::vector<Joined::SectorInfo> JoinedDubiousTarget::sectorInfos() const
     infos.push_back({"Duration Ratio Non-Dubious [%]", "Duration ratio of non-dubious targets", p_nondub_t_var});
 
     return infos;
+}
+
+/**
+*/
+FeatureDefinitions JoinedDubiousTarget::getCustomAnnotationDefinitions() const
+{
+    FeatureDefinitions defs;
+
+    //dubious state to binary value
+    // auto getValue = [ = ] (const EvaluationDetail& detail)
+    // {
+    //     bool ok = SingleDubiousTarget::detailIsOkStatic(detail);
+    //     return ok ? 1.0 : 0.0;
+    // };
+
+    // return AnnotationDefinitions().addBinaryGrid("", 
+    //                                              requirement_->name(),
+    //                                              DetailValueSource(getValue),
+    //                                              GridAddDetailMode::AddEvtPosition,
+    //                                              false,
+    //                                              Qt::green,
+    //                                              Qt::red);
+
+    return defs;
 }
 
 }

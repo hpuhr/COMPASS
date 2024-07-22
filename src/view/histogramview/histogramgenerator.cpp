@@ -52,7 +52,7 @@ void HistogramGenerator::Results::toRaw(RawHistogramCollection& collection,
         if (add_null)
             h.addBin(RawHistogramBin(r.null_count, NullString));
 
-        collection.addLayer(h, name, color);
+        collection.addDataSeries(h, name, color);
     }
 
     if (add_selected)
@@ -72,7 +72,7 @@ void HistogramGenerator::Results::toRaw(RawHistogramCollection& collection,
         if (add_null)
             h.addBin(RawHistogramBin(null_selected_count, NullString));
 
-        collection.addLayer(h, name, color);
+        collection.addDataSeries(h, name, color);
     }
 }
 

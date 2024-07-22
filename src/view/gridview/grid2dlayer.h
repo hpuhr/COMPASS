@@ -31,15 +31,30 @@
 class ColorMap;
 
 /**
+ * A grid layer obtained from a Grid2D.
 */
 struct Grid2DLayer
 {
-    boost::optional<std::pair<double, double>> range() const; 
+    bool hasData() const;
+    bool hasFlags() const;
 
-    std::string                   name;
-    Eigen::MatrixXd               data;
-    Eigen::MatrixXi               flags;
-    RasterReference               ref;
+    boost::optional<std::pair<double, double>> range() const;
+
+    nlohmann::json toJSON(bool binary = false) const;
+    bool fromJSON(const nlohmann::json& obj);
+
+    static const std::string TagName;
+    static const std::string TagNumCellsX;
+    static const std::string TagNumCellsY;
+    static const std::string TagData;
+    static const std::string TagDataRaw;
+    static const std::string TagFlags;
+    static const std::string TagRef;
+
+    std::string     name;  // layer name
+    Eigen::MatrixXd data;  // grid data
+    Eigen::MatrixXi flags; // data flags
+    RasterReference ref;   // geo-reference
 };
 
 /**
@@ -47,8 +62,9 @@ struct Grid2DLayer
 class Grid2DLayers
 {
 public:
-    typedef std::unique_ptr<Grid2DLayer>    LayerPtr;
-    typedef std::map<std::string, LayerPtr> Layers;
+    typedef std::unique_ptr<Grid2DLayer>               LayerPtr;
+    typedef std::vector<LayerPtr>                      Layers;
+    typedef std::map<std::string, std::vector<size_t>> LayerMap;
 
     Grid2DLayers();
     virtual ~Grid2DLayers();
@@ -60,11 +76,21 @@ public:
                   const Eigen::MatrixXi& flags);
     void addLayer(LayerPtr&& layer);
 
+    size_t numLayers() const;
     const Layers& layers() const;
+    const Grid2DLayer& layer(size_t idx) const;
     const Grid2DLayer& layer(const std::string& name) const;
+    std::vector<const Grid2DLayer*> layers(const std::string& name) const;
+    bool hasLayer(const std::string& name) const;
+
+    nlohmann::json toJSON(bool binary = false) const;
+    bool fromJSON(const nlohmann::json& obj);
+
+    static const std::string TagLayers;
 
 private:
-    Layers layers_;
+    Layers   layers_;
+    LayerMap layer_map_;
 };
 
 /**
@@ -75,6 +101,9 @@ struct Grid2DRenderSettings
     boost::optional<double> min_value;
     boost::optional<double> max_value;
     int                     pixels_per_cell = 1;
+
+    nlohmann::json toJSON() const;
+    bool fromJSON(const nlohmann::json& obj);
 
     bool show_selected = true;
 };

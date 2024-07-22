@@ -20,7 +20,6 @@
 #include "histogramview.h"
 #include "compass.h"
 #include "buffer.h"
-//#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
@@ -30,48 +29,9 @@
 #include "evaluationmanager.h"
 #include "histogramgenerator.h"
 #include "histogramgeneratorbuffer.h"
-#include "histogramgeneratorresults.h"
 #include "viewvariable.h"
 #include "property_templates.h"
 #include "viewpointgenerator.h"
-
-//#include "eval/results/extra/datasingle.h"
-//#include "eval/results/extra/datajoined.h"
-//#include "eval/results/extra/tracksingle.h"
-//#include "eval/results/extra/trackjoined.h"
-
-//#include "eval/results/dubious/dubioustracksingle.h"
-//#include "eval/results/dubious/dubioustrackjoined.h"
-//#include "eval/results/dubious/dubioustargetsingle.h"
-//#include "eval/results/dubious/dubioustargetjoined.h"
-
-//#include "eval/results/detection/joined.h"
-//#include "eval/results/detection/single.h"
-//#include "eval/results/position/distancejoined.h"
-//#include "eval/results/position/distancesingle.h"
-//#include "eval/results/position/alongsingle.h"
-//#include "eval/results/position/alongjoined.h"
-//#include "eval/results/position/acrosssingle.h"
-//#include "eval/results/position/acrossjoined.h"
-//#include "eval/results/position/latencysingle.h"
-//#include "eval/results/position/latencyjoined.h"
-
-//#include "eval/results/speed/speedjoined.h"
-//#include "eval/results/speed/speedsingle.h"
-
-//#include "eval/results/identification/correctsingle.h"
-//#include "eval/results/identification/correctjoined.h"
-//#include "eval/results/identification/falsesingle.h"
-//#include "eval/results/identification/falsejoined.h"
-
-//#include "eval/results/mode_a/presentsingle.h"
-//#include "eval/results/mode_a/presentjoined.h"
-//#include "eval/results/mode_a/falsesingle.h"
-//#include "eval/results/mode_a/falsejoined.h"
-//#include "eval/results/mode_c/presentsingle.h"
-//#include "eval/results/mode_c/presentjoined.h"
-//#include "eval/results/mode_c/falsesingle.h"
-//#include "eval/results/mode_c/falsejoined.h"
 
 #include <QHBoxLayout>
 #include <QMessageBox>
@@ -92,8 +52,6 @@
 #include <algorithm>
 
 QT_CHARTS_USE_NAMESPACE
-
-#define USE_NEW_SHIT
 
 using namespace EvaluationRequirementResult;
 using namespace std;
@@ -133,6 +91,7 @@ void HistogramViewDataWidget::resetHistogram()
     histogram_raw_.clear();
 
     x_axis_name_ = "";
+    title_       = "";
 }
 
 /**
@@ -148,7 +107,13 @@ void HistogramViewDataWidget::updateDataEvent(bool requires_reset)
 void HistogramViewDataWidget::resetVariableData()
 {
     resetHistogram();
+}
 
+/**
+ */
+void HistogramViewDataWidget::resetIntermediateVariableData()
+{
+    resetHistogram();
 }
 
 /**
@@ -185,18 +150,15 @@ void HistogramViewDataWidget::updateFromAnnotations()
 {
     loginf << "HistogramViewDataWidget: updateFromAnnotations";
 
-    resetHistogram();
-
     if (!view_->hasCurrentAnnotation())
         return;
 
-    x_axis_name_ = view_->currentAnnotationID();
-
     const auto& anno = view_->currentAnnotation();
-    if (anno.size() == 0)
-        return;
 
-    const auto& feature = anno[ 0 ];
+    title_       = anno.metadata.title_;
+    x_axis_name_ = anno.metadata.xAxisLabel();
+
+    const auto& feature = anno.feature_json;
 
     if (!feature.is_object() || !feature.contains(ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram))
         return;
@@ -217,13 +179,12 @@ void HistogramViewDataWidget::updateFromVariables()
 {
     loginf << "HistogramViewDataWidget: updateVariableData";
 
-    resetHistogram();
-
     assert(view_->numVariables() == 1);
     assert(view_->variable(0).hasVariable());
 
     auto& variable = view_->variable(0);
 
+    title_       = "";
     x_axis_name_ = variable.description();
 
     if (viewData().empty())
@@ -333,6 +294,7 @@ bool HistogramViewDataWidget::updateChart()
     QChart* chart = new QChart();
     chart->setBackgroundRoundness(0);
     chart->layout()->setContentsMargins(0, 0, 0, 0);
+    chart->setTitle(QString::fromStdString(title_));
 
     bool use_log_scale = view_->useLogScale();
 
@@ -405,18 +367,18 @@ bool HistogramViewDataWidget::updateChart()
 
         //generate a bar set for each DBContent
 
-        for (const auto& layer : histogram_raw_.layers())
+        for (const auto& data_series : histogram_raw_.dataSeries())
         {
-            const auto& histogram = layer.histogram;
+            const auto& histogram = data_series.histogram;
 
-            const QString bar_legend_name = QString::fromStdString(layer.name);
+            const QString bar_legend_name = QString::fromStdString(data_series.name);
 
             QBarSet* set = new QBarSet(bar_legend_name);
 
             for (const auto& bin : histogram.getBins())
                 addCount(set, bin.count);
             
-            set->setColor(layer.color);
+            set->setColor(data_series.color);
             chart_series->append(set);
         }
 

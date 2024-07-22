@@ -63,7 +63,7 @@ public:
         Highlight
     };
     
-    enum AnnotationType
+    enum class AnnotationArrayType
     {
         TypeOk = 0,
         TypeError,
@@ -78,9 +78,6 @@ public:
     };
 
     typedef Info TargetInfo;
-
-    typedef std::function<bool(const EvaluationDetail&)> DetailSkipFunc;
-    typedef std::function<void(const EvaluationDetail&, const EvaluationDetail*, int, int)> DetailFunc;
 
     Single(const std::string& type, 
            const std::string& result_id,
@@ -121,15 +118,11 @@ public:
 
     void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
 
-    std::vector<double> getValues(const DetailValueSource& source) const override final;
-    std::vector<Eigen::Vector3d> getValuesPlusPos(const DetailValueSource& source, 
-                                                  DetailValuePositionMode detail_pos_mode = DetailValuePositionMode::EventPosition,
-                                                  std::vector<std::pair<size_t,size_t>>* detail_ranges = nullptr) const override final;
+    void iterateDetails(const DetailFunc& func,
+                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
+
     /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
-
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const = 0;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const = 0;
 
     const static std::string tr_details_table_name_;
     const static std::string target_table_name_;
@@ -152,6 +145,7 @@ protected:
     std::string getTargetRequirementSectionID();
 
     virtual std::string getRequirementSectionID () const override;
+    virtual std::string getRequirementAnnotationID_impl() const override;
 
     /*report contents related*/
 
@@ -193,9 +187,6 @@ protected:
     virtual DetailNestingMode detailNestingMode() const { return DetailNestingMode::Vector; } 
 
     boost::optional<DetailIndex> detailIndex(const QVariant& annotation) const;
-    void iterateDetails(const DetailFunc& func,
-                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const;
-    size_t totalNumDetails() const;
 
     /*viewable + annotation related*/
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
@@ -213,9 +204,10 @@ protected:
                                         TargetAnnotationType type,
                                         bool is_ok) const = 0;
     /// returns the index of the event position (where the event occurs)
+    /// first position is default
     virtual int eventPositionIndex() const { return 0; }
-    /// returns the index of the event reference position (e.g. the position the event is measured against, a ref trajectory, the interval begin, etc.)
-    /// -1 means the last position
+    /// returns the index of the event reference position (the position the event is measured against, e.g. a ref trajectory position, the interval begin, etc.)
+    /// -1 means the last position (default)
     virtual int eventRefPositionIndex() const { return -1; }
 
     void createTargetAnnotations(nlohmann::json& annotations_json,
@@ -225,33 +217,23 @@ protected:
     
     void addAnnotationPos(nlohmann::json& annotations_json,
                           const EvaluationDetail::Position& pos, 
-                          AnnotationType type) const;
+                          AnnotationArrayType type) const;
     void addAnnotationLine(nlohmann::json& annotations_json,
                            const EvaluationDetail::Position& pos0, 
                            const EvaluationDetail::Position& pos1,
-                           AnnotationType type) const;
+                           AnnotationArrayType type) const;
     void addAnnotationDistance(nlohmann::json& annotations_json,
                                const EvaluationDetail& detail,
-                               AnnotationType type,
+                               AnnotationArrayType type,
                                bool add_line = true,
                                bool add_ref = true) const;
 
     /// creates if not existing
-    nlohmann::json& annotationPointCoords(nlohmann::json& annotations_json, AnnotationType type, bool overview=false) const;
-    nlohmann::json& annotationLineCoords(nlohmann::json& annotations_json, AnnotationType type, bool overview=false) const;
-    nlohmann::json& getOrCreateAnnotation(nlohmann::json& annotations_json, AnnotationType type, bool overview) const;
-    
-    void addValuesToGridBinary(Grid2D& grid, 
-                               int detail_key, 
-                               bool invert = false, 
-                               bool use_ref_pos = true) const;
-    void addValuesToGridBinary(Grid2D& grid, 
-                               const EvaluationDetails& details, 
-                               const std::function<bool(size_t)>& is_ok, 
-                               bool use_ref_pos = true) const;
-    LayerDefinition getGridLayerDefBinary() const;
+    nlohmann::json& annotationPointCoords(nlohmann::json& annotations_json, AnnotationArrayType type, bool overview = false) const;
+    nlohmann::json& annotationLineCoords(nlohmann::json& annotations_json, AnnotationArrayType type, bool overview = false) const;
+    nlohmann::json& getOrCreateAnnotation(nlohmann::json& annotations_json, AnnotationArrayType type, bool overview) const;
 
-    std::map<AnnotationType, std::string> annotation_type_names_;
+    std::map<AnnotationArrayType, std::string> annotation_type_names_;
 
     unsigned int                utn_;    // used to generate result
     const EvaluationTargetData* target_; // used to generate result

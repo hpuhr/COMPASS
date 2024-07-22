@@ -27,6 +27,7 @@
 #include "scatterplotviewwidget.h"
 #include "logger.h"
 #include "latexvisitor.h"
+#include "viewpointgenerator.h"
 
 #include <QApplication>
 
@@ -237,4 +238,14 @@ void ScatterPlotView::viewInfoJSON_impl(nlohmann::json& info) const
     VariableView::viewInfoJSON_impl(info);
 
     info[ ParamUseConnectionLines ] = settings_.use_connection_lines;
+}
+
+/**
+ */
+std::set<std::string> ScatterPlotView::acceptedAnnotationFeatureTypes() const
+{
+    std::set<std::string> types;
+    types.insert(ViewPointGenFeatureScatterSeries::FeatureName);
+
+    return types;
 }
