@@ -23,6 +23,8 @@
 #include "view/points/viewpointgenerator.h"
 #include "view/scatterplotview/scatterseries.h"
 
+#include "dbcontent/dbcontent.h"
+
 #include "evaluationmanager.h"
 
 namespace EvaluationRequirementResult
@@ -216,7 +218,7 @@ public:
     FeatureDefinitionTimedScatterSeries(const EvaluationManager& eval_manager,
                                         const std::string& feature_description,
                                         const std::string& y_axis_label) 
-    :   FeatureDefinition(eval_manager, feature_description, "Time [s]", y_axis_label) {}
+    :   FeatureDefinition(eval_manager, feature_description, DBContent::meta_var_timestamp_.name(), y_axis_label) {}
 
     virtual ~FeatureDefinitionTimedScatterSeries() = default;
 

@@ -446,11 +446,9 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
     //we obtain valid data if a data range is available and if the variables are available in the buffer data
     bool has_data = (scatter_series_.numDataSeries() > 0 && variablesOk());
 
-    //!take care: this functional will assert if it is called when no series has yet been added to the chart!
+    //!take care: this functional may assert if it is called when no series has yet been added to the chart!
     auto createAxes = [ & ] ()
     {
-        //chart->createDefaultAxes();
-
         bool dynamic_labels = false;
 
         const std::pair<QString, bool> DateTimeFormatDefault = { "hh:mm:ss", false };
@@ -543,11 +541,8 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
         createAxis(1, y_axis_name_, y_axis_is_datetime_, Qt::AlignLeft);
 
-        std::cout << "Axes horz: " << chart->axes(Qt::Horizontal).size() << std::endl;
-        std::cout << "Axes vert: " << chart->axes(Qt::Vertical).size() << std::endl;
-
-        //assert (chart->axes(Qt::Horizontal).size() == 1);
-        //assert (chart->axes(Qt::Vertical).size() == 1);
+        assert (chart->axes(Qt::Horizontal).size() == 1);
+        assert (chart->axes(Qt::Vertical).size() == 1);
     };
 
     if (has_data)
