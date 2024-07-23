@@ -103,6 +103,32 @@ struct PosValue
 };
 
 /**
+ * Time plus value.
+*/
+template <typename T>
+struct TimedValue
+{
+    TimedValue() = default;
+    TimedValue(const boost::posix_time::ptime& t, const T& v) : timestamp(t), value(v) {}
+
+    boost::posix_time::ptime timestamp;
+    T                        value;
+};
+
+/**
+ * Time in seconds plus value.
+*/
+template <typename T>
+struct SecTimedValue
+{
+    SecTimedValue() = default;
+    SecTimedValue(double tsecs, const T& v) : t_secs(tsecs), value(v) {}
+
+    double t_secs;
+    T      value;
+};
+
+/**
  * Collection of templated data retrieval functions for an evaluation result.
 */
 class EvaluationResultTemplates
@@ -177,6 +203,60 @@ public:
         result_->iterateDetails(func);
 
         values.shrink_to_fit();
+
+        return values;
+    }
+
+    /**
+     * Obtains values plus their timestamp from all details using the passed value source.
+     * The values will be casted to T, which might fail.
+    */
+    template <typename T>
+    std::vector<TimedValue<T>> getTimedValues(const ValueSource<T>& source) const
+    {
+        assert(source.isValid());
+
+        std::vector<TimedValue<T>> values;
+        values.reserve(result_->totalNumDetails());
+
+        auto func = [ & ] (const EvaluationDetail& detail, 
+                           const EvaluationDetail* parent_detail, 
+                           int didx0, 
+                           int didx1,
+                           int evt_pos_idx, 
+                           int evt_ref_pos_idx)
+        {
+            //get detail value from source
+            auto v = source.valueFromDetail(detail);
+
+            //value might not be set => skip
+            if (!v.has_value())
+                return;
+
+            //collect converted value
+            values.emplace_back(detail.timestamp(), v.value());
+        };
+
+        result_->iterateDetails(func);
+
+        values.shrink_to_fit();
+
+        return values;
+    }
+
+    template <typename T>
+    std::vector<SecTimedValue<T>> getSecTimedValues(const ValueSource<T>& source) const
+    {
+        auto tvalues = getTimedValues<T>(source);
+
+        std::sort(tvalues.begin(), tvalues.end(), [ & ] (const TimedValue<T>& v0, const TimedValue<T>& v1) { return v0.timestamp < v1.timestamp; });
+
+        size_t n = tvalues.size();
+
+        std::vector<SecTimedValue<T>> values(n);
+
+        for (size_t i = 0; i < n; ++i)
+            values[ i ] = SecTimedValue<T>((double)Utils::Time::toLong(tvalues[ i ].timestamp), tvalues[ i ].value);
 
         return values;
     }

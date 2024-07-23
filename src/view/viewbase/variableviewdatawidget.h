@@ -18,9 +18,12 @@
 #pragma once
 
 #include "viewdatawidget.h"
+#include "property.h"
 
 #include <map>
 #include <vector>
+
+#include <boost/optional.hpp>
 
 class ViewWidget;
 class VariableView;
@@ -51,6 +54,9 @@ public:
     VariableState variableState(int var_idx) const;
     bool variableOk(int var_idx) const;
     bool variablesOk() const;
+
+    boost::optional<PropertyDataType> variableDataType(int var_idx) const;
+    bool variableIsDateTime(int var_idx) const;
 
 protected:
     virtual void loadingStarted_impl() override final;

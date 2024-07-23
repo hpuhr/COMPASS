@@ -307,6 +307,24 @@ bool VariableViewDataWidget::variablesOk() const
 }
 
 /**
+*/
+boost::optional<PropertyDataType> VariableViewDataWidget::variableDataType(int var_idx) const
+{
+    if (!variable_view_->variable(var_idx).hasVariable())
+        return {};
+
+    return variable_view_->variable(var_idx).dataType();
+}
+
+/**
+*/
+bool VariableViewDataWidget::variableIsDateTime(int var_idx) const
+{
+    auto dtype = variableDataType(var_idx);
+    return (dtype.has_value() ? dtype.value() == PropertyDataType::TIMESTAMP : false);
+}
+
+/**
  * Default behavior:
  *  - check if variables are part of dbcontent via canUpdate()
  *  - if yes trigger updateVariableData()

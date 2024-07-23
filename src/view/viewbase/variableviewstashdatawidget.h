@@ -113,9 +113,16 @@ inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(Nu
             continue;
         }
 
+        //to utc msecs since epoch
         long t = Utils::Time::toLong(data.get(cnt));
+
+        //fix timestamp for display in QDateTimeAxis (as UTC)
+        //https://stackoverflow.com/questions/45326462/bad-values-in-qdatetimeaxis-qtcharts
+        auto temp_time       = QDateTime::fromMSecsSinceEpoch(t);
+        auto local_offset    = (long)temp_time.offsetFromUtc() * 1000; //offset in msecs
+        auto fixed_timestamp = t - local_offset;
             
-        target.push_back(t);
+        target.push_back(fixed_timestamp);
     }
 }
 

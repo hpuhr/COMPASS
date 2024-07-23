@@ -29,6 +29,7 @@ class Buffer;
 namespace QtCharts 
 {
     class QChart;
+    class QAbstractAxis;
     class ScatterPlotViewChartView;
 }
 
@@ -89,9 +90,12 @@ protected:
     void viewInfoJSON_impl(nlohmann::json& info) const override;
 
 private:
+    void updateDateTimeInfoFromVariables();
     bool updateChart();
     void updateDataSeries(QtCharts::QChart* chart);
     void resetSeries();
+
+    void setAxisRange(QtCharts::QAbstractAxis* axis, double vmin, double vmax);
 
     ScatterPlotView*           view_       {nullptr};
     ScatterPlotViewDataSource* data_source_{nullptr};
@@ -105,4 +109,7 @@ private:
     std::string             x_axis_name_;
     std::string             y_axis_name_;
     std::string             title_;
+
+    bool x_axis_is_datetime_ = false;
+    bool y_axis_is_datetime_ = false;
 };

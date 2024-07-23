@@ -29,12 +29,20 @@
 */
 struct ScatterSeries
 {
+    enum DataType
+    {
+        DataTypeFloatingPoint = 0,  // general floating point values
+        DataTypeTimestamp           // timestamp as ms since epoch
+    };
+
     typedef std::vector<Eigen::Vector2d> Points;
 
     bool fromJSON(const nlohmann::json& data, bool binary);
     nlohmann::json toJSON(bool binary) const;
 
     std::vector<Eigen::Vector2d> points;
+    DataType                     data_type_x = DataTypeFloatingPoint;
+    DataType                     data_type_y = DataTypeFloatingPoint;
 };
 
 /**
@@ -46,6 +54,7 @@ public:
     struct DataSeries
     {
         ScatterSeries scatter_series;
+        
         std::string   name;
         QColor        color;
         double        marker_size;
@@ -65,12 +74,17 @@ public:
 
     const std::vector<DataSeries>& dataSeries() const;
 
+    ScatterSeries::DataType commonDataTypeX() const;
+    ScatterSeries::DataType commonDataTypeY() const; 
+
     bool fromJSON(const nlohmann::json& data);
     nlohmann::json toJSON(bool binary = false) const;
 
     static const std::string TagDataSeries;
     static const std::string TagData;
     static const std::string TagDataRaw;
+    static const std::string TagDataTypeX;
+    static const std::string TagDataTypeY;
     static const std::string TagName;
     static const std::string TagColor;
     static const std::string TagMarkerSize;

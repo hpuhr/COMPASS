@@ -205,4 +205,85 @@ private:
     std::vector<ScatterDataSeries> data_series_;
 };
 
+/**
+ * Scatter series feature definition.
+*/
+class FeatureDefinitionTimedScatterSeries : public FeatureDefinition
+{
+public:
+    typedef FeatureDefinitionDataSeries<double> ScatterDataSeries;
+
+    FeatureDefinitionTimedScatterSeries(const EvaluationManager& eval_manager,
+                                        const std::string& feature_description,
+                                        const std::string& y_axis_label) 
+    :   FeatureDefinition(eval_manager, feature_description, "Time [s]", y_axis_label) {}
+
+    virtual ~FeatureDefinitionTimedScatterSeries() = default;
+
+    /**
+    */
+    FeatureDefinitionTimedScatterSeries& addDataSeries(const std::string& name, 
+                                                       const ValueSource<double>& value_source, 
+                                                       const QColor& color = DataSeriesColorDefault)
+    {
+        ScatterDataSeries ds;
+        ds.series_name         = name;
+        ds.series_color        = color;
+        ds.series_value_source = value_source;
+
+        data_series_.push_back(ds);
+        
+        return *this;
+    }
+
+    /**
+    */
+    bool isValid() const override final
+    {
+        //check if all data series are valid
+        for (const auto& ds : data_series_)
+            if (!ds.isValid())
+                return false;
+
+        return true;
+    }
+
+    /**
+    */
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final
+    {
+        assert(isValid());
+
+        ScatterSeriesCollection collection;
+
+        //handle data series
+        size_t n = data_series_.size();
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            const auto& data_series = data_series_[ i ];
+
+            auto values = data_series.getSecTimedValues(result);
+
+            ScatterSeries series;
+            series.points.reserve(n);
+            series.data_type_x = ScatterSeries::DataTypeTimestamp;
+
+            for (const auto& v : values)
+                series.points.emplace_back(v.t_secs, v.value);
+
+            series.points.shrink_to_fit();
+
+            collection.addDataSeries(series, data_series.series_name, data_series.series_color);
+        }
+
+        auto feat = new ViewPointGenFeatureScatterSeries(collection);
+
+        return std::unique_ptr<ViewPointGenFeature>(feat);
+    }
+
+private:
+    std::vector<ScatterDataSeries> data_series_;
+};
+
 }

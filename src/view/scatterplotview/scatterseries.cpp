@@ -130,6 +130,8 @@ nlohmann::json ScatterSeries::toJSON(bool binary) const
 const std::string ScatterSeriesCollection::TagDataSeries = "dataseries";
 const std::string ScatterSeriesCollection::TagData       = "data";
 const std::string ScatterSeriesCollection::TagDataRaw    = "data_raw";
+const std::string ScatterSeriesCollection::TagDataTypeX  = "data_type_x";
+const std::string ScatterSeriesCollection::TagDataTypeY  = "data_type_y";
 const std::string ScatterSeriesCollection::TagName       = "name";
 const std::string ScatterSeriesCollection::TagColor      = "color";
 const std::string ScatterSeriesCollection::TagMarkerSize = "marker_size";
@@ -164,9 +166,9 @@ void ScatterSeriesCollection::addDataSeries(const ScatterSeries& scatter_series,
                                             double marker_size)
 {
     DataSeries series;
+    series.scatter_series = scatter_series;
     series.name           = name;
     series.color          = color;
-    series.scatter_series = scatter_series;
     series.marker_size    = marker_size;
 
     data_series_.push_back(series);
@@ -184,6 +186,38 @@ size_t ScatterSeriesCollection::numDataSeries() const
 const std::vector<ScatterSeriesCollection::DataSeries>& ScatterSeriesCollection::dataSeries() const
 {
     return data_series_;
+}
+
+/**
+*/
+ScatterSeries::DataType ScatterSeriesCollection::commonDataTypeX() const
+{
+    if (data_series_.empty())
+        return ScatterSeries::DataTypeFloatingPoint;
+
+    ScatterSeries::DataType data_type = data_series_[ 0 ].scatter_series.data_type_x;
+
+    for (size_t i = 1; i < data_series_.size(); ++i)
+        if (data_series_[ i ].scatter_series.data_type_x != data_type)
+            return ScatterSeries::DataTypeFloatingPoint;
+
+    return data_type;
+}
+
+/**
+*/
+ScatterSeries::DataType ScatterSeriesCollection::commonDataTypeY() const
+{
+    if (data_series_.empty())
+        return ScatterSeries::DataTypeFloatingPoint;
+
+    ScatterSeries::DataType data_type = data_series_[ 0 ].scatter_series.data_type_y;
+
+    for (size_t i = 1; i < data_series_.size(); ++i)
+        if (data_series_[ i ].scatter_series.data_type_y != data_type)
+            return ScatterSeries::DataTypeFloatingPoint;
+
+    return data_type;
 }
 
 /**
@@ -210,6 +244,12 @@ bool ScatterSeriesCollection::fromJSON(const nlohmann::json& data)
 
         if (!dseries.scatter_series.fromJSON(js[ read_raw ? TagDataRaw : TagData ], read_raw))
             return false;
+
+        if (js.contains(TagDataTypeX))
+            dseries.scatter_series.data_type_x = js[ TagDataTypeX ];
+
+        if (js.contains(TagDataTypeY))
+            dseries.scatter_series.data_type_y = js[ TagDataTypeY ];
 
         if (js.contains(TagName))
             dseries.name = js[ TagName ];
@@ -242,6 +282,8 @@ nlohmann::json ScatterSeriesCollection::toJSON(bool binary) const
 
         js[ binary ? TagDataRaw : TagData ] = dseries.scatter_series.toJSON(binary);
 
+        js[ TagDataTypeX  ] = dseries.scatter_series.data_type_x;
+        js[ TagDataTypeY  ] = dseries.scatter_series.data_type_y;
         js[ TagName       ] = dseries.name;
         js[ TagColor      ] = dseries.color.name().toStdString();
         js[ TagMarkerSize ] = dseries.marker_size;

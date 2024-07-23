@@ -59,6 +59,8 @@ public:
     bool hasVariable() const;
     bool isMetaVariable() const;
 
+    PropertyDataType dataType() const;
+
     dbContent::Variable& variable();
     const dbContent::Variable& variable() const;
     dbContent::Variable* variablePtr();

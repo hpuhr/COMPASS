@@ -40,6 +40,7 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QLegend>
 #include <QtCharts/QValueAxis>
+#include <QtCharts/QDateTimeAxis>
 #include <QGraphicsLayout>
 #include <QShortcut>
 #include <QApplication>
@@ -72,6 +73,7 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view
     x_axis_name_ = view_->variable(0).description();
     y_axis_name_ = view_->variable(1).description();
 
+    updateDateTimeInfoFromVariables();
     updateChart();
 }
 
@@ -91,6 +93,9 @@ void ScatterPlotViewDataWidget::resetSeries()
     x_axis_name_ = "";
     y_axis_name_ = "";
     title_       = "";
+
+    x_axis_is_datetime_ = false;
+    y_axis_is_datetime_ = false;
 }
 
 /**
@@ -131,6 +136,14 @@ bool ScatterPlotViewDataWidget::updateVariableDisplay()
 void ScatterPlotViewDataWidget::resetStashDependentData()
 {
     resetSeries();
+}
+
+/**
+*/
+void ScatterPlotViewDataWidget::updateDateTimeInfoFromVariables()
+{
+    x_axis_is_datetime_ = variableIsDateTime(0);
+    y_axis_is_datetime_ = variableIsDateTime(1);
 }
 
 /**
@@ -189,6 +202,8 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
     y_axis_name_ = view_->variable(1).description();
     title_       = "";
 
+    updateDateTimeInfoFromVariables();
+
     loginf << "ScatterPlotViewDataWidget: processStash: done, generated " << scatter_series_.numDataSeries() << " series";
 }
 
@@ -217,6 +232,9 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
         scatter_series_.clear();
         return;
     }
+
+    x_axis_is_datetime_ = scatter_series_.commonDataTypeX();
+    y_axis_is_datetime_ = scatter_series_.commonDataTypeY();
 
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
 }
@@ -271,8 +289,8 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
 
             if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
             {
-                chart_view_->chart()->axisX()->setRange(min(p1.x(), p2.x()), max(p1.x(), p2.x()));
-                chart_view_->chart()->axisY()->setRange(min(p1.y(), p2.y()), max(p1.y(), p2.y()));
+                setAxisRange(chart_view_->chart()->axisX(), min(p1.x(), p2.x()), max(p1.x(), p2.x()));
+                setAxisRange(chart_view_->chart()->axisY(), min(p1.y(), p2.y()), max(p1.y(), p2.y()));
             }
         }
         else if (selected_tool_ == SP_SELECT_TOOL)
@@ -282,8 +300,10 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
             selectData(min(p1.x(), p2.x()), max(p1.x(), p2.x()), min(p1.y(), p2.y()), max(p1.y(), p2.y()), 0, 1);
         }
         else
+        {
             throw std::runtime_error("ScatterPlotViewDataWidget: rectangleSelectedSlot: unknown tool "
                                      +to_string((unsigned int)selected_tool_));
+        }
     }
 
     endTool();
@@ -332,23 +352,39 @@ void ScatterPlotViewDataWidget::clearSelectionSlot()
 
 /**
 */
+void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, double vmax)
+{
+    assert(axis);
+
+    //handle datetime axis
+    auto axis_dt = dynamic_cast<QDateTimeAxis*>(axis);
+    if (axis_dt)
+    {
+        axis_dt->setMin(QDateTime::fromMSecsSinceEpoch(vmin));
+        axis_dt->setMax(QDateTime::fromMSecsSinceEpoch(vmax));
+
+        return;
+    }
+
+    //default range
+    axis->setRange(vmin, vmax);
+}
+
+/**
+*/
 void ScatterPlotViewDataWidget::resetZoomSlot()
 {
     loginf << "ScatterPlotViewDataWidget: resetZoomSlot";
 
     if (chart_view_ && chart_view_->chart())
     {
-        //chart_view_->chart()->createDefaultAxes();
-
         if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
         {
             auto bounds = getDataBounds();
 
-            chart_view_->chart()->axisX()->setRange(bounds.left(), bounds.right());
-            chart_view_->chart()->axisY()->setRange(bounds.top(), bounds.bottom());
+            setAxisRange(chart_view_->chart()->axisX(), bounds.left(), bounds.right() );
+            setAxisRange(chart_view_->chart()->axisY(), bounds.top() , bounds.bottom());
         }
-
-        //chart_->zoomReset();
     }
 }
 
@@ -413,17 +449,105 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
     //!take care: this functional will assert if it is called when no series has yet been added to the chart!
     auto createAxes = [ & ] ()
     {
-        chart->createDefaultAxes();
+        //chart->createDefaultAxes();
+
+        bool dynamic_labels = false;
+
+        const std::pair<QString, bool> DateTimeFormatDefault = { "hh:mm:ss", false };
+
+        auto dateTimeFormatFromSeries = [ & ] (int axis_id)
+        {
+            if (dynamic_labels)
+            {
+                boost::optional<qreal> tmin, tmax;
+                for (auto s : chart->series())
+                {
+                    auto scatter_series = dynamic_cast<QScatterSeries*>(s);
+                    if (!scatter_series)
+                        continue;
+
+                    for (const auto& pos : scatter_series->points())
+                    {
+                        qreal v = axis_id == 0 ? pos.x() : pos.y();
+                        if (!tmin.has_value() || v < tmin.value()) tmin = v;
+                        if (!tmax.has_value() || v > tmax.value()) tmax = v;
+                    }
+                }
+
+                if (!tmin.has_value() || !tmax.has_value())
+                    return std::pair<QString, bool>("yyyy-MM-dd hh:mm:ss", true);
+
+                auto date_time0 = QDateTime::fromMSecsSinceEpoch(tmin.value());
+                auto date_time1 = QDateTime::fromMSecsSinceEpoch(tmax.value());
+
+                bool needs_year  = date_time0.date().year()  != date_time1.date().year();
+                bool needs_month = date_time0.date().month() != date_time1.date().month();
+                bool needs_day   = date_time0.date().day()   != date_time1.date().day();
+
+                if (needs_year)
+                    return std::pair<QString, bool>("yyyy-MM-dd hh:mm:ss", true);
+                if (needs_month)
+                    return std::pair<QString, bool>("MMM dd hh:mm:ss", true);
+                if (needs_day)
+                    return std::pair<QString, bool>("ddd hh:mm:ss", false);
+
+                return std::pair<QString, bool>("hh:mm:ss", false);
+            }
+            else
+            {
+                return DateTimeFormatDefault;
+            }
+        };
+
+        auto genDateTimeAxis = [ & ] (const std::string& title, int axis_id)
+        {
+            auto format = dateTimeFormatFromSeries(axis_id);
+
+            auto axis = new QDateTimeAxis;
+            axis->setFormat(format.first);
+            axis->setTitleText(QString::fromStdString(title));
+            axis->setLabelsAngle(format.second ? -90 : 0);
+
+            return dynamic_cast<QAbstractAxis*>(axis);
+        };
+
+        auto genValueAxis = [ & ] (const std::string& title)
+        {
+            auto axis = new QValueAxis;
+            axis->setTitleText(QString::fromStdString(title));
+
+            return dynamic_cast<QAbstractAxis*>(axis);
+        };
+
+        auto createAxis = [ & ] (int axis_id,
+                                 const std::string& title,
+                                 bool is_date_time,
+                                 Qt::Alignment alignment)
+        {
+            QAbstractAxis* axis = is_date_time ? genDateTimeAxis(title, axis_id) : genValueAxis(title);
+            assert (axis);
+
+            chart->addAxis(axis, alignment);
+
+            for (auto series : chart->series())
+                series->attachAxis(axis);
+        };
 
         //config x axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title x '" << view_->variable(0).description() << "'";
-        assert (chart->axes(Qt::Horizontal).size() == 1);
-        chart->axes(Qt::Horizontal).at(0)->setTitleText(x_axis_name_.c_str());
+        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title x '" << view_->variable(0).description() << "' is_datetime " << x_axis_is_datetime_;
+
+        createAxis(0, x_axis_name_, x_axis_is_datetime_, Qt::AlignBottom);
 
         //config y axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title y '" << view_->variable(1).description() << "'";
-        assert (chart->axes(Qt::Vertical).size() == 1);
-        chart->axes(Qt::Vertical).at(0)->setTitleText(y_axis_name_.c_str());
+        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title y '" << view_->variable(1).description() << "' is_datetime " << y_axis_is_datetime_;
+
+        createAxis(1, y_axis_name_, y_axis_is_datetime_, Qt::AlignLeft);
+
+        std::cout << "Axes horz: " << chart->axes(Qt::Horizontal).size() << std::endl;
+        std::cout << "Axes vert: " << chart->axes(Qt::Vertical).size() << std::endl;
+
+        //assert (chart->axes(Qt::Horizontal).size() == 1);
+        //assert (chart->axes(Qt::Vertical).size() == 1);
     };
 
     if (has_data)

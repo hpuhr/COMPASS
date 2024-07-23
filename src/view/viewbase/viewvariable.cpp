@@ -96,6 +96,18 @@ bool ViewVariable::isMetaVariable () const
 
 /**
  */
+PropertyDataType ViewVariable::dataType() const
+{
+    assert (hasVariable());
+
+    if (isMetaVariable())
+        return metaVariable().dataType();
+
+    return variable().dataType();
+}
+
+/**
+ */
 dbContent::Variable& ViewVariable::variable()
 {
     assert (hasVariable());

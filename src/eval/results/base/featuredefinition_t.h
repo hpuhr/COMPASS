@@ -56,6 +56,24 @@ struct FeatureDefinitionDataSeries
     }
 
     /**
+     * Get series values + time.
+    */
+    std::vector<TimedValue<T>> getTimedValues(const Base* base) const
+    {
+        assert(isValid());
+        return EvaluationResultTemplates(base).getTimedValues<T>(series_value_source);
+    }
+
+    /**
+     * Get series values + time in seconds.
+    */
+    std::vector<SecTimedValue<T>> getSecTimedValues(const Base* base) const
+    {
+        assert(isValid());
+        return EvaluationResultTemplates(base).getSecTimedValues<T>(series_value_source);
+    }
+
+    /**
      * Get series values + positions.
     */
     std::vector<PosValue<T>> getValuesPlusPosition(const Base* base,
