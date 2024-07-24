@@ -442,13 +442,15 @@ public:
     void setSymbolColor(const QColor& color);
 
     void addFeature(std::unique_ptr<ViewPointGenFeature>&& feat);
+    void addFeature(ViewPointGenFeature* feat);
 
-    template<class T, typename... Arguments>
-    T* addFeature(Arguments... args)
+    template <class T, typename... Targs>
+    T* addFeature(Targs&&... args)
     {
-        T* ptr = new T(args...);
-        features_.push_back(std::unique_ptr<T>(ptr));
-        return ptr;
+        T* feat = new T(std::forward<Targs>(args)...);
+        features_.push_back(std::unique_ptr<T>(feat));
+
+        return feat;
     }
 
     ViewPointGenAnnotation* addAnnotation(const std::string& name, bool hidden = false);
