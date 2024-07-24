@@ -262,10 +262,10 @@ QRectF EvaluationDetail::bounds(double eps) const
     if (n == 0)
         return QRectF();
 
-    double lat_min =  DBL_MAX;
-    double lon_min =  DBL_MAX;
-    double lat_max = -DBL_MAX;
-    double lon_max = -DBL_MAX;
+    double lat_min =  std::numeric_limits<double>::max();
+    double lon_min =  std::numeric_limits<double>::max();
+    double lat_max =  std::numeric_limits<double>::min();
+    double lon_max =  std::numeric_limits<double>::min();
 
     for (size_t i = 0; i < n; ++i)
     {
