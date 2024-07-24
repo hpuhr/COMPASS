@@ -711,6 +711,13 @@ void ViewPointGenAnnotation::addFeature(std::unique_ptr<ViewPointGenFeature>&& f
 
 /**
 */
+void ViewPointGenAnnotation::addFeature(ViewPointGenFeature* feat)
+{
+    features_.emplace_back(feat);
+}
+
+/**
+*/
 ViewPointGenAnnotation* ViewPointGenAnnotation::addAnnotation(const std::string& name, bool hidden)
 {
     annotations_.emplace_back(new ViewPointGenAnnotation(name, hidden));
