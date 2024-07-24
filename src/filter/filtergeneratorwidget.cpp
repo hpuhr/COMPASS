@@ -267,6 +267,9 @@ void FilterGeneratorWidget::accept()
         ConditionTemplate& data_condition = data_conditions_.at(cnt);
         std::string condition_name = filter_name + "Condition" + std::to_string(cnt);
 
+        loginf << "FilterGeneratorWidget: accept: creating condition with operator '"
+               << data_condition.operator_ << "'";
+
         Configuration& condition_configuration = configuration->addNewSubConfiguration("DBFilterCondition", condition_name);
         condition_configuration.addParameter<std::string>("operator", data_condition.operator_);
         condition_configuration.addParameter<std::string>("variable_name", data_condition.variable_name_);

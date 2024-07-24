@@ -267,6 +267,7 @@ class ReconstructorTarget
     size_t trackerCount() const;
     boost::posix_time::ptime trackerTime(size_t idx) const;
     bool canPredict(boost::posix_time::ptime timestamp) const;
+    bool predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const;
     bool predict(reconstruction::Measurement& mm, 
                  const dbContent::targetReport::ReconstructorInfo& tr, 
                  int thread_id = 0,

@@ -130,6 +130,7 @@ public:
     bool needsReestimate() const;
     bool reestimate(UpdateStats* stats = nullptr);
 
+    bool predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const;
     bool canPredict(const boost::posix_time::ptime& ts) const;
     bool predict(Measurement& mm_predicted,
                  const boost::posix_time::ptime& ts,

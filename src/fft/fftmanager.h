@@ -52,7 +52,7 @@ public:
     bool hasDBFFT(const std::string& name);
     DBFFT& dbFFT(const std::string& name);
     bool canAddNewFFTFromConfig (const std::string& name);
-    void addNewFFT (const std::string& name); // be sure not to call from different thread
+    void addNewFFT (const std::string& name, bool emit_signal=true); // be sure not to call from different thread
     void addNewFFT (const std::string& name, nlohmann::json info, bool emit_signal);
     const std::vector<std::unique_ptr<DBFFT>>& dbFFTs() const;
 

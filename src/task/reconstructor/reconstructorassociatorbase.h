@@ -42,6 +42,10 @@ class ReconstructorAssociatorBase
 
     unsigned int num_merges_ {0};
 
+    boost::posix_time::time_duration time_assoc_trs_;
+    boost::posix_time::time_duration time_assoc_new_utns_;
+    boost::posix_time::time_duration time_retry_assoc_trs_;
+
     void associateTargetReports();
     void associateTargetReports(std::set<unsigned int> dbcont_ids);
 
