@@ -69,6 +69,7 @@ public:
     virtual void accept(LatexVisitor& v) override;
 
     virtual bool canShowAnnotations() const override final { return true; }
+    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const override;
 
     const Settings& settings() const { return settings_; }
 
@@ -82,8 +83,6 @@ protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) override;
-
-    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const override;
 
     GridViewDataWidget* getDataWidget();
 

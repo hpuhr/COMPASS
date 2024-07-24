@@ -67,6 +67,7 @@ public:
     virtual void accept(LatexVisitor& v) override;
 
     virtual bool canShowAnnotations() const override final { return true; }
+    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const override;
 
     bool useConnectionLines();
     void useConnectionLines(bool value);
@@ -86,8 +87,6 @@ protected:
 
     virtual void unshowViewPoint(const ViewableDataConfig* vp) override;
     virtual void showViewPoint(const ViewableDataConfig* vp) override;
-
-    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const override;
 
     ScatterPlotViewDataWidget* getDataWidget();
 

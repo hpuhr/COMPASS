@@ -93,13 +93,11 @@ nlohmann::json Grid2DLayer::toJSON(bool binary) const
 
     if (binary)
     {
-        size_t n = data.cols() * data.rows();
-
         //write data binary
         QByteArray ba;
 
         //add array
-        ba.append((const char*)data.data(), n * sizeof(double));
+        ba.append((const char*)data.data(), data.size() * sizeof(double));
 
         //code base 64
         QString byte_str(ba.toBase64());
@@ -169,7 +167,7 @@ bool Grid2DLayer::fromJSON(const nlohmann::json& obj)
 
         const double* data_raw = (const double*)(ba.data());
 
-        memcpy(data.data(), data_raw, data.cols() * data.rows() * sizeof(double));
+        memcpy(data.data(), data_raw, data.size() * sizeof(double));
     }
     else
     {

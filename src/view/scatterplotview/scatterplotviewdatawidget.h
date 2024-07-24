@@ -94,7 +94,7 @@ private:
     bool updateChart();
     void updateDataSeries(QtCharts::QChart* chart);
     void resetSeries();
-
+    void correctSeriesDateTime(ScatterSeriesCollection& collection);
     void setAxisRange(QtCharts::QAbstractAxis* axis, double vmin, double vmax);
 
     ScatterPlotView*           view_       {nullptr};

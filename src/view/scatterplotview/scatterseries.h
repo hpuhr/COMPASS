@@ -73,6 +73,7 @@ public:
     size_t numDataSeries() const;
 
     const std::vector<DataSeries>& dataSeries() const;
+    std::vector<DataSeries>& dataSeries();
 
     ScatterSeries::DataType commonDataTypeX() const;
     ScatterSeries::DataType commonDataTypeY() const; 

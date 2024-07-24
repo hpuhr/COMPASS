@@ -97,8 +97,6 @@ protected:
 
     virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) = 0;
 
-    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const { return {}; }
-
     virtual void unshowViewPoint(const ViewableDataConfig* vp) {}
     virtual void showViewPoint(const ViewableDataConfig* vp) {}
 

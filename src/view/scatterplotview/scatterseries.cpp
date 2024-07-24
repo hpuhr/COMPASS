@@ -16,6 +16,8 @@
 
 #include "scatterseries.h"
 
+#include "timeconv.h"
+
 /*******************************************************************************************
  * ScatterSeries
  *******************************************************************************************/
@@ -37,16 +39,17 @@ bool ScatterSeries::fromJSON(const nlohmann::json& data, bool binary)
         QByteArray ba_base64(str.data(), str.size());
         QByteArray ba = QByteArray::fromBase64(ba_base64);
 
-        unsigned int* n    = (unsigned int*)(ba.data());
-        const double* data = (const double*)(ba.data() + sizeof(unsigned int));
+        unsigned int* n        = (unsigned int*)(ba.data());
+        const double* data     = (const double*)(ba.data() + sizeof(unsigned int));
+        unsigned int  n_points = *n;
 
-        unsigned int n_points = *n;
+        Eigen::MatrixXd points_mat(n_points, 2);
+        memcpy(points_mat.data(), data, points_mat.size() * sizeof(double));
 
-        points.resize(*n);
+        points.resize(n_points);
 
-        size_t cnt = 0;
-        for (unsigned int i = 0; i < n_points; ++i, cnt += 2)
-            points[ i ] = Eigen::Vector2d(data[ cnt ], data[ cnt + 1 ]);
+        for (unsigned int i = 0; i < n_points; ++i)
+            points[ i ] = Eigen::Vector2d(points_mat(i, 0), points_mat(i, 1));
     }
     else
     {
@@ -81,24 +84,22 @@ nlohmann::json ScatterSeries::toJSON(bool binary) const
     if (binary)
     {
         //write binary
-        unsigned int n      = points.size();
-        unsigned int n_flat = 2 * n;
+        unsigned int n = points.size();
 
         QByteArray ba;
 
         //add size
         ba.append((const char*)&n, sizeof(unsigned int));
 
-        std::vector<double> points_flat(n_flat);
-        size_t cnt = 0;
-        for (unsigned int i = 0; i < n; ++i, cnt += 2)
+        Eigen::MatrixXd points_mat(n, 2);
+        for (unsigned int i = 0; i < n; ++i)
         {
-            points_flat[ cnt     ] = points[ i ].x();
-            points_flat[ cnt + 1 ] = points[ i ].y();
+            points_mat(i, 0) = points[ i ].x();
+            points_mat(i, 1) = points[ i ].y();
         }
         
-        //add array
-        ba.append((const char*)points_flat.data(), n_flat * sizeof(double));
+        //add points
+        ba.append((const char*)points_mat.data(), points_mat.size() * sizeof(double));
 
         //code base 64
         QString byte_str(ba.toBase64());
@@ -184,6 +185,13 @@ size_t ScatterSeriesCollection::numDataSeries() const
 /**
 */
 const std::vector<ScatterSeriesCollection::DataSeries>& ScatterSeriesCollection::dataSeries() const
+{
+    return data_series_;
+}
+
+/**
+*/
+std::vector<ScatterSeriesCollection::DataSeries>& ScatterSeriesCollection::dataSeries()
 {
     return data_series_;
 }

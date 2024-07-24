@@ -31,6 +31,8 @@
 #include "logger.h"
 #include "property_templates.h"
 
+#include "tbbhack.h"
+
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QTabWidget>
@@ -148,6 +150,27 @@ void ScatterPlotViewDataWidget::updateDateTimeInfoFromVariables()
 
 /**
 */
+void ScatterPlotViewDataWidget::correctSeriesDateTime(ScatterSeriesCollection& collection)
+{
+    if (!x_axis_is_datetime_ && !y_axis_is_datetime_)
+        return;
+
+    loginf << "correcting datetime...";
+
+    for (auto& s : collection.dataSeries())
+    {
+        for (auto& pos : s.scatter_series.points)
+        {
+            if (x_axis_is_datetime_) pos[ 0 ] = Utils::Time::correctLongQtUTC((long)pos[ 0 ]);
+            if (y_axis_is_datetime_) pos[ 1 ] = Utils::Time::correctLongQtUTC((long)pos[ 1 ]);
+        }
+    }
+
+    loginf << "corrected datetime!";
+}
+
+/**
+*/
 void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& stash)
 {
     loginf << "ScatterPlotViewDataWidget: processStash: "
@@ -203,6 +226,7 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
     title_       = "";
 
     updateDateTimeInfoFromVariables();
+    correctSeriesDateTime(scatter_series_);
 
     loginf << "ScatterPlotViewDataWidget: processStash: done, generated " << scatter_series_.numDataSeries() << " series";
 }
@@ -233,8 +257,10 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
         return;
     }
 
-    x_axis_is_datetime_ = scatter_series_.commonDataTypeX();
-    y_axis_is_datetime_ = scatter_series_.commonDataTypeY();
+    x_axis_is_datetime_ = scatter_series_.commonDataTypeX() == ScatterSeries::DataTypeTimestamp;
+    y_axis_is_datetime_ = scatter_series_.commonDataTypeY() == ScatterSeries::DataTypeTimestamp;
+
+    correctSeriesDateTime(scatter_series_);
 
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
 }
@@ -613,12 +639,15 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
             for (const auto& pos : ds.scatter_series.points)
             {
-                chart_symbol_series->append(pos.x(), pos.y());
+                double x = pos.x();
+                double y = pos.y();
+
+                chart_symbol_series->append(x, y);
 
                 if (use_connection_lines)
                 {
                     assert (chart_line_series);
-                    chart_line_series->append(pos.x(), pos.y());
+                    chart_line_series->append(x, y);
                 }
             }
 

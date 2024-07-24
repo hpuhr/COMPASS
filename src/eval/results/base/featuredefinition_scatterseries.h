@@ -265,14 +265,14 @@ public:
         {
             const auto& data_series = data_series_[ i ];
 
-            auto values = data_series.getSecTimedValues(result);
+            auto values = data_series.getMSecTimedValues(result);
 
             ScatterSeries series;
             series.points.reserve(n);
             series.data_type_x = ScatterSeries::DataTypeTimestamp;
 
             for (const auto& v : values)
-                series.points.emplace_back(v.t_secs, v.value);
+                series.points.emplace_back(v.t_msecs, v.value);
 
             series.points.shrink_to_fit();
 

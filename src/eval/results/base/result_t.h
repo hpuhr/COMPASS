@@ -119,12 +119,12 @@ struct TimedValue
  * Time in seconds plus value.
 */
 template <typename T>
-struct SecTimedValue
+struct MSecTimedValue
 {
-    SecTimedValue() = default;
-    SecTimedValue(double tsecs, const T& v) : t_secs(tsecs), value(v) {}
+    MSecTimedValue() = default;
+    MSecTimedValue(double time_msecs, const T& v) : t_msecs(time_msecs), value(v) {}
 
-    double t_secs;
+    double t_msecs;
     T      value;
 };
 
@@ -245,7 +245,7 @@ public:
     }
 
     template <typename T>
-    std::vector<SecTimedValue<T>> getSecTimedValues(const ValueSource<T>& source) const
+    std::vector<MSecTimedValue<T>> getMSecTimedValues(const ValueSource<T>& source) const
     {
         auto tvalues = getTimedValues<T>(source);
 
@@ -253,10 +253,10 @@ public:
 
         size_t n = tvalues.size();
 
-        std::vector<SecTimedValue<T>> values(n);
+        std::vector<MSecTimedValue<T>> values(n);
 
         for (size_t i = 0; i < n; ++i)
-            values[ i ] = SecTimedValue<T>((double)Utils::Time::toLong(tvalues[ i ].timestamp), tvalues[ i ].value);
+            values[ i ] = MSecTimedValue<T>((double)Utils::Time::toLong(tvalues[ i ].timestamp), tvalues[ i ].value);
 
         return values;
     }
