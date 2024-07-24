@@ -17,6 +17,8 @@
 
 #include "eval/results/extra/data.h"
 
+#include "eval/results/base/featuredefinitions.h"
+
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
@@ -202,32 +204,11 @@ void SingleExtraData::addAnnotationForDetail(nlohmann::json& annotations_json,
 
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationPos(annotations_json, detail.position(0), AnnotationType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.position(0), AnnotationArrayType::TypeHighlight);
     }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationType::TypeOk : AnnotationType::TypeError);
-    }
-}
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SingleExtraData::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SingleExtraData::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    if (layer == requirement_->name())
-    {
-        addValuesToGridBinary(grid, EvaluationRequirementResult::SingleExtraData::DetailKey::Extra, true, false);
+        addAnnotationPos(annotations_json, detail.position(0), is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError);
     }
 }
 
@@ -300,6 +281,23 @@ std::vector<Joined::SectorInfo> JoinedExtraData::sectorInfos() const
     return { { "#Check." , "Number of checked test updates", num_extra_ + num_ok_ },
              { "#OK."    , "Number of OK test updates"     , num_ok_              },
              { "#Extra"  , "Number of extra test updates"  , num_extra_           } };
+}
+
+/**
+*/
+FeatureDefinitions JoinedExtraData::getCustomAnnotationDefinitions() const
+{
+    FeatureDefinitions defs;
+
+    // return AnnotationDefinitions().addBinaryGrid("", 
+    //                                              requirement_->name(), 
+    //                                              DetailValueSource(SingleExtraData::DetailKey::Extra),
+    //                                              GridAddDetailMode::AddEvtPosition,
+    //                                              true,
+    //                                              Qt::green,
+    //                                              Qt::red);
+
+    return defs;
 }
 
 }

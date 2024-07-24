@@ -16,18 +16,26 @@
  */
 
 #include "eval/results/base/base.h"
-#include "eval/requirement/base/base.h"
+#include "eval/results/base/result_t.h"
+#include "eval/results/base/featuredefinition.h"
 
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "eval/results/report/section_id.h"
 
+#include "eval/requirement/base/base.h"
+
 #include "sectorlayer.h"
 //#include "logger.h"
 #include "evaluationmanager.h"
 
 #include "viewpoint.h"
+#include "viewpointgenerator.h"
+#include "histograminitializer.h"
+#include "grid2d_defs.h"
+#include "grid2d.h"
+#include "grid2dlayer.h"
 
 #include <sstream>
 #include <cassert>
@@ -38,6 +46,8 @@ namespace EvaluationRequirementResult
 {
 
 const std::string Base::req_overview_table_name_ {"Results Overview"};
+
+const QColor Base::HistogramColorDefault = QColor(0, 0, 255);
 
 /**
 */
@@ -177,7 +187,7 @@ QVariant Base::resultValueOptional(const boost::optional<double>& value) const
 */
 QVariant Base::resultValue(double value) const
 {
-    return value;
+    return requirement_->getResultValueString(value).c_str();
 }
 
 /**
@@ -237,6 +247,13 @@ std::string Base::getRequirementSectionID() const
 std::string Base::getRequirementSumSectionID() const
 {
     return EvaluationResultsReport::SectionID::requirementResultSumID(*this);
+}
+
+/**
+*/
+std::string Base::getRequirementAnnotationID() const
+{
+    return "Evaluation:" + getRequirementAnnotationID_impl();
 }
 
 /**
@@ -354,9 +371,23 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
 
     //init annotation array
     (*viewable_ptr)[ViewPoint::VP_ANNOTATION_KEY] = nlohmann::json::array();
+    auto& vp_anno_array = (*viewable_ptr)[ViewPoint::VP_ANNOTATION_KEY];
+
+    //add root annotation and retrieve its annotation array
+    std::string root_anno_name = getRequirementAnnotationID();
+    assert(!root_anno_name.empty());
+
+    ViewPointGenAnnotation root_anno(root_anno_name);
+
+    nlohmann::json root_anno_json;
+    root_anno.toJSON(root_anno_json);
+
+    vp_anno_array.push_back(root_anno_json);
+
+    auto& result_anno_array = ViewPointGenAnnotation::getChildrenJSON(vp_anno_array.at(0));
 
     //add annotations
-    createAnnotations((*viewable_ptr)[ViewPoint::VP_ANNOTATION_KEY], options);
+    createAnnotations(result_anno_array, options);
 
     return viewable_ptr;
 }
@@ -366,6 +397,125 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
 QString Base::formatValue(double v, int precision) const
 {
     return QString::fromStdString(Utils::String::doubleToStringPrecision(v, precision));
+}
+
+/**
+*/
+FeatureDefinitions Base::getCustomAnnotationDefinitions() const
+{
+    //by default return empty definitions => no custom annotations will be generated
+    return FeatureDefinitions();
+}
+
+/**
+ * Called by Single and Joined to add custom annotations to the viewable.
+*/
+void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
+{
+    assert(annotations_json.is_array());
+
+    //get custom annotations
+    auto defs = getCustomAnnotationDefinitions();
+
+    std::string group_name = getRequirementAnnotationID();
+
+    for (const auto& value_defs : defs.definitions())
+    {
+        loginf << "Base: addCustomAnnotations: Adding annotation for value '" << value_defs.first << "'";
+
+        //create annotation for value features
+        ViewPointGenAnnotation value_annotation(value_defs.first);
+
+        for (const auto& def : value_defs.second)
+        {
+            //create feature and add to annotation
+            auto f = def->createFeature(this);
+            assert(f);
+
+            loginf << "Base: addCustomAnnotations: Adding feature '" << f->name() << "'";
+
+            PlotMetadata metadata;
+            metadata.plot_group_   = group_name;
+            metadata.title_        = value_defs.first;
+            metadata.subtitle_     = def->featureDescription();
+            metadata.x_axis_label_ = def->xAxisLabel();
+            metadata.y_axis_label_ = def->yAxisLabel();
+
+            f->setPlotMetadata(metadata);
+            f->writeBinaryIfPossible(true);
+
+            ViewPointGenAnnotation* feat_annotation = new ViewPointGenAnnotation(def->featureDescription());
+            feat_annotation->addFeature(std::move(f));
+
+            value_annotation.addAnnotation(std::unique_ptr<ViewPointGenAnnotation>(feat_annotation));
+        }
+
+        loginf << "Base: addCustomAnnotations: Added " << value_annotation.numFeatures() << " feature(s) to annotation";
+
+        //convert to json and collect
+        nlohmann::json anno_json;
+        value_annotation.toJSON(anno_json);
+
+        annotations_json.push_back(anno_json);
+    }
+}
+
+/**
+*/
+size_t Base::totalNumDetails() const
+{
+    size_t num_details = 0;
+
+    //scan for estimated max num values
+    auto funcScan = [ & ] (const EvaluationDetail& detail, 
+                            const EvaluationDetail* parent_detail, 
+                            int idx0, 
+                            int idx1,
+                            int evt_pos_idx, 
+                            int evt_ref_pos_idx)
+    {
+        ++num_details;
+    };
+
+    iterateDetails(funcScan);
+
+    return num_details;
+}
+
+/**
+*/
+size_t Base::totalNumPositions() const
+{
+    size_t num_positions = 0;
+
+    //scan for estimated max num values
+    auto funcScan = [ & ] (const EvaluationDetail& detail, 
+                            const EvaluationDetail* parent_detail, 
+                            int idx0, 
+                            int idx1,
+                            int evt_pos_idx, 
+                            int evt_ref_pos_idx)
+    {
+        num_positions += detail.numPositions();
+    };
+
+    iterateDetails(funcScan);
+
+    return num_positions;
+}
+
+/**
+*/
+std::vector<double> Base::getValues(const ValueSource<double>& source) const
+{
+    return EvaluationResultTemplates(this).getValues<double>(source);
+}
+
+/**
+*/
+std::vector<double> Base::getValues(int value_id) const
+{
+    return getValues(ValueSource<double>(value_id));
 }
 
 }

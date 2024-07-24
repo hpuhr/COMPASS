@@ -32,16 +32,15 @@ public:
                           EvaluationManager& eval_man);
     virtual ~ProbabilityBaseConfig() {}
 
-    float prob() const;
-    void prob(float value);
+    double prob() const;
+    void prob(double value);
 
     COMPARISON_TYPE probCheckType() const;
     void probCheckType(const COMPARISON_TYPE& prob_type);
 
 protected:
-    float prob_ {0};
+    double prob_ {0};
     COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EQUAL};
-
 };
 
 } // namespace EvaluationRequirement

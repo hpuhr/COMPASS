@@ -30,7 +30,7 @@ class TrackAngle : public ProbabilityBase
 public:
     TrackAngle(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+            double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
             float threshold, bool use_minimum_speed, float minimum_speed,
             COMPARISON_TYPE threshold_value_check_type,
             bool failed_values_of_interest);

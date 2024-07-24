@@ -17,36 +17,23 @@
 
 #pragma once
 
-//#include "global.h"
-#include "nullablevector.h"
-//#include "dbcontent/variable/variable.h"
-#include "scatterplotviewchartview.h"
-#include "variableviewdatawidget.h"
-#include "util/timeconv.h"
-
-#include <QWidget>
-#include <QVariant>
-
-#include <memory>
-#include <limits>
+#include "variableviewstashdatawidget.h"
+#include "scatterseries.h"
 
 class ScatterPlotView;
 class ScatterPlotViewWidget;
 class ScatterPlotViewDataSource;
 
-//class QTabWidget;
-class QHBoxLayout;
 class Buffer;
-class DBContent;
 
-namespace QtCharts {
+namespace QtCharts 
+{
     class QChart;
-    class QScatterSeries;
-    //class ScatterPlotViewChartView;
-    class QChartView;
-    class QBarCategoryAxis;
-    class QValueAxis;
+    class QAbstractAxis;
+    class ScatterPlotViewChartView;
 }
+
+class QHBoxLayout;
 
 enum ScatterPlotViewDataTool
 {
@@ -59,7 +46,7 @@ enum ScatterPlotViewDataTool
  * @brief Widget with tab containing BufferTableWidgets in ScatterPlotView
  *
  */
-class ScatterPlotViewDataWidget : public VariableViewDataWidget
+class ScatterPlotViewDataWidget : public VariableViewStashDataWidget
 {
     Q_OBJECT
 public:
@@ -74,24 +61,14 @@ public:
 
     QRectF getDataBounds() const;
     QPixmap renderPixmap();
-    unsigned int nullValueCount() const;
 
     static const int ConnectLinesDataCountMax = 100000;
-
-signals:
-//    void showOnlySelectedSignal(bool value);
-//    void usePresentationSignal(bool use_presentation);
-//    void showAssociationsSignal(bool value);
 
 public slots:
     void rectangleSelectedSlot(QPointF p1, QPointF p2);
 
     void invertSelectionSlot();
     void clearSelectionSlot();
-
-//    void showOnlySelectedSlot(bool value);
-//    void usePresentationSlot(bool use_presentation);
-//    void showAssociationsSlot(bool value);
 
     void resetZoomSlot();
 
@@ -103,100 +80,36 @@ protected:
     virtual void toolChanged_impl(int mode) override;
 
     virtual bool postLoadTrigger() override final;
-    virtual void resetVariableData() override final;
     virtual void resetVariableDisplay() override final;
-    virtual void preUpdateVariableDataEvent() override final;
-    virtual void postUpdateVariableDataEvent() override final;
     virtual bool updateVariableDisplay() override final;
-    virtual void updateVariableData(const std::string& dbcontent_name,
-                                    Buffer& buffer) override final;
+    virtual void updateFromAnnotations() override final;
+
+    virtual void processStash(const VariableViewStash<double>& stash) override final;
+    virtual void resetStashDependentData() override final;
 
     void viewInfoJSON_impl(nlohmann::json& info) const override;
 
 private:
-    void resetCounts();
-
-    void updateMinMax();
+    void updateDateTimeInfoFromVariables();
     bool updateChart();
     void updateDataSeries(QtCharts::QChart* chart);
-
-    void selectData (double x_min, double x_max, double y_min, double y_max);
-
-    void updateVariableData(int var_idx, 
-                            std::string dbcontent_name, 
-                            unsigned int current_size);
-
-    template<typename T>
-    void appendData(NullableVector<T>& data, 
-                    std::vector<double>& target, 
-                    unsigned int last_size,
-                    unsigned int current_size)
-    {
-        for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
-        {
-            if (data.isNull(cnt))
-                target.push_back(std::numeric_limits<double>::signaling_NaN());
-            else
-                target.push_back(data.get(cnt));
-        }
-    }
+    void resetSeries();
+    void correctSeriesDateTime(ScatterSeriesCollection& collection);
+    void setAxisRange(QtCharts::QAbstractAxis* axis, double vmin, double vmax);
 
     ScatterPlotView*           view_       {nullptr};
     ScatterPlotViewDataSource* data_source_{nullptr};
-
-    std::map<std::string, unsigned int>               buffer_x_counts_;
-    std::map<std::string, unsigned int>               buffer_y_counts_;
-    std::map<std::string, std::vector<double>>        x_values_;
-    std::map<std::string, std::vector<double>>        y_values_;
-    std::map<std::string, std::vector<bool>>          selected_values_;
-    std::map<std::string, std::vector<unsigned long>> rec_num_values_;
-    std::map<std::string, unsigned int>               dbcont_valid_counts_;
-
-    unsigned int nan_value_cnt_ {0};
-    unsigned int valid_cnt_     {0};
-    unsigned int selected_cnt_  {0};
-
-    bool has_x_min_max_ {false};
-    double x_min_ {0}, x_max_ {0};
-
-    bool has_y_min_max_ {false};
-    double y_min_ {0}, y_max_ {0};
 
     ScatterPlotViewDataTool selected_tool_{SP_NAVIGATE_TOOL};
 
     QHBoxLayout* main_layout_ {nullptr};
     ChartViewPtr chart_view_  {nullptr};
+
+    ScatterSeriesCollection scatter_series_;
+    std::string             x_axis_name_;
+    std::string             y_axis_name_;
+    std::string             title_;
+
+    bool x_axis_is_datetime_ = false;
+    bool y_axis_is_datetime_ = false;
 };
-
-/**
-*/
-template<>
-inline void ScatterPlotViewDataWidget::appendData<boost::posix_time::ptime>(NullableVector<boost::posix_time::ptime>& data, 
-                                                                            std::vector<double>& target, 
-                                                                            unsigned int last_size,
-                                                                            unsigned int current_size)
-{
-    for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
-    {
-        if (data.isNull(cnt))
-        {
-            target.push_back(std::numeric_limits<double>::signaling_NaN());
-            continue;
-        }
-
-        long t = Utils::Time::toLong(data.get(cnt));
-            
-        target.push_back(t);
-    }
-}
-
-/**
-*/
-template<>
-inline void ScatterPlotViewDataWidget::appendData<std::string>(NullableVector<std::string>& data, 
-                                                               std::vector<double>& target, 
-                                                               unsigned int last_size,
-                                                               unsigned int current_size)
-{
-    throw std::runtime_error("ScatterPlotViewDataWidget: appendData: string not supported");
-}

@@ -51,6 +51,8 @@ public:
     void clearResults();
     void addSingleResult(std::shared_ptr<Single> other);
 
+    std::vector<std::shared_ptr<Single>>& singleResults();
+
     void addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
 
     bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
@@ -64,9 +66,8 @@ public:
     std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
 
-    std::vector<double> getValues(int value_id, const boost::optional<int>& check_value_id = boost::optional<int>()) const;
-
-    std::vector<std::shared_ptr<Single>>& singleResults();
+    void iterateDetails(const DetailFunc& func,
+                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
 
     void updateToChanges();
 
@@ -78,14 +79,6 @@ public:
     static const int         SectorOverviewRenderDelayMSec;
 
 protected:
-    enum class OverviewMode
-    {
-        Annotations = 0,
-        Grid,
-        GridPlusAnnotations,
-        GridOrAnnotations
-    };
-
     bool resultUsed(const std::shared_ptr<Single>& result) const;
     void iterateSingleResults(const SingleResultFunc& func,
                               const SingleResultFunc& func_used,
@@ -107,13 +100,12 @@ protected:
     /// implements csv export 
     virtual bool exportAsCSV(std::ofstream& strm) const { return false; }
 
+    virtual std::string getRequirementAnnotationID_impl() const override;
+
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
     ViewableInfo createViewableInfo(const AnnotationOptions& options) const override final;
     void createAnnotations(nlohmann::json& annotations, 
                            const AnnotationOptions& options) const override final;
-
-    //types of overview annotations to create
-    virtual OverviewMode overviewMode() const { return OverviewMode::GridOrAnnotations; }
 
     virtual std::vector<SectorInfo> sectorInfosCommon() const;
     std::vector<SectorInfo> sectorConditionInfos() const;

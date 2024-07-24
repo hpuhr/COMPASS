@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include <QString>
+
 #include <Eigen/Core>
 
 using namespace std;
@@ -41,6 +43,44 @@ float roundToNearest(float num) { return (num > 0.0) ? floor(num + 0.5) : ceil(n
 double round(float num, unsigned int precision)
 {
     return std::round(num * std::pow(10, precision)) / std::pow(10, precision);
+}
+
+unsigned int numDecimals(double v, unsigned int dec_max)
+{
+    auto str = QString::number(v, 'f', dec_max);
+
+    //strange cases => return max dec for safety
+    if (str.isEmpty() || str.count('.') > 1)
+        return dec_max;
+
+    int n   = str.count();
+    int idx = str.lastIndexOf('.');
+
+    //full number
+    if (idx < 0)
+        return 0;
+
+    //strange case => return max dec for safety
+    if (idx == n - 1)
+        return dec_max;
+
+    int idx_end = -1;
+    for (int i = n - 1; i > idx; --i)
+    {
+        if (str[ i ] != '0')
+        {
+            idx_end = i;
+            break;
+        }
+    }
+
+    //only zeros after dec
+    if (idx_end == -1)
+        return 0;
+
+    assert(idx_end >= idx);
+
+    return idx_end - idx;
 }
 
 double calculateAngle(double degrees, double minutes, double seconds)

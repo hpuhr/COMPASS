@@ -19,9 +19,10 @@
 #include "scatterplotviewwidget.h"
 #include "scatterplotview.h"
 #include "viewvariable.h"
-//#include "compass.h"
+#include "viewpointgenerator.h"
+
 #include "buffer.h"
-//#include "dbcontent/dbcontentmanager.h"
+
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
@@ -30,16 +31,18 @@
 #include "logger.h"
 #include "property_templates.h"
 
+#include "tbbhack.h"
+
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QTabWidget>
 #include <QStackedLayout>
 
-//#include <QtCharts/QChartView>
 #include <QtCharts/QScatterSeries>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QLegend>
 #include <QtCharts/QValueAxis>
+#include <QtCharts/QDateTimeAxis>
 #include <QGraphicsLayout>
 #include <QShortcut>
 #include <QApplication>
@@ -56,7 +59,7 @@ using namespace dbContent;
 ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view_widget,
                                                      QWidget* parent,
                                                      Qt::WindowFlags f)
-:   VariableViewDataWidget(view_widget, view_widget->getView(), parent, f)
+:   VariableViewStashDataWidget(view_widget, view_widget->getView(), parent, f)
 {
     view_ = view_widget->getView();
     assert(view_);
@@ -69,6 +72,10 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view
 
     setLayout(main_layout_);
 
+    x_axis_name_ = view_->variable(0).description();
+    y_axis_name_ = view_->variable(1).description();
+
+    updateDateTimeInfoFromVariables();
     updateChart();
 }
 
@@ -77,6 +84,20 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view
 ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
 {
     logdbg << "ScatterPlotViewDataWidget: dtor";
+}
+
+/**
+*/
+void ScatterPlotViewDataWidget::resetSeries()
+{
+    scatter_series_.clear();
+
+    x_axis_name_ = "";
+    y_axis_name_ = "";
+    title_       = "";
+
+    x_axis_is_datetime_ = false;
+    y_axis_is_datetime_ = false;
 }
 
 /**
@@ -100,30 +121,9 @@ bool ScatterPlotViewDataWidget::postLoadTrigger()
 
 /**
 */
-void ScatterPlotViewDataWidget::resetVariableData()
-{
-    resetCounts();
-}
-
-/**
-*/
-void ScatterPlotViewDataWidget::resetVariableDisplay() 
+void ScatterPlotViewDataWidget::resetVariableDisplay()
 {
     chart_view_.reset(nullptr);
-}
-
-/**
-*/
-void ScatterPlotViewDataWidget::preUpdateVariableDataEvent() 
-{
-    resetCounts();
-}
-
-/**
-*/
-void ScatterPlotViewDataWidget::postUpdateVariableDataEvent() 
-{
-    updateMinMax();
 }
 
 /**
@@ -135,127 +135,134 @@ bool ScatterPlotViewDataWidget::updateVariableDisplay()
 
 /**
 */
-void ScatterPlotViewDataWidget::updateVariableData(const std::string& dbcontent_name,
-                                                   Buffer& buffer)
+void ScatterPlotViewDataWidget::resetStashDependentData()
 {
-    loginf << "ScatterPlotViewDataWidget: updateVariableData: updating data";
-
-    logdbg << "ScatterPlotViewDataWidget: updateVariableData: before"
-           << " x " << x_values_[dbcontent_name].size()
-           << " y " << y_values_[dbcontent_name].size();
-
-    unsigned int current_size = buffer.size();
-
-    // add selected flags & rec_nums
-    assert (buffer.has<bool>(DBContent::selected_var.name()));
-    assert (buffer.has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-
-    const NullableVector<bool>&          selected_vec = buffer.get<bool>(DBContent::selected_var.name());
-    const NullableVector<unsigned long>& rec_num_vec  = buffer.get<unsigned long>(DBContent::meta_var_rec_num_.name());
-
-    std::vector<bool>&          selected_data = selected_values_[dbcontent_name];
-    std::vector<unsigned long>& rec_num_data  = rec_num_values_ [dbcontent_name];
-
-    unsigned int last_size = 0;
-
-    if (buffer_x_counts_.count(dbcontent_name))
-        last_size = buffer_x_counts_.at(dbcontent_name);
-
-    for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
-    {
-        if (selected_vec.isNull(cnt))
-            selected_data.push_back(false);
-        else
-            selected_data.push_back(selected_vec.get(cnt));
-
-        assert (!rec_num_vec.isNull(cnt));
-        rec_num_data.push_back(rec_num_vec.get(cnt));
-    }
-
-    //collect data for both variables
-    updateVariableData(0, dbcontent_name, current_size);
-    updateVariableData(1, dbcontent_name, current_size);
-
-    //check counts
-    assert (x_values_[dbcontent_name].size() == y_values_[dbcontent_name].size());
-    assert (x_values_[dbcontent_name].size() == selected_values_[dbcontent_name].size());
-    assert (x_values_[dbcontent_name].size() == rec_num_values_[dbcontent_name].size());
-
-    logdbg << "ScatterPlotViewDataWidget: updateVariableData: after"
-           << " x " << x_values_[dbcontent_name].size()
-           << " y " << y_values_[dbcontent_name].size();
+    resetSeries();
 }
 
 /**
 */
-void ScatterPlotViewDataWidget::updateVariableData(int var_idx, std::string dbcontent_name, unsigned int current_size)
+void ScatterPlotViewDataWidget::updateDateTimeInfoFromVariables()
 {
-    logdbg << "ScatterPlotViewDataWidget: updateVariableData: dbcontent_name " << dbcontent_name << " current_size " << current_size;
-    
-    assert(var_idx == 0 || var_idx == 1);
-    assert (viewData().count(dbcontent_name));
-    Buffer* buffer = viewData().at(dbcontent_name).get();
+    x_axis_is_datetime_ = variableIsDateTime(0);
+    y_axis_is_datetime_ = variableIsDateTime(1);
+}
 
-    auto& buffer_counts = var_idx == 0 ? buffer_x_counts_ : buffer_y_counts_;
-    auto& values        = var_idx == 0 ? x_values_ : y_values_;
+/**
+*/
+void ScatterPlotViewDataWidget::correctSeriesDateTime(ScatterSeriesCollection& collection)
+{
+    if (!x_axis_is_datetime_ && !y_axis_is_datetime_)
+        return;
 
-    unsigned int last_size = 0;
+    //loginf << "correcting datetime...";
 
-    if (buffer_counts.count(dbcontent_name))
-        last_size = buffer_counts.at(dbcontent_name);
-
-    ViewVariable& view_var = view_->variable(var_idx);
-    Variable* data_var = view_var.getFor(dbcontent_name);
-    if (!data_var)
+    for (auto& s : collection.dataSeries())
     {
-        logwrn << "ScatterPlotViewDataWidget: updateVariableData: could not retrieve data var";
+        for (auto& pos : s.scatter_series.points)
+        {
+            if (x_axis_is_datetime_) pos[ 0 ] = Utils::Time::correctLongQtUTC((long)pos[ 0 ]);
+            if (y_axis_is_datetime_) pos[ 1 ] = Utils::Time::correctLongQtUTC((long)pos[ 1 ]);
+        }
+    }
+
+    //loginf << "corrected datetime!";
+}
+
+/**
+*/
+void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& stash)
+{
+    loginf << "ScatterPlotViewDataWidget: processStash: "
+           << " valid: " << stash.valid_count_ << " "
+           << " selected: " << stash.selected_count_ << " "
+           << " nan: " << stash.nan_value_count_;
+
+    //generate dataseries from stash
+    ScatterSeries selected_series;
+    selected_series.points.reserve(stash.selected_count_);
+
+    for (const auto& dbc_stash : stash.dbContentStashes())
+    {
+        if (!dbc_stash.second.valid_count)
+            continue;
+
+        ScatterSeries dbc_series;
+        dbc_series.points.reserve(dbc_stash.second.unsel_count);
+
+        const auto& x_values = dbc_stash.second.variable_stashes[ 0 ].values;
+        const auto& y_values = dbc_stash.second.variable_stashes[ 1 ].values;
+
+        size_t n = x_values.size();
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            if (dbc_stash.second.nan_values[ i ])
+                continue;
+            else if (dbc_stash.second.selected_values[ i ])
+                selected_series.points.emplace_back(x_values[ i ], y_values[ i ]);
+            else
+                dbc_series.points.emplace_back(x_values[ i ], y_values[ i ]);
+        }
+
+        if (!dbc_series.points.empty())
+        {
+            std::string name = dbc_stash.first + " (" + to_string(dbc_series.points.size()) + ")";
+
+            scatter_series_.addDataSeries(dbc_series, name, colorForDBContent(dbc_stash.first), MarkerSizePx);
+        }
+    }
+
+    //add selected dataset as the last one (important for render order)
+    if (!selected_series.points.empty())
+    {
+        std::string name = "Selected (" + to_string(selected_series.points.size()) + ")";
+
+        scatter_series_.addDataSeries(selected_series, name, ColorSelected, MarkerSizeSelectedPx);
+    }
+
+    x_axis_name_ = view_->variable(0).description();
+    y_axis_name_ = view_->variable(1).description();
+    title_       = "";
+
+    updateDateTimeInfoFromVariables();
+    correctSeriesDateTime(scatter_series_);
+
+    loginf << "ScatterPlotViewDataWidget: processStash: done, generated " << scatter_series_.numDataSeries() << " series";
+}
+
+/**
+*/
+void ScatterPlotViewDataWidget::updateFromAnnotations()
+{
+    loginf << "ScatterPlotViewDataWidget: updateFromAnnotations";
+
+    if (!view_->hasCurrentAnnotation())
+        return;
+
+    const auto& anno = view_->currentAnnotation();
+
+    title_       = anno.metadata.title_;
+    x_axis_name_ = anno.metadata.xAxisLabel();
+    y_axis_name_ = anno.metadata.yAxisLabel();
+
+    const auto& feature = anno.feature_json;
+
+    if (!feature.is_object() || !feature.contains(ViewPointGenFeatureScatterSeries::FeatureHistogramFieldNameScatterSeries))
+        return;
+    
+    if (!scatter_series_.fromJSON(feature[ ViewPointGenFeatureScatterSeries::FeatureHistogramFieldNameScatterSeries ]))
+    {
+        scatter_series_.clear();
         return;
     }
 
-    PropertyDataType data_type = data_var->dataType();
-    string current_var_name = data_var->name();
+    x_axis_is_datetime_ = scatter_series_.commonDataTypeX() == ScatterSeries::DataTypeTimestamp;
+    y_axis_is_datetime_ = scatter_series_.commonDataTypeY() == ScatterSeries::DataTypeTimestamp;
 
-    logdbg << "ScatterPlotViewDataWidget: updateVariableData: updating, last size " << last_size;
+    correctSeriesDateTime(scatter_series_);
 
-    #define UpdateFunc(PDType, DType)                                       \
-        assert(view_var.settings().valid_data_types.count(PDType) != 0);    \
-        assert(buffer->has<DType>(current_var_name));                       \
-                                                                            \
-        NullableVector<DType>& data = buffer->get<DType>(current_var_name); \
-                                                                            \
-        appendData(data, values[dbcontent_name], last_size, current_size);  \
-        buffer_counts[dbcontent_name] = current_size;
-
-    #define NotFoundFunc                                                                                                           \
-        logerr << "ScatterPlotViewDataWidget: updateVariableData: impossible for property type " << Property::asString(data_type); \
-        throw std::runtime_error("ScatterPlotViewDataWidget: updateVariableData: impossible property type " + Property::asString(data_type));
-
-    SwitchPropertyDataType(data_type, UpdateFunc, NotFoundFunc)
-
-    logdbg << "ScatterPlotViewDataWidget: updateVariableData: updated size " << buffer_counts.at(dbcontent_name);
-}
-
-/**
-*/
-void ScatterPlotViewDataWidget::resetCounts()
-{
-    buffer_x_counts_.clear();
-    buffer_y_counts_.clear();
-
-    x_values_.clear();
-    y_values_.clear();
-
-    has_x_min_max_ = false;
-    has_y_min_max_ = false;
-
-    selected_values_.clear();
-    rec_num_values_.clear();
-
-    nan_value_cnt_ = 0;
-    valid_cnt_     = 0;
-    selected_cnt_  = 0;
-
-    dbcont_valid_counts_.clear();
+    loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
 }
 
 /**
@@ -287,19 +294,9 @@ QPixmap ScatterPlotViewDataWidget::renderPixmap()
 
 /**
 */
-unsigned int ScatterPlotViewDataWidget::nullValueCount() const
-{
-    return nan_value_cnt_;
-}
-
-/**
-*/
 QRectF ScatterPlotViewDataWidget::getDataBounds() const
 {
-    if (!has_x_min_max_ || !has_y_min_max_)
-        return QRectF();
-
-    return QRectF(x_min_, y_min_, x_max_ - x_min_, y_max_ - y_min_);
+    return getPlanarBounds(0, 1);
 }
 
 /**
@@ -318,19 +315,21 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
 
             if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
             {
-                chart_view_->chart()->axisX()->setRange(min(p1.x(), p2.x()), max(p1.x(), p2.x()));
-                chart_view_->chart()->axisY()->setRange(min(p1.y(), p2.y()), max(p1.y(), p2.y()));
+                setAxisRange(chart_view_->chart()->axisX(), min(p1.x(), p2.x()), max(p1.x(), p2.x()));
+                setAxisRange(chart_view_->chart()->axisY(), min(p1.y(), p2.y()), max(p1.y(), p2.y()));
             }
         }
         else if (selected_tool_ == SP_SELECT_TOOL)
         {
             loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot: select";
 
-            selectData(min(p1.x(), p2.x()), max(p1.x(), p2.x()), min(p1.y(), p2.y()), max(p1.y(), p2.y()));
+            selectData(min(p1.x(), p2.x()), max(p1.x(), p2.x()), min(p1.y(), p2.y()), max(p1.y(), p2.y()), 0, 1);
         }
         else
+        {
             throw std::runtime_error("ScatterPlotViewDataWidget: rectangleSelectedSlot: unknown tool "
                                      +to_string((unsigned int)selected_tool_));
+        }
     }
 
     endTool();
@@ -379,78 +378,40 @@ void ScatterPlotViewDataWidget::clearSelectionSlot()
 
 /**
 */
+void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, double vmax)
+{
+    assert(axis);
+
+    //handle datetime axis
+    auto axis_dt = dynamic_cast<QDateTimeAxis*>(axis);
+    if (axis_dt)
+    {
+        axis_dt->setMin(QDateTime::fromMSecsSinceEpoch(vmin));
+        axis_dt->setMax(QDateTime::fromMSecsSinceEpoch(vmax));
+
+        return;
+    }
+
+    //default range
+    axis->setRange(vmin, vmax);
+}
+
+/**
+*/
 void ScatterPlotViewDataWidget::resetZoomSlot()
 {
     loginf << "ScatterPlotViewDataWidget: resetZoomSlot";
 
     if (chart_view_ && chart_view_->chart())
     {
-        //chart_view_->chart()->createDefaultAxes();
-
-        if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY()
-                && has_x_min_max_ && has_y_min_max_)
+        if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
         {
-            chart_view_->chart()->axisX()->setRange(x_min_, x_max_);
-            chart_view_->chart()->axisY()->setRange(y_min_, y_max_);
-        }
+            auto bounds = getDataBounds();
 
-        //chart_->zoomReset();
-    }
-}
-
-/**
-*/
-void ScatterPlotViewDataWidget::updateMinMax()
-{
-    has_x_min_max_ = false;
-
-    for (auto& x_values_it : x_values_)
-    {
-        for (auto x_it : x_values_it.second)
-        {
-            if (has_x_min_max_)
-            {
-                x_min_ = std::min(x_min_, x_it);
-                x_max_ = std::max(x_max_, x_it);
-            }
-            else
-            {
-                x_min_ = x_it;
-                x_max_ = x_it;
-
-                has_x_min_max_ = true;
-            }
+            setAxisRange(chart_view_->chart()->axisX(), bounds.left(), bounds.right() );
+            setAxisRange(chart_view_->chart()->axisY(), bounds.top() , bounds.bottom());
         }
     }
-
-    has_y_min_max_ = false;
-
-    for (auto& y_values_it : y_values_)
-    {
-        for (auto y_it : y_values_it.second)
-        {
-            if (has_y_min_max_)
-            {
-                y_min_ = std::min(y_min_, y_it);
-                y_max_ = std::max(y_max_, y_it);
-            }
-            else
-            {
-                y_min_ = y_it;
-                y_max_ = y_it;
-
-                has_y_min_max_ = true;
-            }
-        }
-    }
-
-    logdbg << "ScatterPlotViewDataWidget: updateMinMax: "
-           << "has_x_min_max " << has_x_min_max_ << " "
-           << "x_min " << x_min_ << " "
-           << "x_max " << x_max_ << " "
-           << "has_y_min_max " << has_y_min_max_ << " "
-           << "y_min " << y_min_ << " "
-           << "y_max " << y_max_;
 }
 
 /**
@@ -467,10 +428,11 @@ bool ScatterPlotViewDataWidget::updateChart()
     chart->layout()->setContentsMargins(0, 0, 0, 0);
     chart->setBackgroundRoundness(0);
     chart->setDropShadowEnabled(false);
+    chart->setTitle(QString::fromStdString(title_));
 
     chart->legend()->setAlignment(Qt::AlignBottom);
 
-    bool has_data = (x_values_.size() && y_values_.size() && variablesOk());
+    bool has_data = (scatter_series_.numDataSeries() > 0 && variablesOk());
 
     updateDataSeries(chart);
 
@@ -508,23 +470,105 @@ bool ScatterPlotViewDataWidget::updateChart()
 void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 {
     //we obtain valid data if a data range is available and if the variables are available in the buffer data
-    bool has_data = (x_values_.size() && y_values_.size() && variablesOk());
+    bool has_data = (scatter_series_.numDataSeries() > 0 && variablesOk());
 
+    //!take care: this functional may assert if it is called when no series has yet been added to the chart!
     auto createAxes = [ & ] ()
     {
-        chart->createDefaultAxes();
+        bool dynamic_labels = false;
+
+        const std::pair<QString, bool> DateTimeFormatDefault = { "hh:mm:ss", false };
+
+        auto dateTimeFormatFromSeries = [ & ] (int axis_id)
+        {
+            if (dynamic_labels)
+            {
+                boost::optional<qreal> tmin, tmax;
+                for (auto s : chart->series())
+                {
+                    auto scatter_series = dynamic_cast<QScatterSeries*>(s);
+                    if (!scatter_series)
+                        continue;
+
+                    for (const auto& pos : scatter_series->points())
+                    {
+                        qreal v = axis_id == 0 ? pos.x() : pos.y();
+                        if (!tmin.has_value() || v < tmin.value()) tmin = v;
+                        if (!tmax.has_value() || v > tmax.value()) tmax = v;
+                    }
+                }
+
+                if (!tmin.has_value() || !tmax.has_value())
+                    return std::pair<QString, bool>("yyyy-MM-dd hh:mm:ss", true);
+
+                auto date_time0 = QDateTime::fromMSecsSinceEpoch(tmin.value());
+                auto date_time1 = QDateTime::fromMSecsSinceEpoch(tmax.value());
+
+                bool needs_year  = date_time0.date().year()  != date_time1.date().year();
+                bool needs_month = date_time0.date().month() != date_time1.date().month();
+                bool needs_day   = date_time0.date().day()   != date_time1.date().day();
+
+                if (needs_year)
+                    return std::pair<QString, bool>("yyyy-MM-dd hh:mm:ss", true);
+                if (needs_month)
+                    return std::pair<QString, bool>("MMM dd hh:mm:ss", true);
+                if (needs_day)
+                    return std::pair<QString, bool>("ddd hh:mm:ss", false);
+
+                return std::pair<QString, bool>("hh:mm:ss", false);
+            }
+            else
+            {
+                return DateTimeFormatDefault;
+            }
+        };
+
+        auto genDateTimeAxis = [ & ] (const std::string& title, int axis_id)
+        {
+            auto format = dateTimeFormatFromSeries(axis_id);
+
+            auto axis = new QDateTimeAxis;
+            axis->setFormat(format.first);
+            axis->setTitleText(QString::fromStdString(title));
+            axis->setLabelsAngle(format.second ? -90 : 0);
+
+            return dynamic_cast<QAbstractAxis*>(axis);
+        };
+
+        auto genValueAxis = [ & ] (const std::string& title)
+        {
+            auto axis = new QValueAxis;
+            axis->setTitleText(QString::fromStdString(title));
+
+            return dynamic_cast<QAbstractAxis*>(axis);
+        };
+
+        auto createAxis = [ & ] (int axis_id,
+                                 const std::string& title,
+                                 bool is_date_time,
+                                 Qt::Alignment alignment)
+        {
+            QAbstractAxis* axis = is_date_time ? genDateTimeAxis(title, axis_id) : genValueAxis(title);
+            assert (axis);
+
+            chart->addAxis(axis, alignment);
+
+            for (auto series : chart->series())
+                series->attachAxis(axis);
+        };
 
         //config x axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title x '"
-               << view_->variable(0).description() << "'";
-        assert (chart->axes(Qt::Horizontal).size() == 1);
-        chart->axes(Qt::Horizontal).at(0)->setTitleText(view_->variable(0).description().c_str());
+        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title x '" << view_->variable(0).description() << "' is_datetime " << x_axis_is_datetime_;
+
+        createAxis(0, x_axis_name_, x_axis_is_datetime_, Qt::AlignBottom);
 
         //config y axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title y '"
-               << view_->variable(1).description() << "'";
+        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title y '" << view_->variable(1).description() << "' is_datetime " << y_axis_is_datetime_;
+
+        createAxis(1, y_axis_name_, y_axis_is_datetime_, Qt::AlignLeft);
+
+        assert (chart->axes(Qt::Horizontal).size() == 1);
         assert (chart->axes(Qt::Vertical).size() == 1);
-        chart->axes(Qt::Vertical).at(0)->setTitleText(view_->variable(1).description().c_str());
     };
 
     if (has_data)
@@ -533,12 +577,6 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
         chart->legend()->setVisible(true);
 
-        nan_value_cnt_ = 0;
-        valid_cnt_     = 0;
-        selected_cnt_  = 0;
-
-        dbcont_valid_counts_.clear();
-
         bool use_connection_lines = view_->useConnectionLines();
 
         struct SymbolLineSeries { QScatterSeries* scatter_series;
@@ -546,11 +584,13 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
         //generate needed series and sort pointers
         //qtcharts when rendering opengl will sort the series into a map using the pointer of the series as a key
-        //we exploit this behavior to obtain the correct render order for our data
+        //we exploit this behavior to obtain a fixed render order for our data
+
+        size_t n_series = scatter_series_.numDataSeries();
 
         //generate pointers
-        std::vector<SymbolLineSeries> series (x_values_.size() + 1); // last one selected
-        for (size_t i = 0; i < series.size(); ++i)
+        std::vector<SymbolLineSeries> series (n_series); 
+        for (size_t i = 0; i < n_series; ++i)
         {
             series[ i ].scatter_series = new QScatterSeries;
             series[ i ].scatter_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
@@ -571,183 +611,70 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
                 series[ i ].line_series = nullptr;
         }
 
-        //sort pointers to obtain correct render order (as it happens inside qtcharts)
+        //sort pointers to obtain fixed render order (as it happens inside qtcharts)
+        //!the highest pointer is always on top, so the selection series is always assumed to be the last one!
         sort(series.begin(), series.end(),
-             [&](const SymbolLineSeries& a, const SymbolLineSeries& b) {return a.scatter_series > b.scatter_series; });
+             [&](const SymbolLineSeries& a, const SymbolLineSeries& b) {return a.scatter_series < b.scatter_series; });
 
-        //the smallest pointer is the one for the selection, so the selection will be rendered on top
-        QScatterSeries* selected_symbol_series = series.front().scatter_series;
-        selected_symbol_series->setMarkerSize(MarkerSizeSelectedPx);
-        selected_symbol_series->setColor(Qt::yellow);
-
-        QLineSeries* selected_line_series = nullptr;
-
-        if (use_connection_lines)
-        {
-            selected_line_series = series.front().line_series;
-            selected_line_series->setColor(Qt::yellow);
-        }
-
-        //distribute sorted pointers to dbcontent types
-        std::map<std::string, SymbolLineSeries> series_map;
-        {
-            int cnt = 1;
-            for (auto it = x_values_.begin(); it != x_values_.end(); ++it)
-                series_map[ it->first ] = series[ cnt++ ];
-        }
+        const auto& data_series = scatter_series_.dataSeries();
 
         //now add data to series
-        for (auto& data : x_values_)
+        for (size_t i = 0; i < n_series; ++i)
         {
-            auto& dbcont_value_cnt = dbcont_valid_counts_[ data.first ];
-            dbcont_value_cnt = 0;
+            const auto& ds = data_series[ i ];
 
-            vector<double>& x_values        = data.second;
-            vector<double>& y_values        = y_values_[data.first];
-            vector<bool>&   selected_values = selected_values_[data.first];
+            assert (!ds.scatter_series.points.empty());
 
-            QScatterSeries* chart_symbol_series = series_map[ data.first ].scatter_series;
-            chart_symbol_series->setColor(colorForDBContent(data.first));
+            QScatterSeries* chart_symbol_series = series[ i ].scatter_series;
+            chart_symbol_series->setColor(ds.color);
+            chart_symbol_series->setMarkerSize(ds.marker_size);
 
             QLineSeries* chart_line_series = nullptr;
 
             if (use_connection_lines)
             {
-                chart_line_series = series_map[ data.first ].line_series;
-                chart_line_series->setColor(colorForDBContent(data.first));
+                chart_line_series = series[ i ].line_series;
+                chart_line_series->setColor(ds.color);
             }
 
-            assert (x_values.size() == y_values.size());
-            assert (x_values.size() == selected_values.size());
-
-            unsigned int sum_cnt {0};
-
-            for (unsigned int cnt=0; cnt < x_values.size(); ++cnt)
+            for (const auto& pos : ds.scatter_series.points)
             {
-                if (!std::isnan(x_values.at(cnt)) && !std::isnan(y_values.at(cnt)))
-                {
-                    ++valid_cnt_;
-                    ++dbcont_value_cnt;
+                double x = pos.x();
+                double y = pos.y();
 
-                    if (selected_values.at(cnt))
-                    {
-                        selected_symbol_series->append(x_values.at(cnt), y_values.at(cnt));
-
-                        if (use_connection_lines)
-                        {
-                            assert (selected_line_series);
-                            selected_line_series->append(x_values.at(cnt), y_values.at(cnt));
-                        }
-
-                        ++selected_cnt_;
-                    }
-                    else
-                    {
-                        chart_symbol_series->append(x_values.at(cnt), y_values.at(cnt));
-
-                        if (use_connection_lines)
-                        {
-                            assert (chart_line_series);
-                            chart_line_series->append(x_values.at(cnt), y_values.at(cnt));
-                        }
-
-                        ++sum_cnt;
-                    }
-                }
-                else
-                {
-                    ++nan_value_cnt_;
-                }
-            }
-
-            if (!dbcont_value_cnt)
-                continue;
-
-            if (sum_cnt)
-            {
-                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: adding " << data.first << " (" << sum_cnt << ")";
-
-                chart_symbol_series->setName((data.first+" ("+to_string(sum_cnt)+")").c_str());
-                chart->addSeries(chart_symbol_series);
+                chart_symbol_series->append(x, y);
 
                 if (use_connection_lines)
                 {
                     assert (chart_line_series);
-                    chart->addSeries(chart_line_series);
-
-                    logdbg << "ScatterPlotViewDataWidget: updateDataSeries: connection lines "
-                           << chart_line_series->count();
+                    chart_line_series->append(x, y);
                 }
             }
-            else
+
+            chart_symbol_series->setName(ds.name.c_str());
+            chart->addSeries(chart_symbol_series);
+
+            if (use_connection_lines)
             {
-                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: removing empty " << data.first;
+                assert (chart_line_series);
+                chart->addSeries(chart_line_series);
 
-                delete chart_symbol_series;
-
-                if (use_connection_lines)
-                {
-                    assert (chart_line_series);
-                    delete chart_line_series;
-                }
+                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: connection lines " << chart_line_series->count();
             }
         }
 
-        if (valid_cnt_)
-        {
-            //valid values found
-
-            if (selected_cnt_ > 0)
-            {
-                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: adding " << " Selected (" << selected_cnt_ << ")";
-
-                //add series for selected values
-                selected_symbol_series->setName(("Selected ("+to_string(selected_cnt_)+")").c_str());
-                chart->addSeries(selected_symbol_series);
-
-                if (use_connection_lines)
-                {
-                    assert (selected_line_series);
-                    chart->addSeries(selected_line_series);
-                }
-            }
-            else
-            {
-                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: deleting not needed selected";
-
-                //series for selection not needed
-                delete selected_symbol_series;
-                selected_symbol_series = nullptr;
-
-                if (use_connection_lines)
-                {
-                    assert (selected_line_series);
-                    delete selected_line_series;
-                    selected_line_series = nullptr;
-                }
-            }
-
-            createAxes();
-        }
-        else
-        {
-            //no valid values at all
-            has_data = false;
-            logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no valid data";
-        }
+        //safe to create axes
+        createAxes();
     }
     else
     {
         //bad data range or vars not in buffer
-        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no data, size x "
-               << x_values_.size() << " y " << y_values_.size();
-    }
+        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no data, size " << getStash().dbContentStashes().size();
 
-    if (!has_data)
-    {
         //no data -> generate default empty layout
         chart->legend()->setVisible(false);
 
+        //!add empty series first! (otherwise createAxes() will crash)
         QScatterSeries* series = new QScatterSeries;
         chart->addSeries(series);
 
@@ -774,81 +701,11 @@ void ScatterPlotViewDataWidget::mouseMoveEvent(QMouseEvent* event)
 }
 
 /**
-*/
-void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y_min, double y_max)
-{
-    bool ctrl_pressed = QApplication::keyboardModifiers() & Qt::ControlModifier;
-
-    loginf << "ScatterPlotViewDataWidget: selectData: x_min " << x_min << " x_max " << x_max
-           << " y_min " << y_min << " y_max " << y_max << " ctrl pressed " << ctrl_pressed;
-
-    unsigned int sel_cnt = 0;
-    for (auto& buf_it : viewData())
-    {
-        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
-
-        assert (buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-        NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
-                    DBContent::meta_var_rec_num_.name());
-
-        std::map<unsigned long, std::vector<unsigned int>> rec_num_indexes =
-                rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
-        // rec_num -> index
-
-        std::vector<double>&        x_values       = x_values_.at(buf_it.first);
-        std::vector<double>&        y_values       = y_values_.at(buf_it.first);
-        std::vector<unsigned long>& rec_num_values = rec_num_values_.at(buf_it.first);
-
-        assert (x_values.size() == y_values.size());
-        assert (x_values.size() == rec_num_values.size());
-
-        double x, y;
-        bool in_range;
-        unsigned long rec_num, index;
-
-        for (unsigned int cnt=0; cnt < x_values.size(); ++cnt)
-        {
-            x = x_values.at(cnt);
-            y = y_values.at(cnt);
-            rec_num = rec_num_values.at(cnt);
-
-            in_range = false;
-
-            if (!std::isnan(x) && !std::isnan(y))
-                in_range =  x >= x_min && x <= x_max && y >= y_min && y <= y_max;
-
-            assert (rec_num_indexes.count(rec_num));
-            std::vector<unsigned int>& indexes = rec_num_indexes.at(rec_num);
-            assert (indexes.size() == 1);
-
-            index = indexes.at(0);
-
-            if (ctrl_pressed && !selected_vec.isNull(index) && selected_vec.get(index))
-                in_range = true; // add selection to existing
-
-            selected_vec.set(index, in_range);
-
-            if (in_range)
-                ++sel_cnt;
-        }
-    }
-
-    loginf << "ScatterPlotViewDataWidget: selectData: sel_cnt " << sel_cnt;
-
-    emit view_->selectionChangedSignal();
-}
-
-/**
  */
 void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 {
     //!call base!
-    VariableViewDataWidget::viewInfoJSON_impl(info);
-
-    info[ "num_valid"   ] = valid_cnt_;
-    info[ "num_selected"] = selected_cnt_;
-    info[ "num_nan"     ] = nan_value_cnt_;
+    VariableViewStashDataWidget::viewInfoJSON_impl(info);
 
     auto bounds       = getDataBounds();
     bool bounds_valid = bounds.isValid();
@@ -858,25 +715,6 @@ void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     info[ "data_bounds_ymin"  ] = bounds_valid ? bounds.top()    : 0.0;
     info[ "data_bounds_xmax"  ] = bounds_valid ? bounds.right()  : 0.0;
     info[ "data_bounds_ymax"  ] = bounds_valid ? bounds.bottom() : 0.0;
-    
-    nlohmann::json input_value_info = nlohmann::json::array();
-
-    for (const auto& it : x_values_)
-    {
-        nlohmann::json dbo_info;
-
-        const auto& y_values    = y_values_.at(it.first);
-        const auto& valid_count = dbcont_valid_counts_.at(it.first);
-
-        dbo_info[ "dbo_type"       ] = it.first;
-        dbo_info[ "num_input_x"    ] = it.second.size();
-        dbo_info[ "num_input_y"    ] = y_values.size();
-        dbo_info[ "num_input_valid"] = valid_count;
-
-        input_value_info.push_back(dbo_info);
-    }
-
-    info[ "input_values" ] = input_value_info;
 
     auto zoomActive = [ & ] (const QRectF& bounds_data, const QRectF& bounds_axis)
     {
@@ -947,52 +785,3 @@ void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
         info[ "chart" ] = chart_info;
     }
 }
-
-//void ScatterPlotViewDataWidget::showOnlySelectedSlot(bool value)
-//{
-//    loginf << "ScatterPlotViewDataWidget: showOnlySelectedSlot: " << value;
-//    emit showOnlySelectedSignal(value);
-//}
-
-//void ScatterPlotViewDataWidget::usePresentationSlot(bool use_presentation)
-//{
-//    loginf << "ScatterPlotViewDataWidget: usePresentationSlot";
-
-//    emit usePresentationSignal(use_presentation);
-//}
-
-//void ScatterPlotViewDataWidget::showAssociationsSlot(bool value)
-//{
-//    loginf << "ScatterPlotViewDataWidget: showAssociationsSlot: " << value;
-//    emit showAssociationsSignal(value);
-//}
-
-//void ScatterPlotViewDataWidget::resetModels()
-//{
-//    if (all_buffer_table_widget_)
-//        all_buffer_table_widget_->resetModel();
-
-//    for (auto& table_widget_it : buffer_tables_)
-//        table_widget_it.second->resetModel();
-//}
-
-//void ScatterPlotViewDataWidget::updateToSelection()
-//{
-//    if (all_buffer_table_widget_)
-//        all_buffer_table_widget_->updateToSelection();
-
-//    for (auto& table_widget_it : buffer_tables_)
-//        table_widget_it.second->updateToSelection();
-//}
-
-//void ScatterPlotViewDataWidget::selectFirstSelectedRow()
-//{
-//    if (all_buffer_table_widget_)
-//        all_buffer_table_widget_->selectSelectedRows();
-//}
-
-//AllBufferTableWidget* ScatterPlotViewDataWidget::getAllBufferTableWidget ()
-//{
-//    assert (all_buffer_table_widget_);
-//    return all_buffer_table_widget_;
-//}

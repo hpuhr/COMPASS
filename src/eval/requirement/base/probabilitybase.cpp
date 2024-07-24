@@ -18,6 +18,7 @@
 #include "probabilitybase.h"
 
 #include "stringconv.h"
+#include "number.h"
 
 using namespace std;
 using namespace Utils;
@@ -53,24 +54,24 @@ bool ProbabilityBase::invertProb() const
 
 /**
 */
-unsigned int ProbabilityBase::getNumThresholdDecimals() const
-{
-    const double thres = threshold();
+// unsigned int ProbabilityBase::getNumThresholdDecimals() const
+// {
+//     const double thres = threshold();
 
-    assert (thres <= 1);
+//     assert (thres <= 1);
 
-    float        tmp      = 1;
-    unsigned int decimals = 1;
+//     float        tmp      = 1;
+//     unsigned int decimals = 1;
 
-    while (tmp > thres && decimals < NumThresholdDecimalsMax)
-    {
-        tmp /= 10.0;
-        ++decimals;
-    }
+//     while (tmp > thres && decimals < NumThresholdDecimalsMax)
+//     {
+//         tmp /= 10.0;
+//         ++decimals;
+//     }
 
-    //loginf << "ProbabilityBase: getNumThresholdDecimals: threshold " << thres << " dec " << decimals;
-    return decimals;
-}
+//     //loginf << "ProbabilityBase: getNumThresholdDecimals: threshold " << thres << " dec " << decimals;
+//     return decimals;
+// }
 
 /**
 */
@@ -95,9 +96,10 @@ std::string ProbabilityBase::getConditionResultName() const
 
 /**
 */
-std::string ProbabilityBase::getThresholdString(double thres) const
+double ProbabilityBase::convertValueToResult(double value) const
 {
-    return String::percentToString(thres * 100.0, getNumThresholdDecimals());
+    //to percent
+    return value * 100.0;
 }
 
 } // namespace EvaluationRequirement

@@ -54,18 +54,20 @@ struct GridResolution
 
     static bool validResolution(double cell_size);
     static QRectF addBorder(const QRectF& roi,
-                            double border,
+                            const boost::optional<double>& border = boost::optional<double>(),
                             const boost::optional<double>& xmin = boost::optional<double>(),
                             const boost::optional<double>& xmax = boost::optional<double>(),
                             const boost::optional<double>& ymin = boost::optional<double>(),
                             const boost::optional<double>& ymax = boost::optional<double>());
+
+    static const double DefaultBorderFactor;
 
     Type   type        = Type::CellCount;
     size_t num_cells_x = 0;
     size_t num_cells_y = 0;
     double cell_size_x = 0.0;
     double cell_size_y = 0.0;
-    double border      = 0.0; //1 % border
+    double border      = DefaultBorderFactor; 
 };
 
 enum ValueType

@@ -68,6 +68,9 @@ public:
 
     virtual void accept(LatexVisitor& v) override;
 
+    virtual bool canShowAnnotations() const override final { return true; }
+    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const override;
+
     const Settings& settings() const { return settings_; }
 
 protected:

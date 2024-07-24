@@ -88,9 +88,6 @@ public:
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
-
     enum DetailKey
     {
         Offset,         //float
@@ -143,6 +140,8 @@ protected:
 
     virtual bool exportAsCSV(std::ofstream& strm) const override;
     virtual bool canExportCSV() const override { return true; }
+
+    virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };
 
 }

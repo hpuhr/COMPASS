@@ -53,7 +53,7 @@ void ProbabilityBaseConfigWidget::changedProbabilitySlot(const QString& value)
     loginf << "BaseConfigWidget: changedProbabilitySlot: value " << value.toStdString();
 
     bool ok;
-    float val = value.toFloat(&ok);
+    double val = value.toDouble(&ok);
 
     if (ok)
         config().prob(val);

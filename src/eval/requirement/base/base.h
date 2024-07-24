@@ -56,7 +56,7 @@ enum ValueComparisonResult
 class Base
 {
 public:
-    Base(const std::string& name, 
+    explicit Base(const std::string& name, 
          const std::string& short_name, 
          const std::string& group_name,
          double threshold,
@@ -84,16 +84,18 @@ public:
     bool conditionPassed(double value) const;
     std::string getConditionStr() const;
     std::string getConditionResultStr(double value) const;
+    std::string getResultValueString(double value, int dec = -1) const;
+    
+    unsigned int getNumThresholdDecimals() const;
 
-    virtual std::string getThresholdString(double thres) const;
+    std::string getConditionResultNameShort(bool with_units) const;
 
     virtual std::string getConditionResultNameShort() const = 0;
     virtual std::string getConditionResultName() const = 0;
     virtual std::string getConditionUnits() const = 0;
 
-    std::string getConditionResultNameShort(bool with_units) const;
-
-    static const int NumResultDecimalsMax = 6;
+    static const unsigned int NumThresholdDecimalsMin = 2;
+    static const unsigned int NumThresholdDecimalsMax = 6;
     
 protected:
     std::string name_;
@@ -101,6 +103,8 @@ protected:
     std::string group_name_;
 
     EvaluationManager& eval_man_;
+
+    virtual double convertValueToResult(double value) const;
 
     bool compareValue (double val, double threshold, COMPARISON_TYPE check_type) const;
 
@@ -294,7 +298,9 @@ std::pair<ValueComparisonResult, std::string> Base::compare (
 
     }
     else
+    {
         return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
+    }
 }
 
 }

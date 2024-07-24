@@ -95,9 +95,6 @@ public:
                     int num_false,
                     const std::string& false_value_name);
 
-    virtual std::map<std::string, std::vector<LayerDefinition>> gridLayers() const override;
-    virtual void addValuesToGrid(Grid2D& grid, const std::string& layer) const override;
-
     enum DetailKey
     {
         RefExists,    //bool
@@ -150,6 +147,8 @@ protected:
     virtual boost::optional<double> computeResult_impl() const override;
 
     virtual std::vector<SectorInfo> sectorInfos() const override;
+
+    virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };
 
 }

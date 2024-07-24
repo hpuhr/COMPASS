@@ -46,7 +46,7 @@ namespace EvaluationRequirement
 ModeCCorrectPeriod::ModeCCorrectPeriod(const std::string& name, 
                                        const std::string& short_name, 
                                        const std::string& group_name,
-                                       float prob, 
+                                       double prob, 
                                        COMPARISON_TYPE prob_check_type, 
                                        EvaluationManager& eval_man,
                                        float update_interval_s, 
@@ -97,7 +97,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrectPeriod::createR
                                         const SectorLayer& sector_layer, 
                                         const std::vector<EvaluationDetail>& details,
                                         const TimePeriodCollection& periods,
-                                        const std::vector<dbContent::TargetPosition>& ref_updates,
                                         unsigned int sum_uis,
                                         unsigned int misses_total)
 {
@@ -112,8 +111,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrectPeriod::createR
                                         details, 
                                         sum_uis, 
                                         misses_total, 
-                                        periods,
-                                        ref_updates);
+                                        periods);
 }
 
 /**

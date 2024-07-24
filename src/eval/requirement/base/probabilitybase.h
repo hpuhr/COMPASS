@@ -48,15 +48,12 @@ public:
     std::string getConditionResultNameShort() const override final;
     std::string getConditionResultName() const override final;
     std::string getConditionUnits() const override final;
-    std::string getThresholdString(double thres) const final;
 
     virtual std::string probabilityName() const = 0;
     virtual std::string probabilityNameShort() const = 0;
 
-    static const unsigned int NumThresholdDecimalsMax = 6;
-
 protected:
-    unsigned int getNumThresholdDecimals() const;
+    double convertValueToResult(double value) const override final;
 
     bool invert_prob_ = false;
 };

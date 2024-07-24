@@ -48,7 +48,7 @@ void PositionDistanceRMSConfigWidget::thresholdValueEditSlot(QString value)
     loginf << "PositionDistanceRMSConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
 
     bool ok;
-    float val = value.toFloat(&ok);
+    double val = value.toDouble(&ok);
 
     if (ok)
         config().thresholdValue(val);

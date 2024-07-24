@@ -129,20 +129,22 @@ std::string Joined::reference(const EvaluationResultsReport::SectionContentTable
 
 /**
 */
-std::vector<double> Joined::getValues(int value_id, const boost::optional<int>& check_value_id) const
+std::string Joined::getRequirementAnnotationID_impl() const
 {
-    std::vector<double> values;
+    return (requirement_->name() + ":" + sector_layer_.name());
+}
 
-    auto func = [ & ] (const std::shared_ptr<Single>& result)
+/**
+*/
+void Joined::iterateDetails(const DetailFunc& func,
+                            const DetailSkipFunc& skip_func) const
+{
+    auto funcSingleResults = [ & ] (const std::shared_ptr<Single>& result)
     {
-        auto v = result->getValues(value_id, check_value_id);
-
-        values.insert(values.end(), v.begin(), v.end());
+        result->iterateDetails(func, skip_func);
     };
 
-    iterateSingleResults({}, func, {});
-
-    return values;
+    iterateSingleResults({}, funcSingleResults, {});
 }
 
 /**
@@ -197,13 +199,13 @@ void Joined::addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::R
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result Value", "Condition", "Condition Result"
         ov_table.addRow({ sector_layer_.name().c_str(), 
-                        requirement_->groupName().c_str(),
-                        requirement_->shortname().c_str(),
-                        result_id_.c_str(), 
-                        numUpdates(),
-                        result_val, 
-                        requirement_->getConditionStr().c_str(), 
-                        result.c_str() }, this, {});
+                          requirement_->groupName().c_str(),
+                          requirement_->shortname().c_str(),
+                          result_id_.c_str(), 
+                          numUpdates(),
+                          result_val, 
+                          requirement_->getConditionStr().c_str(), 
+                          result.c_str() }, this, {});
     }
 }
 
@@ -498,43 +500,8 @@ Base::ViewableInfo Joined::createViewableInfo(const AnnotationOptions& options) 
 void Joined::createAnnotations(nlohmann::json& annotations, 
                                const AnnotationOptions& options) const
 {
-    auto overview_mode = overviewMode();
-
-    bool has_grid_info = !results_[ 0 ]->gridLayers().empty();
-
-    //create features?
-    bool added_annotations = false;
-
-    if (overview_mode == OverviewMode::Annotations ||
-        overview_mode == OverviewMode::GridPlusAnnotations ||
-        overview_mode == OverviewMode::GridOrAnnotations)
-    {
-        if (overview_mode != OverviewMode::GridOrAnnotations || !has_grid_info)
-        {
-            addOverviewAnnotations(annotations);
-            added_annotations = true;
-        }
-    }
-
-    //create grid?
-    if (overview_mode == OverviewMode::Grid ||
-        overview_mode == OverviewMode::GridPlusAnnotations ||
-        overview_mode == OverviewMode::GridOrAnnotations)
-    {
-        if (overview_mode != OverviewMode::GridOrAnnotations || !added_annotations)
-        {
-            if (has_grid_info)
-            {
-                //add grid data if grid layers are specified
-                addOverviewGrid(annotations);
-            }
-        }
-    }
-
-    //add custom annotations
-    {
-        addCustomAnnotations(annotations);
-    }
+    //everything handled via custom annotations
+    addCustomAnnotations(annotations);
 }
 
 /**
@@ -568,7 +535,7 @@ std::unique_ptr<nlohmann::json::object_t> Joined::viewableData() const
 }
 
 /**
- * Default behaviour for creating viewable annotations.
+ * Legacy code for creating annotations for every single target report in the sector.
 */
 void Joined::addOverviewAnnotations(nlohmann::json& annotations_json) const
 {
@@ -580,129 +547,6 @@ void Joined::addOverviewAnnotations(nlohmann::json& annotations_json) const
             //create overview annotations for single result
             single_result->createSumOverviewAnnotations(annotations_json, 
                                                         eval_man_.settings().show_ok_joined_target_reports_);
-        }
-    }
-}
-
-namespace
-{
-    QRectF gridBounds(const SectorLayer& sector_layer, double border_factor)
-    {
-        auto lat_range = sector_layer.getMinMaxLatitude();
-        auto lon_range = sector_layer.getMinMaxLongitude();
-
-        QRectF roi(lon_range.first, lat_range.first, lon_range.second - lon_range.first, lat_range.second - lat_range.first);
-
-        return grid2d::GridResolution::addBorder(roi, border_factor, -180.0, 180.0, -90.0, 90.0);
-    }
-}
-
-/**
-*/
-void Joined::createGrid(const grid2d::GridResolution& resolution) const
-{
-    QRectF roi = gridBounds(sector_layer_, 0.01);
-
-    grid_.reset(new Grid2D);
-    bool grid_ok = grid_->create(roi, resolution, "wgs84", true);
-
-    assert(grid_ok);
-}
-
-/**
-*/
-void Joined::addOverviewGrid(nlohmann::json& annotations_json) const
-{
-    assert (annotations_json.is_array());
-
-    if (results_.empty())
-        return;
-
-    loginf << "Joined: addGridToViewData: creating grid";
-
-    //create the grid
-    createGrid(grid2d::GridResolution().setCellCount(eval_man_.settings().grid_num_cells_x,
-                                                     eval_man_.settings().grid_num_cells_y));
-
-    loginf << "Joined: addGridToViewData: creating grid layers";
-
-    Grid2DLayers layers;
-
-    std::map<std::string, Grid2DRenderSettings> render_settings;
-
-    //get layers to be generated
-    auto layer_defs = results_[ 0 ]->gridLayers();
-
-    //generate layers
-    for (const auto& l : layer_defs)
-    {
-        //reset grid for new data layer
-        grid_->reset();
-
-        //loginf << "Generating value layer " << l.first;
-
-        //add result values
-        for (const auto& single : results_)
-        {
-            if (!single->use())
-                continue;
-
-            single->addValuesToGrid(*grid_, l.first);
-        }
-
-        assert(grid_->numOutOfRange() == 0);
-
-        //obtain all layer values
-        for (const auto& layer_def : l.second)
-        {
-            std::string lname = l.first + (l.second.size() > 1 ? "_" + grid2d::valueTypeToString(layer_def.value_type) : "");
-
-            //loginf << "Generating render layer " << lname;
-
-            grid_->addToLayers(layers, lname, layer_def.value_type);
-
-            render_settings[ lname ] = layer_def.render_settings;
-        }
-    }
-
-    ViewPointGenAnnotations annotations;
-
-    loginf << "Joined: addGridToViewData: creating features...";
-    
-    //render layers and add them as annotation features
-    for(const auto& l : layers.layers())
-    {
-        //loginf << "Rendering layer " << l.first;
-
-        assert(render_settings.count(l.first));
-        const auto& rs = render_settings.at(l.first);
-
-        //loginf << "value map size: " << l.second.data.cols() << "x" << l.second.data.rows();
-
-        auto render_result = Grid2DLayerRenderer::render(*l.second, rs);
-
-        //loginf << "rendered image size: " << render_result.first.width() << "x" << render_result.first.height();
-        //render_result.first.save(QString::fromStdString("/home/mcphatty/layer_" + l.first + ".png"));
-
-        std::unique_ptr<ViewPointGenFeatureGeoImage> geo_image(new ViewPointGenFeatureGeoImage(render_result.first,
-                                                                                               render_result.second));
-        std::unique_ptr<ViewPointGenAnnotation> a(new ViewPointGenAnnotation(l.first, false));
-        a->addFeature(std::move(geo_image));
-
-        annotations.addAnnotation(std::move(a));
-    }
-
-    loginf << "Joined: addGridToViewData: created " << annotations.size() << " feature(s)";
-
-    //add to view data
-    if (annotations.size() > 0)
-    {
-        for (size_t i = 0; i < annotations.size(); ++i)
-        {
-            nlohmann::json a_info;
-            annotations.annotation(i).toJSON(a_info);
-
-            annotations_json.push_back(a_info);
         }
     }
 }

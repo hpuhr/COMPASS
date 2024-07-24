@@ -29,7 +29,7 @@ class PositionRadarAzimuth : public Base
 public:
     PositionRadarAzimuth(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man, float threshold_value);
+            EvaluationManager& eval_man, double threshold_value);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,

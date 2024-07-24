@@ -16,7 +16,10 @@
  */
 
 #include "eval/results/base/intervalbase.h"
+#include "eval/results/base/featuredefinitions.h"
+
 #include "eval/results/evaluationdetail.h"
+
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
@@ -58,12 +61,10 @@ SingleIntervalBase::SingleIntervalBase(const std::string& result_type,
                                        const EvaluationDetails& details,
                                        int sum_uis,
                                        int missed_uis,
-                                       TimePeriodCollection ref_periods,
-                                       const std::vector<dbContent::TargetPosition>& ref_updates)
-    :   IntervalBase(sum_uis, missed_uis)
-    ,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
-    ,   ref_periods_(ref_periods)
-    ,   ref_updates_(ref_updates)
+                                       TimePeriodCollection ref_periods)
+:   IntervalBase         (sum_uis, missed_uis)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   ref_periods_         (ref_periods)
 {
 }
 
@@ -131,7 +132,7 @@ std::vector<Single::TargetInfo> SingleIntervalBase::targetInfos() const
 */
 std::vector<std::string> SingleIntervalBase::detailHeaders() const
 {
-    return {"ToD", "DToD", "Ref.", "#MUIs", "Comment"};
+    return {"ToD", "DToD", "#MUIs", "Comment"};
 }
 
 /**
@@ -144,7 +145,6 @@ std::vector<QVariant> SingleIntervalBase::detailValues(const EvaluationDetail& d
 
     return { Utils::Time::toString(detail.timestamp()).c_str(),
              d_tod_str,
-             detail.getValue(DetailKey::RefExists),
              detail.getValue(DetailKey::MissedUIs),
              detail.comments().generalComment().c_str() };
 }
@@ -169,69 +169,17 @@ void SingleIntervalBase::addAnnotationForDetail(nlohmann::json& annotations_json
 
     assert (detail.numPositions() >= 2);
 
+    auto anno_type = is_ok ? AnnotationArrayType::TypeOk : AnnotationArrayType::TypeError;
+
     if (type == TargetAnnotationType::Highlight)
     {
-        addAnnotationDistance(annotations_json, detail, TypeHighlight);
+        addAnnotationPos(annotations_json, detail.firstPos(), AnnotationArrayType::TypeHighlight);
+        addAnnotationPos(annotations_json, detail.lastPos() , AnnotationArrayType::TypeHighlight);
     }
-    // else if (type == TargetAnnotationType::Overview)
-    // {
-    //     auto idx0 = detail.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex);
-    //     auto idx1 = detail.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex);
-
-    //     assert(idx0.has_value() && idx1.has_value());
-
-    //     for (unsigned int idx = idx0.value(); idx <= idx1.value(); ++idx)
-    //         addAnnotationPos(annotations_json, detail.position(idx), ok ? TypeOk : TypeError);
-
-    //     for (unsigned int idx = idx0.value() + 1; idx <= idx1.value(); ++idx)
-    //         addAnnotationLine(annotations_json, detail.position(idx - 1), detail.position(idx), ok ? TypeOk : TypeError);
-    // }
     else if (type == TargetAnnotationType::TargetOverview)
     {
-        addAnnotationDistance(annotations_json, detail, is_ok ? TypeOk : TypeError);
-    }
-}
-
-/**
-*/
-std::map<std::string, std::vector<Single::LayerDefinition>> SingleIntervalBase::gridLayers() const
-{
-    std::map<std::string, std::vector<Single::LayerDefinition>> layer_defs;
-
-    layer_defs[ requirement_->name() ].push_back(getGridLayerDefBinary());
-
-    return layer_defs;
-}
-
-/**
-*/
-void SingleIntervalBase::addValuesToGrid(Grid2D& grid, const std::string& layer) const
-{
-    if (layer == requirement_->name())
-    {
-        for (auto& detail_it : getDetails())
-        {
-            auto check_failed = detail_it.getValueAsOrAssert<bool>(
-                        EvaluationRequirementResult::SingleIntervalBase::DetailKey::MissOccurred);
-
-            if (detail_it.numPositions() == 1)
-                continue;
-
-            assert (detail_it.numPositions() >= 2);
-
-            auto idx0 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateStartIndex).value();
-            auto idx1 = detail_it.getValueAs<unsigned int>(EvaluationRequirementResult::SingleIntervalBase::DetailKey::RefUpdateEndIndex).value();
-
-            size_t n = idx1 - idx0 + 1;
-
-            auto pos_getter = [ & ] (double& x, double& y, size_t idx) 
-            { 
-                x =  ref_updates_[ idx0 + idx ].longitude_;
-                y =  ref_updates_[ idx0 + idx ].latitude_;
-            };
-
-            grid.addPoly(pos_getter, n, check_failed ? 1.0 : 0.0);
-        }
+        for (const auto& pos : detail.positions())
+            addAnnotationPos(annotations_json, pos, anno_type);
     }
 }
 
@@ -304,6 +252,23 @@ std::vector<Joined::SectorInfo> JoinedIntervalBase::sectorInfos() const
 {
     return { { "#Updates/#EUIs [1]", "Total number update intervals"     , sum_uis_    },
              { "#MUIs [1]"         , "Number of missed update intervals" , missed_uis_ } };
+}
+
+/**
+*/
+FeatureDefinitions JoinedIntervalBase::getCustomAnnotationDefinitions() const
+{
+    FeatureDefinitions defs;
+    
+    // return AnnotationDefinitions().addBinaryGrid("", 
+    //                                              requirement_->name(), 
+    //                                              DetailValueSource(SingleIntervalBase::DetailKey::MissOccurred),
+    //                                              GridAddDetailMode::AddPositionsAsPolyLine,
+    //                                              true,
+    //                                              Qt::green,
+    //                                              Qt::red);
+
+    return defs;
 }
 
 }

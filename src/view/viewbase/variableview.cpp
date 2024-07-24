@@ -81,6 +81,16 @@ ViewVariable& VariableView::variable(int idx)
 
 /**
 */
+const ViewVariable& VariableView::variable(int idx) const
+{
+    auto var = variables_.at(idx).get();
+    assert(var);
+
+    return *var;
+}
+
+/**
+*/
 size_t VariableView::numVariables() const
 {
     return variables_.size();
@@ -148,9 +158,9 @@ void VariableView::viewInfoJSON_impl(nlohmann::json& info) const
     }
 
     //result related
-    info[ "show_annotation"       ] = show_annotation_;
-    info[ "current_annotation_id" ] = current_annotation_id_;
-    info[ "num_annotations"       ] = annotations_.size();
+    info[ "show_annotation"        ] = show_annotation_;
+    info[ "current_annotation_idx" ] = current_annotation_idx_;
+    info[ "num_annotations"        ] = annotations_.size();
 }
 
 /**
@@ -203,15 +213,17 @@ void VariableView::showAnnotation()
 
 /**
  */
-void VariableView::setCurrentAnnotation(const std::string& id)
+void VariableView::setCurrentAnnotation(int group_idx, int annotation_idx)
 {
     if (!canShowAnnotations())
         return;
 
-    if (current_annotation_id_ == id)
+    if (current_annotation_group_idx_ == group_idx &&
+        current_annotation_idx_ == annotation_idx)
         return;
 
-    current_annotation_id_ = id;
+    current_annotation_group_idx_ = group_idx;
+    current_annotation_idx_       = annotation_idx;
 
     onShowAnnotationChanged(false);
 }
@@ -232,31 +244,41 @@ bool VariableView::hasAnnotations() const
 
 /**
  */
-const VariableView::AnnotationMap& VariableView::annotations() const
+const std::vector<VariableView::AnnotationGroup>& VariableView::annotations() const
 {
     return annotations_;
 }
 
 /**
  */
-const std::string& VariableView::currentAnnotationID() const
+int VariableView::currentAnnotationGroupIdx() const
 {
-    return current_annotation_id_;
+    return current_annotation_group_idx_;
 }
 
 /**
  */
-const std::vector<nlohmann::json>& VariableView::currentAnnotation() const
+int VariableView::currentAnnotationIdx() const
 {
-    assert(annotations_.count(current_annotation_id_) != 0);
-    return annotations_.at(current_annotation_id_);
+    return current_annotation_idx_;
+}
+
+/**
+ */
+const VariableView::Annotation& VariableView::currentAnnotation() const
+{
+    assert(hasCurrentAnnotation());
+    return annotations_.at(current_annotation_group_idx_).annotations.at(current_annotation_idx_);
 }
 
 /**
  */
 bool VariableView::hasCurrentAnnotation() const
 {
-    return (annotations_.count(current_annotation_id_) > 0);
+    return (current_annotation_group_idx_ >= 0 && 
+            current_annotation_group_idx_ < (int)annotations_.size() &&
+            current_annotation_idx_ >= 0 &&
+            current_annotation_idx_ < (int)annotations_.at(current_annotation_group_idx_).annotations.size());
 }
 
 /**
@@ -327,7 +349,9 @@ void VariableView::showViewPointSlot (const ViewableDataConfig* vp)
 void VariableView::clearAnnotations()
 {
     annotations_.clear();
-    current_annotation_id_ = "";
+
+    current_annotation_group_idx_ = -1;
+    current_annotation_idx_       = -1;
 }
 
 /**
@@ -342,11 +366,37 @@ void VariableView::scanViewPointForAnnotations()
     const auto& j = current_view_point_->data();
 
     //scan view point for annotation features
-    annotations_ = ViewPointGenVP::scanForFeatures(j, acceptedAnnotationFeatureTypes());
+    auto features = ViewPointGenVP::scanForFeatures(j, acceptedAnnotationFeatureTypes());
+    if (features.empty())
+        return;
 
-    //set current id
+    std::map<std::string, AnnotationGroup> groups;
+
+    for (const auto& feat : features)
+    {
+        PlotMetadata metadata;
+        
+        if (feat.feature_json.contains(ViewPointGenFeature::FeatureFieldNamePlotMetadata))
+            metadata.fromJSON(feat.feature_json[ ViewPointGenFeature::FeatureFieldNamePlotMetadata ]);
+
+        auto& group = groups[ metadata.plot_group_ ];
+        group.name = metadata.plot_group_;
+
+        Annotation anno;
+        anno.feature_json = feat.feature_json;
+        anno.metadata     = metadata;
+
+        group.annotations.push_back(anno);
+    }
+
+    for (const auto& g : groups)
+        annotations_.push_back(g.second);
+
     if (!annotations_.empty())
-        current_annotation_id_ = annotations_.begin()->first;
+    {
+        current_annotation_group_idx_ = 0;
+        current_annotation_idx_       = 0;
+    }
 }
 
 /**

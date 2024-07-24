@@ -33,7 +33,7 @@ namespace EvaluationRequirement
 {
 
 ModeCFalse::ModeCFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-                       float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference)
+                       double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference)
     : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
       maximum_probability_false_(maximum_probability_false), maximum_difference_(maximum_difference)
 {

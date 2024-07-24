@@ -19,6 +19,7 @@
 
 #include "evaluationdetail.h"
 #include "eval/results/evaluationdetail.h"
+#include "eval/results/base/result_defs.h"
 
 #include <QVariant>
 #include <QRectF>
@@ -27,6 +28,10 @@
 
 #include <memory>
 #include <vector>
+
+#include <QColor>
+
+#include <Eigen/Core>
 
 class EvaluationTargetData;
 class EvaluationManager;
@@ -47,6 +52,11 @@ namespace EvaluationResultsReport
 namespace EvaluationRequirementResult
 {
 
+class FeatureDefinitions;
+
+template <typename T>
+struct ValueSource;
+
 /**
 */
 class Base
@@ -54,6 +64,9 @@ class Base
 public:
     typedef std::vector<EvaluationDetail> EvaluationDetails;  // details vector
     typedef std::array<int, 2>            DetailIndex;        // index for a nested detail struct
+
+    typedef std::function<bool(const EvaluationDetail&)> DetailSkipFunc;
+    typedef std::function<void(const EvaluationDetail&, const EvaluationDetail*, int, int, int, int)> DetailFunc;
 
     enum class BaseType
     {
@@ -110,12 +123,19 @@ public:
     bool hasIssues() const;
     bool isIgnored() const;
 
-    /// returns the number of issues detected for this result
-    virtual unsigned int numIssues() const = 0;
+    size_t numDetails() const;
+    const EvaluationDetails& getDetails() const;
+    const EvaluationDetail& getDetail(int idx) const;
+    const EvaluationDetail& getDetail(const DetailIndex& index) const;
+
+    const SectorLayer& sectorLayer() const { return sector_layer_; } 
 
     QVariant resultValue() const;
     QVariant resultValueOptional(const boost::optional<double>& value) const;
     virtual QVariant resultValue(double value) const;
+
+    /// returns the number of issues detected for this result
+    virtual unsigned int numIssues() const = 0;
 
     /// checks if the result references a specific section of the report
     virtual bool hasReference(const EvaluationResultsReport::SectionContentTable& table, 
@@ -136,14 +156,19 @@ public:
     /// adds the result to the report root item
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
-    size_t numDetails() const;
-    const EvaluationDetails& getDetails() const;
-    const EvaluationDetail& getDetail(int idx) const;
-    const EvaluationDetail& getDetail(const DetailIndex& index) const;
+    /// iterate over details
+    virtual void iterateDetails(const DetailFunc& func,
+                                const DetailSkipFunc& skip_func = DetailSkipFunc()) const = 0;
 
-    const SectorLayer& sectorLayer() const { return sector_layer_; } 
+    std::vector<double> getValues(const ValueSource<double>& source) const;
+    std::vector<double> getValues(int value_id) const;
+
+    size_t totalNumDetails() const;
+    size_t totalNumPositions() const;
 
     const static std::string req_overview_table_name_;
+
+    static const QColor HistogramColorDefault;
 
 protected:
     /**
@@ -226,6 +251,8 @@ protected:
 
     std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options) const;
 
+    void addCustomAnnotations(nlohmann::json& annotations_json) const;
+
     /// creates a basic viewable
     virtual std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const = 0;
     /// creates additional viewable information (region of interest etc.)
@@ -234,14 +261,19 @@ protected:
     virtual void createAnnotations(nlohmann::json& annotations_json, 
                                    const AnnotationOptions& options) const = 0;
 
-    virtual void addCustomAnnotations(nlohmann::json& annotations_json) const {}
+    /// generate definitions for the automatic generation of custom annotations (grids, histograms, etc.)
+    virtual FeatureDefinitions getCustomAnnotationDefinitions() const;
 
     EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
+    /// section and annotation id strings
     virtual std::string getRequirementSectionID() const;
     virtual std::string getRequirementSumSectionID() const;
+    virtual std::string getRequirementAnnotationID_impl() const = 0;
 
+    std::string getRequirementAnnotationID() const;
+    
     EvaluationResultsReport::Section& getRequirementSection(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
     std::string type_;

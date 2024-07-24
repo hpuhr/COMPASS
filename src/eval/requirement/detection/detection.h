@@ -31,7 +31,7 @@ public:
             const std::string& name, 
             const std::string& short_name, 
             const std::string& group_name,
-            float prob, 
+            double prob, 
             COMPARISON_TYPE prob_check_type, 
             EvaluationManager& eval_man,
             float update_interval_s,
@@ -57,8 +57,14 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
-    std::string probabilityNameShort() const override final { return "PD"; }
-    std::string probabilityName() const override final { return "Probability of Detection"; }
+    std::string probabilityNameShort() const override final 
+    { 
+        return (invertProb() ? "PG" : "PD"); 
+    }
+    std::string probabilityName() const override final 
+    { 
+        return (invertProb() ? "Probability of Gap" : "Probability of Detection"); 
+    }
 
 protected:
     bool isMiss (float d_tod) const;

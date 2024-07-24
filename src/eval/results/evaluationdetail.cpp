@@ -255,6 +255,20 @@ const EvaluationDetail::Position& EvaluationDetail::position(size_t idx) const
 
 /**
 */
+const EvaluationDetail::Position& EvaluationDetail::firstPos() const
+{
+    return *positions_.begin();
+}
+
+/**
+*/
+const EvaluationDetail::Position& EvaluationDetail::lastPos() const
+{
+    return *positions_.rbegin();
+}
+
+/**
+*/
 QRectF EvaluationDetail::bounds(double eps) const
 {
     size_t n = numPositions();

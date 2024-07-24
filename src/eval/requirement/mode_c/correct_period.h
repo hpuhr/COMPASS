@@ -35,7 +35,7 @@ public:
             const std::string& name, 
             const std::string& short_name, 
             const std::string& group_name,
-            float prob, 
+            double prob, 
             COMPARISON_TYPE prob_check_type,
             EvaluationManager& eval_man,
             float update_interval_s, 
@@ -60,7 +60,6 @@ protected:
                                                                               const SectorLayer& sector_layer, 
                                                                               const std::vector<EvaluationDetail>& details,
                                                                               const TimePeriodCollection& periods,
-                                                                              const std::vector<dbContent::TargetPosition>& ref_updates,
                                                                               unsigned int sum_uis,
                                                                               unsigned int misses_total) override;
     float max_distance_ft_;
