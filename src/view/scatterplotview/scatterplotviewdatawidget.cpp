@@ -155,7 +155,7 @@ void ScatterPlotViewDataWidget::correctSeriesDateTime(ScatterSeriesCollection& c
     if (!x_axis_is_datetime_ && !y_axis_is_datetime_)
         return;
 
-    loginf << "correcting datetime...";
+    //loginf << "correcting datetime...";
 
     for (auto& s : collection.dataSeries())
     {
@@ -166,7 +166,7 @@ void ScatterPlotViewDataWidget::correctSeriesDateTime(ScatterSeriesCollection& c
         }
     }
 
-    loginf << "corrected datetime!";
+    //loginf << "corrected datetime!";
 }
 
 /**
