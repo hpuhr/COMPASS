@@ -109,15 +109,23 @@ void ReconstructorAssociatorBase::associateTargetReports()
 {
     loginf << "ReconstructorAssociatorBase: associateTargetReports";
 
-    const std::set<unsigned int> debug_utns = reconstructor().task().debugUTNs();
+    bool general_debug = reconstructor().task().debug();
 
-    if (debug_utns.size())
-        loginf << "DBG tns '" << String::compress(debug_utns, ',') << "'";
+    std::set<unsigned int> debug_utns;
+    std::set<unsigned long> debug_rec_nums;
 
-    const std::set<unsigned long> debug_rec_nums = reconstructor().task().debugRecNums();
+    if (general_debug)
+    {
+        debug_utns = reconstructor().task().debugUTNs();
 
-    if (debug_rec_nums.size())
-        loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+        if (debug_utns.size())
+            loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
+
+        debug_rec_nums = reconstructor().task().debugRecNums();
+
+        if (debug_rec_nums.size())
+            loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+    }
 
     unsigned long rec_num;
     int utn;
@@ -137,7 +145,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = debug_rec_nums.count(rec_num);
+        do_debug = general_debug && debug_rec_nums.count(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -146,7 +154,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         if (!tr.in_current_slice_)
         {
-            if(do_debug)
+            if (do_debug)
                 loginf << "DBG tr " << rec_num << " not in current slice";
 
             continue;
@@ -177,15 +185,23 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 {
     loginf << "ReconstructorAssociatorBase: associateTargetReports: dbcont_ids " << String::compress(dbcont_ids, ',');
 
-    const std::set<unsigned int> debug_utns = reconstructor().task().debugUTNs();
+    bool general_debug = reconstructor().task().debug();
 
-    if (debug_utns.size())
-        loginf << "DBG tns '" << String::compress(debug_utns, ',') << "'";
+    std::set<unsigned int> debug_utns;
+    std::set<unsigned long> debug_rec_nums;
 
-    const std::set<unsigned long> debug_rec_nums = reconstructor().task().debugRecNums();
+    if (general_debug)
+    {
+        debug_utns = reconstructor().task().debugUTNs();
 
-    if (debug_rec_nums.size())
-        loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+        if (debug_utns.size())
+            loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
+
+        debug_rec_nums = reconstructor().task().debugRecNums();
+
+        if (debug_rec_nums.size())
+            loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+    }
 
     unsigned long rec_num;
     int utn;
@@ -203,7 +219,7 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = debug_rec_nums.count(rec_num);
+        do_debug = general_debug && debug_rec_nums.count(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -238,9 +254,23 @@ void ReconstructorAssociatorBase::selfAccociateNewUTNs()
     unsigned int run_cnt {0};
     bool do_it_again {true};
 
-    const std::set<unsigned int> debug_utns = reconstructor().task().debugUTNs();
+    bool general_debug = reconstructor().task().debug();
 
-    const std::set<unsigned long> debug_rec_nums = reconstructor().task().debugRecNums();
+    std::set<unsigned int> debug_utns;
+    std::set<unsigned long> debug_rec_nums;
+
+    if (general_debug)
+    {
+        debug_utns = reconstructor().task().debugUTNs();
+
+        if (debug_utns.size())
+            loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
+
+        debug_rec_nums = reconstructor().task().debugRecNums();
+
+        if (debug_rec_nums.size())
+            loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+    }
 
     int other_utn;
 
@@ -334,8 +364,23 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
     if (!unassoc_rec_nums_.size())
         return;
 
-    const std::set<unsigned int> debug_utns = reconstructor().task().debugUTNs();
-    const std::set<unsigned long> debug_rec_nums = reconstructor().task().debugRecNums();
+    bool general_debug = reconstructor().task().debug();
+
+    std::set<unsigned int> debug_utns;
+    std::set<unsigned long> debug_rec_nums;
+
+    if (general_debug)
+    {
+        debug_utns = reconstructor().task().debugUTNs();
+
+        if (debug_utns.size())
+            loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
+
+        debug_rec_nums = reconstructor().task().debugRecNums();
+
+        if (debug_rec_nums.size())
+            loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+    }
 
     unsigned long rec_num;
     unsigned int dbcont_id;
@@ -356,7 +401,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = debug_rec_nums.count(rec_num);
+        do_debug = general_debug && debug_rec_nums.count(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -409,7 +454,7 @@ void ReconstructorAssociatorBase::associate(
     assert (reconstructor().targets_.count(utn));
 
             // check if position usable
-    reconstructor().acc_estimator_->validate(tr, reconstructor());
+    reconstructor().acc_estimator_->validate(tr);
     doOutlierDetection(tr, utn, do_debug); //124976,129072
 
     reconstructor().targets_.at(utn).addTargetReport(tr.record_num_);
@@ -575,9 +620,9 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
                     // check for position offsets
             //            auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
 
-            //            if (pos_offs.has_value())
-            //            {
-            //                std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
+                    //            if (pos_offs.has_value())
+                    //            {
+                    //                std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
 
             boost::optional<bool> check_result = checkPositionOffsetAcceptable(
                 tr, utn, true, do_debug);
@@ -1032,7 +1077,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 #if TBB_VERSION_MAJOR <= 4
                           int thread_id = pthread_self(); // TODO PHIL
 #else
-            int thread_id = tbb::this_task_arena::current_thread_index();
+                          int thread_id = tbb::this_task_arena::current_thread_index();
 #endif
 
                           if (thread_id < 0)

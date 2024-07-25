@@ -25,11 +25,14 @@
 
 #include "util/timeconv.h"
 #include "util/number.h"
+#include "stringconv.h"
 #include "logger.h"
 
 #include <ogr_spatialref.h>
 
 #include "tbbhack.h"
+
+using namespace Utils;
 
 /**
  */
@@ -381,12 +384,28 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 {
     refs.resetCounts();
 
-    const auto& debug_utns    = reconstructor_.task().debugUTNs();
-    const auto& debug_recnums = reconstructor_.task().debugRecNums();
+    bool general_debug = reconstructor_.task().debug();
+
+    std::set<unsigned int> debug_utns;
+    std::set<unsigned long> debug_rec_nums;
+
+    if (general_debug)
+    {
+        debug_utns = reconstructor_.task().debugUTNs();
+
+        if (debug_utns.size())
+            loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
+
+        debug_rec_nums = reconstructor_.task().debugRecNums();
+
+        if (debug_rec_nums.size())
+            loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+    }
+
     const auto& debug_ts_min  = reconstructor_.task().debugTimestampMin();
     const auto& debug_ts_max  = reconstructor_.task().debugTimestampMax();
 
-    bool debug_target = debug_utns.count(refs.utn) > 0; 
+    bool debug_target = general_debug && debug_utns.count(refs.utn) > 0;
 
     if(settings_.activeVerbosity() > 0) 
     {
@@ -489,7 +508,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     {
         const auto& mm = refs.measurements[ i ];
 
-        bool debug_mm = debug_target || (debug_recnums.count(mm.source_id) > 0);
+        bool debug_mm = general_debug && (debug_target || (debug_rec_nums.count(mm.source_id) > 0));
         if (debug_mm && !debug_ts_min.is_not_a_date_time() && mm.t < debug_ts_min)
             debug_mm = false;
         if (debug_mm && !debug_ts_max.is_not_a_date_time() && mm.t > debug_ts_max)

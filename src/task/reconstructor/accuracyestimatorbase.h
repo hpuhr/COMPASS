@@ -30,8 +30,7 @@ class AccuracyEstimatorBase
 
     virtual void init (ReconstructorBase* reconstructor);
 
-    virtual void validate (dbContent::targetReport::ReconstructorInfo& tr,
-                          ReconstructorBase& reconstructor) = 0; // can set do not use position flag
+    virtual void validate (dbContent::targetReport::ReconstructorInfo& tr) = 0; // can set do not use position flag
 
     virtual bool canCorrectPosition(const dbContent::targetReport::ReconstructorInfo& tr) { return false; }
     virtual void correctPosition(dbContent::targetReport::ReconstructorInfo& tr) {} // save in position_corrected_

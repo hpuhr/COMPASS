@@ -10,7 +10,7 @@ class SimpleAccuracyEstimator : public AccuracyEstimatorBase
   public:
     SimpleAccuracyEstimator();
 
-    virtual void validate (dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor) override;
+    virtual void validate (dbContent::targetReport::ReconstructorInfo& tr) override;
 
     virtual dbContent::targetReport::PositionAccuracy positionAccuracy (
         const dbContent::targetReport::ReconstructorInfo& tr) override;
