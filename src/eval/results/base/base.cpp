@@ -366,7 +366,8 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json,
         {
             //create feature and add to annotation
             auto f = def->createFeature(this, details);
-            assert(f);
+            if (!f)
+                continue;
 
             loginf << "Base: addCustomAnnotations: Adding feature '" << f->name() << "'";
 

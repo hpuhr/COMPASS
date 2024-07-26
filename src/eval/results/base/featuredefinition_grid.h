@@ -87,7 +87,7 @@ public:
         assert(isValid());
         assert(converter_);
 
-        loginf << "Base: addGrids: creating grid...";
+        loginf << "FeatureDefinitionGridBase: createFeature_impl: creating grid...";
 
         //create suitably sized grid
         QRectF roi = gridBounds(result->sectorLayer(), {});
@@ -104,7 +104,7 @@ public:
         //!shall not fail! (otherwise sector bounds might be strange)
         assert(grid_ok);
 
-        loginf << "Base: addGrids: filling grid...";
+        loginf << "FeatureDefinitionGridBase: createFeature_impl: filling grid...";
 
         //generate grid layers
         Grid2DLayers layers;
@@ -169,7 +169,13 @@ public:
             render_settings_map[ ds.series_name ] = render_settings;
         }
 
-        loginf << "Base: addGrids: creating features...";
+        loginf << "FeatureDefinitionGridBase: createFeature_impl: creating features...";
+
+        if (layers.numLayers() < 1)
+        {
+            loginf << "FeatureDefinitionGridBase: createFeature_impl: no layers created, skipping...";
+            return {};
+        }
 
         const auto& layer = *layers.layers().begin();
 
