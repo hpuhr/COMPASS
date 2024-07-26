@@ -44,7 +44,7 @@ SinglePositionRadarAzimuth::SinglePositionRadarAzimuth(const std::string& result
 :   SinglePositionValueBase("SinglePositionRadarAzimuth", result_id, requirement, sector_layer, utn, target, eval_man, details,
                             num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed)
 {
-    updateResult();
+    updateResult(details);
 }
 
 /**
@@ -116,7 +116,7 @@ std::vector<QVariant> SinglePositionRadarAzimuth::detailValues(const EvaluationD
 
 /**
 */
-boost::optional<double> SinglePositionRadarAzimuth::computeFinalResultValue() const
+boost::optional<double> SinglePositionRadarAzimuth::computeFinalResultValue(const EvaluationDetails& details) const
 {
     if (accumulator_.numValues() == 0)
         return {};

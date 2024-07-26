@@ -39,7 +39,7 @@ SingleModeCCorrectPeriod::SingleModeCCorrectPeriod(const std::string& result_typ
                                                    TimePeriodCollection ref_periods)
 :   SingleIntervalBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details, sum_uis, missed_uis, ref_periods)
 {
-    updateResult();
+    updateResult(details);
 }
 
 /**

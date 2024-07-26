@@ -16,6 +16,7 @@
  */
 
 #include "eval/results/base/single.h"
+#include "eval/results/base/result_t.h"
 
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
@@ -114,11 +115,18 @@ void Single::updateUseFromTarget()
 
 /**
 */
-void Single::updateResult()
+void Single::updateResult(const EvaluationDetails& details)
 {
-    Base::updateResult();
+    Base::updateResult(computeResult(details));
 
     updateUseFromTarget();
+}
+
+/**
+*/
+boost::optional<double> Single::computeResult(const EvaluationDetails& details) const
+{
+    return computeResult_impl(details);
 }
 
 /**
@@ -551,6 +559,22 @@ std::string Single::reference(const EvaluationResultsReport::SectionContentTable
 {
     assert (hasReference(table, annotation));
     return EvaluationResultsReport::SectionID::createForTargetResult(utn_, *this);
+}
+
+/**
+*/
+std::vector<double> Single::getValues(const ValueSource<double>& source,
+                                      const EvaluationDetails& details) const
+{
+    return EvaluationResultTemplates(this, &details).getValues<double>(source);
+}
+
+/**
+*/
+std::vector<double> Single::getValues(int value_id,
+                                      const EvaluationDetails& details) const
+{
+    return getValues(ValueSource<double>(value_id), details);
 }
 
 /**

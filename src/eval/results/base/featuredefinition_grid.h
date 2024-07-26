@@ -51,12 +51,13 @@ class FeatureDefinitionGridBase : public FeatureDefinition
 {
 public:
     FeatureDefinitionGridBase(const EvaluationManager& eval_manager,
+                              const std::string& description_type,
                               const std::string& feature_description,
                               bool generate_geoimage,
                               const boost::optional<unsigned int>& grid_num_cells_x = boost::optional<unsigned int>(),
                               const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>(),
                               const boost::optional<unsigned int>& grid_pixels_per_cell = boost::optional<unsigned int>())
-    :   FeatureDefinition    (eval_manager, feature_description, "", "")
+    :   FeatureDefinition    (eval_manager, description_type, feature_description, "", "")
     ,   grid_num_cells_x_    (grid_num_cells_x)
     ,   grid_num_cells_y_    (grid_num_cells_y)
     ,   grid_pixels_per_cell_(grid_pixels_per_cell)
@@ -302,7 +303,7 @@ public:
                           const boost::optional<unsigned int>& grid_num_cells_x = boost::optional<unsigned int>(),
                           const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>(),
                           const boost::optional<unsigned int>& grid_pixels_per_cell = boost::optional<unsigned int>())
-    :   FeatureDefinitionGridBase<T>(eval_manager, feature_description, generate_geoimage, grid_num_cells_x, grid_num_cells_y, grid_pixels_per_cell)
+    :   FeatureDefinitionGridBase<T>(eval_manager, "grid", feature_description, generate_geoimage, grid_num_cells_x, grid_num_cells_y, grid_pixels_per_cell)
     {
     }
     virtual ~FeatureDefinitionGrid() = default;
@@ -341,7 +342,7 @@ public:
                                 const boost::optional<unsigned int>& grid_num_cells_x = boost::optional<unsigned int>(),
                                 const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>(),
                                 const boost::optional<unsigned int>& grid_pixels_per_cell = boost::optional<unsigned int>())
-    :   FeatureDefinitionGridBase<bool>(eval_manager, feature_description, true, grid_num_cells_x, grid_num_cells_y, grid_pixels_per_cell)
+    :   FeatureDefinitionGridBase<bool>(eval_manager, "binary_grid", feature_description, true, grid_num_cells_x, grid_num_cells_y, grid_pixels_per_cell)
     {
         //converts bool -> double
         converter_ = [ & ] (const bool& v) { return v ? 1.0 : 0.0; };

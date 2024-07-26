@@ -46,7 +46,7 @@ public:
 protected:
     EvaluationRequirement::ProbabilityBase& probRequirement() const;
 
-    boost::optional<double> computeResult() const override final;
+    boost::optional<double> computeResult(const EvaluationDetails& details) const override final;
 
 private:
     double invertProb(double prob) const;

@@ -30,6 +30,9 @@ namespace EvaluationRequirementResult
 
 class Single;
 
+template <typename T>
+struct ValueSource;
+
 /**
 */
 class Joined : public Base
@@ -52,6 +55,7 @@ public:
     void addSingleResult(std::shared_ptr<Single> other);
 
     std::vector<std::shared_ptr<Single>>& singleResults();
+    std::vector<std::shared_ptr<Single>> usedSingleResults() const;
 
     void addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
 
@@ -77,6 +81,9 @@ public:
 
     bool hasStoredDetails() const;
 
+    std::vector<double> getValues(const ValueSource<double>& source) const;
+    std::vector<double> getValues(int value_id) const;
+
     static const std::string SectorOverviewID;
     static const int         SectorOverviewRenderDelayMSec;
 
@@ -85,6 +92,11 @@ protected:
     void iterateSingleResults(const SingleResultFunc& func,
                               const SingleResultFunc& func_used,
                               const SingleResultFunc& func_unused) const;
+
+    /// compute result value
+    virtual void updateResult();
+    virtual boost::optional<double> computeResult() const;
+    virtual boost::optional<double> computeResult_impl() const = 0;
 
     /// clears result data before accumulating single results
     virtual void clearResults_impl() = 0;

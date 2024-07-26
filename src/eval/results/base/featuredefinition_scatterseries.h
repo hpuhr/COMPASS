@@ -42,7 +42,7 @@ public:
                                    const std::string& feature_description,
                                    const std::string& x_axis_label,
                                    const std::string& y_axis_label) 
-    :   FeatureDefinition(eval_manager, feature_description, x_axis_label, y_axis_label) {}
+    :   FeatureDefinition(eval_manager, "scatterseries", feature_description, x_axis_label, y_axis_label) {}
 
     virtual ~FeatureDefinitionScatterSeries() = default;
 
@@ -144,7 +144,7 @@ public:
                                          const std::string& feature_description,
                                          const std::string& x_axis_label,
                                          const std::string& y_axis_label)
-    :   FeatureDefinition(eval_manager, feature_description, x_axis_label, y_axis_label) 
+    :   FeatureDefinition(eval_manager, "scatterseries_custom", feature_description, x_axis_label, y_axis_label) 
     {
     }
     virtual ~FeatureDefinitionCustomScatterSeries() = default;
@@ -220,7 +220,7 @@ public:
     FeatureDefinitionTimedScatterSeries(const EvaluationManager& eval_manager,
                                         const std::string& feature_description,
                                         const std::string& y_axis_label) 
-    :   FeatureDefinition(eval_manager, feature_description, DBContent::meta_var_timestamp_.name(), y_axis_label) {}
+    :   FeatureDefinition(eval_manager, "scatterseries_timed", feature_description, DBContent::meta_var_timestamp_.name(), y_axis_label) {}
 
     virtual ~FeatureDefinitionTimedScatterSeries() = default;
 

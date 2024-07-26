@@ -54,9 +54,6 @@ namespace EvaluationRequirementResult
 
 class FeatureDefinitions;
 
-template <typename T>
-struct ValueSource;
-
 /**
 */
 class Base
@@ -152,9 +149,6 @@ public:
                                 const DetailSkipFunc& skip_func = DetailSkipFunc(),
                                 const EvaluationDetails* details = nullptr) const = 0;
 
-    std::vector<double> getValues(const ValueSource<double>& source) const;
-    std::vector<double> getValues(int value_id) const;
-
     size_t totalNumDetails(const EvaluationDetails* details = nullptr) const;
     size_t totalNumPositions(const EvaluationDetails* details = nullptr) const;
 
@@ -229,13 +223,9 @@ protected:
     void setIgnored();
 
     QString formatValue(double v, int precision = 2) const;
-
-    /// compute result value
-    virtual void updateResult();
-    virtual boost::optional<double> computeResult() const;
-    virtual boost::optional<double> computeResult_impl() const = 0;
-    
     std::string conditionResultString() const;
+
+    void updateResult(const boost::optional<double>& value);
 
     /// creates overview viewable data
     virtual std::unique_ptr<nlohmann::json::object_t> viewableOverviewData() const = 0;

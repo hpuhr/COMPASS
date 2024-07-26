@@ -136,17 +136,6 @@ const boost::optional<double>& Base::result() const
 
 /**
 */
-void Base::updateResult()
-{
-    result_.reset();
-
-    auto result = computeResult();
-    if (result.has_value())
-        result_ = result.value();
-}
-
-/**
-*/
 bool Base::resultUsable() const
 {
     return (result_.has_value() && !ignore_);
@@ -164,6 +153,13 @@ bool Base::hasFailed() const
 bool Base::hasIssues() const
 {
     return (resultUsable() && numIssues() > 0);
+}
+
+/**
+*/
+void Base::updateResult(const boost::optional<double>& value)
+{
+    result_ = value;
 }
 
 /**
@@ -212,13 +208,6 @@ void Base::setIgnored()
 bool Base::isIgnored() const
 {
     return ignore_;
-}
-
-/**
-*/
-boost::optional<double> Base::computeResult() const
-{
-    return computeResult_impl();
 }
 
 /**
@@ -364,12 +353,17 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json,
 
         for (const auto& def : value_defs.second)
         {
+            assert(def);
+
             //create feature and add to annotation
             auto f = def->createFeature(this, details);
             if (!f)
+            {
+                loginf << "Base: addCustomAnnotations: Skipping empty feature of definition type '" << def->type() << "'";
                 continue;
+            }
 
-            loginf << "Base: addCustomAnnotations: Adding feature '" << f->name() << "'";
+            loginf << "Base: addCustomAnnotations: Adding feature '" << f->name() << "' of definition type '" << def->type() << "'";
 
             PlotMetadata metadata;
             metadata.plot_group_   = group_name;
@@ -439,20 +433,6 @@ size_t Base::totalNumPositions(const EvaluationDetails* details) const
     iterateDetails(funcScan, {}, details);
 
     return num_positions;
-}
-
-/**
-*/
-std::vector<double> Base::getValues(const ValueSource<double>& source) const
-{
-    return EvaluationResultTemplates(this).getValues<double>(source);
-}
-
-/**
-*/
-std::vector<double> Base::getValues(int value_id) const
-{
-    return getValues(ValueSource<double>(value_id));
 }
 
 }

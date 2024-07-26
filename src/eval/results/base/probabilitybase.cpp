@@ -73,9 +73,9 @@ EvaluationRequirement::ProbabilityBase& SingleProbabilityBase::probRequirement()
 
 /**
 */
-boost::optional<double> SingleProbabilityBase::computeResult() const
+boost::optional<double> SingleProbabilityBase::computeResult(const EvaluationDetails& details) const
 {
-    auto result = computeResult_impl();
+    auto result = computeResult_impl(details);
 
     //invert probability?
     if (result.has_value() && probRequirement().invertProb())

@@ -43,6 +43,9 @@ namespace EvaluationRequirementResult
 
 class Joined;
 
+template <typename T>
+struct ValueSource;
+
 /**
 */
 class Single : public Base
@@ -121,6 +124,11 @@ public:
                         const DetailSkipFunc& skip_func = DetailSkipFunc(),
                         const EvaluationDetails* details = nullptr) const override final;
 
+    std::vector<double> getValues(const ValueSource<double>& source,
+                                  const EvaluationDetails& details) const;
+    std::vector<double> getValues(int value_id,
+                                  const EvaluationDetails& details) const;
+
     /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
 
@@ -144,7 +152,10 @@ protected:
     std::string getTargetSectionID();
     std::string getTargetRequirementSectionID();
 
-    void updateResult() override final;
+    /// compute result value
+    virtual void updateResult(const EvaluationDetails& details);
+    virtual boost::optional<double> computeResult(const EvaluationDetails& details) const;
+    virtual boost::optional<double> computeResult_impl(const EvaluationDetails& details) const = 0;
 
     virtual std::string getRequirementSectionID () const override;
     virtual std::string getRequirementAnnotationID_impl() const override;

@@ -107,7 +107,7 @@ public:
 protected:
     EvaluationRequirement::GenericBase& genericRequirement() const;
 
-    virtual boost::optional<double> computeResult_impl() const override;
+    virtual boost::optional<double> computeResult_impl(const EvaluationDetails& details) const override;
     virtual unsigned int numIssues() const override;
 
     virtual std::vector<std::string> targetTableHeadersCustom() const override;

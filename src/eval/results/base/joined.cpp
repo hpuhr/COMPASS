@@ -17,6 +17,7 @@
 
 #include "eval/results/base/joined.h"
 #include "eval/results/base/single.h"
+#include "eval/results/base/result_t.h"
 
 #include "eval/results/report/sectioncontenttable.h"
 #include "eval/results/report/section.h"
@@ -69,6 +70,20 @@ void Joined::clearResults()
 
     //invoke derived
     clearResults_impl();
+}
+
+/**
+*/
+void Joined::updateResult()
+{
+    Base::updateResult(computeResult());
+}
+
+/**
+*/
+boost::optional<double> Joined::computeResult() const
+{
+    return computeResult_impl();
 }
 
 /**
@@ -411,6 +426,22 @@ std::vector<std::shared_ptr<Single>>& Joined::singleResults()
 
 /**
 */
+std::vector<std::shared_ptr<Single>> Joined::usedSingleResults() const
+{
+    std::vector<std::shared_ptr<Single>> used_results;
+
+    auto funcSingleResults = [ & ] (const std::shared_ptr<Single>& result)
+    {
+        used_results.push_back(result);
+    };
+
+    iterateSingleResults({}, funcSingleResults, {});
+
+    return used_results;
+}
+
+/**
+*/
 bool Joined::hasStoredDetails() const
 {
     bool has_details = true;
@@ -493,6 +524,19 @@ void Joined::updateToChanges()
         cacheViewable();
 }
 
+/**
+*/
+std::vector<double> Joined::getValues(const ValueSource<double>& source) const
+{
+    return EvaluationResultTemplates(this).getValues<double>(source);
+}
+
+/**
+*/
+std::vector<double> Joined::getValues(int value_id) const
+{
+    return getValues(ValueSource<double>(value_id));
+}
 
 /**
 */

@@ -44,7 +44,7 @@ SingleIdentificationFalse::SingleIdentificationFalse(const std::string& result_i
 :   SingleFalseBase("SingleIdentificationFalse", result_id, requirement, sector_layer, utn, target, eval_man, details,
                     num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside, num_unknown, num_correct, num_false, "identification")
 {
-    updateResult();
+    updateResult(details);
 }
 
 /**
