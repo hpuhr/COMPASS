@@ -39,9 +39,11 @@ SimpleAccuracyEstimator::SimpleAccuracyEstimator()
 }
 
 void SimpleAccuracyEstimator::validate (
-    dbContent::targetReport::ReconstructorInfo& tr, ReconstructorBase& reconstructor)
+    dbContent::targetReport::ReconstructorInfo& tr)
 {
-    boost::optional<unsigned char> mops_version = reconstructor.accessor(tr).mopsVersion(tr.buffer_index_);
+    assert (reconstructor_);
+
+    boost::optional<unsigned char> mops_version = reconstructor_->accessor(tr).mopsVersion(tr.buffer_index_);
 
     if (mops_version && *mops_version == 0)
         tr.do_not_use_position_ = true;

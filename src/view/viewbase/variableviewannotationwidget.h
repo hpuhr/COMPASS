@@ -22,6 +22,7 @@
 class VariableView;
 
 class QComboBox;
+class QLabel;
 
 /**
 */
@@ -34,15 +35,25 @@ public:
 
     void updateContent();
 
-    std::string currentID() const;
+    bool hasCurrentAnnotation() const;
+    int currentGroupIdx() const;
+    int currentAnnotationIdx() const;
 
 signals:
-    void idChanged();
+    void currentAnnotationChanged();
 
 private:
     void createUI();
 
+    void groupChanged();
+    void annotationChanged();
+
+    void updateGroups(int current_idx = -1);
+    void updateAnnotations(int current_idx = -1);
+
     const VariableView* view_ = nullptr;
 
-    QComboBox* combo_ = nullptr;
+    QLabel*    group_label_ = nullptr;
+    QComboBox* group_combo_ = nullptr;
+    QComboBox* anno_combo_  = nullptr;
 };

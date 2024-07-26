@@ -455,7 +455,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
         unsigned int buffer_size = buffer->size();
         assert(buffer_size);
 
-        loginf << "ASTERIXPostprocessJob: doGroundSpeedCalculations: got ads-b sgv gss "
+        logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: got ads-b sgv gss "
                << buffer->has<float>(DBContent::var_cat021_sgv_gss_.name())
                << " hgt " << buffer->has<double>(DBContent::var_cat021_sgv_hgt_.name())
                << " htt " << buffer->has<bool>(DBContent::var_cat021_sgv_htt_.name())
@@ -525,7 +525,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
             sgv_usable++; // there
         }
 
-        loginf << "ASTERIXPostprocessJob: doGroundSpeedCalculations: CAT021 spd_already_set " << spd_already_set
+        logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: CAT021 spd_already_set " << spd_already_set
                << " sgv_spd_no_val " << sgv_spd_no_val << " sgv_hgt_no_value " << sgv_hgt_no_value
                << " sgv_is_heading " << sgv_is_heading << " sgv_is_magnetic " << sgv_is_magnetic
                << " sgv_usable " << sgv_usable;

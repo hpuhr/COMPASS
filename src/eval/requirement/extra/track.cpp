@@ -16,12 +16,13 @@
  */
 
 #include "eval/requirement/extra/track.h"
-#include "eval/results/extra/tracksingle.h"
-//#include "evaluationdata.h"
+
+#include "eval/results/extra/track.h"
+
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "stringconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
 #include "timeperiod.h"
 
 #include <boost/algorithm/string/join.hpp>
@@ -33,32 +34,47 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-ExtraTrack::ExtraTrack(
-        const std::string& name, const std::string& short_name, const std::string& group_name,
-        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-        float min_duration, unsigned int min_num_updates, bool ignore_primary_only)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
+/**
+*/
+ExtraTrack::ExtraTrack(const std::string& name, 
+                       const std::string& short_name, 
+                       const std::string& group_name,
+                       double prob, 
+                       COMPARISON_TYPE prob_check_type, 
+                       EvaluationManager& eval_man,
+                       float min_duration, 
+                       unsigned int min_num_updates, 
+                       bool ignore_primary_only)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
       min_duration_(Time::partialSeconds(min_duration)),
-      min_num_updates_(min_num_updates), ignore_primary_only_(ignore_primary_only)
+      min_num_updates_(min_num_updates), 
+      ignore_primary_only_(ignore_primary_only)
 {
-
 }
 
+/**
+*/
 float ExtraTrack::minDuration() const
 {
     return Time::partialSeconds(min_duration_);
 }
 
+/**
+*/
 unsigned int ExtraTrack::minNumUpdates() const
 {
     return min_num_updates_;
 }
 
+/**
+*/
 bool ExtraTrack::ignorePrimaryOnly() const
 {
     return ignore_primary_only_;
 }
 
+/**
+*/
 std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)

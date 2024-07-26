@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/speed/speed.h"
-#include "eval/results/speed/speedsingle.h"
+#include "eval/results/speed/speed.h"
 //#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -37,10 +37,10 @@ namespace EvaluationRequirement
 
 Speed::Speed(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+        double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         float threshold_value, bool use_percent_if_higher, float threshold_percent,
         COMPARISON_TYPE threshold_value_check_type, bool failed_values_of_interest)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
       threshold_value_(threshold_value),
       use_percent_if_higher_(use_percent_if_higher), threshold_percent_(threshold_percent),
       threshold_value_check_type_(threshold_value_check_type),
@@ -123,8 +123,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     unsigned int num_speeds {0};
     string comment;
 
-    vector<double> values;
-
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -142,7 +140,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Offset, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::Offset, offset)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -270,8 +268,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_comp_failed, num_comp_passed,
                     comment);
-
-        values.push_back(spd_diff);
     }
 
     //        logdbg << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -295,15 +291,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
                << " num_comp_passed " << num_comp_passed;
 
     assert (num_speeds == num_comp_failed + num_comp_passed);
-    assert (num_speeds == values.size());
-
-    //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SingleSpeed>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value,
-                num_comp_failed, num_comp_passed,
-                values);
+                num_comp_failed, num_comp_passed);
 }
 
 }

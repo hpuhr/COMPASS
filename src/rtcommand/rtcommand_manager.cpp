@@ -253,7 +253,7 @@ rtcommand::IssueInfo RTCommandManager::addCommand(const std::string& cmd_str, So
 
     rtcommand::RTCommandResponse response(issue_result.second);
 
-    loginf << "RTCommandManager: addCommand: respone = ";
+    loginf << "RTCommandManager: addCommand: response = ";
     loginf << response.toJSONString();
 
     //if issue went well push to command queue

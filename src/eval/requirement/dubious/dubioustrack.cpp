@@ -17,9 +17,11 @@
 
 
 #include "eval/requirement/dubious/dubioustrack.h"
-#include "eval/results/dubious/dubioustracksingle.h"
+
+#include "eval/results/dubious/dubioustrack.h"
+
 #include "evaluationmanager.h"
-//#include "evaluationdata.h"
+
 #include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "util/number.h"
@@ -32,35 +34,62 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-DubiousTrack::DubiousTrack(
-        const std::string& name, const std::string& short_name, const std::string& group_name,
-        bool eval_only_single_ds_id, unsigned int single_ds_id,
-        float minimum_comparison_time, float maximum_comparison_time,
-        bool mark_primary_only, bool use_min_updates, unsigned int min_updates,
-        bool use_min_duration, float min_duration,
-        bool use_max_groundspeed, float max_groundspeed_kts,
-        bool use_max_acceleration, float max_acceleration,
-        bool use_max_turnrate, float max_turnrate,
-        bool use_rocd, float max_rocd, float dubious_prob,
-        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
-      eval_only_single_ds_id_(eval_only_single_ds_id), single_ds_id_(single_ds_id),
-      minimum_comparison_time_(minimum_comparison_time), maximum_comparison_time_(maximum_comparison_time),
-      mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
-      use_min_duration_(use_min_duration), min_duration_(Time::partialSeconds(min_duration)),
-      use_max_groundspeed_(use_max_groundspeed), max_groundspeed_kts_(max_groundspeed_kts),
-      use_max_acceleration_(use_max_acceleration), max_acceleration_(max_acceleration),
-      use_max_turnrate_(use_max_turnrate), max_turnrate_(max_turnrate),
-      use_rocd_(use_rocd), max_rocd_(max_rocd), dubious_prob_(dubious_prob)
+/**
+*/
+DubiousTrack::DubiousTrack(const std::string& name, 
+                           const std::string& short_name, 
+                           const std::string& group_name,
+                           bool eval_only_single_ds_id, 
+                           unsigned int single_ds_id,
+                           float minimum_comparison_time, 
+                           float maximum_comparison_time,
+                           bool mark_primary_only, 
+                           bool use_min_updates, 
+                           unsigned int min_updates,
+                           bool use_min_duration, 
+                           float min_duration,
+                           bool use_max_groundspeed, 
+                           float max_groundspeed_kts,
+                           bool use_max_acceleration, 
+                           float max_acceleration,
+                           bool use_max_turnrate, 
+                           float max_turnrate,
+                           bool use_rocd, 
+                           float max_rocd, 
+                           float dubious_prob,
+                           double prob, 
+                           COMPARISON_TYPE prob_check_type, 
+                           EvaluationManager& eval_man)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
+      eval_only_single_ds_id_(eval_only_single_ds_id), 
+      single_ds_id_(single_ds_id),
+      minimum_comparison_time_(minimum_comparison_time), 
+      maximum_comparison_time_(maximum_comparison_time),
+      mark_primary_only_(mark_primary_only), 
+      use_min_updates_(use_min_updates), 
+      min_updates_(min_updates),
+      use_min_duration_(use_min_duration), 
+      min_duration_(Time::partialSeconds(min_duration)),
+      use_max_groundspeed_(use_max_groundspeed), 
+      max_groundspeed_kts_(max_groundspeed_kts),
+      use_max_acceleration_(use_max_acceleration), 
+      max_acceleration_(max_acceleration),
+      use_max_turnrate_(use_max_turnrate), 
+      max_turnrate_(max_turnrate),
+      use_rocd_(use_rocd), 
+      max_rocd_(max_rocd), 
+      dubious_prob_(dubious_prob)
 {
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
-        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
-        const SectorLayer& sector_layer)
+/**
+*/
+std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (const EvaluationTargetData& target_data, 
+                                                                             std::shared_ptr<Base> instance,
+                                                                             const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementDubiousTrack '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " mark_primary_only " << mark_primary_only_ << " prob " << prob_
+           << " mark_primary_only " << mark_primary_only_ << " prob " << threshold()
            << " use_min_updates " << use_min_updates_ << " min_updates " << min_updates_
            << " use_min_duration " << use_min_duration_ << " min_duration " << min_duration_;
 
@@ -442,53 +471,78 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                 num_tracks, num_tracks_dubious);
 }
 
+/**
+*/
 bool DubiousTrack::markPrimaryOnly() const
 {
     return mark_primary_only_;
 }
 
+/**
+*/
 bool DubiousTrack::useMinUpdates() const
 {
     return use_min_updates_;
 }
 
+/**
+*/
 unsigned int DubiousTrack::minUpdates() const
 {
     return min_updates_;
 }
 
+/**
+*/
 bool DubiousTrack::useMinDuration() const
 {
     return use_min_duration_;
 }
 
+/**
+*/
 float DubiousTrack::minDuration() const
 {
     return Time::partialSeconds(min_duration_);
 }
 
+/**
+*/
 bool DubiousTrack::useMaxAcceleration() const
 {
     return use_max_acceleration_;
 }
+
+/**
+*/
 float DubiousTrack::maxAcceleration() const
 {
     return max_acceleration_;
 }
 
+/**
+*/
 bool DubiousTrack::useMaxTurnrate() const
 {
     return use_max_turnrate_;
 }
+
+/**
+*/
 float DubiousTrack::maxTurnrate() const
 {
     return max_turnrate_;
 }
 
+/**
+*/
 bool DubiousTrack::useROCD() const
 {
     return use_rocd_;
 }
+
+/**
+*/
 float DubiousTrack::maxROCD() const
 {
     return max_rocd_;

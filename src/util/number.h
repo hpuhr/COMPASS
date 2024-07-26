@@ -31,6 +31,9 @@ extern float randomNumber(float min, float max);
 /// @brief Returns rounded number to nearest integer
 extern float roundToNearest(float num);
 extern double round(float num, unsigned int precision);
+
+extern unsigned int numDecimals(double v, unsigned int dec_max = 9);
+
 /// @brief Returns angle (degrees) calculated from given values
 extern double calculateAngle(double degrees, double minutes, double seconds);
 

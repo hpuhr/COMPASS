@@ -55,6 +55,8 @@ class ReconstructorTask : public Task, public Configurable
 
     void runDoneSlot();
 
+    void updateProgressSlot(const QString& msg, bool add_slice_progress);
+
   public:
     ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                       TaskManager& task_manager);
@@ -83,6 +85,9 @@ class ReconstructorTask : public Task, public Configurable
 #endif
 
     std::set<unsigned int> disabledDataSources() const;
+
+    bool debug() const;
+    void debug(bool value);
 
     const std::set<unsigned int>& debugUTNs() const;
     void debugUTNs(const std::set<unsigned int>& utns);
@@ -125,6 +130,7 @@ class ReconstructorTask : public Task, public Configurable
 
     std::unique_ptr<QProgressDialog> progress_dialog_;
     boost::posix_time::ptime run_start_time_;
+    boost::posix_time::ptime run_start_time_after_del_;
 
     size_t current_slice_idx_ = 0;
 
@@ -133,6 +139,7 @@ class ReconstructorTask : public Task, public Configurable
     std::unique_ptr<ReconstructorBase::DataSlice> processing_slice_;
     std::unique_ptr<ReconstructorBase::DataSlice> writing_slice_;
 
+    bool debug_ {false};
     std::set<unsigned int> debug_utns_;
     std::set<unsigned long> debug_rec_nums_;
     boost::posix_time::ptime debug_timestamp_min_;
@@ -152,5 +159,4 @@ class ReconstructorTask : public Task, public Configurable
     void processDataSlice();
     void writeDataSlice();
 
-    void updateProgress(const QString& msg, bool add_slice_progress);
 };

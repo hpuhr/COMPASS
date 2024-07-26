@@ -17,6 +17,8 @@
 
 #include "eval/results/report/sectioncontentfigure.h"
 #include "eval/results/report/section.h"
+#include "eval/results/report/section_id.h"
+
 #include "evaluationmanager.h"
 #include "latexvisitor.h"
 #include "logger.h"
@@ -92,11 +94,6 @@ std::string SectionContentFigure::getSubPath() const
 {
     assert (parent_section_);
 
-    string path = parent_section_->compoundResultsHeading();
-
-    boost::replace_all(path, ":", "/");
-    boost::replace_all(path, " ", "_");
-
-    return path+"/";
+    return EvaluationResultsReport::SectionID::sectionID2Path(parent_section_->compoundResultsHeading());
 }
 }

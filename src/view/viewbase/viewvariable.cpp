@@ -96,7 +96,30 @@ bool ViewVariable::isMetaVariable () const
 
 /**
  */
+PropertyDataType ViewVariable::dataType() const
+{
+    assert (hasVariable());
+
+    if (isMetaVariable())
+        return metaVariable().dataType();
+
+    return variable().dataType();
+}
+
+/**
+ */
 dbContent::Variable& ViewVariable::variable()
+{
+    assert (hasVariable());
+    assert (!isMetaVariable());
+    assert (COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).hasVariable(settings_.data_var_name));
+
+    return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).variable(settings_.data_var_name);
+}
+
+/**
+ */
+const dbContent::Variable& ViewVariable::variable() const
 {
     assert (hasVariable());
     assert (!isMetaVariable());
@@ -157,6 +180,16 @@ dbContent::MetaVariable& ViewVariable::metaVariable()
 }
 
 /**
+ */
+const dbContent::MetaVariable& ViewVariable::metaVariable() const
+{
+    assert (hasVariable());
+    assert (isMetaVariable());
+
+    return COMPASS::instance().dbContentManager().metaVariable(settings_.data_var_name);
+}
+
+/**
 */
 dbContent::MetaVariable* ViewVariable::metaVariablePtr()
 {
@@ -207,6 +240,38 @@ dbContent::Variable* ViewVariable::getFor(const std::string& dbcontent_name)
             return nullptr;
 
         var = &meta_var.getFor(dbcontent_name);
+    }
+    else
+    {
+        if (settings_.data_var_dbo != dbcontent_name)
+            return nullptr;
+
+        var = &variable();
+    }
+
+    assert(var);
+    
+    return var;
+}
+
+/**
+*/
+const dbContent::Variable* ViewVariable::getFor(const std::string& dbcontent_name) const
+{
+    if (!hasVariable())
+        return nullptr;
+
+    const dbContent::Variable* var = nullptr;
+
+    if (isMetaVariable())
+    {
+        const auto& meta_var = metaVariable();
+        auto& meta_var_unconst = const_cast<dbContent::MetaVariable&>(meta_var);
+
+        if (!meta_var_unconst.existsIn(dbcontent_name))
+            return nullptr;
+
+        var = &meta_var_unconst.getFor(dbcontent_name);
     }
     else
     {

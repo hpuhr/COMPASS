@@ -15,14 +15,14 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSGENERATOR_H
-#define EVALUATIONRESULTSGENERATOR_H
+#pragma once
 
 #include "eval/results/report/treemodel.h"
-//#include "eval/requirement/base/base.h"
-#include "eval/results/base.h"
+#include "eval/results/base/base.h"
+
 #include "evaluationdata.h"
 #include "evaluationresultsgeneratorwidget.h"
+
 //#include "sectorlayer.h"
 //#include "logger.h"
 
@@ -79,5 +79,3 @@ protected:
 
     void addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 };
-
-#endif // EVALUATIONRESULTSGENERATOR_H

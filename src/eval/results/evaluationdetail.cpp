@@ -255,6 +255,47 @@ const EvaluationDetail::Position& EvaluationDetail::position(size_t idx) const
 
 /**
 */
+const EvaluationDetail::Position& EvaluationDetail::firstPos() const
+{
+    return *positions_.begin();
+}
+
+/**
+*/
+const EvaluationDetail::Position& EvaluationDetail::lastPos() const
+{
+    return *positions_.rbegin();
+}
+
+/**
+*/
+QRectF EvaluationDetail::bounds(double eps) const
+{
+    size_t n = numPositions();
+
+    if (n == 0)
+        return QRectF();
+
+    double lat_min =  std::numeric_limits<double>::max();
+    double lon_min =  std::numeric_limits<double>::max();
+    double lat_max =  std::numeric_limits<double>::min();
+    double lon_max =  std::numeric_limits<double>::min();
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        const auto& pos = positions_[ i ];
+
+        if (pos.latitude_  < lat_min) lat_min = pos.latitude_;
+        if (pos.longitude_ < lon_min) lon_min = pos.longitude_;
+        if (pos.latitude_  > lat_max) lat_max = pos.latitude_;
+        if (pos.longitude_ > lon_max) lon_max = pos.longitude_;
+    }
+
+    return QRectF(lat_min - eps, lon_min - eps, lat_max - lat_min + 2 * eps, lon_max - lon_min + 2 * eps);
+}
+
+/**
+*/
 EvaluationDetail::Details& EvaluationDetail::genDetails() const
 {
     if (!details_.has_value())

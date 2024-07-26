@@ -5,15 +5,11 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/datasingle.h"
-        "${CMAKE_CURRENT_LIST_DIR}/datajoined.h"
-        "${CMAKE_CURRENT_LIST_DIR}/tracksingle.h"
-        "${CMAKE_CURRENT_LIST_DIR}/trackjoined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/data.h"
+        "${CMAKE_CURRENT_LIST_DIR}/track.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/datasingle.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/datajoined.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/tracksingle.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/trackjoined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/data.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/track.cpp"
     )
 
 

@@ -67,7 +67,10 @@ public:
                        bool show_figure = false);
     void reshowLastResultId();
 
-    boost::optional<nlohmann::json> getTableData(const std::string& result_id, const std::string& table_id) const;
+    boost::optional<nlohmann::json> getTableData(const std::string& result_id, 
+                                                 const std::string& table_id,
+                                                 bool rowwise = true,
+                                                 const std::vector<int>& cols = std::vector<int>()) const;
 
 protected:
     EvaluationManager& eval_man_;

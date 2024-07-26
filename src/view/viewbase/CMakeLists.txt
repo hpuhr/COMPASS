@@ -20,12 +20,15 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/variableviewconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/variableviewdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/variableviewannotationwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/variableviewstash.h"
+        "${CMAKE_CURRENT_LIST_DIR}/variableviewstashdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/chartview.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewscreenshotdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/colorscales.h"
         "${CMAKE_CURRENT_LIST_DIR}/colormap_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/colormap.h"
         "${CMAKE_CURRENT_LIST_DIR}/colormapwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/plotmetadata.h"
         
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/view.cpp"
@@ -43,8 +46,10 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/variableviewconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/variableviewdatawidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/variableviewannotationwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/variableviewstashdatawidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/chartview.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewscreenshotdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/colormap.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/colormapwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/plotmetadata.cpp"
 )

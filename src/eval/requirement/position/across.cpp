@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/position/across.h"
-#include "eval/results/position/acrosssingle.h"
+#include "eval/results/position/across.h"
 //#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -36,12 +36,11 @@ namespace EvaluationRequirement
 {
 
 PositionAcross::PositionAcross(const std::string& name, const std::string& short_name, const std::string& group_name,
-                               float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+                               double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
                                float max_abs_value)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
       max_abs_value_(max_abs_value)
 {
-
 }
 
 float PositionAcross::maxAbsValue() const
@@ -99,8 +98,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
     unsigned int num_distances {0};
     string comment;
 
-    vector<double> values;
-
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -118,7 +115,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Value, value.isValid() ? value : 0.0f)
+                                             .setValue(Result::DetailKey::Value, value)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -285,8 +282,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_value_ok, num_value_nok,
                     comment);
-
-        values.push_back(d_across);
     }
 
     //        logdbg << "EvaluationRequirementPositionAcross '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -307,14 +302,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
     assert (num_distances == num_value_ok + num_value_nok);
-    assert (num_distances == values.size());
 
     //assert (details.size() == num_pos);
 
-    return make_shared<EvaluationRequirementResult::SinglePositionAcross>(
+    return std::make_shared<EvaluationRequirementResult::SinglePositionAcross>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok,
-                values);
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok);
 }
 
 }

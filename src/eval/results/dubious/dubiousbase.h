@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "eval/results/single.h"
-#include "eval/results/joined.h"
+#include "eval/results/base/probabilitybase.h"
+
 #include "dbcontent/target/targetposition.h"
 
 #include <memory>
@@ -40,7 +40,32 @@ namespace EvaluationRequirementResult
 
 /**
 */
-class SingleDubiousBase : public Single
+class DubiousBase
+{
+public:
+    DubiousBase();
+    DubiousBase(unsigned int num_updates,
+                unsigned int num_pos_outside,
+                unsigned int num_pos_inside,
+                unsigned int num_pos_inside_dubious);
+
+    unsigned int numUpdates() const;
+    unsigned int numPosOutside() const;
+    unsigned int numPosInside() const;
+    unsigned int numPosInsideDubious() const;
+
+protected:
+    unsigned int num_updates_            {0};
+    unsigned int num_pos_outside_        {0};
+    unsigned int num_pos_inside_         {0};
+    unsigned int num_pos_inside_dubious_ {0};
+
+    mutable boost::optional<double> p_dubious_update_;
+};
+
+/**
+*/
+class SingleDubiousBase : public DubiousBase, public SingleProbabilityBase
 {
 public:
     /**
@@ -65,8 +90,8 @@ public:
         bool                               has_mode_s             = false;
         bool                               left_sector            = false;
         bool                               is_dubious             = false;
-        dbContent::TargetPosition           pos_begin;
-        dbContent::TargetPosition           pos_last;
+        dbContent::TargetPosition          pos_begin;
+        dbContent::TargetPosition          pos_last;
         EvaluationDetails                  details;
         std::map<std::string, std::string> dubious_reasons;
     };
@@ -84,11 +109,6 @@ public:
                       unsigned int num_pos_inside,
                       unsigned int num_pos_inside_dubious);
     virtual ~SingleDubiousBase();
-
-    unsigned int numUpdates() const;
-    unsigned int numPosOutside() const;
-    unsigned int numPosInside() const;
-    unsigned int numPosInsideDubious() const;
 
     static const std::string DetailCommentGroupDubious;
 
@@ -113,21 +133,12 @@ public:
     static EvaluationDetails generateDetails(const std::vector<DetailData>& detail_data);
 
 protected:
-    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
-
     static std::string dubiousReasonsString(const EvaluationDetailComments& comments);
-
-    unsigned int num_updates_            {0};
-    unsigned int num_pos_outside_        {0};
-    unsigned int num_pos_inside_         {0};
-    unsigned int num_pos_inside_dubious_ {0};
-
-    boost::optional<float> p_dubious_update_;
 };
 
 /**
 */
-class JoinedDubiousBase : public Joined
+class JoinedDubiousBase : public DubiousBase, public JoinedProbabilityBase
 {
 public:
     JoinedDubiousBase(const std::string& result_type,
@@ -136,17 +147,9 @@ public:
                       const SectorLayer& sector_layer,
                       EvaluationManager& eval_man);
 protected:
-    unsigned int num_updates_            {0};
-    unsigned int num_pos_outside_        {0};
-    unsigned int num_pos_inside_         {0};
-    unsigned int num_pos_inside_dubious_ {0};
-
     float duration_all_     {0};
     float duration_nondub_  {0};
     float duration_dubious_ {0};
-
-    boost::optional<float> p_dubious_;
-    boost::optional<float> p_dubious_update_;
 };
 
 }

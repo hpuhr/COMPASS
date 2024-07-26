@@ -96,6 +96,7 @@ public slots:
 protected:
     virtual void updateDataEvent(bool requires_reset) override final;
     virtual void resetVariableData() override final;
+    virtual void resetIntermediateVariableData() override final;
     virtual void resetVariableDisplay() override final;
     virtual void preUpdateVariableDataEvent() override final;
     virtual void postUpdateVariableDataEvent() override final;
@@ -129,4 +130,5 @@ protected:
     std::unique_ptr<HistogramGenerator>               histogram_generator_;
     RawHistogramCollection                            histogram_raw_;
     std::string                                       x_axis_name_;
+    std::string                                       title_;
 };

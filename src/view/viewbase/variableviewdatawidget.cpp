@@ -34,6 +34,7 @@ VariableViewDataWidget::VariableViewDataWidget(ViewWidget* view_widget,
 {
     assert(variable_view_);
 
+    //init states
     resetVariableStates();
 }
 
@@ -50,11 +51,21 @@ void VariableViewDataWidget::clearData_impl()
 {
     logdbg << "VariableViewDataWidget: clearData_impl: start";
 
+    //reset everything
     resetVariableStates();
     resetVariableData();
+    resetIntermediateVariableData();
     resetVariableDisplay();
 
     logdbg << "VariableViewDataWidget: clearData_impl: end";
+}
+
+/**
+*/
+void VariableViewDataWidget::clearIntermediateRedrawData_impl()
+{
+    resetIntermediateVariableData(); // reset any intermediate data generated during redraw
+    resetVariableStates();           // reset var states
 }
 
 /**
@@ -74,6 +85,7 @@ void VariableViewDataWidget::updateData_impl(bool requires_reset)
 {
     logdbg << "VariableViewDataWidget: updateData_impl: start";
 
+    //react on data update
     updateDataEvent(requires_reset);
 
     logdbg << "VariableViewDataWidget: updateData_impl: end";
@@ -85,7 +97,7 @@ void VariableViewDataWidget::loadingDone_impl()
 {
     logdbg << "VariableViewDataWidget: loadingDone_impl: start";
 
-    //redraw already triggered by post load trigger?
+    //redraw already triggered by post load trigger? => return
     if (postLoadTrigger())
         return;
 
@@ -101,20 +113,28 @@ bool VariableViewDataWidget::redrawData_impl(bool recompute)
 {
     logdbg << "VariableViewDataWidget: redrawData_impl: start - recompute = " << recompute;
 
+    //recompute data
     if (recompute)
-    {
-        preUpdateVariableDataEvent();
-
-        resetVariableStates();
-
+    {   
         if (variable_view_->showsAnnotation())
+        {
+            //update from annotations
             updateFromAnnotations();
+        }
         else
+        {
+            //things to do before updating the variables
+            preUpdateVariableDataEvent();
+
+            //update from variables
             updateFromVariables();
         
-        postUpdateVariableDataEvent();
+            //things to do after updating the variables
+            postUpdateVariableDataEvent();
+        }
     }
 
+    //update display
     bool drawn = updateVariableDisplay();
 
     logdbg << "VariableViewDataWidget: redrawData_impl: end";
@@ -284,6 +304,24 @@ bool VariableViewDataWidget::variablesOk() const
             return false;
 
     return true;
+}
+
+/**
+*/
+boost::optional<PropertyDataType> VariableViewDataWidget::variableDataType(int var_idx) const
+{
+    if (!variable_view_->variable(var_idx).hasVariable())
+        return {};
+
+    return variable_view_->variable(var_idx).dataType();
+}
+
+/**
+*/
+bool VariableViewDataWidget::variableIsDateTime(int var_idx) const
+{
+    auto dtype = variableDataType(var_idx);
+    return (dtype.has_value() ? dtype.value() == PropertyDataType::TIMESTAMP : false);
 }
 
 /**

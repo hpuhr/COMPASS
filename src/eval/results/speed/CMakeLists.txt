@@ -5,11 +5,9 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/speedsingle.h"
-        "${CMAKE_CURRENT_LIST_DIR}/speedjoined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/speed.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/speedsingle.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/speedjoined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/speed.cpp"
     )
 
 

@@ -15,26 +15,29 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODECFALSE_H
-#define EVALUATIONREQUIREMENTMODECFALSE_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class ModeCFalse : public ProbabilityBase
 {
 public:
     ModeCFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-               float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference);
+               double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
-    float maximumDifference() const;
+    std::string probabilityNameShort() const override final { return "PF"; }
+    std::string probabilityName() const override final { return "Probability of Mode C false"; }
 
+    float maximumDifference() const;
     float maximumProbabilityFalse() const;
 
 protected:
@@ -44,4 +47,3 @@ protected:
 };
 
 }
-#endif // EVALUATIONREQUIREMENTMODECFALSE_H

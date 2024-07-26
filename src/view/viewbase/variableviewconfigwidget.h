@@ -64,7 +64,7 @@ protected:
 
 private:
     void dataSourceToggled();
-    void annotationIDChanged();
+    void annotationChanged();
 
     VariableView* var_view_      = nullptr;
     QVBoxLayout*  config_layout_ = nullptr;

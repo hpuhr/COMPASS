@@ -59,15 +59,20 @@ public:
     bool hasVariable() const;
     bool isMetaVariable() const;
 
+    PropertyDataType dataType() const;
+
     dbContent::Variable& variable();
+    const dbContent::Variable& variable() const;
     dbContent::Variable* variablePtr();
     void setVariable(dbContent::Variable& var, bool notify_changes);
 
     dbContent::MetaVariable& metaVariable();
+    const dbContent::MetaVariable& metaVariable() const;
     dbContent::MetaVariable* metaVariablePtr();
     void setMetaVariable(dbContent::MetaVariable& var, bool notify_changes);
 
     dbContent::Variable* getFor(const std::string& dbcontent_name);
+    const dbContent::Variable* getFor(const std::string& dbcontent_name) const;
 
     const std::string& variableDBContent() const;
     const std::string& variableName() const;

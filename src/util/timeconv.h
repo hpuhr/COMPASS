@@ -33,6 +33,8 @@ extern boost::posix_time::ptime fromString(const std::string& value);
 extern boost::posix_time::ptime fromString(const std::string& value, const std::string& facet);
 extern boost::posix_time::ptime fromLong(unsigned long value);
 extern long toLong(boost::posix_time::ptime value);
+extern long toLongQtUTC(boost::posix_time::ptime value);
+extern long correctLongQtUTC(long t);
 extern std::string toString(boost::posix_time::ptime value, unsigned int partial_digits=3);
 extern std::string toString(boost::posix_time::time_duration duration, unsigned int partial_digits=3);
 extern std::string toStringLong(unsigned long value);

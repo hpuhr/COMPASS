@@ -118,7 +118,7 @@ protected:
         if (scanned_contents.empty() || !histogram_init_.valid())
             return false;
 
-        auto config = histogram_init_.currentConfiguration();
+        auto config = histogram_init_.generateConfiguration();
 
         //init needed histograms
         for (const auto& db_content : scanned_contents)
@@ -420,6 +420,6 @@ private:
         return true;
     }
 
-    HistogramInitializer<T> histogram_init_;
-    Histograms              histograms_;     //histograms per db content type
+    HistogramInitializerT<T> histogram_init_;
+    Histograms               histograms_;     //histograms per db content type
 };

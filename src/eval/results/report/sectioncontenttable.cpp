@@ -16,14 +16,15 @@
  */
 
 #include "eval/results/report/sectioncontenttable.h"
-#include "eval/results/base.h"
-#include "eval/results/single.h"
+#include "eval/results/base/base.h"
+#include "eval/results/base/single.h"
 #include "evaluationmanager.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
 #include "latexvisitor.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "stringmat.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -761,4 +762,16 @@ void SectionContentTable::executeCallBackSlot()
     assert (callback_map_.count(name));
     executeCallBack(name);
 }
+
+Utils::StringTable SectionContentTable::toStringTable() const
+{
+    return Utils::StringTable(this);
+}
+
+nlohmann::json SectionContentTable::toJSON(bool rowwise,
+                                           const std::vector<int>& cols) const
+{
+    return toStringTable().toJSON(rowwise, cols);
+}
+
 }

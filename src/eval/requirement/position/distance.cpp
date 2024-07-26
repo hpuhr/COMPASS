@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/position/distance.h"
-#include "eval/results/position/distancesingle.h"
+#include "eval/results/position/distance.h"
 //#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -37,14 +37,13 @@ namespace EvaluationRequirement
 
 PositionDistance::PositionDistance(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+        double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         float threshold_value, COMPARISON_TYPE threshold_value_check_type,
         bool failed_values_of_interest)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
       threshold_value_(threshold_value), threshold_value_check_type_(threshold_value_check_type),
       failed_values_of_interest_(failed_values_of_interest)
 {
-
 }
 
 float PositionDistance::thresholdValue() const
@@ -110,8 +109,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     unsigned int num_distances {0};
     string comment;
 
-    vector<double> values;
-
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -129,7 +126,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::Value, offset)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -253,8 +250,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_comp_passed, num_comp_failed,
                     comment);
-
-        values.push_back(distance);
     }
 
     //        logdbg << "EvaluationRequirementPositionDistance '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -275,14 +270,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
     assert (num_distances == num_comp_failed + num_comp_passed);
-    assert (num_distances == values.size());
 
     //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
-                values);
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed);
 }
 
 }

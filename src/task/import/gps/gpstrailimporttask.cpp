@@ -255,16 +255,16 @@ void GPSTrailImportTask::useTodOffset(bool value)
 
 /**
 */
-float GPSTrailImportTask::todOffset() const
+double GPSTrailImportTask::todOffset() const
 {
     return settings_.tod_offset;
 }
 
 /**
 */
-void GPSTrailImportTask::todOffset(float tod_offset)
+void GPSTrailImportTask::todOffset(double tod_offset)
 {
-    loginf << "GPSTrailImportTask: todOffset: value " << tod_offset;
+    loginf << "GPSTrailImportTask: todOffset: value " << String::doubleToStringPrecision(tod_offset, 3);
 
     settings_.tod_offset = tod_offset;
 }

@@ -52,19 +52,24 @@ GridViewWidget::GridViewWidget(const std::string& class_id,
         a->setEnabled(data_widget->showsData());
     };
 
+    auto activeIfVariableDataShownCB = [ data_widget, view ] (QAction* a)
+    {
+        a->setEnabled(data_widget->showsData() && view->showsVariables());
+    };
+
     getViewToolSwitcher()->addTool(Tool::GV_NAVIGATE_TOOL, "Navigate", {}, QIcon(), Qt::OpenHandCursor);
     getViewToolSwitcher()->addTool(Tool::GV_SELECT_TOOL, "Select", Qt::Key_S, getIcon("select_action.png"), Qt::CrossCursor);
     getViewToolSwitcher()->addTool(Tool::GV_ZOOM_RECT_TOOL, "Zoom to Rectangle", Qt::Key_R, getIcon("zoom_select_action.png"), Qt::CrossCursor);
 
     getViewToolSwitcher()->setDefaultTool(Tool::GV_NAVIGATE_TOOL);
     
-    getViewToolWidget()->addTool(Tool::GV_SELECT_TOOL, activeIfDataShownCB);
+    getViewToolWidget()->addTool(Tool::GV_SELECT_TOOL, activeIfVariableDataShownCB);
     getViewToolWidget()->addTool(Tool::GV_ZOOM_RECT_TOOL, activeIfDataShownCB);
 
     getViewToolWidget()->addSpacer();
 
-    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, activeIfDataShownCB, getIcon("select_invert.png"));
-    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, activeIfDataShownCB, getIcon("select_delete.png"));
+    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, activeIfVariableDataShownCB, getIcon("select_invert.png"));
+    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, activeIfVariableDataShownCB, getIcon("select_delete.png"));
 
     getViewToolWidget()->addSpacer();
 

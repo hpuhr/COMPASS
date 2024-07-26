@@ -112,6 +112,8 @@ public:
 
     virtual void accept(LatexVisitor& v) = 0;
 
+    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const { return {}; }
+
     QImage renderData() const;
     QImage renderView() const;
 

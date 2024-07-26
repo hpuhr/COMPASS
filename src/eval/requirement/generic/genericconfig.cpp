@@ -132,6 +132,7 @@ double GenericDoubleConfig::threshold() const
 {
     return threshold_;
 }
+
 void GenericDoubleConfig::threshold(double value)
 {
     threshold_ = value;

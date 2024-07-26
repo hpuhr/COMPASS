@@ -174,36 +174,49 @@ QRectF Grid2D::gridBounds() const
 }
 
 /**
+ * Returns a portion of the grid which completely covers the given crop rect.
 */
 void Grid2D::cropGrid(QRectF& roi, 
                       QRect& region, 
                       const QRectF& crop_rect,
+                      const QRectF& grid_roi,
+                      int grid_cells_x,
+                      int grid_cells_y,
+                      bool grid_north_up,
                       bool region_in_image_space,
-                      int pixels_per_cell) const
+                      int pixels_per_cell)
 {
     roi    = QRectF();
     region = QRect();
 
-    if (x1_ < crop_rect.x() ||
-        y1_ < crop_rect.x() ||
-        x0_ > crop_rect.x() + crop_rect.width() ||
-        y0_ > crop_rect.y() + crop_rect.height())
+    if (grid_roi.isEmpty() || grid_cells_x < 1 || grid_cells_y < 1)
         return;
 
-    double x0 = x0_;
-    double y0 = y0_;
-    double x1 = x1_;
-    double y1 = y1_;
+    double gx0 = grid_roi.left();
+    double gy0 = grid_roi.top();
+    double gx1 = grid_roi.right();
+    double gy1 = grid_roi.bottom();
+
+    if (gx1 < crop_rect.x() ||
+        gy1 < crop_rect.x() ||
+        gx0 > crop_rect.x() + crop_rect.width() ||
+        gy0 > crop_rect.y() + crop_rect.height())
+        return;
+
+    double x0 = gx0;
+    double y0 = gy0;
+    double x1 = gx1;
+    double y1 = gy1;
 
     int img_x0 = 0;
     int img_y0 = 0;
-    int img_x1 = n_cells_x_;
-    int img_y1 = n_cells_y_;
+    int img_x1 = grid_cells_x;
+    int img_y1 = grid_cells_y;
 
-    int h = n_cells_y_;
+    int h = grid_cells_y;
 
-    double cell_size_x = cell_size_x_;
-    double cell_size_y = cell_size_y_;
+    double cell_size_x = (x1 - x0) / grid_cells_x;
+    double cell_size_y = (y1 - y0) / grid_cells_y;
 
     //scale values to multiple pixels per cell
     if (region_in_image_space && pixels_per_cell > 0)
@@ -265,12 +278,12 @@ void Grid2D::cropGrid(QRectF& roi,
     region = QRect(img_x0, img_y0, img_x1 - img_x0, img_y1 - img_y0);
 
     //invert region depending on coord system
-    if (region_in_image_space && ref_.is_north_up)
+    if (region_in_image_space && grid_north_up)
     {
         region = QRect(region.x(),
-                        h - img_y1,
-                        region.width(),
-                        region.height());
+                       h - img_y1,
+                       region.width(),
+                       region.height());
     }
 }
 

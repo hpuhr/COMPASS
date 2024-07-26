@@ -16,6 +16,7 @@
  */
 
 #include "eval/results/report/section.h"
+#include "eval/results/report/section_id.h"
 #include "eval/results/report/sectioncontent.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
@@ -27,13 +28,18 @@
 
 namespace EvaluationResultsReport
 {
-
-    Section::Section(const string& heading, const string& parent_heading, TreeItem* parent_item,
+    /**
+    */
+    Section::Section(const string& heading, 
+                     const string& parent_heading, 
+                     TreeItem* parent_item,
                      EvaluationManager& eval_man)
-        : TreeItem(heading, parent_item), heading_(heading), parent_heading_(parent_heading), eval_man_(eval_man)
+    :   TreeItem(heading, parent_item), heading_(heading), parent_heading_(parent_heading), eval_man_(eval_man)
     {
     }
 
+    /**
+    */
     TreeItem* Section::child(int row)
     {
         if (row < 0 || row >= sub_sections_.size())
@@ -42,16 +48,22 @@ namespace EvaluationResultsReport
         return sub_sections_.at(row).get();
     }
 
+    /**
+    */
     int Section::childCount() const
     {
         return sub_sections_.size();
     }
 
+    /**
+    */
     int Section::columnCount() const
     {
         return 1;
     }
 
+    /**
+    */
     QVariant Section::data(int column) const
     {
         assert (column == 0);
@@ -59,16 +71,22 @@ namespace EvaluationResultsReport
         return heading_.c_str();
     }
 
+    /**
+    */
     int Section::row() const
     {
         return 0;
     }
 
+    /**
+    */
     string Section::heading() const
     {
         return heading_;
     }
 
+    /**
+    */
     string Section::compoundHeading() const
     {
         if (parent_heading_.size())
@@ -77,29 +95,29 @@ namespace EvaluationResultsReport
             return heading_;
     }
 
+    /**
+    */
     string Section::compoundResultsHeading() const
     {
         string tmp;
 
         if (parent_heading_.size())
-            tmp = parent_heading_+":"+heading_;
+            tmp = SectionID::sectionID(parent_heading_, heading_);
         else
             tmp = heading_;
 
-        if (tmp == "Results")
-            return "";
-
-        assert (tmp.rfind("Results:", 0) == 0);
-        tmp.erase(0,8);
-
-        return tmp;
+        return SectionID::sectionIDWithoutResults(tmp);
     }
 
+    /**
+    */
     bool Section::hasSubSection (const std::string& heading)
     {
         return findSubSection(heading) != nullptr;
     }
 
+    /**
+    */
     Section& Section::getSubSection (const std::string& heading)
     {
         assert (hasSubSection(heading));
@@ -109,6 +127,8 @@ namespace EvaluationResultsReport
         return *tmp;
     }
 
+    /**
+    */
     void Section::addSubSection (const std::string& heading)
     {
         logdbg << "Section " << heading_ << ": addSubSection: adding " << heading;
@@ -119,6 +139,8 @@ namespace EvaluationResultsReport
         assert (hasSubSection(heading));
     }
 
+    /**
+    */
     QWidget* Section::getContentWidget()
     {
         if (!content_widget_)
@@ -130,11 +152,15 @@ namespace EvaluationResultsReport
         return content_widget_.get();
     }
 
+    /**
+    */
     bool Section::hasText (const std::string& name)
     {
         return findText(name) != nullptr;
     }
 
+    /**
+    */
     SectionContentText& Section::getText (const std::string& name)
     {
         SectionContentText* tmp = findText (name);
@@ -142,6 +168,8 @@ namespace EvaluationResultsReport
         return *tmp;
     }
 
+    /**
+    */
     void Section::addText (const std::string& name)
     {
         assert (!hasText(name));
@@ -149,11 +177,15 @@ namespace EvaluationResultsReport
         assert (hasText(name));
     }
 
+    /**
+    */
     bool Section::hasTable (const std::string& name)
     {
         return findTable(name) != nullptr;
     }
 
+    /**
+    */
     SectionContentTable& Section::getTable (const std::string& name)
     {
         SectionContentTable* tmp = findTable (name);
@@ -161,6 +193,8 @@ namespace EvaluationResultsReport
         return *tmp;
     }
 
+    /**
+    */
     std::vector<std::string> Section::getTableNames() const
     {
         std::vector<std::string> names;
@@ -176,8 +210,14 @@ namespace EvaluationResultsReport
         return names;
     }
 
-    void Section::addTable (const std::string& name, unsigned int num_columns,
-                            vector<string> headings, bool sortable, unsigned int sort_column, Qt::SortOrder order)
+    /**
+    */
+    void Section::addTable (const std::string& name, 
+                            unsigned int num_columns,
+                            vector<string> headings, 
+                            bool sortable, 
+                            unsigned int sort_column, 
+                            Qt::SortOrder order)
     {
         assert (!hasTable(name));
         content_.push_back(make_shared<SectionContentTable>(name, num_columns, headings, this, eval_man_,
@@ -185,11 +225,15 @@ namespace EvaluationResultsReport
         assert (hasTable(name));
     }
 
+    /**
+    */
     bool Section::hasFigure (const std::string& name)
     {
         return findFigure(name) != nullptr;
     }
 
+    /**
+    */
     SectionContentFigure& Section::getFigure (const std::string& name)
     {
         SectionContentFigure* tmp = findFigure (name);
@@ -197,6 +241,8 @@ namespace EvaluationResultsReport
         return *tmp;
     }
 
+    /**
+    */
     void Section::addFigure (const std::string& name, const string& caption,
                              std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
                              int render_delay_msec)
@@ -206,6 +252,8 @@ namespace EvaluationResultsReport
         assert (hasFigure(name));
     }
 
+    /**
+    */
     std::vector<SectionContentFigure*> Section::getFigures() const
     {
         std::vector<SectionContentFigure*> figures;
@@ -218,6 +266,8 @@ namespace EvaluationResultsReport
         return figures;
     }
 
+    /**
+    */
     unsigned int Section::numSections()
     {
         unsigned int num = 1; // me
@@ -228,10 +278,13 @@ namespace EvaluationResultsReport
         return num;
     }
 
-    void Section::addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details,
+    /**
+    */
+    void Section::addSectionsFlat (vector<shared_ptr<Section>>& result, 
+                                   bool include_target_details,
                                    bool report_skip_targets_wo_issues)
     {
-        if (!include_target_details && compoundHeading() == "Results:Targets")
+        if (!include_target_details && compoundHeading() == SectionID::targetResultsID())
             return;
 
         if (report_skip_targets_wo_issues && perTargetSection())
@@ -249,7 +302,7 @@ namespace EvaluationResultsReport
 
         for (auto& sec_it : sub_sections_)
         {
-            if (!include_target_details && sec_it->compoundHeading() == "Results:Targets")
+            if (!include_target_details && sec_it->compoundHeading() == SectionID::targetResultsID())
                 continue;
 
             if (report_skip_targets_wo_issues && sec_it->perTargetSection())
@@ -270,37 +323,51 @@ namespace EvaluationResultsReport
         }
     }
 
+    /**
+    */
     void Section::accept(LatexVisitor& v) const
     {
         loginf << "Section: accept";
         v.visit(this);
     }
 
+    /**
+    */
     const vector<shared_ptr<SectionContent>>& Section::content() const
     {
         return content_;
     }
 
+    /**
+    */
     bool Section::perTargetWithIssues() const
     {
         return per_target_section_with_issues_;
     }
 
+    /**
+    */
     void Section::perTargetWithIssues(bool value)
     {
         per_target_section_with_issues_ = value;
     }
 
+    /**
+    */
     bool Section::perTargetSection() const
     {
         return per_target_section_;
     }
 
+    /**
+    */
     void Section::perTargetSection(bool value)
     {
         per_target_section_ = value;
     }
 
+    /**
+    */
     Section* Section::findSubSection (const std::string& heading)
     {
         for (auto& sec_it : sub_sections_)
@@ -312,6 +379,8 @@ namespace EvaluationResultsReport
         return nullptr;
     }
 
+    /**
+    */
     SectionContentText* Section::findText (const std::string& name)
     {
         SectionContentText* tmp;
@@ -327,6 +396,8 @@ namespace EvaluationResultsReport
         return nullptr;
     }
 
+    /**
+    */
     SectionContentTable* Section::findTable (const std::string& name)
     {
         SectionContentTable* tmp;
@@ -342,6 +413,8 @@ namespace EvaluationResultsReport
         return nullptr;
     }
 
+    /**
+    */
     SectionContentFigure* Section::findFigure (const std::string& name)
     {
         SectionContentFigure* tmp;
@@ -357,6 +430,8 @@ namespace EvaluationResultsReport
         return nullptr;
     }
 
+    /**
+    */
     void Section::createContentWidget()
     {
         assert (!content_widget_);

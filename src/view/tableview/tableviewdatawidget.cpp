@@ -98,6 +98,11 @@ void TableViewDataWidget::clearData_impl()
     logdbg << "TableViewDataWidget: clearData_impl: end";
 }
 
+void TableViewDataWidget::clearIntermediateRedrawData_impl()
+{
+    //nothing to do here
+}
+
 void TableViewDataWidget::loadingStarted_impl()
 {
     loginf << "TableViewDataWidget: loadingStarted_impl";

@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/position/distancerms.h"
-#include "eval/results/position/distancermssingle.h"
+#include "eval/results/position/distancerms.h"
 //#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -37,16 +37,9 @@ namespace EvaluationRequirement
 
 PositionDistanceRMS::PositionDistanceRMS(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        EvaluationManager& eval_man, float threshold_value)
-    : Base(name, short_name, group_name, eval_man),
-      threshold_value_(threshold_value)
+        EvaluationManager& eval_man, double threshold_value)
+    : Base(name, short_name, group_name, threshold_value, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man)
 {
-
-}
-
-float PositionDistanceRMS::thresholdValue() const
-{
-    return threshold_value_;
 }
 
 std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evaluate (
@@ -54,7 +47,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
         const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementPositionDistanceRMS '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " threshold_value " << threshold_value_;
+           << " threshold_value " << threshold();
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
@@ -97,8 +90,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
     unsigned int num_distances {0};
     string comment;
 
-    vector<double> values;
-
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -116,7 +107,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::Value, offset)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -222,7 +213,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
 
         ++num_distances;
 
-        if (fabs(distance) <= threshold_value_) // for single value
+        if (fabs(distance) <= threshold()) // for single value
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -240,8 +231,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_comp_passed, num_comp_failed,
                     comment);
-
-        values.push_back(distance);
     }
 
     //        logdbg << "EvaluationRequirementPositionDistanceRMS '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -262,24 +251,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
     assert (num_distances == num_comp_failed + num_comp_passed);
-    assert (num_distances == values.size());
 
     //assert (details.size() == num_pos);
 
-    return make_shared<EvaluationRequirementResult::SinglePositionDistanceRMS>(
+    return std::make_shared<EvaluationRequirementResult::SinglePositionDistanceRMS>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
-                values);
-}
-
-std::string PositionDistanceRMS::getConditionStr () const
-{
-    return "<= "+ to_string(threshold_value_);
-}
-
-std::string PositionDistanceRMS::getConditionResultStr (float rms_value) const
-{
-    return rms_value <= threshold_value_ ?  "Passed" : "Failed";
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed);
 }
 
 }

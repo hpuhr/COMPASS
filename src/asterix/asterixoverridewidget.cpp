@@ -194,7 +194,7 @@ void ASTERIXOverrideWidget::updateSlot()
     assert(override_active_check_);
     override_active_check_->setChecked(task_.settings().override_tod_active_);
     assert(tod_offset_edit_);
-    tod_offset_edit_->setText(QString::number(task_.settings().override_tod_offset_, 'g', 5));
+    tod_offset_edit_->setText(String::doubleToStringPrecision(task_.settings().override_tod_offset_, 3).c_str());
 
     // tod filter
     assert(filter_tod_active_check_);

@@ -156,7 +156,7 @@ std::string DBFilterCondition::getConditionString(const std::string& dbcontent_n
         }
 
         ss << variable_prefix << db_table_name << "." << db_column_name << variable_suffix;
-        ss << " IS NULL";
+        ss << " " << operator_ << " NULL";
 
         ss << ")";
     }

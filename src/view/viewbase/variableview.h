@@ -19,6 +19,7 @@
 
 #include "view.h"
 #include "property.h"
+#include "plotmetadata.h"
 
 #include <memory>
 #include <vector>
@@ -33,7 +34,17 @@ class ViewableDataConfig;
 class VariableView : public View
 {
 public:
-    typedef std::map<std::string, std::vector<nlohmann::json>> AnnotationMap;
+    struct Annotation
+    {
+        PlotMetadata   metadata;
+        nlohmann::json feature_json;
+    };
+
+    struct AnnotationGroup
+    {
+        std::string             name;
+        std::vector<Annotation> annotations;
+    };
 
     VariableView(const std::string& class_id, 
                  const std::string& instance_id,
@@ -44,6 +55,7 @@ public:
     virtual void loadingDone() override final;
 
     ViewVariable& variable(int idx);
+    const ViewVariable& variable(int idx) const;
     size_t numVariables() const;
 
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override final;
@@ -55,12 +67,13 @@ public:
 
     void showAnnotation();
     bool showsAnnotation() const;
-    void setCurrentAnnotation(const std::string& id);
+    void setCurrentAnnotation(int group_idx, int annotation_idx);
     bool hasAnnotations() const;
 
-    const AnnotationMap& annotations() const;
-    const std::string& currentAnnotationID() const;
-    const std::vector<nlohmann::json>& currentAnnotation() const;
+    const std::vector<AnnotationGroup>& annotations() const;
+    int currentAnnotationGroupIdx() const;
+    int currentAnnotationIdx() const;
+    const Annotation& currentAnnotation() const;
     bool hasCurrentAnnotation() const;
 
     bool hasViewPoint () { return current_view_point_ != nullptr; }
@@ -84,8 +97,6 @@ protected:
 
     virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) = 0;
 
-    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const { return {}; }
-
     virtual void unshowViewPoint(const ViewableDataConfig* vp) {}
     virtual void showViewPoint(const ViewableDataConfig* vp) {}
 
@@ -107,9 +118,10 @@ private:
 
     std::vector<std::unique_ptr<ViewVariable>> variables_;
 
-    AnnotationMap annotations_;
-    std::string   current_annotation_id_;
-    bool          show_annotation_ = false;
+    std::vector<AnnotationGroup> annotations_;
+    int                          current_annotation_group_idx_ = -1;
+    int                          current_annotation_idx_       = -1;
+    bool                         show_annotation_              = false;
 
     const ViewableDataConfig* current_view_point_ {nullptr};
 };

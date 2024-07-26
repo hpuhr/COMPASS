@@ -23,6 +23,7 @@
 #include "logger.h"
 #include "timeconv.h"
 #include "datasourcemanager.h"
+#include "evaluationmanager.h"
 
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"

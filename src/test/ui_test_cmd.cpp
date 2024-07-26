@@ -49,7 +49,7 @@ void RTCommandUIObject::collectOptions_impl(OptionsDescription& options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("object,o", po::value<std::string>()->default_value(""), "name of an ui element, object names separated by '.', e.g. 'mainwindow.window1.geographicview1.toolbar'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "object", 1)
+    ADD_RTCOMMAND_POS_OPTION(positional, "object")
 }
 
 /**
@@ -121,7 +121,7 @@ void RTCommandUISet::collectOptions_impl(OptionsDescription& options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("value,v", po::value<std::string>()->default_value(""), "new value to set, content depending on the addressed ui element");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "value", 2)
+    ADD_RTCOMMAND_POS_OPTION(positional, "value")
 }
 
 /**
@@ -213,7 +213,7 @@ void RTCommandUIGet::collectOptions_impl(OptionsDescription& options,
         ("json", "if present, the result will be returned as a json struct instead of a string")
         ("visible", "if present, the visibility of the ui element will be returned");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "what", 2)
+    ADD_RTCOMMAND_POS_OPTION(positional, "what")
 }
 
 /**
@@ -289,7 +289,7 @@ void RTCommandUIGetJSON::collectOptions_impl(OptionsDescription& options,
         ("what,w", po::value<std::string>()->default_value(""), "which value to retrieve from the ui element (empty = default behavior)")
         ("visible", "if present, the visibility of the ui element will be returned");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "what", 2)
+    ADD_RTCOMMAND_POS_OPTION(positional, "what")
 }
 
 /**
@@ -336,7 +336,7 @@ bool RTCommandUIInject::run_impl()
 /**
  */
 void RTCommandUIInject::collectOptions_impl(OptionsDescription& options,
-                                         PosOptionsDescription& positional)
+                                            PosOptionsDescription& positional)
 {
     //call base
     RTCommandUIInjection::collectOptions_impl(options, positional);
@@ -344,7 +344,7 @@ void RTCommandUIInject::collectOptions_impl(OptionsDescription& options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("event,e", po::value<std::string>()->default_value(""), "event to inject into the ui element");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "event", 2)
+    ADD_RTCOMMAND_POS_OPTION(positional, "event")
 }
 
 /**

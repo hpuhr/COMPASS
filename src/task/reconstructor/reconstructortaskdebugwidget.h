@@ -6,6 +6,7 @@
 
 class ReconstructorTask;
 
+class QCheckBox;
 class QLineEdit;
 
 class ReconstructorTaskDebugWidget : public QWidget
@@ -14,6 +15,8 @@ class ReconstructorTaskDebugWidget : public QWidget
   signals:
 
   public slots:
+    void toggleDebugSlot();
+
     void utnsChangedSlot(const QString& value);
     void recNumsChangedSlot(const QString& value);
 
@@ -27,6 +30,8 @@ class ReconstructorTaskDebugWidget : public QWidget
     void timestampsChanged();
 
     ReconstructorTask& task_;
+
+    QCheckBox* debug_check_{nullptr};
 
     QLineEdit* utns_edit_{nullptr};
     QLineEdit* rec_nums_edit_{nullptr};

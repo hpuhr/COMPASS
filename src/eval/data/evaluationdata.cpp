@@ -27,6 +27,7 @@
 //#include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "util/async.h"
+#include "util/stringmat.h"
 
 #include <QApplication>
 #include <QThread>
@@ -668,4 +669,10 @@ void EvaluationData::allTargetsChangedSlot() // for more than 1 utn
     endResetModel();
 
     eval_man_.updateResultsToChanges();
+}
+
+boost::optional<nlohmann::json> EvaluationData::getTableData(bool rowwise,
+                                                             const std::vector<int>& cols) const
+{
+    return Utils::StringTable(this).toJSON(rowwise, cols);
 }

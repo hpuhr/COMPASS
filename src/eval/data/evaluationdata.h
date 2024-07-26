@@ -92,6 +92,9 @@ public:
 
     const EvaluationTargetData& getTargetOf (const QModelIndex& index);
 
+    boost::optional<nlohmann::json> getTableData(bool rowwise = true,
+                                                 const std::vector<int>& cols = std::vector<int>()) const;
+
     EvaluationDataWidget* widget();
 
     void clearInterestFactors();

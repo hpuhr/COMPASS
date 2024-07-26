@@ -102,6 +102,7 @@ protected:
     virtual void loadingDone_impl();                       //implements behavior at finishing a reload
     virtual void updateData_impl(bool requires_reset) = 0; //implements behavior at receiving new data
     virtual void clearData_impl() = 0;                     //implements clearing all view data
+    virtual void clearIntermediateRedrawData_impl() = 0;   //implements clearing of any data collected during redraw
     virtual bool redrawData_impl(bool recompute) = 0;      //implements redrawing the display (and possibly needed computations), and returns if the redraw succeeded
     virtual void liveReload_impl() = 0;                    //implements data reload during live running mode
 

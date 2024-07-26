@@ -19,6 +19,9 @@
 
 #include "rasterreference.h"
 #include "histogram_raw.h"
+#include "scatterseries.h"
+#include "grid2dlayer.h"
+#include "plotmetadata.h"
 
 #include <memory>
 #include <vector>
@@ -91,6 +94,9 @@ public:
 
     void setName(const std::string& name) { name_ = name; }
     void setColor(const QColor& c) { color_ = c; }
+    void setPlotMetadata(const PlotMetadata& metadata) { plot_metadata_ = metadata; }
+
+    void writeBinaryIfPossible(bool ok) { write_binary_if_possible_ = ok; }
 
     void toJSON(nlohmann::json& j) const;
     void print(std::ostream& strm, const std::string& prefix = "") const;
@@ -104,15 +110,19 @@ public:
     static const std::string FeatureTypeFieldType;
     static const std::string FeatureFieldNameProps;
     static const std::string FeatureFieldNamePropColor;
+    static const std::string FeatureFieldNamePlotMetadata;
 
 protected:
-    virtual void toJSON_impl(nlohmann::json& j) const = 0;
+    virtual void toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const = 0;
 
     QColor color_;
+    boost::optional<PlotMetadata> plot_metadata_;
 
 private:
     std::string name_;
     std::string type_;
+
+    bool write_binary_if_possible_ = false;
 };
 
 /**
@@ -122,7 +132,8 @@ class ViewPointGenFeaturePointGeometry : public ViewPointGenFeature
 public:
     ViewPointGenFeaturePointGeometry(const std::string& type,
                                      const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                                     const std::vector<QColor>& colors = std::vector<QColor>());
+                                     const std::vector<QColor>& colors = std::vector<QColor>(),
+                                     bool enable_color_vector = true);
     virtual ~ViewPointGenFeaturePointGeometry() = default;
 
     virtual void reserve(size_t n, bool reserve_cols);
@@ -133,12 +144,14 @@ public:
     void addPoints(const std::vector<Eigen::Vector2d>& positions,
                    const boost::optional<std::vector<QColor>>& colors = boost::optional<std::vector<QColor>>());
 
+    static nlohmann::json& getCoordinatesJSON(nlohmann::json& feature_json);
+
     static const std::string FeatureFieldNameGeom;
     static const std::string FeatureFieldNameCoords;
     static const std::string FeatureFieldNameColors;
 
 protected:
-    virtual void toJSON_impl(nlohmann::json& j) const override;
+    virtual void toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const override;
 
     virtual void writeGeometry(nlohmann::json& j) const {};
     virtual void writeProperties(nlohmann::json& j) const {};
@@ -146,6 +159,7 @@ protected:
 private:
     std::vector<Eigen::Vector2d> positions_;
     std::vector<QColor>          colors_;
+    bool                         enable_color_vector_ = true;
 };
 
 /**
@@ -158,13 +172,16 @@ public:
         Circle = 0,
         Triangle,
         Square,
-        Cross
+        Cross,
+        Border,
+        BorderThick
     };
 
     ViewPointGenFeaturePoints(Symbol symbol = Symbol::Square,
                               float symbol_size = 6.0f,
                               const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                              const std::vector<QColor>& colors = std::vector<QColor>());
+                              const std::vector<QColor>& colors = std::vector<QColor>(),
+                              bool enable_color_vector = true);
     virtual ~ViewPointGenFeaturePoints() = default;
 
     static const std::string FeatureName;
@@ -175,6 +192,8 @@ public:
     static const std::string SymbolNameTriangle;
     static const std::string SymbolNameSquare;
     static const std::string SymbolNameCross;
+    static const std::string SymbolNameBorder;
+    static const std::string SymbolNameBorderThick;
 
 protected:
     virtual void writeProperties(nlohmann::json& j) const override;
@@ -194,7 +213,8 @@ public:
     ViewPointGenFeatureLineString(bool interpolated,
                                   float line_width = 1.0f,
                                   const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                                  const std::vector<QColor>& colors = std::vector<QColor>());
+                                  const std::vector<QColor>& colors = std::vector<QColor>(),
+                                  bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureLineString() = default;
 
     static const std::string FeatureName;
@@ -215,7 +235,8 @@ class ViewPointGenFeatureLines : public ViewPointGenFeaturePointGeometry
 public:
     ViewPointGenFeatureLines(float line_width = 1.0f,
                              const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
-                             const std::vector<QColor>& colors = std::vector<QColor>());
+                             const std::vector<QColor>& colors = std::vector<QColor>(),
+                             bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureLines() = default;
 
     static const std::string FeatureName;
@@ -237,7 +258,8 @@ public:
                                    size_t num_points = 32,
                                    const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
                                    const std::vector<QColor>& colors = std::vector<QColor>(),
-                                   const std::vector<Eigen::Vector3d>& sizes = std::vector<Eigen::Vector3d>());
+                                   const std::vector<Eigen::Vector3d>& sizes = std::vector<Eigen::Vector3d>(),
+                                   bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureErrEllipses() = default;
 
     virtual void reserve(size_t n, bool reserve_cols) override;
@@ -295,7 +317,7 @@ public:
     static const std::string TextDirNameLeftDown;
 
 protected:
-    virtual void toJSON_impl(nlohmann::json& j) const override;
+    virtual void toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const override;
 
 private:
     std::string textDirString() const;
@@ -330,7 +352,7 @@ public:
     static const std::string FeatureGeoImageFieldNameReference;
 
 protected:
-    virtual void toJSON_impl(nlohmann::json& j) const override;
+    virtual void toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const override;
 
 private:
     std::string     fn_;
@@ -340,25 +362,72 @@ private:
 
 /**
 */
+class ViewPointGenFeatureGrid : public ViewPointGenFeature
+{
+public:
+    ViewPointGenFeatureGrid(const Grid2DLayer& grid);
+    virtual ~ViewPointGenFeatureGrid() = default;
+
+    virtual size_t size() const { return 1; }
+
+    static const std::string FeatureName;
+    static const std::string FeatureGridFieldNameGrid;
+
+protected:
+    virtual void toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const override;
+
+private:
+    Grid2DLayer grid_;
+};
+
+/**
+*/
 class ViewPointGenFeatureHistogram : public ViewPointGenFeature
 {
 public:
     ViewPointGenFeatureHistogram(const RawHistogram& histogram,
-                                 const std::string& layer_name = "",
-                                 const QColor& layer_color = QColor());
-    ViewPointGenFeatureHistogram(const RawHistogramCollection& histogram_collection);
+                                 const std::string& series_name = "",
+                                 const QColor& series_color = Qt::blue,
+                                 const PlotMetadata& metadata = PlotMetadata());
+    ViewPointGenFeatureHistogram(const RawHistogramCollection& histogram_collection,
+                                 const PlotMetadata& metadata = PlotMetadata());
     virtual ~ViewPointGenFeatureHistogram() = default;
 
-    virtual size_t size() const { return histogram_.numLayers(); }
+    virtual size_t size() const override;
 
     static const std::string FeatureName;
     static const std::string FeatureHistogramFieldNameHistogram;
 
 protected:
-    virtual void toJSON_impl(nlohmann::json& j) const override;
+    virtual void toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const override;
 
 private:
     RawHistogramCollection histogram_;
+};
+
+/**
+*/
+class ViewPointGenFeatureScatterSeries : public ViewPointGenFeature
+{
+public:
+    ViewPointGenFeatureScatterSeries(const ScatterSeries& scatter_series,
+                                     const std::string& series_name = "",
+                                     const QColor& series_color = Qt::blue,
+                                     const PlotMetadata& metadata = PlotMetadata());
+    ViewPointGenFeatureScatterSeries(const ScatterSeriesCollection& scatter_series_collection,
+                                     const PlotMetadata& metadata = PlotMetadata());
+    virtual ~ViewPointGenFeatureScatterSeries() = default;
+
+    virtual size_t size() const override;
+
+    static const std::string FeatureName;
+    static const std::string FeatureHistogramFieldNameScatterSeries;
+
+protected:
+    virtual void toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const override;
+
+private:
+    ScatterSeriesCollection scatter_series_;
 };
 
 /**
@@ -373,13 +442,15 @@ public:
     void setSymbolColor(const QColor& color);
 
     void addFeature(std::unique_ptr<ViewPointGenFeature>&& feat);
+    void addFeature(ViewPointGenFeature* feat);
 
-    template<class T, typename... Arguments>
-    T* addFeature(Arguments... args)
+    template <class T, typename... Targs>
+    T* addFeature(Targs&&... args)
     {
-        T* ptr = new T(args...);
-        features_.push_back(std::unique_ptr<T>(ptr));
-        return ptr;
+        T* feat = new T(std::forward<Targs>(args)...);
+        features_.push_back(std::unique_ptr<T>(feat));
+
+        return feat;
     }
 
     ViewPointGenAnnotation* addAnnotation(const std::string& name, bool hidden = false);
@@ -396,6 +467,10 @@ public:
     static const std::string AnnotationFieldSymbolColor;
     static const std::string AnnotationFieldFeatures;
     static const std::string AnnotationFieldAnnotations;
+
+    static nlohmann::json& getFeaturesJSON(nlohmann::json& annotation_json);
+    static nlohmann::json& getFeatureJSON(nlohmann::json& annotation_json, size_t idx);
+    static nlohmann::json& getChildrenJSON(nlohmann::json& annotation_json);
 
 private:
     std::string             name_;
@@ -461,10 +536,15 @@ public:
 
     std::string statusString() const;
 
-    static std::map<std::string, std::vector<nlohmann::json>> scanForFeatures(const nlohmann::json& vp_json,
-                                                                              const std::set<std::string>& feature_types = std::set<std::string>(),
-                                                                              bool assure_unique_ids = false,
-                                                                              const std::string& id_separator = ":");
+    struct JSONFeature
+    {
+        std::vector<std::string> annotations;
+        std::string              name;
+        nlohmann::json           feature_json;
+    };
+
+    static std::vector<JSONFeature> scanForFeatures(const nlohmann::json& vp_json,
+                                                    const std::set<std::string>& feature_types = std::set<std::string>());
 
     static const std::string ViewPointFieldName;
     static const std::string ViewPointFieldID;

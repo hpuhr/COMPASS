@@ -15,13 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DUBIOUSTARGETCONFIG_H
-#define DUBIOUSTARGETCONFIG_H
+#pragma once
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/dubious/dubioustargetconfigwidget.h"
-//#include "eval/requirement/dubious/dubioustarget.h"
 
 class Group;
 class EvaluationStandard;
@@ -119,5 +115,3 @@ protected:
 };
 
 }
-
-#endif // DUBIOUSTARGETCONFIG_H
