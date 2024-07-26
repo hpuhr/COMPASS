@@ -94,20 +94,15 @@ public:
     unsigned int utn() const;
     const EvaluationTargetData* target() const;
 
-    void setInterestFactor(double factor);
-
-    //wip - on demand detail creation
-    std::unique_ptr<EvaluationDetails> generateDetails() const;
-
-    void updateResult() override final;
     void updateUseFromTarget();
+
+    void setInterestFactor(double factor);
 
     bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
-    std::unique_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                            const QVariant& annotation) const override final;
-    std::unique_ptr<nlohmann::json::object_t> viewableData() const override final;
-
+    
     void createSumOverviewAnnotations(nlohmann::json& annotations_json,
                                       bool add_ok_details_to_overview = true) const;
 
@@ -118,8 +113,13 @@ public:
 
     void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
 
+    bool hasStoredDetails() const;
+    size_t numStoredDetails() const;
+    void purgeStoredDetails();
+
     void iterateDetails(const DetailFunc& func,
-                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
+                        const DetailSkipFunc& skip_func = DetailSkipFunc(),
+                        const EvaluationDetails* details = nullptr) const override final;
 
     /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
@@ -143,6 +143,8 @@ public:
 protected:
     std::string getTargetSectionID();
     std::string getTargetRequirementSectionID();
+
+    void updateResult() override final;
 
     virtual std::string getRequirementSectionID () const override;
     virtual std::string getRequirementAnnotationID_impl() const override;
@@ -182,17 +184,25 @@ protected:
     virtual void generateDetailsTable(EvaluationResultsReport::Section& utn_req_section);
 
     /*details related*/
+    const EvaluationDetails& getDetails() const;
+    
+    bool detailIndexValid(const DetailIndex& index,
+                          const EvaluationDetails* details) const; 
 
     /// detail nesting mode
     virtual DetailNestingMode detailNestingMode() const { return DetailNestingMode::Vector; } 
 
-    boost::optional<DetailIndex> detailIndex(const QVariant& annotation) const;
+    boost::optional<DetailIndex> detailIndex(const QVariant& annotation,
+                                             const EvaluationDetails* details = nullptr) const;
 
     /*viewable + annotation related*/
+    std::unique_ptr<nlohmann::json::object_t> viewableOverviewData() const override final;
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
-    ViewableInfo createViewableInfo(const AnnotationOptions& options) const override final;
+    ViewableInfo createViewableInfo(const AnnotationOptions& options,
+                                    const EvaluationDetails* details = nullptr) const override final;
     void createAnnotations(nlohmann::json& annotations_json, 
-                           const AnnotationOptions& options) const override final;
+                           const AnnotationOptions& options,
+                           const EvaluationDetails* details = nullptr) const override final;
 
     /// if yes the overview annotations are added if a detail is highlighted (default)
     virtual bool addOverviewAnnotationsToDetail() const { return true; }
@@ -210,7 +220,8 @@ protected:
     /// -1 means the last position (default)
     virtual int eventRefPositionIndex() const { return -1; }
 
-    void createTargetAnnotations(nlohmann::json& annotations_json,
+    void createTargetAnnotations(const EvaluationDetails& details,
+                                 nlohmann::json& annotations_json,
                                  TargetAnnotationType type,
                                  const boost::optional<DetailIndex>& detail_index = boost::optional<DetailIndex>(),
                                  bool add_ok_details_to_overview = true) const;
@@ -239,6 +250,19 @@ protected:
     const EvaluationTargetData* target_; // used to generate result
 
     double interest_factor_ {0};
+
+private:
+    void iterateDetails(const EvaluationDetails& details,
+                        const DetailFunc& func,
+                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const;
+
+    const EvaluationDetail& getDetail(const EvaluationDetails& details,
+                                      const DetailIndex& index) const;
+    void clearDetails();
+
+    EvaluationDetails recomputeDetails() const;
+
+    boost::optional<EvaluationDetails> details_;
 };
 
 }

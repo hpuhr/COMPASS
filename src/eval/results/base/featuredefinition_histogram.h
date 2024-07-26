@@ -79,7 +79,8 @@ public:
 
     /**
     */
-    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result,
+                                                            const std::vector<EvaluationDetail>* details) const override final
     {
         assert(isValid());
 
@@ -95,7 +96,7 @@ public:
             RawHistogram h;
             HistogramInitializerT<T> hinit;
 
-            bool ok = hinit.createRAW(h, ds.getValues(result), false, num_bins, num_distinct_values_min_);
+            bool ok = hinit.createRAW(h, ds.getValues(result, details), false, num_bins, num_distinct_values_min_);
             if (!ok)
                 continue;
 
@@ -162,7 +163,8 @@ public:
 
     /**
     */
-    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result,
+                                                            const std::vector<EvaluationDetail>* details) const override final
     {
         assert(isValid());
 

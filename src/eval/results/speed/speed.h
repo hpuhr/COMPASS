@@ -54,6 +54,8 @@ public:
     unsigned int numCompFailed() const;
     unsigned int numCompPassed() const;
 
+    const ValueAccumulator& accumulator() const;
+
 protected:
     unsigned int num_pos_          {0};
     unsigned int num_no_ref_       {0};
@@ -139,7 +141,6 @@ protected:
     virtual std::vector<SectorInfo> sectorInfos() const override;
 
     virtual bool exportAsCSV(std::ofstream& strm) const override;
-    virtual bool canExportCSV() const override { return true; }
 
     virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };

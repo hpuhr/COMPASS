@@ -330,6 +330,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     loginf << "EvaluationResultsGenerator: evaluate: adding result '" << result_sum->reqGrpId()
                            << "' id '" << result_sum->resultId() << "'";
                     assert (!results_[result_sum->reqGrpId()].count(result_sum->resultId()));
+
+                    //update now => here we still have all details for the joined viewable
+                    result_sum->updateToChanges();
+
                     results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
                     results_vec_.push_back(result_sum); // has to be added after all singles
                 }
@@ -341,9 +345,17 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                            << "' id '" << mops_res_it.second->resultId() << "'";
 
                     assert (!results_[mops_res_it.second->reqGrpId()].count(mops_res_it.second->resultId()));
+
+                    //update now => here we still have all details for the joined viewable
+                    mops_res_it.second->updateToChanges();
+
                     results_[mops_res_it.second->reqGrpId()][mops_res_it.second->resultId()] = mops_res_it.second;
                     results_vec_.push_back(mops_res_it.second); // has to be added after all singles
                 }
+
+                //purge stored single result details
+                for (auto& result_it : results)
+                    result_it->purgeStoredDetails();
 
                 assert (eval_cnt <= num_req_evals);
                 eval_cnt = results_vec_.size();

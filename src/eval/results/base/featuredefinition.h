@@ -28,6 +28,7 @@
 
 class EvaluationManager;
 class ViewPointGenFeature;
+class EvaluationDetail;
 
 namespace EvaluationRequirementResult
 {
@@ -50,7 +51,8 @@ public:
     /// checks if the feature definition is valid
     virtual bool isValid() const = 0;
 
-    std::unique_ptr<ViewPointGenFeature> createFeature(const Base* result) const;
+    std::unique_ptr<ViewPointGenFeature> createFeature(const Base* result,
+                                                       const std::vector<EvaluationDetail>* details = nullptr) const;
 
     const std::string& featureDescription() const;
     const std::string& xAxisLabel() const;
@@ -62,8 +64,8 @@ public:
 
 protected:
     /// creates a feature which can be part of an annotation
-    virtual std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const = 0;
-
+    virtual std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result,
+                                                                    const std::vector<EvaluationDetail>* details) const = 0;
     const EvaluationManager& evalManager() const;
 
 private:
