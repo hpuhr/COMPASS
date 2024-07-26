@@ -244,7 +244,7 @@ namespace EvaluationResultsReport
     /**
     */
     void Section::addFigure (const std::string& name, const string& caption,
-                             std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
+                             std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
                              int render_delay_msec)
     {
         assert (!hasFigure(name));

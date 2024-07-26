@@ -346,7 +346,7 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json,
 
     for (const auto& value_defs : defs.definitions())
     {
-        loginf << "Base: addCustomAnnotations: Adding annotation for value '" << value_defs.first << "'";
+        loginf << "Base: addCustomAnnotations: Adding annotation for value '" << value_defs.first << "'"; 
 
         //create annotation for value features
         ViewPointGenAnnotation value_annotation(value_defs.first);

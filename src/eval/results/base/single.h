@@ -207,7 +207,7 @@ protected:
                                              const EvaluationDetails* details = nullptr) const;
 
     /*viewable + annotation related*/
-    std::unique_ptr<nlohmann::json::object_t> viewableOverviewData() const override final;
+    std::shared_ptr<nlohmann::json::object_t> viewableOverviewData() const override final;
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
     ViewableInfo createViewableInfo(const AnnotationOptions& options,
                                     const EvaluationDetails* details = nullptr) const override final;

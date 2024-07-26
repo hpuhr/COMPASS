@@ -624,12 +624,14 @@ std::shared_ptr<nlohmann::json::object_t> Single::viewableData(const EvaluationR
  * Creates viewable overview data for this target.
  * BEWARE: !will always recompute the details!
 */
-std::unique_ptr<nlohmann::json::object_t> Single::viewableOverviewData() const
+std::shared_ptr<nlohmann::json::object_t> Single::viewableOverviewData() const
 {
     auto details = recomputeDetails();
 
     //create overview viewable
-    return createViewable(AnnotationOptions().overview(), &details);
+    auto viewable = createViewable(AnnotationOptions().overview(), &details);
+
+    return std::shared_ptr<nlohmann::json::object_t>(viewable.release());
 }
 
 /**

@@ -419,11 +419,11 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
-    // add dataset stuff
-
     Section& gen_sec = root_item->getSection("Overview:General");
 
-    gen_sec.addText("This section contains information about the used application, database and dat sources.");
+    gen_sec.addText("This section contains information about the used application, database and data sources.");
+
+    // add dataset stuff
 
     gen_sec.addTable("gen_overview_table", 3, {"Name", "Comment", "Value"}, false);
 
@@ -435,6 +435,26 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     assert (eval_man_.hasCurrentStandard());
     gen_table.addRow({"Standard", "Standard name", eval_man_.currentStandardName().c_str()}, nullptr);
+
+    // add used sensors
+
+    auto data_source_ref = eval_man_.activeDataSourceInfoRef();
+    auto data_source_tst = eval_man_.activeDataSourceInfoTst();
+
+    std::string sensors_ref;
+    std::string sensors_tst;
+
+    for (const auto& elem : data_source_ref.data_sources)
+        sensors_ref += (sensors_ref.empty() ? "" : ", ") + elem.name;
+    
+    for (const auto& elem : data_source_tst.data_sources)
+        sensors_tst += (sensors_tst.empty() ? "" : ", ") + elem.name;
+
+    sensors_ref = data_source_ref.dbcontent + ": " + sensors_ref;
+    sensors_tst = data_source_tst.dbcontent + ": " + sensors_tst;
+    
+    gen_table.addRow({ "Reference Sensors", "Used reference sensors", sensors_ref.c_str() }, nullptr);
+    gen_table.addRow({ "Test Sensors", "Used test sensors", sensors_tst.c_str() }, nullptr);
 
     // generate results
 

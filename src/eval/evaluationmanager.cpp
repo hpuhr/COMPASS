@@ -1498,7 +1498,29 @@ set<unsigned int> EvaluationManager::activeDataSourcesRef()
             srcs.insert(stoul(ds_it.first));
 
     return srcs;
+}
 
+EvaluationManager::EvaluationDSInfo EvaluationManager::activeDataSourceInfoRef() const
+{
+    EvaluationDSInfo ds_info;
+    ds_info.dbcontent = settings_.dbcontent_name_ref_;
+
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    for (auto& ds_it : data_sources_ref_.at(settings_.dbcontent_name_ref_))
+    {
+        if (!ds_it.second)
+            continue;
+
+        unsigned int ds_id = stoul(ds_it.first);
+        assert (ds_man.hasDBDataSource(ds_id));
+
+        const auto& name = ds_man.dbDataSource(ds_id).name();
+
+        ds_info.data_sources.push_back({ name, ds_id });
+    }
+
+    return ds_info;
 }
 
 std::string EvaluationManager::dbContentNameTst() const
@@ -1534,7 +1556,29 @@ set<unsigned int> EvaluationManager::activeDataSourcesTst()
             srcs.insert(stoul(ds_it.first));
 
     return srcs;
+}
 
+EvaluationManager::EvaluationDSInfo EvaluationManager::activeDataSourceInfoTst() const
+{
+    EvaluationDSInfo ds_info;
+    ds_info.dbcontent = settings_.dbcontent_name_tst_;
+
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    for (auto& ds_it : data_sources_tst_.at(settings_.dbcontent_name_tst_))
+    {
+        if (!ds_it.second)
+            continue;
+
+        unsigned int ds_id = stoul(ds_it.first);
+        assert (ds_man.hasDBDataSource(ds_id));
+
+        const auto& name = ds_man.dbDataSource(ds_id).name();
+
+        ds_info.data_sources.push_back({ name, ds_id });
+    }
+
+    return ds_info;
 }
 
 bool EvaluationManager::dataLoaded() const

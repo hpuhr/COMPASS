@@ -228,7 +228,7 @@ protected:
     void updateResult(const boost::optional<double>& value);
 
     /// creates overview viewable data
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableOverviewData() const = 0;
+    virtual std::shared_ptr<nlohmann::json::object_t> viewableOverviewData() const = 0;
 
     std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options,
                                                              const EvaluationDetails* details = nullptr) const;

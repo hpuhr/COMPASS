@@ -542,7 +542,7 @@ std::vector<double> Joined::getValues(int value_id) const
 */
 void Joined::cacheViewable()
 {
-    viewable_ = viewableOverviewData();
+    viewable_ = createViewable(AnnotationOptions().overview());
 }
 
 /**
@@ -607,10 +607,11 @@ std::shared_ptr<nlohmann::json::object_t> Joined::viewableData(const EvaluationR
 
 /**
 */
-std::unique_ptr<nlohmann::json::object_t> Joined::viewableOverviewData() const
+std::shared_ptr<nlohmann::json::object_t> Joined::viewableOverviewData() const
 {
-    //create overview viewable
-    return createViewable(AnnotationOptions().overview());
+    assert (viewable_);
+
+    return viewable_;
 }
 
 /**
