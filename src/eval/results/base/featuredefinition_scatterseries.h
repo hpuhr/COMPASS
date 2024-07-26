@@ -90,7 +90,8 @@ public:
 
     /**
     */
-    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result,
+                                                            const std::vector<EvaluationDetail>* details) const override final
     {
         assert(isValid());
 
@@ -104,8 +105,8 @@ public:
             const auto& data_series_x = data_series_x_[ i ];
             const auto& data_series_y = data_series_y_[ i ];
 
-            auto values_x = data_series_x.getOptionalValues(result);
-            auto values_y = data_series_y.getOptionalValues(result);
+            auto values_x = data_series_x.getOptionalValues(result, details);
+            auto values_y = data_series_y.getOptionalValues(result, details);
 
             assert(values_x.size() == values_y.size());
 
@@ -174,7 +175,8 @@ public:
 
     /**
     */
-    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result,
+                                                            const std::vector<EvaluationDetail>* details) const override final
     {
         assert(isValid());
 
@@ -252,7 +254,8 @@ public:
 
     /**
     */
-    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result,
+                                                            const std::vector<EvaluationDetail>* details) const override final
     {
         assert(isValid());
 
@@ -265,7 +268,7 @@ public:
         {
             const auto& data_series = data_series_[ i ];
 
-            auto values = data_series.getMSecTimedValues(result);
+            auto values = data_series.getMSecTimedValues(result, details);
 
             ScatterSeries series;
             series.points.reserve(n);

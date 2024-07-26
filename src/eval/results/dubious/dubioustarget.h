@@ -48,6 +48,9 @@ public:
 
     static bool detailIsOkStatic(const EvaluationDetail& detail);
 
+    bool isDubious() const { return is_dubious_; }
+    const boost::posix_time::time_duration& duration() const { return duration_; }
+
 protected:
     EvaluationRequirement::DubiousTarget* req ();
 
@@ -68,6 +71,10 @@ protected:
                                         bool is_ok) const override;
 
     virtual DetailNestingMode detailNestingMode() const { return DetailNestingMode::SingleNested; } 
+
+    bool                             is_dubious_ = false;
+    boost::posix_time::time_duration duration_;
+    std::string                      dubious_reasons_;
 };
 
 /**

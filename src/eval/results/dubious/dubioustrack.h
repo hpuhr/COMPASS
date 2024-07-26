@@ -96,6 +96,8 @@ protected:
     mutable float track_duration_all_     {0};
     mutable float track_duration_nondub_  {0};
     mutable float track_duration_dubious_ {0};
+
+    std::string dubious_reasons_;
 };
 
 /**

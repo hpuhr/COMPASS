@@ -64,9 +64,6 @@ Joined::~Joined() = default;
 */
 void Joined::clearResults()
 {
-    //clear details
-    clearDetails();
-
     num_targets_        = 0;
     num_failed_targets_ = 0;
 
@@ -137,7 +134,8 @@ std::string Joined::getRequirementAnnotationID_impl() const
 /**
 */
 void Joined::iterateDetails(const DetailFunc& func,
-                            const DetailSkipFunc& skip_func) const
+                            const DetailSkipFunc& skip_func,
+                            const EvaluationDetails* details) const
 {
     auto funcSingleResults = [ & ] (const std::shared_ptr<Single>& result)
     {
@@ -361,7 +359,7 @@ void Joined::addOverview (EvaluationResultsReport::Section& section,
 {
     section.addFigure(SectorOverviewID, 
                       name, 
-                      [this](void) { return this->viewableData(); }, 
+                      [this](void) { return this->viewableOverviewData(); }, 
                       SectorOverviewRenderDelayMSec);
 }
 
@@ -395,6 +393,41 @@ void Joined::iterateSingleResults(const SingleResultFunc& func,
         if (func_used) 
             func_used(result_it);
     }
+}
+
+/**
+*/
+void Joined::addSingleResult(std::shared_ptr<Single> other)
+{
+    results_.push_back(other);
+}
+
+/**
+*/
+std::vector<std::shared_ptr<Single>>& Joined::singleResults() 
+{ 
+    return results_; 
+}
+
+/**
+*/
+bool Joined::hasStoredDetails() const
+{
+    bool has_details = true;
+
+    for (const auto& single : results_)
+    {
+        if (!resultUsed(single))
+            continue;
+
+        if (!single->hasStoredDetails())
+        {
+            has_details = false;
+            break;
+        }
+    }
+
+    return has_details;
 }
 
 /**
@@ -444,10 +477,9 @@ void Joined::updateToChanges()
 
     if (issues_total > 0 && resultUsable())
     {
-        for (const auto& single : results_)
+        for (size_t i = 0; i < nu; ++i)
         {
-            if (!resultUsed(single))
-                continue;
+            auto& single = results_[ used[ i ] ];
 
             auto issues = single->numIssues();
             assert (issues_total >= issues);
@@ -455,20 +487,18 @@ void Joined::updateToChanges()
             single->setInterestFactor((double)issues / (double)issues_total);
         }
     }
+
+    //update viewable
+    if (hasStoredDetails())
+        cacheViewable();
 }
+
 
 /**
 */
-void Joined::addSingleResult(std::shared_ptr<Single> other)
+void Joined::cacheViewable()
 {
-    results_.push_back(other);
-}
-
-/**
-*/
-std::vector<std::shared_ptr<Single>>& Joined::singleResults() 
-{ 
-    return results_; 
+    viewable_ = viewableOverviewData();
 }
 
 /**
@@ -480,7 +510,8 @@ std::unique_ptr<nlohmann::json::object_t> Joined::createBaseViewable() const
 
 /**
 */
-Base::ViewableInfo Joined::createViewableInfo(const AnnotationOptions& options) const
+Base::ViewableInfo Joined::createViewableInfo(const AnnotationOptions& options,
+                                              const EvaluationDetails* details) const
 {
     ViewableInfo info;
     info.viewable_type = ViewableType::Overview;
@@ -498,7 +529,8 @@ Base::ViewableInfo Joined::createViewableInfo(const AnnotationOptions& options) 
 /**
 */
 void Joined::createAnnotations(nlohmann::json& annotations, 
-                               const AnnotationOptions& options) const
+                               const AnnotationOptions& options,
+                               const EvaluationDetails* details) const
 {
     //everything handled via custom annotations
     addCustomAnnotations(annotations);
@@ -509,26 +541,29 @@ void Joined::createAnnotations(nlohmann::json& annotations,
 bool Joined::hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                               const QVariant& annotation) const
 {
-    if (table.name() == req_overview_table_name_)
-        return true;
-    else
+    if (table.name() != req_overview_table_name_)
         return false;
+
+    if (!viewable_)
+        return false;
+
+    return true;
 }
 
 /**
  */
-std::unique_ptr<nlohmann::json::object_t> Joined::viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+std::shared_ptr<nlohmann::json::object_t> Joined::viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                                const QVariant& annotation) const
 {
     assert (hasViewableData(table, annotation));
 
-    //just call the general overview version
-    return viewableData();
+    //return cached viewable
+    return viewable_;
 }
 
 /**
 */
-std::unique_ptr<nlohmann::json::object_t> Joined::viewableData() const
+std::unique_ptr<nlohmann::json::object_t> Joined::viewableOverviewData() const
 {
     //create overview viewable
     return createViewable(AnnotationOptions().overview());
@@ -537,18 +572,18 @@ std::unique_ptr<nlohmann::json::object_t> Joined::viewableData() const
 /**
  * Legacy code for creating annotations for every single target report in the sector.
 */
-void Joined::addOverviewAnnotations(nlohmann::json& annotations_json) const
-{
-    //add annotations from single results
-    for (auto& single_result : results_)
-    {
-        if (single_result->use())
-        {
-            //create overview annotations for single result
-            single_result->createSumOverviewAnnotations(annotations_json, 
-                                                        eval_man_.settings().show_ok_joined_target_reports_);
-        }
-    }
-}
+// void Joined::addOverviewAnnotations(nlohmann::json& annotations_json) const
+// {
+//     //add annotations from single results
+//     for (auto& single_result : results_)
+//     {
+//         if (single_result->use())
+//         {
+//             //create overview annotations for single result
+//             single_result->createSumOverviewAnnotations(annotations_json, 
+//                                                         eval_man_.settings().show_ok_joined_target_reports_);
+//         }
+//     }
+// }
 
 }

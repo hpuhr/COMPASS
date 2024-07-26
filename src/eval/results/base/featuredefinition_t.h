@@ -40,37 +40,37 @@ struct FeatureDefinitionDataSeries
     /**
      * Get valid series values.
     */
-    std::vector<T> getValues(const Base* base) const
+    std::vector<T> getValues(const Base* base, const Base::EvaluationDetails* details = nullptr) const
     {
         assert(isValid());
-        return EvaluationResultTemplates(base).getValues<T>(series_value_source);
+        return EvaluationResultTemplates(base, details).getValues<T>(series_value_source);
     }
 
     /**
      * Get optional series values for each detail.
     */
-    std::vector<boost::optional<T>> getOptionalValues(const Base* base) const
+    std::vector<boost::optional<T>> getOptionalValues(const Base* base, const Base::EvaluationDetails* details = nullptr) const
     {
         assert(isValid());
-        return EvaluationResultTemplates(base).getOptionalValues<T>(series_value_source);
+        return EvaluationResultTemplates(base, details).getOptionalValues<T>(series_value_source);
     }
 
     /**
      * Get series values + time.
     */
-    std::vector<TimedValue<T>> getTimedValues(const Base* base) const
+    std::vector<TimedValue<T>> getTimedValues(const Base* base, const Base::EvaluationDetails* details = nullptr) const
     {
         assert(isValid());
-        return EvaluationResultTemplates(base).getTimedValues<T>(series_value_source);
+        return EvaluationResultTemplates(base, details).getTimedValues<T>(series_value_source);
     }
 
     /**
      * Get series values + time in seconds.
     */
-    std::vector<MSecTimedValue<T>> getMSecTimedValues(const Base* base) const
+    std::vector<MSecTimedValue<T>> getMSecTimedValues(const Base* base, const Base::EvaluationDetails* details = nullptr) const
     {
         assert(isValid());
-        return EvaluationResultTemplates(base).getMSecTimedValues<T>(series_value_source);
+        return EvaluationResultTemplates(base, details).getMSecTimedValues<T>(series_value_source);
     }
 
     /**
@@ -78,11 +78,12 @@ struct FeatureDefinitionDataSeries
     */
     std::vector<PosValue<T>> getValuesPlusPosition(const Base* base,
                                                    DetailValuePositionMode detail_pos_mode,
-                                                   std::vector<std::pair<size_t,size_t>>* detail_ranges = nullptr) const
+                                                   std::vector<std::pair<size_t,size_t>>* detail_ranges = nullptr,
+                                                   const Base::EvaluationDetails* details = nullptr) const
     {
-        return EvaluationResultTemplates(base).getValuesPlusPosition<T>(series_value_source, 
-                                                                        detail_pos_mode, 
-                                                                        detail_ranges);
+        return EvaluationResultTemplates(base, details).getValuesPlusPosition<T>(series_value_source, 
+                                                                                 detail_pos_mode, 
+                                                                                 detail_ranges);
     }
 
     std::string    series_name;         // name of the series used in a plot legend

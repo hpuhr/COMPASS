@@ -505,8 +505,7 @@ void SectionContentTable::performClickAction()
     {
         loginf << "SectionContentTable: clickedSlot: index has associated viewable";
 
-        std::unique_ptr<nlohmann::json::object_t> viewable =
-                result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index));
+        auto viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index));
         assert (viewable);
 
         eval_man_.setViewableDataConfig(*viewable.get());

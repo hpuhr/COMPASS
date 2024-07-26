@@ -117,16 +117,10 @@ public:
 
     const boost::optional<double>& result() const;
 
-    virtual void updateResult();
     bool resultUsable() const;
     bool hasFailed() const;
     bool hasIssues() const;
     bool isIgnored() const;
-
-    size_t numDetails() const;
-    const EvaluationDetails& getDetails() const;
-    const EvaluationDetail& getDetail(int idx) const;
-    const EvaluationDetail& getDetail(const DetailIndex& index) const;
 
     const SectorLayer& sectorLayer() const { return sector_layer_; } 
 
@@ -148,23 +142,21 @@ public:
     virtual bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                                   const QVariant& annotation) const = 0;
     /// creates suitable viewable data for the given table and annotation index
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    virtual std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                                    const QVariant& annotation) const = 0;
-    /// creates overview viewable data
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData() const = 0;
-
     /// adds the result to the report root item
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
     /// iterate over details
     virtual void iterateDetails(const DetailFunc& func,
-                                const DetailSkipFunc& skip_func = DetailSkipFunc()) const = 0;
+                                const DetailSkipFunc& skip_func = DetailSkipFunc(),
+                                const EvaluationDetails* details = nullptr) const = 0;
 
     std::vector<double> getValues(const ValueSource<double>& source) const;
     std::vector<double> getValues(int value_id) const;
 
-    size_t totalNumDetails() const;
-    size_t totalNumPositions() const;
+    size_t totalNumDetails(const EvaluationDetails* details = nullptr) const;
+    size_t totalNumPositions(const EvaluationDetails* details = nullptr) const;
 
     const static std::string req_overview_table_name_;
 
@@ -220,7 +212,7 @@ protected:
             return true;
         }
 
-        ViewableType                viewable_type = ViewableType::Overview;
+        ViewableType                 viewable_type = ViewableType::Overview;
         boost::optional<DetailIndex> detail_index;
     };
 
@@ -238,28 +230,31 @@ protected:
 
     QString formatValue(double v, int precision = 2) const;
 
-    void setDetails(const EvaluationDetails& details);
-    void addDetails(const EvaluationDetails& details);
-    void clearDetails();
-    bool detailIndexValid(const DetailIndex& index) const; 
-
     /// compute result value
+    virtual void updateResult();
     virtual boost::optional<double> computeResult() const;
     virtual boost::optional<double> computeResult_impl() const = 0;
     
     std::string conditionResultString() const;
 
-    std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options) const;
+    /// creates overview viewable data
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableOverviewData() const = 0;
 
-    void addCustomAnnotations(nlohmann::json& annotations_json) const;
+    std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options,
+                                                             const EvaluationDetails* details = nullptr) const;
+
+    void addCustomAnnotations(nlohmann::json& annotations_json,
+                              const EvaluationDetails* details = nullptr) const;
 
     /// creates a basic viewable
     virtual std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const = 0;
     /// creates additional viewable information (region of interest etc.)
-    virtual ViewableInfo createViewableInfo(const AnnotationOptions& options) const = 0;
+    virtual ViewableInfo createViewableInfo(const AnnotationOptions& options,
+                                            const EvaluationDetails* details = nullptr) const = 0;
     /// creates annotations for the given options
     virtual void createAnnotations(nlohmann::json& annotations_json, 
-                                   const AnnotationOptions& options) const = 0;
+                                   const AnnotationOptions& options,
+                                   const EvaluationDetails* details = nullptr) const = 0;
 
     /// generate definitions for the automatic generation of custom annotations (grids, histograms, etc.)
     virtual FeatureDefinitions getCustomAnnotationDefinitions() const;
@@ -288,8 +283,6 @@ protected:
     EvaluationManager& eval_man_;
 
 private:
-    EvaluationDetails details_;
-
     boost::optional<double> result_;
     bool                    ignore_ = false;
 };

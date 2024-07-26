@@ -126,6 +126,13 @@ unsigned int TrackAngleBase::numNoRef() const
     return num_no_ref_;
 }
 
+/**
+*/
+const ValueAccumulator& TrackAngleBase::accumulator() const
+{
+    return accumulator_;
+}
+
 /***************************************************************************************
  * SingleTrackAngle
  ***************************************************************************************/
@@ -356,10 +363,7 @@ void JoinedTrackAngle::accumulateSingleResult(const std::shared_ptr<Single>& sin
     num_comp_failed_  += single_ta->numCompFailed();
     num_comp_passed_  += single_ta->numCompPassed();
 
-    auto values = single_ta->getValues(SingleTrackAngle::DetailKey::Offset);
-    assert(values.size() == single_ta->numCompFailed() + single_ta->numCompPassed());
-
-    accumulator_.accumulate(values, last);
+    accumulator_.join(single_ta->accumulator(), last);
 }
 
 /**
@@ -406,19 +410,21 @@ std::vector<Joined::SectorInfo> JoinedTrackAngle::sectorInfos() const
 */
 bool JoinedTrackAngle::exportAsCSV(std::ofstream& strm) const
 {
-    loginf << "JoinedTrackAngle: exportAsCSV";
+    // loginf << "JoinedTrackAngle: exportAsCSV";
 
-    strm << "trackangle_offset\n";
+    // strm << "trackangle_offset\n";
 
-    auto values = getValues(SingleTrackAngle::DetailKey::Offset);
+    // auto values = getValues(SingleTrackAngle::DetailKey::Offset);
 
-    for (auto v : values)
-        strm << v << "\n";
+    // for (auto v : values)
+    //     strm << v << "\n";
        
-    if (!strm)
-        return false;
+    // if (!strm)
+    //     return false;
 
-    return true;
+    // return true;
+
+    return false;
 }
 
 /**

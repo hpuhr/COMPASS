@@ -96,6 +96,9 @@ protected:
     unsigned int common_numIssues() const;
     bool common_detailIsOk(const EvaluationDetail& detail) const;
 
+    FeatureDefinitions common_getCustomAnnotationDefinitions(const Single& single,
+                                                             const EvaluationManager& eval_man) const;
+
     virtual boost::optional<double> computeFinalResultValue() const = 0;
 };
 
@@ -132,6 +135,8 @@ protected:
                                 const EvaluationDetail& detail, 
                                 TargetAnnotationType type,
                                 bool is_ok) const override final;
+
+    virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };
 
 /**
@@ -167,6 +172,8 @@ protected:
                                         const EvaluationDetail& detail, 
                                         TargetAnnotationType type,
                                         bool is_ok) const override;
+
+    virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };
 
 /**
@@ -185,7 +192,6 @@ protected:
 
     void common_clearResults();
     void common_accumulateSingleResult(const PositionBase& single_result, 
-                                       const std::vector<double>& values,
                                        bool last);
 
     boost::optional<double> common_computeResult() const;
@@ -220,7 +226,6 @@ protected:
     virtual boost::optional<double> computeResult_impl() const override;
 
     virtual bool exportAsCSV(std::ofstream& strm) const override;
-    virtual bool canExportCSV() const override { return true; }
 
     virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };
@@ -248,7 +253,6 @@ protected:
     virtual boost::optional<double> computeResult_impl() const override;
 
     virtual bool exportAsCSV(std::ofstream& strm) const override;
-    virtual bool canExportCSV() const override { return true; }
 
     virtual FeatureDefinitions getCustomAnnotationDefinitions() const override;
 };

@@ -266,76 +266,11 @@ EvaluationResultsReport::Section& Base::getRequirementSection (
 
 /**
 */
-size_t Base::numDetails() const
+std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationOptions& options,
+                                                               const EvaluationDetails* details) const
 {
-    return details_.size();
-}
-
-/**
-*/
-const Base::EvaluationDetails& Base::getDetails() const
-{
-    return details_;
-}
-
-/**
-*/
-const EvaluationDetail& Base::getDetail(int idx) const
-{
-    return getDetails().at(idx);
-}
-
-/**
-*/
-const EvaluationDetail& Base::getDetail(const DetailIndex& index) const
-{
-    const auto& d = getDetail(index[ 0 ]);
-
-    if (index[ 1 ] < 0)
-        return d;
-
-    return d.details().at(index[ 1 ]);
-}
-
-/**
-*/
-bool Base::detailIndexValid(const DetailIndex& index) const
-{
-    if (index[ 0 ] < 0 || index[ 0 ] >= (int)details_.size())
-        return false;
-    if (index[ 1 ] >= 0 && index[ 1 ] >= (int)details_[ index[ 0 ] ].numDetails())
-        return false;
-
-    return true;
-}
-
-/**
-*/
-void Base::clearDetails()
-{
-    details_ = {};
-}
-
-/**
-*/
-void Base::setDetails(const EvaluationDetails& details)
-{
-    details_ = details;
-}
-
-/**
-*/
-void Base::addDetails(const EvaluationDetails& details)
-{
-    details_.insert(details_.end(), details.begin(), details.end());
-}
-
-/**
-*/
-std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationOptions& options) const
-{
-    auto viewable_ptr = createBaseViewable();        // create basic viewable
-    auto info         = createViewableInfo(options); // create viewable info (data bounds etc.)
+    auto viewable_ptr = createBaseViewable();                 // create basic viewable
+    auto info         = createViewableInfo(options, details); // create viewable info (data bounds etc.)
 
     //configure viewable depending on type
     if (info.viewable_type == ViewableType::Overview)
@@ -387,7 +322,7 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
     auto& result_anno_array = ViewPointGenAnnotation::getChildrenJSON(vp_anno_array.at(0));
 
     //add annotations
-    createAnnotations(result_anno_array, options);
+    createAnnotations(result_anno_array, options, details);
 
     return viewable_ptr;
 }
@@ -410,7 +345,8 @@ FeatureDefinitions Base::getCustomAnnotationDefinitions() const
 /**
  * Called by Single and Joined to add custom annotations to the viewable.
 */
-void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
+void Base::addCustomAnnotations(nlohmann::json& annotations_json,
+                                const EvaluationDetails* details) const
 {
     assert(annotations_json.is_array());
 
@@ -429,7 +365,7 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
         for (const auto& def : value_defs.second)
         {
             //create feature and add to annotation
-            auto f = def->createFeature(this);
+            auto f = def->createFeature(this, details);
             assert(f);
 
             loginf << "Base: addCustomAnnotations: Adding feature '" << f->name() << "'";
@@ -462,44 +398,44 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
 
 /**
 */
-size_t Base::totalNumDetails() const
+size_t Base::totalNumDetails(const EvaluationDetails* details) const
 {
     size_t num_details = 0;
 
     //scan for estimated max num values
     auto funcScan = [ & ] (const EvaluationDetail& detail, 
-                            const EvaluationDetail* parent_detail, 
-                            int idx0, 
-                            int idx1,
-                            int evt_pos_idx, 
-                            int evt_ref_pos_idx)
+                           const EvaluationDetail* parent_detail, 
+                           int idx0, 
+                           int idx1,
+                           int evt_pos_idx, 
+                           int evt_ref_pos_idx)
     {
         ++num_details;
     };
 
-    iterateDetails(funcScan);
+    iterateDetails(funcScan, {}, details);
 
     return num_details;
 }
 
 /**
 */
-size_t Base::totalNumPositions() const
+size_t Base::totalNumPositions(const EvaluationDetails* details) const
 {
     size_t num_positions = 0;
 
     //scan for estimated max num values
     auto funcScan = [ & ] (const EvaluationDetail& detail, 
-                            const EvaluationDetail* parent_detail, 
-                            int idx0, 
-                            int idx1,
-                            int evt_pos_idx, 
-                            int evt_ref_pos_idx)
+                           const EvaluationDetail* parent_detail, 
+                           int idx0, 
+                           int idx1,
+                           int evt_pos_idx, 
+                           int evt_ref_pos_idx)
     {
         num_positions += detail.numPositions();
     };
 
-    iterateDetails(funcScan);
+    iterateDetails(funcScan, {}, details);
 
     return num_positions;
 }

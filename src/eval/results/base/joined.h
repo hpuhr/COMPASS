@@ -57,9 +57,8 @@ public:
 
     bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
-    std::unique_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                            const QVariant& annotation) const override final;
-    std::unique_ptr<nlohmann::json::object_t> viewableData() const override final;
 
     bool hasReference (const EvaluationResultsReport::SectionContentTable& table, 
                        const QVariant& annotation) const override final;
@@ -67,13 +66,16 @@ public:
                           const QVariant& annotation) const override final;
 
     void iterateDetails(const DetailFunc& func,
-                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
+                        const DetailSkipFunc& skip_func = DetailSkipFunc(),
+                        const EvaluationDetails* details = nullptr) const override final;
 
     void updateToChanges();
-
+    
     unsigned int numSingleResults() const;
     unsigned int numUsableSingleResults() const;
     unsigned int numUnusableSingleResults() const;
+
+    bool hasStoredDetails() const;
 
     static const std::string SectorOverviewID;
     static const int         SectorOverviewRenderDelayMSec;
@@ -102,10 +104,13 @@ protected:
 
     virtual std::string getRequirementAnnotationID_impl() const override;
 
+    std::unique_ptr<nlohmann::json::object_t> viewableOverviewData() const override final;
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
-    ViewableInfo createViewableInfo(const AnnotationOptions& options) const override final;
+    ViewableInfo createViewableInfo(const AnnotationOptions& options,
+                                    const EvaluationDetails* details = nullptr) const override final;
     void createAnnotations(nlohmann::json& annotations, 
-                           const AnnotationOptions& options) const override final;
+                           const AnnotationOptions& options,
+                           const EvaluationDetails* details = nullptr) const override final;
 
     virtual std::vector<SectorInfo> sectorInfosCommon() const;
     std::vector<SectorInfo> sectorConditionInfos() const;
@@ -122,14 +127,13 @@ private:
     void addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addSectorDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    void createGrid(const grid2d::GridResolution& resolution) const;
-    void addOverviewGrid(nlohmann::json& annotations_json) const;
-    void addOverviewAnnotations(nlohmann::json& annotations_json) const;
+    void cacheViewable();
 
     unsigned int num_targets_        = 0;
     unsigned int num_failed_targets_ = 0;
 
-    mutable std::unique_ptr<Grid2D> grid_;
+    mutable std::unique_ptr<Grid2D>                   grid_;
+    mutable std::shared_ptr<nlohmann::json::object_t> viewable_;
 };
 
 }
