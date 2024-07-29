@@ -39,8 +39,8 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                                      ReconstructorBaseSettings& base_settings,
                                      unsigned int default_line_id)
 :   Configurable (class_id, instance_id, &task)
-,   task_(task)
 ,   acc_estimator_(std::move(acc_estimator))
+,   task_(task)
 ,   base_settings_(base_settings)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
@@ -238,9 +238,13 @@ void ReconstructorBase::processSlice()
 
     accessor_->add(currentSlice().data_);
 
+    acc_estimator_->prepareForNewSlice();
+
     logdbg << "ReconstructorBase: processSlice: processing slice";
 
     processSlice_impl();
+
+    acc_estimator_->postProccessNewSlice();
 
     processing_ = false;
 
