@@ -104,7 +104,7 @@ public:
     };
 
 protected:
-    virtual boost::optional<double> computeResult_impl() const override final;
+    virtual boost::optional<double> computeResult_impl(const EvaluationDetails& details) const override final;
     virtual unsigned int numIssues() const override final;
 
     virtual std::vector<std::string> targetTableHeadersCustom() const override final;

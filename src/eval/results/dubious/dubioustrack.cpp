@@ -109,7 +109,7 @@ SingleDubiousTrack::SingleDubiousTrack(const std::string& result_id,
         dubious_reasons_ += to_string(detail_it.getValue(DetailKey::UTNOrTrackNum).toUInt()) + ":" + dub_reasons_str;
     }
 
-    updateResult();
+    updateResult(details);
 }
 
 /**
@@ -157,7 +157,7 @@ EvaluationRequirement::DubiousTrack* SingleDubiousTrack::req ()
 
 /**
 */
-boost::optional<double> SingleDubiousTrack::computeResult_impl() const
+boost::optional<double> SingleDubiousTrack::computeResult_impl(const EvaluationDetails& details) const
 {
     assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
     assert (num_tracks_ >= num_tracks_dubious_);
@@ -170,7 +170,7 @@ boost::optional<double> SingleDubiousTrack::computeResult_impl() const
     {
         result = (double)num_tracks_dubious_ / (double)num_tracks_;
 
-        for (const auto& detail_it : getDetails())
+        for (const auto& detail_it : details)
         {
             auto duration   = detail_it.getValue(DetailKey::Duration).toDouble();
             auto is_dubious = detail_it.getValue(DetailKey::IsDubious).toBool();

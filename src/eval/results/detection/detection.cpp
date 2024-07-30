@@ -94,7 +94,7 @@ SingleDetection::SingleDetection(const std::string& result_id,
 ,   SingleProbabilityBase("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man, details)
 ,   ref_periods_(ref_periods)
 {
-    updateResult();
+    updateResult(details);
 }
 
 /**
@@ -107,7 +107,7 @@ std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& re
 
 /**
 */
-boost::optional<double> SingleDetection::computeResult_impl() const
+boost::optional<double> SingleDetection::computeResult_impl(const EvaluationDetails& details) const
 {
     if (!sum_uis_)
         return {};

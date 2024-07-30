@@ -44,7 +44,7 @@ SinglePositionDistanceRMS::SinglePositionDistanceRMS(const std::string& result_i
 :   SinglePositionValueBase("SinglePositionDistanceRMS", result_id, requirement, sector_layer, utn, target, eval_man, details,
                             num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed)
 {
-    updateResult();
+    updateResult(details);
 }
 
 /**
@@ -116,7 +116,7 @@ std::vector<QVariant> SinglePositionDistanceRMS::detailValues(const EvaluationDe
 
 /**
 */
-boost::optional<double> SinglePositionDistanceRMS::computeFinalResultValue() const
+boost::optional<double> SinglePositionDistanceRMS::computeFinalResultValue(const EvaluationDetails& details) const
 {
     if (accumulator_.numValues() == 0)
         return {};

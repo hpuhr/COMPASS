@@ -43,6 +43,7 @@ class FeatureDefinition
 public:
     FeatureDefinition();
     FeatureDefinition(const EvaluationManager& eval_manager,
+                      const std::string& definition_type,
                       const std::string& feature_description,
                       const std::string& x_axis_label,
                       const std::string& y_axis_label);
@@ -53,7 +54,7 @@ public:
 
     std::unique_ptr<ViewPointGenFeature> createFeature(const Base* result,
                                                        const std::vector<EvaluationDetail>* details = nullptr) const;
-
+    const std::string& type() const;
     const std::string& featureDescription() const;
     const std::string& xAxisLabel() const;
     const std::string& yAxisLabel() const;
@@ -70,6 +71,8 @@ protected:
 
 private:
     const EvaluationManager* eval_manager_ = nullptr;
+
+    std::string definition_type_;
 
     std::string feature_description_;
     std::string x_axis_label_;

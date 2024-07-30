@@ -37,7 +37,7 @@ namespace EvaluationResultsReport
 
 SectionContentFigure::SectionContentFigure(
     const string& name, const string& caption,
-    std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
+    std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
     Section* parent_section, EvaluationManager& eval_man, int render_delay_msec)
     : SectionContent(name, parent_section, eval_man), caption_(caption),
       render_delay_msec_(render_delay_msec), viewable_fnc_(viewable_fnc)

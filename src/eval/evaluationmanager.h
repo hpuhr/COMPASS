@@ -182,6 +182,18 @@ public slots:
     void loadingDoneSlot();
 
 public:
+    struct EvaluationDS
+    {
+        std::string  name;
+        unsigned int id;
+    };
+
+    struct EvaluationDSInfo
+    {
+        std::string               dbcontent;
+        std::vector<EvaluationDS> data_sources;
+    };
+
     typedef std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> ResultMap;
     typedef ResultMap::const_iterator ResultIterator;
 
@@ -246,6 +258,7 @@ public:
     bool hasValidReferenceDBContent ();
     std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[settings_.dbcontent_name_ref_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesRef();
+    EvaluationDSInfo activeDataSourceInfoRef() const;
 
     std::string dbContentNameTst() const;
     void dbContentNameTst(const std::string& name);
@@ -253,6 +266,7 @@ public:
     bool hasValidTestDBContent ();
     std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[settings_.dbcontent_name_tst_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesTst();
+    EvaluationDSInfo activeDataSourceInfoTst() const;
 
     bool dataLoaded() const;
     bool evaluated() const;
