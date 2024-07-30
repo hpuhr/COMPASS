@@ -40,7 +40,7 @@ SinglePositionDistance::SinglePositionDistance(const std::string& result_id,
 :   SinglePositionProbabilityBase("SinglePositionDistance", result_id, requirement, sector_layer, utn, target, eval_man, details,
                                   num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed)
 {
-    updateResult(details);
+    updateResult();
 }
 
 /**

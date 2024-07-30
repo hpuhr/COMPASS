@@ -46,7 +46,7 @@ SinglePositionAcross::SinglePositionAcross(const std::string& result_id,
 :   SinglePositionProbabilityBase("SinglePositionAcross", result_id, requirement, sector_layer, utn, target, eval_man, details,
                                   num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_value_ok, num_value_nok)
 {
-    updateResult(details);
+    updateResult();
 }
 
 /**

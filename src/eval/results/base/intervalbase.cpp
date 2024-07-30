@@ -70,7 +70,7 @@ SingleIntervalBase::SingleIntervalBase(const std::string& result_type,
 
 /**
 */
-boost::optional<double> SingleIntervalBase::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SingleIntervalBase::computeResult_impl() const
 {
     assert (missed_uis_ <= sum_uis_);
 

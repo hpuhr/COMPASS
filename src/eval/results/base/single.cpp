@@ -115,18 +115,18 @@ void Single::updateUseFromTarget()
 
 /**
 */
-void Single::updateResult(const EvaluationDetails& details)
+void Single::updateResult()
 {
-    Base::updateResult(computeResult(details));
+    Base::updateResult(computeResult());
 
     updateUseFromTarget();
 }
 
 /**
 */
-boost::optional<double> Single::computeResult(const EvaluationDetails& details) const
+boost::optional<double> Single::computeResult() const
 {
-    return computeResult_impl(details);
+    return computeResult_impl();
 }
 
 /**
@@ -210,6 +210,32 @@ void Single::purgeStoredDetails()
 
 /**
 */
+Single::TemporaryDetails Single::temporaryDetails() const
+{
+    return TemporaryDetails(this);
+}
+
+/**
+*/
+Single::EvaluationDetails Single::recomputeDetails() const
+{
+    assert(requirement_);
+    assert(eval_man_.getData().hasTargetData(utn_));
+
+    loginf << "Single: recomputeDetails: recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
+
+    const auto& data = eval_man_.getData().targetData(utn_);
+
+    auto result = requirement_->evaluate(data, requirement_, sector_layer_);
+    assert(result);
+
+    loginf << "Single: recomputeDetails: target details recomputed!";
+
+    return result->getDetails();
+}
+
+/**
+*/
 const EvaluationDetail& Single::getDetail(const EvaluationDetails& details,
                                           const DetailIndex& index) const
 {
@@ -232,12 +258,11 @@ const Single::EvaluationDetails& Single::getDetails() const
 
 /**
 */
-bool Single::detailIndexValid(const DetailIndex& index,
-                              const EvaluationDetails* details) const
+bool Single::detailIndexValid(const DetailIndex& index) const
 {
-    if (index[ 0 ] < 0 || (details && index[ 0 ] >= (int)details->size()))
+    if (index[ 0 ] < 0 || (details_.has_value() && index[ 0 ] >= (int)details_.value().size()))
         return false;
-    if (index[ 1 ] >= 0 && (details && index[ 1 ] >= (int)(*details)[ index[ 0 ] ].numDetails()))
+    if (index[ 1 ] >= 0 && (details_.has_value() && index[ 1 ] >= (int)details_.value()[ index[ 0 ] ].numDetails()))
         return false;
 
     return true;
@@ -383,7 +408,7 @@ void Single::generateDetailsTable(EvaluationResultsReport::Section& utn_req_sect
         [this, &utn_req_details_table](void)
         {
             //create details on demand
-            auto details = recomputeDetails();
+            auto temp_details = temporaryDetails();
 
             //detail => table row functor
             auto func = [ & ] (const EvaluationDetail& detail, 
@@ -401,7 +426,7 @@ void Single::generateDetailsTable(EvaluationResultsReport::Section& utn_req_sect
             };
 
             //iterate over temporary details
-            this->iterateDetails(details, func);
+            this->iterateDetails(func);
         } );
 }
 
@@ -563,18 +588,16 @@ std::string Single::reference(const EvaluationResultsReport::SectionContentTable
 
 /**
 */
-std::vector<double> Single::getValues(const ValueSource<double>& source,
-                                      const EvaluationDetails& details) const
+std::vector<double> Single::getValues(const ValueSource<double>& source) const
 {
-    return EvaluationResultTemplates(this, &details).getValues<double>(source);
+    return EvaluationResultTemplates(this).getValues<double>(source);
 }
 
 /**
 */
-std::vector<double> Single::getValues(int value_id,
-                                      const EvaluationDetails& details) const
+std::vector<double> Single::getValues(int value_id) const
 {
-    return getValues(ValueSource<double>(value_id), details);
+    return getValues(ValueSource<double>(value_id));
 }
 
 /**
@@ -600,21 +623,21 @@ std::shared_ptr<nlohmann::json::object_t> Single::viewableData(const EvaluationR
 {
     assert (hasViewableData(table, annotation));
 
-    auto details = recomputeDetails();
+    auto temp_details = temporaryDetails();
 
     if (table.name() == target_table_name_)
     {
         //return target overview viewable
-        return createViewable(AnnotationOptions().overview(), &details);
+        return createViewable(AnnotationOptions().overview());
     }
     else if (table.name() == tr_details_table_name_ && annotation.isValid())
     {
         //obtain detail key from annotation
-        auto detail_key = detailIndex(annotation, &details);
+        auto detail_key = detailIndex(annotation);
         assert(detail_key.has_value());
 
         //return target detail viewable
-        return createViewable(AnnotationOptions().highlight(detail_key.value()), &details);
+        return createViewable(AnnotationOptions().highlight(detail_key.value()));
     }
 
     return nullptr;
@@ -626,10 +649,10 @@ std::shared_ptr<nlohmann::json::object_t> Single::viewableData(const EvaluationR
 */
 std::shared_ptr<nlohmann::json::object_t> Single::viewableOverviewData() const
 {
-    auto details = recomputeDetails();
+    auto temp_details = temporaryDetails();
 
     //create overview viewable
-    auto viewable = createViewable(AnnotationOptions().overview(), &details);
+    auto viewable = createViewable(AnnotationOptions().overview());
 
     return std::shared_ptr<nlohmann::json::object_t>(viewable.release());
 }
@@ -857,30 +880,10 @@ void Single::addAnnotationDistance(nlohmann::json& annotations_json,
 }
 
 /**
-*/
-Single::EvaluationDetails Single::recomputeDetails() const
-{
-    assert(requirement_);
-    assert(eval_man_.getData().hasTargetData(utn_));
-
-    loginf << "Single: recomputeDetails: recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
-
-    const auto& data = eval_man_.getData().targetData(utn_);
-
-    auto result = requirement_->evaluate(data, requirement_, sector_layer_);
-    assert(result);
-
-    loginf << "Single: recomputeDetails: target details recomputed!";
-
-    return result->getDetails();
-}
-
-/**
  * Returns a detail key given an annotation id.
  * Default behaviour will return a first level detail index.
 */
-boost::optional<Base::DetailIndex> Single::detailIndex(const QVariant& annotation,
-                                                       const EvaluationDetails* details) const
+boost::optional<Base::DetailIndex> Single::detailIndex(const QVariant& annotation) const
 {
     if (!annotation.isValid())
         return {};
@@ -889,10 +892,8 @@ boost::optional<Base::DetailIndex> Single::detailIndex(const QVariant& annotatio
     if (index.isNull())
         return {};
 
-    const EvaluationDetails* details2check = details ? details : (details_.has_value() ? &details_.value() : nullptr);
-
     DetailIndex dindex = { index.x(), index.y() };
-    if (!detailIndexValid(dindex, details2check))
+    if (!detailIndexValid(dindex))
         return {};
 
     return dindex;
@@ -903,12 +904,11 @@ boost::optional<Base::DetailIndex> Single::detailIndex(const QVariant& annotatio
  * Default behaviour will iterate over all first level details.
 */
 void Single::iterateDetails(const DetailFunc& func,
-                            const DetailSkipFunc& skip_func,
-                            const EvaluationDetails* details) const
+                            const DetailSkipFunc& skip_func) const
 {
-    assert (details || details_.has_value());
+    assert (details_.has_value());
 
-    iterateDetails(details ? *details : details_.value(), func, skip_func);
+    iterateDetails(details_.value(), func, skip_func);
 }
 
 /**
@@ -970,11 +970,10 @@ std::unique_ptr<nlohmann::json::object_t> Single::createBaseViewable() const
 
 /**
 */
-Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options,
-                                              const EvaluationDetails* details) const
+Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options) const
 {
     assert(options.valid());
-    assert(details || details_.has_value());
+    assert(details_.has_value());
 
     Base::ViewableInfo info;
     info.viewable_type = options.viewable_type;
@@ -1003,14 +1002,14 @@ Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options,
             bounds |= detail.bounds(BoundsEps);
         };
 
-        iterateDetails(func, skip_func, details);
+        iterateDetails(func, skip_func);
 
         info.bounds = bounds;
     }
     else if (options.viewable_type == ViewableType::Highlight)
     {
         //highlight single detail
-        const auto& d = getDetail(details ? *details : details_.value(), options.detail_index.value());
+        const auto& d = getDetail(details_.value(), options.detail_index.value());
 
         assert(d.numPositions() >= 1);
 
@@ -1114,23 +1113,22 @@ void Single::createTargetAnnotations(const EvaluationDetails& details,
 /**
 */
 void Single::createAnnotations(nlohmann::json& annotations_json, 
-                               const AnnotationOptions& options,
-                               const EvaluationDetails* details) const
+                               const AnnotationOptions& options) const
 {
     assert (options.valid());
-    assert (details || details_.has_value());
+    assert (details_.has_value());
 
     if (options.viewable_type == ViewableType::Overview)
     {
         //create target overview annotations
-        createTargetAnnotations(details ? *details : details_.value(), annotations_json, TargetAnnotationType::TargetOverview);
+        createTargetAnnotations(details_.value(), annotations_json, TargetAnnotationType::TargetOverview);
 
         //add custom annotations to target overview
-        addCustomAnnotations(annotations_json, details);
+        addCustomAnnotations(annotations_json);
     }
     else if (options.viewable_type == ViewableType::Highlight)
     {
-        createTargetAnnotations(details ? *details : details_.value(), annotations_json, TargetAnnotationType::Highlight, options.detail_index);
+        createTargetAnnotations(details_.value(), annotations_json, TargetAnnotationType::Highlight, options.detail_index);
     }
 }
 

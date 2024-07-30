@@ -146,11 +146,10 @@ public:
 
     /// iterate over details
     virtual void iterateDetails(const DetailFunc& func,
-                                const DetailSkipFunc& skip_func = DetailSkipFunc(),
-                                const EvaluationDetails* details = nullptr) const = 0;
+                                const DetailSkipFunc& skip_func = DetailSkipFunc()) const = 0;
 
-    size_t totalNumDetails(const EvaluationDetails* details = nullptr) const;
-    size_t totalNumPositions(const EvaluationDetails* details = nullptr) const;
+    size_t totalNumDetails() const;
+    size_t totalNumPositions() const;
 
     const static std::string req_overview_table_name_;
 
@@ -230,21 +229,17 @@ protected:
     /// creates overview viewable data
     virtual std::shared_ptr<nlohmann::json::object_t> viewableOverviewData() const = 0;
 
-    std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options,
-                                                             const EvaluationDetails* details = nullptr) const;
+    std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options) const;
 
-    void addCustomAnnotations(nlohmann::json& annotations_json,
-                              const EvaluationDetails* details = nullptr) const;
+    void addCustomAnnotations(nlohmann::json& annotations_json) const;
 
     /// creates a basic viewable
     virtual std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const = 0;
     /// creates additional viewable information (region of interest etc.)
-    virtual ViewableInfo createViewableInfo(const AnnotationOptions& options,
-                                            const EvaluationDetails* details = nullptr) const = 0;
+    virtual ViewableInfo createViewableInfo(const AnnotationOptions& options) const = 0;
     /// creates annotations for the given options
     virtual void createAnnotations(nlohmann::json& annotations_json, 
-                                   const AnnotationOptions& options,
-                                   const EvaluationDetails* details = nullptr) const = 0;
+                                   const AnnotationOptions& options) const = 0;
 
     /// generate definitions for the automatic generation of custom annotations (grids, histograms, etc.)
     virtual FeatureDefinitions getCustomAnnotationDefinitions() const;

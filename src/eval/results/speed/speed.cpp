@@ -156,7 +156,7 @@ SingleSpeed::SingleSpeed(const std::string& result_id,
 :   SpeedBase(num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value, num_comp_failed, num_comp_passed)
 ,   SingleProbabilityBase("SingleSpeed", result_id, requirement, sector_layer, utn, target, eval_man, details)
 {
-    updateResult(details);
+    updateResult();
 }
 
 /**
@@ -168,14 +168,14 @@ std::shared_ptr<Joined> SingleSpeed::createEmptyJoined(const std::string& result
 
 /**
 */
-boost::optional<double> SingleSpeed::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SingleSpeed::computeResult_impl() const
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
     accumulator_.reset();
 
-    auto values = getValues(DetailKey::Offset, details);
+    auto values = getValues(DetailKey::Offset);
 
     assert (values.size() == num_comp_failed_ + num_comp_passed_);
 

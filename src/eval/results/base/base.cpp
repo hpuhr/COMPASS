@@ -255,11 +255,10 @@ EvaluationResultsReport::Section& Base::getRequirementSection (
 
 /**
 */
-std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationOptions& options,
-                                                               const EvaluationDetails* details) const
+std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationOptions& options) const
 {
-    auto viewable_ptr = createBaseViewable();                 // create basic viewable
-    auto info         = createViewableInfo(options, details); // create viewable info (data bounds etc.)
+    auto viewable_ptr = createBaseViewable();        // create basic viewable
+    auto info         = createViewableInfo(options); // create viewable info (data bounds etc.)
 
     //configure viewable depending on type
     if (info.viewable_type == ViewableType::Overview)
@@ -311,7 +310,7 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
     auto& result_anno_array = ViewPointGenAnnotation::getChildrenJSON(vp_anno_array.at(0));
 
     //add annotations
-    createAnnotations(result_anno_array, options, details);
+    createAnnotations(result_anno_array, options);
 
     return viewable_ptr;
 }
@@ -334,8 +333,7 @@ FeatureDefinitions Base::getCustomAnnotationDefinitions() const
 /**
  * Called by Single and Joined to add custom annotations to the viewable.
 */
-void Base::addCustomAnnotations(nlohmann::json& annotations_json,
-                                const EvaluationDetails* details) const
+void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
 {
     assert(annotations_json.is_array());
 
@@ -356,7 +354,7 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json,
             assert(def);
 
             //create feature and add to annotation
-            auto f = def->createFeature(this, details);
+            auto f = def->createFeature(this);
             if (!f)
             {
                 loginf << "Base: addCustomAnnotations: Skipping empty feature of definition type '" << def->type() << "'";
@@ -393,7 +391,7 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json,
 
 /**
 */
-size_t Base::totalNumDetails(const EvaluationDetails* details) const
+size_t Base::totalNumDetails() const
 {
     size_t num_details = 0;
 
@@ -408,14 +406,14 @@ size_t Base::totalNumDetails(const EvaluationDetails* details) const
         ++num_details;
     };
 
-    iterateDetails(funcScan, {}, details);
+    iterateDetails(funcScan, {});
 
     return num_details;
 }
 
 /**
 */
-size_t Base::totalNumPositions(const EvaluationDetails* details) const
+size_t Base::totalNumPositions() const
 {
     size_t num_positions = 0;
 
@@ -430,7 +428,7 @@ size_t Base::totalNumPositions(const EvaluationDetails* details) const
         num_positions += detail.numPositions();
     };
 
-    iterateDetails(funcScan, {}, details);
+    iterateDetails(funcScan, {});
 
     return num_positions;
 }

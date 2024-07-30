@@ -49,7 +49,7 @@ public:
     const std::vector<double>& rangeValuesTst() const { return range_values_tst_; }
 
 protected:
-    virtual boost::optional<double> computeFinalResultValue(const EvaluationDetails& details) const override;
+    virtual boost::optional<double> computeFinalResultValue() const override;
 
     virtual std::vector<std::string> targetTableHeadersCustom() const override;
     virtual std::vector<QVariant> targetTableValuesCustom() const override;

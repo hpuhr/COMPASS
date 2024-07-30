@@ -149,8 +149,7 @@ std::string Joined::getRequirementAnnotationID_impl() const
 /**
 */
 void Joined::iterateDetails(const DetailFunc& func,
-                            const DetailSkipFunc& skip_func,
-                            const EvaluationDetails* details) const
+                            const DetailSkipFunc& skip_func) const
 {
     auto funcSingleResults = [ & ] (const std::shared_ptr<Single>& result)
     {
@@ -463,10 +462,14 @@ bool Joined::hasStoredDetails() const
 
 /**
 */
-void Joined::updateToChanges()
+void Joined::updateToChanges(bool reset_viewable)
 {
     //clear first
     clearResults();
+
+    //invalidate cached viewable?
+    if (reset_viewable)
+        viewable_.reset();
 
     //accumulate single results
     size_t nr = results_.size();
@@ -519,9 +522,9 @@ void Joined::updateToChanges()
         }
     }
 
-    //update viewable
+    //update viewable immediately if details are still stored
     if (hasStoredDetails())
-        cacheViewable();
+        getOrCreateCachedViewable();
 }
 
 /**
@@ -540,9 +543,27 @@ std::vector<double> Joined::getValues(int value_id) const
 
 /**
 */
-void Joined::cacheViewable()
+std::shared_ptr<nlohmann::json::object_t> Joined::getOrCreateCachedViewable() const
 {
-    viewable_ = createViewable(AnnotationOptions().overview());
+    if (!viewable_)
+    {
+        //cache all needed single details
+        std::vector<Single::TemporaryDetails> temp_details;
+
+        auto funcSingleResults = [ & ] (const std::shared_ptr<Single>& result)
+        {
+            temp_details.push_back(result->temporaryDetails());
+        };
+        iterateSingleResults({}, funcSingleResults, {});
+
+        //create new viewable
+        viewable_ = createViewable(AnnotationOptions().overview());
+
+        //wipe all single result details
+        temp_details.resize(0);
+    }
+
+    return viewable_;
 }
 
 /**
@@ -554,8 +575,7 @@ std::unique_ptr<nlohmann::json::object_t> Joined::createBaseViewable() const
 
 /**
 */
-Base::ViewableInfo Joined::createViewableInfo(const AnnotationOptions& options,
-                                              const EvaluationDetails* details) const
+Base::ViewableInfo Joined::createViewableInfo(const AnnotationOptions& options) const
 {
     ViewableInfo info;
     info.viewable_type = ViewableType::Overview;
@@ -573,8 +593,7 @@ Base::ViewableInfo Joined::createViewableInfo(const AnnotationOptions& options,
 /**
 */
 void Joined::createAnnotations(nlohmann::json& annotations, 
-                               const AnnotationOptions& options,
-                               const EvaluationDetails* details) const
+                               const AnnotationOptions& options) const
 {
     //everything handled via custom annotations
     addCustomAnnotations(annotations);
@@ -588,9 +607,6 @@ bool Joined::hasViewableData (const EvaluationResultsReport::SectionContentTable
     if (table.name() != req_overview_table_name_)
         return false;
 
-    if (!viewable_)
-        return false;
-
     return true;
 }
 
@@ -601,17 +617,16 @@ std::shared_ptr<nlohmann::json::object_t> Joined::viewableData(const EvaluationR
 {
     assert (hasViewableData(table, annotation));
 
-    //return cached viewable
-    return viewable_;
+    //return cached viewable (might recreate the viewable)
+    return getOrCreateCachedViewable();
 }
 
 /**
 */
 std::shared_ptr<nlohmann::json::object_t> Joined::viewableOverviewData() const
 {
-    assert (viewable_);
-
-    return viewable_;
+    //return cached viewable (might recreate the viewable)
+    return getOrCreateCachedViewable();
 }
 
 /**

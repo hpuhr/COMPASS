@@ -60,7 +60,7 @@ SingleModeCCorrect::SingleModeCCorrect(const std::string& result_id,
                       "#CMC",
                       "#NCMC")
 {
-    updateResult(details);
+    updateResult();
 }
 
 /**

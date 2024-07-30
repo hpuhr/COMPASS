@@ -98,7 +98,7 @@ SingleExtraData::SingleExtraData(const std::string& result_id,
     if (ignore)
         setIgnored();
 
-    updateResult(details);
+    updateResult();
 }
 
 /**
@@ -117,7 +117,7 @@ std::shared_ptr<Joined> SingleExtraData::createEmptyJoined(const std::string& re
 
 /**
 */
-boost::optional<double> SingleExtraData::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SingleExtraData::computeResult_impl() const
 {
     unsigned int num_total = num_extra_ + num_ok_;
 

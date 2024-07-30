@@ -56,12 +56,11 @@ FeatureDefinition::~FeatureDefinition() = default;
 
 /**
 */
-std::unique_ptr<ViewPointGenFeature> FeatureDefinition::createFeature(const Base* result,
-                                                                      const std::vector<EvaluationDetail>* details) const
+std::unique_ptr<ViewPointGenFeature> FeatureDefinition::createFeature(const Base* result) const
 {
     assert(result);
 
-    auto feat = createFeature_impl(result, details);
+    auto feat = createFeature_impl(result);
     if (!feat)
         return {};
 
