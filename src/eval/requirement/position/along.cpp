@@ -17,14 +17,10 @@
 
 #include "eval/requirement/position/along.h"
 #include "eval/results/position/along.h"
-//#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-//#include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
-
-#include <ogr_spatialref.h>
 
 #include <algorithm>
 
@@ -74,22 +70,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
 
     ptime timestamp;
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
-
-    OGRSpatialReference local;
-
-    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+    Transformation ogr_geo2cart;
 
     dbContent::TargetPosition tst_pos;
 
-    double x_pos, y_pos;
-    double distance, angle, d_along;
+    double d_along;
 
     bool is_inside;
     boost::optional<dbContent::TargetPosition> ref_pos;
     boost::optional<dbContent::TargetVelocity> ref_spd;
-    bool ok;
 
     bool along_ok;
 
@@ -196,28 +185,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         }
         ++num_pos_inside;
 
-        local.SetStereographic(ref_pos->latitude_, ref_pos->longitude_, 1.0, 0.0, 0.0);
+        bool   transform_ok;
+        double distance, angle;
 
-        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
+        std::tie(transform_ok, distance, angle) = ogr_geo2cart.distanceAngleCart(ref_pos->latitude_, ref_pos->longitude_, tst_pos.latitude_, tst_pos.longitude_);
+        assert(transform_ok);
 
-        x_pos = tst_pos.longitude_;
-        y_pos = tst_pos.latitude_;
-
-        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-        if (!ok)
-        {
-            addDetail(timestamp, tst_pos,
-                        ref_pos, // ref_pos
-                        is_inside, {}, along_ok, // pos_inside, value, value_ok
-                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                        num_value_ok, num_value_nok,
-                        "Position transformation error");
-            ++num_pos_calc_errors;
-            continue;
-        }
-
-        distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-        angle = ref_spd->track_angle_ - atan2(y_pos, x_pos);
+        angle = ref_spd->track_angle_ - angle;
 
         if (std::isnan(distance) || std::isinf(distance))
         {

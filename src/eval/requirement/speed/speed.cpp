@@ -101,18 +101,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     ptime timestamp;
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
-
-    OGRSpatialReference local;
-
-    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
-
     dbContent::TargetPosition tst_pos;
 
     bool is_inside;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    bool ok;
 
     boost::optional<dbContent::TargetVelocity> ref_spd;
     boost::optional<float> tst_spd_ms;

@@ -17,14 +17,10 @@
 
 #include "eval/requirement/position/distancerms.h"
 #include "eval/results/position/distancerms.h"
-//#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-//#include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
-
-#include <ogr_spatialref.h>
 
 #include <algorithm>
 
@@ -68,22 +64,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
 
     ptime timestamp;
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
-
-    OGRSpatialReference local;
-
-    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+    Transformation ogr_geo2cart;
 
     dbContent::TargetPosition tst_pos;
-
-    double x_pos, y_pos;
-    double distance;
 
     bool is_inside;
     //boost::optional<dbContent::TargetPosition> ret_pos;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    bool ok;
 
     bool comp_passed;
 
@@ -144,9 +131,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
 
         ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
-//        ref_pos = ret_pos.first;
-//        ok = ret_pos.second;
-
         if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
@@ -177,27 +161,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
         }
         ++num_pos_inside;
 
-        local.SetStereographic(ref_pos->latitude_, ref_pos->longitude_, 1.0, 0.0, 0.0);
+        bool   transform_ok;
+        double distance;
 
-        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
-
-        x_pos = tst_pos.longitude_;
-        y_pos = tst_pos.latitude_;
-
-        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-        if (!ok)
-        {
-            addDetail(timestamp, tst_pos,
-                        ref_pos, // ref_pos
-                        is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                        num_comp_passed, num_comp_failed, 
-                        "Position transformation error");
-            ++num_pos_calc_errors;
-            continue;
-        }
-
-        distance = sqrt(pow(x_pos,2) + pow(y_pos,2));
+        std::tie(transform_ok, distance) = ogr_geo2cart.distanceL2Cart(ref_pos->latitude_, ref_pos->longitude_, tst_pos.latitude_, tst_pos.longitude_);
+        assert(transform_ok);
 
         if (std::isnan(distance) || std::isinf(distance))
         {

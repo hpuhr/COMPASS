@@ -104,18 +104,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
     ptime timestamp;
 
-//    OGRSpatialReference wgs84;
-//    wgs84.SetWellKnownGeogCS("WGS84");
-
-//    OGRSpatialReference local;
-
-    //std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
-
     dbContent::TargetPosition tst_pos;
 
     bool is_inside;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    bool ok;
 
     boost::optional<dbContent::TargetVelocity> ref_spd;
     double ref_trackangle_deg;
