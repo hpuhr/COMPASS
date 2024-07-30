@@ -132,7 +132,7 @@ SinglePresentBase::SinglePresentBase(const std::string& result_type,
 
 /**
 */
-boost::optional<double> SinglePresentBase::computeResult_impl() const
+boost::optional<double> SinglePresentBase::computeResult_impl(const EvaluationDetails& details) const
 {
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);

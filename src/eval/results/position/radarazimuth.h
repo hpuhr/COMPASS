@@ -44,7 +44,7 @@ public:
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
 protected:
-    virtual boost::optional<double> computeFinalResultValue() const override;
+    virtual boost::optional<double> computeFinalResultValue(const EvaluationDetails& details) const override;
 
     virtual std::vector<std::string> targetTableHeadersCustom() const override;
     virtual std::vector<QVariant> targetTableValuesCustom() const override;

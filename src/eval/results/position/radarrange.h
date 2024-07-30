@@ -39,18 +39,17 @@ public:
                              unsigned int num_pos_outside,
                              unsigned int num_pos_inside,
                              unsigned int num_comp_passed,
-                             unsigned int num_comp_failed);
+                             unsigned int num_comp_failed,
+                             const std::vector<double>& range_values_ref,
+                             const std::vector<double>& range_values_tst);
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    enum DetailKeyAdditional
-    {
-        RangeRef = DetailKey::PositionBaseMax + 0,
-        RangeTst = DetailKey::PositionBaseMax + 1
-    };
+    const std::vector<double>& rangeValuesRef() const { return range_values_ref_; }
+    const std::vector<double>& rangeValuesTst() const { return range_values_tst_; }
 
 protected:
-    virtual boost::optional<double> computeFinalResultValue() const override;
+    virtual boost::optional<double> computeFinalResultValue(const EvaluationDetails& details) const override;
 
     virtual std::vector<std::string> targetTableHeadersCustom() const override;
     virtual std::vector<QVariant> targetTableValuesCustom() const override;
@@ -62,6 +61,9 @@ protected:
 private:
     mutable QVariant range_bias_;
     mutable QVariant range_gain_;
+
+    std::vector<double> range_values_ref_;
+    std::vector<double> range_values_tst_;
 };
 
 /**

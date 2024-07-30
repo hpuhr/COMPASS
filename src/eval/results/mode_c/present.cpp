@@ -43,7 +43,7 @@ SingleModeCPresent::SingleModeCPresent(const std::string& result_id,
 :   SinglePresentBase("SingleModeAPresent", result_id, requirement, sector_layer, utn, target, eval_man, details,
                         num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside, num_no_ref_id, num_present_id, num_missing_id, "#NoRefC")
 {
-    updateResult();
+    updateResult(details);
 }
 
 /**

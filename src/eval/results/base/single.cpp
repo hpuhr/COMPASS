@@ -16,6 +16,7 @@
  */
 
 #include "eval/results/base/single.h"
+#include "eval/results/base/result_t.h"
 
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
@@ -114,11 +115,18 @@ void Single::updateUseFromTarget()
 
 /**
 */
-void Single::updateResult()
+void Single::updateResult(const EvaluationDetails& details)
 {
-    Base::updateResult();
+    Base::updateResult(computeResult(details));
 
     updateUseFromTarget();
+}
+
+/**
+*/
+boost::optional<double> Single::computeResult(const EvaluationDetails& details) const
+{
+    return computeResult_impl(details);
 }
 
 /**
@@ -555,6 +563,22 @@ std::string Single::reference(const EvaluationResultsReport::SectionContentTable
 
 /**
 */
+std::vector<double> Single::getValues(const ValueSource<double>& source,
+                                      const EvaluationDetails& details) const
+{
+    return EvaluationResultTemplates(this, &details).getValues<double>(source);
+}
+
+/**
+*/
+std::vector<double> Single::getValues(int value_id,
+                                      const EvaluationDetails& details) const
+{
+    return getValues(ValueSource<double>(value_id), details);
+}
+
+/**
+*/
 bool Single::hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                               const QVariant& annotation) const
 {
@@ -600,12 +624,14 @@ std::shared_ptr<nlohmann::json::object_t> Single::viewableData(const EvaluationR
  * Creates viewable overview data for this target.
  * BEWARE: !will always recompute the details!
 */
-std::unique_ptr<nlohmann::json::object_t> Single::viewableOverviewData() const
+std::shared_ptr<nlohmann::json::object_t> Single::viewableOverviewData() const
 {
     auto details = recomputeDetails();
 
     //create overview viewable
-    return createViewable(AnnotationOptions().overview(), &details);
+    auto viewable = createViewable(AnnotationOptions().overview(), &details);
+
+    return std::shared_ptr<nlohmann::json::object_t>(viewable.release());
 }
 
 /**
