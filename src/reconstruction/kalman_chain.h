@@ -31,6 +31,31 @@ class KalmanEstimator;
 class KalmanInterface;
 
 /**
+*/
+
+
+/**
+*/
+class KalmanChainPredictors
+{
+public:
+    size_t size() const;
+    bool isInit() const;
+
+    KalmanEstimator& predictor(size_t idx);
+
+    void init(std::unique_ptr<KalmanInterface>&& interface,
+              const KalmanEstimator::Settings& settings,
+              unsigned int max_threads);
+    void init(kalman::KalmanType ktype,
+              const KalmanEstimator::Settings& settings,
+              unsigned int max_threads);
+
+private:
+    std::vector<std::unique_ptr<KalmanEstimator>> predictors;
+};
+
+/**
  * Chain of kalman updates in which new measurements can be inserted and 
  * a reestimation of kalman states can be triggered.
  * - Utilizes a KalmanOnlineTracker which is reinitialized to certain chain updates as needed
@@ -133,6 +158,7 @@ public:
     bool canPredict(const boost::posix_time::ptime& ts) const;
     bool predictMT(Measurement& mm_predicted,
                    const boost::posix_time::ptime& ts,
+                   KalmanChainPredictors& predictors,
                    unsigned int thread_id,
                    PredictionStats* stats = nullptr) const;
     bool predict(Measurement& mm_predicted,
@@ -145,12 +171,6 @@ public:
 
     Settings& settings();
 
-    static void initMTPredictors(std::unique_ptr<KalmanInterface>&& interface,
-                                 const KalmanEstimator::Settings& settings,
-                                 unsigned int max_threads);
-    static void initMTPredictors(kalman::KalmanType ktype,
-                                 const KalmanEstimator::Settings& settings,
-                                 unsigned int max_threads);
 private:
     struct Tracker
     {
@@ -201,7 +221,8 @@ private:
 
     bool predictInternal(Measurement& mm_predicted,
                          const boost::posix_time::ptime& ts,
-                         int thread_id,
+                         KalmanChainPredictors* predictors,
+                         unsigned int thread_id,
                          PredictionStats* stats) const;
 
     Settings settings_;
@@ -214,8 +235,6 @@ private:
     mutable Tracker                tracker_;
     std::vector<int>               fresh_indices_;
     std::vector<Update>            updates_;
-
-    static std::vector<Predictor> mt_predictors_;
 };
 
 } // reconstruction

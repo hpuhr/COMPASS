@@ -45,6 +45,7 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
 ,   acc_estimator_(std::move(acc_estimator))
 ,   task_(task)
 ,   base_settings_(base_settings)
+,   chain_predictors_(new reconstruction::KalmanChainPredictors)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
@@ -241,9 +242,11 @@ void ReconstructorBase::processSlice()
 
         assert (num_threads > 0);
 
-        reconstruction::KalmanChain::initMTPredictors(referenceCalculatorSettings().kalman_type,
-                                                      referenceCalculatorSettings().kalmanEstimatorSettings(),
-                                                      num_threads);
+        assert(chain_predictors_);
+
+        chain_predictors_->init(referenceCalculatorSettings().kalman_type,
+                                referenceCalculatorSettings().kalmanEstimatorSettings(),
+                                num_threads);
     }
 
     if (!currentSlice().first_slice_)
@@ -740,4 +743,11 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     assert(it != target_reports_.end());
 
     createMeasurement(mm, it->second);
+}
+
+reconstruction::KalmanChainPredictors& ReconstructorBase::chainPredictors()
+{
+    assert(chain_predictors_);
+
+    return *chain_predictors_;
 }

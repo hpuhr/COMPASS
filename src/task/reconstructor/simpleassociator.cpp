@@ -138,6 +138,7 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
     const dbContent::targetReport::ReconstructorInfo& tr,
     const dbContent::ReconstructorTarget& target, 
     bool do_debug,
+    const boost::optional<unsigned int>& thread_id,
     reconstruction::PredictionStats* stats)
 {
     dbContent::targetReport::Position ref_pos;
@@ -179,6 +180,7 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
     const dbContent::ReconstructorTarget& target0,
     const dbContent::ReconstructorTarget& target1,
     bool do_debug,
+    const boost::optional<unsigned int>& thread_id,
     reconstruction::PredictionStats* stats)
 {
     dbContent::targetReport::Position target0_pos;
@@ -202,7 +204,7 @@ boost::optional<bool> SimpleAssociator::checkPositionOffsetAcceptable (
     dbContent::targetReport::ReconstructorInfo& tr,
     unsigned int utn, bool secondary_verified, bool do_debug)
 {
-    auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
+    auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug, {});
     if (!pos_offs.has_value())
         return false;
 

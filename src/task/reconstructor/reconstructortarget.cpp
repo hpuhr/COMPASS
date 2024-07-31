@@ -1946,34 +1946,53 @@ bool ReconstructorTarget::predictPosClose(boost::posix_time::ptime timestamp, do
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
                                   const dbContent::targetReport::ReconstructorInfo& tr,
-                                  int thread_id,
                                   reconstruction::PredictionStats* stats) const
 {
-    return predict(mm, tr.timestamp_, thread_id, stats);
+    return predict(mm, tr.timestamp_, stats);
 }
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
                                   const boost::posix_time::ptime& ts,
-                                  int thread_id,
                                   reconstruction::PredictionStats* stats) const
 {
     assert(chain_);
 
     bool ok = false;
 
-    if (thread_id >= 0)
+    if (stats)
     {
-        ok = chain_->predictMT(mm, ts, thread_id, stats);
+        ok = chain_->predict(mm, ts, stats);
     }
     else
     {
         reconstruction::PredictionStats pstats;
-        ok = chain_->predictMT(mm, ts, thread_id, &pstats);
+        ok = chain_->predict(mm, ts, &pstats);
 
         //log immediately (!take care when using this method in a multithreaded context!)
         ReconstructorTarget::addPredictionToGlobalStats(pstats);
     }
     
+    assert(ok);
+
+    return ok;
+}
+
+bool ReconstructorTarget::predictMT(reconstruction::Measurement& mm, 
+                                    const dbContent::targetReport::ReconstructorInfo& tr, 
+                                    unsigned int thread_id,
+                                    reconstruction::PredictionStats* stats) const
+{
+    return predictMT(mm, tr.timestamp_, thread_id, stats);
+}
+
+bool ReconstructorTarget::predictMT(reconstruction::Measurement& mm, 
+                                    const boost::posix_time::ptime& ts,
+                                    unsigned int thread_id,
+                                    reconstruction::PredictionStats* stats) const
+{
+    assert(chain_);
+
+    bool ok = chain_->predictMT(mm, ts, reconstructor_.chainPredictors(), thread_id, stats);
     assert(ok);
 
     return ok;
