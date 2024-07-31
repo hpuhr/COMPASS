@@ -134,10 +134,8 @@ struct MSecTimedValue
 class EvaluationResultTemplates
 {
 public:
-    EvaluationResultTemplates(const Base* result, 
-                              const Base::EvaluationDetails* details = nullptr) 
+    EvaluationResultTemplates(const Base* result) 
     :   result_ (result )
-    ,   details_(details) 
     { 
         assert(result_); 
     }
@@ -153,7 +151,7 @@ public:
         assert(source.isValid());
 
         std::vector<T> values;
-        values.reserve(result_->totalNumDetails(details_));
+        values.reserve(result_->totalNumDetails());
 
         auto func = [ & ] (const EvaluationDetail& detail, 
                            const EvaluationDetail* parent_detail, 
@@ -173,7 +171,7 @@ public:
             values.push_back(v.value());
         };
 
-        result_->iterateDetails(func, {}, details_);
+        result_->iterateDetails(func, {});
 
         values.shrink_to_fit();
 
@@ -190,7 +188,7 @@ public:
         assert(source.isValid());
 
         std::vector<boost::optional<T>> values;
-        values.reserve(result_->totalNumDetails(details_));
+        values.reserve(result_->totalNumDetails());
 
         auto func = [ & ] (const EvaluationDetail& detail, 
                            const EvaluationDetail* parent_detail, 
@@ -206,7 +204,7 @@ public:
             values.push_back(v);
         };
 
-        result_->iterateDetails(func, {}, details_);
+        result_->iterateDetails(func, {});
 
         values.shrink_to_fit();
 
@@ -223,7 +221,7 @@ public:
         assert(source.isValid());
 
         std::vector<TimedValue<T>> values;
-        values.reserve(result_->totalNumDetails(details_));
+        values.reserve(result_->totalNumDetails());
 
         auto func = [ & ] (const EvaluationDetail& detail, 
                            const EvaluationDetail* parent_detail, 
@@ -243,7 +241,7 @@ public:
             values.emplace_back(detail.timestamp(), v.value());
         };
 
-        result_->iterateDetails(func, {}, details_);
+        result_->iterateDetails(func, {});
 
         values.shrink_to_fit();
 
@@ -284,8 +282,8 @@ public:
         bool single_pos = detail_pos_mode == DetailValuePositionMode::EventPosition || 
                           detail_pos_mode == DetailValuePositionMode::EventRefPosition;
 
-        size_t n_details   = result_->totalNumDetails(details_);
-        size_t n_positions = single_pos ? n_details : result_->totalNumPositions(details_);
+        size_t n_details   = result_->totalNumDetails();
+        size_t n_positions = single_pos ? n_details : result_->totalNumPositions();
         
         if (n_positions == 0)
             return {};
@@ -349,7 +347,7 @@ public:
             }
         };
 
-        result_->iterateDetails(func, {}, details_);
+        result_->iterateDetails(func, {});
 
         pos_values.shrink_to_fit();
 
@@ -360,8 +358,7 @@ public:
     }
 
 private:
-    const Base*                    result_  = nullptr;
-    const Base::EvaluationDetails* details_ = nullptr;
+    const Base* result_  = nullptr;
 };
 
 }

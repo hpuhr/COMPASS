@@ -92,15 +92,14 @@ public:
     };
 
 protected:
-    boost::optional<double> common_computeResult(const Single* single_result, 
-                                                 const Single::EvaluationDetails& details) const;
+    boost::optional<double> common_computeResult(const Single* single_result) const;
     unsigned int common_numIssues() const;
     bool common_detailIsOk(const EvaluationDetail& detail) const;
 
     FeatureDefinitions common_getCustomAnnotationDefinitions(const Single& single,
                                                              const EvaluationManager& eval_man) const;
 
-    virtual boost::optional<double> computeFinalResultValue(const Single::EvaluationDetails& details) const = 0;
+    virtual boost::optional<double> computeFinalResultValue() const = 0;
 };
 
 /**
@@ -126,9 +125,9 @@ public:
     virtual ~SinglePositionProbabilityBase() = default;
 
 protected:
-    boost::optional<double> computeFinalResultValue(const Single::EvaluationDetails& details) const override final;
+    boost::optional<double> computeFinalResultValue() const override final;
 
-    boost::optional<double> computeResult_impl(const Single::EvaluationDetails& details) const override final;
+    boost::optional<double> computeResult_impl() const override final;
     unsigned int numIssues() const override final;
 
     bool detailIsOk(const EvaluationDetail& detail) const override final;
@@ -165,7 +164,7 @@ public:
     QVariant resultValue(double value) const override final;
 
 protected:
-    virtual boost::optional<double> computeResult_impl(const EvaluationDetails& details) const override;
+    virtual boost::optional<double> computeResult_impl() const override;
     virtual unsigned int numIssues() const override;
 
     virtual bool detailIsOk(const EvaluationDetail& detail) const override;

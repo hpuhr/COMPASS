@@ -26,8 +26,6 @@ SimpleAssociator::SimpleAssociator(SimpleReconstructor& reconstructor)
 
 void SimpleAssociator::associateNewData()
 {
-
-
     assert (!unassoc_rec_nums_.size());
 
     loginf << "SimpleAssociator: associateNewData: associating RefTraj data";
@@ -159,8 +157,8 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
 }
 
 bool SimpleAssociator::canGetPositionOffset(const boost::posix_time::ptime& ts,
-                                                   const dbContent::ReconstructorTarget& target0,
-                                                   const dbContent::ReconstructorTarget& target1)
+                                            const dbContent::ReconstructorTarget& target0,
+                                            const dbContent::ReconstructorTarget& target1)
 {
     dbContent::targetReport::Position ref_pos;
     bool ok;
@@ -180,7 +178,6 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
     const boost::posix_time::ptime& ts,
     const dbContent::ReconstructorTarget& target0,
     const dbContent::ReconstructorTarget& target1,
-    int thread_id, 
     bool do_debug,
     reconstruction::PredictionStats* stats)
 {

@@ -25,6 +25,9 @@
 #include "datasourcemanager.h"
 #include "evaluationmanager.h"
 
+#include "kalman_chain.h"
+#include "tbbhack.h"
+
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
 #include "number.h"
@@ -225,6 +228,23 @@ void ReconstructorBase::processSlice()
     logdbg << "ReconstructorBase: processSlice: first_slice " << currentSlice().first_slice_;
 
     processing_ = true;
+
+    if (currentSlice().first_slice_)
+    {
+        //int num_threads = std::max(1, tbb::task_scheduler_init::default_num_threads());
+
+        #if TBB_VERSION_MAJOR <= 4
+            int num_threads = tbb::task_scheduler_init::default_num_threads(); // TODO PHIL
+        #else
+            int num_threads = oneapi::tbb::info::default_concurrency();
+        #endif
+
+        assert (num_threads > 0);
+
+        reconstruction::KalmanChain::initMTPredictors(referenceCalculatorSettings().kalman_type,
+                                                      referenceCalculatorSettings().kalmanEstimatorSettings(),
+                                                      num_threads);
+    }
 
     if (!currentSlice().first_slice_)
     {

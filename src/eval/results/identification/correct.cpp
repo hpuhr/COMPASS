@@ -59,7 +59,7 @@ SingleIdentificationCorrect::SingleIdentificationCorrect(const std::string& resu
                       "#CID",
                       "#NCID")
 {
-    updateResult(details);
+    updateResult();
 }
 
 /**

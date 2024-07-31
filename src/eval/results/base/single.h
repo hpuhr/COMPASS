@@ -53,6 +53,42 @@ class Single : public Base
 public:
     /**
     */
+    class TemporaryDetails
+    {
+    public:
+        TemporaryDetails() = default;
+        TemporaryDetails(TemporaryDetails&& other) 
+        :   single_ (other.single_ )
+        ,   created_(other.created_)
+        {
+            other.single_  = nullptr;
+            other.created_ = false;
+        }
+        TemporaryDetails(const Single* single) 
+        :   single_(single) 
+        { 
+            assert(single_); 
+
+            //recompute details if not available
+            if (!single_->details_.has_value())
+            {
+                single_->details_ = single_->recomputeDetails();
+                created_ = true;
+            }
+        }
+        ~TemporaryDetails()
+        { 
+            //purge temporary details if they were created by this class
+            if (single_ && created_)
+                single_->details_.reset();
+        }
+    private:
+        const Single* single_  = nullptr;
+        bool          created_ = false;
+    };
+
+    /**
+    */
     struct LayerDefinition
     {
         grid2d::ValueType    value_type;
@@ -119,15 +155,13 @@ public:
     bool hasStoredDetails() const;
     size_t numStoredDetails() const;
     void purgeStoredDetails();
+    TemporaryDetails temporaryDetails() const;
 
     void iterateDetails(const DetailFunc& func,
-                        const DetailSkipFunc& skip_func = DetailSkipFunc(),
-                        const EvaluationDetails* details = nullptr) const override final;
+                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
 
-    std::vector<double> getValues(const ValueSource<double>& source,
-                                  const EvaluationDetails& details) const;
-    std::vector<double> getValues(int value_id,
-                                  const EvaluationDetails& details) const;
+    std::vector<double> getValues(const ValueSource<double>& source) const;
+    std::vector<double> getValues(int value_id) const;
 
     /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
@@ -153,9 +187,9 @@ protected:
     std::string getTargetRequirementSectionID();
 
     /// compute result value
-    virtual void updateResult(const EvaluationDetails& details);
-    virtual boost::optional<double> computeResult(const EvaluationDetails& details) const;
-    virtual boost::optional<double> computeResult_impl(const EvaluationDetails& details) const = 0;
+    virtual void updateResult();
+    virtual boost::optional<double> computeResult() const;
+    virtual boost::optional<double> computeResult_impl() const = 0;
 
     virtual std::string getRequirementSectionID () const override;
     virtual std::string getRequirementAnnotationID_impl() const override;
@@ -197,23 +231,19 @@ protected:
     /*details related*/
     const EvaluationDetails& getDetails() const;
     
-    bool detailIndexValid(const DetailIndex& index,
-                          const EvaluationDetails* details) const; 
+    bool detailIndexValid(const DetailIndex& index) const; 
 
     /// detail nesting mode
     virtual DetailNestingMode detailNestingMode() const { return DetailNestingMode::Vector; } 
 
-    boost::optional<DetailIndex> detailIndex(const QVariant& annotation,
-                                             const EvaluationDetails* details = nullptr) const;
+    boost::optional<DetailIndex> detailIndex(const QVariant& annotation) const;
 
     /*viewable + annotation related*/
     std::shared_ptr<nlohmann::json::object_t> viewableOverviewData() const override final;
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
-    ViewableInfo createViewableInfo(const AnnotationOptions& options,
-                                    const EvaluationDetails* details = nullptr) const override final;
+    ViewableInfo createViewableInfo(const AnnotationOptions& options) const override final;
     void createAnnotations(nlohmann::json& annotations_json, 
-                           const AnnotationOptions& options,
-                           const EvaluationDetails* details = nullptr) const override final;
+                           const AnnotationOptions& options) const override final;
 
     /// if yes the overview annotations are added if a detail is highlighted (default)
     virtual bool addOverviewAnnotationsToDetail() const { return true; }
@@ -273,7 +303,7 @@ private:
 
     EvaluationDetails recomputeDetails() const;
 
-    boost::optional<EvaluationDetails> details_;
+    mutable boost::optional<EvaluationDetails> details_;
 };
 
 }

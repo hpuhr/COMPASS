@@ -332,7 +332,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     assert (!results_[result_sum->reqGrpId()].count(result_sum->resultId()));
 
                     //update now => here we still have all details for the joined viewable
-                    result_sum->updateToChanges();
+                    result_sum->updateToChanges(true);
 
                     results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
                     results_vec_.push_back(result_sum); // has to be added after all singles
@@ -347,7 +347,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     assert (!results_[mops_res_it.second->reqGrpId()].count(mops_res_it.second->resultId()));
 
                     //update now => here we still have all details for the joined viewable
-                    mops_res_it.second->updateToChanges();
+                    mops_res_it.second->updateToChanges(true);
 
                     results_[mops_res_it.second->reqGrpId()][mops_res_it.second->resultId()] = mops_res_it.second;
                     results_vec_.push_back(mops_res_it.second); // has to be added after all singles
@@ -365,7 +365,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     postprocess_dialog.close();
 
-    updateToChanges();
+    //viewables are up-to-date => do not reset them
+    updateToChanges(false);
 
     elapsed_time = boost::posix_time::microsec_clock::local_time();
 
@@ -506,9 +507,9 @@ EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
     return results_model_;
 }
 
-void EvaluationResultsGenerator::updateToChanges ()
+void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
 {
-    loginf << "EvaluationResultsGenerator: updateToChanges";
+    loginf << "EvaluationResultsGenerator: updateToChanges: reset_viewable " << reset_viewable;
 
     // clear everything
     results_model_.beginReset();
@@ -539,11 +540,17 @@ void EvaluationResultsGenerator::updateToChanges ()
                 static_pointer_cast<EvaluationRequirementResult::Joined>(result_it);
 
             assert (result);
-            result->updateToChanges();
+            result->updateToChanges(reset_viewable);
         }
     }
 
     generateResultsReportGUI();
+}
+
+void EvaluationResultsGenerator::updateToChanges ()
+{
+    //always reset the viewable on standard result updates
+    updateToChanges(true);
 }
 
 EvaluationResultsGeneratorWidget& EvaluationResultsGenerator::widget()

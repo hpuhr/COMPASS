@@ -141,7 +141,7 @@ SingleFalseBase::SingleFalseBase(const std::string& result_type,
 
 /**
 */
-boost::optional<double> SingleFalseBase::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SingleFalseBase::computeResult_impl() const
 {
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_val_ + num_unknown_ + num_correct_ + num_false_);

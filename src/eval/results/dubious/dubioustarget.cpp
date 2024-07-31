@@ -66,7 +66,7 @@ SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id,
 {
     assert (details.size() >= 1);
 
-    updateResult(details);
+    updateResult();
 
     auto is_dubious = details[ 0 ].getValueAs<bool>(SingleDubiousTarget::DetailKey::IsDubious);
     assert(is_dubious.has_value());
@@ -98,7 +98,7 @@ EvaluationRequirement::DubiousTarget* SingleDubiousTarget::req ()
 
 /**
 */
-boost::optional<double> SingleDubiousTarget::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SingleDubiousTarget::computeResult_impl() const
 {
     assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
     //assert (values_.size() == num_comp_failed_ + num_comp_passed_);
@@ -106,7 +106,7 @@ boost::optional<double> SingleDubiousTarget::computeResult_impl(const Evaluation
 
     p_dubious_update_.reset();
 
-    const auto& detail = details[ 0 ];
+    const auto& detail = getDetails()[ 0 ];
 
     boost::optional<double> result = (double)detail.getValue(DetailKey::IsDubious).toBool();
 

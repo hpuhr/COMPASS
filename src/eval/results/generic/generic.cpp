@@ -153,7 +153,7 @@ SingleGeneric::SingleGeneric(const std::string& result_type, const std::string& 
                 num_pos_inside, num_unknown, num_correct, num_false)
 ,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
 {
-    updateResult(details);
+    updateResult();
 }
 
 /**
@@ -176,7 +176,7 @@ EvaluationRequirement::GenericBase& SingleGeneric::genericRequirement() const
 
 /**
 */
-boost::optional<double> SingleGeneric::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SingleGeneric::computeResult_impl() const
 {
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_val_ + num_unknown_ + num_correct_+num_false_);

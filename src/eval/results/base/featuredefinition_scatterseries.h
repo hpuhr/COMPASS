@@ -58,9 +58,7 @@ public:
 
     /**
     */
-    std::unique_ptr<ViewPointGenFeature> createFeature_impl(
-        const Base* result,
-        const std::vector<EvaluationDetail>* details) const override final;
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final;
 
 private:
     std::vector<ScatterDataSeries> data_series_x_;
@@ -92,8 +90,7 @@ public:
 
     /**
     */
-    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result,
-                                                            const std::vector<EvaluationDetail>* details) const override final;
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final;
 
 private:
     /**
@@ -134,8 +131,7 @@ public:
 
     /**
     */
-    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result,
-                                                            const std::vector<EvaluationDetail>* details) const override final;
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final;
 
 private:
     std::vector<ScatterDataSeries> data_series_;

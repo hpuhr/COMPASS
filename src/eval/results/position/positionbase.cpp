@@ -126,8 +126,7 @@ SinglePositionBaseCommon::SinglePositionBaseCommon(unsigned int num_pos,
 
 /**
 */
-boost::optional<double> SinglePositionBaseCommon::common_computeResult(const Single* single_result,
-                                                                       const Single::EvaluationDetails& details) const
+boost::optional<double> SinglePositionBaseCommon::common_computeResult(const Single* single_result) const
 {
     assert (single_result);
     assert (num_no_ref_ <= num_pos_);
@@ -135,7 +134,7 @@ boost::optional<double> SinglePositionBaseCommon::common_computeResult(const Sin
 
     accumulator_.reset();
 
-    auto values = single_result->getValues(DetailKey::Value, details);
+    auto values = single_result->getValues(DetailKey::Value);
 
     assert (values.size() == num_passed_ + num_failed_);
 
@@ -146,7 +145,7 @@ boost::optional<double> SinglePositionBaseCommon::common_computeResult(const Sin
     if (num_distances > 0)
         accumulator_.accumulate(values, true);
 
-    return computeFinalResultValue(details);
+    return computeFinalResultValue();
 }
 
 /**
@@ -210,7 +209,7 @@ SinglePositionProbabilityBase::SinglePositionProbabilityBase(const std::string& 
 /**
  * Result value for all probability based position requirement results.
  */
-boost::optional<double> SinglePositionProbabilityBase::computeFinalResultValue(const EvaluationDetails& details) const
+boost::optional<double> SinglePositionProbabilityBase::computeFinalResultValue() const
 {
     auto total = num_passed_ + num_failed_;
 
@@ -222,9 +221,9 @@ boost::optional<double> SinglePositionProbabilityBase::computeFinalResultValue(c
 
 /**
 */
-boost::optional<double> SinglePositionProbabilityBase::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SinglePositionProbabilityBase::computeResult_impl() const
 {
-    return common_computeResult(this, details);
+    return common_computeResult(this);
 }
 
 /**
@@ -305,9 +304,9 @@ QVariant SinglePositionValueBase::resultValue(double value) const
 
 /**
 */
-boost::optional<double> SinglePositionValueBase::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SinglePositionValueBase::computeResult_impl() const
 {
-    return common_computeResult(this, details);
+    return common_computeResult(this);
 }
 
 /**

@@ -54,7 +54,7 @@ SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
 {
     assert (range_values_ref_.size() == range_values_tst_.size());
 
-    updateResult(details);
+    updateResult();
 }
 
 /**
@@ -138,7 +138,7 @@ std::vector<QVariant> SinglePositionRadarRange::detailValues(const EvaluationDet
 
 /**
 */
-boost::optional<double> SinglePositionRadarRange::computeFinalResultValue(const EvaluationDetails& details) const
+boost::optional<double> SinglePositionRadarRange::computeFinalResultValue() const
 {
     range_gain_ = QVariant();
     range_bias_ = QVariant();

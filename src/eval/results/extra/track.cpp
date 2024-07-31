@@ -106,7 +106,7 @@ SingleExtraTrack::SingleExtraTrack(const std::string& result_id,
     if (ignore)
         setIgnored();
 
-    updateResult(details);
+    updateResult();
 }
 
 /**
@@ -119,7 +119,7 @@ std::shared_ptr<Joined> SingleExtraTrack::createEmptyJoined(const std::string& r
 
 /**
 */
-boost::optional<double> SingleExtraTrack::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SingleExtraTrack::computeResult_impl() const
 {
     logdbg << "SingleTrack: updateProb: result_id " << result_id_ << " num_extra " << num_extra_ << " num_ok " << num_ok_;
 

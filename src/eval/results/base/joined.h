@@ -70,10 +70,9 @@ public:
                           const QVariant& annotation) const override final;
 
     void iterateDetails(const DetailFunc& func,
-                        const DetailSkipFunc& skip_func = DetailSkipFunc(),
-                        const EvaluationDetails* details = nullptr) const override final;
+                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
 
-    void updateToChanges();
+    void updateToChanges(bool reset_viewable);
     
     unsigned int numSingleResults() const;
     unsigned int numUsableSingleResults() const;
@@ -118,11 +117,9 @@ protected:
 
     std::shared_ptr<nlohmann::json::object_t> viewableOverviewData() const override final;
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
-    ViewableInfo createViewableInfo(const AnnotationOptions& options,
-                                    const EvaluationDetails* details = nullptr) const override final;
+    ViewableInfo createViewableInfo(const AnnotationOptions& options) const override final;
     void createAnnotations(nlohmann::json& annotations, 
-                           const AnnotationOptions& options,
-                           const EvaluationDetails* details = nullptr) const override final;
+                           const AnnotationOptions& options) const override final;
 
     virtual std::vector<SectorInfo> sectorInfosCommon() const;
     std::vector<SectorInfo> sectorConditionInfos() const;
@@ -139,7 +136,7 @@ private:
     void addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addSectorDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    void cacheViewable();
+    std::shared_ptr<nlohmann::json::object_t> getOrCreateCachedViewable() const;
 
     unsigned int num_targets_        = 0;
     unsigned int num_failed_targets_ = 0;

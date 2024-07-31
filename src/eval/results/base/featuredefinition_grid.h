@@ -82,8 +82,7 @@ public:
 
     /**
     */
-    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result,
-                                                            const std::vector<EvaluationDetail>* details) const override final
+    std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const override final
     {
         assert(isValid());
         assert(converter_);
@@ -122,8 +121,7 @@ public:
             std::vector<std::pair<size_t, size_t>> detail_ranges;
             auto values = ds.getValuesPlusPosition(result, 
                                                    ds.positionMode(),
-                                                   add_as_polys ? &detail_ranges : nullptr,
-                                                   details);
+                                                   add_as_polys ? &detail_ranges : nullptr);
             if (values.empty())
                 continue;
 

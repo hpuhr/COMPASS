@@ -270,11 +270,11 @@ class ReconstructorTarget
     bool predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const;
     bool predict(reconstruction::Measurement& mm, 
                  const dbContent::targetReport::ReconstructorInfo& tr, 
-                 int thread_id = 0,
+                 int thread_id,
                  reconstruction::PredictionStats* stats = nullptr) const;
     bool predict(reconstruction::Measurement& mm, 
-                 const boost::posix_time::ptime& ts, 
-                 int thread_id = 0,
+                 const boost::posix_time::ptime& ts,
+                 int thread_id,
                  reconstruction::PredictionStats* stats = nullptr) const;
     // hp: plz rework to tr -> posix timestamp, mm to targetreportdefs structs pos, posacc, maybe by return
 

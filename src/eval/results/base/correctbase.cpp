@@ -162,7 +162,7 @@ SingleCorrectBase::SingleCorrectBase(const std::string& result_type,
 
 /**
 */
-boost::optional<double> SingleCorrectBase::computeResult_impl(const EvaluationDetails& details) const
+boost::optional<double> SingleCorrectBase::computeResult_impl() const
 {
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_id_ + num_correct_ + num_not_correct_);
