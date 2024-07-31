@@ -123,6 +123,8 @@ class ViewManager : public QObject, public Configurable
 
     void loadViewPoints();
     std::pair<bool, std::string> loadViewPoints(nlohmann::json json_obj);
+    void clearViewPoints();
+    void addViewPoints(const std::map <std::string, nlohmann::json>& viewpoints);
 
     void setCurrentViewPoint (const ViewableDataConfig* viewable);
     void unsetCurrentViewPoint ();

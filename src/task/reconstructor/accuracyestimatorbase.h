@@ -30,8 +30,10 @@ class AccuracyEstimatorBase
 
     virtual void init (ReconstructorBase* reconstructor);
 
-    virtual void validate (dbContent::targetReport::ReconstructorInfo& tr,
-                          ReconstructorBase& reconstructor) = 0; // can set do not use position flag
+    virtual void prepareForNewSlice() {}
+    virtual void postProccessNewSlice() {}
+
+    virtual void validate (dbContent::targetReport::ReconstructorInfo& tr) = 0; // can set do not use position flag
 
     virtual bool canCorrectPosition(const dbContent::targetReport::ReconstructorInfo& tr) { return false; }
     virtual void correctPosition(dbContent::targetReport::ReconstructorInfo& tr) {} // save in position_corrected_
@@ -46,8 +48,6 @@ class AccuracyEstimatorBase
     virtual void addAssociatedDistance(dbContent::targetReport::ReconstructorInfo& tr, const AssociatedDistance& dist);
     virtual void analyzeAssociatedDistances() const;
     virtual void clearAssociatedDistances();
-
-    virtual void estimateAccuracies() = 0; // when targets with calculated references are done
 
   protected:
 

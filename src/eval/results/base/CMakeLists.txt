@@ -33,4 +33,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/probabilitybase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/valueaccumulator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/featuredefinition.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/featuredefinition_scatterseries.cpp"
     )

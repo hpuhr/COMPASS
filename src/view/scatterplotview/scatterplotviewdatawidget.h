@@ -19,6 +19,7 @@
 
 #include "variableviewstashdatawidget.h"
 #include "scatterseries.h"
+#include "scatterplotviewchartview.h"
 
 class ScatterPlotView;
 class ScatterPlotViewWidget;
@@ -30,7 +31,7 @@ namespace QtCharts
 {
     class QChart;
     class QAbstractAxis;
-    class ScatterPlotViewChartView;
+    //class ScatterPlotViewChartView;
 }
 
 class QHBoxLayout;

@@ -86,6 +86,9 @@ class ReconstructorTask : public Task, public Configurable
 
     std::set<unsigned int> disabledDataSources() const;
 
+    bool debug() const;
+    void debug(bool value);
+
     const std::set<unsigned int>& debugUTNs() const;
     void debugUTNs(const std::set<unsigned int>& utns);
 
@@ -109,6 +112,9 @@ class ReconstructorTask : public Task, public Configurable
     std::map<unsigned int, std::set<unsigned int>> unusedDSIDLines() const;
 
     ReconstructorBase::DataSlice& processingSlice();
+
+    nlohmann::json& getDebugViewpoint(const std::string& name);
+    void saveDebugViewPoints();
 
   protected:
     std::string current_reconstructor_str_;
@@ -136,6 +142,7 @@ class ReconstructorTask : public Task, public Configurable
     std::unique_ptr<ReconstructorBase::DataSlice> processing_slice_;
     std::unique_ptr<ReconstructorBase::DataSlice> writing_slice_;
 
+    bool debug_ {false};
     std::set<unsigned int> debug_utns_;
     std::set<unsigned long> debug_rec_nums_;
     boost::posix_time::ptime debug_timestamp_min_;
@@ -147,6 +154,8 @@ class ReconstructorTask : public Task, public Configurable
     std::future<void> process_future_;
     bool processing_data_slice_ {false};
     bool cancelled_ {false};
+
+    std::map <std::string, nlohmann::json> debug_viewpoints_;
 
     virtual void checkSubConfigurables() override;
     void deleteCalculatedReferences();

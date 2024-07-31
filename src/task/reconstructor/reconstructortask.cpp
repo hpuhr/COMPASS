@@ -52,6 +52,8 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 {
     tooltip_ = "Associate target reports and calculate reference trajectories based on all DB Content.";
 
+    registerParameter("debug", &debug_, debug_);
+
     registerParameter("use_dstypes", &use_dstypes_, nlohmann::json::object());
     registerParameter("use_data_sources", &use_data_sources_, nlohmann::json::object());
     registerParameter("use_data_sources_lines", &use_data_sources_lines_, nlohmann::json::object());
@@ -994,6 +996,33 @@ ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
 {
     assert (processing_slice_);
     return *processing_slice_;
+}
+
+nlohmann::json& ReconstructorTask::getDebugViewpoint(const std::string& name)
+{
+    if (!debug_viewpoints_.count(name))
+    {
+        debug_viewpoints_[name] = nlohmann::json::object_t();
+        debug_viewpoints_[name]["name"] = name;
+        debug_viewpoints_[name]["type"] = "Reconstructor";
+    }
+
+    return debug_viewpoints_.at(name);
+}
+
+void ReconstructorTask::saveDebugViewPoints()
+{
+
+}
+
+bool ReconstructorTask::debug() const
+{
+    return debug_;
+}
+
+void ReconstructorTask::debug(bool value)
+{
+    debug_ = value;
 }
 
 void ReconstructorTask::checkSubConfigurables()

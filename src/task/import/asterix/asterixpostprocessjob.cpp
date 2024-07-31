@@ -98,7 +98,7 @@ void ASTERIXPostprocessJob::run()
 
 void ASTERIXPostprocessJob::doTodOverride()
 {
-    loginf << "ASTERIXPostprocessJob: doTodOverride: offset "
+    logdbg << "ASTERIXPostprocessJob: doTodOverride: offset "
            << String::doubleToStringPrecision(override_tod_offset_, 3);
 
     assert (override_tod_active_);

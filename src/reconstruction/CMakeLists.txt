@@ -6,6 +6,7 @@ include_directories (
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/kalman_defs.h"
+        "${CMAKE_CURRENT_LIST_DIR}/measurement.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_projection.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface.h"
@@ -19,6 +20,7 @@ target_sources(compass
         
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/kalman.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/measurement.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_projection.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface_linear.cpp"

@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QLineEdit>
+#include <QCheckBox>
 
 using namespace std;
 using namespace Utils;
@@ -21,6 +22,11 @@ ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& ta
     QFormLayout* combo_layout = new QFormLayout;
     //combo_layout->setMargin(0);
     combo_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
+
+    debug_check_ = new QCheckBox ();
+    connect(debug_check_, &QCheckBox::clicked,
+            this, &ReconstructorTaskDebugWidget::toggleDebugSlot);
+    combo_layout->addRow("Debug Reconstruction", debug_check_);
 
     utns_edit_ = new QLineEdit();
     connect(utns_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskDebugWidget::utnsChangedSlot);
@@ -47,9 +53,19 @@ ReconstructorTaskDebugWidget::~ReconstructorTaskDebugWidget()
 {
 }
 
+void ReconstructorTaskDebugWidget::toggleDebugSlot()
+{
+    assert (debug_check_);
+    task_.debug(debug_check_->checkState() == Qt::Checked);
+}
+
+
 void ReconstructorTaskDebugWidget::updateValues()
 {
     loginf << "ReconstructorTaskDebugWidget: updateValues";
+
+    assert (debug_check_);
+    debug_check_->setChecked(task_.debug());
 
     assert (utns_edit_);
     utns_edit_->setText(String::compress(task_.debugUTNs(), ',').c_str());
