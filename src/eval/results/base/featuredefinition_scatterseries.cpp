@@ -53,15 +53,13 @@ bool FeatureDefinitionScatterSeries::isValid() const
 
 /**
  */
-std::unique_ptr<ViewPointGenFeature> FeatureDefinitionScatterSeries::createFeature_impl(
-    const Base* result,
-    const std::vector<EvaluationDetail>* details) const
+std::unique_ptr<ViewPointGenFeature> FeatureDefinitionScatterSeries::createFeature_impl(const Base* result) const
 {
     assert(isValid());
 
     ScatterSeriesCollection collection;
 
-            //handle data series
+    //handle data series
     size_t n = data_series_x_.size();
 
     for (size_t i = 0; i < n; ++i)
@@ -69,8 +67,8 @@ std::unique_ptr<ViewPointGenFeature> FeatureDefinitionScatterSeries::createFeatu
         const auto& data_series_x = data_series_x_[ i ];
         const auto& data_series_y = data_series_y_[ i ];
 
-        auto values_x = data_series_x.getOptionalValues(result, details);
-        auto values_y = data_series_y.getOptionalValues(result, details);
+        auto values_x = data_series_x.getOptionalValues(result);
+        auto values_y = data_series_y.getOptionalValues(result);
 
         assert(values_x.size() == values_y.size());
 
@@ -128,14 +126,13 @@ bool FeatureDefinitionCustomScatterSeries::isValid() const
 
 /**
  */
-std::unique_ptr<ViewPointGenFeature> FeatureDefinitionCustomScatterSeries::createFeature_impl(const Base* result,
-                                                        const std::vector<EvaluationDetail>* details) const
+std::unique_ptr<ViewPointGenFeature> FeatureDefinitionCustomScatterSeries::createFeature_impl(const Base* result) const
 {
     assert(isValid());
 
     ScatterSeriesCollection collection;
 
-            //handle data series
+    //handle data series
     for (const auto& ds : data_series_)
     {
         ScatterSeries series;
@@ -150,16 +147,16 @@ std::unique_ptr<ViewPointGenFeature> FeatureDefinitionCustomScatterSeries::creat
 }
 
 FeatureDefinitionTimedScatterSeries::FeatureDefinitionTimedScatterSeries(const EvaluationManager& eval_manager,
-                                    const std::string& feature_description,
-                                    const std::string& y_axis_label)
-    :   FeatureDefinition(eval_manager, "scatterseries_timed", feature_description, DBContent::meta_var_timestamp_.name(), y_axis_label) {}
+                                                                         const std::string& feature_description,
+                                                                         const std::string& y_axis_label)
+:   FeatureDefinition(eval_manager, "scatterseries_timed", feature_description, DBContent::meta_var_timestamp_.name(), y_axis_label) {}
 
 
 /**
  */
 FeatureDefinitionTimedScatterSeries& FeatureDefinitionTimedScatterSeries::addDataSeries(const std::string& name,
-                                                   const ValueSource<double>& value_source,
-                                                   const QColor& color)
+                                                                                        const ValueSource<double>& value_source,
+                                                                                        const QColor& color)
 {
     ScatterDataSeries ds;
     ds.series_name         = name;
@@ -185,8 +182,7 @@ bool FeatureDefinitionTimedScatterSeries::isValid() const
 
 /**
  */
-std::unique_ptr<ViewPointGenFeature> FeatureDefinitionTimedScatterSeries::createFeature_impl(const Base* result,
-                                                        const std::vector<EvaluationDetail>* details) const
+std::unique_ptr<ViewPointGenFeature> FeatureDefinitionTimedScatterSeries::createFeature_impl(const Base* result) const
 {
     assert(isValid());
 
@@ -199,7 +195,7 @@ std::unique_ptr<ViewPointGenFeature> FeatureDefinitionTimedScatterSeries::create
     {
         const auto& data_series = data_series_[ i ];
 
-        auto values = data_series.getMSecTimedValues(result, details);
+        auto values = data_series.getMSecTimedValues(result);
 
         ScatterSeries series;
         series.points.reserve(n);
