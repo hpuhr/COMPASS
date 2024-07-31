@@ -74,6 +74,8 @@ struct KalmanUpdateMinimal
     Matrix                   P;                 // covariance matrix
     boost::posix_time::ptime t;                 // time of update
     Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
+    double                   lat;               // latitude of state position
+    double                   lon;               // longitude of state position
 
     bool valid  = false; // kalman update is valid
 };
@@ -94,6 +96,8 @@ struct KalmanUpdate
         state.dt = 0.0; // not defined by min update
 
         projection_center = update_min.projection_center;
+        lat               = update_min.lat;
+        lon               = update_min.lon;
         t                 = update_min.t;
         valid             = update_min.valid;
         reinit            = false; // not defined by min update
@@ -111,6 +115,8 @@ struct KalmanUpdate
         info.P                 = state.P;
         info.t                 = t;
         info.projection_center = projection_center;
+        info.lat               = lat;
+        info.lon               = lon;
         info.valid             = valid;
     };
 
@@ -124,6 +130,8 @@ struct KalmanUpdate
 
     KalmanState              state;             // kalman internal state, can be used for rts smooting, state interpolation, etc.
     Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
+    double                   lat;               // latitude of state position
+    double                   lon;               // longitude of state position
     boost::posix_time::ptime t;                 // time of update
 
     bool valid  = false; // kalman update is valid

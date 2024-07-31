@@ -362,7 +362,7 @@ bool KalmanChain::addToTracker(unsigned long mm_id,
 
     //just track measurement
     KalmanEstimator::StepResult res;
-    bool ok = tracker_.tracker_ptr->track(getMeasurement(mm_id), &res);
+    bool ok = tracker_.tracker_ptr->track(getMeasurement(mm_id), true, &res);
 
     if (stats)
     {
@@ -958,7 +958,7 @@ bool KalmanChain::reestimate(int idx,
     //check fetched mm's time against update
     assert(update.t == mm.t);
 
-    if (!tracker_.tracker_ptr->track(mm, res))
+    if (!tracker_.tracker_ptr->track(mm, true, res))
         return false;
 
     tracker_.tracker_ptr->currentState().value().minimalInfo(update.kalman_update);
