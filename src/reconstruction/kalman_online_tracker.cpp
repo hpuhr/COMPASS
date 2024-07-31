@@ -62,7 +62,9 @@ void KalmanOnlineTracker::init(kalman::KalmanType ktype)
 
 /**
 */
-bool KalmanOnlineTracker::track(const Measurement& mm, KalmanEstimator::StepResult* res)
+bool KalmanOnlineTracker::track(const Measurement& mm, 
+                                bool update_wgs84_pos, 
+                                KalmanEstimator::StepResult* res)
 {
     assert(isInit());
 
@@ -76,7 +78,7 @@ bool KalmanOnlineTracker::track(const Measurement& mm, KalmanEstimator::StepResu
     }
     else
     {
-        r = estimator_->kalmanStep(tmp_update_, mm);
+        r = estimator_->kalmanStep(tmp_update_, mm, update_wgs84_pos);
         if (r == KalmanEstimator::StepResult::Success)
             current_update_ = tmp_update_;
     }

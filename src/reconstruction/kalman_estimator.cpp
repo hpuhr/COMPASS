@@ -325,11 +325,12 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
 /**
 */
 KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& update,
-                                                        const Measurement& mm)
+                                                        const Measurement& mm,
+                                                        bool update_wgs84_pos)
 {
     assert(isInit());
 
-    //init measurement
+    //init measurement (will also project the mm wgs84 pos to the current local system)
     initMeasurement(update, mm);
 
     //check if timestep is too small
@@ -390,9 +391,22 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
     //update projection if needed
     checkProjection(update);
 
+    //unproject if desired
+    if (update_wgs84_pos)
+        storeWGS84Pos(update);
+
     update.valid = true;
 
     return KalmanEstimator::StepResult::Success;
+}
+
+/**
+*/
+void KalmanEstimator::storeWGS84Pos(kalman::KalmanUpdate& update) const
+{
+    double x, y;
+    kalman_interface_->xPos(x, y, update.state.x);
+    proj_handler_->unproject(update.lat, update.lon, x, y);
 }
 
 /**

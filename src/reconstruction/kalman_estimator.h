@@ -121,7 +121,8 @@ public:
     void kalmanInit(const kalman::KalmanUpdateMinimal& update);
 
     StepResult kalmanStep(kalman::KalmanUpdate& update,
-                          const Measurement& mm);
+                          const Measurement& mm,
+                          bool update_wgs84_pos);
     
     bool kalmanPrediction(Measurement& mm,
                           double dt,
@@ -205,6 +206,8 @@ private:
     void storeUpdate(Reference& ref, 
                      const kalman::KalmanUpdate& update,
                      KalmanProjectionHandler& phandler) const;
+
+    void storeWGS84Pos(kalman::KalmanUpdate& update) const;
 
     reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
 
