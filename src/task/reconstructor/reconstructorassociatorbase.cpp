@@ -902,7 +902,6 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
     auto scoreUTN = [ & ] (const std::vector<size_t>& rec_nums,
                         const dbContent::ReconstructorTarget& other,
                         unsigned int result_idx,
-                        int thread_id,
                         bool secondary_verified,
                         //                        double max_mahal_dist_accept,
                         //                        double max_mahal_dist_dub,
@@ -933,8 +932,8 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                 continue;
             }
 
-                    //@TODO: debug flag
-            auto pos_offs = getPositionOffset(tr.timestamp_, target, other, thread_id, false, &prediction_stats[ result_idx ]);
+            //@TODO: debug flag
+            auto pos_offs = getPositionOffset(tr.timestamp_, target, other, false, &prediction_stats[ result_idx ]);
             if (!pos_offs.has_value())
             {
                 ++pos_skipped_cnt;
@@ -1026,141 +1025,127 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 #else
     for (unsigned int cnt=0; cnt < num_utns; ++cnt)
 #endif
-                      {
+    {
+        unsigned int other_utn = utn_vec_.at(cnt);
+
+                //bool print_debug_target = debug_utns.count(utn) && debug_utns.count(other_utn);
+
+                // only check for previous targets
+        const dbContent::ReconstructorTarget& other = reconstructor().targets_.at(other_utn);
+
+        results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
+
+        if (utn == other_utn)
 #ifdef FIND_UTN_FOR_TARGET_MT
-
-#if TBB_VERSION_MAJOR <= 4
-                          int thread_id = pthread_self(); // TODO PHIL
-#else
-            int thread_id = tbb::this_task_arena::current_thread_index();
-#endif
-
-                          if (thread_id < 0)
-                              thread_id = 0; // can be task_arena_base::not_initialized = -1
-
-#else
-        int thread_id = 0;
-#endif
-                          unsigned int other_utn = utn_vec_.at(cnt);
-
-                                  //bool print_debug_target = debug_utns.count(utn) && debug_utns.count(other_utn);
-
-                                  // only check for previous targets
-                          const dbContent::ReconstructorTarget& other = reconstructor().targets_.at(other_utn);
-
-                          results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
-
-                          if (utn == other_utn)
-#ifdef FIND_UTN_FOR_TARGET_MT
-                              return;
+            return;
 #else
             continue;
 #endif
-                          if (target.hasACAD() && other.hasACAD())
+        if (target.hasACAD() && other.hasACAD())
 #ifdef FIND_UTN_FOR_TARGET_MT
-                              return;
+            return;
 #else
             continue;
 #endif
-                          Transformation trafo;
+        Transformation trafo;
 
-                          bool print_debug = debug_utns.count(utn) && debug_utns.count(other_utn);
+        bool print_debug = debug_utns.count(utn) && debug_utns.count(other_utn);
 
-                          if (print_debug)
-                          {
-                              loginf << "\ttarget " << target.utn_ << " " << target.timeStr()
-                                     << " checking other " << other.utn_ << " " << other.timeStr()
-                                     << " overlaps " << target.timeOverlaps(other)
-                                     << " prob " << target.probTimeOverlaps(other);
-                          }
-
-                          if (target.timeOverlaps(other)
-                              && target.probTimeOverlaps(other) >= settings.target_prob_min_time_overlap_)
-                          {
-                              // check based on mode a/c/pos
-
-                              if (print_debug)
-                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " overlap passed";
-
-                              vector<unsigned long> ma_unknown; // record numbers
-                              vector<unsigned long> ma_same;
-                              vector<unsigned long> ma_different;
-
-                              tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(
-                                  other, max_time_diff_);
-
-                              if (print_debug)
-                              {
-                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                         << " ma unknown " << ma_unknown.size()
-                                         << " same " << ma_same.size() << " diff " << ma_different.size();
-                              }
-
-                              if (ma_same.size() > ma_different.size()
-                                  && ma_same.size() >= settings.target_min_updates_)
-                              {
-                                  if (print_debug)
-                                      loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                             << " mode a check passed";
-
-                                          // check mode c codes
-
-                                  vector<unsigned long> mc_unknown;
-                                  vector<unsigned long> mc_same;
-                                  vector<unsigned long> mc_different;
-
-                                  tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(
-                                      other, ma_same, max_time_diff_, settings.max_altitude_diff_, print_debug);
-
-                                  if (print_debug)
-                                  {
-                                      loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                             << " ma same " << ma_same.size() << " diff " << ma_different.size()
-                                             << " mc same " << mc_same.size() << " diff " << mc_different.size();
-                                  }
-
-                                  if (mc_same.size() > mc_different.size()
-                                      && mc_same.size() >= settings.target_min_updates_)
-                                  {
-                                      if (print_debug)
-                                          loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                 << " mode c check passed";
-
-                                              // check positions
-                                      scoreUTN(mc_same, other, cnt, thread_id, true, print_debug);
-                                  }
-                                  else
-                                  {
-                                      if (print_debug)
-                                          loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check failed";
-                                  }
-                              }
-                              else if (!ma_different.size())
-                              {
-                                  // check based on pos only
-                                  scoreUTN(target.target_reports_, other, cnt, thread_id, false, print_debug);
-                              }
-                              else
-                                  if (print_debug)
-                                      loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                             << " mode a check failed";
-                          }
-                          else
-                          {
-                              if (print_debug)
-                                  loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " no overlap";
-                          }
-#ifdef FIND_UTN_FOR_TARGET_MT
-                      });
-#else
+        if (print_debug)
+        {
+            loginf << "\ttarget " << target.utn_ << " " << target.timeStr()
+                    << " checking other " << other.utn_ << " " << other.timeStr()
+                    << " overlaps " << target.timeOverlaps(other)
+                    << " prob " << target.probTimeOverlaps(other);
         }
+
+        if (target.timeOverlaps(other)
+            && target.probTimeOverlaps(other) >= settings.target_prob_min_time_overlap_)
+        {
+            // check based on mode a/c/pos
+
+            if (print_debug)
+                loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " overlap passed";
+
+            vector<unsigned long> ma_unknown; // record numbers
+            vector<unsigned long> ma_same;
+            vector<unsigned long> ma_different;
+
+            tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(
+                other, max_time_diff_);
+
+            if (print_debug)
+            {
+                loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                        << " ma unknown " << ma_unknown.size()
+                        << " same " << ma_same.size() << " diff " << ma_different.size();
+            }
+
+            if (ma_same.size() > ma_different.size()
+                && ma_same.size() >= settings.target_min_updates_)
+            {
+                if (print_debug)
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                            << " mode a check passed";
+
+                        // check mode c codes
+
+                vector<unsigned long> mc_unknown;
+                vector<unsigned long> mc_same;
+                vector<unsigned long> mc_different;
+
+                tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(
+                    other, ma_same, max_time_diff_, settings.max_altitude_diff_, print_debug);
+
+                if (print_debug)
+                {
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                            << " ma same " << ma_same.size() << " diff " << ma_different.size()
+                            << " mc same " << mc_same.size() << " diff " << mc_different.size();
+                }
+
+                if (mc_same.size() > mc_different.size()
+                    && mc_same.size() >= settings.target_min_updates_)
+                {
+                    if (print_debug)
+                        loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                                << " mode c check passed";
+
+                            // check positions
+                    scoreUTN(mc_same, other, cnt, true, print_debug);
+                }
+                else
+                {
+                    if (print_debug)
+                        loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check failed";
+                }
+            }
+            else if (!ma_different.size())
+            {
+                // check based on pos only
+                scoreUTN(target.target_reports_, other, cnt, false, print_debug);
+            }
+            else
+                if (print_debug)
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                            << " mode a check failed";
+        }
+        else
+        {
+            if (print_debug)
+                loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " no overlap";
+        }
+#ifdef FIND_UTN_FOR_TARGET_MT
+    });
+#else
+    }
 #endif
 
-            //log failed predictions
+    //log failed predictions
     for (const auto& s : prediction_stats)
         ReconstructorTarget::addPredictionToGlobalStats(s);
 
-            // find best match
+    // find best match
     bool usable;
     unsigned int other_utn;
     unsigned int num_updates;
@@ -1173,8 +1158,8 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
     double best_distance_score_avg;
     double best_score;
 
-            //    if (print_debug_target)
-            //        loginf << "\ttarget " << target.utn_ << " checking results";
+    //    if (print_debug_target)
+    //        loginf << "\ttarget " << target.utn_ << " checking results";
 
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
     {
@@ -1213,7 +1198,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
     }
     else
     {
-       //if (print_debug_target)
+        //if (print_debug_target)
         loginf << "ReconstructorAssociatorBase: findUTNForTarget: target " << target.utn_
                << " match found best other " << best_other_utn
                << " best score " << fixed << best_score

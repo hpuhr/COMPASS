@@ -17,6 +17,8 @@
 
 #include "system.h"
 
+#include "tbbhack.h"
+
 #include <fstream>
 #include <limits>
 #include <string>
@@ -107,6 +109,20 @@ double secondsSinceMidnightUTC ()
 
     auto p_time = microsec_clock::universal_time (); // UTC.
     return (p_time.time_of_day().total_milliseconds() / 1000.0);
+}
+
+int tbbCurrentThreadID()
+{
+#if TBB_VERSION_MAJOR <= 4
+    int thread_id = pthread_self(); // TODO PHIL
+#else
+    int thread_id = tbb::this_task_arena::current_thread_index();
+#endif
+
+    if (thread_id < 0)
+        thread_id = 0; // can be task_arena_base::not_initialized = -1
+
+    return thread_id;
 }
 
 }

@@ -91,7 +91,7 @@ public:
     typedef std::function<const Measurement&(unsigned long)> MeasurementGetFunc;
     typedef std::function<void(Measurement&, unsigned long)> MeasurementAssignFunc;
 
-    KalmanChain(int max_prediction_threads = 1);
+    KalmanChain();
     virtual ~KalmanChain();
 
     void reset();
@@ -130,18 +130,27 @@ public:
     bool needsReestimate() const;
     bool reestimate(UpdateStats* stats = nullptr);
 
-    bool predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const;
     bool canPredict(const boost::posix_time::ptime& ts) const;
+    bool predictMT(Measurement& mm_predicted,
+                   const boost::posix_time::ptime& ts,
+                   unsigned int thread_id,
+                   PredictionStats* stats = nullptr) const;
     bool predict(Measurement& mm_predicted,
                  const boost::posix_time::ptime& ts,
-                 int thread_id = 0,
                  PredictionStats* stats = nullptr) const;
+    bool predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const;
     
     size_t size() const;
     int count() const;
 
     Settings& settings();
 
+    static void initMTPredictors(std::unique_ptr<KalmanInterface>&& interface,
+                                 const KalmanEstimator::Settings& settings,
+                                 unsigned int max_threads);
+    static void initMTPredictors(kalman::KalmanType ktype,
+                                 const KalmanEstimator::Settings& settings,
+                                 unsigned int max_threads);
 private:
     struct Tracker
     {
@@ -190,16 +199,23 @@ private:
     int predictionRefIndex(const boost::posix_time::ptime& ts) const;
     Interval predictionRefInterval(const boost::posix_time::ptime& ts) const;
 
+    bool predictInternal(Measurement& mm_predicted,
+                         const boost::posix_time::ptime& ts,
+                         int thread_id,
+                         PredictionStats* stats) const;
+
     Settings settings_;
 
     MeasurementGetFunc    get_func_;
     MeasurementAssignFunc assign_func_;
     mutable Measurement   mm_tmp_;
 
+    mutable Predictor              predictor_;
     mutable Tracker                tracker_;
-    mutable std::vector<Predictor> predictors_;
     std::vector<int>               fresh_indices_;
     std::vector<Update>            updates_;
+
+    static std::vector<Predictor> mt_predictors_;
 };
 
 } // reconstruction

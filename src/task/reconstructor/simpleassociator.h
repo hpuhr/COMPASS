@@ -33,7 +33,6 @@ class SimpleAssociator : public ReconstructorAssociatorBase
         const boost::posix_time::ptime& ts,
         const dbContent::ReconstructorTarget& target0,
         const dbContent::ReconstructorTarget& target1,
-        int thread_id, 
         bool do_debug,
         reconstruction::PredictionStats* stats = nullptr) override;
 
