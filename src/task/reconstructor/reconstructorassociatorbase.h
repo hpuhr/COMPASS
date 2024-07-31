@@ -80,6 +80,7 @@ class ReconstructorAssociatorBase
         const dbContent::targetReport::ReconstructorInfo& tr,
         const dbContent::ReconstructorTarget& target, 
         bool do_debug,
+        const boost::optional<unsigned int>& thread_id,
         reconstruction::PredictionStats* stats = nullptr) = 0;
     virtual bool canGetPositionOffset(
         const boost::posix_time::ptime& ts,
@@ -90,6 +91,7 @@ class ReconstructorAssociatorBase
         const dbContent::ReconstructorTarget& target0,
         const dbContent::ReconstructorTarget& target1,
         bool do_debug,
+        const boost::optional<unsigned int>& thread_id,
         reconstruction::PredictionStats* stats = nullptr) = 0;
 
     virtual boost::optional<bool> checkPositionOffsetAcceptable (

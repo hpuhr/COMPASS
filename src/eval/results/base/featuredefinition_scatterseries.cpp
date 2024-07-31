@@ -99,7 +99,6 @@ FeatureDefinitionCustomScatterSeries::FeatureDefinitionCustomScatterSeries(const
 {
 }
 
-
 /**
  * Add static counts to histogram.
  */

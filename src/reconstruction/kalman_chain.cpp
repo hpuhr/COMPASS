@@ -25,7 +25,74 @@
 namespace reconstruction
 {
 
-std::vector<KalmanChain::Predictor> KalmanChain::mt_predictors_ = std::vector<KalmanChain::Predictor>();
+/**
+*/
+size_t KalmanChainPredictors::size() const
+{
+    return predictors.size();
+}
+
+/**
+*/
+bool KalmanChainPredictors::isInit() const
+{
+    if (size() == 0)
+        return false;
+
+    for (const auto& p : predictors)
+        if (!p->isInit())
+            return false;
+
+    return true;
+}
+
+/**
+*/
+KalmanEstimator& KalmanChainPredictors::predictor(size_t idx)
+{
+    auto& p = predictors.at(idx);
+    assert(p);
+
+    return *p;
+}
+
+/**
+*/
+void KalmanChainPredictors::init(std::unique_ptr<KalmanInterface>&& interface,
+                                 const KalmanEstimator::Settings& settings,
+                                 unsigned int max_threads)
+{
+    assert (max_threads > 0);
+
+    predictors.clear();
+    predictors.resize(max_threads);
+
+    for (unsigned int i = 0; i < max_threads; ++i)
+    {
+        predictors[ i ].reset(new KalmanEstimator);
+        predictors[ i ]->settings() = settings;
+        predictors[ i ]->init(std::unique_ptr<KalmanInterface>(interface->clone()));
+    }
+}
+
+/**
+*/
+void KalmanChainPredictors::init(kalman::KalmanType ktype,
+                                 const KalmanEstimator::Settings& settings,
+                                 unsigned int max_threads)
+{
+    assert (max_threads > 0);
+
+    predictors.clear();
+    predictors.resize(max_threads);
+
+    for (unsigned int i = 0; i < max_threads; ++i)
+    {
+        predictors[ i ].reset(new KalmanEstimator);
+        predictors[ i ]->settings() = settings;
+        predictors[ i ]->init(ktype);
+    }
+}
 
 /**
 */
@@ -57,40 +124,6 @@ KalmanChain::KalmanChain()
 /**
 */
 KalmanChain::~KalmanChain() = default;
-
-/**
-*/
-void KalmanChain::initMTPredictors(std::unique_ptr<KalmanInterface>&& interface,
-                                   const KalmanEstimator::Settings& settings,
-                                   unsigned int max_threads)
-{
-    mt_predictors_.clear();
-    mt_predictors_.resize(max_threads);
-
-    for (unsigned int i = 0; i < max_threads; ++i)
-    {
-        mt_predictors_[ i ].estimator_ptr.reset(new KalmanEstimator);
-        mt_predictors_[ i ].estimator_ptr->settings() = settings;
-        mt_predictors_[ i ].estimator_ptr->init(std::unique_ptr<KalmanInterface>(interface->clone()));
-    }
-}
-
-/**
-*/
-void KalmanChain::initMTPredictors(kalman::KalmanType ktype,
-                                   const KalmanEstimator::Settings& settings,
-                                   unsigned int max_threads)
-{
-    mt_predictors_.clear();
-    mt_predictors_.resize(max_threads);
-
-    for (unsigned int i = 0; i < max_threads; ++i)
-    {
-        mt_predictors_[ i ].estimator_ptr.reset(new KalmanEstimator);
-        mt_predictors_[ i ].estimator_ptr->settings() = settings;
-        mt_predictors_[ i ].estimator_ptr->init(ktype);
-    }
-}
 
 /**
 */
@@ -635,10 +668,13 @@ bool KalmanChain::canPredict(const boost::posix_time::ptime& ts) const
 */
 bool KalmanChain::predictMT(Measurement& mm_predicted,
                             const boost::posix_time::ptime& ts,
+                            KalmanChainPredictors& predictors,
                             unsigned int thread_id,
                             PredictionStats* stats) const
 {
-    return predictInternal(mm_predicted, ts, (int)thread_id, stats);
+    assert (thread_id < predictors.size());
+
+    return predictInternal(mm_predicted, ts, &predictors, (int)thread_id, stats);
 }
 
 /**
@@ -647,7 +683,7 @@ bool KalmanChain::predict(Measurement& mm_predicted,
                           const boost::posix_time::ptime& ts,
                           PredictionStats* stats) const
 {
-    return predictInternal(mm_predicted, ts, -1, stats);
+    return predictInternal(mm_predicted, ts, nullptr, 0, stats);
 }
 
 /**
@@ -655,13 +691,14 @@ bool KalmanChain::predict(Measurement& mm_predicted,
 */
 bool KalmanChain::predictInternal(Measurement& mm_predicted,
                                   const boost::posix_time::ptime& ts,
-                                  int thread_id,
+                                  KalmanChainPredictors* predictors,
+                                  unsigned int thread_id,
                                   PredictionStats* stats) const
 {
     //static mode? => just ask tracker
     if (!canReestimate())
     {
-        assert (thread_id < 0);
+        assert (!predictors);
 
         bool fixed;
         bool ok = tracker_.tracker_ptr->predict(mm_predicted, ts, &fixed);
@@ -676,7 +713,8 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         return ok;
     }
 
-    assert(thread_id < 0 || thread_id < (int)mt_predictors_.size()); //!thread id oor!
+    assert(!predictors || predictors->isInit()); //!predictors must be init!
+    assert(!predictors || thread_id < predictors->size()); //!thread id must be in range!
     assert(!needsReestimate()); //!no predictions if chain is out of date!
     assert(!updates_.empty());  //!no prediction from empty chains!
 
@@ -690,14 +728,17 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         assert(update.mm_id >= 0);
         assert(update.init);
 
-        auto& p = thread_id >= 0 ? mt_predictors_.at(thread_id) : predictor_;
+        auto& p = predictors ? predictors->predictor(thread_id) : *predictor_.estimator_ptr;
         
-        bool ref_changed = thread_id >= 0 ? true : (!p.ref_mm_id.has_value() || update.mm_id != p.ref_mm_id.value());
+        bool ref_changed = true;
+        
+        if (!predictors)
+            ref_changed = !predictor_.ref_mm_id.has_value() || update.mm_id != predictor_.ref_mm_id.value();
 
         //predict
         bool fixed;
-        bool ok = ref_changed ? p.estimator_ptr->kalmanPrediction(mm_predicted, update.kalman_update, ts, &fixed) :
-                                p.estimator_ptr->kalmanPrediction(mm_predicted, ts, &fixed);
+        bool ok = ref_changed ? p.kalmanPrediction(mm_predicted, update.kalman_update, ts, &fixed) :
+                                p.kalmanPrediction(mm_predicted, ts, &fixed);
 
         if (stats)
         {
@@ -707,8 +748,8 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         }
 
         //remember current mm id?
-        if (thread_id < 0)
-            p.ref_mm_id = update.mm_id;
+        if (!predictors)
+            predictor_.ref_mm_id = update.mm_id;
 
         return ok;
     };
@@ -726,11 +767,11 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         assert(update0.init);
         assert(update1.init);
 
-        auto& p = thread_id >= 0 ? mt_predictors_.at(thread_id) : predictor_;
+        auto& p = predictors ? predictors->predictor(thread_id) : *predictor_.estimator_ptr;
 
         //@TODO: interpolate
         size_t num_fixed;
-        bool ok = p.estimator_ptr->kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts, &num_fixed);
+        bool ok = p.kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts, &num_fixed);
 
         if (stats)
         {
@@ -739,8 +780,8 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
             stats->num_fixed       = num_fixed;
         }
 
-        if (thread_id < 0)
-            p.ref_mm_id.reset();
+        if (!predictors)
+            predictor_.ref_mm_id.reset();
 
         return ok;
     };

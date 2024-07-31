@@ -6,6 +6,7 @@
 #include "util/tbbhack.h"
 #include "reconstructortask.h"
 #include "number.h"
+#include "util/system.h"
 
 #define FIND_UTN_FOR_TARGET_MT
 #define FIND_UTN_FOR_TARGET_REPORT_MT
@@ -835,7 +836,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
             continue;
 #endif
 
-                          auto pos_offs = getPositionOffset(tr, other, do_debug, &prediction_stats[ target_cnt ]);
+                          auto pos_offs = getPositionOffset(tr, other, do_debug, {}, &prediction_stats[ target_cnt ]);
 
                           if (!pos_offs.has_value()) 
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
@@ -952,7 +953,8 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                         //                        double max_mahal_dist_dub,
                         //                        double max_mahal_dist_quit,
                         //double max_pos_dubious_rate,
-                        bool print_debug)
+                        bool print_debug,
+                        const boost::optional<unsigned int>& thread_id)
     {
         vector<pair<unsigned long, double>> distance_scores;
         double distance_scores_sum {0};
@@ -978,7 +980,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
             }
 
             //@TODO: debug flag
-            auto pos_offs = getPositionOffset(tr.timestamp_, target, other, false, &prediction_stats[ result_idx ]);
+            auto pos_offs = getPositionOffset(tr.timestamp_, target, other, false, thread_id, &prediction_stats[ result_idx ]);
             if (!pos_offs.has_value())
             {
                 ++pos_skipped_cnt;
@@ -1126,6 +1128,11 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                         << " same " << ma_same.size() << " diff " << ma_different.size();
             }
 
+            boost::optional<unsigned int> thread_id;
+    #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
+            thread_id = Utils::System::tbbCurrentThreadID();
+    #endif
+
             if (ma_same.size() > ma_different.size()
                 && ma_same.size() >= settings.target_min_updates_)
             {
@@ -1157,7 +1164,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                                 << " mode c check passed";
 
                             // check positions
-                    scoreUTN(mc_same, other, cnt, true, print_debug);
+                    scoreUTN(mc_same, other, cnt, true, print_debug, thread_id);
                 }
                 else
                 {
@@ -1168,7 +1175,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
             else if (!ma_different.size())
             {
                 // check based on pos only
-                scoreUTN(target.target_reports_, other, cnt, false, print_debug);
+                scoreUTN(target.target_reports_, other, cnt, false, print_debug, thread_id);
             }
             else
                 if (print_debug)
