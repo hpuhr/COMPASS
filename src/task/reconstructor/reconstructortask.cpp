@@ -998,6 +998,23 @@ ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
     return *processing_slice_;
 }
 
+nlohmann::json& ReconstructorTask::getDebugViewpoint(const std::string& name)
+{
+    if (!debug_viewpoints_.count(name))
+    {
+        debug_viewpoints_[name] = nlohmann::json::object_t();
+        debug_viewpoints_[name]["name"] = name;
+        debug_viewpoints_[name]["type"] = "Reconstructor";
+    }
+
+    return debug_viewpoints_.at(name);
+}
+
+void ReconstructorTask::saveDebugViewPoints()
+{
+
+}
+
 bool ReconstructorTask::debug() const
 {
     return debug_;

@@ -1,10 +1,10 @@
 #include "transformation.h"
 #include "logger.h"
-//#include "compass.h"
 
 #include <ogr_spatialref.h>
 
 #include <iomanip>
+#include <cmath>
 
 /********************************************************************************************************
  * Transformation
@@ -91,11 +91,11 @@ std::tuple<bool, double> Transformation::distanceL2Cart (double lat1,
     std::tie(ok, dx, dy) = distanceCart(lat1, lon1, lat2, lon2);
 
     if (!ok)
-        return {false, 0};
+        return std::tuple<bool, double>{false, 0};
 
     double distance = std::sqrt(std::pow(dx, 2) + std::pow(dy, 2));
 
-    return {true, distance};
+    return std::tuple<bool, double>{true, distance};
 }
 
 /**
@@ -111,12 +111,12 @@ std::tuple<bool, double, double> Transformation::distanceAngleCart (double lat1,
     std::tie(ok, dx, dy) = distanceCart(lat1, lon1, lat2, lon2);
 
     if (!ok)
-        return {false, 0, 0};
+        return std::tuple<bool, double, double>{false, 0, 0};
 
     double distance = std::sqrt(std::pow(dx, 2) + std::pow(dy, 2));
     double angle    = std::atan2(dy, dx);
 
-    return {true, distance, angle};
+    return std::tuple<bool, double, double>{true, distance, angle};
 }
 
 /**

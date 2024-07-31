@@ -270,6 +270,7 @@ dbContent::VariableSet ViewManager::getReadSet(const std::string& dbcontent_name
 
 ViewPointsWidget* ViewManager::viewPointsWidget() const
 {
+    assert (view_points_widget_);
     return view_points_widget_;
 }
 
@@ -329,6 +330,22 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
     }
     
     return std::make_pair(true, "");  
+}
+
+void ViewManager::clearViewPoints()
+{
+    DBInterface& db_interface = COMPASS::instance().interface();
+
+            //delete existing viewpoints
+    if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
+        db_interface.deleteAllViewPoints();
+
+    viewPointsWidget()->clearViewPoints();
+
+}
+void ViewManager::addViewPoints(const std::map <std::string, nlohmann::json>& viewpoints)
+{
+    viewPointsWidget()->addViewPoints(viewpoints);
 }
 
 void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
