@@ -266,8 +266,8 @@ class ReconstructorTarget
             // online reconstructor
     size_t trackerCount() const;
     boost::posix_time::ptime trackerTime(size_t idx) const;
-    bool canPredict(boost::posix_time::ptime timestamp) const;
-    bool predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const;
+    bool canPredict(boost::posix_time::ptime ts) const;
+    bool predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const;
     bool predict(reconstruction::Measurement& mm, 
                  const dbContent::targetReport::ReconstructorInfo& tr,
                  reconstruction::PredictionStats* stats = nullptr) const;

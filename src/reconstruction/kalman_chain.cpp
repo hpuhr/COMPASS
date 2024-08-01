@@ -22,6 +22,9 @@
 #include "logger.h"
 #include "timeconv.h"
 
+
+#include <cmath>
+
 namespace reconstruction
 {
 
@@ -827,11 +830,17 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
 
 /**
 */
-bool KalmanChain::predictPosClose(boost::posix_time::ptime timestamp, 
-                                  double max_lat_lon_dist) const
+bool KalmanChain::predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const
 {
-    //@TODO
-    return true;
+    int idx =  predictionRefIndex(ts);
+
+    if (idx == -1)
+        return false;
+
+    const auto& update = updates_[ idx ];
+
+    return std::sqrt(std::pow(update.kalman_update.lat-lat, 2)+std::pow(update.kalman_update.lon-lon, 2))
+           < settings_.prediction_max_wgs84_diff;
 }
 
 /**

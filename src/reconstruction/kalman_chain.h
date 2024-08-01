@@ -90,6 +90,7 @@ public:
         double reestim_residual_cov_sqr   = 10000;                          // 100 * 100 - reestimation stop criterion based on cov mat change residual
 
         TD     prediction_max_tdiff       = boost::posix_time::seconds(10); // maximum difference in time which can be predicted
+        double prediction_max_wgs84_diff  = 0.5;
 
         int    verbosity = 0;
     };
@@ -164,7 +165,7 @@ public:
     bool predict(Measurement& mm_predicted,
                  const boost::posix_time::ptime& ts,
                  PredictionStats* stats = nullptr) const;
-    bool predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const;
+    bool predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const;
     
     size_t size() const;
     int count() const;
