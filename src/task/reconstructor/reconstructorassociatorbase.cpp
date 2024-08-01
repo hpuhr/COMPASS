@@ -973,14 +973,14 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 
             const dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rn_it);
 
-            if (!canGetPositionOffset(tr.timestamp_, target, other))
+            if (!canGetPositionOffset(tr, other))
             {
                 ++pos_skipped_cnt;
                 continue;
             }
 
             //@TODO: debug flag
-            auto pos_offs = getPositionOffset(tr.timestamp_, target, other, false, thread_id, &prediction_stats[ result_idx ]);
+            auto pos_offs = getPositionOffset(tr, other, false, thread_id, &prediction_stats[ result_idx ]);
             if (!pos_offs.has_value())
             {
                 ++pos_skipped_cnt;
