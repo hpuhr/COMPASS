@@ -614,7 +614,7 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
             utn = createNewTarget(tr);
             assert (reconstructor().targets_.count(utn));
         }
-        else if (canGetPositionOffset(tr, reconstructor().targets_.at(utn)))
+        else if (canGetPositionOffsetTR(tr, reconstructor().targets_.at(utn)))
         {
             assert (reconstructor().targets_.count(utn));
 
@@ -829,14 +829,14 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0}; //, sum_est_std_dev{0};
                           //double mahalanobis_dist{0};
 
-                          if (!canGetPositionOffset(tr, other))
+                          if (!canGetPositionOffsetTR(tr, other))
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
 #else
             continue;
 #endif
 
-                          auto pos_offs = getPositionOffset(tr, other, do_debug, {}, &prediction_stats[ target_cnt ]);
+                          auto pos_offs = getPositionOffsetTR(tr, other, do_debug, {}, &prediction_stats[ target_cnt ]);
 
                           if (!pos_offs.has_value()) 
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
@@ -973,14 +973,15 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 
             const dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rn_it);
 
-            if (!canGetPositionOffset(tr.timestamp_, target, other))
+            if (!canGetPositionOffsetTargets(tr.timestamp_, target, other))
             {
                 ++pos_skipped_cnt;
                 continue;
             }
 
             //@TODO: debug flag
-            auto pos_offs = getPositionOffset(tr.timestamp_, target, other, false, thread_id, &prediction_stats[ result_idx ]);
+            auto pos_offs = getPositionOffsetTargets(tr.timestamp_, target, other, false,
+                                                     thread_id, &prediction_stats[ result_idx ]);
             if (!pos_offs.has_value())
             {
                 ++pos_skipped_cnt;

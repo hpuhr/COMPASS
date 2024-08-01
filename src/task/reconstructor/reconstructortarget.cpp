@@ -1928,20 +1928,20 @@ bool ReconstructorTarget::addToTracker(const dbContent::targetReport::Reconstruc
     return chain_->insert(tr.record_num_, tr.timestamp_, reestimate, stats);
 }
 
-bool ReconstructorTarget::canPredict(boost::posix_time::ptime timestamp) const
+bool ReconstructorTarget::canPredict(boost::posix_time::ptime ts) const
 {
     if (!chain_)
         return false;
 
-    return chain_->canPredict(timestamp);
+    return chain_->canPredict(ts);
 }
 
-bool ReconstructorTarget::predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const
+bool ReconstructorTarget::predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const
 {
     if (!chain_)
         return false;
 
-    return chain_->predictPosClose(timestamp, max_lat_lon_dist);
+    return chain_->predictPositionClose(ts, lat, lon);
 }
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
