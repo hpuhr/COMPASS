@@ -122,8 +122,9 @@ void SimpleAssociator::associateNewData()
            << " multiple " << multiple_associated << " single " << single_associated;
 }
 
-bool SimpleAssociator::canGetPositionOffset(const dbContent::targetReport::ReconstructorInfo& tr,
-                                                   const dbContent::ReconstructorTarget& target)
+bool SimpleAssociator::canGetPositionOffsetTR(
+    const dbContent::targetReport::ReconstructorInfo& tr,
+    const dbContent::ReconstructorTarget& target, bool use_max_distance)
 {
     dbContent::targetReport::Position ref_pos;
     bool ok;
@@ -134,7 +135,7 @@ bool SimpleAssociator::canGetPositionOffset(const dbContent::targetReport::Recon
 }
 
 // distance, target acc, tr acc
-boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositionOffset(
+boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositionOffsetTR(
     const dbContent::targetReport::ReconstructorInfo& tr,
     const dbContent::ReconstructorTarget& target, 
     bool do_debug,
@@ -157,7 +158,7 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
     return std::tuple<double, double, double>(distance_m, -1, -1);
 }
 
-bool SimpleAssociator::canGetPositionOffset(const boost::posix_time::ptime& ts,
+bool SimpleAssociator::canGetPositionOffsetTargets(const boost::posix_time::ptime& ts,
                                             const dbContent::ReconstructorTarget& target0,
                                             const dbContent::ReconstructorTarget& target1)
 {
@@ -175,7 +176,7 @@ bool SimpleAssociator::canGetPositionOffset(const boost::posix_time::ptime& ts,
 }
 
 // distance, target0 acc, target1 acc
-boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositionOffset(
+boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositionOffsetTargets(
     const boost::posix_time::ptime& ts,
     const dbContent::ReconstructorTarget& target0,
     const dbContent::ReconstructorTarget& target1,
@@ -204,7 +205,7 @@ boost::optional<bool> SimpleAssociator::checkPositionOffsetAcceptable (
     dbContent::targetReport::ReconstructorInfo& tr,
     unsigned int utn, bool secondary_verified, bool do_debug)
 {
-    auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug, {});
+    auto pos_offs = getPositionOffsetTR(tr, reconstructor().targets_.at(utn), do_debug, {});
     if (!pos_offs.has_value())
         return false;
 

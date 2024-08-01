@@ -675,6 +675,9 @@ bool KalmanChain::predictMT(Measurement& mm_predicted,
                             unsigned int thread_id,
                             PredictionStats* stats) const
 {
+    if (thread_id >= predictors.size())
+        logerr << "KalmanChain: predictMT: thread_id " << thread_id << " >= predictors.size() " << predictors.size();
+
     assert (thread_id < predictors.size());
 
     return predictInternal(mm_predicted, ts, &predictors, (int)thread_id, stats);
