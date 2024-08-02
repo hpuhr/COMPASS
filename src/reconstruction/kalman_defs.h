@@ -74,10 +74,11 @@ struct KalmanUpdateMinimal
     Matrix                   P;                 // covariance matrix
     boost::posix_time::ptime t;                 // time of update
     Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
-    double                   lat;               // latitude of state position
-    double                   lon;               // longitude of state position
+    double                   lat;               // latitude of state position (do not confuse with center of local projection!)
+    double                   lon;               // longitude of state position (do not confuse with center of local projection!)
 
-    bool valid  = false; // kalman update is valid
+    bool has_wgs84_pos = false; // lat/long are set
+    bool valid         = false; // kalman update is valid
 };
 
 /**
@@ -99,14 +100,16 @@ struct KalmanUpdate
         lat               = update_min.lat;
         lon               = update_min.lon;
         t                 = update_min.t;
+        has_wgs84_pos     = update_min.has_wgs84_pos;
         valid             = update_min.valid;
         reinit            = false; // not defined by min update
     }
 
     void resetFlags()
     {
-        valid  = false;
-        reinit = false;
+        has_wgs84_pos = false;
+        valid         = false;
+        reinit        = false;
     }
 
     void minimalInfo(KalmanUpdateMinimal& info) const
@@ -117,6 +120,7 @@ struct KalmanUpdate
         info.projection_center = projection_center;
         info.lat               = lat;
         info.lon               = lon;
+        info.has_wgs84_pos     = has_wgs84_pos;
         info.valid             = valid;
     };
 
@@ -130,12 +134,13 @@ struct KalmanUpdate
 
     KalmanState              state;             // kalman internal state, can be used for rts smooting, state interpolation, etc.
     Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
-    double                   lat;               // latitude of state position
-    double                   lon;               // longitude of state position
+    double                   lat;               // latitude of state position (do not confuse with center of local projection!)
+    double                   lon;               // longitude of state position (do not confuse with center of local projection!)
     boost::posix_time::ptime t;                 // time of update
 
-    bool valid  = false; // kalman update is valid
-    bool reinit = false; // kalman was reinitialized at this update, represents the beginning of a new kalman chain
+    bool has_wgs84_pos = false; // lat/long are set
+    bool valid         = false; // kalman update is valid
+    bool reinit        = false; // kalman was reinitialized at this update, represents the beginning of a new kalman chain
 };
 
 } // namespace kalman

@@ -835,7 +835,6 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #else
             continue;
 #endif
-
                           auto pos_offs = getPositionOffsetTR(tr, other, do_debug, {}, &prediction_stats[ target_cnt ]);
 
                           if (!pos_offs.has_value()) 
@@ -860,11 +859,11 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                       );
 #endif
 
-            //log failed predictions
+    //log failed predictions
     for (const auto& s : prediction_stats)
         ReconstructorTarget::addPredictionToGlobalStats(s);
 
-            // find best match
+    // find best match
     bool usable;
     unsigned int other_utn;
 
@@ -904,8 +903,8 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 }
 
 int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
-                                                  const std::set<unsigned long>& debug_rec_nums,
-                                                  const std::set<unsigned int>& debug_utns)
+                                                   const std::set<unsigned long>& debug_rec_nums,
+                                                   const std::set<unsigned int>& debug_utns)
 {
     if (!reconstructor().targets_.size()) // check if targets exist
         return -1;
@@ -942,9 +941,9 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 
     const auto& settings = reconstructor().settings();
 
-            //const boost::posix_time::time_duration max_time_diff_tracker = Utils::Time::partialSeconds(settings.max_time_diff_);
+    //const boost::posix_time::time_duration max_time_diff_tracker = Utils::Time::partialSeconds(settings.max_time_diff_);
 
-            //computes a match score for the given other target
+    //computes a match score for the given other target
     auto scoreUTN = [ & ] (const std::vector<size_t>& rec_nums,
                         const dbContent::ReconstructorTarget& other,
                         unsigned int result_idx,
@@ -953,8 +952,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                         //                        double max_mahal_dist_dub,
                         //                        double max_mahal_dist_quit,
                         //double max_pos_dubious_rate,
-                        bool print_debug,
-                        const boost::optional<unsigned int>& thread_id)
+                        bool print_debug)
     {
         vector<pair<unsigned long, double>> distance_scores;
         double distance_scores_sum {0};
@@ -981,7 +979,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 
             //@TODO: debug flag
             auto pos_offs = getPositionOffsetTargets(tr.timestamp_, target, other, false,
-                                                     thread_id, &prediction_stats[ result_idx ]);
+                                                     {}, &prediction_stats[ result_idx ]);
             if (!pos_offs.has_value())
             {
                 ++pos_skipped_cnt;
@@ -1129,11 +1127,6 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                         << " same " << ma_same.size() << " diff " << ma_different.size();
             }
 
-            boost::optional<unsigned int> thread_id;
-    #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
-            thread_id = Utils::System::tbbCurrentThreadID();
-    #endif
-
             if (ma_same.size() > ma_different.size()
                 && ma_same.size() >= settings.target_min_updates_)
             {
@@ -1165,7 +1158,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
                                 << " mode c check passed";
 
                             // check positions
-                    scoreUTN(mc_same, other, cnt, true, print_debug, thread_id);
+                    scoreUTN(mc_same, other, cnt, true, print_debug);
                 }
                 else
                 {
@@ -1176,7 +1169,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
             else if (!ma_different.size())
             {
                 // check based on pos only
-                scoreUTN(target.target_reports_, other, cnt, false, print_debug, thread_id);
+                scoreUTN(target.target_reports_, other, cnt, false, print_debug);
             }
             else
                 if (print_debug)

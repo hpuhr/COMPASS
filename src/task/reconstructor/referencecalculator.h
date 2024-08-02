@@ -24,14 +24,16 @@
 */
 struct ReferenceCalculatorSettings
 {
+    /**
+    */
     reconstruction::KalmanEstimator::Settings kalmanEstimatorSettings() const
     {
         reconstruction::KalmanEstimator::Settings settings;
 
-        settings.min_chain_size = min_chain_size;
-        settings.min_dt         = min_dt;
-        settings.max_dt         = max_dt;
-        settings.max_distance   = max_distance;
+        settings.min_chain_size    = min_chain_size;
+        settings.min_dt            = min_dt;
+        settings.max_dt            = max_dt;
+        settings.max_distance_cart = max_distance;
 
         settings.Q_var       = Q_std       * Q_std;
         settings.R_var_undef = R_std_undef * R_std_undef;
@@ -49,6 +51,17 @@ struct ReferenceCalculatorSettings
 
         settings.fix_predictions        = fix_predictions;
         settings.fix_predictions_interp = fix_predictions_interp;
+
+        return settings;
+    }
+
+    /**
+    */
+    reconstruction::KalmanEstimator::Settings chainEstimatorSettings() const
+    {
+        reconstruction::KalmanEstimator::Settings settings = kalmanEstimatorSettings();
+
+        //override settings for chain if needed
 
         return settings;
     }
@@ -81,7 +94,7 @@ struct ReferenceCalculatorSettings
     reconstruction::StateInterpMode resample_blend_mode = reconstruction::StateInterpMode::BlendVar;
 
     //dynamic projection change
-    double max_proj_distance_cart = 20000.0;
+    double max_proj_distance_cart  = 20000.0;
 
     //systrack resampling related
     bool   resample_systracks        = true; // resample system tracks using spline interpolation

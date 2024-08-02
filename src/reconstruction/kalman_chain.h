@@ -32,10 +32,6 @@ class KalmanInterface;
 
 /**
 */
-
-
-/**
-*/
 class KalmanChainPredictors
 {
 public:
@@ -50,7 +46,6 @@ public:
     void init(kalman::KalmanType ktype,
               const KalmanEstimator::Settings& settings,
               unsigned int max_threads);
-
 private:
     std::vector<std::unique_ptr<KalmanEstimator>> predictors;
 };
@@ -166,6 +161,9 @@ public:
                  const boost::posix_time::ptime& ts,
                  PredictionStats* stats = nullptr) const;
     bool predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const;
+    bool getChainState(Measurement& mm,
+                       const boost::posix_time::ptime& ts,
+                       PredictionStats* stats = nullptr) const;
     
     size_t size() const;
     int count() const;
@@ -206,11 +204,11 @@ private:
     void resetReestimationIndices();
     bool reinit(int idx) const;
     bool reestimate(int idx, 
-                    KalmanEstimator::StepResult* res = nullptr);
+                    KalmanEstimator::StepInfo* info = nullptr);
     bool reestimate(int idx, 
                     double& d_state_sqr, 
                     double& d_cov_sqr, 
-                    KalmanEstimator::StepResult* res = nullptr);
+                    KalmanEstimator::StepInfo* info = nullptr);
     void removeUpdate(int idx);
 
     int lastIndex() const;

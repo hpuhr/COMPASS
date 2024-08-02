@@ -36,6 +36,7 @@
 #include "view/gridview/grid2d_defs.h"
 
 #include "compass.h"
+#include "tbbhack.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -547,14 +548,21 @@ std::shared_ptr<nlohmann::json::object_t> Joined::getOrCreateCachedViewable() co
 {
     if (!viewable_)
     {
-        //cache all needed single details
-        std::vector<Single::TemporaryDetails> temp_details;
+        loginf << "Joined: getOrCreateCachedViewable: recreating viewable for "
+               << "requirement '" << requirement_->name() << "' " 
+               << "sector '" << sector_layer_.name() << "'..."; 
 
-        auto funcSingleResults = [ & ] (const std::shared_ptr<Single>& result)
+        //cache all needed single details in parallel
+        auto used_results = usedSingleResults();
+
+        unsigned int n = used_results.size();
+
+        std::vector<Single::TemporaryDetails> temp_details(n);
+
+        tbb::parallel_for(uint(0), n, [ & ] (unsigned int idx)
         {
-            temp_details.push_back(result->temporaryDetails());
-        };
-        iterateSingleResults({}, funcSingleResults, {});
+            temp_details[ idx ] = used_results[ idx ]->temporaryDetails();
+        });
 
         //create new viewable
         viewable_ = createViewable(AnnotationOptions().overview());

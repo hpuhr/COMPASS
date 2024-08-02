@@ -38,11 +38,12 @@ class ReconstructorTarget
     {
         void reset()
         {
-            num_chain_added              = 0;
-            num_chain_updates            = 0;
-            num_chain_updates_valid      = 0;
-            num_chain_updates_failed     = 0;
-            num_chain_updates_skipped    = 0;
+            num_chain_added                = 0;
+            num_chain_updates              = 0;
+            num_chain_updates_valid        = 0;
+            num_chain_updates_failed       = 0;
+            num_chain_updates_skipped      = 0;
+            num_chain_updates_proj_changed = 0; 
 
             num_chain_predictions        = 0;
             num_chain_predictions_failed = 0;
@@ -55,15 +56,17 @@ class ReconstructorTarget
             num_rec_interp_failed        = 0;
         }
 
-        size_t num_chain_added              = 0;
-        size_t num_chain_updates            = 0;
-        size_t num_chain_updates_valid      = 0;
-        size_t num_chain_updates_failed     = 0;
-        size_t num_chain_updates_skipped    = 0;
+        size_t num_chain_added                = 0;
+        size_t num_chain_updates              = 0;
+        size_t num_chain_updates_valid        = 0;
+        size_t num_chain_updates_failed       = 0;
+        size_t num_chain_updates_skipped      = 0;
+        size_t num_chain_updates_proj_changed = 0;
 
-        size_t num_chain_predictions        = 0;
-        size_t num_chain_predictions_failed = 0;
-        size_t num_chain_predictions_fixed  = 0;
+        size_t num_chain_predictions              = 0;
+        size_t num_chain_predictions_failed       = 0;
+        size_t num_chain_predictions_fixed        = 0;
+        size_t num_chain_predictions_proj_changed = 0;
 
         size_t num_rec_updates              = 0;
         size_t num_rec_updates_valid        = 0;
@@ -269,19 +272,15 @@ class ReconstructorTarget
     bool canPredict(boost::posix_time::ptime ts) const;
     bool predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const;
     bool predict(reconstruction::Measurement& mm, 
-                 const dbContent::targetReport::ReconstructorInfo& tr,
-                 reconstruction::PredictionStats* stats = nullptr) const;
-    bool predict(reconstruction::Measurement& mm, 
                  const boost::posix_time::ptime& ts,
                  reconstruction::PredictionStats* stats = nullptr) const;
-    bool predictMT(reconstruction::Measurement& mm, 
-                   const dbContent::targetReport::ReconstructorInfo& tr, 
-                   unsigned int thread_id,
-                   reconstruction::PredictionStats* stats = nullptr) const;
     bool predictMT(reconstruction::Measurement& mm, 
                    const boost::posix_time::ptime& ts,
                    unsigned int thread_id,
                    reconstruction::PredictionStats* stats = nullptr) const;
+    bool getChainState(reconstruction::Measurement& mm, 
+                       const boost::posix_time::ptime& ts,
+                       reconstruction::PredictionStats* stats = nullptr) const;
     // hp: plz rework to tr -> posix timestamp, mm to targetreportdefs structs pos, posacc, maybe by return
 
     //    bool hasADSBMOPSVersion();

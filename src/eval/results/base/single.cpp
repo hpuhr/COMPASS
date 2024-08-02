@@ -222,14 +222,14 @@ Single::EvaluationDetails Single::recomputeDetails() const
     assert(requirement_);
     assert(eval_man_.getData().hasTargetData(utn_));
 
-    loginf << "Single: recomputeDetails: recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
+    logdbg << "Single: recomputeDetails: recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
 
     const auto& data = eval_man_.getData().targetData(utn_);
 
     auto result = requirement_->evaluate(data, requirement_, sector_layer_);
     assert(result);
 
-    loginf << "Single: recomputeDetails: target details recomputed!";
+    logdbg << "Single: recomputeDetails: target details recomputed!";
 
     return result->getDetails();
 }

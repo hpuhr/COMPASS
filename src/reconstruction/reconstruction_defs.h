@@ -40,6 +40,12 @@ enum MapProjectionMode
                         //but results in some computation overhead)
 };
 
+enum class MapProjDistanceCheck
+{
+    Cart,
+    WGS84
+}; 
+
 enum class StateInterpMode
 {
     BlendHalf,      // time-projected kalman states will be blended halfways
@@ -98,12 +104,15 @@ struct InterpOptions
 */
 struct UpdateStats
 {
-    bool   set         = false;
+    bool set = false;
+
     size_t num_fresh   = 0;
     size_t num_updated = 0;
     size_t num_valid   = 0;
     size_t num_failed  = 0;
     size_t num_skipped = 0;
+
+    size_t num_proj_changed = 0;
 };
 
 /**
@@ -113,6 +122,8 @@ struct PredictionStats
     size_t num_predictions = 0;
     size_t num_failed      = 0;
     size_t num_fixed       = 0;
+
+    size_t num_proj_changed = 0;
 };
 
 } // namespace reconstruction

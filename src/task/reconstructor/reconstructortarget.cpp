@@ -46,6 +46,8 @@ void ReconstructorTarget::addUpdateToGlobalStats(const reconstruction::UpdateSta
     global_stats_.num_chain_updates_valid   += s.num_valid;
     global_stats_.num_chain_updates_failed  += s.num_failed;
     global_stats_.num_chain_updates_skipped += s.num_skipped;
+
+    global_stats_.num_chain_updates_proj_changed += s.num_proj_changed;
 }
 
 void ReconstructorTarget::addPredictionToGlobalStats(const reconstruction::PredictionStats& s)
@@ -53,6 +55,10 @@ void ReconstructorTarget::addPredictionToGlobalStats(const reconstruction::Predi
     global_stats_.num_chain_predictions        += s.num_predictions;
     global_stats_.num_chain_predictions_failed += s.num_failed;
     global_stats_.num_chain_predictions_fixed  += s.num_fixed;
+
+    global_stats_.num_chain_predictions_proj_changed += s.num_proj_changed;
+
+
 }
 
 void ReconstructorTarget::addTargetReport (unsigned long rec_num,
@@ -1904,7 +1910,13 @@ void ReconstructorTarget::reinitTracker()
 {
     chain_.reset(new reconstruction::KalmanChain);
 
-    chain_->configureEstimator(reconstructor_.referenceCalculatorSettings().kalmanEstimatorSettings());
+    //override some estimator settings for the chain
+    chain_->settings().mode            = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts :
+                                                               reconstruction::KalmanChain::Settings::Mode::StaticAdd;
+    chain_->settings().prediction_mode = reconstruction::KalmanChain::Settings::PredictionMode::Interpolate;
+    chain_->settings().verbosity       = 0;
+
+    chain_->configureEstimator(reconstructor_.referenceCalculatorSettings().chainEstimatorSettings());
     chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type);
 
     chain_->setMeasurementAssignFunc(
@@ -1913,10 +1925,7 @@ void ReconstructorTarget::reinitTracker()
             this->reconstructor_.createMeasurement(mm, rec_num);
         });
 
-    chain_->settings().mode            = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts :
-                                                               reconstruction::KalmanChain::Settings::Mode::StaticAdd;
-    chain_->settings().prediction_mode = reconstruction::KalmanChain::Settings::PredictionMode::Interpolate;
-    chain_->settings().verbosity       = 0;
+    
 }
 
 bool ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
@@ -1942,13 +1951,6 @@ bool ReconstructorTarget::predictPositionClose(boost::posix_time::ptime ts, doub
         return false;
 
     return chain_->predictPositionClose(ts, lat, lon);
-}
-
-bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
-                                  const dbContent::targetReport::ReconstructorInfo& tr,
-                                  reconstruction::PredictionStats* stats) const
-{
-    return predict(mm, tr.timestamp_, stats);
 }
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
@@ -1978,14 +1980,6 @@ bool ReconstructorTarget::predict(reconstruction::Measurement& mm,
 }
 
 bool ReconstructorTarget::predictMT(reconstruction::Measurement& mm, 
-                                    const dbContent::targetReport::ReconstructorInfo& tr, 
-                                    unsigned int thread_id,
-                                    reconstruction::PredictionStats* stats) const
-{
-    return predictMT(mm, tr.timestamp_, thread_id, stats);
-}
-
-bool ReconstructorTarget::predictMT(reconstruction::Measurement& mm, 
                                     const boost::posix_time::ptime& ts,
                                     unsigned int thread_id,
                                     reconstruction::PredictionStats* stats) const
@@ -1993,6 +1987,32 @@ bool ReconstructorTarget::predictMT(reconstruction::Measurement& mm,
     assert(chain_);
 
     bool ok = chain_->predictMT(mm, ts, reconstructor_.chainPredictors(), thread_id, stats);
+    assert(ok);
+
+    return ok;
+}
+
+bool ReconstructorTarget::getChainState(reconstruction::Measurement& mm, 
+                                        const boost::posix_time::ptime& ts,
+                                        reconstruction::PredictionStats* stats) const
+{
+    assert(chain_);
+
+    bool ok = false;
+
+    if (stats)
+    {
+        ok = chain_->getChainState(mm, ts, stats);
+    }
+    else
+    {
+        reconstruction::PredictionStats pstats;
+        ok = chain_->getChainState(mm, ts, &pstats);
+
+        //log immediately (!take care when using this method in a multithreaded context!)
+        ReconstructorTarget::addPredictionToGlobalStats(pstats);
+    }
+    
     assert(ok);
 
     return ok;
