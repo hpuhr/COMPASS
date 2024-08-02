@@ -259,15 +259,11 @@ std::vector<Joined::SectorInfo> JoinedIntervalBase::sectorInfos() const
 FeatureDefinitions JoinedIntervalBase::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
-    
-    // return AnnotationDefinitions().addBinaryGrid("", 
-    //                                              requirement_->name(), 
-    //                                              DetailValueSource(SingleIntervalBase::DetailKey::MissOccurred),
-    //                                              GridAddDetailMode::AddPositionsAsPolyLine,
-    //                                              true,
-    //                                              Qt::green,
-    //                                              Qt::red);
 
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+        .addDataSeries(SingleIntervalBase::DetailKey::MissOccurred, 
+                       GridAddDetailMode::AddPositionsAsPolyLine, 
+                       true);
     return defs;
 }
 
