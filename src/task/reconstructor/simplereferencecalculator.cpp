@@ -522,7 +522,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                    << " * Measurement:         \n\n" << mm.asString()                                    << "\n";
         }
 
-        auto res = estimator.kalmanStep(update, mm, false);
+        auto res = estimator.kalmanStep(update, mm);
 
         //!only add update if valid!
         if (update.valid)

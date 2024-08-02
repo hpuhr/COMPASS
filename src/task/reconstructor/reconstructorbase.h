@@ -204,6 +204,8 @@ class ReconstructorBase : public Configurable
     bool cancelled_ {false};
 
   private:
+    void initChainPredictors();
+
     ReferenceCalculatorSettings ref_calc_settings_;
 
     unsigned int slice_cnt_ {0};

@@ -82,6 +82,18 @@ public:
             if (single_ && created_)
                 single_->details_.reset();
         }
+
+        TemporaryDetails& operator=(TemporaryDetails&& other)
+        {
+            single_  = other.single_;
+            created_ = other.created_;
+
+            other.single_  = nullptr;
+            other.created_ = false;
+
+            return *this;
+        }
+
     private:
         const Single* single_  = nullptr;
         bool          created_ = false;

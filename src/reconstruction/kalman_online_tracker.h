@@ -47,7 +47,7 @@ public:
     void init(std::unique_ptr<KalmanInterface>&& interface);
     void init(kalman::KalmanType ktype);
 
-    bool track(const Measurement& mm, bool update_wgs84_pos, KalmanEstimator::StepResult* res); 
+    bool track(const Measurement& mm); 
     bool track(const kalman::KalmanUpdate& update);
     bool track(const kalman::KalmanUpdateMinimal& update);
 
@@ -62,6 +62,7 @@ public:
     KalmanEstimator::Settings& settings();
     const boost::optional<kalman::KalmanUpdate>& currentState() const;
     const boost::posix_time::ptime& currentTime() const;
+    const KalmanEstimator::StepInfo& stepInfo() const;
     const KalmanEstimator& estimator() const;
 
 private:

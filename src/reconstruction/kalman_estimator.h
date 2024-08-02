@@ -61,17 +61,20 @@ public:
         double Q_var       = 900.0;   // variance of kalman process (30*30)
         double R_var_undef = HighVar; // high variance for undefined values (1000*1000)
 
-        size_t min_chain_size = 2;       // minimum number of consecutive kalman updates without reinit            (0 = do not check)
-        double max_distance   = 50000.0; // maximum allowed distance of consecutive measurements in meters         (0 = do not check)
-        double min_dt         = 0.0;     // minimum allowed time difference of consecutive measurements in seconds (0 = do not check)
-        double max_dt         = 11.0;    // maximum allowed time difference of consecutive measurements in seconds (0 = do not check)
+        size_t min_chain_size     = 2;       // minimum number of consecutive kalman updates without reinit            (0 = do not check)
+        double max_distance_cart  = 50000.0; // maximum allowed distance of consecutive measurements in meters         (0 = do not check)
+        double min_dt             = 0.0;     // minimum allowed time difference of consecutive measurements in seconds (0 = do not check)
+        double max_dt             = 11.0;    // maximum allowed time difference of consecutive measurements in seconds (0 = do not check)
 
         double min_pred_dt = 0.0;
 
         int reinit_check_flags = ReinitCheckTime; // checks used for reinitialization of kalman
 
-        double max_proj_distance_cart = 20000.0; // maximum distance from the current map projection origin in meters 
-                                                 // before changing the projection center
+        MapProjDistanceCheck proj_distance_check     = MapProjDistanceCheck::Cart; // projection center distance check type
+        double               max_proj_distance_cart  = 20000.0;                    // maximum distance from the current map projection origin in meters 
+                                                                                   // before changing the projection center
+        double               max_proj_distance_wgs84 = 0.2;                        // maximum distance from the current map projection origin in degrees 
+                                                                                   // before changing the projection center
 
         double          resample_dt          = 2.0;                       // resampling step size in seconds
         double          resample_Q_var       = 100.0;                     // resampling process noise (10*10)
@@ -84,6 +87,8 @@ public:
 
         bool fix_predictions        = true;
         bool fix_predictions_interp = true;
+
+        bool extract_wgs84_pos = false;
         
         int verbosity = 0;
 
@@ -104,6 +109,14 @@ public:
         FailKalmanError
     };
 
+    struct StepInfo
+    {
+        void reset();
+
+        StepResult result       = StepResult::Success;
+        bool       proj_changed = false;
+    };
+
     typedef std::vector<kalman::KalmanUpdate> Updates;
     typedef std::function<void(Updates&, size_t, size_t)> ChainFunc;
 
@@ -121,8 +134,7 @@ public:
     void kalmanInit(const kalman::KalmanUpdateMinimal& update);
 
     StepResult kalmanStep(kalman::KalmanUpdate& update,
-                          const Measurement& mm,
-                          bool update_wgs84_pos);
+                          const Measurement& mm);
     
     bool kalmanPrediction(Measurement& mm,
                           double dt,
@@ -133,22 +145,34 @@ public:
     bool kalmanPrediction(Measurement& mm,
                           const kalman::KalmanUpdate& ref_update,
                           const boost::posix_time::ptime& ts,
-                          bool* fixed = nullptr);
+                          bool* fixed = nullptr,
+                          bool* proj_changed = nullptr);
     bool kalmanPrediction(Measurement& mm,
                           const kalman::KalmanUpdateMinimal& ref_update,
                           const boost::posix_time::ptime& ts,
-                          bool* fixed = nullptr);
+                          bool* fixed = nullptr,
+                          bool* proj_changed = nullptr);
     bool kalmanPrediction(Measurement& mm,
                           const kalman::KalmanUpdate& ref_update0,
                           const kalman::KalmanUpdate& ref_update1,
                           const boost::posix_time::ptime& ts,
-                          size_t* num_fixed = nullptr);
+                          size_t* num_fixed = nullptr,
+                          size_t* num_proj_changed = nullptr);
     bool kalmanPrediction(Measurement& mm,
                           const kalman::KalmanUpdateMinimal& ref_update0,
                           const kalman::KalmanUpdateMinimal& ref_update1,
                           const boost::posix_time::ptime& ts,
-                          size_t* num_fixed = nullptr);
+                          size_t* num_fixed = nullptr,
+                          size_t* num_proj_changed = nullptr);
 
+    void storeUpdate(Measurement& mm, 
+                     const kalman::KalmanUpdate& update) const;
+    void storeUpdate(Measurement& mm, 
+                     const kalman::KalmanUpdateMinimal& update) const;
+    void storeUpdate(Reference& ref, 
+                     const kalman::KalmanUpdate& update) const;
+    void storeUpdate(Reference& ref, 
+                     const kalman::KalmanUpdateMinimal& update) const;
     void storeUpdates(std::vector<Reference>& refs,
                       const std::vector<kalman::KalmanUpdate>& updates) const;
     
@@ -158,8 +182,9 @@ public:
                        size_t* num_steps_failed = nullptr) const;
 
     kalman::KalmanState currentState() const;
-    const boost::posix_time::ptime& currentTime() const;
     Measurement currentStateAsMeasurement() const;
+    const boost::posix_time::ptime& currentTime() const;
+    const StepInfo& stepInfo() const;
 
     std::string asString(const std::string& prefix = "") const;
 
@@ -172,14 +197,23 @@ public:
     static const double HighVar;
 
 private:
-    void initMeasurement(kalman::KalmanUpdate& update,
+    void initDataStructs(kalman::KalmanUpdate& update,
                          const Measurement& mm);
     ReinitState needsReinit(const Measurement& mm) const;
-    void reinit(kalman::KalmanUpdate& update,
-                const Measurement& mm);
-    bool step(kalman::KalmanUpdate& update,
-              const Measurement& mm);
+    void kalmanInterfaceReinit(kalman::KalmanUpdate& update,
+                               const Measurement& mm);
+    bool kalmanInterfaceStep(kalman::KalmanUpdate& update,
+                             const Measurement& mm);
     void checkProjection(kalman::KalmanUpdate& update);
+    void initProjection(double lat_proj_center,
+                        double lon_proj_center,
+                        const boost::optional<double>& lat_mm, 
+                        const boost::optional<double>& lon_mm);
+
+    void storePositionWGS84(kalman::KalmanUpdate& update);
+
+    StepResult kalmanStepInternal(kalman::KalmanUpdate& update,
+                                  const Measurement& mm);
 
     void executeChainFunc(Updates& updates, const ChainFunc& func) const;
 
@@ -201,13 +235,12 @@ private:
                         double Q_var,
                         StateInterpMode interp_mode,
                         KalmanProjectionHandler& proj_handler,
-                        size_t* num_fixed) const;
+                        size_t* num_fixed,
+                        size_t* num_proj_changed) const;
     
     void storeUpdate(Reference& ref, 
                      const kalman::KalmanUpdate& update,
                      KalmanProjectionHandler& phandler) const;
-
-    void storeWGS84Pos(kalman::KalmanUpdate& update) const;
 
     reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
 
@@ -219,6 +252,8 @@ private:
     Settings settings_;
 
     double max_distance_sqr_;
+
+    StepInfo step_info_;
 };
 
 } // reconstruction
