@@ -289,13 +289,10 @@ FeatureDefinitions JoinedExtraData::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    // return AnnotationDefinitions().addBinaryGrid("", 
-    //                                              requirement_->name(), 
-    //                                              DetailValueSource(SingleExtraData::DetailKey::Extra),
-    //                                              GridAddDetailMode::AddEvtPosition,
-    //                                              true,
-    //                                              Qt::green,
-    //                                              Qt::red);
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+        .addDataSeries(SingleExtraData::DetailKey::Extra, 
+                       GridAddDetailMode::AddEvtPosition, 
+                       true);
 
     return defs;
 }

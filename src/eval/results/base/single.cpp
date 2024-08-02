@@ -615,6 +615,14 @@ bool Single::hasViewableData (const EvaluationResultsReport::SectionContentTable
 }
 
 /**
+*/
+bool Single::viewableDataReady() const
+{
+    //viewable data for single results is always computed on the fly, so return false in any case
+    return false;
+}
+
+/**
  * Creates viewable data for this target for the given section.
  * BEWARE: !will always recompute the details!
 */

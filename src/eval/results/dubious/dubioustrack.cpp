@@ -446,20 +446,15 @@ FeatureDefinitions JoinedDubiousTrack::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    //dubious state to binary value
-    // auto getValue = [ = ] (const EvaluationDetail& detail)
-    // {
-    //     bool ok = SingleDubiousTrack::detailIsOkStatic(detail);
-    //     return ok ? 1.0 : 0.0;
-    // };
+    auto getValue = [ = ] (const EvaluationDetail& detail)
+    {
+        return boost::optional<bool>(SingleDubiousTrack::detailIsOkStatic(detail));
+    };
 
-    // return AnnotationDefinitions().addBinaryGrid("", 
-    //                                              requirement_->name(),
-    //                                              DetailValueSource(getValue),
-    //                                              GridAddDetailMode::AddEvtPosition,
-    //                                              false,
-    //                                              Qt::green,
-    //                                              Qt::red);
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+        .addDataSeries(ValueSource<bool>(getValue), 
+                       GridAddDetailMode::AddEvtPosition, 
+                       false);
 
     return defs;
 }

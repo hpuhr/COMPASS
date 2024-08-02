@@ -619,6 +619,13 @@ bool Joined::hasViewableData (const EvaluationResultsReport::SectionContentTable
 }
 
 /**
+*/
+bool Joined::viewableDataReady() const
+{
+    return (viewable_ != nullptr);
+}
+
+/**
  */
 std::shared_ptr<nlohmann::json::object_t> Joined::viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                                const QVariant& annotation) const

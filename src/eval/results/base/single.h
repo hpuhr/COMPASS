@@ -151,6 +151,7 @@ public:
 
     bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
+    bool viewableDataReady() const override final;
     std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                            const QVariant& annotation) const override final;
     

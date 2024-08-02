@@ -20,6 +20,7 @@
 #include "eval/results/base/featuredefinitions.h"
 
 #include "eval/requirement/base/base.h"
+#include "eval/requirement/position/distance.h"
 #include "evaluationmanager.h"
 
 #include "histograminitializer.h"
@@ -445,11 +446,22 @@ FeatureDefinitions JoinedPositionBase::common_getCustomAnnotationDefinitions(con
 {
     FeatureDefinitions defs;
 
+    //@TODO: remove this hack...
+    bool invert = false;
+    const EvaluationRequirement::PositionDistance* pos_distance = dynamic_cast<const EvaluationRequirement::PositionDistance*>(joined.requirement().get());
+    if (pos_distance) 
+    {
+        if (pos_distance->thresholdValueCheckType() == EvaluationRequirement::COMPARISON_TYPE::GREATER_THAN || 
+            pos_distance->thresholdValueCheckType() == EvaluationRequirement::COMPARISON_TYPE::GREATER_THAN_OR_EQUAL)
+            invert = true;
+    }
+
     //grids (as geoimages)
     defs.addDefinition<FeatureDefinitionBinaryGrid>("Position Error", eval_man, "Comparison Passed")
         .addDataSeries(SinglePositionBaseCommon::DetailKey::CheckPassed, 
                        GridAddDetailMode::AddEvtRefPosition, 
-                       false);
+                       invert);
+    
     // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Mean", true)
     //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
     //                    grid2d::ValueType::ValueTypeMean, 
@@ -462,6 +474,7 @@ FeatureDefinitions JoinedPositionBase::common_getCustomAnnotationDefinitions(con
     //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
     //                    grid2d::ValueType::ValueTypeMax, 
     //                    GridAddDetailMode::AddEvtRefPosition);
+
     //histograms
     defs.addDefinition<FeatureDefinitionStringCategoryHistogram>("Position Error", eval_man, "Error Count", "Error Count")
         .addDataSeries("", { "#CF", "#CP" }, { numFailed(), numPassed() });

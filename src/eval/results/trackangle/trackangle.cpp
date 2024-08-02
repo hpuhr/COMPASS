@@ -433,13 +433,10 @@ FeatureDefinitions JoinedTrackAngle::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    // return AnnotationDefinitions().addBinaryGrid("", 
-    //                                              requirement_->name(), 
-    //                                              DetailValueSource(SingleTrackAngle::DetailKey::CheckPassed),
-    //                                              GridAddDetailMode::AddEvtRefPosition,
-    //                                              false,
-    //                                              Qt::green,
-    //                                              Qt::red);
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+        .addDataSeries(SingleTrackAngle::DetailKey::CheckPassed, 
+                       GridAddDetailMode::AddEvtRefPosition, 
+                       false);
 
     return defs;
 }
