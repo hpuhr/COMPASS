@@ -138,6 +138,8 @@ public:
     /// checks if the result can generate viewable data for the given table and annotation index
     virtual bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                                   const QVariant& annotation) const = 0;
+    /// checks if the viewable data is ready (e.g. cached or invalidated)
+    virtual bool viewableDataReady() const = 0;
     /// creates suitable viewable data for the given table and annotation index
     virtual std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                                    const QVariant& annotation) const = 0;

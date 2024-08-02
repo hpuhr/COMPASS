@@ -512,14 +512,23 @@ void SectionContentTable::performClickAction()
 
         std::shared_ptr<nlohmann::json::object_t> viewable;
 
-        auto func = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
+        if (result_ptrs_.at(row_index)->viewableDataReady())
         {
+            //view data ready, just get it
             viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
-            return AsyncTaskResult(true, "");
-        };
-
-        AsyncFuncTask task(func, "Updating Contents", "Updating contents...", false);
-        task.runAsyncDialog();
+        }
+        else
+        {
+            //recompute async and show wait dialog, this may take a while...
+            auto func = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
+            {
+                viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
+                return AsyncTaskResult(true, "");
+            };
+            
+            AsyncFuncTask task(func, "Updating Contents", "Updating contents...", false);
+            task.runAsyncDialog();
+        }
 
         assert (viewable);
 
