@@ -247,12 +247,22 @@ bool ReconstructorTarget::hasAnyOfACADs (std::set<unsigned int> tas) const
     return false;
 }
 
+bool ReconstructorTarget::hasACID () const
+{
+    return acids_.size();
+}
+
+bool ReconstructorTarget::hasACID (const std::string& acid) const
+{
+    return acids_.count(String::trim(acid));
+}
+
 bool ReconstructorTarget::hasModeA () const
 {
     return mode_as_.size();
 }
 
-bool ReconstructorTarget::hasModeA (unsigned int code)  const
+bool ReconstructorTarget::hasModeA (unsigned int code) const
 {
     return mode_as_.count(code);
 }
@@ -291,7 +301,7 @@ std::string ReconstructorTarget::asStr() const
         ss << " acids ";
 
         bool first {true};
-        for (auto& it : acads_)
+        for (auto& it : acids_)
         {
             if (first)
                 ss << "'" << it << "'";
@@ -307,7 +317,7 @@ std::string ReconstructorTarget::asStr() const
         ss << " m3as '";
 
         bool first {true};
-        for (auto it : acads_)
+        for (auto it : mode_as_)
         {
             if (first)
                 ss << String::octStringFromInt(it, 4, '0');

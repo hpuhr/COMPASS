@@ -820,9 +820,9 @@ void ReconstructorTask::writeDoneSlot()
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
-        malloc_trim(0); // release unused memory
-
     }
+
+    malloc_trim(0); // release unused memory
 
     writing_slice_ = nullptr;
 }

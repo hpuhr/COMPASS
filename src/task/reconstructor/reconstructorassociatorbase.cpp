@@ -163,7 +163,9 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         if (reconstructor().acc_estimator_->canCorrectPosition(tr))
         {
-            //loginf << "ReconstructorAssociatorBase: associateTargetReports: correct pos";
+            if (do_debug)
+                loginf << "DBG correcting position";
+
             reconstructor().acc_estimator_->correctPosition(tr);
         }
 
@@ -171,13 +173,35 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         is_unreliable_primary_only = tr.dbcont_id_ != 62 && tr.dbcont_id_  != 255 && tr.isPrimaryOnlyDetection();
 
+        if (do_debug)
+            loginf << "is_unreliable_primary_only " << is_unreliable_primary_only;
+
         if (!is_unreliable_primary_only) // if unreliable primary only, delay association until retry
+        {
+            if (do_debug)
+                loginf << "DBG finding UTN";
+
             utn = findUTNFor(tr, debug_rec_nums, debug_utns);
 
+            if (do_debug)
+                loginf << "DBG got UTN " << utn;
+        }
+
         if (utn != -1) // estimate accuracy and associate
+        {
+            if (do_debug)
+                loginf << "DBG associating to UTN " << utn;
+
+
             associate(tr, utn, debug_rec_nums, debug_utns);
+        }
         else // not associated
+        {
+            if (do_debug)
+                loginf << "DBG adding to unassoc_rec_nums_";
+
             unassoc_rec_nums_.push_back(rec_num);
+        }
     }
 
 }
@@ -500,6 +524,12 @@ void ReconstructorAssociatorBase::checkACADLookup()
         ++count;
     }
 
+    for (auto& acad_it : acad_2_utn_)
+    {
+        assert (reconstructor().targets_.count(acad_it.second));
+        assert (reconstructor().targets_.at(acad_it.second).hasACAD(acad_it.first));
+    }
+
     assert (acad_2_utn_.size() == count);
 }
 
@@ -541,7 +571,7 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
 
     assert (reconstructor().targets_.size() == utn_vec_.size());
 
-    double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0};
+    //double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0};
 
     bool reset_tr_assoc {false};
 
@@ -560,6 +590,7 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
 
         utn = acad_2_utn_.at(*tr.acad_);
         assert (reconstructor().targets_.count(utn));
+        assert (reconstructor().targets_.at(utn).hasACAD(*tr.acad_));
     };
 
     auto canAssocByACID = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
@@ -569,6 +600,17 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
 
         if (*tr.acid_ == "00000000" || *tr.acid_ == "????????" || *tr.acid_ == "        ")
             return false;
+
+        if (acid_2_utn_.count(*tr.acid_)) // already exists, but check if mode s address changed
+        {
+            assert (reconstructor().targets_.count(acid_2_utn_.at(*tr.acid_)));
+
+            // tr has acad, target has an acad but not the target reports
+            // happens if same callsign is used by 2 different transponders
+            if (tr.acad_ && reconstructor().targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD()
+                && !reconstructor().targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD(!tr.acad_))
+                return false;
+        }
 
         return (bool) acid_2_utn_.count(*tr.acid_);
     };
@@ -580,6 +622,7 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
 
         utn = acid_2_utn_.at(*tr.acid_);
         assert (reconstructor().targets_.count(utn));
+        assert (reconstructor().targets_.at(utn).hasACID(*tr.acid_));
     };
 
     auto canAssocByTrackNumber = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)

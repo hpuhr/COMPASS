@@ -177,6 +177,9 @@ class ReconstructorTarget
     bool hasAllOfACADs (std::set<unsigned int> tas) const;
     bool hasAnyOfACADs (std::set<unsigned int> tas) const;
 
+    bool hasACID () const;
+    bool hasACID (const std::string& acid)  const;
+
     bool hasModeA () const;
     bool hasModeA (unsigned int code) const;
 
