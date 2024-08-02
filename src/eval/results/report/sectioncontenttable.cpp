@@ -25,6 +25,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "stringmat.h"
+#include "asynctask.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -455,6 +456,8 @@ void SectionContentTable::createOnDemandIfNeeded()
     {
         loginf << "SectionContentTable: createOnDemandIfNeeded: creating";
 
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+
         beginResetModel();
 
         create_on_demand_fnc_();
@@ -464,6 +467,8 @@ void SectionContentTable::createOnDemandIfNeeded()
 
         if (table_view_)
             table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+
+        QApplication::restoreOverrideCursor();
     }
 }
 
@@ -503,9 +508,19 @@ void SectionContentTable::performClickAction()
 
     if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
     {
-        loginf << "SectionContentTable: clickedSlot: index has associated viewable";
+        loginf << "SectionContentTable: performClickAction: index has associated viewable";
 
-        auto viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index));
+        std::shared_ptr<nlohmann::json::object_t> viewable;
+
+        auto func = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
+        {
+            viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
+            return AsyncTaskResult(true, "");
+        };
+
+        AsyncFuncTask task(func, "Updating Contents", "Updating contents...", false);
+        task.runAsyncDialog();
+
         assert (viewable);
 
         eval_man_.setViewableDataConfig(*viewable.get());
