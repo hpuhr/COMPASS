@@ -343,7 +343,7 @@ void ViewManager::clearViewPoints()
     viewPointsWidget()->clearViewPoints();
 
 }
-void ViewManager::addViewPoints(const std::map <std::string, nlohmann::json>& viewpoints)
+void ViewManager::addViewPoints(const std::vector <nlohmann::json>& viewpoints)
 {
     viewPointsWidget()->addViewPoints(viewpoints);
 }

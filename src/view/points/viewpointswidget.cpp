@@ -174,10 +174,10 @@ void ViewPointsWidget::clearViewPoints()
     table_model_->clearViewPoints();
 }
 
-void ViewPointsWidget::addViewPoints(const std::map <std::string, nlohmann::json>& viewpoints)
+void ViewPointsWidget::addViewPoints(const std::vector <nlohmann::json>& viewpoints)
 {
     for (auto vp_it = viewpoints.begin(); vp_it != viewpoints.end(); ++vp_it)
-        table_model_->saveNewViewPoint(vp_it->second, std::next(vp_it) == viewpoints.end());
+        table_model_->saveNewViewPoint(*vp_it, std::next(vp_it) == viewpoints.end());
 }
 
 void ViewPointsWidget::resizeColumnsToContents()

@@ -893,6 +893,9 @@ void ReconstructorTask::runDoneSlot()
 
     currentReconstructor()->reset();
 
+    if (debug_)
+        saveDebugViewPoints();
+
     loading_slice_ = nullptr;
     processing_slice_ = nullptr;
     writing_slice_ = nullptr;
@@ -998,21 +1001,35 @@ ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
     return *processing_slice_;
 }
 
-nlohmann::json& ReconstructorTask::getDebugViewpoint(const std::string& name)
+nlohmann::json& ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type)
 {
-    if (!debug_viewpoints_.count(name))
+    auto key_str = std::pair<std::string,std::string>(name,type);
+
+    if (!debug_viewpoints_.count(key_str))
     {
-        debug_viewpoints_[name] = nlohmann::json::object_t();
-        debug_viewpoints_[name]["name"] = name;
-        debug_viewpoints_[name]["type"] = "Reconstructor";
+
+        debug_viewpoints_[key_str] = nlohmann::json::object_t();
+        debug_viewpoints_[key_str]["name"] = name;
+        debug_viewpoints_[key_str]["type"] = type;
     }
 
-    return debug_viewpoints_.at(name);
+    return debug_viewpoints_.at(key_str);
 }
 
 void ReconstructorTask::saveDebugViewPoints()
 {
+    loginf << "ReconstructorTask: saveDebugViewPoints";
 
+    COMPASS::instance().viewManager().clearViewPoints();
+
+    std::vector <nlohmann::json> view_points;
+
+    for (auto& vp_it : debug_viewpoints_)
+        view_points.emplace_back(std::move(vp_it.second));
+
+    COMPASS::instance().viewManager().addViewPoints(view_points);
+
+    debug_viewpoints_.clear();
 }
 
 bool ReconstructorTask::debug() const

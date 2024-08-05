@@ -67,7 +67,7 @@ public:
 
     void loadViewPoints();
     void clearViewPoints();
-    void addViewPoints(const std::map <std::string, nlohmann::json>& viewpoints);
+    void addViewPoints(const std::vector <nlohmann::json>& viewpoints);
 
     void resizeColumnsToContents();
 
