@@ -70,6 +70,7 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
     void loadViewPoints();
+    void addViewPoints(const std::vector <nlohmann::json>& viewpoints);
     void clearViewPoints();
 
     bool hasViewPoint (unsigned int id);

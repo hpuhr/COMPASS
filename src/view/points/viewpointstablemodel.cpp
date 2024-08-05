@@ -83,6 +83,22 @@ void ViewPointsTableModel::loadViewPoints()
 
     endResetModel();
 }
+void ViewPointsTableModel::addViewPoints(const std::vector <nlohmann::json>& viewpoints)
+{
+    loginf << "ViewPointsTableModel: loadViewPoints";
+
+    beginResetModel();
+
+    for (auto vp_it = viewpoints.begin(); vp_it != viewpoints.end(); ++vp_it)
+        saveNewViewPoint(*vp_it, std::next(vp_it) == viewpoints.end());
+
+    updateTableColumns();
+    updateTypes();
+    updateStatuses();
+
+    endResetModel();
+}
+
 void ViewPointsTableModel::clearViewPoints()
 {
     loginf << "ViewPointsTableModel: clearViewPoints";
