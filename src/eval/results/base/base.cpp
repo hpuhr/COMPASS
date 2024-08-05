@@ -136,17 +136,6 @@ const boost::optional<double>& Base::result() const
 
 /**
 */
-void Base::updateResult()
-{
-    result_.reset();
-
-    auto result = computeResult();
-    if (result.has_value())
-        result_ = result.value();
-}
-
-/**
-*/
 bool Base::resultUsable() const
 {
     return (result_.has_value() && !ignore_);
@@ -164,6 +153,13 @@ bool Base::hasFailed() const
 bool Base::hasIssues() const
 {
     return (resultUsable() && numIssues() > 0);
+}
+
+/**
+*/
+void Base::updateResult(const boost::optional<double>& value)
+{
+    result_ = value;
 }
 
 /**
@@ -216,13 +212,6 @@ bool Base::isIgnored() const
 
 /**
 */
-boost::optional<double> Base::computeResult() const
-{
-    return computeResult_impl();
-}
-
-/**
-*/
 EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
@@ -262,72 +251,6 @@ EvaluationResultsReport::Section& Base::getRequirementSection (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     return root_item->getSection(getRequirementSectionID());
-}
-
-/**
-*/
-size_t Base::numDetails() const
-{
-    return details_.size();
-}
-
-/**
-*/
-const Base::EvaluationDetails& Base::getDetails() const
-{
-    return details_;
-}
-
-/**
-*/
-const EvaluationDetail& Base::getDetail(int idx) const
-{
-    return getDetails().at(idx);
-}
-
-/**
-*/
-const EvaluationDetail& Base::getDetail(const DetailIndex& index) const
-{
-    const auto& d = getDetail(index[ 0 ]);
-
-    if (index[ 1 ] < 0)
-        return d;
-
-    return d.details().at(index[ 1 ]);
-}
-
-/**
-*/
-bool Base::detailIndexValid(const DetailIndex& index) const
-{
-    if (index[ 0 ] < 0 || index[ 0 ] >= (int)details_.size())
-        return false;
-    if (index[ 1 ] >= 0 && index[ 1 ] >= (int)details_[ index[ 0 ] ].numDetails())
-        return false;
-
-    return true;
-}
-
-/**
-*/
-void Base::clearDetails()
-{
-    details_ = {};
-}
-
-/**
-*/
-void Base::setDetails(const EvaluationDetails& details)
-{
-    details_ = details;
-}
-
-/**
-*/
-void Base::addDetails(const EvaluationDetails& details)
-{
-    details_.insert(details_.end(), details.begin(), details.end());
 }
 
 /**
@@ -421,18 +344,24 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
 
     for (const auto& value_defs : defs.definitions())
     {
-        loginf << "Base: addCustomAnnotations: Adding annotation for value '" << value_defs.first << "'";
+        loginf << "Base: addCustomAnnotations: Adding annotation for value '" << value_defs.first << "'"; 
 
         //create annotation for value features
         ViewPointGenAnnotation value_annotation(value_defs.first);
 
         for (const auto& def : value_defs.second)
         {
+            assert(def);
+
             //create feature and add to annotation
             auto f = def->createFeature(this);
-            assert(f);
+            if (!f)
+            {
+                loginf << "Base: addCustomAnnotations: Skipping empty feature of definition type '" << def->type() << "'";
+                continue;
+            }
 
-            loginf << "Base: addCustomAnnotations: Adding feature '" << f->name() << "'";
+            loginf << "Base: addCustomAnnotations: Adding feature '" << f->name() << "' of definition type '" << def->type() << "'";
 
             PlotMetadata metadata;
             metadata.plot_group_   = group_name;
@@ -468,16 +397,16 @@ size_t Base::totalNumDetails() const
 
     //scan for estimated max num values
     auto funcScan = [ & ] (const EvaluationDetail& detail, 
-                            const EvaluationDetail* parent_detail, 
-                            int idx0, 
-                            int idx1,
-                            int evt_pos_idx, 
-                            int evt_ref_pos_idx)
+                           const EvaluationDetail* parent_detail, 
+                           int idx0, 
+                           int idx1,
+                           int evt_pos_idx, 
+                           int evt_ref_pos_idx)
     {
         ++num_details;
     };
 
-    iterateDetails(funcScan);
+    iterateDetails(funcScan, {});
 
     return num_details;
 }
@@ -490,32 +419,18 @@ size_t Base::totalNumPositions() const
 
     //scan for estimated max num values
     auto funcScan = [ & ] (const EvaluationDetail& detail, 
-                            const EvaluationDetail* parent_detail, 
-                            int idx0, 
-                            int idx1,
-                            int evt_pos_idx, 
-                            int evt_ref_pos_idx)
+                           const EvaluationDetail* parent_detail, 
+                           int idx0, 
+                           int idx1,
+                           int evt_pos_idx, 
+                           int evt_ref_pos_idx)
     {
         num_positions += detail.numPositions();
     };
 
-    iterateDetails(funcScan);
+    iterateDetails(funcScan, {});
 
     return num_positions;
-}
-
-/**
-*/
-std::vector<double> Base::getValues(const ValueSource<double>& source) const
-{
-    return EvaluationResultTemplates(this).getValues<double>(source);
-}
-
-/**
-*/
-std::vector<double> Base::getValues(int value_id) const
-{
-    return getValues(ValueSource<double>(value_id));
 }
 
 }

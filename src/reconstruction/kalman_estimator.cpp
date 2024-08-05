@@ -39,6 +39,14 @@ const double KalmanEstimator::HighVar    = KalmanEstimator::HighStdDev * KalmanE
 
 /**
 */
+void KalmanEstimator::StepInfo::reset()
+{
+    result       = StepResult::Success;
+    proj_changed = false;
+}
+
+/**
+*/
 KalmanEstimator::KalmanEstimator()
 :   proj_handler_(new KalmanProjectionHandler)
 {
@@ -65,12 +73,17 @@ void KalmanEstimator::init(std::unique_ptr<KalmanInterface>&& interface)
     kalman_interface_ = std::move(interface);
     assert(kalman_interface_);
 
+    //configure & init interface
     kalman_interface_->setVerbosity(settings_.verbosity);
     kalman_interface_->init();
     
+    //configure projection handler
+    proj_handler_->settings().proj_dist_check        = settings_.proj_distance_check;
     proj_handler_->settings().proj_max_dist_cart_sqr = settings_.max_proj_distance_cart * settings_.max_proj_distance_cart;
+    proj_handler_->settings().proj_max_dist_wgs84    = settings_.max_proj_distance_wgs84;
 
-    max_distance_sqr_ = settings_.max_distance * settings_.max_distance;
+    //cache some values
+    max_distance_sqr_ = settings_.max_distance_cart * settings_.max_distance_cart;
 }
 
 /**
@@ -118,6 +131,14 @@ kalman::KalmanState KalmanEstimator::currentState() const
 
 /**
 */
+Measurement KalmanEstimator::currentStateAsMeasurement() const
+{
+    assert(isInit());
+    return kalman_interface_->currentStateAsMeasurement();
+}
+
+/**
+*/
 const boost::posix_time::ptime& KalmanEstimator::currentTime() const
 {
     assert(isInit());
@@ -126,13 +147,81 @@ const boost::posix_time::ptime& KalmanEstimator::currentTime() const
 
 /**
 */
-Measurement KalmanEstimator::currentStateAsMeasurement() const
+const KalmanEstimator::StepInfo& KalmanEstimator::stepInfo() const
 {
-    assert(isInit());
-    return kalman_interface_->currentStateAsMeasurement();
+    return step_info_;
 }
 
 /**
+ * Notice: no reprojection to wgs84 will be executed, the wgs84 pos of the update will be stored to the mm.
+*/
+void KalmanEstimator::storeUpdate(Measurement& mm, 
+                                  const kalman::KalmanUpdate& update) const
+{
+    assert(isInit());
+    assert(update.has_wgs84_pos);
+
+    kalman_interface_->storeState(mm, update.state);
+
+    mm.t   = update.t;
+    mm.lat = update.lat;
+    mm.lon = update.lon;
+}
+
+/**
+ * Notice: no reprojection to wgs84 will be executed, the wgs84 pos of the update will be stored to the mm.
+*/
+void KalmanEstimator::storeUpdate(Measurement& mm, 
+                                  const kalman::KalmanUpdateMinimal& update) const
+{
+    assert(isInit());
+    assert(update.has_wgs84_pos);
+
+    kalman_interface_->storeState(mm, update.x, update.P);
+
+    mm.t   = update.t;
+    mm.lat = update.lat;
+    mm.lon = update.lon;
+}
+
+/**
+ * Notice: no reprojection to wgs84 will be executed, the wgs84 pos of the update will be stored to the mm.
+*/
+void KalmanEstimator::storeUpdate(Reference& ref, 
+                                  const kalman::KalmanUpdate& update) const
+{
+    assert(isInit());
+    assert(update.has_wgs84_pos);
+
+    kalman_interface_->storeState(ref, update.state);
+
+    ref.t   = update.t;
+    ref.lat = update.lat;
+    ref.lon = update.lon;
+
+    ref.cov = update.state.P;
+}
+
+/**
+ * Notice: no reprojection to wgs84 will be executed, the wgs84 pos of the update will be stored to the mm.
+*/
+void KalmanEstimator::storeUpdate(Reference& ref, 
+                                  const kalman::KalmanUpdateMinimal& update) const
+{
+    assert(isInit());
+    assert(update.has_wgs84_pos);
+
+    kalman_interface_->storeState(ref, update.x, update.P);
+
+    ref.t   = update.t;
+    ref.lat = update.lat;
+    ref.lon = update.lon;
+
+    ref.cov = update.P;
+}
+
+/**
+ * Notice: will reproject from the update's local system to wgs84.
 */
 void KalmanEstimator::storeUpdate(Reference& ref, 
                                   const kalman::KalmanUpdate& update,
@@ -153,6 +242,7 @@ void KalmanEstimator::storeUpdate(Reference& ref,
 }
 
 /**
+ * Notice: will reproject from the updates local system to wgs84.
 */
 void KalmanEstimator::storeUpdates(std::vector<Reference>& refs,
                                    const std::vector<kalman::KalmanUpdate>& updates) const
@@ -170,7 +260,7 @@ void KalmanEstimator::storeUpdates(std::vector<Reference>& refs,
 /**
  * Inits the measurement and its respective update.
 */
-void KalmanEstimator::initMeasurement(kalman::KalmanUpdate& update,
+void KalmanEstimator::initDataStructs(kalman::KalmanUpdate& update,
                                       const Measurement& mm)
 {
     //reset update flags
@@ -192,16 +282,21 @@ void KalmanEstimator::kalmanInit(kalman::KalmanUpdate& update,
 {
     assert(isInit());
 
+    step_info_.reset();
+
     //init projection
-    proj_handler_->initProjection(mm.lat, mm.lon);
+    initProjection(mm.lat, mm.lon, mm.lat, mm.lon);
     
-    //init measurement
-    initMeasurement(update, mm);
+    //init measurement + update
+    initDataStructs(update, mm);
 
     //reinit kalman
-    reinit(update, mm);
+    kalmanInterfaceReinit(update, mm);
 
+    update.lat               = mm.lat;
+    update.lon               = mm.lon;
     update.projection_center = proj_handler_->projectionCenter();
+    update.has_wgs84_pos     = true;
     update.valid             = true;
 }
 
@@ -213,8 +308,10 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdate& update)
     assert(isInit());
     assert(update.valid);
 
+    step_info_.reset();
+
     //init projection
-    proj_handler_->initProjection(update.projection_center.x(), update.projection_center.y());
+    initProjection(update.projection_center.x(), update.projection_center.y(), {}, {});
 
     //reinit kalman from update
     kalman_interface_->kalmanInit(update.state, update.t);
@@ -228,8 +325,10 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdateMinimal& update)
     assert(isInit());
     assert(update.valid);
 
+    step_info_.reset();
+
     //init projection
-    proj_handler_->initProjection(update.projection_center.x(), update.projection_center.y());
+    initProjection(update.projection_center.x(), update.projection_center.y(), {}, {}); 
 
     //reinit kalman from update
     kalman_interface_->kalmanInit(update.x, update.P, update.t);
@@ -240,11 +339,14 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdateMinimal& update)
 */
 KalmanEstimator::ReinitState KalmanEstimator::needsReinit(const Measurement& mm) const
 {
-    if ((settings_.reinit_check_flags & Settings::ReinitFlags::ReinitCheckDistance) && settings_.max_distance > 0)
+    if (settings_.reinit_check_flags & Settings::ReinitFlags::ReinitCheckDistance)
     {
-        const double d_sqr = kalman_interface_->distanceSqr(mm);
-        if (d_sqr > max_distance_sqr_)
-            return KalmanEstimator::ReinitState::ReinitDistance;
+        if (settings_.max_distance_cart > 0)
+        {
+            const double d_sqr = kalman_interface_->distanceSqr(mm);
+            if (d_sqr > max_distance_sqr_)
+                return KalmanEstimator::ReinitState::ReinitDistance;
+        }
     }
 
     if ((settings_.reinit_check_flags & Settings::ReinitFlags::ReinitCheckTime) && settings_.max_dt > 0)
@@ -275,8 +377,8 @@ reconstruction::Uncertainty KalmanEstimator::defaultUncert(const Measurement& mm
 /**
  * Reinitializes the kalman filter and marks the update.
 */
-void KalmanEstimator::reinit(kalman::KalmanUpdate& update,
-                             const Measurement& mm)
+void KalmanEstimator::kalmanInterfaceReinit(kalman::KalmanUpdate& update,
+                                            const Measurement& mm)
 {
     if (settings_.verbosity > 0)
         loginf << "KalmanEstimator: reinit: Reinitializing kalman filter at t = " << mm.t;
@@ -290,8 +392,8 @@ void KalmanEstimator::reinit(kalman::KalmanUpdate& update,
 /**
  * Executes a kalman step.
 */
-bool KalmanEstimator::step(kalman::KalmanUpdate& update,
-                           const Measurement& mm)
+bool KalmanEstimator::kalmanInterfaceStep(kalman::KalmanUpdate& update,
+                                          const Measurement& mm)
 {
     if (!kalman_interface_->kalmanStep(update.state, mm, defaultUncert(mm), settings_.Q_var))
     {
@@ -301,6 +403,23 @@ bool KalmanEstimator::step(kalman::KalmanUpdate& update,
     }
 
     return true;
+}
+
+/**
+*/
+void KalmanEstimator::storePositionWGS84(kalman::KalmanUpdate& update)
+{
+    //!projection center must match!
+    assert(proj_handler_->projectionCenter() == update.projection_center);
+
+    //get local cartesian coordinates
+    double x, y;
+    kalman_interface_->xPos(x, y, update.state.x);
+
+    //unproject to wgs84
+    proj_handler_->unproject(update.lat, update.lon, x, y);
+
+    update.has_wgs84_pos = true;
 }
 
 /**
@@ -316,6 +435,8 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
 
         if (settings_.verbosity > 1)
             loginf << "Changed map projection @t=" << update.t;
+
+        step_info_.proj_changed = true;
     }
 
     //store current projection to update
@@ -324,13 +445,47 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
 
 /**
 */
+void KalmanEstimator::initProjection(double lat_proj_center,
+                                     double lon_proj_center,
+                                     const boost::optional<double>& lat_mm, 
+                                     const boost::optional<double>& lon_mm)
+{
+    //skip reinit if in wgs84 range of current projection
+    if (lat_mm.has_value() &&
+        lon_mm.has_value() &&
+        proj_handler_->valid() && 
+        settings_.proj_distance_check == MapProjDistanceCheck::Cart &&
+        proj_handler_->inRangeWGS84(lat_mm.value(), lon_mm.value()))
+        return;
+
+    proj_handler_->initProjection(lat_proj_center, lon_proj_center);
+
+    step_info_.proj_changed = true;
+}
+
+/**
+*/
 KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& update,
-                                                        const Measurement& mm)
+                                                                const Measurement& mm)
+{
+    step_info_.reset();
+
+    auto result = kalmanStepInternal(update, mm);
+
+    step_info_.result = result;
+
+    return result;
+}
+
+/**
+*/
+KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUpdate& update,
+                                                                const Measurement& mm)
 {
     assert(isInit());
 
-    //init measurement
-    initMeasurement(update, mm);
+    //init measurement (will also project the mm wgs84 pos to the current local system)
+    initDataStructs(update, mm);
 
     //check if timestep is too small
     auto tstep = kalman_interface_->timestep(mm);
@@ -347,12 +502,12 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
     if (needsReinit(mm) != ReinitState::ReinitNotNeeded)
     {
         //reinit
-        reinit(update, mm);
+        kalmanInterfaceReinit(update, mm);
     }
     else
     {
         //normal step
-        bool kalman_step_ok = step(update, mm);
+        bool kalman_step_ok = kalmanInterfaceStep(update, mm);
 
         //handle failed step?
         if (!kalman_step_ok)
@@ -371,7 +526,7 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
             if (settings_.step_fail_strategy == Settings::StepFailStrategy::Reinit)
             {
                 //reinit to new measurement
-                reinit(update, mm);
+                kalmanInterfaceReinit(update, mm);
             }
             else if (settings_.step_fail_strategy == Settings::StepFailStrategy::ReturnInvalid)
             {
@@ -389,6 +544,10 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
 
     //update projection if needed
     checkProjection(update);
+
+    //store wgs84 pos?
+    if (settings_.extract_wgs84_pos)
+        storePositionWGS84(update);
 
     update.valid = true;
 
@@ -500,9 +659,14 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        const kalman::KalmanUpdate& ref_update,
                                        const boost::posix_time::ptime& ts,
-                                       bool* fixed)
+                                       bool* fixed,
+                                       bool* proj_changed)
 {
     kalmanInit(ref_update);
+
+    if (proj_changed)
+        *proj_changed = stepInfo().proj_changed;
+
     return kalmanPrediction(mm, ts, fixed);
 }
 
@@ -511,9 +675,14 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
 bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        const kalman::KalmanUpdateMinimal& ref_update,
                                        const boost::posix_time::ptime& ts,
-                                       bool* fixed)
+                                       bool* fixed,
+                                       bool* proj_changed)
 {
     kalmanInit(ref_update);
+
+    if (proj_changed)
+        *proj_changed = stepInfo().proj_changed;
+
     return kalmanPrediction(mm, ts, fixed);
 }
 
@@ -524,9 +693,10 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        const kalman::KalmanUpdate& ref_update0,
                                        const kalman::KalmanUpdate& ref_update1,
                                        const boost::posix_time::ptime& ts,
-                                       size_t* num_fixed)
+                                       size_t* num_fixed,
+                                       size_t* num_proj_changed)
 {
-    return kalmanPrediction(mm, ref_update0.minimalInfo(), ref_update1.minimalInfo(), ts, num_fixed);
+    return kalmanPrediction(mm, ref_update0.minimalInfo(), ref_update1.minimalInfo(), ts, num_fixed, num_proj_changed);
 }
 
 /**
@@ -536,7 +706,8 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        const kalman::KalmanUpdateMinimal& ref_update0,
                                        const kalman::KalmanUpdateMinimal& ref_update1,
                                        const boost::posix_time::ptime& ts,
-                                       size_t* num_fixed)
+                                       size_t* num_fixed,
+                                       size_t* num_proj_changed)
 {
     assert(isInit());
 
@@ -549,7 +720,8 @@ bool KalmanEstimator::kalmanPrediction(Measurement& mm,
                                                settings_.resample_Q_var,
                                                settings_.resample_interp_mode,
                                                *proj_handler_,
-                                               num_fixed);
+                                               num_fixed,
+                                               num_proj_changed);
     if (!kalman_prediction_ok)
     {
         //debatable: should the step fail strategy apply here?
@@ -881,12 +1053,29 @@ bool KalmanEstimator::predictBetween(kalman::KalmanUpdateMinimal& update_interp,
                                      double Q_var,
                                      StateInterpMode interp_mode,
                                      KalmanProjectionHandler& proj_handler,
-                                     size_t* num_fixed) const
+                                     size_t* num_fixed,
+                                     size_t* num_proj_changed) const
 {
     assert(isInit());
     assert(update0.valid);
     assert(update1.valid);
     assert(ts >= update0.t && ts <= update1.t);
+
+    if (num_fixed)
+        *num_fixed = 0;
+    if (num_proj_changed)
+        *num_proj_changed = 0;
+
+    if (ts == update0.t)
+    {
+        update_interp = update0;
+        return true;
+    }
+    if (ts == update1.t)
+    {
+        update_interp = update1;
+        return true;
+    }
     
     double dt  = Utils::Time::partialSeconds(update1.t - update0.t);
     double dt0 = Utils::Time::partialSeconds(ts - update0.t);
@@ -900,7 +1089,7 @@ bool KalmanEstimator::predictBetween(kalman::KalmanUpdateMinimal& update_interp,
     state1_tr.P = update1.P;
 
     //reproject update1 into update0's coord system
-    proj_handler.xReprojected(state1_tr.x, *kalman_interface_, update1.x, update1.projection_center, update0.projection_center);
+    proj_handler.xReprojected(state1_tr.x, *kalman_interface_, update1.x, update1.projection_center, update0.projection_center, num_proj_changed);
 
     bool fixed0, fixed1;
 

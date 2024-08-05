@@ -113,6 +113,9 @@ class ReconstructorTask : public Task, public Configurable
 
     ReconstructorBase::DataSlice& processingSlice();
 
+    nlohmann::json& getDebugViewpoint(const std::string& name);
+    void saveDebugViewPoints();
+
   protected:
     std::string current_reconstructor_str_;
 
@@ -151,6 +154,8 @@ class ReconstructorTask : public Task, public Configurable
     std::future<void> process_future_;
     bool processing_data_slice_ {false};
     bool cancelled_ {false};
+
+    std::map <std::string, nlohmann::json> debug_viewpoints_;
 
     virtual void checkSubConfigurables() override;
     void deleteCalculatedReferences();

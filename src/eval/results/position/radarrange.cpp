@@ -44,10 +44,16 @@ SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
                                                    unsigned int num_pos_outside,
                                                    unsigned int num_pos_inside,
                                                    unsigned int num_comp_passed,
-                                                   unsigned int num_comp_failed)
+                                                   unsigned int num_comp_failed,
+                                                   const std::vector<double>& range_values_ref,
+                                                   const std::vector<double>& range_values_tst)
 :   SinglePositionValueBase("SinglePositionRadarRange", result_id, requirement, sector_layer, utn, target, eval_man, details,
                             num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed)
+,   range_values_ref_(range_values_ref)
+,   range_values_tst_(range_values_tst)
 {
+    assert (range_values_ref_.size() == range_values_tst_.size());
+
     updateResult();
 }
 
@@ -134,8 +140,6 @@ std::vector<QVariant> SinglePositionRadarRange::detailValues(const EvaluationDet
 */
 boost::optional<double> SinglePositionRadarRange::computeFinalResultValue() const
 {
-    //assert (accumulator_.numValues() == ref_range_values_.size() && ref_range_values_.size() == tst_range_values_.size());
-
     range_gain_ = QVariant();
     range_bias_ = QVariant();
 
@@ -143,23 +147,17 @@ boost::optional<double> SinglePositionRadarRange::computeFinalResultValue() cons
         return {};
 
     // linear regression
-
-    auto ref_range_values = getValues(SinglePositionRadarRange::DetailKeyAdditional::RangeRef);
-    auto tst_range_values = getValues(SinglePositionRadarRange::DetailKeyAdditional::RangeTst);
-
-    assert (ref_range_values.size() == tst_range_values.size());
-
     size_t num_distances = accumulator_.numValues();
 
-    assert (num_distances == ref_range_values.size());
+    assert (num_distances == range_values_ref_.size());
 
     Eigen::MatrixXd x_mat = Eigen::MatrixXd::Ones(num_distances, 2);
     Eigen::MatrixXd y_mat = Eigen::MatrixXd::Ones(num_distances, 1);
 
     for (unsigned int cnt=0; cnt < num_distances; ++cnt)
     {
-        x_mat(cnt, 0) = tst_range_values.at(cnt);
-        y_mat(cnt, 0) = ref_range_values.at(cnt);
+        x_mat(cnt, 0) = range_values_tst_.at(cnt);
+        y_mat(cnt, 0) = range_values_ref_.at(cnt);
     }
 
     Eigen::JacobiSVD<Eigen::MatrixXd> svd;
@@ -224,20 +222,34 @@ boost::optional<double> JoinedPositionRadarRange::computeFinalResultValue() cons
     if (accumulator_.numValues() == 0)
         return {};
 
-    auto ref_range_values = getValues(SinglePositionRadarRange::DetailKeyAdditional::RangeRef);
-    auto tst_range_values = getValues(SinglePositionRadarRange::DetailKeyAdditional::RangeTst);
+    auto single_results = usedSingleResults();
+
+    std::vector<double> range_values_ref;
+    std::vector<double> range_values_tst;
+
+    for (const auto& single_result : single_results)
+    {
+        const SinglePositionRadarRange* single_radar_range = dynamic_cast<const SinglePositionRadarRange*>(single_result.get());
+        assert(single_radar_range);
+
+        const auto& values_ref = single_radar_range->rangeValuesRef();
+        const auto& values_tst = single_radar_range->rangeValuesTst();
+
+        range_values_ref.insert(range_values_ref.end(), values_ref.begin(), values_ref.end());
+        range_values_tst.insert(range_values_tst.end(), values_tst.begin(), values_tst.end());
+    }
 
     unsigned int num_distances = accumulator_.numValues();
 
-    assert (num_distances == ref_range_values.size() && ref_range_values.size() == tst_range_values.size());
+    assert (num_distances == range_values_ref.size() && range_values_ref.size() == range_values_tst.size());
 
     Eigen::MatrixXd x_mat = Eigen::MatrixXd::Ones(num_distances, 2);
     Eigen::MatrixXd y_mat = Eigen::MatrixXd::Ones(num_distances, 1);
 
     for (unsigned int cnt=0; cnt < num_distances; ++cnt)
     {
-        x_mat(cnt, 0) = tst_range_values.at(cnt);
-        y_mat(cnt, 0) = ref_range_values.at(cnt);
+        x_mat(cnt, 0) = range_values_tst.at(cnt);
+        y_mat(cnt, 0) = range_values_ref.at(cnt);
     }
 
     Eigen::JacobiSVD<Eigen::MatrixXd> svd;

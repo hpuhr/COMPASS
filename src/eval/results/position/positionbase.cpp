@@ -20,6 +20,7 @@
 #include "eval/results/base/featuredefinitions.h"
 
 #include "eval/requirement/base/base.h"
+#include "eval/requirement/position/distance.h"
 #include "evaluationmanager.h"
 
 #include "histograminitializer.h"
@@ -165,6 +166,22 @@ bool SinglePositionBaseCommon::common_detailIsOk(const EvaluationDetail& detail)
     return check_passed.value();
 }
 
+/**
+*/
+FeatureDefinitions SinglePositionBaseCommon::common_getCustomAnnotationDefinitions(const Single& single,
+                                                                                   const EvaluationManager& eval_man) const
+{
+    FeatureDefinitions defs;
+
+    //histograms
+    defs.addDefinition<FeatureDefinitionStringCategoryHistogram>("Position Error", eval_man, "Error Count", "Error Count")
+        .addDataSeries("", { "#CF", "#CP" }, { numFailed(), numPassed() });
+    defs.addDefinition<FeatureDefinitionHistogram<double>>("Position Error", eval_man, "Full distribution", "Full distribution [m]")
+        .addDataSeries("", SinglePositionBaseCommon::DetailKey::Value);
+
+    return defs;
+}
+
 /****************************************************************************
  * SinglePositionProbabilityBase
  ****************************************************************************/
@@ -246,6 +263,13 @@ void SinglePositionProbabilityBase::addAnnotationForDetail(nlohmann::json& annot
     }
 }
 
+/**
+*/
+FeatureDefinitions SinglePositionProbabilityBase::getCustomAnnotationDefinitions() const
+{
+    return common_getCustomAnnotationDefinitions(*this, eval_man_);
+}
+
 /****************************************************************************
  * SinglePositionValueBase
  ****************************************************************************/
@@ -322,6 +346,13 @@ void SinglePositionValueBase::addAnnotationForDetail(nlohmann::json& annotations
     }
 }
 
+/**
+*/
+FeatureDefinitions SinglePositionValueBase::getCustomAnnotationDefinitions() const
+{
+    return common_getCustomAnnotationDefinitions(*this, eval_man_);
+}
+
 /****************************************************************************
  * JoinedPositionBase
  ****************************************************************************/
@@ -364,7 +395,6 @@ void JoinedPositionBase::common_clearResults()
 /**
 */
 void JoinedPositionBase::common_accumulateSingleResult(const PositionBase& single_result,
-                                                       const std::vector<double>& values,
                                                        bool last)
 {
     num_pos_         += single_result.numPos();
@@ -374,7 +404,7 @@ void JoinedPositionBase::common_accumulateSingleResult(const PositionBase& singl
     num_passed_      += single_result.numPassed();
     num_failed_      += single_result.numFailed();
 
-    accumulator_.accumulate(values, last);
+    accumulator_.join(single_result.accumulator(), last);
 }
 
 /**
@@ -394,19 +424,21 @@ boost::optional<double> JoinedPositionBase::common_computeResult() const
 bool JoinedPositionBase::common_exportAsCSV(std::ofstream& strm,
                                             const Joined* result) const
 {
-    assert(result);
+    // assert(result);
 
-    strm << csv_header_ << "\n";
+    // strm << csv_header_ << "\n";
 
-    auto values = result->getValues(SinglePositionBaseCommon::DetailKey::Value);
+    // auto values = result->getValues(SinglePositionBaseCommon::DetailKey::Value);
 
-    for (auto v : values)
-        strm << v << "\n";
+    // for (auto v : values)
+    //     strm << v << "\n";
 
-    if (!strm)
-        return false;
+    // if (!strm)
+    //     return false;
 
-    return true;
+    // return true;
+
+    return false;
 }
 
 FeatureDefinitions JoinedPositionBase::common_getCustomAnnotationDefinitions(const Joined& joined,
@@ -414,23 +446,35 @@ FeatureDefinitions JoinedPositionBase::common_getCustomAnnotationDefinitions(con
 {
     FeatureDefinitions defs;
 
+    //@TODO: remove this hack...
+    bool invert = false;
+    const EvaluationRequirement::PositionDistance* pos_distance = dynamic_cast<const EvaluationRequirement::PositionDistance*>(joined.requirement().get());
+    if (pos_distance) 
+    {
+        if (pos_distance->thresholdValueCheckType() == EvaluationRequirement::COMPARISON_TYPE::GREATER_THAN || 
+            pos_distance->thresholdValueCheckType() == EvaluationRequirement::COMPARISON_TYPE::GREATER_THAN_OR_EQUAL)
+            invert = true;
+    }
+
     //grids (as geoimages)
     defs.addDefinition<FeatureDefinitionBinaryGrid>("Position Error", eval_man, "Comparison Passed")
         .addDataSeries(SinglePositionBaseCommon::DetailKey::CheckPassed, 
                        GridAddDetailMode::AddEvtRefPosition, 
-                       false);
-    defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Mean", true)
-        .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
-                       grid2d::ValueType::ValueTypeMean, 
-                       GridAddDetailMode::AddEvtRefPosition);
-    defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Stddev", true)
-        .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
-                       grid2d::ValueType::ValueTypeStddev, 
-                       GridAddDetailMode::AddEvtRefPosition);
-    defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Max", true)
-        .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
-                       grid2d::ValueType::ValueTypeMax, 
-                       GridAddDetailMode::AddEvtRefPosition);
+                       invert);
+    
+    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Mean", true)
+    //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
+    //                    grid2d::ValueType::ValueTypeMean, 
+    //                    GridAddDetailMode::AddEvtRefPosition);
+    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Stddev", true)
+    //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
+    //                    grid2d::ValueType::ValueTypeStddev, 
+    //                    GridAddDetailMode::AddEvtRefPosition);
+    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Max", true)
+    //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
+    //                    grid2d::ValueType::ValueTypeMax, 
+    //                    GridAddDetailMode::AddEvtRefPosition);
+
     //histograms
     defs.addDefinition<FeatureDefinitionStringCategoryHistogram>("Position Error", eval_man, "Error Count", "Error Count")
         .addDataSeries("", { "#CF", "#CP" }, { numFailed(), numPassed() });
@@ -438,18 +482,18 @@ FeatureDefinitions JoinedPositionBase::common_getCustomAnnotationDefinitions(con
         .addDataSeries("", SinglePositionBaseCommon::DetailKey::Value);
 
     //scatterplot
-    defs.addDefinition<FeatureDefinitionCustomScatterSeries>("My Scatter Series", eval_man, "Just Some Points", "X", "Y")
-        .addDataSeries("pointset1", { {0,0}, {1,1}, {2,2}, {3,3} }, Qt::red)
-        .addDataSeries("pointset2", { {1,0}, {2,1}, {3,2}, {4,3} }, Qt::green)
-        .addDataSeries("pointset3", { {2,0}, {3,1}, {4,2}, {5,3} }, Qt::blue);
-    defs.addDefinition<FeatureDefinitionTimedScatterSeries>("Position Error", eval_man, "Development over Time", "Error [m]")
-        .addDataSeries("", SinglePositionBaseCommon::DetailKey::Value);
+    // defs.addDefinition<FeatureDefinitionCustomScatterSeries>("My Scatter Series", eval_man, "Just Some Points", "X", "Y")
+    //     .addDataSeries("pointset1", { {0,0}, {1,1}, {2,2}, {3,3} }, Qt::red)
+    //     .addDataSeries("pointset2", { {1,0}, {2,1}, {3,2}, {4,3} }, Qt::green)
+    //     .addDataSeries("pointset3", { {2,0}, {3,1}, {4,2}, {5,3} }, Qt::blue);
+    // defs.addDefinition<FeatureDefinitionTimedScatterSeries>("Position Error", eval_man, "Development over Time", "Error [m]")
+    //     .addDataSeries("", SinglePositionBaseCommon::DetailKey::Value);
 
     //grids (as raw grids)
-    defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Mean", false)
-        .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
-                       grid2d::ValueType::ValueTypeMean, 
-                       GridAddDetailMode::AddEvtRefPosition);
+    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Mean", false)
+    //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
+    //                    grid2d::ValueType::ValueTypeMean, 
+    //                    GridAddDetailMode::AddEvtRefPosition);
 
     return defs;
 }
@@ -511,7 +555,7 @@ void JoinedPositionProbabilityBase::accumulateSingleResult(const std::shared_ptr
 {
     std::shared_ptr<SinglePositionProbabilityBase> single = std::static_pointer_cast<SinglePositionProbabilityBase>(single_result);
 
-    common_accumulateSingleResult(*single, single->getValues(SinglePositionBaseCommon::DetailKey::Value), last);
+    common_accumulateSingleResult(*single, last);
 }
 
 /**
@@ -593,7 +637,7 @@ void JoinedPositionValueBase::accumulateSingleResult(const std::shared_ptr<Singl
 {
     std::shared_ptr<SinglePositionValueBase> single = std::static_pointer_cast<SinglePositionValueBase>(single_result);
 
-    common_accumulateSingleResult(*single, single->getValues(SinglePositionBaseCommon::DetailKey::Value), last);
+    common_accumulateSingleResult(*single, last); 
 }
 
 /**

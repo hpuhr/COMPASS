@@ -22,6 +22,8 @@
 #include <cmath>
 #include <numeric>
 
+#include <cassert>
+
 /**
 */
 double ValueAccumulator::min() const
@@ -75,19 +77,21 @@ size_t ValueAccumulator::numValues() const
 */
 void ValueAccumulator::reset()
 {
-    value_min_    = 0;
-    value_max_    = 0;
-    value_avg_    = 0;
-    value_rms_    = 0;
-    value_var_    = 0;
-    value_stddev_ = 0;
-    value_cnt_    = 0;
-    finalized_    = false;
+    value_sum_     = 0;
+    value_sum_sqr_ = 0;
+
+    value_min_     = 0;
+    value_max_     = 0;
+    value_avg_     = 0;
+    value_rms_     = 0;
+    value_var_     = 0;
+    value_stddev_  = 0;
+    value_cnt_     = 0;
 }
 
 /**
 */
-void ValueAccumulator::accumulate(const std::vector<double>& values, bool do_finalize)
+void ValueAccumulator::accumulate(const std::vector<double>& values, bool update_stats)
 {
     if (!values.empty())
     {
@@ -98,29 +102,46 @@ void ValueAccumulator::accumulate(const std::vector<double>& values, bool do_fin
         if (value_cnt_ == 0 || vmin < value_min_) value_min_ = vmin;
         if (value_cnt_ == 0 || vmax > value_max_) value_max_ = vmax;
 
-        value_avg_ += sum;
+        value_sum_ += sum;
 
         for (const auto& v : values)
-            value_var_ += std::pow(v, 2);
+            value_sum_sqr_ += std::pow(v, 2);
 
         value_cnt_ += values.size();
     }
 
-    if (do_finalize)
-        finalize();
+    if (update_stats)
+        updateStats();
 }
 
 /**
 */
-void ValueAccumulator::finalize()
+bool ValueAccumulator::updateStats()
 {
     if (value_cnt_ == 0)
-        return;
+        return false;
 
-    value_avg_   /= (double)value_cnt_;
-    value_var_   /= (double)value_cnt_;
+    value_avg_    = value_sum_     / (double)value_cnt_;
+    value_var_    = value_sum_sqr_ / (double)value_cnt_;
     value_rms_    = value_var_;
     value_var_   -= value_avg_ * value_avg_;
     value_rms_    = std::sqrt(value_rms_);
     value_stddev_ = std::sqrt(value_var_);
+
+    return true;
+}
+
+/**
+*/
+void ValueAccumulator::join(const ValueAccumulator& other, bool update_stats)
+{
+    value_sum_     += other.value_sum_;
+    value_sum_sqr_ += other.value_sum_sqr_;
+    value_cnt_     += other.value_cnt_;
+
+    if (other.value_cnt_ > 0 && (value_cnt_ == 0 || other.value_min_ < value_min_)) value_min_ = other.value_min_;
+    if (other.value_cnt_ > 0 && (value_cnt_ == 0 || other.value_max_ > value_max_)) value_max_ = other.value_max_;
+
+    if (update_stats)
+        updateStats();
 }

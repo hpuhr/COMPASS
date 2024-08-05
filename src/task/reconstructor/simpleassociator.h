@@ -17,24 +17,26 @@ class SimpleAssociator : public ReconstructorAssociatorBase
     SimpleReconstructor& reconstructor_;
 
             // distance, target acc, tr acc
-    virtual bool canGetPositionOffset(
+    virtual bool canGetPositionOffsetTR(
         const dbContent::targetReport::ReconstructorInfo& tr,
-        const dbContent::ReconstructorTarget& target) override;
-    virtual boost::optional<std::tuple<double, double, double>> getPositionOffset(
+        const dbContent::ReconstructorTarget& target, bool use_max_distance=true) override;
+    virtual boost::optional<std::tuple<double, double, double>> getPositionOffsetTR(
         const dbContent::targetReport::ReconstructorInfo& tr,
         const dbContent::ReconstructorTarget& target, 
         bool do_debug,
+        const boost::optional<unsigned int>& thread_id,
         reconstruction::PredictionStats* stats = nullptr) override;
-    virtual bool canGetPositionOffset(
+
+    virtual bool canGetPositionOffsetTargets(
         const boost::posix_time::ptime& ts,
         const dbContent::ReconstructorTarget& target0,
         const dbContent::ReconstructorTarget& target1)  override;
-    virtual boost::optional<std::tuple<double, double, double>> getPositionOffset(
+    virtual boost::optional<std::tuple<double, double, double>> getPositionOffsetTargets(
         const boost::posix_time::ptime& ts,
         const dbContent::ReconstructorTarget& target0,
         const dbContent::ReconstructorTarget& target1,
-        int thread_id, 
         bool do_debug,
+        const boost::optional<unsigned int>& thread_id,
         reconstruction::PredictionStats* stats = nullptr) override;
 
     virtual boost::optional<bool> checkPositionOffsetAcceptable (

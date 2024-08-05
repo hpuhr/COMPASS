@@ -62,31 +62,23 @@ void KalmanOnlineTracker::init(kalman::KalmanType ktype)
 
 /**
 */
-bool KalmanOnlineTracker::track(const Measurement& mm, KalmanEstimator::StepResult* res)
+bool KalmanOnlineTracker::track(const Measurement& mm)
 {
     assert(isInit());
-
-    KalmanEstimator::StepResult r;
 
     if (!isTracking())
     {
         kalmanInit(mm);
-        
-        r = KalmanEstimator::StepResult::Success;
     }
     else
     {
-        r = estimator_->kalmanStep(tmp_update_, mm);
-        if (r == KalmanEstimator::StepResult::Success)
+        if (estimator_->kalmanStep(tmp_update_, mm) == KalmanEstimator::StepResult::Success)
             current_update_ = tmp_update_;
     }
 
-    if (res)
-        *res = r;
-
     assert(current_update_.has_value() && current_update_->t == estimator_->currentTime());
 
-    return (r == KalmanEstimator::StepResult::Success);
+    return (estimator_->stepInfo().result == KalmanEstimator::StepResult::Success);
 }
 
 /**
@@ -99,7 +91,7 @@ bool KalmanOnlineTracker::track(const kalman::KalmanUpdate& update)
 
     assert(current_update_.has_value() && current_update_->t == estimator_->currentTime());
 
-    return true;
+    return (estimator_->stepInfo().result == KalmanEstimator::StepResult::Success);
 }
 
 /**
@@ -112,7 +104,7 @@ bool KalmanOnlineTracker::track(const kalman::KalmanUpdateMinimal& update)
 
     assert(current_update_.has_value() && current_update_->t == estimator_->currentTime());
 
-    return true;
+    return (estimator_->stepInfo().result == KalmanEstimator::StepResult::Success);
 }
 
 /**
@@ -203,6 +195,13 @@ const boost::optional<kalman::KalmanUpdate>& KalmanOnlineTracker::currentState()
 const boost::posix_time::ptime& KalmanOnlineTracker::currentTime() const
 {
     return estimator_->currentTime();
+}
+
+/**
+*/
+const KalmanEstimator::StepInfo& KalmanOnlineTracker::stepInfo() const
+{
+    return estimator_->stepInfo();
 }
 
 /**

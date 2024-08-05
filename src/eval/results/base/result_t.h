@@ -134,7 +134,11 @@ struct MSecTimedValue
 class EvaluationResultTemplates
 {
 public:
-    EvaluationResultTemplates(const Base* result) : result_(result) { assert(result_); }
+    EvaluationResultTemplates(const Base* result) 
+    :   result_ (result )
+    { 
+        assert(result_); 
+    }
     virtual ~EvaluationResultTemplates() = default;
 
     /**
@@ -167,7 +171,7 @@ public:
             values.push_back(v.value());
         };
 
-        result_->iterateDetails(func);
+        result_->iterateDetails(func, {});
 
         values.shrink_to_fit();
 
@@ -200,7 +204,7 @@ public:
             values.push_back(v);
         };
 
-        result_->iterateDetails(func);
+        result_->iterateDetails(func, {});
 
         values.shrink_to_fit();
 
@@ -237,7 +241,7 @@ public:
             values.emplace_back(detail.timestamp(), v.value());
         };
 
-        result_->iterateDetails(func);
+        result_->iterateDetails(func, {});
 
         values.shrink_to_fit();
 
@@ -343,7 +347,7 @@ public:
             }
         };
 
-        result_->iterateDetails(func);
+        result_->iterateDetails(func, {});
 
         pos_values.shrink_to_fit();
 
@@ -354,7 +358,7 @@ public:
     }
 
 private:
-    const Base* result_ = nullptr;
+    const Base* result_  = nullptr;
 };
 
 }

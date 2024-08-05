@@ -330,6 +330,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     loginf << "EvaluationResultsGenerator: evaluate: adding result '" << result_sum->reqGrpId()
                            << "' id '" << result_sum->resultId() << "'";
                     assert (!results_[result_sum->reqGrpId()].count(result_sum->resultId()));
+
+                    //update now => here we still have all details for the joined viewable
+                    result_sum->updateToChanges(true);
+
                     results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
                     results_vec_.push_back(result_sum); // has to be added after all singles
                 }
@@ -341,9 +345,17 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                            << "' id '" << mops_res_it.second->resultId() << "'";
 
                     assert (!results_[mops_res_it.second->reqGrpId()].count(mops_res_it.second->resultId()));
+
+                    //update now => here we still have all details for the joined viewable
+                    mops_res_it.second->updateToChanges(true);
+
                     results_[mops_res_it.second->reqGrpId()][mops_res_it.second->resultId()] = mops_res_it.second;
                     results_vec_.push_back(mops_res_it.second); // has to be added after all singles
                 }
+
+                //purge stored single result details
+                for (auto& result_it : results)
+                    result_it->purgeStoredDetails();
 
                 assert (eval_cnt <= num_req_evals);
                 eval_cnt = results_vec_.size();
@@ -353,7 +365,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     postprocess_dialog.close();
 
-    updateToChanges();
+    //viewables are up-to-date => do not reset them
+    updateToChanges(false);
 
     elapsed_time = boost::posix_time::microsec_clock::local_time();
 
@@ -407,11 +420,11 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
-    // add dataset stuff
-
     Section& gen_sec = root_item->getSection("Overview:General");
 
-    gen_sec.addText("This section contains information about the used application, database and dat sources.");
+    gen_sec.addText("This section contains information about the used application, database and data sources.");
+
+    // add dataset stuff
 
     gen_sec.addTable("gen_overview_table", 3, {"Name", "Comment", "Value"}, false);
 
@@ -423,6 +436,26 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     assert (eval_man_.hasCurrentStandard());
     gen_table.addRow({"Standard", "Standard name", eval_man_.currentStandardName().c_str()}, nullptr);
+
+    // add used sensors
+
+    auto data_source_ref = eval_man_.activeDataSourceInfoRef();
+    auto data_source_tst = eval_man_.activeDataSourceInfoTst();
+
+    std::string sensors_ref;
+    std::string sensors_tst;
+
+    for (const auto& elem : data_source_ref.data_sources)
+        sensors_ref += (sensors_ref.empty() ? "" : ", ") + elem.name;
+    
+    for (const auto& elem : data_source_tst.data_sources)
+        sensors_tst += (sensors_tst.empty() ? "" : ", ") + elem.name;
+
+    sensors_ref = data_source_ref.dbcontent + ": " + sensors_ref;
+    sensors_tst = data_source_tst.dbcontent + ": " + sensors_tst;
+    
+    gen_table.addRow({ "Reference Sensors", "Used reference sensors", sensors_ref.c_str() }, nullptr);
+    gen_table.addRow({ "Test Sensors", "Used test sensors", sensors_tst.c_str() }, nullptr);
 
     // generate results
 
@@ -474,9 +507,9 @@ EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
     return results_model_;
 }
 
-void EvaluationResultsGenerator::updateToChanges ()
+void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
 {
-    loginf << "EvaluationResultsGenerator: updateToChanges";
+    loginf << "EvaluationResultsGenerator: updateToChanges: reset_viewable " << reset_viewable;
 
     // clear everything
     results_model_.beginReset();
@@ -507,11 +540,17 @@ void EvaluationResultsGenerator::updateToChanges ()
                 static_pointer_cast<EvaluationRequirementResult::Joined>(result_it);
 
             assert (result);
-            result->updateToChanges();
+            result->updateToChanges(reset_viewable);
         }
     }
 
     generateResultsReportGUI();
+}
+
+void EvaluationResultsGenerator::updateToChanges ()
+{
+    //always reset the viewable on standard result updates
+    updateToChanges(true);
 }
 
 EvaluationResultsGeneratorWidget& EvaluationResultsGenerator::widget()

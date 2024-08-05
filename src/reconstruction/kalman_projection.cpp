@@ -106,24 +106,52 @@ void KalmanProjectionHandler::unproject(double& lat,
 // }
 
 /**
+*/
+bool KalmanProjectionHandler::inRangeCart(double x_cart, double y_cart) const
+{
+    const auto& center = proj_->centerCart();
+
+    const double d_sqr = (Eigen::Vector2d(center.x(), center.y()) - Eigen::Vector2d(x_cart, y_cart)).squaredNorm();
+    if (d_sqr > settings_.proj_max_dist_cart_sqr)
+        return false; 
+
+    return true;
+}
+
+/**
+*/
+bool KalmanProjectionHandler::inRangeWGS84(double lat, double lon) const
+{
+    if (std::fabs(proj_->centerLat() - lat) > settings_.proj_max_dist_wgs84 ||
+        std::fabs(proj_->centerLon() - lon) > settings_.proj_max_dist_wgs84)
+        return false;
+
+    return true;
+}
+
+/**
  * Checks if the currently set map projection is still valid or outdated.
  */
 bool KalmanProjectionHandler::needsReprojectionChange(kalman::KalmanUpdate& update,
                                                       const KalmanInterface& interface) const
 {
-    //check if map projection still valid
-    const auto& center = proj_->centerCart();
+    if (settings_.proj_dist_check == MapProjDistanceCheck::WGS84)
+    {
+        //check wgs84 distance
+        if (!inRangeWGS84(update.lat, update.lon))
+            return true;
+    }
+    else if (settings_.proj_dist_check == MapProjDistanceCheck::Cart)
+    {
+        //obtain cartesian coordinates of state
+        double x_cart, y_cart;
+        interface.xPos(x_cart, y_cart, update.state.x);
 
-    //obtain cartesian coordinates of state
-    double x_cart, y_cart;
-    interface.xPos(x_cart, y_cart, update.state.x);
+        if (!inRangeCart(x_cart, y_cart))
+            return true;
+    }
 
-    //distance from last projection origin is bigger than threshold?
-    const double d_sqr = (Eigen::Vector2d(center.x(), center.y()) - Eigen::Vector2d(x_cart, y_cart)).squaredNorm();
-    if (d_sqr > settings_.proj_max_dist_cart_sqr)
-        return false;
-
-    return true;
+    return false;
 }
 
 /**
@@ -161,7 +189,7 @@ void KalmanProjectionHandler::changeProjection(kalman::KalmanUpdate& update,
 bool KalmanProjectionHandler::changeProjectionIfNeeded(kalman::KalmanUpdate& update,
                                                        const KalmanInterface& interface)
 {
-    if (needsReprojectionChange(update, interface))
+    if (!needsReprojectionChange(update, interface))
         return false;
 
     changeProjection(update, interface);
@@ -176,11 +204,15 @@ void KalmanProjectionHandler::xReprojected(kalman::Vector& x_repr,
                                            const KalmanInterface& interface,
                                            const kalman::Vector& x,
                                            const Eigen::Vector2d& proj_center,
-                                           const Eigen::Vector2d& proj_center_new)
+                                           const Eigen::Vector2d& proj_center_new,
+                                           size_t* num_proj_center_changed)
 {
     assert(proj_);
 
     x_repr = x;
+
+    if(num_proj_center_changed)
+        *num_proj_center_changed = 0;
 
     //projection centers do match => nothing more to do
     if (proj_center == proj_center_new)
@@ -192,9 +224,13 @@ void KalmanProjectionHandler::xReprojected(kalman::Vector& x_repr,
     double x_pos_cart, y_pos_cart;
     interface.xPos(x_pos_cart, y_pos_cart, x);
 
+    bool changed0 = proj_center != projectionCenter();
+
     //unproject to geodetic using old projection center
     double pos_lat, pos_lon;
     unproject(pos_lat, pos_lon, x_pos_cart, y_pos_cart, &proj_center);
+
+    bool changed1 = proj_center != proj_center_new;
 
     //project to cartesian using new projection center
     proj_->update(proj_center_new.x(), proj_center_new.y());
@@ -202,6 +238,9 @@ void KalmanProjectionHandler::xReprojected(kalman::Vector& x_repr,
 
     //set new position in state vector
     interface.xPos(x_repr, x_pos_cart, y_pos_cart);
+
+    if (num_proj_center_changed)
+        *num_proj_center_changed = changed0 ? (changed1 ? 2 : 1) : (changed1 ? 1 : 0);
 }
 
 /**

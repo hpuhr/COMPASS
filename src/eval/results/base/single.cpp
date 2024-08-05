@@ -16,6 +16,7 @@
  */
 
 #include "eval/results/base/single.h"
+#include "eval/results/base/result_t.h"
 
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
@@ -65,12 +66,11 @@ Single::Single(const std::string& type,
                const EvaluationTargetData* target,
                EvaluationManager& eval_man,
                const EvaluationDetails& details)
-:   Base   (type, result_id, requirement, sector_layer, eval_man)
-,   utn_   (utn   )
-,   target_(target)
+:   Base    (type, result_id, requirement, sector_layer, eval_man)
+,   utn_    (utn   )
+,   target_ (target)
+,   details_(details)
 {
-    setDetails(details);
-
     annotation_type_names_[AnnotationArrayType::TypeHighlight] = "Selected";
     annotation_type_names_[AnnotationArrayType::TypeError    ] = "Errors";
     annotation_type_names_[AnnotationArrayType::TypeOk       ] = "OK";
@@ -117,9 +117,16 @@ void Single::updateUseFromTarget()
 */
 void Single::updateResult()
 {
-    Base::updateResult();
+    Base::updateResult(computeResult());
 
     updateUseFromTarget();
+}
+
+/**
+*/
+boost::optional<double> Single::computeResult() const
+{
+    return computeResult_impl();
 }
 
 /**
@@ -179,6 +186,97 @@ std::string Single::getRequirementAnnotationID_impl() const
 
 /**
 */
+bool Single::hasStoredDetails() const
+{
+    return details_.has_value();
+}
+
+/**
+*/
+size_t Single::numStoredDetails() const
+{
+    if (!hasStoredDetails())
+        return 0;
+
+    return details_.value().size();
+}
+
+/**
+*/
+void Single::purgeStoredDetails()
+{
+    clearDetails();
+}
+
+/**
+*/
+Single::TemporaryDetails Single::temporaryDetails() const
+{
+    return TemporaryDetails(this);
+}
+
+/**
+*/
+Single::EvaluationDetails Single::recomputeDetails() const
+{
+    assert(requirement_);
+    assert(eval_man_.getData().hasTargetData(utn_));
+
+    logdbg << "Single: recomputeDetails: recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
+
+    const auto& data = eval_man_.getData().targetData(utn_);
+
+    auto result = requirement_->evaluate(data, requirement_, sector_layer_);
+    assert(result);
+
+    logdbg << "Single: recomputeDetails: target details recomputed!";
+
+    return result->getDetails();
+}
+
+/**
+*/
+const EvaluationDetail& Single::getDetail(const EvaluationDetails& details,
+                                          const DetailIndex& index) const
+{
+    const auto& d = details.at(index[ 0 ]);
+
+    if (index[ 1 ] < 0)
+        return d;
+
+    return d.details().at(index[ 1 ]);
+}
+
+/**
+*/
+const Single::EvaluationDetails& Single::getDetails() const
+{
+    assert(hasStoredDetails());
+
+    return details_.value();
+}
+
+/**
+*/
+bool Single::detailIndexValid(const DetailIndex& index) const
+{
+    if (index[ 0 ] < 0 || (details_.has_value() && index[ 0 ] >= (int)details_.value().size()))
+        return false;
+    if (index[ 1 ] >= 0 && (details_.has_value() && index[ 1 ] >= (int)details_.value()[ index[ 0 ] ].numDetails()))
+        return false;
+
+    return true;
+}
+
+/**
+*/
+void Single::clearDetails()
+{
+    details_.reset();
+}
+
+/**
+*/
 void Single::addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     logdbg << "Single: addToReport: " <<  requirement_->name();
@@ -189,7 +287,7 @@ void Single::addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root
     // add requirement results to targets->utn->requirements->group->req
     addTargetDetailsToReport(root_item);
 
-    // TODO add requirement description, methods
+    // @TODO add requirement description, methods
 }
 
 /**
@@ -277,7 +375,7 @@ void Single::addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::R
     {
         utn_req_section.addFigure("target_errors_overview", 
                                   "Target Errors Overview",
-                                  [this](void) { return this->viewableData(); });
+                                  [this](void) { return this->viewableOverviewData(); });
     }
     else
     {
@@ -310,7 +408,9 @@ void Single::generateDetailsTable(EvaluationResultsReport::Section& utn_req_sect
         [this, &utn_req_details_table](void)
         {
             //create details on demand
+            auto temp_details = temporaryDetails();
 
+            //detail => table row functor
             auto func = [ & ] (const EvaluationDetail& detail, 
                                const EvaluationDetail* parent_detail, 
                                int didx0, 
@@ -325,6 +425,7 @@ void Single::generateDetailsTable(EvaluationResultsReport::Section& utn_req_sect
                 utn_req_details_table.addRow(values, this, QPoint(didx0, didx1));
             };
 
+            //iterate over temporary details
             this->iterateDetails(func);
         } );
 }
@@ -487,6 +588,20 @@ std::string Single::reference(const EvaluationResultsReport::SectionContentTable
 
 /**
 */
+std::vector<double> Single::getValues(const ValueSource<double>& source) const
+{
+    return EvaluationResultTemplates(this).getValues<double>(source);
+}
+
+/**
+*/
+std::vector<double> Single::getValues(int value_id) const
+{
+    return getValues(ValueSource<double>(value_id));
+}
+
+/**
+*/
 bool Single::hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                               const QVariant& annotation) const
 {
@@ -501,10 +616,22 @@ bool Single::hasViewableData (const EvaluationResultsReport::SectionContentTable
 
 /**
 */
-std::unique_ptr<nlohmann::json::object_t> Single::viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+bool Single::viewableDataReady() const
+{
+    //viewable data for single results is always computed on the fly, so return false in any case
+    return false;
+}
+
+/**
+ * Creates viewable data for this target for the given section.
+ * BEWARE: !will always recompute the details!
+*/
+std::shared_ptr<nlohmann::json::object_t> Single::viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                                const QVariant& annotation) const
 {
     assert (hasViewableData(table, annotation));
+
+    auto temp_details = temporaryDetails();
 
     if (table.name() == target_table_name_)
     {
@@ -525,11 +652,17 @@ std::unique_ptr<nlohmann::json::object_t> Single::viewableData(const EvaluationR
 }
 
 /**
+ * Creates viewable overview data for this target.
+ * BEWARE: !will always recompute the details!
 */
-std::unique_ptr<nlohmann::json::object_t> Single::viewableData() const
+std::shared_ptr<nlohmann::json::object_t> Single::viewableOverviewData() const
 {
-    //per default return target overview annotations
-    return createViewable(AnnotationOptions().overview());
+    auto temp_details = temporaryDetails();
+
+    //create overview viewable
+    auto viewable = createViewable(AnnotationOptions().overview());
+
+    return std::shared_ptr<nlohmann::json::object_t>(viewable.release());
 }
 
 /**
@@ -755,28 +888,6 @@ void Single::addAnnotationDistance(nlohmann::json& annotations_json,
 }
 
 /**
-*/
-std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
-{
-    if (!requirement_)
-        return {};
-
-    if (!eval_man_.getData().hasTargetData(utn_))
-        return {};
-
-    const auto& data = eval_man_.getData().targetData(utn_);
-
-    auto result = requirement_->evaluate(data, requirement_, sector_layer_);
-    if (!result)
-        return {};
-
-    auto eval_details = new EvaluationDetails;
-    *eval_details = result->getDetails();
-
-    return std::unique_ptr<EvaluationDetails>(eval_details);
-}
-
-/**
  * Returns a detail key given an annotation id.
  * Default behaviour will return a first level detail index.
 */
@@ -803,11 +914,22 @@ boost::optional<Base::DetailIndex> Single::detailIndex(const QVariant& annotatio
 void Single::iterateDetails(const DetailFunc& func,
                             const DetailSkipFunc& skip_func) const
 {
+    assert (details_.has_value());
+
+    iterateDetails(details_.value(), func, skip_func);
+}
+
+/**
+*/
+void Single::iterateDetails(const EvaluationDetails& details,
+                            const DetailFunc& func,
+                            const DetailSkipFunc& skip_func) const
+{
     assert(func);
 
     auto nesting_mode = detailNestingMode();
 
-    const auto& details0 = getDetails();
+    const auto& details0 = details;
 
     int evt_pos_idx     = eventPositionIndex();
     int evt_ref_pos_idx = eventRefPositionIndex();
@@ -859,6 +981,7 @@ std::unique_ptr<nlohmann::json::object_t> Single::createBaseViewable() const
 Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options) const
 {
     assert(options.valid());
+    assert(details_.has_value());
 
     Base::ViewableInfo info;
     info.viewable_type = options.viewable_type;
@@ -894,7 +1017,7 @@ Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options) 
     else if (options.viewable_type == ViewableType::Highlight)
     {
         //highlight single detail
-        const auto& d = getDetail(options.detail_index.value());
+        const auto& d = getDetail(details_.value(), options.detail_index.value());
 
         assert(d.numPositions() >= 1);
 
@@ -915,12 +1038,14 @@ Base::ViewableInfo Single::createViewableInfo(const AnnotationOptions& options) 
 void Single::createSumOverviewAnnotations(nlohmann::json& annotations_json,
                                           bool add_ok_details_to_overview) const
 {
-    createTargetAnnotations(annotations_json, TargetAnnotationType::SumOverview, {}, add_ok_details_to_overview);
+    assert(details_.has_value());
+    createTargetAnnotations(details_.value(), annotations_json, TargetAnnotationType::SumOverview, {}, add_ok_details_to_overview);
 }
 
 /**
 */
-void Single::createTargetAnnotations(nlohmann::json& annotations_json,
+void Single::createTargetAnnotations(const EvaluationDetails& details,
+                                     nlohmann::json& annotations_json,
                                      TargetAnnotationType type,
                                      const boost::optional<DetailIndex>& detail_index,
                                      bool add_ok_details_to_overview) const
@@ -948,7 +1073,7 @@ void Single::createTargetAnnotations(nlohmann::json& annotations_json,
             addAnnotationForDetail(annotations_json, detail, TargetAnnotationType::SumOverview, detailIsOk(detail));
         };
 
-        iterateDetails(func, skip_func);
+        iterateDetails(details, func, skip_func);
 
         return;
     }
@@ -965,7 +1090,7 @@ void Single::createTargetAnnotations(nlohmann::json& annotations_json,
             addAnnotationForDetail(annotations_json, detail, TargetAnnotationType::TargetOverview, detailIsOk(detail));
         };
 
-        iterateDetails(func);
+        iterateDetails(details, func);
     }
     else if (type == TargetAnnotationType::Highlight)
     {
@@ -984,32 +1109,34 @@ void Single::createTargetAnnotations(nlohmann::json& annotations_json,
                 addAnnotationForDetail(annotations_json, detail, TargetAnnotationType::TargetOverview, detailIsOk(detail));
             };
 
-            iterateDetails(func);
+            iterateDetails(details, func);
         }
 
         //add detail annotation
-        const auto& d = getDetail(detail_index.value());
+        const auto& d = getDetail(details, detail_index.value());
         addAnnotationForDetail(annotations_json, d, TargetAnnotationType::Highlight, detailIsOk(d));
     }
 }
 
 /**
 */
-void Single::createAnnotations(nlohmann::json& annotations_json, const AnnotationOptions& options) const
+void Single::createAnnotations(nlohmann::json& annotations_json, 
+                               const AnnotationOptions& options) const
 {
     assert (options.valid());
+    assert (details_.has_value());
 
     if (options.viewable_type == ViewableType::Overview)
     {
         //create target overview annotations
-        createTargetAnnotations(annotations_json, TargetAnnotationType::TargetOverview);
+        createTargetAnnotations(details_.value(), annotations_json, TargetAnnotationType::TargetOverview);
 
         //add custom annotations to target overview
         addCustomAnnotations(annotations_json);
     }
     else if (options.viewable_type == ViewableType::Highlight)
     {
-        createTargetAnnotations(annotations_json, TargetAnnotationType::Highlight, options.detail_index);
+        createTargetAnnotations(details_.value(), annotations_json, TargetAnnotationType::Highlight, options.detail_index);
     }
 }
 

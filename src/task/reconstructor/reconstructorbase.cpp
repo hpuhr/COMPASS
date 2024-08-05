@@ -25,6 +25,9 @@
 #include "datasourcemanager.h"
 #include "evaluationmanager.h"
 
+#include "kalman_chain.h"
+#include "tbbhack.h"
+
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
 #include "number.h"
@@ -39,9 +42,10 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                                      ReconstructorBaseSettings& base_settings,
                                      unsigned int default_line_id)
 :   Configurable (class_id, instance_id, &task)
-,   task_(task)
 ,   acc_estimator_(std::move(acc_estimator))
+,   task_(task)
 ,   base_settings_(base_settings)
+,   chain_predictors_(new reconstruction::KalmanChainPredictors)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
@@ -218,6 +222,30 @@ void ReconstructorBase::reset()
 
 /**
  */
+void ReconstructorBase::initChainPredictors()
+{
+    if (chain_predictors_->isInit())
+        return;
+
+    //int num_threads = std::max(1, tbb::task_scheduler_init::default_num_threads());
+
+    #if TBB_VERSION_MAJOR <= 4
+        int num_threads = tbb::task_scheduler_init::default_num_threads(); // TODO PHIL
+    #else
+        int num_threads = oneapi::tbb::info::default_concurrency();
+    #endif
+
+    assert (num_threads > 0);
+
+    assert(chain_predictors_);
+
+    chain_predictors_->init(referenceCalculatorSettings().kalman_type,
+                            referenceCalculatorSettings().chainEstimatorSettings(),
+                            num_threads);
+}
+
+/**
+ */
 void ReconstructorBase::processSlice()
 {
     assert (!currentSlice().remove_before_time_.is_not_a_date_time());
@@ -225,6 +253,12 @@ void ReconstructorBase::processSlice()
     logdbg << "ReconstructorBase: processSlice: first_slice " << currentSlice().first_slice_;
 
     processing_ = true;
+
+    if (currentSlice().first_slice_)
+    {
+        //not needed at the moment
+        //initChainPredictors();
+    }
 
     if (!currentSlice().first_slice_)
     {
@@ -238,9 +272,13 @@ void ReconstructorBase::processSlice()
 
     accessor_->add(currentSlice().data_);
 
+    acc_estimator_->prepareForNewSlice();
+
     logdbg << "ReconstructorBase: processSlice: processing slice";
 
     processSlice_impl();
+
+    acc_estimator_->postProccessNewSlice();
 
     processing_ = false;
 
@@ -259,30 +297,35 @@ void ReconstructorBase::processSlice()
             return QString::number((double)num / (double)num_total * 100.0, 'f', Decimals).toStdString();
         };
 
-        std::string num_chain_updates_valid_p      = perc(stats.num_chain_updates_valid  , stats.num_chain_updates);
-        std::string num_chain_updates_failed_p     = perc(stats.num_chain_updates_failed , stats.num_chain_updates);
-        std::string num_chain_updates_skipped_p    = perc(stats.num_chain_updates_skipped, stats.num_chain_updates);
+        std::string num_chain_updates_valid_p            = perc(stats.num_chain_updates_valid       , stats.num_chain_updates);
+        std::string num_chain_updates_failed_p           = perc(stats.num_chain_updates_failed      , stats.num_chain_updates);
+        std::string num_chain_updates_skipped_p          = perc(stats.num_chain_updates_skipped     , stats.num_chain_updates);
+        std::string num_chain_updates_proj_changed_p     = perc(stats.num_chain_updates_proj_changed, stats.num_chain_added  );
 
-        std::string num_chain_predictions_failed_p = perc(stats.num_chain_predictions_failed, stats.num_chain_predictions);
-        std::string num_chain_predictions_fixed_p  = perc(stats.num_chain_predictions_fixed , stats.num_chain_predictions);
+        std::string num_chain_predictions_failed_p       = perc(stats.num_chain_predictions_failed      , stats.num_chain_predictions);
+        std::string num_chain_predictions_fixed_p        = perc(stats.num_chain_predictions_fixed       , stats.num_chain_predictions);
+        std::string num_chain_predictions_proj_changed_p = perc(stats.num_chain_predictions_proj_changed, stats.num_chain_predictions);
 
-        std::string num_rec_updates_valid_p        = perc(stats.num_rec_updates_valid  , stats.num_rec_updates);
-        std::string num_rec_updates_failed_p       = perc(stats.num_rec_updates_failed , stats.num_rec_updates);
-        std::string num_rec_updates_skipped_p      = perc(stats.num_rec_updates_skipped, stats.num_rec_updates);
+        std::string num_rec_updates_valid_p              = perc(stats.num_rec_updates_valid  , stats.num_rec_updates);
+        std::string num_rec_updates_failed_p             = perc(stats.num_rec_updates_failed , stats.num_rec_updates);
+        std::string num_rec_updates_skipped_p            = perc(stats.num_rec_updates_skipped, stats.num_rec_updates);
 
         loginf << "ReconstructorBase: processSlice: last slice finished\n"
-               << "   chain updates:     " << stats.num_chain_updates_valid      << " valid ("   << num_chain_updates_valid_p      << "%), "
-                                           << stats.num_chain_updates_failed     << " failed ("  << num_chain_updates_failed_p     << "%), "
-                                           << stats.num_chain_updates_skipped    << " skipped (" << num_chain_updates_skipped_p    << "%), "
-                                           << stats.num_chain_updates            << " total\n"
-               << "   chain predictions: " << stats.num_chain_predictions_failed << " failed ("  << num_chain_predictions_failed_p << "%), "
-                                           << stats.num_chain_predictions_fixed  << " fixed ("   << num_chain_predictions_fixed_p  << "%), "
-                                           << stats.num_chain_predictions        << " total\n"
-               << "   rec updates:       " << stats.num_rec_updates_valid        << " valid ("   << num_rec_updates_valid_p        << "%), "
-                                           << stats.num_rec_updates_failed       << " failed ("  << num_rec_updates_failed_p       << "%), "
-                                           << stats.num_rec_updates_skipped      << " skipped (" << num_rec_updates_skipped_p      << "%), "
-                                           << stats.num_rec_updates              << " total\n"
-               << "   rec interp steps:  " << stats.num_rec_interp_failed        << " failed";
+               << "   chain updates:     " << stats.num_chain_added                    << " mm added, "
+                                           << stats.num_chain_updates_valid            << " updates valid ("   << num_chain_updates_valid_p      << "%), "
+                                           << stats.num_chain_updates_failed           << " updates failed ("  << num_chain_updates_failed_p     << "%), "
+                                           << stats.num_chain_updates_skipped          << " updates skipped (" << num_chain_updates_skipped_p    << "%), "
+                                           << stats.num_chain_updates                  << " updates total, "
+                                           << stats.num_chain_updates_proj_changed     << " proj changed (" << num_chain_updates_proj_changed_p << "%)\n"
+               << "   chain predictions: " << stats.num_chain_predictions_failed       << " pred failed ("  << num_chain_predictions_failed_p << "%), "
+                                           << stats.num_chain_predictions_fixed        << " pred fixed ("   << num_chain_predictions_fixed_p  << "%), "
+                                           << stats.num_chain_predictions              << " pred total, "
+                                           << stats.num_chain_predictions_proj_changed << " proj changed (" << num_chain_predictions_proj_changed_p << "%)\n"
+               << "   rec updates:       " << stats.num_rec_updates_valid              << " valid ("   << num_rec_updates_valid_p        << "%), "
+                                           << stats.num_rec_updates_failed             << " failed ("  << num_rec_updates_failed_p       << "%), "
+                                           << stats.num_rec_updates_skipped            << " skipped (" << num_rec_updates_skipped_p      << "%), "
+                                           << stats.num_rec_updates                    << " total\n"
+               << "   rec interp steps:  " << stats.num_rec_interp_failed              << " failed";
     }
 }
 
@@ -716,4 +759,11 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     assert(it != target_reports_.end());
 
     createMeasurement(mm, it->second);
+}
+
+reconstruction::KalmanChainPredictors& ReconstructorBase::chainPredictors()
+{
+    assert(chain_predictors_);
+
+    return *chain_predictors_;
 }

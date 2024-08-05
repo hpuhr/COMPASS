@@ -29,8 +29,10 @@ public:
     virtual ~ValueAccumulator() = default;
 
     void reset();
-    void accumulate(const std::vector<double>& values, bool do_finalize = false);
-    void finalize();
+    void accumulate(const std::vector<double>& values, bool update_stats = false);
+    bool updateStats();
+
+    void join(const ValueAccumulator& other, bool update_stats = false);
 
     double min() const;
     double max() const;
@@ -42,12 +44,14 @@ public:
     std::size_t numValues() const;
 
 private:
-    double      value_min_    = 0;
-    double      value_max_    = 0;
-    double      value_avg_    = 0;
-    double      value_rms_    = 0;
-    double      value_var_    = 0;
-    double      value_stddev_ = 0;
-    std::size_t value_cnt_    = 0;
-    bool        finalized_    = false;
+    double      value_sum_     = 0;
+    double      value_sum_sqr_ = 0;
+
+    double      value_min_     = 0;
+    double      value_max_     = 0;
+    double      value_avg_     = 0;
+    double      value_rms_     = 0;
+    double      value_var_     = 0;
+    double      value_stddev_  = 0;
+    std::size_t value_cnt_     = 0;
 };

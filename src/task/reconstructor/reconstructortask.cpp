@@ -820,9 +820,9 @@ void ReconstructorTask::writeDoneSlot()
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
-        malloc_trim(0); // release unused memory
-
     }
+
+    malloc_trim(0); // release unused memory
 
     writing_slice_ = nullptr;
 }
@@ -996,6 +996,23 @@ ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
 {
     assert (processing_slice_);
     return *processing_slice_;
+}
+
+nlohmann::json& ReconstructorTask::getDebugViewpoint(const std::string& name)
+{
+    if (!debug_viewpoints_.count(name))
+    {
+        debug_viewpoints_[name] = nlohmann::json::object_t();
+        debug_viewpoints_[name]["name"] = name;
+        debug_viewpoints_[name]["type"] = "Reconstructor";
+    }
+
+    return debug_viewpoints_.at(name);
+}
+
+void ReconstructorTask::saveDebugViewPoints()
+{
+
 }
 
 bool ReconstructorTask::debug() const

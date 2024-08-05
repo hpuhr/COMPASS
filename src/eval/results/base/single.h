@@ -43,11 +43,62 @@ namespace EvaluationRequirementResult
 
 class Joined;
 
+template <typename T>
+struct ValueSource;
+
 /**
 */
 class Single : public Base
 {
 public:
+    /**
+    */
+    class TemporaryDetails
+    {
+    public:
+        TemporaryDetails() = default;
+        TemporaryDetails(TemporaryDetails&& other) 
+        :   single_ (other.single_ )
+        ,   created_(other.created_)
+        {
+            other.single_  = nullptr;
+            other.created_ = false;
+        }
+        TemporaryDetails(const Single* single) 
+        :   single_(single) 
+        { 
+            assert(single_); 
+
+            //recompute details if not available
+            if (!single_->details_.has_value())
+            {
+                single_->details_ = single_->recomputeDetails();
+                created_ = true;
+            }
+        }
+        ~TemporaryDetails()
+        { 
+            //purge temporary details if they were created by this class
+            if (single_ && created_)
+                single_->details_.reset();
+        }
+
+        TemporaryDetails& operator=(TemporaryDetails&& other)
+        {
+            single_  = other.single_;
+            created_ = other.created_;
+
+            other.single_  = nullptr;
+            other.created_ = false;
+
+            return *this;
+        }
+
+    private:
+        const Single* single_  = nullptr;
+        bool          created_ = false;
+    };
+
     /**
     */
     struct LayerDefinition
@@ -94,20 +145,16 @@ public:
     unsigned int utn() const;
     const EvaluationTargetData* target() const;
 
-    void setInterestFactor(double factor);
-
-    //wip - on demand detail creation
-    std::unique_ptr<EvaluationDetails> generateDetails() const;
-
-    void updateResult() override final;
     void updateUseFromTarget();
+
+    void setInterestFactor(double factor);
 
     bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
-    std::unique_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    bool viewableDataReady() const override final;
+    std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                            const QVariant& annotation) const override final;
-    std::unique_ptr<nlohmann::json::object_t> viewableData() const override final;
-
+    
     void createSumOverviewAnnotations(nlohmann::json& annotations_json,
                                       bool add_ok_details_to_overview = true) const;
 
@@ -118,8 +165,16 @@ public:
 
     void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
 
+    bool hasStoredDetails() const;
+    size_t numStoredDetails() const;
+    void purgeStoredDetails();
+    TemporaryDetails temporaryDetails() const;
+
     void iterateDetails(const DetailFunc& func,
                         const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
+
+    std::vector<double> getValues(const ValueSource<double>& source) const;
+    std::vector<double> getValues(int value_id) const;
 
     /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
@@ -143,6 +198,11 @@ public:
 protected:
     std::string getTargetSectionID();
     std::string getTargetRequirementSectionID();
+
+    /// compute result value
+    virtual void updateResult();
+    virtual boost::optional<double> computeResult() const;
+    virtual boost::optional<double> computeResult_impl() const = 0;
 
     virtual std::string getRequirementSectionID () const override;
     virtual std::string getRequirementAnnotationID_impl() const override;
@@ -182,6 +242,9 @@ protected:
     virtual void generateDetailsTable(EvaluationResultsReport::Section& utn_req_section);
 
     /*details related*/
+    const EvaluationDetails& getDetails() const;
+    
+    bool detailIndexValid(const DetailIndex& index) const; 
 
     /// detail nesting mode
     virtual DetailNestingMode detailNestingMode() const { return DetailNestingMode::Vector; } 
@@ -189,6 +252,7 @@ protected:
     boost::optional<DetailIndex> detailIndex(const QVariant& annotation) const;
 
     /*viewable + annotation related*/
+    std::shared_ptr<nlohmann::json::object_t> viewableOverviewData() const override final;
     std::unique_ptr<nlohmann::json::object_t> createBaseViewable() const override final;
     ViewableInfo createViewableInfo(const AnnotationOptions& options) const override final;
     void createAnnotations(nlohmann::json& annotations_json, 
@@ -210,7 +274,8 @@ protected:
     /// -1 means the last position (default)
     virtual int eventRefPositionIndex() const { return -1; }
 
-    void createTargetAnnotations(nlohmann::json& annotations_json,
+    void createTargetAnnotations(const EvaluationDetails& details,
+                                 nlohmann::json& annotations_json,
                                  TargetAnnotationType type,
                                  const boost::optional<DetailIndex>& detail_index = boost::optional<DetailIndex>(),
                                  bool add_ok_details_to_overview = true) const;
@@ -239,6 +304,19 @@ protected:
     const EvaluationTargetData* target_; // used to generate result
 
     double interest_factor_ {0};
+
+private:
+    void iterateDetails(const EvaluationDetails& details,
+                        const DetailFunc& func,
+                        const DetailSkipFunc& skip_func = DetailSkipFunc()) const;
+
+    const EvaluationDetail& getDetail(const EvaluationDetails& details,
+                                      const DetailIndex& index) const;
+    void clearDetails();
+
+    EvaluationDetails recomputeDetails() const;
+
+    mutable boost::optional<EvaluationDetails> details_;
 };
 
 }

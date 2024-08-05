@@ -64,7 +64,19 @@ SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id,
 :   SingleDubiousBase("SingleDubiousTarget", result_id, requirement, sector_layer, utn, target, 
                       eval_man, details, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
 {
+    assert (details.size() >= 1);
+
     updateResult();
+
+    auto is_dubious = details[ 0 ].getValueAs<bool>(SingleDubiousTarget::DetailKey::IsDubious);
+    assert(is_dubious.has_value());
+
+    auto duration = details[ 0 ].getValueAs<boost::posix_time::time_duration>(SingleDubiousTarget::DetailKey::Duration);
+    assert(duration.has_value());
+
+    is_dubious_      = is_dubious.value();
+    duration_        = duration.value();
+    dubious_reasons_ = dubiousReasonsString(details[ 0 ].comments());
 }
 
 /**
@@ -90,11 +102,11 @@ boost::optional<double> SingleDubiousTarget::computeResult_impl() const
 {
     assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
     //assert (values_.size() == num_comp_failed_ + num_comp_passed_);
-    assert (numDetails() == 1);
+    assert (numStoredDetails() == 1);
 
     p_dubious_update_.reset();
 
-    const auto& detail = getDetail(0);
+    const auto& detail = getDetails()[ 0 ];
 
     boost::optional<double> result = (double)detail.getValue(DetailKey::IsDubious).toBool();
 
@@ -128,25 +140,17 @@ std::vector<std::string> SingleDubiousTarget::targetTableHeadersCustom() const
 */
 std::vector<QVariant> SingleDubiousTarget::targetTableValuesCustom() const
 {
-    assert(numDetails() > 0);
-    std::string dub_string = dubiousReasonsString(getDetail(0).comments());
-
     return { num_pos_inside_,                        // "#PosInside"
              num_pos_inside_dubious_,                // "#DU"
              resultValueOptional(p_dubious_update_), // "PDU"
-             dub_string.c_str() };                   // "Reasons"
+             dubious_reasons_.c_str() };             // "Reasons"
 }
 
 /**
 */
 std::vector<Single::TargetInfo> SingleDubiousTarget::targetInfos() const
 {
-    assert(numDetails() > 0);
-
-    auto duration = getDetail(0).getValueAs<boost::posix_time::time_duration>(DetailKey::Duration);
-    assert(duration.has_value());
-
-    auto duration_var         = formatValue(Time::partialSeconds(duration.value()));
+    auto duration_var         = formatValue(Time::partialSeconds(duration_));
     auto p_dubious_update_var = SingleProbabilityBase::formatProbabilityOptional(p_dubious_update_);
 
     return { TargetInfo("#Up [1]"        , "Number of updates"                      , num_updates_              ),
@@ -272,25 +276,18 @@ void JoinedDubiousTarget::accumulateSingleResult(const std::shared_ptr<Single>& 
 
     num_utns_ += 1;
 
-    assert (single->numDetails() >= 1);
+    bool   is_dubious = single->isDubious();
+    double duration   = Time::partialSeconds(single->duration());
 
-    const auto& detail = single->getDetail(0);
-
-    auto is_dubious = detail.getValueAs<bool>(SingleDubiousTarget::DetailKey::IsDubious);
-    assert(is_dubious.has_value());
-
-    auto duration = detail.getValueAs<boost::posix_time::time_duration>(SingleDubiousTarget::DetailKey::Duration);
-    assert(duration.has_value());
-
-    if (is_dubious.value())
+    if (is_dubious)
         num_utns_dubious_ += 1;
 
-    duration_all_ += Time::partialSeconds(duration.value());
+    duration_all_ += duration;
 
-    if (is_dubious.value())
-        duration_dubious_ += Time::partialSeconds(duration.value());
+    if (is_dubious)
+        duration_dubious_ += duration;
     else
-        duration_nondub_ += Time::partialSeconds(duration.value());
+        duration_nondub_ += duration;
 }
 
 /**
@@ -363,20 +360,15 @@ FeatureDefinitions JoinedDubiousTarget::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    //dubious state to binary value
-    // auto getValue = [ = ] (const EvaluationDetail& detail)
-    // {
-    //     bool ok = SingleDubiousTarget::detailIsOkStatic(detail);
-    //     return ok ? 1.0 : 0.0;
-    // };
+    auto getValue = [ = ] (const EvaluationDetail& detail)
+    {
+        return boost::optional<bool>(SingleDubiousTarget::detailIsOkStatic(detail));
+    };
 
-    // return AnnotationDefinitions().addBinaryGrid("", 
-    //                                              requirement_->name(),
-    //                                              DetailValueSource(getValue),
-    //                                              GridAddDetailMode::AddEvtPosition,
-    //                                              false,
-    //                                              Qt::green,
-    //                                              Qt::red);
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+        .addDataSeries(ValueSource<bool>(getValue), 
+                       GridAddDetailMode::AddEvtPosition, 
+                       false);
 
     return defs;
 }

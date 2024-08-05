@@ -22,8 +22,83 @@
 #include "logger.h"
 #include "timeconv.h"
 
+
+#include <cmath>
+
 namespace reconstruction
 {
+
+/**
+*/
+size_t KalmanChainPredictors::size() const
+{
+    return predictors.size();
+}
+
+/**
+*/
+bool KalmanChainPredictors::isInit() const
+{
+    if (size() == 0)
+        return false;
+
+    for (const auto& p : predictors)
+        if (!p->isInit())
+            return false;
+
+    return true;
+}
+
+/**
+*/
+KalmanEstimator& KalmanChainPredictors::predictor(size_t idx)
+{
+    auto& p = predictors.at(idx);
+    assert(p);
+
+    return *p;
+}
+
+/**
+*/
+void KalmanChainPredictors::init(std::unique_ptr<KalmanInterface>&& interface,
+                                 const KalmanEstimator::Settings& settings,
+                                 unsigned int max_threads)
+{
+    assert (max_threads > 0);
+
+    predictors.clear();
+    predictors.resize(max_threads);
+
+    for (unsigned int i = 0; i < max_threads; ++i)
+    {
+        predictors[ i ].reset(new KalmanEstimator);
+        predictors[ i ]->settings() = settings;
+
+        
+
+        predictors[ i ]->init(std::unique_ptr<KalmanInterface>(interface->clone()));
+    }
+}
+
+/**
+*/
+void KalmanChainPredictors::init(kalman::KalmanType ktype,
+                                 const KalmanEstimator::Settings& settings,
+                                 unsigned int max_threads)
+{
+    assert (max_threads > 0);
+
+    predictors.clear();
+    predictors.resize(max_threads);
+
+    for (unsigned int i = 0; i < max_threads; ++i)
+    {
+        predictors[ i ].reset(new KalmanEstimator);
+        predictors[ i ]->settings() = settings;
+        predictors[ i ]->init(ktype);
+    }
+}
 
 /**
 */
@@ -44,17 +119,10 @@ void KalmanChain::Predictor::reset()
 
 /**
 */
-KalmanChain::KalmanChain(int max_prediction_threads)
+KalmanChain::KalmanChain()
 {
+    predictor_.estimator_ptr.reset(new KalmanEstimator);
     tracker_.tracker_ptr.reset(new KalmanOnlineTracker);
-
-    if (max_prediction_threads > 0)
-    {
-        predictors_.resize(max_prediction_threads);
-
-        for (int i = 0; i < max_prediction_threads; ++i)
-            predictors_[ i ].estimator_ptr.reset(new KalmanEstimator);
-    }
 
     reset();
 }
@@ -81,9 +149,7 @@ void KalmanChain::reset()
 {
     updates_.clear();
     tracker_.reset();
-
-    for (auto& p : predictors_)
-        p.reset();
+    predictor_.reset();
 
     resetReestimationIndices();
 }
@@ -102,10 +168,9 @@ bool KalmanChain::isInit() const
 {
     if (!tracker_.tracker_ptr->isInit())
         return false;
-
-    for (auto& p : predictors_)
-        if (!p.estimator_ptr->isInit())
-            return false;
+    
+    if (!predictor_.estimator_ptr->isInit())
+        return false;
     
     return true;
 }
@@ -117,10 +182,7 @@ void KalmanChain::init(std::unique_ptr<KalmanInterface>&& interface)
 {
     assert(interface);
 
-    //clone for predictors
-    for (auto& p : predictors_)
-        p.estimator_ptr->init(std::unique_ptr<KalmanInterface>(interface->clone()));
-
+    predictor_.estimator_ptr->init(std::unique_ptr<KalmanInterface>(interface->clone()));
     tracker_.tracker_ptr->init(std::move(interface));
 }
 
@@ -129,9 +191,7 @@ void KalmanChain::init(std::unique_ptr<KalmanInterface>&& interface)
 */
 void KalmanChain::init(kalman::KalmanType ktype)
 {
-    for (auto& p : predictors_)
-        p.estimator_ptr->init(ktype);
-
+    predictor_.estimator_ptr->init(ktype);
     tracker_.tracker_ptr->init(ktype);
 }
 
@@ -168,10 +228,13 @@ KalmanChain::Settings& KalmanChain::settings()
 */
 void KalmanChain::configureEstimator(const KalmanEstimator::Settings& settings)
 {
-    for (auto& p : predictors_)
-        p.estimator_ptr->settings() = settings;
+    KalmanEstimator::Settings settings_override = settings;
 
-    tracker_.tracker_ptr->settings() = settings;
+    //set all needed chain-specific overrides
+    settings_override.extract_wgs84_pos = true; //essential for chain
+
+    predictor_.estimator_ptr->settings() = settings_override;
+    tracker_.tracker_ptr->settings()     = settings_override;
 }
 
 /**
@@ -309,11 +372,13 @@ bool KalmanChain::addToTracker(unsigned long mm_id,
     assert (!canReestimate());
 
     //just track measurement
-    KalmanEstimator::StepResult res;
-    bool ok = tracker_.tracker_ptr->track(getMeasurement(mm_id), &res);
+    KalmanEstimator::StepInfo info;
+    bool ok = tracker_.tracker_ptr->track(getMeasurement(mm_id));
 
     if (stats)
     {
+        const auto& step_info = tracker_.tracker_ptr->stepInfo();
+
         stats->set = true;
 
         ++stats->num_fresh;
@@ -321,10 +386,13 @@ bool KalmanChain::addToTracker(unsigned long mm_id,
 
         if (ok)
             ++stats->num_valid;
-        else if (res == KalmanEstimator::StepResult::FailStepTooSmall)
+        else if (step_info.result == KalmanEstimator::StepResult::FailStepTooSmall)
             ++stats->num_skipped;
         else
             ++stats->num_failed;
+
+        if (step_info.proj_changed)
+            ++stats->num_proj_changed;
     }
 
     return ok;
@@ -531,8 +599,7 @@ void KalmanChain::removeUpdatesBefore(const boost::posix_time::ptime& ts)
 
     //current mm ids might be outdated now => reset
     tracker_.tracked_mm_id.reset();
-    for (auto& p : predictors_)
-        p.ref_mm_id.reset();
+    predictor_.ref_mm_id.reset();
 }
 
 /**
@@ -614,24 +681,44 @@ bool KalmanChain::canPredict(const boost::posix_time::ptime& ts) const
 }
 
 /**
- * Guesses if prediction will be somewhat close, as in smaller than max_lat_lon_dist.
- */
-bool KalmanChain::predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const
+*/
+bool KalmanChain::predictMT(Measurement& mm_predicted,
+                            const boost::posix_time::ptime& ts,
+                            KalmanChainPredictors& predictors,
+                            unsigned int thread_id,
+                            PredictionStats* stats) const
 {
+    if (thread_id >= predictors.size())
+        logerr << "KalmanChain: predictMT: thread_id " << thread_id << " >= predictors.size() " << predictors.size();
 
+    assert (thread_id < predictors.size());
+
+    return predictInternal(mm_predicted, ts, &predictors, (int)thread_id, stats);
+}
+
+/**
+*/
+bool KalmanChain::predict(Measurement& mm_predicted,
+                          const boost::posix_time::ptime& ts,
+                          PredictionStats* stats) const
+{
+    return predictInternal(mm_predicted, ts, nullptr, 0, stats);
 }
 
 /**
  * Predicts the given timestamp from the nearest existing update in the chain.
 */
-bool KalmanChain::predict(Measurement& mm_predicted,
-                          const boost::posix_time::ptime& ts,
-                          int thread_id,
-                          PredictionStats* stats) const
+bool KalmanChain::predictInternal(Measurement& mm_predicted,
+                                  const boost::posix_time::ptime& ts,
+                                  KalmanChainPredictors* predictors,
+                                  unsigned int thread_id,
+                                  PredictionStats* stats) const
 {
     //static mode? => just ask tracker
     if (!canReestimate())
     {
+        assert (!predictors);
+
         bool fixed;
         bool ok = tracker_.tracker_ptr->predict(mm_predicted, ts, &fixed);
 
@@ -645,10 +732,8 @@ bool KalmanChain::predict(Measurement& mm_predicted,
         return ok;
     }
 
-//    if (thread_id < 0 || thread_id >= (int)predictors_.size())
-//        logerr << "UGA thread_id " << thread_id << " predictors_.size() " << predictors_.size();
-
-    assert(thread_id >= 0 && thread_id < (int)predictors_.size());
+    assert(!predictors || predictors->isInit()); //!predictors must be init!
+    assert(!predictors || thread_id < predictors->size()); //!thread id must be in range!
     assert(!needsReestimate()); //!no predictions if chain is out of date!
     assert(!updates_.empty());  //!no prediction from empty chains!
 
@@ -662,23 +747,34 @@ bool KalmanChain::predict(Measurement& mm_predicted,
         assert(update.mm_id >= 0);
         assert(update.init);
 
-        auto& p = predictors_.at(thread_id);
+        auto& p = predictors ? predictors->predictor(thread_id) : *predictor_.estimator_ptr;
         
-        bool ref_changed = (!p.ref_mm_id.has_value() || update.mm_id != p.ref_mm_id.value());
+        bool ref_changed = true;
+        
+        if (!predictors)
+            ref_changed = !predictor_.ref_mm_id.has_value() || update.mm_id != predictor_.ref_mm_id.value();
 
         //predict
         bool fixed;
-        bool ok = ref_changed ? p.estimator_ptr->kalmanPrediction(mm_predicted, update.kalman_update, ts, &fixed) :
-                                p.estimator_ptr->kalmanPrediction(mm_predicted, ts, &fixed);
+        bool proj_changed = false;
+        bool ok = ref_changed ? p.kalmanPrediction(mm_predicted, update.kalman_update, ts, &fixed, &proj_changed) :
+                                p.kalmanPrediction(mm_predicted, ts, &fixed);
 
         if (stats)
         {
+            const auto& step_info = p.stepInfo();
+
             stats->num_predictions = 1;
             stats->num_failed      = !ok   ? 1 : 0;
             stats->num_fixed       = fixed ? 1 : 0;
+
+            if (proj_changed)
+                ++stats->num_proj_changed;
         }
 
-        p.ref_mm_id = update.mm_id;
+        //remember current mm id?
+        if (!predictors)
+            predictor_.ref_mm_id = update.mm_id;
 
         return ok;
     };
@@ -696,20 +792,23 @@ bool KalmanChain::predict(Measurement& mm_predicted,
         assert(update0.init);
         assert(update1.init);
 
-        auto& p = predictors_.at(thread_id);
+        auto& p = predictors ? predictors->predictor(thread_id) : *predictor_.estimator_ptr;
 
         //@TODO: interpolate
         size_t num_fixed;
-        bool ok = p.estimator_ptr->kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts, &num_fixed);
+        size_t num_proj_changed;
+        bool ok = p.kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts, &num_fixed, &num_proj_changed);
 
         if (stats)
         {
-            stats->num_predictions = 2;
-            stats->num_failed      = !ok ? 2 : 0;
-            stats->num_fixed       = num_fixed;
+            stats->num_predictions  = 2;
+            stats->num_failed       = !ok ? 2 : 0;
+            stats->num_fixed        = num_fixed;
+            stats->num_proj_changed = num_proj_changed;
         }
 
-        p.ref_mm_id.reset();
+        if (!predictors)
+            predictor_.ref_mm_id.reset();
 
         return ok;
     };
@@ -754,6 +853,68 @@ bool KalmanChain::predict(Measurement& mm_predicted,
 }
 
 /**
+ * Gets the chain state at the given timestamp as a measurement.
+*/
+bool KalmanChain::getChainState(Measurement& mm,
+                                const boost::posix_time::ptime& ts,
+                                PredictionStats* stats) const
+{
+    //static mode? => just ask tracker
+    if (!canReestimate())
+    {
+        //memoryless => check against currently tracked timestamp
+        if (tracker_.tracker_ptr->currentTime() != ts)
+            return false;
+
+        const auto& update = tracker_.tracker_ptr->currentState();
+        if (!update.has_value())
+            return false;
+
+        tracker_.tracker_ptr->estimator().storeUpdate(mm, update.value());
+        
+        return true;
+    }
+
+    //get lower bound
+    auto it = std::lower_bound(updates_.begin(), updates_.end(), ts, 
+        [ & ] (const Update& u, const boost::posix_time::ptime& t) { return u.t < t; });
+
+    //not found?
+    if (it == updates_.end())
+        return false;
+
+    //did not find update for timestamp?
+    if (it->t != ts)
+        return false;
+
+    //retrieve update and store to mm
+    size_t idx = it - updates_.begin();
+
+    const auto& update = updates_[ idx ];
+
+    tracker_.tracker_ptr->estimator().storeUpdate(mm, update.kalman_update);
+
+    return true;
+}
+
+/**
+*/
+bool KalmanChain::predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const
+{
+    int idx =  predictionRefIndex(ts);
+
+    if (idx == -1)
+        return false;
+
+    const auto& update = updates_[ idx ];
+
+    assert(update.kalman_update.has_wgs84_pos);
+
+    return std::sqrt(std::pow(update.kalman_update.lat-lat, 2)+std::pow(update.kalman_update.lon-lon, 2))
+           < settings_.prediction_max_wgs84_diff;
+}
+
+/**
  * Reinits the tracker to the given stored update.
 */
 bool KalmanChain::reinit(int idx) const
@@ -793,13 +954,12 @@ void KalmanChain::removeUpdate(int idx)
 {
     const auto& update_tbr = updates_.at(idx);
 
-    //reset nay now outdated measurement id
+    //reset now outdated measurement id
     if (tracker_.tracked_mm_id.has_value() && update_tbr.mm_id == tracker_.tracked_mm_id.value())
         tracker_.tracked_mm_id.reset();
 
-    for (auto& p : predictors_)
-        if (p.ref_mm_id.has_value() && update_tbr.mm_id == p.ref_mm_id.value())
-            p.ref_mm_id.reset();
+    if (predictor_.ref_mm_id.has_value() && update_tbr.mm_id == predictor_.ref_mm_id.value())
+        predictor_.ref_mm_id.reset();
 
     //erase update
     updates_.erase(updates_.begin() + idx);
@@ -866,7 +1026,7 @@ bool KalmanChain::needsReestimate() const
  * Reestimates the kalman state of a measurement based on the current tracker state.
 */
 bool KalmanChain::reestimate(int idx, 
-                             KalmanEstimator::StepResult* res)
+                             KalmanEstimator::StepInfo* info)
 {
     assert(canReestimate());
     assert(idx >= 0 && idx < count());
@@ -878,7 +1038,11 @@ bool KalmanChain::reestimate(int idx,
     //check fetched mm's time against update
     assert(update.t == mm.t);
 
-    if (!tracker_.tracker_ptr->track(mm, res))
+    bool ok = tracker_.tracker_ptr->track(mm);
+
+    if (info) *info = tracker_.tracker_ptr->stepInfo();
+
+    if (!ok)
         return false;
 
     tracker_.tracker_ptr->currentState().value().minimalInfo(update.kalman_update);
@@ -898,7 +1062,7 @@ bool KalmanChain::reestimate(int idx,
 bool KalmanChain::reestimate(int idx, 
                              double& d_state_sqr, 
                              double& d_cov_sqr, 
-                             KalmanEstimator::StepResult* res)
+                             KalmanEstimator::StepInfo* info)
 {
     assert(canReestimate());
     assert(idx >= 0 && idx < count());
@@ -908,7 +1072,7 @@ bool KalmanChain::reestimate(int idx,
     auto x0 = updates_[ idx ].kalman_update.x;
     auto P0 = updates_[ idx ].kalman_update.P;
 
-    if (!reestimate(idx, res))
+    if (!reestimate(idx, info))
         return false;
 
     const auto& x1 = updates_[ idx ].kalman_update.x;
@@ -988,8 +1152,8 @@ bool KalmanChain::reestimate(UpdateStats* stats)
             bool check_norm = (idx > idx_start);
 
             //reestim mm
-            KalmanEstimator::StepResult res;
-            bool ok = check_norm ? reestimate(idx, d_state_sqr, d_cov_sqr, &res) : reestimate(idx, &res);
+            KalmanEstimator::StepInfo info;
+            bool ok = check_norm ? reestimate(idx, d_state_sqr, d_cov_sqr, &info) : reestimate(idx, &info);
 
             if (stats)
             {
@@ -997,10 +1161,13 @@ bool KalmanChain::reestimate(UpdateStats* stats)
 
                 if (ok)
                     ++stats->num_valid;
-                else if (res == KalmanEstimator::StepResult::FailStepTooSmall)
+                else if (info.result == KalmanEstimator::StepResult::FailStepTooSmall)
                     ++stats->num_skipped;
                 else
                     ++stats->num_failed;
+
+                if (info.proj_changed)
+                    ++stats->num_proj_changed;
             }
 
             if (!ok)

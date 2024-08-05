@@ -25,7 +25,6 @@
 #include "util/timeconv.h"
 #include "sectorlayer.h"
 
-
 #include <algorithm>
 
 using namespace std;

@@ -39,6 +39,7 @@ class ReconstructorTarget;
 namespace reconstruction
 {
 struct Measurement;
+class KalmanChainPredictors;
 }
 
 class Buffer;
@@ -177,6 +178,8 @@ class ReconstructorBase : public Configurable
                                                   std::pair<unsigned int, unsigned int>>>& assocAounts() const = 0;
     // ds_id -> dbcont id -> (assoc, not assoc cnt)
 
+    reconstruction::KalmanChainPredictors& chainPredictors();
+
   protected:
 
     ReconstructorTask& task_;
@@ -201,6 +204,8 @@ class ReconstructorBase : public Configurable
     bool cancelled_ {false};
 
   private:
+    void initChainPredictors();
+
     ReferenceCalculatorSettings ref_calc_settings_;
 
     unsigned int slice_cnt_ {0};
@@ -213,4 +218,6 @@ class ReconstructorBase : public Configurable
     boost::posix_time::ptime write_before_time_;
 
     bool processing_ {false};
+
+    std::unique_ptr<reconstruction::KalmanChainPredictors> chain_predictors_;
 };

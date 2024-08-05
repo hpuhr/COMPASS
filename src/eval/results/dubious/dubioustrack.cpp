@@ -99,6 +99,16 @@ SingleDubiousTrack::SingleDubiousTrack(const std::string& result_id,
 ,   SingleDubiousBase ("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, eval_man, details,
                        num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
 {
+    for (const auto& detail_it : details)
+    {
+        if (dubious_reasons_.size())
+            dubious_reasons_ += "\n";
+
+        auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
+
+        dubious_reasons_ += to_string(detail_it.getValue(DetailKey::UTNOrTrackNum).toUInt()) + ":" + dub_reasons_str;
+    }
+
     updateResult();
 }
 
@@ -206,25 +216,12 @@ std::vector<std::string> SingleDubiousTrack::targetTableHeadersCustom() const
 */
 std::vector<QVariant> SingleDubiousTrack::targetTableValuesCustom() const
 {
-    //collect reasons
-    string reasons;
-
-    for (const auto& detail_it : getDetails())
-    {
-        if (reasons.size())
-            reasons += "\n";
-
-        auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
-
-        reasons += to_string(detail_it.getValue(DetailKey::UTNOrTrackNum).toUInt()) + ":" + dub_reasons_str;
-    }
-
     return { num_pos_inside_,                        // "#IU"
              num_pos_inside_dubious_,                // "#DU"
              resultValueOptional(p_dubious_update_), // "PDU"
              num_tracks_,                            // "#T"
              num_tracks_dubious_,                    // "#DT"
-             reasons.c_str() };                      // "Reasons"
+             dubious_reasons_.c_str() };             // "Reasons"
 }
 
 /**
@@ -449,20 +446,15 @@ FeatureDefinitions JoinedDubiousTrack::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    //dubious state to binary value
-    // auto getValue = [ = ] (const EvaluationDetail& detail)
-    // {
-    //     bool ok = SingleDubiousTrack::detailIsOkStatic(detail);
-    //     return ok ? 1.0 : 0.0;
-    // };
+    auto getValue = [ = ] (const EvaluationDetail& detail)
+    {
+        return boost::optional<bool>(SingleDubiousTrack::detailIsOkStatic(detail));
+    };
 
-    // return AnnotationDefinitions().addBinaryGrid("", 
-    //                                              requirement_->name(),
-    //                                              DetailValueSource(getValue),
-    //                                              GridAddDetailMode::AddEvtPosition,
-    //                                              false,
-    //                                              Qt::green,
-    //                                              Qt::red);
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+        .addDataSeries(ValueSource<bool>(getValue), 
+                       GridAddDetailMode::AddEvtPosition, 
+                       false);
 
     return defs;
 }

@@ -126,6 +126,13 @@ unsigned int SpeedBase::numNoRef() const
     return num_no_ref_;
 }
 
+/**
+*/
+const ValueAccumulator& SpeedBase::accumulator() const
+{
+    return accumulator_;
+}
+
 /***********************************************************************************
  * SingleSpeed
  ***********************************************************************************/
@@ -345,10 +352,7 @@ void JoinedSpeed::accumulateSingleResult(const std::shared_ptr<Single>& single_r
     num_comp_failed_  += single->numCompFailed();
     num_comp_passed_  += single->numCompPassed();
 
-    auto values = single->getValues(SingleSpeed::DetailKey::Offset);
-    assert(values.size() == single->numCompFailed() + single->numCompPassed());
-
-    accumulator_.accumulate(values, last);
+    accumulator_.join(single->accumulator(), last);
 }
 
 /**
@@ -395,19 +399,21 @@ std::vector<Joined::SectorInfo> JoinedSpeed::sectorInfos() const
 */
 bool JoinedSpeed::exportAsCSV(std::ofstream& strm) const
 {
-    loginf << "JoinedSpeed: exportAsCSV";
+    // loginf << "JoinedSpeed: exportAsCSV";
 
-    strm << "speed_offset\n";
+    // strm << "speed_offset\n";
     
-    auto values = getValues(SingleSpeed::DetailKey::Offset);
+    // auto values = getValues(SingleSpeed::DetailKey::Offset);
 
-    for (auto v : values)
-        strm << v << "\n";
+    // for (auto v : values)
+    //     strm << v << "\n";
 
-    if (!strm)
-        return false;
+    // if (!strm)
+    //     return false;
 
-    return true;
+    // return true;
+
+    return false;
 }
 
 /**
@@ -416,13 +422,10 @@ FeatureDefinitions JoinedSpeed::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    // return AnnotationDefinitions().addBinaryGrid("", 
-    //                                              requirement_->name(), 
-    //                                              DetailValueSource(SingleSpeed::DetailKey::CheckPassed),
-    //                                              GridAddDetailMode::AddEvtRefPosition,
-    //                                              false,
-    //                                              Qt::green,
-    //                                              Qt::red);
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+        .addDataSeries(SingleSpeed::DetailKey::CheckPassed, 
+                       GridAddDetailMode::AddEvtRefPosition, 
+                       false);
 
     return defs;
 }

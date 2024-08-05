@@ -91,6 +91,8 @@ void ViewPointsTableModel::clearViewPoints()
 
     view_points_.clear();
 
+    max_id_ = 0;
+
     table_columns_ = default_table_columns_;
     types_.clear();
     statuses_.clear();

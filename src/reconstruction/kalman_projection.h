@@ -43,7 +43,9 @@ class KalmanProjectionHandler
 public:
     struct Settings
     {
-        double proj_max_dist_cart_sqr = 0.0; //maximum squared distance threshold for MapProjectionMode::Dynamic
+        MapProjDistanceCheck proj_dist_check        = MapProjDistanceCheck::Cart; //distance checks performed
+        double               proj_max_dist_cart_sqr = 0.0;                        //maximum squared distance threshold for MapProjectionMode::Dynamic
+        double               proj_max_dist_wgs84    = 0.0;                        //maximum wgs84 distance threshold in degrees for MapProjectionMode::Dynamic
     };
 
     KalmanProjectionHandler();
@@ -65,19 +67,22 @@ public:
     
     //void unproject(std::vector<Reference>& references,
     //               const std::vector<Eigen::Vector2d>& proj_centers) const;
+
+    bool inRangeCart(double x_cart, double y_cart) const;
+    bool inRangeWGS84(double lat, double lon) const;
     
     bool changeProjectionIfNeeded(kalman::KalmanUpdate& update,
                                   const KalmanInterface& interface);
-
+    
     void xReprojected(kalman::Vector& x_repr, 
                       const KalmanInterface& interface,
                       const kalman::Vector& x,
                       const Eigen::Vector2d& proj_center,
-                      const Eigen::Vector2d& proj_center_new);
+                      const Eigen::Vector2d& proj_center_new,
+                      size_t* num_proj_center_changed = nullptr);
     kalman::XTransferFunc reprojectionTransform(const std::vector<kalman::KalmanUpdate>* updates,
                                                 const KalmanInterface* interface,
                                                 size_t offset = 0);
-
     Eigen::Vector2d projectionCenter() const;
 
     Settings& settings() { return settings_; }

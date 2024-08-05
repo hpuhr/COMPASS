@@ -31,6 +31,26 @@ class KalmanEstimator;
 class KalmanInterface;
 
 /**
+*/
+class KalmanChainPredictors
+{
+public:
+    size_t size() const;
+    bool isInit() const;
+
+    KalmanEstimator& predictor(size_t idx);
+
+    void init(std::unique_ptr<KalmanInterface>&& interface,
+              const KalmanEstimator::Settings& settings,
+              unsigned int max_threads);
+    void init(kalman::KalmanType ktype,
+              const KalmanEstimator::Settings& settings,
+              unsigned int max_threads);
+private:
+    std::vector<std::unique_ptr<KalmanEstimator>> predictors;
+};
+
+/**
  * Chain of kalman updates in which new measurements can be inserted and 
  * a reestimation of kalman states can be triggered.
  * - Utilizes a KalmanOnlineTracker which is reinitialized to certain chain updates as needed
@@ -65,6 +85,7 @@ public:
         double reestim_residual_cov_sqr   = 10000;                          // 100 * 100 - reestimation stop criterion based on cov mat change residual
 
         TD     prediction_max_tdiff       = boost::posix_time::seconds(10); // maximum difference in time which can be predicted
+        double prediction_max_wgs84_diff  = 0.5;
 
         int    verbosity = 0;
     };
@@ -91,7 +112,7 @@ public:
     typedef std::function<const Measurement&(unsigned long)> MeasurementGetFunc;
     typedef std::function<void(Measurement&, unsigned long)> MeasurementAssignFunc;
 
-    KalmanChain(int max_prediction_threads = 1);
+    KalmanChain();
     virtual ~KalmanChain();
 
     void reset();
@@ -130,12 +151,19 @@ public:
     bool needsReestimate() const;
     bool reestimate(UpdateStats* stats = nullptr);
 
-    bool predictPosClose(boost::posix_time::ptime timestamp, double max_lat_lon_dist) const;
     bool canPredict(const boost::posix_time::ptime& ts) const;
+    bool predictMT(Measurement& mm_predicted,
+                   const boost::posix_time::ptime& ts,
+                   KalmanChainPredictors& predictors,
+                   unsigned int thread_id,
+                   PredictionStats* stats = nullptr) const;
     bool predict(Measurement& mm_predicted,
                  const boost::posix_time::ptime& ts,
-                 int thread_id = 0,
                  PredictionStats* stats = nullptr) const;
+    bool predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const;
+    bool getChainState(Measurement& mm,
+                       const boost::posix_time::ptime& ts,
+                       PredictionStats* stats = nullptr) const;
     
     size_t size() const;
     int count() const;
@@ -176,11 +204,11 @@ private:
     void resetReestimationIndices();
     bool reinit(int idx) const;
     bool reestimate(int idx, 
-                    KalmanEstimator::StepResult* res = nullptr);
+                    KalmanEstimator::StepInfo* info = nullptr);
     bool reestimate(int idx, 
                     double& d_state_sqr, 
                     double& d_cov_sqr, 
-                    KalmanEstimator::StepResult* res = nullptr);
+                    KalmanEstimator::StepInfo* info = nullptr);
     void removeUpdate(int idx);
 
     int lastIndex() const;
@@ -190,14 +218,20 @@ private:
     int predictionRefIndex(const boost::posix_time::ptime& ts) const;
     Interval predictionRefInterval(const boost::posix_time::ptime& ts) const;
 
+    bool predictInternal(Measurement& mm_predicted,
+                         const boost::posix_time::ptime& ts,
+                         KalmanChainPredictors* predictors,
+                         unsigned int thread_id,
+                         PredictionStats* stats) const;
+
     Settings settings_;
 
     MeasurementGetFunc    get_func_;
     MeasurementAssignFunc assign_func_;
     mutable Measurement   mm_tmp_;
 
+    mutable Predictor              predictor_;
     mutable Tracker                tracker_;
-    mutable std::vector<Predictor> predictors_;
     std::vector<int>               fresh_indices_;
     std::vector<Update>            updates_;
 };

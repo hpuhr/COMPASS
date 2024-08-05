@@ -38,10 +38,12 @@ FeatureDefinition::FeatureDefinition() = default;
 /**
 */
 FeatureDefinition::FeatureDefinition(const EvaluationManager& eval_manager,
+                                     const std::string& definition_type,
                                      const std::string& feature_description,
                                      const std::string& x_axis_label,
                                      const std::string& y_axis_label)
 :   eval_manager_       (&eval_manager      )
+,   definition_type_    (definition_type    )
 ,   feature_description_(feature_description)
 ,   x_axis_label_       (x_axis_label       )
 ,   y_axis_label_       (y_axis_label       )
@@ -65,6 +67,13 @@ std::unique_ptr<ViewPointGenFeature> FeatureDefinition::createFeature(const Base
     feat->setName(feature_description_);
 
     return feat;
+}
+
+/**
+*/
+const std::string& FeatureDefinition::type() const
+{
+    return definition_type_;
 }
 
 /**

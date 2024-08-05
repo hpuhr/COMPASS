@@ -43,7 +43,7 @@ public:
                                const std::string& x_axis_label,
                                const boost::optional<unsigned int>& num_bins = boost::optional<unsigned int>(),
                                const boost::optional<unsigned int>& num_distinct_values_min = boost::optional<unsigned int>()) 
-    :   FeatureDefinition       (eval_manager, feature_description, x_axis_label, "") 
+    :   FeatureDefinition       (eval_manager, "histogram", feature_description, x_axis_label, "") 
     ,   num_bins_               (num_bins)
     ,   num_distinct_values_min_(num_distinct_values_min) {}
 
@@ -124,7 +124,7 @@ public:
     FeatureDefinitionCategoryHistogram(const EvaluationManager& eval_manager,
                                        const std::string& feature_description,
                                        const std::string& x_axis_label)
-    :   FeatureDefinition(eval_manager, feature_description, x_axis_label, "") 
+    :   FeatureDefinition(eval_manager, "histogram_category", feature_description, x_axis_label, "") 
     {
     }
     virtual ~FeatureDefinitionCategoryHistogram() = default;

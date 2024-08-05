@@ -54,9 +54,6 @@ namespace EvaluationRequirementResult
 
 class FeatureDefinitions;
 
-template <typename T>
-struct ValueSource;
-
 /**
 */
 class Base
@@ -117,16 +114,10 @@ public:
 
     const boost::optional<double>& result() const;
 
-    virtual void updateResult();
     bool resultUsable() const;
     bool hasFailed() const;
     bool hasIssues() const;
     bool isIgnored() const;
-
-    size_t numDetails() const;
-    const EvaluationDetails& getDetails() const;
-    const EvaluationDetail& getDetail(int idx) const;
-    const EvaluationDetail& getDetail(const DetailIndex& index) const;
 
     const SectorLayer& sectorLayer() const { return sector_layer_; } 
 
@@ -147,21 +138,17 @@ public:
     /// checks if the result can generate viewable data for the given table and annotation index
     virtual bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
                                   const QVariant& annotation) const = 0;
+    /// checks if the viewable data is ready (e.g. cached or invalidated)
+    virtual bool viewableDataReady() const = 0;
     /// creates suitable viewable data for the given table and annotation index
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    virtual std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
                                                                    const QVariant& annotation) const = 0;
-    /// creates overview viewable data
-    virtual std::unique_ptr<nlohmann::json::object_t> viewableData() const = 0;
-
     /// adds the result to the report root item
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
     /// iterate over details
     virtual void iterateDetails(const DetailFunc& func,
                                 const DetailSkipFunc& skip_func = DetailSkipFunc()) const = 0;
-
-    std::vector<double> getValues(const ValueSource<double>& source) const;
-    std::vector<double> getValues(int value_id) const;
 
     size_t totalNumDetails() const;
     size_t totalNumPositions() const;
@@ -220,7 +207,7 @@ protected:
             return true;
         }
 
-        ViewableType                viewable_type = ViewableType::Overview;
+        ViewableType                 viewable_type = ViewableType::Overview;
         boost::optional<DetailIndex> detail_index;
     };
 
@@ -237,17 +224,12 @@ protected:
     void setIgnored();
 
     QString formatValue(double v, int precision = 2) const;
-
-    void setDetails(const EvaluationDetails& details);
-    void addDetails(const EvaluationDetails& details);
-    void clearDetails();
-    bool detailIndexValid(const DetailIndex& index) const; 
-
-    /// compute result value
-    virtual boost::optional<double> computeResult() const;
-    virtual boost::optional<double> computeResult_impl() const = 0;
-    
     std::string conditionResultString() const;
+
+    void updateResult(const boost::optional<double>& value);
+
+    /// creates overview viewable data
+    virtual std::shared_ptr<nlohmann::json::object_t> viewableOverviewData() const = 0;
 
     std::unique_ptr<nlohmann::json::object_t> createViewable(const AnnotationOptions& options) const;
 
@@ -288,8 +270,6 @@ protected:
     EvaluationManager& eval_man_;
 
 private:
-    EvaluationDetails details_;
-
     boost::optional<double> result_;
     bool                    ignore_ = false;
 };

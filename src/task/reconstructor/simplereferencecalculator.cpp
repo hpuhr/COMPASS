@@ -536,7 +536,6 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
             ++refs.num_updates_skipped;
         else
             ++refs.num_updates_failed;
-        
     }
 
     if (settings_.activeVerbosity() > 0)

@@ -104,7 +104,6 @@ std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& re
     return std::make_shared<JoinedDetection>(result_id, requirement_, sector_layer_, eval_man_);
 }
 
-
 /**
 */
 boost::optional<double> SingleDetection::computeResult_impl() const
