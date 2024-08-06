@@ -141,7 +141,9 @@ kalman::Vector KalmanInterface::stateVecXInv(const kalman::Vector& x) const
 bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                                     size_t idx0,
                                     size_t idx1,
-                                    KalmanProjectionHandler& proj_handler) const
+                                    KalmanProjectionHandler& proj_handler,
+                                    double smooth_scale,
+                                    kalman::SmoothFailStrategy fail_strategy) const
 {
     assert(idx1 >= idx0);
 
@@ -152,6 +154,7 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
 
     std::vector<kalman::Vector> x_smooth;
     std::vector<kalman::Matrix> P_smooth;
+    std::vector<bool>           state_valid_tmp;
 
     //loginf << "KalmanInterface: smoothUpdates: #updates: " << updates.size() << ", idx0: " << idx0 << ", idx1: " << idx1 << ", n: " << n;
 
@@ -166,16 +169,27 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
     auto x_tr = proj_handler.reprojectionTransform(&updates, this, idx0);
 
     //smooth states
-    if (!smoothUpdates_impl(x_smooth, P_smooth, states, x_tr))
+    if (!smoothUpdates_impl(x_smooth, 
+                            P_smooth, 
+                            states, 
+                            x_tr, 
+                            smooth_scale, 
+                            fail_strategy == kalman::SmoothFailStrategy::Stop, 
+                            fail_strategy == kalman::SmoothFailStrategy::SetInvalid ? &state_valid_tmp : nullptr))
+    {
         return false;
-
+    }
+    
     //write smoothed states back to updates
     for (size_t i = 0; i < n; ++i)
     {
         updates[ idx0 + i ].state.x = x_smooth[ i ];
         updates[ idx0 + i ].state.P = P_smooth[ i ];
-    }
 
+        if (fail_strategy == kalman::SmoothFailStrategy::SetInvalid && !state_valid_tmp[ i ])
+            updates[ idx0 + i ].valid = false;
+    }
+    
     return true;
 }
 

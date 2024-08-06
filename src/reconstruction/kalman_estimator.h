@@ -82,6 +82,8 @@ public:
 
         StepFailStrategy step_fail_strategy = StepFailStrategy::ReturnInvalid;
 
+        double smoothing_scale = 0.1;
+
         bool track_velocities      = true;
         bool track_accelerations   = true;
 
@@ -106,7 +108,8 @@ public:
     {
         Success = 0,
         FailStepTooSmall,
-        FailKalmanError
+        FailKalmanError,
+        FailResultInvalid
     };
 
     struct StepInfo
@@ -176,7 +179,8 @@ public:
     void storeUpdates(std::vector<Reference>& refs,
                       const std::vector<kalman::KalmanUpdate>& updates) const;
     
-    bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const;
+    bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
+                       kalman::SmoothFailStrategy fail_strategy) const;
     bool interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
                        std::vector<kalman::KalmanUpdate>& updates,
                        size_t* num_steps_failed = nullptr) const;
@@ -245,6 +249,7 @@ private:
     reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
 
     bool checkPrediction(const Measurement& mm) const;
+    bool checkState(const kalman::KalmanUpdate& update) const;
 
     std::unique_ptr<KalmanInterface>         kalman_interface_;
     std::unique_ptr<KalmanProjectionHandler> proj_handler_;

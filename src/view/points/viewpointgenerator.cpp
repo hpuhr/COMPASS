@@ -713,6 +713,7 @@ void ViewPointGenAnnotation::addFeature(std::unique_ptr<ViewPointGenFeature>&& f
 */
 void ViewPointGenAnnotation::addFeature(ViewPointGenFeature* feat)
 {
+    assert(feat);
     features_.emplace_back(feat);
 }
 
@@ -720,6 +721,7 @@ void ViewPointGenAnnotation::addFeature(ViewPointGenFeature* feat)
 */
 ViewPointGenAnnotation* ViewPointGenAnnotation::addAnnotation(const std::string& name, bool hidden)
 {
+    anno_map_[ name ] = annotations_.size();
     annotations_.emplace_back(new ViewPointGenAnnotation(name, hidden));
     return annotations_.back().get();
 }
@@ -728,7 +730,37 @@ ViewPointGenAnnotation* ViewPointGenAnnotation::addAnnotation(const std::string&
 */
 void ViewPointGenAnnotation::addAnnotation(std::unique_ptr<ViewPointGenAnnotation>&& a)
 {
+    assert(a);
+
+    anno_map_[ a->name() ] = annotations_.size();
     annotations_.push_back(std::move(a));
+}
+
+/**
+*/
+ViewPointGenAnnotation* ViewPointGenAnnotation::getOrCreateAnnotation(const std::string& name, bool hidden)
+{
+    if (hasAnnotation(name))
+        return annotation(name);
+
+    return addAnnotation(name, hidden);
+}
+
+/**
+*/
+bool ViewPointGenAnnotation::hasAnnotation(const std::string& name) const
+{
+    return anno_map_.count(name) > 0;
+}
+
+/**
+*/
+ViewPointGenAnnotation* ViewPointGenAnnotation::annotation(const std::string& name) const
+{
+    auto it = anno_map_.find(name);
+    assert(it != anno_map_.end());
+
+    return annotations_.at(it->second).get();
 }
 
 /**
@@ -824,6 +856,7 @@ nlohmann::json& ViewPointGenAnnotation::getChildrenJSON(nlohmann::json& annotati
 */
 ViewPointGenAnnotation* ViewPointGenAnnotations::addAnnotation(const std::string& name, bool hidden)
 {
+    anno_map_[ name ] = annotations_.size();
     annotations_.emplace_back(new ViewPointGenAnnotation(name, hidden));
     return annotations_.back().get();
 }
@@ -832,7 +865,37 @@ ViewPointGenAnnotation* ViewPointGenAnnotations::addAnnotation(const std::string
 */
 void ViewPointGenAnnotations::addAnnotation(std::unique_ptr<ViewPointGenAnnotation>&& a)
 {
+    assert(a);
+
+    anno_map_[ a->name() ] = annotations_.size();
     annotations_.push_back(std::move(a));
+}
+
+/**
+*/
+ViewPointGenAnnotation* ViewPointGenAnnotations::getOrCreateAnnotation(const std::string& name, bool hidden)
+{
+    if (hasAnnotation(name))
+        return annotation(name);
+
+    return addAnnotation(name, hidden);
+}
+
+/**
+*/
+bool ViewPointGenAnnotations::hasAnnotation(const std::string& name) const
+{
+    return anno_map_.count(name) > 0;
+}
+
+/**
+*/
+ViewPointGenAnnotation* ViewPointGenAnnotations::annotation(const std::string& name) const
+{
+    auto it = anno_map_.find(name);
+    assert(it != anno_map_.end());
+
+    return annotations_.at(it->second).get();
 }
 
 /**

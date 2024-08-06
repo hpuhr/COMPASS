@@ -18,6 +18,7 @@
 #include "metavariable.h"
 #include "util/async.h"
 #include "evaluationmanager.h"
+#include "viewpointgenerator.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
@@ -526,7 +527,7 @@ void ReconstructorTask::deleteAssociationsDoneSlot()
     progress_dialog_->setCancelButton(new QPushButton("Cancel"));
 
     connect(progress_dialog_.get(), &QProgressDialog::canceled,
-            this, &ReconstructorTask::runDoneSlot);
+            this, &ReconstructorTask::runCancelledSlot);
 
     updateProgressSlot("Initializing", false);
 
@@ -820,6 +821,8 @@ void ReconstructorTask::writeDoneSlot()
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
+        if (debug_)
+            saveDebugViewPoints();
     }
 
     malloc_trim(0); // release unused memory
@@ -827,9 +830,9 @@ void ReconstructorTask::writeDoneSlot()
     writing_slice_ = nullptr;
 }
 
-void ReconstructorTask::runDoneSlot()
+void ReconstructorTask::runCancelledSlot()
 {
-    loginf << "ReconstructorTask: runDoneSlot";
+    loginf << "ReconstructorTask: runCancelledSlot";
 
     assert (progress_dialog_);
 
@@ -874,7 +877,7 @@ void ReconstructorTask::runDoneSlot()
            || processing_data_slice_ || currentReconstructor()->processing()
            || dbcontent_man.insertInProgress())
     {
-        loginf << "ReconstructorTask: runDoneSlot: waiting, load "
+        loginf << "ReconstructorTask: runCancelledSlot: waiting, load "
                << (loading_data_ || dbcontent_man.loadInProgress())
                << " proc " << (processing_data_slice_ || currentReconstructor()->processing())
                << " insert " << dbcontent_man.insertInProgress();
@@ -882,7 +885,7 @@ void ReconstructorTask::runDoneSlot()
         Async::waitAndProcessEventsFor(500);
     }
 
-    loginf << "ReconstructorTask: runDoneSlot: all done";
+    loginf << "ReconstructorTask: runCancelledSlot: all done";
 
     disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
                this, &ReconstructorTask::loadedDataSlot);
@@ -908,7 +911,7 @@ void ReconstructorTask::runDoneSlot()
 
     emit doneSignal();
 
-    loginf << "ReconstructorTask: runDoneSlot: done";
+    loginf << "ReconstructorTask: runCancelledSlot: done";
 }
 
 bool ReconstructorTask::useDStype(const std::string& ds_type) const
@@ -1001,19 +1004,29 @@ ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
     return *processing_slice_;
 }
 
-nlohmann::json& ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type)
+ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type) const
 {
     auto key_str = std::pair<std::string,std::string>(name,type);
 
     if (!debug_viewpoints_.count(key_str))
     {
-
-        debug_viewpoints_[key_str] = nlohmann::json::object_t();
-        debug_viewpoints_[key_str]["name"] = name;
-        debug_viewpoints_[key_str]["type"] = type;
+        std::unique_ptr<ViewPointGenVP> vp(new ViewPointGenVP(name, 0, type));
+        debug_viewpoints_[ key_str ] = std::move(vp);
     }
 
-    return debug_viewpoints_.at(key_str);
+    return debug_viewpoints_.at(key_str).get();
+}
+
+ViewPointGenVP* ReconstructorTask::getDebugViewpointForUTN(unsigned long utn) const
+{
+    return getDebugViewpoint("UTN " + std::to_string(utn), "UTN");
+}
+
+ViewPointGenAnnotation* ReconstructorTask::getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const
+{
+    auto vp = getDebugViewpointForUTN(utn);
+
+    return vp->annotations().getOrCreateAnnotation("Slice " + std::to_string(slice_idx));
 }
 
 void ReconstructorTask::saveDebugViewPoints()
@@ -1025,7 +1038,12 @@ void ReconstructorTask::saveDebugViewPoints()
     std::vector <nlohmann::json> view_points;
 
     for (auto& vp_it : debug_viewpoints_)
-        view_points.emplace_back(std::move(vp_it.second));
+    {
+        nlohmann::json j;
+        vp_it.second->toJSON(j);
+
+        view_points.emplace_back(j);
+    }
 
     COMPASS::instance().viewManager().addViewPoints(view_points);
 

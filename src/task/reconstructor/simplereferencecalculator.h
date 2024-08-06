@@ -28,6 +28,15 @@ namespace dbContent
     class ReconstructorTarget;
 }
 
+class ViewPointGenAnnotation;
+
+namespace reconstruction
+{
+    class KalmanEstimator;
+}
+
+class QColor;
+
 /**
 */
 class SimpleReferenceCalculator
@@ -71,7 +80,10 @@ private:
         size_t num_updates_valid       = 0;
         size_t num_updates_failed      = 0;
         size_t num_updates_skipped     = 0;
+        size_t num_smooth_steps_failed = 0;
         size_t num_interp_steps_failed = 0;
+
+        ViewPointGenAnnotation* annotation = nullptr;
     };
 
     enum class InitRecResult
@@ -107,6 +119,22 @@ private:
     void updateReferences();
 
     boost::posix_time::ptime getJoinThreshold() const;
+
+    ViewPointGenAnnotation* addAnnotations(const reconstruction::KalmanEstimator& estimator, 
+                                           ViewPointGenAnnotation& root,
+                                           const std::string& name,
+                                           const std::vector<kalman::KalmanUpdate>& updates,
+                                           const std::vector<reconstruction::Measurement> measurements,
+                                           const std::vector<unsigned int>& used_mms,
+                                           size_t offs,
+                                           const boost::optional<boost::posix_time::ptime>& t0,
+                                           const boost::optional<boost::posix_time::ptime>& t1,
+                                           const QColor& base_color,
+                                           bool add_positions = true,
+                                           bool add_accuracies = true,
+                                           bool add_velocities = true,
+                                           bool add_acceleration = true,
+                                           bool add_input_connections = false) const;
 
     ReconstructorBase& reconstructor_;
 

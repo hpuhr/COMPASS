@@ -508,13 +508,16 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
     {
         //normal step
         bool kalman_step_ok = kalmanInterfaceStep(update, mm);
+        bool update_ok      = kalman_step_ok && checkState(update);
 
         //handle failed step?
-        if (!kalman_step_ok)
+        if (!update_ok)
         {
             if (settings_.verbosity > 0)
                 logwrn << "KalmanEstimator: kalmanStep: step failed";
 
+            KalmanEstimator::StepResult result = !kalman_step_ok ? KalmanEstimator::StepResult::FailKalmanError :
+                                                                   KalmanEstimator::StepResult::FailResultInvalid;
             //print kalman state
             //kalman_interface_->printState();
 
@@ -531,13 +534,13 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
             else if (settings_.step_fail_strategy == Settings::StepFailStrategy::ReturnInvalid)
             {
                 //keep old state and return error
-                return KalmanEstimator::StepResult::FailKalmanError;
+                return result;
             }
             else
             {
                 //assert on error
-                assert(kalman_step_ok);
-                return KalmanEstimator::StepResult::FailKalmanError;
+                assert(update_ok);
+                return result;
             }
         }
     }
@@ -558,19 +561,39 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
 */
 bool KalmanEstimator::checkPrediction(const Measurement& mm) const
 {
-    if (mm.x_stddev.has_value() && std::isnan(mm.x_stddev.value()))
+    if (mm.x_stddev.has_value() && !std::isfinite(mm.x_stddev.value()))
         return false;
-    if (mm.y_stddev.has_value() && std::isnan(mm.y_stddev.value()))
+    if (mm.y_stddev.has_value() && !std::isfinite(mm.y_stddev.value()))
         return false;
-    if (mm.xy_cov.has_value() && std::isnan(mm.xy_cov.value()))
+    if (mm.xy_cov.has_value() && !std::isfinite(mm.xy_cov.value()))
         return false;
-    if (mm.vx_stddev.has_value() && std::isnan(mm.vx_stddev.value()))
+    if (mm.vx_stddev.has_value() && !std::isfinite(mm.vx_stddev.value()))
         return false;
-    if (mm.vy_stddev.has_value() && std::isnan(mm.vy_stddev.value()))
+    if (mm.vy_stddev.has_value() && !std::isfinite(mm.vy_stddev.value()))
         return false;
-    if (mm.ax_stddev.has_value() && std::isnan(mm.ax_stddev.value()))
+    if (mm.ax_stddev.has_value() && !std::isfinite(mm.ax_stddev.value()))
         return false;
-    if (mm.ay_stddev.has_value() && std::isnan(mm.ay_stddev.value()))
+    if (mm.ay_stddev.has_value() && !std::isfinite(mm.ay_stddev.value()))
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool KalmanEstimator::checkState(const kalman::KalmanUpdate& update) const
+{
+    double x, y;
+    kalman_interface_->xPos(x, y, update.state.x);
+
+    if (!std::isfinite(x) || !std::isfinite(y))
+        return false;
+
+    double xvar  = kalman_interface_->xVar(update.state.P);
+    double yvar  = kalman_interface_->yVar(update.state.P);
+    double xycov = kalman_interface_->xyCov(update.state.P);
+
+    if (!std::isfinite(xvar) || !std::isfinite(yvar) || !std::isfinite(xycov))
         return false;
 
     return true;
@@ -781,18 +804,24 @@ void KalmanEstimator::executeChainFunc(Updates& updates, const ChainFunc& func) 
 
 /**
 */
-bool KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates) const
+bool KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
+                                    kalman::SmoothFailStrategy fail_strategy) const
 {
     assert(isInit());
 
     KalmanProjectionHandler phandler;
 
     bool ok = true;
-
+    
     auto func = [ & ] (std::vector<kalman::KalmanUpdate>& updates, size_t idx0, size_t idx1)
     {
         //@TODO: what happens if smoothing fails? => assert for the moment
-        ok = ok && kalman_interface_->smoothUpdates(updates, idx0, idx1, phandler);
+        ok = ok && kalman_interface_->smoothUpdates(updates, 
+                                                    idx0, 
+                                                    idx1, 
+                                                    phandler, 
+                                                    settings_.smoothing_scale,
+                                                    fail_strategy);
         assert(ok);
     };
 

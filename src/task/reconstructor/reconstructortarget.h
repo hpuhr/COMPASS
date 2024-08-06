@@ -53,6 +53,7 @@ class ReconstructorTarget
             num_rec_updates_valid        = 0;
             num_rec_updates_failed       = 0;
             num_rec_updates_skipped      = 0;
+            num_rec_smooth_failed        = 0;
             num_rec_interp_failed        = 0;
         }
 
@@ -72,6 +73,7 @@ class ReconstructorTarget
         size_t num_rec_updates_valid        = 0;
         size_t num_rec_updates_failed       = 0;
         size_t num_rec_updates_skipped      = 0;
+        size_t num_rec_smooth_failed        = 0;
         size_t num_rec_interp_failed        = 0;
     };
 

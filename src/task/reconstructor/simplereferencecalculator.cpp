@@ -23,6 +23,8 @@
 
 #include "kalman_estimator.h"
 
+#include "viewpointgenerator.h"
+
 #include "util/timeconv.h"
 #include "util/number.h"
 #include "stringconv.h"
@@ -44,6 +46,8 @@ void SimpleReferenceCalculator::TargetReferences::reset()
     start_index.reset();
 
     resetCounts();
+
+    annotation = nullptr;
 }
 
 /**
@@ -54,6 +58,7 @@ void SimpleReferenceCalculator::TargetReferences::resetCounts()
     num_updates_valid       = 0;
     num_updates_failed      = 0;
     num_updates_skipped     = 0;
+    num_smooth_steps_failed = 0;
     num_interp_steps_failed = 0;
 }
 
@@ -120,8 +125,20 @@ void SimpleReferenceCalculator::reset()
  */
 void SimpleReferenceCalculator::resetDataStructs()
 {
+    const auto& task = reconstructor_.task();
+
+    bool        debug         = task.debug();
+    const auto& debug_utns    = task.debugUTNs();
+    const auto& debug_recnums = task.debugRecNums();
+
     for (auto& ref : references_)
+    {
         ref.second.reset();
+
+        //set debug annotation if desired
+        if (debug && debug_utns.count(ref.second.utn) != 0)
+            ref.second.annotation = task.getDebugAnnotationForUTNSlice(ref.second.utn, slice_idx_);
+    }
 
     updateInterpOptions();
 }
@@ -328,8 +345,7 @@ void SimpleReferenceCalculator::reconstructMeasurements()
 boost::posix_time::ptime SimpleReferenceCalculator::getJoinThreshold() const
 {
     const auto ThresJoin = reconstructor_.currentSlice().remove_before_time_
-                           + (reconstructor_.currentSlice().slice_begin_
-                              - reconstructor_.currentSlice().remove_before_time_) / 2;
+                           + (reconstructor_.currentSlice().slice_begin_ - reconstructor_.currentSlice().remove_before_time_) / 2;
     return ThresJoin;
 }
 
@@ -405,6 +421,9 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     const auto& debug_ts_min  = reconstructor_.task().debugTimestampMin();
     const auto& debug_ts_max  = reconstructor_.task().debugTimestampMax();
 
+    const auto& slice_t0 = reconstructor_.currentSlice().slice_begin_;
+    const auto& slice_t1 = reconstructor_.currentSlice().next_slice_begin_;
+
     bool debug_target = general_debug && debug_utns.count(refs.utn) > 0;
 
     if(settings_.activeVerbosity() > 0) 
@@ -448,6 +467,9 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     size_t n_mm     = refs.measurements.size() - refs.start_index.value() + 1;
 
     refs.updates.reserve(n_before + n_mm);
+
+    //std::vector<unsigned int> used_mms(n_before);
+    //used_mms.reserve(n_before + n_mm);
 
     // auto ThresRemove = reconstructor_.remove_before_time_;
     // auto ThresJoin   = getJoinThreshold();
@@ -499,11 +521,13 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         assert(update.valid);
 
         refs.updates.push_back(update);
+        //used_mms.push_back(refs.start_index.value());
 
         ++offs; //continue with second measurement
     }
 
     //add new measurements to kalman and collect updates
+    
     for (size_t i = refs.start_index.value() + offs; i < refs.measurements.size(); ++i)
     {
         const auto& mm = refs.measurements[ i ];
@@ -526,7 +550,10 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
         //!only add update if valid!
         if (update.valid)
+        {
             refs.updates.push_back(update);
+            //used_mms.push_back(i);
+        }
 
         ++refs.num_updates;
 
@@ -544,20 +571,53 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         loginf << "    #updates: " << refs.updates.size();
     }
 
+    if (refs.annotation)
+    {
+        // addAnnotations(estimator, 
+        //                *refs.annotation, 
+        //                "kalman", 
+        //                refs.updates, 
+        //                refs.measurements, 
+        //                used_mms, 
+        //                n_before,
+        //                slice_t0, 
+        //                slice_t1, 
+        //                QColor(255, 255, 0),
+        //                true,
+        //                true,
+        //                true,
+        //                true,
+        //                true);
+    }
+
     //start with joined kalman updates
     std::vector<kalman::KalmanUpdate> updates = refs.updates;
 
+    //std::vector<unsigned int> used_mms_smooth(n_before);
+    
     //run rts smoothing?
     if (settings_.smooth_rts)
     {
         //jointly smooth old + new kalman updates RTS
-        bool ok = estimator.smoothUpdates(updates);
+        bool ok = estimator.smoothUpdates(updates, kalman::SmoothFailStrategy::SetInvalid);
         assert(ok);
 
         //combine old rts updates with new rts updates
-        refs.updates_smooth.insert(refs.updates_smooth.end(),
-                                   updates.begin() + n_before,
-                                   updates.end());
+        refs.updates_smooth.reserve(n_before + n_mm);
+
+        size_t n_updates = updates.size();
+        for (size_t i = n_before; i < n_updates; ++i)
+        {
+            if (updates[ i ].valid)
+            {
+                refs.updates_smooth.push_back(updates[ i ]);
+                //used_mms_smooth.push_back(used_mms[ i ]);
+            }
+            else
+            {
+                ++refs.num_smooth_steps_failed;
+            }
+        }
 
         updates = refs.updates_smooth;
 
@@ -565,6 +625,25 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         {
             loginf << "    #updates (smoothed): " << updates.size();
         }
+    }
+
+    if (refs.annotation)
+    {
+        // addAnnotations(estimator, 
+        //                *refs.annotation, 
+        //                "kalman_rts", 
+        //                updates, 
+        //                refs.measurements, 
+        //                used_mms_smooth, 
+        //                n_before,
+        //                slice_t0, 
+        //                slice_t1, 
+        //                QColor(255, 0, 255),
+        //                true,
+        //                true,
+        //                true,
+        //                true,
+        //                true);
     }
 
     //resample?
@@ -591,6 +670,128 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
 /**
  */
+ViewPointGenAnnotation* SimpleReferenceCalculator::addAnnotations(const reconstruction::KalmanEstimator& estimator, 
+                                                                  ViewPointGenAnnotation& root,
+                                                                  const std::string& name,
+                                                                  const std::vector<kalman::KalmanUpdate>& updates,
+                                                                  const std::vector<reconstruction::Measurement> measurements,
+                                                                  const std::vector<unsigned int>& used_mms,
+                                                                  size_t offs,
+                                                                  const boost::optional<boost::posix_time::ptime>& t0,
+                                                                  const boost::optional<boost::posix_time::ptime>& t1,
+                                                                  const QColor& base_color,
+                                                                  bool add_positions,
+                                                                  bool add_accuracies,
+                                                                  bool add_velocities,
+                                                                  bool add_acceleration,
+                                                                  bool add_input_connections) const
+{
+    //loginf << "SimpleReferenceCalculator: addAnnotations: Adding annotation '" << name << "' to parent '" << root.name() << "'";
+
+    auto parent_anno = root.getOrCreateAnnotation(name);
+    assert(parent_anno);
+
+    std::vector<reconstruction::Reference> references;
+    estimator.storeUpdates(references, updates);
+
+    assert(references.size() == used_mms.size());
+
+    auto iterateReferences = [ & ] (const std::function<void(const reconstruction::Reference&, const reconstruction::Measurement&)>& func)
+    {
+        size_t n = references.size();
+
+        for (size_t i = offs; i < n; ++i)
+        {
+            const auto& r  = references.at(i);
+            const auto& mm = measurements.at(used_mms.at(i));
+
+            if (t0.has_value() && r.t < t0.value()) continue;
+            if (t1.has_value() && r.t > t1.value()) continue;
+
+            func(r, mm);
+        }
+    };
+
+    if (add_positions)
+    {
+        auto anno = parent_anno->getOrCreateAnnotation("positions");
+
+        std::vector<Eigen::Vector2d> positions;
+        auto func = [ & ] (const reconstruction::Reference& r, const reconstruction::Measurement& mm)
+        {
+            assert(std::isfinite(r.lat) && std::isfinite(r.lon));
+            positions.emplace_back(r.lat, r.lon);
+        };
+        iterateReferences(func);
+
+        auto fp = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Cross, 6.0f, positions, {}, false);
+        fp->setColor(base_color);
+        anno->addFeature(fp);
+
+        auto fl = new ViewPointGenFeatureLineString(false, 1.0f, positions, {}, false);
+        fl->setColor(base_color);
+        anno->addFeature(fl);
+    }
+    if (add_accuracies)
+    {
+        auto anno = parent_anno->getOrCreateAnnotation("accuracies");
+
+        std::vector<Eigen::Vector2d> positions;
+        std::vector<Eigen::Vector3d> accuracies;
+        auto func = [ & ] (const reconstruction::Reference& r, const reconstruction::Measurement& mm)
+        {
+            assert(std::isfinite(r.lat) && std::isfinite(r.lon));
+
+            if (!r.hasStdDevPosition())
+                return;
+
+            assert(std::isfinite(r.x_stddev.value()) && std::isfinite(r.y_stddev.value()));
+            assert(!r.xy_cov.has_value() || std::isfinite(r.xy_cov.value()));
+            
+            positions.emplace_back(r.lat, r.lon);
+            accuracies.emplace_back(r.x_stddev.value(), r.y_stddev.value(), r.xy_cov.has_value() ? r.xy_cov.value() : 0.0);
+        };
+        iterateReferences(func);
+
+        auto f = new ViewPointGenFeatureErrEllipses(1.0f, 32u, positions, {}, accuracies, false);
+        f->setColor(base_color);
+
+        anno->addFeature(f);
+    }
+    if (add_velocities)
+    {
+        auto anno = parent_anno->getOrCreateAnnotation("velocities");
+    }
+    if (add_acceleration)
+    {
+        auto anno = parent_anno->getOrCreateAnnotation("accelerations");
+    }
+    if (add_input_connections)
+    {
+        // auto anno = parent_anno->getOrCreateAnnotation("input_data_connections");
+
+        // std::vector<Eigen::Vector2d> positions;
+        // auto func = [ & ] (const reconstruction::Reference& r, const reconstruction::Measurement& mm)
+        // {
+        //     assert(std::isfinite(r.lat) && std::isfinite(r.lon));
+        //     assert(std::isfinite(mm.lat) && std::isfinite(mm.lon));
+
+        //     positions.emplace_back(r.lat, r.lon);
+        //     positions.emplace_back(mm.lat, mm.lon);
+        // };
+        // iterateReferences(func);
+
+        // auto f = new ViewPointGenFeatureLines(1.0f, positions, {}, false);
+        // f->setColor(base_color);
+
+        // anno->addFeature(f);
+    }
+
+    return parent_anno;
+}
+
+/**
+ */
 void SimpleReferenceCalculator::updateReferences()
 {
     for (auto& ref : references_)
@@ -611,6 +812,7 @@ void SimpleReferenceCalculator::updateReferences()
         dbContent::ReconstructorTarget::globalStats().num_rec_updates_valid   += ref.second.num_updates_valid;
         dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed  += ref.second.num_updates_failed;
         dbContent::ReconstructorTarget::globalStats().num_rec_updates_skipped += ref.second.num_updates_skipped;
+        dbContent::ReconstructorTarget::globalStats().num_rec_smooth_failed   += ref.second.num_smooth_steps_failed;
         dbContent::ReconstructorTarget::globalStats().num_rec_interp_failed   += ref.second.num_interp_steps_failed;
     }
 }

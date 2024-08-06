@@ -762,8 +762,6 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
 
         if (stats)
         {
-            const auto& step_info = p.stepInfo();
-
             stats->num_predictions = 1;
             stats->num_failed      = !ok   ? 1 : 0;
             stats->num_fixed       = fixed ? 1 : 0;

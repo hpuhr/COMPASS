@@ -448,6 +448,7 @@ public:
     T* addFeature(Targs&&... args)
     {
         T* feat = new T(std::forward<Targs>(args)...);
+
         features_.push_back(std::unique_ptr<T>(feat));
 
         return feat;
@@ -455,6 +456,13 @@ public:
 
     ViewPointGenAnnotation* addAnnotation(const std::string& name, bool hidden = false);
     void addAnnotation(std::unique_ptr<ViewPointGenAnnotation>&& a);
+
+    ViewPointGenAnnotation* getOrCreateAnnotation(const std::string& name, bool hidden = false);
+
+    bool hasAnnotation(const std::string& name) const;
+    ViewPointGenAnnotation* annotation(const std::string& name) const;
+
+    const std::string& name() const { return name_; }
 
     size_t size() const { return annotations_.size(); }
     size_t numFeatures() const { return features_.size(); }
@@ -479,6 +487,7 @@ private:
 
     std::vector<std::unique_ptr<ViewPointGenFeature>>    features_;
     std::vector<std::unique_ptr<ViewPointGenAnnotation>> annotations_;
+    std::map<std::string, size_t>                        anno_map_;
 };
 
 /**
@@ -492,14 +501,20 @@ public:
     ViewPointGenAnnotation* addAnnotation(const std::string& name, bool hidden = false);
     void addAnnotation(std::unique_ptr<ViewPointGenAnnotation>&& a);
 
+    ViewPointGenAnnotation* getOrCreateAnnotation(const std::string& name, bool hidden = false);
+
     size_t size() const { return annotations_.size(); }
-    const ViewPointGenAnnotation& annotation(size_t idx) const { return *annotations_.at(idx); }
+    ViewPointGenAnnotation* annotation(size_t idx) const { return annotations_.at(idx).get(); }
+
+    bool hasAnnotation(const std::string& name) const;
+    ViewPointGenAnnotation* annotation(const std::string& name) const;
 
     void toJSON(nlohmann::json& j) const;
     void print(std::ostream& strm, const std::string& prefix = "") const;
 
 private:
     std::vector<std::unique_ptr<ViewPointGenAnnotation>> annotations_;
+    std::map<std::string, size_t>                        anno_map_;
 };
 
 /**

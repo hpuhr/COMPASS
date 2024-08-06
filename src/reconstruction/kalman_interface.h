@@ -75,7 +75,9 @@ public:
     bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                        size_t idx0,
                        size_t idx1,
-                       KalmanProjectionHandler& proj_handler) const;
+                       KalmanProjectionHandler& proj_handler,
+                       double smooth_scale = 1.0,
+                       kalman::SmoothFailStrategy fail_strategy = kalman::SmoothFailStrategy::Stop) const; 
 
     double timestep(const Measurement& mm) const;
     static double timestep(const Measurement& mm0, const Measurement& mm1);
@@ -153,7 +155,10 @@ protected:
     virtual bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
                                     std::vector<kalman::Matrix>& P_smooth,
                                     const std::vector<kalman::KalmanState>& states,
-                                    const kalman::XTransferFunc& x_tr) const = 0;
+                                    const kalman::XTransferFunc& x_tr,
+                                    double smooth_scale,
+                                    bool stop_on_fail,
+                                    std::vector<bool>* state_valid) const = 0;
 
     int verbosity() const { return verbosity_; }
 

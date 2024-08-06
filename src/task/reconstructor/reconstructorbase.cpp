@@ -325,6 +325,7 @@ void ReconstructorBase::processSlice()
                                            << stats.num_rec_updates_failed             << " failed ("  << num_rec_updates_failed_p       << "%), "
                                            << stats.num_rec_updates_skipped            << " skipped (" << num_rec_updates_skipped_p      << "%), "
                                            << stats.num_rec_updates                    << " total\n"
+               << "   rec smooth steps:  " << stats.num_rec_smooth_failed              << " failed"
                << "   rec interp steps:  " << stats.num_rec_interp_failed              << " failed";
     }
 }

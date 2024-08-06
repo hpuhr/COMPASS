@@ -215,9 +215,12 @@ void KalmanInterfaceLinear::stateVecX(const kalman::Vector& x)
 bool KalmanInterfaceLinear::smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
                                                std::vector<kalman::Matrix>& P_smooth,
                                                const std::vector<kalman::KalmanState>& states,
-                                               const kalman::XTransferFunc& x_tr) const
+                                               const kalman::XTransferFunc& x_tr,
+                                               double smooth_scale,
+                                               bool stop_on_fail,
+                                               std::vector<bool>* state_valid) const
 {
-    return kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, states, x_tr);
+    return kalman::KalmanFilter::rtsSmoother(x_smooth, P_smooth, states, x_tr, smooth_scale, stop_on_fail, state_valid);
 }
 
 /**

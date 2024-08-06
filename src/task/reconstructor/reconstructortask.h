@@ -8,7 +8,6 @@
 #include "global.h"
 #include "json.hpp"
 
-
 #include <QObject>
 
 #include <memory>
@@ -22,6 +21,9 @@ class DBContent;
 class Buffer;
 class ReconstructorBase;
 class SimpleReconstructor;
+
+class ViewPointGenVP;
+class ViewPointGenAnnotation;
 
 #if USE_EXPERIMENTAL_SOURCE == true
 class ProbIMMReconstructor;
@@ -53,7 +55,7 @@ class ReconstructorTask : public Task, public Configurable
     void processingDoneSlot();
     void writeDoneSlot();
 
-    void runDoneSlot();
+    void runCancelledSlot();
 
     void updateProgressSlot(const QString& msg, bool add_slice_progress);
 
@@ -113,7 +115,9 @@ class ReconstructorTask : public Task, public Configurable
 
     ReconstructorBase::DataSlice& processingSlice();
 
-    nlohmann::json& getDebugViewpoint(const std::string& name, const std::string& type);
+    ViewPointGenVP* getDebugViewpoint(const std::string& name, const std::string& type) const;
+    ViewPointGenVP* getDebugViewpointForUTN(unsigned long utn) const;
+    ViewPointGenAnnotation* getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const;
     void saveDebugViewPoints();
 
   protected:
@@ -155,7 +159,7 @@ class ReconstructorTask : public Task, public Configurable
     bool processing_data_slice_ {false};
     bool cancelled_ {false};
 
-    std::map <std::pair<std::string,std::string>, nlohmann::json> debug_viewpoints_;
+    mutable std::map<std::pair<std::string,std::string>, std::unique_ptr<ViewPointGenVP>> debug_viewpoints_;
 
     virtual void checkSubConfigurables() override;
     void deleteCalculatedReferences();

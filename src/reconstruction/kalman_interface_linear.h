@@ -85,7 +85,10 @@ protected:
     bool smoothUpdates_impl(std::vector<kalman::Vector>& x_smooth,
                             std::vector<kalman::Matrix>& P_smooth,
                             const std::vector<kalman::KalmanState>& states,
-                            const kalman::XTransferFunc& x_tr) const override final;
+                            const kalman::XTransferFunc& x_tr,
+                            double smooth_scale,
+                            bool stop_on_fail,
+                            std::vector<bool>* state_valid) const override final;
 
     std::unique_ptr<kalman::KalmanFilter> kalman_filter_;
 };

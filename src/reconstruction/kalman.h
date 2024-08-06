@@ -64,13 +64,18 @@ public:
     bool checkState() const;
     void revert();
 
+    static bool checkState(const Vector& x, const Matrix& P);
+
     static Matrix continuousWhiteNoise(size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
     static void continuousWhiteNoise(Matrix& Q_noise, size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
 
     static bool rtsSmoother(std::vector<kalman::Vector>& x_smooth,
                             std::vector<kalman::Matrix>& P_smooth,
                             const std::vector<KalmanState>& states,
-                            const XTransferFunc& x_tr = XTransferFunc());
+                            const XTransferFunc& x_tr = XTransferFunc(),
+                            double smooth_scale = 1.0,
+                            bool stop_on_fail = false,
+                            std::vector<bool>* state_valid = nullptr);
 
     kalman::KalmanState state() const;
 
@@ -112,7 +117,6 @@ public:
     std::string asString(const std::string prefix = "") const;
 
 private:
-    bool checkState(const Vector& x, const Matrix& P) const;
     void postConditionP(Matrix& P) const;
 
     size_t dim_x_;

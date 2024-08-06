@@ -88,9 +88,10 @@ kalman::KalmanState KalmanFilter::state() const
 
 /**
 */
-bool KalmanFilter::checkState(const Vector& x, const Matrix& P) const
+bool KalmanFilter::checkState(const Vector& x, const Matrix& P)
 {
-    for (size_t i = 0; i < dim_x_; ++i)
+    size_t n = x.size();
+    for (size_t i = 0; i < n; ++i)
         if (P(i, i) < 0)
             return false;
 
@@ -394,7 +395,10 @@ Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
 bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
                                std::vector<kalman::Matrix>& P_smooth,
                                const std::vector<KalmanState>& states,
-                               const XTransferFunc& x_tr)
+                               const XTransferFunc& x_tr,
+                               double smooth_scale,
+                               bool stop_on_fail,
+                               std::vector<bool>* state_valid)
 {
     if (states.empty())
         return true;
@@ -405,15 +409,18 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
     x_smooth.resize(n);
     P_smooth.resize(n);
 
+    if (state_valid)
+        state_valid->resize(n, true);
+
     std::vector<kalman::Matrix> Pp(n);
     std::vector<kalman::Matrix> K (n);
 
     for (int i = 0; i < n; ++i)
     {
-        x_smooth[ i ] = states[ i ].x;
-        P_smooth[ i ] = states[ i ].P / 10.0; // TODO HACK
-        Pp      [ i ] = states[ i ].P / 10.0;
-        K       [ i ].setZero(dim_x, dim_x);
+        x_smooth   [ i ] = states[ i ].x;
+        P_smooth   [ i ] = states[ i ].P * smooth_scale; // TODO HACK
+        Pp         [ i ] = states[ i ].P * smooth_scale;
+        K          [ i ].setZero(dim_x, dim_x);
     }
 
     if (states.size() < 2)
@@ -440,6 +447,14 @@ bool KalmanFilter::rtsSmoother(std::vector<kalman::Vector>& x_smooth,
 
         x_smooth[ k ] += K[ k ] * (x_smooth_1 - F_1 * x_smooth[ k ]);
         P_smooth[ k ] += K[ k ] * (P_smooth[ k+1 ] - Pp[ k ]) * ((const kalman::Matrix&)K[ k ]).transpose();
+
+        bool state_ok = (stop_on_fail || state_valid) ? checkState(x_smooth[ k ], P_smooth[ k ]) : true;
+
+        if (stop_on_fail && !state_ok)
+            return false;
+
+        if (state_valid)
+            (*state_valid)[ k ] = state_ok;
     }
 
     return true;

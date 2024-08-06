@@ -31,6 +31,13 @@ enum KalmanType
     AMKalman2D      // accelerated motion kalman in the plane
 };
 
+enum SmoothFailStrategy
+{
+    None = 0,
+    Stop,
+    SetInvalid
+};
+
 typedef Eigen::MatrixXd         Matrix;
 typedef Eigen::VectorXd         Vector;
 typedef boost::optional<Matrix> OMatrix;

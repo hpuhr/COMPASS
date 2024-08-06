@@ -280,7 +280,7 @@ public:
             return false;
 
         HistogramT<T> h;
-        if (!initHistogram(h, generateConfiguration()))
+        if (!initHistogram(h, generateConfiguration(num_bins, distinct_values_min)))
             return false;
 
         h.add(data);
@@ -317,7 +317,7 @@ public:
             return false;
 
         HistogramT<T> h;
-        if (!initHistogram(h, generateConfiguration()))
+        if (!initHistogram(h, generateConfiguration(num_bins, distinct_values_min)))
             return false;
 
         h.add(data);
