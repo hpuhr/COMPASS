@@ -727,7 +727,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
 
         // lines
         std::unique_ptr<ViewPointGenFeatureLines> feature_lines;
-        feature_lines.reset(new ViewPointGenFeatureLines(line_width, {}, {}, false));
+        feature_lines.reset(new ViewPointGenFeatureLines(line_width, ViewPointGenFeatureLineString::LineStyle::Solid, {}, {}, false));
         feature_lines->setColor(line_color);
 
         annotation.addFeature(std::move(feature_lines));

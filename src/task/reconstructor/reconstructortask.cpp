@@ -1004,14 +1004,20 @@ ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
     return *processing_slice_;
 }
 
-ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type) const
+ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type, bool* created) const
 {
     auto key_str = std::pair<std::string,std::string>(name,type);
+
+    if (created)
+        *created = false;
 
     if (!debug_viewpoints_.count(key_str))
     {
         std::unique_ptr<ViewPointGenVP> vp(new ViewPointGenVP(name, 0, type));
         debug_viewpoints_[ key_str ] = std::move(vp);
+
+        if (created)
+            *created = true;
     }
 
     return debug_viewpoints_.at(key_str).get();
@@ -1019,7 +1025,17 @@ ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, co
 
 ViewPointGenVP* ReconstructorTask::getDebugViewpointForUTN(unsigned long utn) const
 {
-    return getDebugViewpoint("UTN " + std::to_string(utn), "UTN");
+    bool created;
+    auto vp = getDebugViewpoint("UTN " + std::to_string(utn), "UTN", &created);
+
+    if (created)
+    {
+        ViewPointGenFilterUTN* filter_utn = new ViewPointGenFilterUTN(utn);
+
+        vp->filters().addFilter(std::unique_ptr<ViewPointGenFilterUTN>(filter_utn));
+    }
+
+    return vp;
 }
 
 ViewPointGenAnnotation* ReconstructorTask::getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const

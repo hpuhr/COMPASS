@@ -225,9 +225,16 @@ void KalmanEstimator::storeUpdate(Reference& ref,
 */
 void KalmanEstimator::storeUpdate(Reference& ref, 
                                   const kalman::KalmanUpdate& update,
-                                  KalmanProjectionHandler& phandler) const
+                                  KalmanProjectionHandler& phandler,
+                                  boost::optional<Eigen::Vector2d>* speedvec_pos_wgs84,
+                                  boost::optional<Eigen::Vector2d>* accvec_pos_wgs84) const
 {
     assert(isInit());
+
+    if (speedvec_pos_wgs84)
+        speedvec_pos_wgs84->reset();
+    if (accvec_pos_wgs84)
+        accvec_pos_wgs84->reset();
 
     kalman_interface_->storeState(ref, update.state);
 
@@ -237,15 +244,37 @@ void KalmanEstimator::storeUpdate(Reference& ref,
     //unproject to lat/lon
     phandler.unproject(ref.lat, ref.lon, ref.x, ref.y, &update.projection_center);
 
+    if (speedvec_pos_wgs84 && ref.hasVelocity())
+    {
+        *speedvec_pos_wgs84 = Eigen::Vector2d();
+        phandler.unproject(speedvec_pos_wgs84->value()[ 0 ], 
+                           speedvec_pos_wgs84->value()[ 1 ], 
+                           ref.x + ref.vx.value(), 
+                           ref.y + ref.vy.value(), 
+                           &update.projection_center);
+    }
+
+    if (accvec_pos_wgs84 && ref.hasAcceleration())
+    {
+        *accvec_pos_wgs84 = Eigen::Vector2d();
+        phandler.unproject(accvec_pos_wgs84->value()[ 0 ], 
+                           accvec_pos_wgs84->value()[ 1 ], 
+                           ref.x + ref.ax.value(), 
+                           ref.y + ref.ay.value(), 
+                           &update.projection_center);
+    }
+
     //loginf << "KalmanEstimator: storeUpdate: (" << update.projection_center.x() << "," << update.projection_center.y() << ") "
     //                                            << ref.x << "," << ref.y << " => " << ref.lat << "," << ref.lon;
 }
 
 /**
  * Notice: will reproject from the updates local system to wgs84.
-*/
+ */
 void KalmanEstimator::storeUpdates(std::vector<Reference>& refs,
-                                   const std::vector<kalman::KalmanUpdate>& updates) const
+                                   const std::vector<kalman::KalmanUpdate>& updates,
+                                   std::vector<boost::optional<Eigen::Vector2d>>* speeds_pos_wgs84,
+                                   std::vector<boost::optional<Eigen::Vector2d>>* accel_pos_wgs84) const
 {
     KalmanProjectionHandler phandler;
 
@@ -253,8 +282,19 @@ void KalmanEstimator::storeUpdates(std::vector<Reference>& refs,
 
     refs.resize(n);
 
+    if (speeds_pos_wgs84)
+        speeds_pos_wgs84->assign(n, boost::optional<Eigen::Vector2d>());
+    if (accel_pos_wgs84)
+        accel_pos_wgs84->assign(n, boost::optional<Eigen::Vector2d>());
+
     for (size_t i = 0; i < n; ++i)
-        storeUpdate(refs[ i ], updates[ i ], phandler);
+    {
+        storeUpdate(refs[ i ], 
+                    updates[ i ], 
+                    phandler, 
+                    speeds_pos_wgs84 ? &(*speeds_pos_wgs84)[ i ] : nullptr, 
+                    accel_pos_wgs84  ? &(*accel_pos_wgs84 )[ i ] : nullptr);
+    }
 }
 
 /**

@@ -58,6 +58,7 @@ public:
     virtual ~ViewPointGenFilters() = default;
 
     void addFilter(std::unique_ptr<ViewPointGenFilter>&& filter);
+    size_t size() const;
 
     void toJSON(nlohmann::json& j) const;
 
@@ -207,11 +208,43 @@ private:
 
 /**
 */
-class ViewPointGenFeatureLineString : public ViewPointGenFeaturePointGeometry
+class ViewPointGenFeatureStyledLine : public ViewPointGenFeaturePointGeometry
+{
+public:
+    enum class LineStyle
+    {
+        Solid = 0,
+        Dotted
+    };
+
+    ViewPointGenFeatureStyledLine(const std::string& type,
+                                  float line_width,
+                                  LineStyle line_style,
+                                  const std::vector<Eigen::Vector2d>& positions,
+                                  const std::vector<QColor>& colors,
+                                  bool enable_color_vector);
+    virtual ~ViewPointGenFeatureStyledLine() = default;
+
+    static const std::string FeatureLineStringFieldNameLineWidth;
+    static const std::string FeatureLineStringFieldNameLineStyle;
+
+protected:
+    virtual void writeProperties(nlohmann::json& j) const override;
+
+    std::string styleString() const;
+
+    float     line_width_;
+    LineStyle line_style_;
+};
+
+/**
+*/
+class ViewPointGenFeatureLineString : public ViewPointGenFeatureStyledLine
 {
 public:
     ViewPointGenFeatureLineString(bool interpolated,
                                   float line_width = 1.0f,
+                                  LineStyle line_style = LineStyle::Solid,
                                   const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
                                   const std::vector<QColor>& colors = std::vector<QColor>(),
                                   bool enable_color_vector = true);
@@ -219,34 +252,22 @@ public:
 
     static const std::string FeatureName;
     static const std::string FeatureNameInterp;
-    static const std::string FeatureLineStringFieldNameLineWidth;
-
-protected:
-    virtual void writeProperties(nlohmann::json& j) const override;
-
-private:
-    float line_width_;
+    
 };
 
 /**
 */
-class ViewPointGenFeatureLines : public ViewPointGenFeaturePointGeometry
+class ViewPointGenFeatureLines : public ViewPointGenFeatureStyledLine
 {
 public:
     ViewPointGenFeatureLines(float line_width = 1.0f,
+                             LineStyle line_style = LineStyle::Solid,
                              const std::vector<Eigen::Vector2d>& positions = std::vector<Eigen::Vector2d>(),
                              const std::vector<QColor>& colors = std::vector<QColor>(),
                              bool enable_color_vector = true);
     virtual ~ViewPointGenFeatureLines() = default;
 
     static const std::string FeatureName;
-    static const std::string FeatureLinesFieldNameLineWidth;
-
-protected:
-    virtual void writeProperties(nlohmann::json& j) const override;
-
-private:
-    float line_width_;
 };
 
 /**
@@ -393,6 +414,8 @@ public:
                                  const PlotMetadata& metadata = PlotMetadata());
     virtual ~ViewPointGenFeatureHistogram() = default;
 
+    RawHistogramCollection& histograms() { return histogram_; }
+
     virtual size_t size() const override;
 
     static const std::string FeatureName;
@@ -417,6 +440,8 @@ public:
     ViewPointGenFeatureScatterSeries(const ScatterSeriesCollection& scatter_series_collection,
                                      const PlotMetadata& metadata = PlotMetadata());
     virtual ~ViewPointGenFeatureScatterSeries() = default;
+
+    ScatterSeriesCollection& scatterSeries() { return scatter_series_; }
 
     virtual size_t size() const override;
 
@@ -445,13 +470,34 @@ public:
     void addFeature(ViewPointGenFeature* feat);
 
     template <class T, typename... Targs>
-    T* addFeature(Targs&&... args)
+    T* addFeature(const std::string& name, Targs&&... args)
     {
         T* feat = new T(std::forward<Targs>(args)...);
+        feat->setName(name);
 
+        feat_map_[ name ] = features_.size();
         features_.push_back(std::unique_ptr<T>(feat));
 
         return feat;
+    }
+
+    bool hasFeature(const std::string& name) const;
+
+    ViewPointGenFeature* getFeature(const std::string& name);
+    const ViewPointGenFeature* getFeature(const std::string& name) const;
+
+    template <class T>
+    T* getFeatureAs(const std::string& name)
+    {
+        auto f = getFeature(name);
+        return dynamic_cast<T*>(f);
+    }
+
+    template <class T>
+    const T* getFeatureAs(const std::string& name) const
+    {
+        auto f = getFeature(name);
+        return dynamic_cast<const T*>(f);
     }
 
     ViewPointGenAnnotation* addAnnotation(const std::string& name, bool hidden = false);
@@ -487,6 +533,7 @@ private:
 
     std::vector<std::unique_ptr<ViewPointGenFeature>>    features_;
     std::vector<std::unique_ptr<ViewPointGenAnnotation>> annotations_;
+    std::map<std::string, size_t>                        feat_map_;
     std::map<std::string, size_t>                        anno_map_;
 };
 

@@ -115,7 +115,7 @@ class ReconstructorTask : public Task, public Configurable
 
     ReconstructorBase::DataSlice& processingSlice();
 
-    ViewPointGenVP* getDebugViewpoint(const std::string& name, const std::string& type) const;
+    ViewPointGenVP* getDebugViewpoint(const std::string& name, const std::string& type, bool* created = nullptr) const;
     ViewPointGenVP* getDebugViewpointForUTN(unsigned long utn) const;
     ViewPointGenAnnotation* getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const;
     void saveDebugViewPoints();

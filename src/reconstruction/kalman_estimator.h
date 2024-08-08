@@ -177,7 +177,9 @@ public:
     void storeUpdate(Reference& ref, 
                      const kalman::KalmanUpdateMinimal& update) const;
     void storeUpdates(std::vector<Reference>& refs,
-                      const std::vector<kalman::KalmanUpdate>& updates) const;
+                      const std::vector<kalman::KalmanUpdate>& updates,
+                      std::vector<boost::optional<Eigen::Vector2d>>* speeds_pos_wgs84 = nullptr,
+                      std::vector<boost::optional<Eigen::Vector2d>>* accel_pos_wgs84 = nullptr) const;
     
     bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                        kalman::SmoothFailStrategy fail_strategy) const;
@@ -244,7 +246,9 @@ private:
     
     void storeUpdate(Reference& ref, 
                      const kalman::KalmanUpdate& update,
-                     KalmanProjectionHandler& phandler) const;
+                     KalmanProjectionHandler& phandler,
+                     boost::optional<Eigen::Vector2d>* speed_pos_wgs84 = nullptr,
+                     boost::optional<Eigen::Vector2d>* accel_pos_wgs84 = nullptr) const;
 
     reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
 
