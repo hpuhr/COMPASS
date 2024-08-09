@@ -40,6 +40,17 @@
 
 using namespace Utils;
 
+const QColor SimpleReferenceCalculator::ColorMeasurements   = QColor(102, 178, 255);
+const QColor SimpleReferenceCalculator::ColorKalman         = QColor(255, 102, 178);
+const QColor SimpleReferenceCalculator::ColorKalmanSmoothed = QColor(255, 178, 102);
+
+const float SimpleReferenceCalculator::PointSizeBase           = 6.0f;
+const float SimpleReferenceCalculator::PointSizeMeasurements   = 6.0f;
+const float SimpleReferenceCalculator::PointSizeKalman         = 5.0f;
+const float SimpleReferenceCalculator::PointSizeKalmanSmoothed = 4.0f;
+
+const float SimpleReferenceCalculator::LineWidthBase = 1.0f;
+
 /**
  */
 void SimpleReferenceCalculator::TargetReferences::reset()
@@ -495,6 +506,18 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     return;
 #endif
 
+    if (debug_target)
+    {
+        addAnnotationData(refs,
+                          "Input Measurements",
+                          AnnotationStyle(ColorMeasurements, PointSizeMeasurements, LineWidthBase),
+                          AnnotationStyle(ColorMeasurements, PointSizeBase, LineWidthBase),
+                          refs.measurements,
+                          slice_t0, 
+                          slice_t1,
+                          refs.start_index.value());
+    }
+
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
     {
@@ -583,12 +606,13 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         addAnnotationData(refs,
                           estimator, 
                           "Kalman", 
-                          QColor(255, 255, 0),
+                          AnnotationStyle(ColorKalman, PointSizeKalman, LineWidthBase),
+                          AnnotationStyle(ColorKalman, PointSizeBase, LineWidthBase),
                           refs.updates,
-                          used_mms, 
-                          n_before,
+                          used_mms,
                           slice_t0, 
-                          slice_t1);
+                          slice_t1,
+                          n_before);
     }
 
     //start with joined kalman updates
@@ -643,12 +667,13 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         addAnnotationData(refs,
                           estimator, 
                           "Kalman (RTS)", 
-                          QColor(255, 0, 255),
+                          AnnotationStyle(ColorKalmanSmoothed, PointSizeKalmanSmoothed, LineWidthBase),
+                          AnnotationStyle(ColorKalmanSmoothed, PointSizeBase, LineWidthBase),
                           updates,
                           used_mms, 
-                          n_before,
                           slice_t0, 
-                          slice_t1);
+                          slice_t1,
+                          n_before);
     }
 
     //resample?
@@ -678,50 +703,110 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 }
 
 /**
- */
+*/
 void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_references,
                                                   const reconstruction::KalmanEstimator& estimator, 
                                                   const std::string& name,
-                                                  const QColor& base_color,
+                                                  const AnnotationStyle& style,
+                                                  const boost::optional<AnnotationStyle>& style_osg,
                                                   const std::vector<kalman::KalmanUpdate>& updates,
                                                   const std::vector<unsigned int>& used_mms,
-                                                  size_t offs,
                                                   const boost::optional<boost::posix_time::ptime>& t0,
-                                                  const boost::optional<boost::posix_time::ptime>& t1) const
+                                                  const boost::optional<boost::posix_time::ptime>& t1,
+                                                  size_t offs) const
 {
-    AnnotationData& data = target_references.annotation_data[ name ];
-
-    data.name       = name;
-    data.base_color = base_color;
-
     //store updates to references for easier access
     std::vector<reconstruction::Reference> references;
     std::vector<boost::optional<Eigen::Vector2d>> speed_positions, accel_positions;
     estimator.storeUpdates(references, updates, &speed_positions, &accel_positions);
 
-    size_t n     = references.size();
+    std::vector<reconstruction::Measurement> measurements(references.size());
+    for (size_t i = 0; i < references.size(); ++i)
+        measurements[ i ] = references[ i ];
+
+    addAnnotationData(target_references, 
+                      name, 
+                      style, 
+                      style_osg, 
+                      measurements, 
+                      t0, 
+                      t1, 
+                      offs, 
+                      speed_positions, 
+                      accel_positions,
+                      &used_mms);
+}
+
+/**
+ */
+void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_references,
+                                                  const std::string& name,
+                                                  const AnnotationStyle& style,
+                                                  const boost::optional<AnnotationStyle>& style_osg,
+                                                  const std::vector<reconstruction::Measurement>& measurements,
+                                                  const boost::optional<boost::posix_time::ptime>& t0,
+                                                  const boost::optional<boost::posix_time::ptime>& t1,
+                                                  size_t offs) const
+{
+    std::vector<boost::optional<Eigen::Vector2d>> speed_positions, accel_positions;
+    reconstruction::KalmanEstimator::extractVelAccPositionsWGS84(speed_positions, accel_positions, measurements);
+
+    addAnnotationData(target_references, 
+                      name, 
+                      style, 
+                      style_osg, 
+                      measurements, 
+                      t0, 
+                      t1, 
+                      offs, 
+                      speed_positions, 
+                      accel_positions,
+                      nullptr);
+}
+
+/**
+ */
+void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_references,
+                                                  const std::string& name,
+                                                  const AnnotationStyle& style,
+                                                  const boost::optional<AnnotationStyle>& style_osg,
+                                                  const std::vector<reconstruction::Measurement>& reconstructed_measurements,
+                                                  const boost::optional<boost::posix_time::ptime>& t0,
+                                                  const boost::optional<boost::posix_time::ptime>& t1,
+                                                  size_t offs,
+                                                  const std::vector<boost::optional<Eigen::Vector2d>>& vel_pos_wgs84,
+                                                  const std::vector<boost::optional<Eigen::Vector2d>>& acc_pos_wgs84,
+                                                  const std::vector<unsigned int>* used_input_mms) const
+{
+    AnnotationData& data = target_references.annotation_data[ name ];
+
+    data.name      = name;
+    data.style     = style;
+    data.style_osg = style_osg.has_value() ? style_osg.value() : style;
+
+    size_t n     = reconstructed_measurements.size();
     size_t n_cur = data.positions.size();
 
     bool added = false;
 
     for (size_t i = offs; i < n; ++i)
     {
-        const auto& r = references.at(i);
+        const auto& r = reconstructed_measurements.at(i);
         
         if (t0.has_value() && r.t < t0.value()) continue;
         if (t1.has_value() && r.t > t1.value()) continue;
 
         added = true;
 
-        const auto& mm = target_references.measurements.at(used_mms.at(i));
+        const auto mm = used_input_mms ? &target_references.measurements.at(used_input_mms->at(i)) : nullptr;
 
         data.timestamps.push_back(r.t);
 
         data.positions.emplace_back(r.lat, r.lon);
-        data.positions_mm.emplace_back(mm.lat, mm.lon);
+        if (mm) data.positions_mm.emplace_back(mm->lat, mm->lon);
 
-        data.speed_positions.push_back(speed_positions.at(i));
-        data.accel_positions.push_back(accel_positions.at(i));
+        data.speed_positions.push_back(vel_pos_wgs84.at(i));
+        data.accel_positions.push_back(acc_pos_wgs84.at(i));
 
         data.accuracies.push_back(r.hasStdDevPosition() ? Eigen::Vector3d(r.x_stddev.value(), r.y_stddev.value(), r.xy_cov.has_value() ? r.xy_cov.value() : 0.0) :
                                                           boost::optional<Eigen::Vector3d>());
@@ -763,18 +848,21 @@ void SimpleReferenceCalculator::addAnnotations(const TargetReferences& target_re
 
         auto data_anno = parent_anno->getOrCreateAnnotation(data.name);
 
+        const auto& style     = data.style;
+        const auto& style_osg = data.style_osg;
+
         //add positions
         {
             auto anno = data_anno->getOrCreateAnnotation("Positions");
 
             //point feature
-            auto fp = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Cross, 6.0f, data.positions, {}, false);
-            fp->setColor(data.base_color);
+            auto fp = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Cross, style_osg.point_size_, data.positions, {}, false);
+            fp->setColor(style_osg.base_color_);
             anno->addFeature(fp);
 
             //line feature
-            auto fl = new ViewPointGenFeatureLineString(false, 1.0f, ViewPointGenFeatureLineString::LineStyle::Solid, data.positions, {}, false);
-            fl->setColor(data.base_color);
+            auto fl = new ViewPointGenFeatureLineString(false, style_osg.line_width_, ViewPointGenFeatureLineString::LineStyle::Solid, data.positions, {}, false);
+            fl->setColor(style_osg.base_color_);
             anno->addFeature(fl);
         }
 
@@ -786,12 +874,13 @@ void SimpleReferenceCalculator::addAnnotations(const TargetReferences& target_re
             for (auto idx : data.slice_begins)
                 positions.push_back(data.positions.at(idx));
 
-            auto fp = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::BorderThick, 10.0f, positions, {}, false);
-            fp->setColor(data.base_color);
+            auto fp = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::BorderThick, style_osg.point_size_ * 1.5f, positions, {}, false);
+            fp->setColor(style_osg.base_color_);
             anno->addFeature(fp);
         }
 
         //add connections to input target reports
+        if (data.positions_mm.size() == data.positions.size())
         {
             auto anno = data_anno->getOrCreateAnnotation("Input Data Connections");
 
@@ -803,12 +892,13 @@ void SimpleReferenceCalculator::addAnnotations(const TargetReferences& target_re
                 conn_lines.push_back(data.positions_mm[ i ]);
             }
 
-            auto f = new ViewPointGenFeatureLines(1.0f, ViewPointGenFeatureLineString::LineStyle::Dotted, conn_lines, {}, false);
-            f->setColor(data.base_color);
+            auto f = new ViewPointGenFeatureLines(style_osg.line_width_, ViewPointGenFeatureLineString::LineStyle::Dotted, conn_lines, {}, false);
+            f->setColor(style_osg.base_color_);
             anno->addFeature(f);
         }
 
         //add velocities
+        if (data.speeds.size() == data.positions.size())
         {
             auto anno = data_anno->getOrCreateAnnotation("Velocities");
 
@@ -828,8 +918,8 @@ void SimpleReferenceCalculator::addAnnotations(const TargetReferences& target_re
                 }
             }
 
-            auto f = new ViewPointGenFeatureLines(1.0f, ViewPointGenFeatureLineString::LineStyle::Solid, speed_lines, {}, false);
-            f->setColor(data.base_color);
+            auto f = new ViewPointGenFeatureLines(style_osg.line_width_, ViewPointGenFeatureLineString::LineStyle::Solid, speed_lines, {}, false);
+            f->setColor(style_osg.base_color_);
             anno->addFeature(f);
 
             //add histogram data series
@@ -838,10 +928,10 @@ void SimpleReferenceCalculator::addAnnotations(const TargetReferences& target_re
                 RawHistogram h;
                 HistogramInitializerT<double> init;
                 if (init.createRAW(h, values, true, 20))
-                    feat_speed_histo->histograms().addDataSeries(h, data.name, data.base_color);
+                    feat_speed_histo->histograms().addDataSeries(h, data.name, style.base_color_);
 
                 //add own feature
-                auto f = new ViewPointGenFeatureHistogram(h, data.name, data.base_color, 
+                auto f = new ViewPointGenFeatureHistogram(h, data.name, style.base_color_, 
                     PlotMetadata("Reconstruction", "Speed " + data.name, "Speed", "", PlotGroup));
                 anno->addFeature(f);
             }
@@ -855,16 +945,17 @@ void SimpleReferenceCalculator::addAnnotations(const TargetReferences& target_re
 
                 series.data_type_x = ScatterSeries::DataType::DataTypeTimestamp;
 
-                feat_speed_scatter->scatterSeries().addDataSeries(series, data.name, data.base_color);
+                feat_speed_scatter->scatterSeries().addDataSeries(series, data.name, style.base_color_, style.point_size_);
 
                 //add own feature
-                auto f = new ViewPointGenFeatureScatterSeries(series, data.name, data.base_color, 
+                auto f = new ViewPointGenFeatureScatterSeries(series, data.name, style.base_color_, style.point_size_, 
                     PlotMetadata("Reconstruction", "Speed " + data.name, "Timestamp", "Speed", PlotGroup));
                 anno->addFeature(f);
             }
         }
 
         //add accelerations
+        if (data.accelerations.size() == data.positions.size())
         {
             auto anno = data_anno->getOrCreateAnnotation("Accelerations");
 
@@ -879,12 +970,13 @@ void SimpleReferenceCalculator::addAnnotations(const TargetReferences& target_re
                 }
             }
 
-            auto f = new ViewPointGenFeatureLines(1.0f, ViewPointGenFeatureLineString::LineStyle::Solid, accel_lines, {}, false);
-            f->setColor(data.base_color);
+            auto f = new ViewPointGenFeatureLines(style_osg.line_width_, ViewPointGenFeatureLineString::LineStyle::Solid, accel_lines, {}, false);
+            f->setColor(style_osg.base_color_);
             anno->addFeature(f);
         }
 
         //add accuracies
+        if (data.accuracies.size() == data.positions.size())
         {
             auto anno = data_anno->getOrCreateAnnotation("Accuracies");
 
@@ -912,8 +1004,8 @@ void SimpleReferenceCalculator::addAnnotations(const TargetReferences& target_re
                 }
             }
 
-            auto f = new ViewPointGenFeatureErrEllipses(1.0f, 32u, positions, {}, accuracies, false);
-            f->setColor(data.base_color);
+            auto f = new ViewPointGenFeatureErrEllipses(style_osg.line_width_, 32u, positions, {}, accuracies, false);
+            f->setColor(style_osg.base_color_);
             anno->addFeature(f);
 
             //just for fun: add a grid

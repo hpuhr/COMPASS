@@ -298,6 +298,63 @@ void KalmanEstimator::storeUpdates(std::vector<Reference>& refs,
 }
 
 /**
+*/
+void KalmanEstimator::extractVelAccPosWGS84(boost::optional<Eigen::Vector2d>& speed_pos_wgs84,
+                                            boost::optional<Eigen::Vector2d>& accel_pos_wgs84,
+                                            KalmanProjectionHandler& phandler,
+                                            const Measurement& mm)
+{
+    speed_pos_wgs84.reset();
+    accel_pos_wgs84.reset();
+
+    if (mm.hasVelocity())
+    {
+        Eigen::Vector2d proj_center(mm.lat, mm.lon);
+
+        speed_pos_wgs84 = Eigen::Vector2d();
+        phandler.unproject(speed_pos_wgs84.value()[ 0 ], 
+                           speed_pos_wgs84.value()[ 1 ], 
+                           mm.vx.value(), 
+                           mm.vy.value(),
+                           &proj_center);
+    }
+}
+
+/**
+*/
+void KalmanEstimator::extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speeds_pos_wgs84,
+                                                  std::vector<boost::optional<Eigen::Vector2d>>& accel_pos_wgs84,
+                                                  const std::vector<Measurement>& measurements)
+{
+    KalmanProjectionHandler phandler;
+
+    size_t n = measurements.size();
+
+    speeds_pos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
+    accel_pos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
+
+    for (size_t i = 0; i < n; ++i)
+        extractVelAccPosWGS84(speeds_pos_wgs84[ i ], accel_pos_wgs84[ i ], phandler, measurements[ i ]);
+}
+
+/**
+*/
+void KalmanEstimator::extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speeds_pos_wgs84,
+                                                  std::vector<boost::optional<Eigen::Vector2d>>& accel_pos_wgs84,
+                                                  const std::vector<Reference>& references)
+{
+    KalmanProjectionHandler phandler;
+
+    size_t n = references.size();
+
+    speeds_pos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
+    accel_pos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
+
+    for (size_t i = 0; i < n; ++i)
+        extractVelAccPosWGS84(speeds_pos_wgs84[ i ], accel_pos_wgs84[ i ], phandler, references[ i ]);
+}
+
+/**
  * Inits the measurement and its respective update.
 */
 void KalmanEstimator::initDataStructs(kalman::KalmanUpdate& update,

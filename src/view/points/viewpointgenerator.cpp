@@ -674,10 +674,11 @@ const std::string ViewPointGenFeatureScatterSeries::FeatureHistogramFieldNameSca
 ViewPointGenFeatureScatterSeries::ViewPointGenFeatureScatterSeries(const ScatterSeries& scatter_series,
                                                                    const std::string& series_name,
                                                                    const QColor& series_color,
+                                                                   double marker_size,
                                                                    const PlotMetadata& metadata)
 :   ViewPointGenFeature(FeatureName)
 {
-    scatter_series_.addDataSeries(scatter_series, series_name, series_color);
+    scatter_series_.addDataSeries(scatter_series, series_name, series_color, marker_size);
 
     plot_metadata_ = metadata;
 }

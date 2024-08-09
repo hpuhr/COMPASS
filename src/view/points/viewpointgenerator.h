@@ -436,6 +436,7 @@ public:
     ViewPointGenFeatureScatterSeries(const ScatterSeries& scatter_series,
                                      const std::string& series_name = "",
                                      const QColor& series_color = Qt::blue,
+                                     double marker_size = 8.0,
                                      const PlotMetadata& metadata = PlotMetadata());
     ViewPointGenFeatureScatterSeries(const ScatterSeriesCollection& scatter_series_collection,
                                      const PlotMetadata& metadata = PlotMetadata());

@@ -197,6 +197,14 @@ public:
     static std::unique_ptr<KalmanInterface> createInterface(kalman::KalmanType ktype, 
                                                             bool track_velocity = true, 
                                                             bool track_accel = true);
+
+    static void extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speeds_pos_wgs84,
+                                            std::vector<boost::optional<Eigen::Vector2d>>& accel_pos_wgs84,
+                                            const std::vector<Measurement>& measurements);
+    static void extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speeds_pos_wgs84,
+                                            std::vector<boost::optional<Eigen::Vector2d>>& accel_pos_wgs84,
+                                            const std::vector<Reference>& references);
+
     Settings& settings() { return settings_; }
 
     static const double HighStdDev;
@@ -254,6 +262,11 @@ private:
 
     bool checkPrediction(const Measurement& mm) const;
     bool checkState(const kalman::KalmanUpdate& update) const;
+
+    static void extractVelAccPosWGS84(boost::optional<Eigen::Vector2d>& speed_pos_wgs84,
+                                      boost::optional<Eigen::Vector2d>& accel_pos_wgs84,
+                                      KalmanProjectionHandler& phandler,
+                                      const Measurement& mm);
 
     std::unique_ptr<KalmanInterface>         kalman_interface_;
     std::unique_ptr<KalmanProjectionHandler> proj_handler_;
