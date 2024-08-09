@@ -42,6 +42,7 @@ const std::string ViewPoint::VP_NAME_KEY {"name"};
 const std::string ViewPoint::VP_TYPE_KEY {"type"};
 const std::string ViewPoint::VP_STATUS_KEY {"status"};
 const std::string ViewPoint::VP_COMMENT_KEY {"comment"};
+const std::string ViewPoint::VP_DESCRIPTION_KEY {"description"};
 
 const std::string ViewPoint::VP_DS_TYPES_KEY {"data_source_types"};
 const std::string ViewPoint::VP_DS_KEY {"data_sources"};

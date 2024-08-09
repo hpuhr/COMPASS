@@ -594,6 +594,8 @@ public:
     ViewPointGenAnnotations& annotations() { return annotations_; }
     ViewPointGenFilters& filters() { return filters_; }
 
+    void appendToDescription(const std::string& text);
+
     void toJSON(nlohmann::json& j) const;
     void print(std::ostream& strm, const std::string& prefix = "") const;
 
@@ -630,6 +632,7 @@ private:
     std::string  type_;
     QRectF       roi_;
     Status       status_;
+    std::string  description_;
 
     ViewPointGenAnnotations annotations_;
     ViewPointGenFilters     filters_;

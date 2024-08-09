@@ -992,16 +992,16 @@ void ViewPointGenAnnotations::print(std::ostream& strm, const std::string& prefi
  * ViewPointGenVP
  ********************************************************************************/
 
-const std::string ViewPointGenVP::ViewPointFieldName        = "name";
-const std::string ViewPointGenVP::ViewPointFieldID          = "id";
-const std::string ViewPointGenVP::ViewPointFieldType        = "type";
-const std::string ViewPointGenVP::ViewPointFieldStatus      = "status";
-const std::string ViewPointGenVP::ViewPointFieldAnnotations = "annotations";
-const std::string ViewPointGenVP::ViewPointFieldFilters     = "filters";
-const std::string ViewPointGenVP::ViewPointFieldPosLat      = "position_latitude";
-const std::string ViewPointGenVP::ViewPointFieldPosLon      = "position_longitude";
-const std::string ViewPointGenVP::ViewPointFieldWinLat      = "position_window_latitude";
-const std::string ViewPointGenVP::ViewPointFieldWinLon      = "position_window_longitude";
+const std::string ViewPointGenVP::ViewPointFieldName        = ViewPoint::VP_NAME_KEY;
+const std::string ViewPointGenVP::ViewPointFieldID          = ViewPoint::VP_ID_KEY;
+const std::string ViewPointGenVP::ViewPointFieldType        = ViewPoint::VP_TYPE_KEY;
+const std::string ViewPointGenVP::ViewPointFieldStatus      = ViewPoint::VP_STATUS_KEY;
+const std::string ViewPointGenVP::ViewPointFieldAnnotations = ViewPoint::VP_ANNOTATION_KEY;
+const std::string ViewPointGenVP::ViewPointFieldFilters     = ViewPoint::VP_FILTERS_KEY;
+const std::string ViewPointGenVP::ViewPointFieldPosLat      = ViewPoint::VP_POS_LAT_KEY;
+const std::string ViewPointGenVP::ViewPointFieldPosLon      = ViewPoint::VP_POS_LON_KEY;
+const std::string ViewPointGenVP::ViewPointFieldWinLat      = ViewPoint::VP_POS_WIN_LAT_KEY;
+const std::string ViewPointGenVP::ViewPointFieldWinLon      = ViewPoint::VP_POS_WIN_LON_KEY;
 
 const std::string ViewPointGenVP::StatusNameOpen   = "open";
 const std::string ViewPointGenVP::StatusNameClosed = "closed";
@@ -1042,6 +1042,11 @@ std::string ViewPointGenVP::statusString() const
     return "";
 }
 
+void ViewPointGenVP::appendToDescription(const std::string& text)
+{
+    description_ += text;
+}
+
 /**
 */
 void ViewPointGenVP::toJSON(nlohmann::json& j) const
@@ -1050,6 +1055,9 @@ void ViewPointGenVP::toJSON(nlohmann::json& j) const
     j[ViewPointFieldID    ] = id_;
     j[ViewPointFieldType  ] = type_;
     j[ViewPointFieldStatus] = statusString();
+
+    if (description_.size())
+        j[ViewPoint::VP_DESCRIPTION_KEY] = description_;
 
     if (!roi_.isEmpty())
     {
