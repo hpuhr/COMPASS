@@ -62,18 +62,46 @@ public:
     
     static std::vector<std::vector<reconstruction::Measurement>> splitMeasurements(const Measurements& measurements,
                                                                                    double max_dt);
+    static const QColor ColorMeasurements;
+    static const QColor ColorKalman;
+    static const QColor ColorKalmanSmoothed;
+
+    static const float PointSizeBase;
+    static const float PointSizeMeasurements;
+    static const float PointSizeKalman;
+    static const float PointSizeKalmanSmoothed;
+
+    static const float LineWidthBase;
+                                
 private:
+    struct AnnotationStyle
+    {
+        AnnotationStyle() {}
+        AnnotationStyle(const QColor& base_color,
+                        float point_size,
+                        float line_width)
+        :   base_color_(base_color)
+        ,   point_size_(point_size)
+        ,   line_width_(line_width)
+        {}
+
+        QColor base_color_;
+        float  point_size_;
+        float  line_width_;
+    };
+
     struct AnnotationData
     {
         std::string                                   name;
-        QColor                                        base_color;
+        AnnotationStyle                               style;
+        AnnotationStyle                               style_osg;
 
         std::vector<boost::posix_time::ptime>         timestamps;
         std::vector<Eigen::Vector2d>                  positions;
         std::vector<Eigen::Vector2d>                  positions_mm;
         std::vector<boost::optional<double>>          speeds;
         std::vector<boost::optional<double>>          accelerations;
-        std::vector<boost::optional<Eigen::Vector2d>> speed_positions; 
+        std::vector<boost::optional<Eigen::Vector2d>> speed_positions;  
         std::vector<boost::optional<Eigen::Vector2d>> accel_positions;
         std::vector<boost::optional<Eigen::Vector3d>> accuracies;
         std::vector<size_t>                           slice_begins;
@@ -140,14 +168,34 @@ private:
     boost::posix_time::ptime getJoinThreshold() const;
 
     void addAnnotationData(TargetReferences& target_references,
+                           const std::string& name,
+                           const AnnotationStyle& style,
+                           const boost::optional<AnnotationStyle>& style_osg,
+                           const std::vector<reconstruction::Measurement>& reconstructed_measurements,
+                           const boost::optional<boost::posix_time::ptime>& t0,
+                           const boost::optional<boost::posix_time::ptime>& t1,
+                           size_t offs,
+                           const std::vector<boost::optional<Eigen::Vector2d>>& vel_pos_wgs84,
+                           const std::vector<boost::optional<Eigen::Vector2d>>& acc_pos_wgs84,
+                           const std::vector<unsigned int>* used_input_mms = nullptr) const;
+    void addAnnotationData(TargetReferences& target_references,
                            const reconstruction::KalmanEstimator& estimator, 
                            const std::string& name,
-                           const QColor& base_color,
+                           const AnnotationStyle& style,
+                           const boost::optional<AnnotationStyle>& style_osg,
                            const std::vector<kalman::KalmanUpdate>& updates,
                            const std::vector<unsigned int>& used_mms,
-                           size_t offs,
                            const boost::optional<boost::posix_time::ptime>& t0,
-                           const boost::optional<boost::posix_time::ptime>& t1) const;
+                           const boost::optional<boost::posix_time::ptime>& t1,
+                           size_t offs) const;
+    void addAnnotationData(TargetReferences& target_references,
+                           const std::string& name,
+                           const AnnotationStyle& style,
+                           const boost::optional<AnnotationStyle>& style_osg,
+                           const std::vector<reconstruction::Measurement>& measurements,
+                           const boost::optional<boost::posix_time::ptime>& t0,
+                           const boost::optional<boost::posix_time::ptime>& t1,
+                           size_t offs) const;
     void addAnnotations(const TargetReferences& target_references) const;
 
     ReconstructorBase& reconstructor_;
