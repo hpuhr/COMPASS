@@ -491,7 +491,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     return;
 #endif
 
-    if (debug_target)
+    if (debug_target && shallAddAnnotationData())
     {
         addAnnotationData(refs,
                           "Input Measurements",
@@ -586,7 +586,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         loginf << "    #updates: " << refs.updates.size();
     }
 
-    if (debug_target)
+    if (debug_target && shallAddAnnotationData())
     {
         addAnnotationData(refs,
                           estimator, 
@@ -647,7 +647,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         }
     }
 
-    if (debug_target)
+    if (debug_target && shallAddAnnotationData())
     {
         addAnnotationData(refs,
                           estimator, 
@@ -681,6 +681,14 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     //generate references
     estimator.storeUpdates(refs.references, updates);
+}
+
+/**
+*/
+bool SimpleReferenceCalculator::shallAddAnnotationData() const
+{
+    //add only if in last iteration
+    return !reconstructor_.willDoFurtherSliceProcessing();
 }
 
 /**

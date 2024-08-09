@@ -169,6 +169,8 @@ private:
 
     boost::posix_time::ptime getJoinThreshold() const;
 
+    bool shallAddAnnotationData() const;
+
     void addAnnotationData(TargetReferences& target_references,
                            const std::string& name,
                            const AnnotationStyle& style,
