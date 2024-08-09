@@ -41,11 +41,11 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                                      std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator,
                                      ReconstructorBaseSettings& base_settings,
                                      unsigned int default_line_id)
-:   Configurable (class_id, instance_id, &task)
-,   acc_estimator_(std::move(acc_estimator))
-,   task_(task)
-,   base_settings_(base_settings)
-,   chain_predictors_(new reconstruction::KalmanChainPredictors)
+    :   Configurable (class_id, instance_id, &task)
+      ,   acc_estimator_(std::move(acc_estimator))
+      ,   task_(task)
+      ,   base_settings_(base_settings)
+      ,   chain_predictors_(new reconstruction::KalmanChainPredictors)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
@@ -227,13 +227,13 @@ void ReconstructorBase::initChainPredictors()
     if (chain_predictors_->isInit())
         return;
 
-    //int num_threads = std::max(1, tbb::task_scheduler_init::default_num_threads());
+                //int num_threads = std::max(1, tbb::task_scheduler_init::default_num_threads());
 
-    #if TBB_VERSION_MAJOR <= 4
-        int num_threads = tbb::task_scheduler_init::default_num_threads(); // TODO PHIL
-    #else
-        int num_threads = oneapi::tbb::info::default_concurrency();
-    #endif
+#if TBB_VERSION_MAJOR <= 4
+    int num_threads = tbb::task_scheduler_init::default_num_threads(); // TODO PHIL
+#else
+    int num_threads = oneapi::tbb::info::default_concurrency();
+#endif
 
     assert (num_threads > 0);
 
@@ -250,14 +250,16 @@ void ReconstructorBase::processSlice()
 {
     assert (!currentSlice().remove_before_time_.is_not_a_date_time());
 
+    loginf << "ReconstructorBase: processSlice: " << Time::toString(currentSlice().timestamp_min_);
+
     logdbg << "ReconstructorBase: processSlice: first_slice " << currentSlice().first_slice_;
 
     processing_ = true;
 
     if (currentSlice().first_slice_)
     {
-        //not needed at the moment
-        //initChainPredictors();
+       //not needed at the moment
+       //initChainPredictors();
     }
 
     if (!currentSlice().first_slice_)
@@ -272,13 +274,9 @@ void ReconstructorBase::processSlice()
 
     accessor_->add(currentSlice().data_);
 
-    acc_estimator_->prepareForNewSlice();
-
     logdbg << "ReconstructorBase: processSlice: processing slice";
 
     processSlice_impl();
-
-    acc_estimator_->postProccessNewSlice();
 
     processing_ = false;
 
@@ -312,19 +310,19 @@ void ReconstructorBase::processSlice()
 
         loginf << "ReconstructorBase: processSlice: last slice finished\n"
                << "   chain updates:     " << stats.num_chain_added                    << " mm added, "
-                                           << stats.num_chain_updates_valid            << " updates valid ("   << num_chain_updates_valid_p      << "%), "
-                                           << stats.num_chain_updates_failed           << " updates failed ("  << num_chain_updates_failed_p     << "%), "
-                                           << stats.num_chain_updates_skipped          << " updates skipped (" << num_chain_updates_skipped_p    << "%), "
-                                           << stats.num_chain_updates                  << " updates total, "
-                                           << stats.num_chain_updates_proj_changed     << " proj changed (" << num_chain_updates_proj_changed_p << "%)\n"
+               << stats.num_chain_updates_valid            << " updates valid ("   << num_chain_updates_valid_p      << "%), "
+               << stats.num_chain_updates_failed           << " updates failed ("  << num_chain_updates_failed_p     << "%), "
+               << stats.num_chain_updates_skipped          << " updates skipped (" << num_chain_updates_skipped_p    << "%), "
+               << stats.num_chain_updates                  << " updates total, "
+               << stats.num_chain_updates_proj_changed     << " proj changed (" << num_chain_updates_proj_changed_p << "%)\n"
                << "   chain predictions: " << stats.num_chain_predictions_failed       << " pred failed ("  << num_chain_predictions_failed_p << "%), "
-                                           << stats.num_chain_predictions_fixed        << " pred fixed ("   << num_chain_predictions_fixed_p  << "%), "
-                                           << stats.num_chain_predictions              << " pred total, "
-                                           << stats.num_chain_predictions_proj_changed << " proj changed (" << num_chain_predictions_proj_changed_p << "%)\n"
+               << stats.num_chain_predictions_fixed        << " pred fixed ("   << num_chain_predictions_fixed_p  << "%), "
+               << stats.num_chain_predictions              << " pred total, "
+               << stats.num_chain_predictions_proj_changed << " proj changed (" << num_chain_predictions_proj_changed_p << "%)\n"
                << "   rec updates:       " << stats.num_rec_updates_valid              << " valid ("   << num_rec_updates_valid_p        << "%), "
-                                           << stats.num_rec_updates_failed             << " failed ("  << num_rec_updates_failed_p       << "%), "
-                                           << stats.num_rec_updates_skipped            << " skipped (" << num_rec_updates_skipped_p      << "%), "
-                                           << stats.num_rec_updates                    << " total\n"
+               << stats.num_rec_updates_failed             << " failed ("  << num_rec_updates_failed_p       << "%), "
+               << stats.num_rec_updates_skipped            << " skipped (" << num_rec_updates_skipped_p      << "%), "
+               << stats.num_rec_updates                    << " total\n"
                << "   rec smooth steps:  " << stats.num_rec_smooth_failed              << " failed"
                << "   rec interp steps:  " << stats.num_rec_interp_failed              << " failed";
     }
@@ -384,7 +382,7 @@ void ReconstructorBase::createTargetReports()
 
     accessors_.clear();
 
-    //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+            //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     std::set<unsigned int> unused_ds_ids = task_.unusedDSIDs();
     std::map<unsigned int, std::set<unsigned int>> unused_lines = task_.unusedDSIDLines();
@@ -406,7 +404,7 @@ void ReconstructorBase::createTargetReports()
             record_num = tgt_acc.recordNumber(cnt);
             ts = tgt_acc.timestamp(cnt);
 
-            //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
+                    //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
 
             if (!tgt_acc.position(cnt))
                 continue;
@@ -421,7 +419,7 @@ void ReconstructorBase::createTargetReports()
                 info.line_id_ = tgt_acc.lineID(cnt);
                 info.timestamp_ = ts;
 
-                // reconstructor info
+                        // reconstructor info
                 info.in_current_slice_ = true;
 
                 info.is_calculated_reference_ = ds_man.hasDBDataSource(info.ds_id_) && 
@@ -441,8 +439,8 @@ void ReconstructorBase::createTargetReports()
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
 
                 info.do_not_use_position_ = !info.position().has_value()
-                    || (unused_ds_ids.count(info.ds_id_)
-                    || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
+                                            || (unused_ds_ids.count(info.ds_id_)
+                                                || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
 
                 info.barometric_altitude_ = tgt_acc.barometricAltitude(cnt);
 
@@ -452,11 +450,11 @@ void ReconstructorBase::createTargetReports()
                 info.track_angle_ = tgt_acc.trackAngle(cnt);
                 info.ground_bit_ = tgt_acc.groundBit(cnt);
 
-                // insert info
+                        // insert info
                 assert (!target_reports_.count(record_num));
                 target_reports_[record_num] = info;
 
-                // insert into lookups
+                        // insert into lookups
                 tr_timestamps_.insert({ts, record_num});
                 // dbcontent id -> ds_id -> ts ->  record_num
 
@@ -488,6 +486,13 @@ void ReconstructorBase::createTargetReports()
             }
         }
     }
+}
+
+void ReconstructorBase::removeTargetAssociationsNewerThan(const boost::posix_time::ptime& ts)
+{
+            // remove target reports from targets & clean
+    for (auto& tgt_it : targets_)
+        tgt_it.second.removeTargetReportsNewerThan(ts);
 }
 
 std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase::createAssociations()

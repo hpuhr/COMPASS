@@ -150,6 +150,11 @@ void SimpleReconstructor::processSlice_impl()
     if (cancelled_)
         return;
 
+    acc_estimator_->prepareForNewSlice(); // does nothing here
+
+    if (cancelled_)
+        return;
+
     clearOldTargetReports();
 
     if (cancelled_)
@@ -179,6 +184,11 @@ void SimpleReconstructor::processSlice_impl()
         return;
 
     ref_calculator_.computeReferences();
+
+    if (cancelled_)
+        return;
+
+    acc_estimator_->postProccessNewSlice(); // does nothing here
 
     if (cancelled_)
         return;

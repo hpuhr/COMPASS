@@ -92,33 +92,41 @@ void SimpleReferenceCalculator::prepareForNextSlice()
 {
     if (!reconstructor_.currentSlice().first_slice_)
     {
-        auto ThresRemove = reconstructor_.currentSlice().remove_before_time_;
-        auto ThresJoin   = getJoinThreshold();
-
-        //remove previous updates which are no longer needed (either too old or above the join threshold)
-        for (auto& ref : references_)
-        {
-            auto it = std::remove_if(ref.second.updates.begin(),
-                                     ref.second.updates.end(),
-                                     [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                              update.t >= ThresJoin; });
-            ref.second.updates.erase(it, ref.second.updates.end());
-
-            auto it_s = std::remove_if(ref.second.updates_smooth.begin(),
-                                       ref.second.updates_smooth.end(),
-                                       [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                                update.t >= ThresJoin; });
-            ref.second.updates_smooth.erase(it_s, ref.second.updates_smooth.end());
-        }
+        prepareForCurrentSlice(); // also does resetDataStructs()
 
         ++slice_idx_;
     }
     else
     {
         slice_idx_ = 0;
+
+        //reset data structs
+        resetDataStructs();
     }
 
     is_last_slice_ = reconstructor_.currentSlice().is_last_slice_;
+}
+
+void SimpleReferenceCalculator::prepareForCurrentSlice()
+{
+    auto ThresRemove = reconstructor_.currentSlice().remove_before_time_;
+    auto ThresJoin   = getJoinThreshold();
+
+            //remove previous updates which are no longer needed (either too old or above the join threshold)
+    for (auto& ref : references_)
+    {
+        auto it = std::remove_if(ref.second.updates.begin(),
+                                 ref.second.updates.end(),
+                                 [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                          update.t >= ThresJoin; });
+        ref.second.updates.erase(it, ref.second.updates.end());
+
+        auto it_s = std::remove_if(ref.second.updates_smooth.begin(),
+                                   ref.second.updates_smooth.end(),
+                                   [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                            update.t >= ThresJoin; });
+        ref.second.updates_smooth.erase(it_s, ref.second.updates_smooth.end());
+    }
 
     //reset data structs
     resetDataStructs();

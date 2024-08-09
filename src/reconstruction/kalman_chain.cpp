@@ -602,6 +602,22 @@ void KalmanChain::removeUpdatesBefore(const boost::posix_time::ptime& ts)
     predictor_.ref_mm_id.reset();
 }
 
+void KalmanChain::removeUpdatesNewerThan(const boost::posix_time::ptime& ts)
+{
+    assert(!needsReestimate());
+
+    if (size() == 0)
+        return;
+
+    auto it = std::remove_if(updates_.begin(), updates_.end(), [ & ] (const Update& u) { return u.t > ts; });
+    updates_.erase(it, updates_.end());
+    updates_.shrink_to_fit();
+
+            //current mm ids might be outdated now => reset
+    tracker_.tracked_mm_id.reset();
+    predictor_.ref_mm_id.reset();
+}
+
 /**
 */
 const kalman::KalmanUpdateMinimal& KalmanChain::getKalmanUpdate(size_t idx) const

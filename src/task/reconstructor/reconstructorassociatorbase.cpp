@@ -119,13 +119,13 @@ void ReconstructorAssociatorBase::associateTargetReports()
     {
         debug_utns = reconstructor().task().debugUTNs();
 
-        if (debug_utns.size())
-            loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
+        // if (debug_utns.size())
+        //     loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
 
         debug_rec_nums = reconstructor().task().debugRecNums();
 
-        if (debug_rec_nums.size())
-            loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+        // if (debug_rec_nums.size())
+        //     loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
     }
 
     unsigned long rec_num;
@@ -219,13 +219,13 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
     {
         debug_utns = reconstructor().task().debugUTNs();
 
-        if (debug_utns.size())
-            loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
+        // if (debug_utns.size())
+        //     loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
 
         debug_rec_nums = reconstructor().task().debugRecNums();
 
-        if (debug_rec_nums.size())
-            loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+        // if (debug_rec_nums.size())
+        //     loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
     }
 
     unsigned long rec_num;
@@ -288,13 +288,13 @@ void ReconstructorAssociatorBase::selfAccociateNewUTNs()
     {
         debug_utns = reconstructor().task().debugUTNs();
 
-        if (debug_utns.size())
-            loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
+        // if (debug_utns.size())
+        //     loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
 
         debug_rec_nums = reconstructor().task().debugRecNums();
 
-        if (debug_rec_nums.size())
-            loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+        // if (debug_rec_nums.size())
+        //     loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
     }
 
     int other_utn;
@@ -398,13 +398,13 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
     {
         debug_utns = reconstructor().task().debugUTNs();
 
-        if (debug_utns.size())
-            loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
+        // if (debug_utns.size())
+        //     loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
 
         debug_rec_nums = reconstructor().task().debugRecNums();
 
-        if (debug_rec_nums.size())
-            loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
+        // if (debug_rec_nums.size())
+        //     loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
     }
 
     unsigned long rec_num;

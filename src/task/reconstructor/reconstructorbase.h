@@ -197,6 +197,7 @@ protected:
 
     void clearOldTargetReports();
     void createTargetReports();
+    void removeTargetAssociationsNewerThan(const boost::posix_time::ptime& ts); // for slice recalc
 
     std::map<unsigned int, std::map<unsigned long, unsigned int>> createAssociations();
     std::map<std::string, std::shared_ptr<Buffer>> createAssociationBuffers(

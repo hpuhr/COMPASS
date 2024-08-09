@@ -54,6 +54,7 @@ public:
     virtual ~SimpleReferenceCalculator();
 
     void prepareForNextSlice();
+    void prepareForCurrentSlice();
     bool computeReferences();
 
     void reset();
