@@ -142,6 +142,7 @@ public:
                 UpdateStats* stats = nullptr);
 
     void removeUpdatesBefore(const boost::posix_time::ptime& ts);
+    void removeUpdatesNewerThan(const boost::posix_time::ptime& ts);
 
     kalman::KalmanUpdateMinimal lastKalmanUpdate() const;
     const kalman::KalmanUpdateMinimal& getKalmanUpdate(size_t idx) const;

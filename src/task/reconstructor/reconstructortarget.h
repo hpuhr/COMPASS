@@ -270,6 +270,7 @@ class ReconstructorTarget
     std::shared_ptr<Buffer> getReferenceBuffer();
 
     void removeOutdatedTargetReports();
+    void removeTargetReportsNewerThan(boost::posix_time::ptime ts);
 
             // online reconstructor
     size_t trackerCount() const;

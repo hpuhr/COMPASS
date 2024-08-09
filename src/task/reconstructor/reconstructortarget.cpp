@@ -1892,10 +1892,32 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     if (chain_)
         chain_->removeUpdatesBefore(reconstructor_.currentSlice().remove_before_time_);
 
-    for (auto ts_it : tmp_tr_timestamps)
+    for (auto& ts_it : tmp_tr_timestamps)
     {
         if (reconstructor_.target_reports_.count(ts_it.second))
             addTargetReport(ts_it.second, false, false);
+    }
+
+    references_.clear();
+}
+
+void ReconstructorTarget::removeTargetReportsNewerThan(boost::posix_time::ptime ts)
+{
+    auto tmp_tr_timestamps = std::move(tr_timestamps_);
+
+    target_reports_.clear();
+    tr_timestamps_.clear();
+    tr_ds_timestamps_.clear();
+
+    if (chain_)
+        chain_->removeUpdatesNewerThan(ts);
+
+    for (auto& ts_it : tmp_tr_timestamps)
+    {
+        if (ts_it.first <= ts)
+            addTargetReport(ts_it.second, false, false);
+        else
+            break;
     }
 
     references_.clear();
