@@ -187,3 +187,8 @@ void SimpleReconstructor::processSlice_impl()
 
     return;
 }
+
+void SimpleReconstructor::createAdditionalAnnotations()
+{
+    ref_calculator_.createAnnotations();
+}

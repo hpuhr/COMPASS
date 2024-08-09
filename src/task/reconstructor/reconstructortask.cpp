@@ -812,6 +812,10 @@ void ReconstructorTask::writeDoneSlot()
 
         updateProgressSlot("Reference Calculation Done", true);
 
+        //call this before resetting the reconstructor, in case the reconstructor wants to create some additional annotations
+        if (debug_)
+            saveDebugViewPoints();
+
         currentReconstructor()->reset();
 
         double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
@@ -820,9 +824,6 @@ void ReconstructorTask::writeDoneSlot()
                << String::timeStringFromDouble(time_elapsed_s, false);
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
-
-        if (debug_)
-            saveDebugViewPoints();
     }
 
     malloc_trim(0); // release unused memory
@@ -894,10 +895,11 @@ void ReconstructorTask::runCancelledSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    currentReconstructor()->reset();
-
+    //call this before resetting the reconstructor, in case the reconstructor wants to create some additional annotations
     if (debug_)
         saveDebugViewPoints();
+
+    currentReconstructor()->reset();
 
     loading_slice_ = nullptr;
     processing_slice_ = nullptr;
@@ -1048,6 +1050,10 @@ ViewPointGenAnnotation* ReconstructorTask::getDebugAnnotationForUTNSlice(unsigne
 void ReconstructorTask::saveDebugViewPoints()
 {
     loginf << "ReconstructorTask: saveDebugViewPoints";
+
+    //write some additional stuff before saving
+    if (currentReconstructor())
+        currentReconstructor()->createAdditionalAnnotations();
 
     COMPASS::instance().viewManager().clearViewPoints();
 

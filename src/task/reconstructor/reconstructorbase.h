@@ -178,9 +178,11 @@ class ReconstructorBase : public Configurable
                                                   std::pair<unsigned int, unsigned int>>>& assocAounts() const = 0;
     // ds_id -> dbcont id -> (assoc, not assoc cnt)
 
+    virtual void createAdditionalAnnotations() {}
+
     reconstruction::KalmanChainPredictors& chainPredictors();
 
-  protected:
+protected:
 
     ReconstructorTask& task_;
 

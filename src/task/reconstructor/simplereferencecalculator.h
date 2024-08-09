@@ -58,6 +58,8 @@ public:
 
     void reset();
 
+    void createAnnotations();
+
     Settings& settings() { return settings_; }
     
     static std::vector<std::vector<reconstruction::Measurement>> splitMeasurements(const Measurements& measurements,
@@ -66,7 +68,7 @@ public:
     static const QColor ColorKalman;
     static const QColor ColorKalmanSmoothed;
 
-    static const float PointSizeBase;
+    static const float PointSizeOSG;
     static const float PointSizeMeasurements;
     static const float PointSizeKalman;
     static const float PointSizeKalmanSmoothed;
@@ -129,7 +131,6 @@ private:
         size_t num_smooth_steps_failed = 0;
         size_t num_interp_steps_failed = 0;
 
-        ViewPointGenAnnotation*               annotation = nullptr;
         std::map<std::string, AnnotationData> annotation_data;
     };
 
@@ -196,7 +197,8 @@ private:
                            const boost::optional<boost::posix_time::ptime>& t0,
                            const boost::optional<boost::posix_time::ptime>& t1,
                            size_t offs) const;
-    void addAnnotations(const TargetReferences& target_references) const;
+    void addAnnotations(ViewPointGenAnnotation* annotation, 
+                        const TargetReferences& target_references) const;
 
     ReconstructorBase& reconstructor_;
 
