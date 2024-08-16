@@ -93,9 +93,11 @@ class ReconstructorTask : public Task, public Configurable
 
     const std::set<unsigned int>& debugUTNs() const;
     void debugUTNs(const std::set<unsigned int>& utns);
+    bool debugUTN(unsigned int utn);
 
     const std::set<unsigned long>& debugRecNums() const;
     void debugRecNums(const std::set<unsigned long>& rec_nums);
+    bool debugRecNum(unsigned long rec_num);
 
     const boost::posix_time::ptime& debugTimestampMin() const;
     void debugTimestampMin(const boost::posix_time::ptime& ts);

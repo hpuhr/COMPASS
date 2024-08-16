@@ -51,25 +51,18 @@ class ReconstructorAssociatorBase
 
     void selfAccociateNewUTNs();
     void retryAssociateTargetReports();
-    void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn,
-                   const std::set<unsigned long>& debug_rec_nums, const std::set<unsigned int>& debug_utns);
+    void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn);
     virtual void postAssociate(dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn) {};
     void checkACADLookup();
     void countUnAssociated();
 
-    int findUTNFor (dbContent::targetReport::ReconstructorInfo& tr,
-                   const std::set<unsigned long>& debug_rec_nums,
-                   const std::set<unsigned int>& debug_utns);
+    int findUTNFor (dbContent::targetReport::ReconstructorInfo& tr);
 
             // tries to find existing utn for target report, based on mode a/c and position, -1 if failed
     int findUTNByModeACPos (const dbContent::targetReport::ReconstructorInfo& tr,
-                           const std::vector<unsigned int>& utn_vec,
-                           const std::set<unsigned long>& debug_rec_nums,
-                           const std::set<unsigned int>& debug_utns);
+                           const std::vector<unsigned int>& utn_vec);
 
-    int findUTNForTarget (unsigned int utn,
-                         const std::set<unsigned long>& debug_rec_nums,
-                         const std::set<unsigned int>& debug_utns);
+    int findUTNForTarget (unsigned int utn);
 
     unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 

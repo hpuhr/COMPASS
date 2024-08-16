@@ -110,24 +110,6 @@ void ReconstructorAssociatorBase::associateTargetReports()
 {
     loginf << "ReconstructorAssociatorBase: associateTargetReports";
 
-    bool general_debug = reconstructor().task().debug();
-
-    std::set<unsigned int> debug_utns;
-    std::set<unsigned long> debug_rec_nums;
-
-    if (general_debug)
-    {
-        debug_utns = reconstructor().task().debugUTNs();
-
-        // if (debug_utns.size())
-        //     loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
-
-        debug_rec_nums = reconstructor().task().debugRecNums();
-
-        // if (debug_rec_nums.size())
-        //     loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
-    }
-
     unsigned long rec_num;
     int utn;
 
@@ -146,7 +128,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = general_debug && debug_rec_nums.count(rec_num);
+        do_debug = reconstructor().task().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -181,7 +163,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
             if (do_debug)
                 loginf << "DBG finding UTN";
 
-            utn = findUTNFor(tr, debug_rec_nums, debug_utns);
+            utn = findUTNFor(tr);
 
             if (do_debug)
                 loginf << "DBG got UTN " << utn;
@@ -193,7 +175,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
                 loginf << "DBG associating to UTN " << utn;
 
 
-            associate(tr, utn, debug_rec_nums, debug_utns);
+            associate(tr, utn);
         }
         else // not associated
         {
@@ -209,24 +191,6 @@ void ReconstructorAssociatorBase::associateTargetReports()
 void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> dbcont_ids)
 {
     loginf << "ReconstructorAssociatorBase: associateTargetReports: dbcont_ids " << String::compress(dbcont_ids, ',');
-
-    bool general_debug = reconstructor().task().debug();
-
-    std::set<unsigned int> debug_utns;
-    std::set<unsigned long> debug_rec_nums;
-
-    if (general_debug)
-    {
-        debug_utns = reconstructor().task().debugUTNs();
-
-        // if (debug_utns.size())
-        //     loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
-
-        debug_rec_nums = reconstructor().task().debugRecNums();
-
-        // if (debug_rec_nums.size())
-        //     loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
-    }
 
     unsigned long rec_num;
     int utn;
@@ -244,7 +208,7 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = general_debug && debug_rec_nums.count(rec_num);
+        do_debug = reconstructor().task().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -262,10 +226,10 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
             continue;
         }
 
-        utn = findUTNFor(tr, debug_rec_nums, debug_utns);
+        utn = findUTNFor(tr);
 
         if (utn != -1) // estimate accuracy and associate
-            associate(tr, utn, debug_rec_nums, debug_utns);
+            associate(tr, utn);
         else // not associated
             unassoc_rec_nums_.push_back(rec_num);
     }
@@ -278,24 +242,6 @@ void ReconstructorAssociatorBase::selfAccociateNewUTNs()
 
     unsigned int run_cnt {0};
     bool do_it_again {true};
-
-    bool general_debug = reconstructor().task().debug();
-
-    std::set<unsigned int> debug_utns;
-    std::set<unsigned long> debug_rec_nums;
-
-    if (general_debug)
-    {
-        debug_utns = reconstructor().task().debugUTNs();
-
-        // if (debug_utns.size())
-        //     loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
-
-        debug_rec_nums = reconstructor().task().debugRecNums();
-
-        // if (debug_rec_nums.size())
-        //     loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
-    }
 
     int other_utn;
 
@@ -314,7 +260,7 @@ void ReconstructorAssociatorBase::selfAccociateNewUTNs()
             if (!reconstructor().targets_.at(utn).created_in_current_slice_)
                 continue;
 
-            other_utn = findUTNForTarget(utn, debug_rec_nums, debug_utns);
+            other_utn = findUTNForTarget(utn);
 
             if (other_utn != -1)
             {
@@ -389,24 +335,6 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
     if (!unassoc_rec_nums_.size())
         return;
 
-    bool general_debug = reconstructor().task().debug();
-
-    std::set<unsigned int> debug_utns;
-    std::set<unsigned long> debug_rec_nums;
-
-    if (general_debug)
-    {
-        debug_utns = reconstructor().task().debugUTNs();
-
-        // if (debug_utns.size())
-        //     loginf << "DBG utns '" << String::compress(debug_utns, ',') << "'";
-
-        debug_rec_nums = reconstructor().task().debugRecNums();
-
-        // if (debug_rec_nums.size())
-        //     loginf << "DBG recnums '" << String::compress(debug_rec_nums, ',') << "'";
-    }
-
     unsigned long rec_num;
     unsigned int dbcont_id;
     int utn;
@@ -426,7 +354,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = general_debug && debug_rec_nums.count(rec_num);
+        do_debug = reconstructor().task().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -448,11 +376,11 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
         if (dbcont_id == 62 || dbcont_id == 255)
             assert (!tr.track_number_);
 
-        utn = findUTNByModeACPos (tr, utn_vec_, debug_rec_nums, debug_utns);
+        utn = findUTNByModeACPos (tr, utn_vec_);
 
         if (utn != -1) // estimate accuracy and associate
         {
-            associate(tr, utn, debug_rec_nums, debug_utns);
+            associate(tr, utn);
 
             ++assocated_cnt;
         }
@@ -462,12 +390,12 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 }
 
 void ReconstructorAssociatorBase::associate(
-    dbContent::targetReport::ReconstructorInfo& tr, int utn,
-    const std::set<unsigned long>& debug_rec_nums, const std::set<unsigned int>& debug_utns)
+    dbContent::targetReport::ReconstructorInfo& tr, int utn)
 {
     assert (utn >= 0);
 
-    bool do_debug = debug_rec_nums.count(tr.record_num_) || debug_utns.count(utn);
+    bool do_debug = reconstructor().task().debugRecNum(tr.record_num_)
+                    || reconstructor().task().debugUTN(utn);
 
     unsigned int dbcont_id  = Number::recNumGetDBContId(tr.record_num_);
     //AccuracyEstimatorBase::AssociatedDistance dist;
@@ -555,13 +483,11 @@ void ReconstructorAssociatorBase::countUnAssociated()
     }
 }
 
-int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::ReconstructorInfo& tr,
-                                            const std::set<unsigned long>& debug_rec_nums,
-                                            const std::set<unsigned int>& debug_utns)
+int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::ReconstructorInfo& tr)
 {
     int utn {-1};
 
-    bool do_debug = debug_rec_nums.count(tr.record_num_);
+    bool do_debug = reconstructor().task().debugRecNum(tr.record_num_);
 
     unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
 
@@ -683,7 +609,7 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
     auto findUTNByModeACPosOrCreateNewTarget = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
     {
         // check if position match to other target would exist
-        utn = findUTNByModeACPos (tr, utn_vec_, debug_rec_nums, debug_utns);
+        utn = findUTNByModeACPos (tr, utn_vec_);
 
         if (utn == -1)
         {
@@ -734,7 +660,7 @@ START_TR_ASSOC:
         if(do_debug)
             loginf << "DBG tr " << tr.record_num_ << " no utn by acad, doing mode a/c + pos";
 
-        utn = findUTNByModeACPos (tr, utn_vec_, debug_rec_nums, debug_utns);
+        utn = findUTNByModeACPos (tr, utn_vec_);
 
         if (utn != -1)
             assert (reconstructor().targets_.count(utn));
@@ -744,10 +670,7 @@ START_TR_ASSOC:
 }
 
 int ReconstructorAssociatorBase::findUTNByModeACPos (
-    const dbContent::targetReport::ReconstructorInfo& tr,
-    const std::vector<unsigned int>& utn_vec,
-    const std::set<unsigned long>& debug_rec_nums,
-    const std::set<unsigned int>& debug_utns)
+    const dbContent::targetReport::ReconstructorInfo& tr, const std::vector<unsigned int>& utn_vec)
 {
     unsigned int num_targets = reconstructor().targets_.size();
     assert (utn_vec.size() == num_targets);
@@ -761,7 +684,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
     const float max_altitude_diff = reconstructor().settings().max_altitude_diff_;
 
-    bool do_debug = debug_rec_nums.count(tr.record_num_);
+    bool do_debug = reconstructor().task().debugRecNum(tr.record_num_);
 
     if (do_debug)
         loginf << "ReconstructorAssociatorBase: findUTNByModeACPos: rn " << tr.record_num_;
@@ -945,9 +868,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     return -1;
 }
 
-int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
-                                                   const std::set<unsigned long>& debug_rec_nums,
-                                                   const std::set<unsigned int>& debug_utns)
+int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn)
 {
     if (!reconstructor().targets_.size()) // check if targets exist
         return -1;
@@ -1138,7 +1059,8 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn,
 #endif
         Transformation trafo;
 
-        bool print_debug = debug_utns.count(utn) && debug_utns.count(other_utn);
+        bool print_debug = reconstructor().task().debugUTN(utn)
+                           && reconstructor().task().debugUTN(other_utn);
 
         if (print_debug)
         {

@@ -354,6 +354,14 @@ void ReconstructorTask::debugUTNs(const std::set<unsigned int>& utns)
     debug_utns_ = utns;
 }
 
+bool ReconstructorTask::debugUTN(unsigned int utn)
+{
+    if (!debug_)
+        return false;
+
+    return debug_utns_.count(utn);
+}
+
 const std::set<unsigned long>& ReconstructorTask::debugRecNums() const
 {
     return debug_rec_nums_;
@@ -364,6 +372,14 @@ void ReconstructorTask::debugRecNums(const std::set<unsigned long>& rec_nums)
     loginf << "ReconstructorTask: debugRecNums: values '" << String::compress(rec_nums, ',') << "'";
 
     debug_rec_nums_ = rec_nums;
+}
+
+bool ReconstructorTask::debugRecNum(unsigned long rec_num)
+{
+    if (!debug_)
+        return false;
+
+    return debug_rec_nums_.count(rec_num);
 }
 
 const boost::posix_time::ptime& ReconstructorTask::debugTimestampMin() const
