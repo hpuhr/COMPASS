@@ -44,6 +44,14 @@ ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& ta
     connect(timestamp_max_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskDebugWidget::timestampsChanged);
     combo_layout->addRow("Timestamp Max.", timestamp_max_edit_);
 
+    // QCheckBox* debug_accuracy_est_box_{nullptr};
+
+    debug_accuracy_est_box_ = new QCheckBox();
+    connect(debug_accuracy_est_box_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugAccuracyEstimation(ok); });
+
+    combo_layout->addRow("Debug Accuracy Estimation", debug_accuracy_est_box_);
+
     setLayout(combo_layout);
 
     updateValues();
@@ -84,6 +92,9 @@ void ReconstructorTaskDebugWidget::updateValues()
         timestamp_max_edit_->setText(QString::fromStdString(Utils::Time::toString(task_.debugTimestampMax())));
     else
         timestamp_max_edit_->setText("");
+
+    assert (debug_accuracy_est_box_);
+    debug_accuracy_est_box_->setChecked(task_.debugAccuracyEstimation());
 }
 
 void ReconstructorTaskDebugWidget::utnsChangedSlot(const QString& value)

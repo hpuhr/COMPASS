@@ -1089,6 +1089,9 @@ void ViewPointGenVP::toJSON(nlohmann::json& j) const
         else if (cf.second.type() == QVariant::Type::String)
             j[cf.first] = cf.second.toString().toStdString();
     }
+
+    if (no_data_loaded_)
+        j[ViewPoint::VP_DS_TYPES_KEY] = nlohmann::json::array();
 }
 
 /**
@@ -1237,6 +1240,8 @@ std::vector<ViewPointGenVP::JSONFeature> ViewPointGenVP::scanForFeatures(const n
 
     return features;
 }
+
+
 
 /********************************************************************************
  * ViewPointGenerator

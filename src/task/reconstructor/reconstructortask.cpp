@@ -55,6 +55,9 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 
     registerParameter("debug", &debug_, debug_);
 
+    // registerParameter("debug_accuracy_estimation", &debug_accuracy_estimation_,
+    //                   debug_accuracy_estimation_);
+
     registerParameter("use_dstypes", &use_dstypes_, nlohmann::json::object());
     registerParameter("use_data_sources", &use_data_sources_, nlohmann::json::object());
     registerParameter("use_data_sources_lines", &use_data_sources_lines_, nlohmann::json::object());
@@ -404,6 +407,16 @@ void ReconstructorTask::debugTimestampMax(const boost::posix_time::ptime& ts)
     loginf << "ReconstructorTask: debugTimestampMax: value '" << Utils::Time::toString(ts) << "'";
 
     debug_timestamp_max_ = ts;
+}
+
+bool ReconstructorTask::debugAccuracyEstimation() const
+{
+    return debug_accuracy_estimation_;
+}
+
+void ReconstructorTask::debugAccuracyEstimation(bool value)
+{
+    debug_accuracy_estimation_ = value;
 }
 
 void ReconstructorTask::dialogRunSlot()
@@ -1039,6 +1052,14 @@ ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, co
     }
 
     return debug_viewpoints_.at(key_str).get();
+}
+
+ViewPointGenVP* ReconstructorTask::getDebugViewpointNoData(const std::string& name, const std::string& type)
+{
+    auto vp = getDebugViewpoint(name, type);
+    vp->noDataLoaded(true);
+
+    return vp;
 }
 
 ViewPointGenVP* ReconstructorTask::getDebugViewpointForUTN(unsigned long utn) const

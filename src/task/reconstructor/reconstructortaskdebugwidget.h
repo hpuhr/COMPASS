@@ -37,4 +37,6 @@ class ReconstructorTaskDebugWidget : public QWidget
     QLineEdit* rec_nums_edit_{nullptr};
     QLineEdit* timestamp_min_edit_{nullptr};
     QLineEdit* timestamp_max_edit_{nullptr};
+
+    QCheckBox* debug_accuracy_est_box_{nullptr};
 };

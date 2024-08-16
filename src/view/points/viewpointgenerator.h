@@ -626,7 +626,10 @@ public:
     static const std::string StatusNameClosed;
     static const std::string StatusNameTodo;
 
-private:
+    bool noDataLoaded() const { return no_data_loaded_; }
+    void noDataLoaded(bool value) { no_data_loaded_ = value; }
+
+  private:
     std::string  name_;
     unsigned int id_;
     std::string  type_;
@@ -636,6 +639,7 @@ private:
 
     ViewPointGenAnnotations annotations_;
     ViewPointGenFilters     filters_;
+    bool no_data_loaded_ {false}; // set if no dbcontent data should be loaded
 
     std::map<std::string, QVariant> custom_fields_;
 };
