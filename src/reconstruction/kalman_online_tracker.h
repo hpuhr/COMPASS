@@ -53,9 +53,9 @@ public:
 
     bool canPredict(const boost::posix_time::ptime& ts,
                     const boost::posix_time::time_duration& max_time_diff = boost::posix_time::seconds(10)) const;
-    bool predict(Measurement& mm_predicted,
-                 const boost::posix_time::ptime& ts,
-                 bool* fixed = nullptr) const;
+    kalman::KalmanError predict(Measurement& mm_predicted,
+                                const boost::posix_time::ptime& ts,
+                                bool* fixed = nullptr) const;
 
     bool isTracking() const;
 

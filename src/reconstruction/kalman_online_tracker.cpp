@@ -125,9 +125,9 @@ bool KalmanOnlineTracker::canPredict(const boost::posix_time::ptime& ts,
 
 /**
 */
-bool KalmanOnlineTracker::predict(Measurement& mm_predicted,
-                                  const boost::posix_time::ptime& ts,
-                                  bool* fixed) const
+kalman::KalmanError KalmanOnlineTracker::predict(Measurement& mm_predicted,
+                                                 const boost::posix_time::ptime& ts,
+                                                 bool* fixed) const
 {
     assert(isInit());
     assert(isTracking());

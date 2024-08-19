@@ -7,10 +7,11 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/kalman_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/measurement.h"
-        "${CMAKE_CURRENT_LIST_DIR}/kalman.h"
+        "${CMAKE_CURRENT_LIST_DIR}/kalman_filter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/kalman_filter_linear.h"
+        "${CMAKE_CURRENT_LIST_DIR}/kalman_filter_um2d.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_projection.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface.h"
-        "${CMAKE_CURRENT_LIST_DIR}/kalman_interface_linear.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface_umkalman2d.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_estimator.h"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_online_tracker.h"
@@ -19,11 +20,12 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/spline_interpolator.h"
         
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/kalman.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/kalman_filter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/kalman_filter_linear.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/kalman_filter_um2d.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/measurement.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_projection.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/kalman_interface_linear.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_interface_umkalman2d.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_estimator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/kalman_online_tracker.cpp"

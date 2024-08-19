@@ -115,9 +115,11 @@ public:
     struct StepInfo
     {
         void reset();
+        bool isOk() const;
 
-        StepResult result       = StepResult::Success;
-        bool       proj_changed = false;
+        StepResult          result       = StepResult::Success; 
+        kalman::KalmanError kalman_error = kalman::KalmanError::NoError;
+        bool                proj_changed = false;
     };
 
     typedef std::vector<kalman::KalmanUpdate> Updates;
@@ -139,34 +141,34 @@ public:
     StepResult kalmanStep(kalman::KalmanUpdate& update,
                           const Measurement& mm);
     
-    bool kalmanPrediction(Measurement& mm,
-                          double dt,
-                          bool* fixed = nullptr) const;
-    bool kalmanPrediction(Measurement& mm,
-                          const boost::posix_time::ptime& ts,
-                          bool* fixed = nullptr) const;
-    bool kalmanPrediction(Measurement& mm,
-                          const kalman::KalmanUpdate& ref_update,
-                          const boost::posix_time::ptime& ts,
-                          bool* fixed = nullptr,
-                          bool* proj_changed = nullptr);
-    bool kalmanPrediction(Measurement& mm,
-                          const kalman::KalmanUpdateMinimal& ref_update,
-                          const boost::posix_time::ptime& ts,
-                          bool* fixed = nullptr,
-                          bool* proj_changed = nullptr);
-    bool kalmanPrediction(Measurement& mm,
-                          const kalman::KalmanUpdate& ref_update0,
-                          const kalman::KalmanUpdate& ref_update1,
-                          const boost::posix_time::ptime& ts,
-                          size_t* num_fixed = nullptr,
-                          size_t* num_proj_changed = nullptr);
-    bool kalmanPrediction(Measurement& mm,
-                          const kalman::KalmanUpdateMinimal& ref_update0,
-                          const kalman::KalmanUpdateMinimal& ref_update1,
-                          const boost::posix_time::ptime& ts,
-                          size_t* num_fixed = nullptr,
-                          size_t* num_proj_changed = nullptr);
+    kalman::KalmanError kalmanPrediction(Measurement& mm,
+                                         double dt,
+                                         bool* fixed = nullptr) const;
+    kalman::KalmanError kalmanPrediction(Measurement& mm,
+                                         const boost::posix_time::ptime& ts,
+                                         bool* fixed = nullptr) const;
+    kalman::KalmanError kalmanPrediction(Measurement& mm,
+                                         const kalman::KalmanUpdate& ref_update,
+                                         const boost::posix_time::ptime& ts,
+                                         bool* fixed = nullptr,
+                                         bool* proj_changed = nullptr);
+    kalman::KalmanError kalmanPrediction(Measurement& mm,
+                                         const kalman::KalmanUpdateMinimal& ref_update,
+                                         const boost::posix_time::ptime& ts,
+                                         bool* fixed = nullptr,
+                                         bool* proj_changed = nullptr);
+    kalman::KalmanError kalmanPrediction(Measurement& mm,
+                                         const kalman::KalmanUpdate& ref_update0,
+                                         const kalman::KalmanUpdate& ref_update1,
+                                         const boost::posix_time::ptime& ts,
+                                         size_t* num_fixed = nullptr,
+                                         size_t* num_proj_changed = nullptr);
+    kalman::KalmanError kalmanPrediction(Measurement& mm,
+                                         const kalman::KalmanUpdateMinimal& ref_update0,
+                                         const kalman::KalmanUpdateMinimal& ref_update1,
+                                         const boost::posix_time::ptime& ts,
+                                         size_t* num_fixed = nullptr,
+                                         size_t* num_proj_changed = nullptr);
 
     void storeUpdate(Measurement& mm, 
                      const kalman::KalmanUpdate& update) const;
@@ -192,7 +194,7 @@ public:
     const boost::posix_time::ptime& currentTime() const;
     const StepInfo& stepInfo() const;
 
-    std::string asString(const std::string& prefix = "") const;
+    std::string asString(int flags = kalman::KalmanInfoFlags::InfoAll, const std::string& prefix = "") const;
 
     static std::unique_ptr<KalmanInterface> createInterface(kalman::KalmanType ktype, 
                                                             bool track_velocity = true, 
@@ -216,8 +218,8 @@ private:
     ReinitState needsReinit(const Measurement& mm) const;
     void kalmanInterfaceReinit(kalman::KalmanUpdate& update,
                                const Measurement& mm);
-    bool kalmanInterfaceStep(kalman::KalmanUpdate& update,
-                             const Measurement& mm);
+    kalman::KalmanError kalmanInterfaceStep(kalman::KalmanUpdate& update,
+                                            const Measurement& mm);
     void checkProjection(kalman::KalmanUpdate& update);
     void initProjection(double lat_proj_center,
                         double lon_proj_center,
@@ -241,16 +243,16 @@ private:
                        StateInterpMode interp_mode,
                        KalmanProjectionHandler& proj_handler,
                        size_t* num_steps_failed = nullptr) const;
-    bool predictBetween(kalman::KalmanUpdateMinimal& update_interp,
-                        const kalman::KalmanUpdateMinimal& update0,
-                        const kalman::KalmanUpdateMinimal& update1,
-                        const boost::posix_time::ptime& ts,
-                        double min_dt_sec,
-                        double Q_var,
-                        StateInterpMode interp_mode,
-                        KalmanProjectionHandler& proj_handler,
-                        size_t* num_fixed,
-                        size_t* num_proj_changed) const;
+    kalman::KalmanError predictBetween(kalman::KalmanUpdateMinimal& update_interp,
+                                       const kalman::KalmanUpdateMinimal& update0,
+                                       const kalman::KalmanUpdateMinimal& update1,
+                                       const boost::posix_time::ptime& ts,
+                                       double min_dt_sec,
+                                       double Q_var,
+                                       StateInterpMode interp_mode,
+                                       KalmanProjectionHandler& proj_handler,
+                                       size_t* num_fixed,
+                                       size_t* num_proj_changed) const;
     
     void storeUpdate(Reference& ref, 
                      const kalman::KalmanUpdate& update,

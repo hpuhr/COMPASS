@@ -117,6 +117,73 @@ void KalmanChain::Predictor::reset()
     ref_mm_id.reset();
 }
 
+namespace
+{
+    /**
+    */
+    void addToStats(PredictionStats& stats, 
+                    kalman::KalmanError err,
+                    size_t num_predictions,
+                    size_t num_fixed,
+                    size_t num_proj_changed)
+    {
+        bool ok = (err == kalman::KalmanError::NoError);
+
+        stats.num_predictions = num_predictions;
+        stats.num_failed      = !ok ? num_predictions : 0;
+        stats.num_fixed       = num_fixed;
+
+        if (!ok)
+        {
+            if (err == kalman::KalmanError::Numeric) 
+                ++stats.num_failed_numeric;
+            else if (err == kalman::KalmanError::InvalidState) 
+                ++stats.num_failed_badstate;
+            else
+                ++stats.num_failed_other;
+        }
+    }
+
+    /**
+    */
+    void addToStats(UpdateStats& stats,
+                    bool ok,
+                    const KalmanEstimator::StepInfo& info)
+    {
+        stats.set = true;
+
+        ++stats.num_updated;
+
+        if (ok)
+        {
+            ++stats.num_valid;
+        }
+        else if (info.result == KalmanEstimator::StepResult::FailStepTooSmall)
+        {
+            ++stats.num_skipped;
+        }
+        else if (info.result == KalmanEstimator::StepResult::FailKalmanError)
+        {
+            ++stats.num_failed;
+
+            if (info.kalman_error == kalman::KalmanError::Numeric) 
+                ++stats.num_failed_numeric;
+            else if (info.kalman_error == kalman::KalmanError::InvalidState) 
+                ++stats.num_failed_badstate;
+            else 
+                ++stats.num_failed_other;
+        }
+        else
+        {
+            ++stats.num_failed;
+            ++stats.num_failed_other;
+        }
+
+        if (info.proj_changed)
+            ++stats.num_proj_changed;
+    }
+}
+
 /**
 */
 KalmanChain::KalmanChain()
@@ -372,27 +439,17 @@ bool KalmanChain::addToTracker(unsigned long mm_id,
     assert (!canReestimate());
 
     //just track measurement
-    KalmanEstimator::StepInfo info;
     bool ok = tracker_.tracker_ptr->track(getMeasurement(mm_id));
 
     if (stats)
     {
         const auto& step_info = tracker_.tracker_ptr->stepInfo();
 
-        stats->set = true;
-
-        ++stats->num_fresh;
-        ++stats->num_updated;
-
-        if (ok)
-            ++stats->num_valid;
-        else if (step_info.result == KalmanEstimator::StepResult::FailStepTooSmall)
-            ++stats->num_skipped;
-        else
-            ++stats->num_failed;
-
-        if (step_info.proj_changed)
-            ++stats->num_proj_changed;
+        if (stats)
+        {
+            ++stats->num_fresh;
+            addToStats(*stats, ok, step_info);
+        }
     }
 
     return ok;
@@ -736,14 +793,12 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         assert (!predictors);
 
         bool fixed;
-        bool ok = tracker_.tracker_ptr->predict(mm_predicted, ts, &fixed);
+        auto err = tracker_.tracker_ptr->predict(mm_predicted, ts, &fixed);
+
+        bool ok = (err == kalman::KalmanError::NoError);
 
         if (stats)
-        {
-            stats->num_predictions = 1;
-            stats->num_failed      = !ok   ? 1 : 0;
-            stats->num_fixed       = fixed ? 1 : 0;
-        }
+            addToStats(*stats, err, 1, fixed ? 1 : 0, 0);
         
         return ok;
     }
@@ -773,18 +828,13 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         //predict
         bool fixed;
         bool proj_changed = false;
-        bool ok = ref_changed ? p.kalmanPrediction(mm_predicted, update.kalman_update, ts, &fixed, &proj_changed) :
-                                p.kalmanPrediction(mm_predicted, ts, &fixed);
+        auto err = ref_changed ? p.kalmanPrediction(mm_predicted, update.kalman_update, ts, &fixed, &proj_changed) :
+                                 p.kalmanPrediction(mm_predicted, ts, &fixed);
+
+        bool ok = (err == kalman::KalmanError::NoError);
 
         if (stats)
-        {
-            stats->num_predictions = 1;
-            stats->num_failed      = !ok   ? 1 : 0;
-            stats->num_fixed       = fixed ? 1 : 0;
-
-            if (proj_changed)
-                ++stats->num_proj_changed;
-        }
+            addToStats(*stats, err, 1, fixed ? 1 : 0, proj_changed ? 1 : 0);
 
         //remember current mm id?
         if (!predictors)
@@ -811,15 +861,12 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         //@TODO: interpolate
         size_t num_fixed;
         size_t num_proj_changed;
-        bool ok = p.kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts, &num_fixed, &num_proj_changed);
+        auto err = p.kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts, &num_fixed, &num_proj_changed);
+
+        bool ok = (err == kalman::KalmanError::NoError);
 
         if (stats)
-        {
-            stats->num_predictions  = 2;
-            stats->num_failed       = !ok ? 2 : 0;
-            stats->num_fixed        = num_fixed;
-            stats->num_proj_changed = num_proj_changed;
-        }
+            addToStats(*stats, err, 2, num_fixed, num_proj_changed);
 
         if (!predictors)
             predictor_.ref_mm_id.reset();
@@ -1170,19 +1217,7 @@ bool KalmanChain::reestimate(UpdateStats* stats)
             bool ok = check_norm ? reestimate(idx, d_state_sqr, d_cov_sqr, &info) : reestimate(idx, &info);
 
             if (stats)
-            {
-                ++stats->num_updated;
-
-                if (ok)
-                    ++stats->num_valid;
-                else if (info.result == KalmanEstimator::StepResult::FailStepTooSmall)
-                    ++stats->num_skipped;
-                else
-                    ++stats->num_failed;
-
-                if (info.proj_changed)
-                    ++stats->num_proj_changed;
-            }
+                addToStats(*stats, ok, info);
 
             if (!ok)
             {

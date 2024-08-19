@@ -17,7 +17,7 @@
 
 #include "kalman_interface_umkalman2d.h"
 
-#include "kalman.h"
+#include "kalman_filter_um2d.h"
 #include "reconstruction_defs.h"
 
 namespace reconstruction
@@ -26,7 +26,8 @@ namespace reconstruction
 /**
 */
 KalmanInterfaceUMKalman2D::KalmanInterfaceUMKalman2D(bool track_velocities) 
-:   track_velocities_(track_velocities) 
+:   KalmanInterface  (new kalman::KalmanFilterUM2D(track_velocities))
+,   track_velocities_(track_velocities)
 {
 }
 
@@ -35,27 +36,6 @@ KalmanInterfaceUMKalman2D::KalmanInterfaceUMKalman2D(bool track_velocities)
 KalmanInterface* KalmanInterfaceUMKalman2D::clone() const
 {
     return new KalmanInterfaceUMKalman2D(track_velocities_);
-}
-
-/**
-*/
-size_t KalmanInterfaceUMKalman2D::dimX() const
-{
-    return 4;
-}
-
-/**
-*/
-size_t KalmanInterfaceUMKalman2D::dimZ() const
-{
-    return (track_velocities_ ? 4 : 2);
-}
-
-/**
-*/
-size_t KalmanInterfaceUMKalman2D::dimU() const
-{
-    return 0;
 }
 
 /**
@@ -137,29 +117,6 @@ void KalmanInterfaceUMKalman2D::measurementVecZ(kalman::Vector& z, const Measure
     P(2, 0) = cov_xy;
 }
 
-/**
-*/
-void KalmanInterfaceUMKalman2D::processUncertMatQ(kalman::Matrix& Q, double dt, double Q_var) const
-{
-    kalman::KalmanFilter::continuousWhiteNoise(Q, 2, dt, Q_var, 2);
-}
-
-/**
-*/
-void KalmanInterfaceUMKalman2D::measurementMatH(kalman::Matrix& H) const
-{
-    if (track_velocities_)
-    {
-        H.setIdentity(4, 4);
-    }
-    else
-    {
-        H.setZero(2, 4);
-        H(0, 0) = 1.0;
-        H(1, 2) = 1.0;
-    }
-}
-
 namespace helpers
 {
     /**
@@ -237,16 +194,6 @@ void KalmanInterfaceUMKalman2D::measurementUncertMatR(kalman::Matrix& R,
 
 /**
 */
-void KalmanInterfaceUMKalman2D::stateTransitionMatF(kalman::Matrix& F, double dt) const
-{
-    F.setIdentity(4, 4);
-
-    F(0, 1) = dt;
-    F(2, 3) = dt;
-}
-
-/**
-*/
 void KalmanInterfaceUMKalman2D::storeState(Measurement& mm, 
                                            const kalman::Vector& x, 
                                            const kalman::Matrix& P) const
@@ -266,13 +213,6 @@ void KalmanInterfaceUMKalman2D::xPos(double& x, double& y, const kalman::Vector&
 {
     x = x_vec[ 0 ];
     y = x_vec[ 2 ];
-}
-
-/**
-*/
-void KalmanInterfaceUMKalman2D::xPos(double& x, double& y) const
-{
-    return xPos(x, y, kalman_filter_->getX());
 }
 
 /**
@@ -302,16 +242,6 @@ double KalmanInterfaceUMKalman2D::yVar(const kalman::Matrix& P) const
 double KalmanInterfaceUMKalman2D::xyCov(const kalman::Matrix& P) const
 {
     return P(2, 0);
-}
-
-/**
-*/
-void KalmanInterfaceUMKalman2D::stateVecXInv(kalman::Vector& x_inv, const kalman::Vector& x) const
-{
-    x_inv = x;
-
-    x_inv[ 1 ] *= -1.0;
-    x_inv[ 3 ] *= -1.0;
 }
 
 } // reconstruction

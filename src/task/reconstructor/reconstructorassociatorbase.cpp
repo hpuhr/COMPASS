@@ -935,7 +935,7 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn)
 
             const dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rn_it);
 
-            if (!canGetPositionOffsetTargets(tr.timestamp_, target, other))
+            if (tr.do_not_use_position_ || !canGetPositionOffsetTargets(tr.timestamp_, target, other))
             {
                 ++pos_skipped_cnt;
                 continue;

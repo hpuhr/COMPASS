@@ -128,6 +128,8 @@ private:
         size_t num_updates             = 0;
         size_t num_updates_valid       = 0;
         size_t num_updates_failed      = 0;
+        size_t num_updates_failed_numeric      = 0;
+        size_t num_updates_failed_badstate  = 0;
         size_t num_updates_skipped     = 0;
         size_t num_smooth_steps_failed = 0;
         size_t num_interp_steps_failed = 0;
