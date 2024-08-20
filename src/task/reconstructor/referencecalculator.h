@@ -105,7 +105,7 @@ struct ReferenceCalculatorSettings
     bool allow_invalid_updates = true;
 
     bool fix_predictions        = true;
-    bool fix_predictions_interp = true;
+    bool fix_predictions_interp = false;
 
     //debug options
     bool compat_mode     = false;
