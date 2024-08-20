@@ -88,7 +88,7 @@ public:
         bool track_accelerations   = true;
 
         bool fix_predictions        = true;
-        bool fix_predictions_interp = true;
+        bool fix_predictions_interp = false;
 
         bool extract_wgs84_pos = false;
         
