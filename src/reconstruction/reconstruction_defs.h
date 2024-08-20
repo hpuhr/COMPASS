@@ -106,11 +106,14 @@ struct UpdateStats
 {
     bool set = false;
 
-    size_t num_fresh   = 0;
-    size_t num_updated = 0;
-    size_t num_valid   = 0;
-    size_t num_failed  = 0;
-    size_t num_skipped = 0;
+    size_t num_fresh           = 0;
+    size_t num_updated         = 0;
+    size_t num_valid           = 0;
+    size_t num_failed          = 0;
+    size_t num_failed_numeric  = 0;
+    size_t num_failed_badstate = 0;
+    size_t num_failed_other    = 0;
+    size_t num_skipped         = 0;
 
     size_t num_proj_changed = 0;
 };
@@ -119,9 +122,12 @@ struct UpdateStats
 */
 struct PredictionStats
 {
-    size_t num_predictions = 0;
-    size_t num_failed      = 0;
-    size_t num_fixed       = 0;
+    size_t num_predictions     = 0;
+    size_t num_failed          = 0;
+    size_t num_failed_numeric  = 0;
+    size_t num_failed_badstate = 0;
+    size_t num_failed_other    = 0;
+    size_t num_fixed           = 0;
 
     size_t num_proj_changed = 0;
 };

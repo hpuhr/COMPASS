@@ -118,6 +118,9 @@ public:
     void reset();
     bool hasData() const;
 
+    boost::posix_time::ptime timestampMin() const;
+    boost::posix_time::ptime timestampMax() const;
+
     bool isInit() const;
     void init(std::unique_ptr<KalmanInterface>&& interface);
     void init(kalman::KalmanType ktype);
@@ -147,6 +150,9 @@ public:
     kalman::KalmanUpdateMinimal lastKalmanUpdate() const;
     const kalman::KalmanUpdateMinimal& getKalmanUpdate(size_t idx) const;
     const Update& getUpdate(size_t idx);
+
+    bool hasUpdateFor(const boost::posix_time::ptime& ts) const;
+    bool hasUpdateFor(unsigned int mm_id) const;
 
     bool canReestimate() const;
     bool needsReestimate() const;
@@ -200,8 +206,8 @@ private:
     void insertAt(int idx, 
                   unsigned long mm_id,
                   const boost::posix_time::ptime& ts);
-    void addReesimationIndex(int idx);
-    void addReesimationIndexRange(int idx0, int idx1);
+    void addReestimationIndex(int idx);
+    void addReestimationIndexRange(int idx0, int idx1);
     void resetReestimationIndices();
     bool reinit(int idx) const;
     bool reestimate(int idx, 

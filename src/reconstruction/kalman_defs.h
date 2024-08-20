@@ -38,6 +38,22 @@ enum SmoothFailStrategy
     SetInvalid
 };
 
+enum class KalmanError
+{
+    NoError = 0,
+    Numeric,
+    InvalidState,
+    Unknown
+};
+
+enum KalmanInfoFlags
+{
+    InfoState        = 1 << 0,
+    InfoStateExt     = 1 << 1,
+    InfoIntermSteps  = 1 << 2,
+    InfoAll          = 255
+};
+
 typedef Eigen::MatrixXd         Matrix;
 typedef Eigen::VectorXd         Vector;
 typedef boost::optional<Matrix> OMatrix;

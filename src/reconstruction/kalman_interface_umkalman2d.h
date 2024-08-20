@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "kalman_interface_linear.h"
+#include "kalman_interface.h"
 
 namespace kalman
 {
@@ -32,7 +32,7 @@ struct Uncertainty;
 
 /**
  */
-class KalmanInterfaceUMKalman2D : public KalmanInterfaceLinear
+class KalmanInterfaceUMKalman2D : public KalmanInterface
 {
 public:
     KalmanInterfaceUMKalman2D(bool track_velocities);
@@ -40,31 +40,22 @@ public:
 
     KalmanInterface* clone() const override final;
 
-    size_t dimX() const override final; 
-    size_t dimZ() const override final;
-    size_t dimU() const override final;
-
     void stateVecXFromMM(kalman::Vector& x, const Measurement& mm) const override final;
     void measurementVecZ(kalman::Vector& z, const Measurement& mm) const override final;
     void covarianceMatP(kalman::Matrix& P, const Measurement& mm, const reconstruction::Uncertainty& default_uncert) const override final;
-    void processUncertMatQ(kalman::Matrix& Q, double dt, double Q_var) const override final;
-    void measurementMatH(kalman::Matrix& H) const override final;
     void measurementUncertMatR(kalman::Matrix& R, 
                                const Measurement& mm, 
                                const reconstruction::Uncertainty& default_uncert) const override final;
-    void stateTransitionMatF(kalman::Matrix& F, double dt) const override final;
 
     void storeState(Measurement& mm, 
                     const kalman::Vector& x, 
                     const kalman::Matrix& P) const override final;
 
     void xPos(double& x, double& y, const kalman::Vector& x_vec) const override final;
-    void xPos(double& x, double& y) const override final;
     void xPos(kalman::Vector& x_vec, double x, double y) const override final;
     double xVar(const kalman::Matrix& P) const override final;
     double yVar(const kalman::Matrix& P) const override final;
     double xyCov(const kalman::Matrix& P) const override final;
-    void stateVecXInv(kalman::Vector& x_inv, const kalman::Vector& x) const override final;
 
 private:
     bool track_velocities_;

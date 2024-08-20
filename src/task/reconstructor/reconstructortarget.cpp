@@ -41,20 +41,26 @@ ReconstructorTarget::~ReconstructorTarget()
 
 void ReconstructorTarget::addUpdateToGlobalStats(const reconstruction::UpdateStats& s)
 {
-    global_stats_.num_chain_added           += s.num_fresh;
-    global_stats_.num_chain_updates         += s.num_updated;
-    global_stats_.num_chain_updates_valid   += s.num_valid;
-    global_stats_.num_chain_updates_failed  += s.num_failed;
-    global_stats_.num_chain_updates_skipped += s.num_skipped;
+    global_stats_.num_chain_added                   += s.num_fresh;
+    global_stats_.num_chain_updates                 += s.num_updated;
+    global_stats_.num_chain_updates_valid           += s.num_valid;
+    global_stats_.num_chain_updates_failed          += s.num_failed;
+    global_stats_.num_chain_updates_failed_numeric  += s.num_failed_numeric;
+    global_stats_.num_chain_updates_failed_badstate += s.num_failed_badstate;
+    global_stats_.num_chain_updates_failed_other    += s.num_failed_other;
+    global_stats_.num_chain_updates_skipped         += s.num_skipped;
 
     global_stats_.num_chain_updates_proj_changed += s.num_proj_changed;
 }
 
 void ReconstructorTarget::addPredictionToGlobalStats(const reconstruction::PredictionStats& s)
 {
-    global_stats_.num_chain_predictions        += s.num_predictions;
-    global_stats_.num_chain_predictions_failed += s.num_failed;
-    global_stats_.num_chain_predictions_fixed  += s.num_fixed;
+    global_stats_.num_chain_predictions                 += s.num_predictions;
+    global_stats_.num_chain_predictions_failed          += s.num_failed;
+    global_stats_.num_chain_predictions_failed_numeric  += s.num_failed_numeric;
+    global_stats_.num_chain_predictions_failed_badstate += s.num_failed_badstate;
+    global_stats_.num_chain_predictions_failed_other    += s.num_failed_other;
+    global_stats_.num_chain_predictions_fixed           += s.num_fixed;
 
     global_stats_.num_chain_predictions_proj_changed += s.num_proj_changed;
 
@@ -1977,6 +1983,14 @@ bool ReconstructorTarget::canPredict(boost::posix_time::ptime ts) const
     return chain_->canPredict(ts);
 }
 
+bool ReconstructorTarget::hasChainState(boost::posix_time::ptime ts) const
+{
+    if (!chain_)
+        return false;
+
+    return chain_->hasUpdateFor(ts);
+}
+
 bool ReconstructorTarget::predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const
 {
     if (!chain_)
@@ -2048,6 +2062,13 @@ bool ReconstructorTarget::getChainState(reconstruction::Measurement& mm,
     assert(ok);
 
     return ok;
+}
+
+const reconstruction::KalmanChain& ReconstructorTarget::getChain() const
+{
+    assert(chain_);
+
+    return *chain_;
 }
 
 //bool ReconstructorTarget::hasADSBMOPSVersion()

@@ -295,36 +295,66 @@ void ReconstructorBase::processSlice()
             return QString::number((double)num / (double)num_total * 100.0, 'f', Decimals).toStdString();
         };
 
-        std::string num_chain_updates_valid_p            = perc(stats.num_chain_updates_valid       , stats.num_chain_updates);
-        std::string num_chain_updates_failed_p           = perc(stats.num_chain_updates_failed      , stats.num_chain_updates);
-        std::string num_chain_updates_skipped_p          = perc(stats.num_chain_updates_skipped     , stats.num_chain_updates);
-        std::string num_chain_updates_proj_changed_p     = perc(stats.num_chain_updates_proj_changed, stats.num_chain_added  );
+        std::string num_chain_updates_valid_p           = perc(stats.num_chain_updates_valid          , stats.num_chain_updates       );
+        std::string num_chain_updates_failed_p          = perc(stats.num_chain_updates_failed         , stats.num_chain_updates       );
+        std::string num_chain_updates_failed_numeric_p  = perc(stats.num_chain_updates_failed_numeric , stats.num_chain_updates_failed);
+        std::string num_chain_updates_failed_badstate_p = perc(stats.num_chain_updates_failed_badstate, stats.num_chain_updates_failed);
+        std::string num_chain_updates_failed_other_p    = perc(stats.num_chain_updates_failed_other   , stats.num_chain_updates_failed);
+        std::string num_chain_updates_skipped_p         = perc(stats.num_chain_updates_skipped        , stats.num_chain_updates       );
+        std::string num_chain_updates_proj_changed_p    = perc(stats.num_chain_updates_proj_changed   , stats.num_chain_added         );
 
-        std::string num_chain_predictions_failed_p       = perc(stats.num_chain_predictions_failed      , stats.num_chain_predictions);
-        std::string num_chain_predictions_fixed_p        = perc(stats.num_chain_predictions_fixed       , stats.num_chain_predictions);
-        std::string num_chain_predictions_proj_changed_p = perc(stats.num_chain_predictions_proj_changed, stats.num_chain_predictions);
+        std::string num_chain_predictions_failed_p          = perc(stats.num_chain_predictions_failed         , stats.num_chain_predictions       );
+        std::string num_chain_predictions_failed_numeric_p  = perc(stats.num_chain_predictions_failed_numeric , stats.num_chain_predictions_failed);
+        std::string num_chain_predictions_failed_badstate_p = perc(stats.num_chain_predictions_failed_badstate, stats.num_chain_predictions_failed);
+        std::string num_chain_predictions_failed_other_p    = perc(stats.num_chain_predictions_failed_other   , stats.num_chain_predictions_failed);
+        std::string num_chain_predictions_fixed_p           = perc(stats.num_chain_predictions_fixed          , stats.num_chain_predictions       );
+        std::string num_chain_predictions_proj_changed_p    = perc(stats.num_chain_predictions_proj_changed   , stats.num_chain_predictions       );
 
-        std::string num_rec_updates_valid_p              = perc(stats.num_rec_updates_valid  , stats.num_rec_updates);
-        std::string num_rec_updates_failed_p             = perc(stats.num_rec_updates_failed , stats.num_rec_updates);
-        std::string num_rec_updates_skipped_p            = perc(stats.num_rec_updates_skipped, stats.num_rec_updates);
+        std::string num_rec_updates_valid_p           = perc(stats.num_rec_updates_valid          , stats.num_rec_updates       );
+        std::string num_rec_updates_failed_p          = perc(stats.num_rec_updates_failed         , stats.num_rec_updates       );
+        std::string num_rec_updates_failed_numeric_p  = perc(stats.num_rec_updates_failed_numeric , stats.num_rec_updates_failed);
+        std::string num_rec_updates_failed_badstate_p = perc(stats.num_rec_updates_failed_badstate, stats.num_rec_updates_failed);
+        std::string num_rec_updates_failed_other_p    = perc(stats.num_rec_updates_failed_other   , stats.num_rec_updates_failed);
+        std::string num_rec_updates_skipped_p         = perc(stats.num_rec_updates_skipped        , stats.num_rec_updates       );
 
-        loginf << "ReconstructorBase: processSlice: last slice finished\n"
-               << "   chain updates:     " << stats.num_chain_added                    << " mm added, "
-               << stats.num_chain_updates_valid            << " updates valid ("   << num_chain_updates_valid_p      << "%), "
-               << stats.num_chain_updates_failed           << " updates failed ("  << num_chain_updates_failed_p     << "%), "
-               << stats.num_chain_updates_skipped          << " updates skipped (" << num_chain_updates_skipped_p    << "%), "
-               << stats.num_chain_updates                  << " updates total, "
-               << stats.num_chain_updates_proj_changed     << " proj changed (" << num_chain_updates_proj_changed_p << "%)\n"
-               << "   chain predictions: " << stats.num_chain_predictions_failed       << " pred failed ("  << num_chain_predictions_failed_p << "%), "
-               << stats.num_chain_predictions_fixed        << " pred fixed ("   << num_chain_predictions_fixed_p  << "%), "
-               << stats.num_chain_predictions              << " pred total, "
-               << stats.num_chain_predictions_proj_changed << " proj changed (" << num_chain_predictions_proj_changed_p << "%)\n"
-               << "   rec updates:       " << stats.num_rec_updates_valid              << " valid ("   << num_rec_updates_valid_p        << "%), "
-               << stats.num_rec_updates_failed             << " failed ("  << num_rec_updates_failed_p       << "%), "
-               << stats.num_rec_updates_skipped            << " skipped (" << num_rec_updates_skipped_p      << "%), "
-               << stats.num_rec_updates                    << " total\n"
-               << "   rec smooth steps:  " << stats.num_rec_smooth_failed              << " failed"
-               << "   rec interp steps:  " << stats.num_rec_interp_failed              << " failed";
+        loginf << "ReconstructorBase: processSlice: last slice finished\n\n"
+
+               << "Reconstruction Statistics\n\n"
+
+               << " * Chain updates:\n"
+               << "   " << stats.num_chain_added                    << " mm added\n"
+               << "   " << stats.num_chain_updates_valid            << " updates valid ("   << num_chain_updates_valid_p      << "%)\n"
+               << "   " << stats.num_chain_updates_failed           << " updates failed ("  << num_chain_updates_failed_p     << "%)\n"
+               << "      " << stats.num_chain_updates_failed_numeric  << " numeric ("   << num_chain_updates_failed_numeric_p  << "%)\n"
+               << "      " << stats.num_chain_updates_failed_badstate << " bad state (" << num_chain_updates_failed_badstate_p << "%)\n"
+               << "      " << stats.num_chain_updates_failed_other    << " other ("     << num_chain_updates_failed_other_p    << "%)\n"
+               << "   " << stats.num_chain_updates_skipped          << " updates skipped (" << num_chain_updates_skipped_p    << "%)\n"
+               << "   " << stats.num_chain_updates                  << " updates total\n"
+               << "   " << stats.num_chain_updates_proj_changed     << " proj changed (" << num_chain_updates_proj_changed_p << "%)\n"
+
+               << " * Chain predictions:\n" 
+               << "   " << stats.num_chain_predictions_failed       << " pred failed ("  << num_chain_predictions_failed_p << "%)\n"
+               << "      " << stats.num_chain_predictions_failed_numeric  << " numeric ("   << num_chain_predictions_failed_numeric_p  << "%)\n"
+               << "      " << stats.num_chain_predictions_failed_badstate << " bad state (" << num_chain_predictions_failed_badstate_p << "%)\n"
+               << "      " << stats.num_chain_predictions_failed_other    << " other ("     << num_chain_predictions_failed_other_p    << "%)\n"
+               << "   " << stats.num_chain_predictions_fixed        << " pred fixed ("   << num_chain_predictions_fixed_p  << "%)\n"
+               << "   " << stats.num_chain_predictions              << " pred total\n"
+               << "   " << stats.num_chain_predictions_proj_changed << " proj changed (" << num_chain_predictions_proj_changed_p << "%)\n"
+
+               << " * Rec updates:\n" 
+               << "   " << stats.num_rec_updates_valid              << " valid ("   << num_rec_updates_valid_p        << "%)\n"
+               << "   " << stats.num_rec_updates_failed             << " failed ("  << num_rec_updates_failed_p       << "%)\n"
+               << "      " << stats.num_rec_updates_failed_numeric  << " numeric ("   << num_rec_updates_failed_numeric_p  << "%)\n"
+               << "      " << stats.num_rec_updates_failed_badstate << " bad state (" << num_rec_updates_failed_badstate_p << "%)\n"
+               << "      " << stats.num_rec_updates_failed_other    << " other ("     << num_rec_updates_failed_other_p    << "%)\n"
+               << "   " << stats.num_rec_updates_skipped            << " skipped (" << num_rec_updates_skipped_p      << "%)\n"
+               << "   " << stats.num_rec_updates                    << " total\n"
+
+               << " * Rec smooth steps:\n" 
+               << "   " << stats.num_rec_smooth_failed              << " failed\n"
+
+               << " * Rec interp steps:\n" 
+               << "   " << stats.num_rec_interp_failed              << " failed\n";
     }
 }
 

@@ -125,12 +125,15 @@ private:
         boost::optional<kalman::KalmanUpdate> init_update;
         boost::optional<size_t>               start_index;
 
-        size_t num_updates             = 0;
-        size_t num_updates_valid       = 0;
-        size_t num_updates_failed      = 0;
-        size_t num_updates_skipped     = 0;
-        size_t num_smooth_steps_failed = 0;
-        size_t num_interp_steps_failed = 0;
+        size_t num_updates                 = 0;
+        size_t num_updates_valid           = 0;
+        size_t num_updates_failed          = 0;
+        size_t num_updates_failed_numeric  = 0;
+        size_t num_updates_failed_badstate = 0;
+        size_t num_updates_failed_other    = 0;
+        size_t num_updates_skipped         = 0;
+        size_t num_smooth_steps_failed     = 0;
+        size_t num_interp_steps_failed     = 0;
 
         std::map<std::string, AnnotationData> annotation_data;
     };
