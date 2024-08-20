@@ -118,7 +118,7 @@ void ViewPoint::accept(LatexVisitor& v) const
 
 void ViewPoint::save()
 {
-    loginf << "ViewPoint: save: id " << id_;
+    logdbg << "ViewPoint: save: id " << id_;
 
     DBInterface& db_interface = COMPASS::instance().interface();
     db_interface.setViewPoint(id_, data_.dump());

@@ -741,8 +741,11 @@ void ReconstructorTask::loadingDoneSlot()
         if (cancelled_)
             return;
 
+        loginf << "currentReconstructor()->processing() " << currentReconstructor()->processing()
+               << " processing_data_slice_ " << processing_data_slice_;
+
         QCoreApplication::processEvents();
-        QThread::msleep(1);
+        QThread::msleep(1000);
     }
 
     if (cancelled_)
