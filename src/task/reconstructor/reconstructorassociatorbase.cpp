@@ -7,6 +7,7 @@
 #include "reconstructortask.h"
 #include "number.h"
 #include "util/system.h"
+#include "kalman_chain.h"
 
 #define FIND_UTN_FOR_TARGET_MT
 #define FIND_UTN_FOR_TARGET_REPORT_MT
@@ -909,14 +910,14 @@ int ReconstructorAssociatorBase::findUTNForTarget (unsigned int utn)
 
     //computes a match score for the given other target
     auto scoreUTN = [ & ] (const std::vector<size_t>& rec_nums,
-                        const dbContent::ReconstructorTarget& other,
-                        unsigned int result_idx,
-                        bool secondary_verified,
-                        //                        double max_mahal_dist_accept,
-                        //                        double max_mahal_dist_dub,
-                        //                        double max_mahal_dist_quit,
-                        //double max_pos_dubious_rate,
-                        bool print_debug)
+                           const dbContent::ReconstructorTarget& other,
+                           unsigned int result_idx,
+                           bool secondary_verified,
+                           //                        double max_mahal_dist_accept,
+                           //                        double max_mahal_dist_dub,
+                           //                        double max_mahal_dist_quit,
+                           //double max_pos_dubious_rate,
+                           bool print_debug)
     {
         vector<pair<unsigned long, double>> distance_scores;
         double distance_scores_sum {0};

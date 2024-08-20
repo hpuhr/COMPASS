@@ -465,7 +465,7 @@ void KalmanChain::addToEnd(unsigned long mm_id,
 
     assert(updates_.empty() || ts >= updates_.rbegin()->t);
         
-    addReesimationIndex(count());
+    addReestimationIndex(count());
     
     updates_.emplace_back(mm_id, ts);
 }
@@ -536,7 +536,7 @@ bool KalmanChain::add(const std::vector<std::pair<unsigned long, boost::posix_ti
 
         int idx_max = lastIndex();
 
-        addReesimationIndexRange(idx_min, idx_max);
+        addReestimationIndexRange(idx_min, idx_max);
 
         if (reestim && !reestimate(stats))
             return false;
@@ -591,7 +591,7 @@ void KalmanChain::insertAt(int idx,
         assert(idx <= count());
         updates_.insert(updates_.begin() + idx, Update(mm_id, ts));
 
-        addReesimationIndex(idx);
+        addReestimationIndex(idx);
     }
 
     assert(checkIntegrity());
@@ -610,12 +610,15 @@ bool KalmanChain::insert(unsigned long mm_id,
         return add(mm_id, ts, reestim, stats);
 
     int idx = insertionIndex(ts);
+
     insertAt(idx, mm_id, ts);
 
-    if (reestim)
-        return reestimate(stats);
+    bool ok = true;
 
-    return true;
+    if (reestim)
+        ok = reestimate(stats);
+
+    return ok;
 }
 
 /**
@@ -914,6 +917,53 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
 }
 
 /**
+*/
+boost::posix_time::ptime KalmanChain::timestampMin() const
+{
+    if (updates_.empty())
+        return boost::posix_time::ptime();
+
+    return updates_.begin()->t;
+}
+
+/**
+*/
+boost::posix_time::ptime KalmanChain::timestampMax() const
+{
+    if (updates_.empty())
+        return boost::posix_time::ptime();
+
+    return updates_.rbegin()->t;
+}
+
+/**
+*/
+bool KalmanChain::hasUpdateFor(const boost::posix_time::ptime& ts) const
+{
+    if (!canReestimate())
+        return (tracker_.tracker_ptr->currentTime() == ts);
+
+    auto it = std::lower_bound(updates_.begin(), updates_.end(), ts, 
+        [ & ] (const Update& u, const boost::posix_time::ptime& t) { return u.t < t; });
+
+    if (it == updates_.end())
+        return false;
+
+    if (it->t != ts)
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool KalmanChain::hasUpdateFor(unsigned int mm_id) const
+{
+    auto it = std::find_if(updates_.begin(), updates_.end(), [ & ] (const Update& u) { return u.mm_id == mm_id; });
+    return (it != updates_.end());
+}
+
+/**
  * Gets the chain state at the given timestamp as a measurement.
 */
 bool KalmanChain::getChainState(Measurement& mm,
@@ -1029,7 +1079,7 @@ void KalmanChain::removeUpdate(int idx)
 /**
  * Keeps track of the range of inserted yet uninitialized indices. 
 */
-void KalmanChain::addReesimationIndex(int idx)
+void KalmanChain::addReestimationIndex(int idx)
 {
     assert(idx >= 0);
     assert(canReestimate());
@@ -1040,7 +1090,7 @@ void KalmanChain::addReesimationIndex(int idx)
 /**
  * Keeps track of the range of inserted yet uninitialized indices. 
 */
-void KalmanChain::addReesimationIndexRange(int idx0, int idx1)
+void KalmanChain::addReestimationIndexRange(int idx0, int idx1)
 {
     assert(idx0 >= 0 && idx1 >= idx0);
     assert(canReestimate());

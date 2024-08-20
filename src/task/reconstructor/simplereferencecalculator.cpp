@@ -67,12 +67,15 @@ void SimpleReferenceCalculator::TargetReferences::reset()
  */
 void SimpleReferenceCalculator::TargetReferences::resetCounts()
 {
-    num_updates             = 0;
-    num_updates_valid       = 0;
-    num_updates_failed      = 0;
-    num_updates_skipped     = 0;
-    num_smooth_steps_failed = 0;
-    num_interp_steps_failed = 0;
+    num_updates                 = 0;
+    num_updates_valid           = 0;
+    num_updates_failed          = 0;
+    num_updates_failed_numeric  = 0;
+    num_updates_failed_badstate = 0;
+    num_updates_failed_other    = 0;
+    num_updates_skipped         = 0;
+    num_smooth_steps_failed     = 0;
+    num_interp_steps_failed     = 0;
 }
 
 /**
@@ -573,11 +576,31 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         ++refs.num_updates;
 
         if (update.valid)
+        {
             ++refs.num_updates_valid;
+        }
         else if (res == reconstruction::KalmanEstimator::StepResult::FailStepTooSmall)
+        {
             ++refs.num_updates_skipped;
-        else
+        }
+        else if (res == reconstruction::KalmanEstimator::StepResult::FailKalmanError)
+        {
             ++refs.num_updates_failed;
+
+            const auto& step_info = estimator.stepInfo();
+
+            if (step_info.kalman_error == kalman::KalmanError::Numeric)
+                ++refs.num_updates_failed_numeric;
+            else if (step_info.kalman_error == kalman::KalmanError::InvalidState)
+                ++refs.num_updates_failed_badstate;
+            else
+                ++refs.num_updates_failed_other;  
+        }
+        else
+        {
+            ++refs.num_updates_failed;
+            ++refs.num_updates_failed_other;
+        }
     }
 
     if (settings_.activeVerbosity() > 0)
@@ -1097,12 +1120,15 @@ void SimpleReferenceCalculator::updateReferences()
 
         ref.second.references.clear();
 
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates         += ref.second.num_updates;
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates_valid   += ref.second.num_updates_valid;
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed  += ref.second.num_updates_failed;
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates_skipped += ref.second.num_updates_skipped;
-        dbContent::ReconstructorTarget::globalStats().num_rec_smooth_failed   += ref.second.num_smooth_steps_failed;
-        dbContent::ReconstructorTarget::globalStats().num_rec_interp_failed   += ref.second.num_interp_steps_failed;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates                 += ref.second.num_updates;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_valid           += ref.second.num_updates_valid;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed          += ref.second.num_updates_failed;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_numeric  += ref.second.num_updates_failed_numeric;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_badstate += ref.second.num_updates_failed_badstate;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_other    += ref.second.num_updates_failed_other;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_skipped         += ref.second.num_updates_skipped;
+        dbContent::ReconstructorTarget::globalStats().num_rec_smooth_failed           += ref.second.num_smooth_steps_failed;
+        dbContent::ReconstructorTarget::globalStats().num_rec_interp_failed           += ref.second.num_interp_steps_failed;
     }
 }
 
