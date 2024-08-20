@@ -129,9 +129,10 @@ namespace
     {
         bool ok = (err == kalman::KalmanError::NoError);
 
-        stats.num_predictions = num_predictions;
-        stats.num_failed      = !ok ? num_predictions : 0;
-        stats.num_fixed       = num_fixed;
+        stats.num_predictions  = num_predictions;
+        stats.num_failed       = !ok ? num_predictions : 0;
+        stats.num_fixed        = num_fixed;
+        stats.num_proj_changed = num_proj_changed;
 
         if (!ok)
         {
