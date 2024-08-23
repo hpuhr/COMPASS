@@ -16,7 +16,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 message("  Platform: Linux")
-add_definitions ( -UNDEBUG -Wall -std=c++11) # -DQT_NO_KEYWORDS
+add_definitions ( -UNDEBUG -Wall -std=c++14) # -DQT_NO_KEYWORDS
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -111,7 +111,8 @@ message("OSG libs
 
 add_library(compass "")
 
-message("Install path: ${CMAKE_INSTALL_PREFIX}")
+message("Install pat
+    experimental_src/reconstruction/complex/accuracygridestimator.h experimental_src/reconstruction/complex/accuracygridestimator.cpph: ${CMAKE_INSTALL_PREFIX}")
 
 include(lib/CMakeLists.txt)
 include(src/CMakeLists.txt)

@@ -45,6 +45,28 @@ double round(float num, unsigned int precision)
     return std::round(num * std::pow(10, precision)) / std::pow(10, precision);
 }
 
+double roundToClosestPowerOf10(double value) {
+    if (value == 0.0f) {
+        return 0.0f; // Edge case: return 0 if input is 0
+    }
+
+            // Calculate the logarithm base 10 of the absolute value
+    double log10_value = std::log10(std::fabs(value));
+
+            // Round the log10_value to the nearest integer
+    double rounded_log10 = std::round(log10_value);
+
+            // Calculate the power of 10 corresponding to the rounded logarithm
+    double power_of_10 = std::pow(10.0f, rounded_log10);
+
+            // Preserve the sign of the original value
+    if (value < 0) {
+        power_of_10 = -power_of_10;
+    }
+
+    return power_of_10;
+}
+
 unsigned int numDecimals(double v, unsigned int dec_max)
 {
     auto str = QString::number(v, 'f', dec_max);
