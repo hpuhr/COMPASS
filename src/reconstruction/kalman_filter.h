@@ -36,11 +36,14 @@ public:
     typedef KalmanError     Error;
     typedef KalmanInfoFlags InfoFlags;
 
-    typedef std::function<void(Vector&)> InvertStateFunc;
+    typedef std::function<void(Vector&)>         InvertStateFunc;
+    typedef std::function<Vector(const Vector&)> ZFunc;
+    typedef std::function<Matrix(const Matrix&)> RFunc;
 
     struct Settings
     {
         double process_noise_var;
+        bool   debug = false;
     };
 
     KalmanFilter(size_t dim_x, 
@@ -51,6 +54,7 @@ public:
     size_t dimZ() const { return dim_z_; }
 
     Settings& settings() { return settings_; }
+    const Settings& settings() const { return settings_; }
 
     Error predict(double dt,
                   const OVector& u = OVector());
@@ -96,8 +100,8 @@ public:
     virtual void revert();
     virtual void invert();
 
-    void init(const Vector& x, const Matrix& P);
-    void init(const Vector& x, const Matrix& P, double dt);
+    virtual void init(const Vector& x, const Matrix& P);
+    virtual void init(const Vector& x, const Matrix& P, double dt);
     virtual void init(const KalmanState& state);
 
     void setX(const Vector& x) { x_ = x; }
@@ -120,6 +124,8 @@ public:
     Matrix& rMat() { return R_; }
 
     void setInvertStateFunc(const InvertStateFunc& func) { invert_state_func_ = func; }
+    void setZFunc(const ZFunc& func) { z_func_ = func; }
+    void setRFunc(const RFunc& func) { R_func_ = func; }
 
     boost::optional<double> logLikelihood() const;
     boost::optional<double> likelihood() const;
@@ -128,7 +134,7 @@ public:
     kalman::KalmanState state() const;
     virtual void state(kalman::KalmanState& s) const;
 
-    std::string asString(int info_flags = InfoFlags::InfoAll, const std::string& prefix = "") const;
+    virtual std::string asString(int info_flags = InfoFlags::InfoAll, const std::string& prefix = "") const;
 
     void invertState(Vector& x_inv, const Vector& x) const;
     void invertState(Vector& x) const;
@@ -208,6 +214,8 @@ private:
     Matrix P_post_;
 
     InvertStateFunc invert_state_func_;
+    ZFunc           z_func_;
+    RFunc           R_func_;
 };
 
 } // namespace kalman

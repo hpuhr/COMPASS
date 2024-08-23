@@ -277,8 +277,10 @@ KalmanFilter::Error KalmanFilter::update(const Vector& z,
     resetLikelihoods();
 
     const Matrix& R__ = R.has_value() ? R.value() : R_;
+    
+    auto err = update_impl(z_func_ ? z_func_(z) : z, 
+                           R_func_ ? R_func_(R__) : R__);
 
-    auto err = update_impl(z, R__);
     if (err != Error::NoError)
     {
         x_post_ = x_;
@@ -577,6 +579,22 @@ boost::optional<double> KalmanFilter::logLikelihood() const
     if (log_likelihood_.has_value())
         return log_likelihood_;
     
+    auto lh = likelihood();
+    if (!lh.has_value())
+        return {};
+
+    log_likelihood_ = std::log(lh.value());
+
+    return log_likelihood_;
+}
+
+/**
+*/
+boost::optional<double> KalmanFilter::likelihood() const
+{
+    if (likelihood_.has_value())
+        return likelihood_;
+
     const double LogSqrt2Pi = 0.5 * std::log(2 * M_PI);
     typedef Eigen::LLT<Eigen::MatrixXd> Chol;
     Chol chol(S_);
@@ -588,23 +606,9 @@ boost::optional<double> KalmanFilter::logLikelihood() const
     const Chol::Traits::MatrixL& L = chol.matrixL();
     double quadform = (L.solve(y_)).squaredNorm();
 
-    return std::exp(-y_.rows() * LogSqrt2Pi - 0.5 * quadform) / L.determinant();
-}
+    likelihood_ = std::max(std::numeric_limits<double>::epsilon(), std::exp(-y_.rows() * LogSqrt2Pi - 0.5 * quadform) / L.determinant());
 
-/**
-*/
-boost::optional<double> KalmanFilter::likelihood() const
-{
-    if (likelihood_.has_value())
-        return likelihood_;
-
-    auto llh = logLikelihood();
-    if (!llh.has_value())
-        return {};
-
-    double lh = std::max(std::numeric_limits<double>::epsilon(), std::exp(llh.value()));
-
-    return lh;
+    return likelihood_;
 }
 
 /**

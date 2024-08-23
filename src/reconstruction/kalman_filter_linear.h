@@ -47,7 +47,6 @@ public:
     size_t dimU() const { return dim_u_; }
 
     void init(const KalmanState& state) override final;
-
     void state(kalman::KalmanState& s) const override final;
 
     void setB(const Matrix& B) { B_ = B; }
@@ -58,16 +57,16 @@ public:
     void setControlTransitionMat(const Matrix& B) { setB(B); }
     void setStateTransitionMat(const Matrix& F) { setF(F); }
     void setMeasurementMat(const Matrix& H) { setH(H); }
-    
     void setProcessMMCrossCorrMat(const Matrix& M) { setM(M); }
 
+    const boost::optional<Matrix>& getB() const { return B_; }
+    Matrix& bMat() { assert(B_.has_value()); return B_.value(); }
     const Matrix& getF() const { return F_; }
-    Matrix& getF() { return F_; }
+    Matrix& fMat() { return F_; }
     const Matrix& getH() const { return H_; }
-    Matrix& getH() { return H_; }
-    
+    Matrix& hMat() { return H_; }
     const Matrix& getM() const { return M_; }
-    Matrix& getM() { return M_; }
+    Matrix& mMat() { return M_; }
 
     void setFMatFunc(const FMatFunc& func) { F_func_ = func; }
     void setQMatFunc(const QMatFunc& func) { Q_func_ = func; }
@@ -117,14 +116,13 @@ protected:
     void printExtendedState(std::stringstream& strm, const std::string& prefix) const override final;
     void printIntermSteps(std::stringstream& strm, const std::string& prefix) const override final;
 
-    OMatrix B_; // control transition matrix
-    Matrix  M_; // process-measurement cross correlation
-    Matrix  H_; // measurement function
-
 private:
     size_t dim_u_;
 
-    Matrix F_; // state transition matrix
+    Matrix  F_; // state transition matrix
+    OMatrix B_; // control transition matrix
+    Matrix  M_; // process-measurement cross correlation
+    Matrix  H_; // measurement function
     
     OVector z_;
 
