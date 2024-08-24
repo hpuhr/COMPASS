@@ -55,6 +55,7 @@ public:
     unsigned int lineID(unsigned int index) const;
 
     boost::optional<unsigned char> mopsVersion(unsigned int index) const;
+    boost::optional<unsigned char> nucp(unsigned int index) const;
     boost::optional<unsigned char> nacp(unsigned int index) const;
 
     boost::optional<unsigned int> acad(unsigned int index) const;

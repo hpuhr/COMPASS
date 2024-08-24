@@ -149,7 +149,7 @@ class ReconstructorBase : public Configurable
     void createMeasurement(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& ri);
     void createMeasurement(reconstruction::Measurement& mm, unsigned long rec_num);
 
-    const dbContent::TargetReportAccessor& accessor(dbContent::targetReport::ReconstructorInfo& tr) const;
+    const dbContent::TargetReportAccessor& accessor(const dbContent::targetReport::ReconstructorInfo& tr) const;
 
     virtual void updateWidgets() = 0;
 

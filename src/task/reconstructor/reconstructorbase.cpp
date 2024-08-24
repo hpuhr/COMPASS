@@ -728,7 +728,8 @@ void ReconstructorBase::saveTargets()
     logdbg << "ReconstructorBase: saveTargets: done";
 }
 
-const dbContent::TargetReportAccessor& ReconstructorBase::accessor(dbContent::targetReport::ReconstructorInfo& tr) const
+const dbContent::TargetReportAccessor& ReconstructorBase::accessor(
+    const dbContent::targetReport::ReconstructorInfo& tr) const
 {
     assert (accessors_.count(tr.dbcont_id_));
     return accessors_.at(tr.dbcont_id_);

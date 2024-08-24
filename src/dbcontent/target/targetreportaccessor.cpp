@@ -210,6 +210,11 @@ boost::optional<unsigned char> TargetReportAccessor::mopsVersion(unsigned int in
     return getOptional<unsigned char>(cat021_mops_version_vec_, index);
 }
 
+boost::optional<unsigned char> TargetReportAccessor::nucp(unsigned int index) const
+{
+    return getOptional<unsigned char>(cat021_nucp_nic_vec_, index);
+}
+
 boost::optional<unsigned char> TargetReportAccessor::nacp(unsigned int index) const
 {
     return getOptional<unsigned char>(cat021_nac_p_vec_, index);

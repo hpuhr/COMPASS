@@ -1,7 +1,6 @@
 #include "accuracyestimatorbase.h"
 #include "datasourcemanager.h"
 #include "dbdatasource.h"
-#include "compass.h"
 #include "logger.h"
 #include "stringconv.h"
 
@@ -40,10 +39,7 @@ const dbContent::targetReport::AccelerationAccuracy AccuracyEstimatorBase::AccAc
     { AccuracyEstimatorBase::AccAccStdDevFallback, AccuracyEstimatorBase::AccAccStdDevFallback};
 
 AccuracyEstimatorBase::AccuracyEstimatorBase()
-//    : ds_man_ (COMPASS::instance().dataSourceManager())
 {
-    //    connect (&ds_man_, &DataSourceManager::dataSourcesChangedSignal,
-    //            this, &AccuracyEstimatorBase::updateDataSourcesInfoSlot);
 }
 
 void AccuracyEstimatorBase::init(ReconstructorBase* reconstructor)
