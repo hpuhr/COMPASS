@@ -109,6 +109,7 @@ const Property DBContent::var_cat021_nacp_ {"NACp", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nucp_nic_ {"NUCp or NIC", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nucv_nacv_ {"NUCr or NACv", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_sil_ {"SIL", PropertyDataType::UCHAR};
+const Property DBContent::var_cat021_geo_alt_ {"Geometric Height", PropertyDataType::FLOAT};
 
 const Property DBContent::var_cat021_sgv_gss_ {"SGV GSS", PropertyDataType::FLOAT};
 const Property DBContent::var_cat021_sgv_hgt_ {"SGV HGT", PropertyDataType::DOUBLE};

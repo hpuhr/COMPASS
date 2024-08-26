@@ -139,6 +139,7 @@ void TargetReportAccessor::cacheVectors()
     meta_longitude_vec_     = metaVarVector<double>(DBContent::meta_var_longitude_);
     cat062_alt_trusted_vec_ = varVector<float>(DBContent::var_cat062_fl_measured_);
     cat062_alt_sec_vec_     = varVector<float>(DBContent::var_cat062_baro_alt_);
+    cat021_alt_geo_vec_     = varVector<float>(DBContent::var_cat021_geo_alt_);
     meta_ground_bit_vec_    = metaVarVector<bool>(DBContent::meta_var_ground_bit_);
 
     //position accuracy
@@ -358,6 +359,11 @@ boost::optional<targetReport::BarometricAltitude> TargetReportAccessor::barometr
 
     //not implemented for dbcontent
     return {};
+}
+
+boost::optional<float> TargetReportAccessor::geometricAltitude(unsigned int index) const
+{
+    return getOptional<float>(cat021_alt_geo_vec_, index);
 }
 
 /**

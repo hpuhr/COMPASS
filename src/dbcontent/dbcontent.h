@@ -186,6 +186,7 @@ public:
     static const Property var_cat021_nucp_nic_;
     static const Property var_cat021_nucv_nacv_;
     static const Property var_cat021_sil_;
+    static const Property var_cat021_geo_alt_;
 
     static const Property var_cat021_sgv_gss_; // ground speed, kts
     static const Property var_cat021_sgv_hgt_; // heading / ground track, deg, based on htt

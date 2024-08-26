@@ -111,8 +111,7 @@ message("OSG libs
 
 add_library(compass "")
 
-message("Install pat
-    experimental_src/reconstruction/complex/accuracygridestimator.h experimental_src/reconstruction/complex/accuracygridestimator.cpph: ${CMAKE_INSTALL_PREFIX}")
+message("Install path: ${CMAKE_INSTALL_PREFIX}")
 
 include(lib/CMakeLists.txt)
 include(src/CMakeLists.txt)
