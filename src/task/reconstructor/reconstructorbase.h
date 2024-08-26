@@ -181,10 +181,12 @@ class ReconstructorBase : public Configurable
     virtual void createAdditionalAnnotations() {}
 
     virtual bool doFurtherSliceProcessing() { return false; }     // called for repeat checking
-    virtual bool willDoFurtherSliceProcessing() { return false; } // called to check if another repeat run is planned
+    virtual bool isLastSliceProcessingRun() { return true; } // called to check if another repeat run is planned
     virtual unsigned int currentSliceRepeatRun() { return 0; }    // current repeat run
 
     reconstruction::KalmanChainPredictors& chainPredictors();
+
+    boost::optional<unsigned int> utnForACAD(unsigned int acad);
 
 protected:
 

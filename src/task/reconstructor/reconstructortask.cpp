@@ -1062,10 +1062,17 @@ ViewPointGenVP* ReconstructorTask::getDebugViewpointNoData(const std::string& na
     return vp;
 }
 
-ViewPointGenVP* ReconstructorTask::getDebugViewpointForUTN(unsigned long utn) const
+ViewPointGenVP* ReconstructorTask::getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix) const
 {
     bool created;
-    auto vp = getDebugViewpoint("UTN " + std::to_string(utn), "UTN", &created);
+    string name;
+
+    if (name_prefix.size())
+        name = name_prefix + " UTN " + std::to_string(utn);
+    else
+        name = "UTN " + std::to_string(utn);
+
+    auto vp = getDebugViewpoint(name, "UTN", &created);
 
     if (created)
     {

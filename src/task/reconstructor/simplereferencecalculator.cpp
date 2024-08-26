@@ -711,7 +711,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 bool SimpleReferenceCalculator::shallAddAnnotationData() const
 {
     //add only if in last iteration
-    return !reconstructor_.willDoFurtherSliceProcessing();
+    return !reconstructor_.isLastSliceProcessingRun();
 }
 
 /**

@@ -813,3 +813,16 @@ reconstruction::KalmanChainPredictors& ReconstructorBase::chainPredictors()
 
     return *chain_predictors_;
 }
+
+boost::optional<unsigned int> ReconstructorBase::utnForACAD(unsigned int acad)
+{
+    auto it = std::find_if(targets_.begin(), targets_.end(),
+                           [acad](const std::pair<const unsigned int, dbContent::ReconstructorTarget> & t) -> bool {
+                               return t.second.hasACAD(acad);
+                           });
+
+    if (it != targets_.end())
+        return it->first;
+    else
+        return {};
+}

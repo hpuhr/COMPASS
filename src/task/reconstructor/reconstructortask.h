@@ -122,7 +122,7 @@ class ReconstructorTask : public Task, public Configurable
 
     ViewPointGenVP* getDebugViewpoint(const std::string& name, const std::string& type, bool* created = nullptr) const;
     ViewPointGenVP* getDebugViewpointNoData(const std::string& name, const std::string& type); // w/o sur data
-    ViewPointGenVP* getDebugViewpointForUTN(unsigned long utn) const;
+    ViewPointGenVP* getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix="") const;
     ViewPointGenAnnotation* getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const;
     void saveDebugViewPoints();
 
