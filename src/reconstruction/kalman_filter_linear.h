@@ -85,10 +85,12 @@ protected:
     Error predict_impl(Vector& x, 
                        Matrix& P,
                        double dt,
+                       double Q_var,
                        const OVector& u) override final;
     Error predictState_impl(Vector& x, 
                             Matrix& P,
                             double dt,
+                            double Q_var,
                             bool mt_safe,
                             const OVector& u,
                             KalmanState* state) const override final;
@@ -110,7 +112,7 @@ protected:
                      bool stop_on_fail,
                      std::vector<bool>* state_valid) const;
 
-    void updateInternalMatrices_impl(double dt) override final;
+    void updateInternalMatrices_impl(double dt, double Q_var) override final;
 
     void printState(std::stringstream& strm, const std::string& prefix) const override final;
     void printExtendedState(std::stringstream& strm, const std::string& prefix) const override final;
@@ -145,8 +147,6 @@ private:
     using KalmanFilter::SI_;
 
     using KalmanFilter::I_;
-
-    using KalmanFilter::settings_;
 };
 
 } // namespace kalman

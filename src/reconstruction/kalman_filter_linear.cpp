@@ -51,6 +51,9 @@ void KalmanFilterLinear::init(const KalmanState& state)
 {
     KalmanFilter::init(state);
 
+    if (isDebug())
+        assert(state.F.size() > 0);
+
     F_ = state.F;
 }
 
@@ -90,13 +93,13 @@ void KalmanFilterLinear::printIntermSteps(std::stringstream& strm, const std::st
 
 /**
 */
-void KalmanFilterLinear::updateInternalMatrices_impl(double dt)
+void KalmanFilterLinear::updateInternalMatrices_impl(double dt, double Q_var)
 {
     assert(F_func_);
     assert(Q_func_);
 
     F_func_(F_, dt);
-    Q_func_(Q_, dt, settings_.process_noise_var);
+    Q_func_(Q_, dt, Q_var);
 }
 
 /**
@@ -126,6 +129,7 @@ KalmanFilter::Error KalmanFilterLinear::predict(Vector& x,
 KalmanFilter::Error KalmanFilterLinear::predict_impl(Vector& x, 
                                                      Matrix& P,
                                                      double dt,
+                                                     double Q_var,
                                                      const OVector& u)
 {
     return predict(x, P, F_, Q_, B_, u);
@@ -192,6 +196,7 @@ KalmanFilter::Error KalmanFilterLinear::update_impl(const Vector& z,
 KalmanFilter::Error KalmanFilterLinear::predictState_impl(Vector& x, 
                                                           Matrix& P,
                                                           double dt,
+                                                          double Q_var,
                                                           bool mt_safe,
                                                           const OVector& u,
                                                           KalmanState* state) const
@@ -205,7 +210,7 @@ KalmanFilter::Error KalmanFilterLinear::predictState_impl(Vector& x,
     {
         //use state internal matrices
         F_func_(state->F, dt);
-        Q_func_(state->Q, dt, settings_.process_noise_var);
+        Q_func_(state->Q, dt, Q_var);
 
         err = predict(x, P, state->F, state->Q, B_, u);
     }
@@ -214,7 +219,7 @@ KalmanFilter::Error KalmanFilterLinear::predictState_impl(Vector& x,
         kalman::Matrix F, Q;
 
         F_func_(F, dt);
-        Q_func_(Q, dt, settings_.process_noise_var);
+        Q_func_(Q, dt, Q_var);
 
         err = predict(x, P, F, Q, B_, u);
     }

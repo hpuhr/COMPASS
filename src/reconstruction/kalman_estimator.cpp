@@ -25,10 +25,12 @@
 #include "spline_interpolator.h"
 
 #include "logger.h"
+#include "global.h"
 
 #include "kalman_interface_umkalman2d.h"
 #if USE_EXPERIMENTAL_SOURCE
 #include "kalman_interface_amkalman2d.h"
+#include "kalman_interface_imm2d.h"
 #endif
 
 namespace reconstruction
@@ -36,6 +38,20 @@ namespace reconstruction
 
 const double KalmanEstimator::HighStdDev = 1000.0;
 const double KalmanEstimator::HighVar    = KalmanEstimator::HighStdDev * KalmanEstimator::HighStdDev;
+
+/**
+*/
+KalmanEstimator::Settings::Settings()
+{
+    imm_mu_init.resize(3);
+    imm_mu_init << 0.333, 0.334, 0.333;
+                                                  
+    imm_M_init.resize(3, 3);
+                   //   zero,   uniform,   accelerated
+    imm_M_init <<       0.7,        0.1,        0.2,   // zero
+                        0.1,        0.7,        0.2,   // uniform
+                       0.15,       0.15,        0.7;   // accelerated
+}
 
 /**
 */
@@ -96,17 +112,24 @@ void KalmanEstimator::init(std::unique_ptr<KalmanInterface>&& interface)
 /**
 */
 std::unique_ptr<KalmanInterface> KalmanEstimator::createInterface(kalman::KalmanType ktype,
-                                                                  bool track_velocity, 
-                                                                  bool track_accel)
+                                                                  const Settings& settings)
 {
     if (ktype == kalman::KalmanType::UMKalman2D)
     {
-        return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceUMKalman2D(track_velocity));
+        return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceUMKalman2D(settings.track_velocities));
     }
     else if (ktype == kalman::KalmanType::AMKalman2D)
     {
 #if USE_EXPERIMENTAL_SOURCE
         return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceAMKalman2D());
+#else
+        throw std::runtime_error("KalmanEstimator: createInterface: reconstructor type not supported by build");
+#endif
+    }
+    else if (ktype == kalman::KalmanType::IMMKalman2D)
+    {
+#if USE_EXPERIMENTAL_SOURCE
+        return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceIMM2D(settings.imm_mu_init, settings.imm_M_init));
 #else
         throw std::runtime_error("KalmanEstimator: createInterface: reconstructor type not supported by build");
 #endif
@@ -124,7 +147,7 @@ std::unique_ptr<KalmanInterface> KalmanEstimator::createInterface(kalman::Kalman
  */
 void KalmanEstimator::init(kalman::KalmanType ktype)
 {
-    auto interface = KalmanEstimator::createInterface(ktype, settings_.track_velocities, settings_.track_accelerations);
+    auto interface = KalmanEstimator::createInterface(ktype, settings_);
     init(std::move(interface));
 }
 
@@ -1278,6 +1301,12 @@ std::string KalmanEstimator::asString(int flags, const std::string& prefix) cons
         return kalman_interface_->asString(flags, prefix);
 
     return "";
+}
+
+void KalmanEstimator::enableDebugging(bool ok)
+{
+    if (kalman_interface_)
+        return kalman_interface_->enableDebugging(ok);
 }
 
 } // reconstruction

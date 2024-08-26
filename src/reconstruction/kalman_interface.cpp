@@ -28,6 +28,10 @@ namespace reconstruction
 
 /**
 */
+KalmanInterface::KalmanInterface() = default;
+
+/**
+*/
 KalmanInterface::KalmanInterface(kalman::KalmanFilter* kalman_filter)
 :   kalman_filter_(kalman_filter)
 {
@@ -37,6 +41,14 @@ KalmanInterface::KalmanInterface(kalman::KalmanFilter* kalman_filter)
 /**
 */
 KalmanInterface::~KalmanInterface() = default;
+
+/**
+*/
+void KalmanInterface::setKalmanFilter(kalman::KalmanFilter* kalman_filter)
+{
+    assert(kalman_filter);
+    kalman_filter_.reset(kalman_filter);
+}
 
 /**
 */
@@ -84,14 +96,16 @@ void KalmanInterface::kalmanInit(kalman::KalmanState& init_state,
     
     const double dt_start = 1.0;
 
-    kalman_filter_->settings().process_noise_var = Q_var;
-
     //init kalman
-    stateVecXFromMM(kalman_filter_->xVec(), mm);
-    covarianceMatP(kalman_filter_->pMat(), mm, default_uncert);
+    //@TODO: cache x and P somewhere
+    kalman::Vector x;
+    kalman::Matrix P;
+    stateVecXFromMM(x, mm);
+    covarianceMatP(P, mm, default_uncert);
     //measurementUncertMatR(kalman_filter_->rMat(), mm, default_uncert);
 
-    kalman_filter_->updateInternalMatrices(dt_start);
+    kalman_filter_->init(x, P);
+    kalman_filter_->updateInternalMatrices(dt_start, Q_var);
 
     if (verbosity() > 1)
     {
@@ -139,8 +153,6 @@ kalman::KalmanError KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
 
     const double dt = timestep(mm);
 
-    kalman_filter_->settings().process_noise_var = Q_var;
-
     //set kalman internal matrices
     measurementUncertMatR(kalman_filter_->rMat(), mm, default_uncert);
 
@@ -155,7 +167,7 @@ kalman::KalmanError KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
                << "z: " << z << "\n";
     }
 
-    auto err = kalman_filter_->predictAndUpdate(dt, z, {}, {});
+    auto err = kalman_filter_->predictAndUpdate(dt, Q_var, z, {}, {});
 
     if (err != kalman::KalmanError::NoError)
         return err;
@@ -179,9 +191,7 @@ kalman::KalmanError KalmanInterface::kalmanPrediction(kalman::Vector& x,
 {
     assert(kalman_filter_);
 
-    kalman_filter_->settings().process_noise_var = Q_var;
-
-    auto err = kalman_filter_->predictState(x, P, dt, fix_estimate, fixed, {});
+    auto err = kalman_filter_->predictState(x, P, dt, Q_var, fix_estimate, fixed, {});
 
     return err;
 }
@@ -270,13 +280,12 @@ kalman::KalmanError KalmanInterface::interpStep(kalman::KalmanState& state_inter
 {
     assert(kalman_filter_);
 
-    kalman_filter_->settings().process_noise_var = Q_var;
-
     return kalman_filter_->predictStateFrom(state_interp.x,
                                             state_interp.P,
                                             state0.x, 
                                             state0.P,
                                             dt,
+                                            Q_var,
                                             fix_estimate,
                                             fixed,
                                             {},
@@ -339,6 +348,14 @@ std::string KalmanInterface::asString(int flags,
 {
     assert(kalman_filter_);
     return kalman_filter_->asString(flags, prefix);
+}
+
+/**
+*/
+void KalmanInterface::enableDebugging(bool ok) 
+{ 
+    assert(kalman_filter_);
+    kalman_filter_->enableDebugging(ok);
 }
 
 } // reconstruction

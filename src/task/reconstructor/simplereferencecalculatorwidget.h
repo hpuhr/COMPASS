@@ -23,6 +23,7 @@ private:
     ReconstructorBase& reconstructor_;
 
     QComboBox*      rec_type_combo_               = nullptr;
+    QComboBox*      rec_type_combo_final_         = nullptr;
     QDoubleSpinBox* Q_std_edit_                   = nullptr;
     QDoubleSpinBox* repr_distance_box_            = nullptr;
     QSpinBox*       min_chain_size_box_           = nullptr;

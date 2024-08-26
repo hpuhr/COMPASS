@@ -78,7 +78,8 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
 
             // reference computation
     {
-        registerParameter("ref_rec_type", (int*)&ref_calc_settings_.kalman_type, (int)ReferenceCalculatorSettings().kalman_type);
+        registerParameter("ref_rec_type", (int*)&ref_calc_settings_.kalman_type_assoc, (int)ReferenceCalculatorSettings().kalman_type_assoc);
+        registerParameter("ref_rec_type_final", (int*)&ref_calc_settings_.kalman_type_final, (int)ReferenceCalculatorSettings().kalman_type_final);
 
         registerParameter("ref_Q_std", &ref_calc_settings_.Q_std, ReferenceCalculatorSettings().Q_std);
 
@@ -239,7 +240,7 @@ void ReconstructorBase::initChainPredictors()
 
     assert(chain_predictors_);
 
-    chain_predictors_->init(referenceCalculatorSettings().kalman_type,
+    chain_predictors_->init(referenceCalculatorSettings().kalman_type_assoc,
                             referenceCalculatorSettings().chainEstimatorSettings(),
                             num_threads);
 }
