@@ -70,16 +70,6 @@ public:
                        bool* fixed = nullptr,
                        const OVector& u = OVector(),
                        KalmanState* state = nullptr) const;
-    Error predictStateFrom(Vector& x, 
-                           Matrix& P,
-                           const Vector& x_from, 
-                           const Matrix& P_from,
-                           double dt, 
-                           double Q_var,
-                           bool fix_estimate = false,
-                           bool* fixed = nullptr,
-                           const OVector& u = OVector(),
-                           KalmanState* state = nullptr) const;
 
     bool smooth(std::vector<kalman::Vector>& x_smooth,
                 std::vector<kalman::Matrix>& P_smooth,
@@ -94,13 +84,13 @@ public:
     bool checkState() const;
     bool checkVariances() const;
 
-    virtual void backup();
-    virtual void revert();
-    virtual void invert();
+    virtual void backup(bool recursive = false);
+    virtual void revert(bool recursive = false);
+    virtual void invert(bool recursive = false);
 
     virtual void init(const Vector& x, const Matrix& P);
     virtual void init(const Vector& x, const Matrix& P, double dt, double Q_var);
-    virtual void init(const KalmanState& state);
+    virtual void init(const KalmanState& state, bool xP_only = false);
 
     const Vector& getX() const { return x_; }
     const Matrix& getP() const { return P_; }

@@ -96,11 +96,14 @@ void KalmanFilter::init(const Vector& x, const Matrix& P, double dt, double Q_va
 
 /**
 */
-void KalmanFilter::init(const KalmanState& state)
+void KalmanFilter::init(const KalmanState& state, bool xP_only)
 {
     init(state.x, state.P);
 
-    Q_ = state.Q;
+    if (!xP_only)
+    {
+        Q_ = state.Q;
+    }
 }
 
 /**
@@ -170,7 +173,7 @@ bool KalmanFilter::checkVariances() const
 
 /**
 */
-void KalmanFilter::backup()
+void KalmanFilter::backup(bool recursive)
 {
     x_backup_ = x_;
     P_backup_ = P_;
@@ -178,7 +181,7 @@ void KalmanFilter::backup()
 
 /**
 */
-void KalmanFilter::revert()
+void KalmanFilter::revert(bool recursive)
 {
     x_ = x_backup_;
     P_ = P_backup_;
@@ -186,7 +189,7 @@ void KalmanFilter::revert()
 
 /**
 */
-void KalmanFilter::invert()
+void KalmanFilter::invert(bool recursive)
 {
     invertState(x_);
 }
@@ -414,33 +417,6 @@ KalmanFilter::Error KalmanFilter::predictState(Vector& x,
     }
 
     return Error::NoError;
-}
-
-/**
-*/
-KalmanFilter::Error KalmanFilter::predictStateFrom(Vector& x, 
-                                                   Matrix& P,
-                                                   const Vector& x_from, 
-                                                   const Matrix& P_from,
-                                                   double dt, 
-                                                   double Q_var,
-                                                   bool fix_estimate,
-                                                   bool* fixed,
-                                                   const OVector& u,
-                                                   KalmanState* state) const
-{
-    x_backup_ = x_;
-    P_backup_ = P_;
-
-    x_ = x_from;
-    P_ = P_from;
-
-    auto r = predictState(x, P, dt, Q_var, fix_estimate, fixed, u, state);
-
-    x_ = x_backup_;
-    P_ = P_backup_;
-
-    return r;
 }
 
 /**

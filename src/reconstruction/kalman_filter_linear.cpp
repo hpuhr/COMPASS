@@ -47,14 +47,14 @@ KalmanFilterLinear::~KalmanFilterLinear() = default;
 
 /**
 */
-void KalmanFilterLinear::init(const KalmanState& state)
+void KalmanFilterLinear::init(const KalmanState& state, bool xP_only)
 {
-    KalmanFilter::init(state);
+    KalmanFilter::init(state, xP_only);
 
-    if (isDebug())
-        assert(state.F.size() > 0);
-
-    F_ = state.F;
+    if (!xP_only)
+    {
+        F_ = state.F;
+    }
 }
 
 /**
