@@ -74,7 +74,7 @@ struct ReferenceCalculatorSettings
     int verbosity = 0;
 
     kalman::KalmanType kalman_type_assoc = kalman::KalmanType::UMKalman2D;
-    kalman::KalmanType kalman_type_final = kalman::KalmanType::UMKalman2D;
+    kalman::KalmanType kalman_type_final = kalman::KalmanType::IMMKalman2D;
 
     //default noise
     double Q_std       = 30.0;
