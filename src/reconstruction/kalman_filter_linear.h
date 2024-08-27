@@ -46,7 +46,7 @@ public:
 
     size_t dimU() const { return dim_u_; }
 
-    void init(const KalmanState& state) override final;
+    void init(const KalmanState& state, bool xP_only = false) override final;
     void state(kalman::KalmanState& s) const override final;
 
     void setB(const Matrix& B) { B_ = B; }

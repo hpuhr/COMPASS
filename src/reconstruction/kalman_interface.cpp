@@ -280,16 +280,25 @@ kalman::KalmanError KalmanInterface::interpStep(kalman::KalmanState& state_inter
 {
     assert(kalman_filter_);
 
-    return kalman_filter_->predictStateFrom(state_interp.x,
+    //backup current state
+    auto state_backup = kalman_filter_->state();
+
+    //init to interp state
+    kalman_filter_->init(state0);
+
+    //predict
+    auto err = kalman_filter_->predictState(state_interp.x,
                                             state_interp.P,
-                                            state0.x, 
-                                            state0.P,
                                             dt,
                                             Q_var,
                                             fix_estimate,
                                             fixed,
                                             {},
                                             &state_interp);
+    //revert
+    kalman_filter_->init(state_backup);
+
+    return err;
 }
 
 /**

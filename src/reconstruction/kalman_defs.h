@@ -73,12 +73,14 @@ typedef std::function<void(Vector&,const Vector&,size_t,size_t)> XTransferFunc;
 */
 struct KalmanState
 {
-    struct SubState
+    struct IMMState
     {
-        Vector x; // state
-        Matrix P; // state uncertainty
+        std::vector<KalmanState> filter_states;
+
+        Vector mu;
+        Matrix omega;
+        Vector cbar;
     };
-    typedef std::vector<KalmanState> SubStates;
 
     KalmanState() {}
     KalmanState(const Vector& _x, const Matrix& _P) : x(_x), P(_P) {}
@@ -90,10 +92,10 @@ struct KalmanState
     ,   F (other.F )
     ,   Q (other.Q )
     {
-        if (other.sub_states)
+        if (other.imm_state)
         {
-            sub_states.reset(new SubStates);
-            *sub_states = *other.sub_states;
+            imm_state.reset(new IMMState);
+            *imm_state = *other.imm_state;
         }
     }
     KalmanState(KalmanState&& other)
@@ -103,8 +105,8 @@ struct KalmanState
     ,   F (other.F )
     ,   Q (other.Q )
     {
-        if (other.sub_states)
-            sub_states = std::move(other.sub_states);
+        if (other.imm_state)
+            imm_state = std::move(other.imm_state);
     }
 
     KalmanState& operator=(const KalmanState& other)
@@ -115,10 +117,10 @@ struct KalmanState
         F  = other.F;
         Q  = other.Q;
 
-        if (other.sub_states)
-            subStates() = *other.sub_states;
-        else if (sub_states)
-            sub_states.reset();
+        if (other.imm_state)
+            immState() = *other.imm_state;
+        else if (imm_state)
+            imm_state.reset();
 
         return *this;
     }
@@ -131,19 +133,19 @@ struct KalmanState
         F  = other.F;
         Q  = other.Q;
 
-        if (other.sub_states)
-            sub_states = std::move(other.sub_states);
-        else if (sub_states)
-            sub_states.reset();
+        if (other.imm_state)
+            imm_state = std::move(other.imm_state);
+        else if (imm_state)
+            imm_state.reset();
 
         return *this;
     }
 
-    SubStates& subStates()
+    IMMState& immState()
     {
-        if (!sub_states)
-            sub_states.reset(new SubStates);
-        return *sub_states;
+        if (!imm_state)
+            imm_state.reset(new IMMState);
+        return *imm_state;
     }
 
     double dt = 0.0; // used timestep
@@ -152,7 +154,7 @@ struct KalmanState
     Matrix F;        // transition mat
     Matrix Q;        // process noise
 
-    std::unique_ptr<SubStates> sub_states;
+    std::unique_ptr<IMMState> imm_state;
 };
 
 /**
