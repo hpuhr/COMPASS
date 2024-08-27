@@ -51,6 +51,8 @@ class AccuracyEstimatorBase
 
   protected:
 
+    bool skip_unused_positions_ {true};
+
     static const double PosAccStdDevMin;
     static const dbContent::targetReport::PositionAccuracy PosAccStdMin;
 
