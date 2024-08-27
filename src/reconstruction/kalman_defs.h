@@ -27,8 +27,9 @@ namespace kalman
 
 enum KalmanType
 {
-    UMKalman2D = 0, // uniform motion kalman in the plane
-    AMKalman2D      // accelerated motion kalman in the plane
+    UMKalman2D     = 0, // uniform motion kalman in the plane
+    AMKalman2D,         // accelerated motion kalman in the plane
+    IMMKalman2D         // mixed kalman model filter in the plane
 };
 
 enum SmoothFailStrategy
@@ -72,15 +73,86 @@ typedef std::function<void(Vector&,const Vector&,size_t,size_t)> XTransferFunc;
 */
 struct KalmanState
 {
+    struct SubState
+    {
+        Vector x; // state
+        Matrix P; // state uncertainty
+    };
+    typedef std::vector<KalmanState> SubStates;
+
     KalmanState() {}
     KalmanState(const Vector& _x, const Matrix& _P) : x(_x), P(_P) {}
     KalmanState(const Vector& _x, const Matrix& _P, double _dt) : dt(_dt), x(_x), P(_P) {}
+    KalmanState(const KalmanState& other)
+    :   dt(other.dt)
+    ,   x (other.x )
+    ,   P (other.P )
+    ,   F (other.F )
+    ,   Q (other.Q )
+    {
+        if (other.sub_states)
+        {
+            sub_states.reset(new SubStates);
+            *sub_states = *other.sub_states;
+        }
+    }
+    KalmanState(KalmanState&& other)
+    :   dt(other.dt)
+    ,   x (other.x )
+    ,   P (other.P )
+    ,   F (other.F )
+    ,   Q (other.Q )
+    {
+        if (other.sub_states)
+            sub_states = std::move(other.sub_states);
+    }
+
+    KalmanState& operator=(const KalmanState& other)
+    {
+        dt = other.dt;
+        x  = other.x;
+        P  = other.P;
+        F  = other.F;
+        Q  = other.Q;
+
+        if (other.sub_states)
+            subStates() = *other.sub_states;
+        else if (sub_states)
+            sub_states.reset();
+
+        return *this;
+    }
+
+    KalmanState& operator=(KalmanState&& other)
+    {
+        dt = other.dt;
+        x  = other.x;
+        P  = other.P;
+        F  = other.F;
+        Q  = other.Q;
+
+        if (other.sub_states)
+            sub_states = std::move(other.sub_states);
+        else if (sub_states)
+            sub_states.reset();
+
+        return *this;
+    }
+
+    SubStates& subStates()
+    {
+        if (!sub_states)
+            sub_states.reset(new SubStates);
+        return *sub_states;
+    }
 
     double dt = 0.0; // used timestep
     Vector x;        // state
     Matrix P;        // state uncertainty
     Matrix F;        // transition mat
     Matrix Q;        // process noise
+
+    std::unique_ptr<SubStates> sub_states;
 };
 
 /**

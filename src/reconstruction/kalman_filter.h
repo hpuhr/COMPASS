@@ -36,12 +36,9 @@ public:
     typedef KalmanError     Error;
     typedef KalmanInfoFlags InfoFlags;
 
-    typedef std::function<void(Vector&)> InvertStateFunc;
-
-    struct Settings
-    {
-        double process_noise_var;
-    };
+    typedef std::function<void(Vector&)>         InvertStateFunc;
+    typedef std::function<Vector(const Vector&)> ZFunc;
+    typedef std::function<Matrix(const Matrix&)> RFunc;
 
     KalmanFilter(size_t dim_x, 
                  size_t dim_z);
@@ -50,14 +47,17 @@ public:
     size_t dimX() const { return dim_x_; }
     size_t dimZ() const { return dim_z_; }
 
-    Settings& settings() { return settings_; }
+    void setOverrideProcessNoiseVar(double Q_var);
+    virtual void enableDebugging(bool ok);
 
     Error predict(double dt,
+                  double Q_var,
                   const OVector& u = OVector());
     Error update(const Vector& z,
                  const OMatrix& R = OMatrix());
 
     Error predictAndUpdate(double dt,
+                           double Q_var,
                            const Vector& z,
                            const OMatrix& R = OMatrix(),
                            const OVector& u = OVector());
@@ -65,6 +65,7 @@ public:
     Error predictState(Vector& x, 
                        Matrix& P,
                        double dt, 
+                       double Q_var,
                        bool fix_estimate = false,
                        bool* fixed = nullptr,
                        const OVector& u = OVector(),
@@ -74,6 +75,7 @@ public:
                            const Vector& x_from, 
                            const Matrix& P_from,
                            double dt, 
+                           double Q_var,
                            bool fix_estimate = false,
                            bool* fixed = nullptr,
                            const OVector& u = OVector(),
@@ -87,7 +89,7 @@ public:
                 bool stop_on_fail = false,
                 std::vector<bool>* state_valid = nullptr) const;
 
-    void updateInternalMatrices(double dt);
+    void updateInternalMatrices(double dt, double Q_var);
 
     bool checkState() const;
     bool checkVariances() const;
@@ -96,9 +98,14 @@ public:
     virtual void revert();
     virtual void invert();
 
-    void init(const Vector& x, const Matrix& P);
-    void init(const Vector& x, const Matrix& P, double dt);
+    virtual void init(const Vector& x, const Matrix& P);
+    virtual void init(const Vector& x, const Matrix& P, double dt, double Q_var);
     virtual void init(const KalmanState& state);
+
+    const Vector& getX() const { return x_; }
+    const Matrix& getP() const { return P_; }
+    const Matrix& getQ() const { return Q_; }
+    const Matrix& getR() const { return R_; }
 
     void setX(const Vector& x) { x_ = x; }
     void setP(const Matrix& P) { P_ = P; }
@@ -110,16 +117,14 @@ public:
     void setProcessUncertMat(const Matrix& Q) { setQ(Q); }
     void setMeasurementUncertMat(const Matrix& R) { setR(R); }
 
-    const Vector& getX() const { return x_; }
     Vector& xVec() { return x_; }
-    const Matrix& getP() const { return P_; }
     Matrix& pMat() { return P_; }
-    const Matrix& getQ() const { return Q_; }
     Matrix& qMat() { return Q_; }
-    const Matrix& getR() const { return R_; }
     Matrix& rMat() { return R_; }
 
     void setInvertStateFunc(const InvertStateFunc& func) { invert_state_func_ = func; }
+    void setZFunc(const ZFunc& func) { z_func_ = func; }
+    void setRFunc(const RFunc& func) { R_func_ = func; }
 
     boost::optional<double> logLikelihood() const;
     boost::optional<double> likelihood() const;
@@ -128,7 +133,7 @@ public:
     kalman::KalmanState state() const;
     virtual void state(kalman::KalmanState& s) const;
 
-    std::string asString(int info_flags = InfoFlags::InfoAll, const std::string& prefix = "") const;
+    virtual std::string asString(int info_flags = InfoFlags::InfoAll, const std::string& prefix = "") const;
 
     void invertState(Vector& x_inv, const Vector& x) const;
     void invertState(Vector& x) const;
@@ -144,15 +149,17 @@ protected:
                      Matrix& P,
                      bool* fixed = nullptr) const;
 
-    virtual void updateInternalMatrices_impl(double dt) = 0;
+    virtual void updateInternalMatrices_impl(double dt, double Q_var) = 0;
 
     virtual Error predict_impl(Vector& x, 
                                Matrix& P,
                                double dt, 
+                               double Q_var,
                                const OVector& u) = 0;
     virtual Error predictState_impl(Vector& x, 
                                     Matrix& P,
                                     double dt,
+                                    double Q_var,
                                     bool mt_safe,
                                     const OVector& u,
                                     KalmanState* state) const = 0;
@@ -170,6 +177,8 @@ protected:
     virtual void printExtendedState(std::stringstream& strm, const std::string& prefix) const;
     virtual void printIntermSteps(std::stringstream& strm, const std::string& prefix) const;
 
+    bool isDebug() const { return debug_; }
+
     size_t dim_x_;
     size_t dim_z_;
 
@@ -184,8 +193,6 @@ protected:
     Matrix SI_; // inverse system uncertainty
 
     Matrix I_;  // identity matrix
-
-    Settings settings_;
 
 private:
     void postConditionP(Matrix& P) const;
@@ -208,6 +215,11 @@ private:
     Matrix P_post_;
 
     InvertStateFunc invert_state_func_;
+    ZFunc           z_func_;
+    RFunc           R_func_;
+
+    boost::optional<double> Q_var_;
+    bool                    debug_ = false;
 };
 
 } // namespace kalman

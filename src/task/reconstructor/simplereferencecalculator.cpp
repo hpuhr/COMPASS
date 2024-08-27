@@ -456,7 +456,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //configure and init estimator
     reconstruction::KalmanEstimator estimator;
     estimator.settings() = settings_.kalmanEstimatorSettings();
-    estimator.init(settings_.kalman_type);
+    estimator.init(settings_.kalman_type_final);
 
     kalman::KalmanUpdate update;
     size_t offs     = 0;
@@ -506,6 +506,15 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                           refs.start_index.value());
     }
 
+    // auto checkState = [ & ] (const kalman::KalmanUpdate& update)
+    // {
+    //     assert(update.state.sub_states);
+    //     assert(update.state.x.size() > 0);
+    //     assert(update.state.P.cols() > 0 && update.state.P.rows() > 0);
+    //     assert(update.state.sub_states->at(0).F.cols() > 0 && update.state.sub_states->at(0).F.rows());
+    //     assert(update.state.sub_states->at(1).F.cols() > 0 && update.state.sub_states->at(1).F.rows());
+    // };
+
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
     {
@@ -532,7 +541,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         //reinit kalman with first measurement
         estimator.kalmanInit(update, mm0);
         assert(update.valid);
-
+        
         refs.updates.push_back(update);
 
         if (debug_target)
@@ -542,9 +551,10 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     }
 
     //add new measurements to kalman and collect updates
-    
     for (size_t i = refs.start_index.value() + offs; i < refs.measurements.size(); ++i)
     {
+        //estimator.enableDebugging(refs.utn == 0 && i == refs.start_index.value() + offs);
+
         const auto& mm = refs.measurements[ i ];
 
         bool debug_mm = debug_target && debug_rec_nums.count(mm.source_id);
