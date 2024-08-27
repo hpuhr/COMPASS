@@ -72,6 +72,8 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
             ))
         current_reconstructor_str_ = ScoringUMReconstructorName;
 
+    registerParameter("debug_accuracy_estimation", &debug_accuracy_estimation_, debug_accuracy_estimation_);
+
     createSubConfigurables();
 }
 
