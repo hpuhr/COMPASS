@@ -30,15 +30,16 @@ KalmanFilterUM2D::KalmanFilterUM2D(bool track_velocities)
 :   KalmanFilterLinear(4, track_velocities ? 4 : 2, 0)
 {
     //configure H
+    Matrix& H = hMat();
     if (track_velocities)
     {
-        H_.setIdentity(4, 4);
+        H.setIdentity(4, 4);
     }
     else
     {
-        H_.setZero(2, 4);
-        H_(0, 0) = 1.0;
-        H_(1, 2) = 1.0;
+        H.setZero(2, 4);
+        H(0, 0) = 1.0;
+        H(1, 2) = 1.0;
     }
 
     auto F_func  = [ this ] (Matrix& F, double dt) { return this->configureFMat(F, dt); };

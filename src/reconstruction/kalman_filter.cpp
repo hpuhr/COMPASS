@@ -59,6 +59,20 @@ KalmanFilter::~KalmanFilter() = default;
 
 /**
 */
+void KalmanFilter::setOverrideProcessNoiseVar(double Q_var)
+{
+    Q_var_ = Q_var;
+}
+
+/**
+ */
+void KalmanFilter::enableDebugging(bool ok)
+{
+    debug_ = ok;
+}
+
+/**
+*/
 void KalmanFilter::init(const Vector& x, const Matrix& P)
 {
     // reset to force recompute
@@ -73,11 +87,11 @@ void KalmanFilter::init(const Vector& x, const Matrix& P)
 
 /**
 */
-void KalmanFilter::init(const Vector& x, const Matrix& P, double dt)
+void KalmanFilter::init(const Vector& x, const Matrix& P, double dt, double Q_var)
 {
     init(x, P);
 
-    updateInternalMatrices(dt);
+    updateInternalMatrices(dt, Q_var);
 }
 
 /**
@@ -231,9 +245,15 @@ void KalmanFilter::resetLikelihoods()
 
 /**
 */
-void KalmanFilter::updateInternalMatrices(double dt)
+void KalmanFilter::updateInternalMatrices(double dt, double Q_var)
 {
-    updateInternalMatrices_impl(dt);
+    if (isDebug())
+        loginf << "KalmanFilter: updateInternalMatrices: UPDATING!!!";
+
+    updateInternalMatrices_impl(dt, Q_var_.has_value() ? Q_var_.value() : Q_var);
+
+    if (isDebug())
+        loginf << "KalmanFilter: updateInternalMatrices: UPDATING ENDED";
 }
 
 /**
@@ -241,6 +261,7 @@ void KalmanFilter::updateInternalMatrices(double dt)
  * dt must not be negative.
 */
 KalmanFilter::Error KalmanFilter::predict(double dt, 
+                                          double Q_var,
                                           const OVector& u)
 {
     // reset to force recompute
@@ -249,11 +270,13 @@ KalmanFilter::Error KalmanFilter::predict(double dt,
     // save backup state
     backup();
 
+    const double Q_var_active = Q_var_.has_value() ? Q_var_.value() : Q_var;
+
     //update internal time-dependent matrices
-    updateInternalMatrices(dt);
+    updateInternalMatrices(dt, Q_var_active);
 
     // predict
-    auto err = predict_impl(x_, P_, dt, u);
+    auto err = predict_impl(x_, P_, dt, Q_var_active, u);
     if (err != Error::NoError)
         return err;
 
@@ -277,8 +300,10 @@ KalmanFilter::Error KalmanFilter::update(const Vector& z,
     resetLikelihoods();
 
     const Matrix& R__ = R.has_value() ? R.value() : R_;
+    
+    auto err = update_impl(z_func_ ? z_func_(z) : z, 
+                           R_func_ ? R_func_(R__) : R__);
 
-    auto err = update_impl(z, R__);
     if (err != Error::NoError)
     {
         x_post_ = x_;
@@ -303,12 +328,13 @@ KalmanFilter::Error KalmanFilter::update(const Vector& z,
  * when failing, making it the safe choice when executing a kalman step.
 */
 KalmanFilter::Error KalmanFilter::predictAndUpdate(double dt,
+                                                   double Q_var,
                                                    const Vector& z,
                                                    const OMatrix& R,
                                                    const OVector& u)
 {
     //predict
-    auto err = predict(dt, u);
+    auto err = predict(dt, Q_var, u);
     if (err != Error::NoError)
     {
         //revert to initial state
@@ -336,6 +362,7 @@ KalmanFilter::Error KalmanFilter::predictAndUpdate(double dt,
 KalmanFilter::Error KalmanFilter::predictState(Vector& x, 
                                                Matrix& P,
                                                double dt,
+                                               double Q_var,
                                                bool fix_estimate,
                                                bool* fixed,
                                                const OVector& u,
@@ -343,6 +370,8 @@ KalmanFilter::Error KalmanFilter::predictState(Vector& x,
 {
     if (fixed)
         *fixed = false;
+
+    const double Q_var_active = Q_var_.has_value() ? Q_var_.value() : Q_var;
 
     if (dt < 0.0)
     {
@@ -355,7 +384,7 @@ KalmanFilter::Error KalmanFilter::predictState(Vector& x,
         //...and use positive timestep
         dt = std::fabs(dt);
         
-        Error err = predictState_impl(x, P, dt, true, u, state);
+        Error err = predictState_impl(x, P, dt, Q_var_active, true, u, state);
         
         //revert state
         x_ = x_backup;
@@ -365,7 +394,7 @@ KalmanFilter::Error KalmanFilter::predictState(Vector& x,
     }
     else
     {
-        Error err = predictState_impl(x, P, dt, true, u, state);
+        Error err = predictState_impl(x, P, dt, Q_var_active, true, u, state);
 
         if (err != Error::NoError)
             return err;
@@ -394,6 +423,7 @@ KalmanFilter::Error KalmanFilter::predictStateFrom(Vector& x,
                                                    const Vector& x_from, 
                                                    const Matrix& P_from,
                                                    double dt, 
+                                                   double Q_var,
                                                    bool fix_estimate,
                                                    bool* fixed,
                                                    const OVector& u,
@@ -405,7 +435,7 @@ KalmanFilter::Error KalmanFilter::predictStateFrom(Vector& x,
     x_ = x_from;
     P_ = P_from;
 
-    auto r = predictState(x, P, dt, fix_estimate, fixed, u, state);
+    auto r = predictState(x, P, dt, Q_var, fix_estimate, fixed, u, state);
 
     x_ = x_backup_;
     P_ = P_backup_;
@@ -577,6 +607,22 @@ boost::optional<double> KalmanFilter::logLikelihood() const
     if (log_likelihood_.has_value())
         return log_likelihood_;
     
+    auto lh = likelihood();
+    if (!lh.has_value())
+        return {};
+
+    log_likelihood_ = std::log(lh.value());
+
+    return log_likelihood_;
+}
+
+/**
+*/
+boost::optional<double> KalmanFilter::likelihood() const
+{
+    if (likelihood_.has_value())
+        return likelihood_;
+
     const double LogSqrt2Pi = 0.5 * std::log(2 * M_PI);
     typedef Eigen::LLT<Eigen::MatrixXd> Chol;
     Chol chol(S_);
@@ -588,23 +634,9 @@ boost::optional<double> KalmanFilter::logLikelihood() const
     const Chol::Traits::MatrixL& L = chol.matrixL();
     double quadform = (L.solve(y_)).squaredNorm();
 
-    return std::exp(-y_.rows() * LogSqrt2Pi - 0.5 * quadform) / L.determinant();
-}
+    likelihood_ = std::max(std::numeric_limits<double>::epsilon(), std::exp(-y_.rows() * LogSqrt2Pi - 0.5 * quadform) / L.determinant());
 
-/**
-*/
-boost::optional<double> KalmanFilter::likelihood() const
-{
-    if (likelihood_.has_value())
-        return likelihood_;
-
-    auto llh = logLikelihood();
-    if (!llh.has_value())
-        return {};
-
-    double lh = std::max(std::numeric_limits<double>::epsilon(), std::exp(llh.value()));
-
-    return lh;
+    return likelihood_;
 }
 
 /**

@@ -58,6 +58,8 @@ public:
             ReturnInvalid    //return error and set update to invalid
         };
 
+        Settings();
+
         double Q_var       = 900.0;   // variance of kalman process (30*30)
         double R_var_undef = HighVar; // high variance for undefined values (1000*1000)
 
@@ -95,6 +97,9 @@ public:
         int verbosity = 0;
 
         reconstruction::Uncertainty default_uncert; //default uncertainties used if none are provided in the measurement
+
+        kalman::Vector imm_mu_init;
+        kalman::Matrix imm_M_init;
     };
 
     enum class ReinitState
@@ -196,9 +201,10 @@ public:
 
     std::string asString(int flags = kalman::KalmanInfoFlags::InfoAll, const std::string& prefix = "") const;
 
+    void enableDebugging(bool ok);
+
     static std::unique_ptr<KalmanInterface> createInterface(kalman::KalmanType ktype, 
-                                                            bool track_velocity = true, 
-                                                            bool track_accel = true);
+                                                            const Settings& settings);
 
     static void extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speeds_pos_wgs84,
                                             std::vector<boost::optional<Eigen::Vector2d>>& accel_pos_wgs84,

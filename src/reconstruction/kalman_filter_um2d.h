@@ -39,11 +39,28 @@ private:
 
     using KalmanFilterLinear::setFMatFunc;
     using KalmanFilterLinear::setQMatFunc;
-    using KalmanFilter::setInvertStateFunc;
 
-    using KalmanFilterLinear::B_;
-    using KalmanFilterLinear::M_;
-    using KalmanFilterLinear::H_;
+    using KalmanFilterLinear::bMat;
+    using KalmanFilterLinear::fMat;
+    using KalmanFilterLinear::hMat;
+    using KalmanFilterLinear::mMat;
+    using KalmanFilterLinear::qMat;
+
+    using KalmanFilterLinear::setB;
+    using KalmanFilterLinear::setF;
+    using KalmanFilterLinear::setH;
+    using KalmanFilterLinear::setM;
+    using KalmanFilterLinear::setQ;
+
+    using KalmanFilterLinear::setControlTransitionMat;
+    using KalmanFilterLinear::setStateTransitionMat;
+    using KalmanFilterLinear::setMeasurementMat;
+    using KalmanFilterLinear::setProcessMMCrossCorrMat;
+    using KalmanFilterLinear::setProcessUncertMat;
+
+    using KalmanFilter::setInvertStateFunc;
+    using KalmanFilter::setZFunc;
+    using KalmanFilter::setRFunc;
 };
 
 } // namespace kalman

@@ -43,6 +43,7 @@ class KalmanProjectionHandler;
 class KalmanInterface
 {
 public:
+    KalmanInterface();
     KalmanInterface(kalman::KalmanFilter* kalman_filter);
     virtual ~KalmanInterface();
 
@@ -138,9 +139,12 @@ public:
     virtual double xyCov(const kalman::Matrix& P) const = 0;
 
     void setVerbosity(int v) { verbosity_ = v; }
+    void enableDebugging(bool ok);
 
 protected:
     int verbosity() const { return verbosity_; }
+
+    void setKalmanFilter(kalman::KalmanFilter* kalman_filter);
 
 private:
     boost::posix_time::ptime ts_;

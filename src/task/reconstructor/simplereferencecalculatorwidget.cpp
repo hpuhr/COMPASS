@@ -41,12 +41,18 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     bool is_appimage = COMPASS::instance().isAppImage();
 
     rec_type_combo_ = new QComboBox;
-    rec_type_combo_->addItem("Uniform Motion"    , QVariant(kalman::UMKalman2D));
-    rec_type_combo_->addItem("Accelerated Motion", QVariant(kalman::AMKalman2D));
+    rec_type_combo_->addItem("Uniform Motion", QVariant(kalman::UMKalman2D));
     rec_type_combo_->setEnabled(false);
     connect(rec_type_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), 
-        [ = ] (int idx) { settings->kalman_type = (kalman::KalmanType)rec_type_combo_->currentData().toInt(); });
-    layout->addRow("Kalman Type", rec_type_combo_);
+        [ = ] (int idx) { settings->kalman_type_assoc = (kalman::KalmanType)rec_type_combo_->currentData().toInt(); });
+    layout->addRow("Kalman Type Association", rec_type_combo_);
+
+    rec_type_combo_final_ = new QComboBox;
+    rec_type_combo_final_->addItem("Uniform Motion", QVariant(kalman::UMKalman2D));
+    rec_type_combo_final_->addItem("IMM", QVariant(kalman::IMMKalman2D));
+    connect(rec_type_combo_final_, QOverload<int>::of(&QComboBox::currentIndexChanged), 
+        [ = ] (int idx) { settings->kalman_type_final = (kalman::KalmanType)rec_type_combo_final_->currentData().toInt(); });
+    layout->addRow("Kalman Type Final", rec_type_combo_final_);
 
     addHeader("Map Projection");
 
@@ -173,7 +179,8 @@ void SimpleReferenceCalculatorWidget::update()
 {
     const auto& settings = reconstructor_.referenceCalculatorSettings();
 
-    if (rec_type_combo_) rec_type_combo_->setCurrentIndex(rec_type_combo_->findData(QVariant(settings.kalman_type)));
+    if (rec_type_combo_) rec_type_combo_->setCurrentIndex(rec_type_combo_->findData(QVariant(settings.kalman_type_assoc)));
+    if (rec_type_combo_final_) rec_type_combo_final_->setCurrentIndex(rec_type_combo_final_->findData(QVariant(settings.kalman_type_final)));
 
     if (Q_std_edit_) Q_std_edit_->setValue(settings.Q_std);
 

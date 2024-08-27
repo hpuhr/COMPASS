@@ -1955,7 +1955,7 @@ void ReconstructorTarget::reinitTracker()
     chain_->settings().verbosity       = 0;
 
     chain_->configureEstimator(reconstructor_.referenceCalculatorSettings().chainEstimatorSettings());
-    chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type);
+    chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type_assoc);
 
     chain_->setMeasurementAssignFunc(
         [ this ] (reconstruction::Measurement& mm, unsigned long rec_num) 
