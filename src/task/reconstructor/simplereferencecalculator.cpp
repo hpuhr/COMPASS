@@ -721,13 +721,15 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 bool SimpleReferenceCalculator::shallAddAnnotationData() const
 {
     //add only if in last iteration
-    return !reconstructor_.isLastSliceProcessingRun();
+    return true;//!reconstructor_.isLastSliceProcessingRun();
 }
 
 /**
 */
 void SimpleReferenceCalculator::createAnnotations()
 {
+    loginf << "SimpleReferenceCalculator: createAnnotations: Creating annotations from " << references_.size() << " reference(s)";
+
     if (references_.empty())
         return;
 
@@ -740,6 +742,8 @@ void SimpleReferenceCalculator::createAnnotations()
     {
         if (ref.second.annotation_data.empty())
             continue;
+
+        loginf << "SimpleReferenceCalculator: createAnnotations: Creating annotation for UTN " << ref.second.utn;
 
         auto vp   = task.getDebugViewpointForUTN(ref.second.utn);
         auto anno = vp->annotations().getOrCreateAnnotation("Final Reconstruction");

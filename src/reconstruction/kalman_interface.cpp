@@ -172,7 +172,7 @@ kalman::KalmanError KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
     if (err != kalman::KalmanError::NoError)
         return err;
 
-    new_state = kalman_filter_->state();
+    new_state    = kalman_filter_->state();
     new_state.dt = dt;
 
     ts_ = mm.t;

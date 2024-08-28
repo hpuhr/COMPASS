@@ -141,6 +141,69 @@ struct KalmanState
         return *this;
     }
 
+    bool operator==(const KalmanState& other) const
+    {
+        if (dt != other.dt || 
+            x  != other.x  ||
+            P  != other.P  ||
+            F  != other.F  ||
+            Q  != other.Q)
+            return false;
+
+        bool has_imm       = imm_state != nullptr;
+        bool has_imm_other = other.imm_state != nullptr;
+
+        if (has_imm != has_imm_other)
+            return false;
+
+        if (has_imm)
+        {
+            if (imm_state->mu != other.imm_state->mu ||
+                imm_state->cbar != other.imm_state->cbar ||
+                imm_state->omega != other.imm_state->omega)
+                return false;
+
+            if (imm_state->filter_states.size() != other.imm_state->filter_states.size())
+                return false;
+
+            size_t n = imm_state->filter_states.size();
+
+            for (size_t i = 0; i < n; ++i)
+                if (imm_state->filter_states[ i ] != other.imm_state->filter_states[ i ])
+                    return false;
+        }
+
+        return true;
+    }
+
+    bool operator!=(const KalmanState& other) const
+    {
+        return !operator==(other);
+    }
+
+    std::string print() const
+    {
+        std::stringstream ss;
+        ss << "dt: " << dt << "\n"
+           << "x:\n" << x << "\n"
+           << "P:\n" << P << "\n"
+           << "F:\n" << F << "\n"
+           << "Q:\n" << Q << "\n";
+
+        if (imm_state)
+        {
+            ss << "mu:\n" << imm_state->mu << "\n"
+               << "omega:\n" << imm_state->omega << "\n"
+               << "cbar:\n" << imm_state->cbar << "\n\n";
+
+            for (size_t i = 0; i < imm_state->filter_states.size(); ++i)
+                ss << "[Filter" << i << "]\n"
+                   << imm_state->filter_states[ i ].print() << "\n";
+        }
+
+        return ss.str();
+    }
+
     IMMState& immState()
     {
         if (!imm_state)

@@ -108,21 +108,25 @@ void KalmanFilter::init(const KalmanState& state, bool xP_only)
 
 /**
 */
-kalman::KalmanState KalmanFilter::state() const
+kalman::KalmanState KalmanFilter::state(bool xP_only) const
 {
     kalman::KalmanState s;
-    state(s);
+    state(s, xP_only);
 
     return s;
 }
 
 /**
 */
-void KalmanFilter::state(kalman::KalmanState& s) const
+void KalmanFilter::state(kalman::KalmanState& s, bool xP_only) const
 {
     s.x = x_;
     s.P = P_;
-    s.Q = Q_;
+
+    if (!xP_only)
+    {
+        s.Q = Q_;
+    }
 }
 
 /**
@@ -250,13 +254,7 @@ void KalmanFilter::resetLikelihoods()
 */
 void KalmanFilter::updateInternalMatrices(double dt, double Q_var)
 {
-    if (isDebug())
-        loginf << "KalmanFilter: updateInternalMatrices: UPDATING!!!";
-
     updateInternalMatrices_impl(dt, Q_var_.has_value() ? Q_var_.value() : Q_var);
-
-    if (isDebug())
-        loginf << "KalmanFilter: updateInternalMatrices: UPDATING ENDED";
 }
 
 /**

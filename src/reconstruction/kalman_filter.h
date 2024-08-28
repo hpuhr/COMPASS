@@ -120,13 +120,15 @@ public:
     boost::optional<double> likelihood() const;
     boost::optional<double> mahalanobis() const;
 
-    kalman::KalmanState state() const;
-    virtual void state(kalman::KalmanState& s) const;
+    kalman::KalmanState state(bool xP_only = false) const;
+    virtual void state(kalman::KalmanState& s, bool xP_only = false) const;
 
     virtual std::string asString(int info_flags = InfoFlags::InfoAll, const std::string& prefix = "") const;
 
     void invertState(Vector& x_inv, const Vector& x) const;
     void invertState(Vector& x) const;
+
+    bool isDebug() const { return debug_; }
     
     static bool checkState(const Vector& x, const Matrix& P);
     static bool checkVariances(const Vector& x, const Matrix& P);
@@ -166,8 +168,6 @@ protected:
     virtual void printState(std::stringstream& strm, const std::string& prefix) const;
     virtual void printExtendedState(std::stringstream& strm, const std::string& prefix) const;
     virtual void printIntermSteps(std::stringstream& strm, const std::string& prefix) const;
-
-    bool isDebug() const { return debug_; }
 
     size_t dim_x_;
     size_t dim_z_;

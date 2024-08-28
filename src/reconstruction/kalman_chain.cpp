@@ -1179,6 +1179,8 @@ bool KalmanChain::reestimate(int idx,
     assert(canReestimate());
     assert(idx >= 0 && idx < count());
     assert(updates_[ idx ].mm_id >= 0);
+
+    //@TODO: triggered when adding system tracks in different lines!?
     assert(updates_[ idx ].init); //!no freshly added measurements!
 
     auto x0 = updates_[ idx ].kalman_update.x;

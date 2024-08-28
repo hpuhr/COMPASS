@@ -59,10 +59,14 @@ void KalmanFilterLinear::init(const KalmanState& state, bool xP_only)
 
 /**
 */
-void KalmanFilterLinear::state(kalman::KalmanState& s) const
+void KalmanFilterLinear::state(kalman::KalmanState& s, bool xP_only) const
 {
-    KalmanFilter::state(s);
-    s.F = F_;
+    KalmanFilter::state(s, xP_only);
+
+    if (!xP_only)
+    {
+        s.F = F_;
+    }
 }
 
 /**

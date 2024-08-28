@@ -44,13 +44,21 @@ const double KalmanEstimator::HighVar    = KalmanEstimator::HighStdDev * KalmanE
 KalmanEstimator::Settings::Settings()
 {
     imm_mu_init.resize(3);
-    imm_mu_init << 0.333, 0.334, 0.333;
-                                                  
+    imm_mu_init << 0.33, 0.34, 0.33;
+                                  
     imm_M_init.resize(3, 3);
-                   //   zero,   uniform,   accelerated
+
+#if 1
+                    //   zero,   uniform,   accelerated
     imm_M_init <<       0.7,        0.1,        0.2,   // zero
                         0.1,        0.7,        0.2,   // uniform
                        0.15,       0.15,        0.7;   // accelerated
+#else
+                   //   zero,   uniform,   accelerated
+    imm_M_init <<       0.9,        0.05,        0.05,   // zero
+                        0.05,        0.9,        0.05,   // uniform
+                        0.05,       0.05,         0.9;   // accelerated
+#endif
 }
 
 /**
