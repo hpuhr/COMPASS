@@ -1222,6 +1222,8 @@ bool KalmanChain::reestimate(UpdateStats* stats)
 
     std::vector<int> tbr;
 
+    int last_valid_idx = -1;
+
     auto reestimateRange = [ & ] (int idx_start, int idx_end)
     {
         if (stats)
@@ -1245,8 +1247,18 @@ bool KalmanChain::reestimate(UpdateStats* stats)
         }
         else
         {
+            int reinit_idx = idx_start - 1;
+            if (!tbr.empty() && reinit_idx == tbr.back())
+                reinit_idx = last_valid_idx;
+
+            if (reinit_idx < 0)
+            {
+                tbr.push_back(idx_start);
+                return 0;
+            }
+
             //reinit to last valid update
-            bool ok = reinit(idx_start - 1);
+            bool ok = reinit(reinit_idx);
             assert(ok); // !reinit should always succeed! 
         }
 
@@ -1278,6 +1290,8 @@ bool KalmanChain::reestimate(UpdateStats* stats)
                 tbr.push_back(idx);
                 continue;
             }
+
+            last_valid_idx = idx;
 
             ++reestimations;
 
