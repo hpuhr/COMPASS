@@ -406,9 +406,6 @@ const QColor& ColorMap::specialColor(SpecialColor type) const
  */
 size_t ColorMap::indexFromFactor(double t) const
 {
-    if (!std::isfinite(t))
-        return 0;
-    
     //!discrete colormaps cannot be accessed by this method!
     assert (type_ != Type::Discrete);
 
@@ -433,7 +430,7 @@ size_t ColorMap::indexFromFactor(double t) const
     const size_t n_inner = n_colors_ - 2;
     const size_t idx     = (size_t)std::floor(t * n_inner) + 1;
 
-    assert(idx >= 0 && idx <= n_colors_ - 1);
+    assert(idx <= n_colors_ - 2);
 
     return idx;
 }
