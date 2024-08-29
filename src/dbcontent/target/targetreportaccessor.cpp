@@ -150,6 +150,9 @@ void TargetReportAccessor::cacheVectors()
     meta_pos_std_dev_y_m_vec_           = metaVarVector<double>(DBContent::meta_var_y_stddev_);
     meta_pos_std_dev_xy_corr_coeff_vec_ = metaVarVector<double>(DBContent::meta_var_xy_cov_);
 
+    meta_radar_range_vec_    = metaVarVector<double>(DBContent::var_radar_range_);;
+    meta_radar_azimuth_vec_  = metaVarVector<double>(DBContent::var_radar_azimuth_);;
+
     //velocity / angle
     meta_speed_vec_       = metaVarVector<double>(DBContent::meta_var_ground_speed_);
     meta_track_angle_vec_ = metaVarVector<double>(DBContent::meta_var_track_angle_);
@@ -364,6 +367,15 @@ boost::optional<targetReport::BarometricAltitude> TargetReportAccessor::barometr
 boost::optional<float> TargetReportAccessor::geometricAltitude(unsigned int index) const
 {
     return getOptional<float>(cat021_alt_geo_vec_, index);
+}
+
+boost::optional<double> TargetReportAccessor::radarRange(unsigned int index) const
+{
+    return getOptional<double>(meta_radar_range_vec_, index);
+}
+boost::optional<double> TargetReportAccessor::radarAzimuth(unsigned int index) const
+{
+    return getOptional<double>(meta_radar_azimuth_vec_, index);
 }
 
 /**

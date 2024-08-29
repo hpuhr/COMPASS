@@ -250,7 +250,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
 
         azimuth_rad = azimuth_deg * DEG2RAD;
 
-        range_m = 1852.0 * range_nm;
+        range_m = NM2M * range_nm;
 
         if (!projection.hasCoordinateSystem(ds_id))
         {

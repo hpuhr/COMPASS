@@ -65,6 +65,8 @@ public:
     boost::optional<targetReport::PositionAccuracy> positionAccuracy(unsigned int index) const;
     boost::optional<targetReport::BarometricAltitude> barometricAltitude(unsigned int index) const;
     boost::optional<float> geometricAltitude(unsigned int index) const;
+    boost::optional<double> radarRange(unsigned int index) const;
+    boost::optional<double> radarAzimuth(unsigned int index) const;
     boost::optional<targetReport::Velocity> velocity(unsigned int index) const;
     boost::optional<targetReport::VelocityAccuracy> velocityAccuracy(unsigned int index) const;
     boost::optional<double> trackAngle(unsigned int index) const;
@@ -135,6 +137,9 @@ private:
     const NullableVector<float>*  cat062_alt_sec_vec_     = nullptr;
     const NullableVector<float>*  cat021_alt_geo_vec_     = nullptr;
     const NullableVector<bool>*   meta_ground_bit_vec_    = nullptr;
+
+    const NullableVector<double>* meta_radar_range_vec_    = nullptr;
+    const NullableVector<double>* meta_radar_azimuth_vec_  = nullptr;
  
     //position accuracy
     const NullableVector<unsigned char>* cat021_mops_version_vec_            = nullptr;
