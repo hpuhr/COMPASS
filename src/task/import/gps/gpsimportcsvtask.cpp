@@ -650,6 +650,11 @@ void GPSImportCSVTask::insertDoneSlot()
 
     buffer_ = nullptr;
 
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+               this, &GPSImportCSVTask::insertDoneSlot);
+
     COMPASS::instance().dataSourceManager().saveDBDataSources();
     emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
 

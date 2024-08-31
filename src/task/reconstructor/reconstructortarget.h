@@ -233,7 +233,8 @@ class ReconstructorTarget
     std::pair<dbContent::targetReport::Position, bool> interpolatedPosForTimeFast (
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
-    boost::optional<dbContent::targetReport::Position> interpolatedRefPosForTimeFast (
+    std::pair<boost::optional<dbContent::targetReport::Position>,
+              boost::optional<dbContent::targetReport::PositionAccuracy>> interpolatedRefPosForTimeFast (
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
     //    bool hasDataForExactTime (boost::posix_time::ptime timestamp) const;

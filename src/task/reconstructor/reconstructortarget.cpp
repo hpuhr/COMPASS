@@ -973,7 +973,8 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     return {{int_lat, int_long}, true};
 }
 
-boost::optional<dbContent::targetReport::Position> ReconstructorTarget::interpolatedRefPosForTimeFast (
+std::pair<boost::optional<dbContent::targetReport::Position>,
+          boost::optional<dbContent::targetReport::PositionAccuracy>> ReconstructorTarget::interpolatedRefPosForTimeFast (
     ptime timestamp, time_duration d_max) const
 {
     const reconstruction::Reference* lower_ref, *upper_ref;
@@ -981,13 +982,14 @@ boost::optional<dbContent::targetReport::Position> ReconstructorTarget::interpol
     tie(lower_ref, upper_ref) = refDataFor(timestamp, d_max);
 
     if (lower_ref && !upper_ref) // exact time
-        return lower_ref->position();
+        return {lower_ref->position(),lower_ref->positionAccuracy()};
 
     if (!lower_ref || !upper_ref)
         return {};
 
     dbContent::targetReport::Position pos1 = lower_ref->position();
     dbContent::targetReport::Position pos2 = upper_ref->position();
+
     float d_t = Time::partialSeconds(upper_ref->t - lower_ref->t);
 
     logdbg << "Target: interpolatedRefPosForTimeFast: d_t " << d_t;
@@ -996,7 +998,7 @@ boost::optional<dbContent::targetReport::Position> ReconstructorTarget::interpol
 
     if (pos1.latitude_ == pos2.latitude_
         && pos1.longitude_ == pos2.longitude_) // same pos
-        return pos1;
+        return {lower_ref->position(),lower_ref->positionAccuracy()};
 
     if (lower_ref == upper_ref) // same time
     {
@@ -1018,7 +1020,11 @@ boost::optional<dbContent::targetReport::Position> ReconstructorTarget::interpol
 
     logdbg << "Target: interpolatedRefPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
 
-    return dbContent::targetReport::Position{int_lat, int_long};
+    boost::optional<dbContent::targetReport::PositionAccuracy> ret_pos_acc =
+        lower_ref->positionAccuracy().maxStdDev() > upper_ref->positionAccuracy().maxStdDev()
+            ? lower_ref->positionAccuracy() : upper_ref->positionAccuracy();
+
+    return {dbContent::targetReport::Position{int_lat, int_long}, ret_pos_acc};
 }
 
 //bool ReconstructorTarget::hasDataForExactTime (ptime timestamp) const

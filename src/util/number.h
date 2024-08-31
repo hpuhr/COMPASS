@@ -36,6 +36,10 @@ extern float roundToNearest(float num);
 extern double round(float num, unsigned int precision);
 extern double roundToClosestPowerOf10(double value);
 
+
+extern void calculateWeightedAverageAndStdDev(
+    const std::vector<double>& values, const std::vector<double>& std_devs, double& avg, double& std_dev);
+
 extern unsigned int numDecimals(double v, unsigned int dec_max = 9);
 
 /// @brief Returns angle (degrees) calculated from given values

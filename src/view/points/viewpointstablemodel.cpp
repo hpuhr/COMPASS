@@ -114,6 +114,8 @@ void ViewPointsTableModel::clearViewPoints()
     statuses_.clear();
 
     endResetModel();
+
+    loginf << "ViewPointsTableModel: clearViewPoints: done";
 }
 
 int ViewPointsTableModel::rowCount(const QModelIndex& parent) const

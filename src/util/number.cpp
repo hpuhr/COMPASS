@@ -67,6 +67,24 @@ double roundToClosestPowerOf10(double value) {
     return power_of_10;
 }
 
+// Function to calculate weighted average and standard deviation of a data series
+void calculateWeightedAverageAndStdDev(const std::vector<double>& values, const std::vector<double>& std_devs,
+                                            double& avg, double& std_dev) {
+    double weighted_sum = 0.0;
+    double weight_sum = 0.0;
+    //double variance_sum = 0.0;
+
+    for (size_t i = 0; i < values.size(); ++i) {
+        double weight = 1.0 / (std_devs[i] * std_devs[i]);
+        weighted_sum += values[i] * weight;
+        weight_sum += weight;
+        //variance_sum += weight;
+    }
+
+    avg = weighted_sum / weight_sum;
+    std_dev = sqrt(1.0 / weight_sum);
+}
+
 unsigned int numDecimals(double v, unsigned int dec_max)
 {
     auto str = QString::number(v, 'f', dec_max);

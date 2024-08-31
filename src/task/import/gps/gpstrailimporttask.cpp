@@ -927,6 +927,11 @@ void GPSTrailImportTask::insertDoneSlot()
 
     buffer_ = nullptr;
 
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+            this, &GPSTrailImportTask::insertDoneSlot);
+
     COMPASS::instance().dataSourceManager().saveDBDataSources();
     emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
 
