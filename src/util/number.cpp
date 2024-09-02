@@ -72,17 +72,31 @@ void calculateWeightedAverageAndStdDev(const std::vector<double>& values, const 
                                             double& avg, double& std_dev) {
     double weighted_sum = 0.0;
     double weight_sum = 0.0;
-    //double variance_sum = 0.0;
 
     for (size_t i = 0; i < values.size(); ++i) {
         double weight = 1.0 / (std_devs[i] * std_devs[i]);
         weighted_sum += values[i] * weight;
         weight_sum += weight;
-        //variance_sum += weight;
     }
 
     avg = weighted_sum / weight_sum;
     std_dev = sqrt(1.0 / weight_sum);
+}
+
+void add_with_weighted_average(double value1, double std_dev1, unsigned int value1_cnt,
+                               double value2, double std_dev2, unsigned int value2_cnt,
+                               double& weighted_avg, double& weighted_std_dev, unsigned int& weighted_cnt)
+{
+    // Calculate weights based on standard deviations
+    double weight1 = (double) value1_cnt / (std_dev1 * std_dev1);
+    double weight2 = (double) value2_cnt / (std_dev2 * std_dev2);
+
+            // Calculate the weighted average
+    weighted_avg = (value1 * weight1 + value2 * weight2) / (weight1 + weight2);
+
+            // Calculate the combined standard deviation
+    weighted_std_dev = sqrt(1.0 / (weight1 + weight2));
+    weighted_cnt = value1_cnt + value2_cnt;
 }
 
 unsigned int numDecimals(double v, unsigned int dec_max)
