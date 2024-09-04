@@ -521,49 +521,49 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //     assert(update.state.sub_states->at(1).F.cols() > 0 && update.state.sub_states->at(1).F.rows());
     // };
 
-    if (refs.utn == 21)
-    {
-        FrameProjector p;
-        if (!refs.t0.has_value())
-        {
-            refs.t0   = refs.measurements[ 0 ].t;
-            refs.lat_ = refs.measurements[ 0 ].lat;
-            refs.lon_ = refs.measurements[ 0 ].lon;
-        }
-        p.update(refs.lat_, refs.lon_);
+    // if (refs.utn == 21)
+    // {
+    //     FrameProjector p;
+    //     if (!refs.t0.has_value())
+    //     {
+    //         refs.t0   = refs.measurements[ 0 ].t;
+    //         refs.lat_ = refs.measurements[ 0 ].lat;
+    //         refs.lon_ = refs.measurements[ 0 ].lon;
+    //     }
+    //     p.update(refs.lat_, refs.lon_);
 
-        for (const auto& mm : refs.measurements)
-        {
-            if (mm.t < reconstructor_.currentSlice().slice_begin_ ||
-                mm.t >= reconstructor_.currentSlice().next_slice_begin_)
-                continue;
+    //     for (const auto& mm : refs.measurements)
+    //     {
+    //         if (mm.t < reconstructor_.currentSlice().slice_begin_ ||
+    //             mm.t >= reconstructor_.currentSlice().next_slice_begin_)
+    //             continue;
 
-            TestTarget::Measurement mm_tt;
-            p.project(mm_tt.x, mm_tt.y, mm.lat, mm.lon);
+    //         TestTarget::Measurement mm_tt;
+    //         p.project(mm_tt.x, mm_tt.y, mm.lat, mm.lon);
 
-            mm_tt.vx = mm.vx.has_value() ? mm.vx.value() : 0.0;
-            mm_tt.vy = mm.vy.has_value() ? mm.vy.value() : 0.0;
+    //         mm_tt.vx = mm.vx.has_value() ? mm.vx.value() : 0.0;
+    //         mm_tt.vy = mm.vy.has_value() ? mm.vy.value() : 0.0;
 
-            mm_tt.ax = mm.ax.has_value() ? mm.ax.value() : 0.0;
-            mm_tt.ay = mm.ay.has_value() ? mm.ay.value() : 0.0;
+    //         mm_tt.ax = mm.ax.has_value() ? mm.ax.value() : 0.0;
+    //         mm_tt.ay = mm.ay.has_value() ? mm.ay.value() : 0.0;
 
-            mm_tt.x_stddev = mm.x_stddev;
-            mm_tt.y_stddev = mm.y_stddev;
-            mm_tt.xy_cov = mm.xy_cov;
+    //         mm_tt.x_stddev = mm.x_stddev;
+    //         mm_tt.y_stddev = mm.y_stddev;
+    //         mm_tt.xy_cov = mm.xy_cov;
 
-            mm_tt.vx_stddev = mm.vx_stddev;
-            mm_tt.vy_stddev = mm.vy_stddev;
+    //         mm_tt.vx_stddev = mm.vx_stddev;
+    //         mm_tt.vy_stddev = mm.vy_stddev;
 
-            mm_tt.ax_stddev = mm.ax_stddev;
-            mm_tt.ay_stddev = mm.ay_stddev;
+    //         mm_tt.ax_stddev = mm.ax_stddev;
+    //         mm_tt.ay_stddev = mm.ay_stddev;
 
-            mm_tt.t = Utils::Time::partialSeconds(mm.t - refs.t0.value());
+    //         mm_tt.t = Utils::Time::partialSeconds(mm.t - refs.t0.value());
 
-            refs.test_target.addMeasurement(mm_tt);
-        }
+    //         refs.test_target.addMeasurement(mm_tt);
+    //     }
 
-        refs.test_target.exportJSON("/home/mcphatty/track_utn21.json");
-    }
+    //     refs.test_target.exportJSON("/home/mcphatty/track_utn21.json");
+    // }
 
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
