@@ -919,6 +919,7 @@ void MainWindow::reconstructReferencesSlot()
     loginf << "MainWindow: reconstructReferencesSlot";
 
     COMPASS::instance().taskManager().reconstructReferencesTask().dialog()->show();
+    COMPASS::instance().taskManager().reconstructReferencesTask().dialog()->showCurrentReconstructorWidget();
 }
 
 void MainWindow::configureDataSourcesSlot()
