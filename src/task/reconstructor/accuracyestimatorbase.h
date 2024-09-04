@@ -80,7 +80,7 @@ class AccuracyEstimatorBase
 
     ReconstructorBase* reconstructor_ {nullptr};
 
-    std::vector<AssociatedDistance> distances_;
+    std::vector<AssociatedDistance> assoc_distances_;
 
     void printStatistics (const std::string name, std::function<double(const AssociatedDistance&)>& lambda) const;
 };

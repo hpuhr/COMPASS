@@ -48,18 +48,18 @@ void AccuracyEstimatorBase::init(ReconstructorBase* reconstructor)
 
     assert (reconstructor);
     reconstructor_ = reconstructor;
-    distances_.clear();
+    assoc_distances_.clear();
 }
 
 void AccuracyEstimatorBase::addAssociatedDistance(
     dbContent::targetReport::ReconstructorInfo& tr, const AssociatedDistance& dist)
 {
-    distances_.push_back(dist);
+    assoc_distances_.push_back(dist);
 }
 
 void AccuracyEstimatorBase::analyzeAssociatedDistances() const
 {
-    if (!distances_.size())
+    if (!assoc_distances_.size())
         return;
 
     std::function<double(const AssociatedDistance&)> dist_lambda =
@@ -80,29 +80,29 @@ void AccuracyEstimatorBase::analyzeAssociatedDistances() const
 
 void AccuracyEstimatorBase::clearAssociatedDistances()
 {
-    distances_.clear();
+    assoc_distances_.clear();
 }
 
 void AccuracyEstimatorBase::printStatistics (
     const std::string name, std::function<double(const AssociatedDistance&)>& lambda)  const
 {
-    if (!distances_.size())
+    if (!assoc_distances_.size())
         return;
 
-    double sum = std::accumulate(distances_.begin(), distances_.end(), 0.0,
+    double sum = std::accumulate(assoc_distances_.begin(), assoc_distances_.end(), 0.0,
                                  [lambda] (double sum, const AssociatedDistance& dist) { return sum + lambda(dist); });
-    double mean = sum / distances_.size();
+    double mean = sum / assoc_distances_.size();
 
-    std::vector<double> diff(distances_.size());
-    std::transform(distances_.begin(), distances_.end(), diff.begin(),
+    std::vector<double> diff(assoc_distances_.size());
+    std::transform(assoc_distances_.begin(), assoc_distances_.end(), diff.begin(),
                    [mean, lambda](const AssociatedDistance& dist) { return lambda(dist) - mean; });
     double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
-    double stdev = std::sqrt(sq_sum / distances_.size());
+    double stdev = std::sqrt(sq_sum / assoc_distances_.size());
 
     auto comp = [lambda] (const AssociatedDistance& a, const AssociatedDistance& b) { return lambda(a) < lambda(b); };
 
-    double min = lambda(*std::min_element(distances_.begin(), distances_.end(), comp));
-    double max = lambda(*std::max_element(distances_.begin(), distances_.end(), comp));
+    double min = lambda(*std::min_element(assoc_distances_.begin(), assoc_distances_.end(), comp));
+    double max = lambda(*std::max_element(assoc_distances_.begin(), assoc_distances_.end(), comp));
 
     loginf << name << " SRC " << name_ << ": "  << " avg " << String::doubleToStringPrecision(mean, 2)
            << " stddev " << String::doubleToStringPrecision(stdev, 2) << " min " << min << " max " << max;

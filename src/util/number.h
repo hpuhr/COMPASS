@@ -39,7 +39,7 @@ extern double roundToClosestPowerOf10(double value);
 
 extern void calculateWeightedAverageAndStdDev(
     const std::vector<double>& values, const std::vector<double>& std_devs, double& avg, double& std_dev);
-void add_with_weighted_average(double value1, double std_dev1, unsigned int value1_cnt,
+void addWithWeightedAverage(double value1, double std_dev1, unsigned int value1_cnt,
                                double value2, double std_dev2, unsigned int value2_cnt,
                                double& weighted_avg, double& weighted_std_dev, unsigned int& weighted_cnt);
 
