@@ -88,6 +88,7 @@ public:
         double prediction_max_wgs84_diff  = 0.5;
 
         int    verbosity = 0;
+        bool   debug     = false;
     };
 
     struct Update

@@ -189,7 +189,7 @@ class ReconstructorTarget
 
     void addTargetReport (unsigned long rec_num,
                          bool add_to_tracker = true);
-    void addTargetReports (std::vector<unsigned long> rec_nums,
+    void addTargetReports (const ReconstructorTarget& other,
                           bool add_to_tracker = true);
 
     unsigned int numAssociated() const;

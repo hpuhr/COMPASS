@@ -632,7 +632,7 @@ bool KalmanChain::insert(const std::vector<std::pair<unsigned long, boost::posix
     //mode does not support inserts? => add instead
     if (!canReestimate())
         return add(mms, reestim, stats);
-    
+
     for (const auto& mm : mms)
     {
         int idx = insertionIndex(mm.second);
@@ -1085,6 +1085,17 @@ void KalmanChain::addReestimationIndex(int idx)
     assert(idx >= 0);
     assert(canReestimate());
 
+    if (settings_.debug && (!fresh_indices_.empty() && idx <= fresh_indices_.back()))
+    {
+        std::string str;
+        for (int idx : fresh_indices_)
+            str += std::to_string(idx) + " ";
+        loginf << str;
+        loginf << "adding: " << idx;
+    }
+
+    assert(fresh_indices_.empty() || idx > fresh_indices_.back());
+
     fresh_indices_.push_back(idx);
 }
 
@@ -1218,6 +1229,18 @@ bool KalmanChain::reestimate(UpdateStats* stats)
     if (n_fresh > 1)
         std::sort(fresh_indices_.begin(), fresh_indices_.end());
 
+    if (settings_.debug)
+    {
+        loginf << "KalmanChain: reestimate: n_fresh = " << n_fresh;
+
+        std::string str;
+        for (int idx : fresh_indices_)
+            str += std::to_string(idx) + " ";
+        str += "\n";
+
+        loginf << str;
+    }
+
     bool is_last = (n_fresh == 1 && fresh_indices_[ 0 ] == lastIndex());
 
     std::vector<int> tbr;
@@ -1239,17 +1262,26 @@ bool KalmanChain::reestimate(UpdateStats* stats)
             loginf << "KalmanChain: reestimate: reestimating range [" << idx_start << "," << idx_end << "): "
                    << "idx cutoff = " << idx_cutoff; 
 
+        if (settings_.debug)
+            loginf << "KalmanChain: reestimate: idx_start = " << idx_start << ", idx_end = " << idx_end << ", idx_cutoff = " << idx_cutoff;
+
         //reinit tracker
         if (idx_start == 0)
         {
             //first uninit index is start of chain => start from scratch
             tracker_.reset();
+
+            if (settings_.debug)
+                loginf << "KalmanChain: reestimate: idx = 0 => ressetting tracker";
         }
         else
         {
             int reinit_idx = idx_start - 1;
             if (!tbr.empty() && reinit_idx == tbr.back())
                 reinit_idx = last_valid_idx;
+
+            if (settings_.debug)
+                loginf << "KalmanChain: reestimate: reinit_idx = " << reinit_idx;
 
             if (reinit_idx < 0)
             {
@@ -1344,6 +1376,5 @@ bool KalmanChain::reestimate(UpdateStats* stats)
 
     return ok;
 }
-
 
 } // reconstruction

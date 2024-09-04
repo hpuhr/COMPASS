@@ -73,14 +73,14 @@ void ReconstructorTarget::addTargetReport (unsigned long rec_num,
     addTargetReport(rec_num, add_to_tracker, true);
 }
 
-void ReconstructorTarget::addTargetReports (std::vector<unsigned long> rec_nums,
-                                           bool add_to_tracker)
+void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
+                                            bool add_to_tracker)
 {
     //add single tr without reestimating
     size_t num_added = 0;
 
-    for (auto& rn_it : rec_nums)
-        if (addTargetReport(rn_it, add_to_tracker, false))
+    for (auto& rn_it : other.tr_timestamps_)
+        if (addTargetReport(rn_it.second, add_to_tracker, false))
             ++num_added;
 
             //reestimate chain after adding
@@ -1959,6 +1959,7 @@ void ReconstructorTarget::reinitTracker()
                                                                reconstruction::KalmanChain::Settings::Mode::StaticAdd;
     chain_->settings().prediction_mode = reconstruction::KalmanChain::Settings::PredictionMode::Interpolate;
     chain_->settings().verbosity       = 0;
+    chain_->settings().debug           = false; //utn_ == 537;
 
     chain_->configureEstimator(reconstructor_.referenceCalculatorSettings().chainEstimatorSettings());
     chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type_assoc);

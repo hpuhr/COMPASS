@@ -18,6 +18,7 @@
 #pragma once
 
 #include "referencecalculator.h"
+#include "test_target.h"
 
 #include <vector>
 
@@ -136,6 +137,11 @@ private:
         size_t num_interp_steps_failed     = 0;
 
         std::map<std::string, AnnotationData> annotation_data;
+
+        TestTarget test_target;
+        boost::optional<boost::posix_time::ptime> t0;
+        double lat_;
+        double lon_;
     };
 
     enum class InitRecResult 

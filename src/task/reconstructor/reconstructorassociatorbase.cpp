@@ -272,7 +272,7 @@ void ReconstructorAssociatorBase::selfAccociateNewUTNs()
                 dbContent::ReconstructorTarget& other_target = reconstructor().targets_.at(other_utn);
 
                         // move target reports
-                other_target.addTargetReports(target.target_reports_);
+                other_target.addTargetReports(target);
 
                         // remove from targets
                 assert (reconstructor().targets_.count(utn));
