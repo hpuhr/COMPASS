@@ -33,7 +33,7 @@ enum class ComparisonResult
 
 class ReconstructorTarget
 {
-  public:
+public:
     struct GlobalStats
     {
         void reset()
@@ -151,13 +151,13 @@ class ReconstructorTarget
     bool associations_written_ {false}; // set after the utn was used in db at least once
     bool track_begin_ {true}; // unset after first target report written
 
-            // target report aggregation & search structures, by record numbers
+    // target report aggregation & search structures, by record numbers
     std::vector<unsigned long> target_reports_;
     std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
     // all sources sorted by time, ts -> record_num
     std::map<unsigned int, std::map<unsigned int,
                                     std::map<unsigned int,
-                                    std::multimap<boost::posix_time::ptime, unsigned long>>>> tr_ds_timestamps_;
+                                             std::multimap<boost::posix_time::ptime, unsigned long>>>> tr_ds_timestamps_;
     // dbcontent id -> ds_id -> line_id -> ts -> record_num
 
     std::set<unsigned int> acads_;
@@ -218,16 +218,16 @@ class ReconstructorTarget
 
     // TODO lambda for selective data
     ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp,
-                                   boost::posix_time::time_duration d_max,
-                                   const InfoValidFunc& tr_valid_func = InfoValidFunc(),
-                                   const InterpOptions& interp_options = InterpOptions()) const;
+                                  boost::posix_time::time_duration d_max,
+                                  const InfoValidFunc& tr_valid_func = InfoValidFunc(),
+                                  const InterpOptions& interp_options = InterpOptions()) const;
     ReferencePair refDataFor (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
     //    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timesFor (
     //        boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     // lower/upper times, -1 if not existing
 
-            // TODO lambda for selective data without do not use pos
+    // TODO lambda for selective data without do not use pos
     std::pair<dbContent::targetReport::Position, bool> interpolatedPosForTime (
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     std::pair<dbContent::targetReport::Position, bool> interpolatedPosForTimeFast (
@@ -266,22 +266,24 @@ class ReconstructorTarget
         boost::posix_time::time_duration max_time_diff, float max_alt_diff, bool debug) const;
 
     boost::optional<float> modeCCodeAt (boost::posix_time::ptime timestamp,
-                                        boost::posix_time::time_duration max_time_diff,
-                                        const InterpOptions& interp_options = InterpOptions()) const;
-    boost::optional<bool> groundBitAt (boost::posix_time::ptime timestamp,
                                        boost::posix_time::time_duration max_time_diff,
                                        const InterpOptions& interp_options = InterpOptions()) const;
+    boost::optional<bool> groundBitAt (boost::posix_time::ptime timestamp,
+                                      boost::posix_time::time_duration max_time_diff,
+                                      const InterpOptions& interp_options = InterpOptions()) const;
     boost::optional<double> groundSpeedAt (boost::posix_time::ptime timestamp,
-                                           boost::posix_time::time_duration max_time_diff,
-                                           const InterpOptions& interp_options = InterpOptions()) const; // m/s
+                                          boost::posix_time::time_duration max_time_diff,
+                                          const InterpOptions& interp_options = InterpOptions()) const; // m/s
 
     ComparisonResult compareModeCCode (const dbContent::targetReport::ReconstructorInfo& tr,
                                       boost::posix_time::time_duration max_time_diff, float max_alt_diff,
                                       bool debug) const;
     // unknown, same, different timestamps from this
 
-            //void calculateSpeeds();
-            //void removeNonModeSTRs();
+    //fl_unknown, fl_on_ground, fl_index
+    std::tuple<bool, bool, unsigned int> getAltitudeState (
+        const boost::posix_time::ptime& ts, boost::posix_time::time_duration max_time_diff,
+        const InterpOptions& interp_options = InterpOptions());
 
     void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts() const;
@@ -291,7 +293,7 @@ class ReconstructorTarget
     void removeOutdatedTargetReports();
     void removeTargetReportsNewerThan(boost::posix_time::ptime ts);
 
-            // online reconstructor
+    // online reconstructor
     size_t trackerCount() const;
     boost::posix_time::ptime trackerTime(size_t idx) const;
     bool canPredict(boost::posix_time::ptime ts) const;
@@ -318,13 +320,16 @@ class ReconstructorTarget
     static void addUpdateToGlobalStats(const reconstruction::UpdateStats& s);
     static void addPredictionToGlobalStats(const reconstruction::PredictionStats& s);
 
-  protected:
+protected:
     enum class TargetReportSkipResult
     {
         Valid = 0,
         SkipReference,
         SkipFunc
     };
+
+    static const double on_ground_max_alt_ft_;
+    static const double on_ground_max_speed_ms_;
 
     bool hasTracker() const;
     void reinitTracker();
@@ -338,7 +343,7 @@ class ReconstructorTarget
                          bool reestimate);
 
     TargetReportSkipResult skipTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
-                                             const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
+                                            const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
 
     std::unique_ptr<reconstruction::KalmanChain> chain_;
 

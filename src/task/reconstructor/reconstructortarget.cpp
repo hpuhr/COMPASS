@@ -20,6 +20,9 @@ using namespace boost::posix_time;
 namespace dbContent 
 {
 
+const double ReconstructorTarget::on_ground_max_alt_ft_ {500};
+const double ReconstructorTarget::on_ground_max_speed_ms_ {30};
+
 ReconstructorTarget::GlobalStats ReconstructorTarget::global_stats_ = ReconstructorTarget::GlobalStats();
 
 ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor, 
@@ -1437,6 +1440,40 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
     }
     else
         return ComparisonResult::DIFFERENT;
+}
+
+//fl_unknown, fl_on_ground, fl_index
+std::tuple<bool, bool, unsigned int> ReconstructorTarget::getAltitudeState (
+    const boost::posix_time::ptime& ts, boost::posix_time::time_duration max_time_diff,
+    const ReconstructorTarget::InterpOptions& interp_options)
+{
+    boost::optional<float> mode_c_code = modeCCodeAt (ts, max_time_diff, interp_options);
+    boost::optional<bool> gbs          = groundBitAt (ts, max_time_diff, interp_options);
+    boost::optional<double> speed_ms   = groundSpeedAt (ts, max_time_diff, interp_options);
+
+    bool fl_unknown {true};
+    bool fl_on_ground {false};
+    unsigned int fl_index {0};
+
+    if ((gbs && *gbs)
+        || (mode_c_code && *mode_c_code <= on_ground_max_alt_ft_)
+        || (speed_ms && *speed_ms <= on_ground_max_speed_ms_)) // gbs, very close to ground, or slower than 30 m/s (~55kts)
+    {
+        fl_on_ground = true;
+        fl_unknown = false;
+    }
+    else if (mode_c_code) // not on ground
+    {
+        if (*mode_c_code >= 0)
+            fl_index = *mode_c_code / 1000.0; // fl / 10
+        else
+            fl_index = 0;
+
+        fl_unknown = false;
+        fl_on_ground = false;
+    }
+
+    return std::tuple<bool, bool, unsigned int>(fl_unknown, fl_on_ground, fl_index);
 }
 
 void ReconstructorTarget::updateCounts()
