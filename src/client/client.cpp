@@ -66,6 +66,26 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     APP_FILENAME = argv[0];
 
+QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+
+#ifdef OSG_GL3_AVAILABLE
+    format.setVersion(3, 2);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    //format.setOption(QSurfaceFormat::DebugContext); // scatterplot stops working if active
+#else
+    format.setVersion(2, 0);
+    format.setProfile(QSurfaceFormat::CompatibilityProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    //format.setOption(QSurfaceFormat::DebugContext); // scatterplot stops working if active
+#endif
+    //format.setDepthBufferSize(32); // scatterplot stops working if active
+    format.setAlphaBufferSize(8);
+    format.setSamples(8);
+    format.setStencilBufferSize(8);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    QSurfaceFormat::setDefaultFormat(format);
+
     //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
     //    QSurfaceFormat format;
