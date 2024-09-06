@@ -744,26 +744,12 @@ void MainWindow::importAsterixRecordingSlot()
             filenames_vec.push_back(filename.toStdString());
         }
 
-        task.source().addFiles(filenames_vec);//, file_line);
-
-        //task.addImportFileNames(filenames_vec);
+        task.source().addFiles(filenames_vec);
 
         updateMenus();
 
         task.runDialog(this);
     }
-
-//    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
-
-//    if (filename.size() > 0)
-//    {
-//        //COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
-
-//        updateMenus();
-
-//        COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
-//        COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
-//    }
 }
 
 void MainWindow::importRecentAsterixRecordingSlot()
@@ -790,20 +776,50 @@ void MainWindow::importAsterixFromPCAPSlot()
 {
     loginf << "MainWindow: importAsterixFromPCAPSlot";
 
-    auto fn = QFileDialog::getOpenFileName(this, 
-                                           "Import PCAP File", 
-                                           COMPASS::instance().lastUsedPath().c_str(),
-                                           "PCAP Files (*.pcap *.PCAP)");
-    if (fn.isEmpty())
-        return;
+    // auto fn = QFileDialog::getOpenFileName(this,
+    //                                        "Import PCAP File",
+    //                                        COMPASS::instance().lastUsedPath().c_str(),
+    //                                        "PCAP Files (*.pcap *.PCAP)");
+    // if (fn.isEmpty())
+    //     return;
+
+    // ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    // task.source().setSourceType(ASTERIXImportSource::SourceType::FilePCAP, { fn.toStdString() });
+
+    // updateMenus();
+
+    // task.runDialog(this);
+
+    QFileDialog dialog(this, "Import PCAP File(s)");
+    dialog.setViewMode(QFileDialog::Detail);
+    dialog.setFileMode(QFileDialog::ExistingFiles);
+    dialog.setDirectory(COMPASS::instance().lastUsedPath().c_str());
 
     ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    task.source().setSourceType(ASTERIXImportSource::SourceType::FilePCAP, { fn.toStdString() });
+    task.source().setSourceType(ASTERIXImportSource::SourceType::FilePCAP);
 
-    updateMenus();
+    if (dialog.exec())
+    {
+        QStringList filenames = dialog.selectedFiles();
 
-    task.runDialog(this);
+        vector<string> filenames_vec;
+
+        for (auto& filename : filenames)
+        {
+            assert (Files::fileExists(filename.toStdString()));
+            COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename.toStdString()));
+
+            filenames_vec.push_back(filename.toStdString());
+        }
+
+        task.source().addFiles(filenames_vec);
+
+        updateMenus();
+
+        task.runDialog(this);
+    }
 }
 
 void MainWindow::importAsterixFromNetworkSlot()
