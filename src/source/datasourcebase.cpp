@@ -131,15 +131,9 @@ float DataSourceBase::updateInterval () const
 
 bool DataSourceBase::hasPosition() const
 {
-    return info_.contains(position_key);
-}
-
-bool DataSourceBase::hasFullPosition() const
-{
     return info_.contains(position_key)
-            && info_.at(position_key).contains("latitude")
-            && info_.at(position_key).contains("longitude")
-            && info_.at(position_key).contains("altitude");
+           && info_.at(position_key).contains("latitude")
+           && info_.at(position_key).contains("longitude");
 }
 
 void DataSourceBase::latitude (double value)
