@@ -682,8 +682,6 @@ void DBContentManager::finishInserting()
         string dbcont_name = buf_it.first;
 
         assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
-        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_latitude_));
-        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_longitude_));
 
         unsigned int buffer_size = buf_it.second->size();
 
@@ -739,6 +737,8 @@ void DBContentManager::finishInserting()
         }
 
         // lat & long
+        if (metaCanGetVariable(dbcont_name, DBContent::meta_var_longitude_)
+            && metaCanGetVariable(dbcont_name, DBContent::meta_var_latitude_))
         {
             Variable& lat_var = metaGetVariable(dbcont_name, DBContent::meta_var_latitude_);
             Variable& lon_var = metaGetVariable(dbcont_name, DBContent::meta_var_longitude_);
@@ -1470,8 +1470,8 @@ void DBContentManager::addStandardVariables(std::string dbcont_name, dbContent::
     assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_utn_));
-    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_utn_));
+    if(metaCanGetVariable(dbcont_name, DBContent::meta_var_utn_))
+        read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_utn_));
 }
 
 MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()

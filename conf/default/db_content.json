@@ -44,6 +44,11 @@
         },
         {
             "class_id": "DBContent",
+            "instance_id": "CAT063",
+            "path": "db_content_cat063.json"
+        },
+        {
+            "class_id": "DBContent",
             "instance_id": "RefTraj",
             "path": "db_content_reftraj.json"
         }
@@ -398,6 +403,12 @@
                         "VariableDefinitionCAT062DS ID0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT063DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
                                 "variable_name": "DS ID"
                             }
                         },
@@ -1205,6 +1216,12 @@
                                 "variable_name": "SAC"
                             }
                         },
+                        "VariableDefinitionCAT063SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "SAC"
+                            }
+                        },
                         "VariableDefinitionRefTrajSAC0": {
                             "parameters": {
                                 "dbcontent_name": "RefTraj",
@@ -1253,6 +1270,12 @@
                         "VariableDefinitionCAT062SIC0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT063SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
                                 "variable_name": "SIC"
                             }
                         },
@@ -1463,6 +1486,12 @@
                                 "variable_name": "Time of Day"
                             }
                         },
+                        "VariableDefinitionCAT063Time of Message0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "Time of Message"
+                            }
+                        },
                         "VariableDefinitionRefTrajTime of Day0": {
                             "parameters": {
                                 "dbcontent_name": "RefTraj",
@@ -1511,6 +1540,12 @@
                         "VariableDefinitionCAT062Timestamp0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT063Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
                                 "variable_name": "Timestamp"
                             }
                         },
@@ -2357,6 +2392,12 @@
                                 "variable_name": "Line ID"
                             }
                         },
+                        "VariableDefinitionCAT063Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "Line ID"
+                            }
+                        },
                         "VariableDefinitionRefTrajLine ID0": {
                             "parameters": {
                                 "dbcontent_name": "RefTraj",
@@ -2405,6 +2446,12 @@
                         "VariableDefinitionCAT062rec_num0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT063Record Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
                                 "variable_name": "Record Number"
                             }
                         },

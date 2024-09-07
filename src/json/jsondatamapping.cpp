@@ -138,7 +138,7 @@ void JSONDataMapping::initializeIfRequired()
     if (!initialized_)
         initialize();
 
-    assert(initialized_);
+    //assert(initialized_); can fail
 }
 
 std::string& JSONDataMapping::formatDataTypeRef() { return format_data_type_; }

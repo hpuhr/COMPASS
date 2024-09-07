@@ -3,14 +3,22 @@
         "current_file_framing": "ioss",
         "current_framing": "",
         "debug_jasterix": false,
-        "file_list": [
-        ],
+        "file_list": [],
+        "filter_latitude_max": 48.324502,
+        "filter_latitude_min": 47.901371063,
+        "filter_longitude_max": 17.1397473,
+        "filter_longitude_min": 16.02758299,
+        "filter_modec_max": 50000.0,
+        "filter_modec_min": -10000.0,
+        "filter_tod_max": 86399.0,
+        "filter_tod_min": 0.0,
         "limit_ram": false,
+        "num_packets_overload": 60,
         "override_sac_new": 120,
         "override_sac_org": 120,
         "override_sic_new": 51,
         "override_sic_org": 50,
-        "override_tod_offset": 0.0
+        "override_tod_offset": 43208.66
     },
     "sub_configs": {
         "ASTERIXCategoryConfig": {
@@ -27,7 +35,7 @@
                 "parameters": {
                     "category": 20,
                     "decode": true,
-                    "edition": "1.8",
+                    "edition": "1.5",
                     "ref": "1.3",
                     "spf": ""
                 }
@@ -36,7 +44,7 @@
                 "parameters": {
                     "category": 62,
                     "decode": true,
-                    "edition": "1.18",
+                    "edition": "1.16",
                     "ref": "1.2",
                     "spf": "ARTAS"
                 }
@@ -44,7 +52,7 @@
             "ASTERIXCategoryConfig11": {
                 "parameters": {
                     "category": 10,
-                    "decode": true,
+                    "decode": false,
                     "edition": "0.31",
                     "ref": "",
                     "spf": ""
@@ -98,7 +106,7 @@
             "ASTERIXCategoryConfig6": {
                 "parameters": {
                     "category": 63,
-                    "decode": false,
+                    "decode": true,
                     "edition": "1.0",
                     "ref": "",
                     "spf": ""
@@ -126,8 +134,8 @@
                 "parameters": {
                     "category": 21,
                     "decode": true,
-                    "edition": "2.1",
-                    "ref": "",
+                    "edition": "2.4",
+                    "ref": "1.5",
                     "spf": ""
                 }
             }
@@ -167,6 +175,11 @@
                         "class_id": "ASTERIXJSONParser",
                         "instance_id": "CAT062",
                         "path": "task_import_asterix_cat062.json"
+                    },
+                    {
+                        "class_id": "ASTERIXJSONParser",
+                        "instance_id": "CAT063",
+                        "path": "task_import_asterix_cat063.json"
                     }
                 ]
             }
