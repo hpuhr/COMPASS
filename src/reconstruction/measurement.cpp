@@ -1,8 +1,11 @@
+
 #include "measurement.h"
 
 namespace reconstruction
 {
 
+/**
+*/
 Eigen::Vector2d Measurement::position2D(CoordSystem cs) const
 {
     if (cs == CoordSystem::WGS84)
@@ -10,6 +13,8 @@ Eigen::Vector2d Measurement::position2D(CoordSystem cs) const
     return Eigen::Vector2d(x, y);
 }
 
+/**
+*/
 void Measurement::position2D(const Eigen::Vector2d& pos, CoordSystem cs)
 {
     if (cs == CoordSystem::WGS84)
@@ -21,6 +26,8 @@ void Measurement::position2D(const Eigen::Vector2d& pos, CoordSystem cs)
     y = pos[ 1 ];
 }
 
+/**
+*/
 double Measurement::distance(const Measurement& other, CoordSystem cs) const
 {
     if (cs == CoordSystem::WGS84)
@@ -32,6 +39,8 @@ double Measurement::distance(const Measurement& other, CoordSystem cs) const
     return (Eigen::Vector2d(x, y) - Eigen::Vector2d(other.x, other.y)).norm();
 }
 
+/**
+*/
 double Measurement::distanceSqr(const Measurement& other, CoordSystem cs) const
 {
     if (cs == CoordSystem::WGS84)
@@ -43,6 +52,8 @@ double Measurement::distanceSqr(const Measurement& other, CoordSystem cs) const
     return (Eigen::Vector2d(x, y) - Eigen::Vector2d(other.x, other.y)).squaredNorm();
 }
 
+/**
+*/
 bool Measurement::hasVelocity() const
 {
     if (!vx.has_value() || !vy.has_value())
@@ -54,6 +65,8 @@ bool Measurement::hasVelocity() const
     return true;
 }
 
+/**
+*/
 bool Measurement::hasAcceleration() const
 {
     if (!ax.has_value() || !ay.has_value())
@@ -64,16 +77,23 @@ bool Measurement::hasAcceleration() const
 
     return true;
 }
+
+/**
+*/
 bool Measurement::hasStdDevPosition() const
 {
     return (x_stddev.has_value() && y_stddev.has_value());
 }
 
+/**
+*/
 dbContent::targetReport::Position Measurement::position() const
 {
     return {lat, lon};
 }
 
+/**
+*/
 dbContent::targetReport::PositionAccuracy Measurement::positionAccuracy() const
 {
     assert (hasStdDevPosition());
@@ -84,16 +104,22 @@ dbContent::targetReport::PositionAccuracy Measurement::positionAccuracy() const
         return dbContent::targetReport::PositionAccuracy(*x_stddev, *y_stddev, 0);
 }
 
-
+/**
+*/
 bool Measurement::hasStdDevVelocity() const
 {
     return (vx_stddev.has_value() && vy_stddev.has_value());
 }
+
+/**
+*/
 bool Measurement::hasStdDevAccel() const
 {
     return (ax_stddev.has_value() && ay_stddev.has_value());
 }
 
+/**
+*/
 std::string Measurement::asString(const std::string& prefix) const
 {
     std::stringstream ss;
@@ -118,12 +144,17 @@ std::string Measurement::asString(const std::string& prefix) const
     std::string ax_stddev_str = (ax_stddev.has_value() ? std::to_string(ax_stddev.value()) : "-");
     std::string ay_stddev_str = (ay_stddev.has_value() ? std::to_string(ay_stddev.value()) : "-");
 
-    ss << prefix << "source_id: " << source_id << std::endl;
-    ss << prefix << "interp:    " << mm_interp << std::endl;
-    ss << prefix << "pos wgs84: " << lat << ", " << lon << std::endl;
-    ss << prefix << "pos cart:  " << x << ", " << y << ", " << alt_str << " (" << x_stddev_str << ", " << y_stddev_str << ", " << xy_cov_str << ")" << std::endl;
-    ss << prefix << "velocity:  " << vx_str << ", " << vy_str << " (" << vx_stddev_str << ", " << vy_stddev_str << ")" << std::endl;
-    ss << prefix << "accel:     " << ax_str << ", " << ay_str << " (" << ax_stddev_str << ", " << ay_stddev_str << ")";
+    std::string Q_var_str        = (Q_var.has_value() ? std::to_string(Q_var.value()) : "-");
+    std::string Q_var_interp_str = (Q_var_interp.has_value() ? std::to_string(Q_var_interp.value()) : "-");
+
+    ss << prefix << "source_id:    " << source_id << std::endl;
+    ss << prefix << "interp:       " << mm_interp << std::endl;
+    ss << prefix << "pos wgs84:    " << lat << ", " << lon << std::endl;
+    ss << prefix << "pos cart:     " << x << ", " << y << ", " << alt_str << " (" << x_stddev_str << ", " << y_stddev_str << ", " << xy_cov_str << ")" << std::endl;
+    ss << prefix << "velocity:     " << vx_str << ", " << vy_str << " (" << vx_stddev_str << ", " << vy_stddev_str << ")" << std::endl;
+    ss << prefix << "accel:        " << ax_str << ", " << ay_str << " (" << ax_stddev_str << ", " << ay_stddev_str << ")";
+    ss << prefix << "Q_var:        " << Q_var_str;
+    ss << prefix << "Q_var_interp: " << Q_var_interp_str;
 
     return ss.str();
 }

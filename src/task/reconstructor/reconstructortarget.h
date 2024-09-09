@@ -283,7 +283,7 @@ public:
     //fl_unknown, fl_on_ground, fl_index
     std::tuple<bool, bool, unsigned int> getAltitudeState (
         const boost::posix_time::ptime& ts, boost::posix_time::time_duration max_time_diff,
-        const InterpOptions& interp_options = InterpOptions());
+        const InterpOptions& interp_options = InterpOptions()) const;
 
     void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts() const;

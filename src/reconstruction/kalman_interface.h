@@ -52,7 +52,7 @@ public:
     std::string asString(int flags, 
                          const std::string& prefix = "") const;
 
-    const boost::posix_time::ptime& currrentTime() const { return ts_; }
+    const boost::posix_time::ptime& currentTime() const { return ts_; }
 
     Measurement currentStateAsMeasurement() const;
     kalman::KalmanState currentState() const;
@@ -66,7 +66,8 @@ public:
                     const boost::posix_time::ptime& ts);
     void kalmanInit(const kalman::Vector& x,
                     const kalman::Matrix& P,
-                    const boost::posix_time::ptime& ts);
+                    const boost::posix_time::ptime& ts,
+                    double Q_var);
     
     //integrate measurement and obtain next kalman state
     kalman::KalmanError kalmanStep(kalman::KalmanState& new_state,
@@ -78,15 +79,15 @@ public:
     kalman::KalmanError kalmanPrediction(kalman::Vector& x,
                                          kalman::Matrix& P,
                                          double dt,
-                                         double Q_var,
                                          bool fix_estimate,
-                                         bool* fixed = nullptr) const;
+                                         bool* fixed = nullptr,
+                                         const boost::optional<double>& Q_var = boost::optional<double>()) const;
     kalman::KalmanError kalmanPrediction(kalman::Vector& x,
                                          kalman::Matrix& P,
                                          const boost::posix_time::ptime& ts,
-                                         double Q_var,
                                          bool fix_estimate,
-                                         bool* fixed = nullptr) const;
+                                         bool* fixed = nullptr,
+                                         const boost::optional<double>& Q_var = boost::optional<double>()) const;
 
     //smooth kalman updates  
     bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
@@ -101,9 +102,9 @@ public:
                                    const kalman::KalmanState& state0,
                                    const kalman::KalmanState& state1,
                                    double dt,
-                                   double Q_var,
                                    bool fix_estimate,
-                                   bool* fixed = nullptr) const;
+                                   bool* fixed = nullptr,
+                                   const boost::optional<double>& Q_var = boost::optional<double>()) const;
     //kalman state integrity
     bool checkKalmanState(kalman::KalmanState& state) const;
     

@@ -82,7 +82,6 @@ double KalmanInterface::distanceSqr(const Measurement& mm) const
     return (Eigen::Vector2d(x0, y0) - Eigen::Vector2d(mm.x, mm.y)).squaredNorm();
 }
 
-
 /**
 */
 void KalmanInterface::kalmanInit(kalman::KalmanState& init_state,
@@ -95,6 +94,7 @@ void KalmanInterface::kalmanInit(kalman::KalmanState& init_state,
     ts_ = mm.t;
     
     const double dt_start = 1.0;
+    const double Q_var_in = mm.Q_var.has_value() ? mm.Q_var.value() : Q_var;
 
     //init kalman
     //@TODO: cache x and P somewhere
@@ -104,8 +104,7 @@ void KalmanInterface::kalmanInit(kalman::KalmanState& init_state,
     covarianceMatP(P, mm, default_uncert);
     //measurementUncertMatR(kalman_filter_->rMat(), mm, default_uncert);
 
-    kalman_filter_->init(x, P);
-    kalman_filter_->updateInternalMatrices(dt_start, Q_var);
+    kalman_filter_->init(x, P, dt_start, Q_var_in);
 
     if (verbosity() > 1)
     {
@@ -133,13 +132,14 @@ void KalmanInterface::kalmanInit(const kalman::KalmanState& init_state,
 */
 void KalmanInterface::kalmanInit(const kalman::Vector& x,
                                  const kalman::Matrix& P,
-                                 const boost::posix_time::ptime& ts)
+                                 const boost::posix_time::ptime& ts,
+                                 double Q_var)
 {
     assert(kalman_filter_);
 
     ts_ = ts;
     
-    kalman_filter_->init(x, P);
+    kalman_filter_->init(x, P, Q_var);
 }
 
 /**
@@ -167,7 +167,9 @@ kalman::KalmanError KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
                << "z: " << z << "\n";
     }
 
-    auto err = kalman_filter_->predictAndUpdate(dt, Q_var, z, {}, {});
+    double Q_var_in = mm.Q_var.has_value() ? mm.Q_var.value() : Q_var;
+
+    auto err = kalman_filter_->predictAndUpdate(dt, Q_var_in, z, {}, {});
 
     if (err != kalman::KalmanError::NoError)
         return err;
@@ -185,13 +187,13 @@ kalman::KalmanError KalmanInterface::kalmanStep(kalman::KalmanState& new_state,
 kalman::KalmanError KalmanInterface::kalmanPrediction(kalman::Vector& x,
                                                       kalman::Matrix& P,
                                                       double dt,
-                                                      double Q_var,
                                                       bool fix_estimate,
-                                                      bool* fixed) const
+                                                      bool* fixed,
+                                                      const boost::optional<double>& Q_var) const
 {
     assert(kalman_filter_);
 
-    auto err = kalman_filter_->predictState(x, P, dt, Q_var, fix_estimate, fixed, {});
+    auto err = kalman_filter_->predictState(x, P, dt, fix_estimate, fixed, {}, nullptr, Q_var);
 
     return err;
 }
@@ -201,12 +203,12 @@ kalman::KalmanError KalmanInterface::kalmanPrediction(kalman::Vector& x,
 kalman::KalmanError KalmanInterface::kalmanPrediction(kalman::Vector& x,
                                                       kalman::Matrix& P,
                                                       const boost::posix_time::ptime& ts,
-                                                      double Q_var,
                                                       bool fix_estimate,
-                                                      bool* fixed) const
+                                                      bool* fixed,
+                                                      const boost::optional<double>& Q_var) const
 {
     double dt = KalmanInterface::timestep(ts_, ts);
-    return kalmanPrediction(x, P, dt, Q_var, fix_estimate, fixed);
+    return kalmanPrediction(x, P, dt, fix_estimate, fixed, Q_var);
 }
 
 /**
@@ -274,9 +276,9 @@ kalman::KalmanError KalmanInterface::interpStep(kalman::KalmanState& state_inter
                                                 const kalman::KalmanState& state0,
                                                 const kalman::KalmanState& state1,
                                                 double dt,
-                                                double Q_var,
                                                 bool fix_estimate,
-                                                bool* fixed) const
+                                                bool* fixed,
+                                                const boost::optional<double>& Q_var) const
 {
     assert(kalman_filter_);
 
@@ -290,11 +292,11 @@ kalman::KalmanError KalmanInterface::interpStep(kalman::KalmanState& state_inter
     auto err = kalman_filter_->predictState(state_interp.x,
                                             state_interp.P,
                                             dt,
-                                            Q_var,
                                             fix_estimate,
                                             fixed,
                                             {},
-                                            &state_interp);
+                                            &state_interp,
+                                            Q_var);
     //revert
     kalman_filter_->init(state_backup);
 

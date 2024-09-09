@@ -48,17 +48,15 @@ KalmanEstimator::Settings::Settings()
                                   
     imm_M_init.resize(3, 3);
 
-#if 1
-                    //   zero,   uniform,   accelerated
-    imm_M_init <<       0.7,        0.1,        0.2,   // zero
-                        0.1,        0.7,        0.2,   // uniform
-                       0.15,       0.15,        0.7;   // accelerated
-#else
-                   //   zero,   uniform,   accelerated
-    imm_M_init <<       0.9,        0.05,        0.05,   // zero
-                        0.05,        0.9,        0.05,   // uniform
-                        0.05,       0.05,         0.9;   // accelerated
-#endif
+    const double M_big = 0.9999999999999999;
+    const double M_mid = 0.00000000000000005;
+    const double M_sm0 = 0.00000000000000009;
+    const double M_sm1 = 0.00000000000000001;
+
+                   //   zero,        uniform,     accelerated
+    imm_M_init <<       M_big,       M_mid,       M_mid,     // zero
+                        M_mid,       M_big,       M_mid,     // uniform
+                        M_mid,       M_mid,       M_big;     // accelerated
 }
 
 /**
@@ -180,7 +178,7 @@ Measurement KalmanEstimator::currentStateAsMeasurement() const
 const boost::posix_time::ptime& KalmanEstimator::currentTime() const
 {
     assert(isInit());
-    return kalman_interface_->currrentTime();
+    return kalman_interface_->currentTime();
 }
 
 /**
@@ -466,7 +464,7 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdateMinimal& update)
     initProjection(update.projection_center.x(), update.projection_center.y(), {}, {}); 
 
     //reinit kalman from update
-    kalman_interface_->kalmanInit(update.x, update.P, update.t);
+    kalman_interface_->kalmanInit(update.x, update.P, update.t, update.Q_var);
 }
 
 /**
@@ -603,7 +601,7 @@ void KalmanEstimator::initProjection(double lat_proj_center,
 /**
 */
 KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& update,
-                                                                const Measurement& mm)
+                                                        const Measurement& mm)
 {
     step_info_.reset();
 
@@ -750,8 +748,7 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
     kalman::KalmanState state;
     auto kalman_err = kalman_interface_->kalmanPrediction(state.x, 
                                                           state.P, 
-                                                          dt, 
-                                                          settings_.Q_var, 
+                                                          dt,
                                                           settings_.fix_predictions, 
                                                           fixed);
     if (kalman_err != kalman::KalmanError::NoError)
@@ -785,18 +782,32 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
     assert(isInit());
 
     kalman::KalmanState state;
-    auto kalman_err = kalman_interface_->kalmanPrediction(state.x, 
-                                                          state.P, 
-                                                          ts, 
-                                                          settings_.Q_var, 
-                                                          settings_.fix_predictions, 
-                                                          fixed);
-    if (kalman_err != kalman::KalmanError::NoError)
+
+    const auto& curr_ts = kalman_interface_->currentTime();
+    double dt = Utils::Time::partialSeconds(ts >= curr_ts ? ts - curr_ts : curr_ts - ts);
+    if (dt <= settings_.min_pred_dt)
     {
-        //debatable: should the step fail strategy apply here?
-        if (settings_.step_fail_strategy == Settings::StepFailStrategy::Assert)
-            assert(kalman_err == kalman::KalmanError::NoError);
-        return kalman_err;
+        //close enough to current state => reuse
+        state = kalman_interface_->currentState();
+
+        if (fixed)
+            *fixed = false;
+    }
+    else
+    {
+        //predict from current state
+        auto kalman_err = kalman_interface_->kalmanPrediction(state.x, 
+                                                              state.P, 
+                                                              ts, 
+                                                              settings_.fix_predictions, 
+                                                              fixed);
+        if (kalman_err != kalman::KalmanError::NoError)
+        {
+            //debatable: should the step fail strategy apply here?
+            if (settings_.step_fail_strategy == Settings::StepFailStrategy::Assert)
+                assert(kalman_err == kalman::KalmanError::NoError);
+            return kalman_err;
+        }
     }
 
     kalman_interface_->storeState(mm, state);
@@ -809,9 +820,9 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
                << "STATE P = \n" << state.P;
 
         logerr << "KalmanEstimator: kalmanPrediction: prediction yielded nan\n\n"
-               << "ts_cur: " << Utils::Time::toString(kalman_interface_->currrentTime()) << "\n"
+               << "ts_cur: " << Utils::Time::toString(kalman_interface_->currentTime()) << "\n"
                << "ts:     " << Utils::Time::toString(ts) << "\n"
-               << "dt:     " << KalmanInterface::timestep(kalman_interface_->currrentTime(), ts) << "\n"
+               << "dt:     " << KalmanInterface::timestep(kalman_interface_->currentTime(), ts) << "\n"
                << kalman_interface_->asString(kalman::KalmanInfoFlags::InfoAll) << "\n"
                << mm.asString() << "\n";
         assert(kalman_prediction_check);
@@ -821,6 +832,7 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
 }
 
 /**
+ * Note: Changes the estimator's current state to the passed one.
 */
 kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
                                                       const kalman::KalmanUpdate& ref_update,
@@ -837,6 +849,7 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
 }
 
 /**
+ * Note: Changes the estimator's current state to the passed one.
 */
 kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
                                                       const kalman::KalmanUpdateMinimal& ref_update,
@@ -854,6 +867,7 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
 
 /**
  * Prediction by interpolation of two reference update predictions.
+ * Note: Changes the estimator's current state to the passed one.
  */
 kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
                                                       const kalman::KalmanUpdate& ref_update0,
@@ -867,6 +881,7 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
 
 /**
  * Prediction by interpolation of two reference update predictions.
+ * Note: Changes the estimator's current state to the passed one.
  */
 kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
                                                       const kalman::KalmanUpdateMinimal& ref_update0,
@@ -883,7 +898,6 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
                                        ref_update1,
                                        ts,
                                        settings_.min_pred_dt,
-                                       settings_.resample_Q_var,
                                        settings_.resample_interp_mode,
                                        *proj_handler_,
                                        num_fixed,
@@ -1127,6 +1141,13 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
         const auto& proj_center0  = update0.projection_center;
         const auto& proj_center1  = update1.projection_center;
 
+        //use either process noise stored in update or default process noise
+        double Q_var0 = update0.Q_var_interp.has_value() ? update0.Q_var_interp.value() : Q_var;
+        double Q_var1 = update1.Q_var_interp.has_value() ? update1.Q_var_interp.value() : Q_var;
+
+        if (settings_.debug)
+            loginf << "KalmanEstimator: interpUpdates: interpolating using Q_var " << Q_var0 << " / " << Q_var1; 
+
         auto t0 = update0.t;
         auto t1 = update1.t;
 
@@ -1167,9 +1188,10 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
             }
 
             kalman::KalmanState new_state0, new_state1;
+            kalman::KalmanError error0, error1;
 
-            auto error0 = kalman_interface_->interpStep(new_state0, state0, state1_ref,  dt0, Q_var, settings_.fix_predictions_interp);
-            auto error1 = kalman_interface_->interpStep(new_state1, state1_ref, state0, -dt1, Q_var, settings_.fix_predictions_interp);
+            error0 = kalman_interface_->interpStep(new_state0, state0, state1_ref,  dt0, settings_.fix_predictions_interp, nullptr, Q_var0);
+            error1 = kalman_interface_->interpStep(new_state1, state1_ref, state0, -dt1, settings_.fix_predictions_interp, nullptr, Q_var1);
 
             if (error0 == kalman::KalmanError::NoError &&
                 error1 == kalman::KalmanError::NoError)
@@ -1226,7 +1248,6 @@ kalman::KalmanError KalmanEstimator::predictBetween(kalman::KalmanUpdateMinimal&
                                                     const kalman::KalmanUpdateMinimal& update1,
                                                     const boost::posix_time::ptime& ts,
                                                     double min_dt_sec,
-                                                    double Q_var,
                                                     StateInterpMode interp_mode,
                                                     KalmanProjectionHandler& proj_handler,
                                                     size_t* num_fixed,
@@ -1241,21 +1262,21 @@ kalman::KalmanError KalmanEstimator::predictBetween(kalman::KalmanUpdateMinimal&
         *num_fixed = 0;
     if (num_proj_changed)
         *num_proj_changed = 0;
-
-    if (ts == update0.t)
-    {
-        update_interp = update0;
-        return kalman::KalmanError::NoError;
-    }
-    if (ts == update1.t)
-    {
-        update_interp = update1;
-        return kalman::KalmanError::NoError;
-    }
     
     double dt  = Utils::Time::partialSeconds(update1.t - update0.t);
     double dt0 = Utils::Time::partialSeconds(ts - update0.t);
     double dt1 = Utils::Time::partialSeconds(update1.t - ts);
+
+    if (dt0 <= min_dt_sec)
+    {
+        update_interp = update0;
+        return kalman::KalmanError::NoError;
+    }
+    if (dt1 <= min_dt_sec)
+    {
+        update_interp = update1;
+        return kalman::KalmanError::NoError;
+    }
 
     kalman::KalmanState state0;
     state0.x = update0.x;
@@ -1272,8 +1293,8 @@ kalman::KalmanError KalmanEstimator::predictBetween(kalman::KalmanUpdateMinimal&
     //predict forth and back to the specified time
     kalman::KalmanState new_state0, new_state1;
 
-    auto error0 = kalman_interface_->interpStep(new_state0, state0, state1_tr,  dt0, Q_var, settings_.fix_predictions, &fixed0);
-    auto error1 = kalman_interface_->interpStep(new_state1, state1_tr, state0, -dt1, Q_var, settings_.fix_predictions, &fixed1);
+    auto error0 = kalman_interface_->interpStep(new_state0, state0, state1_tr,  dt0, settings_.fix_predictions, &fixed0);
+    auto error1 = kalman_interface_->interpStep(new_state1, state1_tr, state0, -dt1, settings_.fix_predictions, &fixed1);
 
     if (error0 != kalman::KalmanError::NoError)
         return error0;
@@ -1313,6 +1334,8 @@ std::string KalmanEstimator::asString(int flags, const std::string& prefix) cons
 
 void KalmanEstimator::enableDebugging(bool ok)
 {
+    settings_.debug = ok;
+
     if (kalman_interface_)
         return kalman_interface_->enableDebugging(ok);
 }

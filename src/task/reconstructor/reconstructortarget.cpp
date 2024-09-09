@@ -1444,8 +1444,9 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
 
 //fl_unknown, fl_on_ground, fl_index
 std::tuple<bool, bool, unsigned int> ReconstructorTarget::getAltitudeState (
-    const boost::posix_time::ptime& ts, boost::posix_time::time_duration max_time_diff,
-    const ReconstructorTarget::InterpOptions& interp_options)
+    const boost::posix_time::ptime& ts, 
+    boost::posix_time::time_duration max_time_diff,
+    const ReconstructorTarget::InterpOptions& interp_options) const
 {
     boost::optional<float> mode_c_code = modeCCodeAt (ts, max_time_diff, interp_options);
     boost::optional<bool> gbs          = groundBitAt (ts, max_time_diff, interp_options);

@@ -60,15 +60,15 @@ public:
 
         Settings();
 
-        double Q_var       = 900.0;   // variance of kalman process (30*30)
-        double R_var_undef = HighVar; // high variance for undefined values (1000*1000)
+        double Q_var       = 900.0;   // default variance of kalman process (30*30)
+        double R_var_undef = HighVar; // high variance for undefined values   (1000*1000)
 
         size_t min_chain_size     = 2;       // minimum number of consecutive kalman updates without reinit            (0 = do not check)
         double max_distance_cart  = 50000.0; // maximum allowed distance of consecutive measurements in meters         (0 = do not check)
-        double min_dt             = 0.0;     // minimum allowed time difference of consecutive measurements in seconds (0 = do not check)
+        double min_dt             = 0.001;   // minimum allowed time difference of consecutive measurements in seconds (0 = do not check)
         double max_dt             = 11.0;    // maximum allowed time difference of consecutive measurements in seconds (0 = do not check)
 
-        double min_pred_dt = 0.0;
+        double min_pred_dt = 0.001;
 
         int reinit_check_flags = ReinitCheckTime; // checks used for reinitialization of kalman
 
@@ -94,7 +94,8 @@ public:
 
         bool extract_wgs84_pos = false;
         
-        int verbosity = 0;
+        int  verbosity = 0;
+        bool debug     = false;
 
         reconstruction::Uncertainty default_uncert; //default uncertainties used if none are provided in the measurement
 
@@ -254,7 +255,6 @@ private:
                                        const kalman::KalmanUpdateMinimal& update1,
                                        const boost::posix_time::ptime& ts,
                                        double min_dt_sec,
-                                       double Q_var,
                                        StateInterpMode interp_mode,
                                        KalmanProjectionHandler& proj_handler,
                                        size_t* num_fixed,

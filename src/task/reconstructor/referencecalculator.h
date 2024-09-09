@@ -24,6 +24,24 @@
 */
 struct ReferenceCalculatorSettings
 {
+    struct ProcessNoise
+    {
+        ProcessNoise() = default;
+        ProcessNoise(double stddev_static,
+                     double stddev_ground,
+                     double stddev_air,
+                     double stddev_unknown)
+        :   Q_std_static (stddev_static)
+        ,   Q_std_ground (stddev_ground)
+        ,   Q_std_air    (stddev_air)
+        ,   Q_std_unknown(stddev_unknown) {}
+
+        double Q_std_static;
+        double Q_std_ground;
+        double Q_std_air;
+        double Q_std_unknown;
+    };
+
     /**
     */
     reconstruction::KalmanEstimator::Settings kalmanEstimatorSettings() const
@@ -35,11 +53,13 @@ struct ReferenceCalculatorSettings
         settings.max_dt            = max_dt;
         settings.max_distance_cart = max_distance;
 
-        settings.Q_var       = Q_std       * Q_std;
+        settings.Q_var       = Q_std.Q_std_static * Q_std.Q_std_static;
         settings.R_var_undef = R_std_undef * R_std_undef;
+
+        settings.min_pred_dt = min_dt;
         
         settings.resample_dt          = resample_dt;
-        settings.resample_Q_var       = resample_Q_std * resample_Q_std;
+        settings.resample_Q_var       = resample_Q_std.Q_std_static * resample_Q_std.Q_std_static;
         settings.resample_interp_mode = resample_blend_mode;
 
         settings.max_proj_distance_cart = max_proj_distance_cart;
@@ -77,22 +97,24 @@ struct ReferenceCalculatorSettings
     kalman::KalmanType kalman_type_final = kalman::KalmanType::IMMKalman2D;
 
     //default noise
-    double Q_std       = 30.0;
-    double R_std_undef = reconstruction::KalmanEstimator::HighStdDev;
+    double       R_std_undef       = reconstruction::KalmanEstimator::HighStdDev;
+    ProcessNoise Q_std             = ProcessNoise(5.0, 3.0, 10.0, 7.0); // (static, ground, air, unknown)
+    double       Q_altitude_min_ft = 0.0;
+    double       Q_altitude_max_ft = 30000.0;
 
     //reinit related
     int    min_chain_size = 2;
-    double min_dt         = 0.01;
+    double min_dt         = 0.001;
     double max_dt         = 11.0;
     double max_distance   = 50000.0;
 
     bool smooth_rts = true;
 
     //result resampling related
-    bool                            resample_result     = true;
-    double                          resample_Q_std      = 10.0;
-    double                          resample_dt         = 2.0;
-    reconstruction::StateInterpMode resample_blend_mode = reconstruction::StateInterpMode::BlendVar;
+    bool                            resample_result       = true;
+    ProcessNoise                    resample_Q_std        = ProcessNoise(2.0, 1.0, 5.0, 3.0); // (static, ground, air, unknown)
+    double                          resample_dt           = 2.0;
+    reconstruction::StateInterpMode resample_blend_mode   = reconstruction::StateInterpMode::BlendVar;
 
     //dynamic projection change
     double max_proj_distance_cart  = 20000.0;
@@ -107,6 +129,8 @@ struct ReferenceCalculatorSettings
 
     bool fix_predictions        = true;
     bool fix_predictions_interp = false;
+
+    bool dynamic_process_noise = true;
 
     //debug options
     bool compat_mode     = false;

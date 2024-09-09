@@ -19,6 +19,8 @@
 SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBase& reconstructor)
 :   reconstructor_(reconstructor)
 {
+    auto* settings = &reconstructor_.referenceCalculatorSettings();
+
     auto layout = new QFormLayout;
     setLayout(layout);
 
@@ -36,7 +38,45 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
         layout->addRow(l);
     };
 
-    auto* settings = &reconstructor_.referenceCalculatorSettings();
+    auto createProcessNoiseBox = [ = ] (double* settings_value)
+    {
+        auto box = new QDoubleSpinBox;
+        box->setDecimals(3);
+        box->setMinimum(0.0);
+        box->setMaximum(std::numeric_limits<double>::max());
+        QObject::connect(box, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { *settings_value = v; });
+        
+        return box;
+    };
+
+    auto addProcessNoise = [ & ] (const QString& name,
+                                  QDoubleSpinBox** Q_static_box,
+                                  QDoubleSpinBox** Q_ground_box,
+                                  QDoubleSpinBox** Q_air_box,
+                                  QDoubleSpinBox** Q_unknown_box,
+                                  ReferenceCalculatorSettings::ProcessNoise& Q_std)
+    {
+        QHBoxLayout* layout_h = new QHBoxLayout;
+
+        *Q_static_box  = createProcessNoiseBox(&Q_std.Q_std_static);
+        *Q_ground_box  = createProcessNoiseBox(&Q_std.Q_std_ground);
+        *Q_air_box     = createProcessNoiseBox(&Q_std.Q_std_air);
+        *Q_unknown_box = createProcessNoiseBox(&Q_std.Q_std_unknown);
+
+        layout_h->addWidget(new QLabel("Static"));
+        layout_h->addWidget(*Q_static_box);
+
+        layout_h->addWidget(new QLabel("Ground"));
+        layout_h->addWidget(*Q_ground_box);
+
+        layout_h->addWidget(new QLabel("Air"));
+        layout_h->addWidget(*Q_air_box);
+
+        layout_h->addWidget(new QLabel("Unknown"));
+        layout_h->addWidget(*Q_unknown_box);
+
+        layout->addRow(name, layout_h);
+    };
 
     bool is_appimage = COMPASS::instance().isAppImage();
 
@@ -65,12 +105,21 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
 
     addHeader("Default Uncertainties");
 
-    Q_std_edit_ = new QDoubleSpinBox;
-    Q_std_edit_->setDecimals(3);
-    Q_std_edit_->setMinimum(0.0);
-    Q_std_edit_->setMaximum(std::numeric_limits<double>::max());
-    connect(Q_std_edit_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->Q_std = v; });
-    layout->addRow("Process Stddev [m]", Q_std_edit_);
+    dynamic_Q_box_ = new QCheckBox("");
+    connect(dynamic_Q_box_, &QCheckBox::toggled, 
+        [ = ] (bool ok) 
+        { 
+            settings->dynamic_process_noise = ok; 
+            this->updateEnabledStates();
+        });
+    layout->addRow("Dynamic Process Noise", dynamic_Q_box_);
+
+    addProcessNoise("Process Stddev [m]", 
+                    &Q_std_static_edit_,
+                    &Q_std_ground_edit_,
+                    &Q_std_air_edit_,
+                    &Q_std_unknown_edit_,
+                    settings->Q_std);
 
     addHeader("Chain Generation");
 
@@ -114,9 +163,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
         [ = ] (bool ok) 
         { 
             settings->resample_systracks = ok; 
-
-            resample_systracks_dt_box_->setEnabled(ok);
-            resample_systracks_maxdt_box_->setEnabled(ok);
+            this->updateEnabledStates();
         });
     layout->addRow("Resample SystemTracks", resample_systracks_box_);
 
@@ -146,9 +193,7 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
         [ = ] (bool ok) 
         { 
             settings->resample_result = ok; 
-
-            resample_dt_box_->setEnabled(ok);
-            resample_Q_std_box_->setEnabled(ok);
+            this->updateEnabledStates();
         });
     layout->addRow("Resample Results", resample_result_box_);
 
@@ -159,12 +204,12 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     connect(resample_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_dt = v; });
     layout->addRow("Resample Interval [s]", resample_dt_box_);
 
-    resample_Q_std_box_ = new QDoubleSpinBox;
-    resample_Q_std_box_->setDecimals(3);
-    resample_Q_std_box_->setMinimum(0.0);
-    resample_Q_std_box_->setMaximum(std::numeric_limits<double>::max());
-    connect(resample_Q_std_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_Q_std = v; });
-    layout->addRow("Resample Process Stddev [m]", resample_Q_std_box_);
+    addProcessNoise("Resample Process Stddev [m]", 
+                    &resample_Q_std_static_edit_,
+                    &resample_Q_std_ground_edit_,
+                    &resample_Q_std_air_edit_,
+                    &resample_Q_std_unknown_edit_,
+                    settings->resample_Q_std);
 
     update();
 }
@@ -175,6 +220,29 @@ SimpleReferenceCalculatorWidget::~SimpleReferenceCalculatorWidget() = default;
 
 /**
 */
+void SimpleReferenceCalculatorWidget::updateEnabledStates()
+{
+    bool dynamic_Q          = dynamic_Q_box_->isChecked();
+    bool resample_res       = resample_result_box_->isChecked();
+    bool resample_systracks = resample_systracks_box_->isChecked();
+
+    Q_std_static_edit_->setEnabled(!dynamic_Q);
+    Q_std_ground_edit_->setEnabled(dynamic_Q);
+    Q_std_air_edit_->setEnabled(dynamic_Q);
+    Q_std_unknown_edit_->setEnabled(dynamic_Q);
+
+    resample_Q_std_static_edit_->setEnabled(resample_res && !dynamic_Q);
+    resample_Q_std_ground_edit_->setEnabled(resample_res && dynamic_Q);
+    resample_Q_std_air_edit_->setEnabled(resample_res && dynamic_Q);
+    resample_Q_std_unknown_edit_->setEnabled(resample_res && dynamic_Q);
+    resample_dt_box_->setEnabled(resample_res);
+
+    resample_systracks_dt_box_->setEnabled(resample_systracks);
+    resample_systracks_maxdt_box_->setEnabled(resample_systracks);
+}
+
+/**
+*/
 void SimpleReferenceCalculatorWidget::update()
 {
     const auto& settings = reconstructor_.referenceCalculatorSettings();
@@ -182,7 +250,11 @@ void SimpleReferenceCalculatorWidget::update()
     if (rec_type_combo_) rec_type_combo_->setCurrentIndex(rec_type_combo_->findData(QVariant(settings.kalman_type_assoc)));
     if (rec_type_combo_final_) rec_type_combo_final_->setCurrentIndex(rec_type_combo_final_->findData(QVariant(settings.kalman_type_final)));
 
-    if (Q_std_edit_) Q_std_edit_->setValue(settings.Q_std);
+    if (Q_std_static_edit_) Q_std_static_edit_->setValue(settings.Q_std.Q_std_static);
+    if (Q_std_ground_edit_) Q_std_ground_edit_->setValue(settings.Q_std.Q_std_ground);
+    if (Q_std_air_edit_) Q_std_air_edit_->setValue(settings.Q_std.Q_std_air);
+    if (Q_std_unknown_edit_) Q_std_unknown_edit_->setValue(settings.Q_std.Q_std_unknown);
+    if (dynamic_Q_box_) dynamic_Q_box_->setChecked(settings.dynamic_process_noise);
 
     if (repr_distance_box_) repr_distance_box_->setValue(settings.max_proj_distance_cart);
 
@@ -199,5 +271,10 @@ void SimpleReferenceCalculatorWidget::update()
 
     if (resample_result_box_) resample_result_box_->setChecked(settings.resample_result);
     if (resample_dt_box_) resample_dt_box_->setValue(settings.resample_dt);
-    if (resample_Q_std_box_) resample_Q_std_box_->setValue(settings.resample_Q_std);
+    if (resample_Q_std_static_edit_) resample_Q_std_static_edit_->setValue(settings.resample_Q_std.Q_std_static);
+    if (resample_Q_std_ground_edit_) resample_Q_std_ground_edit_->setValue(settings.resample_Q_std.Q_std_ground);
+    if (resample_Q_std_air_edit_) resample_Q_std_air_edit_->setValue(settings.resample_Q_std.Q_std_air);
+    if (resample_Q_std_unknown_edit_) resample_Q_std_unknown_edit_->setValue(settings.resample_Q_std.Q_std_unknown);
+
+    updateEnabledStates();
 }

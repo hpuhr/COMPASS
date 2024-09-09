@@ -49,7 +49,7 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
-            // base settings
+    // base settings
     {
         registerParameter("ds_line", &base_settings_.ds_line, default_line_id);
 
@@ -62,7 +62,7 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                           base_settings_.delete_all_calc_reftraj);
     }
 
-            // association stuff
+    // association stuff
     registerParameter("max_time_diff", &base_settings_.max_time_diff_, base_settings_.max_time_diff_);
     registerParameter("track_max_time_diff", &base_settings_.track_max_time_diff_, base_settings_.track_max_time_diff_);
 
@@ -76,12 +76,17 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
     registerParameter("target_max_positions_dubious_unknown_rate", &base_settings_.target_max_positions_dubious_unknown_rate_,
                       base_settings_.target_max_positions_dubious_unknown_rate_);
 
-            // reference computation
+    // reference computation
     {
         registerParameter("ref_rec_type", (int*)&ref_calc_settings_.kalman_type_assoc, (int)ReferenceCalculatorSettings().kalman_type_assoc);
         registerParameter("ref_rec_type_final", (int*)&ref_calc_settings_.kalman_type_final, (int)ReferenceCalculatorSettings().kalman_type_final);
 
-        registerParameter("ref_Q_std", &ref_calc_settings_.Q_std, ReferenceCalculatorSettings().Q_std);
+        registerParameter("ref_Q_std", &ref_calc_settings_.Q_std.Q_std_static, ReferenceCalculatorSettings().Q_std.Q_std_static);
+        registerParameter("ref_Q_std_ground", &ref_calc_settings_.Q_std.Q_std_ground, ReferenceCalculatorSettings().Q_std.Q_std_ground);
+        registerParameter("ref_Q_std_air", &ref_calc_settings_.Q_std.Q_std_air, ReferenceCalculatorSettings().Q_std.Q_std_air);
+        registerParameter("ref_Q_std_unknown", &ref_calc_settings_.Q_std.Q_std_unknown, ReferenceCalculatorSettings().Q_std.Q_std_unknown);
+
+        registerParameter("dynamic_process_noise", &ref_calc_settings_.dynamic_process_noise, ReferenceCalculatorSettings().dynamic_process_noise);
 
         registerParameter("ref_min_chain_size", &ref_calc_settings_.min_chain_size   , ReferenceCalculatorSettings().min_chain_size);
         registerParameter("ref_min_dt"        , &ref_calc_settings_.min_dt   , ReferenceCalculatorSettings().min_dt);
@@ -91,7 +96,10 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
         registerParameter("ref_smooth_rts", &ref_calc_settings_.smooth_rts, ReferenceCalculatorSettings().smooth_rts);
 
         registerParameter("ref_resample_result", &ref_calc_settings_.resample_result, ReferenceCalculatorSettings().resample_result);
-        registerParameter("ref_resample_Q_std" , &ref_calc_settings_.resample_Q_std , ReferenceCalculatorSettings().resample_Q_std);
+        registerParameter("ref_resample_Q_std", &ref_calc_settings_.resample_Q_std.Q_std_static, ReferenceCalculatorSettings().resample_Q_std.Q_std_static);
+        registerParameter("ref_resample_Q_std_ground", &ref_calc_settings_.resample_Q_std.Q_std_ground, ReferenceCalculatorSettings().resample_Q_std.Q_std_ground);
+        registerParameter("ref_resample_Q_std_air", &ref_calc_settings_.resample_Q_std.Q_std_air, ReferenceCalculatorSettings().resample_Q_std.Q_std_air);
+        registerParameter("ref_resample_Q_std_unknown", &ref_calc_settings_.resample_Q_std.Q_std_unknown, ReferenceCalculatorSettings().resample_Q_std.Q_std_unknown);
         registerParameter("ref_resample_dt"    , &ref_calc_settings_.resample_dt    , ReferenceCalculatorSettings().resample_dt);
 
         registerParameter("ref_max_proj_distance_cart", &ref_calc_settings_.max_proj_distance_cart, ReferenceCalculatorSettings().max_proj_distance_cart);
@@ -746,8 +754,31 @@ ReconstructorBase::DataSlice& ReconstructorBase::currentSlice()
     return task_.processingSlice();
 }
 
+float ReconstructorBase::qVarForAltitude(bool fl_unknown, 
+                                         bool fl_ground, 
+                                         unsigned int fl_index,
+                                         bool dynamic,
+                                         const ReferenceCalculatorSettings::ProcessNoise& Q_std) const
+{
+    if (!dynamic)
+        return Q_std.Q_std_static * Q_std.Q_std_static;
+    if (fl_unknown)
+        return Q_std.Q_std_unknown * Q_std.Q_std_unknown;
+    if (fl_ground)
+        return Q_std.Q_std_ground * Q_std.Q_std_ground;
+
+    assert (ref_calc_settings_.Q_altitude_min_ft < ref_calc_settings_.Q_altitude_max_ft);
+
+    double alt_ft       = std::max(ref_calc_settings_.Q_altitude_min_ft, std::min(ref_calc_settings_.Q_altitude_max_ft, fl_index * 100.0));
+    double t            = (alt_ft - ref_calc_settings_.Q_altitude_min_ft) / (ref_calc_settings_.Q_altitude_max_ft - ref_calc_settings_.Q_altitude_min_ft);
+    double Q_std_interp = (1.0 - t) * Q_std.Q_std_ground + t * Q_std.Q_std_air;
+
+    return Q_std_interp * Q_std_interp;
+}
+
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 
-                                          const dbContent::targetReport::ReconstructorInfo& ri)
+                                          const dbContent::targetReport::ReconstructorInfo& ri,
+                                          const dbContent::ReconstructorTarget* target)
 {
     mm = {};
 
@@ -771,23 +802,36 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     auto vel_acc = acc_estimator_->velocityAccuracy(ri);
     auto acc_acc = acc_estimator_->accelerationAccuracy(ri);
 
-            //position
+    //position
     mm.lat = pos.value().latitude_;
     mm.lon = pos.value().longitude_;
 
-            //velocity
+    //height information
+    if (target)
+    {
+        bool fl_unknown, fl_ground;
+        unsigned int fl_index;
+        std::tie(fl_unknown, fl_ground, fl_index) = target->getAltitudeState(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
+
+        //compute measurement-specific process noise from altitude state
+        mm.Q_var        = qVarForAltitude(fl_unknown, fl_ground, fl_index, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.Q_std);
+        mm.Q_var_interp = qVarForAltitude(fl_unknown, fl_ground, fl_index, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.resample_Q_std);
+    }
+
+    //velocity
     if (vel.has_value())
     {
         auto speed_vec = Utils::Number::speedAngle2SpeedVec(vel->speed_, vel->track_angle_);
 
         mm.vx = speed_vec.first;
         mm.vy = speed_vec.second;
+
         //@TODO: vz?
     }
 
-            //@TODO: acceleration?
+    //@TODO: acceleration?
 
-            //accuracies
+    //accuracies
     mm.x_stddev = pos_acc.x_stddev_;
     mm.y_stddev = pos_acc.y_stddev_;
     mm.xy_cov   = pos_acc.xy_cov_;
@@ -800,12 +844,13 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
 }
 
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
-                                          unsigned long rec_num)
+                                          unsigned long rec_num,
+                                          const dbContent::ReconstructorTarget* target)
 {
     auto it = target_reports_.find(rec_num);
     assert(it != target_reports_.end());
 
-    createMeasurement(mm, it->second);
+    createMeasurement(mm, it->second, target);
 }
 
 reconstruction::KalmanChainPredictors& ReconstructorBase::chainPredictors()

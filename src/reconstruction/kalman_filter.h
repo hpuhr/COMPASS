@@ -18,6 +18,7 @@
 #pragma once
 
 #include "kalman_defs.h"
+#include "global.h"
 
 #include <vector>
 
@@ -47,7 +48,6 @@ public:
     size_t dimX() const { return dim_x_; }
     size_t dimZ() const { return dim_z_; }
 
-    void setOverrideProcessNoiseVar(double Q_var);
     virtual void enableDebugging(bool ok);
 
     Error predict(double dt,
@@ -64,12 +64,12 @@ public:
 
     Error predictState(Vector& x, 
                        Matrix& P,
-                       double dt, 
-                       double Q_var,
+                       double dt,
                        bool fix_estimate = false,
                        bool* fixed = nullptr,
                        const OVector& u = OVector(),
-                       KalmanState* state = nullptr) const;
+                       KalmanState* state = nullptr,
+                       const boost::optional<double>& Q_var = boost::optional<double>()) const;
 
     bool smooth(std::vector<kalman::Vector>& x_smooth,
                 std::vector<kalman::Matrix>& P_smooth,
@@ -79,8 +79,6 @@ public:
                 bool stop_on_fail = false,
                 std::vector<bool>* state_valid = nullptr) const;
 
-    void updateInternalMatrices(double dt, double Q_var);
-
     bool checkState() const;
     bool checkVariances() const;
 
@@ -88,14 +86,17 @@ public:
     virtual void revert(bool recursive = false);
     virtual void invert(bool recursive = false);
 
-    virtual void init(const Vector& x, const Matrix& P);
     virtual void init(const Vector& x, const Matrix& P, double dt, double Q_var);
+    virtual void init(const Vector& x, const Matrix& P, double Q_var);
+    virtual void init(const BasicKalmanState& state, bool xP_only = false);
     virtual void init(const KalmanState& state, bool xP_only = false);
 
     const Vector& getX() const { return x_; }
     const Matrix& getP() const { return P_; }
     const Matrix& getQ() const { return Q_; }
     const Matrix& getR() const { return R_; }
+
+    double getProcessNoiseVariance() const { return Q_var_; }
 
     void setX(const Vector& x) { x_ = x; }
     void setP(const Matrix& P) { P_ = P; }
@@ -122,6 +123,7 @@ public:
 
     kalman::KalmanState state(bool xP_only = false) const;
     virtual void state(kalman::KalmanState& s, bool xP_only = false) const;
+    virtual void state(kalman::BasicKalmanState& s, bool xP_only = false) const;
 
     virtual std::string asString(int info_flags = InfoFlags::InfoAll, const std::string& prefix = "") const;
 
@@ -137,9 +139,16 @@ public:
     static void continuousWhiteNoise(Matrix& Q_noise, size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
 
 protected:
+#if USE_EXPERIMENTAL_SOURCE
+    friend class KalmanFilterIMM;
+#endif
+
+    void updateInternalMatrices(double dt, double Q_var);
     void fixEstimate(const Vector& x,
                      Matrix& P,
                      bool* fixed = nullptr) const;
+
+    virtual void init(const Vector& x, const Matrix& P);
 
     virtual void updateInternalMatrices_impl(double dt, double Q_var) = 0;
 
@@ -195,6 +204,7 @@ private:
     //before predict()
     mutable Vector x_backup_;
     mutable Matrix P_backup_;
+    mutable double Q_var_backup_;
 
     //after predict()
     Vector x_prior_;
@@ -208,7 +218,7 @@ private:
     ZFunc           z_func_;
     RFunc           R_func_;
 
-    boost::optional<double> Q_var_;
+    double                  Q_var_;
     bool                    debug_ = false;
 };
 

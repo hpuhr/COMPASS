@@ -24,7 +24,6 @@ struct Measurement
     void position2D(const Eigen::Vector2d& pos, CoordSystem cs);
 
     double distance(const Measurement& other, CoordSystem cs) const;
-
     double distanceSqr(const Measurement& other, CoordSystem cs) const;
 
     bool hasVelocity() const;
@@ -32,9 +31,7 @@ struct Measurement
     bool hasStdDevPosition() const;
 
     dbContent::targetReport::Position position() const;
-
     dbContent::targetReport::PositionAccuracy positionAccuracy() const;
-
 
     bool hasStdDevVelocity() const;
     bool hasStdDevAccel() const;
@@ -70,7 +67,9 @@ struct Measurement
 
     boost::optional<double>  ax_stddev;            // accel stddev x
     boost::optional<double>  ay_stddev;            // accel stddev y
+
+    boost::optional<float>   Q_var;                // optional mm-specific process noise variance
+    boost::optional<float>   Q_var_interp;         // optional mm-specific process noise variance for interpolation
 };
 
 }  // namespace reconstruction
-

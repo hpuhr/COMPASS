@@ -146,8 +146,12 @@ class ReconstructorBase : public Configurable
     ReferenceCalculatorSettings& referenceCalculatorSettings() { return ref_calc_settings_; }
     const ReferenceCalculatorSettings& referenceCalculatorSettings() const { return ref_calc_settings_; }
 
-    void createMeasurement(reconstruction::Measurement& mm, const dbContent::targetReport::ReconstructorInfo& ri);
-    void createMeasurement(reconstruction::Measurement& mm, unsigned long rec_num);
+    void createMeasurement(reconstruction::Measurement& mm, 
+                           const dbContent::targetReport::ReconstructorInfo& ri,
+                           const dbContent::ReconstructorTarget* target = nullptr);
+    void createMeasurement(reconstruction::Measurement& mm, 
+                           unsigned long rec_num,
+                           const dbContent::ReconstructorTarget* target = nullptr);
 
     const dbContent::TargetReportAccessor& accessor(const dbContent::targetReport::ReconstructorInfo& tr) const;
 
@@ -181,7 +185,7 @@ class ReconstructorBase : public Configurable
     virtual void createAdditionalAnnotations() {}
 
     virtual bool doFurtherSliceProcessing() { return false; }     // called for repeat checking
-    virtual bool isLastSliceProcessingRun() { return true; } // called to check if another repeat run is planned
+    virtual bool isLastSliceProcessingRun() { return true; }      // called to check if another repeat run is planned
     virtual unsigned int currentSliceRepeatRun() { return 0; }    // current repeat run
 
     reconstruction::KalmanChainPredictors& chainPredictors();
@@ -214,6 +218,12 @@ protected:
 
   private:
     void initChainPredictors();
+
+    float qVarForAltitude(bool fl_unknown, 
+                          bool fl_ground, 
+                          unsigned int fl_index,
+                          bool dynamic,
+                          const ReferenceCalculatorSettings::ProcessNoise& Q_std) const;
 
     ReferenceCalculatorSettings ref_calc_settings_;
 

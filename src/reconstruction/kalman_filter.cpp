@@ -58,13 +58,6 @@ KalmanFilter::KalmanFilter(size_t dim_x,
 KalmanFilter::~KalmanFilter() = default;
 
 /**
-*/
-void KalmanFilter::setOverrideProcessNoiseVar(double Q_var)
-{
-    Q_var_ = Q_var;
-}
-
-/**
  */
 void KalmanFilter::enableDebugging(bool ok)
 {
@@ -87,11 +80,33 @@ void KalmanFilter::init(const Vector& x, const Matrix& P)
 
 /**
 */
-void KalmanFilter::init(const Vector& x, const Matrix& P, double dt, double Q_var)
+void KalmanFilter::init(const Vector& x, const Matrix& P, double Q_var)
 {
     init(x, P);
 
+    Q_var_ = Q_var;
+}
+
+/**
+*/
+void KalmanFilter::init(const Vector& x, const Matrix& P, double dt, double Q_var)
+{
+    init(x, P, Q_var);
+
     updateInternalMatrices(dt, Q_var);
+}
+
+
+/**
+*/
+void KalmanFilter::init(const BasicKalmanState& state, bool xP_only)
+{
+    init(state.x, state.P);
+
+    if (!xP_only)
+    {
+        Q_ = state.Q;
+    }
 }
 
 /**
@@ -102,7 +117,8 @@ void KalmanFilter::init(const KalmanState& state, bool xP_only)
 
     if (!xP_only)
     {
-        Q_ = state.Q;
+        Q_     = state.Q;
+        Q_var_ = state.Q_var;
     }
 }
 
@@ -118,7 +134,7 @@ kalman::KalmanState KalmanFilter::state(bool xP_only) const
 
 /**
 */
-void KalmanFilter::state(kalman::KalmanState& s, bool xP_only) const
+void KalmanFilter::state(kalman::BasicKalmanState& s, bool xP_only) const
 {
     s.x = x_;
     s.P = P_;
@@ -126,6 +142,20 @@ void KalmanFilter::state(kalman::KalmanState& s, bool xP_only) const
     if (!xP_only)
     {
         s.Q = Q_;
+    }
+}
+
+/**
+*/
+void KalmanFilter::state(kalman::KalmanState& s, bool xP_only) const
+{
+    s.x = x_;
+    s.P = P_;
+
+    if (!xP_only)
+    {
+        s.Q     = Q_;
+        s.Q_var = Q_var_;
     }
 }
 
@@ -179,16 +209,18 @@ bool KalmanFilter::checkVariances() const
 */
 void KalmanFilter::backup(bool recursive)
 {
-    x_backup_ = x_;
-    P_backup_ = P_;
+    x_backup_     = x_;
+    P_backup_     = P_;
+    Q_var_backup_ = Q_var_;
 }
 
 /**
 */
 void KalmanFilter::revert(bool recursive)
 {
-    x_ = x_backup_;
-    P_ = P_backup_;
+    x_     = x_backup_;
+    P_     = P_backup_;
+    Q_var_ = Q_var_backup_;
 }
 
 /**
@@ -254,7 +286,9 @@ void KalmanFilter::resetLikelihoods()
 */
 void KalmanFilter::updateInternalMatrices(double dt, double Q_var)
 {
-    updateInternalMatrices_impl(dt, Q_var_.has_value() ? Q_var_.value() : Q_var);
+    Q_var_ = Q_var;
+
+    updateInternalMatrices_impl(dt, Q_var_);
 }
 
 /**
@@ -271,13 +305,11 @@ KalmanFilter::Error KalmanFilter::predict(double dt,
     // save backup state
     backup();
 
-    const double Q_var_active = Q_var_.has_value() ? Q_var_.value() : Q_var;
-
     //update internal time-dependent matrices
-    updateInternalMatrices(dt, Q_var_active);
+    updateInternalMatrices(dt, Q_var);
 
     // predict
-    auto err = predict_impl(x_, P_, dt, Q_var_active, u);
+    auto err = predict_impl(x_, P_, dt, Q_var_, u);
     if (err != Error::NoError)
         return err;
 
@@ -363,17 +395,18 @@ KalmanFilter::Error KalmanFilter::predictAndUpdate(double dt,
 KalmanFilter::Error KalmanFilter::predictState(Vector& x, 
                                                Matrix& P,
                                                double dt,
-                                               double Q_var,
                                                bool fix_estimate,
                                                bool* fixed,
                                                const OVector& u,
-                                               KalmanState* state) const
+                                               KalmanState* state,
+                                               const boost::optional<double>& Q_var) const
 {
     if (fixed)
         *fixed = false;
 
-    const double Q_var_active = Q_var_.has_value() ? Q_var_.value() : Q_var;
-
+    //determine used process noise (override > passed externally > last value)
+    const double Q_var_used = (Q_var.has_value() ? Q_var.value() : Q_var_);
+    
     if (dt < 0.0)
     {
         //backup current state
@@ -385,7 +418,7 @@ KalmanFilter::Error KalmanFilter::predictState(Vector& x,
         //...and use positive timestep
         dt = std::fabs(dt);
         
-        Error err = predictState_impl(x, P, dt, Q_var_active, true, u, state);
+        Error err = predictState_impl(x, P, dt, Q_var_used, true, u, state);
         
         //revert state
         x_ = x_backup;
@@ -395,7 +428,7 @@ KalmanFilter::Error KalmanFilter::predictState(Vector& x,
     }
     else
     {
-        Error err = predictState_impl(x, P, dt, Q_var_active, true, u, state);
+        Error err = predictState_impl(x, P, dt, Q_var_used, true, u, state);
 
         if (err != Error::NoError)
             return err;
@@ -437,6 +470,7 @@ void KalmanFilter::printState(std::stringstream& strm, const std::string& prefix
     strm << prefix << "x_:\n" << x_ << "\n";
     strm << prefix << "P_:\n" << P_ << "\n";
     strm << prefix << "Q_:\n" << Q_ << "\n";
+    strm << prefix << "Q_var: " << Q_var_ << "\n";
 }
 
 /**

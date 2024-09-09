@@ -71,26 +71,101 @@ typedef std::function<void(Vector&,const Vector&,size_t,size_t)> XTransferFunc;
 
 /**
 */
-struct KalmanState
+struct BasicKalmanState
 {
+    BasicKalmanState() {}
+    BasicKalmanState(const Vector& _x, const Matrix& _P) : x(_x), P(_P) {}
+    BasicKalmanState(const BasicKalmanState& other)
+    :   x (other.x )
+    ,   P (other.P )
+    ,   F (other.F )
+    ,   Q (other.Q ) {}
+    BasicKalmanState(BasicKalmanState&& other)
+    :   x (other.x )
+    ,   P (other.P )
+    ,   F (other.F )
+    ,   Q (other.Q ) {}
+
+    BasicKalmanState& operator=(const BasicKalmanState& other)
+    {
+        x  = other.x;
+        P  = other.P;
+        F  = other.F;
+        Q  = other.Q;
+
+        return *this;
+    }
+
+    BasicKalmanState& operator=(BasicKalmanState&& other)
+    {
+        x  = other.x;
+        P  = other.P;
+        F  = other.F;
+        Q  = other.Q;
+
+        return *this;
+    }
+
+    bool operator==(const BasicKalmanState& other) const
+    {
+        if (x  != other.x  ||
+            P  != other.P  ||
+            F  != other.F  ||
+            Q  != other.Q)
+            return false;
+
+        return true;
+    }
+
+    bool operator!=(const BasicKalmanState& other) const
+    {
+        return !operator==(other);
+    }
+
+    virtual std::string print() const
+    {
+        std::stringstream ss;
+        ss << "x:\n" << x << "\n"
+           << "P:\n" << P << "\n"
+           << "F:\n" << F << "\n"
+           << "Q:\n" << Q << "\n";
+
+        return ss.str();
+    }
+
+    Vector x;        // state
+    Matrix P;        // state uncertainty
+    Matrix F;        // transition mat
+    Matrix Q;        // process noise mat
+};
+
+/**
+*/
+struct KalmanState : public BasicKalmanState
+{
+    /**
+     * State for IMM filter
+    */
     struct IMMState
     {
-        std::vector<KalmanState> filter_states;
+        // individual sub-filter states
+        std::vector<BasicKalmanState> filter_states; 
 
-        Vector mu;
-        Matrix omega;
-        Vector cbar;
+        // current IMM state
+        Vector mu;     // sub-filter probabilities
+        Matrix omega;  // transition probabilities
+        Vector cbar;   // normailization factors 
     };
 
     KalmanState() {}
-    KalmanState(const Vector& _x, const Matrix& _P) : x(_x), P(_P) {}
-    KalmanState(const Vector& _x, const Matrix& _P, double _dt) : dt(_dt), x(_x), P(_P) {}
+    KalmanState(const Vector& _x, const Matrix& _P) : BasicKalmanState(_x, _P) {}
+    KalmanState(const Vector& _x, const Matrix& _P, double _dt) : BasicKalmanState(_x, _P), dt(_dt) {}
+    KalmanState(const Vector& _x, const Matrix& _P, double _dt, double _Q_var) : BasicKalmanState(_x, _P), dt(_dt), Q_var(_Q_var) {}
+
     KalmanState(const KalmanState& other)
-    :   dt(other.dt)
-    ,   x (other.x )
-    ,   P (other.P )
-    ,   F (other.F )
-    ,   Q (other.Q )
+    :   BasicKalmanState(other)
+    ,   dt   (other.dt   )
+    ,   Q_var(other.Q_var)
     {
         if (other.imm_state)
         {
@@ -99,11 +174,9 @@ struct KalmanState
         }
     }
     KalmanState(KalmanState&& other)
-    :   dt(other.dt)
-    ,   x (other.x )
-    ,   P (other.P )
-    ,   F (other.F )
-    ,   Q (other.Q )
+    :   BasicKalmanState(other)
+    ,   dt   (other.dt   )
+    ,   Q_var(other.Q_var)
     {
         if (other.imm_state)
             imm_state = std::move(other.imm_state);
@@ -111,11 +184,10 @@ struct KalmanState
 
     KalmanState& operator=(const KalmanState& other)
     {
-        dt = other.dt;
-        x  = other.x;
-        P  = other.P;
-        F  = other.F;
-        Q  = other.Q;
+        BasicKalmanState::operator=(other);
+
+        dt    = other.dt;
+        Q_var = other.Q_var;
 
         if (other.imm_state)
             immState() = *other.imm_state;
@@ -127,11 +199,10 @@ struct KalmanState
 
     KalmanState& operator=(KalmanState&& other)
     {
-        dt = other.dt;
-        x  = other.x;
-        P  = other.P;
-        F  = other.F;
-        Q  = other.Q;
+        BasicKalmanState::operator=(other);
+
+        dt    = other.dt;
+        Q_var = other.Q_var;
 
         if (other.imm_state)
             imm_state = std::move(other.imm_state);
@@ -143,11 +214,11 @@ struct KalmanState
 
     bool operator==(const KalmanState& other) const
     {
-        if (dt != other.dt || 
-            x  != other.x  ||
-            P  != other.P  ||
-            F  != other.F  ||
-            Q  != other.Q)
+        if (!BasicKalmanState::operator==(other))
+            return false;
+
+        if (dt    != other.dt || 
+            Q_var != other.Q_var)
             return false;
 
         bool has_imm       = imm_state != nullptr;
@@ -177,18 +248,16 @@ struct KalmanState
     }
 
     bool operator!=(const KalmanState& other) const
-    {
+    {    
         return !operator==(other);
     }
 
-    std::string print() const
+    std::string print() const override final
     {
         std::stringstream ss;
         ss << "dt: " << dt << "\n"
-           << "x:\n" << x << "\n"
-           << "P:\n" << P << "\n"
-           << "F:\n" << F << "\n"
-           << "Q:\n" << Q << "\n";
+           << "Q_var: " << Q_var << "\n"
+           << BasicKalmanState::print();
 
         if (imm_state)
         {
@@ -211,13 +280,10 @@ struct KalmanState
         return *imm_state;
     }
 
-    double dt = 0.0; // used timestep
-    Vector x;        // state
-    Matrix P;        // state uncertainty
-    Matrix F;        // transition mat
-    Matrix Q;        // process noise
+    std::unique_ptr<IMMState> imm_state; // optional IMM filter state
 
-    std::unique_ptr<IMMState> imm_state;
+    double dt    = 0.0; // used timestep
+    double Q_var = 0.0; // used process noise variance
 };
 
 /**
@@ -236,6 +302,7 @@ struct KalmanUpdateMinimal
     Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
     double                   lat;               // latitude of state position (do not confuse with center of local projection!)
     double                   lon;               // longitude of state position (do not confuse with center of local projection!)
+    double                   Q_var;             // used process noise variance
 
     bool has_wgs84_pos = false; // lat/long are set
     bool valid         = false; // kalman update is valid
@@ -250,11 +317,12 @@ struct KalmanUpdate
     KalmanUpdate() {}
     KalmanUpdate(const KalmanUpdateMinimal& update_min)
     {
-        state.x  = update_min.x;
-        state.P  = update_min.P;
-        state.F  = kalman::Matrix();
-        state.Q  = kalman::Matrix();
-        state.dt = 0.0; // not defined by min update
+        state.x     = update_min.x;
+        state.P     = update_min.P;
+        state.F     = kalman::Matrix();
+        state.Q     = kalman::Matrix();
+        state.dt    = 0.0; // not defined by min update
+        state.Q_var = update_min.Q_var;
 
         projection_center = update_min.projection_center;
         lat               = update_min.lat;
@@ -280,6 +348,7 @@ struct KalmanUpdate
         info.projection_center = projection_center;
         info.lat               = lat;
         info.lon               = lon;
+        info.Q_var             = state.Q_var;
         info.has_wgs84_pos     = has_wgs84_pos;
         info.valid             = valid;
     };
@@ -297,6 +366,8 @@ struct KalmanUpdate
     double                   lat;               // latitude of state position (do not confuse with center of local projection!)
     double                   lon;               // longitude of state position (do not confuse with center of local projection!)
     boost::posix_time::ptime t;                 // time of update
+
+    boost::optional<float> Q_var_interp; // optional interpolation process noise variance
 
     bool has_wgs84_pos = false; // lat/long are set
     bool valid         = false; // kalman update is valid

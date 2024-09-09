@@ -112,6 +112,8 @@ void SimpleReferenceCalculator::prepareForNextSlice()
     is_last_slice_ = reconstructor_.currentSlice().is_last_slice_;
 }
 
+/**
+ */
 void SimpleReferenceCalculator::prepareForCurrentSlice()
 {
     auto ThresRemove = reconstructor_.currentSlice().remove_before_time_;
@@ -123,13 +125,13 @@ void SimpleReferenceCalculator::prepareForCurrentSlice()
         auto it = std::remove_if(ref.second.updates.begin(),
                                  ref.second.updates.end(),
                                  [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                          update.t >= ThresJoin; });
+                                                                                     update.t >= ThresJoin; });
         ref.second.updates.erase(it, ref.second.updates.end());
 
         auto it_s = std::remove_if(ref.second.updates_smooth.begin(),
                                    ref.second.updates_smooth.end(),
                                    [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                            update.t >= ThresJoin; });
+                                                                                       update.t >= ThresJoin; });
         ref.second.updates_smooth.erase(it_s, ref.second.updates_smooth.end());
     }
 
@@ -239,7 +241,7 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
             continue;
 
         reconstruction::Measurement mm;
-        reconstructor_.createMeasurement(mm, tr_info);
+        reconstructor_.createMeasurement(mm, tr_info, &target);
 
         // if (tr_info.track_number_.value() == 69 || target.utn_ == 69)
         // {
@@ -459,9 +461,6 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     reconstruction::KalmanEstimator estimator;
     estimator.settings() = settings_.kalmanEstimatorSettings();
 
-    //if (settings_.kalman_type_final == kalman::KalmanType::IMMKalman2D)
-    //    estimator.settings().step_fail_strategy = reconstruction::KalmanEstimator::Settings::StepFailStrategy::Reinit;
-
     estimator.init(settings_.kalman_type_final);
 
     kalman::KalmanUpdate update;
@@ -526,6 +525,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //     FrameProjector p;
     //     if (!refs.t0.has_value())
     //     {
+    //         refs.test_target.clear();
+
     //         refs.t0   = refs.measurements[ 0 ].t;
     //         refs.lat_ = refs.measurements[ 0 ].lat;
     //         refs.lon_ = refs.measurements[ 0 ].lon;
@@ -565,6 +566,17 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //     refs.test_target.exportJSON("/home/mcphatty/track_utn21.json");
     // }
 
+    auto collectUpdate = [ & ] (const kalman::KalmanUpdate& update, const 
+                                reconstruction::Measurement& mm,
+                                unsigned int mm_idx)
+    {
+        refs.updates.push_back(update);
+        refs.updates.back().Q_var_interp = mm.Q_var_interp;
+
+        if (debug_target)
+            used_mms.push_back(mm_idx);
+    };
+
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
     {
@@ -591,11 +603,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         //reinit kalman with first measurement
         estimator.kalmanInit(update, mm0);
         assert(update.valid);
-        
-        refs.updates.push_back(update);
 
-        if (debug_target)
-            used_mms.push_back(refs.start_index.value());
+        collectUpdate(update, mm0, refs.start_index.value());
 
         ++offs; //continue with second measurement
     }
@@ -627,10 +636,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         //!only add update if valid!
         if (update.valid)
         {
-            refs.updates.push_back(update);
-
-            if (debug_target)
-                used_mms.push_back(i);
+            collectUpdate(update, mm, i);
         }
 
         ++refs.num_updates;
@@ -771,7 +777,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 bool SimpleReferenceCalculator::shallAddAnnotationData() const
 {
     //add only if in last iteration
-    return true;//!reconstructor_.isLastSliceProcessingRun();
+    return reconstructor_.isLastSliceProcessingRun();
 }
 
 /**
@@ -834,6 +840,10 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
     for (size_t i = 0; i < references.size(); ++i)
         measurements[ i ] = references[ i ];
 
+    std::vector<double> Q_vars;
+    for (size_t i = 0; i < references.size(); ++i)
+        Q_vars.push_back(updates[ i ].state.Q_var);
+
     addAnnotationData(target_references, 
                       name, 
                       style, 
@@ -844,7 +854,8 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                       offs, 
                       speed_positions, 
                       accel_positions,
-                      &used_mms);
+                      &used_mms,
+                      &Q_vars);
 }
 
 /**
@@ -871,6 +882,7 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                       offs, 
                       speed_positions, 
                       accel_positions,
+                      nullptr,
                       nullptr);
 }
 
@@ -886,7 +898,8 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                                                   size_t offs,
                                                   const std::vector<boost::optional<Eigen::Vector2d>>& vel_pos_wgs84,
                                                   const std::vector<boost::optional<Eigen::Vector2d>>& acc_pos_wgs84,
-                                                  const std::vector<unsigned int>* used_input_mms) const
+                                                  const std::vector<unsigned int>* used_input_mms,
+                                                  const std::vector<double>* Q_vars) const
 {
     AnnotationData& data = target_references.annotation_data[ name ];
 
@@ -925,6 +938,8 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                                                 boost::optional<double>());
         data.accelerations.push_back(r.hasAcceleration() ? std::sqrt(r.ax.value() * r.ax.value() + r.ay.value() * r.ay.value()) : 
                                                            boost::optional<double>());
+        
+        if (Q_vars) data.Q_vars.push_back(Q_vars->at(i));
     }
 
     if (added)
@@ -1149,6 +1164,26 @@ void SimpleReferenceCalculator::addAnnotations(ViewPointGenAnnotation* annotatio
                 anno->addFeature(f);
 #endif
             }
+        }
+
+        //add process noise graph
+        if (data.Q_vars.size() == data.positions.size())
+        {
+            auto anno = data_anno->getOrCreateAnnotation("Additional Infos", true);
+
+            ScatterSeries series;
+            for (size_t i = 0; i < data.Q_vars.size(); ++i)
+                series.points.emplace_back(Utils::Time::toLong(data.timestamps[ i ]), data.Q_vars[ i ]);
+            series.points.emplace_back(series.points.back().x(), 0.0);
+
+            series.data_type_x = ScatterSeries::DataType::DataTypeTimestamp;
+
+            feat_speed_scatter->scatterSeries().addDataSeries(series, data.name, style.base_color_, style.point_size_);
+
+            //add own feature
+            auto f = new ViewPointGenFeatureScatterSeries(series, data.name, style.base_color_, style.point_size_, 
+                PlotMetadata("Reconstruction", "Used Q_vars " + data.name, "Timestamp", "Q_var", PlotGroup));
+            anno->addFeature(f);
         }
 
         //add slice begin positions

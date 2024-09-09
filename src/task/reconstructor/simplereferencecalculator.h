@@ -109,6 +109,7 @@ private:
         std::vector<boost::optional<Eigen::Vector2d>> accel_positions;
         std::vector<boost::optional<Eigen::Vector3d>> accuracies;
         std::vector<size_t>                           slice_begins;
+        std::vector<double>                           Q_vars;
     };
 
     struct TargetReferences
@@ -121,10 +122,11 @@ private:
         std::vector<reconstruction::Measurement> measurements;
         std::vector<kalman::KalmanUpdate>        updates;
         std::vector<kalman::KalmanUpdate>        updates_smooth;
+        std::vector<double>                      updates_smooth_Qvars;
         std::vector<reconstruction::Reference>   references;
 
-        boost::optional<kalman::KalmanUpdate> init_update;
-        boost::optional<size_t>               start_index;
+        boost::optional<kalman::KalmanUpdate>    init_update;
+        boost::optional<size_t>                  start_index;
 
         size_t num_updates                 = 0;
         size_t num_updates_valid           = 0;
@@ -190,7 +192,8 @@ private:
                            size_t offs,
                            const std::vector<boost::optional<Eigen::Vector2d>>& vel_pos_wgs84,
                            const std::vector<boost::optional<Eigen::Vector2d>>& acc_pos_wgs84,
-                           const std::vector<unsigned int>* used_input_mms = nullptr) const;
+                           const std::vector<unsigned int>* used_input_mms = nullptr,
+                           const std::vector<double>* Q_vars = nullptr) const;
     void addAnnotationData(TargetReferences& target_references,
                            const reconstruction::KalmanEstimator& estimator, 
                            const std::string& name,

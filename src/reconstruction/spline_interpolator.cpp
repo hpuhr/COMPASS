@@ -131,6 +131,17 @@ void SplineInterpolator::interpCovarianceMat(Measurement& mm_interp,
         mm_interp.vx_stddev = std::sqrt(interp(vx_stddev_sqr0, vx_stddev_sqr1, interp_factor));
         mm_interp.vy_stddev = std::sqrt(interp(vy_stddev_sqr0, vy_stddev_sqr1, interp_factor));
     }
+    if (mm0.hasStdDevAccel() && mm1.hasStdDevAccel())
+    {
+        double ax_stddev_sqr0 = mm0.ax_stddev.value() * mm0.ax_stddev.value();
+        double ay_stddev_sqr0 = mm0.ay_stddev.value() * mm0.ay_stddev.value();
+
+        double ax_stddev_sqr1 = mm1.ax_stddev.value() * mm1.ax_stddev.value();
+        double ay_stddev_sqr1 = mm1.ay_stddev.value() * mm1.ay_stddev.value();
+
+        mm_interp.ax_stddev = std::sqrt(interp(ax_stddev_sqr0, ax_stddev_sqr1, interp_factor));
+        mm_interp.ay_stddev = std::sqrt(interp(ay_stddev_sqr0, ay_stddev_sqr1, interp_factor));
+    }
 }
 
 /**
@@ -169,6 +180,30 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
 
     //interpolate cov mat values
     interpCovarianceMat(mm_interp, mm0, mm1, interp_factor);
+
+    //interpolate process noise if set
+    if (mm0.Q_var.has_value() || mm1.Q_var.has_value())
+    {
+        if (mm0.Q_var.has_value() && !mm1.Q_var.has_value())
+        {
+            //use mm0 process noise
+            mm_interp.Q_var = mm0.Q_var;
+        }
+        else if (!mm0.Q_var.has_value() && mm1.Q_var.has_value())
+        {
+            //use mm1 process noise
+            mm_interp.Q_var = mm1.Q_var;
+        }
+        else
+        {
+            //interpolate process noise linear
+            double Q_std0 = std::sqrt(mm0.Q_var.value());
+            double Q_std1 = std::sqrt(mm1.Q_var.value());
+            double Q_std  = interp(Q_std0, Q_std1, interp_factor);
+
+            mm_interp.Q_var = Q_std * Q_std;
+        }
+    }
     
     return mm_interp;
 }
