@@ -163,7 +163,10 @@ void JSONDataMapping::check()
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (db_content_name_.size() && !obj_man.existsDBContent(db_content_name_))
+    {
+        logerr << "JSONDataMapping: check: '" << db_content_name_ << "' does not exist";
         assert (false);
+    }
 
     DBContent& dbcontent = obj_man.dbContent(db_content_name_);
 

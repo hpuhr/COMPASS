@@ -153,6 +153,11 @@
                     },
                     {
                         "class_id": "ASTERIXJSONParser",
+                        "instance_id": "CAT002",
+                        "path": "task_import_asterix_cat002.json"
+                    },
+                    {
+                        "class_id": "ASTERIXJSONParser",
                         "instance_id": "CAT010",
                         "path": "task_import_asterix_cat010.json"
                     },
