@@ -507,7 +507,7 @@ void DBContent::insertData(shared_ptr<Buffer> buffer)
 
 void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 {
-    loginf << "DBContent " << name_ << ": doDataSourcesBeforeInsert";
+    logdbg << "DBContent " << name_ << ": doDataSourcesBeforeInsert";
 
     assert (hasVariable(DBContent::meta_var_ds_id_.name()));
 

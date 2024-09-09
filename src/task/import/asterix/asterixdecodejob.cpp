@@ -82,7 +82,7 @@ void ASTERIXDecodeJob::run()
 */
 void ASTERIXDecodeJob::setObsolete()
 {
-    loginf << "ASTERIXDecodeJob: setObsolete";
+    logdbg << "ASTERIXDecodeJob: setObsolete";
 
     Job::setObsolete();
 

@@ -1274,7 +1274,12 @@ bool DBContentManager::metaCanGetVariable (const std::string& dbcont_name, const
 
 dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcont_name, const Property& meta_property)
 {
-    assert (metaCanGetVariable(dbcont_name, meta_property));
+    if (!metaCanGetVariable(dbcont_name, meta_property))
+    {
+        logerr << "DBContentManager: metaGetVariable: defined '" << meta_property.name()
+               << "' in '" << dbcont_name << "'";
+        assert (false);
+    }
 
     return metaVariable(meta_property.name()).getFor(dbcont_name);
 }

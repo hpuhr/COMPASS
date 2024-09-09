@@ -839,7 +839,7 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
     if (disable_data_distribution_)
         return;
 
-    loginf << "ViewManager: loadedDataSlot: reset " << requires_reset;
+    logdbg << "ViewManager: loadedDataSlot: reset " << requires_reset;
 
     processing_data_ = true;
 
@@ -857,7 +857,7 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
 
     processing_data_ = false;
 
-    loginf << "ViewManager: loadedDataSlot: done";
+    logdbg << "ViewManager: loadedDataSlot: done";
 }
 
 void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading
