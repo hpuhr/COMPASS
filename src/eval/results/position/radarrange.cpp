@@ -204,7 +204,7 @@ std::vector<Joined::SectorInfo> JoinedPositionRadarRange::sectorInfos() const
         infos.push_back({ "Range Bias [m]", "Range bias (linear estimation)", formatValue(range_bias_.toDouble()) });
 
     if (range_gain_.isValid())
-        infos.push_back({ "Range Gain [1]", "Range gain (linear estimation)", formatValue(range_gain_.toDouble()) });
+        infos.push_back({ "Range Gain [1]", "Range gain (linear estimation)", formatValue(range_gain_.toDouble(), 5) });
 
     infos.push_back({ "#CF [1]", "Number of updates with failed comparison" , num_failed_});
     infos.push_back({ "#CP [1]", "Number of updates with passed comparison" , num_passed_});

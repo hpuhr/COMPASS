@@ -617,7 +617,7 @@ std::vector<std::unique_ptr<DBFFT>> DBInterface::getFFTs()
 }
 void DBInterface::saveFFTs(const std::vector<std::unique_ptr<DBFFT>>& ffts)
 {
-    loginf << "DBInterface: saveFFTs: num " << ffts.size();
+    logdbg << "DBInterface: saveFFTs: num " << ffts.size();
 
     using namespace dbContent;
 
@@ -643,11 +643,11 @@ void DBInterface::saveFFTs(const std::vector<std::unique_ptr<DBFFT>>& ffts)
         ++cnt;
     }
 
-    loginf << "DBInterface: saveFFTs: buffer size " << buffer->size();
+    logdbg << "DBInterface: saveFFTs: buffer size " << buffer->size();
 
     insertBuffer(DBFFT::table_name_, buffer);
 
-    loginf << "DBInterface: saveFFTs: done";
+    logdbg << "DBInterface: saveFFTs: done";
 }
 
 
