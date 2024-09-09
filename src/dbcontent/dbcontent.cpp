@@ -208,6 +208,7 @@ bool DBContent::hasVariable(const string& name) const
 Variable& DBContent::variable(const string& name) const
 {
     assert(hasVariable(name));
+    assert (variables_.at(name));
 
     return *(variables_.at(name).get());
 }
@@ -222,7 +223,9 @@ void DBContent::renameVariable(const string& old_name, const string& new_name)
     std::unique_ptr<Variable> var = std::move(variables_.at(old_name));
     variables_.erase(old_name);
     var->name(new_name);
+    assert (!variables_.count(old_name));
     variables_.emplace(new_name, std::move(var));
+    assert (variables_.count(new_name));
 
     assert(!hasVariable(old_name));
     assert(hasVariable(new_name));

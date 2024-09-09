@@ -39,6 +39,11 @@
         },
         {
             "class_id": "DBContent",
+            "instance_id": "CAT034",
+            "path": "db_content_cat034.json"
+        },
+        {
+            "class_id": "DBContent",
             "instance_id": "CAT048",
             "path": "db_content_cat048.json"
         },
@@ -407,6 +412,12 @@
                         "VariableDefinitionCAT021DS ID0": {
                             "parameters": {
                                 "dbcontent_name": "CAT021",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT034DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
                                 "variable_name": "DS ID"
                             }
                         },
@@ -1526,6 +1537,12 @@
                                 "variable_name": "Time of Day"
                             }
                         },
+                        "VariableDefinitionCAT034Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "Time of Day"
+                            }
+                        },
                         "VariableDefinitionCAT048Time of Day0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -1592,6 +1609,12 @@
                         "VariableDefinitionCAT021Timestamp0": {
                             "parameters": {
                                 "dbcontent_name": "CAT021",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT034Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
                                 "variable_name": "Timestamp"
                             }
                         },
@@ -2456,6 +2479,12 @@
                                 "variable_name": "Line ID"
                             }
                         },
+                        "VariableDefinitionCAT034Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "Line ID"
+                            }
+                        },
                         "VariableDefinitionCAT048Line ID0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -2522,6 +2551,12 @@
                         "VariableDefinitionCAT021rec_num0": {
                             "parameters": {
                                 "dbcontent_name": "CAT021",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT034Record Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
                                 "variable_name": "Record Number"
                             }
                         },
