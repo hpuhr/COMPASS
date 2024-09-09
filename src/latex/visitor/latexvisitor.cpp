@@ -296,7 +296,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 
     ignore_table_views_ = true;
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
     while (QCoreApplication::hasPendingEvents())
@@ -304,7 +304,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 
     e->view();
 
-    while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+    while (dbcont_man.loadInProgress() || QCoreApplication::hasPendingEvents())
         QCoreApplication::processEvents();
 
     image_prefix_ = e->getSubPath()+e->name();

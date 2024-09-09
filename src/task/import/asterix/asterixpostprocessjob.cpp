@@ -104,7 +104,7 @@ void ASTERIXPostprocessJob::doTodOverride()
 
     assert (override_tod_active_);
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     unsigned int buffer_size;
 
@@ -112,9 +112,9 @@ void ASTERIXPostprocessJob::doTodOverride()
     {
         buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
+        assert (dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
 
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var = dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -148,7 +148,7 @@ const double T24H_OFFSET = 5*60.0;
 
 void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 {
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     unsigned int buffer_size;
 
@@ -169,9 +169,9 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
     {
         buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
+        assert (dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
 
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var = dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -230,7 +230,7 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
 void ASTERIXPostprocessJob::doTimeStampCalculation()
 {
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     unsigned int buffer_size;
 
@@ -239,8 +239,8 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
         buffer_size = buf_it.second->size();
 
         // tod
-        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
+        assert (dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
+        dbContent::Variable& tod_var = dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
         assert (buf_it.second->hasProperty(tod_prop));
@@ -248,8 +248,8 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
         NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
 
         // timestamp
-        assert (obj_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
-        dbContent::Variable& timestamp_var = obj_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
+        assert (dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
+        dbContent::Variable& timestamp_var = dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
 
         Property timestamp_prop {timestamp_var.name(), timestamp_var.dataType()};
         assert (!buf_it.second->hasProperty(timestamp_prop));
@@ -392,8 +392,6 @@ void ASTERIXPostprocessJob::doADSBPositionPorcessing()
     NullableVector<double>& lat_hr_vec = buffer->get<double>(lat_hr_var_name);
     NullableVector<double>& lon_hr_vec = buffer->get<double>(lon_hr_var_name);
 
-    unsigned int cnt = 0;
-
     for (unsigned int index=0; index < buffer_size; index++)
     {
         if (!lat_vec.isNull(index) || !lon_vec.isNull(index)) // no need to copy
@@ -402,8 +400,8 @@ void ASTERIXPostprocessJob::doADSBPositionPorcessing()
         if (lat_hr_vec.isNull(index) || lon_hr_vec.isNull(index)) // can not copy
             continue;
 
-        lat_vec.set(cnt, lat_hr_vec.get(cnt));
-        lon_vec.set(cnt, lon_hr_vec.get(cnt));
+        lat_vec.set(index, lat_hr_vec.get(index));
+        lon_vec.set(index, lon_hr_vec.get(index));
     }
 }
 

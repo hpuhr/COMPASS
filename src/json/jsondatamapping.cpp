@@ -160,15 +160,15 @@ void JSONDataMapping::inArray(bool in_array) { in_array_ = in_array; }
 
 void JSONDataMapping::check()
 {
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (db_content_name_.size() && !obj_man.existsDBContent(db_content_name_))
+    if (db_content_name_.size() && !dbcont_man.existsDBContent(db_content_name_))
     {
         logerr << "JSONDataMapping: check: '" << db_content_name_ << "' does not exist";
         assert (false);
     }
 
-    DBContent& dbcontent = obj_man.dbContent(db_content_name_);
+    DBContent& dbcontent = dbcont_man.dbContent(db_content_name_);
 
     if (dbcontent_variable_name_.size() && !dbcontent.hasVariable(dbcontent_variable_name_))
         dbcontent_variable_name_ = "";
@@ -285,20 +285,20 @@ void JSONDataMapping::initialize()
 
     assert(!initialized_);
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (db_content_name_.size() && !obj_man.existsDBContent(db_content_name_))
+    if (db_content_name_.size() && !dbcont_man.existsDBContent(db_content_name_))
         logwrn << "JSONDataMapping: initialize: dbobject '" << db_content_name_
                << "' does not exist";
 
-    if (db_content_name_.size() && obj_man.existsDBContent(db_content_name_) &&
-            dbcontent_variable_name_.size() && !obj_man.dbContent(db_content_name_).hasVariable(dbcontent_variable_name_))
+    if (db_content_name_.size() && dbcont_man.existsDBContent(db_content_name_) &&
+            dbcontent_variable_name_.size() && !dbcont_man.dbContent(db_content_name_).hasVariable(dbcontent_variable_name_))
         logwrn << "JSONDataMapping: initialize: dbobject " << db_content_name_ << " variable '"
                << dbcontent_variable_name_ << "' does not exist";
 
-    if (db_content_name_.size() && obj_man.existsDBContent(db_content_name_) &&
-            dbcontent_variable_name_.size() && obj_man.dbContent(db_content_name_).hasVariable(dbcontent_variable_name_))
-        variable_ = &obj_man.dbContent(db_content_name_).variable(dbcontent_variable_name_);
+    if (db_content_name_.size() && dbcont_man.existsDBContent(db_content_name_) &&
+            dbcontent_variable_name_.size() && dbcont_man.dbContent(db_content_name_).hasVariable(dbcontent_variable_name_))
+        variable_ = &dbcont_man.dbContent(db_content_name_).variable(dbcontent_variable_name_);
 
 
     if (append_value_)
