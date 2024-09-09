@@ -24,17 +24,11 @@
 #include "datasourcemanager.h"
 #include "dbcontentreaddbjob.h"
 #include "dbcontent/variable/variable.h"
-//#include "dbtableinfo.h"
 #include "filtermanager.h"
 #include "insertbufferdbjob.h"
 #include "jobmanager.h"
 #include "propertylist.h"
-//#include "stringconv.h"
-//#include "taskmanager.h"
 #include "updatebufferdbjob.h"
-//#include "viewmanager.h"
-//#include "util/number.h"
-//#include "dbcontent/variable/metavariable.h"
 #include "dbcontentdeletedbjob.h"
 
 #include <algorithm>
@@ -110,6 +104,9 @@ const Property DBContent::var_cat021_nucp_nic_ {"NUCp or NIC", PropertyDataType:
 const Property DBContent::var_cat021_nucv_nacv_ {"NUCr or NACv", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_sil_ {"SIL", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_geo_alt_ {"Geometric Height", PropertyDataType::FLOAT};
+
+const Property DBContent::var_cat021_latitude_hr_ {"Latitude HR", PropertyDataType::DOUBLE};;
+const Property DBContent::var_cat021_longitude_hr_ {"Longitude HR", PropertyDataType::DOUBLE};;
 
 const Property DBContent::var_cat021_sgv_gss_ {"SGV GSS", PropertyDataType::FLOAT};
 const Property DBContent::var_cat021_sgv_hgt_ {"SGV HGT", PropertyDataType::DOUBLE};

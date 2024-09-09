@@ -188,6 +188,9 @@ public:
     static const Property var_cat021_sil_;
     static const Property var_cat021_geo_alt_;
 
+    static const Property var_cat021_latitude_hr_;
+    static const Property var_cat021_longitude_hr_;
+
     static const Property var_cat021_sgv_gss_; // ground speed, kts
     static const Property var_cat021_sgv_hgt_; // heading / ground track, deg, based on htt
     static const Property var_cat021_sgv_htt_; // heading 0 / ground track 1

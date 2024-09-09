@@ -69,6 +69,7 @@ private:
     void doFutureTimestampsCheck();
     void doTimeStampCalculation();
     void doRadarPlotPositionCalculations();
+    void doADSBPositionPorcessing();
     void doGroundSpeedCalculations();
     void doFilters();
 };

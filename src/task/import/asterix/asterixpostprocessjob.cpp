@@ -88,6 +88,7 @@ void ASTERIXPostprocessJob::run()
 
     doTimeStampCalculation();
     doRadarPlotPositionCalculations();
+    doADSBPositionPorcessing();
     doGroundSpeedCalculations();
 
     if (filter_tod_active_ || filter_position_active_ || filter_modec_active_)
@@ -337,6 +338,73 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 {
     // radar calculations
     ProjectionManager::instance().doRadarPlotPositionCalculations(buffers_);
+}
+
+void ASTERIXPostprocessJob::doADSBPositionPorcessing()
+{
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    string dbcontent_name = "CAT021";
+
+    if (!buffers_.count(dbcontent_name))
+        return;
+
+    shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
+    unsigned int buffer_size = buffer->size();
+
+    if (!buffer_size)
+        return;
+
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
+
+
+    assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_latitude_hr_));
+    assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_longitude_hr_));
+
+    dbContent::Variable& lat_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
+    dbContent::Variable& lon_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
+
+    dbContent::Variable& lat_hr_var = dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_latitude_hr_);
+    dbContent::Variable& lon_hr_var = dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_longitude_hr_);
+
+    assert (lat_var.dataType() == PropertyDataType::DOUBLE);
+    assert (lon_var.dataType() == PropertyDataType::DOUBLE);
+    assert (lat_hr_var.dataType() == PropertyDataType::DOUBLE);
+    assert (lon_hr_var.dataType() == PropertyDataType::DOUBLE);
+
+    string lat_var_name = lat_var.name();
+    string lon_var_name = lon_var.name();
+    string lat_hr_var_name = lat_hr_var.name();
+    string lon_hr_var_name = lon_hr_var.name();
+
+    if (!buffer->has<double>(lat_hr_var_name) || !buffer->has<double>(lon_hr_var_name)) // can not copy
+        return;
+
+    if (!buffer->has<double>(lat_var_name))
+        buffer->addProperty(lat_var_name, PropertyDataType::DOUBLE); // add if needed
+
+    if (!buffer->has<double>(lon_var_name))
+        buffer->addProperty(lon_var_name, PropertyDataType::DOUBLE); // add if needed
+
+    NullableVector<double>& lat_vec = buffer->get<double>(lat_var_name);
+    NullableVector<double>& lon_vec = buffer->get<double>(lon_var_name);
+    NullableVector<double>& lat_hr_vec = buffer->get<double>(lat_hr_var_name);
+    NullableVector<double>& lon_hr_vec = buffer->get<double>(lon_hr_var_name);
+
+    unsigned int cnt = 0;
+
+    for (unsigned int index=0; index < buffer_size; index++)
+    {
+        if (!lat_vec.isNull(index) || !lon_vec.isNull(index)) // no need to copy
+            continue;
+
+        if (lat_hr_vec.isNull(index) || lon_hr_vec.isNull(index)) // can not copy
+            continue;
+
+        lat_vec.set(cnt, lat_hr_vec.get(cnt));
+        lon_vec.set(cnt, lon_hr_vec.get(cnt));
+    }
 }
 
 void ASTERIXPostprocessJob::doGroundSpeedCalculations()
