@@ -61,7 +61,7 @@
             "ASTERIXCategoryConfig12": {
                 "parameters": {
                     "category": 4,
-                    "decode": false,
+                    "decode": true,
                     "edition": "1.4",
                     "ref": "",
                     "spf": ""
@@ -155,6 +155,11 @@
                         "class_id": "ASTERIXJSONParser",
                         "instance_id": "CAT002",
                         "path": "task_import_asterix_cat002.json"
+                    },
+                    {
+                        "class_id": "ASTERIXJSONParser",
+                        "instance_id": "CAT004",
+                        "path": "task_import_asterix_cat004.json"
                     },
                     {
                         "class_id": "ASTERIXJSONParser",

@@ -1139,6 +1139,9 @@ void ASTERIXImportTask::insertData()
     {
         current_num_records += job_it.second->size();
         num_records_ += job_it.second->size();
+
+        if (COMPASS::instance().appMode() != AppMode::LiveRunning) // is cleaned special there
+            job_it.second->deleteEmptyProperties();
     }
 
     logdbg << "ASTERIXImportTask: insertData: inserting " << current_num_records << " records/s";

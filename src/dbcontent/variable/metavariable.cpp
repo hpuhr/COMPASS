@@ -57,7 +57,7 @@ MetaVariable::~MetaVariable()
         widget_ = nullptr;
     }
 
-    for (auto it : definitions_)
+    for (auto& it : definitions_)
         delete it.second;
 
     definitions_.clear();
@@ -337,6 +337,18 @@ void MetaVariable::removeOutdatedVariables()
     }
 }
 
+bool MetaVariable::hasDBContent() const
+{
+    for (auto& variable_it : variables_)
+    {
+        if (variable_it.second.hasDBContent())
+            return true;
+    }
+
+    return false;
+}
+
+
 void MetaVariable::updateDescription()
 {
     description_ = "";
@@ -354,7 +366,7 @@ void MetaVariable::checkSubVariables()
     {
         PropertyDataType data_type = variables_.begin()->second.dataType();
 
-        for (auto variable_it : variables_)
+        for (auto& variable_it : variables_)
         {
             if (variable_it.second.dataType() != data_type)
             {
@@ -368,7 +380,7 @@ void MetaVariable::checkSubVariables()
 
         string rep_str = variables_.begin()->second.representationString();
 
-        for (auto variable_it : variables_)
+        for (auto& variable_it : variables_)
         {
             if (variable_it.second.representationString() != rep_str)
             {

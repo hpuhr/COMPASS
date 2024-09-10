@@ -193,6 +193,8 @@ void DBInterface::closeDBFile()
 
         properties_.clear();
         table_info_.clear(); // no need to lock
+
+        dbcolumn_content_flags_.clear();
     }
 
     // signal emitted in COMPASS
@@ -737,7 +739,34 @@ void DBInterface::loadProperties()
         loginf << "DBInterface: loadProperties: id '" << prop_it.first << "' value '"
                << prop_it.second << "'";
 
+    // column with content
+    if (properties_.count(dbcolumn_content_property_name_))
+    {
+        nlohmann::json dbcolumn_content_json = nlohmann::json::parse(properties_.at(dbcolumn_content_property_name_));
+        dbcolumn_content_flags_ = dbcolumn_content_json.get<std::map<std::string, std::set<std::string>>>();
+    }
+
     properties_loaded_ = true;
+}
+
+bool DBInterface::hasContentIn(const std::string& table_name, const std::string& column_name) const
+{
+    if (!properties_loaded_)
+        return false;
+
+    if (dbcolumn_content_flags_.count(table_name))
+        return dbcolumn_content_flags_.at(table_name).count(column_name);
+
+    return false;
+}
+
+void DBInterface::setContentIn(const std::string& table_name, const std::string& column_name)
+{
+    if (!properties_loaded_)
+        return;
+
+    if (!dbcolumn_content_flags_[table_name].count(column_name))
+        dbcolumn_content_flags_[table_name].insert(column_name);
 }
 
 void DBInterface::saveProperties()
@@ -753,6 +782,9 @@ void DBInterface::saveProperties()
     // boost::mutex::scoped_lock locker(connection_mutex_); // done in closeConnection
     assert(db_connection_);
     assert (properties_loaded_);
+
+    nlohmann::json dbcolumn_content_json = dbcolumn_content_flags_;
+    properties_[dbcolumn_content_property_name_] = dbcolumn_content_json.dump();
 
     string str;
 
@@ -1197,9 +1229,6 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
 
         COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID(max_rec_num);
     }
-
-    if (COMPASS::instance().appMode() != AppMode::LiveRunning) // is cleaned special there
-        buffer->deleteEmptyProperties();
 
     insertBuffer(dbcontent.dbTableName(), buffer);
 }

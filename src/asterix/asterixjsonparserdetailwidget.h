@@ -68,7 +68,7 @@ private:
     UnitSelectionWidget* unit_sel_ {nullptr};
     DataTypeFormatSelectionWidget* data_format_widget_ {nullptr};
 
-    dbContent::VariableSelectionWidget* dbo_var_sel_ {nullptr};
+    dbContent::VariableSelectionWidget* dbcont_var_sel_ {nullptr};
     QLabel* dbo_var_data_type_label_ {nullptr};
 
     QTextEdit* dbo_var_comment_edit_ {nullptr};

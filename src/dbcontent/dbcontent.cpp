@@ -485,7 +485,11 @@ void DBContent::insertData(shared_ptr<Buffer> buffer)
     for (auto prop_it : buffer->properties().properties())
     {
         assert (hasVariable(prop_it.name()));
+
         list.add(variable(prop_it.name()));
+
+        if (!variable(prop_it.name()).hasDBContent())
+            variable(prop_it.name()).setHasDBContent();
     }
 
     assert(!insert_job_);
@@ -602,6 +606,9 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
     {
         assert (hasVariable(prop_it.name()));
         list.add(variable(prop_it.name()));
+
+        if (!variable(prop_it.name()).hasDBContent())
+            variable(prop_it.name()).setHasDBContent();
     }
 
     assert(!insert_job_);

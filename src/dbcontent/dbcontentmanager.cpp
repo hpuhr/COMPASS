@@ -618,10 +618,6 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
         assert(existsDBContent(buf_it.first));
         dbContent(buf_it.first).insertData(buf_it.second);
     }
-
-//    COMPASS::instance().dataSourceManager().saveDBDataSources();
-//    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
-
 }
 
 void DBContentManager::insertDone(DBContent& object)
@@ -1236,6 +1232,11 @@ std::pair<double, double> DBContentManager::minMaxLongitude() const
 {
     assert (hasMinMaxPosition());
     return {longitude_min_.get(), longitude_max_.get()};
+}
+
+bool DBContentManager::hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const
+{
+
 }
 
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const

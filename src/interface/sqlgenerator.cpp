@@ -513,9 +513,6 @@ string SQLGenerator::getInsertPropertyStatement(const string& id,
 {
     stringstream ss;
     assert(id.size() < 255);
-    if (value.size() > 1000)
-        logwrn << "SQLGenerator: getInsertPropertyStatement: value size very large ("
-               << value.size() << ")";
 
     // REPLACE into table (id, name, age) values(1, "A", 19)
     ss << "REPLACE INTO " << TABLE_NAME_PROPERTIES << " VALUES ('" << id << "', '" << value

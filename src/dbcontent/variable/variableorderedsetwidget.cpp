@@ -110,46 +110,57 @@ VariableOrderedSetWidget::VariableOrderedSetWidget(VariableOrderedSet& set,
         main_layout->addLayout(button_layout);
     }
 
-    connect(&menu_, &QMenu::triggered, this, &VariableOrderedSetWidget::triggerSlot);
-
     setLayout(main_layout);
-    updateMenuEntries();
 
     connect(&set, SIGNAL(setChangedSignal()), this, SLOT(updateVariableListSlot()));
 }
 
 VariableOrderedSetWidget::~VariableOrderedSetWidget() {}
 
-void VariableOrderedSetWidget::updateMenuEntries()
+void VariableOrderedSetWidget::showMenuSlot()
 {
-    menu_.clear();
-    menu_.setToolTipsVisible(true);
+    QMenu menu;
 
-    QMenu* meta_menu = menu_.addMenu(META_OBJECT_NAME.c_str());
+    menu.setToolTipsVisible(true);
+
+    QMenu* meta_menu = menu.addMenu(META_OBJECT_NAME.c_str());
     meta_menu->setToolTipsVisible(true);
+
+    QFont font_italic;
+    font_italic.setItalic(true);
 
     for (auto& meta_it : COMPASS::instance().dbContentManager().metaVariables())
     {
         QAction* action = meta_menu->addAction(meta_it.first.c_str());
         action->setToolTip(meta_it.second->info().c_str());
         action->setData(QVariantMap({{meta_it.first.c_str(),QVariant(META_OBJECT_NAME.c_str())}}));
+
+        if (!meta_it.second->hasDBContent())
+            action->setFont(font_italic);
     }
 
     for (auto& object_it : COMPASS::instance().dbContentManager())
     {
-        QMenu* m2 = menu_.addMenu(object_it.first.c_str());
+        QMenu* m2 = menu.addMenu(object_it.first.c_str());
         m2->setToolTipsVisible(true);
+
+        if (!object_it.second->hasData())
+            m2->menuAction()->setFont(font_italic);
 
         for (auto& var_it : object_it.second->variables())
         {
             QAction* action = m2->addAction(var_it.first.c_str());
             action->setToolTip(var_it.second->info().c_str());
             action->setData(QVariantMap({{var_it.first.c_str(), QVariant(object_it.first.c_str())}}));
+
+            if (!var_it.second->hasDBContent())
+                action->setFont(font_italic);
         }
     }
-}
 
-void VariableOrderedSetWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
+    connect(&menu, &QMenu::triggered, this, &VariableOrderedSetWidget::triggerSlot);
+    menu.exec(QCursor::pos());
+}
 
 void VariableOrderedSetWidget::triggerSlot(QAction* action)
 {
