@@ -128,8 +128,11 @@ void VariableSelectionWidget::showMenuSlot()
         action->setData(QVariant(vmap));
     }
 
+    QIcon tmp = QIcon(Files::getIconFilepath("db_empty.png").c_str());
+
     QFont font_italic;
     font_italic.setItalic(true);
+    font_italic.setWeight(QFont::Light);
 
     if (show_dbcont_only_)
     {
@@ -143,7 +146,10 @@ void VariableSelectionWidget::showMenuSlot()
             QAction* action = menu.addAction(var_it.first.c_str());
 
             if (!var_it.second->hasDBContent())
+            {
                 action->setFont(font_italic);
+                action->setIcon(tmp);
+            }
 
             action->setToolTip(var_it.second->description().c_str());
 
@@ -184,7 +190,10 @@ void VariableSelectionWidget::showMenuSlot()
                 QMenu* m2 = menu.addMenu(QString::fromStdString(object_it.first));
 
                 if (!object_it.second->hasData())
+                {
                     m2->menuAction()->setFont(font_italic);
+                    m2->menuAction()->setIcon(tmp);
+                }
 
                 for (auto& var_it : object_it.second->variables())
                 {
@@ -194,7 +203,10 @@ void VariableSelectionWidget::showMenuSlot()
                     QAction* action = m2->addAction(QString::fromStdString(var_it.first));
 
                     if (!var_it.second->hasDBContent())
+                    {
                         action->setFont(font_italic);
+                        action->setIcon(tmp);
+                    }
 
                     action->setToolTip(var_it.second->description().c_str());
 

@@ -126,8 +126,11 @@ void VariableOrderedSetWidget::showMenuSlot()
     QMenu* meta_menu = menu.addMenu(META_OBJECT_NAME.c_str());
     meta_menu->setToolTipsVisible(true);
 
+    QIcon tmp = QIcon(Files::getIconFilepath("db_empty.png").c_str());
+
     QFont font_italic;
     font_italic.setItalic(true);
+    font_italic.setWeight(QFont::Light);
 
     for (auto& meta_it : COMPASS::instance().dbContentManager().metaVariables())
     {
@@ -136,7 +139,10 @@ void VariableOrderedSetWidget::showMenuSlot()
         action->setData(QVariantMap({{meta_it.first.c_str(),QVariant(META_OBJECT_NAME.c_str())}}));
 
         if (!meta_it.second->hasDBContent())
+        {
             action->setFont(font_italic);
+            action->setIcon(tmp);
+        }
     }
 
     for (auto& object_it : COMPASS::instance().dbContentManager())
@@ -145,7 +151,10 @@ void VariableOrderedSetWidget::showMenuSlot()
         m2->setToolTipsVisible(true);
 
         if (!object_it.second->hasData())
+        {
             m2->menuAction()->setFont(font_italic);
+            m2->menuAction()->setIcon(tmp);
+        }
 
         for (auto& var_it : object_it.second->variables())
         {
@@ -154,7 +163,10 @@ void VariableOrderedSetWidget::showMenuSlot()
             action->setData(QVariantMap({{var_it.first.c_str(), QVariant(object_it.first.c_str())}}));
 
             if (!var_it.second->hasDBContent())
+            {
                 action->setFont(font_italic);
+                action->setIcon(tmp);
+            }
         }
     }
 
