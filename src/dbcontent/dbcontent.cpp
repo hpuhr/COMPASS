@@ -492,6 +492,10 @@ void DBContent::insertData(shared_ptr<Buffer> buffer)
             variable(prop_it.name()).setHasDBContent();
     }
 
+    assert (hasVariable(DBContent::meta_var_rec_num_.name())); // added during final db insert
+    if (!variable(DBContent::meta_var_rec_num_.name()).hasDBContent())
+        variable(DBContent::meta_var_rec_num_.name()).setHasDBContent();
+
     assert(!insert_job_);
 
     // transform variable names from dbovars to dbcolumns

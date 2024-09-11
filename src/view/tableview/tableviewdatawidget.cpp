@@ -246,9 +246,9 @@ void TableViewDataWidget::showTab(QWidget* widget_ptr, bool value)
         int index = tab_widget_->indexOf(widget_ptr);
         assert (index >= 0);
 
-        tab_widget_->setTabEnabled(index, value);
+        tab_widget_->setTabEnabled(index, value); // setTabVisitable only for >=Qt 5.15
 
-        tab_widget_->setStyleSheet("QTabBar::tab::disabled {width: 0; height: 0; margin: 0; padding: 0; border: none;} ");
+        tab_widget_->setStyleSheet("QTabBar::tab::disabled {min-width: 0px;max-width: 0px;color:rgba(0,0,0,0);background-color: rgba(0,0,0,0);}");
     }
 }
 
