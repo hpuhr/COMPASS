@@ -56,15 +56,16 @@ class BufferTableWidget : public QWidget
     void exportSlot();
     void exportDoneSlot(bool cancelled);
 
-    void showOnlySelectedSlot(bool value);
-    void usePresentationSlot(bool use_presentation);
-
   public:
     /// @brief Constructor
     BufferTableWidget(DBContent& object, TableView& view, TableViewDataSource& data_source,
                       QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~BufferTableWidget();
+
+    void showOnlySelected(bool value);
+    void usePresentation(bool value);
+    void ignoreNonTargetReports(bool value);
 
     void clear();
     /// @brief Shows Buffer content in table
@@ -76,8 +77,10 @@ class BufferTableWidget : public QWidget
     TableView& view() const;
     void resizeColumns();
 
-    bool showOnlySelected() const;
-    bool usePresentation() const;
+    // bool showOnlySelected() const;
+    // bool usePresentation() const;
+
+    bool hasData() const;
 
     const QTableView* table() const { return table_; }
 

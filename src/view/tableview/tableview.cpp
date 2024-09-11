@@ -29,14 +29,15 @@
 
 const std::string ParamShowSelected    = "show_only_selected";
 const std::string ParamUsePresentation = "use_presentation";
+const std::string ParamIgnoreTargetReports = "ignore_non_target_reports";
 const std::string SubConfigDataSource  = "TableViewDataSource";
 const std::string SubConfigViewWidget  = "TableViewWidget";
 
 /**
 */
 TableView::Settings::Settings()
-:   show_only_selected(false)
-,   use_presentation  (true)
+:   show_only_selected_(false)
+,   use_presentation_  (true)
 {
 }
 
@@ -48,8 +49,10 @@ TableView::TableView(const std::string& class_id,
                          ViewManager& view_manager)
 :   View(class_id, instance_id, w, view_manager)
 {
-    registerParameter(ParamShowSelected, &settings_.show_only_selected, Settings().show_only_selected);
-    registerParameter(ParamUsePresentation, &settings_.use_presentation, Settings().use_presentation);
+    registerParameter(ParamShowSelected, &settings_.show_only_selected_, Settings().show_only_selected_);
+    registerParameter(ParamUsePresentation, &settings_.use_presentation_, Settings().use_presentation_);
+    registerParameter(ParamIgnoreTargetReports, &settings_.ignore_non_target_reports_,
+                      Settings().ignore_non_target_reports_);
 }
 
 /**
@@ -82,13 +85,13 @@ bool TableView::init_impl()
     connect(widget_->getViewDataWidget(), &TableViewDataWidget::exportDoneSignal,
             widget_->getViewConfigWidget(), &TableViewConfigWidget::exportDoneSlot);
 
-    connect(this, &TableView::showOnlySelectedSignal,
-            widget_->getViewDataWidget(), &TableViewDataWidget::showOnlySelectedSlot);
-    connect(this, &TableView::usePresentationSignal,
-            widget_->getViewDataWidget(), &TableViewDataWidget::usePresentationSlot);
+    // connect(this, &TableView::showOnlySelectedSignal,
+    //         widget_->getViewDataWidget(), &TableViewDataWidget::showOnlySelectedSlot);
+    // connect(this, &TableView::usePresentationSignal,
+    //         widget_->getViewDataWidget(), &TableViewDataWidget::usePresentationSlot);
 
-    widget_->getViewDataWidget()->showOnlySelectedSlot(settings_.show_only_selected);
-    widget_->getViewDataWidget()->usePresentationSlot(settings_.use_presentation);
+    widget_->getViewDataWidget()->showOnlySelected(settings_.show_only_selected_);
+    widget_->getViewDataWidget()->usePresentation(settings_.use_presentation_);
 
     return true;
 }
@@ -150,19 +153,22 @@ dbContent::VariableSet TableView::getSet(const std::string& dbcontent_name)
 
 bool TableView::usePresentation() const 
 { 
-    return settings_.use_presentation; 
+    return settings_.use_presentation_;
 }
 
-void TableView::usePresentation(bool use_presentation)
+void TableView::usePresentation(bool value)
 {
-    setParameter(settings_.use_presentation, use_presentation);
+    loginf << "TableView: usePresentation: " << value;
 
-    emit usePresentationSignal(settings_.use_presentation);
+    setParameter(settings_.use_presentation_, value);
+
+    //emit usePresentationSignal(settings_.use_presentation_);
+    widget_->getViewDataWidget()->usePresentation(settings_.use_presentation_);
 }
 
 bool TableView::showOnlySelected() const 
 { 
-    return settings_.show_only_selected; 
+    return settings_.show_only_selected_;
 }
 
 void TableView::showOnlySelected(bool value)
@@ -171,9 +177,29 @@ void TableView::showOnlySelected(bool value)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    setParameter(settings_.show_only_selected, value);
+    setParameter(settings_.show_only_selected_, value);
 
-    emit showOnlySelectedSignal(value);
+    //emit showOnlySelectedSignal(value);
+
+    widget_->getViewDataWidget()->showOnlySelected(settings_.show_only_selected_);
+
+    QApplication::restoreOverrideCursor();
+}
+
+bool TableView::ignoreNonTargetReports() const
+{
+    return settings_.ignore_non_target_reports_;
+}
+
+void TableView::ignoreNonTargetReports(bool value)
+{
+    loginf << "TableView: ignoreNonTargetReports: " << value;
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    setParameter(settings_.ignore_non_target_reports_, value);
+
+    widget_->getViewDataWidget()->ignoreNonTargetReports(settings_.ignore_non_target_reports_);
 
     QApplication::restoreOverrideCursor();
 }
@@ -188,7 +214,7 @@ void TableView::updateSelection()
     loginf << "TableView: updateSelection";
     assert(widget_);
 
-    if (settings_.show_only_selected)
+    if (settings_.show_only_selected_)
         widget_->getViewDataWidget()->updateToSelection();
     else
         widget_->getViewDataWidget()->resetModels();  // just updates the checkboxes
@@ -219,11 +245,13 @@ void TableView::onConfigurationChanged_impl(const std::vector<std::string>& chan
     {
         if (param == ParamShowSelected)
         {
-            emit showOnlySelectedSignal(settings_.show_only_selected); 
+            widget_->getViewDataWidget()->showOnlySelected(settings_.show_only_selected_);
+            //emit showOnlySelectedSignal(settings_.show_only_selected_);
         }
         else if (param == ParamUsePresentation)
         {
-            emit usePresentationSignal(settings_.use_presentation);
+            widget_->getViewDataWidget()->usePresentation(settings_.use_presentation_);
+            //emit usePresentationSignal(settings_.use_presentation_);
         }
     }
 }
@@ -233,6 +261,6 @@ void TableView::onConfigurationChanged_impl(const std::vector<std::string>& chan
 void TableView::viewInfoJSON_impl(nlohmann::json& info) const
 {
     info[ "variables"          ] = data_source_->getSet()->definitions();
-    info[ ParamShowSelected    ] = settings_.show_only_selected;
-    info[ ParamUsePresentation ] = settings_.use_presentation;
+    info[ ParamShowSelected    ] = settings_.show_only_selected_;
+    info[ ParamUsePresentation ] = settings_.use_presentation_;
 }

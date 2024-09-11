@@ -58,17 +58,20 @@ class BufferTableModel : public QAbstractTableModel
 
     void clearData();
     void setData(std::shared_ptr<Buffer> buffer);
+    bool hasData() const;
 
     void saveAsCSV(const std::string& file_name);
 
-    void usePresentation(bool use_presentation);
+    void usePresentation(bool value);
     void showOnlySelected(bool value);
+    void ignoreNonTargetReports(bool value);
+
     void reset();
 
     void updateToSelection();
 
-    bool showOnlySelected() const { return show_only_selected_; }
-    bool usePresentation() const { return use_presentation_; }
+    // bool showOnlySelected() const { return show_only_selected_; }
+    // bool usePresentation() const { return use_presentation_; }
 
   protected:
     BufferTableWidget* table_widget_{nullptr};
@@ -80,11 +83,12 @@ class BufferTableModel : public QAbstractTableModel
 
     std::shared_ptr<BufferCSVExportJob> export_job_;
 
-    unsigned int last_processed_index_{0};
+    //unsigned int last_processed_index_{0};
     std::vector<unsigned int> row_indexes_;
 
     bool show_only_selected_{true};
     bool use_presentation_{true};
+    bool ignore_non_target_reports_{true};
 
     void updateRows();
 };

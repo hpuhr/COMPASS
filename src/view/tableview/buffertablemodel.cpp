@@ -16,18 +16,18 @@
  */
 
 #include "buffertablemodel.h"
-
-//#include "compass.h"
+#include "compass.h"
 #include "buffer.h"
 #include "buffercsvexportjob.h"
 #include "buffertablewidget.h"
 #include "dbcontent/dbcontent.h"
-//#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
 #include "tableview.h"
 #include "tableviewdatasource.h"
+#include "tableviewdatawidget.h"
 
 #include <QApplication>
 
@@ -413,13 +413,36 @@ void BufferTableModel::setData(std::shared_ptr<Buffer> buffer)
     endResetModel();
 }
 
+bool BufferTableModel::hasData() const
+{
+    return row_indexes_.size() != 0;
+}
+
 void BufferTableModel::updateRows()
 {
+    row_indexes_.clear();
+
     if (!buffer_)
     {
-        row_indexes_.clear();
+        // if (table_widget_)
+        //     table_widget_->setHidden(true);
+
         return;
     }
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    if (ignore_non_target_reports_
+        && !dbcont_man.metaCanGetVariable(buffer_->dbContentName(), DBContent::meta_var_latitude_))
+    {
+        // if (table_widget_)
+        //     table_widget_->view().getDataWidget()->showTab(table_widget_, false);
+
+        return;
+    }
+
+    if (table_widget_)
+        table_widget_->view().getDataWidget()->showTab(table_widget_, true);
 
     unsigned int buffer_index{0};  // index in buffer
     unsigned int buffer_size = buffer_->size();
@@ -427,10 +450,10 @@ void BufferTableModel::updateRows()
     assert(buffer_->has<bool>(DBContent::selected_var.name()));
     NullableVector<bool> selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
 
-    if (row_indexes_.size())  // get last processed index
-    {
-        buffer_index = last_processed_index_ + 1;  // set to next one
-    }
+    // if (row_indexes_.size())  // get last processed index
+    // {
+    //     buffer_index = last_processed_index_ + 1;  // set to next one
+    // }
 
     while (buffer_index < buffer_size)
     {
@@ -451,7 +474,7 @@ void BufferTableModel::updateRows()
         ++buffer_index;
     }
 
-    last_processed_index_ = buffer_index;
+    //last_processed_index_ = buffer_index;
 }
 
 void BufferTableModel::reset()
@@ -490,10 +513,10 @@ void BufferTableModel::exportJobDoneSlot()
     emit exportDoneSignal(false);
 }
 
-void BufferTableModel::usePresentation(bool use_presentation)
+void BufferTableModel::usePresentation(bool value)
 {
     beginResetModel();
-    use_presentation_ = use_presentation;
+    use_presentation_ = value;
     endResetModel();
 }
 
@@ -501,6 +524,14 @@ void BufferTableModel::showOnlySelected(bool value)
 {
     logdbg << "BufferTableModel: showOnlySelected: " << value;
     show_only_selected_ = value;
+
+    updateToSelection();
+}
+
+void BufferTableModel::ignoreNonTargetReports(bool value)
+{
+    logdbg << "BufferTableModel: ignoreNonTargetReports: " << value;
+    ignore_non_target_reports_ = value;
 
     updateToSelection();
 }

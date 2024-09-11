@@ -44,13 +44,14 @@ class AllBufferTableWidget : public QWidget
     void exportSlot();
     void exportDoneSlot(bool cancelled);
 
-    void showOnlySelectedSlot(bool value);
-    void usePresentationSlot(bool use_presentation);
-
   public:
     AllBufferTableWidget(TableView& view, TableViewDataSource& data_source, QWidget* parent = 0,
                          Qt::WindowFlags f = 0);
     virtual ~AllBufferTableWidget();
+
+    void showOnlySelected(bool value);
+    void usePresentation(bool value);
+    void ignoreNonTargetReports(bool value);
 
     void clear();
     void show(std::map<std::string, std::shared_ptr<Buffer>> buffers);
@@ -68,8 +69,8 @@ class AllBufferTableWidget : public QWidget
     std::vector<std::vector<std::string>> getSelectedText (); // first is header
     std::vector<std::vector<std::string>> getText (unsigned int max_rows=30); // first is header
 
-    bool showOnlySelected() const;
-    bool usePresentation() const;
+    // bool showOnlySelected() const;
+    // bool usePresentation() const;
 
     const QTableView* table() const { return table_; }
 

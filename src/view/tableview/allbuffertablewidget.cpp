@@ -124,7 +124,7 @@ void AllBufferTableWidget::exportSlot()
 
 void AllBufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(cancelled); }
 
-void AllBufferTableWidget::showOnlySelectedSlot(bool value)
+void AllBufferTableWidget::showOnlySelected(bool value)
 {
     logdbg << "AllBufferTableWidget: showOnlySelectedSlot: " << value;
 
@@ -134,25 +134,34 @@ void AllBufferTableWidget::showOnlySelectedSlot(bool value)
     table_->resizeColumnsToContents();
 }
 
-void AllBufferTableWidget::usePresentationSlot(bool use_presentation)
+void AllBufferTableWidget::usePresentation(bool value)
 {
     assert(model_);
-    model_->usePresentation(use_presentation);
+    model_->usePresentation(value);
     assert(table_);
     table_->resizeColumnsToContents();
 }
 
-bool AllBufferTableWidget::showOnlySelected() const
+void AllBufferTableWidget::ignoreNonTargetReports(bool value)
 {
     assert(model_);
-    return model_->showOnlySelected();
+    model_->ignoreNonTargetReports(value);
+    assert(table_);
+
+    table_->resizeColumnsToContents();
 }
 
-bool AllBufferTableWidget::usePresentation() const
-{
-    assert(model_);
-    return model_->usePresentation();
-}
+// bool AllBufferTableWidget::showOnlySelected() const
+// {
+//     assert(model_);
+//     return model_->showOnlySelected();
+// }
+
+// bool AllBufferTableWidget::usePresentation() const
+// {
+//     assert(model_);
+//     return model_->usePresentation();
+// }
 
 void AllBufferTableWidget::resetModel()
 {

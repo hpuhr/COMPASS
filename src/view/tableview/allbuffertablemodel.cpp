@@ -411,7 +411,7 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
         {
             beginResetModel();
 
-            dbo_last_processed_index_.clear();
+            //dbcont_last_processed_index_.clear();
             time_to_indexes_.clear();
             row_indexes_.clear();
 
@@ -432,7 +432,7 @@ void AllBufferTableModel::clearData()
 
     beginResetModel();
 
-    dbo_last_processed_index_.clear();
+    //dbcont_last_processed_index_.clear();
     time_to_indexes_.clear();
     row_indexes_.clear();
     buffers_.clear();
@@ -449,15 +449,15 @@ void AllBufferTableModel::setData(std::map<std::string, std::shared_ptr<Buffer>>
     {
         std::string dbcontent_name = buf_it.first;
 
-        if (dbo_to_number_.count(dbcontent_name) == 0)  // new dbo from the wild
+        if (dbcont_to_number_.count(dbcontent_name) == 0)  // new dbo from the wild
         {
-            unsigned int num = dbo_to_number_.size();
+            unsigned int num = dbcont_to_number_.size();
             number_to_dbo_[num] = dbcontent_name;
-            dbo_to_number_[dbcontent_name] = num;
+            dbcont_to_number_[dbcontent_name] = num;
         }
     }
 
-    assert(dbo_to_number_.size() == number_to_dbo_.size());
+    assert(dbcont_to_number_.size() == number_to_dbo_.size());
 
     buffers_ = buffers;
 
@@ -477,24 +477,28 @@ void AllBufferTableModel::updateTimeIndexes()
 
     unsigned int buffer_index;
     std::string dbcontent_name;
-    unsigned int dbo_num;
+    unsigned int dbcont_num;
     unsigned int buffer_size;
 
     unsigned int num_time_none;
 
-    DBContentManager& dbcont_manager = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     for (auto& buf_it : buffers_)
     {
+        if (ignore_non_target_reports_
+            && !dbcont_man.metaCanGetVariable(buf_it.first, DBContent::meta_var_latitude_))
+            continue;
+
         buffer_index = 0;
         dbcontent_name = buf_it.first;
         num_time_none = 0;
 
-        assert(dbo_to_number_.count(dbcontent_name) == 1);
-        dbo_num = dbo_to_number_.at(dbcontent_name);
+        assert(dbcont_to_number_.count(dbcontent_name) == 1);
+        dbcont_num = dbcont_to_number_.at(dbcontent_name);
 
-        if (dbo_last_processed_index_.count(dbcontent_name) == 1)
-            buffer_index = dbo_last_processed_index_.at(dbcontent_name) + 1;  // last one + 1
+        // if (dbcont_last_processed_index_.count(dbcontent_name) == 1)
+        //     buffer_index = dbcont_last_processed_index_.at(dbcontent_name) + 1;  // last one + 1
 
         buffer_size = buf_it.second->size();
 
@@ -504,7 +508,7 @@ void AllBufferTableModel::updateTimeIndexes()
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
             const dbContent::Variable& ts_var =
-                    dbcont_manager.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name);
+                    dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name);
 
             assert(buf_it.second->has<boost::posix_time::ptime>(ts_var.name()));
             NullableVector<boost::posix_time::ptime>& ts_vec = buf_it.second->get<boost::posix_time::ptime>(ts_var.name());
@@ -532,13 +536,13 @@ void AllBufferTableModel::updateTimeIndexes()
                         continue;
 
                     if (selected_vec.get(buffer_index))  // add if set
-                        time_to_indexes_.insert(std::make_pair(ts, std::make_pair(dbo_num, buffer_index)));
+                        time_to_indexes_.insert(std::make_pair(ts, std::make_pair(dbcont_num, buffer_index)));
                 }
                 else
-                    time_to_indexes_.insert(std::make_pair(ts, std::make_pair(dbo_num, buffer_index)));
+                    time_to_indexes_.insert(std::make_pair(ts, std::make_pair(dbcont_num, buffer_index)));
             }
 
-            dbo_last_processed_index_[dbcontent_name] = buffer_size - 1;  // set to last index
+            //dbcont_last_processed_index_[dbcontent_name] = buffer_size - 1;  // set to last index
 
             if (num_time_none)
                 loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbcontent_name << " skipped "
@@ -613,11 +617,20 @@ void AllBufferTableModel::showOnlySelected(bool value)
     updateToSelection();
 }
 
+void AllBufferTableModel::ignoreNonTargetReports(bool value)
+{
+    logdbg << "AllBufferTableModel: ignoreNonTargetReports: " << value;
+
+    ignore_non_target_reports_ = value;
+
+    updateToSelection();
+}
+
 void AllBufferTableModel::updateToSelection()
 {
     beginResetModel();
 
-    dbo_last_processed_index_.clear();
+    //dbcont_last_processed_index_.clear();
     time_to_indexes_.clear();
     row_indexes_.clear();
 

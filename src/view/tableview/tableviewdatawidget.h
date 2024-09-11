@@ -20,7 +20,6 @@
 
 #include "viewdatawidget.h"
 
-#include <memory>
 
 //#include "global.h"
 
@@ -40,6 +39,16 @@ class DBContent;
 class TableViewDataWidget : public ViewDataWidget
 {
     Q_OBJECT
+
+signals:
+    void exportDoneSignal(bool cancelled);
+    // void showOnlySelectedSignal(bool value);
+    // void usePresentationSignal(bool use_presentation);
+
+public slots:
+    void exportDataSlot();
+    void exportDoneSlot(bool cancelled);
+
 public:
     /// @brief Constructor
     TableViewDataWidget(TableViewWidget* view_widget, 
@@ -56,17 +65,11 @@ public:
 
     AllBufferTableWidget* getAllBufferTableWidget ();
 
-signals:
-    void exportDoneSignal(bool cancelled);
-    void showOnlySelectedSignal(bool value);
-    void usePresentationSignal(bool use_presentation);
+    void showOnlySelected(bool value);
+    void usePresentation(bool value);
+    void ignoreNonTargetReports(bool value);
 
-public slots:
-    void exportDataSlot();
-    void exportDoneSlot(bool cancelled);
-
-    void showOnlySelectedSlot(bool value);
-    void usePresentationSlot(bool use_presentation);
+    void showTab(QWidget* widget_ptr, bool value);
 
 protected:
     virtual void toolChanged_impl(int mode) override;

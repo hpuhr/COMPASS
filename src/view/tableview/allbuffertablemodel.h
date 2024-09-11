@@ -63,14 +63,16 @@ class AllBufferTableModel : public QAbstractTableModel
 
     void usePresentation(bool use_presentation);
     void showOnlySelected(bool value);
+    void ignoreNonTargetReports(bool value);
+
     void reset();
 
     void updateToSelection();
 
     std::pair<int,int> getSelectedRows(); // min, max, selected row
 
-    bool showOnlySelected() const { return show_only_selected_; }
-    bool usePresentation() const { return use_presentation_; }
+    // bool showOnlySelected() const { return show_only_selected_; }
+    // bool usePresentation() const { return use_presentation_; }
 
   protected:
     AllBufferTableWidget* table_widget_{nullptr};
@@ -81,9 +83,9 @@ class AllBufferTableModel : public QAbstractTableModel
     std::shared_ptr<AllBufferCSVExportJob> export_job_;
 
     std::map<unsigned int, std::string> number_to_dbo_;
-    std::map<std::string, unsigned int> dbo_to_number_;
+    std::map<std::string, unsigned int> dbcont_to_number_;
 
-    std::map<std::string, unsigned int> dbo_last_processed_index_;
+    //std::map<std::string, unsigned int> dbcont_last_processed_index_;
 
     std::multimap<boost::posix_time::ptime, std::pair<unsigned int, unsigned int>> time_to_indexes_;
     // timestamp -> [dbo num,index]
@@ -91,6 +93,7 @@ class AllBufferTableModel : public QAbstractTableModel
 
     bool show_only_selected_{true};
     bool use_presentation_{true};
+    bool ignore_non_target_reports_{true};
 
     void updateTimeIndexes();
     void rebuildRowIndexes();

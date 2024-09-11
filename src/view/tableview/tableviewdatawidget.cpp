@@ -58,10 +58,10 @@ TableViewDataWidget::TableViewDataWidget(TableViewWidget* view_widget,
             tab_widget_->addTab(all_buffer_table_widget_, "All");
             connect(all_buffer_table_widget_, &AllBufferTableWidget::exportDoneSignal, this,
                     &TableViewDataWidget::exportDoneSlot);
-            connect(this, &TableViewDataWidget::showOnlySelectedSignal,
-                    all_buffer_table_widget_, &AllBufferTableWidget::showOnlySelectedSlot);
-            connect(this, &TableViewDataWidget::usePresentationSignal,
-                    all_buffer_table_widget_, &AllBufferTableWidget::usePresentationSlot);
+            // connect(this, &TableViewDataWidget::showOnlySelectedSignal,
+            //         all_buffer_table_widget_, &AllBufferTableWidget::showOnlySelectedSlot);
+            // connect(this, &TableViewDataWidget::usePresentationSignal,
+            //         all_buffer_table_widget_, &AllBufferTableWidget::usePresentationSlot);
         }
 
         BufferTableWidget* buffer_table =
@@ -70,10 +70,10 @@ TableViewDataWidget::TableViewDataWidget(TableViewWidget* view_widget,
         buffer_tables_[obj_it.first] = buffer_table;
         connect(buffer_table, &BufferTableWidget::exportDoneSignal, this,
                 &TableViewDataWidget::exportDoneSlot);
-        connect(this, &TableViewDataWidget::showOnlySelectedSignal, buffer_table,
-                &BufferTableWidget::showOnlySelectedSlot);
-        connect(this, &TableViewDataWidget::usePresentationSignal, buffer_table,
-                &BufferTableWidget::usePresentationSlot);
+        // connect(this, &TableViewDataWidget::showOnlySelectedSignal, buffer_table,
+        //         &BufferTableWidget::showOnlySelectedSlot);
+        // connect(this, &TableViewDataWidget::usePresentationSignal, buffer_table,
+        //         &BufferTableWidget::usePresentationSlot);
     }
 
     setLayout(layout);
@@ -130,6 +130,9 @@ void TableViewDataWidget::loadingDone_impl()
 
     //default behavior
     ViewDataWidget::loadingDone_impl();
+
+    for (auto& buf_widget : buffer_tables_)
+        showTab(buf_widget.second, buf_widget.second->hasData());
 
     logdbg << "TableViewDataWidget: loadingDone_impl: end";
 }
@@ -195,17 +198,58 @@ void TableViewDataWidget::exportDoneSlot(bool cancelled)
     emit exportDoneSignal(cancelled); 
 }
 
-void TableViewDataWidget::showOnlySelectedSlot(bool value)
+void TableViewDataWidget::showOnlySelected(bool value)
 {
-    loginf << "TableViewDataWidget: showOnlySelectedSlot: " << value;
-    emit showOnlySelectedSignal(value);
+    loginf << "TableViewDataWidget: showOnlySelected: " << value;
+    //emit showOnlySelectedSignal(value);
+
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->showOnlySelected(value);
+
+    for (auto& buf_wgt : buffer_tables_)
+        buf_wgt.second->showOnlySelected(value);
 }
 
-void TableViewDataWidget::usePresentationSlot(bool use_presentation)
+void TableViewDataWidget::usePresentation(bool value)
 {
-    loginf << "TableViewDataWidget: usePresentationSlot";
+    loginf << "TableViewDataWidget: usePresentation";
 
-    emit usePresentationSignal(use_presentation);
+    //emit usePresentationSignal(use_presentation);
+
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->usePresentation(value);
+
+    for (auto& buf_wgt : buffer_tables_)
+        buf_wgt.second->usePresentation(value);
+}
+
+void TableViewDataWidget::ignoreNonTargetReports(bool value)
+{
+    loginf << "TableViewDataWidget: ignoreNonTargetReports";
+
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->ignoreNonTargetReports(value);
+
+    for (auto& buf_wgt : buffer_tables_)
+    {
+        buf_wgt.second->ignoreNonTargetReports(value);
+
+        showTab(buf_wgt.second, buf_wgt.second->hasData());
+    }
+}
+
+void TableViewDataWidget::showTab(QWidget* widget_ptr, bool value)
+{
+    if (tab_widget_)
+    {
+        assert (widget_ptr);
+        int index = tab_widget_->indexOf(widget_ptr);
+        assert (index >= 0);
+
+        tab_widget_->setTabEnabled(index, value);
+
+        tab_widget_->setStyleSheet("QTabBar::tab::disabled {width: 0; height: 0; margin: 0; padding: 0; border: none;} ");
+    }
 }
 
 void TableViewDataWidget::resetModels()
@@ -284,15 +328,15 @@ void TableViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
     addTable("All", 
              all_buffer_table_widget_->table(), 
-             all_buffer_table_widget_->showOnlySelected(), 
-             all_buffer_table_widget_->usePresentation());
+             view_->showOnlySelected(),
+             view_->usePresentation());
 
     for (const auto& it : buffer_tables_)
     {
         addTable(it.first, 
                  it.second->table(), 
-                 it.second->showOnlySelected(), 
-                 it.second->usePresentation());
+                 view_->showOnlySelected(),
+                 view_->usePresentation());
     }
 
     info[ "tables" ] = table_infos;
