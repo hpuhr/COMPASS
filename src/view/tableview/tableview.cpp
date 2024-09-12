@@ -90,8 +90,7 @@ bool TableView::init_impl()
     // connect(this, &TableView::usePresentationSignal,
     //         widget_->getViewDataWidget(), &TableViewDataWidget::usePresentationSlot);
 
-    widget_->getViewDataWidget()->showOnlySelected(settings_.show_only_selected_);
-    widget_->getViewDataWidget()->usePresentation(settings_.use_presentation_);
+    widget_->getViewDataWidget()->updateToSettingsChange();
 
     return true;
 }
@@ -162,8 +161,7 @@ void TableView::usePresentation(bool value)
 
     setParameter(settings_.use_presentation_, value);
 
-    //emit usePresentationSignal(settings_.use_presentation_);
-    widget_->getViewDataWidget()->usePresentation(settings_.use_presentation_);
+    widget_->getViewDataWidget()->updateToSettingsChange();
 }
 
 bool TableView::showOnlySelected() const 
@@ -179,9 +177,7 @@ void TableView::showOnlySelected(bool value)
 
     setParameter(settings_.show_only_selected_, value);
 
-    //emit showOnlySelectedSignal(value);
-
-    widget_->getViewDataWidget()->showOnlySelected(settings_.show_only_selected_);
+    widget_->getViewDataWidget()->updateToSettingsChange();
 
     QApplication::restoreOverrideCursor();
 }
@@ -199,7 +195,7 @@ void TableView::ignoreNonTargetReports(bool value)
 
     setParameter(settings_.ignore_non_target_reports_, value);
 
-    widget_->getViewDataWidget()->ignoreNonTargetReports(settings_.ignore_non_target_reports_);
+    widget_->getViewDataWidget()->updateToSettingsChange();
 
     QApplication::restoreOverrideCursor();
 }
@@ -243,16 +239,8 @@ void TableView::onConfigurationChanged_impl(const std::vector<std::string>& chan
 {
     for (const auto& param : changed_params)
     {
-        if (param == ParamShowSelected)
-        {
-            widget_->getViewDataWidget()->showOnlySelected(settings_.show_only_selected_);
-            //emit showOnlySelectedSignal(settings_.show_only_selected_);
-        }
-        else if (param == ParamUsePresentation)
-        {
-            widget_->getViewDataWidget()->usePresentation(settings_.use_presentation_);
-            //emit usePresentationSignal(settings_.use_presentation_);
-        }
+        widget_->getViewDataWidget()->updateToSettingsChange();
+        break;
     }
 }
 
@@ -263,4 +251,10 @@ void TableView::viewInfoJSON_impl(nlohmann::json& info) const
     info[ "variables"          ] = data_source_->getSet()->definitions();
     info[ ParamShowSelected    ] = settings_.show_only_selected_;
     info[ ParamUsePresentation ] = settings_.use_presentation_;
+    info[ ParamIgnoreTargetReports ] = settings_.ignore_non_target_reports_;
+}
+
+const TableView::Settings& TableView::settings() const
+{
+    return settings_;
 }

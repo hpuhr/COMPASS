@@ -31,18 +31,15 @@
 
 #include <QApplication>
 
-BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, 
+BufferTableModel::BufferTableModel(BufferTableWidget* table_widget,
                                    DBContent& object,
-                                   TableViewDataSource& data_source)
+                                   TableView& view, TableViewDataSource& data_source)
     : QAbstractTableModel(table_widget),
       table_widget_(table_widget),
-      object_(object),
+      object_(object), view_(view),
       data_source_(data_source)
 {
     read_set_ = data_source_.getSet()->getFor(object_.name());
-
-//    connect(data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
-//            &BufferTableModel::setChangedSlot);
 
     connect(&data_source_, &TableViewDataSource::setChangedSignal, this, &BufferTableModel::setChangedSlot);
 }
@@ -175,8 +172,6 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
 
         value_str = NULL_STRING;
 
-        // const DBTableColumn &column = variable.currentDBColumn ();
-
         if (!properties.hasProperty(variable.name()))
         {
             logdbg << "BufferTableModel: data: variable " << variable.name()
@@ -192,7 +187,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer_->get<bool>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer_->get<bool>(property_name).getAsString(buffer_index));
                     else
@@ -205,7 +200,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer_->get<char>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer_->get<char>(property_name).getAsString(buffer_index));
                     else
@@ -218,7 +213,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer_->get<unsigned char>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer_->get<unsigned char>(property_name).getAsString(buffer_index));
                     else
@@ -232,7 +227,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer_->get<int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer_->get<int>(property_name).getAsString(buffer_index));
                     else
@@ -245,7 +240,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer_->get<unsigned int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer_->get<unsigned int>(property_name).getAsString(buffer_index));
                     else
@@ -259,7 +254,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer_->get<long int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer_->get<long int>(property_name).getAsString(buffer_index));
                     else
@@ -272,7 +267,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer_->get<unsigned long int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer_->get<unsigned long int>(property_name)
                                 .getAsString(buffer_index));
@@ -287,7 +282,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer_->get<float>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer_->get<float>(property_name).getAsString(buffer_index));
                     else
@@ -300,7 +295,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer_->get<double>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer_->get<double>(property_name).getAsString(buffer_index));
                     else
@@ -377,7 +372,7 @@ bool BufferTableModel::setData(const QModelIndex& index,
         assert(table_widget_);
         table_widget_->view().emitSelectionChange();
 
-        if (show_only_selected_)
+        if (view_.settings().show_only_selected_)
         {
             beginResetModel();
             row_indexes_.clear();
@@ -408,7 +403,6 @@ void BufferTableModel::setData(std::shared_ptr<Buffer> buffer)
 
     buffer_ = buffer;
     updateRows();
-    // read_set_ = data_source_.getSet()->getFor(object_.name());
 
     endResetModel();
 }
@@ -432,12 +426,9 @@ void BufferTableModel::updateRows()
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (ignore_non_target_reports_
+    if (view_.settings().ignore_non_target_reports_
         && !dbcont_man.metaCanGetVariable(buffer_->dbContentName(), DBContent::meta_var_latitude_))
     {
-        // if (table_widget_)
-        //     table_widget_->view().getDataWidget()->showTab(table_widget_, false);
-
         return;
     }
 
@@ -450,14 +441,9 @@ void BufferTableModel::updateRows()
     assert(buffer_->has<bool>(DBContent::selected_var.name()));
     NullableVector<bool> selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
 
-    // if (row_indexes_.size())  // get last processed index
-    // {
-    //     buffer_index = last_processed_index_ + 1;  // set to next one
-    // }
-
     while (buffer_index < buffer_size)
     {
-        if (show_only_selected_)
+        if (view_.settings().show_only_selected_)
         {
             if (selected_vec.isNull(buffer_index))  // check if null, skip if so
             {
@@ -473,8 +459,6 @@ void BufferTableModel::updateRows()
 
         ++buffer_index;
     }
-
-    //last_processed_index_ = buffer_index;
 }
 
 void BufferTableModel::reset()
@@ -488,7 +472,7 @@ void BufferTableModel::saveAsCSV(const std::string& file_name)
     loginf << "BufferTableModel: saveAsCSV: into filename " << file_name;
 
     assert(buffer_);
-    BufferCSVExportJob* export_job = new BufferCSVExportJob(buffer_, read_set_, file_name, true, show_only_selected_, use_presentation_);
+    BufferCSVExportJob* export_job = new BufferCSVExportJob(buffer_, read_set_, file_name, true, view_.settings().show_only_selected_, view_.settings().use_presentation_);
 
     export_job_ = std::shared_ptr<BufferCSVExportJob>(export_job);
     connect(export_job, &BufferCSVExportJob::obsoleteSignal, this,
@@ -513,30 +497,7 @@ void BufferTableModel::exportJobDoneSlot()
     emit exportDoneSignal(false);
 }
 
-void BufferTableModel::usePresentation(bool value)
-{
-    beginResetModel();
-    use_presentation_ = value;
-    endResetModel();
-}
-
-void BufferTableModel::showOnlySelected(bool value)
-{
-    logdbg << "BufferTableModel: showOnlySelected: " << value;
-    show_only_selected_ = value;
-
-    updateToSelection();
-}
-
-void BufferTableModel::ignoreNonTargetReports(bool value)
-{
-    logdbg << "BufferTableModel: ignoreNonTargetReports: " << value;
-    ignore_non_target_reports_ = value;
-
-    updateToSelection();
-}
-
-void BufferTableModel::updateToSelection()
+void BufferTableModel::rebuild()
 {
     beginResetModel();
 

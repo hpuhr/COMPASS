@@ -15,14 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ALLBUFFERTABLEWIDGET_H_
-#define ALLBUFFERTABLEWIDGET_H_
+#pragma once
 
 #include <QWidget>
 #include <memory>
-
-//#include "global.h"
-//#include "propertylist.h"
 
 class QTableView;
 class AllBufferTableModel;
@@ -49,9 +45,7 @@ class AllBufferTableWidget : public QWidget
                          Qt::WindowFlags f = 0);
     virtual ~AllBufferTableWidget();
 
-    void showOnlySelected(bool value);
-    void usePresentation(bool value);
-    void ignoreNonTargetReports(bool value);
+    void updateToSettingsChange();
 
     void clear();
     void show(std::map<std::string, std::shared_ptr<Buffer>> buffers);
@@ -69,20 +63,15 @@ class AllBufferTableWidget : public QWidget
     std::vector<std::vector<std::string>> getSelectedText (); // first is header
     std::vector<std::vector<std::string>> getText (unsigned int max_rows=30); // first is header
 
-    // bool showOnlySelected() const;
-    // bool usePresentation() const;
-
     const QTableView* table() const { return table_; }
 
   protected:
     TableView& view_;
     TableViewDataSource& data_source_;
-    /// Table with items
+
     QTableView* table_{nullptr};
     AllBufferTableModel* model_{nullptr};
 
-    /// @brief Is called when keys are pressed
+
     virtual void keyPressEvent(QKeyEvent* event);
 };
-
-#endif /* ALLBUFFERTABLEWIDGET_H_ */

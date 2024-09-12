@@ -15,10 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ALLBUFFERTABLEMODEL_H
-#define ALLBUFFERTABLEMODEL_H
-
-//#include "dbcontent/variable/variableset.h"
+#pragma once
 
 #include <QAbstractTableModel>
 
@@ -26,6 +23,7 @@
 
 #include <memory>
 
+class TableView;
 class Buffer;
 class DBContent;
 class AllBufferCSVExportJob;
@@ -45,7 +43,7 @@ class AllBufferTableModel : public QAbstractTableModel
     void exportJobDoneSlot();
 
   public:
-    AllBufferTableModel(AllBufferTableWidget* table_widget, TableViewDataSource& data_source);
+    AllBufferTableModel(TableView& view, AllBufferTableWidget* table_widget, TableViewDataSource& data_source);
     virtual ~AllBufferTableModel();
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
@@ -61,20 +59,14 @@ class AllBufferTableModel : public QAbstractTableModel
 
     void saveAsCSV(const std::string& file_name);
 
-    void usePresentation(bool use_presentation);
-    void showOnlySelected(bool value);
-    void ignoreNonTargetReports(bool value);
-
     void reset();
 
-    void updateToSelection();
+    void rebuild();
 
     std::pair<int,int> getSelectedRows(); // min, max, selected row
 
-    // bool showOnlySelected() const { return show_only_selected_; }
-    // bool usePresentation() const { return use_presentation_; }
-
   protected:
+    TableView& view_;
     AllBufferTableWidget* table_widget_{nullptr};
     TableViewDataSource& data_source_;
 
@@ -85,18 +77,11 @@ class AllBufferTableModel : public QAbstractTableModel
     std::map<unsigned int, std::string> number_to_dbo_;
     std::map<std::string, unsigned int> dbcont_to_number_;
 
-    //std::map<std::string, unsigned int> dbcont_last_processed_index_;
-
     std::multimap<boost::posix_time::ptime, std::pair<unsigned int, unsigned int>> time_to_indexes_;
     // timestamp -> [dbo num,index]
     std::vector<std::pair<unsigned int, unsigned int>> row_indexes_;  // row index -> dbo num,index
-
-    bool show_only_selected_{true};
-    bool use_presentation_{true};
-    bool ignore_non_target_reports_{true};
 
     void updateTimeIndexes();
     void rebuildRowIndexes();
 };
 
-#endif  // ALLBUFFERTABLEMODEL_H

@@ -26,20 +26,16 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
-//#include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
 #include "tableview.h"
 #include "tableviewdatasource.h"
 #include "dbcontent/variable/metavariable.h"
 
-AllBufferTableModel::AllBufferTableModel(AllBufferTableWidget* table_widget,
+AllBufferTableModel::AllBufferTableModel(TableView& view, AllBufferTableWidget* table_widget,
                                          TableViewDataSource& data_source)
-    : QAbstractTableModel(table_widget), table_widget_(table_widget), data_source_(data_source)
+    : QAbstractTableModel(table_widget), view_(view), table_widget_(table_widget), data_source_(data_source)
 {
-//    connect(data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
-//            &AllBufferTableModel::setChangedSlot);
-
     connect(&data_source_, &TableViewDataSource::setChangedSignal, this, &AllBufferTableModel::setChangedSlot);
 }
 
@@ -217,7 +213,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer->get<bool>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer->get<bool>(property_name).getAsString(buffer_index));
                     else
@@ -230,7 +226,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer->get<char>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer->get<char>(property_name).getAsString(buffer_index));
                     else
@@ -243,7 +239,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer->get<unsigned char>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer->get<unsigned char>(property_name).getAsString(buffer_index));
                     else
@@ -257,7 +253,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer->get<int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer->get<int>(property_name).getAsString(buffer_index));
                     else
@@ -270,7 +266,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer->get<unsigned int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer->get<unsigned int>(property_name).getAsString(buffer_index));
                     else
@@ -284,7 +280,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer->get<long int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer->get<long int>(property_name).getAsString(buffer_index));
                     else
@@ -297,7 +293,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer->get<unsigned long int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer->get<unsigned long int>(property_name)
                                 .getAsString(buffer_index));
@@ -312,7 +308,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer->get<float>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer->get<float>(property_name).getAsString(buffer_index));
                     else
@@ -325,7 +321,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 null = buffer->get<double>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    if (use_presentation_)
+                    if (view_.settings().use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
                             buffer->get<double>(property_name).getAsString(buffer_index));
                     else
@@ -407,19 +403,8 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
         assert(table_widget_);
         table_widget_->view().emitSelectionChange();
 
-        if (show_only_selected_)
-        {
-            beginResetModel();
-
-            //dbcont_last_processed_index_.clear();
-            time_to_indexes_.clear();
-            row_indexes_.clear();
-
-            updateTimeIndexes();
-            rebuildRowIndexes();
-
-            endResetModel();
-        }
+        if (view_.settings().show_only_selected_)
+            rebuild();
 
         QApplication::restoreOverrideCursor();
     }
@@ -432,7 +417,6 @@ void AllBufferTableModel::clearData()
 
     beginResetModel();
 
-    //dbcont_last_processed_index_.clear();
     time_to_indexes_.clear();
     row_indexes_.clear();
     buffers_.clear();
@@ -464,10 +448,6 @@ void AllBufferTableModel::setData(std::map<std::string, std::shared_ptr<Buffer>>
     updateTimeIndexes();
     rebuildRowIndexes();
 
-    //    buffer = buffer;
-    //    updateRows();
-    //    read_set_ = data_source_.getSet()->getFor(object_.name());
-
     endResetModel();
 }
 
@@ -486,7 +466,7 @@ void AllBufferTableModel::updateTimeIndexes()
 
     for (auto& buf_it : buffers_)
     {
-        if (ignore_non_target_reports_
+        if (view_.settings().ignore_non_target_reports_
             && !dbcont_man.metaCanGetVariable(buf_it.first, DBContent::meta_var_latitude_))
             continue;
 
@@ -496,9 +476,6 @@ void AllBufferTableModel::updateTimeIndexes()
 
         assert(dbcont_to_number_.count(dbcontent_name) == 1);
         dbcont_num = dbcont_to_number_.at(dbcontent_name);
-
-        // if (dbcont_last_processed_index_.count(dbcontent_name) == 1)
-        //     buffer_index = dbcont_last_processed_index_.at(dbcontent_name) + 1;  // last one + 1
 
         buffer_size = buf_it.second->size();
 
@@ -530,7 +507,7 @@ void AllBufferTableModel::updateTimeIndexes()
                 else
                     ts = ts_vec.get(buffer_index);
 
-                if (show_only_selected_)
+                if (view_.settings().show_only_selected_)
                 {
                     if (selected_vec.isNull(buffer_index))  // check if null, skip if so
                         continue;
@@ -541,8 +518,6 @@ void AllBufferTableModel::updateTimeIndexes()
                 else
                     time_to_indexes_.insert(std::make_pair(ts, std::make_pair(dbcont_num, buffer_index)));
             }
-
-            //dbcont_last_processed_index_[dbcontent_name] = buffer_size - 1;  // set to last index
 
             if (num_time_none)
                 loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbcontent_name << " skipped "
@@ -576,7 +551,7 @@ void AllBufferTableModel::saveAsCSV(const std::string& file_name)
 
     AllBufferCSVExportJob* export_job = new AllBufferCSVExportJob(
         buffers_, data_source_.getSet(), number_to_dbo_, row_indexes_, file_name, true,
-        show_only_selected_, use_presentation_);
+        view_.settings().show_only_selected_, view_.settings().use_presentation_);
 
     export_job_ = std::shared_ptr<AllBufferCSVExportJob>(export_job);
     connect(export_job, &AllBufferCSVExportJob::obsoleteSignal, this,
@@ -601,36 +576,10 @@ void AllBufferTableModel::exportJobDoneSlot()
     emit exportDoneSignal(false);
 }
 
-void AllBufferTableModel::usePresentation(bool use_presentation)
-{
-    loginf << "AllBufferTableModel: usePresentation: " << use_presentation;
-    beginResetModel();
-    use_presentation_ = use_presentation;
-    endResetModel();
-}
-
-void AllBufferTableModel::showOnlySelected(bool value)
-{
-    logdbg << "AllBufferTableModel: showOnlySelected: " << value;
-    show_only_selected_ = value;
-
-    updateToSelection();
-}
-
-void AllBufferTableModel::ignoreNonTargetReports(bool value)
-{
-    logdbg << "AllBufferTableModel: ignoreNonTargetReports: " << value;
-
-    ignore_non_target_reports_ = value;
-
-    updateToSelection();
-}
-
-void AllBufferTableModel::updateToSelection()
+void AllBufferTableModel::rebuild()
 {
     beginResetModel();
 
-    //dbcont_last_processed_index_.clear();
     time_to_indexes_.clear();
     row_indexes_.clear();
 

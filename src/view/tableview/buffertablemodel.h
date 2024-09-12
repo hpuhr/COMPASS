@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BUFFERTABLEMODEL_H
-#define BUFFERTABLEMODEL_H
+#pragma once
 
 #include "dbcontent/variable/variableset.h"
 
@@ -24,7 +23,7 @@
 
 #include <memory>
 
-
+class TableView;
 class Buffer;
 class DBContent;
 class BufferCSVExportJob;
@@ -45,7 +44,7 @@ class BufferTableModel : public QAbstractTableModel
 
   public:
     BufferTableModel(BufferTableWidget* table_widget, DBContent& object,
-                     TableViewDataSource& data_source);
+                     TableView& view, TableViewDataSource& data_source);
     virtual ~BufferTableModel();
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
@@ -62,20 +61,14 @@ class BufferTableModel : public QAbstractTableModel
 
     void saveAsCSV(const std::string& file_name);
 
-    void usePresentation(bool value);
-    void showOnlySelected(bool value);
-    void ignoreNonTargetReports(bool value);
-
     void reset();
 
-    void updateToSelection();
-
-    // bool showOnlySelected() const { return show_only_selected_; }
-    // bool usePresentation() const { return use_presentation_; }
+    void rebuild();
 
   protected:
     BufferTableWidget* table_widget_{nullptr};
     DBContent& object_;
+    TableView& view_;
     TableViewDataSource& data_source_;
 
     std::shared_ptr<Buffer> buffer_;
@@ -83,14 +76,8 @@ class BufferTableModel : public QAbstractTableModel
 
     std::shared_ptr<BufferCSVExportJob> export_job_;
 
-    //unsigned int last_processed_index_{0};
     std::vector<unsigned int> row_indexes_;
-
-    bool show_only_selected_{true};
-    bool use_presentation_{true};
-    bool ignore_non_target_reports_{true};
 
     void updateRows();
 };
 
-#endif  // BUFFERTABLEMODEL_H

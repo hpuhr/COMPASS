@@ -15,13 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LISTBOXVIEWDATAWIDGET_H_
-#define LISTBOXVIEWDATAWIDGET_H_
+#pragma once
 
 #include "viewdatawidget.h"
-
-
-//#include "global.h"
 
 class TableView;
 class TableViewWidget;
@@ -32,32 +28,22 @@ class BufferTableWidget;
 class Buffer;
 class DBContent;
 
-/**
- * @brief Widget with tab containing BufferTableWidgets in TableView
- *
- */
 class TableViewDataWidget : public ViewDataWidget
 {
     Q_OBJECT
 
 signals:
     void exportDoneSignal(bool cancelled);
-    // void showOnlySelectedSignal(bool value);
-    // void usePresentationSignal(bool use_presentation);
-
 public slots:
     void exportDataSlot();
     void exportDoneSlot(bool cancelled);
 
 public:
-    /// @brief Constructor
     TableViewDataWidget(TableViewWidget* view_widget, 
                           QWidget* parent = nullptr, 
                           Qt::WindowFlags f = 0);
-    /// @brief Destructor
     virtual ~TableViewDataWidget();
 
-    /// @brief Clears the table contents
     void resetModels();
     void updateToSelection();
 
@@ -65,9 +51,7 @@ public:
 
     AllBufferTableWidget* getAllBufferTableWidget ();
 
-    void showOnlySelected(bool value);
-    void usePresentation(bool value);
-    void ignoreNonTargetReports(bool value);
+    void updateToSettingsChange();
 
     void showTab(QWidget* widget_ptr, bool value);
 
@@ -84,14 +68,11 @@ protected:
     void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     TableView*           view_{nullptr};
-    /// Data source
     TableViewDataSource* data_source_{nullptr};
-    /// Main tab widget
     QTabWidget*            tab_widget_{nullptr};
-    /// Container with all table widgets
+
     AllBufferTableWidget*  all_buffer_table_widget_{nullptr};
 
     std::map<std::string, BufferTableWidget*> buffer_tables_;
 };
 
-#endif /* LISTBOXVIEWDATAWIDGET_H_ */

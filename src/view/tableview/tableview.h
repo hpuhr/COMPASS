@@ -73,6 +73,8 @@ public:
 
     virtual void accept(LatexVisitor& v) override;
 
+    const Settings& settings() const;
+
 protected:
     friend class LatexVisitor;
 

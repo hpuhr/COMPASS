@@ -15,15 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include <iostream>
-
 #include "allbuffertablewidget.h"
 #include "allbuffertablemodel.h"
 #include "buffer.h"
-//#include "dbcontent/dbcontent.h"
-//#include "dbcontent/dbcontentmanager.h"
-//#include "dbcontent/variable/variable.h"
-//#include "dbcontent/variable/variableset.h"
 #include "tableviewdatasource.h"
 #include "logger.h"
 #include "compass.h"
@@ -39,7 +33,6 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-// using namespace Utils;
 
 AllBufferTableWidget::AllBufferTableWidget(TableView& view, TableViewDataSource& data_source,
                                            QWidget* parent, Qt::WindowFlags f)
@@ -52,7 +45,7 @@ AllBufferTableWidget::AllBufferTableWidget(TableView& view, TableViewDataSource&
     table_ = new QTableView(this);
     table_->setSelectionBehavior(QAbstractItemView::SelectItems);
     table_->setSelectionMode(QAbstractItemView::ContiguousSelection);
-    model_ = new AllBufferTableModel(this, data_source_);
+    model_ = new AllBufferTableModel(view_, this, data_source_);
     table_->setModel(model_);
 
     connect(model_, &AllBufferTableModel::exportDoneSignal,
@@ -124,44 +117,15 @@ void AllBufferTableWidget::exportSlot()
 
 void AllBufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(cancelled); }
 
-void AllBufferTableWidget::showOnlySelected(bool value)
+void AllBufferTableWidget::updateToSettingsChange()
 {
-    logdbg << "AllBufferTableWidget: showOnlySelectedSlot: " << value;
+    logdbg << "AllBufferTableWidget: updateToSettingsChange";
 
     assert(model_);
-    model_->showOnlySelected(value);
+    model_->rebuild();
     assert(table_);
     table_->resizeColumnsToContents();
 }
-
-void AllBufferTableWidget::usePresentation(bool value)
-{
-    assert(model_);
-    model_->usePresentation(value);
-    assert(table_);
-    table_->resizeColumnsToContents();
-}
-
-void AllBufferTableWidget::ignoreNonTargetReports(bool value)
-{
-    assert(model_);
-    model_->ignoreNonTargetReports(value);
-    assert(table_);
-
-    table_->resizeColumnsToContents();
-}
-
-// bool AllBufferTableWidget::showOnlySelected() const
-// {
-//     assert(model_);
-//     return model_->showOnlySelected();
-// }
-
-// bool AllBufferTableWidget::usePresentation() const
-// {
-//     assert(model_);
-//     return model_->usePresentation();
-// }
 
 void AllBufferTableWidget::resetModel()
 {
@@ -172,7 +136,7 @@ void AllBufferTableWidget::resetModel()
 void AllBufferTableWidget::updateToSelection()
 {
     assert(model_);
-    model_->updateToSelection();
+    model_->rebuild();
     assert(table_);
     table_->resizeColumnsToContents();
 }
