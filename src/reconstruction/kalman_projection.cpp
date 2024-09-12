@@ -161,6 +161,24 @@ bool KalmanProjectionHandler::needsReprojectionChange(kalman::KalmanUpdate& upda
 void KalmanProjectionHandler::changeProjection(kalman::KalmanUpdate& update,
                                                const KalmanInterface& interface)
 {
+    //handle imm state if available
+    if (update.state.imm_state)
+    {
+        size_t n = update.state.imm_state->filter_states.size();
+
+        //obtain lat lon for each submodel state
+        double x_cart, y_cart, lat, lon;
+        for (size_t i = 0; i < n; ++i)
+        {
+            //unproject sub-model position to lat-lon
+            interface.xPos(x_cart, y_cart, update.state.imm_state->filter_states[ i ].x, (int)i);
+            unproject(lat, lon, x_cart, y_cart);
+
+            //temporarily store lat-lon to submodel state
+            interface.xPos(update.state.imm_state->filter_states[ i ].x, lat, lon, (int)i);
+        }
+    }
+
     //obtain cartesian coordinates of state
     double x_cart, y_cart;
     interface.xPos(x_cart, y_cart, update.state.x);
@@ -180,6 +198,25 @@ void KalmanProjectionHandler::changeProjection(kalman::KalmanUpdate& update,
     //so directions, velocities, accelerations and connected uncertainties 
     //are held constant during a projection change.
     interface.xPos(update.state.x, center_cart.x(), center_cart.y());
+    
+    //handle imm state if available
+    if (update.state.imm_state)
+    {
+        size_t n = update.state.imm_state->filter_states.size();
+
+        double lat, lon, x_cart, y_cart;
+        for (size_t i = 0; i < n; ++i)
+        {
+            //get temporarily stored lat-lon
+            interface.xPos(lat, lon, update.state.imm_state->filter_states[ i ].x, (int)i);
+
+            //project to new coord sys
+            project(x_cart, y_cart, lat, lon);
+
+            //store to submodel-state
+            interface.xPos(update.state.imm_state->filter_states[ i ].x, x_cart, y_cart, (int)i);
+        }
+    }
 }
 
 /**

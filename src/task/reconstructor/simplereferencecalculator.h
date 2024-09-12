@@ -51,6 +51,37 @@ public:
     typedef std::multimap<boost::posix_time::ptime, unsigned long>         TargetReports;
     typedef std::map<unsigned int, std::vector<reconstruction::Reference>> References;
 
+    struct TRAnnotation
+    {
+        boost::posix_time::ptime         ts;
+        Eigen::Vector2d                  pos_wgs84;
+        boost::optional<Eigen::Vector2d> speed_pos;
+        boost::optional<Eigen::Vector2d> acc_pos;
+        boost::optional<Eigen::Vector3d> accuracy;
+        boost::optional<Eigen::Vector2d> pos_mm;
+        boost::optional<double>          speed;
+        boost::optional<double>          accel;
+        boost::optional<double>          Q_var;
+        bool                             reset = false;
+        bool                             proj_change = false;
+    };
+
+    struct RTSStepAnnotation
+    {
+        TRAnnotation state1;
+        TRAnnotation state1_smooth;
+        TRAnnotation state0;
+        TRAnnotation state0_smooth;
+        QColor       color;
+    };
+
+    struct RTSAnnotation
+    {
+        std::vector<RTSStepAnnotation> rts_step_models;
+        RTSStepAnnotation              rts_step;
+        std::string                    extra_info;
+    };
+
     SimpleReferenceCalculator(ReconstructorBase& reconstructor);
     virtual ~SimpleReferenceCalculator();
 
@@ -96,20 +127,17 @@ private:
 
     struct AnnotationData
     {
-        std::string                                   name;
-        AnnotationStyle                               style;
-        AnnotationStyle                               style_osg;
-
-        std::vector<boost::posix_time::ptime>         timestamps;
-        std::vector<Eigen::Vector2d>                  positions;
-        std::vector<Eigen::Vector2d>                  positions_mm;
-        std::vector<boost::optional<double>>          speeds;
-        std::vector<boost::optional<double>>          accelerations;
-        std::vector<boost::optional<Eigen::Vector2d>> speed_positions;  
-        std::vector<boost::optional<Eigen::Vector2d>> accel_positions;
-        std::vector<boost::optional<Eigen::Vector3d>> accuracies;
-        std::vector<size_t>                           slice_begins;
-        std::vector<double>                           Q_vars;
+        std::string                  name;
+        AnnotationStyle              style;
+        AnnotationStyle              style_osg;
+        std::vector<TRAnnotation>    annotations;
+        std::vector<size_t>          slice_begins;
+        std::vector<Eigen::Vector2d> fail_positions;
+        std::vector<Eigen::Vector2d> skip_positions;
+        std::vector<double>          Q_vars;
+        std::vector<bool>            is_reset_pos;
+        std::vector<bool>            is_proj_change_pos;
+        std::vector<RTSAnnotation>   rts_annotations;
     };
 
     struct TargetReferences
@@ -136,6 +164,7 @@ private:
         size_t num_updates_failed_other    = 0;
         size_t num_updates_skipped         = 0;
         size_t num_smooth_steps_failed     = 0;
+        size_t num_smoothing_failed        = 0;
         size_t num_interp_steps_failed     = 0;
 
         std::map<std::string, AnnotationData> annotation_data;
@@ -186,14 +215,13 @@ private:
                            const std::string& name,
                            const AnnotationStyle& style,
                            const boost::optional<AnnotationStyle>& style_osg,
-                           const std::vector<reconstruction::Measurement>& reconstructed_measurements,
+                           const std::vector<TRAnnotation>& annotations,
                            const boost::optional<boost::posix_time::ptime>& t0,
                            const boost::optional<boost::posix_time::ptime>& t1,
                            size_t offs,
-                           const std::vector<boost::optional<Eigen::Vector2d>>& vel_pos_wgs84,
-                           const std::vector<boost::optional<Eigen::Vector2d>>& acc_pos_wgs84,
-                           const std::vector<unsigned int>* used_input_mms = nullptr,
-                           const std::vector<double>* Q_vars = nullptr) const;
+                           const std::vector<QPointF>* fail_pos = nullptr,
+                           const std::vector<QPointF>* skip_pos = nullptr,
+                           std::vector<RTSAnnotation>* rts_annotations = nullptr) const;
     void addAnnotationData(TargetReferences& target_references,
                            const reconstruction::KalmanEstimator& estimator, 
                            const std::string& name,
@@ -203,7 +231,10 @@ private:
                            const std::vector<unsigned int>& used_mms,
                            const boost::optional<boost::posix_time::ptime>& t0,
                            const boost::optional<boost::posix_time::ptime>& t1,
-                           size_t offs) const;
+                           size_t offs,
+                           const std::vector<QPointF>* fail_pos = nullptr,
+                           const std::vector<QPointF>* skip_pos = nullptr,
+                           std::vector<kalman::RTSDebugInfo>* rts_debug_infos = nullptr) const;
     void addAnnotationData(TargetReferences& target_references,
                            const std::string& name,
                            const AnnotationStyle& style,

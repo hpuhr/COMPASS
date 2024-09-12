@@ -37,6 +37,7 @@ private:
     QDoubleSpinBox* max_dt_box_                   = nullptr;
     QDoubleSpinBox* max_distance_box_             = nullptr;
     QCheckBox*      smooth_rts_box_               = nullptr;
+    QDoubleSpinBox* smooth_scale_box_             = nullptr;
     QCheckBox*      resample_systracks_box_       = nullptr;
     QDoubleSpinBox* resample_systracks_dt_box_    = nullptr;
     QDoubleSpinBox* resample_systracks_maxdt_box_ = nullptr;

@@ -76,32 +76,36 @@ struct BasicKalmanState
     BasicKalmanState() {}
     BasicKalmanState(const Vector& _x, const Matrix& _P) : x(_x), P(_P) {}
     BasicKalmanState(const BasicKalmanState& other)
-    :   x (other.x )
-    ,   P (other.P )
-    ,   F (other.F )
-    ,   Q (other.Q ) {}
+    :   x    (other.x    )
+    ,   P    (other.P    )
+    ,   F    (other.F    )
+    ,   Q    (other.Q    )
+    ,   debug(other.debug) {}
     BasicKalmanState(BasicKalmanState&& other)
-    :   x (other.x )
-    ,   P (other.P )
-    ,   F (other.F )
-    ,   Q (other.Q ) {}
+    :   x    (other.x    )
+    ,   P    (other.P    )
+    ,   F    (other.F    )
+    ,   Q    (other.Q    )
+    ,   debug(other.debug) {}
 
     BasicKalmanState& operator=(const BasicKalmanState& other)
     {
-        x  = other.x;
-        P  = other.P;
-        F  = other.F;
-        Q  = other.Q;
+        x     = other.x;
+        P     = other.P;
+        F     = other.F;
+        Q     = other.Q;
+        debug = other.debug;
 
         return *this;
     }
 
     BasicKalmanState& operator=(BasicKalmanState&& other)
     {
-        x  = other.x;
-        P  = other.P;
-        F  = other.F;
-        Q  = other.Q;
+        x     = other.x;
+        P     = other.P;
+        F     = other.F;
+        Q     = other.Q;
+        debug = other.debug;
 
         return *this;
     }
@@ -133,10 +137,13 @@ struct BasicKalmanState
         return ss.str();
     }
 
-    Vector x;        // state
-    Matrix P;        // state uncertainty
-    Matrix F;        // transition mat
-    Matrix Q;        // process noise mat
+    virtual void debugState() { debug = true; }
+
+    Vector x;             // state
+    Matrix P;             // state uncertainty
+    Matrix F;             // transition mat
+    Matrix Q;             // process noise mat
+    bool   debug = false; // debug this state
 };
 
 /**
@@ -273,6 +280,17 @@ struct KalmanState : public BasicKalmanState
         return ss.str();
     }
 
+    void debugState() override final
+    {
+        BasicKalmanState::debugState();
+
+        if (imm_state)
+        {
+            for (auto& fs : imm_state->filter_states)
+                fs.debugState();
+        }
+    }
+
     IMMState& immState()
     {
         if (!imm_state)
@@ -321,8 +339,9 @@ struct KalmanUpdate
         state.P     = update_min.P;
         state.F     = kalman::Matrix();
         state.Q     = kalman::Matrix();
-        state.dt    = 0.0; // not defined by min update
+        state.dt    = 0.0;   // not defined by min update
         state.Q_var = update_min.Q_var;
+        state.debug = false; // not defined by min update
 
         projection_center = update_min.projection_center;
         lat               = update_min.lat;
@@ -331,6 +350,8 @@ struct KalmanUpdate
         has_wgs84_pos     = update_min.has_wgs84_pos;
         valid             = update_min.valid;
         reinit            = false; // not defined by min update
+        proj_changed      = false; // not defined by min update
+        
     }
 
     void resetFlags()
@@ -338,6 +359,7 @@ struct KalmanUpdate
         has_wgs84_pos = false;
         valid         = false;
         reinit        = false;
+        proj_changed  = false;
     }
 
     void minimalInfo(KalmanUpdateMinimal& info) const
@@ -361,6 +383,16 @@ struct KalmanUpdate
         return info;
     }
 
+    void debugUpdate() 
+    { 
+        state.debugState(); 
+    }
+
+    bool isDebug() const
+    {
+        return state.debug;
+    }
+
     KalmanState              state;             // kalman internal state, can be used for rts smooting, state interpolation, etc.
     Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
     double                   lat;               // latitude of state position (do not confuse with center of local projection!)
@@ -372,6 +404,26 @@ struct KalmanUpdate
     bool has_wgs84_pos = false; // lat/long are set
     bool valid         = false; // kalman update is valid
     bool reinit        = false; // kalman was reinitialized at this update, represents the beginning of a new kalman chain
+    bool proj_changed  = false; // the projection center changed during this update
+};
+
+struct RTSStepInfo
+{
+    BasicKalmanState state1;
+    BasicKalmanState state1_smooth;
+    BasicKalmanState state0;
+    BasicKalmanState state0_smooth;
+};
+
+/**
+*/
+struct RTSDebugInfo
+{
+    size_t                   update_idx;
+    Eigen::Vector2d          projection_center;
+    std::vector<RTSStepInfo> rts_step_models;
+    RTSStepInfo              rts_step;
+    Vector                   mu;
 };
 
 } // namespace kalman

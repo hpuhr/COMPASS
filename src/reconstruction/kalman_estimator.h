@@ -21,6 +21,8 @@
 
 #include <memory>
 
+#include <QPointF>
+
 namespace reconstruction
 {
 
@@ -177,6 +179,12 @@ public:
                                          size_t* num_proj_changed = nullptr);
 
     void storeUpdate(Measurement& mm, 
+                     const kalman::KalmanUpdate& update,
+                     KalmanProjectionHandler& phandler,
+                     boost::optional<Eigen::Vector2d>& speed_pos_wgs84,
+                     boost::optional<Eigen::Vector2d>& accel_pos_wgs84,
+                     int submodel_idx = -1) const;
+    void storeUpdate(Measurement& mm, 
                      const kalman::KalmanUpdate& update) const;
     void storeUpdate(Measurement& mm, 
                      const kalman::KalmanUpdateMinimal& update) const;
@@ -190,19 +198,27 @@ public:
                       std::vector<boost::optional<Eigen::Vector2d>>* accel_pos_wgs84 = nullptr) const;
     
     bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
-                       kalman::SmoothFailStrategy fail_strategy) const;
+                       kalman::SmoothFailStrategy fail_strategy,
+                       std::vector<kalman::RTSDebugInfo>* debug_infos = nullptr) const;
     bool interpUpdates(std::vector<kalman::KalmanUpdate>& interp_updates,
                        std::vector<kalman::KalmanUpdate>& updates,
                        size_t* num_steps_failed = nullptr) const;
 
     kalman::KalmanState currentState() const;
     Measurement currentStateAsMeasurement() const;
+    QPointF currentPositionCart() const;
+    QPointF currentPositionWGS84() const;
     const boost::posix_time::ptime& currentTime() const;
     const StepInfo& stepInfo() const;
+
+    bool checkKalmanStateNumerical(kalman::KalmanState& state) const;
+    bool validateState(const kalman::KalmanState& state) const;
 
     std::string asString(int flags = kalman::KalmanInfoFlags::InfoAll, const std::string& prefix = "") const;
 
     void enableDebugging(bool ok);
+
+    const KalmanInterface* interface() const { return kalman_interface_.get(); }
 
     static std::unique_ptr<KalmanInterface> createInterface(kalman::KalmanType ktype, 
                                                             const Settings& settings);
@@ -265,6 +281,12 @@ private:
                      KalmanProjectionHandler& phandler,
                      boost::optional<Eigen::Vector2d>* speed_pos_wgs84 = nullptr,
                      boost::optional<Eigen::Vector2d>* accel_pos_wgs84 = nullptr) const;
+    void storeUpdate(Measurement& mm, 
+                     const kalman::KalmanUpdate& update,
+                     KalmanProjectionHandler& phandler,
+                     boost::optional<Eigen::Vector2d>* speed_pos_wgs84 = nullptr,
+                     boost::optional<Eigen::Vector2d>* accel_pos_wgs84 = nullptr,
+                     int submodel_idx = -1) const;
 
     reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
 

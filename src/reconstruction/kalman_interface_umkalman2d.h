@@ -46,17 +46,6 @@ public:
     void measurementUncertMatR(kalman::Matrix& R, 
                                const Measurement& mm, 
                                const reconstruction::Uncertainty& default_uncert) const override final;
-
-    void storeState(Measurement& mm, 
-                    const kalman::Vector& x, 
-                    const kalman::Matrix& P) const override final;
-
-    void xPos(double& x, double& y, const kalman::Vector& x_vec) const override final;
-    void xPos(kalman::Vector& x_vec, double x, double y) const override final;
-    double xVar(const kalman::Matrix& P) const override final;
-    double yVar(const kalman::Matrix& P) const override final;
-    double xyCov(const kalman::Matrix& P) const override final;
-
 private:
     bool track_velocities_;
 };

@@ -77,7 +77,8 @@ public:
                 const XTransferFunc& x_tr = XTransferFunc(),
                 double smooth_scale = 1.0,
                 bool stop_on_fail = false,
-                std::vector<bool>* state_valid = nullptr) const;
+                std::vector<bool>* state_valid = nullptr,
+                std::vector<RTSDebugInfo>* debug_infos = nullptr) const;
 
     bool checkState() const;
     bool checkVariances() const;
@@ -98,6 +99,7 @@ public:
 
     double getProcessNoiseVariance() const { return Q_var_; }
 
+    virtual void setX(const KalmanState& state) { setX(state.x); }
     void setX(const Vector& x) { x_ = x; }
     void setP(const Matrix& P) { P_ = P; }
     void setQ(const Matrix& Q) { Q_ = Q; }
@@ -124,11 +126,29 @@ public:
     kalman::KalmanState state(bool xP_only = false) const;
     virtual void state(kalman::KalmanState& s, bool xP_only = false) const;
     virtual void state(kalman::BasicKalmanState& s, bool xP_only = false) const;
+    virtual bool validateState(const kalman::KalmanState& s, bool xP_only = false) const;
+    virtual bool validateState(const kalman::BasicKalmanState& s, bool xP_only = false) const;
 
     virtual std::string asString(int info_flags = InfoFlags::InfoAll, const std::string& prefix = "") const;
 
     void invertState(Vector& x_inv, const Vector& x) const;
     void invertState(Vector& x) const;
+
+    void xPos(double& x, double& y) const;
+    virtual void xPos(double& x, double& y, const kalman::Vector& x_vec) const;
+    virtual void xPos(kalman::Vector& x_vec, double x, double y) const;
+    virtual double xVar(const kalman::Matrix& P) const;
+    virtual double yVar(const kalman::Matrix& P) const;
+    virtual double xyCov(const kalman::Matrix& P) const;
+    virtual boost::optional<double> xVel(const kalman::Vector& x_vec) const { return boost::optional<double>(); }
+    virtual boost::optional<double> yVel(const kalman::Vector& x_vec) const { return boost::optional<double>(); }
+    virtual boost::optional<double> xAcc(const kalman::Vector& x_vec) const { return boost::optional<double>(); }
+    virtual boost::optional<double> yAcc(const kalman::Vector& x_vec) const { return boost::optional<double>(); }
+
+    virtual bool supportsSubmodels() const { return false; }
+    virtual size_t numSubmodels() const { return 0; }
+    virtual KalmanFilter* subModel(size_t idx) { return nullptr; }
+    virtual const KalmanFilter* subModel(size_t idx) const { return nullptr; }
 
     bool isDebug() const { return debug_; }
     
@@ -166,13 +186,22 @@ protected:
                                     KalmanState* state) const = 0;
     virtual Error update_impl(const Vector& z,
                               const Matrix& R) = 0;
-    virtual bool smooth_impl(std::vector<kalman::Vector>& x_smooth,
-                             std::vector<kalman::Matrix>& P_smooth,
+    virtual bool smooth_impl(std::vector<Vector>& x_smooth,
+                             std::vector<Matrix>& P_smooth,
                              const std::vector<KalmanState>& states,
                              const XTransferFunc& x_tr,
                              double smooth_scale,
                              bool stop_on_fail,
-                             std::vector<bool>* state_valid) const = 0;
+                             std::vector<bool>* state_valid,
+                             std::vector<RTSDebugInfo>* debug_infos) const = 0;
+    virtual bool smoothingStep_impl(Vector& x0_smooth,
+                                    Matrix& P0_smooth,
+                                    const Vector& x1_smooth_tr,
+                                    const Matrix& P1_smooth,
+                                    const BasicKalmanState& state1,
+                                    double dt1,
+                                    double smooth_scale,
+                                    RTSStepInfo* debug_info) const { return false; }
 
     virtual void printState(std::stringstream& strm, const std::string& prefix) const;
     virtual void printExtendedState(std::stringstream& strm, const std::string& prefix) const;

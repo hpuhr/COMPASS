@@ -30,6 +30,14 @@ public:
     KalmanFilterUM2D(bool track_velocities);
     virtual ~KalmanFilterUM2D();
 
+    void xPos(double& x, double& y, const kalman::Vector& x_vec) const override final;
+    void xPos(kalman::Vector& x_vec, double x, double y) const override final;
+    double xVar(const kalman::Matrix& P) const override final;
+    double yVar(const kalman::Matrix& P) const override final;
+    double xyCov(const kalman::Matrix& P) const override final;
+    boost::optional<double> xVel(const kalman::Vector& x_vec) const override final;
+    boost::optional<double> yVel(const kalman::Vector& x_vec) const override final;
+
 protected:
     void configureFMat(Matrix& F, double dt) const;
     void configureQMat(Matrix& Q, double dt, double var) const;

@@ -185,8 +185,20 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
     addHeader("Result Generation");
 
     smooth_rts_box_ = new QCheckBox;
-    connect(smooth_rts_box_, &QCheckBox::toggled, [ = ] (bool ok) { settings->smooth_rts = ok; });
+    connect(smooth_rts_box_, &QCheckBox::toggled, 
+        [ = ] (bool ok) 
+        { 
+            settings->smooth_rts = ok; 
+            this->updateEnabledStates();
+        });
     layout->addRow("Smooth Results", smooth_rts_box_);
+
+    smooth_scale_box_ = new QDoubleSpinBox;
+    smooth_scale_box_->setDecimals(1);
+    smooth_scale_box_->setMinimum(0.1);
+    smooth_scale_box_->setMaximum(1.0);
+    connect(smooth_scale_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->smooth_scale = v; });
+    layout->addRow("Smooth Factor", smooth_scale_box_);
 
     resample_result_box_ = new QCheckBox;
     connect(resample_result_box_, &QCheckBox::toggled, 
@@ -223,6 +235,7 @@ SimpleReferenceCalculatorWidget::~SimpleReferenceCalculatorWidget() = default;
 void SimpleReferenceCalculatorWidget::updateEnabledStates()
 {
     bool dynamic_Q          = dynamic_Q_box_->isChecked();
+    bool smooth             = smooth_rts_box_->isChecked();
     bool resample_res       = resample_result_box_->isChecked();
     bool resample_systracks = resample_systracks_box_->isChecked();
 
@@ -230,6 +243,8 @@ void SimpleReferenceCalculatorWidget::updateEnabledStates()
     Q_std_ground_edit_->setEnabled(dynamic_Q);
     Q_std_air_edit_->setEnabled(dynamic_Q);
     Q_std_unknown_edit_->setEnabled(dynamic_Q);
+
+    smooth_scale_box_->setEnabled(smooth);
 
     resample_Q_std_static_edit_->setEnabled(resample_res && !dynamic_Q);
     resample_Q_std_ground_edit_->setEnabled(resample_res && dynamic_Q);
@@ -264,6 +279,7 @@ void SimpleReferenceCalculatorWidget::update()
     if (max_distance_box_) max_distance_box_->setValue(settings.max_distance);
 
     if (smooth_rts_box_) smooth_rts_box_->setChecked(settings.smooth_rts);
+    if (smooth_scale_box_) smooth_scale_box_->setValue(settings.smooth_scale);
 
     if (resample_systracks_box_) resample_systracks_box_->setChecked(settings.resample_systracks);
     if (resample_systracks_dt_box_) resample_systracks_dt_box_->setValue(settings.resample_systracks_dt);
@@ -274,7 +290,7 @@ void SimpleReferenceCalculatorWidget::update()
     if (resample_Q_std_static_edit_) resample_Q_std_static_edit_->setValue(settings.resample_Q_std.Q_std_static);
     if (resample_Q_std_ground_edit_) resample_Q_std_ground_edit_->setValue(settings.resample_Q_std.Q_std_ground);
     if (resample_Q_std_air_edit_) resample_Q_std_air_edit_->setValue(settings.resample_Q_std.Q_std_air);
-    if (resample_Q_std_unknown_edit_) resample_Q_std_unknown_edit_->setValue(settings.resample_Q_std.Q_std_unknown);
+    if (resample_Q_std_unknown_edit_) resample_Q_std_unknown_edit_->setValue(settings.resample_Q_std.Q_std_unknown); 
 
     updateEnabledStates();
 }

@@ -81,4 +81,55 @@ void KalmanFilterUM2D::invertState(Vector& x) const
     x[ 3 ] *= -1.0;
 }
 
+/**
+*/
+void KalmanFilterUM2D::xPos(double& x, double& y, const kalman::Vector& x_vec) const
+{
+    x = x_vec[ 0 ];
+    y = x_vec[ 2 ];
+}
+
+/**
+*/
+void KalmanFilterUM2D::xPos(kalman::Vector& x_vec, double x, double y) const
+{
+    x_vec[ 0 ] = x;
+    x_vec[ 2 ] = y;
+}
+
+/**
+*/
+double KalmanFilterUM2D::xVar(const kalman::Matrix& P) const
+{
+    return P(0, 0);
+}
+
+/**
+*/
+double KalmanFilterUM2D::yVar(const kalman::Matrix& P) const
+{
+    return P(2, 2);
+}
+
+/**
+*/
+double KalmanFilterUM2D::xyCov(const kalman::Matrix& P) const
+{
+    return P(2, 0);
+}
+
+/**
+*/
+boost::optional<double> KalmanFilterUM2D::xVel(const kalman::Vector& x_vec) const
+{
+    return x_vec[ 1 ];
+}
+
+/**
+*/
+boost::optional<double> KalmanFilterUM2D::yVel(const kalman::Vector& x_vec) const
+{
+    return x_vec[ 3 ];
+}
+
 } // namespace kalman

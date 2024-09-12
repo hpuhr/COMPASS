@@ -328,6 +328,7 @@ void ReconstructorBase::processSlice()
         std::string num_rec_updates_failed_badstate_p = perc(stats.num_rec_updates_failed_badstate, stats.num_rec_updates_failed);
         std::string num_rec_updates_failed_other_p    = perc(stats.num_rec_updates_failed_other   , stats.num_rec_updates_failed);
         std::string num_rec_updates_skipped_p         = perc(stats.num_rec_updates_skipped        , stats.num_rec_updates       );
+        std::string num_rec_smooth_steps_failed_p     = perc(stats.num_rec_smooth_steps_failed    , stats.num_rec_updates       );
 
         loginf << "ReconstructorBase: processSlice: last slice finished\n"
                << "\n"
@@ -367,7 +368,8 @@ void ReconstructorBase::processSlice()
                << "\n"
                << " * Rec smooth steps:\n" 
                << "\n"
-               << "   failed: " << stats.num_rec_smooth_failed << "\n"
+               << "   failed steps:   " << stats.num_rec_smooth_steps_failed << " (" << num_rec_smooth_steps_failed_p << ")\n"
+               << "   failed targets: " << stats.num_rec_smooth_target_failed << "\n"
                << "\n"
                << " * Rec interp steps:\n"
                << "\n" 

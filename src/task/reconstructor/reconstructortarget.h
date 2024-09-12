@@ -62,7 +62,8 @@ public:
             num_rec_updates_failed_badstate = 0;
             num_rec_updates_failed_other    = 0;
             num_rec_updates_skipped         = 0;
-            num_rec_smooth_failed           = 0;
+            num_rec_smooth_steps_failed     = 0;
+            num_rec_smooth_target_failed    = 0;
             num_rec_interp_failed           = 0;
         }
 
@@ -91,7 +92,8 @@ public:
         size_t num_rec_updates_failed_badstate = 0;
         size_t num_rec_updates_failed_other    = 0;
         size_t num_rec_updates_skipped         = 0;
-        size_t num_rec_smooth_failed           = 0;
+        size_t num_rec_smooth_steps_failed     = 0;
+        size_t num_rec_smooth_target_failed    = 0;
         size_t num_rec_interp_failed           = 0;
     };
 

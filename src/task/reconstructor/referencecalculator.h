@@ -62,6 +62,8 @@ struct ReferenceCalculatorSettings
         settings.resample_Q_var       = resample_Q_std.Q_std_static * resample_Q_std.Q_std_static;
         settings.resample_interp_mode = resample_blend_mode;
 
+        settings.smoothing_scale = smooth_scale;
+
         settings.max_proj_distance_cart = max_proj_distance_cart;
 
         settings.verbosity = activeVerbosity() >= 2 ? activeVerbosity() - 1 : 0;
@@ -108,13 +110,14 @@ struct ReferenceCalculatorSettings
     double max_dt         = 11.0;
     double max_distance   = 50000.0;
 
-    bool smooth_rts = true;
+    bool   smooth_rts   = true;
+    double smooth_scale = 1.0;
 
     //result resampling related
-    bool                            resample_result       = true;
-    ProcessNoise                    resample_Q_std        = ProcessNoise(2.0, 1.0, 5.0, 3.0); // (static, ground, air, unknown)
-    double                          resample_dt           = 2.0;
-    reconstruction::StateInterpMode resample_blend_mode   = reconstruction::StateInterpMode::BlendVar;
+    bool                            resample_result     = true;
+    ProcessNoise                    resample_Q_std      = ProcessNoise(2.0, 1.0, 5.0, 3.0); // (static, ground, air, unknown)
+    double                          resample_dt         = 2.0;
+    reconstruction::StateInterpMode resample_blend_mode = reconstruction::StateInterpMode::BlendVar;
 
     //dynamic projection change
     double max_proj_distance_cart  = 20000.0;

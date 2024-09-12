@@ -62,7 +62,7 @@ struct Reference : public Measurement
     bool nospeed_pos    = false; // did this position not obtain speed information
     bool noaccel_pos    = false; // did this position not obtain acceleration information
     bool nostddev_pos   = false; // did this position not obtain stddev information
-    bool projchange_pos = false; // position where a change of map projection happened 
+    bool projchange_pos = false; // position where a change of map projection happened
 
     bool ref_interp     = false; // reference has been interpolated (e.g. from kalman samples)
 

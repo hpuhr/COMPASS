@@ -218,7 +218,8 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                                     size_t idx1,
                                     KalmanProjectionHandler& proj_handler,
                                     double smooth_scale,
-                                    kalman::SmoothFailStrategy fail_strategy) const
+                                    kalman::SmoothFailStrategy fail_strategy,
+                                    std::vector<kalman::RTSDebugInfo>* debug_infos) const
 {
     assert(kalman_filter_);
     assert(idx1 >= idx0);
@@ -235,26 +236,31 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
     //loginf << "KalmanInterface: smoothUpdates: #updates: " << updates.size() << ", idx0: " << idx0 << ", idx1: " << idx1 << ", n: " << n;
 
     //@TODO: duplicate states really needed!?
-    std::vector<kalman::KalmanState> states(n); 
+    std::vector<kalman::KalmanState> states(n);
     for (size_t i = idx0; i <= idx1; ++i)
-    {
-        states[ i - idx0 ] = updates[ i ].state;
-    }
+        states [ i - idx0 ] = updates[ i ].state;
 
     //get reprojection transfer func
     auto x_tr = proj_handler.reprojectionTransform(&updates, this, idx0);
 
     //smooth states
-    if (!kalman_filter_->smooth(x_smooth, 
-                                P_smooth, 
-                                states, 
-                                x_tr, 
-                                smooth_scale, 
-                                fail_strategy == kalman::SmoothFailStrategy::Stop, 
-                                fail_strategy == kalman::SmoothFailStrategy::SetInvalid ? &state_valid_tmp : nullptr))
+    bool ok = kalman_filter_->smooth(x_smooth, 
+                                     P_smooth, 
+                                     states, 
+                                     x_tr, 
+                                     smooth_scale, 
+                                     fail_strategy == kalman::SmoothFailStrategy::Stop, 
+                                     fail_strategy == kalman::SmoothFailStrategy::SetInvalid ? &state_valid_tmp : nullptr, 
+                                     debug_infos);
+    
+    if (debug_infos)
     {
-        return false;
+        for (auto& di : *debug_infos)
+            di.projection_center = updates[ di.update_idx + idx0 ].projection_center;
     }
+
+    if (!ok)
+        return false;
     
     //write smoothed states back to updates
     for (size_t i = 0; i < n; ++i)
@@ -305,7 +311,7 @@ kalman::KalmanError KalmanInterface::interpStep(kalman::KalmanState& state_inter
 
 /**
 */
-bool KalmanInterface::checkKalmanState(kalman::KalmanState& state) const
+bool KalmanInterface::checkKalmanStateNumerical(kalman::KalmanState& state) const
 {
     assert(kalman_filter_);
     return kalman_filter_->checkState(state.x, state.P);
@@ -313,9 +319,52 @@ bool KalmanInterface::checkKalmanState(kalman::KalmanState& state) const
 
 /**
 */
-void KalmanInterface::storeState(Measurement& mm, const kalman::KalmanState& state) const
+bool KalmanInterface::validateState(const kalman::KalmanState& state) const
 {
-    storeState(mm, state.x, state.P);
+    assert(kalman_filter_);
+    return kalman_filter_->validateState(state);
+}
+
+/**
+*/
+void KalmanInterface::storeState(Measurement& mm, 
+                                 const kalman::KalmanState& state, 
+                                 int submodel_idx) const
+{
+    if (submodel_idx >= 0)
+    {
+        assert(state.imm_state);
+        const auto& state_model = state.imm_state->filter_states.at(submodel_idx);
+        storeState(mm, state_model.x, state_model.P, submodel_idx);
+    }
+    else
+    {
+        storeState(mm, state.x, state.P, submodel_idx);
+    }
+}
+
+/**
+*/
+void KalmanInterface::storeState(Measurement& mm, 
+                                 const kalman::Vector& x, 
+                                 const kalman::Matrix& P,
+                                 int submodel_idx) const
+{
+    assert(kalman_filter_);
+    kalman::KalmanFilter* filter = submodel_idx >= 0 ? kalman_filter_->subModel(submodel_idx) : kalman_filter_.get();
+    assert(filter);
+
+    filter->xPos(mm.x, mm.y, x);
+
+    mm.x_stddev = std::sqrt(filter->xVar(P));
+    mm.y_stddev = std::sqrt(filter->yVar(P));
+    mm.xy_cov   = filter->xyCov(P);
+
+    mm.vx = filter->xVel(x);
+    mm.vy = filter->yVel(x);
+
+    mm.ax = filter->xAcc(x);
+    mm.ay = filter->yAcc(x);
 }
 
 /**
@@ -346,10 +395,76 @@ void KalmanInterface::stateVecX(const kalman::Vector& x)
 
 /**
 */
-void KalmanInterface::xPos(double& x, double& y) const
+void KalmanInterface::stateVecX(const kalman::KalmanState& state)
 {
     assert(kalman_filter_);
-    xPos(x, y, kalman_filter_->getX());
+    kalman_filter_->setX(state);
+}
+
+/**
+*/
+void KalmanInterface::xPos(double& x, double& y, int submodel_idx) const
+{
+    assert(kalman_filter_);
+    kalman::KalmanFilter* filter = submodel_idx >= 0 ? kalman_filter_->subModel(submodel_idx) : kalman_filter_.get();
+    assert(filter);
+
+    filter->xPos(x, y);
+}
+
+/**
+*/
+void KalmanInterface::xPos(double& x, double& y, const kalman::Vector& x_vec, int submodel_idx) const
+{
+    assert(kalman_filter_);
+    kalman::KalmanFilter* filter = submodel_idx >= 0 ? kalman_filter_->subModel(submodel_idx) : kalman_filter_.get();
+    assert(filter);
+
+    filter->xPos(x, y, x_vec);
+}
+
+/**
+*/
+void KalmanInterface::xPos(kalman::Vector& x_vec, double x, double y, int submodel_idx) const
+{
+    assert(kalman_filter_);
+    kalman::KalmanFilter* filter = submodel_idx >= 0 ? kalman_filter_->subModel(submodel_idx) : kalman_filter_.get();
+    assert(filter);
+
+    filter->xPos(x_vec, x, y);
+}
+
+/**
+*/
+double KalmanInterface::xVar(const kalman::Matrix& P, int submodel_idx) const
+{
+    assert(kalman_filter_);
+    kalman::KalmanFilter* filter = submodel_idx >= 0 ? kalman_filter_->subModel(submodel_idx) : kalman_filter_.get();
+    assert(filter);
+
+    return filter->xVar(P);
+}
+
+/**
+*/
+double KalmanInterface::yVar(const kalman::Matrix& P, int submodel_idx) const
+{
+    assert(kalman_filter_);
+    kalman::KalmanFilter* filter = submodel_idx >= 0 ? kalman_filter_->subModel(submodel_idx) : kalman_filter_.get();
+    assert(filter);
+
+    return filter->yVar(P);
+}
+
+/**
+*/
+double KalmanInterface::xyCov(const kalman::Matrix& P, int submodel_idx) const
+{
+    assert(kalman_filter_);
+    kalman::KalmanFilter* filter = submodel_idx >= 0 ? kalman_filter_->subModel(submodel_idx) : kalman_filter_.get();
+    assert(filter);
+
+    return filter->xyCov(P);
 }
 
 /**

@@ -95,7 +95,8 @@ public:
                        size_t idx1,
                        KalmanProjectionHandler& proj_handler,
                        double smooth_scale = 1.0,
-                       kalman::SmoothFailStrategy fail_strategy = kalman::SmoothFailStrategy::Stop) const; 
+                       kalman::SmoothFailStrategy fail_strategy = kalman::SmoothFailStrategy::Stop,
+                       std::vector<kalman::RTSDebugInfo>* debug_infos = nullptr) const; 
 
     //interpolation of kalman states
     kalman::KalmanError interpStep(kalman::KalmanState& state_interp,
@@ -106,10 +107,12 @@ public:
                                    bool* fixed = nullptr,
                                    const boost::optional<double>& Q_var = boost::optional<double>()) const;
     //kalman state integrity
-    bool checkKalmanState(kalman::KalmanState& state) const;
+    bool checkKalmanStateNumerical(kalman::KalmanState& state) const;
+    bool validateState(const kalman::KalmanState& state) const;
     
     //needed for feeding kalman
     void stateVecX(const kalman::Vector& x);
+    void stateVecX(const kalman::KalmanState& state);
 
     virtual void stateVecXFromMM(kalman::Vector& x, const Measurement& mm) const = 0;
     virtual void measurementVecZ(kalman::Vector& z, const Measurement& mm) const = 0;
@@ -122,22 +125,24 @@ public:
     
     //needed for retrieval from kalman
     void storeState(Measurement& mm, 
-                    const kalman::KalmanState& state) const;
-    virtual void storeState(Measurement& mm, 
-                            const kalman::Vector& x, 
-                            const kalman::Matrix& P) const = 0;
+                    const kalman::KalmanState& state,
+                    int submodel_idx = -1) const;
+    void storeState(Measurement& mm, 
+                    const kalman::Vector& x, 
+                    const kalman::Matrix& P,
+                    int submodel_idx = -1) const;
     //helpers
     double timestep(const Measurement& mm) const;
     static double timestep(const Measurement& mm0, const Measurement& mm1);
     static double timestep(const boost::posix_time::ptime& ts0, const boost::posix_time::ptime& ts1);
     double distanceSqr(const Measurement& mm) const;
 
-    void xPos(double& x, double& y) const;
-    virtual void xPos(double& x, double& y, const kalman::Vector& x_vec) const = 0;
-    virtual void xPos(kalman::Vector& x_vec, double x, double y) const = 0;
-    virtual double xVar(const kalman::Matrix& P) const = 0;
-    virtual double yVar(const kalman::Matrix& P) const = 0;
-    virtual double xyCov(const kalman::Matrix& P) const = 0;
+    void xPos(double& x, double& y, int submodel_idx = -1) const;
+    void xPos(double& x, double& y, const kalman::Vector& x_vec, int submodel_idx = -1) const;
+    void xPos(kalman::Vector& x_vec, double x, double y, int submodel_idx = -1) const;
+    double xVar(const kalman::Matrix& P, int submodel_idx = -1) const;
+    double yVar(const kalman::Matrix& P, int submodel_idx = -1) const;
+    double xyCov(const kalman::Matrix& P, int submodel_idx = -1) const;
 
     void setVerbosity(int v) { verbosity_ = v; }
     void enableDebugging(bool ok);

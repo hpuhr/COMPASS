@@ -48,6 +48,9 @@ public:
 
     void init(const KalmanState& state, bool xP_only = false) override final;
     void state(kalman::KalmanState& s, bool xP_only = false) const override final;
+    void state(kalman::BasicKalmanState& s, bool xP_only = false) const override final;
+    bool validateState(const kalman::KalmanState& s, bool xP_only = false) const override final;
+    bool validateState(const kalman::BasicKalmanState& s, bool xP_only = false) const override final;
 
     void setB(const Matrix& B) { B_ = B; }
     void setF(const Matrix& F) { F_ = F; }
@@ -102,15 +105,16 @@ protected:
                      const XTransferFunc& x_tr,
                      double smooth_scale,
                      bool stop_on_fail,
-                     std::vector<bool>* state_valid) const override final;
-
-    bool smoothRTS(std::vector<kalman::Vector>& x_smooth,
-                     std::vector<kalman::Matrix>& P_smooth,
-                     const std::vector<KalmanState>& states,
-                     const XTransferFunc& x_tr,
-                     double smooth_scale,
-                     bool stop_on_fail,
-                     std::vector<bool>* state_valid) const;
+                     std::vector<bool>* state_valid,
+                     std::vector<RTSDebugInfo>* debug_infos) const override final;
+    bool smoothingStep_impl(Vector& x0_smooth,
+                            Matrix& P0_smooth,
+                            const Vector& x1_smooth_tr,
+                            const Matrix& P1_smooth,
+                            const BasicKalmanState& state1,
+                            double dt1,
+                            double smooth_scale,
+                            RTSStepInfo* debug_info) const override final;
 
     void updateInternalMatrices_impl(double dt, double Q_var) override final;
 

@@ -175,6 +175,29 @@ Measurement KalmanEstimator::currentStateAsMeasurement() const
 
 /**
 */
+QPointF KalmanEstimator::currentPositionCart() const
+{
+    double x_cart, y_cart;
+    kalman_interface_->xPos(x_cart, y_cart);
+
+    return QPointF(x_cart, y_cart);
+}
+
+/**
+*/
+QPointF KalmanEstimator::currentPositionWGS84() const
+{
+    auto pos_cart = currentPositionCart();
+
+    //unproject to wgs84
+    double lat, lon;
+    proj_handler_->unproject(lat, lon, pos_cart.x(), pos_cart.y());
+
+    return QPointF(lat, lon);
+}
+
+/**
+*/
 const boost::posix_time::ptime& KalmanEstimator::currentTime() const
 {
     assert(isInit());
@@ -259,49 +282,80 @@ void KalmanEstimator::storeUpdate(Reference& ref,
 /**
  * Notice: will reproject from the update's local system to wgs84.
 */
+void KalmanEstimator::storeUpdate(Measurement& mm, 
+                                  const kalman::KalmanUpdate& update,
+                                  KalmanProjectionHandler& phandler,
+                                  boost::optional<Eigen::Vector2d>& speed_pos_wgs84,
+                                  boost::optional<Eigen::Vector2d>& accel_pos_wgs84,
+                                  int submodel_idx) const
+{
+    storeUpdate(mm, update, phandler, &speed_pos_wgs84, &accel_pos_wgs84, submodel_idx);
+}
+
+/**
+ * Notice: will reproject from the update's local system to wgs84.
+*/
+void KalmanEstimator::storeUpdate(Measurement& mm, 
+                                  const kalman::KalmanUpdate& update,
+                                  KalmanProjectionHandler& phandler,
+                                  boost::optional<Eigen::Vector2d>* speed_pos_wgs84,
+                                  boost::optional<Eigen::Vector2d>* accel_pos_wgs84,
+                                  int submodel_idx) const
+{
+    assert(isInit());
+
+    if (speed_pos_wgs84)
+        speed_pos_wgs84->reset();
+    if (accel_pos_wgs84)
+        accel_pos_wgs84->reset();
+
+    kalman_interface_->storeState(mm, update.state, submodel_idx);
+
+    mm.t              = update.t;
+    mm.Q_var          = update.state.Q_var;
+
+    //unproject to lat/lon
+    phandler.unproject(mm.lat, mm.lon, mm.x, mm.y, &update.projection_center);
+
+    if (speed_pos_wgs84 && mm.hasVelocity())
+    {
+        *speed_pos_wgs84 = Eigen::Vector2d();
+        phandler.unproject(speed_pos_wgs84->value()[ 0 ], 
+                           speed_pos_wgs84->value()[ 1 ], 
+                           mm.x + mm.vx.value(), 
+                           mm.y + mm.vy.value(), 
+                           &update.projection_center);
+    }
+
+    if (accel_pos_wgs84 && mm.hasAcceleration())
+    {
+        *accel_pos_wgs84 = Eigen::Vector2d();
+        phandler.unproject(accel_pos_wgs84->value()[ 0 ], 
+                           accel_pos_wgs84->value()[ 1 ], 
+                           mm.x + mm.ax.value(), 
+                           mm.y + mm.ay.value(), 
+                           &update.projection_center);
+    }
+
+    //loginf << "KalmanEstimator: storeUpdate: (" << update.projection_center.x() << "," << update.projection_center.y() << ") "
+    //                                            << mm.x << "," << mm.y << " => " << mm.lat << "," << mm.lon;
+}
+
+/**
+ * Notice: will reproject from the update's local system to wgs84.
+*/
 void KalmanEstimator::storeUpdate(Reference& ref, 
                                   const kalman::KalmanUpdate& update,
                                   KalmanProjectionHandler& phandler,
                                   boost::optional<Eigen::Vector2d>* speedvec_pos_wgs84,
                                   boost::optional<Eigen::Vector2d>* accvec_pos_wgs84) const
 {
-    assert(isInit());
+    Measurement* mm = &ref;
+    storeUpdate(*mm, update, phandler, speedvec_pos_wgs84, accvec_pos_wgs84);
 
-    if (speedvec_pos_wgs84)
-        speedvec_pos_wgs84->reset();
-    if (accvec_pos_wgs84)
-        accvec_pos_wgs84->reset();
-
-    kalman_interface_->storeState(ref, update.state);
-
-    ref.t   = update.t;
-    ref.cov = update.state.P;
-
-    //unproject to lat/lon
-    phandler.unproject(ref.lat, ref.lon, ref.x, ref.y, &update.projection_center);
-
-    if (speedvec_pos_wgs84 && ref.hasVelocity())
-    {
-        *speedvec_pos_wgs84 = Eigen::Vector2d();
-        phandler.unproject(speedvec_pos_wgs84->value()[ 0 ], 
-                           speedvec_pos_wgs84->value()[ 1 ], 
-                           ref.x + ref.vx.value(), 
-                           ref.y + ref.vy.value(), 
-                           &update.projection_center);
-    }
-
-    if (accvec_pos_wgs84 && ref.hasAcceleration())
-    {
-        *accvec_pos_wgs84 = Eigen::Vector2d();
-        phandler.unproject(accvec_pos_wgs84->value()[ 0 ], 
-                           accvec_pos_wgs84->value()[ 1 ], 
-                           ref.x + ref.ax.value(), 
-                           ref.y + ref.ay.value(), 
-                           &update.projection_center);
-    }
-
-    //loginf << "KalmanEstimator: storeUpdate: (" << update.projection_center.x() << "," << update.projection_center.y() << ") "
-    //                                            << ref.x << "," << ref.y << " => " << ref.lat << "," << ref.lon;
+    ref.cov            = update.state.P;
+    ref.projchange_pos = update.proj_changed;
+    ref.reset_pos      = update.reinit;
 }
 
 /**
@@ -566,12 +620,13 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
     if (proj_handler_->changeProjectionIfNeeded(update, *kalman_interface_))
     {
         //projection changed => update kalman state to reprojected position
-        kalman_interface_->stateVecX(update.state.x);
+        kalman_interface_->stateVecX(update.state);
 
         if (settings_.verbosity > 1)
             loginf << "Changed map projection @t=" << update.t;
 
         step_info_.proj_changed = true;
+        update.proj_changed = true;
     }
 
     //store current projection to update
@@ -963,7 +1018,8 @@ void KalmanEstimator::executeChainFunc(Updates& updates, const ChainFunc& func) 
 /**
 */
 bool KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
-                                    kalman::SmoothFailStrategy fail_strategy) const
+                                    kalman::SmoothFailStrategy fail_strategy,
+                                    std::vector<kalman::RTSDebugInfo>* debug_infos) const
 {
     assert(isInit());
 
@@ -979,7 +1035,8 @@ bool KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                                                     idx1, 
                                                     phandler, 
                                                     settings_.smoothing_scale,
-                                                    fail_strategy);
+                                                    fail_strategy,
+                                                    debug_infos);
         assert(ok);
     };
 
@@ -1145,8 +1202,8 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
         double Q_var0 = update0.Q_var_interp.has_value() ? update0.Q_var_interp.value() : Q_var;
         double Q_var1 = update1.Q_var_interp.has_value() ? update1.Q_var_interp.value() : Q_var;
 
-        if (settings_.debug)
-            loginf << "KalmanEstimator: interpUpdates: interpolating using Q_var " << Q_var0 << " / " << Q_var1; 
+        //if (settings_.debug)
+        //    loginf << "KalmanEstimator: interpUpdates: interpolating using Q_var " << Q_var0 << " / " << Q_var1; 
 
         auto t0 = update0.t;
         auto t1 = update1.t;
@@ -1332,12 +1389,30 @@ std::string KalmanEstimator::asString(int flags, const std::string& prefix) cons
     return "";
 }
 
+/**
+*/
 void KalmanEstimator::enableDebugging(bool ok)
 {
     settings_.debug = ok;
 
     if (kalman_interface_)
         return kalman_interface_->enableDebugging(ok);
+}
+
+/**
+*/
+bool KalmanEstimator::checkKalmanStateNumerical(kalman::KalmanState& state) const
+{
+    assert(kalman_interface_);
+    return kalman_interface_->checkKalmanStateNumerical(state);
+}
+
+/**
+*/
+bool KalmanEstimator::validateState(const kalman::KalmanState& state) const
+{
+    assert(kalman_interface_);
+    return kalman_interface_->validateState(state);
 }
 
 } // reconstruction

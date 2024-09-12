@@ -71,6 +71,46 @@ void KalmanFilterLinear::state(kalman::KalmanState& s, bool xP_only) const
 
 /**
 */
+void KalmanFilterLinear::state(kalman::BasicKalmanState& s, bool xP_only) const
+{
+    KalmanFilter::state(s, xP_only);
+
+    if (!xP_only)
+    {
+        s.F = F_;
+    }
+}
+
+/**
+*/
+bool KalmanFilterLinear::validateState(const kalman::KalmanState& s, bool xP_only) const
+{
+    if (!KalmanFilter::validateState(s, xP_only))
+        return false;
+
+    if (!xP_only && (s.F.cols() != dim_x_ ||
+                     s.F.rows() != dim_x_))
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool KalmanFilterLinear::validateState(const kalman::BasicKalmanState& s, bool xP_only) const
+{
+    if (!KalmanFilter::validateState(s, xP_only))
+        return false;
+
+    if (!xP_only && (s.F.cols() != dim_x_ ||
+                     s.F.rows() != dim_x_))
+        return false;
+
+    return true;
+}
+
+/**
+*/
 void KalmanFilterLinear::printState(std::stringstream& strm, const std::string& prefix) const
 {
     KalmanFilter::printState(strm, prefix);
@@ -239,20 +279,8 @@ bool KalmanFilterLinear::smooth_impl(std::vector<kalman::Vector>& x_smooth,
                                      const XTransferFunc& x_tr,
                                      double smooth_scale,
                                      bool stop_on_fail,
-                                     std::vector<bool>* state_valid) const
-{
-    return smoothRTS(x_smooth, P_smooth, states, x_tr, smooth_scale, stop_on_fail, state_valid);
-}
-                
-/**
-*/
-bool KalmanFilterLinear::smoothRTS(std::vector<kalman::Vector>& x_smooth,
-                                   std::vector<kalman::Matrix>& P_smooth,
-                                   const std::vector<KalmanState>& states,
-                                   const XTransferFunc& x_tr,
-                                   double smooth_scale,
-                                   bool stop_on_fail,
-                                   std::vector<bool>* state_valid) const
+                                     std::vector<bool>* state_valid,
+                                     std::vector<RTSDebugInfo>* debug_infos) const
 {
     if (states.empty())
         return true;
@@ -272,8 +300,8 @@ bool KalmanFilterLinear::smoothRTS(std::vector<kalman::Vector>& x_smooth,
     for (int i = 0; i < n; ++i)
     {
         x_smooth   [ i ] = states[ i ].x;
-        P_smooth   [ i ] = states[ i ].P * smooth_scale; // TODO HACK
-        Pp         [ i ] = states[ i ].P * smooth_scale;
+        P_smooth   [ i ] = states[ i ].P;
+        Pp         [ i ] = states[ i ].P;
         K          [ i ].setZero(dim_x, dim_x);
     }
 
@@ -288,12 +316,13 @@ bool KalmanFilterLinear::smoothRTS(std::vector<kalman::Vector>& x_smooth,
         const auto& Q_1  = states[ k+1 ].Q;
         auto        F_1t = F_1.transpose();
 
-        Pp[ k ] = states[ k+1 ].F * P_smooth[ k ] * F_1t + Q_1;
+        Pp[ k ] = F_1 * P_smooth[ k ] * F_1t + Q_1;
 
         if (!Eigen::FullPivLU<Eigen::MatrixXd>(Pp[ k ]).isInvertible())
             return false;
 
-        K[ k ] = P_smooth[ k ] * F_1t * Pp[ k ].inverse();
+        K[ k ]  = P_smooth[ k ] * F_1t * Pp[ k ].inverse();
+        K[ k ] *= smooth_scale;
 
         //get last smoothed state vector
         if (x_tr) x_tr(x_smooth_1_tr, x_smooth[ k+1 ], k + 1, k);
@@ -310,6 +339,38 @@ bool KalmanFilterLinear::smoothRTS(std::vector<kalman::Vector>& x_smooth,
         if (state_valid)
             (*state_valid)[ k ] = state_ok;
     }
+
+    return true;
+}
+
+/**
+*/
+bool KalmanFilterLinear::smoothingStep_impl(Vector& x0_smooth,
+                                            Matrix& P0_smooth,
+                                            const Vector& x1_smooth_tr,
+                                            const Matrix& P1_smooth,
+                                            const BasicKalmanState& state1,
+                                            double dt1,
+                                            double smooth_scale,
+                                            RTSStepInfo* debug_info) const
+{
+    const auto& F_1  = state1.F;
+    const auto& Q_1  = state1.Q;
+    auto        F_1t = F_1.transpose();
+
+    Matrix Pp = F_1 * P0_smooth * F_1t + Q_1;
+
+    if (!Eigen::FullPivLU<Eigen::MatrixXd>(Pp).isInvertible())
+    {
+        loginf << "KalmanFilterLinear: smoothingStep_impl: Could not invert Pp:\n" << Pp;
+        return false;
+    }
+
+    Matrix K = P0_smooth * F_1t * Pp.inverse();
+    K *= smooth_scale;
+
+    x0_smooth += K * (x1_smooth_tr - F_1 * x0_smooth);
+    P0_smooth += K * (P1_smooth - Pp) * ((const kalman::Matrix&)K).transpose();
 
     return true;
 }

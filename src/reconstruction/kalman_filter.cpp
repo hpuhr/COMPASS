@@ -147,6 +147,38 @@ void KalmanFilter::state(kalman::BasicKalmanState& s, bool xP_only) const
 
 /**
 */
+bool KalmanFilter::validateState(const kalman::KalmanState& s, bool xP_only) const
+{
+    if (s.x.size() != dim_x_ ||
+        s.P.cols() != dim_x_ ||
+        s.P.rows() != dim_x_)
+        return false;
+
+    if (!xP_only && (s.Q.cols() != dim_x_ ||
+                     s.Q.rows() != dim_x_))
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool KalmanFilter::validateState(const kalman::BasicKalmanState& s, bool xP_only) const
+{
+    if (s.x.size() != dim_x_ ||
+        s.P.cols() != dim_x_ ||
+        s.P.rows() != dim_x_)
+        return false;
+
+    if (!xP_only && (s.Q.cols() != dim_x_ ||
+                     s.Q.rows() != dim_x_))
+        return false;
+
+    return true;
+}
+
+/**
+*/
 void KalmanFilter::state(kalman::KalmanState& s, bool xP_only) const
 {
     s.x = x_;
@@ -458,9 +490,10 @@ bool KalmanFilter::smooth(std::vector<kalman::Vector>& x_smooth,
                           const XTransferFunc& x_tr,
                           double smooth_scale,
                           bool stop_on_fail,
-                          std::vector<bool>* state_valid) const
+                          std::vector<bool>* state_valid,
+                          std::vector<RTSDebugInfo>* debug_infos) const
 {
-    return smooth_impl(x_smooth, P_smooth, states, x_tr, smooth_scale, stop_on_fail, state_valid);
+    return smooth_impl(x_smooth, P_smooth, states, x_tr, smooth_scale, stop_on_fail, state_valid, debug_infos);
 }
 
 /**
@@ -657,6 +690,59 @@ boost::optional<double> KalmanFilter::mahalanobis() const
     mahalanobis_ = std::sqrt(double(y_.transpose() * SI_ * y_));
 
     return mahalanobis_;
+}
+
+/**
+*/
+void KalmanFilter::xPos(double& x, double& y) const
+{
+    xPos(x, y, getX());
+}
+
+/**
+*/
+void KalmanFilter::xPos(double& x, double& y, const kalman::Vector& x_vec) const
+{
+    bool implemented = false;
+    assert(implemented);
+}
+
+/**
+*/
+void KalmanFilter::xPos(kalman::Vector& x_vec, double x, double y) const
+{
+    bool implemented = false;
+    assert(implemented);
+}
+
+/**
+*/
+double KalmanFilter::xVar(const kalman::Matrix& P) const
+{
+    bool implemented = false;
+    assert(implemented);
+
+    return 0.0;
+}
+
+/**
+*/
+double KalmanFilter::yVar(const kalman::Matrix& P) const
+{
+    bool implemented = false;
+    assert(implemented);
+
+    return 0.0;
+}
+
+/**
+*/
+double KalmanFilter::xyCov(const kalman::Matrix& P) const
+{
+    bool implemented = false;
+    assert(implemented);
+
+    return 0.0;
 }
 
 } // namespace kalman
