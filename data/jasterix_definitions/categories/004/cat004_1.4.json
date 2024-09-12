@@ -622,7 +622,7 @@
                             "comment":"Gate Designator",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":4,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"Gate Designator",
@@ -1140,7 +1140,7 @@
                             "comment":"Mode S Identifier Aircraft 1",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":8,
                             "data_fields":[
                                 {
                                     "name":"Mode S Identifier Aircraft #1",
@@ -1166,7 +1166,7 @@
                             "comment":"Flight Plan Number Aircraft 1",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":8,
+                            "optional_bitfield_index":9,
                             "data_fields":[
                                 {
                                     "name":"Flight Plan Number Aircraft #1",
@@ -1191,7 +1191,7 @@
                             "comment":"Cleared Flight Level Aircraft 1",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":9,
+                            "optional_bitfield_index":10,
                             "data_fields":[
                                 {
                                     "name":"CFL #1",
@@ -1467,7 +1467,7 @@
                             "comment":"Mode S Identifier Aircraft 2",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":8,
                             "data_fields":[
                                 {
                                     "name":"Mode S Identifier Aircraft #2",
@@ -1493,7 +1493,7 @@
                             "comment":"Flight Plan Number Aircraft 2",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":8,
+                            "optional_bitfield_index":9,
                             "data_fields":[
                                 {
                                     "name":"Flight Plan Number Aircraft #2",
@@ -1518,7 +1518,7 @@
                             "comment":"Cleared Flight Level Aircraft 2",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":9,
+                            "optional_bitfield_index":10,
                             "data_fields":[
                                 {
                                     "name":"CFL #2",
