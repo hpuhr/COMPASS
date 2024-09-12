@@ -57,7 +57,7 @@ MetaVariable::~MetaVariable()
         widget_ = nullptr;
     }
 
-    for (auto it : definitions_)
+    for (auto& it : definitions_)
         delete it.second;
 
     definitions_.clear();
@@ -311,15 +311,15 @@ void MetaVariable::removeOutdatedVariables()
 
     bool delete_var;
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     for (auto var_it = definitions_.begin(); var_it != definitions_.end();)
     {
         delete_var = false;
 
-        if (!obj_man.existsDBContent(var_it->second->dbContentName()))
+        if (!dbcont_man.existsDBContent(var_it->second->dbContentName()))
             delete_var = true;
-        else if (!obj_man.dbContent(var_it->second->dbContentName())
+        else if (!dbcont_man.dbContent(var_it->second->dbContentName())
                       .hasVariable(var_it->second->variableName()))
             delete_var = true;
 
@@ -336,6 +336,18 @@ void MetaVariable::removeOutdatedVariables()
             ++var_it;
     }
 }
+
+bool MetaVariable::hasDBContent() const
+{
+    for (auto& variable_it : variables_)
+    {
+        if (variable_it.second.hasDBContent())
+            return true;
+    }
+
+    return false;
+}
+
 
 void MetaVariable::updateDescription()
 {
@@ -354,7 +366,7 @@ void MetaVariable::checkSubVariables()
     {
         PropertyDataType data_type = variables_.begin()->second.dataType();
 
-        for (auto variable_it : variables_)
+        for (auto& variable_it : variables_)
         {
             if (variable_it.second.dataType() != data_type)
             {
@@ -368,7 +380,7 @@ void MetaVariable::checkSubVariables()
 
         string rep_str = variables_.begin()->second.representationString();
 
-        for (auto variable_it : variables_)
+        for (auto& variable_it : variables_)
         {
             if (variable_it.second.representationString() != rep_str)
             {

@@ -200,7 +200,7 @@ int getAppendedInt(std::string text)
     }
 
     if (count == 0)
-        throw std::runtime_error("Util: getAppendedInt: no int found");
+        loginf << "Util: getAppendedInt: no int found, returning 0";
 
     return ret;
 }

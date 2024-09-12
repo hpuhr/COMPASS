@@ -618,10 +618,6 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
         assert(existsDBContent(buf_it.first));
         dbContent(buf_it.first).insertData(buf_it.second);
     }
-
-//    COMPASS::instance().dataSourceManager().saveDBDataSources();
-//    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
-
 }
 
 void DBContentManager::insertDone(DBContent& object)
@@ -682,8 +678,6 @@ void DBContentManager::finishInserting()
         string dbcont_name = buf_it.first;
 
         assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
-        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_latitude_));
-        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_longitude_));
 
         unsigned int buffer_size = buf_it.second->size();
 
@@ -739,6 +733,8 @@ void DBContentManager::finishInserting()
         }
 
         // lat & long
+        if (metaCanGetVariable(dbcont_name, DBContent::meta_var_longitude_)
+            && metaCanGetVariable(dbcont_name, DBContent::meta_var_latitude_))
         {
             Variable& lat_var = metaGetVariable(dbcont_name, DBContent::meta_var_latitude_);
             Variable& lon_var = metaGetVariable(dbcont_name, DBContent::meta_var_longitude_);
@@ -1238,6 +1234,11 @@ std::pair<double, double> DBContentManager::minMaxLongitude() const
     return {longitude_min_.get(), longitude_max_.get()};
 }
 
+bool DBContentManager::hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const
+{
+
+}
+
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const
 {
     return data_;
@@ -1274,7 +1275,12 @@ bool DBContentManager::metaCanGetVariable (const std::string& dbcont_name, const
 
 dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcont_name, const Property& meta_property)
 {
-    assert (metaCanGetVariable(dbcont_name, meta_property));
+    if (!metaCanGetVariable(dbcont_name, meta_property))
+    {
+        logerr << "DBContentManager: metaGetVariable: defined '" << meta_property.name()
+               << "' in '" << dbcont_name << "'";
+        assert (false);
+    }
 
     return metaVariable(meta_property.name()).getFor(dbcont_name);
 }
@@ -1470,8 +1476,8 @@ void DBContentManager::addStandardVariables(std::string dbcont_name, dbContent::
     assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_utn_));
-    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_utn_));
+    if(metaCanGetVariable(dbcont_name, DBContent::meta_var_utn_))
+        read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_utn_));
 }
 
 MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()

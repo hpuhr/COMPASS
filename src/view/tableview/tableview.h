@@ -31,17 +31,18 @@ public slots:
     virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
 
-signals:
-    void showOnlySelectedSignal(bool value);
-    void usePresentationSignal(bool value);
+// signals:
+//     void showOnlySelectedSignal(bool value);
+//     void usePresentationSignal(bool value);
 
 public:
     struct Settings
     {
         Settings();
 
-        bool show_only_selected;
-        bool use_presentation;
+        bool show_only_selected_{false};
+        bool use_presentation_{true};
+        bool ignore_non_target_reports_{true};
     };
 
     TableView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
@@ -57,16 +58,22 @@ public:
         assert(data_source_);
         return data_source_;
     }
+    TableViewDataWidget* getDataWidget();
 
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
 
     bool usePresentation() const;
-    void usePresentation(bool use_presentation);
+    void usePresentation(bool value);
 
     bool showOnlySelected() const;
     void showOnlySelected(bool value);
 
+    bool ignoreNonTargetReports() const;
+    void ignoreNonTargetReports(bool value);
+
     virtual void accept(LatexVisitor& v) override;
+
+    const Settings& settings() const;
 
 protected:
     friend class LatexVisitor;
@@ -80,7 +87,6 @@ protected:
 
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
-    TableViewDataWidget* getDataWidget();
 
     TableViewWidget* widget_{nullptr};
     TableViewDataSource* data_source_{nullptr};

@@ -1987,7 +1987,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude",
-                    "description": "From 130.Latitude\n\nPosition in WGS-84 Co-ordinates latitude",
+                    "description": "From 130.Latitude\n\nPosition in WGS-84 Co-ordinates latitude or from Latitude HR",
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Latitude",
@@ -2000,7 +2000,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude",
-                    "description": "From 130.Longitude\n\nPosition in WGS-84 Co-ordinates longitude",
+                    "description": "From 130.Longitude\n\nPosition in WGS-84 Co-ordinates longitude or from Longitude HR",
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Longitude",

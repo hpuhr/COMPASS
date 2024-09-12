@@ -57,7 +57,7 @@ class Job : public QObject, public QRunnable
     // @brief Sets obsolete flag
     virtual void setObsolete() {
 
-        loginf << "Job: " << name_ << ": setObsolete";
+        logdbg << "Job: " << name_ << ": setObsolete";
         obsolete_ = true;
     }
     // @brief Returns obsolete flag

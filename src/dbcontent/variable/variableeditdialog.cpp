@@ -146,7 +146,7 @@ void VariableEditDialog::nameChangedSlot(const QString& name)
     name_edit_->setToolTip("");
 
     loginf << "VariableEditDialog: nameChangedSlot: renaming '" << variable_.name() << "' to '" << new_name << "'";
-    variable_.object().renameVariable(variable_.name(), new_name);
+    variable_.object().renameVariable(std::string(variable_.name()), new_name); // copy, otherwise wrong
 
     if (new_name.size())
     {

@@ -213,6 +213,9 @@ class Variable : public QObject, public Property, public Configurable
     std::string shortName() const;
     void shortName(const std::string& short_name);
 
+    bool hasDBContent() const;
+    void setHasDBContent();
+
 private:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;

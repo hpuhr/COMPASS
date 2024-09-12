@@ -146,25 +146,27 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
 
     // CREATE [UNIQUE] INDEX index_name ON table_name(column_list);
 
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
     ss << "\nCREATE INDEX TIMESTAMP_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
-    ss << COMPASS::instance().dbContentManager().metaGetVariable(
-              object.name(), DBContent::meta_var_timestamp_).dbColumnName()
+    ss << dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_timestamp_).dbColumnName()
        << ");";
 
     ss << "\nCREATE INDEX DS_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
-    ss << COMPASS::instance().dbContentManager().metaGetVariable(
-              object.name(), DBContent::meta_var_ds_id_).dbColumnName()
+    ss << dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_ds_id_).dbColumnName()
        << ");";
 
     ss << "\nCREATE INDEX LINE_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
-    ss << COMPASS::instance().dbContentManager().metaGetVariable(
-              object.name(), DBContent::meta_var_line_id_).dbColumnName()
+    ss << dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_line_id_).dbColumnName()
        << ");";
 
-    ss << "\nCREATE INDEX UTN_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
-    ss << COMPASS::instance().dbContentManager().metaGetVariable(
-              object.name(), DBContent::meta_var_utn_).dbColumnName()
-       << ");";
+    if (dbcont_man.metaCanGetVariable(object.name(), DBContent::meta_var_utn_)) // status dbcont no utn
+    {
+        ss << "\nCREATE INDEX UTN_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+        ss << COMPASS::instance().dbContentManager().metaGetVariable(
+                  object.name(), DBContent::meta_var_utn_).dbColumnName()
+           << ");";
+    }
 
     loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
     return ss.str();
@@ -511,9 +513,6 @@ string SQLGenerator::getInsertPropertyStatement(const string& id,
 {
     stringstream ss;
     assert(id.size() < 255);
-    if (value.size() > 1000)
-        logwrn << "SQLGenerator: getInsertPropertyStatement: value size very large ("
-               << value.size() << ")";
 
     // REPLACE into table (id, name, age) values(1, "A", 19)
     ss << "REPLACE INTO " << TABLE_NAME_PROPERTIES << " VALUES ('" << id << "', '" << value

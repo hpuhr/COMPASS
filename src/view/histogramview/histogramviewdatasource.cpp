@@ -80,10 +80,10 @@ void HistogramViewDataSource::checkSubConfigurables()
         generateSubConfigurable("VariableOrderedSet", "VariableOrderedSet0");
         assert(set_);
 
-        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+        DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-        if (obj_man.existsMetaVariable("rec_num"))
-            set_->add(obj_man.metaVariable("rec_num"));
+        if (dbcont_man.existsMetaVariable("rec_num"))
+            set_->add(dbcont_man.metaVariable("rec_num"));
     }
 }
 
@@ -140,12 +140,12 @@ void HistogramViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
 bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (dbcontent_name == META_OBJECT_NAME)
     {
-        assert (obj_man.existsMetaVariable(var_name));
-        MetaVariable& meta_var = obj_man.metaVariable(var_name);
+        assert (dbcont_man.existsMetaVariable(var_name));
+        MetaVariable& meta_var = dbcont_man.metaVariable(var_name);
         if (!set_->hasMetaVariable(meta_var))
         {
             set_->add(meta_var);
@@ -156,8 +156,8 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbcontent
     }
     else
     {
-        assert (obj_man.existsDBContent(dbcontent_name));
-        DBContent& obj = obj_man.dbContent(dbcontent_name);
+        assert (dbcont_man.existsDBContent(dbcontent_name));
+        DBContent& obj = dbcont_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
         Variable& var = obj.variable(var_name);
@@ -174,19 +174,19 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbcontent
 
 void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (dbcontent_name == META_OBJECT_NAME)
     {
-        assert (obj_man.existsMetaVariable(var_name));
-        MetaVariable& meta_var = obj_man.metaVariable(var_name);
+        assert (dbcont_man.existsMetaVariable(var_name));
+        MetaVariable& meta_var = dbcont_man.metaVariable(var_name);
         assert (set_->hasMetaVariable(meta_var));
         set_->removeMetaVariable(meta_var);
     }
     else
     {
-        assert (obj_man.existsDBContent(dbcontent_name));
-        DBContent& obj = obj_man.dbContent(dbcontent_name);
+        assert (dbcont_man.existsDBContent(dbcontent_name));
+        DBContent& obj = dbcont_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
         Variable& var = obj.variable(var_name);

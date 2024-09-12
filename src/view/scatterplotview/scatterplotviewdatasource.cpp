@@ -79,10 +79,10 @@ void ScatterPlotViewDataSource::checkSubConfigurables()
         generateSubConfigurable("VariableOrderedSet", "VariableOrderedSet0");
         assert(set_);
 
-        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+        DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-        if (obj_man.existsMetaVariable("rec_num"))
-            set_->add(obj_man.metaVariable("rec_num"));
+        if (dbcont_man.existsMetaVariable("rec_num"))
+            set_->add(dbcont_man.metaVariable("rec_num"));
     }
 }
 
@@ -139,12 +139,12 @@ void ScatterPlotViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
 bool ScatterPlotViewDataSource::addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (dbcontent_name == META_OBJECT_NAME)
     {
-        assert (obj_man.existsMetaVariable(var_name));
-        dbContent::MetaVariable& meta_var = obj_man.metaVariable(var_name);
+        assert (dbcont_man.existsMetaVariable(var_name));
+        dbContent::MetaVariable& meta_var = dbcont_man.metaVariable(var_name);
         if (!set_->hasMetaVariable(meta_var))
         {
             set_->add(meta_var);
@@ -155,8 +155,8 @@ bool ScatterPlotViewDataSource::addTemporaryVariable (const std::string& dbconte
     }
     else
     {
-        assert (obj_man.existsDBContent(dbcontent_name));
-        DBContent& obj = obj_man.dbContent(dbcontent_name);
+        assert (dbcont_man.existsDBContent(dbcontent_name));
+        DBContent& obj = dbcont_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
         dbContent::Variable& var = obj.variable(var_name);
@@ -173,19 +173,19 @@ bool ScatterPlotViewDataSource::addTemporaryVariable (const std::string& dbconte
 
 void ScatterPlotViewDataSource::removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (dbcontent_name == META_OBJECT_NAME)
     {
-        assert (obj_man.existsMetaVariable(var_name));
-        dbContent::MetaVariable& meta_var = obj_man.metaVariable(var_name);
+        assert (dbcont_man.existsMetaVariable(var_name));
+        dbContent::MetaVariable& meta_var = dbcont_man.metaVariable(var_name);
         assert (set_->hasMetaVariable(meta_var));
         set_->removeMetaVariable(meta_var);
     }
     else
     {
-        assert (obj_man.existsDBContent(dbcontent_name));
-        DBContent& obj = obj_man.dbContent(dbcontent_name);
+        assert (dbcont_man.existsDBContent(dbcontent_name));
+        DBContent& obj = dbcont_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
         dbContent::Variable& var = obj.variable(var_name);

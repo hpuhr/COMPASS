@@ -20,11 +20,11 @@
 #include "tableview.h"
 #include "allbuffertablewidget.h"
 #include "compass.h"
-#include "buffer.h"
+//#include "buffer.h"
 #include "buffertablewidget.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "tableviewdatasource.h"
+//#include "tableviewdatasource.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -58,10 +58,6 @@ TableViewDataWidget::TableViewDataWidget(TableViewWidget* view_widget,
             tab_widget_->addTab(all_buffer_table_widget_, "All");
             connect(all_buffer_table_widget_, &AllBufferTableWidget::exportDoneSignal, this,
                     &TableViewDataWidget::exportDoneSlot);
-            connect(this, &TableViewDataWidget::showOnlySelectedSignal,
-                    all_buffer_table_widget_, &AllBufferTableWidget::showOnlySelectedSlot);
-            connect(this, &TableViewDataWidget::usePresentationSignal,
-                    all_buffer_table_widget_, &AllBufferTableWidget::usePresentationSlot);
         }
 
         BufferTableWidget* buffer_table =
@@ -70,10 +66,6 @@ TableViewDataWidget::TableViewDataWidget(TableViewWidget* view_widget,
         buffer_tables_[obj_it.first] = buffer_table;
         connect(buffer_table, &BufferTableWidget::exportDoneSignal, this,
                 &TableViewDataWidget::exportDoneSlot);
-        connect(this, &TableViewDataWidget::showOnlySelectedSignal, buffer_table,
-                &BufferTableWidget::showOnlySelectedSlot);
-        connect(this, &TableViewDataWidget::usePresentationSignal, buffer_table,
-                &BufferTableWidget::usePresentationSlot);
     }
 
     setLayout(layout);
@@ -81,8 +73,6 @@ TableViewDataWidget::TableViewDataWidget(TableViewWidget* view_widget,
 
 TableViewDataWidget::~TableViewDataWidget()
 {
-    // TODO
-    // buffer_tables_.clear();
 }
 
 void TableViewDataWidget::clearData_impl()
@@ -115,12 +105,6 @@ void TableViewDataWidget::updateData_impl(bool requires_reset)
 
     //nothing to do yet
 
-    //    assert(all_buffer_table_widget_);
-    //    all_buffer_table_widget_->show(buffer);
-
-    //    assert(buffer_tables_.count(object.name()) > 0);
-    //    buffer_tables_.at(object.name())->show(buffer);
-
     logdbg << "TableViewDataWidget: updateData_impl: end";
 }
 
@@ -130,6 +114,9 @@ void TableViewDataWidget::loadingDone_impl()
 
     //default behavior
     ViewDataWidget::loadingDone_impl();
+
+    for (auto& buf_widget : buffer_tables_)
+        showTab(buf_widget.second, buf_widget.second->hasData());
 
     logdbg << "TableViewDataWidget: loadingDone_impl: end";
 }
@@ -195,17 +182,32 @@ void TableViewDataWidget::exportDoneSlot(bool cancelled)
     emit exportDoneSignal(cancelled); 
 }
 
-void TableViewDataWidget::showOnlySelectedSlot(bool value)
+void TableViewDataWidget::updateToSettingsChange()
 {
-    loginf << "TableViewDataWidget: showOnlySelectedSlot: " << value;
-    emit showOnlySelectedSignal(value);
+    loginf << "TableViewDataWidget: updateToSettingsChange";
+
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->updateToSettingsChange();
+
+    for (auto& buf_wgt : buffer_tables_)
+    {
+        buf_wgt.second->updateToSettingsChange();
+        showTab(buf_wgt.second, buf_wgt.second->hasData());
+    }
 }
 
-void TableViewDataWidget::usePresentationSlot(bool use_presentation)
+void TableViewDataWidget::showTab(QWidget* widget_ptr, bool value)
 {
-    loginf << "TableViewDataWidget: usePresentationSlot";
+    if (tab_widget_)
+    {
+        assert (widget_ptr);
+        int index = tab_widget_->indexOf(widget_ptr);
+        assert (index >= 0);
 
-    emit usePresentationSignal(use_presentation);
+        tab_widget_->setTabEnabled(index, value); // setTabVisitable only for >=Qt 5.15
+
+        tab_widget_->setStyleSheet("QTabBar::tab::disabled {min-width: 0px;max-width: 0px;color:rgba(0,0,0,0);background-color: rgba(0,0,0,0);}");
+    }
 }
 
 void TableViewDataWidget::resetModels()
@@ -250,13 +252,14 @@ void TableViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     auto addTable = [ & ] (const std::string& db_content, 
                            const QTableView* table,
                            bool show_only_selected,
-                           bool use_presentation)
+                           bool use_presentation, bool ignore_non_target_reports)
     {
         nlohmann::json table_info;
 
         table_info[ "content"            ] = db_content;
         table_info[ "show_only_selected" ] = show_only_selected;
         table_info[ "use_presentation"   ] = use_presentation;
+        table_info[ "ignore_non_target_reports"   ] = ignore_non_target_reports;
         table_info[ "count"              ] = table->model()->rowCount();
 
         //get properties
@@ -284,15 +287,15 @@ void TableViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
     addTable("All", 
              all_buffer_table_widget_->table(), 
-             all_buffer_table_widget_->showOnlySelected(), 
-             all_buffer_table_widget_->usePresentation());
+             view_->showOnlySelected(),
+             view_->usePresentation(), view_->ignoreNonTargetReports());
 
     for (const auto& it : buffer_tables_)
     {
         addTable(it.first, 
                  it.second->table(), 
-                 it.second->showOnlySelected(), 
-                 it.second->usePresentation());
+                 view_->showOnlySelected(),
+                 view_->usePresentation(), view_->ignoreNonTargetReports());
     }
 
     info[ "tables" ] = table_infos;
