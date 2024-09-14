@@ -1057,6 +1057,72 @@ void DBContentManager::cutCachedData()
     loginf << "DBContentManager: cutCachedData: current ts " << Time::toString(Time::currentUTCTime())
            << " min_ts " << Time::toString(min_ts);
 
+    // for (auto buf_it = data_.begin(); buf_it != data_.end(); ++buf_it)
+    // {
+    //     buffer_size = buf_it->second->size();
+
+    //     if (buffer_size == 0)
+    //         continue;
+
+    //     assert (metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it->first));
+
+    //     Variable& ts_var = metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it->first);
+
+    //     Property ts_prop {ts_var.name(), ts_var.dataType()};
+
+    //     if (buf_it->second->hasProperty(ts_prop))
+    //     {
+    //         NullableVector<boost::posix_time::ptime>& ts_vec = buf_it->second->get<boost::posix_time::ptime>(
+    //                     ts_var.name());
+
+    //         unsigned int index=0;
+    //         bool cutoff_found = false;
+
+    //         for (; index < buffer_size; ++index)
+    //         {
+    //             if (!ts_vec.isNull(index) && ts_vec.get(index) > min_ts)
+    //             {
+    //                 logdbg << "DBContentManager: cutCachedData: found " << buf_it->first
+    //                        << " cutoff tod index " << index
+    //                        << " ts " << Time::toString(ts_vec.get(index));
+
+    //                 cutoff_found = true;
+    //                 break; // index is on first index where ts > min_ts
+    //             }
+    //         }
+    //         // index == buffer_size if none bigger than min_ts
+
+    //         if (!cutoff_found) // no ts bigger than remove:ts found, remove all data
+    //         {
+    //             buf_it = data_.erase(buf_it);
+    //         }
+    //         else if (cutoff_found && index != 0) // if index == 0, all ok, otherwise remove
+    //         {
+    //             assert (index >= 1);
+    //             assert (index < buffer_size);
+
+    //             index--; // cut at previous
+
+    //             logdbg << "DBContentManager: cutCachedData: cutting " << buf_it->first
+    //                    << " up to index " << index
+    //                    << " total size " << buffer_size
+    //                    << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
+
+    //             buf_it->second->cutUpToIndex(index);
+    //         }
+    //     }
+    //     else
+    //         logwrn << "DBContentManager: cutCachedData: buffer " << buf_it->first << " has not tod for cutoff";
+    // }
+
+    // remove empty buffers
+    // std::map<std::string, std::shared_ptr<Buffer>> tmp_data = data_;
+
+    // for (auto& buf_it : tmp_data)
+    //     if (!buf_it.second->size())
+    //         data_.erase(buf_it.first);
+
+
     for (auto& buf_it : data_)
     {
         buffer_size = buf_it.second->size();
@@ -1070,7 +1136,7 @@ void DBContentManager::cutCachedData()
         if (buf_it.second->hasProperty(ts_prop))
         {
             NullableVector<boost::posix_time::ptime>& ts_vec = buf_it.second->get<boost::posix_time::ptime>(
-                        ts_var.name());
+                ts_var.name());
 
             unsigned int index=0;
 

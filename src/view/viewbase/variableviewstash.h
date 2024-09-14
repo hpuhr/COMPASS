@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <map>
+#include <cmath>
 
 #include <boost/optional.hpp>
 
@@ -34,7 +35,7 @@ struct VariableStash
 /**
 */
 template <typename T>
-struct DBContentStash
+struct GroupedDataStash
 {
     bool isValid() const
     {
@@ -124,39 +125,39 @@ public:
     }
 
     const std::vector<OptionalDataRange>& dataRanges() const { return data_ranges_; }
-    const std::map<std::string, DBContentStash<T>> dbContentStashes() const { return dbcontent_stashes_; }
+    const std::map<std::string, GroupedDataStash<T>> groupedStashes() const { return grouped_stashes_; }
 
     bool hasData() const
     {
-        return !dbcontent_stashes_.empty();
+        return !grouped_stashes_.empty();
     }
 
-    DBContentStash<T>& dbContentStash(const std::string& dbcontent_name)
+    GroupedDataStash<T>& groupedDataStash(const std::string& group_name)
     {
         //stash already init?
-        if (dbcontent_stashes_.count(dbcontent_name))
-            return dbcontent_stashes_.at(dbcontent_name);
+        if (grouped_stashes_.count(group_name))
+            return grouped_stashes_.at(group_name);
 
         //init new stash for dbcontent
-        auto& s = dbcontent_stashes_[ dbcontent_name ];
+        auto& s = grouped_stashes_[ group_name ];
         s.variable_stashes.resize(num_variables_);
 
         return s;
     }
 
-    const DBContentStash<T>& dbContentStash(const std::string& dbcontent_name) const
+    const GroupedDataStash<T>& dbContentStash(const std::string& group_name) const
     {
-        return dbcontent_stashes_.at(dbcontent_name);
+        return grouped_stashes_.at(group_name);
     }
 
-    bool hasDBContentStash(const std::string& dbcontent_name) const
+    bool hasDBContentStash(const std::string& group_name) const
     {
-        return dbcontent_stashes_.count(dbcontent_name) != 0;
+        return grouped_stashes_.count(group_name) != 0;
     }
 
     void reset()
     {
-        dbcontent_stashes_.clear();
+        grouped_stashes_.clear();
 
         nan_value_count_  = 0;
         valid_count_      = 0;
@@ -170,7 +171,7 @@ public:
     bool isValid() const
     {
         //check if each dbcontent stash is still valid
-        for (const auto& dbc_stash : dbcontent_stashes_)
+        for (const auto& dbc_stash : grouped_stashes_)
             if (!dbc_stash.second.isValid())
                 return false;
 
@@ -186,7 +187,7 @@ public:
             data_range.reset();
 
             //update variable range
-            for (const auto& dbc : dbcontent_stashes_)
+            for (const auto& dbc : grouped_stashes_)
             {
                 const auto& values = dbc.second.variable_stashes[ i ].values;
                 for (const auto& v : values)
@@ -208,7 +209,7 @@ public:
     void updateCounts()
     {
         //update dbcontent counts
-        for (auto& dbc_stash : dbcontent_stashes_)
+        for (auto& dbc_stash : grouped_stashes_)
             dbc_stash.second.updateCounts();
 
         //accumulate individual counts
@@ -217,7 +218,7 @@ public:
         selected_count_   = 0;
         unselected_count_ = 0;
 
-        for (const auto& dbc : dbcontent_stashes_)
+        for (const auto& dbc : grouped_stashes_)
         {
             nan_value_count_  += dbc.second.nan_count;
             valid_count_      += dbc.second.valid_count;
@@ -234,7 +235,7 @@ public:
 
     void freeStashData()
     {
-        for (auto& dbc_stash : dbcontent_stashes_)
+        for (auto& dbc_stash : grouped_stashes_)
             dbc_stash.second.freeStashData();
     }
 
@@ -244,8 +245,8 @@ public:
     unsigned int unselected_count_  = 0;
 
 private:
-    std::map<std::string, DBContentStash<T>> dbcontent_stashes_;
-    std::vector<OptionalDataRange>           data_ranges_;
+    std::map<std::string, GroupedDataStash<T>> grouped_stashes_;
+    std::vector<OptionalDataRange>            data_ranges_;
 
     size_t num_variables_ = 0;
 };

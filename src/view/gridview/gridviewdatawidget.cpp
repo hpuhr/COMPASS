@@ -51,7 +51,7 @@
 GridViewDataWidget::GridViewDataWidget(GridViewWidget* view_widget,
                                        QWidget* parent,
                                        Qt::WindowFlags f)
-:   VariableViewStashDataWidget(view_widget, view_widget->getView(), parent, f)
+:   VariableViewStashDataWidget(view_widget, view_widget->getView(), false, parent, f)
 {
     view_ = view_widget->getView();
     assert(view_);
@@ -168,7 +168,7 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
 
     loginf << "GridViewDataWidget: renderGrid: Created grid of " << grid_->numCellsX() << "x" << grid_->numCellsY();
 
-    for (const auto& dbc_values : getStash().dbContentStashes())
+    for (const auto& dbc_values : getStash().groupedStashes())
     {
         const auto& x_values = dbc_values.second.variable_stashes[ 0 ].values;
         const auto& y_values = dbc_values.second.variable_stashes[ 1 ].values;

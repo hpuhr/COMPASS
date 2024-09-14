@@ -42,10 +42,10 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                                      ReconstructorBaseSettings& base_settings,
                                      unsigned int default_line_id)
     :   Configurable (class_id, instance_id, &task)
-      ,   acc_estimator_(std::move(acc_estimator))
-      ,   task_(task)
-      ,   base_settings_(base_settings)
-      ,   chain_predictors_(new reconstruction::KalmanChainPredictors)
+    ,   acc_estimator_(std::move(acc_estimator))
+    ,   task_(task)
+    ,   base_settings_(base_settings)
+    ,   chain_predictors_(new reconstruction::KalmanChainPredictors)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
@@ -147,7 +147,7 @@ int ReconstructorBase::numSlices() const
         return -1;
 
     return (int)std::ceil(Utils::Time::partialSeconds(timestamp_max_ - timestamp_min_)
-                          / Utils::Time::partialSeconds(base_settings_.sliceDuration()));
+                           / Utils::Time::partialSeconds(base_settings_.sliceDuration()));
 }
 
 std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlice()
@@ -165,7 +165,7 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 
     TimeWindow window {current_slice_begin_, current_slice_end};
 
-    loginf << "ReconstructorBase: getNextTimeSlice: current_slice_begin " << Time::toString(current_slice_begin_)
+    logdbg << "ReconstructorBase: getNextTimeSlice: current_slice_begin " << Time::toString(current_slice_begin_)
            << " current_slice_end " << Time::toString(current_slice_end);
 
     first_slice_ = current_slice_begin_ == timestamp_min_;
@@ -175,7 +175,7 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 
     next_slice_begin_ = current_slice_end; // for next iteration
 
-            //assert (current_slice_begin_ <= timestamp_max_); can be bigger
+    //assert (current_slice_begin_ <= timestamp_max_); can be bigger
 
     std::unique_ptr<DataSlice> slice (new DataSlice());
 
@@ -195,6 +195,15 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
     slice->write_done_ = false;
 
     ++slice_cnt_;
+
+    loginf << "ReconstructorBase: getNextTimeSlice: slice_cnt " << slice_cnt_
+           << " slice_begin " << Time::toString(slice->slice_begin_)
+           << " next_slice_begin " << Time::toString(slice->next_slice_begin_)
+           << " remove_before_time " << Time::toString(slice->remove_before_time_)
+           << " write_before_time "  << Time::toString(slice->write_before_time_)
+           << " timestamp_min " << Time::toString(slice->timestamp_min_)
+           << " timestamp_max " << Time::toString(slice->timestamp_max_)
+           << " first_slice " << slice->first_slice_ << " is_last_slice " << slice->is_last_slice_;
 
     return slice;
 }
@@ -236,7 +245,7 @@ void ReconstructorBase::initChainPredictors()
     if (chain_predictors_->isInit())
         return;
 
-                //int num_threads = std::max(1, tbb::task_scheduler_init::default_num_threads());
+//int num_threads = std::max(1, tbb::task_scheduler_init::default_num_threads());
 
 #if TBB_VERSION_MAJOR <= 4
     int num_threads = tbb::task_scheduler_init::default_num_threads(); // TODO PHIL
@@ -267,8 +276,8 @@ void ReconstructorBase::processSlice()
 
     if (currentSlice().first_slice_)
     {
-       //not needed at the moment
-       //initChainPredictors();
+        //not needed at the moment
+        //initChainPredictors();
     }
 
     if (!currentSlice().first_slice_)
@@ -380,42 +389,56 @@ void ReconstructorBase::processSlice()
 
 void ReconstructorBase::clearOldTargetReports()
 {
-    logdbg << "ReconstructorBase: clearOldTargetReports: remove_before_time "
+    loginf << "ReconstructorBase: clearOldTargetReports: remove_before_time "
            << Time::toString(currentSlice().remove_before_time_)
            << " size " << target_reports_.size();
 
     tr_timestamps_.clear();
     tr_ds_.clear();
 
-    for (auto ts_it = target_reports_.begin(); ts_it != target_reports_.end() /* not hoisted */; /* no increment */)
+    for (auto tr_it = target_reports_.begin(); tr_it != target_reports_.end() /* not hoisted */; /* no increment */)
     {
-        if (ts_it->second.timestamp_ < currentSlice().remove_before_time_)
+        if (tr_it->second.timestamp_ < currentSlice().remove_before_time_) // UGAX <=
         {
             //loginf << "ReconstructorBase: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
-            ts_it = target_reports_.erase(ts_it);
+            tr_it = target_reports_.erase(tr_it);
         }
         else
         {
             //loginf << "ReconstructorBase: clearOldTargetReports: keeping " << Time::toString(ts_it->second.timestamp_);
 
-            ts_it->second.in_current_slice_ = false;
+            tr_it->second.in_current_slice_ = false;
+            //tr_it->second.buffer_index_ = std::numeric_limits<unsigned int>::max(); // set to impossible value UGAX
 
-                    // add to lookup structures
-            tr_timestamps_.insert({ts_it->second.timestamp_, ts_it->second.record_num_});
-            tr_ds_[Number::recNumGetDBContId(ts_it->second.record_num_)]
-                  [ts_it->second.ds_id_][ts_it->second.line_id_].push_back(
-                          ts_it->second.record_num_);
+            // add to lookup structures
+            tr_timestamps_.insert({tr_it->second.timestamp_, tr_it->second.record_num_});
 
-            ++ts_it;
+            tr_ds_[Number::recNumGetDBContId(tr_it->second.record_num_)]
+                  [tr_it->second.ds_id_][tr_it->second.line_id_].push_back(
+                          tr_it->second.record_num_);
+
+            ++tr_it;
         }
     }
 
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+
+    for (auto& tr_it : target_reports_)
+    {
+        assert (tr_it.second.timestamp_ >= currentSlice().remove_before_time_);
+        assert (!tr_it.second.in_current_slice_);
+    }
+
+    for (auto& ts_it : tr_timestamps_)
+        assert (ts_it.first >= currentSlice().remove_before_time_);
+
+#endif
+
     loginf << "ReconstructorBase: clearOldTargetReports: size after " << target_reports_.size();
 
-            // clear old data from targets
+    // clear old data from targets
     for (auto& tgt_it : targets_)
         tgt_it.second.removeOutdatedTargetReports();
-
 }
 
 void ReconstructorBase::createTargetReports()
@@ -432,7 +455,9 @@ void ReconstructorBase::createTargetReports()
 
     accessors_.clear();
 
-            //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+    //loginf << "UGA1";
+
+    //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     std::set<unsigned int> unused_ds_ids = task_.unusedDSIDs();
     std::map<unsigned int, std::set<unsigned int>> unused_lines = task_.unusedDSIDLines();
@@ -441,6 +466,8 @@ void ReconstructorBase::createTargetReports()
 
     for (auto& buf_it : *accessor_)
     {
+        //loginf << "UGA2 " << buf_it.first;
+
         assert (dbcont_man.existsDBContent(buf_it.first));
         unsigned int dbcont_id = dbcont_man.dbContent(buf_it.first).id();
 
@@ -449,18 +476,49 @@ void ReconstructorBase::createTargetReports()
         dbContent::TargetReportAccessor& tgt_acc = accessors_.at(dbcont_id);
         unsigned int buffer_size = tgt_acc.size();
 
+        //loginf << "UGA3 buffer_size " << buffer_size;
+
         for (unsigned int cnt=0; cnt < buffer_size; cnt++)
         {
+            //loginf << "UGA4 cnt " << cnt;
+
             record_num = tgt_acc.recordNumber(cnt);
+
             ts = tgt_acc.timestamp(cnt);
 
-                    //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
+            //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
 
             if (!tgt_acc.position(cnt))
                 continue;
 
-            if (ts >= currentSlice().slice_begin_) // insert
+            if (ts < currentSlice().slice_begin_) // insert // UGAX if (target_reports_.count(record_num)) // update buffer_index_
             {
+                //loginf << "UGA5 update";
+
+                assert (!target_reports_.at(record_num).in_current_slice_);
+
+                if (ts < currentSlice().remove_before_time_)
+                {
+                    logerr << "ReconstructorBase: createTargetReports: old data not removed ts "
+                           << Time::toString(ts)
+                           << " dbcont " << buf_it.first
+                           << " buffer_size " << buffer_size
+                           << " remove before " << Time::toString(currentSlice().remove_before_time_);
+                }
+
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+                assert (ts >= currentSlice().remove_before_time_);
+
+                assert (target_reports_.at(record_num).record_num_ == record_num); // be sure
+                assert (target_reports_.at(record_num).timestamp_ == ts); // be very sure
+#endif
+
+                target_reports_.at(record_num).buffer_index_ = cnt;
+            }
+            else // insert
+            {
+                //loginf << "UGA6 insert";
+
                 // base info
                 info.buffer_index_ = cnt;
                 info.record_num_ = record_num;
@@ -469,12 +527,13 @@ void ReconstructorBase::createTargetReports()
                 info.line_id_ = tgt_acc.lineID(cnt);
                 info.timestamp_ = ts;
 
-                        // reconstructor info
+                // reconstructor info
                 info.in_current_slice_ = true;
 
-                info.is_calculated_reference_ = ds_man.hasDBDataSource(info.ds_id_) && 
-                                                ds_man.dbDataSource(info.ds_id_).sac() == ReconstructorBaseSettings::REC_DS_SAC &&
-                                                ds_man.dbDataSource(info.ds_id_).sic() == ReconstructorBaseSettings::REC_DS_SIC;
+                info.is_calculated_reference_ =
+                    ds_man.hasDBDataSource(info.ds_id_)
+                    && ds_man.dbDataSource(info.ds_id_).sac() == ReconstructorBaseSettings::REC_DS_SAC
+                    && ds_man.dbDataSource(info.ds_id_).sic() == ReconstructorBaseSettings::REC_DS_SIC;
 
                 info.acad_ = tgt_acc.acad(cnt);
                 info.acid_ = tgt_acc.acid(cnt);
@@ -488,9 +547,10 @@ void ReconstructorBase::createTargetReports()
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
 
-                info.do_not_use_position_ = !info.position().has_value()
-                                            || (unused_ds_ids.count(info.ds_id_)
-                                                || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
+                info.do_not_use_position_ =
+                    !info.position().has_value()
+                        || (unused_ds_ids.count(info.ds_id_)
+                        || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
 
                 info.barometric_altitude_ = tgt_acc.barometricAltitude(cnt);
 
@@ -500,49 +560,39 @@ void ReconstructorBase::createTargetReports()
                 info.track_angle_ = tgt_acc.trackAngle(cnt);
                 info.ground_bit_ = tgt_acc.groundBit(cnt);
 
-                        // insert info
-                assert (!target_reports_.count(record_num));
+                // insert info
                 target_reports_[record_num] = info;
 
-                        // insert into lookups
+                // insert into lookups
                 tr_timestamps_.insert({ts, record_num});
                 // dbcontent id -> ds_id -> ts ->  record_num
 
                 tr_ds_[dbcont_id][info.ds_id_][info.line_id_].push_back(record_num);
             }
-            else // update buffer_index_
-            {
-                if (ts < currentSlice().remove_before_time_)
-                {
-                    logerr << "ReconstructorBase: createTargetReports: old data not removed ts "
-                           << Time::toString(ts)
-                           << " dbcont " << buf_it.first
-                           << " buffer_size " << buffer_size
-                           << " remove before " << Time::toString(currentSlice().remove_before_time_);
-                }
 
-                assert (ts >= currentSlice().remove_before_time_);
-
-                if (!target_reports_.count(record_num))
-                    logerr << "ReconstructorBase: createTargetReports: missing prev ts " << Time::toString(ts);
-
-                assert (target_reports_.count(record_num));
-                assert (target_reports_.at(record_num).record_num_ == record_num); // be sure
-
-                target_reports_.at(record_num).buffer_index_ = cnt;
-                target_reports_.at(record_num).in_current_slice_ = false;
-
-                assert (target_reports_.at(record_num).timestamp_ == ts); // be very sure
-            }
         }
     }
+
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+    for (auto& tr_it : target_reports_)
+    {
+        if (tr_it.second.buffer_index_ >= accessor(tr_it.second).size())
+            logerr << "UGA tr " << tr_it.second.asStr() << " buffer index " << tr_it.second.buffer_index_
+                   << " accessor size " << accessor(tr_it.second).size() << " is maxint "
+                   << (tr_it.second.buffer_index_ == std::numeric_limits<unsigned int>::max());
+
+        //assert (tr_it.second.buffer_index_ < accessor(tr_it.second).size()); // fails
+    }
+#endif
+
+    loginf << "ReconstructorBase: createTargetReports: done";
 }
 
 void ReconstructorBase::removeTargetAssociationsNewerThan(const boost::posix_time::ptime& ts)
 {
-            // remove target reports from targets & clean
+    // remove target reports from targets & clean
     for (auto& tgt_it : targets_)
-        tgt_it.second.removeTargetReportsNewerThan(ts);
+        tgt_it.second.removeTargetReportsLaterThan(ts);
 }
 
 std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase::createAssociations()
@@ -583,7 +633,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-            // write association info to buffers
+    // write association info to buffers
 
     std::map<std::string, std::shared_ptr<Buffer>> assoc_data;
 

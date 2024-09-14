@@ -4,6 +4,7 @@
 #include "dbcontentmanager.h"
 #include "dbcontent.h"
 #include "dbcontent/variable/variable.h"
+#include "targetreportaccessor.h"
 #include "buffer.h"
 #include "util/number.h"
 #include "util/timeconv.h"
@@ -111,6 +112,25 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
 
     const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+    // if (rec_num == 903216)
+    // {
+    //     loginf << "ReconstructorTarget::addTargetReport: 903216 add_to_tracker " << add_to_tracker
+    //            << " reestimate " << reestimate << " ts " << Time::toString(tr.timestamp_ );
+    //     assert (add_to_tracker);
+    // }
+#endif
+
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+    // assert (rec_num == tr.record_num_);
+    // //assert (tr.in_current_slice_); // can be old one
+    // if (std::find(target_reports_.begin(), target_reports_.end(), rec_num) != target_reports_.end())
+    // {
+    //     logerr << "ReconstructorTarget: addTargetReport: tr " << tr.asStr() << " already added";
+    //     return false;
+    // }
+#endif
+
             //    if (!timestamp_max_.is_not_a_date_time()) // there is time
             //    {
             //        if (tr.timestamp_ < timestamp_max_)
@@ -154,6 +174,13 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
 
     if (tr.mode_a_code_ && !mode_as_.count(tr.mode_a_code_->code_))
         mode_as_.insert(tr.mode_a_code_->code_);
+
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+    // if (rec_nums_.count(tr.record_num_))
+    //     loginf << "TARGET REPORT DUPLICATE3 " << tr.asStr();
+    // assert (!rec_nums_.count(tr.record_num_));
+    // rec_nums_.insert(tr.record_num_);
+#endif
 
     target_reports_.push_back(tr.record_num_);
     tr_timestamps_.insert({tr.timestamp_,tr.record_num_});
@@ -1939,6 +1966,10 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+    //rec_nums_.clear();
+#endif
+
     if (chain_)
         chain_->removeUpdatesBefore(reconstructor_.currentSlice().remove_before_time_);
 
@@ -1951,7 +1982,7 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     references_.clear();
 }
 
-void ReconstructorTarget::removeTargetReportsNewerThan(boost::posix_time::ptime ts)
+void ReconstructorTarget::removeTargetReportsLaterThan(boost::posix_time::ptime ts)
 {
     auto tmp_tr_timestamps = std::move(tr_timestamps_);
 
@@ -1959,12 +1990,23 @@ void ReconstructorTarget::removeTargetReportsNewerThan(boost::posix_time::ptime 
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+    //rec_nums_.clear();
+#endif
+
     if (chain_)
-        chain_->removeUpdatesNewerThan(ts);
+        chain_->removeUpdatesLaterThan(ts);
 
     for (auto& ts_it : tmp_tr_timestamps)
     {
-        if (ts_it.first <= ts)
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+        assert (reconstructor_.target_reports_.count(ts_it.second));
+
+        dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(ts_it.second);
+        assert (tr.timestamp_ == ts_it.first);
+#endif
+
+        if (ts_it.first <= ts) // UGAX <
             addTargetReport(ts_it.second, false, false);
         else
             break;

@@ -59,7 +59,7 @@ using namespace dbContent;
 ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view_widget,
                                                      QWidget* parent,
                                                      Qt::WindowFlags f)
-:   VariableViewStashDataWidget(view_widget, view_widget->getView(), parent, f)
+:   VariableViewStashDataWidget(view_widget, view_widget->getView(), true, parent, f)
 {
     view_ = view_widget->getView();
     assert(view_);
@@ -182,7 +182,7 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
     ScatterSeries selected_series;
     selected_series.points.reserve(stash.selected_count_);
 
-    for (const auto& dbc_stash : stash.dbContentStashes())
+    for (const auto& dbc_stash : stash.groupedStashes())
     {
         if (!dbc_stash.second.valid_count)
             continue;
@@ -669,7 +669,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
     else
     {
         //bad data range or vars not in buffer
-        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no data, size " << getStash().dbContentStashes().size();
+        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no data, size " << getStash().groupedStashes().size();
 
         //no data -> generate default empty layout
         chart->legend()->setVisible(false);

@@ -663,7 +663,7 @@ void KalmanChain::removeUpdatesBefore(const boost::posix_time::ptime& ts)
     predictor_.ref_mm_id.reset();
 }
 
-void KalmanChain::removeUpdatesNewerThan(const boost::posix_time::ptime& ts)
+void KalmanChain::removeUpdatesLaterThan(const boost::posix_time::ptime& ts)
 {
     assert(!needsReestimate());
 

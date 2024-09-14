@@ -38,6 +38,7 @@ class VariableViewStashDataWidget : public VariableViewDataWidget
 public:
     VariableViewStashDataWidget(ViewWidget* view_widget,
                                 VariableView* view,
+                                bool group_per_datasource,
                                 QWidget* parent = nullptr, 
                                 Qt::WindowFlags f = 0);
     virtual ~VariableViewStashDataWidget();
@@ -94,16 +95,33 @@ private:
         }
     }
 
+    template<typename T>
+    void appendData(NullableVector<T>& data,
+                    std::vector<double>& target,
+                    std::vector<unsigned int> indexes)
+    {
+        for (unsigned int index : indexes)
+        {
+            if (data.isNull(index))
+                target.push_back(std::numeric_limits<double>::signaling_NaN());
+            else
+                target.push_back(data.get(index));
+        }
+    }
+
     VariableViewStash<double> stash_;
+    bool group_per_datasource_ {false}; // true = DS ID + Line ID, false = DBContent
+    std::map<std::string, unsigned int> last_buffer_size_; // dbcontent name -> last buffer size
 };
 
 /**
 */
 template<>
-inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(NullableVector<boost::posix_time::ptime>& data, 
-                                                                              std::vector<double>& target, 
-                                                                              unsigned int last_size,
-                                                                              unsigned int current_size)
+inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(
+    NullableVector<boost::posix_time::ptime>& data,
+    std::vector<double>& target,
+    unsigned int last_size,
+    unsigned int current_size)
 {
     for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
     {
@@ -120,6 +138,27 @@ inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(Nu
     }
 }
 
+template<>
+inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(
+    NullableVector<boost::posix_time::ptime>& data,
+    std::vector<double>& target,
+    std::vector<unsigned int> indexes)
+{
+    for (unsigned int index : indexes)
+    {
+        if (data.isNull(index))
+        {
+            target.push_back(std::numeric_limits<double>::signaling_NaN());
+            continue;
+        }
+
+        //to utc msecs since epoch
+        long t = Utils::Time::toLong(data.get(index));
+
+        target.push_back(t);
+    }
+}
+
 /**
 */
 template<>
@@ -127,6 +166,14 @@ inline void VariableViewStashDataWidget::appendData<std::string>(NullableVector<
                                                                  std::vector<double>& target, 
                                                                  unsigned int last_size,
                                                                  unsigned int current_size)
+{
+    throw std::runtime_error("VariableViewStashDataWidget: appendData: string not supported");
+}
+
+template<>
+inline void VariableViewStashDataWidget::appendData<std::string>(NullableVector<std::string>& data,
+                                                                 std::vector<double>& target,
+                                                                 std::vector<unsigned int> indexes)
 {
     throw std::runtime_error("VariableViewStashDataWidget: appendData: string not supported");
 }

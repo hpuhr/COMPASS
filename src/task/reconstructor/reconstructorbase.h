@@ -30,6 +30,8 @@
 #include <string>
 #include <memory>
 
+#define DO_RECONSTRUCTOR_PEDANTIC_CHECKING 1
+
 namespace dbContent
 {
 class VariableSet;
