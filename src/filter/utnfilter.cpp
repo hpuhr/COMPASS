@@ -43,12 +43,12 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
 
 UTNFilter::~UTNFilter() {}
 
-bool UTNFilter::filters(const std::string& dbo_type)
+bool UTNFilter::filters(const std::string& dbcont_name)
 {
     if (!COMPASS::instance().dbContentManager().hasAssociations())
         return false;
 
-    return true;
+    return true; // condition string for non-associated dbcontent as well
 }
 
 std::string UTNFilter::getConditionString(const std::string& dbcontent_name, bool& first)
@@ -58,10 +58,26 @@ std::string UTNFilter::getConditionString(const std::string& dbcontent_name, boo
     if (!COMPASS::instance().dbContentManager().hasAssociations())
         return "";
 
-    if (!COMPASS::instance().dbContentManager().metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_))
-        return "";
-
     stringstream ss;
+
+    // check if filter non-associated content
+    if (active_ &&
+        !COMPASS::instance().dbContentManager().metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_))
+    {
+        if (null_wanted_)
+            return "";
+        else
+        {
+            if (!first)
+                ss << " AND";
+
+            ss << " false";
+
+            first = false;
+
+            return ss.str();
+        }
+    }
 
     if (active_ && (values_.size() || null_wanted_))
     {
