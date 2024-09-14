@@ -339,7 +339,7 @@ std::set<unsigned int> ReconstructorTask::disabledDataSources() const
     {
         for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
         {
-            if (ds_it->dsType() == "Radar")
+            if (ds_it->name() == "CalcRef")
                 disabled_ds.insert(ds_it->id());
         }
     }
@@ -531,7 +531,7 @@ void ReconstructorTask::deleteTargetsDoneSlot()
         {
             for (auto& dbcont_it : cont_man)
             {
-                if (dbcont_it.second->existsInDB())
+                if (dbcont_it.second->existsInDB() && dbcont_it.second->hasVariable("UTN"))
                 {
                     QMetaObject::invokeMethod(this, "updateProgressSlot", Qt::QueuedConnection,
                                               Q_ARG(const QString&, "Deleting Previous Associations"),
@@ -614,7 +614,7 @@ void ReconstructorTask::loadDataSlice()
         logdbg << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
                << " has data " << dbcont_it.second->hasData();
 
-        if (!dbcont_it.second->hasData())
+        if (!dbcont_it.second->hasData() || !dbcont_it.second->hasVariable("UTN"))
             continue;
 
         VariableSet read_set = currentReconstructor()->getReadSetFor(dbcont_it.first);
