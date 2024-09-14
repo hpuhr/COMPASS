@@ -58,6 +58,9 @@ std::string UTNFilter::getConditionString(const std::string& dbcontent_name, boo
     if (!COMPASS::instance().dbContentManager().hasAssociations())
         return "";
 
+    if (!COMPASS::instance().dbContentManager().metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_))
+        return "";
+
     stringstream ss;
 
     if (active_ && (values_.size() || null_wanted_))
