@@ -408,7 +408,7 @@ void ReconstructorBase::clearOldTargetReports()
             //loginf << "ReconstructorBase: clearOldTargetReports: keeping " << Time::toString(ts_it->second.timestamp_);
 
             tr_it->second.in_current_slice_ = false;
-            //tr_it->second.buffer_index_ = std::numeric_limits<unsigned int>::max(); // set to impossible value UGAX
+            tr_it->second.buffer_index_ = std::numeric_limits<unsigned int>::max(); // set to impossible value UGAX
 
             // add to lookup structures
             tr_timestamps_.insert({tr_it->second.timestamp_, tr_it->second.record_num_});
@@ -491,10 +491,13 @@ void ReconstructorBase::createTargetReports()
             if (!tgt_acc.position(cnt))
                 continue;
 
-            if (ts < currentSlice().slice_begin_) // insert // UGAX if (target_reports_.count(record_num)) // update buffer_index_
+            //if (ts < currentSlice().slice_begin_)
+            if (target_reports_.count(record_num)) // already exist, update buffer_index_
             {
                 //loginf << "UGA5 update";
 
+#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
+                //assert (target_reports_.count(record_num));
                 assert (!target_reports_.at(record_num).in_current_slice_);
 
                 if (ts < currentSlice().remove_before_time_)
@@ -506,7 +509,6 @@ void ReconstructorBase::createTargetReports()
                            << " remove before " << Time::toString(currentSlice().remove_before_time_);
                 }
 
-#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
                 assert (ts >= currentSlice().remove_before_time_);
 
                 assert (target_reports_.at(record_num).record_num_ == record_num); // be sure
@@ -515,9 +517,11 @@ void ReconstructorBase::createTargetReports()
 
                 target_reports_.at(record_num).buffer_index_ = cnt;
             }
-            else // insert
+            else // not yet, insert
             {
                 //loginf << "UGA6 insert";
+
+                //assert (!target_reports_.count(record_num));
 
                 // base info
                 info.buffer_index_ = cnt;
@@ -577,11 +581,12 @@ void ReconstructorBase::createTargetReports()
     for (auto& tr_it : target_reports_)
     {
         if (tr_it.second.buffer_index_ >= accessor(tr_it.second).size())
-            logerr << "UGA tr " << tr_it.second.asStr() << " buffer index " << tr_it.second.buffer_index_
+            logerr << "ReconstructorBase: createTargetReports: tr " << tr_it.second.asStr()
+                   << " buffer index " << tr_it.second.buffer_index_
                    << " accessor size " << accessor(tr_it.second).size() << " is maxint "
                    << (tr_it.second.buffer_index_ == std::numeric_limits<unsigned int>::max());
 
-        //assert (tr_it.second.buffer_index_ < accessor(tr_it.second).size()); // fails
+        assert (tr_it.second.buffer_index_ < accessor(tr_it.second).size()); // fails
     }
 #endif
 

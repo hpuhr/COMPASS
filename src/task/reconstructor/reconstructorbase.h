@@ -119,6 +119,8 @@ class ReconstructorBase : public Configurable
 
         bool processing_done_ {false}; // set if assoc_data_, reftraj_data_ are set correctly and can be written
         bool write_done_ {false}; // set if data has been written
+
+        unsigned int run_count_ {0};
     };
 
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
@@ -188,7 +190,7 @@ class ReconstructorBase : public Configurable
 
     virtual bool doFurtherSliceProcessing() { return false; }     // called for repeat checking
     virtual bool isLastSliceProcessingRun() { return true; }      // called to check if another repeat run is planned
-    virtual unsigned int currentSliceRepeatRun() { return 0; }    // current repeat run
+    virtual unsigned int currentSliceRepeatRun() { return currentSlice().run_count_; }    // current repeat run
 
     reconstruction::KalmanChainPredictors& chainPredictors();
 

@@ -150,7 +150,8 @@ std::string ReconstructorInfo::asStr() const
 
     ss << " acad " << (acad_ ? String::hexStringFromInt(*acad_, 6, '0') : "''")
        << " acid '" << (acid_ ? *acid_ : "")  << "'"
-       << " m3a " << (mode_a_code_ ? mode_a_code_->asStr() : "");
+       << " m3a " << (mode_a_code_ ? mode_a_code_->asStr() : "")
+       << " curslc " << in_current_slice_;
 
     return ss.str();
 }
