@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_COMMANDS_H
-#define MAINWINDOW_COMMANDS_H
+#pragma once
 
 #include "rtcommand.h"
 #include "rtcommand_macros.h"
@@ -220,18 +219,6 @@ protected:
     DECLARE_RTCOMMAND_NOOPTIONS
 };
 
-// calc assoc
-struct RTCommandCalculateAssociations : public rtcommand::RTCommand
-{
-    RTCommandCalculateAssociations();
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(associate_data, "associate target reports")
-    DECLARE_RTCOMMAND_NOOPTIONS
-};
-
 // calc ARTAS assoc
 struct RTCommandCalculateARTASAssociations : public rtcommand::RTCommand
 {
@@ -371,4 +358,3 @@ protected:
 
 }
 
-#endif // MAINWINDOW_COMMANDS_H

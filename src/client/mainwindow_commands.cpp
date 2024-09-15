@@ -11,6 +11,7 @@
 #include "dbcontentmanager.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createartasassociationstask.h"
+#include "reconstructortask.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 //#include "viewpointsimporttaskdialog.h"
@@ -52,7 +53,6 @@ REGISTER_RTCOMMAND(main_window::RTCommandImportJSONFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportGPSTrail)
 REGISTER_RTCOMMAND(main_window::RTCommandImportSectorsJSON)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateRadarPlotPositions)
-REGISTER_RTCOMMAND(main_window::RTCommandCalculateAssociations)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateARTASAssociations)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateReferences)
 REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
@@ -82,7 +82,6 @@ void init_commands()
     main_window::RTCommandImportGPSTrail::init();
     main_window::RTCommandImportSectorsJSON::init();
     main_window::RTCommandCalculateRadarPlotPositions::init();
-    main_window::RTCommandCalculateAssociations::init();
     main_window::RTCommandCalculateReferences::init();
     main_window::RTCommandLoadData::init();
     main_window::RTCommandExportViewPointsReport::init();
@@ -1223,44 +1222,6 @@ bool RTCommandCalculateRadarPlotPositions::run_impl()
     return true;
 }
 
-// associate data
-RTCommandCalculateAssociations::RTCommandCalculateAssociations()
-    : rtcommand::RTCommand()
-{
-    condition.setSignal("compass.taskmanager.createassociationstask.doneSignal", -1); // think about max duration
-}
-
-bool RTCommandCalculateAssociations::run_impl()
-{
-    if (!COMPASS::instance().dbOpened())
-    {
-        setResultMessage("Database not opened");
-        return false;
-    }
-
-    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
-    {
-        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
-        return false;
-    }
-
-    //@TODO_RECONSTRUCTOR
-    // CreateAssociationsTask& task = COMPASS::instance().taskManager().createAssociationsTask();
-
-    // if(!task.canRun())
-    // {
-    //     setResultMessage("Calculate associations task can not be run");
-    //     return false;
-    // }
-
-    // task.allowUserInteractions(false);
-    // task.run();
-
-    // if ok
-    return false;
-}
-
-
 // associate ARTAS target reports
 RTCommandCalculateARTASAssociations::RTCommandCalculateARTASAssociations()
     : rtcommand::RTCommand()
@@ -1301,7 +1262,7 @@ bool RTCommandCalculateARTASAssociations::run_impl()
 RTCommandCalculateReferences::RTCommandCalculateReferences()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.calculatereferencestask.doneSignal", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.reconstructortask.doneSignal", -1); // think about max duration
 }
 
 bool RTCommandCalculateReferences::run_impl()
@@ -1318,17 +1279,16 @@ bool RTCommandCalculateReferences::run_impl()
         return false;
     }
 
-    //@TODO_RECONSTRUCTOR
-    // CalculateReferencesTask& task = COMPASS::instance().taskManager().calculateReferencesTask();
+    ReconstructorTask& task = COMPASS::instance().taskManager().reconstructReferencesTask();
 
-    // if(!task.canRun())
-    // {
-    //     setResultMessage("Calculate references task can not be run");
-    //     return false;
-    // }
+    if(!task.canRun())
+    {
+        setResultMessage("Calculate references task can not be run");
+        return false;
+    }
 
-    // task.allowUserInteractions(false);
-    // task.run();
+    task.allowUserInteractions(false);
+    task.run();
 
     // if ok
     return false;

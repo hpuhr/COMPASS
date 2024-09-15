@@ -943,18 +943,20 @@ void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to ind
                << " null_size " << null_flags_.size();
     }
 
+    // Erase the range including both 0 and index
+
     if (null_flags_.size())
     {
-        if (index < null_flags_.size())
-            null_flags_.erase(null_flags_.begin(), null_flags_.begin() + index + 1); // UGAX
+        if (index < null_flags_.size() - 1)
+            null_flags_.erase(null_flags_.begin(), null_flags_.begin() + index + 1); // first and last, is correct
         else
             null_flags_.clear(); // would have been removed
     }
 
     if (data_.size())
     {
-        if (index < data_.size())
-            data_.erase(data_.begin(), data_.begin() + index + 1); // takes number of elements UGAX
+        if (index < data_.size() - 1)
+            data_.erase(data_.begin(), data_.begin() + index + 1);
         else
             data_.clear(); // would have been removed
     }

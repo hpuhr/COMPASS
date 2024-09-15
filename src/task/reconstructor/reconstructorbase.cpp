@@ -398,7 +398,7 @@ void ReconstructorBase::clearOldTargetReports()
 
     for (auto tr_it = target_reports_.begin(); tr_it != target_reports_.end() /* not hoisted */; /* no increment */)
     {
-        if (tr_it->second.timestamp_ < currentSlice().remove_before_time_) // UGAX <=
+        if (tr_it->second.timestamp_ <= currentSlice().remove_before_time_) // UGAX <=
         {
             //loginf << "ReconstructorBase: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
             tr_it = target_reports_.erase(tr_it);
