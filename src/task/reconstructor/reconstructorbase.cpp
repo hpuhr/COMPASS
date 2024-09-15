@@ -398,7 +398,7 @@ void ReconstructorBase::clearOldTargetReports()
 
     for (auto tr_it = target_reports_.begin(); tr_it != target_reports_.end() /* not hoisted */; /* no increment */)
     {
-        if (tr_it->second.timestamp_ <= currentSlice().remove_before_time_) // UGAX <=
+        if (tr_it->second.timestamp_ <= currentSlice().remove_before_time_)
         {
             //loginf << "ReconstructorBase: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
             tr_it = target_reports_.erase(tr_it);
@@ -408,7 +408,7 @@ void ReconstructorBase::clearOldTargetReports()
             //loginf << "ReconstructorBase: clearOldTargetReports: keeping " << Time::toString(ts_it->second.timestamp_);
 
             tr_it->second.in_current_slice_ = false;
-            tr_it->second.buffer_index_ = std::numeric_limits<unsigned int>::max(); // set to impossible value UGAX
+            tr_it->second.buffer_index_ = std::numeric_limits<unsigned int>::max(); // set to impossible value
 
             // add to lookup structures
             tr_timestamps_.insert({tr_it->second.timestamp_, tr_it->second.record_num_});
@@ -455,8 +455,6 @@ void ReconstructorBase::createTargetReports()
 
     accessors_.clear();
 
-    //loginf << "UGA1";
-
     //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     std::set<unsigned int> unused_ds_ids = task_.unusedDSIDs();
@@ -466,8 +464,6 @@ void ReconstructorBase::createTargetReports()
 
     for (auto& buf_it : *accessor_)
     {
-        //loginf << "UGA2 " << buf_it.first;
-
         assert (dbcont_man.existsDBContent(buf_it.first));
         unsigned int dbcont_id = dbcont_man.dbContent(buf_it.first).id();
 
@@ -476,12 +472,8 @@ void ReconstructorBase::createTargetReports()
         dbContent::TargetReportAccessor& tgt_acc = accessors_.at(dbcont_id);
         unsigned int buffer_size = tgt_acc.size();
 
-        //loginf << "UGA3 buffer_size " << buffer_size;
-
         for (unsigned int cnt=0; cnt < buffer_size; cnt++)
         {
-            //loginf << "UGA4 cnt " << cnt;
-
             record_num = tgt_acc.recordNumber(cnt);
 
             ts = tgt_acc.timestamp(cnt);
@@ -491,11 +483,8 @@ void ReconstructorBase::createTargetReports()
             if (!tgt_acc.position(cnt))
                 continue;
 
-            //if (ts < currentSlice().slice_begin_)
             if (target_reports_.count(record_num)) // already exist, update buffer_index_
             {
-                //loginf << "UGA5 update";
-
 #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
                 //assert (target_reports_.count(record_num));
                 assert (!target_reports_.at(record_num).in_current_slice_);
@@ -519,10 +508,6 @@ void ReconstructorBase::createTargetReports()
             }
             else // not yet, insert
             {
-                //loginf << "UGA6 insert";
-
-                //assert (!target_reports_.count(record_num));
-
                 // base info
                 info.buffer_index_ = cnt;
                 info.record_num_ = record_num;
@@ -593,11 +578,11 @@ void ReconstructorBase::createTargetReports()
     loginf << "ReconstructorBase: createTargetReports: done";
 }
 
-void ReconstructorBase::removeTargetAssociationsNewerThan(const boost::posix_time::ptime& ts)
+void ReconstructorBase::removeTargetReportsLaterOrEqualThan(const boost::posix_time::ptime& ts)
 {
     // remove target reports from targets & clean
     for (auto& tgt_it : targets_)
-        tgt_it.second.removeTargetReportsLaterThan(ts);
+        tgt_it.second.removeTargetReportsLaterOrEqualThan(ts);
 }
 
 std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase::createAssociations()

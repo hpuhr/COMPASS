@@ -161,9 +161,6 @@ public:
                                     std::map<unsigned int,
                                              std::multimap<boost::posix_time::ptime, unsigned long>>>> tr_ds_timestamps_;
     // dbcontent id -> ds_id -> line_id -> ts -> record_num
-#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
-    //std::set<unsigned long> rec_nums_;
-#endif
 
     std::set<unsigned int> acads_;
     std::set<std::string> acids_;
@@ -296,7 +293,7 @@ public:
     std::shared_ptr<Buffer> getReferenceBuffer();
 
     void removeOutdatedTargetReports();
-    void removeTargetReportsLaterThan(boost::posix_time::ptime ts);
+    void removeTargetReportsLaterOrEqualThan(boost::posix_time::ptime ts);
 
     // online reconstructor
     size_t trackerCount() const;

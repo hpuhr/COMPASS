@@ -113,15 +113,6 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
     const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
 #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
-    // if (rec_num == 903216)
-    // {
-    //     loginf << "ReconstructorTarget::addTargetReport: 903216 add_to_tracker " << add_to_tracker
-    //            << " reestimate " << reestimate << " ts " << Time::toString(tr.timestamp_ );
-    //     assert (add_to_tracker);
-    // }
-#endif
-
-#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
     assert (rec_num == tr.record_num_);
 
     // //assert (tr.in_current_slice_); // can be old one
@@ -176,13 +167,6 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
 
     if (tr.mode_a_code_ && !mode_as_.count(tr.mode_a_code_->code_))
         mode_as_.insert(tr.mode_a_code_->code_);
-
-#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
-        // if (rec_nums_.count(tr.record_num_))
-        //     loginf << "TARGET REPORT DUPLICATE3 " << tr.asStr();
-        // assert (!rec_nums_.count(tr.record_num_));
-        // rec_nums_.insert(tr.record_num_);
-#endif
 
     target_reports_.push_back(tr.record_num_);
     tr_timestamps_.insert({tr.timestamp_,tr.record_num_});
@@ -1986,17 +1970,13 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     references_.clear();
 }
 
-void ReconstructorTarget::removeTargetReportsLaterThan(boost::posix_time::ptime ts)
+void ReconstructorTarget::removeTargetReportsLaterOrEqualThan(boost::posix_time::ptime ts)
 {
     auto tmp_tr_timestamps = std::move(tr_timestamps_);
 
     target_reports_.clear();
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
-
-#if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
-    //rec_nums_.clear();
-#endif
 
     if (chain_)
         chain_->removeUpdatesLaterThan(ts);
@@ -2010,7 +1990,7 @@ void ReconstructorTarget::removeTargetReportsLaterThan(boost::posix_time::ptime 
         assert (tr.timestamp_ == ts_it.first);
 #endif
 
-        if (ts_it.first < ts) // UGAX <
+        if (ts_it.first < ts) // add if older than ts
             addTargetReport(ts_it.second, false, false);
         else
             break;
