@@ -112,6 +112,8 @@ public:
 
     virtual void accept(LatexVisitor& v) = 0;
 
+    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const { return {}; }
+
     QImage renderData() const;
     QImage renderView() const;
 
@@ -184,6 +186,8 @@ protected:
     QWidget* central_widget_ {nullptr};
 
 private:
+    friend class ViewVariable;
+
     std::string name_;
     unsigned int getInstanceKey();
 

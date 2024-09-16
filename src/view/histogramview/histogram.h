@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include <util/timeconv.h>
-#include <dbcontent/variable/variable.h>
+#include "util/timeconv.h"
+#include "dbcontent/variable/variable.h"
+#include "histogram_raw.h"
 
 #include <string>
 #include <vector>
@@ -296,6 +297,35 @@ public:
             cnts.push_back(b.count);
 
         return cnts;
+    }
+
+    /**
+     * Convert to raw histogram.
+     */
+    RawHistogram toRaw(bool add_invalid_bin = true, dbContent::Variable* data_var = nullptr) const
+    {
+        RawHistogram::RawHistogramBins bins;
+        bins.reserve(bins_.size() + 1);
+
+        auto addBin = [ & ] (const HistogramBinT<T>& b, RawHistogramBin::Tag tag, const std::string& label)
+        {
+            bins.push_back(RawHistogramBin(b.count, 
+                                           label.empty() ? b.label(data_var) : label,
+                                           tag,
+                                           label.empty() ? b.labelMin(data_var) : label,
+                                           label.empty() ? b.labelMax(data_var) : label));
+        };
+
+        for (const auto& b : bins_)
+            addBin(b, RawHistogramBin::Tag::Standard, "");
+
+        if (add_invalid_bin)
+            addBin(not_found_bin_, RawHistogramBin::Tag::CouldNotInsert, "Invalid");
+
+        RawHistogram h;
+        h.addBins(bins);
+
+        return h;
     }
 
     /**

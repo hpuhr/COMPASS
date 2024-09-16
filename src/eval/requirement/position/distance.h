@@ -15,21 +15,21 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONDISTANCE_H
-#define EVALUATIONREQUIREMENPOSITIONDISTANCE_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
-//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class PositionDistance : public ProbabilityBase
 {
 public:
     PositionDistance(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+            double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
             float threshold_value, COMPARISON_TYPE threshold_value_check_type,
             bool failed_values_of_interest);
 
@@ -41,6 +41,8 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PCP"; }
+    std::string probabilityName() const override final { return "Probability of passed comparison"; }
 
 protected:
     float threshold_value_ {0};
@@ -49,5 +51,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONDISTANCE_H

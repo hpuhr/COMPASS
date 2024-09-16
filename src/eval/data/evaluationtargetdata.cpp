@@ -38,6 +38,8 @@
 
 #include <Eigen/Core>
 
+#include <QString>
+
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
@@ -47,16 +49,16 @@ using namespace dbContent::TargetReport;
 
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, 
                                            EvaluationData& eval_data,
-                                           std::shared_ptr<dbContent::Cache> cache,
+                                           std::shared_ptr<dbContent::DBContentAccessor> accessor,
                                            EvaluationManager& eval_man,
                                            DBContentManager& dbcont_man)
     :   utn_       (utn)
     ,   eval_data_ (eval_data)
-    ,   cache_(cache)
+    ,   accessor_  (accessor)
     ,   eval_man_  (eval_man)
     ,   dbcont_man_(dbcont_man)
-    ,   ref_chain_(cache_, eval_man_.dbContentNameRef())
-    ,   tst_chain_(cache_, eval_man_.dbContentNameTst())
+    ,   ref_chain_ (accessor_, eval_man_.dbContentNameRef())
+    ,   tst_chain_ (accessor_, eval_man_.dbContentNameTst())
 {
 }
 
@@ -813,6 +815,89 @@ std::string EvaluationTargetData::acadsStr() const
     return out.str().c_str();
 }
 
+void EvaluationTargetData::clearInterestFactors() const
+{
+    interest_factors_.clear();
+    interest_factors_sum_ = 0.0;
+
+}
+void EvaluationTargetData::addInterestFactor (const std::string& req_section_id, double factor) const
+{
+    logdbg << "EvaluationTargetData: addInterestFactor: utn " << utn_
+           << " req_section_id " << req_section_id << " factor " << factor;
+
+
+    interest_factors_[req_section_id] += factor;
+    interest_factors_sum_ += factor;
+}
+
+const std::map<std::string, double>& EvaluationTargetData::interestFactors() const
+{
+    return interest_factors_;
+}
+
+QColor EvaluationTargetData::colorForInterestFactor(double factor)
+{
+    if (factor < 0.01)
+        return EvaluationData::color_interest_low_;
+    else if (factor < 0.05)
+        return EvaluationData::color_interest_mid_;
+    
+    return EvaluationData::color_interest_high_;
+}
+
+std::string EvaluationTargetData::stringForInterestFactor(const std::string& req_id, double factor)
+{
+    return req_id + " (" + String::doubleToStringPrecision(factor, InterestFactorPrecision) + ")";
+}
+
+std::string EvaluationTargetData::interestFactorsStr() const
+{
+    std::string ret;
+    if (interest_factors_.empty())
+        return ret;
+
+    auto coloredText = [ & ] (const std::string& txt, const QColor& color)
+    {
+        return "<font color=\"" + color.name().toStdString() + "\">" + txt + "</font>";
+    };
+
+    auto generateRow = [ & ] (const std::string& interest, double factor, int prec, int spacing)
+    {
+        auto factor_color = colorForInterestFactor(factor);
+        auto prec_str     = String::doubleToStringPrecision(factor, prec);
+
+        std::string ret;
+        ret += "<tr>";
+        ret += "<td align=\"left\">"  + coloredText(interest, factor_color) + "</td>";
+        ret += "<td>" + QString().fill(' ', spacing).toStdString() + "</td>";
+        ret += "<td align=\"right\">" + coloredText(prec_str, factor_color) + "</td>";
+        ret += "</tr>";
+
+        return ret;
+    };
+
+    //<font color=\"#ff0000\">bar</font>
+
+    const int Spacing = 4;
+
+    ret = "<html><body><table>";
+
+    for (auto& fac_it : interest_factors_)
+    {
+        ret += generateRow(fac_it.first, fac_it.second, InterestFactorPrecision, Spacing);
+    }
+
+    ret += "</table></body></html>";
+
+    return ret;
+}
+
+double EvaluationTargetData::interestFactorsSum() const
+{
+    return interest_factors_sum_;
+}
+
 void EvaluationTargetData::updateACIDs() const
 {
     acids_.clear();
@@ -1056,6 +1141,8 @@ void EvaluationTargetData::computeSectorInsideInfo() const
     inside_tst_           = {};
     inside_map_           = {};
     inside_sector_layers_ = {};
+
+    assert (eval_man_.sectorsLoaded());
 
     auto sector_layers = eval_man_.sectorsLayers();
 

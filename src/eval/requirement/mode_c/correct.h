@@ -15,24 +15,28 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODECCORRECT_H
-#define EVALUATIONREQUIREMENTMODECCORRECT_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class ModeCCorrect : public ProbabilityBase
 {
 public:
     ModeCCorrect(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float max_distance_ft);
+            double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float max_distance_ft);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
+
+    std::string probabilityNameShort() const override final { return "PC"; }
+    std::string probabilityName() const override final { return "Probability of correct Mode C"; }
 
     float maxDistanceFt() const;
 
@@ -41,4 +45,3 @@ protected:
 };
 
 }
-#endif // EVALUATIONREQUIREMENTDETECTIONCORRECT_H

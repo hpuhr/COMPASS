@@ -68,7 +68,7 @@ public:
             const std::string& name, 
             const std::string& short_name, 
             const std::string& group_name,
-            float prob, 
+            double prob, 
             COMPARISON_TYPE prob_check_type,
             EvaluationManager& eval_man,
             float update_interval_s, 
@@ -76,11 +76,14 @@ public:
             float miss_tolerance_s,
             IdentificationType identification_type);
 
+    static std::string probabilityNameShort(IdentificationType identification_type);
     static std::string probabilityName(IdentificationType identification_type);
-    static std::string probabilityDescription(IdentificationType identification_type);
     static std::string identificationName(IdentificationType identification_type);
 
     IdentificationType identificationType() const { return identification_type_; }
+
+    std::string probabilityNameShort() const override final;
+    std::string probabilityName() const override final;
 
 protected:
     virtual Validity isValid(const dbContent::TargetReport::DataID& data_id,

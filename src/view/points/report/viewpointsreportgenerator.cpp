@@ -166,7 +166,7 @@ void ViewPointsReportGenerator::run ()
             vp_ids = vp_widget->viewedViewPoints();
 
         string status_str, elapsed_time_str, remaining_time_str;
-        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+        DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
         unsigned int vp_cnt = 0;
         unsigned int vp_size = vp_ids.size();
@@ -194,7 +194,7 @@ void ViewPointsReportGenerator::run ()
             loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id;
             view_manager_.setCurrentViewPoint(&view_point);
 
-            while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+            while (dbcont_man.loadInProgress() || QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents();
 
             // do stuff

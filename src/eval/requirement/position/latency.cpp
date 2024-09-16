@@ -16,15 +16,11 @@
  */
 
 #include "eval/requirement/position/latency.h"
-#include "eval/results/position/latencysingle.h"
-//#include "evaluationdata.h"
+#include "eval/results/position/latency.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-//#include "util/stringconv.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
-
-#include <ogr_spatialref.h>
 
 #include <algorithm>
 
@@ -37,10 +33,10 @@ namespace EvaluationRequirement
 
 PositionLatency::PositionLatency(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float max_abs_value)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man), max_abs_value_(max_abs_value)
+        double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float max_abs_value)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man)
+    , max_abs_value_(max_abs_value)
 {
-
 }
 
 float PositionLatency::maxAbsValue() const
@@ -74,31 +70,22 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
 
     ptime timestamp;
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
-
-    OGRSpatialReference local;
-
-    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+    Transformation ogr_geo2cart;
 
     dbContent::TargetPosition tst_pos;
 
-    double x_pos, y_pos;
-    double distance, angle, d_along, latency;
+    double d_along, latency;
 
     bool is_inside = false;
     //pair<dbContent::TargetPosition, bool> ret_pos;
     boost::optional<dbContent::TargetPosition> ref_pos;
     //pair<dbContent::TargetVelocity, bool> ret_spd;
     boost::optional<dbContent::TargetVelocity> ref_spd;
-    bool ok;
 
     bool along_ok;
 
     unsigned int num_distances {0};
     string comment;
-
-    vector<double> values;
 
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
@@ -117,7 +104,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::Value, offset)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -153,9 +140,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
         }
 
         ref_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
-
-//        ref_pos = ret_pos.first;
-//        ok = ret_pos.second;
 
         if (!ref_pos.has_value())
         {
@@ -205,36 +189,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
         }
         ++num_pos_inside;
 
-        local.SetStereographic(ref_pos->latitude_, ref_pos->longitude_, 1.0, 0.0, 0.0);
+        bool   transform_ok;
+        double distance, angle;
 
-        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
+        std::tie(transform_ok, distance, angle) = ogr_geo2cart.distanceAngleCart(ref_pos->latitude_, ref_pos->longitude_, tst_pos.latitude_, tst_pos.longitude_);
+        assert(transform_ok);
 
-//        if (in_appimage_) // inside appimage
-//        {
-            x_pos = tst_pos.longitude_;
-            y_pos = tst_pos.latitude_;
-//        }
-//        else
-//        {
-//            x_pos = tst_pos.latitude_;
-//            y_pos = tst_pos.longitude_;
-//        }
-
-        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-        if (!ok)
-        {
-            addDetail(timestamp, tst_pos,
-                        ref_pos, // ref_pos
-                        is_inside, {}, along_ok, // pos_inside, value, value_ok
-                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                        num_value_ok, num_value_nok,
-                        "Position transformation error");
-            ++num_pos_calc_errors;
-            continue;
-        }
-
-        distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-        angle = ref_spd->track_angle_ - atan2(y_pos, x_pos);
+        angle = ref_spd->track_angle_ - angle;
 
         if (distance == 0 || std::isnan(distance) || std::isinf(distance))
         {
@@ -297,8 +258,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_value_ok, num_value_nok,
                     comment);
-
-        values.push_back(latency);
     }
 
     //        logdbg << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -317,16 +276,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
                << " num_distances " << num_distances;
 
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
-
     assert (num_distances == num_value_ok + num_value_nok);
-    assert (num_distances == values.size());
-
-    //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionLatency>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok,
-                values);
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok);
 }
 
 }

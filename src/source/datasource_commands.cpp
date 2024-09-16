@@ -129,7 +129,7 @@ void RTCommandSetDataSources::collectOptions_impl(OptionsDescription &options,
     ADD_RTCOMMAND_OPTIONS(options)
             ("data_sources", po::value<std::string>()->required(), "Data sources JSON definition");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "data_sources", 1)
+    ADD_RTCOMMAND_POS_OPTION(positional, "data_sources")
 }
 
 /**

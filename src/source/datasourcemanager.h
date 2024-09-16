@@ -20,16 +20,34 @@ class DataSourceManager : public QObject, public Configurable
 {
     Q_OBJECT
 
-signals:
+  signals:
     void dataSourcesChangedSignal();
 
-public slots:
+  public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
 
     void configurationDialogDoneSlot();
 
-public:
+  public:
+    struct Config
+    {
+        Config();
+
+        bool load_widget_show_counts_ {false};
+        bool load_widget_show_lines_ {false};
+
+        unsigned int ds_font_size_ {10};
+
+        double primary_azimuth_stddev_;   // degrees
+        double primary_range_stddev_;     // meters
+        double secondary_azimuth_stddev_; // degrees
+        double secondary_range_stddev_;   // meters
+        double mode_s_azimuth_stddev_;    // degrees
+        double mode_s_range_stddev_;      // meters
+
+    };
+
     const static std::vector<std::string> data_source_types_;
 
     DataSourceManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -100,18 +118,18 @@ public:
     nlohmann::json getSortedDBDataSourcesAsJSON();
 
     void setLoadedCounts(std::map<unsigned int, std::map<std::string,
-                         std::map<unsigned int, unsigned int>>> loaded_counts); // ds id->dbcont->line->cnt
+                                                         std::map<unsigned int, unsigned int>>> loaded_counts); // ds id->dbcont->line->cnt
     void clearInsertedCounts(const std::string& dbcontent_name); // after delete all dbcontent
 
-    bool loadWidgetShowCounts() const;
-    void loadWidgetShowCounts(bool value);
+//    bool loadWidgetShowCounts() const;
+//    void loadWidgetShowCounts(bool value);
 
-    bool loadWidgetShowLines() const;
-    void loadWidgetShowLines(bool value);
+//    bool loadWidgetShowLines() const;
+//    void loadWidgetShowLines(bool value);
 
-    unsigned int dsFontSize() const;
+//    unsigned int dsFontSize() const;
 
-    // selection stuff
+            // selection stuff
 
     void selectAllDSTypes();
     void deselectAllDSTypes();
@@ -125,18 +143,19 @@ public:
     void deselectAllLines();
     void selectSpecificLineSlot(unsigned int line_id);
 
-protected:
+
+    DataSourceManager::Config& config();
+
+  protected:
     COMPASS& compass_;
 
-    unsigned int ds_font_size_ {10};
+    Config config_;
 
     std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
     std::vector<unsigned int> ds_ids_all_; // both from config and db, vector to have order
 
     std::unique_ptr<DataSourcesLoadWidget> load_widget_;
-    bool load_widget_show_counts_ {false};
-    bool load_widget_show_lines_ {false};
 
     std::unique_ptr<DataSourcesConfigurationDialog> config_dialog_;
 

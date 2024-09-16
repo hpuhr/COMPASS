@@ -47,7 +47,11 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
     tree_view_->setRootIsDecorated(false);
     tree_view_->expandAll();
 
+    tree_view_->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
+    connect (tree_view_.get(), &QTreeView::customContextMenuRequested, this, &EvaluationStandardWidget::showContextMenu);
     connect (tree_view_.get(), &QTreeView::clicked, this, &EvaluationStandardWidget::itemClickedSlot);
+    connect (&standard_, &EvaluationStandard::selectionChanged, &standard_model_, &EvaluationStandardTreeModel::updateCheckStates);
 
     splitter_->addWidget(tree_view_.get());
     //req_layout->addWidget(tree_view_.get());
@@ -61,12 +65,14 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
     scroll_area->setWidget(requirements_widget_);
 
     splitter_->addWidget(scroll_area);
-
-    splitter_->setStretchFactor(1, 1);
     //req_layout->addWidget(scroll_area, 1);
 
+    //qt hack: very big screen size x stretch 
+    splitter_->setSizes({ 10000, 30000 });
+
     QSettings settings("COMPASS", ("EvalStandardWidget"+standard_.name()).c_str());
-    splitter_->restoreState(settings.value("splitterSizes").toByteArray());
+    if (settings.value("splitterSizes").isValid())
+        splitter_->restoreState(settings.value("splitterSizes").toByteArray());
 
     //main_layout->addLayout(req_layout);
     main_layout->addWidget(splitter_);
@@ -88,6 +94,34 @@ EvaluationStandardTreeModel& EvaluationStandardWidget::model()
     return standard_model_;
 }
 
+void EvaluationStandardWidget::showContextMenu(const QPoint& pos)
+{
+    assert(tree_view_);
+
+    QModelIndex index = tree_view_->indexAt(pos);
+    if (!index.isValid())
+        return;
+
+    EvaluationStandardTreeItem* item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
+    assert (item);
+
+    if (dynamic_cast<EvaluationStandard*>(item))
+    {
+        loginf << "EvaluationStandardWidget: showContextMenu: got standard";
+
+        EvaluationStandard* std = dynamic_cast<EvaluationStandard*>(item);
+        std->showMenu();
+
+    }
+    else if (dynamic_cast<Group*>(item))
+    {
+        loginf << "EvaluationStandardWidget: showContextMenu: got group";
+
+        Group* group = dynamic_cast<Group*>(item);
+        group->showMenu();
+    }
+}
+
 void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 {
     EvaluationStandardTreeItem* item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
@@ -97,22 +131,13 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got standard";
 
-        EvaluationStandard* std = dynamic_cast<EvaluationStandard*>(item);
-
         showRequirementWidget(nullptr);
-
-        std->showMenu();
-
     }
     else if (dynamic_cast<Group*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got group";
 
-        Group* group = dynamic_cast<Group*>(item);
-
         showRequirementWidget(nullptr);
-
-        group->showMenu();
     }
     else if (dynamic_cast<EvaluationRequirement::BaseConfig*>(item))
     {

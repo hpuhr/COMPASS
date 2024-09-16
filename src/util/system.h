@@ -36,6 +36,8 @@ extern std::string getUserName();
 
 extern double secondsSinceMidnightUTC();
 
+extern int tbbCurrentThreadID();
+
 }  // namespace System
 }  // namespace Utils
 

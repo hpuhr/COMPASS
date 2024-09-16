@@ -378,10 +378,9 @@ A simple example is shown below.
                 [
                     // List of features contained in the annotation 
                     {
-                        "type": "feature",
+                        "type": "points",
                         "geometry" :
                         {
-                            "type": "points",
                             "coordinates": 
                             [
                                 [45.0, 18.0], [46.0, 19.0], [45.0, 20.0], [48.0, 20.0]
@@ -422,7 +421,26 @@ A listed annotation can be shown or hidden by using the checkbox next to it. \\
     \caption{View Point Annotations - Example} 
 \end{figure}
 
-Examples for the existing 'features' will be given below.
+\paragraph{Features} An annotation feature must always contain a unique "type" field
+indicating its content, e.g. "points", "lines", etc. \\
+
+A feature optionally may also contain a custom "name".
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "points",
+            "name": "My Point Feature 1"
+            ...
+        }
+        ...
+}
+\end{lstlisting}
+
+Depending on its type a feature may contain additional fields. Examples for the existing 'features' will be given below.
+
+TODO: List of explained features with links
 
 \paragraph{Points} The 'points' feature displays a set of coordinates using a specified symbol.
 
@@ -430,10 +448,9 @@ Examples for the existing 'features' will be given below.
 {
         ...
         {
-            "type": "feature",
+            "type": "points",
             "geometry" :
             {
-                "type": "points",
                 "coordinates": 
                 [
                     [45.0, 18.0], [46.0, 19.0], [45.0, 20.0], [48.0, 20.0]
@@ -463,10 +480,9 @@ Two consecutive coordinates hereby form an individual line, which means that the
 {
         ...
         {
-            "type": "feature",
+            "type": "lines",
             "geometry":
             {
-                "type": "lines",
                 "coordinates": 
                 [
                     [45.0, 18.0], [45.0, 20.0], [48.0, 20.0], [46.0, 19.0]
@@ -496,10 +512,9 @@ Here $[45.0, 18.0]$ and $[45.0, 20.0]$ form one line, and $[48.0, 20.0]$ and $[4
 {
         ...
         {
-            "type": "feature",
+            "type": "line_string",
             "geometry" :
             {
-                "type": "line_string",
                 "coordinates": 
                 [
                     [45.0, 18.0], [46.0, 19.0], [45.0, 20.0], [48.0, 20.0]
@@ -529,10 +544,9 @@ The displayed line connects the given coordinates, one after another.
 {
         ...
         {
-            "type": "feature",
+            "type": "ellipses",
             "geometry":
             {
-                "type": "ellipses",
                 "coordinates": 
                 [
                     [44.0, 14.0], [44.0, 16.0], [47.0, 16.0], [45.0, 15.0]
@@ -589,6 +603,80 @@ The 'sizes' of the ellipses are provided as value triples (Standard deviation X,
 
 \textbf{Note} that coordinates always need to be provided as WGS84 latitude and longitude. \\
 
+\paragraph{GeoImage} The 'geoimage' feature displays image data with additional information about its geographic location.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "geoimage",
+
+            "source":                      // Image data source
+            {
+                "fn": "/path/to/my/image/file.tif"
+            },
+
+            "reference":                   // Description of the spatial reference system the image is embedded in
+            {
+                "srs": "epsg:3857",        // EPSG code of the spatial reference system (SRS), e.g. WGS84 Pseudo-Mercator
+                "img_origin_x": 16.37208,  // X-coordinate of the upper left image corner in the given SRS, usually its easting, e.g. WGS84 longitude
+                "img_origin_y": 48.20849,  // Y-coordinate of the upper left image corner in the given SRS, usually its northing, e.g. WGS84 latitude
+                "img_pixel_size_x": 1,     // Width of a pixel in units of the SRS, e.g. 1m
+                "img_pixel_size_y": 1,     // Height of a pixel in units of the SRS, e.g. 1m
+                "is_north_up": true        // Flag indicating if the SRS is north-up, usually 'true'
+            } 
+        }
+        ...
+}
+\end{lstlisting}
+
+TODO: Figure
+
+%\begin{figure}[H]
+%    \center
+%        \includegraphics[width=10cm]{figures/viewpoints_anno_example_text.png}
+%    \caption{View Point Annotations - Text} 
+%\end{figure}
+
+\paragraph{Histogram} The 'histogram' feature displays custom histogram data. 
+Such a histogram may contain multiple data layers of the same resolution, which can be
+displayed simultaneously e.g. in HistogramView.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "histogram",
+
+            "layers":                                     // Histogram layers, each layer must obtain the same number of bins
+            [
+                {
+                    "name": "Layer1",                     // Display name for the histogram layer
+                    "bins":                               // Histogram bins
+                    [
+                        // Bin count and a display label describing the bin, e.g. a numerical value or a certain category/state
+                        { "count": 100, "label": "1.1" }, 
+                        { "count": 100, "label": "1.2" },
+                        { "count": 100, "label": "1.3" },
+                        ...
+                    ],
+                    "color": "#AA00FF"                    // Display color for the layer
+                },
+                ...
+            ]
+        }
+        ...
+}
+\end{lstlisting}
+
+TODO: Figure
+
+%\begin{figure}[H]
+%    \center
+%        \includegraphics[width=10cm]{figures/viewpoints_anno_example_text.png}
+%    \caption{View Point Annotations - Text} 
+%\end{figure}
+
 \paragraph{Showing Color Arrays} In all examples provided above, a single color has been used for the geometry stored in a feature.
 In order to show each geometrical primitive in a separate color, the 'color' tag can be removed, and a 'colors' array provided instead.
 
@@ -596,10 +684,9 @@ In order to show each geometrical primitive in a separate color, the 'color' tag
 {
         ...
         {
-            "type": "feature",
+            "type": "points",
             "geometry" :
             {
-                "type": "points",
                 "coordinates": 
                 [
                     [45.0, 18.0], [46.0, 19.0], [45.0, 20.0], [48.0, 20.0]

@@ -39,7 +39,7 @@ using namespace std;
 
 ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
-    : Task("ManageSectorsTask", "Manage Sectors", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_sectors.json")
 {
     registerParameter("current_filename", &current_filename_, std::string());
@@ -117,8 +117,6 @@ void ManageSectorsTask::addFile(const std::string& filename)
     current_filename_ = filename;
     parseCurrentFile(false);
 
-    emit statusChangedSignal(name_);
-
     if (dialog_)
         dialog_->updateFileList();
 }
@@ -141,8 +139,6 @@ void ManageSectorsTask::removeCurrentFilename()
     parse_message_ = "";
     found_sectors_num_ = 0;
 
-    emit statusChangedSignal(name_);
-
     if (dialog_)
         dialog_->updateFileList();
 }
@@ -162,8 +158,6 @@ void ManageSectorsTask::removeAllFiles ()
     parse_message_ = "";
     found_sectors_num_ = 0;
 
-    emit statusChangedSignal(name_);
-
     if (dialog_)
         dialog_->updateFileList();
 }
@@ -171,8 +165,6 @@ void ManageSectorsTask::removeAllFiles ()
 void ManageSectorsTask::currentFilename(const std::string& filename)
 {
     loginf << "ManageSectorsTask: currentFilename: filename '" << filename << "'";
-
-    bool had_filename = canImportFile();
 
     current_filename_ = filename;
 
@@ -183,9 +175,6 @@ void ManageSectorsTask::currentFilename(const std::string& filename)
         parse_message_ = "";
         found_sectors_num_ = 0;
     }
-
-    if (!had_filename)  // not on re-select
-        emit statusChangedSignal(name_);
 }
 
 std::string ManageSectorsTask::parseMessage() const

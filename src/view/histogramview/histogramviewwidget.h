@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HISTOGRAMVIEWWIDGET_H_
-#define HISTOGRAMVIEWWIDGET_H_
+#pragma once
 
 #include "viewwidget.h"
 
@@ -44,5 +43,3 @@ class HistogramViewWidget : public ViewWidget
     /// @brief Returns the basis view
     HistogramView* getView();
 };
-
-#endif /* HISTOGRAMVIEWWIDGET_H_ */

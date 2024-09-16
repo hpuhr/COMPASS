@@ -22,14 +22,41 @@ using namespace nlohmann;
 const std::vector<std::string> DataSourceManager::data_source_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj",
                                                                       "Other"};
 
+DataSourceManager::Config::Config()
+    : load_widget_show_counts_ {true}
+      , load_widget_show_lines_{true}
+      , ds_font_size_ {10}
+      , primary_azimuth_stddev_               (0.05)
+      ,   primary_range_stddev_                 (120.0)
+      ,   secondary_azimuth_stddev_             (0.025)
+      ,   secondary_range_stddev_               (70.0)
+      ,   mode_s_azimuth_stddev_                (0.02) // 70m in 200km, 0.02 * 2 * pi * 200000 /360
+      ,   mode_s_range_stddev_                  (50)
+      //,   use_radar_min_stddev_                 (false)
+{
+}
+
+
 DataSourceManager::DataSourceManager(const std::string& class_id, const std::string& instance_id,
                                      COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "data_sources.json"), compass_(*compass)
-{
-    registerParameter("load_widget_show_counts", &load_widget_show_counts_, true);
-    registerParameter("load_widget_show_lines", &load_widget_show_lines_, true);
 
-    registerParameter("ds_font_size", &ds_font_size_, 10u);
+{
+    registerParameter("load_widget_show_counts", &config_.load_widget_show_counts_, Config().load_widget_show_counts_);
+    registerParameter("load_widget_show_lines", &config_.load_widget_show_lines_, Config().load_widget_show_lines_);
+
+    registerParameter("ds_font_size", &config_.ds_font_size_, Config().ds_font_size_);
+
+    registerParameter("primary_azimuth_stddev", &config_.primary_azimuth_stddev_, Config().primary_azimuth_stddev_);
+    registerParameter("primary_range_stddev", &config_.primary_range_stddev_, Config().primary_range_stddev_);
+
+    registerParameter("secondary_azimuth_stddev", &config_.secondary_azimuth_stddev_, Config().secondary_azimuth_stddev_);
+    registerParameter("secondary_range_stddev", &config_.secondary_range_stddev_, Config().secondary_range_stddev_);
+
+    registerParameter("mode_s_azimuth_stddev", &config_.mode_s_azimuth_stddev_, Config().mode_s_azimuth_stddev_);
+    registerParameter("mode_s_range_stddev", &config_.mode_s_range_stddev_, Config().mode_s_range_stddev_);
+
+    //registerParameter("use_radar_min_stddev", &config_.use_radar_min_stddev_, Config().use_radar_min_stddev_);
 
     createSubConfigurables();
 
@@ -347,7 +374,7 @@ void DataSourceManager::setLoadedCounts(std::map<unsigned int, std::map<std::str
         }
     }
 
-    if (load_widget_ && load_widget_show_counts_)
+    if (load_widget_ && config_.load_widget_show_counts_)
         load_widget_->updateContent();
 }
 
@@ -358,41 +385,6 @@ void DataSourceManager::clearInsertedCounts(const std::string& dbcontent_name)
 
     if (load_widget_)
         load_widget_->updateContent();
-}
-
-bool DataSourceManager::loadWidgetShowCounts() const
-{
-    return load_widget_show_counts_;
-}
-
-void DataSourceManager::loadWidgetShowCounts(bool value)
-{
-    loginf << "DataSourceManager: loadWidgetShowCounts: value " << value;
-
-    load_widget_show_counts_ = value;
-
-    if (load_widget_)
-        load_widget_->updateContent();
-}
-
-bool DataSourceManager::loadWidgetShowLines() const
-{
-    return load_widget_show_lines_;
-}
-
-void DataSourceManager::loadWidgetShowLines(bool value)
-{
-    loginf << "DataSourceManager: loadWidgetShowLines: value " << value;
-
-    load_widget_show_lines_ = value;
-
-    if (load_widget_)
-        load_widget_->updateContent();
-}
-
-unsigned int DataSourceManager::dsFontSize() const
-{
-    return ds_font_size_;
 }
 
 void DataSourceManager::selectAllDSTypes()
@@ -481,6 +473,11 @@ void DataSourceManager::selectSpecificLineSlot(unsigned int line_id)
 
     if (load_widget_)
         load_widget_->updateContent();
+}
+
+DataSourceManager::Config& DataSourceManager::config()
+{
+    return config_;
 }
 
 bool DataSourceManager::loadingWanted (const std::string& dbcontent_name)
@@ -849,7 +846,7 @@ dbContent::DBDataSource& DataSourceManager::dbDataSource(unsigned int ds_id)
 
     return *find_if(db_data_sources_.begin(), db_data_sources_.end(),
                     [ds_id] (const std::unique_ptr<dbContent::DBDataSource>& s)
-    { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } )->get();
+    { return s->id() == ds_id; } )->get();
 }
 
 bool DataSourceManager::dsTypeFiltered()
@@ -981,3 +978,5 @@ std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>
 
     return lines;
 }
+
+

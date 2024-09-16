@@ -17,7 +17,7 @@
 
 #include "eval/requirement/dubious/dubioustrackconfigwidget.h"
 #include "eval/requirement/dubious/dubioustrackconfig.h"
-//#include "textfielddoublevalidator.h"
+
 #include "logger.h"
 
 #include <QLineEdit>

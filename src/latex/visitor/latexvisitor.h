@@ -29,6 +29,7 @@ class HistogramView;
 class GeographicView;
 #endif
 class ScatterPlotView;
+class GridView;
 class LatexDocument;
 
 namespace EvaluationResultsReport
@@ -53,6 +54,7 @@ public:
     virtual void visit(GeographicView* e);
 #endif
     virtual void visit(ScatterPlotView* e);
+    virtual void visit(GridView* e);
 
     virtual void visit(const EvaluationResultsReport::Section* e);
     virtual void visit(const EvaluationResultsReport::SectionContentTable* e);

@@ -17,7 +17,7 @@
 
 #include "eval/requirement/detection/detectionconfigwidget.h"
 #include "eval/requirement/detection/detectionconfig.h"
-//#include "textfielddoublevalidator.h"
+
 #include "logger.h"
 
 #include <QLineEdit>

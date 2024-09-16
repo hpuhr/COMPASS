@@ -31,10 +31,10 @@ bool PrimaryOnlyFilter::filters(const std::string& dbcontent_name)
     if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_))
         return true;
 
-    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
         return true;
 
-    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_))
         return true;
 
     return false;
@@ -72,9 +72,9 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
         first = false;
     }
 
-    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
     {
-        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_);
 
         if (!first)
             ss << " AND";
@@ -84,9 +84,9 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
         first = false;
     }
 
-    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_))
     {
-        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_);
 
         if (!first)
             ss << " AND";
@@ -192,17 +192,17 @@ std::vector<size_t> PrimaryOnlyFilter::filterBuffer(const std::string& dbcontent
     }
 
     NullableVector<unsigned int>* ta_vec {nullptr};
-    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
     {
-        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_);
         assert (buffer->has<unsigned int> (var.name()));
         ta_vec = &buffer->get<unsigned int> (var.name());
     }
 
     NullableVector<string>* ti_vec {nullptr};
-    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_))
     {
-        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_);
         assert (buffer->has<string> (var.name()));
         ti_vec = &buffer->get<string> (var.name());
     }

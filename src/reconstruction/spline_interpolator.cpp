@@ -16,7 +16,7 @@
  */
 
 #include "spline_interpolator.h"
-#include "reconstructor.h"
+#include "kalman_interface.h"
 
 #include "util/number.h"
 #include "util/timeconv.h"
@@ -131,6 +131,17 @@ void SplineInterpolator::interpCovarianceMat(Measurement& mm_interp,
         mm_interp.vx_stddev = std::sqrt(interp(vx_stddev_sqr0, vx_stddev_sqr1, interp_factor));
         mm_interp.vy_stddev = std::sqrt(interp(vy_stddev_sqr0, vy_stddev_sqr1, interp_factor));
     }
+    if (mm0.hasStdDevAccel() && mm1.hasStdDevAccel())
+    {
+        double ax_stddev_sqr0 = mm0.ax_stddev.value() * mm0.ax_stddev.value();
+        double ay_stddev_sqr0 = mm0.ay_stddev.value() * mm0.ay_stddev.value();
+
+        double ax_stddev_sqr1 = mm1.ax_stddev.value() * mm1.ax_stddev.value();
+        double ay_stddev_sqr1 = mm1.ay_stddev.value() * mm1.ay_stddev.value();
+
+        mm_interp.ax_stddev = std::sqrt(interp(ax_stddev_sqr0, ax_stddev_sqr1, interp_factor));
+        mm_interp.ay_stddev = std::sqrt(interp(ay_stddev_sqr0, ay_stddev_sqr1, interp_factor));
+    }
 }
 
 /**
@@ -169,6 +180,30 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
 
     //interpolate cov mat values
     interpCovarianceMat(mm_interp, mm0, mm1, interp_factor);
+
+    //interpolate process noise if set
+    if (mm0.Q_var.has_value() || mm1.Q_var.has_value())
+    {
+        if (mm0.Q_var.has_value() && !mm1.Q_var.has_value())
+        {
+            //use mm0 process noise
+            mm_interp.Q_var = mm0.Q_var;
+        }
+        else if (!mm0.Q_var.has_value() && mm1.Q_var.has_value())
+        {
+            //use mm1 process noise
+            mm_interp.Q_var = mm1.Q_var;
+        }
+        else
+        {
+            //interpolate process noise linear
+            double Q_std0 = std::sqrt(mm0.Q_var.value());
+            double Q_std1 = std::sqrt(mm1.Q_var.value());
+            double Q_std  = interp(Q_std0, Q_std1, interp_factor);
+
+            mm_interp.Q_var = Q_std * Q_std;
+        }
+    }
     
     return mm_interp;
 }
@@ -223,7 +258,7 @@ size_t SplineInterpolator::estimatedSamples(const Measurement& mm0,
                                             const Measurement& mm1,
                                             double dt)
 {
-    return (size_t)(std::ceil(Reconstructor::timestep(mm0, mm1) / dt) + 2);
+    return (size_t)(std::ceil(KalmanInterface::timestep(mm0, mm1) / dt) + 2);
 }
 
 /**
@@ -303,6 +338,45 @@ std::vector<MeasurementInterp> SplineInterpolator::interpolateLinear(const std::
 
 /**
 */
+std::vector<std::vector<Measurement>> SplineInterpolator::splitMeasurements(const std::vector<Measurement>& measurements,
+                                                                            double max_dt)
+{
+    size_t n = measurements.size();
+    if (n == 0)
+        return {};
+
+    std::vector<std::vector<Measurement>> split_measurements;
+    std::vector<Measurement> current;
+
+    current.push_back(measurements[ 0 ]);
+
+    for (size_t i = 1; i < n; ++i)
+    {
+        const auto& mm0 = measurements[i - 1];
+        const auto& mm1 = measurements[i    ];
+
+        double dt = KalmanInterface::timestep(mm0, mm1);
+
+        if (dt > max_dt)
+        {
+            if (current.size() > 0)
+            {
+                split_measurements.push_back(current);
+                current.clear();
+            }
+        }
+
+        current.push_back(mm1);
+    }
+
+    if (current.size() > 0)
+        split_measurements.push_back(current);
+
+    return split_measurements;
+}
+
+/**
+*/
 std::vector<MeasurementInterp> SplineInterpolator::interpolate(const std::vector<Measurement>& measurements)
 {
     size_t n = measurements.size();
@@ -311,7 +385,7 @@ std::vector<MeasurementInterp> SplineInterpolator::interpolate(const std::vector
         return {};
 
     //split up measurements time-based
-    auto measurements_parts = Reconstructor::splitMeasurements(measurements, config().max_dt);
+    auto measurements_parts = SplineInterpolator::splitMeasurements(measurements, config().max_dt);
 
     std::vector<MeasurementInterp> interpolation;
 
@@ -395,7 +469,7 @@ std::vector<MeasurementInterp> SplineInterpolator::interpolatePart(const std::ve
         auto idx_last = indices.back();
 
         double d  = (position2D(measurements[idx_last])- position2D(measurements[i])).norm();
-        double dt = Reconstructor::timestep(measurements[idx_last], measurements[i]);
+        double dt = KalmanInterface::timestep(measurements[idx_last], measurements[i]);
 
         if (d < config().min_len || dt < config().min_dt)
             continue;

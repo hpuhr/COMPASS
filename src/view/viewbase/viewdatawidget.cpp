@@ -23,11 +23,27 @@
 #include "buffer.h"
 #include "variable.h"
 #include "property.h"
+#include "stringconv.h"
 
 #include <QApplication>
 #include <QPainter>
 
 #include <iostream>
+
+const double      ViewDataWidget::MarkerSizePx         = 8.0;
+const double      ViewDataWidget::MarkerSizeSelectedPx = 6.0;
+
+const std::string ViewDataWidget::Color_CAT001  = "#00FF00";
+const std::string ViewDataWidget::Color_CAT010  = "#AAAA66";
+const std::string ViewDataWidget::Color_CAT020  = "#FF0000";
+const std::string ViewDataWidget::Color_CAT021  = "#6666FF";
+const std::string ViewDataWidget::Color_CAT048  = "#00FF00";
+const std::string ViewDataWidget::Color_RefTraj = "#FFA500";
+const std::string ViewDataWidget::Color_CAT062  = "#CCCCCC";
+
+const QColor ViewDataWidget::ColorSelected = Qt::yellow; // darker than yellow #808000
+
+using namespace Utils;
 
 /**
  */
@@ -38,6 +54,14 @@ ViewDataWidget::ViewDataWidget(ViewWidget* view_widget, QWidget* parent, Qt::Win
     assert(view_widget_);
 
     setObjectName("datawidget");
+
+    dbc_colors_["CAT001" ] = QColor(QString::fromStdString(Color_CAT001 ));
+    dbc_colors_["CAT010" ] = QColor(QString::fromStdString(Color_CAT010 ));
+    dbc_colors_["CAT020" ] = QColor(QString::fromStdString(Color_CAT020 ));
+    dbc_colors_["CAT021" ] = QColor(QString::fromStdString(Color_CAT021 ));
+    dbc_colors_["CAT048" ] = QColor(QString::fromStdString(Color_CAT048 ));
+    dbc_colors_["RefTraj"] = QColor(QString::fromStdString(Color_RefTraj));
+    dbc_colors_["CAT062" ] = QColor(QString::fromStdString(Color_CAT062 ));
 }
 
 /**
@@ -64,7 +88,24 @@ unsigned int ViewDataWidget::loadedDataCount()
 bool ViewDataWidget::showsData() const
 {
     //the view needs to obtain data, and the last redraw needs to be a valid one.
-    return (hasData() && drawn_);
+    return drawn_;
+}
+
+/**
+*/
+QColor ViewDataWidget::colorForGroupName(const std::string& group_name)
+{
+    if (!dbc_colors_.count(group_name))
+        dbc_colors_[group_name] = QColor::fromRgb(String::hash(group_name));
+
+    return dbc_colors_.at(group_name);
+}
+
+/**
+*/
+const std::map<std::string, QColor>& ViewDataWidget::dbContentColors() const
+{
+    return dbc_colors_;
 }
 
 /**
@@ -202,6 +243,10 @@ bool ViewDataWidget::redrawData(bool recompute, bool notify)
         emit redrawStarted();
         QApplication::processEvents(); //process any ui reactions on this signal before ui is blocked by redraw
     }
+
+    //clear computed data before a recompute
+    if (recompute)
+        clearIntermediateRedrawData_impl();
     
     //invoke derived: redraw and remember if data has been redrawn correctly
     drawn_ = redrawData_impl(recompute);

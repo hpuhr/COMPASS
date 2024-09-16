@@ -169,8 +169,8 @@ dbContent::VariableSet RTCommandGetData::getReadSetFor() const
     DBContent& db_content = dbcont_man.dbContent(dbcontent_name_);
 
     // ds id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name_, DBContent::meta_var_datasource_id_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name_, DBContent::meta_var_datasource_id_));
+    assert(dbcont_man.metaCanGetVariable(dbcontent_name_, DBContent::meta_var_ds_id_));
+    read_set.add(dbcont_man.metaGetVariable(dbcontent_name_, DBContent::meta_var_ds_id_));
 
     // line id
     assert(dbcont_man.metaCanGetVariable(dbcontent_name_, DBContent::meta_var_line_id_));
@@ -204,10 +204,10 @@ void RTCommandGetData::collectOptions_impl(OptionsDescription &options,
         ("utn"      , po::value<unsigned int>()           , "UTN to retrieve data for"      )
         ("max_size" , po::value<unsigned int>()           , "maximum number of results rows");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "dbcontent", 1)
-    ADD_RTCOMMAND_POS_OPTION(positional, "variables", 2)
-    ADD_RTCOMMAND_POS_OPTION(positional, "utn"      , 3)
-    ADD_RTCOMMAND_POS_OPTION(positional, "max_size" , 4)
+    ADD_RTCOMMAND_POS_OPTION(positional, "dbcontent")
+    ADD_RTCOMMAND_POS_OPTION(positional, "variables")
+    ADD_RTCOMMAND_POS_OPTION(positional, "utn"      )
+    ADD_RTCOMMAND_POS_OPTION(positional, "max_size" )
 }
 
 /**
@@ -334,7 +334,7 @@ void RTCommandGetTarget::collectOptions_impl(OptionsDescription &options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("utn", po::value<unsigned int>()->required(), "UTN of the target to retrieve information for");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "utn", 1)
+    ADD_RTCOMMAND_POS_OPTION(positional, "utn")
 }
 
 /**

@@ -7,8 +7,8 @@ set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 
 project( COMPASS )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "7")
-SET(CPACK_PACKAGE_VERSION_PATCH "5")
+SET(CPACK_PACKAGE_VERSION_MINOR "8")
+SET(CPACK_PACKAGE_VERSION_PATCH "0")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -16,7 +16,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 message("  Platform: Linux")
-add_definitions ( -UNDEBUG -Wall -std=c++11) # -DQT_NO_KEYWORDS
+add_definitions ( -UNDEBUG -Wall -std=c++14) # -DQT_NO_KEYWORDS
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -86,6 +86,28 @@ find_package(NemaTode REQUIRED CONFIG)
 find_package(Threads REQUIRED)
 
 find_package(PCAP REQUIRED)
+
+find_package(OpenSceneGraph 3.6.5 REQUIRED osgTerrain osgSim osgDB osgGA osgUtil osgViewer osgText osgParticle osgShadow osgFX)
+    # libOpenThreads & libosg automatically searched  osgQt
+message("  OSG_INCLUDE_DIR: ${OPENSCENEGRAPH_INCLUDE_DIRS}")
+
+find_package(osgQt REQUIRED)
+
+message("  OSGQT_INCLUDE_DIR: ${OSGQT_INCLUDE_DIR}")
+message("  OSGQT_LIBRARIES: ${OSGQT_LIBRARIES}")
+
+find_package(OSGEarth 3.2 REQUIRED)
+
+message("  OSGEARTH_INCLUDE_DIR: ${OSGEARTH_INCLUDE_DIRS}")
+message("  OSGEARTH_LIST: ${OSGEARTH_LIBRARY}")
+
+message("  OSGEARTH_INCLUDE_DIRS: ${OSGEARTH_INCLUDE_DIRS}")
+message("  OSGEARTH_LIBRARY: ${OSGEARTH_LIBRARY}")
+
+message("OSG libs
+    ${OPENSCENEGRAPH_LIBRARIES}"
+    ${OSGQT_INCLUDE_DIR}
+    )
 
 add_library(compass "")
 
@@ -159,6 +181,9 @@ target_link_libraries ( compass
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
     Threads::Threads
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${OSGQT_LIBRARIES}
+    ${OSGEARTH_LIBRARY}
     )
 
 # installation stuff

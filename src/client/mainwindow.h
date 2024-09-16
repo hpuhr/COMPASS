@@ -15,9 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAINWINDOW_H_
-#define MAINWINDOW_H_
-
+#pragma once
 #include "appmode.h"
 #include "autoresumedialog.h"
 
@@ -73,6 +71,7 @@ public slots:
     void importRecentAsterixRecordingSlot();
     void importAsterixFromNetworkSlot();
     void importAsterixFromPCAPSlot();
+    void importAsterixFromJSONSlot();
     void importJSONRecordingSlot();
 
     void importGPSTrailSlot();
@@ -82,8 +81,7 @@ public slots:
 
     void calculateRadarPlotPositionsSlot();
     void calculateAssociationsARTASSlot();
-    void calculateAssociationsSlot();
-    void calculateReferencesSlot();
+    void reconstructReferencesSlot();
 
     void quitRequestedSlot();
     void showAddViewMenuSlot();
@@ -146,7 +144,7 @@ protected:
 
     // process menu
     QMenu* process_menu_ {nullptr};
-    QAction* calculate_references_action_ {nullptr};
+    //QAction* calculate_references_action_ {nullptr};
 
     // ui menu
     QMenu* ui_menu_ {nullptr};
@@ -167,5 +165,3 @@ private:
     void showCommandShell();
 };
 
-//}
-#endif /* MAINWINDOW_H_ */

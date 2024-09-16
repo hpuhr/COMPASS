@@ -15,35 +15,29 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H
-#define EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H
+#pragma once
 
 #include "eval/requirement/base/base.h"
-//#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class PositionRadarAzimuth : public Base
 {
 public:
     PositionRadarAzimuth(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man, float threshold_value);
-
-    float thresholdValue() const;
+            EvaluationManager& eval_man, double threshold_value);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
-    std::string getConditionStr () const override;
-    std::string getConditionResultStr (float rms_value) const;
-
-protected:
-    float threshold_value_ {0};
+    std::string getConditionResultNameShort() const override final { return "PosAzmMean"; }
+    std::string getConditionResultName() const override final { return "Position Azimuth Mean"; }
+    std::string getConditionUnits() const override final { return "deg"; }
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENPOSITIONRADARAZIMUTH_H

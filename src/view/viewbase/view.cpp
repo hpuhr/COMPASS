@@ -599,7 +599,11 @@ View::PresetError View::applyPreset(const ViewPresets::Preset& preset,
     auto version = COMPASS::instance().config().getString("version");
 
     if (!preset.app_version.empty() && preset.app_version != version)
-        return PresetError::IncompatibleVersion;
+    {
+        loginf << "View: applyPreset: preset version mismatch, "
+               << preset.app_version << ", app version " << version;
+        //return PresetError::IncompatibleVersion;
+    }
 
     bool assert_on_errors = !COMPASS::instance().isAppImage();
 

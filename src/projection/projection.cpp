@@ -41,6 +41,8 @@ void Projection::generateSubConfigurable(const std::string& class_id,
 
 void Projection::addAllRadarCoordinateSystems()
 {
+    logdbg << "Projection: addAllRadarCoordinateSystems: added " << radar_coordinate_systems_added_;
+
     if (!radar_coordinate_systems_added_)
     {
         boost::mutex::scoped_lock locker(radar_coordinate_systems_mutex_);

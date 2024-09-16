@@ -48,6 +48,7 @@ public:
 public slots:
     void toggleShowOnlySeletedSlot();
     void toggleUsePresentation();
+    void toggleIgnoreNonTargetReports();
     void exportSlot();
     void exportDoneSlot(bool cancelled);
 
@@ -61,6 +62,7 @@ protected:
 
     QCheckBox*      only_selected_check_{nullptr};
     QCheckBox*      presentation_check_{nullptr};
+    QCheckBox*      ignore_non_target_reports_check_{nullptr};
 
     QPushButton*    export_button_{nullptr};
 

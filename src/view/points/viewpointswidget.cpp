@@ -168,6 +168,20 @@ void ViewPointsWidget::loadViewPoints()
     table_view_->resizeRowsToContents();
 }
 
+void ViewPointsWidget::clearViewPoints()
+{
+    assert (table_model_);
+    table_model_->clearViewPoints();
+}
+
+void ViewPointsWidget::addViewPoints(const std::vector <nlohmann::json>& viewpoints)
+{
+    assert (table_model_);
+    table_model_->addViewPoints(viewpoints);
+
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
+}
 
 void ViewPointsWidget::resizeColumnsToContents()
 {

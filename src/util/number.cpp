@@ -20,6 +20,10 @@
 
 #include <cmath>
 #include <stdlib.h>
+#include <algorithm>
+#include <numeric>
+
+#include <QString>
 
 #include <Eigen/Core>
 
@@ -39,6 +43,98 @@ float roundToNearest(float num) { return (num > 0.0) ? floor(num + 0.5) : ceil(n
 double round(float num, unsigned int precision)
 {
     return std::round(num * std::pow(10, precision)) / std::pow(10, precision);
+}
+
+double roundToClosestPowerOf10(double value) {
+    if (value == 0.0f) {
+        return 0.0f; // Edge case: return 0 if input is 0
+    }
+
+            // Calculate the logarithm base 10 of the absolute value
+    double log10_value = std::log10(std::fabs(value));
+
+            // Round the log10_value to the lower integer
+    double rounded_log10 = std::floor(log10_value);
+
+            // Calculate the power of 10 corresponding to the rounded logarithm
+    double power_of_10 = std::pow(10.0f, rounded_log10);
+
+            // Preserve the sign of the original value
+    if (value < 0) {
+        power_of_10 = -power_of_10;
+    }
+
+    return power_of_10;
+}
+
+// Function to calculate weighted average and standard deviation of a data series
+void calculateWeightedAverageAndStdDev(const std::vector<double>& values, const std::vector<double>& std_devs,
+                                            double& avg, double& std_dev) {
+    double weighted_sum = 0.0;
+    double weight_sum = 0.0;
+
+    for (size_t i = 0; i < values.size(); ++i) {
+        double weight = 1.0 / (std_devs[i] * std_devs[i]);
+        weighted_sum += values[i] * weight;
+        weight_sum += weight;
+    }
+
+    avg = weighted_sum / weight_sum;
+    std_dev = sqrt(1.0 / weight_sum);
+}
+
+void addWithWeightedAverage(double value1, double std_dev1, unsigned int value1_cnt,
+                               double value2, double std_dev2, unsigned int value2_cnt,
+                               double& weighted_avg, double& weighted_std_dev, unsigned int& weighted_cnt)
+{
+    // Calculate weights based on standard deviations
+    double weight1 = (double) value1_cnt / (std_dev1 * std_dev1);
+    double weight2 = (double) value2_cnt / (std_dev2 * std_dev2);
+
+            // Calculate the weighted average
+    weighted_avg = (value1 * weight1 + value2 * weight2) / (weight1 + weight2);
+
+            // Calculate the combined standard deviation
+    weighted_std_dev = sqrt(1.0 / (weight1 + weight2));
+    weighted_cnt = value1_cnt + value2_cnt;
+}
+
+unsigned int numDecimals(double v, unsigned int dec_max)
+{
+    auto str = QString::number(v, 'f', dec_max);
+
+    //strange cases => return max dec for safety
+    if (str.isEmpty() || str.count('.') > 1)
+        return dec_max;
+
+    int n   = str.count();
+    int idx = str.lastIndexOf('.');
+
+    //full number
+    if (idx < 0)
+        return 0;
+
+    //strange case => return max dec for safety
+    if (idx == n - 1)
+        return dec_max;
+
+    int idx_end = -1;
+    for (int i = n - 1; i > idx; --i)
+    {
+        if (str[ i ] != '0')
+        {
+            idx_end = i;
+            break;
+        }
+    }
+
+    //only zeros after dec
+    if (idx_end == -1)
+        return 0;
+
+    assert(idx_end >= idx);
+
+    return idx_end - idx;
 }
 
 double calculateAngle(double degrees, double minutes, double seconds)
@@ -226,6 +322,26 @@ unsigned long recNumGetWithoutDBContId (unsigned long rec_num)
 unsigned int recNumGetDBContId (unsigned long rec_num)
 {
     return rec_num & 0xFF; // first byte
+}
+
+std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values)
+{
+    double mean=0, stddev=0, min=0, max=0;
+
+    double sum = std::accumulate(values.begin(), values.end(), 0.0);
+
+    mean = sum / values.size();
+
+    std::vector<double> diff(values.size());
+    std::transform(values.begin(), values.end(), diff.begin(),
+                   [mean](const double val) { return val - mean; });
+    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    stddev = std::sqrt(sq_sum / values.size());
+
+    min = *std::min_element(values.begin(), values.end());
+    max = *std::max_element(values.begin(), values.end());
+
+    return std::tuple<double,double,double,double>(mean, stddev, min, max);
 }
 
 }  // namespace Number

@@ -33,6 +33,13 @@ void ViewPointGenFilters::addFilter(std::unique_ptr<ViewPointGenFilter>&& filter
 
 /**
 */
+size_t ViewPointGenFilters::size() const
+{
+    return filters_.size();
+}
+
+/**
+*/
 void ViewPointGenFilters::toJSON(nlohmann::json& j) const
 {
     for (const auto& f : filters_)
@@ -79,14 +86,11 @@ void ViewPointGenFilterUTN::toJSON(nlohmann::json& j) const
  * ViewPointGenFeature
  ********************************************************************************/
 
-const std::string ViewPointGenFeature::FeatureTypeFieldName      = "type";
-const std::string ViewPointGenFeature::FeatureTypeNameFeat       = "feature";
-const std::string ViewPointGenFeature::FeatureFieldNameGeom      = "geometry";
-const std::string ViewPointGenFeature::FeatureFieldNameGeomType  = "type";
-const std::string ViewPointGenFeature::FeatureFieldNameCoords    = "coordinates";
-const std::string ViewPointGenFeature::FeatureFieldNameColors    = "colors";
-const std::string ViewPointGenFeature::FeatureFieldNameProps     = "properties";
-const std::string ViewPointGenFeature::FeatureFieldNamePropColor = "color";
+const std::string ViewPointGenFeature::FeatureTypeFieldName         = "name";
+const std::string ViewPointGenFeature::FeatureTypeFieldType         = "type";
+const std::string ViewPointGenFeature::FeatureFieldNameProps        = "properties";
+const std::string ViewPointGenFeature::FeatureFieldNamePropColor    = "color";
+const std::string ViewPointGenFeature::FeatureFieldNamePlotMetadata = "plot_metadata";
 
 /**
 */
@@ -99,9 +103,13 @@ ViewPointGenFeature::ViewPointGenFeature(const std::string& type)
 */
 void ViewPointGenFeature::toJSON(nlohmann::json& j) const
 {
-    j[FeatureTypeFieldName] = type_;
+    j[FeatureTypeFieldType   ] = type_;
+    j[FeatureTypeFieldName   ] = name_;
 
-    toJSON_impl(j);
+    toJSON_impl(j, write_binary_if_possible_);
+
+    if (plot_metadata_.has_value())
+        j[ FeatureFieldNamePlotMetadata ] = plot_metadata_.value().toJSON();
 }
 
 /**
@@ -118,15 +126,21 @@ void ViewPointGenFeature::print(std::ostream& strm, const std::string& prefix) c
  * ViewPointGenFeaturePointGeometry
  ********************************************************************************/
 
+const std::string ViewPointGenFeaturePointGeometry::FeatureFieldNameGeom      = "geometry";
+const std::string ViewPointGenFeaturePointGeometry::FeatureFieldNameCoords    = "coordinates";
+const std::string ViewPointGenFeaturePointGeometry::FeatureFieldNameColors    = "colors";
+
+
 /**
 */
-ViewPointGenFeaturePointGeometry::ViewPointGenFeaturePointGeometry(const std::string& geom_type,
+ViewPointGenFeaturePointGeometry::ViewPointGenFeaturePointGeometry(const std::string& type,
                                                                    const std::vector<Eigen::Vector2d>& positions,
-                                                                   const std::vector<QColor>& colors)
-:   ViewPointGenFeature()
-,   geom_type_      (geom_type)
-,   positions_      (positions)
-,   colors_         (colors   )
+                                                                   const std::vector<QColor>& colors,
+                                                                   bool enable_color_vector)
+:   ViewPointGenFeature (type               )
+,   positions_          (positions          )
+,   colors_             (colors             )
+,   enable_color_vector_(enable_color_vector)
 {
 }
 
@@ -135,7 +149,7 @@ ViewPointGenFeaturePointGeometry::ViewPointGenFeaturePointGeometry(const std::st
 void ViewPointGenFeaturePointGeometry::reserve(size_t n, bool reserve_cols)
 {
     positions_.reserve(n);
-    if (reserve_cols)
+    if (enable_color_vector_ && reserve_cols)
         colors_.reserve(n);
 }
 
@@ -145,7 +159,8 @@ void ViewPointGenFeaturePointGeometry::addPoint(const Eigen::Vector2d& pos,
                                                 const boost::optional<QColor>& color)
 {
     positions_.push_back(pos);
-    if (color.has_value())
+
+    if (enable_color_vector_ && color.has_value())
         colors_.push_back(color.value());
 }
 
@@ -156,17 +171,15 @@ void ViewPointGenFeaturePointGeometry::addPoints(const std::vector<Eigen::Vector
 {
     positions_.insert(positions_.end(), positions.begin(), positions.end());
 
-    if (colors.has_value())
+    if (enable_color_vector_ && colors.has_value())
         colors_.insert(colors_.end(), colors->begin(), colors->end());
 }
 
 /**
 */
-void ViewPointGenFeaturePointGeometry::toJSON_impl(nlohmann::json& j) const
+void ViewPointGenFeaturePointGeometry::toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const
 {
     nlohmann::json geom;
-    geom[FeatureFieldNameGeomType] = geom_type_;
-
     nlohmann::json props;
 
     auto coords = nlohmann::json::array();
@@ -182,7 +195,7 @@ void ViewPointGenFeaturePointGeometry::toJSON_impl(nlohmann::json& j) const
 
     geom[FeatureFieldNameCoords] = coords; 
     
-    if (positions_.size() == colors_.size())
+    if (enable_color_vector_ && positions_.size() == colors_.size())
     {
         auto colors = nlohmann::json::array();
 
@@ -206,26 +219,40 @@ void ViewPointGenFeaturePointGeometry::toJSON_impl(nlohmann::json& j) const
     j[FeatureFieldNameProps] = props; 
 }
 
+/**
+*/
+nlohmann::json& ViewPointGenFeaturePointGeometry::getCoordinatesJSON(nlohmann::json& feature_json)
+{
+    //check validity first
+    assert (feature_json.count(FeatureFieldNameGeom));
+    assert (feature_json[ FeatureFieldNameGeom ].count(FeatureFieldNameCoords));
+
+    return feature_json.at(FeatureFieldNameGeom).at(FeatureFieldNameCoords);
+}
+
 /********************************************************************************
  * ViewPointGenFeaturePoints
  ********************************************************************************/
 
-const std::string ViewPointGenFeaturePoints::FeaturePointsTypeName            = "points";
+const std::string ViewPointGenFeaturePoints::FeatureName                      = "points";
 const std::string ViewPointGenFeaturePoints::FeaturePointsFieldNameSymbol     = "symbol";
 const std::string ViewPointGenFeaturePoints::FeaturePointsFieldNameSymbolSize = "symbol_size";
 
-const std::string ViewPointGenFeaturePoints::SymbolNameCircle   = "circle";
-const std::string ViewPointGenFeaturePoints::SymbolNameTriangle = "triangle";
-const std::string ViewPointGenFeaturePoints::SymbolNameSquare   = "square";
-const std::string ViewPointGenFeaturePoints::SymbolNameCross    = "cross";
+const std::string ViewPointGenFeaturePoints::SymbolNameCircle      = "circle";
+const std::string ViewPointGenFeaturePoints::SymbolNameTriangle    = "triangle";
+const std::string ViewPointGenFeaturePoints::SymbolNameSquare      = "square";
+const std::string ViewPointGenFeaturePoints::SymbolNameCross       = "cross";
+const std::string ViewPointGenFeaturePoints::SymbolNameBorder      = "border";
+const std::string ViewPointGenFeaturePoints::SymbolNameBorderThick = "border_thick";
 
 /**
 */
 ViewPointGenFeaturePoints::ViewPointGenFeaturePoints(Symbol symbol,
                                                      float symbol_size,
                                                      const std::vector<Eigen::Vector2d>& positions,
-                                                     const std::vector<QColor>& colors)
-:   ViewPointGenFeaturePointGeometry(FeaturePointsTypeName, positions, colors)
+                                                     const std::vector<QColor>& colors,
+                                                     bool enable_color_vector)
+:   ViewPointGenFeaturePointGeometry(FeatureName, positions, colors, enable_color_vector)
 ,   symbol_     (symbol     )
 ,   symbol_size_(symbol_size)
 {
@@ -243,6 +270,10 @@ std::string ViewPointGenFeaturePoints::symbolString() const
         return SymbolNameSquare;
     if (symbol_ == Symbol::Cross)
         return SymbolNameCross;
+    if (symbol_ == Symbol::Border)
+        return SymbolNameBorder;
+    if (symbol_ == Symbol::BorderThick)
+        return SymbolNameBorderThick;
     return "";
 }
 
@@ -255,60 +286,85 @@ void ViewPointGenFeaturePoints::writeProperties(nlohmann::json& j) const
 }
 
 /********************************************************************************
- * ViewPointGenFeatureLineString
+ * ViewPointGenFeatureStyledLine
  ********************************************************************************/
 
-const std::string ViewPointGenFeatureLineString::FeatureLineStringTypeName           = "line_string";
-const std::string ViewPointGenFeatureLineString::FeatureLineStringInterpTypeName     = "line_string_interpolated";
-const std::string ViewPointGenFeatureLineString::FeatureLineStringFieldNameLineWidth = "line_width";
+const std::string ViewPointGenFeatureStyledLine::FeatureLineStringFieldNameLineWidth = "line_width";
+const std::string ViewPointGenFeatureStyledLine::FeatureLineStringFieldNameLineStyle = "line_style";
 
 /**
 */
-ViewPointGenFeatureLineString::ViewPointGenFeatureLineString(bool interpolated,
-                                                             float line_width,
-                                                             const std::vector<Eigen::Vector2d>& positions,
-                                                             const std::vector<QColor>& colors)
-:   ViewPointGenFeaturePointGeometry(interpolated ? FeatureLineStringInterpTypeName : FeatureLineStringTypeName, positions, colors)
+ViewPointGenFeatureStyledLine::ViewPointGenFeatureStyledLine(const std::string& type,
+                                  float line_width,
+                                  LineStyle line_style,
+                                  const std::vector<Eigen::Vector2d>& positions,
+                                  const std::vector<QColor>& colors,
+                                  bool enable_color_vector)
+:   ViewPointGenFeaturePointGeometry(type, positions, colors, enable_color_vector)
 ,   line_width_(line_width)
+,   line_style_(line_style)
 {
 }
 
 /**
 */
-void ViewPointGenFeatureLineString::writeProperties(nlohmann::json& j) const
+std::string ViewPointGenFeatureStyledLine::styleString() const
+{
+    if (line_style_ == LineStyle::Dotted)
+        return "dotted";
+
+    return "solid";
+}
+
+/**
+*/
+void ViewPointGenFeatureStyledLine::writeProperties(nlohmann::json& j) const
 {
     j[FeatureLineStringFieldNameLineWidth] = line_width_;
+    j[FeatureLineStringFieldNameLineStyle] = styleString();
+}
+
+/********************************************************************************
+ * ViewPointGenFeatureLineString
+ ********************************************************************************/
+
+const std::string ViewPointGenFeatureLineString::FeatureName       = "line_string";
+const std::string ViewPointGenFeatureLineString::FeatureNameInterp = "line_string_interpolated";
+
+/**
+*/
+ViewPointGenFeatureLineString::ViewPointGenFeatureLineString(bool interpolated,
+                                                             float line_width,
+                                                             LineStyle line_style,
+                                                             const std::vector<Eigen::Vector2d>& positions,
+                                                             const std::vector<QColor>& colors,
+                                                             bool enable_color_vector)
+:   ViewPointGenFeatureStyledLine(interpolated ? FeatureNameInterp : FeatureName, line_width, line_style, positions, colors, enable_color_vector)
+{
 }
 
 /********************************************************************************
  * ViewPointGenFeatureLines
  ********************************************************************************/
 
-const std::string ViewPointGenFeatureLines::FeatureLinesTypeName           = "lines";
-const std::string ViewPointGenFeatureLines::FeatureLinesFieldNameLineWidth = "line_width";
+const std::string ViewPointGenFeatureLines::FeatureName = "lines";
 
 /**
 */
 ViewPointGenFeatureLines::ViewPointGenFeatureLines(float line_width,
+                                                   LineStyle line_style,
                                                    const std::vector<Eigen::Vector2d>& positions,
-                                                   const std::vector<QColor>& colors)
-:   ViewPointGenFeaturePointGeometry(FeatureLinesTypeName, positions, colors)
-,   line_width_(line_width)
+                                                   const std::vector<QColor>& colors,
+                                                   bool enable_color_vector)
+:   ViewPointGenFeatureStyledLine(FeatureName, line_width, line_style, positions, colors, enable_color_vector)
 {
-}
-
-/**
-*/
-void ViewPointGenFeatureLines::writeProperties(nlohmann::json& j) const
-{
-    j[FeatureLinesFieldNameLineWidth] = line_width_;
 }
 
 /********************************************************************************
  * ViewPointGenFeatureErrorEllipses
  ********************************************************************************/
 
-const std::string ViewPointGenFeatureErrEllipses::FeatureErrEllipsesTypeName           = "ellipses";
+const std::string ViewPointGenFeatureErrEllipses::FeatureName                          = "ellipses";
 const std::string ViewPointGenFeatureErrEllipses::FeatureErrEllipsesFieldNameLineWidth = "line_width";
 const std::string ViewPointGenFeatureErrEllipses::FeatureErrEllipsesFieldNameNumPoints = "num_points";
 const std::string ViewPointGenFeatureErrEllipses::FeatureErrEllipsesFieldNameSizes     = "sizes";
@@ -319,8 +375,9 @@ ViewPointGenFeatureErrEllipses::ViewPointGenFeatureErrEllipses(float line_width,
                                                                size_t num_points,
                                                                const std::vector<Eigen::Vector2d>& positions,
                                                                const std::vector<QColor>& colors,
-                                                               const std::vector<Eigen::Vector3d>& sizes)
-:   ViewPointGenFeaturePointGeometry(FeatureErrEllipsesTypeName, positions, colors)
+                                                               const std::vector<Eigen::Vector3d>& sizes,
+                                                               bool enable_color_vector)
+:   ViewPointGenFeaturePointGeometry(FeatureName, positions, colors, enable_color_vector)
 ,   line_width_(line_width)
 ,   num_points_(num_points)
 ,   sizes_     (sizes     )
@@ -380,7 +437,7 @@ void ViewPointGenFeatureErrEllipses::writeProperties(nlohmann::json& j) const
  * ViewPointGenFeatureText
  ********************************************************************************/
 
-const std::string ViewPointGenFeatureText::FeatureTypeNameText          = "text";
+const std::string ViewPointGenFeatureText::FeatureName                  = "text";
 const std::string ViewPointGenFeatureText::FeatureTextFieldNameText     = "text";
 const std::string ViewPointGenFeatureText::FeatureTextFieldNamePos      = "position";
 const std::string ViewPointGenFeatureText::FeatureTextFieldNameDir      = "direction";
@@ -398,7 +455,7 @@ ViewPointGenFeatureText::ViewPointGenFeatureText(const std::string& text,
                                                  double y,
                                                  float font_size,
                                                  TextDirection text_dir)
-:   ViewPointGenFeature(FeatureTypeNameText)
+:   ViewPointGenFeature(FeatureName)
 ,   text_           (text     )
 ,   x_              (x        )
 ,   y_              (y        )
@@ -424,7 +481,7 @@ std::string ViewPointGenFeatureText::textDirString() const
 
 /**
 */
-void ViewPointGenFeatureText::toJSON_impl(nlohmann::json& j) const
+void ViewPointGenFeatureText::toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const
 {
     j[FeatureTextFieldNameText] = text_;
 
@@ -439,6 +496,215 @@ void ViewPointGenFeatureText::toJSON_impl(nlohmann::json& j) const
     props[FeatureTextFieldNameDir     ] = textDirString();
 
     j[FeatureFieldNameProps] = props;
+}
+
+/********************************************************************************
+ * ViewPointGenFeatureGeoImage
+ ********************************************************************************/
+
+const std::string ViewPointGenFeatureGeoImage::FeatureName                        = "geoimage";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSource     = "source";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameFn         = "fn";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameData       = "data";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameReference  = "reference";
+
+/**
+*/
+ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const std::string& fn,
+                                                         const RasterReference& ref)
+:   ViewPointGenFeature(FeatureName)
+,   fn_ (fn )
+,   ref_(ref)
+{
+}
+
+/**
+*/
+ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const QImage& data,
+                                                         const RasterReference& ref)
+:   ViewPointGenFeature(FeatureName)
+,   data_(data)
+,   ref_ (ref )
+{
+}
+
+/**
+*/
+void ViewPointGenFeatureGeoImage::toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const
+{
+    //source
+    j[FeatureGeoImageFieldNameSource] = nlohmann::json::object();
+    auto& source = j[FeatureGeoImageFieldNameSource];
+
+    if (!data_.isNull())
+    {
+        source[ FeatureGeoImageFieldNameData ] = ViewPointGenFeatureGeoImage::imageToByteString(data_);
+    }
+    else
+    {
+        source[ FeatureGeoImageFieldNameFn ] = fn_;
+    }
+
+    //reference
+    j[FeatureGeoImageFieldNameReference] = ref_.toJSON();
+}
+
+/**
+*/
+std::string ViewPointGenFeatureGeoImage::imageToByteString(const QImage& img)
+{
+    int w      = img.width();
+    int h      = img.height();
+    int stride = img.bytesPerLine();
+    int format = (int)img.format();
+
+    QByteArray ba;
+
+    //add meta-info
+    ba.append((const char*)&w     , sizeof(int));
+    ba.append((const char*)&h     , sizeof(int));
+    ba.append((const char*)&stride, sizeof(int));
+    ba.append((const char*)&format, sizeof(int));
+    
+    //add image data
+    ba.append((const char*)img.bits(), img.byteCount());
+
+    //code base 64
+    QString byte_str(ba.toBase64());
+
+    return byte_str.toStdString();
+}
+
+/**
+*/
+QImage ViewPointGenFeatureGeoImage::byteStringToImage(const std::string& str)
+{
+    QByteArray ba_base64(str.data(), str.size());
+    QByteArray ba = QByteArray::fromBase64(ba_base64);
+
+    int* w      = (int*)(ba.data() + 0 * sizeof(int));
+    int* h      = (int*)(ba.data() + 1 * sizeof(int));
+    int* stride = (int*)(ba.data() + 2 * sizeof(int));
+    int* format = (int*)(ba.data() + 3 * sizeof(int));
+
+    //std::cout << "byte image - w: " << *w << ", h: " << *h << ", stride: " << *stride << ", format: " << *format << std::endl;
+
+    const char* data = ba.data() + 4 * sizeof(int);
+
+    //data pointer has to live over the whole QImage's lifetime, so we copy the
+    //image, which should do a deep copy of the data
+    return QImage((const uchar*)data, *w, *h, *stride, (QImage::Format)(*format)).copy();
+}
+
+/********************************************************************************
+ * ViewPointGenFeatureGrid
+ ********************************************************************************/
+
+const std::string ViewPointGenFeatureGrid::FeatureName              = "grid";
+const std::string ViewPointGenFeatureGrid::FeatureGridFieldNameGrid = "grid";
+
+/**
+*/
+ViewPointGenFeatureGrid::ViewPointGenFeatureGrid(const Grid2DLayer& grid)
+:   ViewPointGenFeature(FeatureName)
+,   grid_(grid)
+{
+}
+
+/**
+*/
+void ViewPointGenFeatureGrid::toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const
+{
+    j[FeatureGridFieldNameGrid] = grid_.toJSON(write_binary_if_possible);
+}
+
+/********************************************************************************
+ * ViewPointGenFeatureHistogram
+ ********************************************************************************/
+
+const std::string ViewPointGenFeatureHistogram::FeatureName                        = "histogram";
+const std::string ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram = "histogram";
+
+/**
+*/
+ViewPointGenFeatureHistogram::ViewPointGenFeatureHistogram(const RawHistogram& histogram,
+                                                           const std::string& series_name,
+                                                           const QColor& series_color,
+                                                           const PlotMetadata& metadata)
+:   ViewPointGenFeature(FeatureName)
+{
+    histogram_.addDataSeries(histogram, series_name, series_color);
+
+    plot_metadata_ = metadata;
+}
+
+/**
+*/
+ViewPointGenFeatureHistogram::ViewPointGenFeatureHistogram(const RawHistogramCollection& histogram_collection,
+                                                           const PlotMetadata& metadata)
+:   ViewPointGenFeature(FeatureName)
+,   histogram_(histogram_collection)
+{
+    plot_metadata_ = metadata;
+}
+
+/**
+*/
+size_t ViewPointGenFeatureHistogram::size() const 
+{ 
+    return histogram_.numDataSeries();
+}
+
+/**
+*/
+void ViewPointGenFeatureHistogram::toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const
+{
+    j[ FeatureHistogramFieldNameHistogram ] = histogram_.toJSON();
+}
+
+/********************************************************************************
+ * ViewPointGenFeatureScatterSeries
+ ********************************************************************************/
+
+const std::string ViewPointGenFeatureScatterSeries::FeatureName                            = "scatterseries";
+const std::string ViewPointGenFeatureScatterSeries::FeatureHistogramFieldNameScatterSeries = "scatterseries";
+
+/**
+*/
+ViewPointGenFeatureScatterSeries::ViewPointGenFeatureScatterSeries(const ScatterSeries& scatter_series,
+                                                                   const std::string& series_name,
+                                                                   const QColor& series_color,
+                                                                   double marker_size,
+                                                                   const PlotMetadata& metadata)
+:   ViewPointGenFeature(FeatureName)
+{
+    scatter_series_.addDataSeries(scatter_series, series_name, series_color, marker_size);
+
+    plot_metadata_ = metadata;
+}
+
+/**
+*/
+ViewPointGenFeatureScatterSeries::ViewPointGenFeatureScatterSeries(const ScatterSeriesCollection& scatter_series_collection,
+                                                                   const PlotMetadata& metadata)
+:   ViewPointGenFeature(FeatureName)
+,   scatter_series_(scatter_series_collection)
+{
+    plot_metadata_ = metadata;
+}
+
+/**
+*/
+size_t ViewPointGenFeatureScatterSeries::size() const 
+{ 
+    return scatter_series_.numDataSeries();
+}
+
+/**
+*/
+void ViewPointGenFeatureScatterSeries::toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const
+{
+    j[ FeatureHistogramFieldNameScatterSeries ] = scatter_series_.toJSON(write_binary_if_possible);
 }
 
 /********************************************************************************
@@ -471,13 +737,58 @@ void ViewPointGenAnnotation::setSymbolColor(const QColor& color)
 */
 void ViewPointGenAnnotation::addFeature(std::unique_ptr<ViewPointGenFeature>&& feat)
 {
+    assert(feat);
+
+    feat_map_[ feat->name() ] = features_.size();
     features_.push_back(std::move(feat));
+}
+
+/**
+*/
+void ViewPointGenAnnotation::addFeature(ViewPointGenFeature* feat)
+{
+    assert(feat);
+
+    feat_map_[ feat->name() ] = features_.size();
+    features_.emplace_back(feat);
+}
+
+/**
+*/
+bool ViewPointGenAnnotation::hasFeature(const std::string& name) const
+{
+    return feat_map_.count(name) > 0;
+}
+
+/**
+*/
+ViewPointGenFeature* ViewPointGenAnnotation::getFeature(const std::string& name)
+{
+    auto it = feat_map_.find(name);
+
+    if (it == feat_map_.end())
+        return nullptr;
+
+    return features_.at(it->second).get();
+}
+
+/**
+*/
+const ViewPointGenFeature* ViewPointGenAnnotation::getFeature(const std::string& name) const
+{
+    auto it = feat_map_.find(name);
+
+    if (it == feat_map_.end())
+        return nullptr;
+
+    return features_.at(it->second).get();
 }
 
 /**
 */
 ViewPointGenAnnotation* ViewPointGenAnnotation::addAnnotation(const std::string& name, bool hidden)
 {
+    anno_map_[ name ] = annotations_.size();
     annotations_.emplace_back(new ViewPointGenAnnotation(name, hidden));
     return annotations_.back().get();
 }
@@ -486,7 +797,37 @@ ViewPointGenAnnotation* ViewPointGenAnnotation::addAnnotation(const std::string&
 */
 void ViewPointGenAnnotation::addAnnotation(std::unique_ptr<ViewPointGenAnnotation>&& a)
 {
+    assert(a);
+
+    anno_map_[ a->name() ] = annotations_.size();
     annotations_.push_back(std::move(a));
+}
+
+/**
+*/
+ViewPointGenAnnotation* ViewPointGenAnnotation::getOrCreateAnnotation(const std::string& name, bool hidden)
+{
+    if (hasAnnotation(name))
+        return annotation(name);
+
+    return addAnnotation(name, hidden);
+}
+
+/**
+*/
+bool ViewPointGenAnnotation::hasAnnotation(const std::string& name) const
+{
+    return anno_map_.count(name) > 0;
+}
+
+/**
+*/
+ViewPointGenAnnotation* ViewPointGenAnnotation::annotation(const std::string& name) const
+{
+    auto it = anno_map_.find(name);
+    assert(it != anno_map_.end());
+
+    return annotations_.at(it->second).get();
 }
 
 /**
@@ -541,6 +882,39 @@ void ViewPointGenAnnotation::print(std::ostream& strm, const std::string& prefix
         a->print(strm, p2);
 }
 
+/**
+*/
+nlohmann::json& ViewPointGenAnnotation::getFeaturesJSON(nlohmann::json& annotation_json)
+{
+    assert (annotation_json.contains(AnnotationFieldFeatures));
+    assert (annotation_json.at(AnnotationFieldFeatures).is_array());
+
+    return annotation_json.at(AnnotationFieldFeatures);
+}
+
+/**
+*/
+nlohmann::json& ViewPointGenAnnotation::getFeatureJSON(nlohmann::json& annotation_json, size_t idx)
+{
+    auto& feat_arr = ViewPointGenAnnotation::getFeaturesJSON(annotation_json);
+
+    assert (feat_arr.is_array());
+    assert (idx < feat_arr.size());
+    assert (feat_arr.at(idx).is_object());
+
+    return feat_arr.at(idx);
+}
+
+/**
+*/
+nlohmann::json& ViewPointGenAnnotation::getChildrenJSON(nlohmann::json& annotation_json)
+{
+    assert (annotation_json.contains(AnnotationFieldAnnotations));
+    assert (annotation_json.at(AnnotationFieldAnnotations).is_array());
+
+    return annotation_json.at(AnnotationFieldAnnotations);
+}
+
 /********************************************************************************
  * ViewPointGenAnnotations
  ********************************************************************************/
@@ -549,6 +923,7 @@ void ViewPointGenAnnotation::print(std::ostream& strm, const std::string& prefix
 */
 ViewPointGenAnnotation* ViewPointGenAnnotations::addAnnotation(const std::string& name, bool hidden)
 {
+    anno_map_[ name ] = annotations_.size();
     annotations_.emplace_back(new ViewPointGenAnnotation(name, hidden));
     return annotations_.back().get();
 }
@@ -557,7 +932,37 @@ ViewPointGenAnnotation* ViewPointGenAnnotations::addAnnotation(const std::string
 */
 void ViewPointGenAnnotations::addAnnotation(std::unique_ptr<ViewPointGenAnnotation>&& a)
 {
+    assert(a);
+
+    anno_map_[ a->name() ] = annotations_.size();
     annotations_.push_back(std::move(a));
+}
+
+/**
+*/
+ViewPointGenAnnotation* ViewPointGenAnnotations::getOrCreateAnnotation(const std::string& name, bool hidden)
+{
+    if (hasAnnotation(name))
+        return annotation(name);
+
+    return addAnnotation(name, hidden);
+}
+
+/**
+*/
+bool ViewPointGenAnnotations::hasAnnotation(const std::string& name) const
+{
+    return anno_map_.count(name) > 0;
+}
+
+/**
+*/
+ViewPointGenAnnotation* ViewPointGenAnnotations::annotation(const std::string& name) const
+{
+    auto it = anno_map_.find(name);
+    assert(it != anno_map_.end());
+
+    return annotations_.at(it->second).get();
 }
 
 /**
@@ -587,16 +992,16 @@ void ViewPointGenAnnotations::print(std::ostream& strm, const std::string& prefi
  * ViewPointGenVP
  ********************************************************************************/
 
-const std::string ViewPointGenVP::ViewPointFieldName        = "name";
-const std::string ViewPointGenVP::ViewPointFieldID          = "id";
-const std::string ViewPointGenVP::ViewPointFieldType        = "type";
-const std::string ViewPointGenVP::ViewPointFieldStatus      = "status";
-const std::string ViewPointGenVP::ViewPointFieldAnnotations = "annotations";
-const std::string ViewPointGenVP::ViewPointFieldFilters     = "filters";
-const std::string ViewPointGenVP::ViewPointFieldPosLat      = "position_latitude";
-const std::string ViewPointGenVP::ViewPointFieldPosLon      = "position_longitude";
-const std::string ViewPointGenVP::ViewPointFieldWinLat      = "position_window_latitude";
-const std::string ViewPointGenVP::ViewPointFieldWinLon      = "position_window_longitude";
+const std::string ViewPointGenVP::ViewPointFieldName        = ViewPoint::VP_NAME_KEY;
+const std::string ViewPointGenVP::ViewPointFieldID          = ViewPoint::VP_ID_KEY;
+const std::string ViewPointGenVP::ViewPointFieldType        = ViewPoint::VP_TYPE_KEY;
+const std::string ViewPointGenVP::ViewPointFieldStatus      = ViewPoint::VP_STATUS_KEY;
+const std::string ViewPointGenVP::ViewPointFieldAnnotations = ViewPoint::VP_ANNOTATION_KEY;
+const std::string ViewPointGenVP::ViewPointFieldFilters     = ViewPoint::VP_FILTERS_KEY;
+const std::string ViewPointGenVP::ViewPointFieldPosLat      = ViewPoint::VP_POS_LAT_KEY;
+const std::string ViewPointGenVP::ViewPointFieldPosLon      = ViewPoint::VP_POS_LON_KEY;
+const std::string ViewPointGenVP::ViewPointFieldWinLat      = ViewPoint::VP_POS_WIN_LAT_KEY;
+const std::string ViewPointGenVP::ViewPointFieldWinLon      = ViewPoint::VP_POS_WIN_LON_KEY;
 
 const std::string ViewPointGenVP::StatusNameOpen   = "open";
 const std::string ViewPointGenVP::StatusNameClosed = "closed";
@@ -637,6 +1042,11 @@ std::string ViewPointGenVP::statusString() const
     return "";
 }
 
+void ViewPointGenVP::appendToDescription(const std::string& text)
+{
+    description_ += text;
+}
+
 /**
 */
 void ViewPointGenVP::toJSON(nlohmann::json& j) const
@@ -645,6 +1055,9 @@ void ViewPointGenVP::toJSON(nlohmann::json& j) const
     j[ViewPointFieldID    ] = id_;
     j[ViewPointFieldType  ] = type_;
     j[ViewPointFieldStatus] = statusString();
+
+    if (description_.size())
+        j[ViewPoint::VP_DESCRIPTION_KEY] = description_;
 
     if (!roi_.isEmpty())
     {
@@ -660,7 +1073,8 @@ void ViewPointGenVP::toJSON(nlohmann::json& j) const
 
     nlohmann::json filters;
     filters_.toJSON(filters);
-    j[ViewPointFieldFilters] = filters;
+    if (!filters.is_null())
+        j[ViewPointFieldFilters] = filters;
 
     for (const auto& cf : custom_fields_)
     {
@@ -675,6 +1089,9 @@ void ViewPointGenVP::toJSON(nlohmann::json& j) const
         else if (cf.second.type() == QVariant::Type::String)
             j[cf.first] = cf.second.toString().toStdString();
     }
+
+    if (no_data_loaded_)
+        j[ViewPoint::VP_DS_TYPES_KEY] = nlohmann::json::array();
 }
 
 /**
@@ -709,6 +1126,122 @@ bool ViewPointGenVP::hasAnnotations(const nlohmann::json& vp_json)
 
     return true;
 }
+
+namespace
+{
+    /**
+    */
+    void appendID(std::string& id, const std::string& id_to_add, const std::string& sep)
+    {
+        if (id_to_add.empty())
+            return;
+
+        if (id.empty())
+        {
+            id = id_to_add;
+            return;
+        }
+
+        id += sep + id_to_add;
+    }
+
+    /**
+    */
+    std::vector<ViewPointGenVP::JSONFeature> scanForFeaturesRecursive(const nlohmann::json& anno_json, 
+                                                                      std::vector<std::string> path, 
+                                                                      size_t idx,
+                                                                      const std::set<std::string>& feature_types)
+    {
+        if (!anno_json.is_object() || !anno_json.contains(ViewPointGenAnnotation::AnnotationFieldFeatures) || 
+                                      !anno_json.contains(ViewPointGenAnnotation::AnnotationFieldName))
+            return {};
+
+        std::string anno_name = anno_json[ ViewPointGenAnnotation::AnnotationFieldName ];
+
+        path.push_back(anno_name);
+
+        const auto& features_json = anno_json[ ViewPointGenAnnotation::AnnotationFieldFeatures ];
+        if (!features_json.is_array())
+            return {};
+
+        std::vector<ViewPointGenVP::JSONFeature> features;
+
+        //add annotation features
+        size_t feat_idx = 0;
+        for (const auto& f : features_json)
+        {
+            ++feat_idx;
+
+            if (!f.is_object() || !f.contains(ViewPointGenFeature::FeatureTypeFieldType))
+                return {};
+
+            std::string type = f[ ViewPointGenFeature::FeatureTypeFieldType ];
+
+            if (!feature_types.empty() && feature_types.count(type) == 0)
+                continue;
+
+            std::string feat_name;
+            if (f.contains(ViewPointGenFeature::FeatureTypeFieldName))
+                feat_name = f[ ViewPointGenFeature::FeatureTypeFieldName ];
+
+            ViewPointGenVP::JSONFeature entry;
+            entry.annotations  = path;
+            entry.name         = feat_name;
+            entry.feature_json = f;
+
+            features.push_back(entry);
+        }
+
+        //add child annotation features?
+        if (anno_json.contains(ViewPointGenAnnotation::AnnotationFieldAnnotations))
+        {
+            const auto& children_json = anno_json[ ViewPointGenAnnotation::AnnotationFieldAnnotations ];
+            if (!children_json.is_array())
+                return {};
+
+            size_t child_idx = 0;
+            for (const auto& c : children_json)
+            {
+                //obtain child feats
+                auto child_feats = scanForFeaturesRecursive(c, path, child_idx++, feature_types);
+
+                features.insert(features.begin(), child_feats.begin(), child_feats.end());
+            }
+        }
+
+        return features;
+    };
+}
+
+/**
+*/
+std::vector<ViewPointGenVP::JSONFeature> ViewPointGenVP::scanForFeatures(const nlohmann::json& vp_json,
+                                                                         const std::set<std::string>& feature_types)
+{
+    if (!vp_json.is_object() || !vp_json.contains(ViewPointFieldAnnotations))
+        return {};
+
+    const auto& annos_json = vp_json[ ViewPointFieldAnnotations ];
+    if (!annos_json.is_array())
+        return {};
+
+    std::vector<ViewPointGenVP::JSONFeature> features;
+
+    size_t child_idx = 0;
+    for (const auto& anno_json : annos_json)
+    {
+        if (!anno_json.is_object())
+            return {};
+
+        auto f = scanForFeaturesRecursive(anno_json, {}, child_idx++, feature_types);
+
+        features.insert(features.begin(), f.begin(), f.end());
+    }
+
+    return features;
+}
+
+
 
 /********************************************************************************
  * ViewPointGenerator

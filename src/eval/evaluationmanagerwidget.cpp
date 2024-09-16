@@ -165,10 +165,17 @@ void EvaluationManagerWidget::expandResults()
     results_tab_widget_->expand();
 }
 
-void EvaluationManagerWidget::showResultId (const std::string& id)
+void EvaluationManagerWidget::showResultId (const std::string& id, 
+                                            bool select_tab,
+                                            bool show_figure)
 {
+    assert(tab_widget_);
     assert (results_tab_widget_);
-    results_tab_widget_->selectId(id);
+
+    if (select_tab) 
+        tab_widget_->setCurrentWidget(results_tab_widget_.get());
+
+    results_tab_widget_->selectId(id, show_figure);
 }
 
 void EvaluationManagerWidget::reshowLastResultId()
@@ -209,7 +216,15 @@ void EvaluationManagerWidget::generateReportSlot()
     eval_man_.generateReport();
 }
 
-boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std::string& result_id, const std::string& table_id) const
+boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std::string& result_id, 
+                                                                      const std::string& table_id,
+                                                                      bool rowwise,
+                                                                      const std::vector<int>& cols) const
 {
-    return results_tab_widget_->getTableData(result_id, table_id);
+    //retrieve special tables
+    if (table_id == "Targets")
+        return eval_man_.getData().getTableData(rowwise, cols);
+
+    //retrieve result table
+    return results_tab_widget_->getTableData(result_id, table_id, rowwise, cols);
 }

@@ -20,7 +20,7 @@
 
 #include "evaluationtargetdata.h"
 #include "evaluationdatawidget.h"
-#include "dbcontentcache.h"
+#include "dbcontentaccessor.h"
 
 #include <QAbstractItemModel>
 
@@ -65,8 +65,8 @@ public:
     EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man);
 
     void setBuffers(std::map<std::string, std::shared_ptr<Buffer>> buffers);
-    void addReferenceData (std::string dbcontent_name, unsigned int line_id);
-    void addTestData (std::string dbcontent_name, unsigned int line_id);
+    void addReferenceData (const std::string& dbcontent_name, unsigned int line_id);
+    void addTestData (const std::string& dbcontent_name, unsigned int line_id);
     void finalize ();
 
     bool hasTargetData (unsigned int utn);
@@ -92,7 +92,14 @@ public:
 
     const EvaluationTargetData& getTargetOf (const QModelIndex& index);
 
+    boost::optional<nlohmann::json> getTableData(bool rowwise = true,
+                                                 const std::vector<int>& cols = std::vector<int>()) const;
+
     EvaluationDataWidget* widget();
+
+    void clearInterestFactors();
+    void resetModelBegin();
+    void resetModelEnd();
 
     // ref
     unsigned int ref_line_id_;
@@ -100,14 +107,20 @@ public:
     // tst
     unsigned int tst_line_id_;
 
+    static QColor color_interest_high_, color_interest_mid_, color_interest_low_;
+
+
+
 protected:
     EvaluationManager& eval_man_;
     DBContentManager& dbcont_man_;
 
-    QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
+    QStringList table_columns_ {"Use", "UTN", "Comment", "Interest",
+                               "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
                                 "M3/A", "MC Min", "MC Max"};
 
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
+
 
     TargetCache target_data_;
     bool finalized_ {false};

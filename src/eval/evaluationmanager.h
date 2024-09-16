@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONMANAGER_H
-#define EVALUATIONMANAGER_H
+#pragma once
 
 #include "configurable.h"
 #include "evaluationdata.h"
@@ -120,7 +119,6 @@ struct EvaluationManagerSettings
     bool report_skip_no_data_details_ {true};
     bool report_split_results_by_mops_ {false};
     bool report_split_results_by_aconly_ms_ {false};
-    bool report_show_adsb_info_ {false};
 
     std::string report_author_;
     std::string report_abstract_;
@@ -140,6 +138,14 @@ struct EvaluationManagerSettings
     bool report_open_created_pdf_ {false};
 
     bool warning_shown_ {false};
+
+    //grid generation
+    unsigned int grid_num_cells_x     = 512;
+    unsigned int grid_num_cells_y     = 512;
+    unsigned int grid_pixels_per_cell = 5;
+
+    //histogram generation
+    unsigned int histogram_num_bins = 20;
 
     //not written to config
     bool load_only_sector_data_ {true};
@@ -176,6 +182,21 @@ public slots:
     void loadingDoneSlot();
 
 public:
+    struct EvaluationDS
+    {
+        std::string  name;
+        unsigned int id;
+    };
+
+    struct EvaluationDSInfo
+    {
+        std::string               dbcontent;
+        std::vector<EvaluationDS> data_sources;
+    };
+
+    typedef std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> ResultMap;
+    typedef ResultMap::const_iterator ResultIterator;
+
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~EvaluationManager();
 
@@ -237,6 +258,7 @@ public:
     bool hasValidReferenceDBContent ();
     std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[settings_.dbcontent_name_ref_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesRef();
+    EvaluationDSInfo activeDataSourceInfoRef() const;
 
     std::string dbContentNameTst() const;
     void dbContentNameTst(const std::string& name);
@@ -244,6 +266,7 @@ public:
     bool hasValidTestDBContent ();
     std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[settings_.dbcontent_name_tst_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesTst();
+    EvaluationDSInfo activeDataSourceInfoTst() const;
 
     bool dataLoaded() const;
     bool evaluated() const;
@@ -277,17 +300,15 @@ public:
             const std::string& req_grp_id, const std::string& result_id); // empty load
     std::unique_ptr<nlohmann::json::object_t> getViewableForEvaluation (
             unsigned int utn, const std::string& req_grp_id, const std::string& result_id); // with data
-    void showResultId (const std::string& id);
-
-    typedef std::map<std::string,
-      std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
+    void showResultId (const std::string& id, 
+                       bool select_tab = false,
+                       bool show_figure = false);
 
     ResultIterator begin();
     ResultIterator end();
 
     bool hasResults();
-    const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
-    const;
+    const ResultMap& results() const;
 
     void updateResultsToChanges ();
     void showFullUTN (unsigned int utn);
@@ -317,6 +338,8 @@ public:
     bool hasSelectedTestDataSources();
 
     const dbContent::DataSourceCompoundCoverage& tstSrcsCoverage() const;
+
+    void clearLoadedDataAndResults();
 
 protected:
     virtual void checkSubConfigurables() override;
@@ -384,5 +407,3 @@ protected:
 
     dbContent::DataSourceCompoundCoverage tst_srcs_coverage_;
 };
-
-#endif // EVALUATIONMANAGER_H

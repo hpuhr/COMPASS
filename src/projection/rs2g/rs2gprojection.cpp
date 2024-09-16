@@ -59,6 +59,9 @@ bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double sl
                                   bool has_baro_altitude, double baro_altitude_ft, double& latitude,
                                   double& longitude)
 {
+    if (!hasCoordinateSystem(id))
+        logerr << "RS2GProjection: polarToWGS84: no coord system for " << id;
+
     assert(hasCoordinateSystem(id));
 
     double x1, y1, z1;

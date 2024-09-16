@@ -1,5 +1,5 @@
 {
-    "app_version": "0.7.5",
+    "app_version": "0.7.6",
     "category": "Default",
     "description": "Contains main variables to be displayed by default.",
     "deployed": true,
@@ -30,6 +30,10 @@
                                         [
                                             "Meta",
                                             "Line ID"
+                                        ],
+                                        [
+                                            "Meta",
+                                            "UTN"
                                         ],
                                         [
                                             "Meta",

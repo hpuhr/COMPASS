@@ -5,7 +5,6 @@
 #include "logger.h"
 #include "compass.h"
 #include "taskmanager.h"
-#include "calculatereferencestask.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -48,6 +47,7 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+    table_view_->horizontalHeader()->setMaximumSectionSize(300);
     //table_view_->setIconSize(QSize(24, 24));
     table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
     table_view_->setWordWrap(true);
@@ -125,53 +125,22 @@ void TargetListWidget::filterSlot()
 
 void TargetListWidget::customContextMenuSlot(const QPoint& p)
 {
-    logdbg << "TargetListWidget: customContextMenuSlot";
+    // logdbg << "TargetListWidget: customContextMenuSlot";
 
-    assert (table_view_);
+    // assert (table_view_);
 
-    QModelIndex index = table_view_->indexAt(p);
+    // QModelIndex index = table_view_->indexAt(p);
+    // if (!index.isValid())
+    //     return;
 
-    if (!index.isValid())
-        return;
+    // auto const source_index = proxy_model_->mapToSource(index);
+    // assert (source_index.isValid());
 
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
+    // const dbContent::Target& target = model_.getTargetOf(source_index);
 
-    const dbContent::Target& target = model_.getTargetOf(source_index);
-    unsigned int utn = target.utn_;
+    // QMenu menu;
 
-    auto recCB = [=] ()
-    {
-        COMPASS::instance().taskManager().calculateReferencesTask().runUTN(utn);
-    };
-
-    QMenu menu;
-
-    QAction* action = new QAction("Reconstruction Preview", this);
-    connect (action, &QAction::triggered, recCB);
-    menu.addAction(action);
-
-    menu.exec(table_view_->viewport()->mapToGlobal(p));
-
-    //    const EvaluationTargetData& target = eval_data_.getTargetOf(source_index);
-
-    //    unsigned int utn = target.utn_;
-    //    loginf << "TargetListWidget: customContextMenuSlot: row " << index.row() << " utn " << utn;
-    //    assert (eval_man_.getData().hasTargetData(utn));
-
-    //    QMenu menu;
-
-    //    QAction* action = new QAction("Show Full UTN", this);
-    //    connect (action, &QAction::triggered, this, &TargetListWidget::showFullUTNSlot);
-    //    action->setData(utn);
-    //    menu.addAction(action);
-
-    //    QAction* action2 = new QAction("Show Surrounding Data", this);
-    //    connect (action2, &QAction::triggered, this, &TargetListWidget::showSurroundingDataSlot);
-    //    action2->setData(utn);
-    //    menu.addAction(action2);
-
-    //    menu.exec(table_view_->viewport()->mapToGlobal(p));
+    // menu.exec(table_view_->viewport()->mapToGlobal(p));
 }
 
 void TargetListWidget::showFullUTNSlot ()

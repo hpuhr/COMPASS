@@ -42,7 +42,7 @@ class DataSourcesLoadWidget : public QWidget
 
 public slots:
     void loadDSTypeChangedSlot();
-    void loadDSChangedSlot();
+    //void loadDSChangedSlot();
 
     void editClickedSlot();
 

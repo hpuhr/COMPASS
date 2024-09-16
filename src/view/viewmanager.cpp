@@ -102,6 +102,7 @@ void ViewManager::init(QTabWidget* tab_widget)
 #endif
 
     view_class_list_.insert({"ScatterPlotView", "Scatterplot View"});
+    view_class_list_.insert({"GridView", "Grid View"});
 
 #ifdef SCAN_PRESETS
     //scan view presets
@@ -269,6 +270,7 @@ dbContent::VariableSet ViewManager::getReadSet(const std::string& dbcontent_name
 
 ViewPointsWidget* ViewManager::viewPointsWidget() const
 {
+    assert (view_points_widget_);
     return view_points_widget_;
 }
 
@@ -330,6 +332,22 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
     return std::make_pair(true, "");  
 }
 
+void ViewManager::clearViewPoints()
+{
+    DBInterface& db_interface = COMPASS::instance().interface();
+
+            //delete existing viewpoints
+    if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
+        db_interface.deleteAllViewPoints();
+
+    viewPointsWidget()->clearViewPoints();
+
+}
+void ViewManager::addViewPoints(const std::vector <nlohmann::json>& viewpoints)
+{
+    viewPointsWidget()->addViewPoints(viewpoints);
+}
+
 void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 {
     if (current_viewable_)
@@ -362,17 +380,17 @@ void ViewManager::unsetCurrentViewPoint ()
 
 void ViewManager::doViewPointAfterLoad ()
 {
-    loginf << "ViewManager: doViewPointAfterLoad";
+    logdbg << "ViewManager: doViewPointAfterLoad";
 
     if (!current_viewable_)
     {
-        loginf << "ViewManager: doViewPointAfterLoad: no viewable";
+        logdbg << "ViewManager: doViewPointAfterLoad: no viewable";
         return; // nothing to do
     }
 
     if (view_point_data_selected_)
     {
-        loginf << "ViewManager: doViewPointAfterLoad: data already selected";
+        logdbg << "ViewManager: doViewPointAfterLoad: data already selected";
         return; // already done, this is a re-load
     }
 
@@ -821,7 +839,7 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
     if (disable_data_distribution_)
         return;
 
-    loginf << "ViewManager: loadedDataSlot: reset " << requires_reset;
+    logdbg << "ViewManager: loadedDataSlot: reset " << requires_reset;
 
     processing_data_ = true;
 
@@ -839,7 +857,7 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
 
     processing_data_ = false;
 
-    loginf << "ViewManager: loadedDataSlot: done";
+    logdbg << "ViewManager: loadedDataSlot: done";
 }
 
 void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading

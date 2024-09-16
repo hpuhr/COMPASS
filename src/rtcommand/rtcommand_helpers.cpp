@@ -220,6 +220,47 @@ QString parameterFromStrings(const QStringList& strings)
 }
 
 /**
+*/
+boost::optional<std::vector<int>> parameterToIntVector(const std::string& string_param)
+{
+    return parameterToIntVector(QString::fromStdString(string_param));
+}
+
+/**
+*/
+boost::optional<std::vector<int>> parameterToIntVector(const QString& string_param)
+{
+    std::vector<int> vec;
+
+    if (string_param.isEmpty())
+        return vec;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    const auto skip_empty_parts = Qt::SkipEmptyParts;
+#else
+    const auto skip_empty_parts = QString::SkipEmptyParts;
+#endif
+
+
+    QStringList strings = string_param.split(',', skip_empty_parts);
+    if (strings.isEmpty())
+        return vec;
+
+    vec.resize(strings.count());
+
+    for (int i = 0; i < strings.count(); ++i)
+    {
+        bool ok;
+        vec[ i ] = strings[ i ].toInt(&ok);
+
+        if (!ok)
+            return {};
+    }
+
+    return vec;
+}
+
+/**
  * Returns a minimum object path for the given qobject.
  */
 QString getObjectPath(const QObject* obj)

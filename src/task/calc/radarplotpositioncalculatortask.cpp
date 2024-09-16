@@ -48,7 +48,7 @@ const std::string RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME =
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::string& class_id,
                                                                  const std::string& instance_id,
                                                                  TaskManager& task_manager)
-    : Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_radar_pos.json")
 {
     tooltip_ =
@@ -299,7 +299,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
         delete msg_box_;
         msg_box_ = nullptr;
 
-        emit doneSignal(name_);
+        emit doneSignal();
     }
     else
         loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot: not yet done";
@@ -330,8 +330,8 @@ dbContent::VariableSet RadarPlotPositionCalculatorTask::getReadSetFor(const std:
     assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
 
-    assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
-    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
 
     assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
@@ -346,8 +346,8 @@ dbContent::VariableSet RadarPlotPositionCalculatorTask::getReadSetFor(const std:
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
 
     // optionals
-    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
-        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_));
+    if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
+        read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_));
 
     if (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
         read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));

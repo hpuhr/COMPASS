@@ -77,6 +77,8 @@ public:
 
     void removeOutdatedVariables();
 
+    bool hasDBContent() const;
+
 protected:
     std::string name_;
     std::string description_;

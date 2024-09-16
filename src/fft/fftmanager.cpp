@@ -152,24 +152,24 @@ bool FFTManager::canAddNewFFTFromConfig (const std::string& name)
     return hasConfigFFT(name);
 }
 
-void FFTManager::addNewFFT (const std::string& name)
+void FFTManager::addNewFFT (const std::string& name, bool emit_signal)
 {
-    loginf << "FFTManager: addNewFFT: name " << name;
+    logdbg << "FFTManager: addNewFFT: name " << name;
 
     assert (!hasDBFFT(name));
 
     if (hasConfigFFT(name))
     {
-        loginf << "FFTManager: addNewFFT: name " << name << " from config";
+        logdbg << "FFTManager: addNewFFT: name " << name << " from config";
 
         ConfigurationFFT& cfg_fft = configFFT(name);
 
         db_ffts_.emplace_back(std::move(cfg_fft.getAsNewDBFFT()));
-        sortDBFFTs();
+
     }
     else
     {
-        loginf << "FFTManager: addNewFFT: name " << name << " create new";
+        logdbg << "FFTManager: addNewFFT: name " << name << " create new";
 
         createConfigFFT(name);
 
@@ -177,14 +177,14 @@ void FFTManager::addNewFFT (const std::string& name)
         new_fft->name(name);
 
         db_ffts_.emplace_back(std::move(new_fft));
-
-        sortDBFFTs();
     }
 
+    sortDBFFTs();
     assert (hasDBFFT(name));
     updateFFTNamesAll();
 
-    emit fftsChangedSignal();
+    if (emit_signal)
+        emit fftsChangedSignal();
 
     loginf << "FFTManager: addNewFFT: name " << name << " done";
 }
@@ -428,11 +428,11 @@ void FFTManager::loadDBFFTs()
     // create from config into db ones
     for (const auto& cfg_fft_it : config_ffts_)
     {
-        if (canAddNewFFTFromConfig(cfg_fft_it->name()))
+        if (!hasDBFFT(cfg_fft_it->name()) && canAddNewFFTFromConfig(cfg_fft_it->name()))
         {
             loginf << "FFTManager: loadDBFFTs: creating db fft '" << cfg_fft_it->name() << "'";
 
-            addNewFFT(cfg_fft_it->name()); // creates from config if possible
+            addNewFFT(cfg_fft_it->name(), false); // creates from config if possible
             new_created = true;
         }
     }
@@ -456,6 +456,8 @@ void FFTManager::loadDBFFTs()
 
     updateFFTNamesAll();
     sortDBFFTs();
+
+    emit fftsChangedSignal();
 }
 
 void FFTManager::sortDBFFTs()

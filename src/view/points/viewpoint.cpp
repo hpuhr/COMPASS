@@ -42,6 +42,7 @@ const std::string ViewPoint::VP_NAME_KEY {"name"};
 const std::string ViewPoint::VP_TYPE_KEY {"type"};
 const std::string ViewPoint::VP_STATUS_KEY {"status"};
 const std::string ViewPoint::VP_COMMENT_KEY {"comment"};
+const std::string ViewPoint::VP_DESCRIPTION_KEY {"description"};
 
 const std::string ViewPoint::VP_DS_TYPES_KEY {"data_source_types"};
 const std::string ViewPoint::VP_DS_KEY {"data_sources"};
@@ -117,7 +118,7 @@ void ViewPoint::accept(LatexVisitor& v) const
 
 void ViewPoint::save()
 {
-    loginf << "ViewPoint: save: id " << id_;
+    logdbg << "ViewPoint: save: id " << id_;
 
     DBInterface& db_interface = COMPASS::instance().interface();
     db_interface.setViewPoint(id_, data_.dump());

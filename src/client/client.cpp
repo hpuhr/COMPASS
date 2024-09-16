@@ -66,7 +66,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     APP_FILENAME = argv[0];
 
-QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 
 #ifdef OSG_GL3_AVAILABLE
     format.setVersion(3, 2);
@@ -80,7 +81,8 @@ QSurfaceFormat format = QSurfaceFormat::defaultFormat();
     //format.setOption(QSurfaceFormat::DebugContext); // scatterplot stops working if active
 #endif
     //format.setDepthBufferSize(32); // scatterplot stops working if active
-    format.setAlphaBufferSize(8);
+    //format.setAlphaBufferSize(8);
+
     format.setSamples(8);
     format.setStencilBufferSize(8);
     format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
@@ -164,10 +166,9 @@ QSurfaceFormat format = QSurfaceFormat::defaultFormat();
              "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
              "calculate radar plot positions")
-            ("associate_data", po::bool_switch(&associate_data_), "associate target reports")
             ("calculate_artas_tr_usage", po::bool_switch(&calculate_artas_tr_usage_), "associate target reports based on ARTAS usage")
             ("calculate_references", po::bool_switch(&calculate_references_),
-             "calculate references from ADS-B and Tracker data")
+             "calculate references from sensor and tracker data")
             ("load_data", po::bool_switch(&load_data_), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
              "export view points report after start with given filename, e.g. '/data/db2/report.tex")
@@ -221,7 +222,7 @@ QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 
 }
 
-void Client::run ()
+bool Client::run ()
 {
     // #define TBB_VERSION_MAJOR 4
 
@@ -266,6 +267,28 @@ void Client::run ()
     if (open_rt_cmd_port_)
         RTCommandManager::open_port_ = true; // has to be done before COMPASS ctor is called
 
+    loginf << "COMPASSClient: creating COMPASS instance...";
+
+    //!this should be the first call to COMPASS instance!
+    try
+    {
+        COMPASS::instance();
+    }
+    catch(const std::exception& e)
+    {
+        logerr << "COMPASSClient: creating COMPASS instance failed: " << e.what();
+        quit_requested_ = true;
+        return false;
+    }
+    catch(...)
+    {
+        logerr << "COMPASSClient: creating COMPASS instance failed: unknown error";
+        quit_requested_ = true;
+        return false;
+    }
+    
+    loginf << "COMPASSClient: created COMPASS instance";
+
     if (expert_mode_)
         COMPASS::instance().expertMode(true);
 
@@ -308,7 +331,7 @@ void Client::run ()
     {
         logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
         quit_requested_ = true;
-        return;
+        return false;
     }
 
     if (import_asterix_filename_.size())
@@ -396,9 +419,6 @@ void Client::run ()
     if (calculate_radar_plot_positions_)
         rt_man.addCommand("calculate_radar_plot_positions");
 
-    if (associate_data_)
-        rt_man.addCommand("associate_data");
-
     if (calculate_artas_tr_usage_)
         rt_man.addCommand("calculate_artas_tr_usage");
 
@@ -429,6 +449,8 @@ void Client::run ()
 
     //finally => set compass as running
     COMPASS::instance().setAppState(AppState::Running);
+
+    return true;
 }
 
 Client::~Client()

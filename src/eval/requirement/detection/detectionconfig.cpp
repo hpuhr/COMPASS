@@ -20,9 +20,10 @@
 #include "eval/requirement/detection/detectionconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
+
 #include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+
 #include "comparisontype.h"
 #include "stringconv.h"
 

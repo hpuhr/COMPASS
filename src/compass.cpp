@@ -34,6 +34,7 @@
 #include "rtcommand.h"
 #include "util/timeconv.h"
 #include "fftmanager.h"
+#include "util/async.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -96,7 +97,17 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     JobManager::instance().start();
     RTCommandManager::instance().start();
 
-    createSubConfigurables();
+    try
+    {
+        createSubConfigurables();
+    }
+    catch(const std::exception& e)
+    {
+        JobManager::instance().shutdown();
+        RTCommandManager::instance().shutdown();
+        
+        throw std::runtime_error(e.what());
+    }
 
     assert(db_interface_);
     assert(dbcontent_manager_);
@@ -375,8 +386,6 @@ void COMPASS::exportDBFile(const std::string& filename)
 
     db_export_in_progress_ = true;
 
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
     QMessageBox* msg_box = new QMessageBox;
 
     msg_box->setWindowTitle("Exporting Database");
@@ -385,11 +394,7 @@ void COMPASS::exportDBFile(const std::string& filename)
     msg_box->setWindowModality(Qt::ApplicationModal);
     msg_box->show();
 
-    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-    {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
-    }
+    Async::waitAndProcessEventsFor(50);
 
     db_interface_->exportDBFile(filename);
     lastUsedPath(Files::getDirectoryFromPath(filename));

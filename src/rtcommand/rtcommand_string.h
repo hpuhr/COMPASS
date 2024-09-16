@@ -65,6 +65,8 @@ public:
 
     IssueResult issue() const;
 
+    static const bool KeepEmptyCommands;
+
 private:
     QString extractName() const;
     QString quoteString(const QString& s) const;

@@ -68,7 +68,7 @@ public:
     bool lineLoadingWanted(unsigned int line_id) const;
     std::set<unsigned int> getLoadingWantedLines() const;
 
-    DBDataSourceWidget* widget();
+    //DBDataSourceWidget* widget();
 
     bool hasMaxTimestamp(unsigned int line) const;
     void maxTimestamp(unsigned int line, boost::posix_time::ptime value);
@@ -92,7 +92,7 @@ protected:
 
     std::map<unsigned int, unsigned long> max_line_tods_; // only used in live mode, line -> max tod
 
-    std::unique_ptr<DBDataSourceWidget> widget_;
+    //std::unique_ptr<DBDataSourceWidget> widget_;
 };
 
 }

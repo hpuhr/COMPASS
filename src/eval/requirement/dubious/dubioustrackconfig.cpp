@@ -21,17 +21,14 @@
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-//#include "eval/results/report/sectioncontenttable.h"
-//#include "stringconv.h"
 
-//using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
 
 namespace EvaluationRequirement
 {
+
 DubiousTrackConfig::DubiousTrackConfig(const std::string& class_id, const std::string& instance_id,
                                        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)

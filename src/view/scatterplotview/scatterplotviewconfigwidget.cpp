@@ -36,105 +36,33 @@
 using namespace Utils;
 using namespace dbContent;
 
-ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, QWidget* parent)
-:   TabStyleViewConfigWidget(view_widget, parent)
+/**
+*/
+ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, 
+                                                         QWidget* parent)
+:   VariableViewConfigWidget(view_widget, view_widget->getView(), parent)
 {
-    //QVBoxLayout* vlayout = new QVBoxLayout;
-
-    QFont font_bold;
-    font_bold.setBold(true);
-
     view_ = view_widget->getView();
     assert(view_);
 
-    // config
-    {
-        QWidget* cfg_widget = new QWidget();
-        QVBoxLayout* cfg_layout = new QVBoxLayout();
+    auto layout = configLayout();
 
-        cfg_layout->addWidget(new QLabel("X Variable"));
+    use_connection_lines_ = new QCheckBox("Use Connection Lines");
+    use_connection_lines_->setChecked(view_->useConnectionLines());
+    UI_TEST_OBJ_NAME(use_connection_lines_, use_connection_lines_->text())
 
-        select_var_x_ = new VariableSelectionWidget();
-        select_var_x_->showMetaVariables(true);
-        select_var_x_->showEmptyVariable(false);
-        select_var_x_->showDataTypesOnly({PropertyDataType::BOOL,
-                                          PropertyDataType::CHAR,
-                                          PropertyDataType::UCHAR,
-                                          PropertyDataType::INT,
-                                          PropertyDataType::UINT,
-                                          PropertyDataType::LONGINT,
-                                          PropertyDataType::ULONGINT,
-                                          PropertyDataType::FLOAT,
-                                          PropertyDataType::DOUBLE,
-                                          PropertyDataType::TIMESTAMP});
-        select_var_x_->setObjectName("variable_selection_x");
-
-        updateSelectedVarX();
-        connect(select_var_x_, &VariableSelectionWidget::selectionChanged, this,
-                &ScatterPlotViewConfigWidget::selectedVariableXChangedSlot);
-        cfg_layout->addWidget(select_var_x_);
-
-        cfg_layout->addWidget(new QLabel("Y Variable"));
-
-        select_var_y_ = new VariableSelectionWidget();
-        select_var_y_->showMetaVariables(true);
-        select_var_y_->showEmptyVariable(false);
-        select_var_y_->showDataTypesOnly({PropertyDataType::BOOL,
-                                          PropertyDataType::CHAR,
-                                          PropertyDataType::UCHAR,
-                                          PropertyDataType::INT,
-                                          PropertyDataType::UINT,
-                                          PropertyDataType::LONGINT,
-                                          PropertyDataType::ULONGINT,
-                                          PropertyDataType::FLOAT,
-                                          PropertyDataType::DOUBLE,
-                                          PropertyDataType::TIMESTAMP});
-        select_var_y_->setObjectName("variable_selection_y");
-
-        updateSelectedVarY();
-        connect(select_var_y_, &VariableSelectionWidget::selectionChanged, this,
-                &ScatterPlotViewConfigWidget::selectedVariableYChangedSlot);
-        cfg_layout->addWidget(select_var_y_);
-
-        use_connection_lines_ = new QCheckBox("Use Connection Lines");
-        use_connection_lines_->setChecked(view_->useConnectionLines());
-        UI_TEST_OBJ_NAME(use_connection_lines_, use_connection_lines_->text())
-
-        connect(use_connection_lines_, &QCheckBox::clicked,
-                this, &ScatterPlotViewConfigWidget::useConnectionLinesSlot);
-        cfg_layout->addWidget(use_connection_lines_);
-
-        cfg_layout->addStretch();
-
-        cfg_widget->setLayout(cfg_layout);
-
-        getTabWidget()->addTab(cfg_widget, "Config");
-    }
+    connect(use_connection_lines_, &QCheckBox::clicked,
+            this, &ScatterPlotViewConfigWidget::useConnectionLinesSlot);
+    
+    layout->addWidget(use_connection_lines_);
 }
 
+/**
+*/
 ScatterPlotViewConfigWidget::~ScatterPlotViewConfigWidget() = default;
 
-void ScatterPlotViewConfigWidget::selectedVariableXChangedSlot()
-{
-    loginf << "ScatterPlotViewConfigWidget: selectedVariableChangedSlot";
-
-    if (select_var_x_->hasVariable())
-        view_->dataVarX(select_var_x_->selectedVariable(), true);
-    else if (select_var_x_->hasMetaVariable())
-        view_->metaDataVarX(select_var_x_->selectedMetaVariable(), true);
-
-}
-
-void ScatterPlotViewConfigWidget::selectedVariableYChangedSlot()
-{
-    loginf << "ScatterPlotViewConfigWidget: selectedVariableChangedSlot";
-
-    if (select_var_y_->hasVariable())
-        view_->dataVarY(select_var_y_->selectedVariable(), true);
-    else if (select_var_y_->hasMetaVariable())
-        view_->metaDataVarY(select_var_y_->selectedMetaVariable(), true);
-}
-
+/**
+*/
 void ScatterPlotViewConfigWidget::useConnectionLinesSlot()
 {
     loginf << "ScatterPlotViewConfigWidget: useConnectionLinesSlot";
@@ -143,51 +71,20 @@ void ScatterPlotViewConfigWidget::useConnectionLinesSlot()
     view_->useConnectionLines(use_connection_lines_->checkState() == Qt::Checked);
 }
 
-void ScatterPlotViewConfigWidget::configChanged()
-{
-    updateSelectedVarX();
-    updateSelectedVarY();
-}
-
-void ScatterPlotViewConfigWidget::updateSelectedVarX()
-{
-    if (view_->hasDataVarX())
-    {
-        if (view_->isDataVarXMeta())
-            select_var_x_->selectedMetaVariable(view_->metaDataVarX());
-        else
-            select_var_x_->selectedVariable(view_->dataVarX());
-    }
-}
-
-void ScatterPlotViewConfigWidget::updateSelectedVarY()
-{
-    if (view_->hasDataVarY())
-    {
-        if (view_->isDataVarYMeta())
-            select_var_y_->selectedMetaVariable(view_->metaDataVarY());
-        else
-            select_var_y_->selectedVariable(view_->dataVarY());
-    }
-}
-
+/**
+*/
 void ScatterPlotViewConfigWidget::onDisplayChange_impl()
 {
     assert (use_connection_lines_);
     use_connection_lines_->setChecked(view_->useConnectionLines());
 }
 
+/**
+*/
 void ScatterPlotViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
 {
-    if (select_var_x_->hasMetaVariable())
-        info[ "selected_var_x" ] = "Meta - " + select_var_x_->selectedMetaVariable().name();
-    else
-        info[ "selected_var_x" ] = select_var_x_->selectedVariable().dbContentName() + " - " + select_var_x_->selectedVariable().name();
-
-    if (select_var_y_->hasMetaVariable())
-        info[ "selected_var_y" ] = "Meta - " + select_var_y_->selectedMetaVariable().name();
-    else
-        info[ "selected_var_y" ] = select_var_y_->selectedVariable().dbContentName() + " - " + select_var_y_->selectedVariable().name();
+    //!call base!
+    VariableViewConfigWidget::viewInfoJSON_impl(info);
 
     info[ "use_connection_lines" ] = use_connection_lines_->isChecked();
 }

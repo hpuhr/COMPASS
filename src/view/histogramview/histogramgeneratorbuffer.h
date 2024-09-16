@@ -111,14 +111,14 @@ protected:
             if (ok)
                 scanned_contents.push_back(elem.first);
             else
-                loginf << "HistogramGeneratorBuffer: could not scan buffer of DBContent " << elem.first;
+                logdbg << "HistogramGeneratorBuffer: could not scan buffer of DBContent " << elem.first;
         }
 
         //no data range available -> no good
         if (scanned_contents.empty() || !histogram_init_.valid())
             return false;
 
-        auto config = histogram_init_.currentConfiguration();
+        auto config = histogram_init_.generateConfiguration();
 
         //init needed histograms
         for (const auto& db_content : scanned_contents)
@@ -143,7 +143,7 @@ protected:
             bool ok = addBuffer(elem.first, *elem.second);
 
             if (!ok)
-                loginf << "HistogramGeneratorBuffer: could not add buffer of DBContent " << elem.first;
+                logdbg << "HistogramGeneratorBuffer: could not add buffer of DBContent " << elem.first;
         }
 
         return true;
@@ -332,7 +332,10 @@ private:
 
         NullableVector<T>& data = buffer.get<T>(current_var_name);
         
-        return histogram_init_.scan(data);
+        if (!histogram_init_.scan(data))
+            return false;
+
+        return true;
     }
 
     /**
@@ -417,6 +420,6 @@ private:
         return true;
     }
 
-    HistogramInitializer<T> histogram_init_;
-    Histograms              histograms_;     //histograms per db content type
+    HistogramInitializerT<T> histogram_init_;
+    Histograms               histograms_;     //histograms per db content type
 };

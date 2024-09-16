@@ -16,7 +16,7 @@
  */
 
 #include "eval/requirement/trackangle/trackangle.h"
-#include "eval/results/trackangle/trackanglesingle.h"
+#include "eval/results/trackangle/trackangle.h"
 //#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -40,17 +40,17 @@ namespace EvaluationRequirement
 
 TrackAngle::TrackAngle(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+        double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
                     float threshold, bool use_minimum_speed, float minimum_speed,
         COMPARISON_TYPE threshold_value_check_type, bool failed_values_of_interest)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
       threshold_(threshold),
       use_minimum_speed_(use_minimum_speed), minimum_speed_(minimum_speed),
       threshold_value_check_type_(threshold_value_check_type),
       failed_values_of_interest_(failed_values_of_interest)
 {
-
 }
+
 float TrackAngle::threshold() const
 {
     return threshold_;
@@ -104,18 +104,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
     ptime timestamp;
 
-//    OGRSpatialReference wgs84;
-//    wgs84.SetWellKnownGeogCS("WGS84");
-
-//    OGRSpatialReference local;
-
-    //std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
-
     dbContent::TargetPosition tst_pos;
 
     bool is_inside;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    bool ok;
 
     boost::optional<dbContent::TargetVelocity> ref_spd;
     double ref_trackangle_deg;
@@ -126,8 +118,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
     unsigned int num_trackangle_comp {0};
     string comment;
-
-    vector<double> values; // track angle diff percentage
 
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
@@ -150,7 +140,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Offset, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::Offset, offset)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::ValueRef, value_ref)
                                              .setValue(Result::DetailKey::ValueTst, value_tst)
@@ -323,8 +313,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                   num_comp_failed, num_comp_passed,
                   comment);
-
-        values.push_back(trackangle_min_diff);
     }
 
     //        logdbg << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -348,15 +336,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                << " num_comp_failed " <<  num_comp_failed << " num_comp_passed " << num_comp_passed;
 
     assert (num_trackangle_comp == num_comp_failed + num_comp_passed);
-    assert (num_trackangle_comp == values.size());
-
-    //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SingleTrackAngle>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value,
-                num_comp_failed, num_comp_passed,
-                values);
+                num_comp_failed, num_comp_passed);
 }
 
 // deg, m/s
@@ -374,7 +358,6 @@ dbContent::TargetPosition TrackAngle::getPositionAtAngle(
 
     tie (ok, new_pos.latitude_, new_pos.longitude_) = trafo_.wgsAddCartOffset(org.latitude_, org.longitude_, x, y);
     assert (ok);
-
 
     return new_pos;
 }

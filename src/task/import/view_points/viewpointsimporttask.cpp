@@ -28,6 +28,7 @@
 
 #include "asteriximporttask.h"
 #include "util/timeconv.h"
+#include "util/async.h"
 
 #include <fstream>
 
@@ -44,7 +45,7 @@ using namespace Utils;
 
 ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const std::string& instance_id,
                                            TaskManager& task_manager)
-    : Task("ViewPointsImportTask", "Import View Points", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_view_points.json")
 {
     tooltip_ =
@@ -298,20 +299,13 @@ void ViewPointsImportTask::run()
 
             }
 
-            //task_manager_.appendSuccess("ViewPointsImportTask: import of ASTERIX files done");
-
-            boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-            while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-            {
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                QThread::msleep(1);
-            }
+            Async::waitAndProcessEventsFor(50);
         }
     }
 
     done_ = true;
 
-    emit doneSignal(name_);
+    emit doneSignal();
 
     loginf << "ViewPointsImportTask: done";
 }

@@ -95,7 +95,7 @@ ASTERIXImportTaskSettings::ASTERIXImportTaskSettings()
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, 
                                      const std::string& instance_id,
                                      TaskManager& task_manager)
-    : Task("ASTERIXImportTask", "Import ASTERIX Data", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_asterix.json")
 {
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
@@ -1139,9 +1139,12 @@ void ASTERIXImportTask::insertData()
     {
         current_num_records += job_it.second->size();
         num_records_ += job_it.second->size();
+
+        if (COMPASS::instance().appMode() != AppMode::LiveRunning) // is cleaned special there
+            job_it.second->deleteEmptyProperties();
     }
 
-    loginf << "ASTERIXImportTask: insertData: inserting " << current_num_records << " records/s";
+    logdbg << "ASTERIXImportTask: insertData: inserting " << current_num_records << " records/s";
 
     if (!insert_slot_connected_)
     {
@@ -1216,7 +1219,7 @@ void ASTERIXImportTask::insertDoneSlot()
                    this, &ASTERIXImportTask::insertDoneSlot);
         insert_slot_connected_ = false;
 
-        emit doneSignal(name_);
+        emit doneSignal();
     }
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";

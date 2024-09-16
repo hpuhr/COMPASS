@@ -40,7 +40,6 @@ PositionRadarRangeConfigWidget::PositionRadarRangeConfigWidget(PositionRadarRang
             this, &PositionRadarRangeConfigWidget::thresholdValueEditSlot);
 
     form_layout_->addRow("Threshold Value [m]", threshold_value_edit_);
-
 }
 
 void PositionRadarRangeConfigWidget::thresholdValueEditSlot(QString value)
@@ -48,7 +47,7 @@ void PositionRadarRangeConfigWidget::thresholdValueEditSlot(QString value)
     loginf << "PositionRadarRangeConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
 
     bool ok;
-    float val = value.toFloat(&ok);
+    double val = value.toDouble(&ok);
 
     if (ok)
         config().thresholdValue(val);

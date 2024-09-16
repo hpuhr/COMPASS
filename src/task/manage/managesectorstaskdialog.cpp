@@ -16,7 +16,7 @@ ManageSectorsTaskDialog::ManageSectorsTaskDialog(ManageSectorsTask& task)
 
     setModal(true);
 
-    setMinimumSize(QSize(800, 600));
+    setMinimumSize(QSize(900, 600));
 
     QFont font_bold;
     font_bold.setBold(true);

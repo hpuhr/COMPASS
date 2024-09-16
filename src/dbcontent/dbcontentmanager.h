@@ -15,15 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_DBCONTENTMANAGER_H_
-#define DBCONTENT_DBCONTENTMANAGER_H_
+#pragma once
 
 #include "configurable.h"
-//#include "global.h"
-//#include "singleton.h"
 #include "buffer.h"
 #include "targetmodel.h"
-//#include "dbcontent/dbcontentcache.h"
 #include "viewabledataconfig.h"
 
 #include <boost/optional.hpp>
@@ -47,8 +43,8 @@ namespace dbContent
     class VariableSet;
     class Target;
     class TargetListWidget;
-//    class LabelGenerator;
     class VariableSet;
+    class ReconstructorTarget;
 }
 
 class DBContentManager : public QObject, public Configurable
@@ -102,7 +98,7 @@ public:
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
     void renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name);
     void deleteMetaVariable(const std::string& var_name);
-    const std::map<std::string, std::unique_ptr<dbContent::MetaVariable>>& metaVariables() { return meta_variables_; }
+    const std::map<std::string, std::unique_ptr<dbContent::MetaVariable>>& metaVariables() const { return meta_variables_; }
 
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
@@ -147,6 +143,8 @@ public:
     void setMinMaxLongitude(double min, double max);
     std::pair<double, double> minMaxLongitude() const;
 
+    bool hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const;
+
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
 
     bool canGetVariable (const std::string& dbcont_name, const Property& property);
@@ -158,7 +156,7 @@ public:
     bool hasTargetsInfo() const;
     void clearTargetsInfo();
     bool existsTarget(unsigned int utn);
-    void createNewTarget(unsigned int utn);
+    void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     dbContent::Target& target(unsigned int utn);
     void removeDBContentFromTargets(const std::string& dbcont_name);
     void loadTargets();
@@ -253,4 +251,3 @@ protected:
     void restoreSelectedRecNums();
 };
 
-#endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

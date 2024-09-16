@@ -16,13 +16,14 @@
  */
 
 #include "eval/requirement/mode_a/false.h"
-#include "eval/results/mode_a/falsesingle.h"
-//#include "evaluationdata.h"
+
+#include "eval/results/mode_a/false.h"
+
 #include "evaluationmanager.h"
-#include "logger.h"
-//#include "util/stringconv.h"
-#include "util/timeconv.h"
 #include "sectorlayer.h"
+
+#include "logger.h"
+#include "util/timeconv.h"
 
 using namespace std;
 using namespace Utils;
@@ -32,8 +33,8 @@ namespace EvaluationRequirement
 {
 
 ModeAFalse::ModeAFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-                       float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, eval_man)
+                       double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man)
 {
 }
 
@@ -80,6 +81,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAFalse::evaluate (
 
     auto addDetail = [ & ] (const ptime& ts,
             const dbContent::TargetPosition& tst_pos,
+            const boost::optional<dbContent::TargetPosition>& ref_pos,
             const QVariant& ref_exists,
             const QVariant& pos_inside,
             const QVariant& is_not_ok,
@@ -102,6 +104,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAFalse::evaluate (
                           .setValue(Result::DetailKey::NumUnknownID, num_unknown_id)
                           .setValue(Result::DetailKey::NumCorrectID, num_correct_id)
                           .setValue(Result::DetailKey::NumFalseID, num_false_id)
+                          .addPosition(ref_pos)
                           .generalComment(comment));
     };
 
@@ -121,7 +124,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAFalse::evaluate (
         if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, {},
                           false, {}, false, // ref_exists, pos_inside,
                           num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                           num_unknown, num_correct, num_false, "No reference data");
@@ -138,7 +141,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAFalse::evaluate (
         if (!ref_pos.has_value())
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, {},
                           false, {}, false, // ref_exists, pos_inside,
                           num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                           num_unknown, num_correct, num_false, "No reference position");
@@ -153,7 +156,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAFalse::evaluate (
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                addDetail(timestamp, pos_current,
+                addDetail(timestamp, pos_current, ref_pos,
                           ref_exists, is_inside, false, // ref_exists, pos_inside,
                           num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                           num_unknown, num_correct, num_false, "Outside sector");
@@ -194,7 +197,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAFalse::evaluate (
                                 +to_string(cmp_res));
 
         if (!skip_detail)
-            addDetail(timestamp, pos_current,
+            addDetail(timestamp, pos_current, ref_pos,
                       ref_exists, is_inside, !code_ok,
                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                       num_unknown, num_correct, num_false, comment);

@@ -16,6 +16,20 @@ const std::string network_lines_key = "network_lines";
 namespace dbContent
 {
 
+const std::string DataSourceBase::PSRIRMinKey{"primary_ir_min"};
+const std::string DataSourceBase::PSRIRMaxKey{"primary_ir_max"};
+const std::string DataSourceBase::SSRIRMinKey{"secondary_ir_min"};
+const std::string DataSourceBase::SSRIRMaxKey{"secondary_ir_max"};
+const std::string DataSourceBase::ModeSIRMinKey{"mode_s_ir_min"};
+const std::string DataSourceBase::ModeSIRMaxKey{"mode_s_ir_max"};
+
+const std::string DataSourceBase::PSRAzmSDKey{"primary_azimuth_stddev"};
+const std::string DataSourceBase::PSRRngSDKey{"primary_range_stddev"};
+const std::string DataSourceBase::SSRAzmSDKey{"secondary_azimuth_stddev"};
+const std::string DataSourceBase::SSRRngSDKey{"secondary_range_stddev"};
+const std::string DataSourceBase::ModeSAzmSDKey{"mode_s_azimuth_stddev"};
+const std::string DataSourceBase::ModeSRngSDKey{"mode_s_range_stddev"};
+
 
 DataSourceBase::DataSourceBase()
 {
@@ -154,6 +168,7 @@ void DataSourceBase::longitude (double value)
 {
     info_[position_key]["longitude"] = value;
 }
+
 double DataSourceBase::longitude () const
 {
     assert (hasPosition());
@@ -220,7 +235,7 @@ void DataSourceBase::addRadarAccuracies()
 
 std::map<std::string, double> DataSourceBase::radarAccuracies() const
 {
-    assert (hasRadarRanges());
+    assert (hasRadarAccuracies());
     return info_.at(radar_accuracy_key).get<std::map<std::string, double>>();
 }
 
@@ -362,68 +377,44 @@ void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)
         info_[position_key]["altitude"] = j.at("altitude");
 
     //    // psr
-    //    if (has_primary_azimuth_stddev_)
-    //        j["primary_azimuth_stddev"] = primary_azimuth_stddev_;
-    if (j.contains("primary_azimuth_stddev"))
-        info_[radar_accuracy_key]["primary_azimuth_stddev"] = j.at("primary_azimuth_stddev");
+    if (j.contains(PSRAzmSDKey))
+        info_[radar_accuracy_key][PSRAzmSDKey] = j.at(PSRAzmSDKey);
 
-    //    if (has_primary_range_stddev_)
-    //        j["primary_range_stddev"] = primary_range_stddev_;
-    if (j.contains("primary_range_stddev"))
-        info_[radar_accuracy_key]["primary_range_stddev"] = j.at("primary_range_stddev");
+    if (j.contains(PSRRngSDKey))
+        info_[radar_accuracy_key][PSRRngSDKey] = j.at(PSRRngSDKey);
 
-    //    if (has_primary_ir_min_)
-    //        j["primary_ir_min"] = primary_ir_min_;
-    if (j.contains("primary_ir_min"))
-        info_[radar_range_key]["primary_ir_min"] = j.at("primary_ir_min");
+    if (j.contains(PSRIRMinKey))
+        info_[radar_range_key][PSRIRMinKey] = j.at(PSRIRMinKey);
 
-    //    if (has_primary_ir_max_)
-    //        j["primary_ir_max"] = primary_ir_max_;
-    if (j.contains("primary_ir_max"))
-        info_[radar_range_key]["primary_ir_max"] = j.at("primary_ir_max");
+    if (j.contains(PSRIRMaxKey))
+        info_[radar_range_key][PSRIRMaxKey] = j.at(PSRIRMaxKey);
 
     //    // ssr
-    //    if (has_secondary_azimuth_stddev_)
-    //        j["secondary_azimuth_stddev"] = secondary_azimuth_stddev_;
-    if (j.contains("secondary_azimuth_stddev"))
-        info_[radar_accuracy_key]["secondary_azimuth_stddev"] = j.at("secondary_azimuth_stddev");
+    if (j.contains(SSRAzmSDKey))
+        info_[radar_accuracy_key][SSRAzmSDKey] = j.at(SSRAzmSDKey);
 
-    //    if (has_secondary_range_stddev_)
-    //        j["secondary_range_stddev"] = secondary_range_stddev_;
-    if (j.contains("secondary_range_stddev"))
-        info_[radar_accuracy_key]["secondary_range_stddev"] = j.at("secondary_range_stddev");
+    if (j.contains(SSRRngSDKey))
+        info_[radar_accuracy_key][SSRRngSDKey] = j.at(SSRRngSDKey);
 
 
-    //    if (has_secondary_ir_min_)
-    //        j["secondary_ir_min"] = secondary_ir_min_;
-    if (j.contains("secondary_ir_min"))
-        info_[radar_range_key]["secondary_ir_min"] = j.at("secondary_ir_min");
+    if (j.contains(SSRIRMinKey))
+        info_[radar_range_key][SSRIRMinKey] = j.at(SSRIRMinKey);
 
-    //    if (has_secondary_ir_max_)
-    //        j["secondary_ir_max"] = secondary_ir_max_;
-    if (j.contains("secondary_ir_max"))
-        info_[radar_range_key]["secondary_ir_max"] = j.at("secondary_ir_max");
+    if (j.contains(SSRIRMaxKey))
+        info_[radar_range_key][SSRIRMaxKey] = j.at(SSRIRMaxKey);
 
     //    // mode s
-    //    if (has_mode_s_azimuth_stddev_)
-    //        j["mode_s_azimuth_stddev"] = mode_s_azimuth_stddev_;
-    if (j.contains("mode_s_azimuth_stddev"))
-        info_[radar_accuracy_key]["mode_s_azimuth_stddev"] = j.at("mode_s_azimuth_stddev");
+    if (j.contains(ModeSAzmSDKey))
+        info_[radar_accuracy_key][ModeSAzmSDKey] = j.at(ModeSAzmSDKey);
 
-    //    if (has_mode_s_range_stddev_)
-    //        j["mode_s_range_stddev"] = mode_s_range_stddev_;
-    if (j.contains("mode_s_range_stddev"))
-        info_[radar_accuracy_key]["mode_s_range_stddev"] = j.at("mode_s_range_stddev");
+    if (j.contains(ModeSRngSDKey))
+        info_[radar_accuracy_key][ModeSRngSDKey] = j.at(ModeSRngSDKey);
 
-    //    if (has_mode_s_ir_min_)
-    //        j["mode_s_ir_min"] = mode_s_ir_min_;
-    if (j.contains("mode_s_ir_min"))
-        info_[radar_range_key]["mode_s_ir_min"] = j.at("mode_s_ir_min");
+    if (j.contains(ModeSIRMinKey))
+        info_[radar_range_key][ModeSIRMinKey] = j.at(ModeSIRMinKey);
 
-    //    if (has_mode_s_ir_max_)
-    //        j["mode_s_ir_max"] = mode_s_ir_max_;
-    if (j.contains("secondary_ir_min"))
-        info_[radar_range_key]["secondary_ir_min"] = j.at("secondary_ir_min");
+    if (j.contains(ModeSIRMaxKey))
+        info_[radar_range_key][ModeSIRMaxKey] = j.at(ModeSIRMaxKey);
 
 }
 

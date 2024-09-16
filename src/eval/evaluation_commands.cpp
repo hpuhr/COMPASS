@@ -91,7 +91,7 @@ bool RTCommandGetEvalResult::checkResult_impl()
         return false;
     }
 
-    auto json_reply = eval_widget->getTableData(result, table);
+    auto json_reply = eval_widget->getTableData(result, table, !colwise, columns);
 
     if (!json_reply.has_value())
     {
@@ -111,10 +111,13 @@ void RTCommandGetEvalResult::collectOptions_impl(OptionsDescription &options,
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("result", po::value<std::string>()->default_value(""), "which evaluation result to retrieve")
-        ("table", po::value<std::string>()->default_value(""), "which evaluation result table to retrieve");
+        ("table", po::value<std::string>()->default_value(""), "which evaluation result table to retrieve")
+        ("columns", po::value<std::string>()->default_value(""), "which table columns to retrieve")
+        ("colwise", "retrieve evaluation result table column-wise");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "result", 1)
-    ADD_RTCOMMAND_POS_OPTION(positional, "table", 2)
+    ADD_RTCOMMAND_POS_OPTION(positional, "result")
+    ADD_RTCOMMAND_POS_OPTION(positional, "table")
+    ADD_RTCOMMAND_POS_OPTION(positional, "columns")
 }
 
 /**
@@ -123,4 +126,6 @@ void RTCommandGetEvalResult::assignVariables_impl(const VariablesMap &vars)
 {
     RTCOMMAND_GET_VAR_OR_THROW(vars, "result", std::string, result)
     RTCOMMAND_GET_VAR_OR_THROW(vars, "table", std::string, table)
+    RTCOMMAND_GET_INTVECTOR_OR_THROW(vars, "columns", columns)
+    RTCOMMAND_CHECK_VAR(vars, "colwise", colwise)
 }

@@ -38,7 +38,7 @@ private:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 
     bool override_tod_active_{false};
-    float override_tod_offset_{0};
+    double override_tod_offset_{0};
 
     bool ignore_time_jumps_{false};
     bool do_timestamp_checks_{false};
@@ -69,6 +69,7 @@ private:
     void doFutureTimestampsCheck();
     void doTimeStampCalculation();
     void doRadarPlotPositionCalculations();
+    void doADSBPositionPorcessing();
     void doGroundSpeedCalculations();
     void doFilters();
 };

@@ -16,7 +16,6 @@
  */
 
 #include "dbcontent/dbcontentmanager.h"
-//#include "dbcontent/label/labelgenerator.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
@@ -294,7 +293,7 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
     if (load_in_progress_)
     {
-        loginf << "DBContentManager: loadSlot: quitting previous load";
+        logdbg << "DBContentManager: loadSlot: quitting previous load";
 
         for (auto& object : dbcontent_)
         {
@@ -326,13 +325,14 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
     for (auto& object : dbcontent_)
     {
-        loginf << "DBContentManager: loadSlot: object " << object.first
+        logdbg << "DBContentManager: loadSlot: object " << object.first
                << " loadable " << object.second->loadable()
-               << " loading wanted " << ds_man.loadingWanted(object.first);
+               << " loading wanted " << ds_man.loadingWanted(object.first)
+               << " filters " << COMPASS::instance().filterManager().useFilters();
 
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
-            loginf << "DBContentManager: loadSlot: loading object " << object.first;
+            logdbg << "DBContentManager: loadSlot: loading object " << object.first;
             VariableSet read_set = view_man.getReadSet(object.first);
 
             // add required vars for processing
@@ -524,9 +524,7 @@ void DBContentManager::loadingDone(DBContent& object)
     }
 
     if (done)
-    {
         finishLoading();
-    }
     else
         logdbg << "DBContentManager: loadingDoneSlot: not done";
 }
@@ -572,6 +570,7 @@ void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
 {
     COMPASS::instance().interface().setProperty("associations_generated", "1");
     COMPASS::instance().interface().setProperty("associations_id", assoc_id);
+    COMPASS::instance().interface().saveProperties();
 
     has_associations_ = true;
     associations_id_ = assoc_id;
@@ -680,8 +679,6 @@ void DBContentManager::finishInserting()
         string dbcont_name = buf_it.first;
 
         assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
-        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_latitude_));
-        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_longitude_));
 
         unsigned int buffer_size = buf_it.second->size();
 
@@ -737,6 +734,8 @@ void DBContentManager::finishInserting()
         }
 
         // lat & long
+        if (metaCanGetVariable(dbcont_name, DBContent::meta_var_longitude_)
+            && metaCanGetVariable(dbcont_name, DBContent::meta_var_latitude_))
         {
             Variable& lat_var = metaGetVariable(dbcont_name, DBContent::meta_var_latitude_);
             Variable& lon_var = metaGetVariable(dbcont_name, DBContent::meta_var_longitude_);
@@ -1000,10 +999,10 @@ void DBContentManager::filterDataSources()
         std::advance(buf_it, buffer_cnt);
 
         // remove unwanted data sources
-        assert (metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(buf_it->first));
+        assert (metaVariable(DBContent::meta_var_ds_id_.name()).existsIn(buf_it->first));
         assert (metaVariable(DBContent::meta_var_line_id_.name()).existsIn(buf_it->first));
 
-        Variable& ds_id_var = metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(buf_it->first);
+        Variable& ds_id_var = metaVariable(DBContent::meta_var_ds_id_.name()).getFor(buf_it->first);
         Variable& line_id_var = metaVariable(DBContent::meta_var_line_id_.name()).getFor(buf_it->first);
 
         Property ds_id_prop {ds_id_var.name(), ds_id_var.dataType()};
@@ -1059,6 +1058,72 @@ void DBContentManager::cutCachedData()
     loginf << "DBContentManager: cutCachedData: current ts " << Time::toString(Time::currentUTCTime())
            << " min_ts " << Time::toString(min_ts);
 
+    // for (auto buf_it = data_.begin(); buf_it != data_.end(); ++buf_it)
+    // {
+    //     buffer_size = buf_it->second->size();
+
+    //     if (buffer_size == 0)
+    //         continue;
+
+    //     assert (metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it->first));
+
+    //     Variable& ts_var = metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it->first);
+
+    //     Property ts_prop {ts_var.name(), ts_var.dataType()};
+
+    //     if (buf_it->second->hasProperty(ts_prop))
+    //     {
+    //         NullableVector<boost::posix_time::ptime>& ts_vec = buf_it->second->get<boost::posix_time::ptime>(
+    //                     ts_var.name());
+
+    //         unsigned int index=0;
+    //         bool cutoff_found = false;
+
+    //         for (; index < buffer_size; ++index)
+    //         {
+    //             if (!ts_vec.isNull(index) && ts_vec.get(index) > min_ts)
+    //             {
+    //                 logdbg << "DBContentManager: cutCachedData: found " << buf_it->first
+    //                        << " cutoff tod index " << index
+    //                        << " ts " << Time::toString(ts_vec.get(index));
+
+    //                 cutoff_found = true;
+    //                 break; // index is on first index where ts > min_ts
+    //             }
+    //         }
+    //         // index == buffer_size if none bigger than min_ts
+
+    //         if (!cutoff_found) // no ts bigger than remove:ts found, remove all data
+    //         {
+    //             buf_it = data_.erase(buf_it);
+    //         }
+    //         else if (cutoff_found && index != 0) // if index == 0, all ok, otherwise remove
+    //         {
+    //             assert (index >= 1);
+    //             assert (index < buffer_size);
+
+    //             index--; // cut at previous
+
+    //             logdbg << "DBContentManager: cutCachedData: cutting " << buf_it->first
+    //                    << " up to index " << index
+    //                    << " total size " << buffer_size
+    //                    << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
+
+    //             buf_it->second->cutUpToIndex(index);
+    //         }
+    //     }
+    //     else
+    //         logwrn << "DBContentManager: cutCachedData: buffer " << buf_it->first << " has not tod for cutoff";
+    // }
+
+    // remove empty buffers
+    // std::map<std::string, std::shared_ptr<Buffer>> tmp_data = data_;
+
+    // for (auto& buf_it : tmp_data)
+    //     if (!buf_it.second->size())
+    //         data_.erase(buf_it.first);
+
+
     for (auto& buf_it : data_)
     {
         buffer_size = buf_it.second->size();
@@ -1072,7 +1137,7 @@ void DBContentManager::cutCachedData()
         if (buf_it.second->hasProperty(ts_prop))
         {
             NullableVector<boost::posix_time::ptime>& ts_vec = buf_it.second->get<boost::posix_time::ptime>(
-                        ts_var.name());
+                ts_var.name());
 
             unsigned int index=0;
 
@@ -1122,10 +1187,10 @@ void DBContentManager::updateNumLoadedCounts()
 
     for (auto& buf_it : data_)
     {
-        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_datasource_id_));
+        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_ds_id_));
         assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_line_id_));
 
-        Variable& ds_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_datasource_id_);
+        Variable& ds_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_ds_id_);
         Variable& line_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_line_id_);
 
         NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
@@ -1236,6 +1301,11 @@ std::pair<double, double> DBContentManager::minMaxLongitude() const
     return {longitude_min_.get(), longitude_max_.get()};
 }
 
+bool DBContentManager::hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const
+{
+
+}
+
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const
 {
     return data_;
@@ -1272,7 +1342,12 @@ bool DBContentManager::metaCanGetVariable (const std::string& dbcont_name, const
 
 dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcont_name, const Property& meta_property)
 {
-    assert (metaCanGetVariable(dbcont_name, meta_property));
+    if (!metaCanGetVariable(dbcont_name, meta_property))
+    {
+        logerr << "DBContentManager: metaGetVariable: defined '" << meta_property.name()
+               << "' in '" << dbcont_name << "'";
+        assert (false);
+    }
 
     return metaVariable(meta_property.name()).getFor(dbcont_name);
 }
@@ -1292,9 +1367,12 @@ bool DBContentManager::existsTarget(unsigned int utn)
     return target_model_->existsTarget(utn);
 }
 
-void DBContentManager::createNewTarget(unsigned int utn)
+void DBContentManager::createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets)
 {
-    target_model_->createNewTarget(utn);
+    target_model_->createNewTargets(targets);
+
+    if (target_list_widget_)
+        target_list_widget_->resizeColumnsToContents();
 }
 
 dbContent::Target& DBContentManager::target(unsigned int utn)
@@ -1456,8 +1534,8 @@ void DBContentManager::addStandardVariables(std::string dbcont_name, dbContent::
     assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_rec_num_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_rec_num_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_datasource_id_));
-    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_datasource_id_));
+    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_ds_id_));
+    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_ds_id_));
 
     assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_line_id_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_line_id_));
@@ -1465,8 +1543,8 @@ void DBContentManager::addStandardVariables(std::string dbcont_name, dbContent::
     assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_utn_));
-    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_utn_));
+    if(metaCanGetVariable(dbcont_name, DBContent::meta_var_utn_))
+        read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_utn_));
 }
 
 MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
@@ -1519,7 +1597,7 @@ void DBContentManager::saveSelectedRecNums()
 
 void DBContentManager::restoreSelectedRecNums()
 {
-    loginf << "DBContentManager: restoreSelectedRecNums";
+    logdbg << "DBContentManager: restoreSelectedRecNums";
 
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {
@@ -1556,6 +1634,10 @@ void DBContentManager::restoreSelectedRecNums()
 bool DBContentManager::utnUseEval (unsigned int utn)
 {
     assert (target_model_);
+
+    if (!target_model_->existsTarget(utn))
+        logerr << "DBContentManager: utnUseEval: utn " << utn << " does not exist";
+
     assert (target_model_->existsTarget(utn));
     return target_model_->target(utn).useInEval();
 }

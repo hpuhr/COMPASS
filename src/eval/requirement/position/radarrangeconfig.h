@@ -38,13 +38,13 @@ public:
 
     std::shared_ptr<Base> createRequirement() override;
 
-    float thresholdValue() const;
-    void thresholdValue(float value);
+    double thresholdValue() const;
+    void thresholdValue(double value);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
 protected:
-    float threshold_value_ {0};
+    double threshold_value_ {0};
 
     virtual void createWidget() override;
 };

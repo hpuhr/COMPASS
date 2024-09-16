@@ -40,6 +40,7 @@
 #include "eval/requirement/extra/trackconfig.h"
 #include "eval/requirement/dubious/dubioustrackconfig.h"
 #include "eval/requirement/dubious/dubioustargetconfig.h"
+#include "eval/requirement/generic/genericconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>
@@ -73,9 +74,14 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
     {"EvaluationRequirementPositionAcrossConfig", "Position Across"},
     {"EvaluationRequirementPositionLatencyConfig", "Position Latency"},
     {"EvaluationRequirementSpeedConfig", "Speed"},
-    {"EvaluationRequirementTrackAngleConfig", "TrackAngle"}
+    {"EvaluationRequirementTrackAngleConfig", "TrackAngle"},
+    {"EvaluationRequirementMoMLongAccConfig", "MoM Longitutidinal Acceleration Correct"},
+    {"EvaluationRequirementMoMTransAccConfig", "MoM Transversal Acceleration Correct"},
+    {"EvaluationRequirementMoMVertRateConfig", "MoM Vertical Rate Correct"},
+    {"EvaluationRequirementROCDCorrectConfig", "ROCD Correct"},
+    {"EvaluationRequirementAccelerationCorrectConfig", "Acceleration Correct"},
+    {"EvaluationRequirementCoastingCorrectConfig", "Track Coasting Correct"}
 };
-
 
 Group::Group(const std::string& class_id, const std::string& instance_id,
                                                        EvaluationStandard& standard, EvaluationManager& eval_man)
@@ -83,6 +89,7 @@ Group::Group(const std::string& class_id, const std::string& instance_id,
       eval_man_(eval_man)
 {
     registerParameter("name", &name_, std::string());
+    registerParameter("use", &use_, true);
 
     assert (name_.size());
 
@@ -91,6 +98,21 @@ Group::Group(const std::string& class_id, const std::string& instance_id,
 
 Group::~Group()
 {
+}
+
+void Group::use(bool ok)
+{
+    use_ = ok;
+}
+
+bool Group::used() const
+{
+    return use_;
+}
+
+bool Group::checkable() const
+{
+    return true;
 }
 
 void Group::generateSubConfigurable(const std::string& class_id,
@@ -326,6 +348,60 @@ void Group::generateSubConfigurable(const std::string& class_id,
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
+    else if (class_id == "EvaluationRequirementMoMLongAccConfig")
+    {
+        EvaluationRequirement::GenericIntegerConfig* config = new EvaluationRequirement::GenericIntegerConfig(
+                class_id, instance_id, "MomLongAccCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementMoMTransAccConfig")
+    {
+        EvaluationRequirement::GenericIntegerConfig* config = new EvaluationRequirement::GenericIntegerConfig(
+            class_id, instance_id, "MomTransAccCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementMoMVertRateConfig")
+    {
+        EvaluationRequirement::GenericIntegerConfig* config = new EvaluationRequirement::GenericIntegerConfig(
+            class_id, instance_id, "MomVertRateCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementCoastingCorrectConfig")
+    {
+        EvaluationRequirement::GenericIntegerConfig* config = new EvaluationRequirement::GenericIntegerConfig(
+            class_id, instance_id, "CoastingCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementROCDCorrectConfig")
+    {
+        EvaluationRequirement::GenericDoubleConfig* config = new EvaluationRequirement::GenericDoubleConfig(
+            class_id, instance_id, "ROCDCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id == "EvaluationRequirementAccelerationCorrectConfig")
+    {
+        EvaluationRequirement::GenericDoubleConfig* config = new EvaluationRequirement::GenericDoubleConfig(
+            class_id, instance_id, "AccelerationCorrect", *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
     else
         throw std::runtime_error("EvaluationRequirementGroup: generateSubConfigurable: unknown class_id " +
                                  class_id);
@@ -345,8 +421,7 @@ bool Group::hasRequirementConfig (const std::string& name)
     return iter != configs_.end();
 }
 
-void Group::addRequirementConfig (const std::string& class_id, const std::string& name,
-                                                       const std::string& short_name)
+void Group::addRequirementConfig (const std::string& class_id, const std::string& name, const std::string& short_name)
 {
     loginf << "EvaluationRequirementGroup: addRequirementConfig: class_id " << class_id << " name " << name
            << " short_name " << short_name;
@@ -538,6 +613,15 @@ void Group::showMenu ()
             }
         }
 
+        menu.addSeparator();
+
+        {
+            QAction* sel_action = menu.addAction("Select All");
+            connect(sel_action, &QAction::triggered, this, &Group::useAll);
+
+            QAction* unsel_action = menu.addAction("Deselect All");
+            connect(unsel_action, &QAction::triggered, this, &Group::useNone);
+        }
     }
 
     menu.exec(QCursor::pos());
@@ -642,7 +726,6 @@ void Group::deleteRequirementSlot()
       }
 }
 
-
 void Group::sortConfigs()
 {
     sort(configs_.begin(), configs_.end(),
@@ -650,4 +733,31 @@ void Group::sortConfigs()
     {
         return a->name() > b->name();
     });
+}
+
+unsigned int Group::numUsedRequirements() const
+{
+    unsigned int n = 0;
+
+    for (const auto& c : configs_)
+        if (c->used())
+            ++n;
+
+    return n;
+}
+
+void Group::useAll()
+{
+    for (auto& c : configs_)
+        c->use(true);
+
+    emit selectionChanged();
+}
+
+void Group::useNone()
+{
+    for (auto& c : configs_)
+        c->use(false);
+
+    emit selectionChanged();
 }

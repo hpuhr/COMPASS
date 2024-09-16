@@ -134,6 +134,10 @@ public:
     void setProperty(const std::string& id, const std::string& value);
     std::string getProperty(const std::string& id);
     bool hasProperty(const std::string& id);
+
+    bool hasContentIn(const std::string& table_name, const std::string& column_name) const;
+    void setContentIn(const std::string& table_name, const std::string& column_name);
+
     void saveProperties();
 
     bool existsTable(const std::string& table_name);
@@ -163,6 +167,8 @@ public:
     void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets);
     void saveTarget(const std::unique_ptr<dbContent::Target>& target);
 
+    void clearAssociations(const DBContent& dbcontent);
+
     void clearTableContent(const std::string& table_name);
 
     unsigned long getMaxRecordNumber(DBContent& object);
@@ -176,6 +182,7 @@ protected:
     std::unique_ptr<SQLiteConnection> db_connection_;
 
     bool properties_loaded_ {false};
+    const std::string dbcolumn_content_property_name_{"dbcolumn_content"};
 
     boost::mutex connection_mutex_;
     boost::mutex table_info_mutex_;
@@ -187,6 +194,7 @@ protected:
     std::map<std::string, DBTableInfo> table_info_;
 
     std::map<std::string, std::string> properties_;
+    std::map<std::string, std::set<std::string>> dbcolumn_content_flags_; // dbtable -> dbcols with content
 
     virtual void checkSubConfigurables();
 

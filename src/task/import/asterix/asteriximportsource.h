@@ -23,6 +23,8 @@
 
 #include <QObject>
 
+#include <boost/optional.hpp>
+
 class ASTERIXImportTask;
 
 /**
@@ -98,10 +100,10 @@ struct ASTERIXImportFileInfo
     std::string            filename;
     //unsigned int         line_id = 0; // TODO rework
 
-    Sections               sections;
-
-    ASTERIXImportFileError error;
-    bool                   used = true;
+    Sections                sections;
+    boost::optional<size_t> total_size_bytes;
+    ASTERIXImportFileError  error;
+    bool                    used = true;
 
 private:
     friend class ASTERIXDecoderFile;

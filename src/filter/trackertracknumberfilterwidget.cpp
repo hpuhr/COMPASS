@@ -37,11 +37,14 @@ void TrackerTrackNumberFilterWidget::update()
     DBFilterWidget::update();
 
     QLayoutItem* child;
-    while ((child = main_layout_->takeAt(0)) != nullptr)
+    if (!main_layout_->isEmpty())
     {
-        if (child->widget())
-            delete child->widget();
-        delete child;
+        while ((child = main_layout_->takeAt(0)) != nullptr)
+        {
+            if (child->widget())
+                delete child->widget();
+            delete child;
+        }
     }
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();

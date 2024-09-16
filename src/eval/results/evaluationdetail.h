@@ -26,6 +26,7 @@
 
 #include <QVariant>
 #include <QColor>
+#include <QRectF>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/optional.hpp>
@@ -70,7 +71,7 @@ class EvaluationDetail
 public:
     typedef unsigned char                 Key;
     typedef boost::posix_time::ptime      Timestamp;
-    typedef dbContent::TargetPosition      Position;
+    typedef dbContent::TargetPosition     Position;
     typedef std::vector<EvaluationDetail> Details;
 
     EvaluationDetail() = default;
@@ -116,6 +117,10 @@ public:
     size_t numPositions() const;
     const std::vector<Position>& positions() const;
     const Position& position(size_t idx) const;
+    const Position& firstPos() const;
+    const Position& lastPos() const;
+
+    QRectF bounds(double eps = 0.0) const;
 
     EvaluationDetailComments& comments() { return comments_; }
     const EvaluationDetailComments& comments() const { return comments_; }
@@ -132,7 +137,9 @@ private:
     Details& genDetails() const;
 
     Timestamp                        timestamp_;
-    std::vector<Position>            positions_;
+    std::vector<Position>            positions_;  // by design the first value shall refer to the position the detail is assigned to,
+                                                  // the last position shall refer to the position the detail is measured against,
+                                                  // e.g. a reference trajectory position, an interval begin, etc.
     std::vector<QVariant>            values_;
     EvaluationDetailComments         comments_;
     mutable boost::optional<Details> details_;

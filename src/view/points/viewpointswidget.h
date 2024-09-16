@@ -20,6 +20,8 @@
 
 #include <QWidget>
 
+#include "json.hpp"
+
 class ViewManager;
 class ViewPointsToolWidget;
 class ViewPointsTableModel;
@@ -64,6 +66,8 @@ public:
     virtual ~ViewPointsWidget();
 
     void loadViewPoints();
+    void clearViewPoints();
+    void addViewPoints(const std::vector <nlohmann::json>& viewpoints);
 
     void resizeColumnsToContents();
 

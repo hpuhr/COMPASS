@@ -44,7 +44,58 @@ class DBContentDeleteDBJob;
 namespace dbContent
 {
 class VariableSet;
+
+//bits 8/7
+//    (TRANS)
+//    Transversal Acceleration
+//    = 00 Constant Course
+//    = 01 Right Turn
+//    = 10 Left Turn
+//    = 11 Undetermined
+//      bits 6/5
+
+enum class MOM_TRANS_ACC
+{
+    ConstantCourse=0,
+    RightTurn, // 1
+    LeftTurn, // 2
+    Undetermined // 3
+};
+
+//      (LONG)
+//      Longitudinal Acceleration
+//    = 00 Constant Groundspeed
+//    = 01 Increasing Groundspeed
+//    = 10 Decreasing Groundspeed
+//    = 11 Undetermined
+
+enum class MOM_LONG_ACC
+{
+    ConstantGroundspeed=0,
+    IncreasingGroundspeed, // 1
+    DecreasingGroundspeed, // 2
+    Undetermined // 3
+};
+
+//      bits 4/3
+//      (VERT)
+//      Vertical Rate
+//    = 00 Level
+//    = 01 Climb
+//    = 10 Descent
+//    = 11 Undetermined
+
+enum class MOM_VERT_RATE
+{
+    Level=0,
+    Climb, // 1
+    Descent, // 2
+    Undetermined // 3
+};
+
 }
+
+
 
 class DBContent : public QObject, public Configurable
 {
@@ -71,7 +122,7 @@ public slots:
 
 public:
     static const Property meta_var_rec_num_;
-    static const Property meta_var_datasource_id_;
+    static const Property meta_var_ds_id_;
     static const Property meta_var_sac_id_;
     static const Property meta_var_sic_id_;
     static const Property meta_var_line_id_;
@@ -81,8 +132,8 @@ public:
     static const Property meta_var_m3a_g_;
     static const Property meta_var_m3a_v_;
     static const Property meta_var_m3a_smoothed_;
-    static const Property meta_var_ta_;
-    static const Property meta_var_ti_;
+    static const Property meta_var_acad_;
+    static const Property meta_var_acid_;
     static const Property meta_var_mc_;
     static const Property meta_var_mc_g_;
     static const Property meta_var_mc_v_;
@@ -107,6 +158,13 @@ public:
     static const Property meta_var_track_angle_; // deg
     static const Property meta_var_horizontal_man_;
 
+    static const Property meta_var_ax_;
+    static const Property meta_var_ay_;
+
+    static const Property meta_var_mom_long_acc_;
+    static const Property meta_var_mom_trans_acc_;
+    static const Property meta_var_mom_vert_rate_;
+
     static const Property meta_var_x_stddev_;
     static const Property meta_var_y_stddev_;
     static const Property meta_var_xy_cov_;
@@ -116,6 +174,7 @@ public:
     static const Property meta_var_latlon_cov_;
 
     static const Property meta_var_climb_descent_;
+    static const Property meta_var_rocd_;
     static const Property meta_var_spi_;
 
     static const Property var_radar_range_;
@@ -127,6 +186,15 @@ public:
     static const Property var_cat021_nucp_nic_;
     static const Property var_cat021_nucv_nacv_;
     static const Property var_cat021_sil_;
+    static const Property var_cat021_geo_alt_;
+
+    static const Property var_cat021_latitude_hr_;
+    static const Property var_cat021_longitude_hr_;
+
+    static const Property var_cat021_sgv_gss_; // ground speed, kts
+    static const Property var_cat021_sgv_hgt_; // heading / ground track, deg, based on htt
+    static const Property var_cat021_sgv_htt_; // heading 0 / ground track 1
+    static const Property var_cat021_sgv_hrd_; // true north 0 / magnetic north 1
 
     static const Property var_cat062_tris_;
     static const Property var_cat062_tri_recnums_;
@@ -138,11 +206,18 @@ public:
     static const Property var_cat062_baro_alt_;
     static const Property var_cat062_fl_measured_; // trusted, not valid
 
+    //Rate of Climb/Descent float feet / min
+    //Ax Ay float m/s2
+    // trans long vert "MOM Longitudinal Acc" "MOM Transversal Acc" "MOM Vertical Rate" uchar
+
     static const Property var_cat062_wtc_;
     static const Property var_cat062_callsign_fpl_;
 
     static const Property var_cat062_vx_stddev_;
     static const Property var_cat062_vy_stddev_;
+
+    static const Property var_cat063_sensor_sac_;
+    static const Property var_cat063_sensor_sic_;
 
     static const Property selected_var;
 
@@ -184,6 +259,7 @@ public:
     void insertData(std::shared_ptr<Buffer> buffer);
     void updateData(dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer);
 
+    // counts and targets have to be adjusted outside
     void deleteDBContentData();
     void deleteDBContentData(unsigned int sac, unsigned int sic);
     void deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id);

@@ -109,7 +109,7 @@ void DBContentDeleteDBJob::run()
         }
         else // all
         {
-            logdbg << "DBContentDeleteDBJob: run: deleting dbcontent for " << specific_dbcontent_;
+            loginf << "DBContentDeleteDBJob: run: deleting all dbcontent for " << specific_dbcontent_;
             assert (dbcont_man.existsDBContent(specific_dbcontent_));
             db_interface_.deleteAll(dbcont_man.dbContent(specific_dbcontent_));
         }

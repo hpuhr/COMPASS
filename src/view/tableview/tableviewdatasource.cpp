@@ -63,9 +63,10 @@ void TableViewDataSource::generateSubConfigurable(const std::string& class_id,
 
         connect(set_.get(), &VariableOrderedSet::setChangedSignal, this,
                 &TableViewDataSource::setChangedSignal, Qt::UniqueConnection);
-        connect(set_.get(), &VariableOrderedSet::setChangedSignal, this,
-                &TableViewDataSource::reloadNeeded, Qt::UniqueConnection);
 
+        //some variable modifications result in a reload
+        connect(set_.get(), &VariableOrderedSet::variableAddedChangedSignal, this,
+                &TableViewDataSource::reloadNeeded, Qt::UniqueConnection);
     }
     else
     {
@@ -238,13 +239,13 @@ bool TableViewDataSource::addTemporaryVariable (const std::string& dbcontent_nam
     loginf << "TableViewDataSource: addTemporaryVariable: dbcontent_name '" << dbcontent_name
            << "' var_name '" << var_name << "'";
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     
     assert (set_);
     if (dbcontent_name == META_OBJECT_NAME)
     {
-        assert (obj_man.existsMetaVariable(var_name));
-        MetaVariable& meta_var = obj_man.metaVariable(var_name);
+        assert (dbcont_man.existsMetaVariable(var_name));
+        MetaVariable& meta_var = dbcont_man.metaVariable(var_name);
         if (!getSet()->hasMetaVariable(meta_var))
         {
             getSet()->add(meta_var);
@@ -255,8 +256,8 @@ bool TableViewDataSource::addTemporaryVariable (const std::string& dbcontent_nam
     }
     else
     {
-        assert (obj_man.existsDBContent(dbcontent_name));
-        DBContent& obj = obj_man.dbContent(dbcontent_name);
+        assert (dbcont_man.existsDBContent(dbcontent_name));
+        DBContent& obj = dbcont_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
         Variable& var = obj.variable(var_name);
@@ -278,19 +279,19 @@ void TableViewDataSource::removeTemporaryVariable (const std::string& dbcontent_
 //    assert (el != temporary_added_variables_.end());
 //    temporary_added_variables_.erase(el);
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (dbcontent_name == META_OBJECT_NAME)
     {
-        assert (obj_man.existsMetaVariable(var_name));
-        MetaVariable& meta_var = obj_man.metaVariable(var_name);
+        assert (dbcont_man.existsMetaVariable(var_name));
+        MetaVariable& meta_var = dbcont_man.metaVariable(var_name);
         assert (getSet()->hasMetaVariable(meta_var));
         getSet()->removeMetaVariable(meta_var);
     }
     else
     {
-        assert (obj_man.existsDBContent(dbcontent_name));
-        DBContent& obj = obj_man.dbContent(dbcontent_name);
+        assert (dbcont_man.existsDBContent(dbcontent_name));
+        DBContent& obj = dbcont_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
         Variable& var = obj.variable(var_name);
@@ -308,20 +309,20 @@ void TableViewDataSource::addDefaultVariables (VariableOrderedSet& set)
         set.add(dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()));
 
     // Datasource
-    if (dbcont_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()))
-        set.add(dbcont_man.metaVariable(DBContent::meta_var_datasource_id_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_ds_id_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_ds_id_.name()));
 
     // Mode 3/A code
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_m3a_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_m3a_.name()));
 
     // Mode S TA
-    if (dbcont_man.existsMetaVariable(DBContent::meta_var_ta_.name()))
-        set.add(dbcont_man.metaVariable(DBContent::meta_var_ta_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_acad_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_acad_.name()));
 
     // Mode S Callsign
-    if (dbcont_man.existsMetaVariable(DBContent::meta_var_ti_.name()))
-        set.add(dbcont_man.metaVariable(DBContent::meta_var_ti_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_acid_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_acid_.name()));
 
     // Mode C
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_mc_.name()))

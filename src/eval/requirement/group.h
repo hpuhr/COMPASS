@@ -39,6 +39,7 @@ class Group : public QObject, public Configurable, public EvaluationStandardTree
 
 signals:
     void configsChangedSignal();
+    void selectionChanged();
 
 public slots:
     void deleteGroupSlot();
@@ -52,6 +53,10 @@ public:
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
+
+    void use(bool ok) override;
+    bool used() const override;
+    bool checkable() const override;
 
     std::string name() const;
 
@@ -67,6 +72,8 @@ public:
     EvaluationRequirementConfigIterator end() { return configs_.end(); }
     unsigned int size () { return configs_.size(); };
 
+    unsigned int numUsedRequirements() const;
+
     virtual EvaluationStandardTreeItem *child(int row) override;
     virtual int childCount() const override;
     virtual int columnCount() const override;
@@ -80,6 +87,8 @@ public:
 protected:
     EvaluationStandard& standard_;
     EvaluationManager& eval_man_;
+
+    bool        use_ = true;
     std::string name_;
 
     std::vector<std::unique_ptr<EvaluationRequirement::BaseConfig>> configs_;
@@ -87,6 +96,9 @@ protected:
     virtual void checkSubConfigurables() override;
 
     void sortConfigs();
+
+    void useAll();
+    void useNone();
 };
 
 #endif // EVALUATIONREQUIREMENTGROUP_H
