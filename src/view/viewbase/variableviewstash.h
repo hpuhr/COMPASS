@@ -145,12 +145,12 @@ public:
         return s;
     }
 
-    const GroupedDataStash<T>& dbContentStash(const std::string& group_name) const
+    const GroupedDataStash<T>& groupStash(const std::string& group_name) const
     {
         return grouped_stashes_.at(group_name);
     }
 
-    bool hasDBContentStash(const std::string& group_name) const
+    bool hasGroupStash(const std::string& group_name) const
     {
         return grouped_stashes_.count(group_name) != 0;
     }

@@ -30,6 +30,7 @@
 #include "scatterplotviewchartview.h"
 #include "logger.h"
 #include "property_templates.h"
+#include "timeconv.h"
 
 #include "tbbhack.h"
 
@@ -41,6 +42,7 @@
 #include <QtCharts/QScatterSeries>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QLegend>
+#include <QtCharts/QLegendMarker>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QDateTimeAxis>
 #include <QGraphicsLayout>
@@ -53,6 +55,7 @@ QT_CHARTS_USE_NAMESPACE
 
 using namespace std;
 using namespace dbContent;
+using namespace Utils;
 
 /**
 */
@@ -130,7 +133,12 @@ void ScatterPlotViewDataWidget::resetVariableDisplay()
 */
 bool ScatterPlotViewDataWidget::updateVariableDisplay() 
 {
-    return updateChart();
+    bool updated = updateChart();
+
+    if (updated)
+        resetZoomSlot();
+
+    return updated;
 }
 
 /**
@@ -302,7 +310,7 @@ QRectF ScatterPlotViewDataWidget::getDataBounds() const
 
 /**
 */
-void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
+void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2) // TODO
 {
     loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot";
 
@@ -387,8 +395,17 @@ void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, d
     auto axis_dt = dynamic_cast<QDateTimeAxis*>(axis);
     if (axis_dt)
     {
-        axis_dt->setMin(QDateTime::fromMSecsSinceEpoch(vmin));
-        axis_dt->setMax(QDateTime::fromMSecsSinceEpoch(vmax));
+        // need correction sind bound calculated before correction
+
+        QDateTime vmin_cor = QDateTime::fromMSecsSinceEpoch(Time::correctLongQtUTC(vmin));
+        QDateTime vmax_cor = QDateTime::fromMSecsSinceEpoch(Time::correctLongQtUTC(vmax));
+
+        loginf << "ScatterPlotViewDataWidget: setAxisRange: ts min "
+               << vmin_cor.toString().toStdString()
+               << " max " << vmax_cor.toString().toStdString();
+
+        axis_dt->setMin(vmin_cor);
+        axis_dt->setMax(vmax_cor);
 
         return;
     }
@@ -408,6 +425,9 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
         if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
         {
             auto bounds = getDataBounds();
+
+            loginf << "ScatterPlotViewDataWidget: resetZoomSlot: X min " << bounds.left()
+                   << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom();
 
             setAxisRange(chart_view_->chart()->axisX(), bounds.left(), bounds.right() );
             setAxisRange(chart_view_->chart()->axisY(), bounds.top() , bounds.bottom());
@@ -431,7 +451,8 @@ bool ScatterPlotViewDataWidget::updateChart()
     chart->setDropShadowEnabled(false);
     chart->setTitle(QString::fromStdString(title_));
 
-    chart->legend()->setAlignment(Qt::AlignBottom);
+    chart->legend()->setAlignment(Qt::AlignRight);
+    chart->legend();
 
     bool has_data = (scatter_series_.numDataSeries() > 0 && variablesOk());
 
@@ -659,6 +680,8 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
             {
                 assert (chart_line_series);
                 chart->addSeries(chart_line_series);
+
+                chart->legend()->markers(chart_line_series)[0]->setVisible(false); // remove line marker in legend
 
                 logdbg << "ScatterPlotViewDataWidget: updateDataSeries: connection lines " << chart_line_series->count();
             }

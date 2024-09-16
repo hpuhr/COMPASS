@@ -16,8 +16,7 @@
  */
 
 
-#ifndef TIMECONV_H
-#define TIMECONV_H
+#pragma once
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -51,4 +50,4 @@ extern double partialSeconds(boost::posix_time::time_duration seconds);
 
 }  // namespace Utils
 
-#endif // TIMECONV_H
+

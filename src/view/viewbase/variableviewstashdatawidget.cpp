@@ -27,6 +27,7 @@
 #include "dbcontentmanager.h"
 #include "datasourcemanager.h"
 #include "stringconv.h"
+#include "number.h"
 
 #include "logger.h"
 #include "property_templates.h"
@@ -147,6 +148,22 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
 
         unsigned int ds_id, line_id;
 
+        const NullableVector<unsigned char>* sensor_sacs {nullptr};
+        const NullableVector<unsigned char>* sensor_sics {nullptr};
+
+        if (dbcontent_name == "CAT063") // use sensor sec/sic special case
+        {
+            assert(buffer.has<unsigned char>(
+                dbcontent_man.getVariable(dbcontent_name, DBContent::var_cat063_sensor_sac_).name()));
+            assert(buffer.has<unsigned char>(
+                dbcontent_man.getVariable(dbcontent_name, DBContent::var_cat063_sensor_sic_).name()));
+
+            sensor_sacs = &buffer.get<unsigned char>(
+                dbcontent_man.getVariable(dbcontent_name, DBContent::var_cat063_sensor_sac_).name());
+            sensor_sics = &buffer.get<unsigned char>(
+                dbcontent_man.getVariable(dbcontent_name, DBContent::var_cat063_sensor_sic_).name());
+        }
+
         for (unsigned int index = last_size; index < current_size; ++index)
         {
             assert (!ds_ids.isNull(index));
@@ -155,8 +172,16 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
             ds_id = ds_ids.get(index);
             line_id = line_ids.get(index);
 
+            if (sensor_sacs && sensor_sics)
+            {
+                if(!sensor_sacs->isNull(index) && !sensor_sics->isNull(index))
+                    ds_id = Number::dsIdFrom(sensor_sacs->get(index), sensor_sics->get(index));
+                else
+                    continue;
+            }
+
             if (!ds_man.hasDBDataSource(ds_id))
-                group_name = to_string(ds_id);
+                group_name = to_string(Number::sacFromDsId(ds_id))+"/"+to_string(Number::sicFromDsId(ds_id));
             else
                 group_name = ds_man.dbDataSource(ds_id).name();
 
@@ -225,36 +250,6 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
             logdbg << "   " << view->variable(i).id() << " " << group_stash.variable_stashes[ i ].values.size();
     }
 
-    // std::vector<bool>&          selected_data = dbcontent_stash.selected_values;
-    // std::vector<unsigned long>& rec_num_data  = dbcontent_stash.record_numbers;
-
-    // auto& x_stash = dbcontent_stash.variable_stashes[ 0 ];
-
-    // unsigned int last_size = x_stash.count;
-
-    // for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
-    // {
-    //     if (selected_vec.isNull(cnt))
-    //         selected_data.push_back(false);
-    //     else
-    //         selected_data.push_back(selected_vec.get(cnt));
-
-    //     assert (!rec_num_vec.isNull(cnt));
-    //     rec_num_data.push_back(rec_num_vec.get(cnt));
-    // }
-
-    // //collect data for all variables
-    // for (size_t i = 0; i < view->numVariables(); ++i)
-    //     updateVariableData(i, dbcontent_name, current_size);
-
-    // //check counts
-    // assert (stash_.isValid());
-
-    // logdbg << "VariableViewStashDataWidget: updateVariableData: value counts after:";
-
-    // for (size_t i = 0; i < view->numVariables(); ++i)
-    //     logdbg << "   " << view->variable(i).id() << " " << dbcontent_stash.variable_stashes[ i ].values.size();
-
     last_buffer_size_[dbcontent_name] = current_size;
 }
 
@@ -264,7 +259,7 @@ void VariableViewStashDataWidget::updateVariableData(
     size_t var_idx, std::string group_name, const Buffer& buffer,
     const std::vector<unsigned int>& indexes)
 {
-    loginf << "VariableViewStashDataWidget: updateVariableData: group_name "
+    logdbg << "VariableViewStashDataWidget: updateVariableData: group_name "
            << group_name << " indexes size " << indexes.size();
 
     auto& group_stash = stash_.groupedDataStash(group_name);
@@ -384,6 +379,7 @@ void VariableViewStashDataWidget::selectData(double x_min,
            << "ctrl pressed " << ctrl_pressed;
     
     unsigned int sel_cnt = 0;
+
     for (auto& buf_it : viewData())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
@@ -397,7 +393,8 @@ void VariableViewStashDataWidget::selectData(double x_min,
             rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
         // rec_num -> index
 
-        const auto& dbc_stash = getStash().dbContentStash(buf_it.first);
+        assert (getStash().hasGroupStash(buf_it.first));
+        const auto& dbc_stash = getStash().groupStash(buf_it.first);
 
         const std::vector<double>&        x_values       = dbc_stash.variable_stashes[ var_x ].values;
         const std::vector<double>&        y_values       = dbc_stash.variable_stashes[ var_y ].values;

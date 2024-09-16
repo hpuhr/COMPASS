@@ -167,7 +167,21 @@ ScatterPlotViewDataWidget* ScatterPlotView::getDataWidget()
 VariableSet ScatterPlotView::getBaseSet(const std::string& dbcontent_name)
 {
     assert(data_source_);
-    return data_source_->getSet()->getFor(dbcontent_name);
+
+    VariableSet set = data_source_->getSet()->getFor(dbcontent_name);
+
+    if (dbcontent_name == "CAT063") // add sensor sec/sic special case
+    {
+        DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat063_sensor_sac_));
+        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat063_sensor_sic_));
+
+        set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat063_sensor_sac_));
+        set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat063_sensor_sic_));
+    }
+
+    return set;
 }
 
 /**

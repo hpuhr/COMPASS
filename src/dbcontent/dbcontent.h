@@ -216,6 +216,9 @@ public:
     static const Property var_cat062_vx_stddev_;
     static const Property var_cat062_vy_stddev_;
 
+    static const Property var_cat063_sensor_sac_;
+    static const Property var_cat063_sensor_sic_;
+
     static const Property selected_var;
 
     DBContent(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
