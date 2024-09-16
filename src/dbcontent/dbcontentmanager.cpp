@@ -570,6 +570,7 @@ void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
 {
     COMPASS::instance().interface().setProperty("associations_generated", "1");
     COMPASS::instance().interface().setProperty("associations_id", assoc_id);
+    COMPASS::instance().interface().saveProperties();
 
     has_associations_ = true;
     associations_id_ = assoc_id;

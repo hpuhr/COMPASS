@@ -23,6 +23,7 @@
 #include "buffer.h"
 #include "variable.h"
 #include "property.h"
+#include "stringconv.h"
 
 #include <QApplication>
 #include <QPainter>
@@ -41,6 +42,8 @@ const std::string ViewDataWidget::Color_RefTraj = "#FFA500";
 const std::string ViewDataWidget::Color_CAT062  = "#CCCCCC";
 
 const QColor ViewDataWidget::ColorSelected = Qt::yellow; // darker than yellow #808000
+
+using namespace Utils;
 
 /**
  */
@@ -90,9 +93,12 @@ bool ViewDataWidget::showsData() const
 
 /**
 */
-QColor ViewDataWidget::colorForDBContent(const std::string& dbcontent_name) const
+QColor ViewDataWidget::colorForGroupName(const std::string& group_name)
 {
-    return dbc_colors_.at(dbcontent_name);
+    if (!dbc_colors_.count(group_name))
+        dbc_colors_[group_name] = QColor::fromRgb(String::hash(group_name));
+
+    return dbc_colors_.at(group_name);
 }
 
 /**

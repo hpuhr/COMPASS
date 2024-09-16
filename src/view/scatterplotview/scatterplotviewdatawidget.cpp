@@ -209,7 +209,7 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
         {
             std::string name = dbc_stash.first + " (" + to_string(dbc_series.points.size()) + ")";
 
-            scatter_series_.addDataSeries(dbc_series, name, colorForDBContent(dbc_stash.first), MarkerSizePx);
+            scatter_series_.addDataSeries(dbc_series, name, colorForGroupName(dbc_stash.first), MarkerSizePx);
         }
     }
 
@@ -226,6 +226,7 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
     title_       = "";
 
     updateDateTimeInfoFromVariables();
+
     correctSeriesDateTime(scatter_series_);
 
     loginf << "ScatterPlotViewDataWidget: processStash: done, generated " << scatter_series_.numDataSeries() << " series";

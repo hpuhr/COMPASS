@@ -855,6 +855,9 @@ void ReconstructorTask::writeDoneSlot()
                << String::timeStringFromDouble(time_elapsed_s, false);
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+
+        if (!allow_user_interactions_)
+            progress_dialog_->close();
     }
 
     malloc_trim(0); // release unused memory

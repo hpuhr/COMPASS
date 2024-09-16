@@ -109,7 +109,7 @@ public:
     void cutUpToIndex(size_t index); // everything up to index is removed
     void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
 
-    const std::string& dbContentName() { return dbcontent_name_; }
+    const std::string& dbContentName() const { return dbcontent_name_; }
 
     void dbContentName(const std::string& dbcontent_name) { dbcontent_name_ = dbcontent_name; }
 

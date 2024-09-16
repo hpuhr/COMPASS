@@ -71,7 +71,7 @@ public:
 
     virtual QImage renderData();
 
-    QColor colorForDBContent(const std::string& dbcontent_name) const;
+    QColor colorForGroupName(const std::string& group_name); // creates new one of required
     const std::map<std::string, QColor>& dbContentColors() const;
 
     static const double      MarkerSizePx;

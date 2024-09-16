@@ -45,9 +45,9 @@ VariableViewStashDataWidget::VariableViewStashDataWidget(ViewWidget* view_widget
                                                          bool group_per_datasource,
                                                          QWidget* parent, 
                                                          Qt::WindowFlags f)
-:   VariableViewDataWidget(view_widget, view, parent, f)
-,   stash_                (view->numVariables())
-,   group_per_datasource_(group_per_datasource)
+    :   VariableViewDataWidget(view_widget, view, parent, f)
+    ,   stash_                (view->numVariables())
+    ,   group_per_datasource_(group_per_datasource)
 {
 }
 
@@ -111,89 +111,43 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
 
     loginf << "VariableViewStashDataWidget: updateVariableData: updating data for view " << view->classId();
 
-    auto& dbcontent_stash = stash_.groupedDataStash(dbcontent_name);
-
-    logdbg << "VariableViewStashDataWidget: updateVariableData: value counts before:";
-
     for (size_t i = 0; i < view->numVariables(); ++i)
-        logdbg << "   " << view->variable(i).id() << " " << dbcontent_stash.variable_stashes[ i ].values.size();
-
-    unsigned int current_size = buffer.size();
-
-    // add selected flags & rec_nums
-    assert (buffer.has<bool>(DBContent::selected_var.name()));
-    assert (buffer.has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-
-    const NullableVector<bool>&          selected_vec = buffer.get<bool>(DBContent::selected_var.name());
-    const NullableVector<unsigned long>& rec_num_vec  = buffer.get<unsigned long>(DBContent::meta_var_rec_num_.name());
-
-    std::vector<bool>&          selected_data = dbcontent_stash.selected_values;
-    std::vector<unsigned long>& rec_num_data  = dbcontent_stash.record_numbers;
-
-    auto& x_stash = dbcontent_stash.variable_stashes[ 0 ];
-
-    unsigned int last_size = x_stash.count;
-
-    for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
     {
-        if (selected_vec.isNull(cnt))
-            selected_data.push_back(false);
-        else
-            selected_data.push_back(selected_vec.get(cnt));
+        const ViewVariable& view_var = variableView()->variable(i);
 
-        assert (!rec_num_vec.isNull(cnt));
-        rec_num_data.push_back(rec_num_vec.get(cnt));
+        if (!view_var.getFor(dbcontent_name))
+        {
+            loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.variableName()
+                   << " not existing in " << dbcontent_name << ", skipping";
+            return;
+        }
     }
 
-    //collect data for all variables
-    for (size_t i = 0; i < view->numVariables(); ++i)
-        updateVariableData(i, dbcontent_name, current_size);
+    unsigned int last_size = last_buffer_size_[dbcontent_name];
+    unsigned int current_size = buffer.size();
 
-    //check counts
-    assert (stash_.isValid());
+    map<string, vector<unsigned int>> grouped_indexes; // group name -> indexes
+    std::string group_name;
 
-    logdbg << "VariableViewStashDataWidget: updateVariableData: value counts after:";
-
-    for (size_t i = 0; i < view->numVariables(); ++i)
-        logdbg << "   " << view->variable(i).id() << " " << dbcontent_stash.variable_stashes[ i ].values.size();
-}
-
-/**
-*/
-void VariableViewStashDataWidget::updateVariableData(
-    size_t var_idx, std::string dbcontent_name, unsigned int current_size)
-{
-    logdbg << "VariableViewStashDataWidget: updateVariableData: dbcontent_name "
-           << dbcontent_name << " current_size " << current_size;
-
-    assert (viewData().count(dbcontent_name));
-    Buffer* buffer = viewData().at(dbcontent_name).get();
-
-    if (group_per_datasource_)
+    if (group_per_datasource_) // add by DS ID + Line ID
     {
-        // prepare index lists
-
         DBContentManager&  dbcontent_man = COMPASS::instance().dbContentManager();
         DataSourceManager& ds_man        = COMPASS::instance().dataSourceManager();
 
-        assert(buffer->has<unsigned int>(
+        assert(buffer.has<unsigned int>(
             dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_).name()));
-        assert(buffer->has<unsigned int>(
+        assert(buffer.has<unsigned int>(
             dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_).name()));
 
-        const NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(
+        const NullableVector<unsigned int>& ds_ids = buffer.get<unsigned int>(
             dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_).name());
 
-        const NullableVector<unsigned int>& line_ids = buffer->get<unsigned int>(
+        const NullableVector<unsigned int>& line_ids = buffer.get<unsigned int>(
             dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_).name());
-
-        map<string, vector<unsigned int>> grouped_indexes; // DS ID + Line ID -> indexes
 
         unsigned int ds_id, line_id;
 
-        std::string group_name;
-
-        for (unsigned int index = last_buffer_size_[dbcontent_name]; index < current_size; ++index)
+        for (unsigned int index = last_size; index < current_size; ++index)
         {
             assert (!ds_ids.isNull(index));
             assert (!line_ids.isNull(index));
@@ -210,93 +164,150 @@ void VariableViewStashDataWidget::updateVariableData(
 
             grouped_indexes[group_name].push_back(index);
         }
-
-        // process
-        const ViewVariable& view_var = variableView()->variable(var_idx);
-        const dbContent::Variable* data_var = view_var.getFor(dbcontent_name);
-        if (!data_var)
-        {
-            logwrn << "VariableViewStashDataWidget: updateVariableData: could not retrieve data var";
-            return;
-        }
-
-        PropertyDataType data_type        = data_var->dataType();
-        std::string      current_var_name = data_var->name();
-
-        for (auto& group_it : grouped_indexes)
-        {
-            auto& group_name = group_it.first;
-            auto& index_list = group_it.second;
-
-            auto& group_stash = stash_.groupedDataStash(group_name);
-            auto& var_stash   = group_stash.variable_stashes.at(var_idx);
-
-            auto& buffer_counts = var_stash.count;
-            auto& values      = var_stash.values;
-
-            #define IndexUpdateFunc(PDType, DType)                                  \
-                assert(view_var.settings().valid_data_types.count(PDType) != 0);    \
-                assert(buffer->has<DType>(current_var_name));                       \
-                                                                                    \
-                NullableVector<DType>& data = buffer->get<DType>(current_var_name); \
-                                                                                    \
-                appendData(data, values, index_list);                  \
-                buffer_counts = current_size;
-
-            #define NotFoundFunc                                                                                                             \
-                logerr << "VariableViewStashDataWidget: updateVariableData: impossible for property type " \
-                << Property::asString(data_type); \
-                throw std::runtime_error("VariableViewStashDataWidget: updateVariableData: impossible property type " \
-                + Property::asString(data_type));
-
-            SwitchPropertyDataType(data_type, IndexUpdateFunc, NotFoundFunc)
-        }
-
-        last_buffer_size_[dbcontent_name] = current_size;
     }
-    else
+    else // simple add
     {
-        auto& group_stash = stash_.groupedDataStash(dbcontent_name);
-        auto& var_stash       = group_stash.variable_stashes.at(var_idx);
+        group_name = dbcontent_name;
 
-        auto& buffer_counts = var_stash.count;
-        auto& values        = var_stash.values;
+        for (unsigned int index = last_size; index < current_size; ++index)
+            grouped_indexes[dbcontent_name].push_back(index);
+    }
 
-        unsigned int last_size = buffer_counts;
+    // add selected flags & rec_nums
+    assert (buffer.has<bool>(DBContent::selected_var.name()));
+    assert (buffer.has<unsigned long>(DBContent::meta_var_rec_num_.name()));
 
-        const ViewVariable& view_var = variableView()->variable(var_idx);
-        const dbContent::Variable* data_var = view_var.getFor(dbcontent_name);
-        if (!data_var)
+    const NullableVector<bool>&          selected_vec = buffer.get<bool>(DBContent::selected_var.name());
+    const NullableVector<unsigned long>& rec_num_vec  = buffer.get<unsigned long>(DBContent::meta_var_rec_num_.name());
+
+    for (auto& group_it : grouped_indexes)
+    {
+        group_name = group_it.first;
+
+        if (!group_it.second.size())
+            continue;
+
+        auto& group_stash = stash_.groupedDataStash(group_name);
+
+        logdbg << "VariableViewStashDataWidget: updateVariableData: value counts before:";
+
+        for (size_t i = 0; i < view->numVariables(); ++i)
+            logdbg << "   " << view->variable(i).id() << " " << group_stash.variable_stashes[ i ].values.size();
+
+        std::vector<bool>&          selected_data = group_stash.selected_values;
+        std::vector<unsigned long>& rec_num_data  = group_stash.record_numbers;
+
+        //auto& x_stash = group_stash.variable_stashes[ 0 ];
+
+        //unsigned int last_size = x_stash.count;
+
+        for (auto index : group_it.second)
         {
-            logwrn << "VariableViewStashDataWidget: updateVariableData: could not retrieve data var";
-            return;
+            if (selected_vec.isNull(index))
+                selected_data.push_back(false);
+            else
+                selected_data.push_back(selected_vec.get(index));
+
+            assert (!rec_num_vec.isNull(index));
+            rec_num_data.push_back(rec_num_vec.get(index));
         }
 
-        PropertyDataType data_type        = data_var->dataType();
-        std::string      current_var_name = data_var->name();
+        //collect data for all variables
+        for (size_t i = 0; i < view->numVariables(); ++i)
+            updateVariableData(i, group_name, buffer, group_it.second);
 
-        logdbg << "VariableViewStashDataWidget: updateVariableData: updating, last size " << last_size;
+        //check counts
+        assert (stash_.isValid());
 
-        #define UpdateFunc(PDType, DType)                                       \
-            assert(view_var.settings().valid_data_types.count(PDType) != 0);    \
-            assert(buffer->has<DType>(current_var_name));                       \
-                                                                                \
-            NullableVector<DType>& data = buffer->get<DType>(current_var_name); \
-                                                                                \
-            appendData(data, values, last_size, current_size);                  \
-            buffer_counts = current_size;
+        logdbg << "VariableViewStashDataWidget: updateVariableData: value counts after:";
 
-        #define NotFoundFunc                                                                                                             \
-            logerr << "VariableViewStashDataWidget: updateVariableData: impossible for property type " \
-            << Property::asString(data_type); \
-            throw std::runtime_error("VariableViewStashDataWidget: updateVariableData: impossible property type " \
-            + Property::asString(data_type));
-
-        SwitchPropertyDataType(data_type, UpdateFunc, NotFoundFunc)
-
-            logdbg << "VariableViewStashDataWidget: updateVariableData: updated size " << buffer_counts;
-
+        for (size_t i = 0; i < view->numVariables(); ++i)
+            logdbg << "   " << view->variable(i).id() << " " << group_stash.variable_stashes[ i ].values.size();
     }
+
+    // std::vector<bool>&          selected_data = dbcontent_stash.selected_values;
+    // std::vector<unsigned long>& rec_num_data  = dbcontent_stash.record_numbers;
+
+    // auto& x_stash = dbcontent_stash.variable_stashes[ 0 ];
+
+    // unsigned int last_size = x_stash.count;
+
+    // for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
+    // {
+    //     if (selected_vec.isNull(cnt))
+    //         selected_data.push_back(false);
+    //     else
+    //         selected_data.push_back(selected_vec.get(cnt));
+
+    //     assert (!rec_num_vec.isNull(cnt));
+    //     rec_num_data.push_back(rec_num_vec.get(cnt));
+    // }
+
+    // //collect data for all variables
+    // for (size_t i = 0; i < view->numVariables(); ++i)
+    //     updateVariableData(i, dbcontent_name, current_size);
+
+    // //check counts
+    // assert (stash_.isValid());
+
+    // logdbg << "VariableViewStashDataWidget: updateVariableData: value counts after:";
+
+    // for (size_t i = 0; i < view->numVariables(); ++i)
+    //     logdbg << "   " << view->variable(i).id() << " " << dbcontent_stash.variable_stashes[ i ].values.size();
+
+    last_buffer_size_[dbcontent_name] = current_size;
+}
+
+/**
+*/
+void VariableViewStashDataWidget::updateVariableData(
+    size_t var_idx, std::string group_name, const Buffer& buffer,
+    const std::vector<unsigned int>& indexes)
+{
+    loginf << "VariableViewStashDataWidget: updateVariableData: group_name "
+           << group_name << " indexes size " << indexes.size();
+
+    auto& group_stash = stash_.groupedDataStash(group_name);
+    auto& var_stash   = group_stash.variable_stashes.at(var_idx);
+
+    auto& buffer_counts = var_stash.count;
+    auto& values        = var_stash.values;
+
+    unsigned int last_size = buffer_counts;
+
+    const ViewVariable& view_var = variableView()->variable(var_idx);
+    const dbContent::Variable* data_var = view_var.getFor(buffer.dbContentName());
+
+    if (!data_var)
+    {
+        logwrn << "VariableViewStashDataWidget: updateVariableData: could not retrieve data var";
+        return;
+    }
+
+    PropertyDataType data_type        = data_var->dataType();
+    std::string      current_var_name = data_var->name();
+
+    logdbg << "VariableViewStashDataWidget: updateVariableData: updating, last size " << last_size;
+
+#define UpdateFunc(PDType, DType)                                                \
+        assert(view_var.settings().valid_data_types.count(PDType) != 0);         \
+        assert(buffer.has<DType>(current_var_name));                             \
+                                                                                 \
+        const NullableVector<DType>& data = buffer.get<DType>(current_var_name); \
+                                                                                 \
+        appendData(data, values, indexes);                                       \
+        //buffer_counts = current_size;
+
+#define NotFoundFunc                                                                                                             \
+    logerr << "VariableViewStashDataWidget: updateVariableData: impossible for property type " \
+           << Property::asString(data_type); \
+        throw std::runtime_error("VariableViewStashDataWidget: updateVariableData: impossible property type " \
+                                 + Property::asString(data_type));
+
+    SwitchPropertyDataType(data_type, UpdateFunc, NotFoundFunc)
+
+    logdbg << "VariableViewStashDataWidget: updateVariableData: updated size " << buffer_counts;
+
 }
 
 /**
@@ -380,10 +391,10 @@ void VariableViewStashDataWidget::selectData(double x_min,
 
         assert (buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
         NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
-                    DBContent::meta_var_rec_num_.name());
+            DBContent::meta_var_rec_num_.name());
 
         std::map<unsigned long, std::vector<unsigned int>> rec_num_indexes =
-                rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
+            rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
         // rec_num -> index
 
         const auto& dbc_stash = getStash().dbContentStash(buf_it.first);

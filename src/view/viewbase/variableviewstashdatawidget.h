@@ -76,12 +76,12 @@ private:
     void resetStash();
     void updateStash();
 
-    void updateVariableData(size_t var_idx, 
-                            std::string dbcontent_name, 
-                            unsigned int current_size);
+    void updateVariableData(size_t var_idx,
+                            std::string group_name, const Buffer& buffer,
+                            const std::vector<unsigned int>& indexes);
 
     template<typename T>
-    void appendData(NullableVector<T>& data, 
+    void appendData(const NullableVector<T>& data,
                     std::vector<double>& target, 
                     unsigned int last_size,
                     unsigned int current_size)
@@ -96,7 +96,7 @@ private:
     }
 
     template<typename T>
-    void appendData(NullableVector<T>& data,
+    void appendData(const NullableVector<T>& data,
                     std::vector<double>& target,
                     std::vector<unsigned int> indexes)
     {
@@ -111,14 +111,14 @@ private:
 
     VariableViewStash<double> stash_;
     bool group_per_datasource_ {false}; // true = DS ID + Line ID, false = DBContent
-    std::map<std::string, unsigned int> last_buffer_size_; // dbcontent name -> last buffer size
+    std::map<std::string, unsigned int> last_buffer_size_; // dbcontent name -> last buffer size, only used if group_per_datasource_
 };
 
 /**
 */
 template<>
 inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(
-    NullableVector<boost::posix_time::ptime>& data,
+    const NullableVector<boost::posix_time::ptime>& data,
     std::vector<double>& target,
     unsigned int last_size,
     unsigned int current_size)
@@ -140,7 +140,7 @@ inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(
 
 template<>
 inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(
-    NullableVector<boost::posix_time::ptime>& data,
+    const NullableVector<boost::posix_time::ptime>& data,
     std::vector<double>& target,
     std::vector<unsigned int> indexes)
 {
@@ -162,7 +162,7 @@ inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(
 /**
 */
 template<>
-inline void VariableViewStashDataWidget::appendData<std::string>(NullableVector<std::string>& data, 
+inline void VariableViewStashDataWidget::appendData<std::string>(const NullableVector<std::string>& data,
                                                                  std::vector<double>& target, 
                                                                  unsigned int last_size,
                                                                  unsigned int current_size)
@@ -171,7 +171,7 @@ inline void VariableViewStashDataWidget::appendData<std::string>(NullableVector<
 }
 
 template<>
-inline void VariableViewStashDataWidget::appendData<std::string>(NullableVector<std::string>& data,
+inline void VariableViewStashDataWidget::appendData<std::string>(const NullableVector<std::string>& data,
                                                                  std::vector<double>& target,
                                                                  std::vector<unsigned int> indexes)
 {
