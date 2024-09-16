@@ -116,6 +116,14 @@ void RadarPlotPositionCalculatorTask::run()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
+    // set up projections
+    ProjectionManager& proj_man = ProjectionManager::instance();
+
+    assert(proj_man.hasCurrentProjection());
+    Projection& projection = proj_man.currentProjection();
+    projection.clearCoordinateSystems(); // to rebuild from data sources
+    projection.addAllRadarCoordinateSystems();
+
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     dbcontent_man.clearData();

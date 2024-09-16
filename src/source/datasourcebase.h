@@ -57,7 +57,6 @@ public:
     float updateInterval () const;
 
     bool hasPosition() const;
-    bool hasFullPosition() const;
 
     void latitude (double value);
     double latitude () const;

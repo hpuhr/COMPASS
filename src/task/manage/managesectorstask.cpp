@@ -327,7 +327,21 @@ void ManageSectorsTask::parseCurrentFile (bool import)
             for(geom_field_cnt = 0; geom_field_cnt < geom_field_num; geom_field_cnt ++ )
             {
                 geometry = feature->GetGeomFieldRef(geom_field_cnt);
-                if(geometry != NULL && wkbFlatten(geometry->getGeometryType()) == wkbPolygon)
+
+                if (!geometry)
+                    continue;
+                if (geometry->getGeometryType() != wkbPolygon
+                    && geometry->getGeometryType() != wkbPolygon25D
+                    && geometry->getGeometryType() != wkbMultiPolygon
+                    && geometry->getGeometryType() != wkbMultiPolygon25D)
+                {
+                    loginf << "ManageSectorsTask: parseCurrentFile skipping unsupported geometry name "
+                           << geometry->getGeometryName()
+                           << " type " << geometry->getGeometryType();
+                    continue;
+                }
+
+                if(wkbFlatten(geometry->getGeometryType()) == wkbPolygon)
                 {
                     OGRPolygon* polygon = dynamic_cast<OGRPolygon*>(geometry);
                     assert (polygon);

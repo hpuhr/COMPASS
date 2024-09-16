@@ -56,7 +56,7 @@ void Projection::addAllRadarCoordinateSystems()
         {
             if (!hasCoordinateSystem(ds_it->id()))
             {
-                if (!ds_it->hasFullPosition())
+                if (!ds_it->hasPosition())
                     continue;
 
                 addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());
@@ -67,7 +67,7 @@ void Projection::addAllRadarCoordinateSystems()
         {
             if (!hasCoordinateSystem(ds_it->id()))
             {
-                if (!ds_it->hasFullPosition())
+                if (!ds_it->hasPosition())
                     continue;
 
                 addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());
