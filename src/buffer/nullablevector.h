@@ -283,7 +283,7 @@ void NullableVector<T>::setAll(T value)
 {
     unsigned int data_size = data_.size();
 
-    for (unsigned int cnt=0; cnt < data_size; ++cnt)
+    for (unsigned int index=0; index < data_size; ++index)
     {
         data_.at(index) = value;
         unsetNull(index);
