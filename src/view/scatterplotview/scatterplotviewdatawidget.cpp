@@ -314,6 +314,17 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2) /
 {
     loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot";
 
+    if (x_axis_is_datetime_)
+    {
+        p1.setX(Time::decorrectLongQtUTC(p1.x()));
+        p2.setX(Time::decorrectLongQtUTC(p2.x()));
+    }
+    if(y_axis_is_datetime_)
+    {
+        p1.setY(Time::decorrectLongQtUTC(p1.y()));
+        p2.setY(Time::decorrectLongQtUTC(p2.y()));
+    }
+
     if (chart_view_ && chart_view_->chart())
     {
         if (selected_tool_ == SP_ZOOM_RECT_TOOL)
