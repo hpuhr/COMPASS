@@ -179,12 +179,6 @@ public:
                                          size_t* num_proj_changed = nullptr);
 
     void storeUpdate(Measurement& mm, 
-                     const kalman::KalmanUpdate& update,
-                     KalmanProjectionHandler& phandler,
-                     boost::optional<Eigen::Vector2d>& speed_pos_wgs84,
-                     boost::optional<Eigen::Vector2d>& accel_pos_wgs84,
-                     int submodel_idx = -1) const;
-    void storeUpdate(Measurement& mm, 
                      const kalman::KalmanUpdate& update) const;
     void storeUpdate(Measurement& mm, 
                      const kalman::KalmanUpdateMinimal& update) const;
@@ -194,8 +188,19 @@ public:
                      const kalman::KalmanUpdateMinimal& update) const;
     void storeUpdates(std::vector<Reference>& refs,
                       const std::vector<kalman::KalmanUpdate>& updates,
-                      std::vector<boost::optional<Eigen::Vector2d>>* speeds_pos_wgs84 = nullptr,
-                      std::vector<boost::optional<Eigen::Vector2d>>* accel_pos_wgs84 = nullptr) const;
+                      std::vector<boost::optional<Eigen::Vector2d>>* speedvec_tippos_wgs84 = nullptr,
+                      std::vector<boost::optional<Eigen::Vector2d>>* accelvec_tippos_wgs84 = nullptr) const;
+    void storeUpdateAndUnproject(Measurement& mm, 
+                                 const kalman::KalmanUpdate& update,
+                                 KalmanProjectionHandler& phandler,
+                                 boost::optional<Eigen::Vector2d>* speedvec_tippos_wgs84 = nullptr,
+                                 boost::optional<Eigen::Vector2d>* accelvec_tippos_wgs84 = nullptr,
+                                 int submodel_idx = -1) const;
+    void storeUpdateAndUnproject(Reference& ref, 
+                                 const kalman::KalmanUpdate& update,
+                                 KalmanProjectionHandler& phandler,
+                                 boost::optional<Eigen::Vector2d>* speedvec_tippos_wgs84 = nullptr,
+                                 boost::optional<Eigen::Vector2d>* accelvec_tippos_wgs84 = nullptr) const;
     
     bool smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                        kalman::SmoothFailStrategy fail_strategy,
@@ -223,11 +228,11 @@ public:
     static std::unique_ptr<KalmanInterface> createInterface(kalman::KalmanType ktype, 
                                                             const Settings& settings);
 
-    static void extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speeds_pos_wgs84,
-                                            std::vector<boost::optional<Eigen::Vector2d>>& accel_pos_wgs84,
+    static void extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speedvec_tippos_wgs84,
+                                            std::vector<boost::optional<Eigen::Vector2d>>& accelvec_tippos_wgs84,
                                             const std::vector<Measurement>& measurements);
-    static void extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speeds_pos_wgs84,
-                                            std::vector<boost::optional<Eigen::Vector2d>>& accel_pos_wgs84,
+    static void extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speedvec_tippos_wgs84,
+                                            std::vector<boost::optional<Eigen::Vector2d>>& accelvec_tippos_wgs84,
                                             const std::vector<Reference>& references);
 
     Settings& settings() { return settings_; }
@@ -279,13 +284,13 @@ private:
     void storeUpdate(Reference& ref, 
                      const kalman::KalmanUpdate& update,
                      KalmanProjectionHandler& phandler,
-                     boost::optional<Eigen::Vector2d>* speed_pos_wgs84 = nullptr,
-                     boost::optional<Eigen::Vector2d>* accel_pos_wgs84 = nullptr) const;
+                     boost::optional<Eigen::Vector2d>* speedvec_tippos_wgs84 = nullptr,
+                     boost::optional<Eigen::Vector2d>* accelvec_tippos_wgs84 = nullptr) const;
     void storeUpdate(Measurement& mm, 
                      const kalman::KalmanUpdate& update,
                      KalmanProjectionHandler& phandler,
-                     boost::optional<Eigen::Vector2d>* speed_pos_wgs84 = nullptr,
-                     boost::optional<Eigen::Vector2d>* accel_pos_wgs84 = nullptr,
+                     boost::optional<Eigen::Vector2d>* speedvec_tippos_wgs84 = nullptr,
+                     boost::optional<Eigen::Vector2d>* accelvec_tippos_wgs84 = nullptr,
                      int submodel_idx = -1) const;
 
     reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
@@ -293,8 +298,8 @@ private:
     bool checkPrediction(const Measurement& mm) const;
     bool checkState(const kalman::KalmanUpdate& update) const;
 
-    static void extractVelAccPosWGS84(boost::optional<Eigen::Vector2d>& speed_pos_wgs84,
-                                      boost::optional<Eigen::Vector2d>& accel_pos_wgs84,
+    static void extractVelAccPosWGS84(boost::optional<Eigen::Vector2d>& speedvec_tippos_wgs84,
+                                      boost::optional<Eigen::Vector2d>& accelvec_tippos_wgs84,
                                       KalmanProjectionHandler& phandler,
                                       const Measurement& mm);
 

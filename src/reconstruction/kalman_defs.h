@@ -168,6 +168,7 @@ struct KalmanState : public BasicKalmanState
     KalmanState(const Vector& _x, const Matrix& _P) : BasicKalmanState(_x, _P) {}
     KalmanState(const Vector& _x, const Matrix& _P, double _dt) : BasicKalmanState(_x, _P), dt(_dt) {}
     KalmanState(const Vector& _x, const Matrix& _P, double _dt, double _Q_var) : BasicKalmanState(_x, _P), dt(_dt), Q_var(_Q_var) {}
+    KalmanState(const BasicKalmanState& basic_state) : BasicKalmanState(basic_state) {}
 
     KalmanState(const KalmanState& other)
     :   BasicKalmanState(other)
@@ -409,21 +410,31 @@ struct KalmanUpdate
 
 struct RTSStepInfo
 {
-    BasicKalmanState state1;
-    BasicKalmanState state1_smooth;
     BasicKalmanState state0;
+    BasicKalmanState state1;
     BasicKalmanState state0_smooth;
+    BasicKalmanState state1_smooth;
 };
 
 /**
 */
 struct RTSDebugInfo
 {
-    size_t                   update_idx;
-    Eigen::Vector2d          projection_center;
-    std::vector<RTSStepInfo> rts_step_models;
-    RTSStepInfo              rts_step;
-    Vector                   mu;
+    void addStepInfo(const RTSStepInfo& step_info)
+    {
+        state0.immState().filter_states.push_back(step_info.state0);
+        state1.immState().filter_states.push_back(step_info.state1);
+        state0_smooth.immState().filter_states.push_back(step_info.state0_smooth);
+        state1_smooth.immState().filter_states.push_back(step_info.state1_smooth);
+    }
+
+    KalmanState     state0;
+    KalmanState     state1;
+    KalmanState     state0_smooth;
+    KalmanState     state1_smooth;
+    size_t          update_idx;
+    Eigen::Vector2d projection_center;
+    Vector          mu;
 };
 
 } // namespace kalman

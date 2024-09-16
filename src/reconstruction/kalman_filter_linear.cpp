@@ -347,6 +347,8 @@ bool KalmanFilterLinear::smooth_impl(std::vector<kalman::Vector>& x_smooth,
 */
 bool KalmanFilterLinear::smoothingStep_impl(Vector& x0_smooth,
                                             Matrix& P0_smooth,
+                                            Vector& x1_pred,
+                                            Matrix& P1_pred,
                                             const Vector& x1_smooth_tr,
                                             const Matrix& P1_smooth,
                                             const BasicKalmanState& state1,
@@ -358,19 +360,20 @@ bool KalmanFilterLinear::smoothingStep_impl(Vector& x0_smooth,
     const auto& Q_1  = state1.Q;
     auto        F_1t = F_1.transpose();
 
-    Matrix Pp = F_1 * P0_smooth * F_1t + Q_1;
+    x1_pred = F_1 * x0_smooth;
+    P1_pred = F_1 * P0_smooth * F_1t + Q_1;
 
-    if (!Eigen::FullPivLU<Eigen::MatrixXd>(Pp).isInvertible())
+    if (!Eigen::FullPivLU<Eigen::MatrixXd>(P1_pred).isInvertible())
     {
-        loginf << "KalmanFilterLinear: smoothingStep_impl: Could not invert Pp:\n" << Pp;
+        loginf << "KalmanFilterLinear: smoothingStep_impl: Could not invert P1_pred:\n" << P1_pred;
         return false;
     }
 
-    Matrix K = P0_smooth * F_1t * Pp.inverse();
+    Matrix K = P0_smooth * F_1t * P1_pred.inverse();
     K *= smooth_scale;
 
-    x0_smooth += K * (x1_smooth_tr - F_1 * x0_smooth);
-    P0_smooth += K * (P1_smooth - Pp) * ((const kalman::Matrix&)K).transpose();
+    x0_smooth += K * (x1_smooth_tr - x1_pred);
+    P0_smooth += K * (P1_smooth - P1_pred) * ((const kalman::Matrix&)K).transpose();
 
     return true;
 }

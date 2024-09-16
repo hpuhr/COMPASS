@@ -280,34 +280,47 @@ void KalmanEstimator::storeUpdate(Reference& ref,
 }
 
 /**
- * Notice: will reproject from the update's local system to wgs84.
+ * Notice: will reproject from the update's local system to wgs84 using the passed projection handler.
 */
-void KalmanEstimator::storeUpdate(Measurement& mm, 
-                                  const kalman::KalmanUpdate& update,
-                                  KalmanProjectionHandler& phandler,
-                                  boost::optional<Eigen::Vector2d>& speed_pos_wgs84,
-                                  boost::optional<Eigen::Vector2d>& accel_pos_wgs84,
-                                  int submodel_idx) const
+void KalmanEstimator::storeUpdateAndUnproject(Measurement& mm, 
+                                              const kalman::KalmanUpdate& update,
+                                              KalmanProjectionHandler& phandler,
+                                              boost::optional<Eigen::Vector2d>* speedvec_tippos_wgs84,
+                                              boost::optional<Eigen::Vector2d>* accelvec_tippos_wgs84,
+                                              int submodel_idx) const
 {
-    storeUpdate(mm, update, phandler, &speed_pos_wgs84, &accel_pos_wgs84, submodel_idx);
+    storeUpdate(mm, update, phandler, speedvec_tippos_wgs84, accelvec_tippos_wgs84, submodel_idx);
+}
+
+/**
+ * Notice: will reproject from the update's local system to wgs84 using the passed projection handler.
+*/
+void KalmanEstimator::storeUpdateAndUnproject(Reference& ref, 
+                                              const kalman::KalmanUpdate& update,
+                                              KalmanProjectionHandler& phandler,
+                                              boost::optional<Eigen::Vector2d>* speedvec_tippos_wgs84,
+                                              boost::optional<Eigen::Vector2d>* accelvec_tippos_wgs84) const
+{
+    storeUpdate(ref, update, phandler, speedvec_tippos_wgs84, accelvec_tippos_wgs84, -1);
 }
 
 /**
  * Notice: will reproject from the update's local system to wgs84.
+ * Internal version.
 */
 void KalmanEstimator::storeUpdate(Measurement& mm, 
                                   const kalman::KalmanUpdate& update,
                                   KalmanProjectionHandler& phandler,
-                                  boost::optional<Eigen::Vector2d>* speed_pos_wgs84,
-                                  boost::optional<Eigen::Vector2d>* accel_pos_wgs84,
+                                  boost::optional<Eigen::Vector2d>* speedvec_tippos_wgs84,
+                                  boost::optional<Eigen::Vector2d>* accelvec_tippos_wgs84,
                                   int submodel_idx) const
 {
     assert(isInit());
 
-    if (speed_pos_wgs84)
-        speed_pos_wgs84->reset();
-    if (accel_pos_wgs84)
-        accel_pos_wgs84->reset();
+    if (speedvec_tippos_wgs84)
+        speedvec_tippos_wgs84->reset();
+    if (accelvec_tippos_wgs84)
+        accelvec_tippos_wgs84->reset();
 
     kalman_interface_->storeState(mm, update.state, submodel_idx);
 
@@ -317,21 +330,23 @@ void KalmanEstimator::storeUpdate(Measurement& mm,
     //unproject to lat/lon
     phandler.unproject(mm.lat, mm.lon, mm.x, mm.y, &update.projection_center);
 
-    if (speed_pos_wgs84 && mm.hasVelocity())
+    //obtain tip position of speed vector if desired
+    if (speedvec_tippos_wgs84 && mm.hasVelocity())
     {
-        *speed_pos_wgs84 = Eigen::Vector2d();
-        phandler.unproject(speed_pos_wgs84->value()[ 0 ], 
-                           speed_pos_wgs84->value()[ 1 ], 
+        *speedvec_tippos_wgs84 = Eigen::Vector2d();
+        phandler.unproject(speedvec_tippos_wgs84->value()[ 0 ], 
+                           speedvec_tippos_wgs84->value()[ 1 ], 
                            mm.x + mm.vx.value(), 
                            mm.y + mm.vy.value(), 
                            &update.projection_center);
     }
 
-    if (accel_pos_wgs84 && mm.hasAcceleration())
+    //obtain tip position of acceleration vector if desired
+    if (accelvec_tippos_wgs84 && mm.hasAcceleration())
     {
-        *accel_pos_wgs84 = Eigen::Vector2d();
-        phandler.unproject(accel_pos_wgs84->value()[ 0 ], 
-                           accel_pos_wgs84->value()[ 1 ], 
+        *accelvec_tippos_wgs84 = Eigen::Vector2d();
+        phandler.unproject(accelvec_tippos_wgs84->value()[ 0 ], 
+                           accelvec_tippos_wgs84->value()[ 1 ], 
                            mm.x + mm.ax.value(), 
                            mm.y + mm.ay.value(), 
                            &update.projection_center);
@@ -343,15 +358,16 @@ void KalmanEstimator::storeUpdate(Measurement& mm,
 
 /**
  * Notice: will reproject from the update's local system to wgs84.
+ * Internal version.
 */
 void KalmanEstimator::storeUpdate(Reference& ref, 
                                   const kalman::KalmanUpdate& update,
                                   KalmanProjectionHandler& phandler,
-                                  boost::optional<Eigen::Vector2d>* speedvec_pos_wgs84,
-                                  boost::optional<Eigen::Vector2d>* accvec_pos_wgs84) const
+                                  boost::optional<Eigen::Vector2d>* speedvec_tippos_wgs84,
+                                  boost::optional<Eigen::Vector2d>* accelvec_tippos_wgs84) const
 {
     Measurement* mm = &ref;
-    storeUpdate(*mm, update, phandler, speedvec_pos_wgs84, accvec_pos_wgs84);
+    storeUpdate(*mm, update, phandler, speedvec_tippos_wgs84, accelvec_tippos_wgs84);
 
     ref.cov            = update.state.P;
     ref.projchange_pos = update.proj_changed;
@@ -363,8 +379,8 @@ void KalmanEstimator::storeUpdate(Reference& ref,
  */
 void KalmanEstimator::storeUpdates(std::vector<Reference>& refs,
                                    const std::vector<kalman::KalmanUpdate>& updates,
-                                   std::vector<boost::optional<Eigen::Vector2d>>* speeds_pos_wgs84,
-                                   std::vector<boost::optional<Eigen::Vector2d>>* accel_pos_wgs84) const
+                                   std::vector<boost::optional<Eigen::Vector2d>>* speedvec_tippos_wgs84,
+                                   std::vector<boost::optional<Eigen::Vector2d>>* accelvec_tippos_wgs84) const
 {
     KalmanProjectionHandler phandler;
 
@@ -372,76 +388,88 @@ void KalmanEstimator::storeUpdates(std::vector<Reference>& refs,
 
     refs.resize(n);
 
-    if (speeds_pos_wgs84)
-        speeds_pos_wgs84->assign(n, boost::optional<Eigen::Vector2d>());
-    if (accel_pos_wgs84)
-        accel_pos_wgs84->assign(n, boost::optional<Eigen::Vector2d>());
+    if (speedvec_tippos_wgs84)
+        speedvec_tippos_wgs84->assign(n, boost::optional<Eigen::Vector2d>());
+    if (accelvec_tippos_wgs84)
+        accelvec_tippos_wgs84->assign(n, boost::optional<Eigen::Vector2d>());
 
     for (size_t i = 0; i < n; ++i)
     {
         storeUpdate(refs[ i ], 
                     updates[ i ], 
                     phandler, 
-                    speeds_pos_wgs84 ? &(*speeds_pos_wgs84)[ i ] : nullptr, 
-                    accel_pos_wgs84  ? &(*accel_pos_wgs84 )[ i ] : nullptr);
+                    speedvec_tippos_wgs84 ? &(*speedvec_tippos_wgs84)[ i ] : nullptr, 
+                    accelvec_tippos_wgs84  ? &(*accelvec_tippos_wgs84 )[ i ] : nullptr);
     }
 }
 
 /**
 */
-void KalmanEstimator::extractVelAccPosWGS84(boost::optional<Eigen::Vector2d>& speed_pos_wgs84,
-                                            boost::optional<Eigen::Vector2d>& accel_pos_wgs84,
+void KalmanEstimator::extractVelAccPosWGS84(boost::optional<Eigen::Vector2d>& speedvec_tippos_wgs84,
+                                            boost::optional<Eigen::Vector2d>& accelvec_tippos_wgs84,
                                             KalmanProjectionHandler& phandler,
                                             const Measurement& mm)
 {
-    speed_pos_wgs84.reset();
-    accel_pos_wgs84.reset();
+    speedvec_tippos_wgs84.reset();
+    accelvec_tippos_wgs84.reset();
 
     if (mm.hasVelocity())
     {
         Eigen::Vector2d proj_center(mm.lat, mm.lon);
 
-        speed_pos_wgs84 = Eigen::Vector2d();
-        phandler.unproject(speed_pos_wgs84.value()[ 0 ], 
-                           speed_pos_wgs84.value()[ 1 ], 
+        speedvec_tippos_wgs84 = Eigen::Vector2d();
+        phandler.unproject(speedvec_tippos_wgs84.value()[ 0 ], 
+                           speedvec_tippos_wgs84.value()[ 1 ], 
                            mm.vx.value(), 
                            mm.vy.value(),
+                           &proj_center);
+    }
+
+    if (mm.hasAcceleration())
+    {
+        Eigen::Vector2d proj_center(mm.lat, mm.lon);
+
+        accelvec_tippos_wgs84 = Eigen::Vector2d();
+        phandler.unproject(accelvec_tippos_wgs84.value()[ 0 ], 
+                           accelvec_tippos_wgs84.value()[ 1 ], 
+                           mm.ax.value(), 
+                           mm.ay.value(),
                            &proj_center);
     }
 }
 
 /**
 */
-void KalmanEstimator::extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speeds_pos_wgs84,
-                                                  std::vector<boost::optional<Eigen::Vector2d>>& accel_pos_wgs84,
+void KalmanEstimator::extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speedvec_tippos_wgs84,
+                                                  std::vector<boost::optional<Eigen::Vector2d>>& accelvec_tippos_wgs84,
                                                   const std::vector<Measurement>& measurements)
 {
     KalmanProjectionHandler phandler;
 
     size_t n = measurements.size();
 
-    speeds_pos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
-    accel_pos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
+    speedvec_tippos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
+    accelvec_tippos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
 
     for (size_t i = 0; i < n; ++i)
-        extractVelAccPosWGS84(speeds_pos_wgs84[ i ], accel_pos_wgs84[ i ], phandler, measurements[ i ]);
+        extractVelAccPosWGS84(speedvec_tippos_wgs84[ i ], accelvec_tippos_wgs84[ i ], phandler, measurements[ i ]);
 }
 
 /**
 */
-void KalmanEstimator::extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speeds_pos_wgs84,
-                                                  std::vector<boost::optional<Eigen::Vector2d>>& accel_pos_wgs84,
+void KalmanEstimator::extractVelAccPositionsWGS84(std::vector<boost::optional<Eigen::Vector2d>>& speedvec_tippos_wgs84,
+                                                  std::vector<boost::optional<Eigen::Vector2d>>& accelvec_tippos_wgs84,
                                                   const std::vector<Reference>& references)
 {
     KalmanProjectionHandler phandler;
 
     size_t n = references.size();
 
-    speeds_pos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
-    accel_pos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
+    speedvec_tippos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
+    accelvec_tippos_wgs84.assign(n, boost::optional<Eigen::Vector2d>());
 
     for (size_t i = 0; i < n; ++i)
-        extractVelAccPosWGS84(speeds_pos_wgs84[ i ], accel_pos_wgs84[ i ], phandler, references[ i ]);
+        extractVelAccPosWGS84(speedvec_tippos_wgs84[ i ], accelvec_tippos_wgs84[ i ], phandler, references[ i ]);
 }
 
 /**

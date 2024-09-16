@@ -109,6 +109,8 @@ protected:
                      std::vector<RTSDebugInfo>* debug_infos) const override final;
     bool smoothingStep_impl(Vector& x0_smooth,
                             Matrix& P0_smooth,
+                            Vector& x1_pred,
+                            Matrix& P1_pred,
                             const Vector& x1_smooth_tr,
                             const Matrix& P1_smooth,
                             const BasicKalmanState& state1,

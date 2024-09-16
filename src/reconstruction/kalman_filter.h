@@ -158,6 +158,8 @@ public:
     static Matrix continuousWhiteNoise(size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
     static void continuousWhiteNoise(Matrix& Q_noise, size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
 
+    static boost::optional<double> pdf(const Vector& x, const Matrix& P);
+
 protected:
 #if USE_EXPERIMENTAL_SOURCE
     friend class KalmanFilterIMM;
@@ -196,6 +198,8 @@ protected:
                              std::vector<RTSDebugInfo>* debug_infos) const = 0;
     virtual bool smoothingStep_impl(Vector& x0_smooth,
                                     Matrix& P0_smooth,
+                                    Vector& x1_pred,
+                                    Matrix& P1_pred,
                                     const Vector& x1_smooth_tr,
                                     const Matrix& P1_smooth,
                                     const BasicKalmanState& state1,

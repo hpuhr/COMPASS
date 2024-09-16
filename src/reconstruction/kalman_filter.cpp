@@ -17,6 +17,7 @@
  */
 
 #include "kalman_filter.h"
+#include "gaussian_pdf.h"
 #include "logger.h"
 
 #include <Eigen/Dense>
@@ -643,6 +644,14 @@ Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
 
 /**
 */
+boost::optional<double> KalmanFilter::pdf(const Vector& x, const Matrix& P)
+{
+    GaussianPDF pdf(P);
+    return pdf.eval(x);
+}
+
+/**
+*/
 boost::optional<double> KalmanFilter::logLikelihood() const
 {
     if (log_likelihood_.has_value())
@@ -664,18 +673,7 @@ boost::optional<double> KalmanFilter::likelihood() const
     if (likelihood_.has_value())
         return likelihood_;
 
-    const double LogSqrt2Pi = 0.5 * std::log(2 * M_PI);
-    typedef Eigen::LLT<Eigen::MatrixXd> Chol;
-    Chol chol(S_);
-
-    // Handle non positive definite covariance somehow:
-    if(chol.info() != Eigen::Success)
-        return {};
-
-    const Chol::Traits::MatrixL& L = chol.matrixL();
-    double quadform = (L.solve(y_)).squaredNorm();
-
-    likelihood_ = std::max(std::numeric_limits<double>::epsilon(), std::exp(-y_.rows() * LogSqrt2Pi - 0.5 * quadform) / L.determinant());
+    likelihood_ = KalmanFilter::pdf(y_, S_);
 
     return likelihood_;
 }

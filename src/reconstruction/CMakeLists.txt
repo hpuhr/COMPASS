@@ -18,6 +18,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/kalman_chain.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstruction_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/spline_interpolator.h"
+        "${CMAKE_CURRENT_LIST_DIR}/gaussian_pdf.h"
         
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/kalman_filter.cpp"

@@ -905,7 +905,7 @@ namespace annotations
         boost::optional<Eigen::Vector2d> speed_pos;
         boost::optional<Eigen::Vector2d> accel_pos;
 
-        estimator.storeUpdate(mm, update, phandler, speed_pos, accel_pos, submodel_idx);
+        estimator.storeUpdateAndUnproject(mm, update, phandler, &speed_pos, &accel_pos, submodel_idx);
 
         if (debug)
             loginf << name << ": pos " << mm.lat << " " << mm.lon;
@@ -919,42 +919,26 @@ namespace annotations
     {
         SimpleReferenceCalculator::RTSAnnotation anno;
 
-        size_t nm = rts_debug_info.rts_step_models.size();
+        assert(rts_debug_info.state0.imm_state);
+
+        size_t nm = rts_debug_info.state0.imm_state->filter_states.size();
 
         anno.rts_step_models.resize(nm);
-
         anno.rts_step.color = QColor(255, 255, 255);
 
-        auto createUpdate = [ & ] (const kalman::BasicKalmanState& state)
+        auto createUpdate = [ & ] (const kalman::KalmanState& state)
         {
             kalman::KalmanUpdate update;
             update.projection_center = rts_debug_info.projection_center;
-
-            (kalman::BasicKalmanState&)(update.state) = state;
-            update.state.immState().filter_states.resize(nm);
+            update.state             = state;
 
             return update;
         };
 
-        kalman::KalmanUpdate update_state0        = createUpdate(rts_debug_info.rts_step.state0);
-        kalman::KalmanUpdate update_state0_smooth = createUpdate(rts_debug_info.rts_step.state0_smooth);
-        kalman::KalmanUpdate update_state1        = createUpdate(rts_debug_info.rts_step.state1);
-        kalman::KalmanUpdate update_state1_smooth = createUpdate(rts_debug_info.rts_step.state1_smooth);
-
-        for (size_t i = 0; i < nm; ++i)
-        {
-            const auto& step_info = rts_debug_info.rts_step_models.at(i);
-            
-            update_state0.state.immState().filter_states[ i ]        = step_info.state0;
-            update_state0_smooth.state.immState().filter_states[ i ] = step_info.state0_smooth;
-            update_state1.state.immState().filter_states[ i ]        = step_info.state1;
-            update_state1_smooth.state.immState().filter_states[ i ] = step_info.state1_smooth;
-        }
-
-        // loginf << "STATE0:       " << update_state0.state.print();
-        // loginf << "STATE1:       " << update_state1.state.print();
-        // loginf << "STATE0_SMOOTH:" << update_state0_smooth.state.print();
-        // loginf << "STATE1_SMOOTH:" << update_state1_smooth.state.print();
+        kalman::KalmanUpdate update_state0        = createUpdate(rts_debug_info.state0);
+        kalman::KalmanUpdate update_state0_smooth = createUpdate(rts_debug_info.state0_smooth);
+        kalman::KalmanUpdate update_state1        = createUpdate(rts_debug_info.state1);
+        kalman::KalmanUpdate update_state1_smooth = createUpdate(rts_debug_info.state1_smooth);
 
         bool debug = false;
 
@@ -1469,22 +1453,41 @@ void SimpleReferenceCalculator::addAnnotations(ViewPointGenAnnotation* annotatio
 
                 auto anno_info = anno_rts->getOrCreateAnnotation(name);
 
-                std::vector<Eigen::Vector2d> positions;
+                std::vector<Eigen::Vector2d> positions_smooth;
+                std::vector<Eigen::Vector2d> positions_nonsmooth;
+                std::vector<Eigen::Vector2d> connections;
                 std::vector<QColor> colors;
 
                 //smoothed position
-                positions.push_back(rts_anno.rts_step.state0_smooth.pos_wgs84);
+                positions_smooth.push_back(rts_anno.rts_step.state0_smooth.pos_wgs84);
+                positions_nonsmooth.push_back(rts_anno.rts_step.state0.pos_wgs84);
+                connections.push_back(positions_smooth.back());
+                connections.push_back(positions_nonsmooth.back());
                 colors.push_back(rts_anno.rts_step.color);
 
                 //smoothed submodel positions
                 for (const auto& rts_anno_model : rts_anno.rts_step_models)
                 {
-                    positions.push_back(rts_anno_model.state0_smooth.pos_wgs84);
+                    positions_smooth.push_back(rts_anno_model.state0_smooth.pos_wgs84);
+                    positions_nonsmooth.push_back(rts_anno_model.state0.pos_wgs84);
+                    connections.push_back(positions_smooth.back());
+                    connections.push_back(positions_nonsmooth.back());
                     colors.push_back(rts_anno_model.color);
                 }
 
-                auto fp = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Cross, style_osg.point_size_, positions, colors, true);
-                anno_info->addFeature(fp);
+                auto anno_smooth = anno_info->getOrCreateAnnotation("Smooth Positions");
+
+                auto fp_smooth = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Cross, style_osg.point_size_, positions_smooth, colors, true);
+                anno_smooth->addFeature(fp_smooth);
+
+                auto anno_input = anno_info->getOrCreateAnnotation("Input Positions");
+
+                auto fp_nonsmooth = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Circle, style_osg.point_size_ * 0.7, positions_nonsmooth, colors, true);
+                anno_input->addFeature(fp_nonsmooth);
+
+                auto fl = new ViewPointGenFeatureLines(style_osg.line_width_, ViewPointGenFeatureLineString::LineStyle::Dotted, connections, {}, true);
+                fl->setColor(QColor(200, 200, 200));
+                anno_input->addFeature(fl);
 
                 ++cnt;
             }
